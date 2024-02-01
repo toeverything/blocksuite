@@ -283,6 +283,7 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
           ? nothing
           : html`<frame-preview
               .edgeless=${this.edgeless}
+              .page=${this.page}
               .host=${this.host}
               .frame=${this.frame}
             ></frame-preview>`}

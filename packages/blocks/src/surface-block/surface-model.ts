@@ -29,6 +29,12 @@ export type SurfaceBlockProps = {
   elements: Boxed<Y.Map<Y.Map<unknown>>>;
 };
 
+export interface ElementUpdatedData {
+  id: string;
+  props: Record<string, unknown>;
+  oldValues: Record<string, unknown>;
+}
+
 const migration = {
   toV4: data => {
     const { elements } = data;
@@ -167,11 +173,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _connectorToElements: Map<string, string[]> = new Map();
   private _elementToConnector: Map<string, string[]> = new Map();
 
-  elementUpdated = new Slot<{
-    id: string;
-    props: Record<string, unknown>;
-    oldValues: Record<string, unknown>;
-  }>();
+  elementUpdated = new Slot<ElementUpdatedData>();
   elementAdded = new Slot<{ id: string }>();
   elementRemoved = new Slot<{
     id: string;

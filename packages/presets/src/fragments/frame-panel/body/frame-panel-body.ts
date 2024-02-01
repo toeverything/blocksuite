@@ -368,7 +368,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     const selectedFrames = new Set(this._selected);
     const frameCards = html`${repeat(
       this._frameItems,
-      frameItem => frameItem.frame.id,
+      frameItem => [frameItem.frame.id, frameItem.cardIndex].join('-'),
       frameItem => {
         const { frame, frameIndex, cardIndex } = frameItem;
         return html`<frame-card
