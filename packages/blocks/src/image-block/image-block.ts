@@ -241,7 +241,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   };
 
   convertToCardView = () => {
-    turnImageIntoCardView(this);
+    turnImageIntoCardView(this).catch(console.error);
   };
 
   private _selectBlock() {
