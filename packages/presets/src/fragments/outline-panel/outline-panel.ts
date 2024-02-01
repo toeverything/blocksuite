@@ -1,3 +1,4 @@
+import { type PageService } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -85,16 +86,37 @@ export class OutlinePanel extends WithDisposable(LitElement) {
     return this.editor.querySelector('affine-edgeless-page');
   }
 
+  private get _pageService() {
+    return this.host.spec.getService('affine:page') as PageService;
+  }
+
   get mode() {
     return this.editor.mode;
   }
 
+  private _tryToRestoreSettings() {
+    if (!this.host || !this._pageService) return;
+
+    const { editSession } = this._pageService;
+    this._showPreviewIcon = editSession.getItem('outlineShowIcon') ?? false;
+    this._enableNotesSorting =
+      editSession.getItem('outlineEnableSorting') ?? false;
+  }
+
   private _toggleShowPreviewIcon = (on: boolean) => {
     this._showPreviewIcon = on;
+    this._pageService.editSession.setItem(
+      'outlineShowIcon',
+      this._showPreviewIcon
+    );
   };
 
   private _toggleNotesSorting = () => {
     this._enableNotesSorting = !this._enableNotesSorting;
+    this._pageService.editSession.setItem(
+      'outlineEnableSorting',
+      this._showPreviewIcon
+    );
   };
 
   private _setNoticeVisibility = (visibility: boolean) => {
@@ -139,6 +161,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    this._tryToRestoreSettings();
   }
 
   override disconnectedCallback() {
