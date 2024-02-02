@@ -172,6 +172,10 @@ export class AffineFormatBarWidget extends WidgetElement {
       this._dragging = ctx.get('pointerState').dragging;
     });
 
+    this.handleEvent('pointerUp', () => {
+      this._dragging = false;
+    });
+
     // calculate placement
     this.disposables.add(
       this.host.event.add('pointerUp', ctx => {

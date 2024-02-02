@@ -319,6 +319,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
+      edgeless.host.event.add('pointerUp', () => {
+        this._dragging = false;
+      })
+    );
+
+    _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
         this._isResizing = true;
       })
