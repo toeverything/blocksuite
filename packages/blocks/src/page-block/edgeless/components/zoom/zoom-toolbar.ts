@@ -12,12 +12,7 @@ import {
   type EdgelessTool,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
-import { clamp } from '../../../../_common/utils/math.js';
-import {
-  ZOOM_MAX,
-  ZOOM_MIN,
-  ZOOM_STEP,
-} from '../../../../surface-block/index.js';
+import { ZOOM_STEP } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
@@ -110,40 +105,21 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     return this.edgeless.edgelessTool;
   }
 
+  get edgelessService() {
+    return this.edgeless.service;
+  }
+
   get zoom() {
     return this.viewport.zoom;
   }
 
   get viewport() {
-    return this.edgeless.service.viewport;
-  }
-
-  private _setZoomByStep(step: number) {
-    this.viewport.smoothZoom(clamp(this.zoom + step, ZOOM_MIN, ZOOM_MAX));
-  }
-
-  private _zoomToFit() {
-    const { centerX, centerY, zoom } = this.edgeless.getFitToScreenData();
-    this.viewport.setViewport(zoom, [centerX, centerY], true);
+    return this.edgelessService.viewport;
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
     this.edgeless.tools.setEdgelessTool(edgelessTool);
   };
-
-  setZoomByAction(action: ZoomAction) {
-    switch (action) {
-      case 'fit':
-        this._zoomToFit();
-        break;
-      case 'reset':
-        this.viewport.smoothZoom(1.0);
-        break;
-      case 'in':
-      case 'out':
-        this._setZoomByStep(ZOOM_STEP * (action === 'in' ? 1 : -1));
-    }
-  }
 
   override firstUpdated() {
     const {
@@ -189,7 +165,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .tooltip=${'Fit to screen'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top-end'}
           .arrow=${!this._isVerticalBar()}
-          @click=${() => this._zoomToFit()}
+          @click=${() => this.edgelessService.zoomToFit()}
         >
           ${ViewBarIcon}
         </edgeless-tool-icon-button>
@@ -197,7 +173,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .tooltip=${'Zoom out'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
           .arrow=${!this._isVerticalBar()}
-          @click=${() => this._setZoomByStep(-ZOOM_STEP)}
+          @click=${() => this.edgelessService.setZoomByStep(-ZOOM_STEP)}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -208,7 +184,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .tooltip=${'Zoom in'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
           .arrow=${!this._isVerticalBar()}
-          @click=${() => this._setZoomByStep(ZOOM_STEP)}
+          @click=${() => this.edgelessService.setZoomByStep(ZOOM_STEP)}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

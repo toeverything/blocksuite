@@ -152,19 +152,19 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         'Mod-1': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.slots.zoomUpdated.emit('fit');
+          this.pageElement.service.setZoomByAction('fit');
         },
         'Mod--': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.slots.zoomUpdated.emit('out');
+          this.pageElement.service.setZoomByAction('out');
         },
         'Mod-0': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.slots.zoomUpdated.emit('reset');
+          this.pageElement.service.setZoomByAction('reset');
         },
         'Mod-=': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.slots.zoomUpdated.emit('in');
+          this.pageElement.service.setZoomByAction('in');
         },
         Backspace: () => {
           this._delete();
