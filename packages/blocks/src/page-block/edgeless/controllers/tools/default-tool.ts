@@ -245,7 +245,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       const viewport = this._service.viewport;
       if (viewport.zoom === 1) {
         // Fit to Screen
-        const { centerX, centerY, zoom } = this._edgeless.getFitToScreenData();
+        const { centerX, centerY, zoom } =
+          this._edgeless.service.getFitToScreenData();
         viewport.setViewport(zoom, [centerX, centerY], true);
       } else {
         // Zoom to 100% and Center

@@ -1,10 +1,14 @@
-import { type BlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type BlockModel, Slot } from '@blocksuite/store';
 
+import type { EdgelessTool, TopLevelBlockModel } from '../../_common/types.js';
 import { last } from '../../_common/utils/iterable.js';
-import type { SurfaceBlockModel } from '../../models.js';
+import { clamp } from '../../_common/utils/math.js';
+import type { FrameBlockModel, SurfaceBlockModel } from '../../models.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
 import type {
+  CanvasElement,
   CanvasElementType,
   ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
@@ -16,6 +20,7 @@ import type { ReorderingDirection } from '../../surface-block/managers/layer-man
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
+import type { ZoomAction } from './components/zoom/zoom-toolbar.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
@@ -32,11 +37,45 @@ import type {
   EdgelessModel,
   HitTestOptions,
 } from './type.js';
+import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
+import { getCursorMode } from './utils/query.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
-import { Viewport } from './utils/viewport.js';
+import {
+  Viewport,
+  ZOOM_INITIAL,
+  ZOOM_MAX,
+  ZOOM_MIN,
+  ZOOM_STEP,
+} from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {
   TemplateJob = TemplateJob;
+
+  slots = {
+    edgelessToolUpdated: new Slot<EdgelessTool>(),
+    zoomUpdated: new Slot<ZoomAction>(),
+    pressShiftKeyUpdated: new Slot<boolean>(),
+    cursorUpdated: new Slot<string>(),
+    copyAsPng: new Slot<{
+      blocks: TopLevelBlockModel[];
+      shapes: CanvasElement[];
+    }>(),
+    pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
+    tagClicked: new Slot<{ tagId: string }>(),
+    readonlyUpdated: new Slot<boolean>(),
+    draggingAreaUpdated: new Slot(),
+    navigatorSettingUpdated: new Slot<{
+      hideToolbar?: boolean;
+      blackBackground?: boolean;
+      fillScreen?: boolean;
+    }>(),
+    navigatorFrameChanged: new Slot<FrameBlockModel>(),
+    fullScreenToggled: new Slot(),
+
+    elementResizeStart: new Slot(),
+    elementResizeEnd: new Slot(),
+    toggleNoteSlicer: new Slot(),
+  };
 
   private _surface!: SurfaceBlockModel;
   private _layer!: LayerManager;
@@ -63,6 +102,9 @@ export class EdgelessPageService extends PageService {
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
     this._tool = EdgelessToolsManager.create(this, []);
+
+    this._initSlotEffects();
+    this._initReadonlyListener();
   }
 
   override unmounted() {
@@ -72,6 +114,7 @@ export class EdgelessPageService extends PageService {
     this.selectionManager.set([]);
     this.viewport.dispose();
     this.tool.dispose();
+    this.disposables.dispose();
   }
 
   get tool() {
@@ -115,6 +158,43 @@ export class EdgelessPageService extends PageService {
 
   get blocks() {
     return (this.frames as EdgelessBlockModel[]).concat(this._layer.blocks);
+  }
+
+  get zoom() {
+    return this.viewport.zoom;
+  }
+
+  private _initSlotEffects() {
+    const { disposables, slots } = this;
+
+    disposables.add(
+      slots.edgelessToolUpdated.on(edgelessTool => {
+        slots.cursorUpdated.emit(getCursorMode(edgelessTool));
+      })
+    );
+
+    disposables.add(
+      slots.zoomUpdated.on((action: ZoomAction) => this.setZoomByAction(action))
+    );
+    disposables.add(
+      slots.pressShiftKeyUpdated.on(pressed => {
+        this.tool.shiftKey = pressed;
+      })
+    );
+  }
+
+  private _initReadonlyListener() {
+    const page = this.page;
+
+    let readonly = page.readonly;
+    this.disposables.add(
+      page.awarenessStore.slots.update.on(() => {
+        if (readonly !== page.readonly) {
+          readonly = page.readonly;
+          this.slots.readonlyUpdated.emit(readonly);
+        }
+      })
+    );
   }
 
   generateIndex(type: string) {
@@ -475,5 +555,63 @@ export class EdgelessPageService extends PageService {
       type,
       middlewares,
     });
+  }
+
+  setZoomByStep(step: number) {
+    this.viewport.smoothZoom(clamp(this.zoom + step, ZOOM_MIN, ZOOM_MAX));
+  }
+
+  zoomToFit() {
+    const { centerX, centerY, zoom } = this.getFitToScreenData();
+    this.viewport.setViewport(zoom, [centerX, centerY], true);
+  }
+
+  getFitToScreenData(padding: [number, number, number, number] = [0, 0, 0, 0]) {
+    const bounds = [];
+
+    this.blocks.forEach(block => {
+      bounds.push(Bound.deserialize(block.xywh));
+    });
+
+    const surfaceElementsBound = getCommonBound(this.elements);
+    if (surfaceElementsBound) {
+      bounds.push(surfaceElementsBound);
+    }
+
+    const [pt, pr, pb, pl] = padding;
+    const { viewport } = this;
+    let { centerX, centerY, zoom } = viewport;
+
+    if (bounds.length) {
+      const { width, height } = viewport;
+      const bound = getCommonBound(bounds);
+      assertExists(bound);
+
+      zoom = Math.min(
+        (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
+        (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
+      );
+      zoom = clamp(zoom, ZOOM_MIN, ZOOM_INITIAL);
+
+      centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
+      centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
+    } else {
+      zoom = ZOOM_INITIAL;
+    }
+    return { zoom, centerX, centerY };
+  }
+
+  setZoomByAction(action: ZoomAction) {
+    switch (action) {
+      case 'fit':
+        this.zoomToFit();
+        break;
+      case 'reset':
+        this.viewport.smoothZoom(1.0);
+        break;
+      case 'in':
+      case 'out':
+        this.setZoomByStep(ZOOM_STEP * (action === 'in' ? 1 : -1));
+    }
   }
 }

@@ -369,7 +369,7 @@ export class EdgelessToolsManager {
         edgelessTool: edgelessTool,
       } = this._rightClickTimer;
       if (e.raw.timeStamp - timeStamp > 233) {
-        this.container.slots.edgelessToolUpdated.emit(edgelessTool);
+        this.setEdgelessTool(edgelessTool);
       } else {
         clearTimeout(timer);
       }
