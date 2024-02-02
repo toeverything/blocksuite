@@ -57,7 +57,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    console.log('onContainerClick: ', this.tool);
     this.clearOverlay();
 
     this._page.captureSync();
