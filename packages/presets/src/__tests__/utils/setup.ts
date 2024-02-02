@@ -85,8 +85,8 @@ export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
 
   window.workspace = workspace;
 
-  const loaded = createEditorWhenLoaded(workspace, mode);
   await initWorkspace(workspace);
+  const loaded = createEditorWhenLoaded(workspace, mode);
   const appElement = await loaded;
 
   return () => {
