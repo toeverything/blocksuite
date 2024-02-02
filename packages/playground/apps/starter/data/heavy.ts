@@ -1,18 +1,12 @@
 import { Text, type Workspace } from '@blocksuite/store';
 
-import { getOptions } from '../utils.js';
 import { type InitFn } from './utils.js';
+
+const params = new URLSearchParams(location.search);
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const heavy: InitFn = async (workspace: Workspace, pageId: string) => {
-  const { count } = getOptions((params: URLSearchParams) => {
-    const count = Number(params.get('count')) || 1000;
-    return {
-      count,
-    };
-  }) as {
-    count: number;
-  };
+  const count = Number(params.get('count')) || 1000;
 
   const page = workspace.createPage({ id: pageId });
   await page.load(() => {

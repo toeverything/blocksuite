@@ -10,10 +10,10 @@ import {
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
 import { type InlineRange, type InlineRootElement } from '@inline/index.js';
-import type { CustomFramePanel } from '@playground/apps/starter/components/custom-frame-panel.js';
-import type { CustomOutlinePanel } from '@playground/apps/starter/components/custom-outline-panel.js';
-import type { DebugMenu } from '@playground/apps/starter/components/debug-menu.js';
-import type { PagesPanel } from '@playground/apps/starter/components/pages-panel.js';
+import type { CustomFramePanel } from '@playground/apps/components/custom-frame-panel.js';
+import type { CustomOutlinePanel } from '@playground/apps/components/custom-outline-panel.js';
+import type { DebugMenu } from '@playground/apps/components/debug-menu.js';
+import type { PagesPanel } from '@playground/apps/components/pages-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { BlockModel } from '@store/schema/index.js';
@@ -97,36 +97,44 @@ async function initEmptyEditor({
           appRoot.append(editor);
           return editor;
         };
-        const editor = createEditor();
-        if (multiEditor) createEditor();
 
-        const debugMenu: DebugMenu = document.createElement('debug-menu');
-        const pagesPanel: PagesPanel = document.createElement('pages-panel');
-        const framePanel: CustomFramePanel =
-          document.createElement('custom-frame-panel');
-        const outlinePanel: CustomOutlinePanel = document.createElement(
-          'custom-outline-panel'
-        );
-        pagesPanel.editor = editor;
-        framePanel.editor = editor;
-        outlinePanel.editor = editor;
-        debugMenu.workspace = workspace;
-        debugMenu.editor = editor;
-        debugMenu.pagesPanel = pagesPanel;
-        debugMenu.framePanel = framePanel;
-        debugMenu.outlinePanel = outlinePanel;
-        const leftSidePanel = document.createElement('left-side-panel');
-        debugMenu.leftSidePanel = leftSidePanel;
-        document.body.appendChild(debugMenu);
-        document.body.appendChild(leftSidePanel);
-        document.body.appendChild(framePanel);
-        document.body.appendChild(outlinePanel);
-        window.debugMenu = debugMenu;
-        window.editor = editor;
-        window.page = page;
-        window.dispatchEvent(
-          new CustomEvent('blocksuite:page-ready', { detail: page.id })
-        );
+        page.slots.rootAdded.once(() => {
+          const editor = createEditor();
+          if (multiEditor) createEditor();
+
+          editor.updateComplete
+            .then(() => {
+              const debugMenu: DebugMenu = document.createElement('debug-menu');
+              const pagesPanel: PagesPanel =
+                document.createElement('pages-panel');
+              const framePanel: CustomFramePanel =
+                document.createElement('custom-frame-panel');
+              const outlinePanel: CustomOutlinePanel = document.createElement(
+                'custom-outline-panel'
+              );
+              pagesPanel.editor = editor;
+              framePanel.editor = editor;
+              outlinePanel.editor = editor;
+              debugMenu.workspace = workspace;
+              debugMenu.editor = editor;
+              debugMenu.pagesPanel = pagesPanel;
+              debugMenu.framePanel = framePanel;
+              debugMenu.outlinePanel = outlinePanel;
+              const leftSidePanel = document.createElement('left-side-panel');
+              debugMenu.leftSidePanel = leftSidePanel;
+              document.body.appendChild(debugMenu);
+              document.body.appendChild(leftSidePanel);
+              document.body.appendChild(framePanel);
+              document.body.appendChild(outlinePanel);
+              window.debugMenu = debugMenu;
+              window.editor = editor;
+              window.page = page;
+              window.dispatchEvent(
+                new CustomEvent('blocksuite:page-ready', { detail: page.id })
+              );
+            })
+            .catch(console.error);
+        });
       }
 
       if (noInit) {
@@ -140,10 +148,12 @@ async function initEmptyEditor({
           if (!page) {
             throw new Error(`Failed to get page ${pageId}`);
           }
+          window.page = page;
           await initPage(page);
         });
       } else {
         const page = workspace.createPage({ id: 'page:home' });
+        window.page = page;
         await initPage(page);
       }
     },
@@ -214,6 +224,7 @@ export function expectConsoleMessage(
         '[vite] connected.',
         'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
         '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
+        'No blocks found after loading page, you may need to init',
       ].includes(message.text())
     ) {
       ignoredLog(message);

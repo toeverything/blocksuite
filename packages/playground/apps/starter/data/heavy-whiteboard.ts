@@ -6,24 +6,17 @@ import {
   type Workspace,
 } from '@blocksuite/store';
 
-import { getOptions } from '../utils.js';
 import { type InitFn } from './utils.js';
 
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
+const params = new URLSearchParams(location.search);
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const heavyWhiteboard: InitFn = async (
   workspace: Workspace,
   id: string
 ) => {
-  const { count } = getOptions((params: URLSearchParams) => {
-    const count = Number(params.get('count')) || 100;
-    return {
-      count,
-    };
-  }) as {
-    count: number;
-  };
+  const count = Number(params.get('count')) || 100;
 
   const page = workspace.createPage({ id });
   await page.load(() => {

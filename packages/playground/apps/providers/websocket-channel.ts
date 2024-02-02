@@ -2,7 +2,7 @@ import type { Workspace } from '@blocksuite/store';
 import type { EventBasedChannel } from 'async-call-rpc';
 import { isPlainObject } from 'merge';
 
-import { notify } from '../utils/notify.js';
+import { notify } from '../default/utils/notify.js';
 import { createAsyncCallRPCProvider } from './async-call-rpc.js';
 
 const BASE_URL = new URL(import.meta.env.PLAYGROUND_SERVER);
@@ -16,7 +16,7 @@ export async function generateRoomId(): Promise<string> {
     .then(({ id }) => id);
 }
 
-export async function initCollaborationSocket(
+export async function setupWebsocketProvider(
   workspace: Workspace,
   room: string
 ) {

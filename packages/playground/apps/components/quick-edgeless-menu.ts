@@ -33,13 +33,13 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { LeftSidePanel } from '../../starter/components/left-side-panel.js';
-import type { PagesPanel } from '../../starter/components/pages-panel.js';
+import { notify } from '../default/utils/notify.js';
 import {
   generateRoomId,
-  initCollaborationSocket,
+  setupWebsocketProvider,
 } from '../providers/websocket-channel.js';
-import { notify } from '../utils/notify.js';
+import type { LeftSidePanel } from './left-side-panel.js';
+import type { PagesPanel } from './pages-panel.js';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -335,7 +335,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   private async _initWebsocketProvider(room: string) {
     this._initws = true;
-    const result = await initCollaborationSocket(this.workspace, room);
+    const result = await setupWebsocketProvider(this.workspace, room);
     this._initws = false;
     return result;
   }

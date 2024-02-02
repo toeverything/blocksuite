@@ -1,6 +1,5 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import {
   type BlobStorage,
   createIndexeddbStorage,
@@ -11,8 +10,11 @@ import {
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
+import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
 
-import { INDEXED_DB_NAME, setupProviders, testIDBExistence } from './providers';
+import { setupWebsocketProvider } from '../../providers/websocket-channel.js';
+
+export const INDEXED_DB_NAME = 'PLAYGROUND_DB';
 
 export function createDefaultPageWorkspace() {
   const blobStorages: ((id: string) => BlobStorage)[] = [
@@ -25,14 +27,10 @@ export function createDefaultPageWorkspace() {
   const options: WorkspaceOptions = {
     id: 'quickEdgeless',
     schema,
-    providerCreators: [],
     idGenerator,
     blobStorages,
     defaultFlags: {
       enable_bultin_ledits: true,
-      readonly: {
-        'page:home': false,
-      },
     },
   };
   const workspace = new Workspace(options);
@@ -42,22 +40,25 @@ export function createDefaultPageWorkspace() {
   window.blockSchemas = AffineSchemas;
   window.job = new Job({ workspace });
   window.Y = Workspace.Y;
-  Object.defineProperty(globalThis, 'host', {
-    get() {
-      return document.querySelector<EditorHost>('editor-host');
-    },
-  });
 
   return workspace;
 }
 
 export async function initDefaultPageWorkspace(workspace: Workspace) {
-  const databaseExists = await testIDBExistence();
-
+  const databaseExists = await testDefaultPageIDBExistence();
   const params = new URLSearchParams(location.search);
-  const shouldInit =
-    (!databaseExists && !params.get('room')) || params.get('init');
 
+  const indexedDBProvider = createIndexedDBProvider(
+    workspace.doc,
+    INDEXED_DB_NAME
+  );
+  indexedDBProvider.connect();
+
+  if (params.get('room')) {
+    await setupWebsocketProvider(workspace, params.get('room') as string);
+  }
+
+  const shouldInit = !databaseExists && !params.get('room');
   if (shouldInit) {
     const deleteResult = await new Promise(resolve => {
       const req = indexedDB.deleteDatabase(INDEXED_DB_NAME);
@@ -68,7 +69,6 @@ export async function initDefaultPageWorkspace(workspace: Workspace) {
 
     console.info('Delete database: ', deleteResult);
 
-    await setupProviders(workspace);
     const page = workspace.createPage({ id: 'page:home' });
     await page.load(() => {
       const pageBlockId = page.addBlock('affine:page', {
@@ -78,7 +78,7 @@ export async function initDefaultPageWorkspace(workspace: Workspace) {
     });
     page.resetHistory();
   } else {
-    await setupProviders(workspace);
+    // wait for data injected from provider
     const firstPageId = await new Promise<string>(resolve =>
       workspace.slots.pageAdded.once(id => resolve(id))
     );
@@ -124,9 +124,25 @@ export async function initDefaultPageWorkspace(workspace: Workspace) {
     });
     // finish migration
 
+    // wait for data injected from provider
     if (!page.root) {
       await new Promise(resolve => page.slots.rootAdded.once(resolve));
     }
     page.resetHistory();
   }
+}
+
+async function testDefaultPageIDBExistence() {
+  return new Promise<boolean>(resolve => {
+    const request = indexedDB.open(INDEXED_DB_NAME);
+    request.onupgradeneeded = function () {
+      request.transaction?.abort();
+      request.result.close();
+      resolve(false);
+    };
+    request.onsuccess = function () {
+      request.result.close();
+      resolve(true);
+    };
+  });
 }

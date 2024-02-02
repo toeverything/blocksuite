@@ -1,9 +1,8 @@
-/// <reference types="../starter/env.js" />
-
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/presets/themes/affine.css';
+import '../dev-format.js';
 
-import { mountDefaultPageEditor } from './utils/page.js';
+import { mountDefaultPageEditor } from './utils/editor.js';
 import {
   createDefaultPageWorkspace,
   initDefaultPageWorkspace,

@@ -1,11 +1,12 @@
 import { __unstableSchemas } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { Workspace } from '@blocksuite/store';
 
-import { LeftSidePanel } from '../../starter/components/left-side-panel.js';
-import { PagesPanel } from '../../starter/components/pages-panel.js';
-import { QuickEdgelessMenu } from '../components/quick-edgeless-menu.js';
+import { LeftSidePanel } from '../../components/left-side-panel.js';
+import { PagesPanel } from '../../components/pages-panel.js';
+import { QuickEdgelessMenu } from '../../components/quick-edgeless-menu.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
 const params = new URLSearchParams(location.search);
@@ -45,12 +46,23 @@ export function mountDefaultPageEditor(workspace: Workspace) {
   quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.pagesPanel = pagesPanel;
+  pagesPanel.editor = editor;
   document.body.appendChild(quickEdgelessMenu);
   document.body.appendChild(leftSidePanel);
 
-  pagesPanel.editor = editor;
+  // debug info
   window.editor = editor;
   window.page = page;
+  Object.defineProperty(globalThis, 'host', {
+    get() {
+      return document.querySelector<EditorHost>('editor-host');
+    },
+  });
+  Object.defineProperty(globalThis, 'std', {
+    get() {
+      return document.querySelector<EditorHost>('editor-host')?.std;
+    },
+  });
 
   return editor;
 }
