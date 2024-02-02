@@ -479,7 +479,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 >
                   <sl-menu-item>
                     <sl-icon slot="prefix" name="github"></sl-icon>
-                    Github
+                    GitHub
                   </sl-menu-item>
                 </a>
               </sl-menu>
