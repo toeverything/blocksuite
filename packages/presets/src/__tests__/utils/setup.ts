@@ -1,4 +1,5 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
+import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlobStorage,
   type Page,
@@ -47,37 +48,27 @@ async function initWorkspace(workspace: Workspace) {
   page.resetHistory();
 }
 
-function createEditor(page: Page, element: HTMLElement) {
-  const editor = new AffineEditorContainer();
-  editor.page = page;
-  element.append(editor);
-
-  return editor;
-}
-
-function createEditorWhenLoaded(
+async function createEditor(
   workspace: Workspace,
   mode: 'edgeless' | 'page' = 'page'
 ) {
-  return new Promise<HTMLDivElement>(resolve => {
-    workspace.slots.pageAdded.once(pageId => {
-      const app = document.createElement('div');
-      const page = workspace.getPage(pageId) as Page;
-      const editor = createEditor(page, app);
+  const app = document.createElement('div');
+  const page = workspace.pages.values().next().value as Page | undefined;
+  assertExists(page, 'Need to create a page first');
+  const editor = new AffineEditorContainer();
+  editor.page = page;
+  editor.mode = mode;
+  app.append(editor);
 
-      editor.mode = mode;
+  window.editor = editor;
+  window.page = page;
 
-      window.editor = editor;
-      window.page = page;
+  app.style.width = '100%';
+  app.style.height = '1280px';
 
-      app.style.width = '100%';
-      app.style.height = '1280px';
-
-      document.body.append(app);
-
-      resolve(app);
-    });
-  });
+  document.body.append(app);
+  await editor.updateComplete;
+  return app;
 }
 
 export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
@@ -86,8 +77,7 @@ export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
   window.workspace = workspace;
 
   await initWorkspace(workspace);
-  const loaded = createEditorWhenLoaded(workspace, mode);
-  const appElement = await loaded;
+  const appElement = await createEditor(workspace, mode);
 
   return () => {
     appElement.remove();
