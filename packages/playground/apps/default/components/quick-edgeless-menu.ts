@@ -20,10 +20,7 @@ import type { AffineTextAttributes } from '@blocksuite/blocks';
 import {
   ColorVariables,
   extractCssVariables,
-  HtmlTransformer,
-  MarkdownTransformer,
   type PageService,
-  ZipTransformer,
 } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
@@ -189,11 +186,13 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportHtml() {
-    HtmlTransformer.exportPage(this.page).catch(console.error);
+    const htmlTransformer = this.pageService.transformers.html;
+    htmlTransformer.exportPage(this.page).catch(console.error);
   }
 
   private _exportMarkDown() {
-    MarkdownTransformer.exportPage(this.page).catch(console.error);
+    const markdownTransformer = this.pageService.transformers.markdown;
+    markdownTransformer.exportPage(this.page).catch(console.error);
   }
 
   private _exportPng() {
@@ -201,7 +200,8 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await ZipTransformer.exportPages(this.workspace, [this.page]);
+    const zipTransformer = this.pageService.transformers.zip;
+    const file = await zipTransformer.exportPages(this.workspace, [this.page]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -222,7 +222,8 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         return;
       }
       try {
-        const pages = await ZipTransformer.importPages(this.workspace, file);
+        const zipTransformer = this.pageService.transformers.zip;
+        const pages = await zipTransformer.importPages(this.workspace, file);
         for (const page of pages) {
           const noteBlock = window.page.getBlockByFlavour('affine:note');
           window.page.addBlock(
