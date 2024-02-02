@@ -58,7 +58,7 @@ export enum CanvasTextFontStyle {
   Italic = 'italic',
 }
 
-export const DEFAULT_CANVAS_TEXT_FONT_CONFIG: FontConfig[] = [
+export const CANVAS_TEXT_FONT_CONFIG: FontConfig[] = [
   // Inter, https://fonts.cdnfonts.com/css/inter?styles=29139,29134,29135,29136,29140,29141
   {
     font: CanvasTextFontFamily.Inter,

@@ -10,7 +10,7 @@ export {
   ZOOM_STEP,
 } from './consts.js';
 export {
-  DEFAULT_CANVAS_TEXT_FONT_CONFIG,
+  CANVAS_TEXT_FONT_CONFIG,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
 } from './consts.js';
