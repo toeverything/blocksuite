@@ -11,7 +11,7 @@ import {
 import { BlockElement } from '@blocksuite/lit';
 import { type BlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../../_common/components/toast.js';
@@ -22,6 +22,7 @@ import {
 } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
+  type EdgelessTool,
   NoteDisplayMode,
   Point,
   requestConnectedFrame,
@@ -155,6 +156,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   mouseRoot!: HTMLElement;
 
+  @state()
+  edgelessTool: EdgelessTool = {
+    type: localStorage.defaultTool ?? 'default',
+  };
+
   @query('edgeless-block-portal-container')
   pageBlockContainer!: EdgelessBlockPortalContainer;
 
@@ -170,10 +176,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   get tools() {
     return this.service.tool;
-  }
-
-  get edgelessTool() {
-    return this.service.tool.edgelessTool;
   }
 
   get dispatcher() {
@@ -257,6 +259,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     disposables.add(this.tools);
     disposables.add(this.service.selection);
+    disposables.add(
+      slots.edgelessToolUpdated.on(tool => (this.edgelessTool = tool))
+    );
     disposables.add(
       slots.cursorUpdated.on(
         throttle((cursor: string) => {

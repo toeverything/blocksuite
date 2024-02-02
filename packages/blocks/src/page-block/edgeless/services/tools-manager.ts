@@ -5,7 +5,7 @@ import {
   type UIEventHandler,
   type UIEventState,
 } from '@blocksuite/block-std';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
@@ -81,8 +81,6 @@ export class EdgelessToolsManager {
   private _shiftKey = false;
 
   private _dragging = false;
-
-  edgelessToolUpdated = new Slot<EdgelessTool>();
 
   get dragging() {
     return this._dragging;
@@ -409,7 +407,7 @@ export class EdgelessToolsManager {
     if (this.edgelessTool === edgelessTool) return;
     const lastType = this.edgelessTool.type;
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
-    this._controllers[edgelessTool.type].beforeModeSwitch(edgelessTool);
+    this._controllers[type].beforeModeSwitch(edgelessTool);
 
     if (
       type === 'default' &&
@@ -422,6 +420,7 @@ export class EdgelessToolsManager {
     }
 
     this.selection.set(state);
+    this.edgelessTool = edgelessTool;
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
