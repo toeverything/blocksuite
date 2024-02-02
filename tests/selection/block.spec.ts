@@ -939,7 +939,12 @@ test('should not clear selected rects when scrolling the wheel', async ({
     if (!viewport) {
       throw new Error();
     }
-    return viewport.querySelectorAll('.selected,affine-block-selection').length;
+    const rects = viewport.querySelectorAll('affine-block-selection');
+    const visibleRects = Array.from(rects).filter(rect => {
+      const display = window.getComputedStyle(rect).display;
+      return display !== 'none';
+    });
+    return visibleRects.length;
   });
 
   expect(count0).toBe(count2);
