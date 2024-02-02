@@ -81,7 +81,7 @@ export class EdgelessBrushToolButton extends EdgelessToolButton<
     if (this._states.some(key => changedProperties.has(key))) {
       if (this._menu) {
         this.updateMenu();
-        this.edgeless.slots.edgelessToolUpdated.emit({
+        this.edgeless.tools.setEdgelessTool({
           type: this._type,
         });
       }

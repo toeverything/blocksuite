@@ -89,7 +89,7 @@ export const BLOCKHUB_TEXT_ITEMS: BlockHubItem[] = [
   },
   {
     flavour: 'affine:code',
-    type: null,
+    type: 'code',
     name: 'Code Block',
     description: 'Capture a code snippet.',
     icon: CodeBlockIcon,

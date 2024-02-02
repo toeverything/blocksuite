@@ -78,7 +78,7 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
             Object.assign(this, { [key]: props[key] });
           }
         });
-        this.edgeless.slots.edgelessToolUpdated.emit({
+        this.edgeless.tools.setEdgelessTool({
           type: 'affine:note',
           childFlavour: this.childFlavour,
           childType: this.childType,
