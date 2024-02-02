@@ -340,24 +340,22 @@ export function addImageBlocks(
 /**
  * Turn the image block into a attachment block.
  */
-export function turnImageIntoCardView(block: ImageBlockComponent) {
+export async function turnImageIntoCardView(block: ImageBlockComponent) {
   const page = block.page;
   if (!page.schema.flavourSchemaMap.has('affine:attachment')) {
     throw new Error('The attachment flavour is not supported!');
   }
 
   const model = block.model;
-  const blob = block.blob;
-  if (!model.sourceId || !blob) {
+  const sourceId = model.sourceId;
+  const blob = await getImageBlob(model);
+  if (!sourceId || !blob) {
     throw new Error('Image data not available');
   }
 
-  const sourceId = model.sourceId;
-  assertExists(sourceId);
-
   const { saveImageData, getAttachmentData } = withTempBlobData();
   saveImageData(sourceId, { width: model.width, height: model.height });
-  const attachmentConvertData = getAttachmentData(model.sourceId);
+  const attachmentConvertData = getAttachmentData(sourceId);
   const attachmentProp: Partial<AttachmentBlockProps> = {
     sourceId,
     name: DEFAULT_ATTACHMENT_NAME,
