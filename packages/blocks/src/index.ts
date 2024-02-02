@@ -99,6 +99,7 @@ export {
   ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,
+  DEFAULT_CANVAS_TEXT_FONT_CONFIG,
   ElementModel,
   generateKeyBetween,
   GroupElementModel,
