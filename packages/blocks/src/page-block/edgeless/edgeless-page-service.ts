@@ -53,7 +53,6 @@ export class EdgelessPageService extends PageService {
 
   slots = {
     edgelessToolUpdated: new Slot<EdgelessTool>(),
-    zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
@@ -173,9 +172,6 @@ export class EdgelessPageService extends PageService {
       })
     );
 
-    disposables.add(
-      slots.zoomUpdated.on((action: ZoomAction) => this.setZoomByAction(action))
-    );
     disposables.add(
       slots.pressShiftKeyUpdated.on(pressed => {
         this.tool.shiftKey = pressed;
