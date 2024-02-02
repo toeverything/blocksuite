@@ -371,21 +371,19 @@ export async function enterPlaygroundWithList(
   await page.evaluate(
     async ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
-      await page.load(() => {
-        const pageId = page.addBlock('affine:page', {
-          title: new page.Text(),
-        });
-        const noteId = page.addBlock('affine:note', {}, pageId);
-        for (let i = 0; i < contents.length; i++) {
-          page.addBlock(
-            'affine:list',
-            contents.length > 0
-              ? { text: new page.Text(contents[i]), type }
-              : { type },
-            noteId
-          );
-        }
+      const pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
       });
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      for (let i = 0; i < contents.length; i++) {
+        page.addBlock(
+          'affine:list',
+          contents.length > 0
+            ? { text: new page.Text(contents[i]), type }
+            : { type },
+          noteId
+        );
+      }
     },
     { contents, type }
   );
