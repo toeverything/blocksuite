@@ -416,6 +416,8 @@ test.describe('slash search', () => {
     await expect(slashItems).toHaveText([
       'Code Block',
       'Italic',
+      'New Doc',
+      'Link Doc',
       'File',
       'Copy',
       'Duplicate',

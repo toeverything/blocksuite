@@ -8,6 +8,11 @@ import {
 } from '../_common/components/file-drop-manager.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
+import {
+  HtmlTransformer,
+  MarkdownTransformer,
+  ZipTransformer,
+} from '../_common/transformers/index.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import { DEFAULT_CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
 import { EditSessionStorage } from '../surface-block/managers/edit-session.js';
@@ -45,6 +50,12 @@ export class PageService extends BlockService<PageBlockModel> {
 
   fileDropManager!: FileDropManager;
   exportManager!: ExportManager;
+
+  transformers = {
+    markdown: MarkdownTransformer,
+    html: HtmlTransformer,
+    zip: ZipTransformer,
+  };
 
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,

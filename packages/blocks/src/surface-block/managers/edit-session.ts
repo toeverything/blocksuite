@@ -131,6 +131,8 @@ const SessionPropsSchema = z.object({
   templateCache: z.string(),
   remoteColor: z.string(),
   showBidirectional: z.boolean(),
+  outlineShowIcon: z.boolean(),
+  outlineEnableSorting: z.boolean(),
 });
 
 type SessionProps = z.infer<typeof SessionPropsSchema>;
@@ -250,6 +252,10 @@ export class EditSessionStorage {
         return 'blocksuite:remote-color';
       case 'showBidirectional':
         return 'blocksuite:' + id + ':showBidirectional';
+      case 'outlineShowIcon':
+        return 'blocksuite:' + id + ':outlineShowIcon';
+      case 'outlineEnableSorting':
+        return 'blocksuite:' + id + ':outlineEnableSorting';
       default:
         return key;
     }

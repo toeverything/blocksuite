@@ -15,7 +15,7 @@
 [![Checks Status](https://img.shields.io/github/checks-status/toeverything/blocksuite/master)](https://github.com/toeverything/blocksuite/actions?query=branch%3Amaster)
 [![Issues Closed](https://img.shields.io/github/issues-closed/toeverything/blocksuite?color=6880ff)](https://github.com/toeverything/blocksuite/issues?q=is%3Aissue+is%3Aclosed)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/framework/store/package.json)
-[![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/presets/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
+[![NPM Canary Release](https://img.shields.io/npm/v/@blocksuite/presets/canary?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/canary-release.yml?query=branch%3Amaster)
 [![Open in StackBlitz](https://img.shields.io/badge/open%20in-StackBlitz-black)](https://stackblitz.com/github/toeverything/blocksuite)
 [![Join Discord](https://img.shields.io/discord/959027316334407691)](https://discord.gg/9vwSWmYYcZ)
 
@@ -66,7 +66,7 @@ The BlockSuite project is structured around key packages that are categorized in
 
 <table>
   <tr>
-    <th colspan="2">Headless Framework</th>
+    <th colspan="2">Framework</th>
   </tr>
   <tr>
     <td><code>@blocksuite/store</code></td>
@@ -88,7 +88,7 @@ The BlockSuite project is structured around key packages that are categorized in
 
 <table>
   <tr>
-    <th colspan="2">Prebuilt Components</th>
+    <th colspan="2">Components</th>
   </tr>
   <tr>
     <td><code>@blocksuite/blocks</code></td>
@@ -106,11 +106,12 @@ This can be illustrated as the diagram below:
 
 ## Resources
 
-- 🎁 Examples
-  - [Nightly Playground](https://try-blocksuite.vercel.app/starter/?init)
-  - [BlockSuite Monorepo in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
+- 🚚 Resources
+  - [Canary Playground](https://try-blocksuite.vercel.app/starter/?init)
+  - [BlockSuite in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
+  - [BlockSuite Ecosystem CI](https://github.com/toeverything/blocksuite-ecosystem-ci)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
-- 📝 [Documentation](https://blocksuite.io/guide/quick-start.html)
+- 📝 [Documentation](https://blocksuite.io/guide/overview.html)
 - 📍 [Good First Issues](https://github.com/toeverything/blocksuite/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)
@@ -118,7 +119,7 @@ This can be illustrated as the diagram below:
 
 ## Building
 
-See [BUILDING.md](BUILDING.md) for instructions on how to build BlockSuite from source code.
+See [BUILDING.md](BUILDING.md) for instructions on how to build and test BlockSuite from source.
 
 ## Contributing
 
