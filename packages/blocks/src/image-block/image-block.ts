@@ -5,7 +5,7 @@ import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/block-selection.js';
 
 import { BlockElement } from '@blocksuite/lit';
-import { html, nothing, render } from 'lit';
+import { html, render } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -302,9 +302,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
         <embed-card-caption .block=${this}></embed-card-caption>
 
-        ${this.selected?.is('block')
-          ? html`<affine-block-selection></affine-block-selection>`
-          : nothing}
+        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
 
       ${this.isInSurface ? null : Object.values(this.widgets)}

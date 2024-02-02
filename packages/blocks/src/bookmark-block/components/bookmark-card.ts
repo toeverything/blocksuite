@@ -1,4 +1,3 @@
-import { PathFinder } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -42,10 +41,10 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     this.disposables.add(() => this._themeObserver.dispose());
 
     this.disposables.add(
-      this.bookmark.selection.slots.changed.on(sels => {
-        this._isSelected = sels.some(sel =>
-          PathFinder.equals(sel.path, this.bookmark.path)
-        );
+      this.bookmark.selection.slots.changed.on(() => {
+        this._isSelected =
+          !!this.bookmark.selected?.is('block') ||
+          !!this.bookmark.selected?.is('surface');
       })
     );
   }

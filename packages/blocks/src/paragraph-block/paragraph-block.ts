@@ -1,11 +1,11 @@
 import '../_common/components/rich-text/rich-text.js';
+import '../_common/components/block-selection.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { type InlineRangeProvider } from '@blocksuite/inline';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { when } from 'lit/directives/when.js';
 
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
@@ -280,11 +280,10 @@ export class ParagraphBlockComponent extends BlockElement<
             .enableUndoRedo=${false}
           ></rich-text>
         </div>
+
         ${children}
-        ${when(
-          this.selected?.is('block'),
-          () => html`<affine-block-selection></affine-block-selection>`
-        )}
+
+        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
     `;
   }

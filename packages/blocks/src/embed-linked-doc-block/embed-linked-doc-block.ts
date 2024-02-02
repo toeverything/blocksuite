@@ -544,9 +544,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
         <embed-card-caption .block=${this}></embed-card-caption>
 
-        ${this.selected?.is('block')
-          ? html`<affine-block-selection></affine-block-selection>`
-          : nothing}
+        <affine-block-selection .block=${this}></affine-block-selection>
       `
     );
   }

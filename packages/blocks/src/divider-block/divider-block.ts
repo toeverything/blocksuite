@@ -1,4 +1,6 @@
 /// <reference types="vite/client" />
+import '../_common/components/block-selection.js';
+
 import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -51,10 +53,10 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     return html`
       <div class="affine-divider-block-container">
         <hr />
+
         ${children}
-        ${this.selected?.is('block')
-          ? html`<affine-block-selection></affine-block-selection>`
-          : null}
+
+        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
     `;
   }
