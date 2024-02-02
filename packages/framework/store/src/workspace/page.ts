@@ -648,10 +648,6 @@ export class Page extends Space<FlatBlockMap> {
       await initFn();
     }
 
-    if (this._yBlocks.size === 0) {
-      console.warn('No blocks found after loading page, you may need to init');
-    }
-
     this._ready = true;
     this.slots.ready.emit();
 

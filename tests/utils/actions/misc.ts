@@ -224,7 +224,6 @@ export function expectConsoleMessage(
         '[vite] connected.',
         'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
         '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
-        'No blocks found after loading page, you may need to init',
       ].includes(message.text())
     ) {
       ignoredLog(message);
