@@ -10,6 +10,7 @@ import {
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
 import { type InlineRange, type InlineRootElement } from '@inline/index.js';
+import type { EditorHost } from '@lit/element/lit-host.js';
 import type { CustomFramePanel } from '@playground/apps/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/components/custom-outline-panel.js';
 import type { DebugMenu } from '@playground/apps/components/debug-menu.js';
@@ -132,9 +133,20 @@ async function initEmptyEditor({
             document.body.appendChild(leftSidePanel);
             document.body.appendChild(framePanel);
             document.body.appendChild(outlinePanel);
+
             window.debugMenu = debugMenu;
             window.editor = editor;
             window.page = page;
+            Object.defineProperty(globalThis, 'host', {
+              get() {
+                return document.querySelector<EditorHost>('editor-host');
+              },
+            });
+            Object.defineProperty(globalThis, 'std', {
+              get() {
+                return document.querySelector<EditorHost>('editor-host')?.std;
+              },
+            });
             window.dispatchEvent(
               new CustomEvent('blocksuite:page-ready', { detail: page.id })
             );
