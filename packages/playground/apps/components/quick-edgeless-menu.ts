@@ -83,9 +83,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   pagesPanel!: PagesPanel;
 
   @state()
-  private _connected = true;
-
-  @state()
   private _canUndo = false;
 
   @state()
@@ -138,24 +135,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this._switchEditorMode();
     }
   };
-
-  private _toggleConnection() {
-    if (this._connected) {
-      this.workspace.providers.forEach(provider => {
-        if ('passive' in provider && provider.connected) {
-          provider.disconnect();
-        }
-      });
-      this._connected = false;
-    } else {
-      this.workspace.providers.forEach(provider => {
-        if ('passive' in provider && !provider.connected) {
-          provider.connect();
-        }
-      });
-      this._connected = true;
-    }
-  }
 
   private _switchEditorMode() {
     const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
@@ -307,11 +286,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   };
 
   private _startCollaboration = async () => {
-    if (
-      this.workspace.providers.find(
-        provider => provider.flavour === 'websocket-channel'
-      )
-    ) {
+    if (window.wsProvider) {
       notify('There is already a websocket provider exists', 'neutral').catch(
         console.error
       );
@@ -436,9 +411,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   ></sl-icon>
                   <span>Test operations</span>
                   <sl-menu slot="submenu">
-                    <sl-menu-item @click=${this._toggleConnection}>
-                      ${this._connected ? 'Disconnect' : 'Connect'}
-                    </sl-menu-item>
                     <sl-menu-item @click=${this._addNote}>
                       Add Note</sl-menu-item
                     >

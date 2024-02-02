@@ -2,7 +2,6 @@ import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
 import type { BlobStorage } from '../persistence/blob/types.js';
-import type { DocProvider, DocProviderCreator } from '../providers/type.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   createAutoIncrementIdGenerator,
@@ -45,7 +44,6 @@ export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
   id?: string;
-  providerCreators?: DocProviderCreator[];
   awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator | IdGenerator;
   defaultFlags?: Partial<Flags>;
@@ -62,19 +60,14 @@ const FLAGS_PRESET = {
 export class Store {
   readonly id: string;
   readonly doc: BlockSuiteDoc;
-  readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
 
   constructor(
-    {
-      id,
-      providerCreators = [],
-      awareness,
-      idGenerator,
-      defaultFlags,
-    }: StoreOptions = { id: nanoid() }
+    { id, awareness, idGenerator, defaultFlags }: StoreOptions = {
+      id: nanoid(),
+    }
   ) {
     this.id = id || '';
     this.doc = new BlockSuiteDoc({ guid: id });
@@ -109,21 +102,6 @@ export class Store {
         }
       }
     }
-
-    this.providers = providerCreators.map(creator =>
-      creator(this.id, this.doc, {
-        awareness: this.awarenessStore.awareness,
-      })
-    );
-  }
-
-  registerProvider(providerCreator: DocProviderCreator, id?: string) {
-    const provider = providerCreator(id ?? this.id, this.doc, {
-      awareness: this.awarenessStore.awareness,
-    });
-
-    this.providers.push(provider);
-    return provider;
   }
 
   addSpace(space: Space) {

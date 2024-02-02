@@ -49,7 +49,6 @@ export function createAsyncCallRPCProvider(
 
   const impl = {
     queryDocState: async (guid, targetClientId) => {
-      console.log('queryDocState', guid, targetClientId);
       const doc = docMap.get(guid);
 
       if (!doc) {
@@ -61,7 +60,6 @@ export function createAsyncCallRPCProvider(
       return Y.encodeStateAsUpdate(doc);
     },
     sendDocUpdate: async (guid, update) => {
-      console.log('sendDocUpdate', guid, update);
       const doc = docMap.get(guid);
       if (!doc) {
         // This case happens when the father doc is not yet updated,

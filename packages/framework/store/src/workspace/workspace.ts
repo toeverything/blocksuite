@@ -1,7 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { DocProviderCreator } from '../providers/type.js';
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
 import { blob, indexer, test, WorkspaceAddonType } from './addon/index.js';
@@ -62,10 +61,6 @@ export class Workspace extends WorkspaceAddonType {
     return this._store.awarenessStore;
   }
 
-  get providers() {
-    return this._store.providers;
-  }
-
   get pages() {
     return this._store.spaces as Map<string, Page>;
   }
@@ -80,10 +75,6 @@ export class Workspace extends WorkspaceAddonType {
 
   get schema() {
     return this._schema;
-  }
-
-  registerProvider(providerCreator: DocProviderCreator, id?: string) {
-    return this._store.registerProvider(providerCreator, id);
   }
 
   private _hasPage(pageId: string) {

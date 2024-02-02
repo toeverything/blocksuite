@@ -23,6 +23,9 @@ declare global {
     testUtils: TestUtils;
     host: EditorHost;
 
+    wsProvider: ReturnType<typeof setupBroadcastProvider>;
+    bcProvider: ReturnType<typeof setupBroadcastProvider>;
+
     devtoolsFormatters: {
       header: (obj: unknown, config: unknown) => null | HTMLTemplate;
       hasBody: (obj: unknown, config: unknown) => boolean | null;

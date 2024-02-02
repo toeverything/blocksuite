@@ -232,9 +232,6 @@ export class DebugMenu extends ShadowlessElement {
   pagesPanel!: PagesPanel;
 
   @state()
-  private _connected = true;
-
-  @state()
   private _canUndo = false;
 
   @state()
@@ -305,24 +302,6 @@ export class DebugMenu extends ShadowlessElement {
 
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     matchMedia.removeEventListener('change', this._darkModeChange);
-  }
-
-  private _toggleConnection() {
-    if (this._connected) {
-      this.workspace.providers.forEach(provider => {
-        if ('passive' in provider && provider.connected) {
-          provider.disconnect();
-        }
-      });
-      this._connected = false;
-    } else {
-      this.workspace.providers.forEach(provider => {
-        if ('passive' in provider && !provider.connected) {
-          provider.connect();
-        }
-      });
-      this._connected = true;
-    }
   }
 
   private _switchEditorMode() {
@@ -673,9 +652,6 @@ export class DebugMenu extends ShadowlessElement {
               Test Operations
             </sl-button>
             <sl-menu>
-              <sl-menu-item @click="${this._toggleConnection}">
-                ${this._connected ? 'Disconnect' : 'Connect'}
-              </sl-menu-item>
               <sl-menu-item @click="${this._exportMarkDown}">
                 Export Markdown
               </sl-menu-item>

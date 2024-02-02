@@ -21,5 +21,6 @@ export function setupBroadcastProvider(workspace: Workspace) {
   const channel = new BroadcastMessageChannel(workspace.id);
   const provider = createAsyncCallRPCProvider(workspace, channel);
   provider.connect();
+  window.bcProvider = provider;
   return provider;
 }

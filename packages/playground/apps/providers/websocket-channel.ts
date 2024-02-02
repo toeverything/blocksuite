@@ -39,22 +39,10 @@ export async function setupWebsocketProvider(
     const provider = createAsyncCallRPCProvider(workspace, channel);
     provider.connect();
 
-    const removeProvider = () => {
-      provider.disconnect();
-      const idx = workspace.providers.findIndex(p => p === provider);
-
-      workspace.providers.splice(idx, 1);
-
-      ws.addEventListener('error', removeProvider);
-      ws.addEventListener('close', removeProvider);
-    };
-
-    ws.addEventListener('close', removeProvider);
-    ws.addEventListener('error', removeProvider);
-
     notify('Collaboration socket has connected', 'success').catch(
       console.error
     );
+    window.wsProvider = provider;
     return provider;
   } else {
     notify('Collaboration socket connection failed', 'warning').catch(

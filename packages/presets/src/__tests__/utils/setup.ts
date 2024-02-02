@@ -1,7 +1,6 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import {
   type BlobStorage,
-  type DocProviderCreator,
   type Page,
   Text,
   Workspace,
@@ -11,7 +10,6 @@ import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
 import { AffineEditorContainer } from '../../index.js';
 
 function createWorkspaceOptions() {
-  const providerCreators: DocProviderCreator[] = [];
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   const schema = new Schema();
   const room = Math.random().toString(16).slice(2, 8);
@@ -25,7 +23,6 @@ function createWorkspaceOptions() {
   return {
     id: room,
     schema,
-    providerCreators,
     idGenerator,
     blobStorages,
     defaultFlags: {
