@@ -120,6 +120,7 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
         );
 
         this.page.deleteBlock(noteBlock);
+        this.host.selection.setGroup('edgeless', []);
       }
 
       return true;

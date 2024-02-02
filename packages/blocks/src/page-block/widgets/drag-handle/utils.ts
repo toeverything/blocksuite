@@ -409,9 +409,12 @@ export function convertDragPreviewDocToEdgeless({
     edgelessPage.surfaceBlockModel
   );
 
+  const page = blockComponent.page;
+  const host = blockComponent.host;
   const altKey = state.raw.altKey;
   if (!altKey) {
-    blockComponent.page.deleteBlock(blockModel);
+    page.deleteBlock(blockModel);
+    host.selection.setGroup('note', []);
   }
 
   return true;
@@ -426,6 +429,7 @@ export function convertDragPreviewEdgelessToDoc({
   blockComponent: BlockElement;
 }): boolean {
   const page = blockComponent.page;
+  const host = blockComponent.host;
   const targetBlock = page.getBlockById(dropBlockId);
   if (!targetBlock) return false;
 
@@ -447,6 +451,7 @@ export function convertDragPreviewEdgelessToDoc({
   const altKey = state.raw.altKey;
   if (!altKey) {
     page.deleteBlock(blockModel);
+    host.selection.setGroup('edgeless', []);
   }
 
   return true;
