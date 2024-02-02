@@ -60,7 +60,6 @@ export class EdgelessPageService extends PageService {
       shapes: CanvasElement[];
     }>(),
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
-    tagClicked: new Slot<{ tagId: string }>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
     navigatorSettingUpdated: new Slot<{
