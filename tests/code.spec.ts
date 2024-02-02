@@ -606,7 +606,9 @@ test('press backspace inside should select code block', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
   const codeBlock = page.locator('affine-code');
-  const selectedRects = page.locator('affine-block-selection');
+  const selectedRects = page
+    .locator('affine-block-selection')
+    .locator('visible=true');
   await page.keyboard.press('Backspace');
   await expect(selectedRects).toHaveCount(1);
   await expect(codeBlock).toBeVisible();

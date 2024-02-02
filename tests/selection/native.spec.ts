@@ -1471,7 +1471,7 @@ test('should clear native selection before block selection', async ({
 
   expect(text0).toBe('456');
   expect(textCount).toBe(0);
-  const rects = page.locator('affine-block-selection');
+  const rects = page.locator('affine-block-selection').locator('visible=true');
   await expect(rects).toHaveCount(1);
 });
 
