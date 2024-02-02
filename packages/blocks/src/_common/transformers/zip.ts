@@ -11,7 +11,7 @@ import JSZip from 'jszip';
 
 import { replaceIdMiddleware } from './middlewares.js';
 
-export async function exportPages(workspace: Workspace, pages: Page[]) {
+async function exportPages(workspace: Workspace, pages: Page[]) {
   const zip = new JSZip();
 
   const job = new Job({ workspace });
@@ -38,7 +38,7 @@ export async function exportPages(workspace: Workspace, pages: Page[]) {
   return zip.generateAsync({ type: 'blob' });
 }
 
-export async function importPages(workspace: Workspace, imported: Blob) {
+async function importPages(workspace: Workspace, imported: Blob) {
   const zip = new JSZip();
   const { files } = await zip.loadAsync(imported);
 
@@ -112,3 +112,8 @@ export async function importPages(workspace: Workspace, imported: Blob) {
     })
   );
 }
+
+export const ZipTransformer = {
+  exportPages,
+  importPages,
+};

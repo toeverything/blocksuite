@@ -4,7 +4,7 @@ import { Job } from '@blocksuite/store';
 import { HtmlAdapter } from '../adapters/index.js';
 import { createAssetsArchive, download } from './utils.js';
 
-export async function exportPage(page: Page) {
+async function exportPage(page: Page) {
   const job = new Job({ workspace: page.workspace });
   const snapshot = await job.pageToSnapshot(page);
   const adapter = new HtmlAdapter();
@@ -30,3 +30,7 @@ export async function exportPage(page: Page) {
   }
   download(downloadBlob, name);
 }
+
+export const HtmlTransformer = {
+  exportPage,
+};
