@@ -73,8 +73,15 @@ async function initEmptyEditor({
     async ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
 
-      async function initPage(page: ReturnType<typeof workspace.createPage>) {
-        await page.load();
+      async function waitForMountPageEditor(
+        page: ReturnType<typeof workspace.createPage>
+      ) {
+        if (!page.ready) await page.load();
+
+        if (!page.root) {
+          await new Promise(resolve => page.slots.rootAdded.once(resolve));
+        }
+
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
@@ -98,63 +105,64 @@ async function initEmptyEditor({
           return editor;
         };
 
-        page.slots.rootAdded.once(() => {
-          const editor = createEditor();
-          if (multiEditor) createEditor();
+        const editor = createEditor();
+        if (multiEditor) createEditor();
 
-          editor.updateComplete
-            .then(() => {
-              const debugMenu: DebugMenu = document.createElement('debug-menu');
-              const pagesPanel: PagesPanel =
-                document.createElement('pages-panel');
-              const framePanel: CustomFramePanel =
-                document.createElement('custom-frame-panel');
-              const outlinePanel: CustomOutlinePanel = document.createElement(
-                'custom-outline-panel'
-              );
-              pagesPanel.editor = editor;
-              framePanel.editor = editor;
-              outlinePanel.editor = editor;
-              debugMenu.workspace = workspace;
-              debugMenu.editor = editor;
-              debugMenu.pagesPanel = pagesPanel;
-              debugMenu.framePanel = framePanel;
-              debugMenu.outlinePanel = outlinePanel;
-              const leftSidePanel = document.createElement('left-side-panel');
-              debugMenu.leftSidePanel = leftSidePanel;
-              document.body.appendChild(debugMenu);
-              document.body.appendChild(leftSidePanel);
-              document.body.appendChild(framePanel);
-              document.body.appendChild(outlinePanel);
-              window.debugMenu = debugMenu;
-              window.editor = editor;
-              window.page = page;
-              window.dispatchEvent(
-                new CustomEvent('blocksuite:page-ready', { detail: page.id })
-              );
-            })
-            .catch(console.error);
-        });
+        editor.updateComplete
+          .then(() => {
+            const debugMenu: DebugMenu = document.createElement('debug-menu');
+            const pagesPanel: PagesPanel =
+              document.createElement('pages-panel');
+            const framePanel: CustomFramePanel =
+              document.createElement('custom-frame-panel');
+            const outlinePanel: CustomOutlinePanel = document.createElement(
+              'custom-outline-panel'
+            );
+            pagesPanel.editor = editor;
+            framePanel.editor = editor;
+            outlinePanel.editor = editor;
+            debugMenu.workspace = workspace;
+            debugMenu.editor = editor;
+            debugMenu.pagesPanel = pagesPanel;
+            debugMenu.framePanel = framePanel;
+            debugMenu.outlinePanel = outlinePanel;
+            const leftSidePanel = document.createElement('left-side-panel');
+            debugMenu.leftSidePanel = leftSidePanel;
+            document.body.appendChild(debugMenu);
+            document.body.appendChild(leftSidePanel);
+            document.body.appendChild(framePanel);
+            document.body.appendChild(outlinePanel);
+            window.debugMenu = debugMenu;
+            window.editor = editor;
+            window.page = page;
+            window.dispatchEvent(
+              new CustomEvent('blocksuite:page-ready', { detail: page.id })
+            );
+          })
+          .catch(console.error);
       }
 
       if (noInit) {
-        workspace.meta.pageMetas.forEach(meta => {
-          const pageId = meta.id;
-          const page = workspace.getPage(pageId);
-          if (page) initPage(page).catch(console.error);
-        });
-        workspace.slots.pageAdded.on(async pageId => {
-          const page = workspace.getPage(pageId);
-          if (!page) {
-            throw new Error(`Failed to get page ${pageId}`);
-          }
-          window.page = page;
-          await initPage(page);
-        });
+        const firstPage = workspace.pages.values().next().value as
+          | ReturnType<typeof workspace.createPage>
+          | undefined;
+        if (firstPage) {
+          window.page = firstPage;
+          waitForMountPageEditor(firstPage).catch;
+        } else {
+          workspace.slots.pageAdded.on(async pageId => {
+            const page = workspace.getPage(pageId);
+            if (!page) {
+              throw new Error(`Failed to get page ${pageId}`);
+            }
+            window.page = page;
+            waitForMountPageEditor(page).catch(console.error);
+          });
+        }
       } else {
         const page = workspace.createPage({ id: 'page:home' });
         window.page = page;
-        await initPage(page);
+        waitForMountPageEditor(page).catch(console.error);
       }
     },
     [flags, noInit, multiEditor] as const
