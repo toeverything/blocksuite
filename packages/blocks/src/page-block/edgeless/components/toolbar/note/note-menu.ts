@@ -62,7 +62,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
   childFlavour!: NoteChildrenFlavour;
 
   @property({ attribute: false })
-  childType!: string;
+  childType!: string | null;
 
   @property({ attribute: false })
   tip!: string;
@@ -75,6 +75,22 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
       tip: string;
     }>
   ) => void;
+
+  override firstUpdated() {
+    this.disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(tool => {
+        if (tool.type !== 'affine:note') return;
+        this.childFlavour = tool.childFlavour;
+        this.childType = tool.childType;
+        this.tip = tool.tip;
+      })
+    );
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.disposables.dispose();
+  }
 
   override render() {
     if (this.edgeless.edgelessTool.type !== 'affine:note') return nothing;
