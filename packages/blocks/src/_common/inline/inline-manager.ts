@@ -98,7 +98,8 @@ export class InlineManager<
     const defaultRenderer = getDefaultAttributeRenderer<TextAttributes>();
 
     const renderer: AttributeRenderer<TextAttributes> = (delta, selected) => {
-      for (const spec of this._specs) {
+      // Priority increases from front to back
+      for (const spec of this._specs.toReversed()) {
         if (spec.match(delta)) {
           return spec.renderer(delta, selected);
         }
