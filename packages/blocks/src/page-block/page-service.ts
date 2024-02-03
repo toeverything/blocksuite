@@ -14,7 +14,7 @@ import {
   ZipTransformer,
 } from '../_common/transformers/index.js';
 import type { EmbedCardStyle } from '../_common/types.js';
-import { CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
+import { CanvasTextFonts } from '../surface-block/consts.js';
 import { EditSessionStorage } from '../surface-block/managers/edit-session.js';
 import {
   copySelectedModelsCommand,
@@ -210,6 +210,6 @@ export class PageService extends BlockService<PageBlockModel> {
   }
 
   loadFonts() {
-    this.fontLoader.load(CANVAS_TEXT_FONT_CONFIG);
+    this.fontLoader.load(CanvasTextFonts);
   }
 }

@@ -95,8 +95,8 @@ export * from './paragraph-block/index.js';
 export {
   Bound,
   BrushElementModel,
-  CANVAS_TEXT_FONT_CONFIG,
   CanvasElementType,
+  CanvasTextFonts,
   ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,
