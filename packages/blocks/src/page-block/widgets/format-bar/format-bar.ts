@@ -1,3 +1,5 @@
+import '../../../_common/components/button.js';
+
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
@@ -10,7 +12,7 @@ import {
   shift,
 } from '@floating-ui/dom';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
 import { HoverController } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
@@ -89,6 +91,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     return this.host.selection;
   }
 
+  @state()
   private _dragging = false;
 
   private _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
@@ -165,19 +168,13 @@ export class AffineFormatBarWidget extends WidgetElement {
       );
     }
 
-    this.disposables.add(
-      this.host.event.add('dragStart', () => {
-        this._dragging = true;
-        this.requestUpdate();
-      })
-    );
+    this.handleEvent('pointerMove', ctx => {
+      this._dragging = ctx.get('pointerState').dragging;
+    });
 
-    this.disposables.add(
-      this.host.event.add('dragEnd', () => {
-        this._dragging = false;
-        this.requestUpdate();
-      })
-    );
+    this.handleEvent('pointerUp', () => {
+      this._dragging = false;
+    });
 
     // calculate placement
     this.disposables.add(

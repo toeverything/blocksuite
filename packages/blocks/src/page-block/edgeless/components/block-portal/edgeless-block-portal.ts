@@ -133,6 +133,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @state()
   private _slicerAnchorNote: NoteBlockModel | null = null;
+
+  @state()
+  private _dragging = false;
+
   private _surfaceRefReferenceSet = new Set<string>();
 
   private _clearWillChangeId: null | ReturnType<typeof setTimeout> = null;
@@ -309,6 +313,18 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
+      edgeless.host.event.add('pointerMove', ctx => {
+        this._dragging = ctx.get('pointerState').dragging;
+      })
+    );
+
+    _disposables.add(
+      edgeless.host.event.add('pointerUp', () => {
+        this._dragging = false;
+      })
+    );
+
+    _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
         this._isResizing = true;
       })
@@ -453,7 +469,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .edgeless=${edgeless}
         .show=${this._showIndexLabel}
       ></edgeless-index-label>
-      ${this._toolbarVisible && !page.readonly
+      ${this._toolbarVisible && !page.readonly && !this._dragging
         ? html`<edgeless-component-toolbar .edgeless=${edgeless}>
           </edgeless-component-toolbar>`
         : nothing}
