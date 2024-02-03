@@ -60,15 +60,6 @@ export async function initDefaultPageWorkspace(workspace: Workspace) {
 
   const shouldInit = !databaseExists && !params.get('room');
   if (shouldInit) {
-    const deleteResult = await new Promise(resolve => {
-      const req = indexedDB.deleteDatabase(INDEXED_DB_NAME);
-      req.onerror = resolve;
-      req.onblocked = resolve;
-      req.onsuccess = resolve;
-    });
-
-    console.info('Delete database: ', deleteResult);
-
     const page = workspace.createPage({ id: 'page:home' });
     await page.load(() => {
       const pageBlockId = page.addBlock('affine:page', {
@@ -79,9 +70,12 @@ export async function initDefaultPageWorkspace(workspace: Workspace) {
     page.resetHistory();
   } else {
     // wait for data injected from provider
-    const firstPageId = await new Promise<string>(resolve =>
-      workspace.slots.pageAdded.once(id => resolve(id))
-    );
+    const firstPageId =
+      workspace.pages.size > 0
+        ? workspace.pages.keys().next().value
+        : await new Promise<string>(resolve =>
+            workspace.slots.pageAdded.once(id => resolve(id))
+          );
     const page = workspace.getPage(firstPageId);
     assertExists(page);
 
@@ -134,15 +128,17 @@ export async function initDefaultPageWorkspace(workspace: Workspace) {
 
 async function testDefaultPageIDBExistence() {
   return new Promise<boolean>(resolve => {
-    const request = indexedDB.open(INDEXED_DB_NAME);
-    request.onupgradeneeded = function () {
-      request.transaction?.abort();
-      request.result.close();
-      resolve(false);
+    const req = indexedDB.open(INDEXED_DB_NAME);
+    let existed = true;
+    req.onsuccess = function () {
+      req.result.close();
+      if (!existed) {
+        indexedDB.deleteDatabase(INDEXED_DB_NAME);
+      }
+      resolve(existed);
     };
-    request.onsuccess = function () {
-      request.result.close();
-      resolve(true);
+    req.onupgradeneeded = function () {
+      existed = false;
     };
   });
 }
