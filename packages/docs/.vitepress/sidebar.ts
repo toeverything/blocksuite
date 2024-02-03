@@ -122,7 +122,16 @@ export const reference: DefaultTheme.NavItem[] = [
 ];
 
 export const components: DefaultTheme.NavItem[] = [
-  { text: 'Component Types', link: 'guide/component-types' },
+  {
+    text: 'Introduction',
+    items: [
+      { text: 'Overview', link: 'components/overview' },
+      {
+        text: 'Components in AFFiNE',
+        link: 'components/overview#blocksuite-components-in-affine',
+      },
+    ],
+  },
   {
     text: 'Editors',
     items: [
