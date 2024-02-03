@@ -41,8 +41,6 @@ export class Page extends Space<FlatBlockMap> {
   private readonly _blockTree: BlockTree;
   private _history!: Y.UndoManager;
   private _root: BlockModel | null = null;
-  /** Indicate whether the underlying subdoc has been loaded. */
-  private _docLoaded = false;
   /** Indicate whether the block tree is ready */
   private _ready = false;
   private _shouldTransact = true;
@@ -50,6 +48,7 @@ export class Page extends Space<FlatBlockMap> {
   readonly slots = {
     /**
      * This fires when the block tree is initialized via API call or underlying existing ydoc binary.
+     * (Equivalent to when you execute `Page.load`)
      * Note that this is different with the `doc.loaded` field,
      * since `loaded` only indicates that the ydoc is loaded, not the block tree.
      */
@@ -637,27 +636,22 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  trySyncFromExistingDoc() {
-    if (this._docLoaded) {
-      throw new Error('Cannot sync from existing doc more than once');
+  override async load(initFn?: () => Promise<void> | void) {
+    if (this.ready) {
+      throw new Error('Cannot load page more than once');
     }
 
-    if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
-      this._handleVersion();
+    await super.load();
+    this._trySyncFromExistingDoc();
+
+    if (initFn) {
+      await initFn();
     }
 
-    this._initYBlocks();
+    this._ready = true;
+    this.slots.ready.emit();
 
-    this._yBlocks.forEach((_, id) => {
-      this._handleYBlockAdd(id);
-    });
-
-    this._docLoaded = true;
-
-    if (this._yBlocks.size > 0) {
-      this._ready = true;
-      this.slots.ready.emit();
-    }
+    return this;
   }
 
   dispose() {
@@ -666,7 +660,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.rootDeleted.dispose();
     this.slots.blockUpdated.dispose();
 
-    if (this._docLoaded) {
+    if (this.ready) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
     }
@@ -798,19 +792,20 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async load(initFn?: () => Promise<void> | void) {
-    await super.load();
-    if (!this._docLoaded) {
-      this.trySyncFromExistingDoc();
+  private _trySyncFromExistingDoc() {
+    if (this.ready) {
+      throw new Error('Cannot sync from existing doc more than once');
     }
 
-    if (initFn) {
-      await initFn();
-      this._ready = true;
-      this.slots.ready.emit();
+    if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
+      this._handleVersion();
     }
 
-    return this;
+    this._initYBlocks();
+
+    this._yBlocks.forEach((_, id) => {
+      this._handleYBlockAdd(id);
+    });
   }
 
   /** @deprecated use page.load() instead */

@@ -1,15 +1,14 @@
-import type { PassiveDocProvider, Workspace } from '@blocksuite/store';
+import type { Workspace } from '@blocksuite/store';
 import type { EventBasedChannel } from 'async-call-rpc';
 import { isPlainObject } from 'merge';
 
-import { notify } from '../utils/notify.js';
-import { createAsyncCallRPCProviderCreator } from './async-call-rpc.js';
-import type { DocProviderCreator } from './type.js';
+import { notify } from '../default/utils/notify.js';
+import { createAsyncCallRPCProvider } from './async-call-rpc.js';
 
 const BASE_URL = new URL(import.meta.env.PLAYGROUND_SERVER);
 const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
-export function generateRoomId(): Promise<string> {
+export async function generateRoomId(): Promise<string> {
   return fetch(new URL('/room/', BASE_URL), {
     method: 'post',
   })
@@ -17,28 +16,12 @@ export function generateRoomId(): Promise<string> {
     .then(({ id }) => id);
 }
 
-export function createCollaborationSocket(room?: string) {
-  room = room ?? new URLSearchParams(location.search).get('room') ?? '';
-
-  if (!room) {
-    console.warn('Invalid collaboration room');
-    return;
-  }
-
-  const ws = new WebSocket(new URL(`/room/${room}`, BASE_WEBSOCKET_URL));
-
-  return ws;
-}
-
-export async function initCollaborationSocket(
+export async function setupWebsocketProvider(
   workspace: Workspace,
   room: string
 ) {
   const ws = createCollaborationSocket(room);
-
-  if (!ws) {
-    return false;
-  }
+  if (!ws) return null;
 
   const connected = await new Promise<boolean>(res => {
     const resetWs = () => {
@@ -52,39 +35,37 @@ export async function initCollaborationSocket(
   });
 
   if (connected) {
-    const provider = workspace.registerProvider(
-      createWebsocketCreator(ws),
-      room
-    ) as PassiveDocProvider;
+    const channel = new WebsocketMessageChannel(ws);
+    const provider = createAsyncCallRPCProvider(workspace, channel);
     provider.connect();
-
-    const removeProvider = () => {
-      provider.disconnect();
-      const idx = workspace.providers.findIndex(p => p === provider);
-
-      workspace.providers.splice(idx, 1);
-
-      ws.addEventListener('error', removeProvider);
-      ws.addEventListener('close', removeProvider);
-    };
-
-    ws.addEventListener('close', removeProvider);
-    ws.addEventListener('error', removeProvider);
 
     notify('Collaboration socket has connected', 'success').catch(
       console.error
     );
-    return true;
+    window.wsProvider = provider;
+    return provider;
   } else {
     notify('Collaboration socket connection failed', 'warning').catch(
       console.error
     );
+    return null;
   }
-
-  return false;
 }
 
-export class WebsocketMessageChannel implements EventBasedChannel {
+function createCollaborationSocket(room?: string) {
+  room = room ?? new URLSearchParams(location.search).get('room') ?? '';
+
+  if (!room) {
+    console.warn('Invalid collaboration room');
+    return;
+  }
+
+  const ws = new WebSocket(new URL(`/room/${room}`, BASE_WEBSOCKET_URL));
+
+  return ws;
+}
+
+class WebsocketMessageChannel implements EventBasedChannel {
   static url = 'ws://localhost:8787';
 
   private _ws!: WebSocket;
@@ -175,15 +156,3 @@ export class WebsocketMessageChannel implements EventBasedChannel {
     this._ws.close();
   }
 }
-
-export const createWebsocketCreator = (ws: WebSocket): DocProviderCreator => {
-  const channel = new WebsocketMessageChannel(ws);
-
-  return (...args) => {
-    return createAsyncCallRPCProviderCreator('websocket-channel', channel, {
-      cleanup() {
-        channel.close();
-      },
-    })(...args);
-  };
-};

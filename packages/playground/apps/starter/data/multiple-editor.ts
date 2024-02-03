@@ -1,7 +1,6 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { Text, type Workspace } from '@blocksuite/store';
 
-import { createEditor } from '../utils.js';
 import { type InitFn } from './utils.js';
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -25,7 +24,17 @@ export const multiEditor: InitFn = async (workspace: Workspace, id: string) => {
 
   const app = document.getElementById('app');
   if (app) {
-    createEditor(page, app);
+    const editor = new AffineEditorContainer();
+    editor.page = page;
+    editor.slots.pageLinkClicked.on(({ pageId }) => {
+      const target = workspace.getPage(pageId);
+      if (!target) {
+        throw new Error(`Failed to jump to page ${pageId}`);
+      }
+      editor.page = target;
+    });
+
+    app.append(editor);
     app.style.display = 'flex';
     app.childNodes.forEach(node => {
       if (node instanceof AffineEditorContainer) {
@@ -63,7 +72,16 @@ export const multiEditorVertical: InitFn = async (
 
   const app = document.getElementById('app');
   if (app) {
-    createEditor(page, app);
+    const editor = new AffineEditorContainer();
+    editor.page = page;
+    editor.slots.pageLinkClicked.on(({ pageId }) => {
+      const target = workspace.getPage(pageId);
+      if (!target) {
+        throw new Error(`Failed to jump to page ${pageId}`);
+      }
+      editor.page = target;
+    });
+    app.append(editor);
   }
 };
 

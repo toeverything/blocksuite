@@ -3,16 +3,10 @@
 
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Awareness } from 'y-protocols/awareness.js';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
-import type {
-  BlockModel,
-  BlockSchemaType,
-  Page,
-  PassiveDocProvider,
-} from '../index.js';
+import type { BlockModel, BlockSchemaType, Page } from '../index.js';
 import { Generator, Schema, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
@@ -116,33 +110,6 @@ describe('basic', () => {
           blocks: {},
         },
       },
-    });
-  });
-
-  it('init with provider', async () => {
-    const options = createTestOptions();
-    new Workspace({
-      ...options,
-      providerCreators: [
-        vi.fn((id, doc, config): PassiveDocProvider => {
-          expect(id).toBe(options.id);
-          expect(doc.guid).toBe(options.id);
-          expect(config.awareness).toBeInstanceOf(Awareness);
-          return {
-            flavour: '',
-            passive: true,
-            connect() {
-              // do nothing
-            },
-            get connected() {
-              return false;
-            },
-            disconnect() {
-              // do nothing
-            },
-          };
-        }),
-      ],
     });
   });
 

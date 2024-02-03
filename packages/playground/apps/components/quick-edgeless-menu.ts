@@ -30,13 +30,13 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { LeftSidePanel } from '../../starter/components/left-side-panel.js';
-import type { PagesPanel } from '../../starter/components/pages-panel.js';
+import { notify } from '../default/utils/notify.js';
 import {
   generateRoomId,
-  initCollaborationSocket,
+  setupWebsocketProvider,
 } from '../providers/websocket-channel.js';
-import { notify } from '../utils/notify.js';
+import type { LeftSidePanel } from './left-side-panel.js';
+import type { PagesPanel } from './pages-panel.js';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -78,9 +78,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
   pagesPanel!: PagesPanel;
-
-  @state()
-  private _connected = true;
 
   @state()
   private _canUndo = false;
@@ -135,24 +132,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this._switchEditorMode();
     }
   };
-
-  private _toggleConnection() {
-    if (this._connected) {
-      this.workspace.providers.forEach(provider => {
-        if ('passive' in provider && provider.connected) {
-          provider.disconnect();
-        }
-      });
-      this._connected = false;
-    } else {
-      this.workspace.providers.forEach(provider => {
-        if ('passive' in provider && !provider.connected) {
-          provider.connect();
-        }
-      });
-      this._connected = true;
-    }
-  }
 
   private _switchEditorMode() {
     const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
@@ -308,11 +287,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   };
 
   private _startCollaboration = async () => {
-    if (
-      this.workspace.providers.find(
-        provider => provider.flavour === 'websocket-channel'
-      )
-    ) {
+    if (window.wsProvider) {
       notify('There is already a websocket provider exists', 'neutral').catch(
         console.error
       );
@@ -334,9 +309,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.leftSidePanel.toggle(this.pagesPanel);
   }
 
-  private async _initWebsocketProvider(room: string): Promise<boolean> {
+  private async _initWebsocketProvider(room: string) {
     this._initws = true;
-    const result = await initCollaborationSocket(this.workspace, room);
+    const result = await setupWebsocketProvider(this.workspace, room);
     this._initws = false;
     return result;
   }
@@ -437,9 +412,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   ></sl-icon>
                   <span>Test operations</span>
                   <sl-menu slot="submenu">
-                    <sl-menu-item @click=${this._toggleConnection}>
-                      ${this._connected ? 'Disconnect' : 'Connect'}
-                    </sl-menu-item>
                     <sl-menu-item @click=${this._addNote}>
                       Add Note</sl-menu-item
                     >

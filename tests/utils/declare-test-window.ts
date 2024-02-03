@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { TestUtils } from '@blocks/index.js';
 import type { EditorHost } from '@lit/element/index.js';
-import type { DebugMenu } from '@playground/apps/starter/components/debug-menu.js';
+import type { DebugMenu } from '@playground/apps/components/debug-menu.js';
 import type { AffineEditorContainer } from '@presets/editors/index.js';
 import type { BlockModel, Page, Workspace } from '@store/index.js';
-import type { DocProvider } from '@store/providers/type.js';
 
 declare global {
   interface Window {
@@ -24,8 +23,5 @@ declare global {
     editor: AffineEditorContainer;
     host: EditorHost;
     testUtils: TestUtils;
-
-    // TODO: remove this when provider support subdocument
-    subdocProviders: Map<string, DocProvider[]>;
   }
 }

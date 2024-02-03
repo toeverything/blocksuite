@@ -1,12 +1,7 @@
 import type { TestUtils } from '@blocksuite/blocks';
 import type { EditorHost } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import type {
-  BlockSchema,
-  DocProvider,
-  Page,
-  Workspace,
-} from '@blocksuite/store';
+import type { BlockSchema, Page, Workspace } from '@blocksuite/store';
 import type { Job } from '@blocksuite/store';
 import type { z } from 'zod';
 
@@ -28,8 +23,8 @@ declare global {
     testUtils: TestUtils;
     host: EditorHost;
 
-    // TODO: remove this when provider support subdocument
-    subdocProviders: Map<string, DocProvider[]>;
+    wsProvider: ReturnType<typeof setupBroadcastProvider>;
+    bcProvider: ReturnType<typeof setupBroadcastProvider>;
 
     devtoolsFormatters: {
       header: (obj: unknown, config: unknown) => null | HTMLTemplate;
