@@ -217,18 +217,14 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
     event.preventDefault();
 
-    let ctx: CompositionEndHookCtx<TextAttributes> | null = {
+    const ctx: CompositionEndHookCtx<TextAttributes> = {
       inlineEditor: this.editor,
       raw: event,
       inlineRange,
       data: event.data,
       attributes: {} as TextAttributes,
     };
-    const hook = this.editor.hooks.compositionEnd;
-    if (hook) {
-      ctx = hook(ctx);
-    }
-    if (!ctx) return;
+    this.editor.hooks.compositionEnd?.(ctx);
 
     const { inlineRange: newInlineRange, data: newData } = ctx;
     if (newData && newData.length > 0) {
@@ -275,18 +271,14 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
     event.preventDefault();
 
-    let ctx: BeforeinputHookCtx<TextAttributes> | null = {
+    const ctx: BeforeinputHookCtx<TextAttributes> = {
       inlineEditor: this.editor,
       raw: event,
       inlineRange: inlineRange,
       data: event.data,
       attributes: {} as TextAttributes,
     };
-    const hook = this.editor.hooks.beforeinput;
-    if (hook) {
-      ctx = hook(ctx);
-    }
-    if (!ctx) return;
+    this.editor.hooks.beforeinput?.(ctx);
 
     const { raw: newEvent, data, inlineRange: newInlineRange } = ctx;
     transformInput<TextAttributes>(

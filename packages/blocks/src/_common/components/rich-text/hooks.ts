@@ -51,23 +51,13 @@ const autoIdentifyLink = (ctx: HookContext<AffineTextAttributes>) => {
   );
 };
 
-let ifPrefixSpace = false;
-export const onVBeforeinput = (
-  ctx: BeforeinputHookCtx<AffineTextAttributes>
-) => {
-  const { inlineEditor, inlineRange, data, raw } = ctx;
+function handleExtendedAttributes(
+  ctx:
+    | BeforeinputHookCtx<AffineTextAttributes>
+    | CompositionEndHookCtx<AffineTextAttributes>
+) {
+  const { data, inlineEditor, inlineRange } = ctx;
   const deltas = inlineEditor.getDeltasByInlineRange(inlineRange);
-
-  // Overwrite the default behavior (Insert period when consecutive spaces) of IME.
-  if (raw.inputType === 'insertText' && data === ' ') {
-    ifPrefixSpace = true;
-  } else if (data !== '. ' && data !== '。 ') {
-    ifPrefixSpace = false;
-  }
-  if (ifPrefixSpace && (data === '. ' || data === '。 ')) {
-    ctx.data = ' ';
-  }
-
   if (data && data.length > 0 && data !== '\n') {
     if (
       // cursor is in the between of two deltas
@@ -100,38 +90,19 @@ export const onVBeforeinput = (
       ctx.attributes = attributes ?? {};
     }
   }
-  autoIdentifyLink(ctx);
 
   return ctx;
+}
+
+export const onVBeforeinput = (
+  ctx: BeforeinputHookCtx<AffineTextAttributes>
+) => {
+  handleExtendedAttributes(ctx);
+  autoIdentifyLink(ctx);
 };
 
 export const onVCompositionEnd = (
   ctx: CompositionEndHookCtx<AffineTextAttributes>
 ) => {
-  const { inlineEditor, inlineRange, data } = ctx;
-  const deltas = inlineEditor.getDeltasByInlineRange(inlineRange);
-
-  if (data && data.length > 0 && data !== '\n') {
-    if (deltas.length > 1 || (deltas.length === 1 && inlineRange.index !== 0)) {
-      const newAttributes = deltas[0][0].attributes;
-      if (
-        deltas.length !== 1 ||
-        inlineRange.index === inlineEditor.yText.length
-      ) {
-        EDGE_IGNORED_ATTRIBUTES.forEach(attr => {
-          delete newAttributes?.[attr];
-        });
-      }
-
-      GLOBAL_IGNORED_ATTRIBUTES.forEach(attr => {
-        delete newAttributes?.[attr];
-      });
-
-      ctx.attributes = newAttributes ?? {};
-    }
-  }
-
-  autoIdentifyLink(ctx);
-
-  return ctx;
+  handleExtendedAttributes(ctx);
 };
