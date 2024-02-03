@@ -96,6 +96,7 @@ export {
   Bound,
   BrushElementModel,
   CanvasElementType,
+  CanvasTextFonts,
   ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,
