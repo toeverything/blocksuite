@@ -14,8 +14,8 @@ hero:
       text: Get Started
       link: /guide/overview
     - theme: alt
-      text: View on GitHub
-      link: https://github.com/toeverything/blocksuite
+      text: Explore Components
+      link: /components/overview
 
 features:
   - title: 🧩 Headless Editor Framework

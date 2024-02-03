@@ -50,7 +50,7 @@ export default defineConfig({
     nav: [
       {
         text: 'Components 🚧',
-        link: '/components/doc-editor',
+        link: '/components/overview',
         activeMatch: '/components/*',
       },
       {
