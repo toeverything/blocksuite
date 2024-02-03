@@ -189,6 +189,7 @@ export const linkPopupStyle = css`
   }
 
   .affine-link-popover-input {
+    background: transparent;
     border: none;
   }
   .affine-link-popover-input::placeholder {
