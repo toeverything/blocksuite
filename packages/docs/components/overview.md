@@ -2,6 +2,6 @@
 
 TODO
 
-## BlockSuite Components in AFFiNE
+## AFFiNE Integration
 
 TODO

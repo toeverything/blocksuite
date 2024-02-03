@@ -127,8 +127,8 @@ export const components: DefaultTheme.NavItem[] = [
     items: [
       { text: 'Overview', link: 'components/overview' },
       {
-        text: 'Components in AFFiNE',
-        link: 'components/overview#blocksuite-components-in-affine',
+        text: 'AFFiNE Integration',
+        link: 'components/overview#affine-integration',
       },
     ],
   },
@@ -155,7 +155,7 @@ export const components: DefaultTheme.NavItem[] = [
         ],
       },
       {
-        text: 'Special Blocks',
+        text: 'Advanced Blocks',
         items: [
           { text: 'Surface Block', link: '' },
           { text: 'Database Block', link: '' },

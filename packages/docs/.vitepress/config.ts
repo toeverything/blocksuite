@@ -49,7 +49,7 @@ export default defineConfig({
 
     nav: [
       {
-        text: 'Components 🚧',
+        text: 'Components',
         link: '/components/overview',
         activeMatch: '/components/*',
       },
