@@ -65,7 +65,7 @@ export function createStarterPageWorkspace() {
 export async function initStarterPageWorkspace(workspace: Workspace) {
   const functionMap = new Map<
     string,
-    (workspace: Workspace, id: string) => void
+    (workspace: Workspace, id: string) => Promise<void>
   >();
   Object.values(
     (await import('../data/index.js')) as Record<string, InitFn>
@@ -92,9 +92,11 @@ export async function initStarterPageWorkspace(workspace: Workspace) {
   const init = params.get('init') || 'preset';
   // Load built-in init function when `?init=heavy` param provided
   if (functionMap.has(init)) {
-    functionMap.get(init)?.(workspace, 'page:home');
+    await functionMap.get(init)?.(workspace, 'page:home');
     const page = workspace.getPage('page:home');
-    await page?.load();
+    if (!page?.loaded) {
+      await page?.load();
+    }
     page?.resetHistory();
   }
 }

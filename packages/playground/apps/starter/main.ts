@@ -37,7 +37,7 @@ async function main() {
   }
 
   await initStarterPageWorkspace(workspace);
-  mountDefaultPageEditor(workspace);
+  await mountDefaultPageEditor(workspace);
 }
 
 main().catch(console.error);

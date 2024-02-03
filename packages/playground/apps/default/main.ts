@@ -13,7 +13,7 @@ async function main() {
 
   const workspace = createDefaultPageWorkspace();
   await initDefaultPageWorkspace(workspace);
-  mountDefaultPageEditor(workspace);
+  await mountDefaultPageEditor(workspace);
 }
 
 main().catch(console.error);
