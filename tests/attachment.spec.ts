@@ -554,7 +554,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   await page.mouse.move(rect.x + 40, rect.y + rect.height + 80, { steps: 20 });
   await page.mouse.up();
 
-  const rects = page.locator('affine-block-selection');
+  const rects = page.locator('affine-block-selection').locator('visible=true');
   await expect(rects).toHaveCount(1);
 
   await assertStoreMatchJSX(

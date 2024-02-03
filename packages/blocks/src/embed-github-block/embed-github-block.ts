@@ -2,7 +2,6 @@ import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
 
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
@@ -123,10 +122,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     );
 
     this.disposables.add(
-      this.selection.slots.changed.on(sels => {
-        this._isSelected = sels.some(sel =>
-          PathFinder.equals(sel.path, this.path)
-        );
+      this.selection.slots.changed.on(() => {
+        this._isSelected =
+          !!this.selected?.is('block') || !!this.selected?.is('surface');
       })
     );
 
@@ -339,9 +337,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
           <embed-card-caption .block=${this}></embed-card-caption>
 
-          ${this.selected?.is('block')
-            ? html`<affine-block-selection></affine-block-selection>`
-            : nothing}
+          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
       `
     );

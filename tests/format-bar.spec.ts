@@ -982,7 +982,9 @@ test('should format quick bar work in single block selection', async ({
     { x: -26 - 24, y: -10 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator('.selected,affine-block-selection');
+  const blockSelections = page
+    .locator('affine-block-selection')
+    .locator('visible=true');
   await expect(blockSelections).toHaveCount(1);
 
   const { formatBar } = getFormatBar(page);
@@ -1071,7 +1073,9 @@ test('should format quick bar work in multiple block selection', async ({
     { x: 20, y: 20 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator('.selected,affine-block-selection');
+  const blockSelections = page
+    .locator('affine-block-selection')
+    .locator('visible=true');
   await expect(blockSelections).toHaveCount(3);
 
   const formatBarController = getFormatBar(page);
@@ -1173,7 +1177,9 @@ test('should format quick bar with block selection works when update block type'
     { x: 20, y: 20 },
     { x: 0, y: 0 }
   );
-  const blockSelections = page.locator('.selected,affine-block-selection');
+  const blockSelections = page
+    .locator('affine-block-selection')
+    .locator('visible=true');
   await expect(blockSelections).toHaveCount(3);
 
   const formatBarController = getFormatBar(page);

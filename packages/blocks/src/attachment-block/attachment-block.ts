@@ -1,10 +1,9 @@
 import '../_common/components/embed-card/embed-card-caption.js';
 
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { html, nothing, render } from 'lit';
+import { html, render } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
@@ -246,10 +245,10 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
     // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
-      this.std.selection.slots.changed.on(sels => {
-        this._isSelected = sels.some(sel =>
-          PathFinder.equals(sel.path, this.path)
-        );
+      this.std.selection.slots.changed.on(() => {
+        this._isSelected =
+          !!this.selected?.is('block') || !!this.selected?.is('surface');
+
         this._showOverlay =
           this._isResizing || this._isDragging || !this._isSelected;
       })
@@ -393,60 +392,60 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
     const embedView = this._embedView;
 
-    return html`<div
-      ${this.isInSurface ? null : ref(this._whenHover.setReference)}
-      class="affine-attachment-container"
-      style=${containerStyleMap}
-    >
-      ${embedView
-        ? html`<div
-            class="affine-attachment-embed-container"
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            ${embedView}
+    return html`
+      <div
+        ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+        class="affine-attachment-container"
+        style=${containerStyleMap}
+      >
+        ${embedView
+          ? html`<div
+              class="affine-attachment-embed-container"
+              @click=${this._handleClick}
+              @dblclick=${this._handleDoubleClick}
+            >
+              ${embedView}
 
-            <div
+              <div
+                class=${classMap({
+                  'affine-attachment-iframe-overlay': true,
+                  hide: !this._showOverlay,
+                })}
+              ></div>
+            </div>`
+          : html`<div
               class=${classMap({
-                'affine-attachment-iframe-overlay': true,
-                hide: !this._showOverlay,
+                'affine-attachment-card': true,
+                [cardStyle]: true,
+                loading: this.loading,
+                error: this.error,
+                unsynced: false,
               })}
-            ></div>
-          </div>`
-        : html`<div
-            class=${classMap({
-              'affine-attachment-card': true,
-              [cardStyle]: true,
-              loading: this.loading,
-              error: this.error,
-              unsynced: false,
-            })}
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            <div class="affine-attachment-content">
-              <div class="affine-attachment-content-title">
-                <div class="affine-attachment-content-title-icon">
-                  ${titleIcon}
+              @click=${this._handleClick}
+              @dblclick=${this._handleDoubleClick}
+            >
+              <div class="affine-attachment-content">
+                <div class="affine-attachment-content-title">
+                  <div class="affine-attachment-content-title-icon">
+                    ${titleIcon}
+                  </div>
+
+                  <div class="affine-attachment-content-title-text">
+                    ${titleText}
+                  </div>
                 </div>
 
-                <div class="affine-attachment-content-title-text">
-                  ${titleText}
-                </div>
+                <div class="affine-attachment-content-info">${infoText}</div>
               </div>
 
-              <div class="affine-attachment-content-info">${infoText}</div>
-            </div>
+              <div class="affine-attachment-banner">${FileTypeIcon}</div>
+            </div>`}
 
-            <div class="affine-attachment-banner">${FileTypeIcon}</div>
-          </div>`}
+        <embed-card-caption .block=${this}></embed-card-caption>
 
-      <embed-card-caption .block=${this}></embed-card-caption>
-
-      ${this.selected?.is('block')
-        ? html`<affine-block-selection></affine-block-selection>`
-        : nothing}
-    </div> `;
+        <affine-block-selection .block=${this}></affine-block-selection>
+      </div>
+    `;
   }
 }
 

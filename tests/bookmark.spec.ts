@@ -416,7 +416,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
   await page.mouse.up();
   await page.waitForTimeout(200);
 
-  const rects = page.locator('affine-block-selection');
+  const rects = page.locator('affine-block-selection').locator('visible=true');
   await expect(rects).toHaveCount(1);
 
   await assertStoreMatchJSX(

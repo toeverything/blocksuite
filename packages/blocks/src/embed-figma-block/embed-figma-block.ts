@@ -2,10 +2,9 @@ import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
 
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
@@ -97,10 +96,10 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 
     // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
-      this.std.selection.slots.changed.on(sels => {
-        this._isSelected = sels.some(sel =>
-          PathFinder.equals(sel.path, this.path)
-        );
+      this.std.selection.slots.changed.on(() => {
+        this._isSelected =
+          !!this.selected?.is('block') || !!this.selected?.is('surface');
+
         this._showOverlay =
           this._isResizing || this._isDragging || !this._isSelected;
       })
@@ -237,9 +236,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 
         <embed-card-caption .block=${this}></embed-card-caption>
 
-        ${this.selected?.is('block')
-          ? html`<affine-block-selection></affine-block-selection>`
-          : nothing}
+        <affine-block-selection .block=${this}></affine-block-selection>
       `
     );
   }

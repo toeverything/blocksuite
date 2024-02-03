@@ -1471,7 +1471,7 @@ test('should clear native selection before block selection', async ({
 
   expect(text0).toBe('456');
   expect(textCount).toBe(0);
-  const rects = page.locator('affine-block-selection');
+  const rects = page.locator('affine-block-selection').locator('visible=true');
   await expect(rects).toHaveCount(1);
 });
 
@@ -2008,7 +2008,9 @@ test('click to select divided', async ({ page }) => {
   await assertDivider(page, 1);
 
   await page.click('affine-divider');
-  const selectedBlocks = page.locator('.selected,affine-block-selection');
+  const selectedBlocks = page
+    .locator('affine-block-selection')
+    .locator('visible=true');
   await expect(selectedBlocks).toHaveCount(1);
 
   await pressForwardDelete(page);

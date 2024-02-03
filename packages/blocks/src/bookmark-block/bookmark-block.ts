@@ -6,7 +6,7 @@ import '../_common/components/embed-card/embed-card-toolbar.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { html, nothing, render } from 'lit';
+import { html, render } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -272,23 +272,23 @@ export class BookmarkBlockComponent extends BlockElement<
       });
     }
 
-    return html`<div
-      ${this.isInSurface ? null : ref(this._whenHover.setReference)}
-      class="affine-bookmark-container"
-      style=${containerStyleMap}
-    >
-      <bookmark-card
-        .bookmark=${this}
-        .loading=${this.loading}
-        .error=${this.error}
-      ></bookmark-card>
+    return html`
+      <div
+        ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+        class="affine-bookmark-container"
+        style=${containerStyleMap}
+      >
+        <bookmark-card
+          .bookmark=${this}
+          .loading=${this.loading}
+          .error=${this.error}
+        ></bookmark-card>
 
-      <embed-card-caption .block=${this}></embed-card-caption>
+        <embed-card-caption .block=${this}></embed-card-caption>
 
-      ${this.selected?.is('block')
-        ? html`<affine-block-selection></affine-block-selection>`
-        : nothing}
-    </div> `;
+        <affine-block-selection .block=${this}></affine-block-selection>
+      </div>
+    `;
   }
 }
 
