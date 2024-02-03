@@ -15,19 +15,19 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     }
   `;
 
-  private get _linkedDoc() {
+  private get _syncedDoc() {
     const page = this.std.workspace.getPage(this.model.pageId);
     return page;
   }
 
   override render() {
-    const linkedDoc = this._linkedDoc;
-    assertExists(linkedDoc);
+    const syncedDoc = this._syncedDoc;
+    assertExists(syncedDoc);
 
     const selected = this.selected?.is('block');
 
     return html`<div class="affine-synced-block ${selected ? 'selected' : ''}">
-      ${this.host.renderSpecPortal(linkedDoc, DocEditorBlockSpecs)}
+      ${this.host.renderSpecPortal(syncedDoc, DocEditorBlockSpecs)}
     </div>`;
   }
 }
