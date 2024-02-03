@@ -27,12 +27,8 @@ export class InlineHookService<TextAttributes extends BaseTextAttributes> {
   constructor(
     public readonly editor: InlineEditor<TextAttributes>,
     public readonly hooks: {
-      beforeinput?: (
-        props: BeforeinputHookCtx<TextAttributes>
-      ) => BeforeinputHookCtx<TextAttributes> | null;
-      compositionEnd?: (
-        props: CompositionEndHookCtx<TextAttributes>
-      ) => CompositionEndHookCtx<TextAttributes> | null;
+      beforeinput?: (props: BeforeinputHookCtx<TextAttributes>) => void;
+      compositionEnd?: (props: CompositionEndHookCtx<TextAttributes>) => void;
     } = {}
   ) {}
 }
