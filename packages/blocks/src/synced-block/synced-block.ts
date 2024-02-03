@@ -14,12 +14,20 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       outline-offset: -2px;
     }
   `;
-  override render() {
+
+  private get _syncedDoc() {
     const page = this.std.workspace.getPage(this.model.pageId);
-    assertExists(page);
+    return page;
+  }
+
+  override render() {
+    const syncedDoc = this._syncedDoc;
+    assertExists(syncedDoc);
+
     const selected = this.selected?.is('block');
+
     return html`<div class="affine-synced-block ${selected ? 'selected' : ''}">
-      ${this.host.renderSpecPortal(page, DocEditorBlockSpecs)}
+      ${this.host.renderSpecPortal(syncedDoc, DocEditorBlockSpecs)}
     </div>`;
   }
 }

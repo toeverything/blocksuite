@@ -12,14 +12,9 @@ import { PagesPanel } from '../../components/pages-panel.js';
 import { SidePanel } from '../../components/side-panel.js';
 
 const params = new URLSearchParams(location.search);
-const defaultMode =
-  params.get('mode') === 'page'
-    ? 'page'
-    : !params.get('mode')
-      ? 'page'
-      : 'edgeless';
+const defaultMode = params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 
-export function mountDefaultPageEditor(workspace: Workspace) {
+export async function mountDefaultPageEditor(workspace: Workspace) {
   const page = workspace.pages.values().next().value;
   assertExists(page, 'Need to create a page first');
 
@@ -40,53 +35,54 @@ export function mountDefaultPageEditor(workspace: Workspace) {
   });
 
   app.append(editor);
+  await editor.updateComplete;
 
-  editor.updateComplete
-    .then(() => {
-      const debugMenu = new DebugMenu();
-      const outlinePanel = new CustomOutlinePanel();
-      const framePanel = new CustomFramePanel();
-      const copilotPanelPanel = new CopilotPanel();
-      const sidePanel = new SidePanel();
-      const leftSidePanel = new LeftSidePanel();
-      const pagesPanel = new PagesPanel();
+  const outlinePanel = new CustomOutlinePanel();
+  outlinePanel.editor = editor;
 
-      debugMenu.workspace = workspace;
-      debugMenu.editor = editor;
-      debugMenu.mode = defaultMode;
-      debugMenu.outlinePanel = outlinePanel;
-      debugMenu.framePanel = framePanel;
-      debugMenu.copilotPanel = copilotPanelPanel;
-      debugMenu.sidePanel = sidePanel;
-      debugMenu.leftSidePanel = leftSidePanel;
-      debugMenu.pagesPanel = pagesPanel;
+  const framePanel = new CustomFramePanel();
+  framePanel.editor = editor;
 
-      outlinePanel.editor = editor;
-      copilotPanelPanel.editor = editor;
-      framePanel.editor = editor;
-      pagesPanel.editor = editor;
+  const copilotPanelPanel = new CopilotPanel();
+  copilotPanelPanel.editor = editor;
 
-      document.body.appendChild(debugMenu);
-      document.body.appendChild(outlinePanel);
-      document.body.appendChild(sidePanel);
-      document.body.appendChild(leftSidePanel);
-      document.body.appendChild(framePanel);
+  const sidePanel = new SidePanel();
 
-      // debug info
-      window.editor = editor;
-      window.page = page;
-      Object.defineProperty(globalThis, 'host', {
-        get() {
-          return document.querySelector<EditorHost>('editor-host');
-        },
-      });
-      Object.defineProperty(globalThis, 'std', {
-        get() {
-          return document.querySelector<EditorHost>('editor-host')?.std;
-        },
-      });
-    })
-    .catch(console.error);
+  const leftSidePanel = new LeftSidePanel();
+
+  const pagesPanel = new PagesPanel();
+  pagesPanel.editor = editor;
+
+  const debugMenu = new DebugMenu();
+  debugMenu.workspace = workspace;
+  debugMenu.editor = editor;
+  debugMenu.mode = defaultMode;
+  debugMenu.outlinePanel = outlinePanel;
+  debugMenu.framePanel = framePanel;
+  debugMenu.copilotPanel = copilotPanelPanel;
+  debugMenu.sidePanel = sidePanel;
+  debugMenu.leftSidePanel = leftSidePanel;
+  debugMenu.pagesPanel = pagesPanel;
+
+  document.body.appendChild(outlinePanel);
+  document.body.appendChild(framePanel);
+  document.body.appendChild(sidePanel);
+  document.body.appendChild(leftSidePanel);
+  document.body.appendChild(debugMenu);
+
+  // debug info
+  window.editor = editor;
+  window.page = page;
+  Object.defineProperty(globalThis, 'host', {
+    get() {
+      return document.querySelector<EditorHost>('editor-host');
+    },
+  });
+  Object.defineProperty(globalThis, 'std', {
+    get() {
+      return document.querySelector<EditorHost>('editor-host')?.std;
+    },
+  });
 
   return editor;
 }

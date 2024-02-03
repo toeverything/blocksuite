@@ -12,7 +12,7 @@ import { getExampleSpecs } from '../specs-examples/index.js';
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
-export function mountDefaultPageEditor(workspace: Workspace) {
+export async function mountDefaultPageEditor(workspace: Workspace) {
   const page = workspace.pages.values().next().value;
   assertExists(page, 'Need to create a page first');
 
@@ -37,18 +37,22 @@ export function mountDefaultPageEditor(workspace: Workspace) {
   });
 
   app.append(editor);
+  await editor.updateComplete;
+
+  const leftSidePanel = new LeftSidePanel();
+
+  const pagesPanel = new PagesPanel();
+  pagesPanel.editor = editor;
 
   const quickEdgelessMenu = new QuickEdgelessMenu();
-  const pagesPanel = new PagesPanel();
-  const leftSidePanel = new LeftSidePanel();
   quickEdgelessMenu.workspace = page.workspace;
   quickEdgelessMenu.editor = editor;
   quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.pagesPanel = pagesPanel;
-  pagesPanel.editor = editor;
-  document.body.appendChild(quickEdgelessMenu);
+
   document.body.appendChild(leftSidePanel);
+  document.body.appendChild(quickEdgelessMenu);
 
   // debug info
   window.editor = editor;
