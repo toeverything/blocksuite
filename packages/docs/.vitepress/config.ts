@@ -50,17 +50,18 @@ export default defineConfig({
     nav: [
       {
         text: 'Components 🚧',
-        items: [
-          { text: '📝 DocEditor', link: '/components/doc-editor' },
-          { text: '🎨 EdgelessEditor', link: '/components/edgeless-editor' },
-        ],
+        link: '/components/doc-editor',
+        activeMatch: '/components/*',
       },
       {
         text: 'Framework',
-        items: [
-          { text: 'Documentation', link: '/guide/overview' },
-          { text: 'API', link: '/api/' },
-        ],
+        link: '/guide/overview',
+        activeMatch: '/guide/*',
+      },
+      {
+        text: 'API',
+        link: '/api/',
+        activeMatch: '/api/*',
       },
       { text: 'Blog', link: '/blog/', activeMatch: '/blog/*' },
       {

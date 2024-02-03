@@ -122,6 +122,57 @@ export const reference: DefaultTheme.NavItem[] = [
 ];
 
 export const components: DefaultTheme.NavItem[] = [
-  { text: '📝 DocEditor', link: 'components/doc-editor' },
-  { text: '🎨 EdgelessEditor', link: 'components/edgeless-editor' },
+  { text: 'Component Types', link: 'guide/component-types' },
+  {
+    text: 'Editors',
+    items: [
+      { text: '📝 DocEditor', link: 'components/doc-editor' },
+      { text: '🎨 EdgelessEditor', link: 'components/edgeless-editor' },
+    ],
+  },
+  {
+    text: 'Blocks 🚧',
+    items: [
+      {
+        text: 'Regular Blocks',
+        items: [
+          { text: 'Page Block', link: '' },
+          { text: 'Note Block', link: '' },
+          { text: 'Paragraph Block', link: '' },
+          { text: 'List Block', link: '' },
+          { text: 'Code Block', link: '' },
+          { text: 'Image Block', link: '' },
+          { text: 'Attachment Block', link: '' },
+        ],
+      },
+      {
+        text: 'Special Blocks',
+        items: [
+          { text: 'Surface Block', link: '' },
+          { text: 'Database Block', link: '' },
+          { text: 'Frame Block', link: '' },
+          { text: 'Link Blocks', link: '' },
+          { text: 'Embed Blocks', link: '' },
+        ],
+      },
+    ],
+  },
+  {
+    text: 'Widgets 🚧',
+    items: [
+      { text: 'Slash Menu', link: '' },
+      { text: 'Format Bar', link: '' },
+      { text: 'Drag Handle', link: '' },
+    ],
+  },
+  {
+    text: 'Fragments 🚧',
+    items: [
+      { text: 'Doc Title', link: '' },
+      { text: 'Frame Panel', link: '' },
+      { text: 'Outline Panel', link: '' },
+      { text: 'Copilot Panel', link: '' },
+      { text: 'Bi-Directional Link Panel', link: '' },
+    ],
+  },
 ];
