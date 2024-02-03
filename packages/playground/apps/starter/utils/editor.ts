@@ -12,7 +12,12 @@ import { PagesPanel } from '../../components/pages-panel.js';
 import { SidePanel } from '../../components/side-panel.js';
 
 const params = new URLSearchParams(location.search);
-const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
+const defaultMode =
+  params.get('mode') === 'page'
+    ? 'page'
+    : !params.get('mode')
+      ? 'page'
+      : 'edgeless';
 
 export function mountDefaultPageEditor(workspace: Workspace) {
   const page = workspace.pages.values().next().value;
