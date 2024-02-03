@@ -23,13 +23,14 @@
 
 ## Overview
 
-BlockSuite is a toolkit for building diverse collaborative editors and applications. It implements a series of collaborative editing infrastructures and editors independently.
+BlockSuite is a toolkit for building editors and collaborative applications. It implements a series of content editing infrastructures, UI components and editors independently.
 
-With BlockSuite, you can:
+You can consider BlockSuite as a [UI component library](https://blocksuite.io/components/overview.html) for building various editors, based on a minimized vanilla framework as their runtime. With BlockSuite, you can:
 
-- Reuse multiple first-party BlockSuite editors right out of the box:
+- Reuse multiple first-party BlockSuite editors:
   - [**`DocEditor`**](https://blocksuite.io/components/doc-editor.html): A comprehensive block-based document editor, offering extensive customization and flexibility.
-  - [**`EdgelessEditor`**](https://blocksuite.io/components/edgeless-editor.html): A graphicis editor featuring canvas-based graphics rendering, but also shares the same rich-text capabilities with the `DocEditor`.
+  - [**`EdgelessEditor`**](https://blocksuite.io/components/edgeless-editor.html): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `DocEditor`.
+- Customize, extend and enhance these editors with a rich set of [BlockSuite components](https://blocksuite.io/components/overview.html). All BlockSuite components (including editors) are native web components, making them framework-agnostic and easy to interop with popular frameworks.
 - Or, build new editors from scratch based on the underlying vallina framework.
 
 > 🚧 BlockSuite is currently in its early stage, with components and extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
@@ -58,7 +59,7 @@ And under the hood, the vanilla BlockSuite framework supports:
 - Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](https://blocksuite.io/guide/data-synchronization.html#snapshot-api) and transformer.
 - State scheduling across multiple documents and reusing one document in multiple editors.
 
-To try out BlockSuite, refer to the [Quick Start](https://blocksuite.io/guide/quick-start.html) example and start with the preset editors in `@blocksuite/presets`.
+To try out BlockSuite, refer to the [quick start](https://blocksuite.io/guide/quick-start.html) example and start with the preset editors in `@blocksuite/presets`.
 
 ## Architecture
 

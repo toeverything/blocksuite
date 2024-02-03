@@ -8,7 +8,7 @@ titleTemplate: Content Editing Tech Stack
 hero:
   name: BlockSuite
   text: Content Editing Tech Stack for the Web
-  tagline: BlockSuite is a toolkit for building diverse collaborative editors and applications.
+  tagline: BlockSuite is a toolkit for building editors and collaborative applications.
   actions:
     - theme: brand
       text: Get Started

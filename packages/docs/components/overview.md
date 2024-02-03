@@ -1,4 +1,4 @@
-# Components Overview
+# BlockSuite Components Overview
 
 TODO
 

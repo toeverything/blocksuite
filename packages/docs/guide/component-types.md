@@ -4,11 +4,11 @@
 🌐 This documentation has a [Chinese translation](https://insider.affine.pro/share/af3478a2-9c9c-4d16-864d-bffa1eb10eb6/94-Y53OqW0NFm6l-wqDz6).
 :::
 
-After getting started, this section outlines the foundational editing components in BlockSuite, namely `Editor`, `Fragment`, `Block` and `Widget`.
+After getting started, this section outlines the foundational [editing components](../components/overview) in BlockSuite, namely `Editor`, `Fragment`, `Block` and `Widget`.
 
 ## Editors and Fragments
 
-The `@blocksuite/presets` package includes reusable editors like `DocEditor` and `EdgelessEditor`. Besides these editors, BlockSuite also defines **_fragments_** - UI components that are not editors but are dependent on the document's state. These fragments, such as sidebars, panels, and toolbars, may be independent in lifecycle from the editors, yet should work out-of-the-box when attached to the block tree.
+The `@blocksuite/presets` package includes reusable editors like `DocEditor` and `EdgelessEditor`. Besides these editors, BlockSuite also defines **_fragments_** - UI components that are **NOT** editors but are dependent on the document's state. These fragments, such as sidebars, panels, and toolbars, may be independent in lifecycle from the editors, yet should work out-of-the-box when attached to the block tree.
 
 The distinction between editors and fragments lies in their complexity and functionality. **Fragments typically offer more simplified capabilities, serving specific UI purposes, whereas editors provide comprehensive editing capabilities over the block tree**. Nevertheless, both editors and fragments shares similar tech stacks and [data flows](/blog/crdt-native-data-flow).
 
@@ -80,4 +80,4 @@ This allows you to **implement various editors easily on top of the same documen
 
 ## Summary
 
-So far, we've explained the interplay between editors, fragments, blocks, and widgets. The next sections will delve into more detailed functionalities of BlockSuite, starting with block tree manipulation.
+So far, we have explored the interplay between different BlockSuite component types. The subsequent sections will delve deeper into the detailed framework functionalities, beginning with block tree manipulation. For the moment, understanding the structured outline of the [BlockSuite components](../components/overview) gallery might provide clearer insights.
