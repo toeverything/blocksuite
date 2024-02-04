@@ -1,3 +1,6 @@
+import '../../../../../components/button.js';
+import '../../../../../components/tooltip/tooltip.js';
+
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline/types';
 import type { BlockElement } from '@blocksuite/lit';

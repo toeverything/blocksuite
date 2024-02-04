@@ -7,7 +7,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, nothing, type PropertyValues } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
@@ -37,16 +37,16 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     }
 
     affine-synced .affine-doc-page-block-container {
-      padding-left: 0;
-      padding-right: 0;
+      padding-left: 24px;
+      padding-right: 24px;
     }
 
     .affine-synced-block {
       border-radius: 8px;
+      overflow: hidden;
     }
     .affine-synced-block.page {
       display: block;
-      padding: 0px 24px;
       width: 100%;
     }
     .affine-synced-block.edgeless {
@@ -73,6 +73,14 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
         0px 0px 0px 2px rgba(255, 255, 255, 0.14),
         0px 0px 0px 1px var(--affine-brand-color);
     }
+
+    .synced-block-editor-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
   `;
 
   @state()
@@ -90,7 +98,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   @state()
   private _editing = false;
 
-  @query('.affine-synced-block > editor-host')
+  @query('.affine-synced-block > .synced-block-editor > editor-host')
   syncedDocEditorHost?: EditorHost;
 
   private _isInSurface = false;
@@ -141,26 +149,13 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     }
 
     this._loading = false;
+
+    await this.updateComplete;
+
+    this.syncedDocEditorHost.std.selection.slots.changed.on(() => {
+      this._editing = !!this.syncedDocEditorHost?.std.event.isActive;
+    });
   }
-
-  // private _selectBlock() {
-  //   const selectionManager = this.host.selection;
-  //   const blockSelection = selectionManager.create('block', {
-  //     path: this.path,
-  //   });
-  //   selectionManager.setGroup('note', [blockSelection]);
-  // }
-
-  // private _handleClick(event: MouseEvent) {
-  //   event.stopPropagation();
-  //   if (this.isInSurface) return;
-  //   this._selectBlock();
-  // }
-
-  // private _handleDoubleClick(event: MouseEvent) {
-  //   event.stopPropagation();
-  //   this.open();
-  // }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
     const selection = this.host.selection;
@@ -277,13 +272,6 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     this._isInSurface = parent?.flavour === 'affine:surface';
   }
 
-  override updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-
-    const syncedDocEditorHost = this.syncedDocEditorHost;
-    this._editing = !!syncedDocEditorHost?.std.selection.value.length;
-  }
-
   override render() {
     const syncedDoc = this._syncedDoc;
     const isDeleted = !syncedDoc;
@@ -301,7 +289,9 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
     return html`
       <div
-        ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+        ${this.isInSurface || this._editing
+          ? nothing
+          : ref(this._whenHover.setReference)}
         class=${classMap({
           'affine-synced-block': true,
           [pageMode]: true,
@@ -314,6 +304,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       >
         <div
           class=${classMap({
+            'synced-block-editor': true,
             'affine-doc-viewport': pageMode === 'page',
             'affine-edgeless-viewport': pageMode === 'edgeless',
           })}
