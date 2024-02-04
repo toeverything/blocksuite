@@ -150,11 +150,15 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
     this._loading = false;
 
-    await this.updateComplete;
+    if (!this._error) {
+      await this.updateComplete;
 
-    this.syncedDocEditorHost.std.selection.slots.changed.on(() => {
-      this._editing = !!this.syncedDocEditorHost?.std.event.isActive;
-    });
+      const syncedDocEditorHost = this.syncedDocEditorHost;
+      assertExists(syncedDocEditorHost);
+      syncedDocEditorHost.std.selection.slots.changed.on(() => {
+        this._editing = !!this.syncedDocEditorHost?.std.event.isActive;
+      });
+    }
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
