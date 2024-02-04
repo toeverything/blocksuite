@@ -140,7 +140,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       });
     }
 
-    if (!syncedDoc.root) {
+    if (!this._error && !syncedDoc.root) {
       await new Promise<void>(resolve => {
         syncedDoc.slots.rootAdded.once(() => {
           resolve();
