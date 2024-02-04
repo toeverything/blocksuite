@@ -84,7 +84,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   `;
 
   @state()
-  private _pageMode: 'page' | 'edgeless' = 'page';
+  pageMode: 'page' | 'edgeless' = 'page';
 
   @state()
   private _loading = false;
@@ -107,13 +107,17 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     return this._isInSurface;
   }
 
-  private get _syncedDoc() {
+  get syncedDoc() {
     const page = this.std.workspace.getPage(this.model.pageId);
     return page;
   }
 
+  get pageTitle() {
+    return this.syncedDoc?.meta.title ?? '';
+  }
+
   private async _load() {
-    const syncedDoc = this._syncedDoc;
+    const syncedDoc = this.syncedDoc;
     if (!syncedDoc) {
       return;
     }
@@ -125,7 +129,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       'affine:page'
     ) as PageService | null;
     assertExists(pageService, `Page service not found.`);
-    this._pageMode = pageService.getPageMode(this.model.pageId);
+    this.pageMode = pageService.getPageMode(this.model.pageId);
 
     if (!syncedDoc.loaded) {
       await new Promise<void>(resolve => {
@@ -277,7 +281,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   }
 
   override render() {
-    const syncedDoc = this._syncedDoc;
+    const syncedDoc = this.syncedDoc;
     const isDeleted = !syncedDoc;
     const isLoading = this._loading;
     const isError = this._error;
@@ -286,7 +290,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     }
 
     const theme = getThemeMode();
-    const pageMode = this._pageMode;
+    const pageMode = this.pageMode;
 
     const EditorBlockSpec =
       pageMode === 'page' ? DocEditorBlockSpecs : EdgelessEditorBlockSpecs;

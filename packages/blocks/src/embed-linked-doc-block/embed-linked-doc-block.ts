@@ -50,7 +50,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
   @state()
-  private _pageMode: 'page' | 'edgeless' = 'page';
+  pageMode: 'page' | 'edgeless' = 'page';
 
   @state()
   private _loading = false;
@@ -73,13 +73,17 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
-  private get _linkedDoc() {
+  get linkedDoc() {
     const page = this.std.workspace.getPage(this.model.pageId);
     return page;
   }
 
+  get pageTitle() {
+    return this.linkedDoc?.meta.title ?? '';
+  }
+
   private _load() {
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.linkedDoc;
     if (!linkedDoc) {
       return;
     }
@@ -109,7 +113,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       'affine:page'
     ) as PageService | null;
     assertExists(pageService, `Page service not found.`);
-    this._pageMode = pageService.getPageMode(this.model.pageId);
+    this.pageMode = pageService.getPageMode(this.model.pageId);
     this._pageUpdatedAt = pageService.getPageUpdatedAt(this.model.pageId);
 
     if (linkedDoc.loaded) {
@@ -128,7 +132,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private _isPageEmpty() {
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.linkedDoc;
     if (!linkedDoc) {
       return false;
     }
@@ -138,7 +142,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private _getNoteFromPage() {
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.linkedDoc;
     assertExists(
       linkedDoc,
       `Trying to load page ${this.model.pageId} in linked page block, but the page is not found.`
@@ -164,7 +168,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     this._cleanUpSurfaceRefRenderer();
 
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.linkedDoc;
     assertExists(
       linkedDoc,
       `Trying to load page ${this.model.pageId} in linked page block, but the page is not found.`
@@ -175,7 +179,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       linkedDoc
     );
     this._surfaceRefRenderer.slots.mounted.on(async () => {
-      if (this._pageMode === 'edgeless') {
+      if (this.pageMode === 'edgeless') {
         await this._renderEdgelessAbstract();
       } else {
         await this._renderPageAbstract();
@@ -358,7 +362,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   override updated() {
     // update card style when linked page deleted
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.linkedDoc;
     const { xywh, style } = this.model;
     const bound = Bound.deserialize(xywh);
     if (linkedDoc && style === 'horizontalThin') {
@@ -387,7 +391,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     this._load();
 
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.linkedDoc;
     if (linkedDoc) {
       this.disposables.add(
         linkedDoc.workspace.meta.pageMetasUpdated.on(() => this._load())
@@ -458,10 +462,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   });
 
   override renderBlock() {
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.linkedDoc;
     const isDeleted = !linkedDoc;
     const isLoading = this._loading;
-    const pageMode = this._pageMode;
+    const pageMode = this.pageMode;
 
     this._cardStyle = this.model.style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
@@ -483,7 +487,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       LinkedDocDeletedIcon,
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
-    } = getEmbedLinkedDocIcons(this._pageMode, this._cardStyle);
+    } = getEmbedLinkedDocIcons(pageMode, this._cardStyle);
 
     const titleIcon = isLoading
       ? LoadingIcon

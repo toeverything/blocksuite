@@ -22,6 +22,10 @@ import type {
   EmbedLinkedDocBlockComponent,
   EmbedLinkedDocModel,
 } from '../../../embed-linked-doc-block/index.js';
+import {
+  LinkedEdgelessIcon,
+  LinkedPageIcon,
+} from '../../../embed-linked-doc-block/styles.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import {
   isBookmarkBlock,
@@ -109,6 +113,43 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       font-style: normal;
       font-weight: 400;
       line-height: 24px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      opacity: var(--add, 1);
+    }
+
+    .embed-card-toolbar-button.page-info {
+      display: flex;
+      align-items: center;
+      max-width: 180px;
+      padding: var(--1, 0px);
+
+      gap: 4px;
+      border-radius: var(--1, 0px);
+      opacity: var(--add, 1);
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .embed-card-toolbar-button.page-info > svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .embed-card-toolbar-button.page-info > span {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+
+      color: var(--affine-text-primary-color);
+      font-feature-settings:
+        'clig' off,
+        'liga' off;
+      font-family: var(--affine-font-family);
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
       text-overflow: ellipsis;
       overflow: hidden;
       opacity: var(--add, 1);
@@ -211,6 +252,27 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     navigator.clipboard.writeText(this._model.url).catch(console.error);
     toast(this._host as EditorHost, 'Copied link to clipboard');
     this.remove();
+  }
+
+  private get _pageIcon() {
+    if (!isEmbedLinkedDocBlock(this._model) && !isSyncedBlock(this._model)) {
+      return nothing;
+    }
+    const block = this.block as
+      | EmbedLinkedDocBlockComponent
+      | SyncedBlockComponent;
+
+    return block.pageMode === 'page' ? LinkedPageIcon : LinkedEdgelessIcon;
+  }
+
+  private get _pageTitle() {
+    if (!isEmbedLinkedDocBlock(this._model) && !isSyncedBlock(this._model)) {
+      return '';
+    }
+    const block = this.block as
+      | EmbedLinkedDocBlockComponent
+      | SyncedBlockComponent;
+    return block.pageTitle;
   }
 
   private _turnIntoInlineView() {
@@ -408,7 +470,8 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     return html`
       <div class="embed-card-toolbar">
         ${this._canShowUrlOptions && 'url' in model
-          ? html`<div
+          ? html`
+              <div
                 class="embed-card-toolbar-button url"
                 @click=${() => this._copyUrl()}
               >
@@ -438,10 +501,20 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
                 <affine-tooltip .offset=${12}>${'Edit'}</affine-tooltip>
               </icon-button>
 
-              <div class="divider"></div>`
+              <div class="divider"></div>
+            `
           : nothing}
         ${isEmbedLinkedDocBlock(model) || isSyncedBlock(model)
-          ? html`<icon-button
+          ? html`
+              <div
+                class="embed-card-toolbar-button page-info"
+                @click=${() => this.block.open()}
+              >
+                ${this._pageIcon}
+                <span>${this._pageTitle}</span>
+              </div>
+
+              <icon-button
                 size="32px"
                 class="embed-card-toolbar-button open"
                 @click=${() => this.block.open()}
@@ -450,7 +523,8 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
                 <affine-tooltip .offset=${12}>${'Open'}</affine-tooltip>
               </icon-button>
 
-              <div class="divider"></div>`
+              <div class="divider"></div>
+            `
           : nothing}
 
         <div class="embed-card-toolbar-button view-selector">
@@ -481,33 +555,37 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
           </icon-button>
 
           ${this._canConvertToEmbedView || this._isEmbedView
-            ? html`<icon-button
-                size="24px"
-                class=${classMap({
-                  'embed-card-toolbar-button': true,
-                  embed: true,
-                  'current-view': this._isEmbedView,
-                })}
-                hover="false"
-                ?disabled=${model.page.readonly}
-                @click=${() => this._convertToEmbedView()}
-              >
-                ${EmbedWebIcon}
-                <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
-              </icon-button>`
+            ? html`
+                <icon-button
+                  size="24px"
+                  class=${classMap({
+                    'embed-card-toolbar-button': true,
+                    embed: true,
+                    'current-view': this._isEmbedView,
+                  })}
+                  hover="false"
+                  ?disabled=${model.page.readonly}
+                  @click=${() => this._convertToEmbedView()}
+                >
+                  ${EmbedWebIcon}
+                  <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
+                </icon-button>
+              `
             : nothing}
         </div>
 
         ${this._canShowCardStylePanel(model)
-          ? html` <icon-button
-              size="32px"
-              class="embed-card-toolbar-button card-style"
-              ?disabled=${model.page.readonly}
-              @click=${() => this._toggleCardStyleMenu()}
-            >
-              ${PaletteIcon}
-              <affine-tooltip .offset=${12}>${'Card style'}</affine-tooltip>
-            </icon-button>`
+          ? html`
+              <icon-button
+                size="32px"
+                class="embed-card-toolbar-button card-style"
+                ?disabled=${model.page.readonly}
+                @click=${() => this._toggleCardStyleMenu()}
+              >
+                ${PaletteIcon}
+                <affine-tooltip .offset=${12}>${'Card style'}</affine-tooltip>
+              </icon-button>
+            `
           : nothing}
 
         <div class="divider"></div>
