@@ -191,7 +191,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   get viewportElement(): HTMLElement {
     if (this._viewportElement) return this._viewportElement;
     this._viewportElement = this.host.closest(
-      'edgeless-editor'
+      '.affine-edgeless-viewport'
     ) as HTMLElement | null;
     assertExists(this._viewportElement);
     return this._viewportElement;

@@ -26,30 +26,37 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   override render() {
     return html`
       <style>
+        edgeless-editor {
+          font-family: var(--affine-font-family);
+          background: var(--affine-background-primary-color);
+        }
+
         edgeless-editor * {
           box-sizing: border-box;
         }
-        edgeless-editor {
-          display: block;
-          height: 100%;
-          position: relative;
-          overflow: hidden;
-          font-family: var(--affine-font-family);
-          background: var(--affine-background-primary-color);
-          container-name: viewport;
-          container-type: inline-size;
-        }
+
         @media print {
           edgeless-editor {
             height: auto;
           }
         }
+
+        .affine-edgeless-viewport {
+          display: block;
+          height: 100%;
+          position: relative;
+          overflow: hidden;
+          container-name: viewport;
+          container-type: inline-size;
+        }
       </style>
-      <editor-host
-        ${ref(this._host)}
-        .page=${this.page}
-        .specs=${this.specs}
-      ></editor-host>
+      <div class="affine-edgeless-viewport">
+        <editor-host
+          ${ref(this._host)}
+          .page=${this.page}
+          .specs=${this.specs}
+        ></editor-host>
+      </div>
     `;
   }
 

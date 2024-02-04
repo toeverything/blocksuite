@@ -238,11 +238,20 @@ export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
 }
 
 export function isInsideDocEditor(host: EditorHost) {
-  return !!host.closest('doc-editor');
+  const hostParentEl = host.parentElement;
+  return (
+    !!hostParentEl &&
+    (hostParentEl.classList.contains('affine-doc-viewport') ||
+      hostParentEl.classList.contains('doc-editor-container'))
+  );
 }
 
 export function isInsideEdgelessEditor(host: EditorHost) {
-  return !!host.closest('edgeless-editor');
+  const hostParentEl = host.parentElement;
+  return (
+    !!hostParentEl &&
+    hostParentEl.classList.contains('affine-edgeless-viewport')
+  );
 }
 
 /**

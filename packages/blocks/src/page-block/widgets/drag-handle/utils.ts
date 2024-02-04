@@ -161,17 +161,23 @@ export const getClosestBlockByPoint = (
   point: Point
 ) => {
   const closestNoteBlock = getClosestNoteBlock(editorHost, pageBlock, point);
-  if (!closestNoteBlock || closestNoteBlock.closest('.affine-surface-ref'))
+  if (!closestNoteBlock || closestNoteBlock.closest('.affine-surface-ref')) {
     return null;
+  }
+
   const noteRect = Rect.fromDOM(closestNoteBlock);
+
   const blockElement = getClosestBlockElementByPoint(point, {
     container: closestNoteBlock,
     rect: noteRect,
-  });
+  }) as BlockElement | null;
+
   const blockSelector =
     '.affine-note-block-container > .affine-block-children-container > [data-block-id]';
+
   const closestBlockElement = (
-    blockElement
+    blockElement &&
+    PathFinder.includes(blockElement.path, closestNoteBlock.path)
       ? blockElement
       : findClosestBlockElement(
           closestNoteBlock as BlockElement,
@@ -179,11 +185,14 @@ export const getClosestBlockByPoint = (
           blockSelector
         )
   ) as BlockElement;
+
   if (
     !closestBlockElement ||
     !!closestBlockElement.closest('.surface-ref-note-portal')
-  )
+  ) {
     return null;
+  }
+
   return closestBlockElement;
 };
 

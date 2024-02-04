@@ -36,13 +36,31 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       margin: 10px 0;
     }
 
+    affine-synced .affine-doc-page-block-container {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
     .affine-synced-block {
       border-radius: 8px;
     }
-    .affine-synced-block.hovered.light {
+    .affine-synced-block.page {
+      display: block;
+      padding: 0px 24px;
+      width: 100%;
+    }
+    .affine-synced-block.edgeless {
+      display: block;
+      padding: 18px 24px;
+      width: 100%;
+      height: calc(${SYNCED_BLOCK_DEFAULT_HEIGHT}px + 36px);
+    }
+    .affine-synced-block.hovered.light,
+    affine-synced.with-drag-handle > .affine-synced-block.light {
       box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.08);
     }
-    .affine-synced-block.hovered.dark {
+    .affine-synced-block.hovered.dark,
+    affine-synced.with-drag-handle > .affine-synced-block.dark {
       box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.14);
     }
     .affine-synced-block.editing.light {
@@ -54,25 +72,6 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       box-shadow:
         0px 0px 0px 2px rgba(255, 255, 255, 0.14),
         0px 0px 0px 1px var(--affine-brand-color);
-    }
-
-    .affine-synced-block.page > editor-host {
-      display: block;
-      padding: 0px 24px;
-      pointer-events: none;
-    }
-
-    .affine-synced-block.edgeless > editor-host {
-      display: block;
-      padding: 18px 24px;
-      width: calc(${SYNCED_BLOCK_DEFAULT_WIDTH}px + 48px);
-      height: calc(${SYNCED_BLOCK_DEFAULT_HEIGHT}px + 36px);
-      pointer-events: none;
-    }
-
-    .affine-synced-block .affine-doc-page-block-container {
-      padding-left: 0;
-      padding-right: 0;
     }
   `;
 
@@ -276,16 +275,6 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
-
-    this.handleEvent(
-      'pointerMove',
-      ctx => {
-        const posY = ctx.get('pointerState').raw.y;
-        const rect = this.getBoundingClientRect();
-        this._hovered = posY >= rect.top && posY <= rect.bottom;
-      },
-      { global: true }
-    );
   }
 
   override updated(changedProperties: PropertyValues) {
@@ -315,13 +304,23 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
         ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
         class=${classMap({
           'affine-synced-block': true,
-          [theme]: true,
           [pageMode]: true,
+          [theme]: true,
           hovered: this._hovered,
           editing: this._editing,
         })}
+        @pointerenter=${() => (this._hovered = true)}
+        @pointerleave=${() => (this._hovered = false)}
       >
-        ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
+        <div
+          class=${classMap({
+            'affine-doc-viewport': pageMode === 'page',
+            'affine-edgeless-viewport': pageMode === 'edgeless',
+          })}
+        >
+          ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
+        </div>
+
         ${this._isInSurface
           ? html`<embed-card-caption .block=${this}></embed-card-caption>`
           : nothing}
