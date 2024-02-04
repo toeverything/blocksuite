@@ -57,11 +57,11 @@ export class AffineEditorContainer
       container-type: inline-size;
       background: var(--affine-background-primary-color);
       font-family: var(--affine-font-family);
-      overflow: hidden;
     }
     .affine-doc-viewport * {
       box-sizing: border-box;
     }
+
     @media print {
       .affine-doc-viewport {
         height: auto;
