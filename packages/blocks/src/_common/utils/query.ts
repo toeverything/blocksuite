@@ -1,4 +1,4 @@
-import type { ViewStore } from '@blocksuite/block-std';
+import { PathFinder, type ViewStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
@@ -621,8 +621,11 @@ export function findClosestBlockElement(
   container: BlockComponent,
   point: Point,
   selector: string
-) {
-  const children = Array.from(container.querySelectorAll(selector));
+): BlockComponent | null {
+  const children = (
+    Array.from(container.querySelectorAll(selector)) as BlockComponent[]
+  ).filter(child => PathFinder.includes(child.path, container.path));
+
   let lastDistance = Number.POSITIVE_INFINITY;
   let lastChild = null;
 

@@ -952,14 +952,17 @@ export class AffineDragHandleWidget extends WidgetElement<
     // TODO: need to optimize
     // When pointer out of note block hover area or inside database, should hide drag handle
     const point = new Point(state.raw.x, state.raw.y);
+
     const closestNoteBlock = getClosestNoteBlock(
       this.host,
       this.pageBlockElement,
       point
     ) as NoteBlockComponent | null;
+
     this.noteScale = isInsideDocEditor(this.host)
       ? 1
       : closestNoteBlock?.model.edgeless.scale ?? 1;
+
     if (
       closestNoteBlock &&
       this._canEditing(closestNoteBlock) &&
@@ -973,6 +976,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       this._pointerMoveOnBlock(state);
       return true;
     }
+
     this._hide();
     return false;
   };
@@ -1367,7 +1371,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     const inPage = !!relatedElement?.closest('.affine-doc-viewport');
 
     const inDragHandle = !!relatedElement?.closest(AFFINE_DRAG_HANDLE_WIDGET);
-    if (outOfPageViewPort && !inDragHandle && !inPage) this._hide();
+    if (outOfPageViewPort && !inDragHandle && !inPage) {
+      this._hide();
+    }
   };
 
   private _keyboardHandler: UIEventHandler = ctx => {
@@ -1506,9 +1512,9 @@ export class AffineDragHandleWidget extends WidgetElement<
       this._onDragHandlePointerLeave
     );
 
-    this._disposables.addFromEvent(this.host, 'pointerleave', () =>
-      this._hide()
-    );
+    this._disposables.addFromEvent(this.host, 'pointerleave', () => {
+      this._hide();
+    });
 
     if (isInsideDocEditor(this.host)) {
       this._disposables.add(
@@ -1519,7 +1525,9 @@ export class AffineDragHandleWidget extends WidgetElement<
       this._disposables.add(
         docPage.slots.viewportUpdated.on(() => {
           this._hide();
-          if (this.dropIndicator) this.dropIndicator.rect = null;
+          if (this.dropIndicator) {
+            this.dropIndicator.rect = null;
+          }
         })
       );
 

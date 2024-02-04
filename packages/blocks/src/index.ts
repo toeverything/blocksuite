@@ -112,6 +112,7 @@ export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
+export * from './synced-block/index.js';
 export const BlocksUtils = {
   splitElements,
   matchFlavours,

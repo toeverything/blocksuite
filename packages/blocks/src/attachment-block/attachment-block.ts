@@ -1,9 +1,10 @@
+import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { html, render } from 'lit';
+import { html, nothing, render } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
@@ -91,6 +92,41 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (this.isInSurface || !this.model.embed || !this.blobUrl) return;
     return renderEmbedView(this.model, this.blobUrl);
   }
+
+  private _whenHover = new HoverController(this, ({ abortController }) => {
+    const selection = this.host.selection;
+    const textSelection = selection.find('text');
+    if (
+      !!textSelection &&
+      (!!textSelection.to || !!textSelection.from.length)
+    ) {
+      return null;
+    }
+
+    const blockSelections = selection.filter('block');
+    if (
+      blockSelections.length > 1 ||
+      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+    ) {
+      return null;
+    }
+
+    return {
+      template: AttachmentOptionsTemplate({
+        anchor: this,
+        model: this.model,
+        showCaption: () => this.captionElement.show(),
+        downloadAttachment: this.download,
+        abortController,
+      }),
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+    };
+  });
 
   private _dragHandleOption: DragHandleOption = {
     flavour: AttachmentBlockSchema.model.flavour,
@@ -205,6 +241,45 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     },
   };
 
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      path: this.path,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (this.allowEmbed) {
+      this.open();
+    } else {
+      this.download();
+    }
+  }
+
+  open = () => {
+    if (!this.blobUrl) {
+      return;
+    }
+    window.open(this.blobUrl, '_blank');
+  };
+
+  download = () => {
+    downloadAttachmentBlob(this).catch(console.error);
+  };
+
+  refreshData = () => {
+    checkAttachmentBlob(this).catch(console.error);
+  };
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -281,80 +356,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     super.disconnectedCallback();
   }
 
-  open = () => {
-    if (!this.blobUrl) {
-      return;
-    }
-    window.open(this.blobUrl, '_blank');
-  };
-
-  download = () => {
-    downloadAttachmentBlob(this).catch(console.error);
-  };
-
-  refreshData = () => {
-    checkAttachmentBlob(this).catch(console.error);
-  };
-
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      path: this.path,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (this.allowEmbed) {
-      this.open();
-    } else {
-      this.download();
-    }
-  }
-
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-    ) {
-      return null;
-    }
-
-    return {
-      template: AttachmentOptionsTemplate({
-        anchor: this,
-        model: this.model,
-        showCaption: () => this.captionElement.show(),
-        downloadAttachment: this.download,
-        abortController,
-      }),
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-end',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    };
-  });
-
   override renderBlock() {
     const { name, size, style } = this.model;
     const cardStyle = style ?? AttachmentBlockStyles[1];
@@ -394,7 +395,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
     return html`
       <div
-        ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+        ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
         class="affine-attachment-container"
         style=${containerStyleMap}
       >

@@ -5,7 +5,7 @@ import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/block-selection.js';
 
 import { BlockElement } from '@blocksuite/lit';
-import { html, render } from 'lit';
+import { html, nothing, render } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -183,32 +183,19 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     },
   };
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this.refreshData();
-
-    this.contentEditable = 'false';
-
-    const parent = this.host.page.getParent(this.model);
-    this._isInSurface = parent?.flavour === 'affine:surface';
-
-    this.model.propsUpdated.on(({ key }) => {
-      if (key === 'sourceId') {
-        this.refreshData();
-      }
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      path: this.path,
     });
-
-    this.disposables.add(
-      AffineDragHandleWidget.registerOption(this._dragHandleOption)
-    );
+    selectionManager.setGroup('note', [blockSelection]);
   }
 
-  override disconnectedCallback() {
-    if (this.blobUrl) {
-      URL.revokeObjectURL(this.blobUrl);
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.isInSurface) {
+      this._selectBlock();
     }
-    super.disconnectedCallback();
   }
 
   openEditor = () => {
@@ -244,19 +231,32 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     turnImageIntoCardView(this).catch(console.error);
   };
 
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      path: this.path,
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.refreshData();
+
+    this.contentEditable = 'false';
+
+    const parent = this.host.page.getParent(this.model);
+    this._isInSurface = parent?.flavour === 'affine:surface';
+
+    this.model.propsUpdated.on(({ key }) => {
+      if (key === 'sourceId') {
+        this.refreshData();
+      }
     });
-    selectionManager.setGroup('note', [blockSelection]);
+
+    this.disposables.add(
+      AffineDragHandleWidget.registerOption(this._dragHandleOption)
+    );
   }
 
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (!this.isInSurface) {
-      this._selectBlock();
+  override disconnectedCallback() {
+    if (this.blobUrl) {
+      URL.revokeObjectURL(this.blobUrl);
     }
+    super.disconnectedCallback();
   }
 
   override updated() {
@@ -305,7 +305,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>
 
-      ${this.isInSurface ? null : Object.values(this.widgets)}
+      ${this.isInSurface ? nothing : Object.values(this.widgets)}
     `;
   }
 }

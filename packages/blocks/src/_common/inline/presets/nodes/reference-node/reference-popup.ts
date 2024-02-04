@@ -1,3 +1,6 @@
+import '../../../../components/tooltip/tooltip.js';
+import '../../../../components/button.js';
+
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline';
 import type { BlockElement } from '@blocksuite/lit';
@@ -10,7 +13,7 @@ import type { PageBlockComponent } from '../../../../../page-block/types.js';
 import { createLitPortal } from '../../../../components/portal.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../../../icons/index.js';
-import { LinkIcon, OpenIcon } from '../../../../icons/text.js';
+import { EmbedWebIcon, LinkIcon, OpenIcon } from '../../../../icons/text.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 import { ReferencePopupMoreMenu } from './reference-popup-more-menu-popup.js';
 import { styles } from './styles.js';
@@ -139,6 +142,27 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
+  private _convertToEmbedView() {
+    const blockElement = this.blockElement;
+    const page = blockElement.host.page;
+    const parent = page.getParent(blockElement.model);
+    assertExists(parent);
+
+    const index = parent.children.indexOf(blockElement.model);
+    const pageId = this.referencePageId;
+    page.addBlock('affine:synced', { pageId }, parent, index + 1);
+
+    const totalTextLength = this.inlineEditor.yTextLength;
+    const inlineTextLength = this.targetInlineRange.length;
+    if (totalTextLength === inlineTextLength) {
+      page.deleteBlock(blockElement.model);
+    } else {
+      this.inlineEditor.insertText(this.targetInlineRange, this.pageTitle);
+    }
+
+    this.abortController.abort();
+  }
+
   private _toggleMoreMenu() {
     if (this._moreMenuAbortController) {
       this._moreMenuAbortController.abort();
@@ -196,6 +220,16 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               >
                 ${BookmarkIcon}
                 <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
+              </icon-button>
+
+              <icon-button
+                size="24px"
+                class="affine-reference-popover-view-selector-button embed"
+                hover="false"
+                @click=${() => this._convertToEmbedView()}
+              >
+                ${EmbedWebIcon}
+                <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
               </icon-button>
             </div>
 

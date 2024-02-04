@@ -6,7 +6,7 @@ import '../_common/components/embed-card/embed-card-toolbar.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { html, render } from 'lit';
+import { html, nothing, render } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -231,11 +231,8 @@ export class BookmarkBlockComponent extends BlockElement<
           }
         </style>
         <embed-card-toolbar
-          .model=${this.model}
           .block=${this}
-          .host=${this.host}
           .abortController=${abortController}
-          .std=${this.std}
         ></embed-card-toolbar>
       `,
       computePosition: {
@@ -274,7 +271,7 @@ export class BookmarkBlockComponent extends BlockElement<
 
     return html`
       <div
-        ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+        ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
         class="affine-bookmark-container"
         style=${containerStyleMap}
       >

@@ -21,7 +21,6 @@ export const EmbedLinkedDocBlockSpec = createEmbedBlock({
     toModel: () => new EmbedLinkedDocModel(),
     props: (): EmbedLinkedDocBlockProps => defaultEmbedLinkedDocBlockProps,
   },
-
   view: {
     component: literal`affine-embed-linked-doc-block`,
   },

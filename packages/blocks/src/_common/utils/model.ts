@@ -33,6 +33,8 @@ import type {
   SurfaceBlockModel,
   SurfaceBlockSchema,
   SurfaceRefBlockModel,
+  SyncedBlockModel,
+  SyncedBlockSchema,
 } from '../../index.js';
 
 export type BlockModels = {
@@ -55,6 +57,7 @@ export type BlockModels = {
   'affine:embed-figma': EmbedFigmaModel;
   'affine:embed-linked-doc': EmbedLinkedDocModel;
   'affine:embed-html': EmbedHtmlModel;
+  'affine:synced': SyncedBlockModel;
 };
 
 export type BlockSchemas = {
@@ -71,6 +74,7 @@ export type BlockSchemas = {
   'affine:data-view': typeof DataViewBlockSchema;
   'affine:bookmark': typeof BookmarkBlockSchema;
   'affine:attachment': typeof AttachmentBlockSchema;
+  'affine:synced': typeof SyncedBlockSchema;
 };
 
 export type BlockModelProps = {

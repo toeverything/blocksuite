@@ -1,6 +1,6 @@
 import '../_common/components/block-selection.js';
-import '../_common/components/embed-card/embed-card-toolbar.js';
 import '../_common/components/embed-card/embed-card-caption.js';
+import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -18,7 +18,8 @@ import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
-import type { NoteBlockModel, PageBlockComponent } from '../index.js';
+import type { NoteBlockModel } from '../note-block/index.js';
+import type { PageBlockComponent, PageService } from '../page-block/index.js';
 import {
   Bound,
   deserializeXYWH,
@@ -49,6 +50,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
   @state()
+  private _pageMode: 'page' | 'edgeless' = 'page';
+
+  @state()
   private _loading = false;
 
   @state()
@@ -63,8 +67,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   @queryAsync('.affine-embed-linked-doc-banner.render')
   private _bannerContainer!: Promise<HTMLDivElement>;
 
-  private _pageMode: 'page' | 'edgeless' = 'page';
-
   private _pageUpdatedAt: Date = new Date();
 
   private _surfaceRefService!: SurfaceRefBlockService;
@@ -74,10 +76,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   private get _linkedDoc() {
     const page = this.std.workspace.getPage(this.model.pageId);
     return page;
-  }
-
-  private get _service() {
-    return this.service;
   }
 
   private _load() {
@@ -107,9 +105,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this._abstractText = '';
     this._isBannerEmpty = true;
 
-    const { pageId } = this.model;
-    this._pageMode = this._service.getPageMode(pageId);
-    this._pageUpdatedAt = this._service.getPageUpdatedAt(pageId);
+    const pageService = this.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService, `Page service not found.`);
+    this._pageMode = pageService.getPageMode(this.model.pageId);
+    this._pageUpdatedAt = pageService.getPageUpdatedAt(this.model.pageId);
 
     if (linkedDoc.loaded) {
       onLoad();
@@ -290,6 +291,17 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     selectionManager.setGroup('note', [blockSelection]);
   }
 
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (this.isInSurface) return;
+    this._selectBlock();
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
+  }
+
   open = () => {
     const linkedDocId = this.model.pageId;
     if (linkedDocId === this.model.page.id) return;
@@ -305,7 +317,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   covertToInline = () => {
     const { page, pageId } = this.model;
     const parent = page.getParent(this.model);
-    const index = parent?.children.indexOf(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
 
     const yText = new Workspace.Y.Text();
     yText.insert(0, REFERENCE_NODE);
@@ -326,20 +339,22 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     page.deleteBlock(this.model);
   };
 
+  convertToEmbed = () => {
+    const { page, pageId, caption } = this.model;
+
+    const parent = page.getParent(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
+
+    page.addBlock('affine:synced', { pageId, caption }, parent, index);
+
+    this.std.selection.setGroup('note', []);
+    page.deleteBlock(this.model);
+  };
+
   refreshData = () => {
     this._load();
   };
-
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (this.isInSurface) return;
-    this._selectBlock();
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.open();
-  }
 
   override updated() {
     // update card style when linked page deleted
@@ -429,16 +444,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           }
         </style>
         <embed-card-toolbar
-          .model=${this.model}
           .block=${this}
-          .host=${this.host}
           .abortController=${abortController}
-          .std=${this.std}
         ></embed-card-toolbar>
       `,
       computePosition: {
         referenceElement: this,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },
@@ -506,7 +518,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     return this.renderEmbed(
       () => html`
         <div
-          ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+          ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
           class="affine-embed-linked-doc-block${cardClassMap}"
           @click=${this._handleClick}
           @dblclick=${this._handleDoubleClick}

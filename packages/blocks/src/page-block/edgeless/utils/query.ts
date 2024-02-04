@@ -9,11 +9,11 @@ import {
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
+import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
-import type { EmbedHtmlModel } from '../../../index.js';
 import type { AttachmentBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import {
@@ -28,6 +28,7 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '../../../surface-block/index.js';
+import type { SyncedBlockModel } from '../../../synced-block/index.js';
 import type { EdgelessBlockModel, EdgelessModel } from '../type.js';
 import { getElementsWithoutGroup } from './group.js';
 import type { Viewport } from './viewport.js';
@@ -129,6 +130,14 @@ export function isEmbedHtmlBlock(
 ): element is EmbedHtmlModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:embed-html'
+  );
+}
+
+export function isSyncedBlock(
+  element: BlockModel | EdgelessModel | null
+): element is SyncedBlockModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:synced'
   );
 }
 
