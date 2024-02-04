@@ -178,8 +178,8 @@ export const components: DefaultTheme.NavItem[] = [
     text: 'Fragments 🚧',
     items: [
       { text: 'Doc Title', link: '' },
-      { text: 'Frame Panel', link: '' },
       { text: 'Outline Panel', link: '' },
+      { text: 'Frame Panel', link: '' },
       { text: 'Copilot Panel', link: '' },
       { text: 'Bi-Directional Link Panel', link: '' },
     ],

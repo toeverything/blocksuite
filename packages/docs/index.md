@@ -24,7 +24,7 @@ features:
     linkText: Learn More
   - title: 🎨 Extensive Components
     details: Based on the framework, BlockSuite ships components for building complex editor UIs, which are highly interoperable.
-    link: /guide/component-types
+    link: /components/overview
     linkText: Learn More
   - title: 🧬 Collaborative at Core
     details: Natively powered by CRDT, BlockSuite supports document streaming and conflict resolution at its heart, ready for collaboration inherently.
