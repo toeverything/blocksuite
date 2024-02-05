@@ -389,8 +389,9 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    if ('captionElement' in this.block) {
-      this.block.captionElement.show();
+    const captionElement = this.block.captionElement;
+    if (captionElement) {
+      captionElement.show();
     } else {
       toggleEmbedCardCaptionEditModal(this.block);
     }

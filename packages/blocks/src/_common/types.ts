@@ -205,7 +205,8 @@ export type NoteChildrenFlavour =
   | 'affine:image'
   | 'affine:bookmark'
   | 'affine:attachment'
-  | 'affine:surface-ref';
+  | 'affine:surface-ref'
+  | 'affine:synced';
 
 export type NoteTool = {
   type: 'affine:note';

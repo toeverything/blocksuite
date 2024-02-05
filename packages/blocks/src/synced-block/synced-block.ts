@@ -7,87 +7,44 @@ import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, nothing } from 'lit';
+import { html, nothing, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/index.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
+import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
 import {
   DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
 } from '../_specs/_specs.js';
 import type { PageBlockComponent, PageService } from '../page-block/index.js';
-import type { SyncedBlockModel } from './synced-model.js';
-
-export const SYNCED_BLOCK_DEFAULT_WIDTH = 752;
-export const SYNCED_BLOCK_DEFAULT_HEIGHT = 455;
+import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  captureEventTarget,
+  convertDragPreviewDocToEdgeless,
+  convertDragPreviewEdgelessToDoc,
+} from '../page-block/widgets/drag-handle/utils.js';
+import { Bound } from '../surface-block/utils/bound.js';
+import {
+  styles,
+  SYNCED_BLOCK_DEFAULT_HEIGHT,
+  SYNCED_BLOCK_DEFAULT_WIDTH,
+} from './styles.js';
+import { type SyncedBlockModel, SyncedBlockSchema } from './synced-model.js';
 
 @customElement('affine-synced')
 export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
-  static override styles = css`
-    affine-synced {
-      position: relative;
-      display: block;
-      left: -24px;
-      width: calc(100% + 48px);
-      margin: 10px 0;
-    }
-
-    .affine-synced-block {
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .affine-synced-block.page {
-      display: block;
-      width: 100%;
-    }
-    .affine-synced-block.edgeless {
-      display: block;
-      padding: 18px 24px;
-      width: 100%;
-      height: calc(${SYNCED_BLOCK_DEFAULT_HEIGHT}px + 36px);
-    }
-    .affine-synced-block.hovered.light,
-    affine-synced.with-drag-handle > .affine-synced-block.light {
-      box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.08);
-    }
-    .affine-synced-block.hovered.dark,
-    affine-synced.with-drag-handle > .affine-synced-block.dark {
-      box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.14);
-    }
-    .affine-synced-block.editing.light {
-      box-shadow:
-        0px 0px 0px 2px rgba(0, 0, 0, 0.08),
-        0px 0px 0px 1px var(--affine-brand-color);
-    }
-    .affine-synced-block.editing.dark {
-      box-shadow:
-        0px 0px 0px 2px rgba(255, 255, 255, 0.14),
-        0px 0px 0px 1px var(--affine-brand-color);
-    }
-
-    .synced-block-editor-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .affine-synced-block > .affine-doc-viewport,
-    .affine-synced-block > .affine-edgeless-viewport,
-    .affine-synced-block .affine-block-children-container.edgeless {
-      background: transparent;
-    }
-
-    .affine-synced-block .affine-doc-page-block-container {
-      padding-left: 24px;
-      padding-right: 24px;
-    }
-  `;
+  static override styles = styles;
 
   @state()
   pageMode: 'page' | 'edgeless' = 'page';
@@ -110,13 +67,23 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   @state()
   private _editing = false;
 
-  @query('.affine-synced-block > .synced-block-editor > editor-host')
+  @query('embed-card-caption')
+  captionElement?: EmbedCardCaption;
+
+  @query('.affine-synced-container > .synced-block-editor > editor-host')
   syncedDocEditorHost?: EditorHost;
 
   private _isInSurface = false;
 
   get isInSurface() {
     return this._isInSurface;
+  }
+
+  get edgeless() {
+    if (!this._isInSurface) {
+      return null;
+    }
+    return this.host.querySelector('affine-edgeless-page');
   }
 
   get syncedDoc() {
@@ -128,6 +95,14 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     return this.syncedDoc?.meta.title.length
       ? this.syncedDoc.meta.title
       : 'Untitled';
+  }
+
+  private get _pageService() {
+    const pageService = this.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService, `Page service not found.`);
+    return pageService;
   }
 
   private _checkCycle() {
@@ -158,11 +133,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       return;
     }
 
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService, `Page service not found.`);
-    this.pageMode = pageService.getPageMode(this.model.pageId);
+    this.pageMode = this._pageService.getPageMode(this.model.pageId);
 
     if (!syncedDoc.loaded) {
       await new Promise<void>(resolve => {
@@ -239,6 +210,93 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     };
   });
 
+  private _dragHandleOption: DragHandleOption = {
+    flavour: SyncedBlockSchema.model.flavour,
+    edgeless: true,
+    onDragStart: ({ state, startDragging, anchorBlockPath }) => {
+      if (!anchorBlockPath) return false;
+      const anchorComponent = this.std.view.viewFromPath(
+        'block',
+        anchorBlockPath
+      );
+      if (
+        !anchorComponent ||
+        !matchFlavours(anchorComponent.model, [SyncedBlockSchema.model.flavour])
+      )
+        return false;
+
+      const blockComponent = anchorComponent as SyncedBlockComponent;
+      const element = captureEventTarget(state.raw.target);
+
+      const isDraggingByDragHandle = !!element?.closest(
+        AFFINE_DRAG_HANDLE_WIDGET
+      );
+      const isDraggingByComponent = blockComponent.contains(element);
+      const isInSurface = blockComponent.isInSurface;
+
+      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
+        this.host.selection.setGroup('note', [
+          this.host.selection.create('block', {
+            path: blockComponent.path,
+          }),
+        ]);
+        startDragging([blockComponent], state);
+        return true;
+      } else if (isInSurface && isDraggingByDragHandle) {
+        const syncedPortal = blockComponent.closest(
+          '.edgeless-block-portal-synced'
+        );
+        assertExists(syncedPortal);
+        const dragPreviewEl = syncedPortal.cloneNode() as HTMLElement;
+        dragPreviewEl.style.transform = '';
+        dragPreviewEl.style.left = '0';
+        dragPreviewEl.style.top = '0';
+        render(
+          blockComponent.host.renderModel(blockComponent.model),
+          dragPreviewEl
+        );
+
+        startDragging([blockComponent], state, dragPreviewEl);
+        return true;
+      }
+      return false;
+    },
+    onDragEnd: props => {
+      const { state, draggingElements } = props;
+      if (
+        draggingElements.length !== 1 ||
+        !matchFlavours(draggingElements[0].model, [
+          SyncedBlockSchema.model.flavour,
+        ])
+      )
+        return false;
+
+      const blockComponent = draggingElements[0] as SyncedBlockComponent;
+      const isInSurface = blockComponent.isInSurface;
+      const target = captureEventTarget(state.raw.target);
+      const isTargetEdgelessContainer =
+        target?.classList.contains('edgeless') &&
+        target?.classList.contains('affine-block-children-container');
+
+      if (isInSurface) {
+        return convertDragPreviewEdgelessToDoc({
+          blockComponent,
+          ...props,
+        });
+      } else if (isTargetEdgelessContainer) {
+        return convertDragPreviewDocToEdgeless({
+          blockComponent,
+          cssSelector: '.affine-synced-container',
+          width: SYNCED_BLOCK_DEFAULT_WIDTH,
+          height: SYNCED_BLOCK_DEFAULT_HEIGHT,
+          ...props,
+        });
+      }
+
+      return false;
+    },
+  };
+
   open = () => {
     const syncedDocId = this.model.pageId;
     if (syncedDocId === this.model.page.id) return;
@@ -277,20 +335,39 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   };
 
   convertToCard = () => {
-    const { page, pageId, caption } = this.model;
+    const { page, pageId, caption, xywh } = this.model;
 
-    const parent = page.getParent(this.model);
-    assertExists(parent);
-    const index = parent.children.indexOf(this.model);
+    if (this.isInSurface) {
+      const style = 'vertical';
+      const bound = Bound.deserialize(xywh);
+      bound.w = EMBED_CARD_WIDTH[style];
+      bound.h = EMBED_CARD_HEIGHT[style];
 
-    page.addBlock(
-      'affine:embed-linked-doc',
-      { pageId, caption },
-      parent,
-      index
-    );
+      const edgeless = this.edgeless;
+      assertExists(edgeless);
+      const blockId = edgeless.service.addBlock(
+        'affine:embed-linked-doc',
+        { pageId, xywh: bound.serialize(), style, caption },
+        edgeless.surface.model
+      );
+      edgeless.service.selection.set({
+        editing: false,
+        elements: [blockId],
+      });
+    } else {
+      const parent = page.getParent(this.model);
+      assertExists(parent);
+      const index = parent.children.indexOf(this.model);
 
-    this.std.selection.setGroup('note', []);
+      page.addBlock(
+        'affine:embed-linked-doc',
+        { pageId, caption },
+        parent,
+        index
+      );
+
+      this.std.selection.setGroup('note', []);
+    }
     page.deleteBlock(this.model);
   };
 
@@ -313,6 +390,10 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
+
+    this.disposables.add(
+      AffineDragHandleWidget.registerOption(this._dragHandleOption)
+    );
   }
 
   override render() {
@@ -331,18 +412,40 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     const EditorBlockSpec =
       pageMode === 'page' ? DocEditorBlockSpecs : EdgelessEditorBlockSpecs;
 
+    let containerStyleMap = styleMap({
+      position: 'relative',
+      width: '100%',
+      margin: '10px 0',
+    });
+    if (this.isInSurface) {
+      const scale = this.model.scale ?? 1;
+      const bound = Bound.deserialize(
+        (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
+          .xywh
+      );
+      const width = bound.w / scale;
+      const height = bound.h / scale;
+      containerStyleMap = styleMap({
+        width: `${width}px`,
+        height: `${height}px`,
+        transform: `scale(${scale})`,
+        transformOrigin: '0 0',
+      });
+    }
+
     return html`
       <div
         ${this.isInSurface || this._editing
           ? nothing
           : ref(this._whenHover.setReference)}
         class=${classMap({
-          'affine-synced-block': true,
+          'affine-synced-container': true,
           [pageMode]: true,
           [theme]: true,
           hovered: this._hovered,
           editing: this._editing,
         })}
+        style=${containerStyleMap}
         @pointerenter=${() => (this._hovered = true)}
         @pointerleave=${() => (this._hovered = false)}
       >
@@ -355,13 +458,13 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
         >
           ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
         </div>
-
-        ${this._isInSurface
-          ? html`<embed-card-caption .block=${this}></embed-card-caption>`
-          : nothing}
-
-        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
+
+      ${this._isInSurface
+        ? html`<embed-card-caption .block=${this}></embed-card-caption>`
+        : nothing}
+
+      <affine-block-selection .block=${this}></affine-block-selection>
     `;
   }
 }

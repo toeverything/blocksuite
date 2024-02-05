@@ -24,7 +24,7 @@ import {
   EMBED_HTML_MIN_HEIGHT,
   EMBED_HTML_MIN_WIDTH,
 } from '../../../../embed-html-block/styles.js';
-import type { EmbedHtmlModel } from '../../../../index.js';
+import type { EmbedHtmlModel, SyncedBlockModel } from '../../../../index.js';
 import type { BookmarkBlockModel } from '../../../../models.js';
 import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
@@ -44,6 +44,10 @@ import {
   normalizeShapeBound,
   serializeXYWH,
 } from '../../../../surface-block/index.js';
+import {
+  SYNCED_MIN_HEIGHT,
+  SYNCED_MIN_WIDTH,
+} from '../../../../synced-block/styles.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { getElementsWithoutGroup } from '../../utils/group.js';
@@ -62,6 +66,7 @@ import {
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
+  isSyncedBlock,
 } from '../../utils/query.js';
 import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
@@ -497,7 +502,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let areAllTexts = true;
 
     for (const element of elements) {
-      if (isNoteBlock(element)) {
+      if (isNoteBlock(element) || isSyncedBlock(element)) {
         areAllConnectors = false;
         if (this._shiftKey) {
           areAllShapes = false;
@@ -638,6 +643,33 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         props.edgeless = { ...element.edgeless, scale };
         props.xywh = bound.serialize();
         edgeless.service.updateElement(element.id, props);
+      } else if (isSyncedBlock(element)) {
+        const curBound = Bound.deserialize(element.xywh);
+        const props: Partial<SyncedBlockModel> = {};
+
+        let scale = element.scale ?? 1;
+        let width = curBound.w / scale;
+        let height = curBound.h / scale;
+        if (this._shiftKey) {
+          scale = bound.w / width;
+          this._scalePercent = `${Math.round(scale * 100)}%`;
+          this._scaleDirection = direction;
+        }
+
+        width = bound.w / scale;
+        width = clamp(width, SYNCED_MIN_WIDTH, Infinity);
+        bound.w = width * scale;
+
+        height = bound.h / scale;
+        height = clamp(height, SYNCED_MIN_HEIGHT, Infinity);
+        bound.h = height * scale;
+
+        this._isWidthLimit = width === SYNCED_MIN_WIDTH;
+        this._isHeightLimit = height === SYNCED_MIN_HEIGHT;
+
+        props.scale = scale;
+        props.xywh = bound.serialize();
+        edgeless.service.updateElement(element.id, props);
       } else if (isEmbedHtmlBlock(element)) {
         bound.w = clamp(bound.w, EMBED_HTML_MIN_WIDTH, Infinity);
         bound.h = clamp(bound.h, EMBED_HTML_MIN_HEIGHT, Infinity);
@@ -776,7 +808,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const element = elements[0];
 
-    if (isNoteBlock(element)) {
+    if (isNoteBlock(element) || isSyncedBlock(element)) {
       this._mode = this._shiftKey ? 'scale' : 'resize';
     } else if (this._isProportionalElement(element)) {
       this._mode = 'scale';
@@ -1012,7 +1044,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         isFrameBlock(ele) ||
         isBookmarkBlock(ele) ||
         isAttachmentBlock(ele) ||
-        isEmbeddedBlock(ele)
+        isEmbeddedBlock(ele) ||
+        isSyncedBlock(ele)
     );
   }
 

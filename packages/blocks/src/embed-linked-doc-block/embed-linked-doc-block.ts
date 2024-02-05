@@ -30,6 +30,10 @@ import type {
   SurfaceRefBlockService,
 } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
+import {
+  SYNCED_BLOCK_DEFAULT_HEIGHT,
+  SYNCED_BLOCK_DEFAULT_WIDTH,
+} from '../synced-block/styles.js';
 import type {
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
@@ -84,6 +88,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       : 'Untitled';
   }
 
+  private get _pageService() {
+    const pageService = this.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService, `Page service not found.`);
+    return pageService;
+  }
+
   private _load() {
     const linkedDoc = this.linkedDoc;
     if (!linkedDoc) {
@@ -111,12 +123,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this._abstractText = '';
     this._isBannerEmpty = true;
 
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService, `Page service not found.`);
-    this.pageMode = pageService.getPageMode(this.model.pageId);
-    this._pageUpdatedAt = pageService.getPageUpdatedAt(this.model.pageId);
+    this.pageMode = this._pageService.getPageMode(this.model.pageId);
+    this._pageUpdatedAt = this._pageService.getPageUpdatedAt(this.model.pageId);
 
     if (linkedDoc.loaded) {
       onLoad();
@@ -346,15 +354,38 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   };
 
   convertToEmbed = () => {
-    const { page, pageId, caption } = this.model;
+    const { page, pageId, caption, xywh } = this.model;
 
-    const parent = page.getParent(this.model);
-    assertExists(parent);
-    const index = parent.children.indexOf(this.model);
+    if (this.isInSurface) {
+      const bound = Bound.deserialize(xywh);
+      bound.w = SYNCED_BLOCK_DEFAULT_WIDTH;
+      bound.h = SYNCED_BLOCK_DEFAULT_HEIGHT;
 
-    page.addBlock('affine:synced', { pageId, caption }, parent, index);
+      const edgeless = this.edgeless;
+      assertExists(edgeless);
+      const blockId = edgeless.service.addBlock(
+        'affine:synced',
+        { pageId, xywh: bound.serialize(), caption },
+        edgeless.surface.model
+      );
+      edgeless.service.selection.set({
+        editing: false,
+        elements: [blockId],
+      });
+    } else {
+      const parent = page.getParent(this.model);
+      assertExists(parent);
+      const index = parent.children.indexOf(this.model);
 
-    this.std.selection.setGroup('note', []);
+      page.addBlock(
+        'affine:embed-linked-doc',
+        { pageId, caption },
+        parent,
+        index
+      );
+
+      this.std.selection.setGroup('note', []);
+    }
     page.deleteBlock(this.model);
   };
 

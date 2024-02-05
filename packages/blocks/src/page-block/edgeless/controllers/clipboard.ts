@@ -36,11 +36,11 @@ import {
 } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type { EmbedHtmlModel } from '../../../embed-html-block/embed-html-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
-import type { EmbedHtmlModel } from '../../../index.js';
 import type { AttachmentBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
@@ -59,6 +59,7 @@ import { compare } from '../../../surface-block/managers/layer-utils.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
+import type { SyncedBlockModel } from '../../../synced-block/synced-model.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import type { PageService } from '../../index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
@@ -76,6 +77,7 @@ import {
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
+  isSyncedBlock,
   isTopLevelBlock,
 } from '../utils/query.js';
 
@@ -647,6 +649,25 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedHtmlIds;
   }
 
+  private _createSyncedBlocks(syncedBlocks: BlockSnapshot[]) {
+    const syncedBlockIds = syncedBlocks.map(({ props }) => {
+      const { xywh, caption, scale, pageId } = props;
+
+      const syncedBlockId = this.host.service.addBlock(
+        'affine:synced',
+        {
+          xywh,
+          caption,
+          scale,
+          pageId,
+        },
+        this.surface.model.id
+      );
+      return syncedBlockId;
+    });
+    return syncedBlockIds;
+  }
+
   private _emitSelectionChangeAfterPaste(
     canvasElementIds: string[],
     blockIds: string[]
@@ -689,7 +710,9 @@ export class EdgelessClipboardController extends PageClipboard {
                         ? 'linkedDocEmbeds'
                         : isEmbedHtmlBlock(data as unknown as Selectable)
                           ? 'htmlEmbeds'
-                          : 'elements'
+                          : isSyncedBlock(data as unknown as Selectable)
+                            ? 'syncedBlocks'
+                            : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
@@ -701,6 +724,7 @@ export class EdgelessClipboardController extends PageClipboard {
       figmaEmbeds?: BlockSnapshot[];
       linkedDocEmbeds?: BlockSnapshot[];
       htmlEmbeds?: BlockSnapshot[];
+      syncedBlocks?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
     pasteCenter =
@@ -743,6 +767,9 @@ export class EdgelessClipboardController extends PageClipboard {
     const embedHtmlIds = this._createHtmlEmbedBlocks(
       groupedByType.htmlEmbeds ?? []
     );
+    const syncedBlockIds = this._createSyncedBlocks(
+      groupedByType.syncedBlocks ?? []
+    );
 
     const notes = noteIds.map(id =>
       this.page.getBlockById(id)
@@ -784,6 +811,10 @@ export class EdgelessClipboardController extends PageClipboard {
       this.host.service.getElementById(id)
     ) as EmbedHtmlModel[];
 
+    const syncedBlocks = syncedBlockIds.map(id =>
+      this.host.service.getElementById(id)
+    ) as SyncedBlockModel[];
+
     const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
@@ -803,6 +834,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...figmaEmbeds,
       ...linkedDocEmbeds,
       ...htmlEmbeds,
+      ...syncedBlocks,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -835,6 +867,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...figmaEmbeds,
       ...linkedDocEmbeds,
       ...htmlEmbeds,
+      ...syncedBlocks,
     ];
     blocks.forEach(block => {
       const bound = Bound.deserialize(block.xywh);
@@ -1208,6 +1241,9 @@ export async function prepareClipboardData(
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isEmbedHtmlBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
+      } else if (isSyncedBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (selected instanceof ConnectorElementModel) {

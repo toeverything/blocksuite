@@ -35,16 +35,16 @@ import {
   groupBy,
   pickValues,
 } from '../../../../_common/utils/iterable.js';
+import type { AttachmentBlockModel } from '../../../../attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
+import type { EmbedHtmlModel } from '../../../../embed-html-block/embed-html-model.js';
 import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { ImageBlockModel } from '../../../../image-block/index.js';
-import type { EmbedHtmlModel } from '../../../../index.js';
-import type { AttachmentBlockModel } from '../../../../models.js';
-import type { NoteBlockModel } from '../../../../note-block/index.js';
+import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
+import type { ImageBlockModel } from '../../../../image-block/image-model.js';
+import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type {
   ElementModel,
   GroupElementModel,
@@ -56,6 +56,7 @@ import {
   type ShapeElementModel,
   type TextElementModel,
 } from '../../../../surface-block/index.js';
+import type { SyncedBlockModel } from '../../../../synced-block/synced-model.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import {
@@ -65,6 +66,7 @@ import {
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
+  isSyncedBlock,
 } from '../../utils/query.js';
 
 type CategorizedElements = {
@@ -82,7 +84,8 @@ type CategorizedElements = {
     EmbedYoutubeModel[] &
     EmbedFigmaModel[] &
     EmbedLinkedDocModel[] &
-    EmbedHtmlModel[];
+    EmbedHtmlModel[] &
+    SyncedBlockModel[];
 };
 
 type ToolBarCustomAction = {
@@ -199,7 +202,11 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'image';
       } else if (isAttachmentBlock(model)) {
         return 'attachment';
-      } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
+      } else if (
+        isBookmarkBlock(model) ||
+        isEmbeddedBlock(model) ||
+        isSyncedBlock(model)
+      ) {
         return 'embedCard';
       }
 

@@ -63,7 +63,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
       title: new Text('Home page, having synced blocks'),
     });
 
-    pageMain.addBlock('affine:surface', {}, pageBlockId);
+    const surfaceId = pageMain.addBlock('affine:surface', {}, pageBlockId);
     const noteId = pageMain.addBlock('affine:note', {}, pageBlockId);
 
     // Add markdown to note block
@@ -89,6 +89,26 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
         pageId: 'synced-edgeless',
       },
       noteId
+    );
+
+    // Add synced block - page view
+    pageMain.addBlock(
+      'affine:synced',
+      {
+        pageId: 'synced-page',
+        xywh: '[-1000, 0, 752, 455]',
+      },
+      surfaceId
+    );
+
+    // Add synced block - edgeless view
+    pageMain.addBlock(
+      'affine:synced',
+      {
+        pageId: 'synced-edgeless',
+        xywh: '[-1000, 500, 752, 455]',
+      },
+      surfaceId
     );
   });
 

@@ -3,10 +3,8 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { SyncedBlockComponent } from '../../../../synced-block/synced-block.js';
+import type { BlockComponent } from '../../../utils/query.js';
 import { embedCardModalStyles } from './styles.js';
-
-type EmbedCardCaptionEditBlock = SyncedBlockComponent;
 
 @customElement('embed-card-caption-edit-modal')
 export class EmbedCardEditCaptionEditModal extends WithDisposable(
@@ -15,7 +13,7 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  block!: EmbedCardCaptionEditBlock;
+  block!: BlockComponent;
 
   @query('.embed-card-modal-input.caption')
   captionInput!: HTMLTextAreaElement;
@@ -100,9 +98,7 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
   }
 }
 
-export function toggleEmbedCardCaptionEditModal(
-  block: EmbedCardCaptionEditBlock
-) {
+export function toggleEmbedCardCaptionEditModal(block: BlockComponent) {
   const host = block.host;
   host.selection.clear();
   const embedCardEditCaptionEditModal = new EmbedCardEditCaptionEditModal();
