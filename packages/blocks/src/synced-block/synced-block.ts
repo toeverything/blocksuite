@@ -36,11 +36,6 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       margin: 10px 0;
     }
 
-    affine-synced .affine-doc-page-block-container {
-      padding-left: 24px;
-      padding-right: 24px;
-    }
-
     .affine-synced-block {
       border-radius: 8px;
       overflow: hidden;
@@ -80,6 +75,17 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       left: 0;
       width: 100%;
       height: 100%;
+    }
+
+    .affine-synced-block > .affine-doc-viewport,
+    .affine-synced-block > .affine-edgeless-viewport,
+    .affine-synced-block .affine-block-children-container.edgeless {
+      background: transparent;
+    }
+
+    .affine-synced-block .affine-doc-page-block-container {
+      padding-left: 24px;
+      padding-right: 24px;
     }
   `;
 
@@ -311,7 +317,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
   override render() {
     const syncedDoc = this.syncedDoc;
-    const isDeleted = !this._deleted || !syncedDoc;
+    const isDeleted = this._deleted || !syncedDoc;
     const isLoading = this._loading;
     const isError = this._error;
     const isCycle = this._cycle;
