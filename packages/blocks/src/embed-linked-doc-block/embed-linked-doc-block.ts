@@ -79,7 +79,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   get pageTitle() {
-    return this.linkedDoc?.meta.title ?? '';
+    return this.linkedDoc?.meta.title.length
+      ? this.linkedDoc.meta.title
+      : 'Untitled';
   }
 
   private _load() {

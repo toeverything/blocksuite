@@ -134,6 +134,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     .embed-card-toolbar-button.page-info > svg {
       width: 20px;
       height: 20px;
+      flex-shrink: 0;
     }
 
     .embed-card-toolbar-button.page-info > span {
@@ -145,6 +146,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       font-feature-settings:
         'clig' off,
         'liga' off;
+      word-break: break-all;
       font-family: var(--affine-font-family);
       font-size: 14px;
       font-style: normal;

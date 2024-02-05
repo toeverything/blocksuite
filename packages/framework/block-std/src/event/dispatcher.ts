@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
 import {
@@ -72,6 +72,10 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
+  slots = {
+    activeChanged: new Slot(),
+  };
+
   private _handlersMap = Object.fromEntries(
     eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
   ) as Record<EventName, Array<EventHandlerRunner>>;
@@ -97,7 +101,10 @@ export class UIEventDispatcher {
   activate = () => {
     const prevDispatcher = UIEventDispatcher._activeDispatcher;
     if (prevDispatcher === this) return;
+
     UIEventDispatcher._activeDispatcher = this;
+    this.slots.activeChanged.emit();
+    prevDispatcher?.std.event.slots.activeChanged.emit();
     prevDispatcher?.std.selection.clear();
   };
 
@@ -105,7 +112,10 @@ export class UIEventDispatcher {
     const prevDispatcher = UIEventDispatcher._activeDispatcher;
     if (!prevDispatcher) return;
     if (prevDispatcher !== this) return;
+
     UIEventDispatcher._activeDispatcher = null;
+    this.slots.activeChanged.emit();
+    prevDispatcher.std.event.slots.activeChanged.emit();
     prevDispatcher.std.selection.clear();
   };
 

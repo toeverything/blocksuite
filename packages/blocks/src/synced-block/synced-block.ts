@@ -113,7 +113,9 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   }
 
   get pageTitle() {
-    return this.syncedDoc?.meta.title ?? '';
+    return this.syncedDoc?.meta.title.length
+      ? this.syncedDoc.meta.title
+      : 'Untitled';
   }
 
   private async _load() {
@@ -159,9 +161,11 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
       const syncedDocEditorHost = this.syncedDocEditorHost;
       assertExists(syncedDocEditorHost);
-      syncedDocEditorHost.std.selection.slots.changed.on(() => {
-        this._editing = !!this.syncedDocEditorHost?.std.event.isActive;
-      });
+      this._disposables.add(
+        syncedDocEditorHost.std.event.slots.activeChanged.on(() => {
+          this._editing = syncedDocEditorHost.std.event.isActive;
+        })
+      );
     }
   }
 
