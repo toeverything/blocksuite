@@ -18,6 +18,10 @@ export class AssetsManager {
     return this._assetsMap;
   }
 
+  isEmpty() {
+    return this._assetsMap.size === 0;
+  }
+
   cleanup() {
     this._assetsMap.clear();
   }
