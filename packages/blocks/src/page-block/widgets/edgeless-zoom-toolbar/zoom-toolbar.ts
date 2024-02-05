@@ -13,8 +13,6 @@ import { stopPropagation } from '../../../_common/utils/event.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless/edgeless-page-block.js';
 import { ZOOM_STEP } from '../../edgeless/utils/viewport.js';
 
-export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
-
 @customElement('edgeless-zoom-toolbar')
 export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   static override styles = css`
