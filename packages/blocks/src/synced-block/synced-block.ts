@@ -416,6 +416,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     const isLoading = this._loading;
     const isError = this._error;
     const isCycle = this._cycle;
+    const isSelected = !!this.selected?.is('block');
     if (isLoading || isError || isDeleted || isCycle) {
       return nothing;
     }
@@ -457,6 +458,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
           [pageMode]: true,
           [theme]: true,
           hovered: this._hovered,
+          selected: isSelected,
           editing: this._editing,
         })}
         style=${containerStyleMap}

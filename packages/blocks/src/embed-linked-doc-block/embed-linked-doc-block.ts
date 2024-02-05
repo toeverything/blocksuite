@@ -377,12 +377,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       assertExists(parent);
       const index = parent.children.indexOf(this.model);
 
-      page.addBlock(
-        'affine:embed-linked-doc',
-        { pageId, caption },
-        parent,
-        index
-      );
+      page.addBlock('affine:synced', { pageId, caption }, parent, index);
 
       this.std.selection.setGroup('note', []);
     }
