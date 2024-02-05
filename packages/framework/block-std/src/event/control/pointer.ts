@@ -156,6 +156,8 @@ export class PointerControl {
   };
 
   private _moveOn = (event: PointerEvent) => {
+    if (!this._dispatcher.isActive) return;
+
     const state = new PointerEventState({
       event,
       rect: this._rect,

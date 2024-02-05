@@ -364,7 +364,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
             width: '100%',
             height: '100%',
             padding: '0 4px',
-            overflow: this._isShowCollapsedContent ? 'initial' : 'hidden',
+            overflow: 'visible',
+            'overflow-x': 'visible',
+            'overflow-y': this._isShowCollapsedContent ? 'initial' : 'hidden',
           })}
         >
           ${surface.renderModel(model)}

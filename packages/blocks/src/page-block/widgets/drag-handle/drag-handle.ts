@@ -1516,6 +1516,14 @@ export class AffineDragHandleWidget extends WidgetElement<
       this._hide();
     });
 
+    this._disposables.add(
+      this.std.event.slots.activeChanged.on(() => {
+        if (!this.std.event.isActive) {
+          this._hide(true);
+        }
+      })
+    );
+
     if (isInsideDocEditor(this.host)) {
       this._disposables.add(
         this.page.slots.blockUpdated.on(() => this._hide())

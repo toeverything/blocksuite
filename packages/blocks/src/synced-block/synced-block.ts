@@ -297,6 +297,13 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     },
   };
 
+  private _handleOverlayDblClick = (event: MouseEvent) => {
+    event.stopPropagation();
+    const syncedDocEditorHost = this.syncedDocEditorHost;
+    assertExists(syncedDocEditorHost);
+    syncedDocEditorHost.std.event.activate();
+  };
+
   open = () => {
     const syncedDocId = this.model.pageId;
     if (syncedDocId === this.model.page.id) return;
@@ -458,6 +465,15 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
         >
           ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
         </div>
+
+        ${this._isInSurface && !this._editing
+          ? html`
+              <div
+                class="synced-block-editor-overlay"
+                @dblclick=${this._handleOverlayDblClick}
+              ></div>
+            `
+          : nothing}
       </div>
 
       ${this._isInSurface
