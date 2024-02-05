@@ -363,10 +363,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
           style=${styleMap({
             width: '100%',
             height: '100%',
-            padding: '0 4px',
-            overflow: 'visible',
-            'overflow-x': 'visible',
-            'overflow-y': this._isShowCollapsedContent ? 'initial' : 'hidden',
+            'overflow-y': this._isShowCollapsedContent ? 'initial' : 'clip',
           })}
         >
           ${surface.renderModel(model)}
