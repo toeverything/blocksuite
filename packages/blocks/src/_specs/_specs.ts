@@ -34,6 +34,7 @@ import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../page-block/widgets/doc-dragg
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../page-block/widgets/drag-handle/drag-handle.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/edgeless-remote-selection/index.js';
+import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../page-block/widgets/edgeless-zoom-toolbar/index.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../page-block/widgets/format-bar/format-bar.js';
 import { AFFINE_LINKED_DOC_WIDGET } from '../page-block/widgets/linked-doc/index.js';
 import { AFFINE_MODAL_WIDGET } from '../page-block/widgets/modal/modal.js';
@@ -108,6 +109,9 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
       )}`,
       [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
         AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET
+      )}`,
+      [AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET]: literal`${unsafeStatic(
+        AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
       )}`,
     },
   },

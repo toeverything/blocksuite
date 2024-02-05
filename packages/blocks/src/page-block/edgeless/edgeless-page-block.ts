@@ -66,8 +66,6 @@ import type { EdgelessPageBlockWidgetName } from '../types.js';
 import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
-import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
-import { EdgelessZoomToolbar } from './components/zoom/zoom-toolbar.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { BrushToolController } from './controllers/tools/brush-tool.js';
 import { ConnectorToolController } from './controllers/tools/connector-tool.js';
@@ -115,6 +113,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
       top: 0;
       contain: size layout;
       z-index: 1;
+      width: 100%;
+      height: 100%;
     }
 
     .affine-edgeless-layer {
@@ -122,18 +122,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
       top: 0;
       left: 0;
       contain: size layout style;
-    }
-
-    @container viewport (width <= 1200px) {
-      edgeless-zoom-toolbar {
-        display: none;
-      }
-    }
-
-    @container viewport (width >= 1200px) {
-      zoom-bar-toggle-button {
-        display: none;
-      }
     }
 
     @media print {
@@ -148,8 +136,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
    */
   components = {
     toolbar: <EdgelessToolbar | null>null,
-    zoomToolbar: <EdgelessZoomToolbar | null>null,
-    zoomBarToggleButton: <ZoomBarToggleButton | null>null,
+    // zoomToolbar: <EdgelessZoomToolbar | null>null,
+    // zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
   keyboardManager: EdgelessPageKeyboardManager | null = null;
@@ -230,22 +218,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _handleToolbarFlag() {
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
-      const zoomToolBar = new EdgelessZoomToolbar(this);
-      const zoomBarToggleButton = new ZoomBarToggleButton(this);
 
       this.appendChild(toolbar);
-      this.appendChild(zoomToolBar);
-      this.appendChild(zoomBarToggleButton);
       this.components.toolbar = toolbar;
-      this.components.zoomToolbar = zoomToolBar;
-      this.components.zoomBarToggleButton = zoomBarToggleButton;
     };
 
-    if (
-      !this.components.toolbar &&
-      !this.components.zoomToolbar &&
-      !this.components.zoomBarToggleButton
-    ) {
+    if (!this.components.toolbar) {
       createToolbar();
     }
   }
