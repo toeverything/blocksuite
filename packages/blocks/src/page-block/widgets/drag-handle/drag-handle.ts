@@ -1,6 +1,7 @@
 import {
   PathFinder,
   type PointerEventState,
+  UIEventDispatcher,
   type UIEventHandler,
 } from '@blocksuite/block-std';
 import {
@@ -1517,7 +1518,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     });
 
     this._disposables.add(
-      this.std.event.slots.activeChanged.on(() => {
+      UIEventDispatcher.slots.activeChanged.on(() => {
         if (!this.std.event.isActive) {
           this._hide(true);
         }

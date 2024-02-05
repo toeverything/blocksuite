@@ -2,6 +2,7 @@ import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
 
+import { UIEventDispatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement } from '@blocksuite/lit';
@@ -164,7 +165,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       const syncedDocEditorHost = this.syncedDocEditorHost;
       assertExists(syncedDocEditorHost);
       this._disposables.add(
-        syncedDocEditorHost.std.event.slots.activeChanged.on(() => {
+        UIEventDispatcher.slots.activeChanged.on(() => {
           this._editing = syncedDocEditorHost.std.event.isActive;
         })
       );
@@ -172,6 +173,12 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
+    UIEventDispatcher.slots.activeChanged.once(() => {
+      if (!this.std.event.isActive) {
+        abortController.abort();
+      }
+    });
+
     const selection = this.host.selection;
     const textSelection = selection.find('text');
     if (

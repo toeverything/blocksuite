@@ -72,7 +72,7 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
-  slots = {
+  static slots = {
     activeChanged: new Slot(),
   };
 
@@ -103,8 +103,7 @@ export class UIEventDispatcher {
     if (prevDispatcher === this) return;
 
     UIEventDispatcher._activeDispatcher = this;
-    this.slots.activeChanged.emit();
-    prevDispatcher?.std.event.slots.activeChanged.emit();
+    UIEventDispatcher.slots.activeChanged.emit();
     prevDispatcher?.std.selection.clear();
   };
 
@@ -114,8 +113,7 @@ export class UIEventDispatcher {
     if (prevDispatcher !== this) return;
 
     UIEventDispatcher._activeDispatcher = null;
-    this.slots.activeChanged.emit();
-    prevDispatcher.std.event.slots.activeChanged.emit();
+    UIEventDispatcher.slots.activeChanged.emit();
     prevDispatcher.std.selection.clear();
   };
 

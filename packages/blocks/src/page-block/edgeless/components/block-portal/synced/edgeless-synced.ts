@@ -5,6 +5,7 @@ import { html } from 'lit/static-html.js';
 
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SyncedBlockModel } from '../../../../../synced-block/index.js';
+import { SYNCED_BLOCK_DEFAULT_HEIGHT } from '../../../../../synced-block/styles.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 @customElement('edgeless-block-portal-synced')
@@ -17,6 +18,20 @@ export class EdgelessBlockPortalSynced extends EdgelessPortalBase<SyncedBlockMod
       top: 0px;
       width: 100%;
       height: 100%;
+    }
+
+    .edgeless-block-portal-synced
+      .synced-block-editor
+      .affine-doc-page-block-container {
+      padding: 12px 24px;
+      width: 100%;
+    }
+
+    .edgeless-block-portal-synced .affine-synced-container.edgeless {
+      display: block;
+      padding: 0;
+      width: 100%;
+      height: calc(${SYNCED_BLOCK_DEFAULT_HEIGHT}px + 36px);
     }
   `;
 

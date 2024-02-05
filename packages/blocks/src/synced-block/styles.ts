@@ -28,11 +28,11 @@ export const styles = css`
     height: calc(${SYNCED_BLOCK_DEFAULT_HEIGHT}px + 36px);
   }
   .affine-synced-container.hovered.light,
-  affine-synced.with-drag-handle > .affine-attachment-container.light {
+  affine-synced.with-drag-handle > .affine-synced-container.light {
     box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.08);
   }
   .affine-synced-container.hovered.dark,
-  affine-synced.with-drag-handle > .affine-attachment-container.dark {
+  affine-synced.with-drag-handle > .affine-synced-container.dark {
     box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.14);
   }
   .affine-synced-container.editing.light {
@@ -61,8 +61,7 @@ export const styles = css`
   }
 
   .synced-block-editor .affine-doc-page-block-container {
-    padding-left: 24px;
-    padding-right: 24px;
+    padding: 0 24px;
     width: 100%;
   }
 `;
