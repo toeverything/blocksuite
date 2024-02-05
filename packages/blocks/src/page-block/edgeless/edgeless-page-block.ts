@@ -136,8 +136,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
    */
   components = {
     toolbar: <EdgelessToolbar | null>null,
-    // zoomToolbar: <EdgelessZoomToolbar | null>null,
-    // zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
   keyboardManager: EdgelessPageKeyboardManager | null = null;
