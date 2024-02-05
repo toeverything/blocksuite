@@ -93,6 +93,12 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   private _error = false;
 
   @state()
+  private _deleted = false;
+
+  @state()
+  private _cycle = false;
+
+  @state()
   private _hovered = false;
 
   @state()
@@ -118,14 +124,33 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       : 'Untitled';
   }
 
+  private _checkCycle() {
+    let editorHost: EditorHost | null = this.host;
+    do {
+      editorHost =
+        editorHost.parentElement?.closest<EditorHost>('editor-host') ?? null;
+      this._cycle = !!editorHost && editorHost.page.id === this.model.pageId;
+    } while (editorHost && !this._cycle);
+  }
+
   private async _load() {
+    this._loading = true;
+    this._error = false;
+    this._deleted = false;
+    this._cycle = false;
+
     const syncedDoc = this.syncedDoc;
     if (!syncedDoc) {
+      this._deleted = true;
+      this._loading = false;
       return;
     }
 
-    this._loading = true;
-    this._error = false;
+    this._checkCycle();
+    if (this._cycle) {
+      this._loading = false;
+      return;
+    }
 
     const pageService = this.std.spec.getService(
       'affine:page'
@@ -286,10 +311,11 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
   override render() {
     const syncedDoc = this.syncedDoc;
-    const isDeleted = !syncedDoc;
+    const isDeleted = !this._deleted || !syncedDoc;
     const isLoading = this._loading;
     const isError = this._error;
-    if (isDeleted || isLoading || isError) {
+    const isCycle = this._cycle;
+    if (isLoading || isError || isDeleted || isCycle) {
       return nothing;
     }
 
