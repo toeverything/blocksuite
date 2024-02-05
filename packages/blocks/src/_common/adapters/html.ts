@@ -989,27 +989,6 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .closeNode();
           break;
         }
-        case 'br': {
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid(),
-                flavour: 'affine:paragraph',
-                props: {
-                  type: 'text',
-                  text: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [],
-                  },
-                },
-                children: [],
-              },
-              'children'
-            )
-            .closeNode();
-          break;
-        }
       }
     });
     walker.setLeave(async (o, context) => {
