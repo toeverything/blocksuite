@@ -37,6 +37,7 @@ import {
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
+  hastFlatNodes,
   hastGetElementChildren,
   hastGetTextChildren,
   hastGetTextChildrenOnlyAst,
@@ -906,6 +907,10 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         case 'li': {
           const firstElementChild = hastGetElementChildren(o.node)[0];
           const listType = context.getNodeContext('hast:list:type');
+          o.node = hastFlatNodes(
+            o.node,
+            tagName => tagName === 'div' || tagName === 'p'
+          );
           context.openNode(
             {
               type: 'block',
