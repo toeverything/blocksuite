@@ -1,4 +1,8 @@
-# BlockSuite Overview
+# BlockSuite Framework Overview
+
+> _People who are really serious about editor should make their own framework._
+
+---
 
 BlockSuite is a toolkit for building editors and collaborative applications. It implements a series of content editing infrastructures, UI components and editors independently.
 
@@ -18,9 +22,11 @@ BlockSuite originated from the open-source knowledge base [AFFiNE](https://githu
 
 - **Support for Multimodal Editable Content**: When considering knowledge as a single source of truth, building its various view modes (e.g., text, slides, mind maps, tables) still requires multiple incompatible frameworks. Ideally, no matter how the presentation of content changes, there should be a consistent framework that helps.
 - **Organizing and Visualizing Complex Knowledge**: Existing editors generally focus on editing single documents, but often fall short in dealing with complex structures involving intertwined references. This requires the framework to natively manage state across multiple documents.
-- **Collaboration-Ready**: Real-time collaboration is often seen as an optional plugin, but in reality, we should natively use the underlying CRDT technology for editor state management, which helps to build a [clearer and more reliable data flow](../blog/crdt-native-data-flow).
+- **Collaboration-Ready**: Real-time collaboration is often seen as an optional plugin, but in reality, we could natively use the underlying CRDT technology for editor state management, which helps to build a [clearer and more reliable data flow](../blog/crdt-native-data-flow).
 
 During the development of AFFiNE, it became clear that BlockSuite was advancing beyond merely being an in-house editor and evolving into a versatile framework. That's why we chose to open source and maintain BlockSuite independently.
+
+<!-- ## Examples -->
 
 ## Features
 
