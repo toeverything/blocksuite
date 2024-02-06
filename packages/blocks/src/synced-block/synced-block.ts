@@ -507,6 +507,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       containerStyleMap = styleMap({
         width: `${width}px`,
         height: `${pageMode === 'page' && isEditing ? `max-content` : `${height}px`}`,
+        minHeight: `${height}px`,
         transform: `scale(${scale})`,
         transformOrigin: '0 0',
       });

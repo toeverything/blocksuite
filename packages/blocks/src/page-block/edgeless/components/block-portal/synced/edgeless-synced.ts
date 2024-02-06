@@ -11,6 +11,10 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 @customElement('edgeless-block-portal-synced')
 export class EdgelessBlockPortalSynced extends EdgelessPortalBase<SyncedBlockModel> {
   static override styles = css`
+    edgeless-block-portal-synced:has(.affine-synced-container.editing) {
+      z-index: 1000 !important;
+    }
+
     .edgeless-block-portal-synced > affine-synced {
       position: relative !important;
       display: block !important;
