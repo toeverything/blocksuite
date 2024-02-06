@@ -12,7 +12,7 @@ import { cardStyles } from '../styles.js';
 import type { SyncedBlockComponent } from '../synced-block.js';
 import { getSyncedDocIcons } from '../utils.js';
 
-@customElement('synced-card')
+@customElement('affine-synced-card')
 export class SyncedCard extends WithDisposable(ShadowlessElement) {
   static override styles = cardStyles;
 
@@ -243,6 +243,6 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'synced-card': SyncedCard;
+    'affine-synced-card': SyncedCard;
   }
 }

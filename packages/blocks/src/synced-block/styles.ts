@@ -59,14 +59,18 @@ export const blockStyles = css`
     z-index: 1;
   }
 
-  .synced-block-editor.affine-doc-viewport,
-  .synced-block-editor.affine-edgeless-viewport {
+  .affine-synced-container.surface {
+    background: var(--affine-background-primary-color);
+  }
+
+  .affine-synced-container > .synced-block-editor.affine-doc-viewport {
     background: transparent;
   }
 
   .synced-block-editor .affine-doc-page-block-container {
     padding: 0 24px;
     width: 100%;
+    max-width: 100%;
   }
 `;
 

@@ -15,13 +15,13 @@ export class EdgelessBlockPortalSynced extends EdgelessPortalBase<SyncedBlockMod
       z-index: 1000 !important;
     }
 
-    .edgeless-block-portal-synced > affine-synced {
-      position: relative !important;
-      display: block !important;
-      left: 0px !important;
-      top: 0px !important;
-      width: 100% !important;
-      height: 100% !important;
+    .edgeless-block-portal-synced > affine-synced[data-nested-editor] {
+      position: relative;
+      display: block;
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      height: 100%;
     }
 
     .edgeless-block-portal-synced

@@ -180,7 +180,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     if (!this._error && !this._cycle) {
       await this.updateComplete;
 
-      const syncedDocEditorHost = await this.syncedDocEditorHost;
+      const syncedDocEditorHost = this.syncedDocEditorHost;
       assertExists(syncedDocEditorHost);
       this._disposables.add(
         UIEventDispatcher.slots.activeChanged.on(() => {
@@ -452,6 +452,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     const syncedDoc = this.doc;
     const { isLoading, isError, isDeleted, isCycle, isEditing } =
       this.blockState;
+    const isInSurface = this.isInSurface;
     const pageMode = this.pageMode;
     const pageUpdatedAt = this.pageUpdatedAt;
     if (isLoading || isError || isDeleted || isCycle || !syncedDoc) {
@@ -461,7 +462,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
         width: '100%',
         margin: '18px 0px',
       });
-      if (this.isInSurface) {
+      if (isInSurface) {
         const bound = Bound.deserialize(this.model.xywh);
         const scaleX = bound.w / SYNCED_BLOCK_DEFAULT_WIDTH;
         const scaleY = bound.h / SYNCED_BLOCK_DEFAULT_HEIGHT;
@@ -475,8 +476,8 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       }
 
       return html`
-        <synced-card
-          ${this.isInSurface || !isCycle
+        <affine-synced-card
+          ${isInSurface || !isCycle
             ? nothing
             : ref(this._whenHover.setReference)}
           style=${cardStyleMap}
@@ -487,7 +488,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
           .isError=${isError}
           .isDeleted=${isDeleted}
           .isCycle=${isCycle}
-        ></synced-card>
+        ></affine-synced-card>
       `;
     }
 
@@ -496,7 +497,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       width: '100%',
       margin: '10px 0',
     });
-    if (this.isInSurface) {
+    if (isInSurface) {
       const scale = this.model.scale ?? 1;
       const bound = Bound.deserialize(
         (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
@@ -522,7 +523,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
     return html`
       <div
-        ${this.isInSurface || this._editing
+        ${isInSurface || isEditing
           ? nothing
           : ref(this._whenHover.setReference)}
         class=${classMap({
@@ -530,7 +531,8 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
           [pageMode]: true,
           [theme]: true,
           selected: isSelected,
-          editing: this._editing,
+          editing: isEditing,
+          surface: isInSurface,
         })}
         style=${containerStyleMap}
       >
@@ -544,7 +546,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
           ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
         </div>
 
-        ${this._isInSurface && !this._editing
+        ${isInSurface && !isEditing
           ? html`
               <div
                 class="synced-block-editor-overlay"
@@ -554,7 +556,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
           : nothing}
       </div>
 
-      ${this._isInSurface
+      ${isInSurface
         ? html`<embed-card-caption .block=${this}></embed-card-caption>`
         : nothing}
 

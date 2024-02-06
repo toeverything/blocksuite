@@ -78,6 +78,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
       'affine:paragraph',
       {
         text: new Text('Cyclic / Matryoshka synced block 👇'),
+        type: 'h4',
       },
       noteId
     );

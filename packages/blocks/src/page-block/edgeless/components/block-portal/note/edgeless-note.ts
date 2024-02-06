@@ -132,6 +132,19 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         background-color: var(--affine-hover-color);
       }
     }
+
+    .edgeless-block-portal-note:has(.affine-synced-container.editing) {
+      .note-background {
+        left: ${-ACTIVE_NOTE_EXTRA_PADDING}px !important;
+        top: ${-ACTIVE_NOTE_EXTRA_PADDING}px !important;
+        width: calc(100% + ${ACTIVE_NOTE_EXTRA_PADDING * 2}px) !important;
+        height: calc(100% + ${ACTIVE_NOTE_EXTRA_PADDING * 2}px) !important;
+      }
+
+      edgeless-note-mask {
+        display: none;
+      }
+    }
   `;
 
   @state()
