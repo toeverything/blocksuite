@@ -104,6 +104,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       isError: this._error,
       isDeleted: this._deleted,
       isCycle: this._cycle,
+      isEditing: this._editing,
     };
   }
 
@@ -449,7 +450,8 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
   override render() {
     const syncedDoc = this.doc;
-    const { isLoading, isError, isDeleted, isCycle } = this.blockState;
+    const { isLoading, isError, isDeleted, isCycle, isEditing } =
+      this.blockState;
     const pageMode = this.pageMode;
     const pageUpdatedAt = this.pageUpdatedAt;
     if (isLoading || isError || isDeleted || isCycle || !syncedDoc) {
@@ -504,7 +506,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       const height = bound.h / scale;
       containerStyleMap = styleMap({
         width: `${width}px`,
-        height: `${height}px`,
+        height: `${pageMode === 'page' && isEditing ? `max-content` : `${height}px`}`,
         transform: `scale(${scale})`,
         transformOrigin: '0 0',
       });
