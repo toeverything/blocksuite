@@ -1,3 +1,4 @@
+import './components/synced-card.js';
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
@@ -37,7 +38,7 @@ import {
 } from '../page-block/widgets/drag-handle/utils.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import {
-  styles,
+  blockStyles,
   SYNCED_BLOCK_DEFAULT_HEIGHT,
   SYNCED_BLOCK_DEFAULT_WIDTH,
 } from './styles.js';
@@ -45,10 +46,13 @@ import { type SyncedBlockModel, SyncedBlockSchema } from './synced-model.js';
 
 @customElement('affine-synced')
 export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
-  static override styles = styles;
+  static override styles = blockStyles;
 
   @state()
-  pageMode: 'page' | 'edgeless' = 'page';
+  private _pageMode: 'page' | 'edgeless' = 'page';
+
+  @state()
+  private _pageUpdatedAt: Date = new Date();
 
   @state()
   private _loading = false;
@@ -61,9 +65,6 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
   @state()
   private _cycle = false;
-
-  @state()
-  private _hovered = false;
 
   @state()
   private _editing = false;
@@ -87,15 +88,35 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     return this.host.querySelector('affine-edgeless-page');
   }
 
-  get syncedDoc() {
+  get surface() {
+    if (!this.isInSurface) return null;
+    return this.host.querySelector('affine-surface');
+  }
+
+  get doc() {
     const page = this.std.workspace.getPage(this.model.pageId);
     return page;
   }
 
+  get blockState() {
+    return {
+      isLoading: this._loading,
+      isError: this._error,
+      isDeleted: this._deleted,
+      isCycle: this._cycle,
+    };
+  }
+
+  get pageMode() {
+    return this._pageMode;
+  }
+
+  get pageUpdatedAt() {
+    return this._pageUpdatedAt;
+  }
+
   get pageTitle() {
-    return this.syncedDoc?.meta.title.length
-      ? this.syncedDoc.meta.title
-      : 'Untitled';
+    return this.doc?.meta.title.length ? this.doc.meta.title : 'Untitled';
   }
 
   private get _pageService() {
@@ -108,11 +129,11 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
   private _checkCycle() {
     let editorHost: EditorHost | null = this.host;
-    do {
+    while (editorHost && !this._cycle) {
+      this._cycle = !!editorHost && editorHost.page.id === this.model.pageId;
       editorHost =
         editorHost.parentElement?.closest<EditorHost>('editor-host') ?? null;
-      this._cycle = !!editorHost && editorHost.page.id === this.model.pageId;
-    } while (editorHost && !this._cycle);
+    }
   }
 
   private async _load() {
@@ -121,7 +142,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     this._deleted = false;
     this._cycle = false;
 
-    const syncedDoc = this.syncedDoc;
+    const syncedDoc = this.doc;
     if (!syncedDoc) {
       this._deleted = true;
       this._loading = false;
@@ -129,12 +150,8 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     }
 
     this._checkCycle();
-    if (this._cycle) {
-      this._loading = false;
-      return;
-    }
-
-    this.pageMode = this._pageService.getPageMode(this.model.pageId);
+    this._pageMode = this._pageService.getPageMode(this.model.pageId);
+    this._pageUpdatedAt = this._pageService.getPageUpdatedAt(this.model.pageId);
 
     if (!syncedDoc.loaded) {
       await new Promise<void>(resolve => {
@@ -159,10 +176,10 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
     this._loading = false;
 
-    if (!this._error) {
+    if (!this._error && !this._cycle) {
       await this.updateComplete;
 
-      const syncedDocEditorHost = this.syncedDocEditorHost;
+      const syncedDocEditorHost = await this.syncedDocEditorHost;
       assertExists(syncedDocEditorHost);
       this._disposables.add(
         UIEventDispatcher.slots.activeChanged.on(() => {
@@ -408,24 +425,69 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
+
+    this.model.propsUpdated.on(({ key }) => {
+      if (key === 'pageId') {
+        this._load().catch(e => {
+          console.error(e);
+          this._error = true;
+        });
+      }
+    });
+
+    if (this.isInSurface) {
+      const surface = this.surface;
+      assertExists(surface);
+
+      this.disposables.add(
+        this.model.propsUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
+    }
   }
 
   override render() {
-    const syncedDoc = this.syncedDoc;
-    const isDeleted = this._deleted || !syncedDoc;
-    const isLoading = this._loading;
-    const isError = this._error;
-    const isCycle = this._cycle;
-    const isSelected = !!this.selected?.is('block');
-    if (isLoading || isError || isDeleted || isCycle) {
-      return nothing;
-    }
-
-    const theme = getThemeMode();
+    const syncedDoc = this.doc;
+    const { isLoading, isError, isDeleted, isCycle } = this.blockState;
     const pageMode = this.pageMode;
+    const pageUpdatedAt = this.pageUpdatedAt;
+    if (isLoading || isError || isDeleted || isCycle || !syncedDoc) {
+      let cardStyleMap = styleMap({
+        position: 'relative',
+        display: 'block',
+        width: '100%',
+        margin: '18px 0px',
+      });
+      if (this.isInSurface) {
+        const bound = Bound.deserialize(this.model.xywh);
+        const scaleX = bound.w / SYNCED_BLOCK_DEFAULT_WIDTH;
+        const scaleY = bound.h / SYNCED_BLOCK_DEFAULT_HEIGHT;
+        cardStyleMap = styleMap({
+          display: 'block',
+          width: `${SYNCED_BLOCK_DEFAULT_WIDTH}px`,
+          height: `${SYNCED_BLOCK_DEFAULT_HEIGHT}px`,
+          transform: `scale(${scaleX}, ${scaleY})`,
+          transformOrigin: '0 0',
+        });
+      }
 
-    const EditorBlockSpec =
-      pageMode === 'page' ? DocEditorBlockSpecs : EdgelessEditorBlockSpecs;
+      return html`
+        <synced-card
+          ${this.isInSurface || !isCycle
+            ? nothing
+            : ref(this._whenHover.setReference)}
+          style=${cardStyleMap}
+          .block=${this}
+          .pageMode=${pageMode}
+          .pageUpdatedAt=${pageUpdatedAt}
+          .isLoading=${isLoading}
+          .isError=${isError}
+          .isDeleted=${isDeleted}
+          .isCycle=${isCycle}
+        ></synced-card>
+      `;
+    }
 
     let containerStyleMap = styleMap({
       position: 'relative',
@@ -448,6 +510,13 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       });
     }
 
+    const isSelected = !!this.selected?.is('block');
+    const theme = getThemeMode();
+    const EditorBlockSpec =
+      pageMode === 'page' ? DocEditorBlockSpecs : EdgelessEditorBlockSpecs;
+
+    this.setAttribute('data-nested-editor', 'true');
+
     return html`
       <div
         ${this.isInSurface || this._editing
@@ -457,13 +526,10 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
           'affine-synced-container': true,
           [pageMode]: true,
           [theme]: true,
-          hovered: this._hovered,
           selected: isSelected,
           editing: this._editing,
         })}
         style=${containerStyleMap}
-        @pointerenter=${() => (this._hovered = true)}
-        @pointerleave=${() => (this._hovered = false)}
       >
         <div
           class=${classMap({

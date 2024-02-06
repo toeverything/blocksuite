@@ -127,7 +127,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
     return html`
       <div
-        class="affine-bookmark-card${cardClassMap}"
+        class="affine-bookmark-card ${cardClassMap}"
         @click=${this._handleClick}
         @dblclick=${this._handleDoubleClick}
       >

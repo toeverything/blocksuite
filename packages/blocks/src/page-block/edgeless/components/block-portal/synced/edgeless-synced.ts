@@ -12,12 +12,12 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 export class EdgelessBlockPortalSynced extends EdgelessPortalBase<SyncedBlockModel> {
   static override styles = css`
     .edgeless-block-portal-synced > affine-synced {
-      position: relative;
-      display: block;
-      left: 0px;
-      top: 0px;
-      width: 100%;
-      height: 100%;
+      position: relative !important;
+      display: block !important;
+      left: 0px !important;
+      top: 0px !important;
+      width: 100% !important;
+      height: 100% !important;
     }
 
     .edgeless-block-portal-synced

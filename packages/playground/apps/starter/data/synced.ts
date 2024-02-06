@@ -73,6 +73,24 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
       markdown: syncedPageMarkdown,
     });
 
+    // Add synced block - self
+    pageMain.addBlock(
+      'affine:paragraph',
+      {
+        text: new Text('Cyclic / Matryoshka synced block 👇'),
+      },
+      noteId
+    );
+
+    // Add synced block - self
+    pageMain.addBlock(
+      'affine:synced',
+      {
+        pageId: id,
+      },
+      noteId
+    );
+
     // Add synced block - page view
     pageMain.addBlock(
       'affine:synced',
@@ -107,6 +125,16 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
       {
         pageId: 'synced-edgeless',
         xywh: '[-1000, 500, 752, 455]',
+      },
+      surfaceId
+    );
+
+    // Add synced block - self
+    pageMain.addBlock(
+      'affine:synced',
+      {
+        pageId: id,
+        xywh: '[-1000, 1000, 752, 455]',
       },
       surfaceId
     );
