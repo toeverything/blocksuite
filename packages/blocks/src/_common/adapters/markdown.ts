@@ -718,7 +718,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 id: nanoid(),
                 flavour: 'affine:code',
                 props: {
-                  language: o.node.lang,
+                  language: o.node.lang ?? 'Plain Text',
                   text: {
                     '$blocksuite:internal:text$': true,
                     delta: [
