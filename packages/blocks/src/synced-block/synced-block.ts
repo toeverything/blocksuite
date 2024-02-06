@@ -25,6 +25,7 @@ import {
   DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
 } from '../_specs/_specs.js';
+import type { NoteBlockModel } from '../note-block/note-model.js';
 import type { PageBlockComponent, PageService } from '../page-block/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
 import {
@@ -69,6 +70,9 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
   @state()
   private _editing = false;
 
+  @state()
+  private _empty = false;
+
   @query('embed-card-caption')
   captionElement?: EmbedCardCaption;
 
@@ -105,6 +109,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       isDeleted: this._deleted,
       isCycle: this._cycle,
       isEditing: this._editing,
+      isEmpty: this._empty,
     };
   }
 
@@ -137,11 +142,50 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     }
   }
 
+  private _checkEmpty() {
+    const syncedDoc = this.doc;
+    const root = syncedDoc?.root;
+    if (!syncedDoc || !root) {
+      this._empty = false;
+      return;
+    }
+
+    const noteBlocks = root.children.filter(child =>
+      matchFlavours(child, ['affine:note'])
+    ) as NoteBlockModel[];
+    if (noteBlocks.length === 0) {
+      this._empty = true;
+
+      syncedDoc.withoutTransact(() => {
+        const noteId = syncedDoc.addBlock('affine:note', {}, root.id);
+        syncedDoc.addBlock('affine:paragraph', {}, noteId);
+      });
+
+      return;
+    }
+
+    const contentBlocks = noteBlocks.flatMap(note => note.children);
+    if (contentBlocks.length === 0) {
+      this._empty = true;
+
+      syncedDoc.withoutTransact(() => {
+        syncedDoc.addBlock('affine:paragraph', {}, noteBlocks[0].id);
+      });
+
+      return;
+    }
+
+    if (contentBlocks.length === 1 && contentBlocks[0].text?.length === 0) {
+      this._empty = true;
+    }
+  }
+
   private async _load() {
     this._loading = true;
     this._error = false;
     this._deleted = false;
     this._cycle = false;
+    this._empty = false;
 
     const syncedDoc = this.doc;
     if (!syncedDoc) {
@@ -175,6 +219,10 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       });
     }
 
+    if (this._pageMode === 'page') {
+      this._checkEmpty();
+    }
+
     this._loading = false;
 
     if (!this._error && !this._cycle) {
@@ -185,6 +233,9 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       this._disposables.add(
         UIEventDispatcher.slots.activeChanged.on(() => {
           this._editing = syncedDocEditorHost.std.event.isActive;
+          if (!this._editing && this._pageMode === 'page') {
+            this._checkEmpty();
+          }
         })
       );
     }
@@ -450,7 +501,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
   override render() {
     const syncedDoc = this.doc;
-    const { isLoading, isError, isDeleted, isCycle, isEditing } =
+    const { isLoading, isError, isDeleted, isCycle, isEditing, isEmpty } =
       this.blockState;
     const isInSurface = this.isInSurface;
     const pageMode = this.pageMode;
@@ -544,6 +595,13 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
           })}
         >
           ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
+          ${isEmpty && !isEditing && pageMode === 'page'
+            ? html`
+                <div class="synced-block-editor-empty">
+                  <span>This is a linked doc, you can add content here.</span>
+                </div>
+              `
+            : nothing}
         </div>
 
         ${isInSurface && !isEditing

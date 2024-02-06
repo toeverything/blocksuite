@@ -106,7 +106,7 @@ export function getEmbedLinkedDocIcons(
   }
 }
 
-export function renderDoc(
+export function renderDocInCard(
   block: EmbedLinkedDocBlockComponent | SyncedCard,
   doc: Page
 ) {

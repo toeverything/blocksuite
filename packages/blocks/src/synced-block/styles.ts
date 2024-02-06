@@ -57,6 +57,33 @@ export const blockStyles = css`
     width: 100%;
     height: 100%;
     z-index: 1;
+    cursor: pointer;
+  }
+  .synced-block-editor-overlay:hover {
+    background: var(--affine-hover-color);
+  }
+
+  .synced-block-editor-empty {
+    position: absolute;
+    top: 0;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+
+  .synced-block-editor-empty > span {
+    color: var(--affine-placeholder-color);
+    font-feature-settings:
+      'clig' off,
+      'liga' off;
+    font-family: var(--affine-font-family);
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
   }
 
   .affine-synced-container.surface {

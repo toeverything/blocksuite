@@ -5,7 +5,7 @@ import { html, nothing } from 'lit';
 import { customElement, property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { renderDoc } from '../../embed-linked-doc-block/utils.js';
+import { renderDocInCard } from '../../embed-linked-doc-block/utils.js';
 import type { SurfaceRefRenderer } from '../../surface-ref-block/surface-ref-renderer.js';
 import type { SurfaceRefBlockService } from '../../surface-ref-block/surface-ref-service.js';
 import { cardStyles } from '../styles.js';
@@ -108,15 +108,15 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
 
     const syncedDoc = this.doc;
     if (this.isCycle && syncedDoc) {
-      renderDoc(this, syncedDoc);
+      renderDocInCard(this, syncedDoc);
 
       this.disposables.add(
         syncedDoc.workspace.meta.pageMetasUpdated.on(() =>
-          renderDoc(this, syncedDoc)
+          renderDocInCard(this, syncedDoc)
         )
       );
       this.disposables.add(
-        syncedDoc.slots.blockUpdated.on(() => renderDoc(this, syncedDoc))
+        syncedDoc.slots.blockUpdated.on(() => renderDocInCard(this, syncedDoc))
       );
     }
   }

@@ -35,7 +35,7 @@ import type {
 } from './embed-linked-doc-model.js';
 import type { EmbedLinkedDocService } from './embed-linked-doc-service.js';
 import { styles } from './styles.js';
-import { getEmbedLinkedDocIcons, renderDoc } from './utils.js';
+import { getEmbedLinkedDocIcons, renderDocInCard } from './utils.js';
 
 @customElement('affine-embed-linked-doc-block')
 export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
@@ -138,7 +138,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this._loading = false;
 
     if (!this._error) {
-      renderDoc(this, linkedDoc);
+      renderDocInCard(this, linkedDoc);
     }
   }
 
