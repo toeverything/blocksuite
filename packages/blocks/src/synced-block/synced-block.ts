@@ -373,6 +373,12 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     },
   };
 
+  private _handlePointerDown = (event: MouseEvent) => {
+    if (this._editing) {
+      event.stopPropagation();
+    }
+  };
+
   private _handleOverlayDblClick = (event: MouseEvent) => {
     event.stopPropagation();
     const syncedDocEditorHost = this.syncedDocEditorHost;
@@ -586,6 +592,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
           surface: isInSurface,
         })}
         style=${containerStyleMap}
+        @pointerdown=${this._handlePointerDown}
       >
         <div
           class=${classMap({

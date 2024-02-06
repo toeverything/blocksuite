@@ -472,7 +472,7 @@ function isDatabase({ tagName }: Element) {
 }
 
 function isEdgelessChildNote({ classList }: Element) {
-  return classList.contains('edgeless-block-portal-note');
+  return classList.contains('note-background');
 }
 
 function isEdgelessChildImage({ classList }: Element) {

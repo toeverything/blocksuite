@@ -58,6 +58,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   surfaceRefService!: SurfaceRefBlockService;
 
   @property({ attribute: false })
+  isError = false;
+
+  @property({ attribute: false })
   surfaceRefRenderer?: SurfaceRefRenderer;
 
   @state()
@@ -68,9 +71,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   @state()
   private _loading = false;
-
-  @state()
-  private _error = false;
 
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
@@ -101,7 +101,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   private async _load() {
     this._loading = true;
-    this._error = false;
+    this.isError = false;
     this.abstractText = '';
     this.isBannerEmpty = true;
 
@@ -121,13 +121,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           .then(() => resolve())
           .catch(e => {
             console.error(e);
-            this._error = true;
+            this.isError = true;
             resolve();
           });
       });
     }
 
-    if (!this._error && !linkedDoc.root) {
+    if (!this.isError && !linkedDoc.root) {
       await new Promise<void>(resolve => {
         linkedDoc.slots.rootAdded.once(() => {
           resolve();
@@ -137,7 +137,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     this._loading = false;
 
-    if (!this._error) {
+    if (!this.isError) {
       renderDocInCard(this, linkedDoc);
     }
   }
@@ -242,7 +242,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   refreshData = () => {
     this._load().catch(e => {
       console.error(e);
-      this._error = true;
+      this.isError = true;
     });
   };
 
@@ -283,22 +283,40 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     this._load().catch(e => {
       console.error(e);
-      this._error = true;
+      this.isError = true;
     });
 
     const linkedDoc = this.doc;
     if (linkedDoc) {
       this.disposables.add(
-        linkedDoc.workspace.meta.pageMetasUpdated.on(() => this._load())
+        linkedDoc.workspace.meta.pageMetasUpdated.on(() => {
+          this._load().catch(e => {
+            console.error(e);
+            this.isError = true;
+          });
+        })
       );
-      this.disposables.add(linkedDoc.slots.blockUpdated.on(() => this._load()));
+      this.disposables.add(
+        linkedDoc.slots.blockUpdated.on(payload => {
+          if (
+            payload.type === 'update' &&
+            ['xywh', 'caption', ''].includes(payload.props.key)
+          ) {
+            return;
+          }
+          this._load().catch(e => {
+            console.error(e);
+            this.isError = true;
+          });
+        })
+      );
     }
 
     this.model.propsUpdated.on(({ key }) => {
       if (key === 'pageId') {
         this._load().catch(e => {
           console.error(e);
-          this._error = true;
+          this.isError = true;
         });
       }
     });

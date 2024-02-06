@@ -173,11 +173,17 @@ function prepareSurfaceRefRenderer(
     doc
   );
 
-  block.surfaceRefRenderer.slots.mounted.on(async () => {
+  block.surfaceRefRenderer.slots.mounted.on(() => {
     if (block.pageMode === 'edgeless') {
-      await renderEdgelessAbstract(block);
+      renderEdgelessAbstract(block).catch(e => {
+        console.error(e);
+        block.isError = true;
+      });
     } else {
-      await renderPageAbstract(block);
+      renderPageAbstract(block).catch(e => {
+        console.error(e);
+        block.isError = true;
+      });
     }
   });
   block.surfaceRefRenderer.mount();

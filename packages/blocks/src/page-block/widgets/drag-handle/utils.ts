@@ -31,6 +31,7 @@ import {
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST,
   type DropResult,
   type DropType,
+  EDGELESS_NOTE_EXTRA_PADDING,
   NOTE_CONTAINER_PADDING,
   type OnDragEndProps,
 } from './config.js';
@@ -132,9 +133,13 @@ export const isOutOfNoteBlock = (
 ) => {
   // TODO: need to find a better way to check if the point is out of note block
   const rect = noteBlock.getBoundingClientRect();
-  const padding = NOTE_CONTAINER_PADDING * scale;
+  const insideDocEditor = isInsideDocEditor(editorHost);
+  const padding =
+    (NOTE_CONTAINER_PADDING +
+      (insideDocEditor ? 0 : EDGELESS_NOTE_EXTRA_PADDING)) *
+    scale;
   return rect
-    ? isInsideDocEditor(editorHost)
+    ? insideDocEditor
       ? point.y < rect.top ||
         point.y > rect.bottom ||
         point.x > rect.right + padding
@@ -152,7 +157,9 @@ export const getClosestNoteBlock = (
 ) => {
   return isInsideDocEditor(editorHost)
     ? findClosestBlockElement(pageBlock, point, 'affine-note')
-    : getHoveringNote(point)?.querySelector('affine-note');
+    : getHoveringNote(point)
+        ?.closest('edgeless-block-portal-note')
+        ?.querySelector('affine-note');
 };
 
 export const getClosestBlockByPoint = (

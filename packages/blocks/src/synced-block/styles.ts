@@ -74,6 +74,13 @@ export const blockStyles = css`
     z-index: -1;
   }
 
+  .affine-synced-container.surface
+    > .synced-block-editor
+    > .synced-block-editor-empty {
+    left: 0;
+    justify-content: center;
+  }
+
   .synced-block-editor-empty > span {
     color: var(--affine-placeholder-color);
     font-feature-settings:

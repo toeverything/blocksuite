@@ -111,12 +111,20 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
       renderDocInCard(this, syncedDoc);
 
       this.disposables.add(
-        syncedDoc.workspace.meta.pageMetasUpdated.on(() =>
-          renderDocInCard(this, syncedDoc)
-        )
+        syncedDoc.workspace.meta.pageMetasUpdated.on(() => {
+          renderDocInCard(this, syncedDoc);
+        })
       );
       this.disposables.add(
-        syncedDoc.slots.blockUpdated.on(() => renderDocInCard(this, syncedDoc))
+        syncedDoc.slots.blockUpdated.on(payload => {
+          if (
+            payload.type === 'update' &&
+            ['xywh', 'caption', ''].includes(payload.props.key)
+          ) {
+            return;
+          }
+          renderDocInCard(this, syncedDoc);
+        })
       );
     }
   }
