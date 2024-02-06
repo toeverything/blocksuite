@@ -108,7 +108,13 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
 
     const syncedDoc = this.doc;
     if (this.isCycle && syncedDoc) {
-      renderDocInCard(this, syncedDoc);
+      if (syncedDoc.root) {
+        renderDocInCard(this, syncedDoc);
+      } else {
+        syncedDoc.slots.rootAdded.once(() => {
+          renderDocInCard(this, syncedDoc);
+        });
+      }
 
       this.disposables.add(
         syncedDoc.workspace.meta.pageMetasUpdated.on(() => {

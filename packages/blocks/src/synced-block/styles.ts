@@ -253,6 +253,7 @@ export const cardStyles = css`
     max-width: 100%;
     height: 102px;
     opacity: var(--add, 1);
+    pointer-events: none;
   }
   .affine-synced-card-banner.render {
     display: none;

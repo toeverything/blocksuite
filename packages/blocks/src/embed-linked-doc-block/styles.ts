@@ -119,6 +119,7 @@ export const styles = css`
     max-width: 100%;
     height: 102px;
     opacity: var(--add, 1);
+    pointer-events: none;
   }
   .affine-embed-linked-doc-banner img,
   .affine-embed-linked-doc-banner object,
