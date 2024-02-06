@@ -1,33 +1,23 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { css, html, LitElement, unsafeCSS } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 import {
   MinusIcon,
   PlusIcon,
   ViewBarIcon,
-} from '../../../../_common/icons/index.js';
-import {
-  type EdgelessTool,
-  stopPropagation,
-} from '../../../../_common/utils/index.js';
-import { ZOOM_STEP } from '../../../../surface-block/index.js';
-import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-
-export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
+} from '../../../_common/icons/edgeless.js';
+import type { EdgelessTool } from '../../../_common/types.js';
+import { stopPropagation } from '../../../_common/utils/event.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless/edgeless-page-block.js';
+import { ZOOM_STEP } from '../../edgeless/utils/viewport.js';
 
 @customElement('edgeless-zoom-toolbar')
 export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      position: absolute;
-      bottom: 20px;
-      left: 12px;
-      z-index: var(--affine-z-index-popover);
       display: flex;
-      justify-content: center;
-      user-select: none;
     }
 
     .edgeless-zoom-toolbar-container {
@@ -36,6 +26,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       background: transparent;
       border-radius: 8px;
       fill: currentcolor;
+      padding: 4px;
     }
 
     .edgeless-zoom-toolbar-container.horizantal {
@@ -64,10 +55,10 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     .zoom-percent {
       display: block;
       box-sizing: border-box;
-      width: 48px;
-      height: 32px;
+      width: 40px;
+      height: 30px;
       line-height: 22px;
-      padding: 5px;
+      padding: 4px;
       border-radius: 4px;
       font-size: 12px;
       font-weight: 500;
@@ -82,9 +73,6 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       background-color: var(--affine-hover-color);
     }
   `;
-
-  @state()
-  private _hide = false;
 
   @property({ attribute: false })
   layout: 'horizontal' | 'vertical' = 'horizontal';
@@ -122,36 +110,17 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   };
 
   override firstUpdated() {
-    const {
-      _disposables,
-      edgeless: { slots },
-    } = this;
-    _disposables.add(
-      slots.edgelessToolUpdated.on(tool => {
-        if (tool.type !== 'frameNavigator') {
-          this._hide = false;
-        }
-        this.requestUpdate();
-      })
-    );
-    _disposables.add(
+    const { disposables } = this;
+    disposables.add(
       this.edgeless.service.viewport.viewportUpdated.on(() =>
         this.requestUpdate()
       )
-    );
-    _disposables.add(
-      slots.navigatorSettingUpdated.on(({ hideToolbar }) => {
-        if (hideToolbar !== undefined) {
-          this._hide = hideToolbar;
-        }
-      })
     );
   }
 
   override render() {
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
     const classes = `edgeless-zoom-toolbar-container ${this.layout}`;
-    if (this._hide) return nothing;
 
     return html`
       <div
@@ -166,6 +135,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top-end'}
           .arrow=${!this._isVerticalBar()}
           @click=${() => this.edgelessService.zoomToFit()}
+          .iconContainerPadding=${4}
         >
           ${ViewBarIcon}
         </edgeless-tool-icon-button>
@@ -174,6 +144,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
           .arrow=${!this._isVerticalBar()}
           @click=${() => this.edgelessService.setZoomByStep(-ZOOM_STEP)}
+          .iconContainerPadding=${4}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -185,6 +156,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
           .arrow=${!this._isVerticalBar()}
           @click=${() => this.edgelessService.setZoomByStep(ZOOM_STEP)}
+          .iconContainerPadding=${4}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

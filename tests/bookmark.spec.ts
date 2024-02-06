@@ -258,6 +258,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await waitNextFrame(page);
   await type(page, '/links');
   await pressEnter(page);
+  await waitNextFrame(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await pressEnter(page);
   await assertStoreMatchJSX(

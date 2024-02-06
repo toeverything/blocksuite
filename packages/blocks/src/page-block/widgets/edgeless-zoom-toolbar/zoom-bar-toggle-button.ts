@@ -3,9 +3,9 @@ import { computePosition } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { MoreIcon } from '../../../../_common/icons/index.js';
-import { stopPropagation } from '../../../../_common/utils/index.js';
-import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { MoreIcon } from '../../../_common/icons/edgeless.js';
+import { stopPropagation } from '../../../_common/utils/event.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless/edgeless-page-block.js';
 import { EdgelessZoomToolbar } from './zoom-toolbar.js';
 
 interface ZoomBarPopper {
@@ -46,9 +46,6 @@ export class ZoomBarToggleButton extends LitElement {
   static override styles = css`
     :host {
       display: flex;
-      position: absolute;
-      bottom: 20px;
-      left: 12px;
     }
     .toggle-button {
       display: flex;
@@ -83,11 +80,6 @@ export class ZoomBarToggleButton extends LitElement {
       this._zoomBar.element.edgeless = this.edgeless;
       this._showPopper = true;
     }
-  }
-
-  constructor(edgeless: EdgelessPageBlockComponent) {
-    super();
-    this.edgeless = edgeless;
   }
 
   override connectedCallback() {

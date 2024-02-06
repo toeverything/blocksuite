@@ -20,7 +20,6 @@ import type { ReorderingDirection } from '../../surface-block/managers/layer-man
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
-import type { ZoomAction } from './components/zoom/zoom-toolbar.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
@@ -46,6 +45,7 @@ import {
   ZOOM_MAX,
   ZOOM_MIN,
   ZOOM_STEP,
+  type ZoomAction,
 } from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {

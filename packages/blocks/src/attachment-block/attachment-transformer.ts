@@ -21,7 +21,8 @@ export class AttachmentBlockTransformer extends BaseBlockTransformer<AttachmentB
   ): Promise<SnapshotReturn<AttachmentBlockProps>> {
     const snapshotRet = await super.fromSnapshot(payload);
     const sourceId = snapshotRet.props.sourceId;
-    if (sourceId) await payload.assets.writeToBlob(sourceId);
+    if (!payload.assets.isEmpty() && sourceId)
+      await payload.assets.writeToBlob(sourceId);
 
     return snapshotRet;
   }

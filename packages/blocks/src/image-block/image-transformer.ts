@@ -21,7 +21,7 @@ export class ImageBlockTransformer extends BaseBlockTransformer<ImageBlockProps>
   ): Promise<SnapshotReturn<ImageBlockProps>> {
     const snapshotRet = await super.fromSnapshot(payload);
     const sourceId = snapshotRet.props.sourceId;
-    if (sourceId && !sourceId.startsWith('/'))
+    if (!payload.assets.isEmpty() && sourceId && !sourceId.startsWith('/'))
       await payload.assets.writeToBlob(sourceId);
 
     return snapshotRet;
