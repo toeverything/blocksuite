@@ -8,23 +8,23 @@ titleTemplate: Content Editing Tech Stack
 hero:
   name: BlockSuite
   text: Content Editing Tech Stack for the Web
-  tagline: BlockSuite is a toolkit for building diverse collaborative editors and applications.
+  tagline: BlockSuite is a toolkit for building editors and collaborative applications.
   actions:
     - theme: brand
       text: Get Started
       link: /guide/overview
     - theme: alt
-      text: View on GitHub
-      link: https://github.com/toeverything/blocksuite
+      text: Explore Components
+      link: /components/overview
 
 features:
   - title: 🧩 Headless Editor Framework
-    details: BlockSuite creates a vallina framework for building various editors, enabling the design of diverse editing interfaces.
+    details: BlockSuite provides a vallina framework for building various editors, enabling the design of diverse editing interfaces.
     link: /guide/overview
     linkText: Learn More
   - title: 🎨 Extensive Components
     details: Based on the framework, BlockSuite ships components for building complex editor UIs, which are highly interoperable.
-    link: /guide/component-types
+    link: /components/overview
     linkText: Learn More
   - title: 🧬 Collaborative at Core
     details: Natively powered by CRDT, BlockSuite supports document streaming and conflict resolution at its heart, ready for collaboration inherently.

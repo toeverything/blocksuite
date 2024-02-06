@@ -122,7 +122,16 @@ export const reference: DefaultTheme.NavItem[] = [
 ];
 
 export const components: DefaultTheme.NavItem[] = [
-  { text: 'Component Types', link: 'guide/component-types' },
+  {
+    text: 'Introduction',
+    items: [
+      { text: 'Overview', link: 'components/overview' },
+      {
+        text: 'AFFiNE Integration',
+        link: 'components/overview#affine-integration',
+      },
+    ],
+  },
   {
     text: 'Editors',
     items: [
@@ -146,7 +155,7 @@ export const components: DefaultTheme.NavItem[] = [
         ],
       },
       {
-        text: 'Special Blocks',
+        text: 'Advanced Blocks',
         items: [
           { text: 'Surface Block', link: '' },
           { text: 'Database Block', link: '' },
@@ -169,8 +178,8 @@ export const components: DefaultTheme.NavItem[] = [
     text: 'Fragments 🚧',
     items: [
       { text: 'Doc Title', link: '' },
-      { text: 'Frame Panel', link: '' },
       { text: 'Outline Panel', link: '' },
+      { text: 'Frame Panel', link: '' },
       { text: 'Copilot Panel', link: '' },
       { text: 'Bi-Directional Link Panel', link: '' },
     ],
