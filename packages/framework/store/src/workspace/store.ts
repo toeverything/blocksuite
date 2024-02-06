@@ -1,3 +1,11 @@
+import { type Logger, NoopLogger } from '@blocksuite/global/utils';
+import {
+  AwarenessEngine,
+  type AwarenessProvider,
+  SyncEngine,
+  type SyncStorage,
+} from '@blocksuite/sync';
+import { MemorySyncStorage } from '@blocksuite/sync/impl/memory.js';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
@@ -44,10 +52,15 @@ export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
   id?: string;
-  awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator | IdGenerator;
   defaultFlags?: Partial<Flags>;
   blobStorages?: ((id: string) => BlobStorage)[];
+  logger?: Logger;
+  sync?: {
+    main: SyncStorage;
+    shared?: SyncStorage[];
+  };
+  awareness?: AwarenessProvider[];
 }
 
 const FLAGS_PRESET = {
@@ -61,11 +74,22 @@ export class Store {
   readonly id: string;
   readonly doc: BlockSuiteDoc;
   readonly spaces = new Map<string, Space>();
+  readonly awareness: AwarenessEngine;
   readonly awarenessStore: AwarenessStore;
+  readonly sync: SyncEngine;
   readonly idGenerator: IdGenerator;
 
   constructor(
-    { id, awareness, idGenerator, defaultFlags }: StoreOptions = {
+    {
+      id,
+      idGenerator,
+      defaultFlags,
+      awareness: awarenessProviders = [],
+      sync = {
+        main: new MemorySyncStorage(),
+      },
+      logger = new NoopLogger(),
+    }: StoreOptions = {
       id: nanoid(),
     }
   ) {
@@ -73,9 +97,14 @@ export class Store {
     this.doc = new BlockSuiteDoc({ guid: id });
     this.awarenessStore = new AwarenessStore(
       this,
-      awareness ?? new Awareness<RawAwarenessState>(this.doc),
+      new Awareness<RawAwarenessState>(this.doc),
       merge(true, FLAGS_PRESET, defaultFlags)
     );
+    this.awareness = new AwarenessEngine(
+      this.awarenessStore.awareness,
+      awarenessProviders
+    );
+    this.sync = new SyncEngine(this.doc, sync.main, sync.shared ?? [], logger);
 
     if (typeof idGenerator === 'function') {
       this.idGenerator = idGenerator;

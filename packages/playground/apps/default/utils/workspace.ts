@@ -10,13 +10,15 @@ import {
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
-import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
+import { BroadcastChannelAwarenessProvider } from '@blocksuite/sync/impl/broadcast.js';
+import { IndexedDBSyncStorage } from '@blocksuite/sync/impl/indexeddb.js';
 
-import { setupWebsocketProvider } from '../../providers/websocket-channel.js';
+import { ChannelPeer } from '../../sync/channel.js';
+import { setupWebsocketChannel } from '../../sync/websocket-channel.js';
 
 export const INDEXED_DB_NAME = 'PLAYGROUND_DB';
 
-export function createDefaultPageWorkspace() {
+export async function createDefaultPageWorkspace() {
   const blobStorages: ((id: string) => BlobStorage)[] = [
     createIndexeddbStorage,
   ];
@@ -24,16 +26,32 @@ export function createDefaultPageWorkspace() {
   const schema = new Schema();
   schema.register(AffineSchemas).register(__unstableSchemas);
 
+  const params = new URLSearchParams(location.search);
+
+  let websocketChannel;
+  if (params.get('room')) {
+    websocketChannel = new ChannelPeer(
+      await setupWebsocketChannel(params.get('room') as string)
+    );
+  }
+
   const options: WorkspaceOptions = {
     id: 'quickEdgeless',
     schema,
     idGenerator,
     blobStorages,
+    sync: {
+      main: new IndexedDBSyncStorage(),
+      shared: websocketChannel ? [websocketChannel] : [],
+    },
+    awareness: [new BroadcastChannelAwarenessProvider()],
     defaultFlags: {
       enable_bultin_ledits: true,
     },
   };
   const workspace = new Workspace(options);
+
+  workspace.start();
 
   // debug info
   window.workspace = workspace;
@@ -45,28 +63,18 @@ export function createDefaultPageWorkspace() {
 }
 
 export async function initDefaultPageWorkspace(workspace: Workspace) {
-  const databaseExists = await testDefaultPageIDBExistence();
   const params = new URLSearchParams(location.search);
 
-  const indexedDBProvider = createIndexedDBProvider(
-    workspace.doc,
-    INDEXED_DB_NAME
-  );
-  indexedDBProvider.connect();
+  await workspace.waitForSynced();
 
-  if (params.get('room')) {
-    await setupWebsocketProvider(workspace, params.get('room') as string);
-  }
-
-  const shouldInit = !databaseExists && !params.get('room');
+  const shouldInit = workspace.pages.size === 0 && !params.get('room');
   if (shouldInit) {
     const page = workspace.createPage({ id: 'page:home' });
-    await page.load(() => {
-      const pageBlockId = page.addBlock('affine:page', {
-        title: new Text(),
-      });
-      page.addBlock('affine:surface', {}, pageBlockId);
+    page.load();
+    const pageBlockId = page.addBlock('affine:page', {
+      title: new Text(),
     });
+    page.addBlock('affine:surface', {}, pageBlockId);
     page.resetHistory();
   } else {
     // wait for data injected from provider
@@ -78,67 +86,11 @@ export async function initDefaultPageWorkspace(workspace: Workspace) {
           );
     const page = workspace.getPage(firstPageId);
     assertExists(page);
-
-    // handle migration
-    const oldMeta = localStorage.getItem('meta');
-    const oldPageVersion = oldMeta ? JSON.parse(oldMeta).pageVersion : 0;
-    const oldBlockVersions = oldMeta
-      ? { ...JSON.parse(oldMeta).blockVersions }
-      : {};
-
-    let run = true;
-    const runWorkspaceMigration = () => {
-      if (run) {
-        workspace.schema.upgradeWorkspace(workspace.doc);
-        const meta = workspace.doc.toJSON().meta;
-        localStorage.setItem('meta', JSON.stringify(meta));
-        run = false;
-      }
-    };
-
-    await page.load().catch(e => {
-      const isValidateError =
-        e instanceof Error && e.message.includes('outdated');
-      if (isValidateError) {
-        page.spaceDoc.once('update', () => {
-          workspace.schema.upgradePage(
-            oldPageVersion,
-            oldBlockVersions,
-            page.spaceDoc
-          );
-          workspace.meta.updateVersion(workspace);
-          page.load().catch(console.error);
-        });
-        return;
-      }
-      throw e;
-    });
-    page.spaceDoc.once('update', () => {
-      runWorkspaceMigration();
-    });
-    // finish migration
-
+    page.load();
     // wait for data injected from provider
     if (!page.root) {
       await new Promise(resolve => page.slots.rootAdded.once(resolve));
     }
     page.resetHistory();
   }
-}
-
-async function testDefaultPageIDBExistence() {
-  return new Promise<boolean>(resolve => {
-    const req = indexedDB.open(INDEXED_DB_NAME);
-    let existed = true;
-    req.onsuccess = function () {
-      req.result.close();
-      if (!existed) {
-        indexedDB.deleteDatabase(INDEXED_DB_NAME);
-      }
-      resolve(existed);
-    };
-    req.onupgradeneeded = function () {
-      existed = false;
-    };
-  });
 }

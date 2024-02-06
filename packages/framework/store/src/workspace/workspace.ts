@@ -57,6 +57,10 @@ export class Workspace extends WorkspaceAddonType {
     return flag;
   }
 
+  get store(): Store {
+    return this._store;
+  }
+
   get awarenessStore(): AwarenessStore {
     return this._store.awarenessStore;
   }
@@ -161,5 +165,41 @@ export class Workspace extends WorkspaceAddonType {
     page.dispose();
     this.meta.removePageMeta(pageId);
     this._store.removeSpace(page);
+  }
+
+  /**
+   * Start the data sync process
+   */
+  start() {
+    this.store.sync.start();
+    this.store.awareness.connect();
+  }
+
+  /**
+   * Verify that all data has been successfully saved to the primary storage.
+   * Return true if the data transfer is complete and it is secure to terminate the synchronization operation.
+   */
+  canGracefulStop() {
+    this.store.sync.canGracefulStop();
+  }
+
+  /**
+   * Wait for all data has been successfully saved to the primary storage.
+   */
+  waitForGracefulStop(abort?: AbortSignal) {
+    return this.store.sync.waitForGracefulStop(abort);
+  }
+
+  /**
+   * Terminate the data sync process forcefully, which may cause data loss.
+   * It is advised to invoke `canGracefulStop` before calling this method.
+   */
+  forceStop() {
+    this.store.sync.forceStop();
+    this.store.awareness.disconnect();
+  }
+
+  waitForSynced() {
+    return this.store.sync.waitForSynced();
   }
 }

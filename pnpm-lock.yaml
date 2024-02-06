@@ -381,6 +381,9 @@ importers:
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../inline
+      '@blocksuite/sync':
+        specifier: workspace:*
+        version: link:../sync
       '@types/flexsearch':
         specifier: ^0.7.6
         version: 0.7.6
@@ -419,6 +422,21 @@ importers:
         specifier: ^13.6.11
         version: 13.6.11
 
+  packages/framework/sync:
+    dependencies:
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../global
+      idb:
+        specifier: ^8.0.0
+        version: 8.0.0
+      y-protocols:
+        specifier: ^1.0.6
+        version: 1.0.6(yjs@13.6.11)
+      yjs:
+        specifier: ^13
+        version: 13.6.11
+
   packages/playground:
     dependencies:
       '@blocksuite/blocks':
@@ -439,6 +457,9 @@ importers:
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
+      '@blocksuite/sync':
+        specifier: workspace:*
+        version: link:../framework/sync
       '@shoelace-style/shoelace':
         specifier: 2.12.0
         version: 2.12.0(@types/react@18.2.48)
@@ -4633,6 +4654,10 @@ packages:
 
   /idb@7.1.1:
     resolution: {integrity: sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ==}
+    dev: false
+
+  /idb@8.0.0:
+    resolution: {integrity: sha512-l//qvlAKGmQO31Qn7xdzagVPPaHTxXx199MhrAFuVBTPqydcPYBWjkrbv4Y0ktB+GmWOiwHl237UUOrLmQxLvw==}
     dev: false
 
   /ieee754@1.2.1:

@@ -6,8 +6,9 @@ import * as blocks from '@blocksuite/blocks';
 import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import * as store from '@blocksuite/store';
+import { IndexedDBSyncStorage } from '@blocksuite/sync/impl/indexeddb.js';
+import { MemorySyncStorage } from '@blocksuite/sync/impl/memory.js';
 
-import { setupBroadcastProvider } from '../providers/broadcast-channel.js';
 import { mountDefaultPageEditor } from './utils/editor.js';
 import {
   createStarterPageWorkspace,
@@ -21,7 +22,9 @@ async function main() {
   const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
   const isE2E = room.startsWith('playwright');
 
-  const workspace = createStarterPageWorkspace();
+  const workspace = createStarterPageWorkspace(
+    isE2E ? new IndexedDBSyncStorage() : new MemorySyncStorage()
+  );
 
   if (isE2E) {
     Object.defineProperty(window, '$blocksuite', {
@@ -32,7 +35,6 @@ async function main() {
         editor,
       }),
     });
-    setupBroadcastProvider(workspace);
     return;
   }
 

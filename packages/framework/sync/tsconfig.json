@@ -5,16 +5,10 @@
     "outDir": "./dist/",
     "noEmit": false,
   },
-  "include": ["./src"],
+  "include": ["./src", "index.d.ts"],
   "references": [
     {
       "path": "../global",
-    },
-    {
-      "path": "../sync",
-    },
-    {
-      "path": "../inline",
     },
   ],
 }

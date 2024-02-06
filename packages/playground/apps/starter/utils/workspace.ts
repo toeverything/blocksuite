@@ -15,6 +15,8 @@ import {
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
+import type { SyncStorage } from '@blocksuite/sync';
+import { BroadcastChannelAwarenessProvider } from '@blocksuite/sync/impl/broadcast.js';
 
 import { setupBroadcastProvider } from '../../providers/broadcast-channel.js';
 import type { InitFn } from '../data/utils.js';
@@ -25,7 +27,7 @@ const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 const isE2E = room.startsWith('playwright');
 
-export function createStarterPageWorkspace() {
+export function createStarterPageWorkspace(sync: SyncStorage) {
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   if (blobStorageArgs.includes('memory')) {
     blobStorages.push(createMemoryStorage);
@@ -49,8 +51,14 @@ export function createStarterPageWorkspace() {
     defaultFlags: {
       enable_bultin_ledits: featureArgs.includes('ledits'),
     },
+    awareness: [new BroadcastChannelAwarenessProvider()],
+    sync: {
+      main: sync,
+    },
   };
   const workspace = new Workspace(options);
+
+  workspace.start();
 
   // debug info
   window.workspace = workspace;
@@ -95,7 +103,7 @@ export async function initStarterPageWorkspace(workspace: Workspace) {
     await functionMap.get(init)?.(workspace, 'page:home');
     const page = workspace.getPage('page:home');
     if (!page?.loaded) {
-      await page?.load();
+      page?.load();
     }
     page?.resetHistory();
   }

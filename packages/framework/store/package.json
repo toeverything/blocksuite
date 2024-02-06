@@ -17,6 +17,7 @@
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
+    "@blocksuite/sync": "workspace:*",
     "@types/flexsearch": "^0.7.6",
     "flexsearch": "0.7.43",
     "idb-keyval": "^6.2.1",

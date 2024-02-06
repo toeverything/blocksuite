@@ -114,15 +114,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     if (linkedDoc.loaded) {
       onLoad();
     } else {
-      linkedDoc
-        .load()
-        .then(() => onLoad())
-        .catch(e => {
-          console.error(
-            `An error occurred while loading page: ${this.model.pageId}`
-          );
-          console.error(e);
-        });
+      linkedDoc.load();
+      onLoad();
     }
   }
 

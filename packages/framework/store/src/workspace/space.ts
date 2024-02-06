@@ -54,20 +54,8 @@ export class Space<
     return this._ySpaceDoc;
   }
 
-  async load() {
-    if (this.loaded) {
-      return this;
-    }
-
-    const promise = new Promise(resolve => {
-      this._onLoadSlot.once(() => {
-        resolve(undefined);
-      });
-    });
-
+  load() {
     this._ySpaceDoc.load();
-
-    await promise;
 
     return this;
   }
