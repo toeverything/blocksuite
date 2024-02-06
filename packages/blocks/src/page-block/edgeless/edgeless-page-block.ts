@@ -113,7 +113,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
       top: 0;
       contain: size layout;
       z-index: 1;
-      width: 100%;
       height: 100%;
     }
 
