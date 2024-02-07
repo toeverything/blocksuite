@@ -23,6 +23,7 @@ export {
   popTagSelect,
   RichText,
   scrollbarStyle,
+  toast
 } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {

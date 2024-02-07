@@ -20,6 +20,7 @@ import type { AffineTextAttributes } from '@blocksuite/blocks';
 import {
   ColorVariables,
   extractCssVariables,
+  toast,
   type PageService,
 } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
@@ -161,21 +162,33 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.pageService.exportManager.exportPdf().catch(console.error);
+    this.pageService.exportManager.exportPdf().catch((error: Error) => {
+      toast(this.editor.host, 'Export PDF Failed!');
+      console.error(error);
+    });
   }
 
   private _exportHtml() {
     const htmlTransformer = this.pageService.transformers.html;
-    htmlTransformer.exportPage(this.page).catch(console.error);
+    htmlTransformer.exportPage(this.page).catch((error: Error) => {
+      toast(this.editor.host, 'Export HTML Failed!');
+      console.error(error);
+    });
   }
 
   private _exportMarkDown() {
     const markdownTransformer = this.pageService.transformers.markdown;
-    markdownTransformer.exportPage(this.page).catch(console.error);
+    markdownTransformer.exportPage(this.page).catch((error: Error) => {
+      toast(this.editor.host, 'Export MarkDown Failed!');
+      console.error(error);
+    });
   }
 
   private _exportPng() {
-    this.pageService.exportManager.exportPng().catch(console.error);
+    this.pageService.exportManager.exportPng().catch((error: Error) => {
+      toast(this.editor.host, 'Export PNG Failed!');
+      console.error(error);
+    });
   }
 
   private async _exportSnapshot() {

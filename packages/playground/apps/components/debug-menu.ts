@@ -33,6 +33,7 @@ import {
   StyleVariables,
   type SurfaceBlockComponent,
   ZipTransformer,
+  toast,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
@@ -381,19 +382,32 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.pageService.exportManager.exportPdf().catch(console.error);
+    this.pageService.exportManager.exportPdf().catch((error: Error) => {
+      toast(this.editor.host, 'Export PDF Failed!');
+      console.error(error);
+    });
   }
 
   private _exportHtml() {
-    HtmlTransformer.exportPage(this.page).catch(console.error);
+    HtmlTransformer.exportPage(this.page).catch((error: Error) => {
+      toast(this.editor.host, 'Export HTML Failed!');
+      console.error(error);
+    });
   }
 
   private async _exportMarkDown() {
-    MarkdownTransformer.exportPage(this.page).catch(console.error);
+    MarkdownTransformer.exportPage(this.page).catch((error: Error) => {
+      toast(this.editor.host, 'Export MarkDown Failed!');
+      console.error(error);
+    });
   }
 
   private _exportPng() {
-    this.pageService.exportManager.exportPng().catch(console.error);
+    toast(this.editor.host, 'Export PNG Failed!');
+    // this.pageService.exportManager.exportPng().catch((error: Error) => {
+    //   toast(this.editor.host, 'Export PNG Failed!');
+    //   console.error(error);
+    // });
   }
 
   private async _exportSnapshot() {
