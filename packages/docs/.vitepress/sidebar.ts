@@ -122,12 +122,15 @@ export const reference: DefaultTheme.NavItem[] = [
 ];
 
 export const components: DefaultTheme.NavItem[] = [
-  { text: 'Component Types', link: 'guide/component-types' },
+  {
+    text: 'Introduction',
+    items: [{ text: 'Overview', link: 'components/overview' }],
+  },
   {
     text: 'Editors',
     items: [
-      { text: '📝 DocEditor', link: 'components/doc-editor' },
-      { text: '🎨 EdgelessEditor', link: 'components/edgeless-editor' },
+      { text: '📝 DocEditor', link: 'components/editors/doc-editor' },
+      { text: '🎨 EdgelessEditor', link: 'components/editors/edgeless-editor' },
     ],
   },
   {
@@ -136,23 +139,32 @@ export const components: DefaultTheme.NavItem[] = [
       {
         text: 'Regular Blocks',
         items: [
-          { text: 'Page Block', link: '' },
-          { text: 'Note Block', link: '' },
-          { text: 'Paragraph Block', link: '' },
-          { text: 'List Block', link: '' },
-          { text: 'Code Block', link: '' },
-          { text: 'Image Block', link: '' },
-          { text: 'Attachment Block', link: '' },
+          { text: 'Page Block', link: 'components/blocks/page-block' },
+          { text: 'Note Block', link: 'components/blocks/note-block' },
+          {
+            text: 'Paragraph Block',
+            link: 'components/blocks/paragraph-block',
+          },
+          { text: 'List Block', link: 'components/blocks/list-block' },
+          { text: 'Code Block', link: 'components/blocks/code-block' },
+          { text: 'Image Block', link: 'components/blocks/image-block' },
+          {
+            text: 'Attachment Block',
+            link: 'components/blocks/attachment-block',
+          },
         ],
       },
       {
-        text: 'Special Blocks',
+        text: 'Advanced Blocks',
         items: [
-          { text: 'Surface Block', link: '' },
-          { text: 'Database Block', link: '' },
-          { text: 'Frame Block', link: '' },
-          { text: 'Link Blocks', link: '' },
-          { text: 'Embed Blocks', link: '' },
+          { text: 'Surface Block', link: 'components/blocks/surface-block' },
+          {
+            text: 'Database Block',
+            link: 'components/blocks/database-block',
+          },
+          { text: 'Frame Block', link: 'components/blocks/frame-block' },
+          { text: 'Link Blocks', link: 'components/blocks/link-blocks' },
+          { text: 'Embed Blocks', link: 'components/blocks/embed-blocks' },
         ],
       },
     ],
@@ -160,19 +172,22 @@ export const components: DefaultTheme.NavItem[] = [
   {
     text: 'Widgets 🚧',
     items: [
-      { text: 'Slash Menu', link: '' },
-      { text: 'Format Bar', link: '' },
-      { text: 'Drag Handle', link: '' },
+      { text: 'Slash Menu', link: 'components/widgets/slash-menu' },
+      { text: 'Format Bar', link: 'components/widgets/format-bar' },
+      { text: 'Drag Handle', link: 'components/widgets/drag-handle' },
     ],
   },
   {
     text: 'Fragments 🚧',
     items: [
-      { text: 'Doc Title', link: '' },
-      { text: 'Frame Panel', link: '' },
-      { text: 'Outline Panel', link: '' },
-      { text: 'Copilot Panel', link: '' },
-      { text: 'Bi-Directional Link Panel', link: '' },
+      { text: 'Doc Title', link: 'components/fragments/doc-title' },
+      { text: 'Outline Panel', link: 'components/fragments/outline-panel' },
+      { text: 'Frame Panel', link: 'components/fragments/frame-panel' },
+      { text: 'Copilot Panel', link: 'components/fragments/copilot-panel' },
+      {
+        text: 'Bi-Directional Link Panel',
+        link: 'components/fragments/bi-directional-link-panel',
+      },
     ],
   },
 ];

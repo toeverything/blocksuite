@@ -89,7 +89,6 @@ export type {
   TemplateCategory,
   TemplateManager,
 } from './page-block/edgeless/components/toolbar/template/template-type.js';
-export { EdgelessPageService } from './page-block/edgeless/edgeless-page-service.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export {

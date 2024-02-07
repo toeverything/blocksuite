@@ -1,10 +1,12 @@
 import './commands/index.js';
 
 export * from './doc/doc-page-block.js';
+export { DocPageService } from './doc/doc-page-service.js';
 export { getAllowSelectedBlocks } from './doc/utils.js';
 export { FramePreview } from './edgeless/components/frame/frame-preview.js';
 export { createButtonPopper } from './edgeless/components/utils.js';
 export * from './edgeless/edgeless-page-block.js';
+export { EdgelessPageService } from './edgeless/edgeless-page-service.js';
 export { EdgelessBlockModel as EdgelessBlock } from './edgeless/type.js';
 export { Viewport } from './edgeless/utils/viewport.js';
 export { type PageBlockModel, PageBlockSchema } from './page-model.js';
