@@ -642,6 +642,20 @@ export class EdgelessPageBlockComponent extends BlockElement<
       })
     );
 
+    this._disposables.add(
+      this.std.event.slots.parentScaleChanged.on(() => {
+        this.service.viewport.setCumulativeParentScale(
+          this.std.event.cumulativeParentScale
+        );
+      })
+    );
+
+    this._disposables.add(
+      this.std.event.slots.editorHostPanned.on(() => {
+        this.service.viewport.onResize();
+      })
+    );
+
     if (this.pageBlockContainer.isUpdatePending) {
       this.pageBlockContainer.updateComplete
         .then(() => appendIndexedCanvasToPortal())
@@ -697,6 +711,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initViewport() {
     this.service.viewport.setContainer(this);
+    this.service.viewport.setCumulativeParentScale(
+      this.std.event.cumulativeParentScale
+    );
 
     const run = () => {
       const viewport =

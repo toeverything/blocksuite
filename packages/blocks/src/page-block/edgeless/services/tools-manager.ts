@@ -317,6 +317,7 @@ export class EdgelessToolsManager {
       startX: 0,
       startY: 0,
       last: null,
+      cumulativeParentScale: 1,
     });
 
     const edgelessTool = this.edgelessTool;

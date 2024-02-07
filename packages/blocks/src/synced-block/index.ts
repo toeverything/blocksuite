@@ -6,3 +6,4 @@ noop(SyncedBlockComponent);
 
 export * from './synced-block.js';
 export * from './synced-model.js';
+export * from './synced-service.js';

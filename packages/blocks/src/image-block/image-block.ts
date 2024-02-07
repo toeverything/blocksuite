@@ -5,30 +5,17 @@ import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/block-selection.js';
 
 import { BlockElement } from '@blocksuite/lit';
-import { html, nothing, render } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
-import {
-  getEdgelessPageByElement,
-  matchFlavours,
-} from '../_common/utils/index.js';
-import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
-import {
-  AFFINE_DRAG_HANDLE_WIDGET,
-  AffineDragHandleWidget,
-} from '../page-block/widgets/drag-handle/drag-handle.js';
-import {
-  captureEventTarget,
-  convertDragPreviewDocToEdgeless,
-  convertDragPreviewEdgelessToDoc,
-} from '../page-block/widgets/drag-handle/utils.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
-import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
+import { type ImageBlockModel } from './image-model.js';
+import type { ImageService } from './image-service.js';
 import { openLeditsEditor } from './ledits/main.js';
 import {
   copyImageBlob,
@@ -39,7 +26,10 @@ import {
 } from './utils.js';
 
 @customElement('affine-image')
-export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
+export class ImageBlockComponent extends BlockElement<
+  ImageBlockModel,
+  ImageService
+> {
   @property({ attribute: false })
   loading = false;
 
@@ -97,91 +87,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   get imageCard() {
     return this._imageCard;
   }
-
-  private _dragHandleOption: DragHandleOption = {
-    flavour: ImageBlockSchema.model.flavour,
-    edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath }) => {
-      const element = captureEventTarget(state.raw.target);
-      if (element?.classList.contains('resize')) return false;
-
-      if (!anchorBlockPath) return false;
-      const anchorComponent = this.std.view.viewFromPath(
-        'block',
-        anchorBlockPath
-      );
-      if (
-        !anchorComponent ||
-        !matchFlavours(anchorComponent.model, [ImageBlockSchema.model.flavour])
-      )
-        return false;
-
-      const blockComponent = anchorComponent as ImageBlockComponent;
-
-      const isDraggingByDragHandle = !!element?.closest(
-        AFFINE_DRAG_HANDLE_WIDGET
-      );
-      const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = blockComponent.isInSurface;
-
-      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
-        this.std.selection.setGroup('note', [
-          this.std.selection.create('block', {
-            path: blockComponent.path,
-          }),
-        ]);
-        startDragging([blockComponent], state);
-        return true;
-      } else if (isInSurface && isDraggingByDragHandle) {
-        const edgelessPage = getEdgelessPageByElement(blockComponent);
-        const scale = edgelessPage ? edgelessPage.service.viewport.zoom : 1;
-        const width = blockComponent.getBoundingClientRect().width;
-
-        const dragPreviewEl = document.createElement('div');
-        dragPreviewEl.classList.add('affine-block-element');
-        dragPreviewEl.style.border = '2px solid var(--affine-border-color)';
-        dragPreviewEl.style.borderRadius = '4px';
-        dragPreviewEl.style.overflow = 'hidden';
-        dragPreviewEl.style.width = `${width / scale}px`;
-        render(blockComponent.renderModel(blockComponent.model), dragPreviewEl);
-
-        startDragging([blockComponent], state, dragPreviewEl);
-        return true;
-      }
-      return false;
-    },
-    onDragEnd: props => {
-      const { state, draggingElements } = props;
-      if (
-        draggingElements.length !== 1 ||
-        !matchFlavours(draggingElements[0].model, [
-          ImageBlockSchema.model.flavour,
-        ])
-      )
-        return false;
-
-      const blockComponent = draggingElements[0] as ImageBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
-      const target = captureEventTarget(state.raw.target);
-      const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless') &&
-        target?.classList.contains('affine-block-children-container');
-
-      if (isInSurface) {
-        return convertDragPreviewEdgelessToDoc({
-          blockComponent,
-          ...props,
-        });
-      } else if (isTargetEdgelessContainer) {
-        return convertDragPreviewDocToEdgeless({
-          blockComponent,
-          cssSelector: '.drag-target',
-          ...props,
-        });
-      }
-      return false;
-    },
-  };
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
@@ -246,10 +151,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         this.refreshData();
       }
     });
-
-    this.disposables.add(
-      AffineDragHandleWidget.registerOption(this._dragHandleOption)
-    );
   }
 
   override disconnectedCallback() {

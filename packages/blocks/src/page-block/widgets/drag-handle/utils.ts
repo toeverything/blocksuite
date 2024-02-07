@@ -9,6 +9,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import {
   type BlockComponent,
+  type EmbedCardStyle,
   findClosestBlockElement,
   getClosestBlockElementByElement,
   getClosestBlockElementByPoint,
@@ -390,6 +391,7 @@ export function convertDragPreviewDocToEdgeless({
   cssSelector: string;
   width?: number;
   height?: number;
+  style?: EmbedCardStyle;
 }): boolean {
   const edgelessPage = blockComponent.closest(
     'affine-edgeless-page'
@@ -403,8 +405,8 @@ export function convertDragPreviewDocToEdgeless({
   const rect = previewEl.getBoundingClientRect();
   const { left: viewportLeft, top: viewportTop } = edgelessPage.viewport;
   const point = edgelessPage.service.viewport.toModelCoord(
-    rect.x - viewportLeft,
-    rect.y - viewportTop
+    (rect.x - viewportLeft) / state.cumulativeParentScale,
+    (rect.y - viewportTop) / state.cumulativeParentScale
   );
   const bound = new Bound(
     point[0],
@@ -441,8 +443,10 @@ export function convertDragPreviewEdgelessToDoc({
   dropBlockId,
   dropType,
   state,
+  style,
 }: OnDragEndProps & {
   blockComponent: BlockElement;
+  style?: EmbedCardStyle;
 }): boolean {
   const page = blockComponent.page;
   const host = blockComponent.host;
@@ -460,8 +464,13 @@ export function convertDragPreviewEdgelessToDoc({
       (dropType === 'after' ? 1 : 0);
 
   const blockModel = blockComponent.model;
+
   const { width, height, xywh, rotate, zIndex, ...blockProps } =
     getBlockProps(blockModel);
+  if (style) {
+    blockProps.style = style;
+  }
+
   page.addBlock(blockModel.flavour, blockProps, parentBlock, parentIndex);
 
   const altKey = state.raw.altKey;

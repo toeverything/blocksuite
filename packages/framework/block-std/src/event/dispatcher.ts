@@ -76,6 +76,11 @@ export class UIEventDispatcher {
     activeChanged: new Slot(),
   };
 
+  slots = {
+    parentScaleChanged: new Slot<number>(),
+    editorHostPanned: new Slot(),
+  };
+
   private _handlersMap = Object.fromEntries(
     eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
   ) as Record<EventName, Array<EventHandlerRunner>>;
@@ -90,6 +95,10 @@ export class UIEventDispatcher {
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
+  }
+
+  get cumulativeParentScale() {
+    return this._pointerControl.cumulativeParentScale;
   }
 
   private static _activeDispatcher: UIEventDispatcher | null = null;

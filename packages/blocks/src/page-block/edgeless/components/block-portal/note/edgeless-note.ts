@@ -369,6 +369,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         data-model-height="${bound.h}"
         @mouseleave=${this._leaved}
         @mousemove=${this._hovered}
+        data-scale="${scale}"
       >
         <div class="note-background" style=${styleMap(backgroundStyle)}></div>
 

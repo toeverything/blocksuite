@@ -53,7 +53,11 @@ export class EdgelessBlockPortalSynced extends EdgelessPortalBase<SyncedBlockMod
     };
 
     return html`
-      <div class="edgeless-block-portal-synced" style=${styleMap(style)}>
+      <div
+        class="edgeless-block-portal-synced"
+        style=${styleMap(style)}
+        data-translate="true"
+      >
         ${this.renderModel(model)}
       </div>
     `;

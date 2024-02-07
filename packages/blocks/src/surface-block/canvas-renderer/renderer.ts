@@ -84,7 +84,7 @@ export class Renderer extends Viewport {
     let sizeUpdatedRafId: number | null = null;
     this.sizeUpdated.on(() => {
       if (sizeUpdatedRafId) return;
-      requestConnectedFrame(() => {
+      sizeUpdatedRafId = requestConnectedFrame(() => {
         this._resetSize();
         this._render();
         sizeUpdatedRafId = null;
@@ -211,10 +211,12 @@ export class Renderer extends Viewport {
   }
 
   private _render() {
-    const { ctx, viewportBounds, rc, zoom } = this;
+    const { ctx, viewportBounds, rc, zoom, cumulativeParentScale } = this;
     const dpr = window.devicePixelRatio;
     const scale = zoom * dpr;
-    const matrix = new DOMMatrix().scaleSelf(scale);
+    const matrix = new DOMMatrix()
+      .scaleSelf(scale)
+      .scaleSelf(cumulativeParentScale);
     /**
      * if a layer does not have a corresponding canvas
      * its element will be add to this array and drawing on the

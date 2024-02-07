@@ -9,9 +9,10 @@ import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
-import { html, nothing, type PropertyValues, render } from 'lit';
+import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -27,16 +28,6 @@ import {
 } from '../_specs/_specs.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
 import type { PageBlockComponent, PageService } from '../page-block/index.js';
-import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
-import {
-  AFFINE_DRAG_HANDLE_WIDGET,
-  AffineDragHandleWidget,
-} from '../page-block/widgets/drag-handle/drag-handle.js';
-import {
-  captureEventTarget,
-  convertDragPreviewDocToEdgeless,
-  convertDragPreviewEdgelessToDoc,
-} from '../page-block/widgets/drag-handle/utils.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { SyncedCard } from './components/synced-card.js';
 import {
@@ -44,10 +35,14 @@ import {
   SYNCED_BLOCK_DEFAULT_HEIGHT,
   SYNCED_BLOCK_DEFAULT_WIDTH,
 } from './styles.js';
-import { type SyncedBlockModel, SyncedBlockSchema } from './synced-model.js';
+import { type SyncedBlockModel } from './synced-model.js';
+import type { SyncedService } from './synced-service.js';
 
 @customElement('affine-synced')
-export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
+export class SyncedBlockComponent extends BlockElement<
+  SyncedBlockModel,
+  SyncedService
+> {
   static override styles = blockStyles;
 
   @state()
@@ -288,93 +283,6 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     };
   });
 
-  private _dragHandleOption: DragHandleOption = {
-    flavour: SyncedBlockSchema.model.flavour,
-    edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath }) => {
-      if (!anchorBlockPath) return false;
-      const anchorComponent = this.std.view.viewFromPath(
-        'block',
-        anchorBlockPath
-      );
-      if (
-        !anchorComponent ||
-        !matchFlavours(anchorComponent.model, [SyncedBlockSchema.model.flavour])
-      )
-        return false;
-
-      const blockComponent = anchorComponent as SyncedBlockComponent;
-      const element = captureEventTarget(state.raw.target);
-
-      const isDraggingByDragHandle = !!element?.closest(
-        AFFINE_DRAG_HANDLE_WIDGET
-      );
-      const isDraggingByComponent = blockComponent.contains(element);
-      const isInSurface = blockComponent.isInSurface;
-
-      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
-        this.host.selection.setGroup('note', [
-          this.host.selection.create('block', {
-            path: blockComponent.path,
-          }),
-        ]);
-        startDragging([blockComponent], state);
-        return true;
-      } else if (isInSurface && isDraggingByDragHandle) {
-        const syncedPortal = blockComponent.closest(
-          '.edgeless-block-portal-synced'
-        );
-        assertExists(syncedPortal);
-        const dragPreviewEl = syncedPortal.cloneNode() as HTMLElement;
-        dragPreviewEl.style.transform = '';
-        dragPreviewEl.style.left = '0';
-        dragPreviewEl.style.top = '0';
-        render(
-          blockComponent.host.renderModel(blockComponent.model),
-          dragPreviewEl
-        );
-
-        startDragging([blockComponent], state, dragPreviewEl);
-        return true;
-      }
-      return false;
-    },
-    onDragEnd: props => {
-      const { state, draggingElements } = props;
-      if (
-        draggingElements.length !== 1 ||
-        !matchFlavours(draggingElements[0].model, [
-          SyncedBlockSchema.model.flavour,
-        ])
-      )
-        return false;
-
-      const blockComponent = draggingElements[0] as SyncedBlockComponent;
-      const isInSurface = blockComponent.isInSurface;
-      const target = captureEventTarget(state.raw.target);
-      const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless') &&
-        target?.classList.contains('affine-block-children-container');
-
-      if (isInSurface) {
-        return convertDragPreviewEdgelessToDoc({
-          blockComponent,
-          ...props,
-        });
-      } else if (isTargetEdgelessContainer) {
-        return convertDragPreviewDocToEdgeless({
-          blockComponent,
-          cssSelector: '.affine-synced-container',
-          width: SYNCED_BLOCK_DEFAULT_WIDTH,
-          height: SYNCED_BLOCK_DEFAULT_HEIGHT,
-          ...props,
-        });
-      }
-
-      return false;
-    },
-  };
-
   private _handlePointerDown = (event: MouseEvent) => {
     if (this._editing) {
       event.stopPropagation();
@@ -482,10 +390,6 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
-    this.disposables.add(
-      AffineDragHandleWidget.registerOption(this._dragHandleOption)
-    );
-
     this.model.propsUpdated.on(({ key }) => {
       if (key === 'pageId') {
         this._load().catch(e => {
@@ -578,6 +482,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
       pageMode === 'page' ? DocEditorBlockSpecs : EdgelessEditorBlockSpecs;
 
     this.setAttribute('data-nested-editor', 'true');
+    const scale = isInSurface ? this.model.scale ?? 1 : undefined;
 
     return html`
       <div
@@ -594,6 +499,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
         })}
         style=${containerStyleMap}
         @pointerdown=${this._handlePointerDown}
+        data-scale=${ifDefined(scale)}
       >
         <div
           class=${classMap({

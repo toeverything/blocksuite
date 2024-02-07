@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
 import type { Point, Rect } from '../../../_common/utils/index.js';
 import type { DragPreview } from './components/drag-preview.js';
@@ -44,6 +44,7 @@ export type OnDragStartProps = {
   ) => void;
   anchorBlockId: string;
   anchorBlockPath: string[] | null;
+  editorHost: EditorHost;
 };
 
 export type OnDragEndProps = {
@@ -53,6 +54,7 @@ export type OnDragEndProps = {
   dropType: DropType | null;
   dragPreview: DragPreview;
   noteScale: number;
+  editorHost: EditorHost;
 };
 
 export type DragHandleOption = {
