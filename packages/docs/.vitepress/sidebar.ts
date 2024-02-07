@@ -124,13 +124,7 @@ export const reference: DefaultTheme.NavItem[] = [
 export const components: DefaultTheme.NavItem[] = [
   {
     text: 'Introduction',
-    items: [
-      { text: 'Overview', link: 'components/overview' },
-      {
-        text: 'AFFiNE Integration',
-        link: 'components/overview#affine-integration',
-      },
-    ],
+    items: [{ text: 'Overview', link: 'components/overview' }],
   },
   {
     text: 'Editors',

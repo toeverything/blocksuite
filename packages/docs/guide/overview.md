@@ -18,7 +18,7 @@ You can consider BlockSuite as a [UI component library](../components/overview) 
 
 ## Motivation
 
-BlockSuite originated from the open-source knowledge base [AFFiNE](https://github.com/toeverything/AFFiNE), with design goals including:
+BlockSuite originated from the [AFFiNE](https://github.com/toeverything/AFFiNE) knowledge base, with design goals including:
 
 - **Support for Multimodal Editable Content**: When considering knowledge as a single source of truth, building its various view modes (e.g., text, slides, mind maps, tables) still requires multiple incompatible frameworks. Ideally, no matter how the presentation of content changes, there should be a consistent framework that helps.
 - **Organizing and Visualizing Complex Knowledge**: Existing editors generally focus on editing single documents, but often fall short in dealing with complex structures involving intertwined references. This requires the framework to natively manage state across multiple documents.
@@ -46,7 +46,14 @@ To try out BlockSuite, refer to the [quick start](./quick-start) example and sta
 
 ## Architecture
 
-The BlockSuite project is structured around key packages that are categorized into two groups: a headless [framework](https://github.com/toeverything/blocksuite/tree/master/packages) and prebuilt editing components.
+The relationship between BlockSuite and AFFiNE is similar to that between the [Monaco Editor](https://github.com/microsoft/monaco-editor) and [VSCode](https://code.visualstudio.com/), but with one major difference: BlockSuite is not automatically generated based on the AFFiNE codebase, but is maintained independently with a different tech stack — AFFiNE uses React while BlockSuite uses [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components).
+
+This difference has led BlockSuite to set clear boundaries between packages, ensuring:
+
+- Both AFFiNE and other projects should equally reuse and extend BlockSuite through components, without any privileges.
+- BlockSuite components can be easily reused regardless of whether you are using React or other frameworks.
+
+To that end, the BlockSuite project is structured around key packages that are categorized into two groups: a headless [framework](https://github.com/toeverything/blocksuite/tree/master/packages/framework) and prebuilt editing components.
 
 <table>
   <tr>
