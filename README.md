@@ -30,8 +30,8 @@ BlockSuite is a toolkit for building editors and collaborative applications. It 
 You can consider BlockSuite as a [UI component library](https://blocksuite.io/components/overview.html) for building various editors, based on a minimized vanilla framework as their runtime. With BlockSuite, you can:
 
 - Reuse multiple first-party BlockSuite editors:
-  - [**`DocEditor`**](https://blocksuite.io/components/doc-editor.html): A comprehensive block-based document editor, offering extensive customization and flexibility.
-  - [**`EdgelessEditor`**](https://blocksuite.io/components/edgeless-editor.html): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `DocEditor`.
+  - [**`DocEditor`**](https://blocksuite.io/components/editors/doc-editor.html): A comprehensive block-based document editor, offering extensive customization and flexibility.
+  - [**`EdgelessEditor`**](https://blocksuite.io/components/editors/edgeless-editor.html): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `DocEditor`.
 - Customize, extend and enhance these editors with a rich set of [BlockSuite components](https://blocksuite.io/components/overview.html). All BlockSuite components (including editors) are native web components, making them framework-agnostic and easy to interop with popular frameworks.
 - Or, build new editors from scratch based on the underlying vallina framework.
 

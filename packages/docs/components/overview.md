@@ -25,7 +25,7 @@ These BlockSuite components are all implemented based on web components. For a m
 
 Based on the components API, BlockSuite allows:
 
-- [Defining third-party blocks](../guide/working-with-block-tree#defining-new-blocks) compatible with multiple editors.
+- [Defining custom blocks](../guide/working-with-block-tree#defining-new-blocks) compatible with multiple editors.
 - Configuring, extending, and replacing widgets within the editor, such as various toolbars, popups, and menus.
 - Reusing components outside of the editor, such as panels for comments, outlines, or even AI copilots.
 
