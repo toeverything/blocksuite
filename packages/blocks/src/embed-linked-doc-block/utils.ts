@@ -107,11 +107,11 @@ export function getEmbedLinkedDocIcons(
 }
 
 export function renderDocInCard(
-  block: EmbedLinkedDocBlockComponent | SyncedCard,
+  card: EmbedLinkedDocBlockComponent | SyncedCard,
   doc: Page
 ) {
-  block.abstractText = getAbstractText(doc);
-  prepareSurfaceRefRenderer(block);
+  card.abstractText = getAbstractText(doc);
+  prepareSurfaceRefRenderer(card);
 }
 
 function getNoteFromPage(doc: Page) {
@@ -135,10 +135,10 @@ function getAbstractText(doc: Page) {
 }
 
 async function addCover(
-  block: EmbedLinkedDocBlockComponent | SyncedCard,
+  card: EmbedLinkedDocBlockComponent | SyncedCard,
   cover: HTMLElement | TemplateResult<1>
 ) {
-  const coverContainer = await block.bannerContainer;
+  const coverContainer = await card.bannerContainer;
   if (!coverContainer) return;
   while (coverContainer.firstChild) {
     coverContainer.removeChild(coverContainer.firstChild);
@@ -152,52 +152,52 @@ async function addCover(
 }
 
 function prepareSurfaceRefRenderer(
-  block: EmbedLinkedDocBlockComponent | SyncedCard
+  card: EmbedLinkedDocBlockComponent | SyncedCard
 ) {
-  const surfaceRedService = block.std.spec.getService(
+  const surfaceRedService = card.std.spec.getService(
     'affine:surface-ref'
   ) as SurfaceRefBlockService;
   assertExists(surfaceRedService, `Surface ref service not found.`);
-  block.surfaceRefService = surfaceRedService;
+  card.surfaceRefService = surfaceRedService;
 
-  block.cleanUpSurfaceRefRenderer();
+  card.cleanUpSurfaceRefRenderer();
 
-  const doc = block.doc;
+  const doc = card.doc;
   assertExists(
     doc,
-    `Trying to load page ${block.model.pageId} in linked page block, but the page is not found.`
+    `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
   );
 
-  block.surfaceRefRenderer = block.surfaceRefService.getRenderer(
-    PathFinder.id(block.path),
+  card.surfaceRefRenderer = card.surfaceRefService.getRenderer(
+    PathFinder.id(card.path),
     doc
   );
 
-  block.surfaceRefRenderer.slots.mounted.on(() => {
-    if (block.pageMode === 'edgeless') {
-      renderEdgelessAbstract(block).catch(e => {
+  card.surfaceRefRenderer.slots.mounted.on(() => {
+    if (card.pageMode === 'edgeless') {
+      renderEdgelessAbstract(card).catch(e => {
         console.error(e);
-        block.isError = true;
+        card.isError = true;
       });
     } else {
-      renderPageAbstract(block).catch(e => {
+      renderPageAbstract(card).catch(e => {
         console.error(e);
-        block.isError = true;
+        card.isError = true;
       });
     }
   });
-  block.surfaceRefRenderer.mount();
+  card.surfaceRefRenderer.mount();
 }
 
 async function renderEdgelessAbstract(
-  block: EmbedLinkedDocBlockComponent | SyncedCard
+  card: EmbedLinkedDocBlockComponent | SyncedCard
 ) {
-  const surfaceRefRenderer = block.surfaceRefRenderer;
+  const surfaceRefRenderer = card.surfaceRefRenderer;
   assertExists(surfaceRefRenderer, 'Surface ref renderer is not found.');
 
   const renderer = surfaceRefRenderer.surfaceRenderer;
   const container = document.createElement('div');
-  await addCover(block, container);
+  await addCover(card, container);
   renderer.attach(container);
 
   // TODO: we may also need to get bounds of surface block's children
@@ -209,17 +209,17 @@ async function renderEdgelessAbstract(
     renderer.onResize();
     renderer.setViewportByBound(bound);
   } else {
-    block.isBannerEmpty = true;
+    card.isBannerEmpty = true;
   }
 }
 
 async function renderPageAbstract(
-  block: EmbedLinkedDocBlockComponent | SyncedCard
+  card: EmbedLinkedDocBlockComponent | SyncedCard
 ) {
-  const linkedDoc = block.doc;
+  const linkedDoc = card.doc;
   assertExists(
     linkedDoc,
-    `Trying to load page ${block.model.pageId} in linked page block, but the page is not found.`
+    `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
   );
 
   const note = getNoteFromPage(linkedDoc);
@@ -229,43 +229,43 @@ async function renderPageAbstract(
 
   switch (target?.flavour) {
     case 'affine:image':
-      await renderImageAbstract(block, target);
+      await renderImageAbstract(card, target);
       return;
     case 'affine:surface-ref':
-      await renderSurfaceRefAbstract(block, target);
+      await renderSurfaceRefAbstract(card, target);
       return;
   }
 
-  block.isBannerEmpty = true;
+  card.isBannerEmpty = true;
 }
 
 async function renderImageAbstract(
-  block: EmbedLinkedDocBlockComponent | SyncedCard,
+  card: EmbedLinkedDocBlockComponent | SyncedCard,
   image: BlockModel
 ) {
   const sourceId = (image as ImageBlockModel).sourceId;
   if (!sourceId) return;
 
-  const storage = block.model.page.blob;
+  const storage = card.model.page.blob;
   const blob = await storage.get(sourceId);
   if (!blob) return;
 
   const url = URL.createObjectURL(blob);
   const $img = document.createElement('img');
   $img.src = url;
-  await addCover(block, $img);
+  await addCover(card, $img);
 
-  block.isBannerEmpty = false;
+  card.isBannerEmpty = false;
 }
 
 async function renderSurfaceRefAbstract(
-  block: EmbedLinkedDocBlockComponent | SyncedCard,
+  card: EmbedLinkedDocBlockComponent | SyncedCard,
   surfaceRef: BlockModel
 ) {
   const referenceId = (surfaceRef as SurfaceRefBlockModel).reference;
   if (!referenceId) return;
 
-  const surfaceRefRenderer = block.surfaceRefRenderer;
+  const surfaceRefRenderer = card.surfaceRefRenderer;
   if (!surfaceRefRenderer) return;
 
   const referencedModel = surfaceRefRenderer.getModel(referenceId);
@@ -273,12 +273,12 @@ async function renderSurfaceRefAbstract(
 
   const renderer = surfaceRefRenderer.surfaceRenderer;
   const container = document.createElement('div');
-  await addCover(block, container);
+  await addCover(card, container);
 
   renderer.attach(container);
   renderer.onResize();
   const bound = Bound.fromXYWH(deserializeXYWH(referencedModel.xywh));
   renderer.setViewportByBound(bound);
 
-  block.isBannerEmpty = false;
+  card.isBannerEmpty = false;
 }

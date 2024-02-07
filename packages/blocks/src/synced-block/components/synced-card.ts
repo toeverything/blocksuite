@@ -20,22 +20,7 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
   block!: SyncedBlockComponent;
 
   @property({ attribute: false })
-  pageMode!: 'page' | 'edgeless';
-
-  @property({ attribute: false })
-  pageUpdatedAt!: Date;
-
-  @property({ attribute: false })
-  isLoading!: boolean;
-
-  @property({ attribute: false })
-  isError!: boolean;
-
-  @property({ attribute: false })
-  isDeleted!: boolean;
-
-  @property({ attribute: false })
-  isCycle!: boolean;
+  isError = false;
 
   @property({ attribute: false })
   abstractText = '';
@@ -72,6 +57,14 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
     return this.block.doc;
   }
 
+  get pageMode() {
+    return this.block.pageMode;
+  }
+
+  get blockState() {
+    return this.block.blockState;
+  }
+
   private _isPageEmpty() {
     const linkedDoc = this.doc;
     if (!linkedDoc) {
@@ -106,8 +99,9 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
+    const { isCycle } = this.block.blockState;
     const syncedDoc = this.doc;
-    if (this.isCycle && syncedDoc) {
+    if (isCycle && syncedDoc) {
       if (syncedDoc.root) {
         renderDocInCard(this, syncedDoc);
       } else {
@@ -141,13 +135,16 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
+    const { isLoading, isDeleted, isError, isCycle } = this.blockState;
+    const error = this.isError || isError;
+
     const isEmpty = this._isPageEmpty() && this.isBannerEmpty;
 
     const cardClassMap = classMap({
-      loading: this.isLoading,
-      error: this.isError,
-      deleted: this.isDeleted,
-      cycle: this.isCycle,
+      loading: isLoading,
+      error,
+      deleted: isDeleted,
+      cycle: isCycle,
       surface: this.block.isInSurface,
       empty: isEmpty,
       'banner-empty': this.isBannerEmpty,
@@ -164,40 +161,41 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
       SyncedDocDeletedBanner,
     } = getSyncedDocIcons(this.pageMode);
 
-    const titleIcon = this.isLoading
+    const titleIcon = isLoading
       ? LoadingIcon
-      : this.isError
+      : error
         ? SyncedDocErrorIcon
-        : this.isDeleted
+        : isDeleted
           ? SyncedDocDeletedIcon
           : SyncedDocIcon;
 
-    const titleText = this.isLoading
+    const titleText = isLoading
       ? 'Loading...'
-      : this.isDeleted
+      : isDeleted
         ? `Deleted doc`
         : this.block.pageTitle;
 
-    const descriptionText = this.isLoading
+    const descriptionText = isLoading
       ? ''
-      : this.isError
+      : error
         ? 'This linked doc failed to load.'
-        : this.isDeleted
+        : isDeleted
           ? 'This linked doc is deleted.'
           : isEmpty
             ? 'Preview of the linked doc will be displayed here.'
             : this.abstractText;
 
-    const dateText = this.pageUpdatedAt.toLocaleTimeString();
+    const dateText = this.block.pageUpdatedAt.toLocaleTimeString();
 
-    const showDefaultBanner =
-      this.isLoading || this.isError || this.isDeleted || isEmpty;
+    const showDefaultBanner = isLoading || error || isDeleted || isEmpty;
 
-    const defaultBanner = this.isError
-      ? SyncedDocErrorBanner
-      : this.isDeleted
-        ? SyncedDocDeletedBanner
-        : SyncedDocEmptyBanner;
+    const defaultBanner = isLoading
+      ? SyncedDocEmptyBanner
+      : error
+        ? SyncedDocErrorBanner
+        : isDeleted
+          ? SyncedDocDeletedBanner
+          : SyncedDocEmptyBanner;
 
     return html`
       <div
@@ -219,7 +217,7 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
             ${descriptionText}
           </div>
 
-          ${this.isError
+          ${error
             ? html`
                 <div class="affine-synced-card-content-reload">
                   <div

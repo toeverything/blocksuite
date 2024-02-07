@@ -292,7 +292,7 @@ export const cardStyles = css`
       display: block;
     }
   }
-  .affine-synced-card.deleted {
+  .affine-synced-card:not(.loading):not(.error).deleted {
     height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
     background: var(--affine-background-secondary-color);
 
@@ -326,7 +326,9 @@ export const cardStyles = css`
       gap: 12px;
     }
   }
-  .affine-synced-card.cycle:not(.banner-empty) {
+  .affine-synced-card:not(.loading):not(.error):not(.deleted).cycle:not(
+      .banner-empty
+    ) {
     .affine-synced-card-banner.render {
       display: block;
     }
@@ -334,7 +336,9 @@ export const cardStyles = css`
       display: none;
     }
   }
-  .affine-synced-card.cycle.banner-empty {
+  .affine-synced-card:not(.loading):not(.error):not(
+      .deleted
+    ).cycle.banner-empty {
     .affine-synced-card-content {
       width: 100%;
       height: 100%;

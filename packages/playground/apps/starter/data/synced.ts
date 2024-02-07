@@ -139,6 +139,15 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
       },
       surfaceId
     );
+
+    // Add synced block - self
+    pageMain.addBlock(
+      'affine:synced',
+      {
+        pageId: 'deleted-page',
+      },
+      noteId
+    );
   });
 
   pageSyncedEdgeless.resetHistory();

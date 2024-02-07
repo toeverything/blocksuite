@@ -9,7 +9,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
-import { html, nothing, render } from 'lit';
+import { html, nothing, type PropertyValues, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
@@ -38,6 +38,7 @@ import {
   convertDragPreviewEdgelessToDoc,
 } from '../page-block/widgets/drag-handle/utils.js';
 import { Bound } from '../surface-block/utils/bound.js';
+import type { SyncedCard } from './components/synced-card.js';
 import {
   blockStyles,
   SYNCED_BLOCK_DEFAULT_HEIGHT,
@@ -72,6 +73,9 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
   @state()
   private _empty = false;
+
+  @query('affine-synced-card')
+  syncedBlockCard?: SyncedCard;
 
   @query('embed-card-caption')
   captionElement?: EmbedCardCaption;
@@ -213,9 +217,7 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
 
     if (!this._error && !syncedDoc.root) {
       await new Promise<void>(resolve => {
-        syncedDoc.slots.rootAdded.once(() => {
-          resolve();
-        });
+        syncedDoc.slots.rootAdded.once(() => resolve());
       });
     }
 
@@ -505,13 +507,18 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
     }
   }
 
+  override updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+    this.syncedBlockCard?.requestUpdate();
+  }
+
   override render() {
     const syncedDoc = this.doc;
     const { isLoading, isError, isDeleted, isCycle, isEditing, isEmpty } =
       this.blockState;
     const isInSurface = this.isInSurface;
     const pageMode = this.pageMode;
-    const pageUpdatedAt = this.pageUpdatedAt;
+
     if (isLoading || isError || isDeleted || isCycle || !syncedDoc) {
       let cardStyleMap = styleMap({
         position: 'relative',
@@ -539,12 +546,6 @@ export class SyncedBlockComponent extends BlockElement<SyncedBlockModel> {
             : ref(this._whenHover.setReference)}
           style=${cardStyleMap}
           .block=${this}
-          .pageMode=${pageMode}
-          .pageUpdatedAt=${pageUpdatedAt}
-          .isLoading=${isLoading}
-          .isError=${isError}
-          .isDeleted=${isDeleted}
-          .isCycle=${isCycle}
         ></affine-synced-card>
       `;
     }
