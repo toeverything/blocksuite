@@ -49,8 +49,8 @@ export default defineConfig({
 
     nav: [
       {
-        text: 'Components 🚧',
-        link: '/components/doc-editor',
+        text: 'Components',
+        link: '/components/overview',
         activeMatch: '/components/*',
       },
       {

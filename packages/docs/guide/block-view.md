@@ -4,7 +4,7 @@ In BlockSuite, blocks can be rendered by any UI framework. A block should be ren
 
 By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit`. But it's still possible to use other UI frameworks. We'll introduce later about how to write custom block renderers.
 
-## Lit Block View
+## Web Component Block View
 
 We provide a `BlockElement` class to help building a lit-based block view.
 

@@ -1,7 +1,7 @@
-# `DocEditor`
+# Doc Editor
 
 ::: info
-🚧 The comprehensive API surface of this component is still a work in progress.
+🚧 The comprehensive document of this component is still a work in progress.
 :::
 
 This editor component is great at block-based rich text editng, with drag handle, slash menu, format toolbar and other built-in powerful widgets combined.
