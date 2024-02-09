@@ -258,7 +258,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         'affine:paragraph',
         'affine:list',
         'affine:embed-linked-doc',
-        'affine:synced',
+        'affine:embed-synced-doc',
       ])
       .forEach(model => {
         if (model.text) {
@@ -270,7 +270,10 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
             ids.add(delta.attributes.reference.pageId);
           });
         } else if (
-          matchFlavours(model, ['affine:embed-linked-doc', 'affine:synced'])
+          matchFlavours(model, [
+            'affine:embed-linked-doc',
+            'affine:embed-synced-doc',
+          ])
         ) {
           ids.add(model.pageId);
         }
@@ -412,7 +415,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         'affine:paragraph',
         'affine:list',
         'affine:embed-linked-doc',
-        'affine:synced',
+        'affine:embed-synced-doc',
       ])
     )
       return nothing;
@@ -427,7 +430,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     }
     const type = matchFlavours(model, [
       'affine:embed-linked-doc',
-      'affine:synced',
+      'affine:embed-synced-doc',
     ])
       ? ''
       : model.type;

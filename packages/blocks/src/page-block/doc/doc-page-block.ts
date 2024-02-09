@@ -332,7 +332,6 @@ export class DocPageBlockComponent extends BlockElement<
             'affine:bookmark',
             'affine:attachment',
             'affine:surface-ref',
-            'affine:synced',
           ]) ||
           /affine:embed-*/.test(last.flavour)
         ) {

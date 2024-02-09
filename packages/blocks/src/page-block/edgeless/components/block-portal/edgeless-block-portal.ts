@@ -3,7 +3,6 @@ import './note/edgeless-note.js';
 import './image/edgeless-image.js';
 import './bookmark/edgeless-bookmark.js';
 import './attachment/edgeless-attachment.js';
-import './synced/edgeless-synced.js';
 import './frame/edgeless-frame.js';
 import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
@@ -49,7 +48,6 @@ const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   ['affine:image', 'edgeless-block-portal-image'],
   ['affine:bookmark', 'edgeless-block-portal-bookmark'],
   ['affine:attachment', 'edgeless-block-portal-attachment'],
-  ['affine:synced', 'edgeless-block-portal-synced'],
   [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 

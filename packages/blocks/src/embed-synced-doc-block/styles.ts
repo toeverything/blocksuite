@@ -2,55 +2,83 @@ import { css, html } from 'lit';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
-export const SYNCED_BLOCK_DEFAULT_WIDTH = 752;
-export const SYNCED_BLOCK_DEFAULT_HEIGHT = 455;
 export const SYNCED_MIN_WIDTH = 370;
 export const SYNCED_MIN_HEIGHT = 80;
 
 export const blockStyles = css`
-  affine-synced[data-nested-editor] {
+  edgeless-block-portal-embed:has(.affine-embed-synced-doc-block.editing) {
+    z-index: 1000 !important;
+  }
+
+  .edgeless-block-portal-embed
+    > affine-embed-synced-doc-block[data-nested-editor] {
+    position: relative;
+    display: block;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+  }
+
+  .edgeless-block-portal-embed
+    .affine-embed-synced-doc-editor
+    .affine-doc-page-block-container {
+    padding: 12px 24px;
+    width: 100%;
+  }
+
+  .edgeless-block-portal-embed .affine-embed-synced-doc-container.edgeless {
+    display: block;
+    padding: 0;
+    width: 100%;
+    height: calc(${EMBED_CARD_HEIGHT.syncedDoc}px + 36px);
+  }
+
+  affine-embed-synced-doc-block[data-nested-editor] {
     position: relative;
     display: block;
     left: -24px;
     width: calc(100% + 48px);
   }
 
-  .affine-synced-container {
+  .affine-embed-synced-doc-container {
     border-radius: 8px;
     overflow: hidden;
   }
-  .affine-synced-container.page {
+  .affine-embed-synced-doc-container.page {
     display: block;
     width: 100%;
   }
-  .affine-synced-container.edgeless {
+  .affine-embed-synced-doc-container.edgeless {
     display: block;
     padding: 18px 24px;
     width: 100%;
-    height: calc(${SYNCED_BLOCK_DEFAULT_HEIGHT}px + 36px);
+    height: calc(${EMBED_CARD_HEIGHT.syncedDoc}px + 36px);
   }
-  .affine-synced-container:hover.light,
-  .affine-synced-container.selected.light,
-  affine-synced.with-drag-handle > .affine-synced-container.light {
+  .affine-embed-synced-doc-container:hover.light,
+  .affine-embed-synced-doc-container.selected.light,
+  aaffine-embed-synced-doc-block.with-drag-handle
+    > .affine-embed-synced-doc-container.light {
     box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.08);
   }
-  .affine-synced-container:hover.dark,
-  .affine-synced-container.selected.dark,
-  affine-synced.with-drag-handle > .affine-synced-container.dark {
+  .affine-embed-synced-doc-container:hover.dark,
+  .affine-embed-synced-doc-container.selected.dark,
+  affine-embed-synced-doc-block.with-drag-handle
+    > .affine-embed-synced-doc-container.dark {
     box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.14);
   }
-  .affine-synced-container.editing.light {
+  .affine-embed-synced-doc-container.editing.light {
     box-shadow:
       0px 0px 0px 2px rgba(0, 0, 0, 0.08),
       0px 0px 0px 1px var(--affine-brand-color);
   }
-  .affine-synced-container.editing.dark {
+  .affine-embed-synced-doc-container.editing.dark {
     box-shadow:
       0px 0px 0px 2px rgba(255, 255, 255, 0.14),
       0px 0px 0px 1px var(--affine-brand-color);
   }
 
-  .synced-block-editor-overlay {
+  .affine-embed-synced-doc-editor-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -59,11 +87,11 @@ export const blockStyles = css`
     z-index: 1;
     cursor: pointer;
   }
-  .synced-block-editor-overlay:hover {
+  .affine-embed-synced-doc-editor-overlay:hover {
     background: var(--affine-hover-color);
   }
 
-  .synced-block-editor-empty {
+  .affine-embed-synced-doc-editor-empty {
     position: absolute;
     top: 0;
     left: 24px;
@@ -74,14 +102,14 @@ export const blockStyles = css`
     z-index: -1;
   }
 
-  .affine-synced-container.surface
-    > .synced-block-editor
-    > .synced-block-editor-empty {
+  .affine-embed-synced-doc-container.surface
+    > .affine-embed-synced-doc-editor
+    > .affine-embed-synced-doc-editor-empty {
     left: 0;
     justify-content: center;
   }
 
-  .synced-block-editor-empty > span {
+  .affine-embed-synced-doc-editor-empty > span {
     color: var(--affine-placeholder-color);
     font-feature-settings:
       'clig' off,
@@ -93,15 +121,16 @@ export const blockStyles = css`
     line-height: 24px;
   }
 
-  .affine-synced-container.surface {
+  .affine-embed-synced-doc-container.surface {
     background: var(--affine-background-primary-color);
   }
 
-  .affine-synced-container > .synced-block-editor.affine-doc-viewport {
+  .affine-embed-synced-doc-container
+    > .affine-embed-synced-doc-editor.affine-doc-viewport {
     background: transparent;
   }
 
-  .synced-block-editor .affine-doc-page-block-container {
+  .affine-embed-synced-doc-editor .affine-doc-page-block-container {
     padding: 0 24px;
     width: 100%;
     max-width: 100%;
@@ -109,7 +138,7 @@ export const blockStyles = css`
 `;
 
 export const cardStyles = css`
-  .affine-synced-card {
+  .affine-embed-synced-doc-card {
     margin: 0 auto;
     box-sizing: border-box;
     display: flex;
@@ -124,7 +153,7 @@ export const cardStyles = css`
     user-select: none;
   }
 
-  .affine-synced-card-content {
+  .affine-embed-synced-doc-card-content {
     width: 536px;
     height: 100%;
     display: flex;
@@ -136,7 +165,7 @@ export const cardStyles = css`
     opacity: var(--add, 1);
   }
 
-  .affine-synced-card-content-title {
+  .affine-embed-synced-doc-card-content-title {
     display: flex;
     flex-direction: row;
     gap: 8px;
@@ -147,20 +176,20 @@ export const cardStyles = css`
     opacity: var(--add, 1);
   }
 
-  .affine-synced-card-content-title-icon {
+  .affine-embed-synced-doc-card-content-title-icon {
     display: flex;
     width: 16px;
     height: 16px;
     justify-content: center;
     align-items: center;
   }
-  .affine-synced-card-content-title-icon svg {
+  .affine-embed-synced-doc-card-content-title-icon svg {
     width: 16px;
     height: 16px;
     fill: var(--affine-background-primary-color);
   }
 
-  .affine-synced-card-content-title-text {
+  .affine-embed-synced-doc-card-content-title-text {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -175,7 +204,7 @@ export const cardStyles = css`
     line-height: 22px;
   }
 
-  .affine-synced-card-content-description {
+  .affine-embed-synced-doc-card-content-description {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -192,8 +221,8 @@ export const cardStyles = css`
     line-height: 20px;
   }
 
-  .affine-synced-card-content-date,
-  .affine-synced-card-content-reload {
+  .affine-embed-synced-doc-card-content-date,
+  .affine-embed-synced-doc-card-content-reload {
     display: flex;
     flex-grow: 1;
     align-items: flex-end;
@@ -203,7 +232,7 @@ export const cardStyles = css`
     max-width: 100%;
   }
 
-  .affine-synced-card-content-date > span {
+  .affine-embed-synced-doc-card-content-date > span {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -219,19 +248,19 @@ export const cardStyles = css`
     line-height: 20px;
   }
 
-  .affine-synced-card-content-reload-button {
+  .affine-embed-synced-doc-card-content-reload-button {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 4px;
     cursor: pointer;
   }
-  .affine-synced-card-content-reload-button svg {
+  .affine-embed-synced-doc-card-content-reload-button svg {
     width: 12px;
     height: 12px;
     fill: var(--affine-background-primary-color);
   }
-  .affine-synced-card-content-reload-button > span {
+  .affine-embed-synced-doc-card-content-reload-button > span {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -247,7 +276,7 @@ export const cardStyles = css`
     line-height: 20px;
   }
 
-  .affine-synced-card-banner {
+  .affine-embed-synced-doc-card-banner {
     margin: 12px 12px 0px 0px;
     width: 204px;
     max-width: 100%;
@@ -255,12 +284,12 @@ export const cardStyles = css`
     opacity: var(--add, 1);
     pointer-events: none;
   }
-  .affine-synced-card-banner.render {
+  .affine-embed-synced-doc-card-banner.render {
     display: none;
   }
-  .affine-synced-card-banner img,
-  .affine-synced-card-banner object,
-  .affine-synced-card-banner svg {
+  .affine-embed-synced-doc-card-banner img,
+  .affine-embed-synced-doc-card-banner object,
+  .affine-embed-synced-doc-card-banner svg {
     width: 204px;
     max-width: 100%;
     height: 102px;
@@ -268,97 +297,97 @@ export const cardStyles = css`
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
-  .affine-synced-card.loading {
-    .affine-synced-card-content-date {
+  .affine-embed-synced-doc-card.loading {
+    .affine-embed-synced-doc-card-content-date {
       display: none;
     }
   }
-  .affine-synced-card.error {
+  .affine-embed-synced-doc-card.error {
     background: var(--affine-background-secondary-color);
 
-    .affine-synced-card-content-description {
+    .affine-embed-synced-doc-card-content-description {
       color: var(--affine-text-secondary-color);
     }
 
-    .affine-synced-card-content-date {
+    .affine-embed-synced-doc-card-content-date {
       display: none;
     }
 
-    .affine-synced-card-banner.render {
+    .affine-embed-synced-doc-card-banner.render {
       display: none;
     }
 
-    .affine-synced-card-banner.default {
+    .affine-embed-synced-doc-card-banner.default {
       display: block;
     }
   }
-  .affine-synced-card:not(.loading):not(.error).deleted {
+  .affine-embed-synced-doc-card:not(.loading):not(.error).deleted {
     height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
     background: var(--affine-background-secondary-color);
 
-    .affine-synced-card-content-description {
+    .affine-embed-synced-doc-card-content-description {
       color: var(--affine-text-secondary-color);
     }
 
-    .affine-synced-card-content-date {
+    .affine-embed-synced-doc-card-content-date {
       display: none;
     }
 
-    .affine-synced-card-banner.render {
+    .affine-embed-synced-doc-card-banner.render {
       display: none;
     }
 
-    .affine-synced-card-banner.default {
+    .affine-embed-synced-doc-card-banner.default {
       display: block;
     }
 
-    .affine-synced-card-banner {
+    .affine-embed-synced-doc-card-banner {
       height: 66px;
     }
 
-    .affine-synced-card-banner img,
-    .affine-synced-card-banner object,
-    .affine-synced-card-banner svg {
+    .affine-embed-synced-doc-card-banner img,
+    .affine-embed-synced-doc-card-banner object,
+    .affine-embed-synced-doc-card-banner svg {
       height: 66px;
     }
 
-    .affine-synced-card-content {
+    .affine-embed-synced-doc-card-content {
       gap: 12px;
     }
   }
-  .affine-synced-card:not(.loading):not(.error):not(.deleted).cycle:not(
-      .banner-empty
-    ) {
-    .affine-synced-card-banner.render {
+  .affine-embed-synced-doc-card:not(.loading):not(.error):not(
+      .deleted
+    ).cycle:not(.banner-empty) {
+    .affine-embed-synced-doc-card-banner.render {
       display: block;
     }
-    .affine-synced-card-banner.default {
+    .affine-embed-synced-doc-card-banner.default {
       display: none;
     }
   }
-  .affine-synced-card:not(.loading):not(.error):not(
+  .affine-embed-synced-doc-card:not(.loading):not(.error):not(
       .deleted
     ).cycle.banner-empty {
-    .affine-synced-card-content {
+    .affine-embed-synced-doc-card-content {
       width: 100%;
       height: 100%;
     }
 
-    .affine-synced-card-banner.render {
+    .affine-embed-synced-doc-card-banner.render {
       display: none;
     }
 
-    .affine-synced-card-banner.default {
+    .affine-embed-synced-doc-card-banner.default {
       display: none;
     }
   }
 
-  .affine-synced-card.surface:not(.cycle) {
-    width: ${SYNCED_BLOCK_DEFAULT_WIDTH}px;
-    height: ${SYNCED_BLOCK_DEFAULT_HEIGHT}px;
+  .affine-embed-synced-doc-card.surface:not(.cycle) {
+    width: ${EMBED_CARD_WIDTH.syncedDoc}px;
+    height: ${EMBED_CARD_HEIGHT.syncedDoc}px;
     flex-direction: column-reverse;
 
-    .affine-synced-card-banner.default {
+    .affine-embed-synced-doc-card-banner.default {
       display: flex;
       align-items: flex-end;
       justify-content: center;
@@ -367,14 +396,14 @@ export const cardStyles = css`
       margin-left: 12px;
       flex-shrink: 0;
     }
-    .affine-synced-card-banner img,
-    .affine-synced-card-banner object,
-    .affine-synced-card-banner svg {
+    .affine-embed-synced-doc-card-banner img,
+    .affine-embed-synced-doc-card-banner object,
+    .affine-embed-synced-doc-card-banner svg {
       width: 340px;
       height: 170px;
     }
 
-    .affine-synced-card-content {
+    .affine-embed-synced-doc-card-content {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -383,78 +412,80 @@ export const cardStyles = css`
       height: 100%;
     }
 
-    .affine-synced-card-content-title {
+    .affine-embed-synced-doc-card-content-title {
       margin: 0 auto;
     }
 
-    .affine-synced-card-content-description {
+    .affine-embed-synced-doc-card-content-description {
       margin: 0 auto;
       flex-grow: 0;
     }
 
-    .affine-synced-card-content-reload {
+    .affine-embed-synced-doc-card-content-reload {
       flex-grow: 0;
       margin: 0 auto;
     }
   }
 
-  .affine-synced-card.surface:not(.loading):not(.error):not(.deleted).cycle {
+  .affine-embed-synced-doc-card.surface:not(.loading):not(.error):not(
+      .deleted
+    ).cycle {
     width: ${EMBED_CARD_WIDTH.vertical}px;
     height: ${EMBED_CARD_HEIGHT.vertical}px;
     flex-direction: column-reverse;
     margin-top: calc(
-      (${SYNCED_BLOCK_DEFAULT_HEIGHT}px - ${EMBED_CARD_HEIGHT.vertical}px) / 2
+      (${EMBED_CARD_HEIGHT.syncedDoc}px - ${EMBED_CARD_HEIGHT.vertical}px) / 2
     );
 
-    .affine-synced-card-content {
+    .affine-embed-synced-doc-card-content {
       width: 100%;
     }
 
-    .affine-synced-card-content-description {
+    .affine-embed-synced-doc-card-content-description {
       -webkit-line-clamp: 6;
       max-height: 120px;
     }
 
-    .affine-synced-card-content-date {
+    .affine-embed-synced-doc-card-content-date {
       flex-grow: 1;
       align-items: flex-end;
     }
 
-    .affine-synced-card-banner {
+    .affine-embed-synced-doc-card-banner {
       width: 340px;
       height: 170px;
       margin-left: 12px;
     }
-    .affine-synced-card-banner img,
-    .affine-synced-card-banner object,
-    .affine-synced-card-banner svg {
+    .affine-embed-synced-doc-card-banner img,
+    .affine-embed-synced-doc-card-banner object,
+    .affine-embed-synced-doc-card-banner svg {
       width: 340px;
       height: 170px;
     }
   }
 
-  .affine-synced-card.surface:not(.loading):not(.error):not(.deleted).cycle:not(
-      .empty
-    ).banner-empty {
-    .affine-synced-card-content {
+  .affine-embed-synced-doc-card.surface:not(.loading):not(.error):not(
+      .deleted
+    ).cycle:not(.empty).banner-empty {
+    .affine-embed-synced-doc-card-content {
       width: 100%;
       height: 100%;
     }
 
-    .affine-synced-card-banner.render {
+    .affine-embed-synced-doc-card-banner.render {
       display: none;
     }
 
-    .affine-synced-card-banner.default {
+    .affine-embed-synced-doc-card-banner.default {
       display: none;
     }
 
-    .affine-synced-card-content-description {
+    .affine-embed-synced-doc-card-content-description {
       -webkit-line-clamp: 16;
       max-height: 320px;
     }
 
-    .affine-synced-card-content-date {
+    .affine-embed-synced-doc-card-content-date {
       flex-grow: unset;
       align-items: center;
     }

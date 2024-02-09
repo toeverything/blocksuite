@@ -21,6 +21,8 @@ import {
   CaptionIcon,
   CopyIcon,
   EditIcon,
+  EmbedEdgelessIcon,
+  EmbedPageIcon,
   EmbedWebIcon,
   ExpandFullIcon,
   OpenIcon,
@@ -47,10 +49,10 @@ import type {
   EmbedLinkedDocBlockComponent,
   EmbedLinkedDocModel,
 } from '../../../../embed-linked-doc-block/index.js';
-import {
-  LinkedEdgelessIcon,
-  LinkedPageIcon,
-} from '../../../../embed-linked-doc-block/styles.js';
+import type {
+  EmbedSyncedDocBlockComponent,
+  EmbedSyncedDocModel,
+} from '../../../../embed-synced-doc-block/index.js';
 import type {
   EmbedYoutubeBlockComponent,
   EmbedYoutubeModel,
@@ -60,17 +62,13 @@ import {
   type EdgelessBlockType,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type {
-  SyncedBlockComponent,
-  SyncedBlockModel,
-} from '../../../../synced-block/index.js';
 import type { EmbedOptions, PageService } from '../../../page-service.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
   isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
-  isSyncedBlock,
+  isEmbedSyncedDocBlock,
 } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -214,8 +212,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedYoutubeModel
     | EmbedFigmaModel
     | EmbedLinkedDocModel
-    | EmbedHtmlModel
-    | SyncedBlockModel;
+    | EmbedSyncedDocModel
+    | EmbedHtmlModel;
 
   @property({ attribute: false })
   std!: BlockStdScope;
@@ -270,7 +268,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | EmbedYoutubeBlockComponent
       | EmbedFigmaBlockComponent
       | EmbedLinkedDocBlockComponent
-      | SyncedBlockComponent
+      | EmbedSyncedDocBlockComponent
       | null;
     assertExists(blockElement);
 
@@ -299,7 +297,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
   private get _isEmbedView() {
     return (
-      isSyncedBlock(this.model) || this._embedOptions?.viewType === 'embed'
+      isEmbedSyncedDocBlock(this.model) ||
+      this._embedOptions?.viewType === 'embed'
     );
   }
 
@@ -355,23 +354,29 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private get _pageIcon() {
-    if (!isEmbedLinkedDocBlock(this.model) && !isSyncedBlock(this.model)) {
+    if (
+      !isEmbedLinkedDocBlock(this.model) &&
+      !isEmbedSyncedDocBlock(this.model)
+    ) {
       return nothing;
     }
     const block = this._blockElement as
       | EmbedLinkedDocBlockComponent
-      | SyncedBlockComponent;
+      | EmbedSyncedDocBlockComponent;
 
-    return block.pageMode === 'page' ? LinkedPageIcon : LinkedEdgelessIcon;
+    return block.pageMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon;
   }
 
   private get _pageTitle() {
-    if (!isEmbedLinkedDocBlock(this.model) && !isSyncedBlock(this.model)) {
+    if (
+      !isEmbedLinkedDocBlock(this.model) &&
+      !isEmbedSyncedDocBlock(this.model)
+    ) {
       return '';
     }
     const block = this._blockElement as
       | EmbedLinkedDocBlockComponent
-      | SyncedBlockComponent;
+      | EmbedSyncedDocBlockComponent;
     return block.pageTitle;
   }
 
@@ -549,7 +554,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               ></component-toolbar-menu-divider>
             `
           : nothing}
-        ${isEmbedLinkedDocBlock(model) || isSyncedBlock(model)
+        ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
           ? html`
               <div
                 class="change-embed-card-button page-info"

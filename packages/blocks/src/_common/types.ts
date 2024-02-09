@@ -1,24 +1,27 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BlockModel, type Page } from '@blocksuite/store';
 
+import type { BookmarkBlockModel } from '../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
+import type { EmbedHtmlModel } from '../embed-html-block/embed-html-model.js';
 import type { EmbedLinkedDocModel } from '../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedSyncedDocModel } from '../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
-import type { FrameBlockModel } from '../frame-block/index.js';
-import type { ImageBlockModel } from '../image-block/index.js';
-import type { EmbedHtmlModel } from '../index.js';
-import type { BookmarkBlockModel } from '../models.js';
-import type { NoteBlockModel } from '../note-block/index.js';
+import type { FrameBlockModel } from '../frame-block/frame-model.js';
+import type { ImageBlockModel } from '../image-block/image-model.js';
+import type { NoteBlockModel } from '../note-block/note-model.js';
 import type { EdgelessModel } from '../page-block/edgeless/type.js';
-import type { ConnectorMode } from '../surface-block/element-model/connector.js';
+import type {
+  ConnectorElementModel,
+  ConnectorMode,
+} from '../surface-block/element-model/connector.js';
+import { type CanvasElement } from '../surface-block/element-model/index.js';
 import type {
   BrushElementModel,
-  ConnectorElementModel,
   GroupElementModel,
-} from '../surface-block/element-model/index.js';
-import { type CanvasElement } from '../surface-block/element-model/index.js';
-import type { ShapeType } from '../surface-block/index.js';
+  ShapeType,
+} from '../surface-block/index.js';
 import type { NavigatorMode } from './edgeless/frame/consts.js';
 import type { RefNodeSlots } from './inline/presets/nodes/reference-node/reference-node.js';
 import type { BlockComponent } from './utils/query.js';
@@ -130,6 +133,7 @@ export type TopLevelBlockModel =
   | EmbedYoutubeModel
   | EmbedFigmaModel
   | EmbedLinkedDocModel
+  | EmbedSyncedDocModel
   | EmbedHtmlModel;
 
 export type { EdgelessModel as EdgelessModel };
@@ -205,8 +209,7 @@ export type NoteChildrenFlavour =
   | 'affine:image'
   | 'affine:bookmark'
   | 'affine:attachment'
-  | 'affine:surface-ref'
-  | 'affine:synced';
+  | 'affine:surface-ref';
 
 export type NoteTool = {
   type: 'affine:note';
@@ -262,4 +265,5 @@ export type EmbedCardStyle =
   | 'cubeThick'
   | 'video'
   | 'figma'
-  | 'html';
+  | 'html'
+  | 'syncedDoc';

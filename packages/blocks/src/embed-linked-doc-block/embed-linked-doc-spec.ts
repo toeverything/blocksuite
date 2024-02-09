@@ -1,6 +1,6 @@
 import { literal } from 'lit/static-html.js';
 
-import { createEmbedBlock } from '../_common/embed-block-helper/index.js';
+import { createEmbedBlock } from '../_common/embed-block-helper/helper.js';
 import {
   type EmbedLinkedDocBlockProps,
   EmbedLinkedDocModel,
@@ -9,8 +9,8 @@ import {
 import { EmbedLinkedDocService } from './embed-linked-doc-service.js';
 
 const defaultEmbedLinkedDocBlockProps: EmbedLinkedDocBlockProps = {
-  style: EmbedLinkedDocStyles[1],
   pageId: '',
+  style: EmbedLinkedDocStyles[1],
   caption: null,
 };
 

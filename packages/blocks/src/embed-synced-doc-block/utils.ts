@@ -2,14 +2,12 @@ import type { TemplateResult } from 'lit';
 
 import {
   DarkLoadingIcon,
+  EmbedEdgelessIcon,
+  EmbedPageIcon,
   LightLoadingIcon,
   ReloadIcon,
 } from '../_common/icons/text.js';
 import { getThemeMode } from '../_common/utils/query.js';
-import {
-  LinkedEdgelessIcon,
-  LinkedPageIcon,
-} from '../embed-linked-doc-block/styles.js';
 import {
   DarkSyncedDocDeletedBanner,
   DarkSyncedDocEmptyBanner,
@@ -39,7 +37,7 @@ export function getSyncedDocIcons(
   if (theme === 'light') {
     return {
       LoadingIcon: LightLoadingIcon,
-      SyncedDocIcon: pageMode === 'page' ? LinkedPageIcon : LinkedEdgelessIcon,
+      SyncedDocIcon: pageMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
       SyncedDocErrorIcon,
       SyncedDocDeletedIcon,
       ReloadIcon,
@@ -50,7 +48,7 @@ export function getSyncedDocIcons(
   } else {
     return {
       LoadingIcon: DarkLoadingIcon,
-      SyncedDocIcon: pageMode === 'page' ? LinkedPageIcon : LinkedEdgelessIcon,
+      SyncedDocIcon: pageMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
       SyncedDocErrorIcon,
       SyncedDocDeletedIcon,
       ReloadIcon,

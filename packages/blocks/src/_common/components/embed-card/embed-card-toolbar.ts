@@ -22,27 +22,25 @@ import type {
   EmbedLinkedDocBlockComponent,
   EmbedLinkedDocModel,
 } from '../../../embed-linked-doc-block/index.js';
-import {
-  LinkedEdgelessIcon,
-  LinkedPageIcon,
-} from '../../../embed-linked-doc-block/styles.js';
+import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
   isEmbedLinkedDocBlock,
-  isSyncedBlock,
+  isEmbedSyncedDocBlock,
 } from '../../../page-block/edgeless/utils/query.js';
 import type {
   EmbedOptions,
   PageService,
 } from '../../../page-block/page-service.js';
-import type { SyncedBlockComponent } from '../../../synced-block/synced-block.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../icons/edgeless.js';
 import {
   CaptionIcon,
   CopyIcon,
   EditIcon,
+  EmbedEdgelessIcon,
+  EmbedPageIcon,
   EmbedWebIcon,
   LinkIcon,
   OpenIcon,
@@ -62,7 +60,7 @@ export type EmbedToolbarBlock =
   | EmbedYoutubeBlockComponent
   | EmbedFigmaBlockComponent
   | EmbedLinkedDocBlockComponent
-  | SyncedBlockComponent;
+  | EmbedSyncedDocBlockComponent;
 
 @customElement('embed-card-toolbar')
 export class EmbedCardToolbar extends WithDisposable(LitElement) {
@@ -226,7 +224,8 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
 
   private get _isEmbedView() {
     return (
-      isSyncedBlock(this._model) || this._embedOptions?.viewType === 'embed'
+      isEmbedSyncedDocBlock(this._model) ||
+      this._embedOptions?.viewType === 'embed'
     );
   }
 
@@ -257,23 +256,29 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   }
 
   private get _pageIcon() {
-    if (!isEmbedLinkedDocBlock(this._model) && !isSyncedBlock(this._model)) {
+    if (
+      !isEmbedLinkedDocBlock(this._model) &&
+      !isEmbedSyncedDocBlock(this._model)
+    ) {
       return nothing;
     }
     const block = this.block as
       | EmbedLinkedDocBlockComponent
-      | SyncedBlockComponent;
+      | EmbedSyncedDocBlockComponent;
 
-    return block.pageMode === 'page' ? LinkedPageIcon : LinkedEdgelessIcon;
+    return block.pageMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon;
   }
 
   private get _pageTitle() {
-    if (!isEmbedLinkedDocBlock(this._model) && !isSyncedBlock(this._model)) {
+    if (
+      !isEmbedLinkedDocBlock(this._model) &&
+      !isEmbedSyncedDocBlock(this._model)
+    ) {
       return '';
     }
     const block = this.block as
       | EmbedLinkedDocBlockComponent
-      | SyncedBlockComponent;
+      | EmbedSyncedDocBlockComponent;
     return block.pageTitle;
   }
 
@@ -507,7 +512,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               <div class="divider"></div>
             `
           : nothing}
-        ${isEmbedLinkedDocBlock(model) || isSyncedBlock(model)
+        ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
           ? html`
               <div
                 class="embed-card-toolbar-button page-info"

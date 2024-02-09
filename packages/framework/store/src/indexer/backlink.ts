@@ -162,7 +162,7 @@ export class BacklinkIndexer {
         const flavour = block.get('sys:flavour');
         if (
           flavour === 'affine:embed-linked-doc' ||
-          flavour === 'affine:synced'
+          flavour === 'affine:embed-synced-doc'
         ) {
           const pageId = block.get('prop:pageId');
           if (typeof pageId === 'string') {

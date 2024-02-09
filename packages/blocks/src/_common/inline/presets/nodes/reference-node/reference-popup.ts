@@ -150,7 +150,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
     const index = parent.children.indexOf(blockElement.model);
     const pageId = this.referencePageId;
-    page.addBlock('affine:synced', { pageId }, parent, index + 1);
+    page.addBlock('affine:embed-synced-doc', { pageId }, parent, index + 1);
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;

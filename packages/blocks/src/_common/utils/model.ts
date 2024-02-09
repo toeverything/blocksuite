@@ -17,6 +17,7 @@ import type {
   EmbedGithubModel,
   EmbedHtmlModel,
   EmbedLinkedDocModel,
+  EmbedSyncedDocModel,
   EmbedYoutubeModel,
   FrameBlockModel,
   FrameBlockSchema,
@@ -33,8 +34,6 @@ import type {
   SurfaceBlockModel,
   SurfaceBlockSchema,
   SurfaceRefBlockModel,
-  SyncedBlockModel,
-  SyncedBlockSchema,
 } from '../../index.js';
 
 export type BlockModels = {
@@ -56,8 +55,8 @@ export type BlockModels = {
   'affine:embed-youtube': EmbedYoutubeModel;
   'affine:embed-figma': EmbedFigmaModel;
   'affine:embed-linked-doc': EmbedLinkedDocModel;
+  'affine:embed-synced-doc': EmbedSyncedDocModel;
   'affine:embed-html': EmbedHtmlModel;
-  'affine:synced': SyncedBlockModel;
 };
 
 export type BlockSchemas = {
@@ -74,7 +73,6 @@ export type BlockSchemas = {
   'affine:data-view': typeof DataViewBlockSchema;
   'affine:bookmark': typeof BookmarkBlockSchema;
   'affine:attachment': typeof AttachmentBlockSchema;
-  'affine:synced': typeof SyncedBlockSchema;
 };
 
 export type BlockModelProps = {

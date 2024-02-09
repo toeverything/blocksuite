@@ -76,6 +76,7 @@ export * from './embed-figma-block/index.js';
 export * from './embed-github-block/index.js';
 export * from './embed-html-block/index.js';
 export * from './embed-linked-doc-block/index.js';
+export * from './embed-synced-doc-block/index.js';
 export * from './embed-youtube-block/index.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
@@ -111,7 +112,6 @@ export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
-export * from './synced-block/index.js';
 export const BlocksUtils = {
   splitElements,
   matchFlavours,

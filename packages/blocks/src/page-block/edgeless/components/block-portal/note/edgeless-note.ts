@@ -133,7 +133,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       }
     }
 
-    .edgeless-block-portal-note:has(.affine-synced-container.editing)
+    .edgeless-block-portal-note:has(.affine-embed-synced-doc-container.editing)
       > .note-background {
       left: ${-ACTIVE_NOTE_EXTRA_PADDING}px !important;
       top: ${-ACTIVE_NOTE_EXTRA_PADDING}px !important;
@@ -141,7 +141,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       height: calc(100% + ${ACTIVE_NOTE_EXTRA_PADDING * 2}px) !important;
     }
 
-    .edgeless-block-portal-note:has(.affine-synced-container.editing)
+    .edgeless-block-portal-note:has(.affine-embed-synced-doc-container.editing)
       > edgeless-note-mask {
       display: none;
     }

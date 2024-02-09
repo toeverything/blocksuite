@@ -5,19 +5,19 @@ import { html, nothing } from 'lit';
 import { customElement, property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { renderDocInCard } from '../../embed-linked-doc-block/utils.js';
+import { renderDocInCard } from '../../_common/utils/render-doc.js';
 import type { SurfaceRefRenderer } from '../../surface-ref-block/surface-ref-renderer.js';
 import type { SurfaceRefBlockService } from '../../surface-ref-block/surface-ref-service.js';
+import type { EmbedSyncedDocBlockComponent } from '../embed-synced-doc-block.js';
 import { cardStyles } from '../styles.js';
-import type { SyncedBlockComponent } from '../synced-block.js';
 import { getSyncedDocIcons } from '../utils.js';
 
-@customElement('affine-synced-card')
-export class SyncedCard extends WithDisposable(ShadowlessElement) {
+@customElement('affine-embed-synced-doc-card')
+export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
   static override styles = cardStyles;
 
   @property({ attribute: false })
-  block!: SyncedBlockComponent;
+  block!: EmbedSyncedDocBlockComponent;
 
   @property({ attribute: false })
   isError = false;
@@ -34,7 +34,7 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   surfaceRefRenderer?: SurfaceRefRenderer;
 
-  @queryAsync('.affine-synced-card-banner.render')
+  @queryAsync('.affine-embed-synced-doc-card-banner.render')
   bannerContainer!: Promise<HTMLDivElement>;
 
   get std() {
@@ -66,12 +66,12 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
   }
 
   private _isPageEmpty() {
-    const linkedDoc = this.doc;
-    if (!linkedDoc) {
+    const syncedDoc = this.doc;
+    if (!syncedDoc) {
       return false;
     }
     return (
-      !!linkedDoc && !linkedDoc.meta.title.length && !this.abstractText.length
+      !!syncedDoc && !syncedDoc.meta.title.length && !this.abstractText.length
     );
   }
 
@@ -199,29 +199,29 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
 
     return html`
       <div
-        class="affine-synced-card ${cardClassMap}"
+        class="affine-embed-synced-doc-card ${cardClassMap}"
         @click=${this._handleClick}
       >
-        <div class="affine-synced-card-content">
-          <div class="affine-synced-card-content-title">
-            <div class="affine-synced-card-content-title-icon">
+        <div class="affine-embed-synced-doc-card-content">
+          <div class="affine-embed-synced-doc-card-content-title">
+            <div class="affine-embed-synced-doc-card-content-title-icon">
               ${titleIcon}
             </div>
 
-            <div class="affine-synced-card-content-title-text">
+            <div class="affine-embed-synced-doc-card-content-title-text">
               ${titleText}
             </div>
           </div>
 
-          <div class="affine-synced-card-content-description">
+          <div class="affine-embed-synced-doc-card-content-description">
             ${descriptionText}
           </div>
 
           ${error
             ? html`
-                <div class="affine-synced-card-content-reload">
+                <div class="affine-embed-synced-doc-card-content-reload">
                   <div
-                    class="affine-synced-card-content-reload-button"
+                    class="affine-embed-synced-doc-card-content-reload-button"
                     @click=${() => this.block.refreshData()}
                   >
                     ${ReloadIcon} <span>Reload</span>
@@ -229,7 +229,7 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
                 </div>
               `
             : html`
-                <div class="affine-synced-card-content-date">
+                <div class="affine-embed-synced-doc-card-content-date">
                   <span>Updated</span>
 
                   <span>${dateText}</span>
@@ -237,11 +237,11 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
               `}
         </div>
 
-        <div class="affine-synced-card-banner render"></div>
+        <div class="affine-embed-synced-doc-card-banner render"></div>
 
         ${showDefaultBanner
           ? html`
-              <div class="affine-synced-card-banner default">
+              <div class="affine-embed-synced-doc-card-banner default">
                 ${defaultBanner}
               </div>
             `
@@ -255,6 +255,6 @@ export class SyncedCard extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-synced-card': SyncedCard;
+    'affine-embed-synced-doc-card': EmbedSyncedDocCard;
   }
 }

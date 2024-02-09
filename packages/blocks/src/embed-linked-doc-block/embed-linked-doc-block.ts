@@ -21,21 +21,18 @@ import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
+import { renderDocInCard } from '../_common/utils/render-doc.js';
 import type { PageBlockComponent, PageService } from '../page-block/index.js';
 import { Bound } from '../surface-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
-import {
-  SYNCED_BLOCK_DEFAULT_HEIGHT,
-  SYNCED_BLOCK_DEFAULT_WIDTH,
-} from '../synced-block/styles.js';
 import type {
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
 } from './embed-linked-doc-model.js';
 import type { EmbedLinkedDocService } from './embed-linked-doc-service.js';
 import { styles } from './styles.js';
-import { getEmbedLinkedDocIcons, renderDocInCard } from './utils.js';
+import { getEmbedLinkedDocIcons } from './utils.js';
 
 @customElement('affine-embed-linked-doc-block')
 export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
@@ -212,14 +209,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const { page, pageId, caption, xywh } = this.model;
 
     if (this.isInSurface) {
+      const style = 'syncedDoc';
       const bound = Bound.deserialize(xywh);
-      bound.w = SYNCED_BLOCK_DEFAULT_WIDTH;
-      bound.h = SYNCED_BLOCK_DEFAULT_HEIGHT;
+      bound.w = EMBED_CARD_WIDTH[style];
+      bound.h = EMBED_CARD_HEIGHT[style];
 
       const edgeless = this.edgeless;
       assertExists(edgeless);
       const blockId = edgeless.service.addBlock(
-        'affine:synced',
+        'affine:embed-synced-doc',
         { pageId, xywh: bound.serialize(), caption },
         edgeless.surface.model
       );
@@ -232,7 +230,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       assertExists(parent);
       const index = parent.children.indexOf(this.model);
 
-      page.addBlock('affine:synced', { pageId, caption }, parent, index);
+      page.addBlock(
+        'affine:embed-synced-doc',
+        { pageId, caption },
+        parent,
+        index
+      );
 
       this.std.selection.setGroup('note', []);
     }

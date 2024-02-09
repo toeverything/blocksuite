@@ -85,7 +85,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
 
     // Add synced block - self
     pageMain.addBlock(
-      'affine:synced',
+      'affine:embed-synced-doc',
       {
         pageId: id,
       },
@@ -94,7 +94,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
 
     // Add synced block - page view
     pageMain.addBlock(
-      'affine:synced',
+      'affine:embed-synced-doc',
       {
         pageId: 'synced-page',
       },
@@ -103,7 +103,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
 
     // Add synced block - edgeless view
     pageMain.addBlock(
-      'affine:synced',
+      'affine:embed-synced-doc',
       {
         pageId: 'synced-edgeless',
       },
@@ -112,7 +112,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
 
     // Add synced block - page view
     pageMain.addBlock(
-      'affine:synced',
+      'affine:embed-synced-doc',
       {
         pageId: 'synced-page',
         xywh: '[-1000, 0, 752, 455]',
@@ -122,7 +122,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
 
     // Add synced block - edgeless view
     pageMain.addBlock(
-      'affine:synced',
+      'affine:embed-synced-doc',
       {
         pageId: 'synced-edgeless',
         xywh: '[-1000, 500, 752, 455]',
@@ -132,7 +132,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
 
     // Add synced block - self
     pageMain.addBlock(
-      'affine:synced',
+      'affine:embed-synced-doc',
       {
         pageId: id,
         xywh: '[-1000, 1000, 752, 455]',
@@ -142,7 +142,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
 
     // Add synced block - self
     pageMain.addBlock(
-      'affine:synced',
+      'affine:embed-synced-doc',
       {
         pageId: 'deleted-page',
       },

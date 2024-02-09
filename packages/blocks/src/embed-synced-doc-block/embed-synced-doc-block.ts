@@ -1,4 +1,4 @@
-import './components/synced-card.js';
+import './components/embed-synced-doc-card.js';
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
@@ -6,7 +6,6 @@ import '../_common/components/embed-card/embed-card-toolbar.js';
 import { UIEventDispatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { BlockElement } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing, type PropertyValues } from 'lit';
@@ -19,6 +18,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/index.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
@@ -29,19 +29,15 @@ import {
 import type { NoteBlockModel } from '../note-block/note-model.js';
 import type { PageBlockComponent, PageService } from '../page-block/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
-import type { SyncedCard } from './components/synced-card.js';
-import {
-  blockStyles,
-  SYNCED_BLOCK_DEFAULT_HEIGHT,
-  SYNCED_BLOCK_DEFAULT_WIDTH,
-} from './styles.js';
-import { type SyncedBlockModel } from './synced-model.js';
-import type { SyncedService } from './synced-service.js';
+import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
+import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
+import type { EmbedSyncedDocService } from './embed-synced-doc-service.js';
+import { blockStyles } from './styles.js';
 
-@customElement('affine-synced')
-export class SyncedBlockComponent extends BlockElement<
-  SyncedBlockModel,
-  SyncedService
+@customElement('affine-embed-synced-doc-block')
+export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
+  EmbedSyncedDocModel,
+  EmbedSyncedDocService
 > {
   static override styles = blockStyles;
 
@@ -69,32 +65,16 @@ export class SyncedBlockComponent extends BlockElement<
   @state()
   private _empty = false;
 
-  @query('affine-synced-card')
-  syncedBlockCard?: SyncedCard;
+  @query('affine-embed-synced-doc-card')
+  syncedDocCard?: EmbedSyncedDocCard;
 
   @query('embed-card-caption')
   captionElement?: EmbedCardCaption;
 
-  @query('.affine-synced-container > .synced-block-editor > editor-host')
+  @query(
+    '.affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
+  )
   syncedDocEditorHost?: EditorHost;
-
-  private _isInSurface = false;
-
-  get isInSurface() {
-    return this._isInSurface;
-  }
-
-  get edgeless() {
-    if (!this._isInSurface) {
-      return null;
-    }
-    return this.host.querySelector('affine-edgeless-page');
-  }
-
-  get surface() {
-    if (!this.isInSurface) return null;
-    return this.host.querySelector('affine-surface');
-  }
 
   get doc() {
     const page = this.std.workspace.getPage(this.model.pageId);
@@ -387,9 +367,6 @@ export class SyncedBlockComponent extends BlockElement<
 
     this.contentEditable = 'false';
 
-    const parent = this.host.page.getParent(this.model);
-    this._isInSurface = parent?.flavour === 'affine:surface';
-
     this.model.propsUpdated.on(({ key }) => {
       if (key === 'pageId') {
         this._load().catch(e => {
@@ -413,10 +390,18 @@ export class SyncedBlockComponent extends BlockElement<
 
   override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
-    this.syncedBlockCard?.requestUpdate();
+    this.syncedDocCard?.requestUpdate();
   }
 
   override render() {
+    const { style, xywh } = this.model;
+
+    this._cardStyle = style;
+
+    const bound = Bound.deserialize(xywh);
+    this._width = this.isInSurface ? bound.w : EMBED_CARD_WIDTH[style];
+    this._height = this.isInSurface ? bound.h : EMBED_CARD_HEIGHT[style];
+
     const syncedDoc = this.doc;
     const { isLoading, isError, isDeleted, isCycle, isEditing, isEmpty } =
       this.blockState;
@@ -432,32 +417,31 @@ export class SyncedBlockComponent extends BlockElement<
       });
       if (isInSurface) {
         const bound = Bound.deserialize(this.model.xywh);
-        const scaleX = bound.w / SYNCED_BLOCK_DEFAULT_WIDTH;
-        const scaleY = bound.h / SYNCED_BLOCK_DEFAULT_HEIGHT;
+        const scaleX = bound.w / EMBED_CARD_WIDTH[style];
+        const scaleY = bound.h / EMBED_CARD_HEIGHT[style];
         cardStyleMap = styleMap({
           display: 'block',
-          width: `${SYNCED_BLOCK_DEFAULT_WIDTH}px`,
-          height: `${SYNCED_BLOCK_DEFAULT_HEIGHT}px`,
+          width: `${EMBED_CARD_WIDTH[style]}px`,
+          height: `${EMBED_CARD_HEIGHT[style]}px`,
           transform: `scale(${scaleX}, ${scaleY})`,
           transformOrigin: '0 0',
         });
       }
 
       return html`
-        <affine-synced-card
+        <affine-embed-synced-doc-card
           ${isInSurface || !isCycle
             ? nothing
             : ref(this._whenHover.setReference)}
           style=${cardStyleMap}
           .block=${this}
-        ></affine-synced-card>
+        ></affine-embed-synced-doc-card>
       `;
     }
 
     let containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
-      margin: '10px 0',
     });
     if (isInSurface) {
       const scale = this.model.scale ?? 1;
@@ -484,55 +468,57 @@ export class SyncedBlockComponent extends BlockElement<
     this.setAttribute('data-nested-editor', 'true');
     const scale = isInSurface ? this.model.scale ?? 1 : undefined;
 
-    return html`
-      <div
-        ${isInSurface || isEditing
-          ? nothing
-          : ref(this._whenHover.setReference)}
-        class=${classMap({
-          'affine-synced-container': true,
-          [pageMode]: true,
-          [theme]: true,
-          selected: isSelected,
-          editing: isEditing,
-          surface: isInSurface,
-        })}
-        style=${containerStyleMap}
-        @pointerdown=${this._handlePointerDown}
-        data-scale=${ifDefined(scale)}
-      >
+    return this.renderEmbed(
+      () => html`
         <div
+          ${isInSurface || isEditing
+            ? nothing
+            : ref(this._whenHover.setReference)}
           class=${classMap({
-            'synced-block-editor': true,
-            'affine-doc-viewport': pageMode === 'page',
-            'affine-edgeless-viewport': pageMode === 'edgeless',
+            'affine-embed-synced-doc-container': true,
+            [pageMode]: true,
+            [theme]: true,
+            selected: isSelected,
+            editing: isEditing,
+            surface: isInSurface,
           })}
+          style=${containerStyleMap}
+          @pointerdown=${this._handlePointerDown}
+          data-scale=${ifDefined(scale)}
         >
-          ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
-          ${isEmpty && !isEditing && pageMode === 'page'
+          <div
+            class=${classMap({
+              'affine-embed-synced-doc-editor': true,
+              'affine-doc-viewport': pageMode === 'page',
+              'affine-edgeless-viewport': pageMode === 'edgeless',
+            })}
+          >
+            ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
+            ${isEmpty && !isEditing && pageMode === 'page'
+              ? html`
+                  <div class="affine-embed-synced-doc-editor-empty">
+                    <span>This is a linked doc, you can add content here.</span>
+                  </div>
+                `
+              : nothing}
+          </div>
+
+          ${isInSurface && !isEditing
             ? html`
-                <div class="synced-block-editor-empty">
-                  <span>This is a linked doc, you can add content here.</span>
-                </div>
+                <div
+                  class="affine-embed-synced-doc-editor-overlay"
+                  @dblclick=${this._handleOverlayDblClick}
+                ></div>
               `
             : nothing}
         </div>
 
-        ${isInSurface && !isEditing
-          ? html`
-              <div
-                class="synced-block-editor-overlay"
-                @dblclick=${this._handleOverlayDblClick}
-              ></div>
-            `
+        ${isInSurface
+          ? html`<embed-card-caption .block=${this}></embed-card-caption>`
           : nothing}
-      </div>
 
-      ${isInSurface
-        ? html`<embed-card-caption .block=${this}></embed-card-caption>`
-        : nothing}
-
-      <affine-block-selection .block=${this}></affine-block-selection>
-    `;
+        <affine-block-selection .block=${this}></affine-block-selection>
+      `
+    );
   }
 }

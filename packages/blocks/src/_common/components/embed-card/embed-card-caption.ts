@@ -5,9 +5,9 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { AttachmentBlockComponent } from '../../../attachment-block/attachment-block.js';
 import type { EmbedHtmlBlockComponent } from '../../../embed-html-block/embed-html-block.js';
+import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
-import type { SyncedBlockComponent } from '../../../synced-block/synced-block.js';
 import { stopPropagation } from '../../utils/event.js';
 import { asyncFocusRichText } from '../../utils/selection.js';
 import type { EmbedToolbarBlock } from './embed-card-toolbar.js';
@@ -38,7 +38,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     | ImageBlockComponent
     | EmbedHtmlBlockComponent
     | SurfaceRefBlockComponent
-    | SyncedBlockComponent;
+    | EmbedSyncedDocBlockComponent;
 
   @state()
   display = false;
