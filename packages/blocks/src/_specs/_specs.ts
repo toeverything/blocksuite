@@ -15,6 +15,7 @@ import { EmbedFigmaBlockSpec } from '../embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
 import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/index.js';
+import { EmbedSyncedDocBlockSpec } from '../embed-synced-doc-block/embed-synced-doc-spec.js';
 import { EmbedYoutubeBlockSpec } from '../embed-youtube-block/index.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
@@ -48,7 +49,6 @@ import {
   SurfaceRefBlockSchema,
   SurfaceRefBlockService,
 } from '../surface-ref-block/index.js';
-import { SyncedBlockSpec } from '../synced-block/synced-spec.js';
 
 const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -193,7 +193,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
   EmbedLinkedDocBlockSpec,
-  SyncedBlockSpec,
+  EmbedSyncedDocBlockSpec,
 ];
 
 export const DocEditorBlockSpecs: BlockSpec[] = [

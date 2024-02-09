@@ -1,6 +1,11 @@
-import type { TemplateResult } from 'lit';
+import { type TemplateResult } from 'lit';
 
-import { DarkLoadingIcon, LightLoadingIcon } from '../_common/icons/text.js';
+import {
+  DarkLoadingIcon,
+  EmbedEdgelessIcon,
+  EmbedPageIcon,
+  LightLoadingIcon,
+} from '../_common/icons/text.js';
 import { getThemeMode } from '../_common/utils/query.js';
 import type { EmbedLinkedDocStyles } from './embed-linked-doc-model.js';
 import {
@@ -21,8 +26,6 @@ import {
   LightLinkedPageEmptyLargeBanner,
   LightLinkedPageEmptySmallBanner,
   LinkedDocDeletedIcon,
-  LinkedEdgelessIcon,
-  LinkedPageIcon,
 } from './styles.js';
 
 type EmbedCardImages = {
@@ -33,17 +36,17 @@ type EmbedCardImages = {
   LinkedDocDeletedBanner: TemplateResult<1>;
 };
 
-export const getEmbedLinkedDocIcons = (
-  pageType: 'page' | 'edgeless',
+export function getEmbedLinkedDocIcons(
+  pageMode: 'page' | 'edgeless',
   style: (typeof EmbedLinkedDocStyles)[number]
-): EmbedCardImages => {
+): EmbedCardImages {
   const theme = getThemeMode();
   const small = style !== 'vertical';
-  if (pageType === 'page') {
+  if (pageMode === 'page') {
     if (theme === 'light') {
       return {
         LoadingIcon: LightLoadingIcon,
-        LinkedDocIcon: LinkedPageIcon,
+        LinkedDocIcon: EmbedPageIcon,
         LinkedDocDeletedIcon,
         LinkedDocEmptyBanner: small
           ? LightLinkedPageEmptySmallBanner
@@ -55,7 +58,7 @@ export const getEmbedLinkedDocIcons = (
     } else {
       return {
         LoadingIcon: DarkLoadingIcon,
-        LinkedDocIcon: LinkedPageIcon,
+        LinkedDocIcon: EmbedPageIcon,
         LinkedDocDeletedIcon,
         LinkedDocEmptyBanner: small
           ? DarkLinkedPageEmptySmallBanner
@@ -69,7 +72,7 @@ export const getEmbedLinkedDocIcons = (
     if (theme === 'light') {
       return {
         LoadingIcon: LightLoadingIcon,
-        LinkedDocIcon: LinkedEdgelessIcon,
+        LinkedDocIcon: EmbedEdgelessIcon,
         LinkedDocDeletedIcon,
         LinkedDocEmptyBanner: small
           ? LightLinkedEdgelessEmptySmallBanner
@@ -81,7 +84,7 @@ export const getEmbedLinkedDocIcons = (
     } else {
       return {
         LoadingIcon: DarkLoadingIcon,
-        LinkedDocIcon: LinkedEdgelessIcon,
+        LinkedDocIcon: EmbedEdgelessIcon,
         LinkedDocDeletedIcon,
         LinkedDocEmptyBanner: small
           ? DarkLinkedEdgelessEmptySmallBanner
@@ -92,4 +95,4 @@ export const getEmbedLinkedDocIcons = (
       };
     }
   }
-};
+}

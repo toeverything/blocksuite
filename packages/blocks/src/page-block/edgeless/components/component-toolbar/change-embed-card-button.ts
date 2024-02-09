@@ -21,6 +21,8 @@ import {
   CaptionIcon,
   CopyIcon,
   EditIcon,
+  EmbedEdgelessIcon,
+  EmbedPageIcon,
   EmbedWebIcon,
   ExpandFullIcon,
   OpenIcon,
@@ -29,22 +31,32 @@ import {
 } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
-import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import { BookmarkStyles } from '../../../../bookmark-block/bookmark-model.js';
-import type { EmbedFigmaBlockComponent } from '../../../../embed-figma-block/embed-figma-block.js';
-import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
+import type {
+  BookmarkBlockComponent,
+  BookmarkBlockModel,
+} from '../../../../bookmark-block/index.js';
+import type {
+  EmbedFigmaBlockComponent,
+  EmbedFigmaModel,
+} from '../../../../embed-figma-block/index.js';
 import type {
   EmbedGithubBlockComponent,
   EmbedGithubModel,
 } from '../../../../embed-github-block/index.js';
-import type { EmbedLinkedDocBlockComponent } from '../../../../embed-linked-doc-block/embed-linked-doc-block.js';
-import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedYoutubeBlockComponent } from '../../../../embed-youtube-block/embed-youtube-block.js';
-import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
+import type { EmbedHtmlModel } from '../../../../embed-html-block/index.js';
 import type {
-  BookmarkBlockComponent,
-  EmbedHtmlModel,
-} from '../../../../index.js';
+  EmbedLinkedDocBlockComponent,
+  EmbedLinkedDocModel,
+} from '../../../../embed-linked-doc-block/index.js';
+import type {
+  EmbedSyncedDocBlockComponent,
+  EmbedSyncedDocModel,
+} from '../../../../embed-synced-doc-block/index.js';
+import type {
+  EmbedYoutubeBlockComponent,
+  EmbedYoutubeModel,
+} from '../../../../embed-youtube-block/index.js';
 import {
   Bound,
   type EdgelessBlockType,
@@ -56,6 +68,7 @@ import {
   isEmbedGithubBlock,
   isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
+  isEmbedSyncedDocBlock,
 } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -114,6 +127,46 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       opacity: var(--add, 1);
     }
 
+    .change-embed-card-button.page-info {
+      display: flex;
+      align-items: center;
+      width: max-content;
+      max-width: 180px;
+      padding: var(--1, 0px);
+
+      gap: 4px;
+      border-radius: var(--1, 0px);
+      opacity: var(--add, 1);
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .change-embed-card-button.page-info > svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .change-embed-card-button.page-info > span {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+
+      color: var(--affine-text-primary-color);
+      font-feature-settings:
+        'clig' off,
+        'liga' off;
+      word-break: break-all;
+      font-family: var(--affine-font-family);
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      opacity: var(--add, 1);
+    }
+
     .change-embed-card-view-style {
       display: flex;
       align-items: center;
@@ -159,6 +212,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedYoutubeModel
     | EmbedFigmaModel
     | EmbedLinkedDocModel
+    | EmbedSyncedDocModel
     | EmbedHtmlModel;
 
   @property({ attribute: false })
@@ -214,6 +268,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | EmbedYoutubeBlockComponent
       | EmbedFigmaBlockComponent
       | EmbedLinkedDocBlockComponent
+      | EmbedSyncedDocBlockComponent
       | null;
     assertExists(blockElement);
 
@@ -229,10 +284,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     );
   }
 
-  private get _canShowOpenButton() {
-    return isEmbedLinkedDocBlock(this.model);
-  }
-
   private get _canShowFullScreenButton() {
     return isEmbedHtmlBlock(this.model);
   }
@@ -245,14 +296,18 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private get _isEmbedView() {
-    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
-      return false;
-    }
-    return this._embedOptions?.viewType === 'embed';
+    return (
+      isEmbedSyncedDocBlock(this.model) ||
+      this._embedOptions?.viewType === 'embed'
+    );
   }
 
   private get _canConvertToEmbedView() {
-    return this._embedOptions?.viewType === 'embed';
+    const block = this._blockElement;
+    return (
+      (block && 'convertToEmbed' in block) ||
+      this._embedOptions?.viewType === 'embed'
+    );
   }
 
   private get _canShowCardStylePanel() {
@@ -298,12 +353,39 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     ];
   }
 
+  private get _pageIcon() {
+    if (
+      !isEmbedLinkedDocBlock(this.model) &&
+      !isEmbedSyncedDocBlock(this.model)
+    ) {
+      return nothing;
+    }
+    const block = this._blockElement as
+      | EmbedLinkedDocBlockComponent
+      | EmbedSyncedDocBlockComponent;
+
+    return block.pageMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon;
+  }
+
+  private get _pageTitle() {
+    if (
+      !isEmbedLinkedDocBlock(this.model) &&
+      !isEmbedSyncedDocBlock(this.model)
+    ) {
+      return '';
+    }
+    const block = this._blockElement as
+      | EmbedLinkedDocBlockComponent
+      | EmbedSyncedDocBlockComponent;
+    return block.pageTitle;
+  }
+
   private _open() {
     this._blockElement?.open();
   }
 
   private _showCaption() {
-    this._blockElement?.captionElement.show();
+    this._blockElement?.captionElement?.show();
   }
 
   private _refreshData() {
@@ -330,11 +412,21 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _convertToCardView() {
-    if (this._isCardView || !('url' in this.model)) {
+    if (this._isCardView) {
       return;
     }
 
-    const { url, xywh, style } = this.model;
+    const block = this._blockElement;
+    if (block && 'convertToCard' in block) {
+      block.convertToCard();
+      return;
+    }
+
+    if (!('url' in this.model)) {
+      return;
+    }
+
+    const { url, xywh, style, caption } = this.model;
 
     let targetFlavour = 'affine:bookmark',
       targetStyle = style;
@@ -353,7 +445,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     const blockId = this.edgeless.service.addBlock(
       targetFlavour as EdgelessBlockType,
-      { url, xywh: bound.serialize(), style: targetStyle },
+      { url, xywh: bound.serialize(), style: targetStyle, caption },
       this.surface.model
     );
     this.edgeless.service.selection.set({
@@ -364,7 +456,17 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _convertToEmbedView() {
-    if (this._isEmbedView || !('url' in this.model)) {
+    if (this._isEmbedView) {
+      return;
+    }
+
+    const block = this._blockElement;
+    if (block && 'convertToEmbed' in block) {
+      block.convertToEmbed();
+      return;
+    }
+
+    if (!('url' in this.model)) {
       return;
     }
 
@@ -423,10 +525,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return html`
       <div class="change-embed-card-container">
         ${this._canShowUrlOptions && 'url' in model
-          ? html`<div
-                class="change-embed-card-button url"
-                @click=${this._copyUrl}
-              >
+          ? html`
+              <div class="change-embed-card-button url" @click=${this._copyUrl}>
                 <span>${model.url}</span>
               </div>
 
@@ -451,10 +551,19 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
               <component-toolbar-menu-divider
                 .vertical=${true}
-              ></component-toolbar-menu-divider>`
+              ></component-toolbar-menu-divider>
+            `
           : nothing}
-        ${this._canShowOpenButton
-          ? html`<edgeless-tool-icon-button
+        ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
+          ? html`
+              <div
+                class="change-embed-card-button page-info"
+                @click=${this._open}
+              >
+                ${this._pageIcon}
+                <span>${this._pageTitle}</span>
+              </div>
+              <edgeless-tool-icon-button
                 .tooltip=${'Open'}
                 class="change-embed-card-button open"
                 @click=${this._open}
@@ -464,18 +573,25 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
               <component-toolbar-menu-divider
                 .vertical=${true}
-              ></component-toolbar-menu-divider>`
+              ></component-toolbar-menu-divider>
+            `
           : nothing}
         ${this._canShowFullScreenButton
-          ? html`<edgeless-tool-icon-button
-              .tooltip=${'Full screen'}
-              class="change-embed-card-button expand"
-              @click=${this._open}
-            >
-              ${ExpandFullIcon}
-            </edgeless-tool-icon-button> `
+          ? html`
+              <edgeless-tool-icon-button
+                .tooltip=${'Full screen'}
+                class="change-embed-card-button expand"
+                @click=${this._open}
+              >
+                ${ExpandFullIcon}
+              </edgeless-tool-icon-button>
+
+              <component-toolbar-menu-divider
+                .vertical=${true}
+              ></component-toolbar-menu-divider>
+            `
           : nothing}
-        ${this._canConvertToEmbedView
+        ${this._canConvertToEmbedView || this._isEmbedView
           ? html`
               <div class="change-embed-card-view-style">
                 <div class="change-embed-card-button-view-selector">
@@ -512,7 +628,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               </div>
             `
           : nothing}
-        ${this._canShowCardStylePanel
+        ${'style' in model && this._canShowCardStylePanel
           ? html`
               <div class="change-embed-card-button card-style">
                 <edgeless-tool-icon-button

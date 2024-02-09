@@ -4,16 +4,13 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { AttachmentBlockComponent } from '../../../attachment-block/attachment-block.js';
-import type { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
-import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
-import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedHtmlBlockComponent } from '../../../embed-html-block/embed-html-block.js';
-import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
-import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
+import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
 import { stopPropagation } from '../../utils/event.js';
 import { asyncFocusRichText } from '../../utils/selection.js';
+import type { EmbedToolbarBlock } from './embed-card-toolbar.js';
 
 @customElement('embed-card-caption')
 export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
@@ -36,15 +33,12 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   block!:
+    | EmbedToolbarBlock
     | AttachmentBlockComponent
-    | BookmarkBlockComponent
     | ImageBlockComponent
-    | EmbedGithubBlockComponent
-    | EmbedYoutubeBlockComponent
-    | EmbedFigmaBlockComponent
-    | EmbedLinkedDocBlockComponent
     | EmbedHtmlBlockComponent
-    | SurfaceRefBlockComponent;
+    | SurfaceRefBlockComponent
+    | EmbedSyncedDocBlockComponent;
 
   @state()
   display = false;

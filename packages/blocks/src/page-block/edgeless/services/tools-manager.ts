@@ -239,6 +239,7 @@ export class EdgelessToolsManager {
         const dx = e.deltaX / viewport.zoom;
         const dy = e.deltaY / viewport.zoom;
         viewport.applyDeltaCenter(dx, dy);
+        e.stopPropagation();
       }
       // zoom
       else {
@@ -251,6 +252,7 @@ export class EdgelessToolsManager {
 
         const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
         viewport.setZoom(zoom, new Point(baseX, baseY));
+        e.stopPropagation();
       }
     });
   }
@@ -315,6 +317,7 @@ export class EdgelessToolsManager {
       startX: 0,
       startY: 0,
       last: null,
+      cumulativeParentScale: 1,
     });
 
     const edgelessTool = this.edgelessTool;

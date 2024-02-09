@@ -27,11 +27,11 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   host!: EditorHost;
 
-  @query('.title')
+  @query('.embed-card-modal-input.title')
   titleInput!: HTMLInputElement;
 
-  @query('.description')
-  descInput!: HTMLInputElement;
+  @query('.embed-card-modal-input.description')
+  descInput!: HTMLTextAreaElement;
 
   @state()
   private _titleInputValue = '';

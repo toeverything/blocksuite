@@ -5,14 +5,15 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import type { AttachmentBlockModel } from '../../attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../embed-github-block/embed-github-model.js';
 import type { EmbedHtmlModel } from '../../embed-html-block/embed-html-model.js';
 import type { EmbedLinkedDocModel } from '../../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedSyncedDocModel } from '../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../embed-youtube-block/embed-youtube-model.js';
 import type { ImageBlockModel } from '../../image-block/image-model.js';
-import type { AttachmentBlockModel } from '../../models.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 
 @customElement('surface-ref-generic-block-portal')
@@ -37,6 +38,7 @@ export class SurfaceRefGenericBlockPortal extends WithDisposable(
     | EmbedYoutubeModel
     | EmbedFigmaModel
     | EmbedLinkedDocModel
+    | EmbedSyncedDocModel
     | EmbedHtmlModel;
 
   @property({ attribute: false })

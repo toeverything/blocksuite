@@ -157,7 +157,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       `${translateX}px ${translateY}px`
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
+
     this.layer.style.setProperty('transform', this._getLayerViewport());
+    this.layer.setAttribute('data-scale', zoom.toString());
+
     this.canvasSlot.style.setProperty(
       '--canvas-transform-offset',
       this._getLayerViewport(true)
@@ -356,6 +359,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const { edgeless } = this;
     const { surface, page, service } = edgeless;
     const { readonly } = page;
+    const { zoom } = service.viewport;
 
     if (!surface) return nothing;
 
@@ -393,7 +397,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     });
     return html`
       <div class="affine-block-children-container edgeless">
-        <div class="affine-edgeless-layer">
+        <div
+          class="affine-edgeless-layer"
+          data-scale="${zoom}"
+          data-translate="true"
+        >
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}

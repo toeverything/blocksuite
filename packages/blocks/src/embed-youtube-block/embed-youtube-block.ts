@@ -52,18 +52,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
   private _isResizing = false;
 
-  open = () => {
-    let link = this.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
-  };
-
-  refreshData = () => {
-    refreshEmbedYoutubeUrlData(this).catch(console.error);
-  };
-
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
@@ -83,6 +71,18 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     event.stopPropagation();
     this.open();
   }
+
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
+
+  refreshData = () => {
+    refreshEmbedYoutubeUrlData(this).catch(console.error);
+  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -180,11 +180,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
           }
         </style>
         <embed-card-toolbar
-          .model=${this.model}
           .block=${this}
-          .host=${this.host}
           .abortController=${abortController}
-          .std=${this.std}
         ></embed-card-toolbar>
       `,
       computePosition: {
@@ -235,7 +232,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     return this.renderEmbed(
       () => html`
         <div
-          ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+          ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
           class=${classMap({
             'affine-embed-youtube-block': true,
             loading,

@@ -41,12 +41,6 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
 
   private _isResizing = false;
 
-  open = () => {
-    this._iframe.requestFullscreen().catch(console.error);
-  };
-
-  refreshData = () => {};
-
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
@@ -66,6 +60,12 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
     event.stopPropagation();
     this.open();
   }
+
+  open = () => {
+    this._iframe.requestFullscreen().catch(console.error);
+  };
+
+  refreshData = () => {};
 
   override connectedCallback() {
     super.connectedCallback();

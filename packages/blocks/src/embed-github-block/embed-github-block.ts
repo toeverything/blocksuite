@@ -45,22 +45,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
 
-  open = () => {
-    let link = this.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
-  };
-
-  refreshData = () => {
-    refreshEmbedGithubUrlData(this).catch(console.error);
-  };
-
-  refreshStatus = () => {
-    refreshEmbedGithubStatus(this).catch(console.error);
-  };
-
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
@@ -85,6 +69,22 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     const link = `https://www.github.com/${assignee}`;
     window.open(link, '_blank');
   }
+
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
+
+  refreshData = () => {
+    refreshEmbedGithubUrlData(this).catch(console.error);
+  };
+
+  refreshStatus = () => {
+    refreshEmbedGithubStatus(this).catch(console.error);
+  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -165,11 +165,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
           }
         </style>
         <embed-card-toolbar
-          .model=${this.model}
           .block=${this}
-          .host=${this.host}
           .abortController=${abortController}
-          .std=${this.std}
         ></embed-card-toolbar>
       `,
       computePosition: {
@@ -237,7 +234,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
             class=${classMap({
               'affine-embed-github-block': true,
               loading,

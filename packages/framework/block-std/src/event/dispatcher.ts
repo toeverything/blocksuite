@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
 import {
@@ -72,6 +72,15 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
+  static slots = {
+    activeChanged: new Slot(),
+  };
+
+  slots = {
+    parentScaleChanged: new Slot<number>(),
+    editorHostPanned: new Slot(),
+  };
+
   private _handlersMap = Object.fromEntries(
     eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
   ) as Record<EventName, Array<EventHandlerRunner>>;
@@ -88,6 +97,10 @@ export class UIEventDispatcher {
     this._clipboardControl = new ClipboardControl(this);
   }
 
+  get cumulativeParentScale() {
+    return this._pointerControl.cumulativeParentScale;
+  }
+
   private static _activeDispatcher: UIEventDispatcher | null = null;
 
   get isActive() {
@@ -97,7 +110,9 @@ export class UIEventDispatcher {
   activate = () => {
     const prevDispatcher = UIEventDispatcher._activeDispatcher;
     if (prevDispatcher === this) return;
+
     UIEventDispatcher._activeDispatcher = this;
+    UIEventDispatcher.slots.activeChanged.emit();
     prevDispatcher?.std.selection.clear();
   };
 
@@ -105,7 +120,9 @@ export class UIEventDispatcher {
     const prevDispatcher = UIEventDispatcher._activeDispatcher;
     if (!prevDispatcher) return;
     if (prevDispatcher !== this) return;
+
     UIEventDispatcher._activeDispatcher = null;
+    UIEventDispatcher.slots.activeChanged.emit();
     prevDispatcher.std.selection.clear();
   };
 
