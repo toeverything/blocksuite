@@ -11,8 +11,8 @@ export class VText extends LitElement {
 
   @property({ attribute: false })
   styles: StyleInfo = {
-    'word-wrap': 'break-word',
-    'white-space': 'break-spaces',
+    'word-break': 'break-word',
+    'white-space': 'pre-wrap',
   };
 
   override render() {
