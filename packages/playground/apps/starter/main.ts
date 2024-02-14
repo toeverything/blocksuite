@@ -19,6 +19,8 @@ async function main() {
   const params = new URLSearchParams(location.search);
   const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
   const isE2E = room.startsWith('playwright');
+  const workspace = createStarterPageWorkspace();
+
   if (isE2E) {
     Object.defineProperty(window, '$blocksuite', {
       value: Object.freeze({
@@ -31,7 +33,6 @@ async function main() {
     return;
   }
 
-  const workspace = createStarterPageWorkspace();
   await initStarterPageWorkspace(workspace);
   await mountDefaultPageEditor(workspace);
 }
