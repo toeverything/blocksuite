@@ -4,7 +4,7 @@ import {
   encodeAwarenessUpdate,
 } from 'y-protocols/awareness';
 
-import type { AwarenessProvider } from '../awareness/index.js';
+import type { AwarenessSource } from '../source.js';
 
 type AwarenessChanges = Record<'added' | 'updated' | 'removed', number[]>;
 
@@ -12,11 +12,11 @@ type ChannelMessage =
   | { type: 'connect' }
   | { type: 'update'; update: Uint8Array };
 
-export class BroadcastChannelAwarenessProvider implements AwarenessProvider {
+export class BroadcastChannelAwarenessSource implements AwarenessSource {
   channel: BroadcastChannel | null = null;
   awareness: Awareness | null = null;
 
-  constructor(private readonly channelName: string = 'blocksuite:awareness') {}
+  constructor(readonly channelName: string = 'blocksuite:awareness') {}
 
   connect(awareness: Awareness): void {
     this.channel = new BroadcastChannel(this.channelName);

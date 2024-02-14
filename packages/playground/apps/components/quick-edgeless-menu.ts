@@ -31,10 +31,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { notify } from '../default/utils/notify.js';
-import {
-  generateRoomId,
-  setupWebsocketProvider,
-} from '../providers/websocket-channel.js';
+import { generateRoomId } from '../sync/websocket/utils.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { PagesPanel } from './pages-panel.js';
 
@@ -93,9 +90,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   @state()
   private _dark = localStorage.getItem('blocksuite:dark') === 'true';
-
-  @state()
-  private _initws = false;
 
   get page() {
     return this.editor.page;
@@ -294,26 +288,16 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       return;
     }
 
-    this._initws = true;
-
     const params = new URLSearchParams(location.search);
     const id = params.get('room') || (await generateRoomId());
-    const success = await this._initWebsocketProvider(id);
 
-    if (success) {
-      history.replaceState({}, '', `?room=${id}`);
-      this.requestUpdate();
-    }
+    params.set('room', id);
+    const url = new URL(location.href);
+    url.search = params.toString();
+    location.href = url.href;
   };
   private _togglePagesPanel() {
     this.leftSidePanel.toggle(this.pagesPanel);
-  }
-
-  private async _initWebsocketProvider(room: string) {
-    this._initws = true;
-    const result = await setupWebsocketProvider(this.workspace, room);
-    this._initws = false;
-    return result;
   }
 
   override async firstUpdated() {
@@ -491,22 +475,12 @@ export class QuickEdgelessMenu extends ShadowlessElement {
             </sl-button-group>
 
             <sl-tooltip content="Start Collaboration" placement="bottom" hoist>
-              <sl-button
-                @click=${this._startCollaboration}
-                size="small"
-                .loading=${this._initws}
-                circle
-              >
+              <sl-button @click=${this._startCollaboration} size="small" circle>
                 <sl-icon name="people" label="Collaboration"></sl-icon>
               </sl-button>
             </sl-tooltip>
             <sl-tooltip content="Pages" placement="bottom" hoist>
-              <sl-button
-                @click=${this._togglePagesPanel}
-                size="small"
-                .loading=${this._initws}
-                circle
-              >
+              <sl-button @click=${this._togglePagesPanel} size="small" circle>
                 <sl-icon name="filetype-doc" label="Page"></sl-icon>
               </sl-button>
             </sl-tooltip>

@@ -3,88 +3,88 @@ import type { Doc } from 'yjs';
 
 import { SharedPriorityTarget } from '../utils/async-queue.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
-import { SyncEngineStep, SyncPeerStep } from './consts.js';
-import { SyncPeer, type SyncPeerStatus } from './peer.js';
-import { type SyncStorage } from './storage.js';
+import { DocEngineStep, DocPeerStep } from './consts.js';
+import { type DocPeerStatus, SyncPeer } from './peer.js';
+import { type DocSource } from './source.js';
 
-export interface SyncEngineStatus {
-  step: SyncEngineStep;
-  main: SyncPeerStatus | null;
-  shared: (SyncPeerStatus | null)[];
+export interface DocEngineStatus {
+  step: DocEngineStep;
+  main: DocPeerStatus | null;
+  shadow: (DocPeerStatus | null)[];
   retrying: boolean;
 }
 
 /**
- * # SyncEngine
+ * # DocEngine
  *
  * ```
  *                    ┌────────────┐
- *                    │ SyncEngine │
+ *                    │  DocEngine │
  *                    └─────┬──────┘
  *                          │
  *                          ▼
  *                    ┌────────────┐
- *                    │  SyncPeer  │
+ *                    │   DocPeer  │
  *          ┌─────────┤    main    ├─────────┐
  *          │         └─────┬──────┘         │
  *          │               │                │
  *          ▼               ▼                ▼
  *   ┌────────────┐   ┌────────────┐   ┌────────────┐
- *   │  SyncPeer  │   │  SyncPeer  │   │  SyncPeer  │
- *   │   shared   │   │   shared   │   │   shared   │
+ *   │   DocPeer  │   │   DocPeer  │   │   DocPeer  │
+ *   │   shadow   │   │   shadow   │   │   shadow   │
  *   └────────────┘   └────────────┘   └────────────┘
  * ```
  *
- * Sync engine manage sync peers
+ * doc engine manage doc peers
  *
  * Sync steps:
  * 1. start main sync
  * 2. wait for main sync complete
- * 3. start shared sync
- * 4. continuously sync main and shared
+ * 3. start shadow sync
+ * 4. continuously sync main and shadow
  */
-export class SyncEngine {
+export class DocEngine {
   get rootDocId() {
     return this.rootDoc.guid;
   }
 
-  private _status: SyncEngineStatus;
-  onStatusChange = new Slot<SyncEngineStatus>();
-  private set status(s: SyncEngineStatus) {
-    this.logger.debug(`syne-engine:${this.rootDocId}:status change`, s);
+  readonly onStatusChange = new Slot<DocEngineStatus>();
+  readonly priorityTarget = new SharedPriorityTarget();
+
+  private _status: DocEngineStatus;
+  private setStatus(s: DocEngineStatus) {
+    this.logger.debug(`syne-engine:${this.rootDocId} status change`, s);
     this._status = s;
     this.onStatusChange.emit(s);
   }
-
-  priorityTarget = new SharedPriorityTarget();
-
   get status() {
     return this._status;
   }
 
-  private abort = new AbortController();
+  private _abort = new AbortController();
 
   constructor(
-    private readonly rootDoc: Doc,
-    private readonly main: SyncStorage,
-    private readonly shared: SyncStorage[],
-    private readonly logger: Logger
+    readonly rootDoc: Doc,
+    readonly main: DocSource,
+    readonly shadow: DocSource[],
+    readonly logger: Logger
   ) {
     this._status = {
-      step: SyncEngineStep.Stopped,
+      step: DocEngineStep.Stopped,
       main: null,
-      shared: shared.map(() => null),
+      shadow: shadow.map(() => null),
       retrying: false,
     };
+    this.logger.debug(`syne-engine:${this.rootDocId} status init`, this.status);
   }
 
   start() {
-    if (this.status.step !== SyncEngineStep.Stopped) {
+    if (this.status.step !== DocEngineStep.Stopped) {
       this.forceStop();
     }
-    this.abort = new AbortController();
+    this._abort = new AbortController();
 
-    this.sync(this.abort.signal).catch(err => {
+    this.sync(this._abort.signal).catch(err => {
       // should never reach here
       this.logger.error(`syne-engine:${this.rootDocId}`, err);
     });
@@ -117,28 +117,28 @@ export class SyncEngine {
   }
 
   forceStop() {
-    this.abort.abort(MANUALLY_STOP);
-    this._status = {
-      step: SyncEngineStep.Stopped,
+    this._abort.abort(MANUALLY_STOP);
+    this.setStatus({
+      step: DocEngineStep.Stopped,
       main: null,
-      shared: this.shared.map(() => null),
+      shadow: this.shadow.map(() => null),
       retrying: false,
-    };
+    });
   }
 
   // main sync process, should never return until abort
   async sync(signal: AbortSignal) {
     const state: {
       mainPeer: SyncPeer | null;
-      sharedPeers: (SyncPeer | null)[];
+      shadowPeers: (SyncPeer | null)[];
     } = {
       mainPeer: null,
-      sharedPeers: this.shared.map(() => null),
+      shadowPeers: this.shadow.map(() => null),
     };
 
     const cleanUp: (() => void)[] = [];
     try {
-      // Step 1: start local sync peer
+      // Step 1: start main sync peer
       state.mainPeer = new SyncPeer(
         this.rootDoc,
         this.main,
@@ -149,35 +149,35 @@ export class SyncEngine {
       cleanUp.push(
         state.mainPeer.onStatusChange.on(() => {
           if (!signal.aborted)
-            this.updateSyncingState(state.mainPeer, state.sharedPeers);
+            this.updateSyncingState(state.mainPeer, state.shadowPeers);
         }).dispose
       );
 
-      this.updateSyncingState(state.mainPeer, state.sharedPeers);
+      this.updateSyncingState(state.mainPeer, state.shadowPeers);
 
-      // Step 2: wait for local sync complete
+      // Step 2: wait for main sync complete
       await state.mainPeer.waitForLoaded(signal);
 
-      // Step 3: start shared sync peer
-      state.sharedPeers = this.shared.map(shared => {
+      // Step 3: start shadow sync peer
+      state.shadowPeers = this.shadow.map(shadow => {
         const peer = new SyncPeer(
           this.rootDoc,
-          shared,
+          shadow,
           this.priorityTarget,
           this.logger
         );
         cleanUp.push(
           peer.onStatusChange.on(() => {
             if (!signal.aborted)
-              this.updateSyncingState(state.mainPeer, state.sharedPeers);
+              this.updateSyncingState(state.mainPeer, state.shadowPeers);
           }).dispose
         );
         return peer;
       });
 
-      this.updateSyncingState(state.mainPeer, state.sharedPeers);
+      this.updateSyncingState(state.mainPeer, state.shadowPeers);
 
-      // Step 4: continuously sync local and shared
+      // Step 4: continuously sync main and shadow
 
       // wait for abort
       await new Promise((_, reject) => {
@@ -196,8 +196,8 @@ export class SyncEngine {
     } finally {
       // stop peers
       state.mainPeer?.stop();
-      for (const sharedPeer of state.sharedPeers) {
-        sharedPeer?.stop();
+      for (const shadowPeer of state.shadowPeers) {
+        shadowPeer?.stop();
       }
       for (const clean of cleanUp) {
         clean();
@@ -205,33 +205,33 @@ export class SyncEngine {
     }
   }
 
-  updateSyncingState(local: SyncPeer | null, shared: (SyncPeer | null)[]) {
-    let step = SyncEngineStep.Synced;
-    const allPeer = [local, ...shared];
+  updateSyncingState(local: SyncPeer | null, shadow: (SyncPeer | null)[]) {
+    let step = DocEngineStep.Synced;
+    const allPeer = [local, ...shadow];
     for (const peer of allPeer) {
-      if (!peer || peer.status.step !== SyncPeerStep.Synced) {
-        step = SyncEngineStep.Syncing;
+      if (!peer || peer.status.step !== DocPeerStep.Synced) {
+        step = DocEngineStep.Syncing;
         break;
       }
     }
-    this.status = {
+    this.setStatus({
       step,
       main: local?.status ?? null,
-      shared: shared.map(peer => peer?.status ?? null),
+      shadow: shadow.map(peer => peer?.status ?? null),
       retrying: allPeer.some(
-        peer => peer?.status.step === SyncPeerStep.Retrying
+        peer => peer?.status.step === DocPeerStep.Retrying
       ),
-    };
+    });
   }
 
   async waitForSynced(abort?: AbortSignal) {
-    if (this.status.step === SyncEngineStep.Synced) {
+    if (this.status.step === DocEngineStep.Synced) {
       return;
     } else {
       return Promise.race([
         new Promise<void>(resolve => {
           this.onStatusChange.on(status => {
-            if (status.step === SyncEngineStep.Synced) {
+            if (status.step === DocEngineStep.Synced) {
               resolve();
             }
           });
@@ -249,9 +249,9 @@ export class SyncEngine {
   }
 
   async waitForLoadedRootDoc(abort?: AbortSignal) {
-    function isLoadedRootDoc(status: SyncEngineStatus) {
-      return ![status.main, ...status.shared].some(
-        peer => !peer || peer.step <= SyncPeerStep.LoadingRootDoc
+    function isLoadedRootDoc(status: DocEngineStatus) {
+      return ![status.main, ...status.shadow].some(
+        peer => !peer || peer.step <= DocPeerStep.LoadingRootDoc
       );
     }
     if (isLoadedRootDoc(this.status)) {

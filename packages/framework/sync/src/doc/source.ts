@@ -1,4 +1,4 @@
-export interface SyncStorage {
+export interface DocSource {
   /**
    * for debug
    */

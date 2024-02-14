@@ -1,7 +1,7 @@
 import { type DBSchema, type IDBPDatabase, openDB } from 'idb';
 import { diffUpdate, encodeStateVectorFromUpdate, mergeUpdates } from 'yjs';
 
-import type { SyncStorage } from '../sync/storage.js';
+import type { DocSource } from '../source.js';
 
 export const dbVersion = 1;
 export const DEFAULT_DB_NAME = 'blocksuite-local';
@@ -32,14 +32,14 @@ type ChannelMessage = {
   payload: { docId: string; update: Uint8Array };
 };
 
-export class IndexedDBSyncStorage implements SyncStorage {
+export class IndexedDBDocSource implements DocSource {
   name = 'indexeddb';
   mergeCount = 1;
   dbPromise: Promise<IDBPDatabase<BlockSuiteBinaryDB>> | null = null;
   // indexeddb could be shared between tabs, so we use broadcast channel to notify other tabs
   channel = new BroadcastChannel('indexeddb:' + this.dbName);
 
-  constructor(private readonly dbName: string = DEFAULT_DB_NAME) {}
+  constructor(readonly dbName: string = DEFAULT_DB_NAME) {}
 
   getDb() {
     if (this.dbPromise === null) {
@@ -96,6 +96,7 @@ export class IndexedDBSyncStorage implements SyncStorage {
       payload: { docId, update: data },
     } satisfies ChannelMessage);
   }
+
   async subscribe(cb: (docId: string, data: Uint8Array) => void) {
     function onMessage(event: MessageEvent<ChannelMessage>) {
       const { type, payload } = event.data;

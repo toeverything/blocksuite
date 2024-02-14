@@ -9,11 +9,11 @@ import {
 } from '../utils/async-queue.js';
 import { mergeUpdates } from '../utils/merge-updates.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
-import { SyncPeerStep } from './consts.js';
-import type { SyncStorage } from './storage.js';
+import { DocPeerStep } from './consts.js';
+import type { DocSource } from './source.js';
 
-export interface SyncPeerStatus {
-  step: SyncPeerStep;
+export interface DocPeerStatus {
+  step: DocPeerStep;
   totalDocs: number;
   loadedDocs: number;
   pendingPullUpdates: number;
@@ -21,8 +21,8 @@ export interface SyncPeerStatus {
 }
 
 /**
- * # SyncPeer
- * A SyncPeer is responsible for syncing one Storage with one Y.Doc and its subdocs.
+ * # DocPeer
+ * A DocPeer is responsible for syncing one Storage with one Y.Doc and its subdocs.
  *
  * ```
  *                    ┌─────┐
@@ -47,26 +47,26 @@ export interface SyncPeerStatus {
  *
  */
 export class SyncPeer {
-  private _status: SyncPeerStatus = {
-    step: SyncPeerStep.LoadingRootDoc,
+  private _status: DocPeerStatus = {
+    step: DocPeerStep.LoadingRootDoc,
     totalDocs: 1,
     loadedDocs: 0,
     pendingPullUpdates: 0,
     pendingPushUpdates: 0,
   };
-  onStatusChange = new Slot<SyncPeerStatus>();
+  readonly onStatusChange = new Slot<DocPeerStatus>();
   readonly abort = new AbortController();
   get name() {
-    return this.storage.name;
+    return this.source.name;
   }
 
   constructor(
-    private readonly rootDoc: Doc,
-    private readonly storage: SyncStorage,
-    private readonly priorityTarget = new SharedPriorityTarget(),
-    private readonly logger: Logger
+    readonly rootDoc: Doc,
+    readonly source: DocSource,
+    readonly priorityTarget = new SharedPriorityTarget(),
+    readonly logger: Logger
   ) {
-    this.logger.debug(`affine:sync-peer:${this.name}:peer start`);
+    this.logger.debug(`doc-peer:${this.name} start`);
 
     this.syncRetryLoop(this.abort.signal).catch(err => {
       // should not reach here
@@ -74,9 +74,9 @@ export class SyncPeer {
     });
   }
 
-  private set status(s: SyncPeerStatus) {
+  private set status(s: DocPeerStatus) {
     if (!isEqual(s, this._status)) {
-      this.logger.debug(`affine:sync-peer:${this.name}:status change`, s);
+      this.logger.debug(`doc-peer:${this.name} status change`, s);
       this._status = s;
       this.onStatusChange.emit(s);
     }
@@ -89,10 +89,10 @@ export class SyncPeer {
   /**
    * stop sync
    *
-   * SyncPeer is one-time use, this peer should be discarded after call stop().
+   * DocPeer is one-time use, this peer should be discarded after call stop().
    */
   stop() {
-    this.logger.debug(`affine:sync-peer:${this.name}:peer stop`);
+    this.logger.debug(`doc-peer:${this.name} stop`);
     this.abort.abort(MANUALLY_STOP);
   }
 
@@ -108,14 +108,12 @@ export class SyncPeer {
           return;
         }
 
-        this.logger.error(`affine:sync-peer:${this.name}:sync error`, err);
+        this.logger.error(`doc-peer:${this.name} sync error`, err);
       }
       try {
-        this.logger.error(
-          `affine:sync-peer:${this.name}:retry after 5 seconds`
-        );
+        this.logger.error(`doc-peer:${this.name} retry after 5 seconds`);
         this.status = {
-          step: SyncPeerStep.Retrying,
+          step: DocPeerStep.Retrying,
           totalDocs: 1,
           loadedDocs: 0,
           pendingPullUpdates: 0,
@@ -146,7 +144,7 @@ export class SyncPeer {
     }
   }
 
-  private readonly state: {
+  readonly state: {
     connectedDocs: Map<string, Doc>;
     pushUpdatesQueue: PriorityAsyncQueue<{
       id: string;
@@ -190,10 +188,10 @@ export class SyncPeer {
 
     let dispose: (() => void) | null = null;
     try {
-      this.reportSyncStatus();
+      this.updateSyncStatus();
 
       // start listen storage updates
-      dispose = await this.storage.subscribe(
+      dispose = await this.source.subscribe(
         this.handleStorageUpdates,
         reason => {
           // abort if storage disconnect, should trigger retry loop
@@ -212,7 +210,7 @@ export class SyncPeer {
           doc,
         }))
       );
-      this.reportSyncStatus();
+      this.updateSyncStatus();
 
       this.rootDoc.on('subdocs', this.handleSubdocsUpdate);
 
@@ -225,10 +223,10 @@ export class SyncPeer {
               abortInner.signal
             );
             this.state.subdocLoading = true;
-            this.reportSyncStatus();
+            this.updateSyncStatus();
             await this.connectDoc(subdoc.doc, abortInner.signal);
             this.state.subdocLoading = false;
-            this.reportSyncStatus();
+            this.updateSyncStatus();
           }
         })(),
         // pull updates
@@ -249,7 +247,7 @@ export class SyncPeer {
                 applyUpdate(subdoc, data, this.name);
               }
             }
-            this.reportSyncStatus();
+            this.updateSyncStatus();
           }
         })(),
         // push updates
@@ -259,7 +257,7 @@ export class SyncPeer {
               abortInner.signal
             );
             this.state.pushingUpdate = true;
-            this.reportSyncStatus();
+            this.updateSyncStatus();
 
             const merged = mergeUpdates(data);
 
@@ -270,11 +268,11 @@ export class SyncPeer {
                 (merged.byteLength === 2 && merged[0] === 0 && merged[1] === 0)
               )
             ) {
-              await this.storage.push(id, merged);
+              await this.source.push(id, merged);
             }
 
             this.state.pushingUpdate = false;
-            this.reportSyncStatus();
+            this.updateSyncStatus();
           }
         })(),
       ]);
@@ -289,7 +287,7 @@ export class SyncPeer {
 
   async connectDoc(doc: Doc, abort: AbortSignal) {
     const { data: docData, state: inStorageState } =
-      (await this.storage.pull(doc.guid, encodeStateVector(doc))) ?? {};
+      (await this.source.pull(doc.guid, encodeStateVector(doc))) ?? {};
     throwIfAborted(abort);
 
     if (docData && docData.length > 0) {
@@ -310,13 +308,13 @@ export class SyncPeer {
     // mark rootDoc as loaded
     doc.emit('sync', [true]);
 
-    this.reportSyncStatus();
+    this.updateSyncStatus();
   }
 
   disconnectDoc(doc: Doc) {
     doc.off('update', this.handleYDocUpdates);
     this.state.connectedDocs.delete(doc.guid);
-    this.reportSyncStatus();
+    this.updateSyncStatus();
   }
 
   // handle updates from ydoc
@@ -336,7 +334,7 @@ export class SyncPeer {
       });
     }
 
-    this.reportSyncStatus();
+    this.updateSyncStatus();
   };
 
   // handle subdocs changes, append new subdocs to queue, remove subdocs from queue
@@ -355,7 +353,7 @@ export class SyncPeer {
       this.disconnectDoc(subdoc);
       this.state.subdocsLoadQueue.remove(doc => doc.doc === subdoc);
     }
-    this.reportSyncStatus();
+    this.updateSyncStatus();
   };
 
   // handle updates from storage
@@ -364,23 +362,23 @@ export class SyncPeer {
       id,
       data,
     });
-    this.reportSyncStatus();
+    this.updateSyncStatus();
   };
 
-  reportSyncStatus() {
+  updateSyncStatus() {
     let step;
     if (this.state.connectedDocs.size === 0) {
-      step = SyncPeerStep.LoadingRootDoc;
+      step = DocPeerStep.LoadingRootDoc;
     } else if (this.state.subdocsLoadQueue.length || this.state.subdocLoading) {
-      step = SyncPeerStep.LoadingSubDoc;
+      step = DocPeerStep.LoadingSubDoc;
     } else if (
       this.state.pullUpdatesQueue.length ||
       this.state.pushUpdatesQueue.length ||
       this.state.pushingUpdate
     ) {
-      step = SyncPeerStep.Syncing;
+      step = DocPeerStep.Syncing;
     } else {
-      step = SyncPeerStep.Synced;
+      step = DocPeerStep.Synced;
     }
 
     this.status = {
@@ -396,13 +394,13 @@ export class SyncPeer {
   }
 
   async waitForSynced(abort?: AbortSignal) {
-    if (this.status.step >= SyncPeerStep.Synced) {
+    if (this.status.step >= DocPeerStep.Synced) {
       return;
     } else {
       return Promise.race([
         new Promise<void>(resolve => {
           this.onStatusChange.on(status => {
-            if (status.step >= SyncPeerStep.Synced) {
+            if (status.step >= DocPeerStep.Synced) {
               resolve();
             }
           });
@@ -420,13 +418,13 @@ export class SyncPeer {
   }
 
   async waitForLoaded(abort?: AbortSignal) {
-    if (this.status.step > SyncPeerStep.Loaded) {
+    if (this.status.step > DocPeerStep.Loaded) {
       return;
     } else {
       return Promise.race([
         new Promise<void>(resolve => {
           this.onStatusChange.on(status => {
-            if (status.step > SyncPeerStep.Loaded) {
+            if (status.step > DocPeerStep.Loaded) {
               resolve();
             }
           });

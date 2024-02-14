@@ -1,7 +1,7 @@
-import type { SyncStorage } from '../sync/storage.js';
-import { mergeUpdates } from '../utils/merge-updates.js';
+import { mergeUpdates } from '../../utils/merge-updates.js';
+import type { DocSource } from '../source.js';
 
-export class MemorySyncStorage implements SyncStorage {
+export class MemoryDocSource implements DocSource {
   memory = new Map<string, Uint8Array>();
 
   name: string = 'testing';

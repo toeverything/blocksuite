@@ -1,11 +1,11 @@
 import { type Logger, NoopLogger } from '@blocksuite/global/utils';
 import {
   AwarenessEngine,
-  type AwarenessProvider,
-  SyncEngine,
-  type SyncStorage,
+  type AwarenessSource,
+  DocEngine,
+  type DocSource,
+  MemoryDocSource,
 } from '@blocksuite/sync';
-import { MemorySyncStorage } from '@blocksuite/sync/impl/memory.js';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
@@ -56,11 +56,11 @@ export interface StoreOptions<
   defaultFlags?: Partial<Flags>;
   blobStorages?: ((id: string) => BlobStorage)[];
   logger?: Logger;
-  sync?: {
-    main: SyncStorage;
-    shared?: SyncStorage[];
+  docSources?: {
+    main: DocSource;
+    shadow?: DocSource[];
   };
-  awareness?: AwarenessProvider[];
+  awarenessSources?: AwarenessSource[];
 }
 
 const FLAGS_PRESET = {
@@ -74,19 +74,20 @@ export class Store {
   readonly id: string;
   readonly doc: BlockSuiteDoc;
   readonly spaces = new Map<string, Space>();
-  readonly awareness: AwarenessEngine;
   readonly awarenessStore: AwarenessStore;
-  readonly sync: SyncEngine;
   readonly idGenerator: IdGenerator;
+
+  readonly docSync: DocEngine;
+  readonly awarenessSync: AwarenessEngine;
 
   constructor(
     {
       id,
       idGenerator,
       defaultFlags,
-      awareness: awarenessProviders = [],
-      sync = {
-        main: new MemorySyncStorage(),
+      awarenessSources = [],
+      docSources = {
+        main: new MemoryDocSource(),
       },
       logger = new NoopLogger(),
     }: StoreOptions = {
@@ -100,11 +101,17 @@ export class Store {
       new Awareness<RawAwarenessState>(this.doc),
       merge(true, FLAGS_PRESET, defaultFlags)
     );
-    this.awareness = new AwarenessEngine(
+
+    this.awarenessSync = new AwarenessEngine(
       this.awarenessStore.awareness,
-      awarenessProviders
+      awarenessSources
     );
-    this.sync = new SyncEngine(this.doc, sync.main, sync.shared ?? [], logger);
+    this.docSync = new DocEngine(
+      this.doc,
+      docSources.main,
+      docSources.shadow ?? [],
+      logger
+    );
 
     if (typeof idGenerator === 'function') {
       this.idGenerator = idGenerator;

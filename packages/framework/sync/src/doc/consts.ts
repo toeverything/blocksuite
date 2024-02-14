@@ -1,10 +1,10 @@
-export enum SyncEngineStep {
+export enum DocEngineStep {
   Stopped = 0,
   Syncing = 1,
   Synced = 2,
 }
 
-export enum SyncPeerStep {
+export enum DocPeerStep {
   Stopped = 0,
   Retrying = 1,
   LoadingRootDoc = 2,

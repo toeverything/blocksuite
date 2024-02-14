@@ -6,15 +6,17 @@ import {
   Generator,
   Job,
   Schema,
+  type StoreOptions,
   Text,
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
-import { BroadcastChannelAwarenessProvider } from '@blocksuite/sync/impl/broadcast.js';
-import { IndexedDBSyncStorage } from '@blocksuite/sync/impl/indexeddb.js';
+import { IndexedDBDocSource } from '@blocksuite/sync';
 
-import { ChannelPeer } from '../../sync/channel.js';
-import { setupWebsocketChannel } from '../../sync/websocket-channel.js';
+import { WebSocketAwarenessSource } from '../../sync/websocket/awareness';
+import { WebSocketDocSource } from '../../sync/websocket/doc';
+
+const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
 export const INDEXED_DB_NAME = 'PLAYGROUND_DB';
 
@@ -27,12 +29,22 @@ export async function createDefaultPageWorkspace() {
   schema.register(AffineSchemas).register(__unstableSchemas);
 
   const params = new URLSearchParams(location.search);
-
-  let websocketChannel;
-  if (params.get('room')) {
-    websocketChannel = new ChannelPeer(
-      await setupWebsocketChannel(params.get('room') as string)
-    );
+  let docSources: StoreOptions['docSources'] = {
+    main: new IndexedDBDocSource(),
+  };
+  let awarenessSources: StoreOptions['awarenessSources'];
+  const room = params.get('room');
+  if (room) {
+    const ws = new WebSocket(new URL(`/room/${room}`, BASE_WEBSOCKET_URL));
+    await new Promise(resolve => {
+      ws.addEventListener('open', resolve);
+      ws.addEventListener('error', resolve);
+    });
+    docSources = {
+      main: new IndexedDBDocSource(),
+      shadow: [new WebSocketDocSource(ws)],
+    };
+    awarenessSources = [new WebSocketAwarenessSource(ws)];
   }
 
   const options: WorkspaceOptions = {
@@ -40,11 +52,8 @@ export async function createDefaultPageWorkspace() {
     schema,
     idGenerator,
     blobStorages,
-    sync: {
-      main: new IndexedDBSyncStorage(),
-      shared: websocketChannel ? [websocketChannel] : [],
-    },
-    awareness: [new BroadcastChannelAwarenessProvider()],
+    docSources,
+    awarenessSources,
     defaultFlags: {
       enable_bultin_ledits: true,
     },
@@ -64,9 +73,6 @@ export async function createDefaultPageWorkspace() {
 
 export async function initDefaultPageWorkspace(workspace: Workspace) {
   const params = new URLSearchParams(location.search);
-
-  await workspace.waitForSynced();
-
   const shouldInit = workspace.pages.size === 0 && !params.get('room');
   if (shouldInit) {
     const page = workspace.createPage({ id: 'page:home' });
