@@ -248,19 +248,30 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _space(event: KeyboardEvent) {
     const edgeless = this.pageElement;
-    const type = edgeless.edgelessTool.type;
     const selection = edgeless.service.selection;
+    const currentTool = edgeless.edgelessTool;
+    const type = currentTool.type;
+    const allowedTools = ['default', 'pan', 'brush', 'eraser'];
 
-    if (type !== 'default' && type !== 'pan') {
+    if (!allowedTools.includes(type)) {
       return;
     }
+    const revertToPrevTool = (ev: KeyboardEvent) => {
+      if (ev.key === ' ') this._setEdgelessTool(edgeless, currentTool);
+    };
+
     if (event.type === 'keydown') {
       if (type === 'pan' || (type === 'default' && selection.editing)) {
         return;
       }
       this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+      this.pageElement.dispatcher.disposables.addFromEvent(
+        document,
+        'keyup',
+        revertToPrevTool
+      );
     } else if (event.type === 'keyup') {
-      this._setEdgelessTool(edgeless, { type: 'default' });
+      document.removeEventListener('keyup', revertToPrevTool, false);
     }
   }
 
