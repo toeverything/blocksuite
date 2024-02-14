@@ -1,19 +1,32 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
+import { render } from 'lit';
 
 import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { setImageProxyMiddlewareURL } from '../_common/transformers/middlewares.js';
+import { matchFlavours } from '../_common/utils/model.js';
 import {
+  getEdgelessPageByElement,
   isInsideEdgelessEditor,
-  matchFlavours,
-} from '../_common/utils/index.js';
+} from '../_common/utils/query.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../page-block/types.js';
-import type { ImageBlockModel } from './image-model.js';
+import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  captureEventTarget,
+  convertDragPreviewDocToEdgeless,
+  convertDragPreviewEdgelessToDoc,
+} from '../page-block/widgets/drag-handle/utils.js';
+import type { ImageBlockComponent } from './image-block.js';
+import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 import { addSiblingImageBlock } from './utils.js';
 
@@ -57,10 +70,101 @@ export class ImageService extends BlockService<ImageBlockModel> {
 
   fileDropManager!: FileDropManager;
 
+  private _dragHandleOption: DragHandleOption = {
+    flavour: ImageBlockSchema.model.flavour,
+    edgeless: true,
+    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
+      const element = captureEventTarget(state.raw.target);
+      if (element?.classList.contains('resize')) return false;
+
+      if (!anchorBlockPath) return false;
+      const anchorComponent = editorHost.std.view.viewFromPath(
+        'block',
+        anchorBlockPath
+      );
+      if (
+        !anchorComponent ||
+        !matchFlavours(anchorComponent.model, [ImageBlockSchema.model.flavour])
+      )
+        return false;
+
+      const blockComponent = anchorComponent as ImageBlockComponent;
+
+      const isDraggingByDragHandle = !!element?.closest(
+        AFFINE_DRAG_HANDLE_WIDGET
+      );
+      const isDraggingByComponent = blockComponent.contains(element);
+      const isInSurface = blockComponent.isInSurface;
+
+      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
+        editorHost.std.selection.setGroup('note', [
+          editorHost.std.selection.create('block', {
+            path: blockComponent.path,
+          }),
+        ]);
+        startDragging([blockComponent], state);
+        return true;
+      } else if (isInSurface && isDraggingByDragHandle) {
+        const edgelessPage = getEdgelessPageByElement(blockComponent);
+        const scale = edgelessPage ? edgelessPage.service.viewport.zoom : 1;
+        const width = blockComponent.getBoundingClientRect().width;
+
+        const dragPreviewEl = document.createElement('div');
+        dragPreviewEl.classList.add('affine-block-element');
+        dragPreviewEl.style.border = '2px solid var(--affine-border-color)';
+        dragPreviewEl.style.borderRadius = '4px';
+        dragPreviewEl.style.overflow = 'hidden';
+        dragPreviewEl.style.width = `${width / scale}px`;
+        render(blockComponent.renderModel(blockComponent.model), dragPreviewEl);
+
+        startDragging([blockComponent], state, dragPreviewEl);
+        return true;
+      }
+      return false;
+    },
+    onDragEnd: props => {
+      const { state, draggingElements } = props;
+      if (
+        draggingElements.length !== 1 ||
+        !matchFlavours(draggingElements[0].model, [
+          ImageBlockSchema.model.flavour,
+        ])
+      )
+        return false;
+
+      const blockComponent = draggingElements[0] as ImageBlockComponent;
+      const isInSurface = blockComponent.isInSurface;
+      const target = captureEventTarget(state.raw.target);
+      const isTargetEdgelessContainer =
+        target?.classList.contains('edgeless') &&
+        target?.classList.contains('affine-block-children-container');
+
+      if (isInSurface) {
+        return convertDragPreviewEdgelessToDoc({
+          blockComponent,
+          ...props,
+        });
+      } else if (isTargetEdgelessContainer) {
+        return convertDragPreviewDocToEdgeless({
+          blockComponent,
+          cssSelector: '.drag-target',
+          ...props,
+        });
+      }
+      return false;
+    },
+  };
+
   override mounted(): void {
     super.mounted();
+
     this.selectionManager.register(ImageSelection);
+
     this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
+
+    this.disposables.add(
+      AffineDragHandleWidget.registerOption(this._dragHandleOption)
+    );
   }
 
   static setImageProxyURL = setImageProxyMiddlewareURL;

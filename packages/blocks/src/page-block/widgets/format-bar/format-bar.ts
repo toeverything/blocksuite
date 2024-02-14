@@ -1,5 +1,6 @@
 import '../../../_common/components/button.js';
 
+import { UIEventDispatcher } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
@@ -94,6 +95,9 @@ export class AffineFormatBarWidget extends WidgetElement {
   @state()
   private _dragging = false;
 
+  @state()
+  private _editorActive = false;
+
   private _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
   get displayType() {
     return this._displayType;
@@ -145,7 +149,12 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     const readonly = this.page.awarenessStore.isReadonly(this.page);
-    return !readonly && this.displayType !== 'none' && !this._dragging;
+    return (
+      !readonly &&
+      this.displayType !== 'none' &&
+      !this._dragging &&
+      this._editorActive
+    );
   }
 
   override connectedCallback() {
@@ -175,6 +184,12 @@ export class AffineFormatBarWidget extends WidgetElement {
     this.handleEvent('pointerUp', () => {
       this._dragging = false;
     });
+
+    this.disposables.add(
+      UIEventDispatcher.slots.activeChanged.on(() => {
+        this._editorActive = this.std.event.isActive;
+      })
+    );
 
     // calculate placement
     this.disposables.add(

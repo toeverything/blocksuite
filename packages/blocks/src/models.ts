@@ -21,10 +21,11 @@ import { DatabaseBlockSchema } from './database-block/database-model.js';
 import type { DividerBlockModel } from './divider-block/divider-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
 import { EmbedFigmaBlockSpec } from './embed-figma-block/embed-figma-spec.js';
-import { EmbedGithubBlockSpec } from './embed-github-block/index.js';
+import { EmbedGithubBlockSpec } from './embed-github-block/embed-github-spec.js';
 import { EmbedHtmlBlockSpec } from './embed-html-block/embed-html-spec.js';
-import { EmbedLinkedDocBlockSpec } from './embed-linked-doc-block/index.js';
-import { EmbedYoutubeBlockSpec } from './embed-youtube-block/index.js';
+import { EmbedLinkedDocBlockSpec } from './embed-linked-doc-block/embed-linked-doc-spec.js';
+import { EmbedSyncedDocBlockSpec } from './embed-synced-doc-block/embed-synced-doc-spec.js';
+import { EmbedYoutubeBlockSpec } from './embed-youtube-block/embed-youtube-spec.js';
 import type { FrameBlockModel } from './frame-block/frame-model.js';
 import { FrameBlockSchema } from './frame-block/frame-model.js';
 import type { ImageBlockModel } from './image-block/image-model.js';
@@ -41,7 +42,6 @@ import type { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 import type { SurfaceRefBlockModel } from './surface-ref-block/surface-ref-model.js';
 import { SurfaceRefBlockSchema } from './surface-ref-block/surface-ref-model.js';
-import { SyncedBlockSchema } from './synced-block/index.js';
 
 export type {
   AttachmentBlockModel,
@@ -83,7 +83,7 @@ export const __unstableSchemas = [
   EmbedGithubBlockSpec.schema,
   EmbedHtmlBlockSpec.schema,
   EmbedLinkedDocBlockSpec.schema,
-  SyncedBlockSchema,
+  EmbedSyncedDocBlockSpec.schema,
 ] satisfies z.infer<typeof BlockSchema>[];
 
 // TODO support dynamic register

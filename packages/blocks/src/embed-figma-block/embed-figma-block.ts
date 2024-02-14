@@ -4,7 +4,7 @@ import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
@@ -44,16 +44,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 
   private _isResizing = false;
 
-  open = () => {
-    let link = this.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
-  };
-
-  refreshData = () => {};
-
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
@@ -73,6 +63,16 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     event.stopPropagation();
     this.open();
   }
+
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
+
+  refreshData = () => {};
 
   override connectedCallback() {
     super.connectedCallback();
@@ -159,11 +159,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
           }
         </style>
         <embed-card-toolbar
-          .model=${this.model}
           .block=${this}
-          .host=${this.host}
           .abortController=${abortController}
-          .std=${this.std}
         ></embed-card-toolbar>
       `,
       computePosition: {
@@ -188,7 +185,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     return this.renderEmbed(
       () => html`
         <div
-          ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+          ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
           class=${classMap({
             'affine-embed-figma-block': true,
             selected: this._isSelected,

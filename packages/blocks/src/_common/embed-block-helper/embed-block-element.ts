@@ -62,9 +62,9 @@ export class EmbedBlockElement<
   private _dragHandleOption: DragHandleOption = {
     flavour: /affine:embed-*/,
     edgeless: true,
-    onDragStart: ({ state, startDragging, anchorBlockPath }) => {
+    onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
       if (!anchorBlockPath) return false;
-      const anchorComponent = this.std.view.viewFromPath(
+      const anchorComponent = editorHost.std.view.viewFromPath(
         'block',
         anchorBlockPath
       );
@@ -86,8 +86,8 @@ export class EmbedBlockElement<
       const isInSurface = blockComponent.isInSurface;
 
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
-        this.host.selection.setGroup('note', [
-          this.host.selection.create('block', {
+        editorHost.selection.setGroup('note', [
+          editorHost.selection.create('block', {
             path: blockComponent.path,
           }),
         ]);
@@ -113,7 +113,7 @@ export class EmbedBlockElement<
       return false;
     },
     onDragEnd: props => {
-      const { state, draggingElements, dropBlockId } = props;
+      const { state, draggingElements } = props;
       if (
         draggingElements.length !== 1 ||
         !matchFlavours(draggingElements[0].model, [
@@ -130,21 +130,12 @@ export class EmbedBlockElement<
         target?.classList.contains('affine-block-children-container');
 
       if (isInSurface) {
-        if (dropBlockId) {
-          const style = blockComponent._cardStyle;
-          if (style === 'vertical' || style === 'cube') {
-            const { xywh } = blockComponent.model;
-            const bound = Bound.deserialize(xywh);
-            bound.w = EMBED_CARD_WIDTH.horizontal;
-            bound.h = EMBED_CARD_HEIGHT.horizontal;
-            this.page.updateBlock(blockComponent.model, {
-              style: 'horizontal',
-              xywh: bound.serialize(),
-            });
-          }
-        }
+        const style = blockComponent._cardStyle;
+        const targetStyle =
+          style === 'vertical' || style === 'cube' ? 'horizontal' : style;
         return convertDragPreviewEdgelessToDoc({
           blockComponent,
+          style: targetStyle,
           ...props,
         });
       } else if (isTargetEdgelessContainer) {

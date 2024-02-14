@@ -27,6 +27,26 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
   private readonly _themeObserver = new ThemeObserver();
 
+  private _selectBlock() {
+    const selectionManager = this.bookmark.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      path: this.bookmark.path,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.bookmark.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.bookmark.open();
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -47,26 +67,6 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           !!this.bookmark.selected?.is('surface');
       })
     );
-  }
-
-  private _selectBlock() {
-    const selectionManager = this.bookmark.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      path: this.bookmark.path,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    if (!this.bookmark.isInSurface) {
-      this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.bookmark.open();
   }
 
   override render() {
@@ -127,7 +127,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
     return html`
       <div
-        class="affine-bookmark-card${cardClassMap}"
+        class="affine-bookmark-card ${cardClassMap}"
         @click=${this._handleClick}
         @dblclick=${this._handleDoubleClick}
       >

@@ -166,9 +166,11 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
   renderSpecPortal = (page: Page, specs: BlockSpec[]) => {
     return html`
-      <div contenteditable="false">
-        <editor-host .page=${page} .specs=${specs}></editor-host>
-      </div>
+      <editor-host
+        .page=${page}
+        .specs=${specs}
+        contenteditable="false"
+      ></editor-host>
     `;
   };
 

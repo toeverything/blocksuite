@@ -27,6 +27,7 @@ export class Viewport {
   protected _rafId: number | null = null;
   protected _el!: HTMLElement;
   private _syncFlag = false;
+  protected _cumulativeParentScale = 1;
 
   viewportUpdated = new Slot<{ zoom: number; center: IVec2 }>();
   sizeUpdated = new Slot<{
@@ -68,6 +69,10 @@ export class Viewport {
     return this._zoom;
   }
 
+  get cumulativeParentScale() {
+    return this._cumulativeParentScale;
+  }
+
   get viewportX() {
     const { centerX, width, zoom } = this;
     return centerX - width / 2 / zoom;
@@ -106,8 +111,8 @@ export class Viewport {
     const { viewportMinXY, viewportMaxXY } = this;
     return Bound.from({
       ...viewportMinXY,
-      w: viewportMaxXY.x - viewportMinXY.x,
-      h: viewportMaxXY.y - viewportMinXY.y,
+      w: (viewportMaxXY.x - viewportMinXY.x) / this._cumulativeParentScale,
+      h: (viewportMaxXY.y - viewportMinXY.y) / this._cumulativeParentScale,
     });
   }
 
@@ -177,6 +182,10 @@ export class Viewport {
       zoom: this.zoom,
       center: Vec.toVec(this.center) as IVec2,
     });
+  }
+
+  setCumulativeParentScale(scale: number) {
+    this._cumulativeParentScale = scale;
   }
 
   applyDeltaCenter(deltaX: number, deltaY: number) {

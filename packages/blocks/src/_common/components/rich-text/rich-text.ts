@@ -283,7 +283,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
 
-    const text = e.clipboardData?.getData('text/plain');
+    const text = e.clipboardData
+      ?.getData('text/plain')
+      ?.replace(/\r?\n|\r/g, '\n');
     if (!text) return;
 
     inlineEditor.insertText(inlineRange, text);

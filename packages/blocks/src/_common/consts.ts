@@ -21,6 +21,7 @@ export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
   video: 752,
   figma: 752,
   html: 752,
+  syncedDoc: 752,
 };
 
 export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
@@ -33,6 +34,7 @@ export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
   video: 544,
   figma: 544,
   html: 544,
+  syncedDoc: 455,
 };
 
 export const DEFAULT_IMAGE_PROXY_ENDPOINT =

@@ -103,6 +103,10 @@ export const embedCardModalStyles = css`
     height: 112px;
   }
 
+  .embed-card-modal-input.caption {
+    height: 112px;
+  }
+
   .embed-card-modal-action {
     display: flex;
     padding: 20px 24px;

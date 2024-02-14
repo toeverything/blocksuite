@@ -19,7 +19,7 @@ hero:
 
 features:
   - title: 🧩 Headless Editor Framework
-    details: BlockSuite provides a vallina framework for building various editors, enabling the design of diverse editing interfaces.
+    details: BlockSuite provides a vanilla framework for building various editors, enabling the design of diverse editing interfaces.
     link: /guide/overview
     linkText: Learn More
   - title: 🎨 Extensive Components

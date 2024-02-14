@@ -6,6 +6,7 @@ type PointerEventStateOptions = {
   startX: number;
   startY: number;
   last: PointerEventState | null;
+  cumulativeParentScale: number;
 };
 
 type Point = { x: number; y: number };
@@ -25,6 +26,7 @@ export class PointerEventState extends UIEventState {
   };
   button: number;
   dragging: boolean;
+  cumulativeParentScale: number;
 
   get x() {
     return this.point.x;
@@ -34,11 +36,18 @@ export class PointerEventState extends UIEventState {
     return this.point.y;
   }
 
-  constructor({ event, rect, startX, startY, last }: PointerEventStateOptions) {
+  constructor({
+    event,
+    rect,
+    startX,
+    startY,
+    last,
+    cumulativeParentScale,
+  }: PointerEventStateOptions) {
     super(event);
 
-    const offsetX = event.clientX - rect.left;
-    const offsetY = event.clientY - rect.top;
+    const offsetX = (event.clientX - rect.left) / cumulativeParentScale;
+    const offsetY = (event.clientY - rect.top) / cumulativeParentScale;
 
     this.raw = event;
     this.point = { x: offsetX, y: offsetY };
@@ -54,6 +63,7 @@ export class PointerEventState extends UIEventState {
     };
     this.button = last?.button || event.button;
     this.dragging = !!last;
+    this.cumulativeParentScale = cumulativeParentScale;
   }
 }
 

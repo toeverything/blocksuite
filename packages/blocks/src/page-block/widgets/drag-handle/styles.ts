@@ -23,6 +23,10 @@ export const styles = css`
     user-select: none;
     box-sizing: border-box;
   }
+  .affine-drag-handle-container:hover {
+    cursor: grab;
+  }
+
   .affine-drag-handle-grabber {
     width: 4px;
     height: 100%;
@@ -30,9 +34,7 @@ export const styles = css`
     background: var(--affine-placeholder-color);
     transition: width 0.25s ease;
   }
-  .affine-drag-handle-container:hover {
-    cursor: grab;
-  }
+
   @media print {
     .affine-drag-handle-widget {
       display: none;
