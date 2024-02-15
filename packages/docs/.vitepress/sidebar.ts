@@ -129,8 +129,11 @@ export const components: DefaultTheme.NavItem[] = [
   {
     text: 'Editors',
     items: [
-      { text: '📝 DocEditor', link: 'components/editors/doc-editor' },
-      { text: '🎨 EdgelessEditor', link: 'components/editors/edgeless-editor' },
+      { text: '📝 Doc Editor', link: 'components/editors/doc-editor' },
+      {
+        text: '🎨 Edgeless Editor',
+        link: 'components/editors/edgeless-editor',
+      },
     ],
   },
   {
