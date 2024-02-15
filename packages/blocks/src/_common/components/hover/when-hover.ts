@@ -102,9 +102,11 @@ export const whenHover = (
       onHoverChange(new MouseEvent('mouseover'));
     }
     element.addEventListener('mouseover', onHoverChange, {
+      capture: true,
       signal: abortController.signal,
     });
     element.addEventListener('mouseleave', onHoverChange, {
+      capture: true,
       signal: abortController.signal,
     });
   };
