@@ -16,7 +16,6 @@ import {
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
 import { isCanvasElement, isNoteBlock } from './utils/query.js';
-
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
     super(pageElement);
@@ -228,7 +227,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       'keyDown',
       ctx => {
         const event = ctx.get('keyboardState').raw;
-        if (event.code === 'Space') {
+        if (event.code === 'Space' && !event.repeat) {
           this._space(event);
         }
       },
@@ -238,7 +237,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       'keyUp',
       ctx => {
         const event = ctx.get('keyboardState').raw;
-        if (event.code === 'Space') {
+        if (event.code === 'Space' && !event.repeat) {
           this._space(event);
         }
       },
@@ -247,36 +246,55 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   }
 
   private _space(event: KeyboardEvent) {
+    /* 
+      Call this function with a check for !event.repeat to consider only the first keydown (not repeat). This way, you can use onPressSpaceBar in a tool to determine if the space bar is pressed or not.
+    */
+
     const edgeless = this.pageElement;
     const selection = edgeless.service.selection;
     const currentTool = edgeless.edgelessTool;
     const type = currentTool.type;
-    const allowedTools = ['default', 'pan', 'brush', 'eraser'];
 
-    if (!allowedTools.includes(type)) {
-      return;
+    const isKeyDown = event.type === 'keydown';
+
+    if (isKeyDown) {
+      edgeless.slots.pressSpaceBarUpdated.emit(true);
+    } else {
+      edgeless.slots.pressSpaceBarUpdated.emit(false);
     }
+
+    if (edgeless.service.tool.dragging) {
+      return; // Don't do anything if currently dragging
+    }
+
     const revertToPrevTool = (ev: KeyboardEvent) => {
-      if (ev.key === ' ') this._setEdgelessTool(edgeless, currentTool);
+      if (ev.code === 'Space') {
+        this._setEdgelessTool(edgeless, currentTool);
+        document.removeEventListener('keyup', revertToPrevTool, false);
+      }
     };
 
-    if (event.type === 'keydown') {
+    if (isKeyDown) {
       if (type === 'pan' || (type === 'default' && selection.editing)) {
         return;
       }
       this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
-      this.pageElement.dispatcher.disposables.addFromEvent(
+
+      edgeless.dispatcher.disposables.addFromEvent(
         document,
         'keyup',
         revertToPrevTool
       );
-    } else if (event.type === 'keyup') {
-      document.removeEventListener('keyup', revertToPrevTool, false);
     }
   }
 
+  /*
+    Bug?? : This function is actually called with key repeat
+    I think the first call is just enough as it is just setting the shift key pressed state to true..
+    */
   private _shift(event: KeyboardEvent) {
     const edgeless = this.pageElement;
+
     if (event.key.toLowerCase() === 'shift' && event.shiftKey) {
       edgeless.slots.pressShiftKeyUpdated.emit(true);
     } else {

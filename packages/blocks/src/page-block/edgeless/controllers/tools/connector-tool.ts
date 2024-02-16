@@ -100,6 +100,10 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     noop();
   }
 
+  onPressSpaceBar(_pressed: boolean): void {
+    noop();
+  }
+
   beforeModeSwitch() {
     noop();
   }

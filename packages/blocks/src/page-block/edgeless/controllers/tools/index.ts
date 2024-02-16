@@ -53,6 +53,7 @@ export abstract class EdgelessToolController<
   abstract onContainerMouseOut(e: PointerEventState): void;
   abstract onContainerContextMenu(e: PointerEventState): void;
   abstract onPressShiftKey(pressed: boolean): void;
+  abstract onPressSpaceBar(pressed: boolean): void;
   abstract beforeModeSwitch(prevMode: Tool): void;
   abstract afterModeSwitch(newMode: Tool): void;
 }
