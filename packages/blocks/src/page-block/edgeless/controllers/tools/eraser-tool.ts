@@ -180,6 +180,10 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     noop();
   }
 
+  override onPressSpaceBar(_pressed: boolean): void {
+    noop();
+  }
+
   override afterModeSwitch(_newMode: EraserTool): void {
     noop();
   }

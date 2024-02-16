@@ -73,6 +73,9 @@ export class PanToolController extends EdgelessToolController<PanTool> {
   onPressShiftKey(_: boolean) {
     noop();
   }
+  onPressSpaceBar(_pressed: boolean): void {
+    noop();
+  }
 
   beforeModeSwitch() {
     noop();

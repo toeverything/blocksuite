@@ -54,6 +54,7 @@ export class EdgelessPageService extends PageService {
   slots = {
     edgelessToolUpdated: new Slot<EdgelessTool>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
+    pressSpaceBarUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
       blocks: TopLevelBlockModel[];
@@ -174,6 +175,12 @@ export class EdgelessPageService extends PageService {
     disposables.add(
       slots.pressShiftKeyUpdated.on(pressed => {
         this.tool.shiftKey = pressed;
+      })
+    );
+
+    disposables.add(
+      slots.pressSpaceBarUpdated.on(pressed => {
+        this.tool.spaceBar = pressed;
       })
     );
   }

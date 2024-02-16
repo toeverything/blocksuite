@@ -54,6 +54,10 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     noop();
   }
 
+  onPressSpaceBar(_pressed: boolean): void {
+    noop();
+  }
+
   beforeModeSwitch() {
     noop();
   }

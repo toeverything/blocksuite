@@ -80,6 +80,8 @@ export class EdgelessToolsManager {
   // pressed shift key
   private _shiftKey = false;
 
+  private _spaceBar = false;
+
   private _dragging = false;
 
   get dragging() {
@@ -118,7 +120,9 @@ export class EdgelessToolsManager {
     const maxY = Math.max(start.y, end.y);
     return new DOMRect(minX, minY, maxX - minX, maxY - minY);
   }
-
+  get spaceBar() {
+    return this._spaceBar;
+  }
   get shiftKey() {
     return this._shiftKey;
   }
@@ -126,6 +130,11 @@ export class EdgelessToolsManager {
   set shiftKey(pressed: boolean) {
     this._shiftKey = pressed;
     this.currentController.onPressShiftKey(pressed);
+  }
+
+  set spaceBar(pressed: boolean) {
+    this._spaceBar = pressed;
+    this.currentController.onPressSpaceBar(pressed);
   }
 
   get page() {
