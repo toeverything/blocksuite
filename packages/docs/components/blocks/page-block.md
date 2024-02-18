@@ -1,5 +1,7 @@
 # Page Block
 
-::: info
-🚧 The comprehensive document of this component is still a work in progress.
-:::
+## Reference
+
+- [`PageBlockSchema`](/api/@blocksuite/blocks/variables/PageBlockSchema.html)
+- [`DocPageService`](/api/@blocksuite/blocks/classes/DocPageService.html)
+- [`EdgelessPageService`](/api/@blocksuite/blocks/classes/EdgelessPageService.html)

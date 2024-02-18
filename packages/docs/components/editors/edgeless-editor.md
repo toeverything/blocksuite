@@ -14,6 +14,14 @@ This editor component offers a canvas with infinite logical dimensions, suitable
 - Various [link cards](../blocks/link-blocks) that can be inserted on top of the canvas.
 - Customizable toolbars and other widgets.
 
+Moreover, this editor inherits capabilities built into the BlockSuite framework, including:
+
+- Per-user undo/redo stack
+- Real-time collaboration
+- [Document streaming](../../guide/data-synchronization#document-streaming)
+
+Notably, the BlockSuite framework allows runtime compatibility between the doc editor and the edgeless editor, beyond mere static file format compatibility. This means you can dynamically attach the same page object to different instances of the doc editor and edgeless editor.
+
 ## Usage
 
 ```ts

@@ -13,7 +13,7 @@ This editor component is designed for conventional flow content editing, offerin
 - Two types of selections, including native text selection and block-level selection.
 - Cross-block dragging and multiple widget toolbars.
 
-Moreover, the doc editor inherits capabilities built into the BlockSuite framework, including:
+Moreover, this editor inherits capabilities built into the BlockSuite framework, including:
 
 - Per-user undo/redo stack
 - Real-time collaboration
