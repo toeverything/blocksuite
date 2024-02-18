@@ -174,7 +174,7 @@ export const components: DefaultTheme.NavItem[] = [
     ],
   },
   {
-    text: 'Widgets',
+    text: 'Widgets 🚧',
     items: [
       { text: 'Slash Menu', link: 'components/widgets/slash-menu' },
       { text: 'Format Bar', link: 'components/widgets/format-bar' },
@@ -182,7 +182,7 @@ export const components: DefaultTheme.NavItem[] = [
     ],
   },
   {
-    text: 'Fragments',
+    text: 'Fragments 🚧',
     items: [
       { text: 'Doc Title', link: 'components/fragments/doc-title' },
       { text: 'Outline Panel', link: 'components/fragments/outline-panel' },

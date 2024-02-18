@@ -33,7 +33,7 @@ Assigning a [`page`](../../guide/working-with-block-tree#block-tree-basics) obje
 
 ## Integration
 
-Like all BlockSuite editors, the editor UI is entirely composed of the combination of [block specs](../../guide/block-spec). A specialized page block spec serves as the root node of the document and implements all top-level document UI, with main widgets also mounted on the page block. Accordingly, commonly used editing APIs are provided in the page service.
+Like all BlockSuite editors, the editor UI is entirely composed of the combination of [block specs](../../guide/block-spec). A specialized [page block](../blocks/page-block) spec serves as the root node of the document and implements all top-level document UI, with main widgets also mounted on the page block. Accordingly, commonly used editing APIs are provided in the page service.
 
 To integrate and customize this editor, you can:
 

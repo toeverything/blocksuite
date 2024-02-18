@@ -1,5 +1,8 @@
 # Attachment Block
 
-::: info
-🚧 The comprehensive document of this component is still a work in progress.
-:::
+This is a block used to place attachment content. It supports optional style configurations to display as cards of different styles.
+
+## Reference
+
+- [`AttachmentBlockSchema`](/api/@blocksuite/blocks/variables/AttachmentBlockSchema.html)
+- [`AttachmentService`](/api/@blocksuite/blocks/classes/AttachmentService.html)

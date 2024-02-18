@@ -3,9 +3,9 @@
 In a nutshell, BlockSuite categorizes components into the following types:
 
 - **Editor** - A container used to present document content in various forms. Different editors are composed of different sets of [block specs](../guide/block-spec).
-- **Block** - The atomic unit for constructing document within the editor. Once a block spec is registered, multiple corresponding block instances can be rendered in the editor.
+- **Block** - The atomic unit for constructing document within the editor. Once a [block spec](../guide/block-spec) is registered, multiple corresponding block instances can be rendered in the editor.
 - **Widget** - Auxiliary components that contextually show up in the editor on demand, such as a search bar or color picker. Every block can define its own widgets.
-- **Fragment** - Independent components outside the editor. They share the document with the editor but have their own lifecycles.
+- **Fragment** - External components outside the editor. They share the document with the editor but have their own lifecycles.
 
 ![showcase-fragments-2](../images/showcase-fragments-2.jpg)
 

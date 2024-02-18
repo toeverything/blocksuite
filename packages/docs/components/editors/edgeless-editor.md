@@ -32,7 +32,7 @@ const editor = new EdgelessEditor();
 
 ## Integration
 
-Like all BlockSuite editors, the editor UI is entirely composed of the combination of [block specs](../../guide/block-spec). A specialized page block spec serves as the root node of the document and implements all top-level document UI, with main widgets also mounted on the page block. Accordingly, commonly used editing APIs are provided in the page service.
+Like all BlockSuite editors, the editor UI is entirely composed of the combination of [block specs](../../guide/block-spec). A specialized [page block](../blocks/page-block) spec serves as the root node of the document and implements all top-level document UI, with main widgets also mounted on the page block. Accordingly, commonly used editing APIs are provided in the page service.
 
 Specifically, the canvas element and some blocks that appear on the top layer of the canvas are located on the [surface block](../blocks/surface-block). Therefore, operating the edgeless editor also requires accessing the model and service mounted on this block.
 
