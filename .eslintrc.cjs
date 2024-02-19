@@ -6,6 +6,7 @@ const allPackages = [
   'frameworlk/inline',
   'framework/lit',
   'framework/store',
+  'framework/sync',
   'blocks',
   'docs',
   'playground',
