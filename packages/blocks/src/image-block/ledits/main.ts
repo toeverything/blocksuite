@@ -4,7 +4,7 @@ import type { EditorHost } from '@blocksuite/lit';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { AffineModalWidget } from '../../page-block/widgets/modal/modal.js';
-import type { ImageBlockModel } from '../image-model.js';
+import type { ImageBlockComponent } from '../image-block.js';
 import { GradioApp } from './gradio-app.js';
 
 function createGradioApp() {
@@ -23,11 +23,11 @@ function getPageElement(host: EditorHost) {
   return page;
 }
 
-export function openLeditsEditor(
-  model: ImageBlockModel,
-  blob: Blob,
-  host: EditorHost
-) {
+export function openLeditsEditor(blockElement: ImageBlockComponent) {
+  const { host, model, blob } = blockElement;
+  if (!blob) {
+    return;
+  }
   const pageElement = getPageElement(host);
   const app = createGradioApp();
   const modal = (

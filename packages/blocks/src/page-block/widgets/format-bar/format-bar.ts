@@ -1,3 +1,6 @@
+import '../../../_common/components/button.js';
+
+import { UIEventDispatcher } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
@@ -10,7 +13,7 @@ import {
   shift,
 } from '@floating-ui/dom';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
 import { HoverController } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
@@ -89,7 +92,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     return this.host.selection;
   }
 
+  @state()
   private _dragging = false;
+
+  @state()
+  private _editorActive = false;
 
   private _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
   get displayType() {
@@ -142,7 +149,12 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     const readonly = this.page.awarenessStore.isReadonly(this.page);
-    return !readonly && this.displayType !== 'none' && !this._dragging;
+    return (
+      !readonly &&
+      this.displayType !== 'none' &&
+      !this._dragging &&
+      this._editorActive
+    );
   }
 
   override connectedCallback() {
@@ -165,17 +177,17 @@ export class AffineFormatBarWidget extends WidgetElement {
       );
     }
 
-    this.disposables.add(
-      this.host.event.add('dragStart', () => {
-        this._dragging = true;
-        this.requestUpdate();
-      })
-    );
+    this.handleEvent('pointerMove', ctx => {
+      this._dragging = ctx.get('pointerState').dragging;
+    });
+
+    this.handleEvent('pointerUp', () => {
+      this._dragging = false;
+    });
 
     this.disposables.add(
-      this.host.event.add('dragEnd', () => {
-        this._dragging = false;
-        this.requestUpdate();
+      UIEventDispatcher.slots.activeChanged.on(() => {
+        this._editorActive = this.std.event.isActive;
       })
     );
 

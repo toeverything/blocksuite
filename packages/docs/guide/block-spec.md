@@ -4,15 +4,15 @@ In BlockSuite, a `BlockSpec` defines the structure and interactive elements for 
 
 A block spec contains the following properties:
 
-- `schema`: Defines the structure and data types for the block's content.
-- `service`: Used for registering methods for specific actions and external invocations.
-- `view`: Represents the visual representation and layout of the block.
+- [`schema`](./block-schema): Defines the structure and data types for the block's content.
+- [`service`](./block-service): Used for registering methods for specific actions and external invocations.
+- [`view`](./block-view): Represents the visual representation and layout of the block.
   - `component`: The primary user interface element of the block.
   - `widgets`: Additional interactive elements enhancing the block's functionality.
 
 ![block-spec](../images/block-spec.png)
 
-## Lit-Based Example
+## Example
 
 Note that in block spec, the definition of `view` is related to UI frameworks. By default, we provide a `@blocksuite/lit` package to help build a lit block view. But it's still possible to use other UI frameworks. We'll introduce later about how to write custom block renderers.
 

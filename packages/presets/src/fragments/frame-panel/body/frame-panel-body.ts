@@ -16,6 +16,7 @@ import {
 import type { Page } from '@blocksuite/store';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import type {
   DragEvent,
@@ -365,17 +366,20 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
 
   private _renderFrameList() {
     const selectedFrames = new Set(this._selected);
-    const frameCards = this._frameItems.map(
-      (frameItem, idx) =>
-        html`<frame-card
-          data-frame-id=${frameItem.frame.id}
+    const frameCards = html`${repeat(
+      this._frameItems,
+      frameItem => [frameItem.frame.id, frameItem.cardIndex].join('-'),
+      frameItem => {
+        const { frame, frameIndex, cardIndex } = frameItem;
+        return html`<frame-card
+          data-frame-id=${frame.id}
           .edgeless=${this.edgeless}
           .page=${this.page}
           .host=${this.editorHost}
-          .frame=${frameItem.frame}
-          .cardIndex=${idx}
-          .frameIndex=${frameItem.frameIndex}
-          .status=${selectedFrames.has(frameItem.frame.id)
+          .frame=${frame}
+          .cardIndex=${cardIndex}
+          .frameIndex=${frameIndex}
+          .status=${selectedFrames.has(frame.id)
             ? this._dragging
               ? 'placeholder'
               : 'selected'
@@ -383,8 +387,9 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
           @select=${this._selectFrame}
           @fitview=${this._fitToElement}
           @drag=${this._drag}
-        ></frame-card>`
-    );
+        ></frame-card>`;
+      }
+    )}`;
 
     const frameList = html` <div class="frame-list-container">
       ${this.insertIndex !== undefined

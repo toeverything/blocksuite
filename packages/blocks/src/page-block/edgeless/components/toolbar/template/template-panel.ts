@@ -5,6 +5,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 
 import {
   requestConnectedFrame,
@@ -116,7 +117,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       width: 135px;
       height: 80px;
       box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.02);
-      background-color: #fff;
+      background-color: var(--affine-background-primary-color);
       border-radius: 4px;
       cursor: pointer;
     }
@@ -124,7 +125,9 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     .template-item > svg {
       display: block;
       margin: 0 auto;
-      transform: translateY(20%);
+      width: 135px;
+      height: 80px;
+      color: var(--affine-background-primary-color);
     }
 
     .template-item:hover::before {
@@ -438,10 +441,12 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
                       @click=${() => this._insertTemplate(template)}
                     >
                       ${template.preview
-                        ? html`<img
-                            src="${template.preview}"
-                            class="template-preview"
-                          />`
+                        ? template.preview.startsWith('<svg')
+                          ? html`${unsafeSVG(template.preview)}`
+                          : html`<img
+                              src="${template.preview}"
+                              class="template-preview"
+                            />`
                         : defaultPreview}
                       ${template === this._loadingTemplate
                         ? html`<affine-template-loading></affine-template-loading>`

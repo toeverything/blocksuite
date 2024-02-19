@@ -2,17 +2,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import { html, type TemplateResult } from 'lit';
 
 import { withTempBlobData } from '../_common/utils/filesys.js';
-import type {
-  ImageBlockModel,
-  ImageBlockProps,
-} from '../image-block/image-model.js';
+import type { ImageBlockProps } from '../image-block/image-model.js';
 import { transformModel } from '../page-block/utils/operations/model.js';
-import type {
-  AttachmentBlockModel,
-  AttachmentBlockProps,
-} from './attachment-model.js';
-
-const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
+import type { AttachmentBlockModel } from './attachment-model.js';
 
 type EmbedConfig = {
   name: string;
@@ -128,30 +120,4 @@ export async function turnIntoImageBlock(model: AttachmentBlockModel) {
     ...imageConvertData,
   };
   transformModel(model, 'affine:image', imageProp);
-}
-
-/**
- * Turn the image block into a attachment block.
- */
-export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
-  if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
-    throw new Error('The attachment flavour is not supported!');
-
-  if (!model.sourceId) throw new Error('Image data not available');
-
-  const sourceId = model.sourceId;
-  assertExists(sourceId);
-
-  const { saveImageData, getAttachmentData } = withTempBlobData();
-  saveImageData(sourceId, { width: model.width, height: model.height });
-  const attachmentConvertData = getAttachmentData(model.sourceId);
-  const attachmentProp: Partial<AttachmentBlockProps> = {
-    sourceId,
-    name: DEFAULT_ATTACHMENT_NAME,
-    size: blob.size,
-    type: blob.type,
-    caption: model.caption,
-    ...attachmentConvertData,
-  };
-  transformModel(model, 'affine:attachment', attachmentProp);
 }

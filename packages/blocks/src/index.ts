@@ -77,6 +77,7 @@ export * from './embed-figma-block/index.js';
 export * from './embed-github-block/index.js';
 export * from './embed-html-block/index.js';
 export * from './embed-linked-doc-block/index.js';
+export * from './embed-synced-doc-block/index.js';
 export * from './embed-youtube-block/index.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
@@ -84,13 +85,19 @@ export * from './list-block/index.js';
 export * from './models.js';
 export * from './note-block/index.js';
 export { EdgelessComponentToolbar } from './page-block/edgeless/components/component-toolbar/component-toolbar.js';
-export { EdgelessPageService } from './page-block/edgeless/edgeless-page-service.js';
+export { EdgelessTemplatePanel } from './page-block/edgeless/components/toolbar/template/template-panel.js';
+export type {
+  Template,
+  TemplateCategory,
+  TemplateManager,
+} from './page-block/edgeless/components/toolbar/template/template-type.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export {
   Bound,
   BrushElementModel,
   CanvasElementType,
+  CanvasTextFonts,
   ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,

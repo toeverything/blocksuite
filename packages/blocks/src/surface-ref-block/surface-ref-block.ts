@@ -1,4 +1,5 @@
 import './surface-ref-portal.js';
+import '../_common/components/embed-card/embed-card-caption.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
@@ -7,15 +8,13 @@ import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import {
   EdgelessModeIcon,
   FrameIcon,
   MoreDeleteIcon,
 } from '../_common/icons/index.js';
-import {
-  requestConnectedFrame,
-  stopPropagation,
-} from '../_common/utils/event.js';
+import { requestConnectedFrame } from '../_common/utils/event.js';
 import { buildPath, getEditorContainer } from '../_common/utils/query.js';
 import type { PageService } from '../index.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
@@ -218,39 +217,12 @@ export class SurfaceRefBlockComponent extends BlockElement<
       color: var(--affine-text-disable-color);
       line-height: 20px;
     }
-
-    .surface-ref-caption {
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .caption-input {
-      border: 0;
-      outline: none;
-      width: 100%;
-      display: block;
-      text-align: center;
-
-      font-size: var(--affine-font-sm);
-      color: var(--affine-icon-color);
-      background-color: transparent;
-    }
-
-    .caption-input::placeholder {
-      color: var(--affine-placeholder-color);
-    }
   `;
   @state()
   private _surfaceModel: SurfaceBlockModel | null = null;
 
   @state()
   private _focused: boolean = false;
-
-  @state()
-  private _caption: string = '';
-
-  @state()
-  private _showCaption: boolean = false;
 
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
@@ -261,6 +233,15 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   @query('surface-ref-portal')
   portal!: SurfaceRefPortal;
+
+  @query('affine-surface-ref > embed-card-caption')
+  captionElement!: EmbedCardCaption;
+
+  private _isInSurface = false;
+
+  get isInSurface() {
+    return this._isInSurface;
+  }
 
   private get _shouldRender() {
     return (
@@ -281,6 +262,11 @@ export class SurfaceRefBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.contentEditable = 'false';
+
+    const parent = this.host.page.getParent(this.model);
+    this._isInSurface = parent?.flavour === 'affine:surface';
+
     if (!this._shouldRender) return;
 
     const service = this.service;
@@ -290,6 +276,9 @@ export class SurfaceRefBlockComponent extends BlockElement<
       this.page,
       true
     );
+    this._disposables.add(() => {
+      this.service?.removeRenderer(this._surfaceRefRenderer.id);
+    });
     this._disposables.add(
       this._surfaceRefRenderer.slots.surfaceModelChanged.on(model => {
         this._surfaceModel = model;
@@ -327,12 +316,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this._initHotkey();
     this._initReferencedModel();
     this._initSelection();
-  }
-
-  override disconnectedCallback() {
-    if (!this._shouldRender) return;
-    this.service?.removeRenderer(this._surfaceRefRenderer.id);
-    super.disconnectedCallback();
   }
 
   override updated() {
@@ -405,9 +388,9 @@ export class SurfaceRefBlockComponent extends BlockElement<
   }
 
   private _initReferencedModel() {
-    let refWathcer: Disposable | null = null;
+    let refWatcher: Disposable | null = null;
     const init = () => {
-      refWathcer?.dispose();
+      refWatcher?.dispose();
 
       const referencedModel = this._surfaceRefRenderer.getModel(
         this.model.reference
@@ -418,7 +401,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
       if (!referencedModel) return;
 
       if ('propsUpdated' in referencedModel) {
-        refWathcer = referencedModel.propsUpdated.on(() => {
+        refWatcher = referencedModel.propsUpdated.on(() => {
           if (referencedModel.flavour !== this.model.refFlavour) {
             this.page.updateBlock(this.model, {
               refFlavour: referencedModel.flavour,
@@ -445,16 +428,17 @@ export class SurfaceRefBlockComponent extends BlockElement<
         }
       });
     });
+
     this._disposables.add(() => {
       this.model.propsUpdated.on(() => {
-        this._caption = this.model.caption ?? '';
         if (this.model.reference !== this._referencedModel?.id) {
           init();
         }
       });
     });
+
     this._disposables.add(() => {
-      refWathcer?.dispose();
+      refWatcher?.dispose();
     });
   }
 
@@ -500,63 +484,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this.selection.update(() => {
       return [this.selection.create('block', { path: this.path })];
     });
-  }
-
-  private _updateCaption() {
-    this.page.updateBlock(this.model, {
-      caption: this._caption,
-    });
-  }
-
-  private _onCaptionKeydown(e: KeyboardEvent) {
-    if (e.isComposing) return;
-    if (e.key === 'Enter') {
-      e.stopPropagation();
-
-      this._updateCaption();
-    }
-  }
-
-  private _onCaptionBlur() {
-    this._updateCaption();
-
-    if (!this._caption.length && this._showCaption) {
-      this._showCaption = false;
-    }
-  }
-
-  private _renderCaption() {
-    if (!this._caption && !this._showCaption) return nothing;
-
-    return html`<div class="surface-ref-caption">
-      <input
-        .value=${this._caption}
-        .disabled=${this.model.page.readonly}
-        placeholder="Write a caption"
-        class="caption-input"
-        @input=${(e: InputEvent) =>
-          (this._caption = (e.target as HTMLInputElement).value)}
-        @keydown=${this._onCaptionKeydown}
-        @blur=${this._onCaptionBlur}
-        @pointerdown=${stopPropagation}
-        @click=${stopPropagation}
-        @paste=${stopPropagation}
-        @cut=${stopPropagation}
-        @copy=${stopPropagation}
-      />
-    </div>`;
-  }
-
-  showCaption() {
-    this._showCaption = true;
-
-    this.updateComplete
-      .then(() => {
-        (
-          this.renderRoot.querySelector('.caption-input') as HTMLInputElement
-        )?.focus();
-      })
-      .catch(console.error);
   }
 
   viewInEdgeless() {
@@ -680,8 +607,11 @@ export class SurfaceRefBlockComponent extends BlockElement<
             : undefined,
         })}
       >
-        ${content} ${this._renderCaption()}
+        ${content}
       </div>
+
+      <embed-card-caption .block=${this}></embed-card-caption>
+
       ${Object.values(this.widgets)}
     `;
   }

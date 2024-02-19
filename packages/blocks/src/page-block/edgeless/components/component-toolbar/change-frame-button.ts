@@ -1,3 +1,4 @@
+import '../buttons/tool-icon-button.js';
 import './component-toolbar-menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
@@ -8,6 +9,8 @@ import { html } from 'lit/static-html.js';
 import { toast } from '../../../../_common/components/toast.js';
 import { NoteIcon, RenameIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { NoteDisplayMode } from '../../../../_common/types.js';
+import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import {
   deserializeXYWH,
@@ -106,13 +109,17 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     if (!this.surface.page.root) return;
 
     const root = this.surface.page.root;
-    const pageChildren = root.children;
-    const last = pageChildren[pageChildren.length - 1];
+    const notes = root.children.filter(
+      model =>
+        matchFlavours(model, ['affine:note']) &&
+        model.displayMode !== NoteDisplayMode.EdgelessOnly
+    );
+    const lastNote = notes[notes.length - 1];
     const referenceFrame = this.frames[0];
 
-    let targetParent = last?.id;
+    let targetParent = lastNote?.id;
 
-    if (last?.flavour !== 'affine:note') {
+    if (!lastNote) {
       const targetXYWH = deserializeXYWH(referenceFrame.xywh);
 
       targetXYWH[1] = targetXYWH[1] + targetXYWH[3];
@@ -164,9 +171,12 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               @click=${this._insertIntoPage}
             >
               ${NoteIcon}
+
               <span style="margin-left: 2px;">Insert into Page</span>
             </edgeless-tool-icon-button>
+
             <component-toolbar-menu-divider></component-toolbar-menu-divider>
+
             <edgeless-tool-icon-button
               .tooltip=${'Rename'}
               .tipPosition=${'bottom'}
@@ -176,6 +186,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             >
               ${RenameIcon}
             </edgeless-tool-icon-button>
+
             <component-toolbar-menu-divider></component-toolbar-menu-divider>
           `
         : nothing}
@@ -190,6 +201,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       >
         <div class="fill-color-container">${ColorUnit(background)}</div>
       </edgeless-tool-icon-button>
+
       <div class="color-panel-container fill-color">
         <edgeless-color-panel
           .value=${background}

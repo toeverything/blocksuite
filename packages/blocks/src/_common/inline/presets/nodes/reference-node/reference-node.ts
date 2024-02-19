@@ -199,6 +199,10 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
+    if (this.page.readonly) {
+      return null;
+    }
+
     const selection = this.std.selection;
     const textSelection = selection.find('text');
     if (

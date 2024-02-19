@@ -1,4 +1,4 @@
-import type { ViewStore } from '@blocksuite/block-std';
+import { PathFinder, type ViewStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
@@ -238,11 +238,20 @@ export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
 }
 
 export function isInsideDocEditor(host: EditorHost) {
-  return !!host.closest('doc-editor');
+  const hostParentEl = host.parentElement;
+  return (
+    !!hostParentEl &&
+    (hostParentEl.classList.contains('affine-doc-viewport') ||
+      hostParentEl.classList.contains('doc-editor-container'))
+  );
 }
 
 export function isInsideEdgelessEditor(host: EditorHost) {
-  return !!host.closest('edgeless-editor');
+  const hostParentEl = host.parentElement;
+  return (
+    !!hostParentEl &&
+    hostParentEl.classList.contains('affine-edgeless-viewport')
+  );
 }
 
 /**
@@ -463,7 +472,7 @@ function isDatabase({ tagName }: Element) {
 }
 
 function isEdgelessChildNote({ classList }: Element) {
-  return classList.contains('edgeless-block-portal-note');
+  return classList.contains('note-background');
 }
 
 function isEdgelessChildImage({ classList }: Element) {
@@ -621,8 +630,11 @@ export function findClosestBlockElement(
   container: BlockComponent,
   point: Point,
   selector: string
-) {
-  const children = Array.from(container.querySelectorAll(selector));
+): BlockComponent | null {
+  const children = (
+    Array.from(container.querySelectorAll(selector)) as BlockComponent[]
+  ).filter(child => PathFinder.includes(child.path, container.path));
+
   let lastDistance = Number.POSITIVE_INFINITY;
   let lastChild = null;
 

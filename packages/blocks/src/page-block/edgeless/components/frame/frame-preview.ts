@@ -1,4 +1,6 @@
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import '../../../../surface-ref-block/surface-ref-portal.js';
+
+import { debounce, DisposableGroup } from '@blocksuite/global/utils';
 import {
   type EditorHost,
   ShadowlessElement,
@@ -9,19 +11,21 @@ import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  EdgelessModel,
-  TopLevelBlockModel,
-} from '../../../../_common/types.js';
+import type { EdgelessModel } from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import type { SurfaceBlockModel } from '../../../../surface-block/surface-model.js';
+import type {
+  ElementUpdatedData,
+  SurfaceBlockModel,
+} from '../../../../surface-block/surface-model.js';
+import type { SurfaceService } from '../../../../surface-block/surface-service.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { SurfaceRefPortal } from '../../../../surface-ref-block/surface-ref-portal.js';
 import type { SurfaceRefRenderer } from '../../../../surface-ref-block/surface-ref-renderer.js';
 import type { SurfaceRefBlockService } from '../../../../surface-ref-block/surface-ref-service.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { isTopLevelBlock } from '../../utils/query.js';
 
 type RefElement = Exclude<EdgelessModel, NoteBlockModel>;
 
@@ -111,11 +115,29 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   private _attachRenderer() {
     if (
       this._surfaceRefRenderer?.surfaceRenderer.canvas.isConnected ||
-      !this.container
+      !this.container ||
+      !this.blocksPortal
     )
       return;
 
     this.surfaceRenderer.attach(this.container);
+    if (this.blocksPortal.isUpdatePending) {
+      this.blocksPortal.updateComplete
+        .then(() => {
+          this.blocksPortal.setStackingCanvas(
+            this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+          );
+        })
+        .catch(console.error);
+    } else {
+      this.blocksPortal.setStackingCanvas(
+        this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+      );
+    }
+  }
+
+  private get _surfaceService() {
+    return this.host?.std.spec.getService('affine:surface') as SurfaceService;
   }
 
   private get _surfaceRefService() {
@@ -123,13 +145,17 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       | SurfaceRefBlockService
       | undefined;
 
-    assertExists(service, 'SurfaceRefBlockService not found');
     return service;
   }
 
   private _setupSurfaceRefRenderer() {
     const surfaceRefService = this._surfaceRefService;
-    const renderer = surfaceRefService.getRenderer(this._surfaceRefRendererId);
+    if (!surfaceRefService) return;
+    const renderer = surfaceRefService.getRenderer(
+      this._surfaceRefRendererId,
+      this.page,
+      true
+    );
     this._surfaceRefRenderer = renderer;
 
     this._disposables.add(
@@ -143,16 +169,27 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       })
     );
 
+    this._disposables.add(
+      this._surfaceRefRenderer.surfaceService.layer.slots.layerUpdated.on(
+        () => {
+          this.blocksPortal.setStackingCanvas(
+            this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+          );
+        }
+      )
+    );
+
     renderer.mount();
   }
 
   private _cleanupSurfaceRefRenderer() {
     const surfaceRefService = this._surfaceRefService;
+    if (!surfaceRefService) return;
     surfaceRefService.removeRenderer(this._surfaceRefRendererId);
   }
 
   private _refreshViewport() {
-    if (!this.frame) {
+    if (!this.frame || !this._surfaceService) {
       return;
     }
 
@@ -160,7 +197,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
     // trigger a rerender to update element's size
     // and set viewport after element's size has been updated
-    this.requestUpdate();
     this.updateComplete
       .then(() => {
         this.surfaceRenderer.onResize();
@@ -174,8 +210,10 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   }
 
   private _tryLoadFillScreen() {
+    if (!this.edgeless) return;
+
     this.fillScreen =
-      this.edgeless!.service.editSession.getItem('presentFillScreen') ?? false;
+      this.edgeless.service.editSession.getItem('presentFillScreen') ?? false;
   }
 
   private _getViewportWH = (referencedModel: RefElement) => {
@@ -193,6 +231,36 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       height: h * scale,
     };
   };
+
+  private _overlapWithFrame = (id: string) => {
+    const ele = this.edgeless?.service.getElementById(id);
+    if (!ele || !ele.xywh) return false;
+
+    const frameBound = Bound.deserialize(this.frame.xywh);
+    const eleBound = Bound.deserialize(ele.xywh);
+    return frameBound.isOverlapWithBound(eleBound);
+  };
+
+  private _handleElementUpdated = (data: ElementUpdatedData) => {
+    const { id, oldValues, props } = data;
+    if (!props.xywh) return;
+    // if element is moved in frame, refresh viewport
+    if (this._overlapWithFrame(id)) {
+      this._refreshViewport();
+    } else if (oldValues.xywh) {
+      // if element is moved out of frame, refresh viewport
+      const oldBound = Bound.deserialize(oldValues.xywh as string);
+      const frameBound = Bound.deserialize(this.frame.xywh);
+      if (oldBound.isOverlapWithBound(frameBound)) {
+        this._refreshViewport();
+      }
+    }
+  };
+
+  private _debounceHandleElementUpdated = debounce(
+    this._handleElementUpdated,
+    1000 / 30
+  );
 
   private _clearEdgelessDisposables = () => {
     this._edgelessDisposables?.dispose();
@@ -221,6 +289,21 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
         }
       })
     );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementAdded.on(({ id }) => {
+        if (this._overlapWithFrame(id)) {
+          this._refreshViewport();
+        }
+      })
+    );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementUpdated.on(
+        this._debounceHandleElementUpdated
+      )
+    );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementRemoved.on(() => this._refreshViewport())
+    );
   }
 
   private _setPageDisposables(page: Page) {
@@ -229,28 +312,18 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
     this._pageDisposables.add(
       page.slots.blockUpdated.on(event => {
-        const { type, flavour } = event;
-        const isTopLevelBlock = ['affine:image', 'affine:note'].includes(
-          flavour
-        );
-        if (!isTopLevelBlock) return;
+        const { type } = event;
+        // Should only check for add and delete events, the update event will be handled by the surface renderer
+        if (type === 'update') return;
+
+        const model =
+          type === 'delete' ? event.model : page.getBlockById(event.id);
+        if (!model || !isTopLevelBlock(model) || !model.xywh) return;
 
         const frameBound = Bound.deserialize(this.frame.xywh);
-        if (type === 'delete') {
-          const deleteModel = event.model as TopLevelBlockModel;
-          const deleteBound = Bound.deserialize(deleteModel.xywh);
-          if (frameBound.containsPoint([deleteBound.x, deleteBound.y])) {
-            this._refreshViewport();
-          }
-        } else {
-          const topLevelBlock = page.getBlockById(event.id);
-          if (!topLevelBlock) return;
-          const newBound = Bound.deserialize(
-            (topLevelBlock as TopLevelBlockModel).xywh
-          );
-          if (frameBound.containsPoint([newBound.x, newBound.y])) {
-            this._refreshViewport();
-          }
+        const modelBound = Bound.deserialize(model.xywh);
+        if (frameBound.containsPoint([modelBound.x, modelBound.y])) {
+          this._refreshViewport();
         }
       })
     );
@@ -261,6 +334,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._frameDisposables = new DisposableGroup();
     this._frameDisposables.add(
       frame.propsUpdated.on(() => {
+        this.requestUpdate();
         this._refreshViewport();
       })
     );
@@ -294,7 +368,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
           <surface-ref-portal
             .page=${this.page}
             .host=${this.host}
-            .containerModel=${referencedModel}
+            .refModel=${referencedModel}
             .renderModel=${this.host.renderModel}
           ></surface-ref-portal>
           <div class="frame-preview-surface-canvas-container">
@@ -311,26 +385,31 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._setupSurfaceRefRenderer();
     this._setPageDisposables(this.page);
     this._setEdgelessDisposables(this.edgeless);
+  }
+
+  override firstUpdated() {
+    this._refreshViewport();
     this._setFrameDisposables(this.frame);
   }
 
   override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('frame')) {
-      this._refreshViewport();
-      this._setFrameDisposables(this.frame);
-    }
-
     if (_changedProperties.has('edgeless')) {
       if (this.edgeless) {
         this._setEdgelessDisposables(this.edgeless);
       } else {
         this._clearEdgelessDisposables();
       }
+      setTimeout(() => {
+        this._refreshViewport();
+      });
     }
 
     if (_changedProperties.has('page')) {
-      this._setPageDisposables(this.page);
+      if (this.page) {
+        this._setPageDisposables(this.page);
+      }
     }
+
     this._attachRenderer();
   }
 
@@ -343,8 +422,9 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { _surfaceModel, frame, host } = this;
-    const noContent = !_surfaceModel || !frame || !frame.xywh || !host;
+    const { _surfaceModel, frame, host, _surfaceService } = this;
+    const noContent =
+      !_surfaceModel || !frame || !frame.xywh || !host || !_surfaceService;
 
     return html`<div class="frame-preview-container">
       ${noContent ? nothing : this._renderSurfaceContent(frame)}

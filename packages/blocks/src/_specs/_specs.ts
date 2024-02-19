@@ -15,6 +15,7 @@ import { EmbedFigmaBlockSpec } from '../embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
 import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/index.js';
+import { EmbedSyncedDocBlockSpec } from '../embed-synced-doc-block/embed-synced-doc-spec.js';
 import { EmbedYoutubeBlockSpec } from '../embed-youtube-block/index.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
@@ -34,6 +35,7 @@ import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../page-block/widgets/doc-dragg
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../page-block/widgets/drag-handle/drag-handle.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/edgeless-remote-selection/index.js';
+import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../page-block/widgets/edgeless-zoom-toolbar/index.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../page-block/widgets/format-bar/format-bar.js';
 import { AFFINE_LINKED_DOC_WIDGET } from '../page-block/widgets/linked-doc/index.js';
 import { AFFINE_MODAL_WIDGET } from '../page-block/widgets/modal/modal.js';
@@ -109,6 +111,9 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
       )}`,
       [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
         AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET
+      )}`,
+      [AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET]: literal`${unsafeStatic(
+        AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
       )}`,
     },
   },
@@ -197,6 +202,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
   EmbedLinkedDocBlockSpec,
+  EmbedSyncedDocBlockSpec,
 ];
 
 export const DocEditorBlockSpecs: BlockSpec[] = [

@@ -131,7 +131,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
     if (width < NOTE_MIN_WIDTH || height < NOTE_MIN_HEIGHT) {
       //TODO: add toast to notify user
-      this._edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
+      this._edgeless.tools.setEdgelessTool({ type: 'default' });
       return;
     }
 

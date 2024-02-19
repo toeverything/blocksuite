@@ -13,8 +13,12 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 const FRAME_OFFSET = 8;
 
 @customElement('edgeless-frame-title')
-export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
-  isInner = false;
+export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
+  @property({ attribute: false })
+  frame!: FrameBlockModel;
+
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
 
   @state()
   private _editing = false;
@@ -22,17 +26,19 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
   @state()
   private _isNavigator = false;
 
-  @property({ attribute: false })
-  frame!: FrameBlockModel;
+  private _isInner = false;
 
-  @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
+  get isInner() {
+    return this._isInner;
+  }
 
   private _updateElement = () => {
     this.requestUpdate();
   };
 
-  override firstUpdated() {
+  override connectedCallback() {
+    super.connectedCallback();
+
     const { _disposables, edgeless } = this;
     const { service, surface } = edgeless;
 
@@ -62,19 +68,14 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
 
     _disposables.add(
       edgeless.service.selection.slots.updated.on(() => {
-        if (
+        this._editing =
           edgeless.service.selection.selectedIds[0] === this.frame.id &&
-          edgeless.service.selection.editing
-        ) {
-          this._editing = true;
-        } else {
-          this._editing = false;
-        }
+          edgeless.service.selection.editing;
       })
     );
 
     surface.edgeless.slots.edgelessToolUpdated.on(tool => {
-      this._isNavigator = tool.type === 'frameNavigator' ? true : false;
+      this._isNavigator = tool.type === 'frameNavigator';
     });
 
     this.setAttribute('data-frame-title-id', this.frame.id);
@@ -86,59 +87,64 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { edgeless, frame: model, _isNavigator } = this;
-    const { service } = edgeless;
-    const { zoom } = service.viewport;
+    const model = this.frame;
     const bound = Bound.deserialize(model.xywh);
-    this.isInner = service.frames.some(frame => {
-      if (frame.id === model.id) return false;
-      if (Bound.deserialize(frame.xywh).contains(bound)) {
-        return true;
-      }
-      return false;
-    });
 
-    const [x, y] = service.viewport.toViewCoord(bound.x, bound.y);
-    const { isInner } = this;
-    const text = model.title.toString();
+    const { frames, viewport } = this.edgeless.service;
+    const { zoom } = viewport;
 
-    const top = (isInner ? FRAME_OFFSET : -(29 + FRAME_OFFSET)) + y;
-    const left = (isInner ? FRAME_OFFSET : 0) + x;
-    const maxWidth = isInner
+    this._isInner = frames.some(
+      frame =>
+        frame.id !== model.id && Bound.deserialize(frame.xywh).contains(bound)
+    );
+
+    const { _isNavigator, _editing, _isInner } = this;
+
+    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+    const left = (_isInner ? FRAME_OFFSET : 0) + x;
+    const top = (_isInner ? FRAME_OFFSET : -(29 + FRAME_OFFSET)) + y;
+    const maxWidth = _isInner
       ? bound.w * zoom - FRAME_OFFSET / zoom
       : bound.w * zoom;
-    const hidden = 32 / zoom > bound.h && isInner;
+    const hidden = 32 / zoom > bound.h && _isInner;
+
+    const text = model.title.toString();
+
     return html`
-      ${text && !_isNavigator && !this._editing
-        ? html` <div
-            style=${styleMap({
-              display: hidden ? 'none' : 'initial',
-              position: 'absolute',
-              zIndex: 1,
-              left: '0px',
-              top: '0px',
-              transform: `translate(${left}px, ${top}px)`,
-              borderRadius: '4px',
-              width: 'fit-content',
-              maxWidth: maxWidth + 'px',
-              padding: '8px 10px',
-              fontSize: '14px',
-              background: isInner
-                ? 'var(--affine-white)'
-                : 'var(--affine-text-primary-color)',
-              color: isInner
-                ? 'var(--affine-text-secondary-color)'
-                : 'var(--affine-white)',
-              cursor: 'default',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              border: isInner ? '1px solid var(--affine-border-color)' : 'none',
-            })}
-            class="affine-frame-title"
-          >
-            ${text}
-          </div>`
+      ${text && !_isNavigator && !_editing
+        ? html`
+            <div
+              style=${styleMap({
+                display: hidden ? 'none' : 'initial',
+                position: 'absolute',
+                zIndex: 1,
+                left: '0px',
+                top: '0px',
+                transform: `translate(${left}px, ${top}px)`,
+                borderRadius: '4px',
+                width: 'fit-content',
+                maxWidth: maxWidth + 'px',
+                padding: '8px 10px',
+                fontSize: '14px',
+                background: _isInner
+                  ? 'var(--affine-white)'
+                  : 'var(--affine-text-primary-color)',
+                color: _isInner
+                  ? 'var(--affine-text-secondary-color)'
+                  : 'var(--affine-white)',
+                cursor: 'default',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                border: _isInner
+                  ? '1px solid var(--affine-border-color)'
+                  : 'none',
+              })}
+              class="affine-frame-title"
+            >
+              ${text}
+            </div>
+          `
         : nothing}
     `;
   }
@@ -198,11 +204,13 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
         frame => frame.id,
         (frame, index) =>
           this.onlyTitle
-            ? html`<edgeless-frame-title
-                .frame=${frame}
-                .edgeless=${this.edgeless}
-              >
-              </edgeless-frame-title>`
+            ? html`
+                <edgeless-frame-title
+                  .frame=${frame}
+                  .edgeless=${this.edgeless}
+                >
+                </edgeless-frame-title>
+              `
             : html`
                 <edgeless-block-portal-frame
                   .index=${index}
@@ -221,6 +229,6 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-frames-container': EdgelessFramesContainer;
     'edgeless-block-portal-frame': EdgelessBlockPortalFrame;
-    'edgeless-frame-title': EdgeelssFrameTitle;
+    'edgeless-frame-title': EdgelessFrameTitle;
   }
 }

@@ -9,6 +9,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import {
   type BlockComponent,
+  type EmbedCardStyle,
   findClosestBlockElement,
   getClosestBlockElementByElement,
   getClosestBlockElementByPoint,
@@ -31,6 +32,7 @@ import {
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST,
   type DropResult,
   type DropType,
+  EDGELESS_NOTE_EXTRA_PADDING,
   NOTE_CONTAINER_PADDING,
   type OnDragEndProps,
 } from './config.js';
@@ -132,9 +134,13 @@ export const isOutOfNoteBlock = (
 ) => {
   // TODO: need to find a better way to check if the point is out of note block
   const rect = noteBlock.getBoundingClientRect();
-  const padding = NOTE_CONTAINER_PADDING * scale;
+  const insideDocEditor = isInsideDocEditor(editorHost);
+  const padding =
+    (NOTE_CONTAINER_PADDING +
+      (insideDocEditor ? 0 : EDGELESS_NOTE_EXTRA_PADDING)) *
+    scale;
   return rect
-    ? isInsideDocEditor(editorHost)
+    ? insideDocEditor
       ? point.y < rect.top ||
         point.y > rect.bottom ||
         point.x > rect.right + padding
@@ -152,7 +158,9 @@ export const getClosestNoteBlock = (
 ) => {
   return isInsideDocEditor(editorHost)
     ? findClosestBlockElement(pageBlock, point, 'affine-note')
-    : getHoveringNote(point)?.querySelector('affine-note');
+    : getHoveringNote(point)
+        ?.closest('edgeless-block-portal-note')
+        ?.querySelector('affine-note');
 };
 
 export const getClosestBlockByPoint = (
@@ -161,17 +169,23 @@ export const getClosestBlockByPoint = (
   point: Point
 ) => {
   const closestNoteBlock = getClosestNoteBlock(editorHost, pageBlock, point);
-  if (!closestNoteBlock || closestNoteBlock.closest('.affine-surface-ref'))
+  if (!closestNoteBlock || closestNoteBlock.closest('.affine-surface-ref')) {
     return null;
+  }
+
   const noteRect = Rect.fromDOM(closestNoteBlock);
+
   const blockElement = getClosestBlockElementByPoint(point, {
     container: closestNoteBlock,
     rect: noteRect,
-  });
+  }) as BlockElement | null;
+
   const blockSelector =
     '.affine-note-block-container > .affine-block-children-container > [data-block-id]';
+
   const closestBlockElement = (
-    blockElement
+    blockElement &&
+    PathFinder.includes(blockElement.path, closestNoteBlock.path)
       ? blockElement
       : findClosestBlockElement(
           closestNoteBlock as BlockElement,
@@ -179,11 +193,14 @@ export const getClosestBlockByPoint = (
           blockSelector
         )
   ) as BlockElement;
+
   if (
     !closestBlockElement ||
     !!closestBlockElement.closest('.surface-ref-note-portal')
-  )
+  ) {
     return null;
+  }
+
   return closestBlockElement;
 };
 
@@ -346,11 +363,19 @@ export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
   blockElements.forEach(blockElement => blockElement.classList.add(className));
 }
 
-function getBlockProps(model: BlockModel) {
+function getBlockProps(model: BlockModel): { [index: string]: unknown } {
   const keys = model.keys as (keyof typeof model)[];
   const values = keys.map(key => model[key]);
   const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
   return blockProps;
+}
+
+export function getDuplicateBlocks(blocks: BlockModel[]) {
+  const duplicateBlocks = blocks.map(block => ({
+    flavour: block.flavour,
+    blockProps: getBlockProps(block),
+  }));
+  return duplicateBlocks;
 }
 
 export function convertDragPreviewDocToEdgeless({
@@ -360,24 +385,28 @@ export function convertDragPreviewDocToEdgeless({
   width,
   height,
   noteScale,
+  state,
 }: OnDragEndProps & {
   blockComponent: BlockElement;
   cssSelector: string;
   width?: number;
   height?: number;
+  style?: EmbedCardStyle;
 }): boolean {
   const edgelessPage = blockComponent.closest(
     'affine-edgeless-page'
   ) as EdgelessPageBlockComponent;
-  if (!edgelessPage) return false;
+  if (!edgelessPage) {
+    return false;
+  }
 
   const previewEl = dragPreview.querySelector(cssSelector);
   assertExists(previewEl);
   const rect = previewEl.getBoundingClientRect();
   const { left: viewportLeft, top: viewportTop } = edgelessPage.viewport;
   const point = edgelessPage.service.viewport.toModelCoord(
-    rect.x - viewportLeft,
-    rect.y - viewportTop
+    (rect.x - viewportLeft) / state.cumulativeParentScale,
+    (rect.y - viewportTop) / state.cumulativeParentScale
   );
   const bound = new Bound(
     point[0],
@@ -397,7 +426,15 @@ export function convertDragPreviewDocToEdgeless({
     },
     edgelessPage.surfaceBlockModel
   );
-  blockComponent.page.deleteBlock(blockModel);
+
+  const page = blockComponent.page;
+  const host = blockComponent.host;
+  const altKey = state.raw.altKey;
+  if (!altKey) {
+    page.deleteBlock(blockModel);
+    host.selection.setGroup('note', []);
+  }
+
   return true;
 }
 
@@ -405,10 +442,14 @@ export function convertDragPreviewEdgelessToDoc({
   blockComponent,
   dropBlockId,
   dropType,
+  state,
+  style,
 }: OnDragEndProps & {
   blockComponent: BlockElement;
+  style?: EmbedCardStyle;
 }): boolean {
   const page = blockComponent.page;
+  const host = blockComponent.host;
   const targetBlock = page.getBlockById(dropBlockId);
   if (!targetBlock) return false;
 
@@ -419,12 +460,24 @@ export function convertDragPreviewEdgelessToDoc({
   assertExists(parentBlock);
   const parentIndex = shouldInsertIn
     ? 0
-    : parentBlock.children.indexOf(targetBlock);
+    : parentBlock.children.indexOf(targetBlock) +
+      (dropType === 'after' ? 1 : 0);
 
   const blockModel = blockComponent.model;
+
   const { width, height, xywh, rotate, zIndex, ...blockProps } =
     getBlockProps(blockModel);
+  if (style) {
+    blockProps.style = style;
+  }
+
   page.addBlock(blockModel.flavour, blockProps, parentBlock, parentIndex);
-  page.deleteBlock(blockModel);
+
+  const altKey = state.raw.altKey;
+  if (!altKey) {
+    page.deleteBlock(blockModel);
+    host.selection.setGroup('edgeless', []);
+  }
+
   return true;
 }

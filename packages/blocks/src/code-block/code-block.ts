@@ -620,35 +620,37 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override renderBlock(): TemplateResult<1> {
-    return html`<div
-      ${ref(this._whenHover.setReference)}
-      class=${classMap({
-        'affine-code-block-container': true,
-        wrap: this._wrap,
-      })}
-    >
-      ${this._curLanguageButtonTemplate()}
-      <div class="rich-text-container">
-        <div contenteditable="false" id="line-numbers"></div>
-        <rich-text
-          .yText=${this.model.text.yText}
-          .inlineEventSource=${this.topContenteditableElement ?? nothing}
-          .undoManager=${this.model.page.history}
-          .attributesSchema=${this.attributesSchema}
-          .attributeRenderer=${this.getAttributeRenderer()}
-          .readonly=${this.model.page.readonly}
-          .inlineRangeProvider=${this._inlineRangeProvider}
-          .enableClipboard=${false}
-          .enableUndoRedo=${false}
-          .wrapText=${this._wrap}
-        >
-        </rich-text>
+    return html`
+      <div
+        ${ref(this._whenHover.setReference)}
+        class=${classMap({
+          'affine-code-block-container': true,
+          wrap: this._wrap,
+        })}
+      >
+        ${this._curLanguageButtonTemplate()}
+        <div class="rich-text-container">
+          <div contenteditable="false" id="line-numbers"></div>
+          <rich-text
+            .yText=${this.model.text.yText}
+            .inlineEventSource=${this.topContenteditableElement ?? nothing}
+            .undoManager=${this.model.page.history}
+            .attributesSchema=${this.attributesSchema}
+            .attributeRenderer=${this.getAttributeRenderer()}
+            .readonly=${this.model.page.readonly}
+            .inlineRangeProvider=${this._inlineRangeProvider}
+            .enableClipboard=${false}
+            .enableUndoRedo=${false}
+            .wrapText=${this._wrap}
+          >
+          </rich-text>
+        </div>
+
+        ${this.renderModelChildren(this.model)}
+
+        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
-      ${this.renderModelChildren(this.model)}
-      ${this.selected?.is('block')
-        ? html`<affine-block-selection></affine-block-selection>`
-        : null}
-    </div>`;
+    `;
   }
 }
 

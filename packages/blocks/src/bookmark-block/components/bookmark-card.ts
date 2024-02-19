@@ -1,4 +1,3 @@
-import { PathFinder } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -17,10 +16,36 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   bookmark!: BookmarkBlockComponent;
 
+  @property({ attribute: false })
+  loading!: boolean;
+
+  @property({ attribute: false })
+  error!: boolean;
+
   @state()
   private _isSelected = false;
 
   private readonly _themeObserver = new ThemeObserver();
+
+  private _selectBlock() {
+    const selectionManager = this.bookmark.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      path: this.bookmark.path,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.bookmark.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.bookmark.open();
+  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -31,59 +56,25 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    this.disposables.add(
-      this.bookmark.slots.loadingUpdated.on(() => this.requestUpdate())
-    );
-
     this._themeObserver.observe(document.documentElement);
     this._themeObserver.on(() => this.requestUpdate());
     this.disposables.add(() => this._themeObserver.dispose());
 
     this.disposables.add(
-      this.bookmark.selection.slots.changed.on(sels => {
-        this._isSelected = sels.some(sel =>
-          PathFinder.equals(sel.path, this.bookmark.path)
-        );
+      this.bookmark.selection.slots.changed.on(() => {
+        this._isSelected =
+          !!this.bookmark.selected?.is('block') ||
+          !!this.bookmark.selected?.is('surface');
       })
     );
-  }
-
-  private _selectBlock() {
-    const selectionManager = this.bookmark.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      path: this.bookmark.path,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _openLink() {
-    let link = this.bookmark.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
-  }
-
-  private _handleClick() {
-    if (!this.bookmark.isInSurface) {
-      this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this._openLink();
   }
 
   override render() {
     const { icon, title, url, description, image, style } = this.bookmark.model;
 
-    const loading = this.bookmark.loading;
-    const loadingFailed = this.bookmark.loadingFailed;
-
     const cardClassMap = classMap({
-      loading,
-      'loading-failed': loadingFailed,
+      loading: this.loading,
+      error: this.error,
       [style]: true,
       selected: this._isSelected,
     });
@@ -92,10 +83,10 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n]+)/im
     )?.[1];
 
-    const titleText = loading
+    const titleText = this.loading
       ? 'Loading...'
       : !title
-        ? loadingFailed
+        ? this.error
           ? domainName ?? 'Link card'
           : ''
         : title;
@@ -107,7 +98,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
         ? 'svg+xml'
         : icon?.split('.').pop();
 
-    const titleIcon = loading
+    const titleIcon = this.loading
       ? LoadingIcon
       : icon
         ? html`<object
@@ -119,16 +110,16 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           </object>`
         : WebIcon16;
 
-    const descriptionText = loading
+    const descriptionText = this.loading
       ? ''
       : !description
-        ? loadingFailed
+        ? this.error
           ? 'Failed to retrieve link information.'
           : url
         : description ?? '';
 
     const bannerImage =
-      !loading && image
+      !this.loading && image
         ? html`<object type="image/webp" data=${image} draggable="false">
             ${EmbedCardBannerIcon}
           </object>`
@@ -136,7 +127,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
     return html`
       <div
-        class="affine-bookmark-card${cardClassMap}"
+        class="affine-bookmark-card ${cardClassMap}"
         @click=${this._handleClick}
         @dblclick=${this._handleDoubleClick}
       >
@@ -148,7 +139,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           <div class="affine-bookmark-content-description">
             ${descriptionText}
           </div>
-          <div class="affine-bookmark-content-url" @click=${this._openLink}>
+          <div class="affine-bookmark-content-url" @click=${this.bookmark.open}>
             <span>${url}</span>
             <div class="affine-bookmark-content-url-icon">${OpenIcon}</div>
           </div>

@@ -1,24 +1,28 @@
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { humanFileSize } from '../../_common/utils/math.js';
+import type { ImageBlockComponent } from '../image-block.js';
 import { FailedImageIcon, ImageIcon, LoadingIcon } from '../styles.js';
 
-const ELEMENT_TAG = 'affine-image-block-card' as const;
 export const SURFACE_IMAGE_CARD_WIDTH = 220;
 export const SURFACE_IMAGE_CARD_HEIGHT = 122;
+export const NOTE_IMAGE_CARD_WIDTH = 752;
 export const NOTE_IMAGE_CARD_HEIGHT = 78;
 
-export enum ImageState {
-  Ready,
-  Loading,
-  Failed,
-}
-
-@customElement(ELEMENT_TAG)
-export class AffinePageImageCard extends ShadowlessElement {
+@customElement('affine-image-block-card')
+export class AffineImageCard extends WithDisposable(ShadowlessElement) {
   static override styles = css`
+    .affine-image-block-card-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .affine-image-block-card {
       display: flex;
       flex-direction: column;
@@ -27,7 +31,6 @@ export class AffinePageImageCard extends ShadowlessElement {
       border-radius: 8px;
       border: 1px solid var(--affine-background-tertiary-color, #eee);
       padding: 12px;
-      margin-top: 12px;
     }
 
     .affine-image-block-card-content {
@@ -57,53 +60,55 @@ export class AffinePageImageCard extends ShadowlessElement {
     }
   `;
 
-  @property({ type: Boolean })
-  isInSurface = false;
-
-  @property({ type: Number })
-  imageState = 0;
-
-  @property()
-  imageName: string | null = null;
-
-  @property({ type: Number })
-  imageSize = -1;
+  @property({ attribute: false })
+  block!: ImageBlockComponent;
 
   override render() {
-    const width = this.isInSurface ? `${SURFACE_IMAGE_CARD_WIDTH}px` : '100%';
-    const height = this.isInSurface
+    const { isInSurface, loading, error, model } = this.block;
+
+    const width = isInSurface
+      ? `${SURFACE_IMAGE_CARD_WIDTH}px`
+      : `${NOTE_IMAGE_CARD_WIDTH}px`;
+
+    const height = isInSurface
       ? `${SURFACE_IMAGE_CARD_HEIGHT}px`
       : `${NOTE_IMAGE_CARD_HEIGHT}px`;
 
-    const contentIcon =
-      this.imageState === ImageState.Loading
-        ? LoadingIcon
-        : this.imageState === ImageState.Failed
-          ? FailedImageIcon
-          : ImageIcon;
+    const rotate = isInSurface ? model.rotate : 0;
 
-    const contentText =
-      this.imageState === ImageState.Loading
-        ? 'Loading image...'
-        : this.imageState === ImageState.Failed
-          ? 'Image loading failed.'
-          : this.imageName ?? 'Image';
+    const cardStyleMap = styleMap({
+      transform: `rotate(${rotate}deg)`,
+      transformOrigin: 'center',
+      width,
+      height,
+    });
+
+    const titleIcon = loading
+      ? LoadingIcon
+      : error
+        ? FailedImageIcon
+        : ImageIcon;
+
+    const titleText = loading
+      ? 'Loading image...'
+      : error
+        ? 'Image loading failed.'
+        : 'Image';
 
     const size =
-      !isNaN(this.imageSize) && this.imageSize > 0
-        ? humanFileSize(this.imageSize, true, 0)
+      !!model.size && model.size > 0
+        ? humanFileSize(model.size, true, 0)
         : null;
 
     return html`
-      <div
-        class="affine-image-block-card"
-        style="width:${width};height:${height};"
-      >
-        <div class="affine-image-block-card-content">
-          ${contentIcon}
-          <span class="affine-image-block-card-title">${contentText}</span>
+      <div class="affine-image-block-card-container">
+        <div class="affine-image-block-card drag-target" style=${cardStyleMap}>
+          <div class="affine-image-block-card-content">
+            ${titleIcon}
+            <span class="affine-image-block-card-title-text">${titleText}</span>
+          </div>
+          <div class="affine-image-card-size">${size}</div>
         </div>
-        <div class="affine-image-card-size">${size}</div>
       </div>
     `;
   }
@@ -111,6 +116,6 @@ export class AffinePageImageCard extends ShadowlessElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [ELEMENT_TAG]: AffinePageImageCard;
+    'affine-image-block-card': AffineImageCard;
   }
 }

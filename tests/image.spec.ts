@@ -138,7 +138,7 @@ test('enter shortcut on focusing embed block and its caption', async ({
   await moveToImage(page);
   await assertImageOption(page);
 
-  const caption = page.locator('.affine-embed-wrapper-caption');
+  const caption = page.locator('affine-image embed-card-caption input');
   await focusCaption(page);
   await type(page, '123');
 
@@ -162,7 +162,7 @@ test('should support the enter key of image caption', async ({ page }) => {
   await moveToImage(page);
   await assertImageOption(page);
 
-  const caption = page.locator('.affine-embed-wrapper-caption');
+  const caption = page.locator('affine-image embed-card-caption input');
   await focusCaption(page);
   await type(page, 'abc123');
   await pressArrowLeft(page, 3);
@@ -188,7 +188,7 @@ test('popup menu should follow position of image when scrolling', async ({
 
   await scrollToTop(page);
 
-  const rect = await page.locator('.affine-image-wrapper img').boundingBox();
+  const rect = await page.locator('.affine-image-container img').boundingBox();
   if (!rect) throw new Error('image not found');
 
   await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
@@ -212,7 +212,7 @@ test('popup menu should follow position of image when scrolling', async ({
   );
 
   await page.waitForTimeout(150);
-  const image = page.locator('.affine-image-wrapper img');
+  const image = page.locator('.affine-image-container img');
   const imageRect = await image.boundingBox();
   const menuRect = await menu.boundingBox();
   if (!imageRect) throw new Error('image not found');
@@ -236,7 +236,7 @@ test('select image should not show format bar', async ({ page }) => {
     { x: rect.x - 20, y: rect.y + 20 },
     { x: rect.x + 20, y: rect.y + 40 }
   );
-  const rects = page.locator('affine-block-selection');
+  const rects = page.locator('affine-block-selection').locator('visible=true');
   await expect(rects).toHaveCount(1);
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).not.toBeVisible();
@@ -272,8 +272,11 @@ test('image loading but failed', async ({ page }) => {
     page,
     'Failed to load resource: the server responded with a status of 404 (Not Found)'
   );
-  expectConsoleMessage(page, 'Cannot find blob, retrying', 'warning');
-  expectConsoleMessage(page, 'Error: Cannot find blob');
+  expectConsoleMessage(
+    page,
+    'Error: Image blob is missing!, retrying',
+    'warning'
+  );
 
   const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
   const timeout = 2000;
@@ -294,14 +297,14 @@ test('image loading but failed', async ({ page }) => {
   await initMockImage(page);
 
   const loadingContent = await page
-    .locator('.affine-image-block-card .affine-image-block-card-title')
+    .locator('.affine-image-block-card .affine-image-block-card-title-text')
     .innerText();
   expect(loadingContent).toBe('Loading image...');
 
   await page.waitForTimeout(3 * timeout);
 
   await expect(
-    page.locator('.affine-image-block-card .affine-image-block-card-title')
+    page.locator('.affine-image-block-card .affine-image-block-card-title-text')
   ).toContainText('Image loading failed.');
 });
 
@@ -311,7 +314,11 @@ test('image loading but success', async ({ page }) => {
     page,
     'Failed to load resource: the server responded with a status of 404 (Not Found)'
   );
-  expectConsoleMessage(page, 'Cannot find blob, retrying', 'warning');
+  expectConsoleMessage(
+    page,
+    'Error: Image blob is missing!, retrying',
+    'warning'
+  );
 
   const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
   const imageBuffer = await readFile(
@@ -344,13 +351,13 @@ test('image loading but success', async ({ page }) => {
   await initMockImage(page);
 
   const loadingContent = await page
-    .locator('.affine-image-block-card .affine-image-block-card-title')
+    .locator('.affine-image-block-card .affine-image-block-card-title-text')
     .innerText();
   expect(loadingContent).toBe('Loading image...');
 
   await page.waitForTimeout(3 * timeout);
 
-  const img = page.locator('.affine-image-wrapper img');
+  const img = page.locator('.affine-image-container img');
   await expect(img).toBeVisible();
   const src = await img.getAttribute('src');
   expect(src).toBeDefined();
@@ -375,7 +382,7 @@ test('image loaded successfully', async ({ page }) => {
 
   await page.waitForTimeout(1000);
 
-  const img = page.locator('.affine-image-wrapper img');
+  const img = page.locator('.affine-image-container img');
   await expect(img).toBeVisible();
   const src = await img.getAttribute('src');
   expect(src).toBeDefined();

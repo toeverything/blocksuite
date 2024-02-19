@@ -10,8 +10,11 @@ import {
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
 import { type InlineRange, type InlineRootElement } from '@inline/index.js';
-import type { DebugMenu } from '@playground/apps/starter/components/debug-menu.js';
-import type { PagesPanel } from '@playground/apps/starter/components/pages-panel.js';
+import type { EditorHost } from '@lit/element/lit-host.js';
+import type { CustomFramePanel } from '@playground/apps/components/custom-frame-panel.js';
+import type { CustomOutlinePanel } from '@playground/apps/components/custom-outline-panel.js';
+import type { DebugMenu } from '@playground/apps/components/debug-menu.js';
+import type { PagesPanel } from '@playground/apps/components/pages-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { BlockModel } from '@store/schema/index.js';
@@ -71,8 +74,15 @@ async function initEmptyEditor({
     async ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
 
-      async function initPage(page: ReturnType<typeof workspace.createPage>) {
-        await page.load();
+      async function waitForMountPageEditor(
+        page: ReturnType<typeof workspace.createPage>
+      ) {
+        if (!page.ready) await page.load();
+
+        if (!page.root) {
+          await new Promise(resolve => page.slots.rootAdded.once(resolve));
+        }
+
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
@@ -95,43 +105,76 @@ async function initEmptyEditor({
           appRoot.append(editor);
           return editor;
         };
+
         const editor = createEditor();
         if (multiEditor) createEditor();
 
-        const debugMenu: DebugMenu = document.createElement('debug-menu');
-        const pagesPanel: PagesPanel = document.createElement('pages-panel');
-        pagesPanel.editor = editor;
-        debugMenu.workspace = workspace;
-        debugMenu.editor = editor;
-        debugMenu.pagesPanel = pagesPanel;
-        const leftSidePanel = document.createElement('left-side-panel');
-        debugMenu.leftSidePanel = leftSidePanel;
-        document.body.appendChild(debugMenu);
-        document.body.appendChild(leftSidePanel);
-        window.debugMenu = debugMenu;
-        window.editor = editor;
-        window.page = page;
-        window.dispatchEvent(
-          new CustomEvent('blocksuite:page-ready', { detail: page.id })
-        );
+        editor.updateComplete
+          .then(() => {
+            const debugMenu: DebugMenu = document.createElement('debug-menu');
+            const pagesPanel: PagesPanel =
+              document.createElement('pages-panel');
+            const framePanel: CustomFramePanel =
+              document.createElement('custom-frame-panel');
+            const outlinePanel: CustomOutlinePanel = document.createElement(
+              'custom-outline-panel'
+            );
+            pagesPanel.editor = editor;
+            framePanel.editor = editor;
+            outlinePanel.editor = editor;
+            debugMenu.workspace = workspace;
+            debugMenu.editor = editor;
+            debugMenu.pagesPanel = pagesPanel;
+            debugMenu.framePanel = framePanel;
+            debugMenu.outlinePanel = outlinePanel;
+            const leftSidePanel = document.createElement('left-side-panel');
+            debugMenu.leftSidePanel = leftSidePanel;
+            document.body.appendChild(debugMenu);
+            document.body.appendChild(leftSidePanel);
+            document.body.appendChild(framePanel);
+            document.body.appendChild(outlinePanel);
+
+            window.debugMenu = debugMenu;
+            window.editor = editor;
+            window.page = page;
+            Object.defineProperty(globalThis, 'host', {
+              get() {
+                return document.querySelector<EditorHost>('editor-host');
+              },
+            });
+            Object.defineProperty(globalThis, 'std', {
+              get() {
+                return document.querySelector<EditorHost>('editor-host')?.std;
+              },
+            });
+            window.dispatchEvent(
+              new CustomEvent('blocksuite:page-ready', { detail: page.id })
+            );
+          })
+          .catch(console.error);
       }
 
       if (noInit) {
-        workspace.meta.pageMetas.forEach(meta => {
-          const pageId = meta.id;
-          const page = workspace.getPage(pageId);
-          if (page) initPage(page).catch(console.error);
-        });
-        workspace.slots.pageAdded.on(async pageId => {
-          const page = workspace.getPage(pageId);
-          if (!page) {
-            throw new Error(`Failed to get page ${pageId}`);
-          }
-          await initPage(page);
-        });
+        const firstPage = workspace.pages.values().next().value as
+          | ReturnType<typeof workspace.createPage>
+          | undefined;
+        if (firstPage) {
+          window.page = firstPage;
+          waitForMountPageEditor(firstPage).catch;
+        } else {
+          workspace.slots.pageAdded.on(async pageId => {
+            const page = workspace.getPage(pageId);
+            if (!page) {
+              throw new Error(`Failed to get page ${pageId}`);
+            }
+            window.page = page;
+            waitForMountPageEditor(page).catch(console.error);
+          });
+        }
       } else {
         const page = workspace.createPage({ id: 'page:home' });
-        await initPage(page);
+        window.page = page;
+        waitForMountPageEditor(page).catch(console.error);
       }
     },
     [flags, noInit, multiEditor] as const
@@ -328,21 +371,19 @@ export async function enterPlaygroundWithList(
   await page.evaluate(
     async ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
-      await page.load(() => {
-        const pageId = page.addBlock('affine:page', {
-          title: new page.Text(),
-        });
-        const noteId = page.addBlock('affine:note', {}, pageId);
-        for (let i = 0; i < contents.length; i++) {
-          page.addBlock(
-            'affine:list',
-            contents.length > 0
-              ? { text: new page.Text(contents[i]), type }
-              : { type },
-            noteId
-          );
-        }
+      const pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
       });
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      for (let i = 0; i < contents.length; i++) {
+        page.addBlock(
+          'affine:list',
+          contents.length > 0
+            ? { text: new page.Text(contents[i]), type }
+            : { type },
+          noteId
+        );
+      }
     },
     { contents, type }
   );

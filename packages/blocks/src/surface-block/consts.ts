@@ -45,7 +45,7 @@ export enum CanvasTextFontFamily {
   BebasNeue = 'blocksuite:surface:BebasNeue',
   OrelegaOne = 'blocksuite:surface:OrelegaOne',
 }
-export const CANVAS_TEXT_FONT_FAMILY = Object.values(CanvasTextFontFamily);
+export const CanvasTextFontFamilies = Object.values(CanvasTextFontFamily);
 
 export enum CanvasTextFontWeight {
   Light = '300',
@@ -58,7 +58,7 @@ export enum CanvasTextFontStyle {
   Italic = 'italic',
 }
 
-export const DEFAULT_CANVAS_TEXT_FONT_CONFIG: FontConfig[] = [
+export const CanvasTextFonts: FontConfig[] = [
   // Inter, https://fonts.cdnfonts.com/css/inter?styles=29139,29134,29135,29136,29140,29141
   {
     font: CanvasTextFontFamily.Inter,

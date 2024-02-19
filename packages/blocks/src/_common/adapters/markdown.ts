@@ -58,9 +58,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     assets,
   }: FromPageSnapshotPayload): Promise<FromPageSnapshotResult<Markdown>> {
     let buffer = '';
-    if (snapshot.meta.title) {
-      buffer += `# ${snapshot.meta.title}\n\n`;
-    }
     const { file, assetsIds } = await this.fromBlockSnapshot({
       snapshot: snapshot.blocks,
       assets,
@@ -456,7 +453,8 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context
             .openNode(
               {
-                type: 'paragraph',
+                type: 'heading',
+                depth: 1,
                 children: this._deltaToMdAST(title.delta, 0),
               },
               'children'
@@ -591,8 +589,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.skipAllChildren();
           break;
         }
+        case 'affine:embed-github':
+        case 'affine:embed-youtube':
+        case 'affine:embed-figma':
         case 'affine:bookmark': {
-          // Parse bookmark as link
+          // Parse as link
           if (
             typeof o.node.props.title !== 'string' ||
             typeof o.node.props.url !== 'string'
@@ -628,6 +629,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     });
     walker.setLeave(async (o, context) => {
       const currentTNode = context.currentNode();
+      const previousTNode = context.previousNode();
       switch (o.node.flavour) {
         case 'affine:paragraph': {
           context.setGlobalContext(
@@ -638,15 +640,24 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
         case 'affine:list': {
           if (
-            context.getNodeContext('affine:list:parent') === o.parent &&
-            currentTNode.type === 'list' &&
-            currentTNode.ordered === (o.node.props.type === 'numbered') &&
-            currentTNode.children[0].checked ===
+            context.getPreviousNodeContext('affine:list:parent') === o.parent &&
+            currentTNode.type === 'listItem' &&
+            previousTNode?.type === 'list' &&
+            previousTNode.ordered === (o.node.props.type === 'numbered') &&
+            previousTNode.children[0]?.checked ===
               (o.node.props.type === 'todo'
                 ? (o.node.props.checked as boolean)
                 : undefined)
           ) {
             context.closeNode();
+            const nextONode = o.parent!.children[o.index! + 1];
+            if (
+              !nextONode ||
+              (nextONode && nextONode.flavour !== 'affine:list')
+            ) {
+              // If the next node is not a list, close the list
+              context.closeNode();
+            }
           } else {
             context.closeNode().closeNode();
           }
@@ -707,7 +718,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 id: nanoid(),
                 flavour: 'affine:code',
                 props: {
-                  language: o.node.lang,
+                  language: o.node.lang ?? 'Plain Text',
                   text: {
                     '$blocksuite:internal:text$': true,
                     delta: [

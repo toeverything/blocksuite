@@ -698,14 +698,14 @@ test.describe('linked page popover', () => {
     await expect(pageBtn).toHaveText([
       'page1',
       'page2',
-      'Create "Untitled" page',
+      'Create "Untitled" doc',
       'Import',
     ]);
     // page2
     //  ^  ^
     await type(page, 'a2');
     await expect(pageBtn).toHaveCount(3);
-    await expect(pageBtn).toHaveText(['page2', 'Create "a2" page', 'Import']);
+    await expect(pageBtn).toHaveText(['page2', 'Create "a2" doc', 'Import']);
     await pressEnter(page);
     await expect(linkedPagePopover).toBeHidden();
     await assertExistRefText('page2');

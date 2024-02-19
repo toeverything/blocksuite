@@ -81,6 +81,7 @@ export const defaultStore: SerializedStore = {
       'affine:embed-github': 1,
       'affine:embed-html': 1,
       'affine:embed-linked-doc': 1,
+      'affine:embed-synced-doc': 1,
       'affine:image': 1,
       'affine:frame': 1,
       'affine:code': 1,

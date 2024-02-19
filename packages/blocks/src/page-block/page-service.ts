@@ -8,8 +8,13 @@ import {
 } from '../_common/components/file-drop-manager.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
+import {
+  HtmlTransformer,
+  MarkdownTransformer,
+  ZipTransformer,
+} from '../_common/transformers/index.js';
 import type { EmbedCardStyle } from '../_common/types.js';
-import { DEFAULT_CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
+import { CanvasTextFonts } from '../surface-block/consts.js';
 import { EditSessionStorage } from '../surface-block/managers/edit-session.js';
 import {
   copySelectedModelsCommand,
@@ -46,6 +51,12 @@ export class PageService extends BlockService<PageBlockModel> {
   fileDropManager!: FileDropManager;
   exportManager!: ExportManager;
 
+  transformers = {
+    markdown: MarkdownTransformer,
+    html: HtmlTransformer,
+    zip: ZipTransformer,
+  };
+
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
   };
@@ -62,6 +73,27 @@ export class PageService extends BlockService<PageBlockModel> {
     const viewportElement = pageElement.viewportElement as HTMLElement | null;
     assertExists(viewportElement);
     return viewportElement;
+  }
+
+  private _getPageMode: (pageId: string) => 'page' | 'edgeless' = pageId =>
+    pageId.endsWith('edgeless') ? 'edgeless' : 'page';
+
+  get getPageMode() {
+    return this._getPageMode;
+  }
+
+  set getPageMode(value) {
+    this._getPageMode = value;
+  }
+
+  private _getPageUpdatedAt: (pageId: string) => Date = () => new Date();
+
+  get getPageUpdatedAt() {
+    return this._getPageUpdatedAt;
+  }
+
+  set getPageUpdatedAt(value) {
+    this._getPageUpdatedAt = value;
   }
 
   private _embedBlockRegistry = new Set<EmbedOptions>();
@@ -160,10 +192,18 @@ export class PageService extends BlockService<PageBlockModel> {
       'dragover',
       this.fileDropManager.onDragOver
     );
+
     this.disposables.addFromEvent(
       this.std.host,
       'dragleave',
       this.fileDropManager.onDragLeave
+    );
+
+    this.disposables.add(
+      this.std.event.add('pointerDown', ctx => {
+        const state = ctx.get('pointerState');
+        state.raw.stopPropagation();
+      })
     );
   }
 
@@ -191,6 +231,6 @@ export class PageService extends BlockService<PageBlockModel> {
   }
 
   loadFonts() {
-    this.fontLoader.load(DEFAULT_CANVAS_TEXT_FONT_CONFIG);
+    this.fontLoader.load(CanvasTextFonts);
   }
 }

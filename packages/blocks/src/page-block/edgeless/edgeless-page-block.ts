@@ -6,7 +6,6 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   assertExists,
   assertInstanceOf,
-  Slot,
   throttle,
 } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
@@ -33,7 +32,6 @@ import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
   on,
-  type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import { AttachmentService } from '../../attachment-block/attachment-service.js';
@@ -48,18 +46,13 @@ import {
 import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { ImageService } from '../../image-block/image-service.js';
 import type { AttachmentBlockProps } from '../../index.js';
-import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
-import { ZOOM_INITIAL } from '../../surface-block/consts.js';
+import type { ImageBlockModel } from '../../models.js';
 import {
   Bound,
-  type CanvasElement,
-  clamp,
-  getCommonBound,
   type IBound,
   type IVec,
   serializeXYWH,
   Vec,
-  ZOOM_MIN,
 } from '../../surface-block/index.js';
 import type { SerializedViewport } from '../../surface-block/managers/edit-session.js';
 import type {
@@ -73,11 +66,6 @@ import type { EdgelessPageBlockWidgetName } from '../types.js';
 import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
-import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
-import {
-  EdgelessZoomToolbar,
-  type ZoomAction,
-} from './components/zoom/zoom-toolbar.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { BrushToolController } from './controllers/tools/brush-tool.js';
 import { ConnectorToolController } from './controllers/tools/connector-tool.js';
@@ -98,9 +86,8 @@ import {
   DEFAULT_NOTE_OFFSET_X,
   DEFAULT_NOTE_OFFSET_Y,
   DEFAULT_NOTE_WIDTH,
-  FIT_TO_SCREEN_PADDING,
 } from './utils/consts.js';
-import { getCursorMode, isCanvasElement } from './utils/query.js';
+import { isCanvasElement } from './utils/query.js';
 
 export interface EdgelessViewport {
   left: number;
@@ -126,6 +113,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       top: 0;
       contain: size layout;
       z-index: 1;
+      height: 100%;
     }
 
     .affine-edgeless-layer {
@@ -133,18 +121,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
       top: 0;
       left: 0;
       contain: size layout style;
-    }
-
-    @container viewport (width <= 1200px) {
-      edgeless-zoom-toolbar {
-        display: none;
-      }
-    }
-
-    @container viewport (width >= 1200px) {
-      zoom-bar-toggle-button {
-        display: none;
-      }
     }
 
     @media print {
@@ -159,8 +135,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
    */
   components = {
     toolbar: <EdgelessToolbar | null>null,
-    zoomToolbar: <EdgelessZoomToolbar | null>null,
-    zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
   keyboardManager: EdgelessPageKeyboardManager | null = null;
@@ -180,32 +154,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   clipboardController = new EdgelessClipboardController(this);
 
-  slots = {
-    edgelessToolUpdated: new Slot<EdgelessTool>(),
-    zoomUpdated: new Slot<ZoomAction>(),
-    pressShiftKeyUpdated: new Slot<boolean>(),
-    cursorUpdated: new Slot<string>(),
-    copyAsPng: new Slot<{
-      blocks: TopLevelBlockModel[];
-      shapes: CanvasElement[];
-    }>(),
-    pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
-    tagClicked: new Slot<{ tagId: string }>(),
-    readonlyUpdated: new Slot<boolean>(),
-    draggingAreaUpdated: new Slot(),
-    navigatorSettingUpdated: new Slot<{
-      hideToolbar?: boolean;
-      blackBackground?: boolean;
-      fillScreen?: boolean;
-    }>(),
-    navigatorFrameChanged: new Slot<FrameBlockModel>(),
-    fullScrennToggled: new Slot(),
-
-    elementResizeStart: new Slot(),
-    elementResizeEnd: new Slot(),
-    toggleNoteSlicer: new Slot(),
-  };
-
   @query('affine-surface')
   surface!: SurfaceBlockComponent;
 
@@ -219,8 +167,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this.service?.uiEventDispatcher;
   }
 
-  override get service() {
-    return super.service!;
+  get slots() {
+    return this.service.slots;
   }
 
   private _viewportElement: HTMLElement | null = null;
@@ -228,7 +176,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   get viewportElement(): HTMLElement {
     if (this._viewportElement) return this._viewportElement;
     this._viewportElement = this.host.closest(
-      'edgeless-editor'
+      '.affine-edgeless-viewport'
     ) as HTMLElement | null;
     assertExists(this._viewportElement);
     return this._viewportElement;
@@ -267,52 +215,29 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _handleToolbarFlag() {
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
-      const zoomToolBar = new EdgelessZoomToolbar(this);
-      const zoomBarToggleButton = new ZoomBarToggleButton(this);
 
       this.appendChild(toolbar);
-      this.appendChild(zoomToolBar);
-      this.appendChild(zoomBarToggleButton);
       this.components.toolbar = toolbar;
-      this.components.zoomToolbar = zoomToolBar;
-      this.components.zoomBarToggleButton = zoomBarToggleButton;
     };
 
-    if (
-      !this.components.toolbar &&
-      !this.components.zoomToolbar &&
-      !this.components.zoomBarToggleButton
-    ) {
+    if (!this.components.toolbar) {
       createToolbar();
     }
   }
 
   private _initSlotEffects() {
-    const { _disposables, slots } = this;
+    const { disposables, slots } = this;
 
-    this._disposables.add(() =>
+    disposables.add(() =>
       listenToThemeChange(this, () => this.surface.refresh())
     );
 
-    _disposables.add(
-      slots.edgelessToolUpdated.on(edgelessTool => {
-        this.edgelessTool = edgelessTool;
-        slots.cursorUpdated.emit(getCursorMode(edgelessTool));
-      })
+    disposables.add(this.tools);
+    disposables.add(this.service.selection);
+    disposables.add(
+      slots.edgelessToolUpdated.on(tool => (this.edgelessTool = tool))
     );
-    _disposables.add(this.tools);
-    _disposables.add(this.service.selection);
-    _disposables.add(
-      slots.zoomUpdated.on((action: ZoomAction) =>
-        this.components.zoomToolbar?.setZoomByAction(action)
-      )
-    );
-    _disposables.add(
-      slots.pressShiftKeyUpdated.on(pressed => {
-        this.tools.shiftKey = pressed;
-      })
-    );
-    _disposables.add(
+    disposables.add(
       slots.cursorUpdated.on(
         throttle((cursor: string) => {
           this.style.cursor = cursor;
@@ -321,7 +246,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
 
     let canCopyAsPng = true;
-    _disposables.add(
+    disposables.add(
       slots.copyAsPng.on(({ blocks, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
@@ -645,13 +570,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return edgelessElementsBound([...service.elements, ...service.blocks]);
   }
 
-  override update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('edgelessTool')) {
-      this.tools.edgelessTool = this.edgelessTool;
-    }
-    super.update(changedProperties);
-  }
-
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.service.selection.set(this.service.selection.selections);
@@ -686,20 +604,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
         this.surface.refresh();
       })
       .catch(console.error);
-  }
-
-  private _initReadonlyListener() {
-    const page = this.page;
-
-    let readonly = page.readonly;
-    this._disposables.add(
-      page.awarenessStore.slots.update.on(() => {
-        if (readonly !== page.readonly) {
-          readonly = page.readonly;
-          this.slots.readonlyUpdated.emit(readonly);
-        }
-      })
-    );
   }
 
   private _initRemoteCursor() {
@@ -738,6 +642,20 @@ export class EdgelessPageBlockComponent extends BlockElement<
       })
     );
 
+    this._disposables.add(
+      this.std.event.slots.parentScaleChanged.on(() => {
+        this.service.viewport.setCumulativeParentScale(
+          this.std.event.cumulativeParentScale
+        );
+      })
+    );
+
+    this._disposables.add(
+      this.std.event.slots.editorHostPanned.on(() => {
+        this.service.viewport.onResize();
+      })
+    );
+
     if (this.pageBlockContainer.isUpdatePending) {
       this.pageBlockContainer.updateComplete
         .then(() => appendIndexedCanvasToPortal())
@@ -752,7 +670,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
     this._initFontloader();
-    this._initReadonlyListener();
     this._initRemoteCursor();
     this._initSurface();
 
@@ -792,48 +709,15 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return result;
   }
 
-  public getFitToScreenData(
-    padding: [number, number, number, number] = [0, 0, 0, 0]
-  ) {
-    const bounds = [];
-
-    this.service.blocks.forEach(block => {
-      bounds.push(Bound.deserialize(block.xywh));
-    });
-
-    const surfaceElementsBound = getCommonBound(this.service.elements);
-    if (surfaceElementsBound) {
-      bounds.push(surfaceElementsBound);
-    }
-
-    const [pt, pr, pb, pl] = padding;
-    const { viewport } = this.service;
-    let { centerX, centerY, zoom } = viewport;
-
-    if (bounds.length) {
-      const { width, height } = viewport;
-      const bound = getCommonBound(bounds);
-      assertExists(bound);
-
-      zoom = Math.min(
-        (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
-        (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
-      );
-      zoom = clamp(zoom, ZOOM_MIN, ZOOM_INITIAL);
-
-      centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
-      centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
-    } else {
-      zoom = ZOOM_INITIAL;
-    }
-    return { zoom, centerX, centerY };
-  }
-
   private _initViewport() {
     this.service.viewport.setContainer(this);
+    this.service.viewport.setCumulativeParentScale(
+      this.std.event.cumulativeParentScale
+    );
 
     const run = () => {
-      const viewport = this._getSavedViewport() ?? this.getFitToScreenData();
+      const viewport =
+        this._getSavedViewport() ?? this.service.getFitToScreenData();
       if ('xywh' in viewport) {
         const { xywh, padding } = viewport;
         const bound = Bound.deserialize(xywh);

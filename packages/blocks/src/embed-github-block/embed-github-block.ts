@@ -1,7 +1,7 @@
-import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/block-selection.js';
+import '../_common/components/embed-card/embed-card-caption.js';
+import '../_common/components/embed-card/embed-card-toolbar.js';
 
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
@@ -42,11 +42,33 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   @property({ attribute: false })
   loading = false;
 
-  @property({ attribute: false })
-  showCaption = false;
-
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
+
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      path: this.path,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (!this.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
+  }
+
+  private _handleAssigneeClick(assignee: string) {
+    const link = `https://www.github.com/${assignee}`;
+    window.open(link, '_blank');
+  }
 
   open = () => {
     let link = this.model.url;
@@ -64,36 +86,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     refreshEmbedGithubStatus(this).catch(console.error);
   };
 
-  private _selectBlock() {
-    const selectionManager = this.host.selection;
-    const blockSelection = selectionManager.create('block', {
-      path: this.path,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _handleClick() {
-    if (!this.isInSurface) {
-      this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.open();
-  }
-
-  private _handleAssigneeClick(assignee: string) {
-    const link = `https://www.github.com/${assignee}`;
-    window.open(link, '_blank');
-  }
-
   override connectedCallback() {
     super.connectedCallback();
-
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
 
     if (!this.model.owner || !this.model.repo || !this.model.githubId) {
       this.page.withoutTransact(() => {
@@ -112,22 +106,25 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     }
 
     this.page.withoutTransact(() => {
-      if (!this.model.description && !this.model.title) this.refreshData();
-      else this.refreshStatus();
+      if (!this.model.description && !this.model.title) {
+        this.refreshData();
+      } else {
+        this.refreshStatus();
+      }
     });
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
-        this.requestUpdate();
-        if (key === 'url') this.refreshData();
+        if (key === 'url') {
+          this.refreshData();
+        }
       })
     );
 
     this.disposables.add(
-      this.selection.slots.changed.on(sels => {
-        this._isSelected = sels.some(sel =>
-          PathFinder.equals(sel.path, this.path)
-        );
+      this.selection.slots.changed.on(() => {
+        this._isSelected =
+          !!this.selected?.is('block') || !!this.selected?.is('surface');
       })
     );
 
@@ -168,11 +165,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
           }
         </style>
         <embed-card-toolbar
-          .model=${this.model}
           .block=${this}
-          .host=${this.host}
           .abortController=${abortController}
-          .std=${this.std}
         ></embed-card-toolbar>
       `,
       computePosition: {
@@ -240,7 +234,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
             class=${classMap({
               'affine-embed-github-block': true,
               loading,
@@ -338,17 +332,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
             <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
 
-          <embed-card-caption
-            .block=${this}
-            .display=${this.showCaption}
-            @blur=${() => {
-              if (!this.model.caption) this.showCaption = false;
-            }}
-          ></embed-card-caption>
+          <embed-card-caption .block=${this}></embed-card-caption>
 
-          ${this.selected?.is('block')
-            ? html`<affine-block-selection></affine-block-selection>`
-            : nothing}
+          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
       `
     );

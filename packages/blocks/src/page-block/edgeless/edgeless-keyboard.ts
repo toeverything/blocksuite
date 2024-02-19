@@ -96,7 +96,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             this.pageElement.service.selection.elements.length !== 0 &&
             !this.pageElement.service.selection.editing
           ) {
-            pageElement.surface.frame.createFrameOnSelected();
+            const frame = pageElement.service.frame.createFrameOnSelected();
+            pageElement.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.pageElement.service.selection.editing) {
             this._setEdgelessTool(pageElement, { type: 'frame' });
           }
@@ -151,19 +152,19 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         'Mod-1': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.slots.zoomUpdated.emit('fit');
+          this.pageElement.service.setZoomByAction('fit');
         },
         'Mod--': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.slots.zoomUpdated.emit('out');
+          this.pageElement.service.setZoomByAction('out');
         },
         'Mod-0': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.slots.zoomUpdated.emit('reset');
+          this.pageElement.service.setZoomByAction('reset');
         },
         'Mod-=': ctx => {
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.slots.zoomUpdated.emit('in');
+          this.pageElement.service.setZoomByAction('in');
         },
         Backspace: () => {
           this._delete();
@@ -247,19 +248,30 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _space(event: KeyboardEvent) {
     const edgeless = this.pageElement;
-    const type = edgeless.edgelessTool.type;
     const selection = edgeless.service.selection;
+    const currentTool = edgeless.edgelessTool;
+    const type = currentTool.type;
+    const allowedTools = ['default', 'pan', 'brush', 'eraser'];
 
-    if (type !== 'default' && type !== 'pan') {
+    if (!allowedTools.includes(type)) {
       return;
     }
+    const revertToPrevTool = (ev: KeyboardEvent) => {
+      if (ev.key === ' ') this._setEdgelessTool(edgeless, currentTool);
+    };
+
     if (event.type === 'keydown') {
       if (type === 'pan' || (type === 'default' && selection.editing)) {
         return;
       }
       this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+      this.pageElement.dispatcher.disposables.addFromEvent(
+        document,
+        'keyup',
+        revertToPrevTool
+      );
     } else if (event.type === 'keyup') {
-      this._setEdgelessTool(edgeless, { type: 'default' });
+      document.removeEventListener('keyup', revertToPrevTool, false);
     }
   }
 

@@ -120,13 +120,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    const blockElement = this._blockElement;
-    if (blockElement) {
-      blockElement.showCaption = true;
-      blockElement.updateComplete
-        .then(() => blockElement.captionElement.input.focus())
-        .catch(console.error);
-    }
+    this._blockElement?.captionElement.show();
   }
 
   private _refreshData() {

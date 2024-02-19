@@ -46,7 +46,7 @@ export function addNote(
       note.edgeless.collapsedHeight = height;
     });
   }
-  edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
+  edgeless.tools.setEdgelessTool({ type: 'default' });
 
   // Wait for edgelessTool updated
   requestAnimationFrame(() => {

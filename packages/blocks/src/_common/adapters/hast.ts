@@ -1,4 +1,4 @@
-import type { Element, Root, RootContentMap, Text } from 'hast';
+import type { Element, ElementContent, Root, RootContentMap, Text } from 'hast';
 
 export type HastUnionType<
   K extends keyof RootContentMap,
@@ -134,4 +134,27 @@ export const hastQuerySelector = (
     }
   }
   return undefined;
+};
+
+export const hastFlatNodes = (
+  ast: HtmlAST,
+  expression: (tagName: string) => boolean
+): HtmlAST => {
+  if (ast.type === 'element') {
+    const children = ast.children.map(child =>
+      hastFlatNodes(child, expression)
+    );
+    return {
+      ...ast,
+      children: children.flatMap(child => {
+        if (child.type === 'element') {
+          if (expression(child.tagName)) {
+            return child.children;
+          }
+        }
+        return child;
+      }) as ElementContent[],
+    };
+  }
+  return ast;
 };

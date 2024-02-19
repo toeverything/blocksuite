@@ -8,6 +8,7 @@ import './change-frame-button.js';
 import './change-group-button.js';
 import './change-embed-card-button.js';
 import './change-attachment-button.js';
+import './change-image-button.js';
 import './add-frame-button.js';
 import './add-group-button.js';
 import './release-from-group-button.js';
@@ -34,15 +35,17 @@ import {
   groupBy,
   pickValues,
 } from '../../../../_common/utils/iterable.js';
+import type { AttachmentBlockModel } from '../../../../attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
+import type { EmbedHtmlModel } from '../../../../embed-html-block/embed-html-model.js';
 import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedSyncedDocModel } from '../../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { ImageBlockModel } from '../../../../image-block/index.js';
-import type { AttachmentBlockModel } from '../../../../models.js';
-import type { NoteBlockModel } from '../../../../note-block/index.js';
+import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
+import type { ImageBlockModel } from '../../../../image-block/image-model.js';
+import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type {
   ElementModel,
   GroupElementModel,
@@ -79,7 +82,9 @@ type CategorizedElements = {
     EmbedGithubModel[] &
     EmbedYoutubeModel[] &
     EmbedFigmaModel[] &
-    EmbedLinkedDocModel[];
+    EmbedLinkedDocModel[] &
+    EmbedSyncedDocModel[] &
+    EmbedHtmlModel[];
 };
 
 type ToolBarCustomAction = {
@@ -307,6 +312,18 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     `;
   }
 
+  private _ImageButton(images?: CategorizedElements['image']) {
+    if (images?.length !== 1) return nothing;
+
+    return html`
+      <edgeless-change-image-button
+        .model=${images[0]}
+        .std=${this.edgeless.std}
+        .surface=${this.surface}
+      ></edgeless-change-image-button>
+    `;
+  }
+
   protected togglePopper = (showPopper: boolean) => {
     this._showPopper = showPopper;
   };
@@ -444,6 +461,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       group,
       embedCard,
       attachment,
+      image,
     } = groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -464,6 +482,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._GroupButton(group),
           this._EmbedCardButton(embedCard),
           this._AttachmentButton(attachment),
+          this._ImageButton(image),
         ].filter(b => !!b && b !== nothing);
 
     if (elements.length > 1) {

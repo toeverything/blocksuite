@@ -13,7 +13,6 @@ import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
-import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
 import { DragIndicator } from '../_common/components/index.js';
@@ -379,13 +378,11 @@ export class DatabaseBlockComponent extends BlockElement<
           ${ref(this._view)}
           .config="${config}"
         ></affine-data-view-native>
-        ${when(
-          this.selected?.is('block'),
-          () =>
-            html` <affine-block-selection
-              style="z-index: 1"
-            ></affine-block-selection>`
-        )}
+
+        <affine-block-selection
+          .block=${this}
+          style="z-index: 1"
+        ></affine-block-selection>
       </div>
     `;
   }
@@ -465,6 +462,10 @@ class DatabaseBlockViewSource implements ViewSource {
         },
         delete: () => {
           this.model.page.captureSync();
+          if (this.model.getViewList().length === 1) {
+            this.model.page.deleteBlock(this.model);
+            return;
+          }
           this.model.deleteView(id);
           this.currentId = undefined;
           this.model.applyViewsUpdate();

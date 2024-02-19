@@ -4,15 +4,15 @@
 
 # ALL_PACKAGES
 packages=(
+  "framework/block-std"
+  "framework/global"
+  "framework/lit"
+  "framework/store"
+  "framework/inline"
   "blocks"
-  "block-std"
-  # "docs" # NOT PUBLISHED
+  # "docs" # NOT PUBLISHING
   "presets"
-  "global"
-  # "playground" # NOT PUBLISHED
-  "store"
-  "inline"
-  "lit"
+  # "playground" # NOT PUBLISHING
 )
 
 npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
@@ -23,11 +23,15 @@ for package in "${packages[@]}"
 do
   cd "packages/$package"
 
-  if [ "$NIGHTLY" = "true" ]; then
-    pnpm publish --no-git-checks --tag nightly
+  if [ "$CANARY" = "true" ]; then
+    pnpm publish --no-git-checks --tag canary
   else
     pnpm publish
   fi
 
-  cd ../../
+  if [[ $package == framework/* ]]; then
+    cd ../../../
+  else
+    cd ../../
+  fi
 done

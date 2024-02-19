@@ -1,12 +1,11 @@
 import '../_common/components/block-selection.js';
-import '../_common/components/embed-card/embed-card-toolbar.js';
 import '../_common/components/embed-card/embed-card-caption.js';
+import '../_common/components/embed-card/embed-card-toolbar.js';
 
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel, Workspace } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
-import { html, nothing, render, type TemplateResult } from 'lit';
+import { html, nothing } from 'lit';
 import {
   customElement,
   property,
@@ -16,25 +15,16 @@ import {
 } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
-import { matchFlavours } from '../_common/utils/index.js';
-import type { ImageBlockModel } from '../image-block/index.js';
-import type { NoteBlockModel, PageBlockComponent } from '../index.js';
-import {
-  Bound,
-  deserializeXYWH,
-  getCommonBound,
-} from '../surface-block/index.js';
-import type {
-  SurfaceRefBlockModel,
-  SurfaceRefBlockService,
-} from '../surface-ref-block/index.js';
+import { renderDocInCard } from '../_common/utils/render-doc.js';
+import type { PageBlockComponent, PageService } from '../page-block/index.js';
+import { Bound } from '../surface-block/index.js';
+import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
 import type {
   EmbedLinkedDocModel,
@@ -55,243 +45,104 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override _width = EMBED_CARD_WIDTH.horizontal;
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
-  @state()
-  private _loading = false;
-
-  @state()
-  private _abstractText = '';
-
-  @state()
-  private _isBannerEmpty = false;
+  @property({ attribute: false })
+  abstractText = '';
 
   @property({ attribute: false })
-  showCaption = false;
+  isBannerEmpty = false;
+
+  @property({ attribute: false })
+  surfaceRefService!: SurfaceRefBlockService;
+
+  @property({ attribute: false })
+  isError = false;
+
+  @property({ attribute: false })
+  surfaceRefRenderer?: SurfaceRefRenderer;
+
+  @state()
+  private _pageMode: 'page' | 'edgeless' = 'page';
+
+  @state()
+  private _pageUpdatedAt: Date = new Date();
+
+  @state()
+  private _loading = false;
 
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
 
   @queryAsync('.affine-embed-linked-doc-banner.render')
-  private _bannerContainer!: Promise<HTMLDivElement>;
+  bannerContainer!: Promise<HTMLDivElement>;
 
-  private _pageMode: 'page' | 'edgeless' = 'page';
+  get pageMode() {
+    return this._pageMode;
+  }
 
-  private _pageUpdatedAt: Date = new Date();
-
-  private _surfaceRefService!: SurfaceRefBlockService;
-
-  private _surfaceRefRenderer!: SurfaceRefRenderer;
-
-  private get _linkedDoc() {
+  get doc() {
     const page = this.std.workspace.getPage(this.model.pageId);
     return page;
   }
 
-  private get _service() {
-    const service = super.service;
-    assertExists(service, `Linked page block must run with its service.`);
-    return service;
+  get pageTitle() {
+    return this.doc?.meta.title.length ? this.doc.meta.title : 'Untitled';
   }
 
-  private _load() {
-    const linkedDoc = this._linkedDoc;
+  private get _pageService() {
+    const pageService = this.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService, `Page service not found.`);
+    return pageService;
+  }
+
+  private async _load() {
+    this._loading = true;
+    this.isError = false;
+    this.abstractText = '';
+    this.isBannerEmpty = true;
+
+    const linkedDoc = this.doc;
     if (!linkedDoc) {
+      this._loading = false;
       return;
     }
 
-    const displayLinkedPageInfo = () => {
-      this._abstractText = this._getAbstractText();
-      this._prepareSurfaceRefRenderer();
-    };
+    this._pageMode = this._pageService.getPageMode(this.model.pageId);
+    this._pageUpdatedAt = this._pageService.getPageUpdatedAt(this.model.pageId);
 
-    const onLoad = () => {
-      if (linkedDoc.root) {
-        displayLinkedPageInfo();
-        this._loading = false;
-      } else {
-        linkedDoc.slots.rootAdded.once(() => {
-          displayLinkedPageInfo();
-          this._loading = false;
-        });
+    if (!linkedDoc.loaded) {
+      try {
+        linkedDoc.load();
+      } catch (e) {
+        console.error(e);
+        this.isError = true;
       }
-    };
+    }
 
-    this._loading = true;
-    this._abstractText = '';
-    this._isBannerEmpty = true;
-
-    const { pageId } = this.model;
-    this._pageMode = this._service.getPageMode(pageId);
-    this._pageUpdatedAt = this._service.getPageUpdatedAt(pageId);
-
-    if (linkedDoc.loaded) {
-      onLoad();
-    } else {
-      linkedDoc
-        .load()
-        .then(() => onLoad())
-        .catch(e => {
-          console.error(
-            `An error occurred while loading page: ${this.model.pageId}`
-          );
-          console.error(e);
+    if (!this.isError && !linkedDoc.root) {
+      await new Promise<void>(resolve => {
+        linkedDoc.slots.rootAdded.once(() => {
+          resolve();
         });
+      });
+    }
+
+    this._loading = false;
+
+    if (!this.isError) {
+      renderDocInCard(this, linkedDoc);
     }
   }
 
   private _isPageEmpty() {
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.doc;
     if (!linkedDoc) {
       return false;
     }
     return (
-      !!linkedDoc && !linkedDoc.meta.title.length && !this._abstractText.length
+      !!linkedDoc && !linkedDoc.meta.title.length && !this.abstractText.length
     );
-  }
-
-  private _getNoteFromPage() {
-    const linkedDoc = this._linkedDoc;
-    assertExists(
-      linkedDoc,
-      `Trying to load page ${this.model.pageId} in linked page block, but the page is not found.`
-    );
-
-    const note = linkedDoc.root?.children.find(child =>
-      matchFlavours(child, ['affine:note'])
-    ) as NoteBlockModel | undefined;
-    assertExists(
-      note,
-      `Trying to get note block in page ${this.model.pageId}, but note not found.`
-    );
-
-    return note;
-  }
-
-  private _prepareSurfaceRefRenderer() {
-    const service = this.std.spec.getService(
-      'affine:surface-ref'
-    ) as SurfaceRefBlockService;
-    assertExists(service, `Surface ref service not found.`);
-    this._surfaceRefService = service;
-
-    this._cleanUpSurfaceRefRenderer();
-
-    const linkedDoc = this._linkedDoc;
-    assertExists(
-      linkedDoc,
-      `Trying to load page ${this.model.pageId} in linked page block, but the page is not found.`
-    );
-
-    this._surfaceRefRenderer = this._surfaceRefService.getRenderer(
-      PathFinder.id(this.path),
-      linkedDoc
-    );
-    this._surfaceRefRenderer.slots.mounted.on(async () => {
-      if (this._pageMode === 'edgeless') {
-        await this._renderEdgelessAbstract();
-      } else {
-        await this._renderPageAbstract();
-      }
-    });
-    this._surfaceRefRenderer.mount();
-  }
-
-  private _cleanUpSurfaceRefRenderer() {
-    if (this._surfaceRefRenderer) {
-      this._surfaceRefService.removeRenderer(this._surfaceRefRenderer.id);
-    }
-  }
-
-  private _getAbstractText() {
-    const note = this._getNoteFromPage();
-    const blockHasText = note.children.find(child => child.text != null);
-    if (!blockHasText) return '';
-    return blockHasText.text!.toString();
-  }
-
-  private async _addCover(cover: HTMLElement | TemplateResult<1>) {
-    const coverContainer = await this._bannerContainer;
-    if (!coverContainer) return;
-    while (coverContainer.firstChild) {
-      coverContainer.removeChild(coverContainer.firstChild);
-    }
-
-    if (cover instanceof HTMLElement) {
-      coverContainer.appendChild(cover);
-    } else {
-      render(cover, coverContainer);
-    }
-  }
-
-  private async _renderEdgelessAbstract() {
-    const renderer = this._surfaceRefRenderer.surfaceRenderer;
-    const container = document.createElement('div');
-    await this._addCover(container);
-    renderer.attach(container);
-
-    // TODO: we may also need to get bounds of surface block's children
-    const bounds = Array.from(
-      this._surfaceRefRenderer.surfaceModel?.elementModels ?? []
-    ).map(element => Bound.deserialize(element.xywh));
-    const bound = getCommonBound(bounds);
-    if (bound) {
-      renderer.onResize();
-      renderer.setViewportByBound(bound);
-    } else {
-      this._isBannerEmpty = true;
-    }
-  }
-
-  private async _renderPageAbstract() {
-    const note = this._getNoteFromPage();
-    const target = note.children.find(child =>
-      matchFlavours(child, ['affine:image', 'affine:surface-ref'])
-    );
-
-    switch (target?.flavour) {
-      case 'affine:image':
-        await this._renderImageAbstract(target);
-        return;
-      case 'affine:surface-ref':
-        await this._renderSurfaceRefAbstract(target);
-        return;
-    }
-
-    this._isBannerEmpty = true;
-  }
-
-  private async _renderImageAbstract(image: BlockModel) {
-    const sourceId = (image as ImageBlockModel).sourceId;
-    if (!sourceId) return;
-
-    const storage = this.model.page.blob;
-    const blob = await storage.get(sourceId);
-    if (!blob) return;
-
-    const url = URL.createObjectURL(blob);
-    const $img = document.createElement('img');
-    $img.src = url;
-    await this._addCover($img);
-
-    this._isBannerEmpty = false;
-  }
-
-  private async _renderSurfaceRefAbstract(surfaceRef: BlockModel) {
-    const referenceId = (surfaceRef as SurfaceRefBlockModel).reference;
-    if (!referenceId) return;
-
-    const referencedModel = this._surfaceRefRenderer.getModel(referenceId);
-    if (!referencedModel) return;
-
-    const renderer = this._surfaceRefRenderer.surfaceRenderer;
-    const container = document.createElement('div');
-    await this._addCover(container);
-
-    renderer.attach(container);
-    renderer.onResize();
-    const bound = Bound.fromXYWH(deserializeXYWH(referencedModel.xywh));
-    renderer.setViewportByBound(bound);
-
-    this._isBannerEmpty = false;
   }
 
   private _selectBlock() {
@@ -300,6 +151,17 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       path: this.path,
     });
     selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (this.isInSurface) return;
+    this._selectBlock();
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
   }
 
   open = () => {
@@ -317,7 +179,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   covertToInline = () => {
     const { page, pageId } = this.model;
     const parent = page.getParent(this.model);
-    const index = parent?.children.indexOf(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
 
     const yText = new Workspace.Y.Text();
     yText.insert(0, REFERENCE_NODE);
@@ -338,23 +201,59 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     page.deleteBlock(this.model);
   };
 
-  refreshData = () => {
-    this._load();
+  convertToEmbed = () => {
+    const { page, pageId, caption, xywh } = this.model;
+
+    if (this.isInSurface) {
+      const style = 'syncedDoc';
+      const bound = Bound.deserialize(xywh);
+      bound.w = EMBED_CARD_WIDTH[style];
+      bound.h = EMBED_CARD_HEIGHT[style];
+
+      const edgeless = this.edgeless;
+      assertExists(edgeless);
+      const blockId = edgeless.service.addBlock(
+        'affine:embed-synced-doc',
+        { pageId, xywh: bound.serialize(), caption },
+        edgeless.surface.model
+      );
+      edgeless.service.selection.set({
+        editing: false,
+        elements: [blockId],
+      });
+    } else {
+      const parent = page.getParent(this.model);
+      assertExists(parent);
+      const index = parent.children.indexOf(this.model);
+
+      page.addBlock(
+        'affine:embed-synced-doc',
+        { pageId, caption },
+        parent,
+        index
+      );
+
+      this.std.selection.setGroup('note', []);
+    }
+    page.deleteBlock(this.model);
   };
 
-  private _handleClick() {
-    if (this.isInSurface) return;
-    this._selectBlock();
-  }
+  refreshData = () => {
+    this._load().catch(e => {
+      console.error(e);
+      this.isError = true;
+    });
+  };
 
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.open();
-  }
+  cleanUpSurfaceRefRenderer = () => {
+    if (this.surfaceRefRenderer) {
+      this.surfaceRefService.removeRenderer(this.surfaceRefRenderer.id);
+    }
+  };
 
   override updated() {
     // update card style when linked page deleted
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.doc;
     const { xywh, style } = this.model;
     const bound = Bound.deserialize(xywh);
     if (linkedDoc && style === 'horizontalThin') {
@@ -381,24 +280,43 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
+    this._load().catch(e => {
+      console.error(e);
+      this.isError = true;
+    });
 
-    this._load();
-
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.doc;
     if (linkedDoc) {
       this.disposables.add(
-        linkedDoc.workspace.meta.pageMetasUpdated.on(() => this._load())
+        linkedDoc.workspace.meta.pageMetasUpdated.on(() => {
+          this._load().catch(e => {
+            console.error(e);
+            this.isError = true;
+          });
+        })
       );
-      this.disposables.add(linkedDoc.slots.blockUpdated.on(() => this._load()));
+      this.disposables.add(
+        linkedDoc.slots.blockUpdated.on(payload => {
+          if (
+            payload.type === 'update' &&
+            ['xywh', 'caption', ''].includes(payload.props.key)
+          ) {
+            return;
+          }
+          this._load().catch(e => {
+            console.error(e);
+            this.isError = true;
+          });
+        })
+      );
     }
 
     this.model.propsUpdated.on(({ key }) => {
-      this.requestUpdate();
       if (key === 'pageId') {
-        this._load();
+        this._load().catch(e => {
+          console.error(e);
+          this.isError = true;
+        });
       }
     });
 
@@ -416,7 +334,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._cleanUpSurfaceRefRenderer();
+    this.cleanUpSurfaceRefRenderer();
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
@@ -445,16 +363,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           }
         </style>
         <embed-card-toolbar
-          .model=${this.model}
           .block=${this}
-          .host=${this.host}
           .abortController=${abortController}
-          .std=${this.std}
         ></embed-card-toolbar>
       `,
       computePosition: {
         referenceElement: this,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },
@@ -462,22 +377,22 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   });
 
   override renderBlock() {
-    const linkedDoc = this._linkedDoc;
+    const linkedDoc = this.doc;
     const isDeleted = !linkedDoc;
     const isLoading = this._loading;
-    const pageMode = this._pageMode;
+    const pageMode = this.pageMode;
 
     this._cardStyle = this.model.style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
     this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
-    const isEmpty = this._isPageEmpty() && this._isBannerEmpty;
+    const isEmpty = this._isPageEmpty() && this.isBannerEmpty;
 
     const cardClassMap = classMap({
       loading: isLoading,
       deleted: isDeleted,
       empty: isEmpty,
-      'banner-empty': this._isBannerEmpty,
+      'banner-empty': this.isBannerEmpty,
       [this._cardStyle]: true,
     });
 
@@ -487,7 +402,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       LinkedDocDeletedIcon,
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
-    } = getEmbedLinkedDocIcons(this._pageMode, this._cardStyle);
+    } = getEmbedLinkedDocIcons(pageMode, this._cardStyle);
 
     const titleIcon = isLoading
       ? LoadingIcon
@@ -509,7 +424,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
         ? 'This linked page is deleted.'
         : isEmpty
           ? 'Preview of the page will be displayed here.'
-          : this._abstractText;
+          : this.abstractText;
 
     const dateText = this._pageUpdatedAt.toLocaleTimeString();
 
@@ -522,59 +437,47 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     return this.renderEmbed(
       () => html`
         <div
-          style=${styleMap({
-            position: 'relative',
-          })}
+          ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+          class="affine-embed-linked-doc-block ${cardClassMap}"
+          @click=${this._handleClick}
+          @dblclick=${this._handleDoubleClick}
         >
-          <div
-            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
-            class="affine-embed-linked-doc-block${cardClassMap}"
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            <div class="affine-embed-linked-doc-content">
-              <div class="affine-embed-linked-doc-content-title">
-                <div class="affine-embed-linked-doc-content-title-icon">
-                  ${titleIcon}
-                </div>
-
-                <div class="affine-embed-linked-doc-content-title-text">
-                  ${titleText}
-                </div>
+          <div class="affine-embed-linked-doc-content">
+            <div class="affine-embed-linked-doc-content-title">
+              <div class="affine-embed-linked-doc-content-title-icon">
+                ${titleIcon}
               </div>
 
-              <div class="affine-embed-linked-doc-content-description">
-                ${descriptionText}
-              </div>
-
-              <div class="affine-embed-linked-doc-content-date">
-                <span>Updated</span>
-
-                <span>${dateText}</span>
+              <div class="affine-embed-linked-doc-content-title-text">
+                ${titleText}
               </div>
             </div>
 
-            <div class="affine-embed-linked-doc-banner render"></div>
+            <div class="affine-embed-linked-doc-content-description">
+              ${descriptionText}
+            </div>
 
-            ${showDefaultBanner
-              ? html`<div class="affine-embed-linked-doc-banner default">
-                  ${defaultBanner}
-                </div>`
-              : nothing}
+            <div class="affine-embed-linked-doc-content-date">
+              <span>Updated</span>
+
+              <span>${dateText}</span>
+            </div>
           </div>
 
-          <embed-card-caption
-            .block=${this}
-            .display=${this.showCaption}
-            @blur=${() => {
-              if (!this.model.caption) this.showCaption = false;
-            }}
-          ></embed-card-caption>
+          <div class="affine-embed-linked-doc-banner render"></div>
 
-          ${this.selected?.is('block')
-            ? html`<affine-block-selection></affine-block-selection>`
+          ${showDefaultBanner
+            ? html`
+                <div class="affine-embed-linked-doc-banner default">
+                  ${defaultBanner}
+                </div>
+              `
             : nothing}
         </div>
+
+        <embed-card-caption .block=${this}></embed-card-caption>
+
+        <affine-block-selection .block=${this}></affine-block-selection>
       `
     );
   }

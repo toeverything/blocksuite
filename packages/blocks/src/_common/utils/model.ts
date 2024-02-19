@@ -15,7 +15,9 @@ import type {
   DividerBlockSchema,
   EmbedFigmaModel,
   EmbedGithubModel,
+  EmbedHtmlModel,
   EmbedLinkedDocModel,
+  EmbedSyncedDocModel,
   EmbedYoutubeModel,
   FrameBlockModel,
   FrameBlockSchema,
@@ -53,6 +55,8 @@ export type BlockModels = {
   'affine:embed-youtube': EmbedYoutubeModel;
   'affine:embed-figma': EmbedFigmaModel;
   'affine:embed-linked-doc': EmbedLinkedDocModel;
+  'affine:embed-synced-doc': EmbedSyncedDocModel;
+  'affine:embed-html': EmbedHtmlModel;
 };
 
 export type BlockSchemas = {

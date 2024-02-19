@@ -135,6 +135,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @state()
   private _slicerAnchorNote: NoteBlockModel | null = null;
+
+  @state()
+  private _dragging = false;
+
   private _surfaceRefReferenceSet = new Set<string>();
 
   private _clearWillChangeId: null | ReturnType<typeof setTimeout> = null;
@@ -155,7 +159,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       `${translateX}px ${translateY}px`
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
+
     this.layer.style.setProperty('transform', this._getLayerViewport());
+    this.layer.setAttribute('data-scale', zoom.toString());
+
     this.canvasSlot.style.setProperty(
       '--canvas-transform-offset',
       this._getLayerViewport(true)
@@ -311,6 +318,18 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
+      edgeless.host.event.add('pointerMove', ctx => {
+        this._dragging = ctx.get('pointerState').dragging;
+      })
+    );
+
+    _disposables.add(
+      edgeless.host.event.add('pointerUp', () => {
+        this._dragging = false;
+      })
+    );
+
+    _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
         this._isResizing = true;
       })
@@ -342,6 +361,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const { edgeless } = this;
     const { surface, page, service } = edgeless;
     const { readonly } = page;
+    const { zoom } = service.viewport;
 
     if (!surface) return nothing;
 
@@ -354,15 +374,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     notes.forEach(note => {
       if (isNoteBlock(note)) {
-        if (
-          note.displayMode === NoteDisplayMode.EdgelessOnly ||
-          (!note.displayMode && note.hidden)
-        ) {
+        if (note.displayMode === NoteDisplayMode.EdgelessOnly) {
           edgelessOnlyNotesSet.add(note);
-        } else if (
-          note.displayMode === NoteDisplayMode.DocAndEdgeless ||
-          (!note.displayMode && !note.hidden)
-        ) {
+        } else if (note.displayMode === NoteDisplayMode.DocAndEdgeless) {
           pageVisibleBlocks.set(note, 1);
         }
       }
@@ -385,7 +399,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     });
     return html`
       <div class="affine-block-children-container edgeless">
-        <div class="affine-edgeless-layer">
+        <div
+          class="affine-edgeless-layer"
+          data-scale="${zoom}"
+          data-translate="true"
+        >
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}
@@ -461,7 +479,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .edgeless=${edgeless}
         .show=${this._showIndexLabel}
       ></edgeless-index-label>
-      ${this._toolbarVisible && !page.readonly
+      ${this._toolbarVisible && !page.readonly && !this._dragging
         ? html`<edgeless-component-toolbar .edgeless=${edgeless}>
           </edgeless-component-toolbar>`
         : nothing}

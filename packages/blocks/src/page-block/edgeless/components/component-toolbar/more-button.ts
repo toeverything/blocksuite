@@ -1,5 +1,6 @@
 import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
+import '../../../../_common/components/menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -22,6 +23,7 @@ import {
   SendToBackIcon,
 } from '../../../../_common/icons/index.js';
 import { type ReorderingType } from '../../../../_common/utils/index.js';
+import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { removeContainedFrames } from '../../frame-manager.js';
 import { duplicate, splitElements } from '../../utils/clipboard-utils.js';
@@ -229,7 +231,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'create-frame': {
-        this.edgeless.surface.frame.createFrameOnSelected();
+        const { service } = this.edgeless;
+        const frame = service.frame.createFrameOnSelected();
+        this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
         break;
       }
       case 'create-group': {

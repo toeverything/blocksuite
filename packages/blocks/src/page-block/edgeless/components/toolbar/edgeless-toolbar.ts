@@ -173,7 +173,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     },
   })
   private _currentFrameIndex = 0;
-  private _timer: ReturnType<typeof setTimeout> | null = null;
+  private _timer?: ReturnType<typeof setTimeout>;
   private _cachedIndex = -1;
 
   private get _frames(): FrameBlockModel[] {
@@ -368,7 +368,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _toggleFullScreen() {
     if (document.fullscreenElement) {
-      this._timer && clearTimeout(this._timer);
+      clearTimeout(this._timer);
       document.exitFullscreen().catch(console.error);
     } else {
       launchIntoFullscreen(this.edgeless.viewportElement);
@@ -378,7 +378,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
 
     setTimeout(() => this._moveToCurrentFrame(), 400);
-    this.edgeless.slots.fullScrennToggled.emit();
+    this.edgeless.slots.fullScreenToggled.emit();
   }
 
   private get _FrameNavigator() {
@@ -394,6 +394,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       >
         ${FrameNavigatorPrevIcon}
       </edgeless-tool-icon-button>
+
       <div class="edgeless-frame-navigator">
         <span
           class="edgeless-frame-navigator-title"
@@ -401,34 +402,38 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             (this._currentFrameIndex = this._currentFrameIndex + 0)}
           >${frame?.title ?? 'no frame'}</span
         >
+
         <span class="edgeless-frame-navigator-count"
           >${frames.length === 0 ? 0 : current + 1}/${frames.length}</span
         >
       </div>
+
       <edgeless-tool-icon-button
         .tooltip=${'Next'}
         @click=${() => this._nextFrame()}
       >
         ${FrameNavigatorNextIcon}
       </edgeless-tool-icon-button>
+
       <div class="short-divider"></div>
+
       <edgeless-frame-order-button
         .frames=${this._frames}
         .edgeless=${this.edgeless}
       >
       </edgeless-frame-order-button>
+
       <edgeless-tool-icon-button
         .tooltip=${document.fullscreenElement
           ? 'Exit Full Screen'
           : 'Enter Full Screen'}
-        @click=${() => {
-          this._toggleFullScreen();
-        }}
+        @click=${() => this._toggleFullScreen()}
       >
         ${document.fullscreenElement
           ? NavigatorExitFullScreenIcon
           : NavigatorFullScreenIcon}
       </edgeless-tool-icon-button>
+
       <edgeless-navigator-setting-button
         .edgeless=${this.edgeless}
         .hideToolbar=${this._hideToolbar}
@@ -441,7 +446,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         }}
       >
       </edgeless-navigator-setting-button>
+
       <div class="short-divider"></div>
+
       <div
         class="edgeless-frame-navigator-stop"
         @click=${() => {
@@ -452,7 +459,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           );
 
           document.fullscreenElement && this._toggleFullScreen();
-          setTimeout(() => this._moveToCurrentFrame(), 400);
         }}
       >
         Stop
@@ -465,28 +471,33 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { type } = edgelessTool;
     return html`
       <div class="full-divider"></div>
+
       <div class="brush-and-eraser">
         <edgeless-brush-tool-button
           .edgeless=${this.edgeless}
           .active=${type === 'brush'}
         ></edgeless-brush-tool-button>
+
         <edgeless-eraser-tool-button
           .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
           .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-eraser-tool-button>
       </div>
+
       <div class="edgeless-toolbar-right-part">
         <edgeless-shape-tool-button
           .edgeless=${this.edgeless}
           .active=${type === 'shape'}
         ></edgeless-shape-tool-button>
+
         <edgeless-text-tool-button
           .edgeless=${this.edgeless}
           .active=${type === 'text'}
         >
           ${EdgelessTextIcon}
         </edgeless-text-tool-button>
+
         <edgeless-toolbar-button
           class="transform-button"
           .disabled=${this._imageLoading}
@@ -497,6 +508,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${EdgelessImageIcon}
         </edgeless-toolbar-button>
+
         <edgeless-template-button .edgeless=${this.edgeless}>
         </edgeless-template-button>
       </div>
@@ -528,6 +540,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             ></edgeless-frame-tool-button>`}
 
         <edgeless-tool-icon-button
+          class="edgeless-frame-navigator-button"
           .tooltip=${'Present'}
           .tooltipOffset=${17}
           .iconContainerPadding=${8}

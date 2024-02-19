@@ -1,0 +1,67 @@
+{
+  "name": "@blocksuite/store",
+  "version": "0.11.0",
+  "description": "BlockSuite data store built for general purpose state management.",
+  "type": "module",
+  "repository": "toeverything/blocksuite",
+  "scripts": {
+    "build": "tsc",
+    "test:unit": "vitest --run",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:unit:ui": "vitest --ui",
+    "test": "pnpm test:unit"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/inline": "workspace:*",
+    "@blocksuite/sync": "workspace:*",
+    "@types/flexsearch": "^0.7.6",
+    "flexsearch": "0.7.43",
+    "idb-keyval": "^6.2.1",
+    "lib0": "^0.2.88",
+    "merge": "^2.1.1",
+    "minimatch": "^9.0.3",
+    "nanoid": "^5.0.4",
+    "y-protocols": "^1.0.6",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "lit": "^3.1.1",
+    "yjs": "^13.6.11"
+  },
+  "peerDependencies": {
+    "yjs": "^13"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./providers/*": "./src/providers/*.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "module": "./dist/index.js",
+        "import": "./dist/index.js"
+      },
+      "./shim.d.ts": "./shim.d.ts",
+      "./providers/*": {
+        "types": "./dist/providers/*.d.ts",
+        "module": "./dist/providers/*.js",
+        "import": "./dist/providers/*.js"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "providers",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ]
+}

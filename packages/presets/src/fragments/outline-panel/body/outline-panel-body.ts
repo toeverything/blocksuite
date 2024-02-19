@@ -316,10 +316,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
         number: index + 1,
       };
 
-      if (
-        blockModel.displayMode === NoteDisplayMode.EdgelessOnly ||
-        (!blockModel.displayMode && blockModel.hidden)
-      ) {
+      if (blockModel.displayMode === NoteDisplayMode.EdgelessOnly) {
         edgelessOnlyNotes.push(OutlineNoteItem);
       } else {
         pageVisibleNotes.push(OutlineNoteItem);

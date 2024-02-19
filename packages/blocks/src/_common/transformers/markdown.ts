@@ -6,7 +6,7 @@ import { MarkdownAdapter } from '../adapters/index.js';
 import { defaultImageProxyMiddleware } from './middlewares.js';
 import { createAssetsArchive, download } from './utils.js';
 
-export async function exportPage(page: Page) {
+async function exportPage(page: Page) {
   const job = new Job({ workspace: page.workspace });
   const snapshot = await job.pageToSnapshot(page);
 
@@ -41,7 +41,7 @@ type ImportMarkdownOptions = {
   noteId: string;
 };
 
-export async function importMarkdown({
+async function importMarkdown({
   page,
   markdown,
   noteId,
@@ -71,3 +71,8 @@ export async function importMarkdown({
 
   return;
 }
+
+export const MarkdownTransformer = {
+  exportPage,
+  importMarkdown,
+};

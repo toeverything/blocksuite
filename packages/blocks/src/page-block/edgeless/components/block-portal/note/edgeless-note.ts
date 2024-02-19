@@ -132,6 +132,19 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         background-color: var(--affine-hover-color);
       }
     }
+
+    .edgeless-block-portal-note:has(.affine-embed-synced-doc-container.editing)
+      > .note-background {
+      left: ${-ACTIVE_NOTE_EXTRA_PADDING}px !important;
+      top: ${-ACTIVE_NOTE_EXTRA_PADDING}px !important;
+      width: calc(100% + ${ACTIVE_NOTE_EXTRA_PADDING * 2}px) !important;
+      height: calc(100% + ${ACTIVE_NOTE_EXTRA_PADDING * 2}px) !important;
+    }
+
+    .edgeless-block-portal-note:has(.affine-embed-synced-doc-container.editing)
+      > edgeless-note-mask {
+      display: none;
+    }
   `;
 
   @state()
@@ -356,6 +369,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         data-model-height="${bound.h}"
         @mouseleave=${this._leaved}
         @mousemove=${this._hovered}
+        data-scale="${scale}"
       >
         <div class="note-background" style=${styleMap(backgroundStyle)}></div>
 
@@ -363,8 +377,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
           style=${styleMap({
             width: '100%',
             height: '100%',
-            padding: '0 4px',
-            overflow: this._isShowCollapsedContent ? 'initial' : 'hidden',
+            'overflow-y': this._isShowCollapsedContent ? 'initial' : 'clip',
           })}
         >
           ${surface.renderModel(model)}

@@ -416,6 +416,8 @@ test.describe('slash search', () => {
     await expect(slashItems).toHaveText([
       'Code Block',
       'Italic',
+      'New Doc',
+      'Link Doc',
       'File',
       'Copy',
       'Duplicate',
@@ -638,6 +640,7 @@ test.skip('should compatible CJK IME', async ({ page }) => {
 test.describe('slash menu with customize menu', () => {
   test('can remove specified menus', async ({ page }) => {
     await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
     await page.evaluate(async () => {
       // https://github.com/lit/lit/blob/84df6ef8c73fffec92384891b4b031d7efc01a64/packages/lit-html/src/static.ts#L93
       const fakeLiteral = (strings: TemplateStringsArray) =>
@@ -666,11 +669,10 @@ test.describe('slash menu with customize menu', () => {
       // @ts-ignore
       pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
         fakeLiteral`affine-custom-slash-menu`;
-      docSpecs.unshift(pageBlockSpec);
-      editor.docSpecs = docSpecs;
+      editor.docSpecs = [pageBlockSpec, ...docSpecs];
+      await editor.updateComplete;
     });
 
-    await initEmptyParagraphState(page);
     await focusRichText(page);
 
     const slashMenu = page.locator(`.slash-menu`);
@@ -683,7 +685,7 @@ test.describe('slash menu with customize menu', () => {
 
   test('can add some menus', async ({ page }) => {
     await enterPlaygroundRoom(page);
-
+    await initEmptyParagraphState(page);
     await page.evaluate(async () => {
       // https://github.com/lit/lit/blob/84df6ef8c73fffec92384891b4b031d7efc01a64/packages/lit-html/src/static.ts#L93
       const fakeLiteral = (strings: TemplateStringsArray) =>
@@ -727,11 +729,10 @@ test.describe('slash menu with customize menu', () => {
       // @ts-ignore
       pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
         fakeLiteral`affine-custom-slash-menu`;
-      docSpecs.unshift(pageBlockSpec);
-      editor.docSpecs = docSpecs;
+      editor.docSpecs = [pageBlockSpec, ...docSpecs];
+      await editor.updateComplete;
     });
 
-    await initEmptyParagraphState(page);
     await focusRichText(page);
 
     const slashMenu = page.locator(`.slash-menu`);

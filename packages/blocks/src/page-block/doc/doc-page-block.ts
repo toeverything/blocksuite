@@ -1,12 +1,12 @@
 import { PathFinder, type PointerEventState } from '@blocksuite/block-std';
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { EditingState, Viewport } from '../../_common/utils/index.js';
+import type { Viewport } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   getDocTitleInlineEditor,
@@ -98,22 +98,11 @@ export class DocPageBlockComponent extends BlockElement<
   @query('.affine-doc-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
-  slots = {
-    draggingAreaUpdated: new Slot<DOMRect | null>(),
-    selectedRectsUpdated: new Slot<DOMRect[]>(),
-    embedRectsUpdated: new Slot<DOMRect[]>(),
-    embedEditingStateUpdated: new Slot<EditingState | null>(),
-    pageLinkClicked: new Slot<{
-      pageId: string;
-      blockId?: string;
-    }>(),
-    tagClicked: new Slot<{
-      tagId: string;
-    }>(),
-    viewportUpdated: new Slot<Viewport>(),
-  };
-
   private _viewportElement: HTMLDivElement | null = null;
+
+  get slots() {
+    return this.service.slots;
+  }
 
   get viewportElement(): HTMLDivElement {
     if (this._viewportElement) return this._viewportElement;
@@ -390,7 +379,7 @@ export class DocPageBlockComponent extends BlockElement<
           !!note.displayMode &&
           note.displayMode === NoteDisplayMode.EdgelessOnly;
         // Should remove deprecated `hidden` property in the future
-        return !(isNote && (displayOnEdgeless || note.hidden));
+        return !(isNote && displayOnEdgeless);
       }),
       child => child.id,
       child => this.renderModel(child)

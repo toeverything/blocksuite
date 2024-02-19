@@ -31,7 +31,7 @@ The snapshot stores the JSON representation of the `page` block tree, preserving
 
 Different from the classic mechanism above, BlockSuite natively supports a state management strategy that can be mentally paralleled with [React Server Components](https://www.joshwcomeau.com/react/server-components/). This allows the state of the block tree to be directly used as serializable data, streaming from the server (or local database) to the client.
 
-In this case, **the document data stored on the server is no longer JSON, but always a binary representation of CRDT** (similar to protobuf or RSC payload). As the block tree in BlockSuite is natively implemented by CRDT, and the CRDT data is always updated first during state updates ([see this article](./crdt-native-data-flow)), the block tree state in the BlockSuite editor is always driven entirely by CRDT data. Therefore, compared to the RSC mindset:
+In this case, **the document data stored on the server is no longer JSON, but always a binary representation of CRDT** (similar to protobuf or RSC payload). As the block tree in BlockSuite is natively implemented by CRDT, and the CRDT data is always updated first during state updates ([see this article](/blog/crdt-native-data-flow)), the block tree state in the BlockSuite editor is always driven entirely by CRDT data. Therefore, compared to the RSC mindset:
 
 ```
 ui = f(data)(state)

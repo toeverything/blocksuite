@@ -9,7 +9,9 @@ import {
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
+import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
@@ -120,6 +122,24 @@ export function isEmbedLinkedDocBlock(
     !!element &&
     'flavour' in element &&
     element.flavour === 'affine:embed-linked-doc'
+  );
+}
+
+export function isEmbedSyncedDocBlock(
+  element: BlockModel | EdgelessModel | null
+): element is EmbedSyncedDocModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-synced-doc'
+  );
+}
+
+export function isEmbedHtmlBlock(
+  element: BlockModel | EdgelessModel | null
+): element is EmbedHtmlModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:embed-html'
   );
 }
 

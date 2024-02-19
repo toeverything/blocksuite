@@ -149,6 +149,7 @@ function SurfaceRefToolbarOptions(options: {
         @click=${() => blockElement.viewInEdgeless()}
         >${EdgelessModeIcon}
       </icon-button>
+
       <div
         class="divider"
         ?hidden=${readonly}
@@ -156,16 +157,20 @@ function SurfaceRefToolbarOptions(options: {
           display: hasValidReference ? undefined : 'none',
         })}
       ></div>
+
       <icon-button
         size="32px"
         ?hidden=${readonly}
         @click=${() => {
-          blockElement.showCaption();
+          abortController.abort();
+          blockElement.captionElement.show();
         }}
       >
         ${CaptionIcon}
+
         <affine-tooltip tip-position="top">Caption</affine-tooltip>
       </icon-button>
+
       <icon-button
         size="32px"
         ?hidden=${!hasValidReference}
@@ -194,8 +199,10 @@ function SurfaceRefToolbarOptions(options: {
         }}
       >
         ${DownloadIcon}
+
         <affine-tooltip tip-position="top">Download</affine-tooltip>
       </icon-button>
+
       <icon-button
         size="32px"
         ?hidden=${!hasValidReference}
@@ -218,8 +225,10 @@ function SurfaceRefToolbarOptions(options: {
         }}
       >
         ${CopyIcon}
+
         <affine-tooltip tip-position="top">Copy to clipboard</affine-tooltip>
       </icon-button>
+
       <icon-button
         class="delete-button"
         size="32px"
@@ -230,6 +239,7 @@ function SurfaceRefToolbarOptions(options: {
         }}"
       >
         ${DeleteIcon}
+
         <affine-tooltip tip-position="top">Delete</affine-tooltip>
       </icon-button>
     </div>

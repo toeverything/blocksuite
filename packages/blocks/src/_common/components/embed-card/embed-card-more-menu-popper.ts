@@ -1,21 +1,10 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
+import './../button.js';
+
 import { WithDisposable } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
-import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
-import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
-import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
-import type {
-  BookmarkBlockComponent,
-  BookmarkBlockModel,
-} from '../../../index.js';
 import {
   CopyIcon,
   DeleteIcon,
@@ -24,6 +13,7 @@ import {
   RefreshIcon,
 } from '../../icons/text.js';
 import { toast } from '../toast.js';
+import type { EmbedToolbarBlock } from './embed-card-toolbar.js';
 
 @customElement('embed-card-more-menu')
 export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
@@ -67,26 +57,22 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!:
-    | BookmarkBlockModel
-    | EmbedGithubModel
-    | EmbedYoutubeModel
-    | EmbedFigmaModel
-    | EmbedLinkedDocModel;
-
-  @property({ attribute: false })
-  block!:
-    | BookmarkBlockComponent
-    | EmbedGithubBlockComponent
-    | EmbedYoutubeBlockComponent
-    | EmbedFigmaBlockComponent
-    | EmbedLinkedDocBlockComponent;
-
-  @property({ attribute: false })
-  std!: BlockStdScope;
+  block!: EmbedToolbarBlock;
 
   @property({ attribute: false })
   abortController!: AbortController;
+
+  private get _model() {
+    return this.block.model;
+  }
+
+  private get _std() {
+    return this.block.std;
+  }
+
+  private get _page() {
+    return this.block.page;
+  }
 
   private _open() {
     this.block.open();
@@ -94,14 +80,14 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   }
 
   private async _copyBlock() {
-    const slice = Slice.fromModels(this.model.page, [this.model]);
-    await this.std.clipboard.copySlice(slice);
+    const slice = Slice.fromModels(this._page, [this._model]);
+    await this._std.clipboard.copySlice(slice);
     toast(this.block.host, 'Copied link to clipboard');
     this.abortController.abort();
   }
 
   private _duplicateBlock() {
-    const model = this.model;
+    const model = this._model;
     const keys = model.keys as (keyof typeof model)[];
     const values = keys.map(key => model[key]);
     const blockProps = Object.fromEntries(
@@ -149,7 +135,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
         height="32px"
         class="menu-item duplicate"
         text="Duplicate"
-        ?disabled=${this.model.page.readonly}
+        ?disabled=${this._page.readonly}
         @click=${() => this._duplicateBlock()}
       >
         ${DuplicateIcon}
@@ -160,7 +146,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
         height="32px"
         class="menu-item reload"
         text="Reload"
-        ?disabled=${this.model.page.readonly}
+        ?disabled=${this._page.readonly}
         @click=${() => this._refreshData()}
       >
         ${RefreshIcon}
@@ -173,8 +159,8 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
         height="32px"
         class="menu-item delete"
         text="Delete"
-        ?disabled=${this.model.page.readonly}
-        @click=${() => this.model.page.deleteBlock(this.model)}
+        ?disabled=${this._page.readonly}
+        @click=${() => this._page.deleteBlock(this._model)}
       >
         ${DeleteIcon}
       </icon-button>
