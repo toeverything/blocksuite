@@ -80,7 +80,7 @@ export function createStarterPageWorkspace() {
 
 export async function initStarterPageWorkspace(workspace: Workspace) {
   // init from other clients
-  if (room && !params.get('init')) {
+  if (room && !params.has('init')) {
     let fistPage = workspace.pages.values().next().value as Page | undefined;
     if (!fistPage) {
       await new Promise<string>(resolve =>

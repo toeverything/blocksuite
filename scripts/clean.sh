@@ -9,6 +9,7 @@ packages=(
   "framework/lit"
   "framework/store"
   "framework/inline"
+  "framework/sync" 
   "blocks"
   "docs"
   "presets"
