@@ -17,6 +17,7 @@ import type {
   EmbedGithubModel,
   EmbedHtmlModel,
   EmbedLinkedDocModel,
+  EmbedLoomModel,
   EmbedSyncedDocModel,
   EmbedYoutubeModel,
   FrameBlockModel,
@@ -57,6 +58,7 @@ export type BlockModels = {
   'affine:embed-linked-doc': EmbedLinkedDocModel;
   'affine:embed-synced-doc': EmbedSyncedDocModel;
   'affine:embed-html': EmbedHtmlModel;
+  'affine:embed-loom': EmbedLoomModel;
 };
 
 export type BlockSchemas = {

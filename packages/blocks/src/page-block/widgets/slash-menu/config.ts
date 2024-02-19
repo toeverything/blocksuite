@@ -39,6 +39,7 @@ import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import type { DatabaseService } from '../../../database-block/database-service.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
+import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { ImageService } from '../../../image-block/image-service.js';
@@ -392,6 +393,30 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             pageElement.host,
             'GitHub',
             'The added GitHub issue or pull request link will be displayed as a card view.',
+            { mode: 'page', parentModel, index }
+          );
+          tryRemoveEmptyLine(model);
+        },
+      },
+      {
+        name: 'Loom',
+        icon: LoomIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-loom')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: async ({ pageElement, model }) => {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
+            return;
+          }
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
+            pageElement.host,
+            'Loom',
+            'The added Loom video link will be displayed as an embed view.',
             { mode: 'page', parentModel, index }
           );
           tryRemoveEmptyLine(model);

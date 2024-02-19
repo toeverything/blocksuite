@@ -589,6 +589,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.skipAllChildren();
           break;
         }
+        case 'affine:embed-loom':
         case 'affine:embed-github':
         case 'affine:embed-youtube':
         case 'affine:embed-figma':

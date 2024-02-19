@@ -76,6 +76,7 @@ export * from './embed-figma-block/index.js';
 export * from './embed-github-block/index.js';
 export * from './embed-html-block/index.js';
 export * from './embed-linked-doc-block/index.js';
+export * from './embed-loom-block/index.js';
 export * from './embed-synced-doc-block/index.js';
 export * from './embed-youtube-block/index.js';
 export * from './frame-block/index.js';

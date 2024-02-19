@@ -50,6 +50,10 @@ import type {
   EmbedLinkedDocModel,
 } from '../../../../embed-linked-doc-block/index.js';
 import type {
+  EmbedLoomBlockComponent,
+  EmbedLoomModel,
+} from '../../../../embed-loom-block/index.js';
+import type {
   EmbedSyncedDocBlockComponent,
   EmbedSyncedDocModel,
 } from '../../../../embed-synced-doc-block/index.js';
@@ -213,7 +217,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedFigmaModel
     | EmbedLinkedDocModel
     | EmbedSyncedDocModel
-    | EmbedHtmlModel;
+    | EmbedHtmlModel
+    | EmbedLoomModel;
 
   @property({ attribute: false })
   std!: BlockStdScope;
@@ -269,6 +274,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | EmbedFigmaBlockComponent
       | EmbedLinkedDocBlockComponent
       | EmbedSyncedDocBlockComponent
+      | EmbedLoomBlockComponent
       | null;
     assertExists(blockElement);
 
@@ -297,8 +303,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
   private get _isEmbedView() {
     return (
-      isEmbedSyncedDocBlock(this.model) ||
-      this._embedOptions?.viewType === 'embed'
+      !isBookmarkBlock(this.model) &&
+      (isEmbedSyncedDocBlock(this.model) ||
+        this._embedOptions?.viewType === 'embed')
     );
   }
 
