@@ -11,7 +11,7 @@ This article has also been published [in PDF format](https://www.inkandswitch.co
 
 We welcome your feedback: [@inkandswitch](https://twitter.com/inkandswitch) or hello@inkandswitch.com.`;
 
-export const synced: InitFn = async (workspace: Workspace, id: string) => {
+export const synced: InitFn = (workspace: Workspace, id: string) => {
   const pageMain = workspace.getPage(id) ?? workspace.createPage({ id });
   const pageSyncedPage = workspace.createPage({ id: 'synced-page' });
   const pageSyncedEdgeless = workspace.createPage({ id: 'synced-edgeless' });
@@ -19,8 +19,7 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
   pageSyncedPage.clear();
   pageSyncedEdgeless.clear();
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  pageSyncedPage.load(async () => {
+  pageSyncedPage.load(() => {
     // Add page block and surface block at root level
     const pageBlockId = pageSyncedPage.addBlock('affine:page', {
       title: new Text('Synced - Page View'),
@@ -32,15 +31,14 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
     const noteId = pageSyncedPage.addBlock('affine:note', {}, pageBlockId);
 
     // Add markdown to note block
-    await MarkdownTransformer.importMarkdown({
+    MarkdownTransformer.importMarkdown({
       page: pageSyncedPage,
       noteId,
       markdown: syncedPageMarkdown,
-    });
+    }).catch(console.error);
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  pageSyncedEdgeless.load(async () => {
+  pageSyncedEdgeless.load(() => {
     // Add page block and surface block at root level
     const pageBlockId = pageSyncedEdgeless.addBlock('affine:page', {
       title: new Text('Synced - Edgeless View'),
@@ -52,15 +50,14 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
     const noteId = pageSyncedEdgeless.addBlock('affine:note', {}, pageBlockId);
 
     // Add markdown to note block
-    await MarkdownTransformer.importMarkdown({
+    MarkdownTransformer.importMarkdown({
       page: pageSyncedEdgeless,
       noteId,
       markdown: syncedPageMarkdown,
-    });
+    }).catch(console.error);
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  pageMain.load(async () => {
+  pageMain.load(() => {
     // Add page block and surface block at root level
     const pageBlockId = pageMain.addBlock('affine:page', {
       title: new Text('Home page, having synced blocks'),
@@ -70,11 +67,11 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
     const noteId = pageMain.addBlock('affine:note', {}, pageBlockId);
 
     // Add markdown to note block
-    await MarkdownTransformer.importMarkdown({
+    MarkdownTransformer.importMarkdown({
       page: pageMain,
       noteId,
       markdown: syncedPageMarkdown,
-    });
+    }).catch(console.error);
 
     // Add synced block - self
     pageMain.addBlock(

@@ -166,7 +166,7 @@ export async function createCodeBlock(page: Page) {
 export async function getCursorBlockIdAndHeight(
   page: Page
 ): Promise<[string | null, number | null]> {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const selection = window.getSelection() as Selection;
 
     const range = selection.getRangeAt(0);

@@ -53,16 +53,16 @@ const transformer = new BaseBlockTransformer();
 const blobManager = new MemoryBlobManager();
 const assets = new AssetsManager({ blob: blobManager });
 
-test('model to snapshot', async () => {
+test('model to snapshot', () => {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: 'home' });
-  await page.load();
+  page.load();
   page.addBlock('page');
   const root = page.root as PageBlockModel;
 
   expect(root).not.toBeNull();
-  const snapshot = await transformer.toSnapshot({
+  const snapshot = transformer.toSnapshot({
     model: root,
     assets,
   });
@@ -73,7 +73,7 @@ test('snapshot to model', async () => {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: 'home' });
-  await page.load();
+  page.load();
   page.addBlock('page');
   const root = page.root as PageBlockModel;
 

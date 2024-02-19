@@ -24,11 +24,11 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, schema };
 }
 
-async function createTestPage(pageId = 'page:home', workspace?: Workspace) {
+function createTestPage(pageId = 'page:home', workspace?: Workspace) {
   const options = createTestOptions();
   const _workspace = workspace || new Workspace(options);
   const page = _workspace.createPage({ id: pageId });
-  await page.load();
+  page.load();
   return page;
 }
 
@@ -37,8 +37,8 @@ beforeEach(() => {
 });
 
 describe('workspace.search works', () => {
-  it('workspace search matching', async () => {
-    const page = await createTestPage();
+  it('workspace search matching', () => {
+    const page = createTestPage();
     const workspace = page.workspace;
 
     const pageId = page.addBlock('affine:page', {
@@ -112,9 +112,9 @@ describe('workspace.search works', () => {
 
 describe('backlink works', () => {
   it('backlink indexer works with subpage', async () => {
-    const page = await createTestPage();
+    const page = createTestPage();
     const workspace = page.workspace;
-    const subpage = await createTestPage('page1', workspace);
+    const subpage = createTestPage('page1', workspace);
     const backlinkIndexer = workspace.indexer.backlink;
 
     const pageId = page.addBlock('affine:page', {
@@ -156,9 +156,9 @@ describe('backlink works', () => {
   });
 
   it('backlink indexer works with linked page', async () => {
-    const page0 = await createTestPage();
+    const page0 = createTestPage();
     const workspace = page0.workspace;
-    const page1 = await createTestPage('space:page1', workspace);
+    const page1 = createTestPage('space:page1', workspace);
     const backlinkIndexer = workspace.indexer.backlink;
 
     const page0Id = page0.addBlock('affine:page');

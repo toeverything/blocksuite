@@ -254,7 +254,7 @@ test('should close zoom bar when click blank area', async ({ page }) => {
   await assertZoomLevel(page, 125);
 
   const verticalZoomBar = '.edgeless-zoom-toolbar-container.vertical';
-  const zoomBar = await page.locator(verticalZoomBar);
+  const zoomBar = page.locator(verticalZoomBar);
   await expect(zoomBar).toBeVisible();
 
   // Click Blank Area

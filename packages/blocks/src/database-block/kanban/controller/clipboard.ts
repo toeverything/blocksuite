@@ -19,7 +19,7 @@ export class KanbanClipboardController implements ReactiveController {
         const kanbanSelection = this.host.selectionController.selection;
         if (!kanbanSelection) return false;
 
-        this._onCopy(ctx, kanbanSelection).catch(console.error);
+        this._onCopy(ctx, kanbanSelection);
         return true;
       })
     );
@@ -34,7 +34,7 @@ export class KanbanClipboardController implements ReactiveController {
     );
   }
 
-  private _onCopy = async (
+  private _onCopy = (
     _context: UIEventStateContext,
     _kanbanSelection: KanbanViewSelectionWithType
   ) => {

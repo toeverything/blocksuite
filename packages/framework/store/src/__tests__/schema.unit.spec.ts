@@ -61,17 +61,17 @@ const BlockSchemas = [
 ];
 
 const defaultPageId = 'page0';
-async function createTestPage(pageId = defaultPageId) {
+function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
-  await page.load();
+  page.load();
   return page;
 }
 
 describe('schema', () => {
-  it('should be able to validate schema by role', async () => {
-    const page = await createTestPage();
+  it('should be able to validate schema by role', () => {
+    const page = createTestPage();
     const pageId = page.addBlock('affine:page', {});
     const noteId = page.addBlock('affine:note', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
@@ -91,8 +91,8 @@ describe('schema', () => {
     ).not.toThrow();
   });
 
-  it('should glob match works', async () => {
-    const page = await createTestPage();
+  it('should glob match works', () => {
+    const page = createTestPage();
     const pageId = page.addBlock('affine:page', {});
     const noteId = page.addBlock('affine:note', {}, pageId);
 

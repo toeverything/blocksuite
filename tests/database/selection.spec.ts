@@ -456,7 +456,7 @@ test.describe('kanban view selection', () => {
     await pressEscape(page);
     await pressEscape(page);
 
-    const card = await getKanbanCard(page, {
+    const card = getKanbanCard(page, {
       groupIndex: 1,
       cardIndex: 0,
     });

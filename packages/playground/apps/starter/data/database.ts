@@ -13,13 +13,11 @@ import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-export const database: InitFn = async (workspace: Workspace, id: string) => {
+export const database: InitFn = (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
   page.awarenessStore.setFlag('enable_expand_database_block', true);
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  await page.load(async () => {
+  page.load(() => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text('BlockSuite Playground'),
@@ -41,86 +39,93 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
       noteId
     );
 
-    await new Promise(resolve => requestAnimationFrame(resolve));
+    new Promise(resolve => requestAnimationFrame(resolve))
+      .then(() => {
+        const service = window.host.std.spec.getService(
+          'affine:database'
+        ) as DatabaseService;
+        service.initDatabaseBlock(page, model, databaseId, 'table', true);
+        const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+        database.addColumn(
+          'end',
+          numberPureColumnConfig.create(numberPureColumnConfig.name)
+        );
+        database.addColumn(
+          'end',
+          richTextPureColumnConfig.create(richTextPureColumnConfig.name)
+        );
+        database.addColumn(
+          'end',
+          datePureColumnConfig.create(datePureColumnConfig.name)
+        );
+        database.addColumn(
+          'end',
+          linkPureColumnConfig.create(linkPureColumnConfig.name)
+        );
+        database.addColumn(
+          'end',
+          progressPureColumnConfig.create(progressPureColumnConfig.name)
+        );
+        database.addColumn(
+          'end',
+          checkboxPureColumnConfig.create(checkboxPureColumnConfig.name)
+        );
+        database.addColumn(
+          'end',
+          multiSelectColumnConfig.create(multiSelectColumnConfig.name)
+        );
+        database.updateView(database.views[0].id, () => {
+          return {
+            groupBy: {
+              columnId: database.columns[1].id,
+              type: 'groupBy',
+              name: 'select',
+            },
+          };
+        });
+        const paragraphTypes: ParagraphType[] = [
+          'text',
+          'quote',
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+        ];
+        paragraphTypes.forEach(type => {
+          page.addBlock(
+            'affine:paragraph',
+            { type: type, text: new Text(`Paragraph type ${type}`) },
+            databaseId
+          );
+        });
+        const listTypes: ListType[] = [
+          'numbered',
+          'bulleted',
+          'todo',
+          'toggle',
+        ];
 
-    const service = window.host.std.spec.getService(
-      'affine:database'
-    ) as DatabaseService;
-    service.initDatabaseBlock(page, model, databaseId, 'table', true);
-    const database = page.getBlockById(databaseId) as DatabaseBlockModel;
-    database.addColumn(
-      'end',
-      numberPureColumnConfig.create(numberPureColumnConfig.name)
-    );
-    database.addColumn(
-      'end',
-      richTextPureColumnConfig.create(richTextPureColumnConfig.name)
-    );
-    database.addColumn(
-      'end',
-      datePureColumnConfig.create(datePureColumnConfig.name)
-    );
-    database.addColumn(
-      'end',
-      linkPureColumnConfig.create(linkPureColumnConfig.name)
-    );
-    database.addColumn(
-      'end',
-      progressPureColumnConfig.create(progressPureColumnConfig.name)
-    );
-    database.addColumn(
-      'end',
-      checkboxPureColumnConfig.create(checkboxPureColumnConfig.name)
-    );
-    database.addColumn(
-      'end',
-      multiSelectColumnConfig.create(multiSelectColumnConfig.name)
-    );
-    database.updateView(database.views[0].id, () => {
-      return {
-        groupBy: {
-          columnId: database.columns[1].id,
-          type: 'groupBy',
-          name: 'select',
-        },
-      };
-    });
-    const paragraphTypes: ParagraphType[] = [
-      'text',
-      'quote',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-    ];
-    paragraphTypes.forEach(type => {
-      page.addBlock(
-        'affine:paragraph',
-        { type: type, text: new Text(`Paragraph type ${type}`) },
-        databaseId
-      );
-    });
-    const listTypes: ListType[] = ['numbered', 'bulleted', 'todo', 'toggle'];
+        listTypes.forEach(type => {
+          page.addBlock(
+            'affine:list',
+            { type: type, text: new Text(`List type ${type}`) },
+            databaseId
+          );
+        });
+        // Add a paragraph after database
+        page.addBlock('affine:paragraph', {}, noteId);
+        page.addBlock('affine:paragraph', {}, noteId);
+        page.addBlock('affine:paragraph', {}, noteId);
+        page.addBlock('affine:paragraph', {}, noteId);
+        page.addBlock('affine:paragraph', {}, noteId);
+        database.addView('kanban');
 
-    listTypes.forEach(type => {
-      page.addBlock(
-        'affine:list',
-        { type: type, text: new Text(`List type ${type}`) },
-        databaseId
-      );
-    });
-    // Add a paragraph after database
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    database.addView('kanban');
+        page.resetHistory();
+      })
+      .catch(console.error);
   });
-
-  page.resetHistory();
 };
 
 database.id = 'database';

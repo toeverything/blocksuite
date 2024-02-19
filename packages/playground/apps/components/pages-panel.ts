@@ -114,7 +114,7 @@ export class PagesPanel extends WithDisposable(ShadowlessElement) {
 
 function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator();
-  createDefaultPage(workspace, { id }).catch(console.error);
+  createDefaultPage(workspace, { id });
 }
 
 declare global {

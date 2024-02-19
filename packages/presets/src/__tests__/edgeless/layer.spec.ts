@@ -57,7 +57,7 @@ test('add new edgeless blocks or canvas elements should update layer automatical
   expect(service.layer.layers.length).toBe(2);
 });
 
-test('delete element should update layer automatically', async () => {
+test('delete element should update layer automatically', () => {
   const id = addNote(page);
   const canvasElId = service.addElement('shape', {
     shapeType: 'rect',

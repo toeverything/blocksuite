@@ -633,11 +633,7 @@ export async function assertStoreMatchJSX(
 
 type MimeType = 'text/plain' | 'blocksuite/x-c+w' | 'text/html';
 
-export async function assertClipItems(
-  _page: Page,
-  _key: MimeType,
-  _value: unknown
-) {
+export function assertClipItems(_page: Page, _key: MimeType, _value: unknown) {
   // FIXME: use original clipboard API
   // const clipItems = await page.evaluate(() => {
   //   return document

@@ -7,8 +7,11 @@ export interface DocSource {
   pull(
     docId: string,
     state: Uint8Array
-  ): Promise<{ data: Uint8Array; state?: Uint8Array } | null>;
-  push(docId: string, data: Uint8Array): Promise<void>;
+  ):
+    | Promise<{ data: Uint8Array; state?: Uint8Array } | null>
+    | { data: Uint8Array; state?: Uint8Array }
+    | null;
+  push(docId: string, data: Uint8Array): Promise<void> | void;
 
   /**
    * Subscribe to updates from peer
@@ -21,5 +24,5 @@ export interface DocSource {
   subscribe(
     cb: (docId: string, data: Uint8Array) => void,
     disconnect: (reason: string) => void
-  ): Promise<() => void>;
+  ): Promise<() => void> | (() => void);
 }

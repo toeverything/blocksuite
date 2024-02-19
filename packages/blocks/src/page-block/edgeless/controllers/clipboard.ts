@@ -143,7 +143,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
         if (selectedIds.length === 0) return false;
 
-        this._onCopy(ctx, selections).catch(console.error);
+        this._onCopy(ctx, selections);
         return;
       },
       { global: true }
@@ -166,7 +166,7 @@ export class EdgelessClipboardController extends PageClipboard {
     );
   };
 
-  private _onCopy = async (
+  private _onCopy = (
     _context: UIEventStateContext,
     surfaceSelection: SurfaceSelection[]
   ) => {
@@ -290,7 +290,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const json = this.std.clipboard.readFromClipboard(data);
     const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
-    this._pasteShapesAndBlocks(elementsRawData).catch(console.error);
+    this._pasteShapesAndBlocks(elementsRawData);
   };
 
   private _onCut = (_context: UIEventStateContext) => {
@@ -301,7 +301,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const event = _context.get('clipboardState').event;
     event.preventDefault();
 
-    this._onCopy(_context, selections).catch(console.error);
+    this._onCopy(_context, selections);
 
     if (selections[0]?.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
@@ -685,7 +685,7 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
-  async createElementsFromClipboardData(
+  createElementsFromClipboardData(
     elementsRawData: Record<string, unknown>[],
     pasteCenter?: IVec
   ) {
@@ -882,11 +882,9 @@ export class EdgelessClipboardController extends PageClipboard {
     return [elements, blocks] as const;
   }
 
-  private async _pasteShapesAndBlocks(
-    elementsRawData: Record<string, unknown>[]
-  ) {
+  private _pasteShapesAndBlocks(elementsRawData: Record<string, unknown>[]) {
     const [elements, blocks] =
-      await this.createElementsFromClipboardData(elementsRawData);
+      this.createElementsFromClipboardData(elementsRawData);
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),
       blocks.map(block => block.id)
@@ -939,7 +937,7 @@ export class EdgelessClipboardController extends PageClipboard {
       assertExists(blob);
 
       this.std.clipboard
-        .writeToClipboard(async _items => {
+        .writeToClipboard(_items => {
           return {
             ..._items,
             [IMAGE_PNG]: blob,
@@ -952,8 +950,8 @@ export class EdgelessClipboardController extends PageClipboard {
   private async _replaceRichTextWithSvgElement(element: HTMLElement) {
     const richList = Array.from(element.querySelectorAll('.inline-editor'));
     await Promise.all(
-      richList.map(async rich => {
-        const svgEle = await this._elementToSvgElement(
+      richList.map(rich => {
+        const svgEle = this._elementToSvgElement(
           rich.cloneNode(true) as HTMLElement,
           rich.clientWidth,
           rich.clientHeight + 1
@@ -964,7 +962,7 @@ export class EdgelessClipboardController extends PageClipboard {
     );
   }
 
-  private async _elementToSvgElement(
+  private _elementToSvgElement(
     node: HTMLElement,
     width: number,
     height: number

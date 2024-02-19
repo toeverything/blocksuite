@@ -4,17 +4,17 @@ export const createMemoryStorage = (): BlobStorage => {
   const memoryStorage = new Map<string, Blob>();
   return {
     crud: {
-      get: async (key: string) => {
+      get: (key: string) => {
         return memoryStorage.get(key) ?? null;
       },
-      set: async (key: string, value: Blob) => {
+      set: (key: string, value: Blob) => {
         memoryStorage.set(key, value);
         return key;
       },
-      delete: async (key: string) => {
+      delete: (key: string) => {
         memoryStorage.delete(key);
       },
-      list: async () => {
+      list: () => {
         return Array.from(memoryStorage.keys());
       },
     },
