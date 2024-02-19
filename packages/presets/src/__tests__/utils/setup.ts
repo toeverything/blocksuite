@@ -39,7 +39,7 @@ function createWorkspaceOptions() {
 async function initWorkspace(workspace: Workspace) {
   const page = workspace.createPage({ id: 'page:home' });
 
-  await page.load(() => {
+  page.load(() => {
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text(),
     });

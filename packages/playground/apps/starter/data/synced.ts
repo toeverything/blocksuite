@@ -19,7 +19,8 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
   pageSyncedPage.clear();
   pageSyncedEdgeless.clear();
 
-  await pageSyncedPage.load(async () => {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  pageSyncedPage.load(async () => {
     // Add page block and surface block at root level
     const pageBlockId = pageSyncedPage.addBlock('affine:page', {
       title: new Text('Synced - Page View'),
@@ -38,7 +39,8 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
     });
   });
 
-  await pageSyncedEdgeless.load(async () => {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  pageSyncedEdgeless.load(async () => {
     // Add page block and surface block at root level
     const pageBlockId = pageSyncedEdgeless.addBlock('affine:page', {
       title: new Text('Synced - Edgeless View'),
@@ -57,7 +59,8 @@ export const synced: InitFn = async (workspace: Workspace, id: string) => {
     });
   });
 
-  await pageMain.load(async () => {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  pageMain.load(async () => {
     // Add page block and surface block at root level
     const pageBlockId = pageMain.addBlock('affine:page', {
       title: new Text('Home page, having synced blocks'),

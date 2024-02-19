@@ -11,7 +11,7 @@ import {
 async function main() {
   if (window.workspace) return;
 
-  const workspace = createDefaultPageWorkspace();
+  const workspace = await createDefaultPageWorkspace();
   await initDefaultPageWorkspace(workspace);
   await mountDefaultPageEditor(workspace);
 }

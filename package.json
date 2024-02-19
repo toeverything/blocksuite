@@ -8,6 +8,7 @@
     "packages/framework/inline",
     "packages/framework/lit",
     "packages/framework/store",
+    "packages/framework/sync",
     "packages/blocks",
     "packages/docs",
     "packages/playground",

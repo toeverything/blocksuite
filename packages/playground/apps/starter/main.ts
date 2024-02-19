@@ -7,7 +7,6 @@ import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import * as store from '@blocksuite/store';
 
-import { setupBroadcastProvider } from '../providers/broadcast-channel.js';
 import { mountDefaultPageEditor } from './utils/editor.js';
 import {
   createStarterPageWorkspace,
@@ -20,7 +19,6 @@ async function main() {
   const params = new URLSearchParams(location.search);
   const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
   const isE2E = room.startsWith('playwright');
-
   const workspace = createStarterPageWorkspace();
 
   if (isE2E) {
@@ -32,7 +30,6 @@ async function main() {
         editor,
       }),
     });
-    setupBroadcastProvider(workspace);
     return;
   }
 

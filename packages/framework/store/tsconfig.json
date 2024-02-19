@@ -11,6 +11,9 @@
       "path": "../global",
     },
     {
+      "path": "../sync",
+    },
+    {
       "path": "../inline",
     },
   ],
