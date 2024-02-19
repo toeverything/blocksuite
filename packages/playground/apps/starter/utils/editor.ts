@@ -1,7 +1,11 @@
 import { __unstableSchemas } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { AffineEditorContainer, CopilotPanel } from '@blocksuite/presets';
+import {
+  AffineEditorContainer,
+  CommentPanel,
+  CopilotPanel,
+} from '@blocksuite/presets';
 import type { Workspace } from '@blocksuite/store';
 
 import { CustomFramePanel } from '../../components/custom-frame-panel.js';
@@ -53,6 +57,9 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
   const pagesPanel = new PagesPanel();
   pagesPanel.editor = editor;
 
+  const commentPanel = new CommentPanel();
+  commentPanel.host = editor.host;
+
   const debugMenu = new DebugMenu();
   debugMenu.workspace = workspace;
   debugMenu.editor = editor;
@@ -63,6 +70,7 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
   debugMenu.sidePanel = sidePanel;
   debugMenu.leftSidePanel = leftSidePanel;
   debugMenu.pagesPanel = pagesPanel;
+  debugMenu.commentPanel = commentPanel;
 
   document.body.appendChild(outlinePanel);
   document.body.appendChild(framePanel);

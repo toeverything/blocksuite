@@ -36,12 +36,12 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
-import {
-  type BlockElement,
-  type EditorHost,
-  ShadowlessElement,
-} from '@blocksuite/lit';
-import type { AffineEditorContainer, CopilotPanel } from '@blocksuite/presets';
+import { type EditorHost, ShadowlessElement } from '@blocksuite/lit';
+import type {
+  AffineEditorContainer,
+  CommentPanel,
+  CopilotPanel,
+} from '@blocksuite/presets';
 import type { BlockModel } from '@blocksuite/store';
 import { Text, Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -167,35 +167,6 @@ function getDarkModeConfig(): boolean {
   return matchMedia.matches;
 }
 
-export function getSelectedBlocks(host: EditorHost) {
-  let blocks: BlockElement[] = [];
-
-  host.std.command
-    .pipe()
-    .getBlockSelections()
-    .inline((ctx, next) => {
-      const selections = ctx.currentBlockSelections;
-      if (!selections) return;
-
-      blocks = selections
-        .map(selection => ctx.std.view.viewFromPath('block', selection.path))
-        .filter(
-          (block): block is BlockElement =>
-            block !== null &&
-            BlocksUtils.matchFlavours(block.model, [
-              'affine:paragraph',
-              'affine:list',
-              'affine:code',
-            ])
-        );
-
-      return next();
-    })
-    .run();
-
-  return blocks;
-}
-
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
   static override styles = css`
@@ -223,6 +194,9 @@ export class DebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   copilotPanel!: CopilotPanel;
+
+  @property({ attribute: false })
+  commentPanel!: CommentPanel;
 
   @property({ attribute: false })
   sidePanel!: SidePanel;
@@ -255,12 +229,20 @@ export class DebugMenu extends ShadowlessElement {
   @state()
   private _dark = getDarkModeConfig();
 
+  get host() {
+    return this.editor.host;
+  }
+
   get page() {
     return this.editor.page;
   }
 
   get pageService() {
-    return this.editor.host.spec.getService('affine:page') as PageService;
+    return this.host.spec.getService('affine:page') as PageService;
+  }
+
+  get command() {
+    return this.host.command;
   }
 
   override createRenderRoot() {
@@ -325,8 +307,21 @@ export class DebugMenu extends ShadowlessElement {
     this.leftSidePanel.toggle(this.pagesPanel);
   }
 
+  private _toggleCommentPanel() {
+    document.body.appendChild(this.commentPanel);
+  }
+
   private _createMindMap() {
-    const blocks = getSelectedBlocks(this.editor.host!);
+    const blocks = this.command.getChainCtx(
+      this.command
+        .pipe()
+        .withHost()
+        .getSelectedBlocks({
+          types: ['block'],
+        })
+    ).selectedBlocks;
+    if (!blocks) return;
+
     const toTreeNode = (block: BlockModel): TreeNode => {
       return {
         text: block.text?.toString() ?? '',
@@ -670,7 +665,9 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._importSnapshot}">
                 Import Snapshot
               </sl-menu-item>
-              <sl-menu-item @click="${this._shareUrl}">Share URL</sl-menu-item>
+              <sl-menu-item @click="${this._shareUrl}">
+                Share URL
+              </sl-menu-item>
               <sl-menu-item @click="${this._toggleStyleDebugMenu}">
                 Toggle CSS Debug Menu
               </sl-menu-item>
@@ -695,7 +692,10 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._createMindMap}">
                 Create Mind Map
               </sl-menu-item>
-              <sl-menu-item @click="${this._addNote}">Add Note</sl-menu-item>
+              <sl-menu-item @click="${this._toggleCommentPanel}">
+                Toggle Comment Panel
+              </sl-menu-item>
+              <sl-menu-item @click="${this._addNote}"> Add Note </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
