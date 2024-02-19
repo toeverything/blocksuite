@@ -129,12 +129,15 @@ export const components: DefaultTheme.NavItem[] = [
   {
     text: 'Editors',
     items: [
-      { text: '📝 DocEditor', link: 'components/editors/doc-editor' },
-      { text: '🎨 EdgelessEditor', link: 'components/editors/edgeless-editor' },
+      { text: '📝 Doc Editor', link: 'components/editors/doc-editor' },
+      {
+        text: '🎨 Edgeless Editor',
+        link: 'components/editors/edgeless-editor',
+      },
     ],
   },
   {
-    text: 'Blocks 🚧',
+    text: 'Blocks',
     items: [
       {
         text: 'Regular Blocks',
@@ -152,6 +155,7 @@ export const components: DefaultTheme.NavItem[] = [
             text: 'Attachment Block',
             link: 'components/blocks/attachment-block',
           },
+          { text: 'Divider Block', link: 'components/blocks/divider-block' },
         ],
       },
       {

@@ -2,11 +2,11 @@
 
 In BlockSuite, widgets are components that can be used to display helper UI elements of a block. Sometimes, you want to display a menu to provide some extra information or actions for a block. As another example, it's a common practice to display a toolbar when you select a block.
 
-The widget is designed to provide this kind of functionalities. Similar to blocks, widgets also depends on UI frameworks. By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit`. But it's still possible to use other UI frameworks. We'll introduce later about how to write custom block renderers.
+The widget is designed to provide this kind of functionalities. Similar to blocks, widgets also depends on UI frameworks. By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit` for building widgets as web components. But it's still possible to use other UI frameworks. We'll introduce later about implementing custom block renderers.
 
-## Lit Widget View
+## Widget Component
 
-We provide a `WidgetElement` class to help build a lit widget view.
+The `WidgetElement` class can be used for building a widget view based on web component:
 
 ```ts
 import { WidgetElement } from '@blocksuite/lit';
