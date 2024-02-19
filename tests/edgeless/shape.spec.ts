@@ -87,6 +87,52 @@ test.describe('add shape', () => {
     await assertEdgelessTool(page, 'default');
     await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
   });
+  test('with holding space bar', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    const start0 = { x: 100, y: 100 };
+    const end0 = { x: 200, y: 200 };
+    await setEdgelessTool(page, 'shape');
+    await dragBetweenCoords(page, start0, end0, {
+      steps: 50,
+      beforeMouseUp: async () => {
+        // move the shape
+        await page.keyboard.down('Space');
+        await page.mouse.move(300, 300);
+        await page.keyboard.up('Space');
+
+        await page.mouse.move(500, 600);
+      },
+    });
+
+    await assertEdgelessSelectedRect(page, [200, 200, 300, 400]);
+  });
+
+  test('with holding space bar + shift', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    const start0 = { x: 100, y: 100 };
+    const end0 = { x: 200, y: 200 };
+    await setEdgelessTool(page, 'shape');
+    await page.keyboard.down('Shift');
+    await dragBetweenCoords(page, start0, end0, {
+      steps: 50,
+      beforeMouseUp: async () => {
+        // move the shape
+        await page.keyboard.down('Space');
+        await page.mouse.move(300, 300);
+        await page.keyboard.up('Space');
+
+        await page.mouse.move(500, 600);
+      },
+    });
+
+    await assertEdgelessSelectedRect(page, [200, 200, 400, 400]);
+  });
 });
 
 test('delete shape by component-toolbar', async ({ page }) => {

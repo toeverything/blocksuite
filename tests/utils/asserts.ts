@@ -788,6 +788,21 @@ export function assertDOMRectEqual(a: DOMRect, b: DOMRect) {
   expect(a.height).toBeCloseTo(b.height, 0);
 }
 
+export async function assertEdgelessDraggingArea(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+  const editor = getEditorLocator(page);
+  const draggingArea = editor
+    .locator('edgeless-dragging-area-rect')
+    .locator('.affine-edgeless-dragging-area');
+
+  const box = await draggingArea.boundingBox();
+  if (!box) throw new Error('Missing edgeless dragging area');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
 export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const [x, y, w, h] = xywh;
   const editor = getEditorLocator(page);
