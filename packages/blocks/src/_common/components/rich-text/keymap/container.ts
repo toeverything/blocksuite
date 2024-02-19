@@ -440,7 +440,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           // [[Selected text]] should automatically be converted to a Linked page with the title "Selected text".
           // See https://github.com/toeverything/blocksuite/issues/2730
           const success = tryConvertToLinkedDoc();
-          if (success) return;
+          if (success) return true;
         }
         inlineEditor.insertText(
           inlineRange,
