@@ -154,9 +154,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       return;
     }
 
-    if (contentBlocks.length === 1 && contentBlocks[0].text?.length === 0) {
-      this._empty = true;
-    }
+    this._empty =
+      contentBlocks.length === 1 && contentBlocks[0].text?.length === 0;
   }
 
   private async _load() {
