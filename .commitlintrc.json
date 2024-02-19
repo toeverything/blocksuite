@@ -13,7 +13,8 @@
         "std",
         "presets",
         "playground",
-        "inline"
+        "inline",
+        "lit"
       ]
     ]
   }
