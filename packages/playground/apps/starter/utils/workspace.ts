@@ -4,6 +4,7 @@ import {
   TestUtils,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import {
   type BlobStorage,
   createIndexeddbStorage,
@@ -12,18 +13,22 @@ import {
   Generator,
   Job,
   Schema,
+  type StoreOptions,
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
+import {
+  BroadcastChannelAwarenessSource,
+  BroadcastChannelDocSource,
+} from '@blocksuite/sync';
 
-import { setupBroadcastProvider } from '../../providers/broadcast-channel.js';
 import type { InitFn } from '../data/utils.js';
 
 const params = new URLSearchParams(location.search);
-const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
+const room = params.get('room');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
-const isE2E = room.startsWith('playwright');
+const isE2E = room?.startsWith('playwright');
 
 export function createStarterPageWorkspace() {
   const blobStorages: ((id: string) => BlobStorage)[] = [];
@@ -41,16 +46,27 @@ export function createStarterPageWorkspace() {
   schema.register(AffineSchemas).register(__unstableSchemas);
   const idGenerator = isE2E ? Generator.AutoIncrement : Generator.NanoID;
 
+  let docSources: StoreOptions['docSources'];
+  if (room) {
+    docSources = {
+      main: new BroadcastChannelDocSource(),
+    };
+  }
+
   const options: WorkspaceOptions = {
-    id: room,
+    id: room ?? 'starter',
     schema,
     idGenerator,
     blobStorages,
     defaultFlags: {
       enable_bultin_ledits: featureArgs.includes('ledits'),
     },
+    awarenessSources: [new BroadcastChannelAwarenessSource()],
+    docSources,
   };
   const workspace = new Workspace(options);
+
+  workspace.start();
 
   // debug info
   window.workspace = workspace;
@@ -63,6 +79,27 @@ export function createStarterPageWorkspace() {
 }
 
 export async function initStarterPageWorkspace(workspace: Workspace) {
+  // init from other clients
+  if (room && !params.get('init')) {
+    let fistPage = workspace.pages.values().next().value as Page | undefined;
+    if (!fistPage) {
+      await new Promise<string>(resolve =>
+        workspace.slots.pageAdded.once(resolve)
+      );
+      fistPage = workspace.pages.values().next().value;
+    }
+    assertExists(fistPage);
+    const page = fistPage;
+
+    page.load();
+    if (!page.root) {
+      await new Promise(resolve => page.slots.rootAdded.once(resolve));
+    }
+    page.resetHistory();
+    return;
+  }
+
+  // use built-in init function
   const functionMap = new Map<
     string,
     (workspace: Workspace, id: string) => Promise<void>
@@ -70,32 +107,12 @@ export async function initStarterPageWorkspace(workspace: Workspace) {
   Object.values(
     (await import('../data/index.js')) as Record<string, InitFn>
   ).forEach(fn => functionMap.set(fn.id, fn));
-
-  if (params.get('room')) {
-    setupBroadcastProvider(workspace);
-    if (!params.get('init')) {
-      // wait for data injected from provider
-      const firstPageId = await new Promise<string>(resolve =>
-        workspace.slots.pageAdded.once(id => resolve(id))
-      );
-      const page = workspace.getPage(firstPageId);
-      assertExists(page);
-      await page.load();
-      if (!page.root) {
-        await new Promise(resolve => page.slots.rootAdded.once(resolve));
-      }
-      page.resetHistory();
-      return;
-    }
-  }
-
   const init = params.get('init') || 'preset';
-  // Load built-in init function when `?init=heavy` param provided
   if (functionMap.has(init)) {
     await functionMap.get(init)?.(workspace, 'page:home');
     const page = workspace.getPage('page:home');
     if (!page?.loaded) {
-      await page?.load();
+      page?.load();
     }
     page?.resetHistory();
   }

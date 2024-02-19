@@ -6,17 +6,21 @@ import {
   Generator,
   Job,
   Schema,
+  type StoreOptions,
   Text,
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
-import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
+import { IndexedDBDocSource } from '@blocksuite/sync';
 
-import { setupWebsocketProvider } from '../../providers/websocket-channel.js';
+import { WebSocketAwarenessSource } from '../../sync/websocket/awareness';
+import { WebSocketDocSource } from '../../sync/websocket/doc';
+
+const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
 export const INDEXED_DB_NAME = 'PLAYGROUND_DB';
 
-export function createDefaultPageWorkspace() {
+export async function createDefaultPageWorkspace() {
   const blobStorages: ((id: string) => BlobStorage)[] = [
     createIndexeddbStorage,
   ];
@@ -24,16 +28,39 @@ export function createDefaultPageWorkspace() {
   const schema = new Schema();
   schema.register(AffineSchemas).register(__unstableSchemas);
 
+  const params = new URLSearchParams(location.search);
+  let docSources: StoreOptions['docSources'] = {
+    main: new IndexedDBDocSource(),
+  };
+  let awarenessSources: StoreOptions['awarenessSources'];
+  const room = params.get('room');
+  if (room) {
+    const ws = new WebSocket(new URL(`/room/${room}`, BASE_WEBSOCKET_URL));
+    await new Promise(resolve => {
+      ws.addEventListener('open', resolve);
+      ws.addEventListener('error', resolve);
+    });
+    docSources = {
+      main: new IndexedDBDocSource(),
+      shadow: [new WebSocketDocSource(ws)],
+    };
+    awarenessSources = [new WebSocketAwarenessSource(ws)];
+  }
+
   const options: WorkspaceOptions = {
     id: 'quickEdgeless',
     schema,
     idGenerator,
     blobStorages,
+    docSources,
+    awarenessSources,
     defaultFlags: {
       enable_bultin_ledits: true,
     },
   };
   const workspace = new Workspace(options);
+
+  workspace.start();
 
   // debug info
   window.workspace = workspace;
@@ -45,28 +72,15 @@ export function createDefaultPageWorkspace() {
 }
 
 export async function initDefaultPageWorkspace(workspace: Workspace) {
-  const databaseExists = await testDefaultPageIDBExistence();
   const params = new URLSearchParams(location.search);
-
-  const indexedDBProvider = createIndexedDBProvider(
-    workspace.doc,
-    INDEXED_DB_NAME
-  );
-  indexedDBProvider.connect();
-
-  if (params.get('room')) {
-    await setupWebsocketProvider(workspace, params.get('room') as string);
-  }
-
-  const shouldInit = !databaseExists && !params.get('room');
+  const shouldInit = workspace.pages.size === 0 && !params.get('room');
   if (shouldInit) {
     const page = workspace.createPage({ id: 'page:home' });
-    await page.load(() => {
-      const pageBlockId = page.addBlock('affine:page', {
-        title: new Text(),
-      });
-      page.addBlock('affine:surface', {}, pageBlockId);
+    page.load();
+    const pageBlockId = page.addBlock('affine:page', {
+      title: new Text(),
     });
+    page.addBlock('affine:surface', {}, pageBlockId);
     page.resetHistory();
   } else {
     // wait for data injected from provider
@@ -78,67 +92,11 @@ export async function initDefaultPageWorkspace(workspace: Workspace) {
           );
     const page = workspace.getPage(firstPageId);
     assertExists(page);
-
-    // handle migration
-    const oldMeta = localStorage.getItem('meta');
-    const oldPageVersion = oldMeta ? JSON.parse(oldMeta).pageVersion : 0;
-    const oldBlockVersions = oldMeta
-      ? { ...JSON.parse(oldMeta).blockVersions }
-      : {};
-
-    let run = true;
-    const runWorkspaceMigration = () => {
-      if (run) {
-        workspace.schema.upgradeWorkspace(workspace.doc);
-        const meta = workspace.doc.toJSON().meta;
-        localStorage.setItem('meta', JSON.stringify(meta));
-        run = false;
-      }
-    };
-
-    await page.load().catch(e => {
-      const isValidateError =
-        e instanceof Error && e.message.includes('outdated');
-      if (isValidateError) {
-        page.spaceDoc.once('update', () => {
-          workspace.schema.upgradePage(
-            oldPageVersion,
-            oldBlockVersions,
-            page.spaceDoc
-          );
-          workspace.meta.updateVersion(workspace);
-          page.load().catch(console.error);
-        });
-        return;
-      }
-      throw e;
-    });
-    page.spaceDoc.once('update', () => {
-      runWorkspaceMigration();
-    });
-    // finish migration
-
+    page.load();
     // wait for data injected from provider
     if (!page.root) {
       await new Promise(resolve => page.slots.rootAdded.once(resolve));
     }
     page.resetHistory();
   }
-}
-
-async function testDefaultPageIDBExistence() {
-  return new Promise<boolean>(resolve => {
-    const req = indexedDB.open(INDEXED_DB_NAME);
-    let existed = true;
-    req.onsuccess = function () {
-      req.result.close();
-      if (!existed) {
-        indexedDB.deleteDatabase(INDEXED_DB_NAME);
-      }
-      resolve(existed);
-    };
-    req.onupgradeneeded = function () {
-      existed = false;
-    };
-  });
 }

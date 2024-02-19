@@ -1,3 +1,11 @@
+import { type Logger, NoopLogger } from '@blocksuite/global/utils';
+import {
+  AwarenessEngine,
+  type AwarenessSource,
+  DocEngine,
+  type DocSource,
+  MemoryDocSource,
+} from '@blocksuite/sync';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
@@ -44,10 +52,15 @@ export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
   id?: string;
-  awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator | IdGenerator;
   defaultFlags?: Partial<Flags>;
   blobStorages?: ((id: string) => BlobStorage)[];
+  logger?: Logger;
+  docSources?: {
+    main: DocSource;
+    shadow?: DocSource[];
+  };
+  awarenessSources?: AwarenessSource[];
 }
 
 const FLAGS_PRESET = {
@@ -64,8 +77,20 @@ export class Store {
   readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
 
+  readonly docSync: DocEngine;
+  readonly awarenessSync: AwarenessEngine;
+
   constructor(
-    { id, awareness, idGenerator, defaultFlags }: StoreOptions = {
+    {
+      id,
+      idGenerator,
+      defaultFlags,
+      awarenessSources = [],
+      docSources = {
+        main: new MemoryDocSource(),
+      },
+      logger = new NoopLogger(),
+    }: StoreOptions = {
       id: nanoid(),
     }
   ) {
@@ -73,8 +98,19 @@ export class Store {
     this.doc = new BlockSuiteDoc({ guid: id });
     this.awarenessStore = new AwarenessStore(
       this,
-      awareness ?? new Awareness<RawAwarenessState>(this.doc),
+      new Awareness<RawAwarenessState>(this.doc),
       merge(true, FLAGS_PRESET, defaultFlags)
+    );
+
+    this.awarenessSync = new AwarenessEngine(
+      this.awarenessStore.awareness,
+      awarenessSources
+    );
+    this.docSync = new DocEngine(
+      this.doc,
+      docSources.main,
+      docSources.shadow ?? [],
+      logger
     );
 
     if (typeof idGenerator === 'function') {

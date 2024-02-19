@@ -636,16 +636,25 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  override async load(initFn?: () => Promise<void> | void) {
+  override load(initFn?: () => void): this {
     if (this.ready) {
-      throw new Error('Cannot load page more than once');
+      return this;
     }
 
-    await super.load();
-    this._trySyncFromExistingDoc();
+    super.load();
+
+    if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
+      this._handleVersion();
+    }
+
+    this._initYBlocks();
+
+    this._yBlocks.forEach((_, id) => {
+      this._handleYBlockAdd(id);
+    });
 
     if (initFn) {
-      await initFn();
+      initFn();
     }
 
     this._ready = true;
@@ -790,22 +799,6 @@ export class Page extends Space<FlatBlockMap> {
         this.workspace.meta.validateVersion(this.workspace);
       }
     }
-  }
-
-  private _trySyncFromExistingDoc() {
-    if (this.ready) {
-      throw new Error('Cannot sync from existing doc more than once');
-    }
-
-    if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
-      this._handleVersion();
-    }
-
-    this._initYBlocks();
-
-    this._yBlocks.forEach((_, id) => {
-      this._handleYBlockAdd(id);
-    });
   }
 
   /** @deprecated use page.load() instead */

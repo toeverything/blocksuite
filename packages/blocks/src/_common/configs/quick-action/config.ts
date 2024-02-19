@@ -125,58 +125,56 @@ export const quickActionConfig: QuickActionConfig[] = [
 
       const page = host.page;
       const linkedPage = page.workspace.createPage({});
-      linkedPage
-        .load(() => {
-          const pageBlockId = linkedPage.addBlock('affine:page', {
-            title: new page.Text(''),
+      linkedPage.load(() => {
+        const pageBlockId = linkedPage.addBlock('affine:page', {
+          title: new page.Text(''),
+        });
+        linkedPage.addBlock('affine:surface', {}, pageBlockId);
+        const noteId = linkedPage.addBlock('affine:note', {}, pageBlockId);
+
+        const firstBlock = selectedModels[0];
+        assertExists(firstBlock);
+
+        page.addSiblingBlocks(
+          firstBlock,
+          [
+            {
+              flavour: 'affine:embed-linked-doc',
+              pageId: linkedPage.id,
+            },
+          ],
+          'before'
+        );
+
+        if (
+          matchFlavours(firstBlock, ['affine:paragraph']) &&
+          firstBlock.type.match(/^h[1-6]$/)
+        ) {
+          const title = firstBlock.text.toString();
+          linkedPage.workspace.setPageMeta(linkedPage.id, {
+            title,
           });
-          linkedPage.addBlock('affine:surface', {}, pageBlockId);
-          const noteId = linkedPage.addBlock('affine:note', {}, pageBlockId);
 
-          const firstBlock = selectedModels[0];
-          assertExists(firstBlock);
+          const pageBlock = linkedPage.getBlockById(pageBlockId);
+          assertExists(pageBlock);
+          linkedPage.updateBlock(pageBlock, {
+            title: new page.Text(title),
+          });
 
-          page.addSiblingBlocks(
-            firstBlock,
-            [
-              {
-                flavour: 'affine:embed-linked-doc',
-                pageId: linkedPage.id,
-              },
-            ],
-            'before'
+          page.deleteBlock(firstBlock);
+          selectedModels.shift();
+        }
+
+        selectedModels.forEach(model => {
+          const keys = model.keys as (keyof typeof model)[];
+          const values = keys.map(key => model[key]);
+          const blockProps = Object.fromEntries(
+            keys.map((key, i) => [key, values[i]])
           );
-
-          if (
-            matchFlavours(firstBlock, ['affine:paragraph']) &&
-            firstBlock.type.match(/^h[1-6]$/)
-          ) {
-            const title = firstBlock.text.toString();
-            linkedPage.workspace.setPageMeta(linkedPage.id, {
-              title,
-            });
-
-            const pageBlock = linkedPage.getBlockById(pageBlockId);
-            assertExists(pageBlock);
-            linkedPage.updateBlock(pageBlock, {
-              title: new page.Text(title),
-            });
-
-            page.deleteBlock(firstBlock);
-            selectedModels.shift();
-          }
-
-          selectedModels.forEach(model => {
-            const keys = model.keys as (keyof typeof model)[];
-            const values = keys.map(key => model[key]);
-            const blockProps = Object.fromEntries(
-              keys.map((key, i) => [key, values[i]])
-            );
-            linkedPage.addBlock(model.flavour, blockProps, noteId);
-            page.deleteBlock(model);
-          });
-        })
-        .catch(console.error);
+          linkedPage.addBlock(model.flavour, blockProps, noteId);
+          page.deleteBlock(model);
+        });
+      });
 
       const linkedDocService = host.spec.getService(
         'affine:embed-linked-doc'

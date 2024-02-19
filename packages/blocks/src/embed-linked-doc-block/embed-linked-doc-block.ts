@@ -112,16 +112,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this._pageUpdatedAt = this._pageService.getPageUpdatedAt(this.model.pageId);
 
     if (!linkedDoc.loaded) {
-      await new Promise<void>(resolve => {
-        linkedDoc
-          .load()
-          .then(() => resolve())
-          .catch(e => {
-            console.error(e);
-            this.isError = true;
-            resolve();
-          });
-      });
+      try {
+        linkedDoc.load();
+      } catch (e) {
+        console.error(e);
+        this.isError = true;
+      }
     }
 
     if (!this.isError && !linkedDoc.root) {

@@ -178,16 +178,12 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this._pageUpdatedAt = this._pageService.getPageUpdatedAt(this.model.pageId);
 
     if (!syncedDoc.loaded) {
-      await new Promise<void>(resolve => {
-        syncedDoc
-          .load()
-          .then(() => resolve())
-          .catch(e => {
-            console.error(e);
-            this._error = true;
-            resolve();
-          });
-      });
+      try {
+        syncedDoc.load();
+      } catch (e) {
+        console.error(e);
+        this._error = true;
+      }
     }
 
     if (!this._error && !syncedDoc.root) {

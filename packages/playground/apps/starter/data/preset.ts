@@ -8,29 +8,28 @@ const presetMarkdown = `Click the 🔁 button to switch between editors dynamica
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  await page.load(async () => {
-    // Add page block and surface block at root level
-    const pageBlockId = page.addBlock('affine:page', {
-      title: new Text('BlockSuite Playground'),
-    });
-    page.addBlock('affine:surface', {}, pageBlockId);
-
-    // Add note block inside page block
-    const noteId = page.addBlock(
-      'affine:note',
-      { xywh: '[0, 100, 800, 640]' },
-      pageBlockId
-    );
-
-    // Import preset markdown content inside note block
-    await MarkdownTransformer.importMarkdown({
-      page,
-      noteId,
-      markdown: presetMarkdown,
-    });
-
-    page.resetHistory();
+  page.load();
+  // Add page block and surface block at root level
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new Text('BlockSuite Playground'),
   });
+  page.addBlock('affine:surface', {}, pageBlockId);
+
+  // Add note block inside page block
+  const noteId = page.addBlock(
+    'affine:note',
+    { xywh: '[0, 100, 800, 640]' },
+    pageBlockId
+  );
+
+  // Import preset markdown content inside note block
+  await MarkdownTransformer.importMarkdown({
+    page,
+    noteId,
+    markdown: presetMarkdown,
+  });
+
+  page.resetHistory();
 };
 
 preset.id = 'preset';
