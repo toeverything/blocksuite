@@ -62,6 +62,7 @@ import {
   isEmbedGithubBlock,
   isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
+  isEmbedLoomBlock,
   isEmbedSyncedDocBlock,
   isEmbedYoutubeBlock,
   isFrameBlock,
@@ -544,6 +545,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       isEmbedFigmaBlock(element) ||
       isEmbedGithubBlock(element) ||
       isEmbedYoutubeBlock(element) ||
+      isEmbedLoomBlock(element) ||
       isEmbedLinkedDocBlock(element)
     );
   }

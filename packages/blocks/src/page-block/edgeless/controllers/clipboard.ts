@@ -38,6 +38,7 @@ import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-mod
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedHtmlModel } from '../../../embed-html-block/embed-html-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';
 import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
@@ -73,6 +74,7 @@ import {
   isEmbedGithubBlock,
   isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
+  isEmbedLoomBlock,
   isEmbedSyncedDocBlock,
   isEmbedYoutubeBlock,
   isFrameBlock,
@@ -677,6 +679,30 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedHtmlIds;
   }
 
+  private _createLoomEmbedBlocks(loomEmbeds: BlockSnapshot[]) {
+    const embedLoomIds = loomEmbeds.map(({ props }) => {
+      const { xywh, style, url, caption, videoId, image, title, description } =
+        props;
+
+      const embedLoomId = this.host.service.addBlock(
+        'affine:embed-loom',
+        {
+          xywh,
+          style,
+          url,
+          caption,
+          videoId,
+          image,
+          title,
+          description,
+        },
+        this.surface.model.id
+      );
+      return embedLoomId;
+    });
+    return embedLoomIds;
+  }
+
   private _emitSelectionChangeAfterPaste(
     canvasElementIds: string[],
     blockIds: string[]
@@ -721,7 +747,9 @@ export class EdgelessClipboardController extends PageClipboard {
                           ? 'syncedDocEmbeds'
                           : isEmbedHtmlBlock(data as unknown as Selectable)
                             ? 'htmlEmbeds'
-                            : 'elements'
+                            : isEmbedLoomBlock(data as unknown as Selectable)
+                              ? 'loomEmbeds'
+                              : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
@@ -734,6 +762,7 @@ export class EdgelessClipboardController extends PageClipboard {
       linkedDocEmbeds?: BlockSnapshot[];
       syncedDocEmbeds?: BlockSnapshot[];
       htmlEmbeds?: BlockSnapshot[];
+      loomEmbeds?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
     pasteCenter =
@@ -778,6 +807,9 @@ export class EdgelessClipboardController extends PageClipboard {
     );
     const embedHtmlIds = this._createHtmlEmbedBlocks(
       groupedByType.htmlEmbeds ?? []
+    );
+    const embedLoomIds = this._createLoomEmbedBlocks(
+      groupedByType.loomEmbeds ?? []
     );
 
     const notes = noteIds.map(id =>
@@ -824,6 +856,10 @@ export class EdgelessClipboardController extends PageClipboard {
       this.host.service.getElementById(id)
     ) as EmbedHtmlModel[];
 
+    const loomEmbeds = embedLoomIds.map(id =>
+      this.host.service.getElementById(id)
+    ) as EmbedLoomModel[];
+
     const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
@@ -844,6 +880,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...linkedDocEmbeds,
       ...syncedDocEmbeds,
       ...htmlEmbeds,
+      ...loomEmbeds,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -877,6 +914,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...linkedDocEmbeds,
       ...syncedDocEmbeds,
       ...htmlEmbeds,
+      ...loomEmbeds,
     ];
     blocks.forEach(block => {
       const bound = Bound.deserialize(block.xywh);
@@ -1247,10 +1285,13 @@ export async function prepareClipboardData(
       } else if (isEmbedLinkedDocBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
+      } else if (isEmbedSyncedDocBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
       } else if (isEmbedHtmlBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
-      } else if (isEmbedSyncedDocBlock(selected)) {
+      } else if (isEmbedLoomBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (selected instanceof ConnectorElementModel) {

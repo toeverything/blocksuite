@@ -11,6 +11,7 @@ import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-mod
 import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
 import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';
 import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
@@ -102,6 +103,14 @@ export function isEmbedYoutubeBlock(
     !!element &&
     'flavour' in element &&
     element.flavour === 'affine:embed-youtube'
+  );
+}
+
+export function isEmbedLoomBlock(
+  element: BlockModel | EdgelessModel | null
+): element is EmbedLoomModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:embed-loom'
   );
 }
 

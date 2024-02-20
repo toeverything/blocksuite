@@ -22,6 +22,7 @@ import type {
   EmbedLinkedDocBlockComponent,
   EmbedLinkedDocModel,
 } from '../../../embed-linked-doc-block/index.js';
+import type { EmbedLoomBlockComponent } from '../../../embed-loom-block/embed-loom-block.js';
 import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import {
@@ -60,7 +61,8 @@ export type EmbedToolbarBlock =
   | EmbedYoutubeBlockComponent
   | EmbedFigmaBlockComponent
   | EmbedLinkedDocBlockComponent
-  | EmbedSyncedDocBlockComponent;
+  | EmbedSyncedDocBlockComponent
+  | EmbedLoomBlockComponent;
 
 @customElement('embed-card-toolbar')
 export class EmbedCardToolbar extends WithDisposable(LitElement) {
@@ -224,8 +226,9 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
 
   private get _isEmbedView() {
     return (
-      isEmbedSyncedDocBlock(this._model) ||
-      this._embedOptions?.viewType === 'embed'
+      !isBookmarkBlock(this._model) &&
+      (isEmbedSyncedDocBlock(this._model) ||
+        this._embedOptions?.viewType === 'embed')
     );
   }
 
