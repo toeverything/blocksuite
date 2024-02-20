@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 import { Generator, Schema, Workspace } from '../index.js';
@@ -32,8 +32,26 @@ function createTestPage(pageId = 'page:home', workspace?: Workspace) {
   return page;
 }
 
+function requestIdleCallbackPolyfill(
+  callback: IdleRequestCallback,
+  options?: IdleRequestOptions
+) {
+  const timeout = options?.timeout ?? 1000;
+  const start = Date.now();
+  return setTimeout(function () {
+    callback({
+      didTimeout: false,
+      timeRemaining: function () {
+        return Math.max(0, timeout - (Date.now() - start));
+      },
+    });
+  }, timeout) as unknown as number;
+}
+
 beforeEach(() => {
-  vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
+  if (globalThis.requestIdleCallback === undefined) {
+    globalThis.requestIdleCallback = requestIdleCallbackPolyfill;
+  }
 });
 
 describe('workspace.search works', () => {
