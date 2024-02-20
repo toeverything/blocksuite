@@ -70,7 +70,6 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     | 'file-failed'
     | 'render-failed'
     | 'loading' = 'loading';
-  private _blob!: Blob;
   private _pdfDoc!: PDFDocumentProxy;
 
   @state()
@@ -136,8 +135,6 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
       this._status = 'file-failed';
       return;
     }
-
-    this._blob = blob;
 
     try {
       const pdfDoc = await this.service.parsePDF(URL.createObjectURL(blob));

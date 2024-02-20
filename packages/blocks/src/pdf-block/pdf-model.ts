@@ -22,7 +22,7 @@ export const PDFBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'hub',
-    parent: ['affine:page'],
+    parent: ['affine:surface', 'affine:note'],
   },
   toModel() {
     return new PDFBlockModel();

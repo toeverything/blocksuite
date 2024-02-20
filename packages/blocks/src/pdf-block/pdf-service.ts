@@ -1,31 +1,16 @@
 import { BlockService } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/lit';
-import pdfWorkerjs from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { toast } from '../_common/components/toast.js';
+import { matchFlavours } from '../_common/utils/model.js';
 import type { PDFBlockModel } from './pdf-model.js';
+import { getPDFDimensions, parsePDF, pdfModule, savePDFFile } from './utils.js';
 
-export class PDFException extends Error {
-  type: 'module' | 'parsing';
-
-  constructor(type: PDFException['type'], message: string, cause: Error) {
-    super(message);
-    this.name = 'PDFException';
-    this.type = type;
-    this.cause = cause;
-  }
-}
-
-export const pdfModule = () => {
-  return import('pdfjs-dist').then(pdfjs => {
-    pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerjs;
-    return pdfjs;
-  });
-};
+export { PDFException } from './utils.js';
 
 export const TextLayerBuilder = () => {
   return import('pdfjs-dist/web/pdf_viewer.mjs').then(
@@ -37,55 +22,61 @@ export class PDFService extends BlockService<PDFBlockModel> {
   fileDropManager!: FileDropManager;
 
   get pdfModule() {
-    return pdfModule().catch(err => {
-      throw new PDFException('module', 'Failed to load pdf.js', err);
-    });
+    return pdfModule();
   }
 
   get TextLayerBuilder() {
     return TextLayerBuilder();
   }
 
-  parsePDF(fileURL: string) {
-    return this.pdfModule.then(pdfjs => {
-      return pdfjs.getDocument(fileURL).promise.catch(err => {
-        throw new PDFException('parsing', 'Failed to parse PDF', err);
-      });
-    });
+  parsePDF(fileURL: string | ArrayBuffer) {
+    return parsePDF(fileURL);
   }
 
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
-    onDrop: async ({ files, point }) => {
-      const pdfFiles = files.filter(file =>
+    onDrop: async ({ files, point, targetModel, place }) => {
+      const pdfFile = files.filter(file =>
         file.type.startsWith('application/pdf')
-      );
-      if (!pdfFiles.length) return false;
+      )[0];
+      if (!pdfFile) return false;
 
-      await Promise.all(
-        pdfFiles.map(async file => {
-          try {
-            const sourceId = await this.page.blob.set(file);
-            const blob = await this.page.blob.get(sourceId);
-            const url = URL.createObjectURL(blob!);
-            const pdfDoc = await this.parsePDF(url);
-            const pdfPage = await pdfDoc.getPage(1);
-            const viewport = pdfPage.getViewport({ scale: 1 });
+      const parentModel =
+        targetModel &&
+        (matchFlavours(targetModel, ['affine:surface'])
+          ? targetModel
+          : this.page.getParent(targetModel)?.flavour === 'affine:note'
+            ? this.page.getParent(targetModel)
+            : null);
 
-            this.page.addBlock(
-              'affine:pdf',
-              {
-                sourceId,
-                xywh: `[${point.x},${point.y},${viewport.width},${viewport.height}]`,
-              },
-              this.page.root!
-            );
-          } catch (err) {
-            toast(this.std.host as EditorHost, 'Failed to load PDF');
-            console.error(err);
-          }
-        })
-      );
+      if (!parentModel) {
+        return false;
+      }
+
+      const targetIdx =
+        parentModel.flavour === 'affine:note'
+          ? parentModel.children.indexOf(targetModel) +
+            (place === 'after' ? 1 : 0)
+          : parentModel.children.length;
+
+      try {
+        const { blob, sourceId } = await savePDFFile(this.page, pdfFile);
+        const fileBuffer = await blob.arrayBuffer();
+        const fileSize = await getPDFDimensions(fileBuffer);
+
+        this.page.addBlock(
+          'affine:pdf',
+          {
+            sourceId,
+            xywh: `[${point.x},${point.y},${fileSize.width},${fileSize.height}]`,
+          },
+          parentModel,
+          targetIdx
+        );
+      } catch (err) {
+        toast(this.std.host as EditorHost, 'Failed to load PDF');
+        console.error(err);
+      }
 
       return true;
     },

@@ -110,6 +110,7 @@ export {
   TextElementModel,
 } from './surface-block/index.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
+export { SurfaceDocBlockComponent } from './surface-block/surface-doc-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';

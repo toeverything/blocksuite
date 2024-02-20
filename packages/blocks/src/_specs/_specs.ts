@@ -211,7 +211,7 @@ export const DocEditorBlockSpecs: BlockSpec[] = [
   {
     schema: SurfaceBlockSchema,
     view: {
-      component: literal`affine-surface`,
+      component: literal`affine-doc-surface`,
     },
     service: SurfacePageService,
   },
