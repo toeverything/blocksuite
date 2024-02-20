@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/presets/themes/affine.css';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import 'pdfjs-dist/web/pdf_viewer.css';
 import '../dev-format.js';
 
 import * as blocks from '@blocksuite/blocks';

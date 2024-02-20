@@ -12,13 +12,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/sync": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/sync": "workspace:*",
     "@shoelace-style/shoelace": "2.12.0",
     "@toeverything/y-indexeddb": "0.10.0-canary.9",
     "@types/katex": "^0.16.7",
@@ -29,6 +29,7 @@
     "lit": "^3.1.1",
     "lz-string": "^1.5.0",
     "merge": "^2.1.1",
+    "pdfjs-dist": "^4.0.379",
     "tweakpane": "^4.0.3",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.11",

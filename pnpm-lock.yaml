@@ -490,6 +490,9 @@ importers:
       merge:
         specifier: ^2.1.1
         version: 2.1.1
+      pdfjs-dist:
+        specifier: ^4.0.379
+        version: 4.0.379
       tweakpane:
         specifier: ^4.0.3
         version: 4.0.3

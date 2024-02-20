@@ -27,17 +27,23 @@ export const pdfModule = () => {
   });
 };
 
+export const TextLayerBuilder = () => {
+  return import('pdfjs-dist/web/pdf_viewer.mjs').then(
+    module => module.TextLayerBuilder
+  );
+};
+
 export class PDFService extends BlockService<PDFBlockModel> {
   fileDropManager!: FileDropManager;
-
-  upload(file: File) {
-    return this.page.blob.set(file);
-  }
 
   get pdfModule() {
     return pdfModule().catch(err => {
       throw new PDFException('module', 'Failed to load pdf.js', err);
     });
+  }
+
+  get TextLayerBuilder() {
+    return TextLayerBuilder();
   }
 
   parsePDF(fileURL: string) {

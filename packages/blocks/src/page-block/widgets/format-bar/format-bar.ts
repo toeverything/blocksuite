@@ -195,9 +195,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     this.disposables.add(
       this.host.event.add('pointerUp', ctx => {
         let targetRect: DOMRect | null = null;
-        if (this.displayType === 'text' || this.displayType === 'native') {
+        if (
+          (this.displayType === 'text' || this.displayType === 'native') &&
+          this.nativeRange
+        ) {
           const range = this.nativeRange;
-          assertExists(range);
           targetRect = range.getBoundingClientRect();
         } else if (this.displayType === 'block') {
           const blockElement = this._selectedBlockElements[0];

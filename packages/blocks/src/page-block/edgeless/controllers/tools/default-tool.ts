@@ -4,6 +4,7 @@ import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import {
   type DefaultTool,
   handleNativeRangeAtPoint,
+  matchFlavours,
   resetNativeSelection,
   type Selectable,
 } from '../../../../_common/utils/index.js';
@@ -27,11 +28,7 @@ import type {
 } from '../../type.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
-import {
-  isCanvasElement,
-  isFrameBlock,
-  isNoteBlock,
-} from '../../utils/query.js';
+import { isCanvasElement, isFrameBlock } from '../../utils/query.js';
 import {
   addText,
   mountFrameTitleEditor,
@@ -135,7 +132,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     // handle single note block click
-    if (!e.keys.shift && selectedIds.length === 1 && isNoteBlock(element)) {
+    if (
+      !e.keys.shift &&
+      selectedIds.length === 1 &&
+      matchFlavours(element as EdgelessBlockModel, [
+        'affine:note',
+        'affine:pdf',
+      ])
+    ) {
       if (
         (selectedIds[0] === element.id && !editing) ||
         (editing && selectedIds[0] !== element.id)

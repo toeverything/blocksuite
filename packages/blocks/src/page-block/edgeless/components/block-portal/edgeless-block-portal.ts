@@ -58,10 +58,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   ShadowlessElement
 ) {
   static override styles = css`
-    .affine-block-children-container.edgeless {
-      user-select: none;
-    }
-
     .surface-layer {
       position: absolute;
     }

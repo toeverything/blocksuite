@@ -8,17 +8,24 @@ import {
   FrameNavigatorPrevIcon,
 } from '../_common/icons/edgeless.js';
 import type { PDFBlockModel } from './pdf-model.js';
-import { PDFException, type PDFService } from './pdf-service.js';
+import type { PDFService } from './pdf-service.js';
+import { PDFException } from './pdf-service.js';
 
 @customElement('affine-pdf')
 export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
+  static RENDERING_SCALE = 2;
   static override styles = css`
     .affine-pdf-block {
       position: relative;
     }
 
-    .affine-pdf-canvas-container {
+    .pdf-renderer-container {
       text-align: center;
+    }
+
+    .pdf-canvas {
+      display: block;
+      font-size: 1px;
     }
 
     .pdf-pagination {
@@ -69,23 +76,30 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
   @state()
   private _pdfPageNum = 1;
 
+  @query('.pdf-renderer-container')
+  rendererConatiner!: HTMLDivElement;
+
   @query('.pdf-canvas')
   pdfCanvas!: HTMLCanvasElement;
 
-  override get service() {
-    return super.service as PDFService;
-  }
+  @query('.pdf-textlayer')
+  pdfTextLayer!: HTMLDivElement;
 
   private async _renderPage(num: number) {
     try {
+      const { RENDERING_SCALE } = PDFBlockComponent;
       const pdfPage = await this._pdfDoc.getPage(num);
-      const viewport = pdfPage.getViewport({ scale: 2 });
-      const context = this.pdfCanvas.getContext('2d')!;
+      const viewport = pdfPage.getViewport({ scale: RENDERING_SCALE });
+      const pdfCanvas = this.pdfCanvas;
+      const context = pdfCanvas.getContext('2d')!;
+      const container = pdfCanvas.parentElement!;
+      const width = container.clientWidth;
+      const height = width * (viewport.height / viewport.width);
 
-      this.pdfCanvas.height = viewport.height;
-      this.pdfCanvas.width = viewport.width;
-      this.pdfCanvas.style.height = `${viewport.height / 2}px`;
-      this.pdfCanvas.style.width = `${viewport.width / 2}px`;
+      pdfCanvas.height = viewport.height;
+      pdfCanvas.width = viewport.width;
+      pdfCanvas.style.height = `${height}px`;
+      pdfCanvas.style.width = `${width}px`;
 
       const renderContext = {
         canvasContext: context,
@@ -93,6 +107,20 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
       };
 
       await pdfPage.render(renderContext).promise;
+      const TextLayerBuilder = await this.service.TextLayerBuilder;
+      const textContent = await pdfPage.getTextContent();
+      const textLayer = new TextLayerBuilder({});
+      const textLayerViewport = pdfPage.getViewport({ scale: 1 });
+
+      textLayer.div.classList.add('pdf-textlayer');
+      textLayer.div.style.setProperty(
+        '--scale-factor',
+        `${height / textLayerViewport.height}`
+      );
+      textLayer.onAppend = (div: HTMLDivElement) =>
+        this.rendererConatiner.append(div);
+      textLayer.setTextContentSource(textContent);
+      await textLayer.render(textLayerViewport);
     } catch (e) {
       console.error(e);
       this._status = 'render-failed';
@@ -149,13 +177,21 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     this._setupPDF().catch(() => {});
   }
 
+  override update(changeProperties: Map<string | number | symbol, unknown>) {
+    if (changeProperties.has('_pdfPageNum')) {
+      this.pdfTextLayer?.remove();
+    }
+
+    super.update(changeProperties);
+  }
+
   override render() {
     if (this._status !== 'loaded' && this._status !== 'loading') {
       return html`<div class="affine-pdf-block">${'Failed to load PDF'}</div>`;
     }
 
     return html`<div class="affine-pdf-block">
-      <div class="affine-pdf-canvas-container">
+      <div class="pdf-renderer-container">
         <canvas class="pdf-canvas"></canvas>
       </div>
       ${this._pdfDoc

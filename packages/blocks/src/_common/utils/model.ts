@@ -31,6 +31,7 @@ import type {
   PageBlockSchema,
   ParagraphBlockModel,
   ParagraphBlockSchema,
+  PDFBlockModel,
   SurfaceBlockModel,
   SurfaceBlockSchema,
   SurfaceRefBlockModel,
@@ -57,6 +58,7 @@ export type BlockModels = {
   'affine:embed-linked-doc': EmbedLinkedDocModel;
   'affine:embed-synced-doc': EmbedSyncedDocModel;
   'affine:embed-html': EmbedHtmlModel;
+  'affine:pdf': PDFBlockModel;
 };
 
 export type BlockSchemas = {
