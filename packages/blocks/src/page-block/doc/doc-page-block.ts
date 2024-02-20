@@ -49,6 +49,10 @@ export class DocPageBlockComponent extends BlockElement<
   DocPageBlockWidgetName
 > {
   static override styles = css`
+    affine-doc-page {
+      display: block;
+    }
+
     .affine-doc-page-block-container {
       display: flex;
       flex-direction: column;
