@@ -58,7 +58,7 @@ With BlockSuite editors, you can selectively reuse all the editing features in [
 And under the hood, the vanilla BlockSuite framework supports:
 
 - Defining [custom blocks](https://blocksuite.io/guide/working-with-block-tree.html#defining-new-blocks) and inline embeds.
-- Incremental updates, real-time collaboration, and even decentralized data synchronization based on the [document streaming](https://blocksuite.io/guide/data-synchronization.html#document-streaming) mechanism of the document.
+- Incremental updates, [real-time collaboration](https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#test-collaboration), and even decentralized data synchronization based on the [document streaming](https://blocksuite.io/guide/data-synchronization.html#document-streaming) mechanism of the document.
 - Writing type-safe complex editing logic based on the [command](https://blocksuite.io/guide/command.html) mechanism, similar to react hooks designed for document editing.
 - Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](https://blocksuite.io/guide/data-synchronization.html#snapshot-api) and transformer.
 - State scheduling across multiple documents and reusing one document in multiple editors.
@@ -121,6 +121,7 @@ This can be illustrated as the diagram below:
 - 🚚 Resources
   - [Canary Playground](https://try-blocksuite.vercel.app/starter/?init)
   - [BlockSuite in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
+  - [Testing Real-Time Collaboration](https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#test-collaboration)
   - [BlockSuite Ecosystem CI](https://github.com/toeverything/blocksuite-ecosystem-ci)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
 - 📝 [Documentation](https://blocksuite.io/guide/overview.html)
