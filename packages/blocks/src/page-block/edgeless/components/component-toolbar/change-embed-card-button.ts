@@ -311,6 +311,17 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
   private get _canConvertToEmbedView() {
     const block = this._blockElement;
+
+    // synced doc entry controlled by awareness flag
+    if (!!block && isEmbedLinkedDocBlock(block.model)) {
+      const isSyncedDocEnabled = block.page.awarenessStore.getFlag(
+        'enable_synced_doc_block'
+      );
+      if (!isSyncedDocEnabled) {
+        return false;
+      }
+    }
+
     return (
       (block && 'convertToEmbed' in block) ||
       this._embedOptions?.viewType === 'embed'

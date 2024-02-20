@@ -204,6 +204,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   convertToEmbed = () => {
     const { page, pageId, caption, xywh } = this.model;
 
+    // synced doc entry controlled by awareness flag
+    const isSyncedDocEnabled = page.awarenessStore.getFlag(
+      'enable_synced_doc_block'
+    );
+    if (!isSyncedDocEnabled) {
+      return;
+    }
+
     if (this.isInSurface) {
       const style = 'syncedDoc';
       const bound = Bound.deserialize(xywh);

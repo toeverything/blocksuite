@@ -233,6 +233,16 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   }
 
   private get _canConvertToEmbedView() {
+    // synced doc entry controlled by awareness flag
+    if (isEmbedLinkedDocBlock(this._model)) {
+      const isSyncedDocEnabled = this._model.page.awarenessStore.getFlag(
+        'enable_synced_doc_block'
+      );
+      if (!isSyncedDocEnabled) {
+        return false;
+      }
+    }
+
     return (
       'convertToEmbed' in this.block || this._embedOptions?.viewType === 'embed'
     );

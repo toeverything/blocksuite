@@ -59,6 +59,7 @@ export function createStarterPageWorkspace() {
     idGenerator,
     blobStorages,
     defaultFlags: {
+      enable_synced_doc_block: true,
       enable_bultin_ledits: featureArgs.includes('ledits'),
     },
     awarenessSources: [new BroadcastChannelAwarenessSource()],

@@ -71,83 +71,85 @@ export const synced: InitFn = (workspace: Workspace, id: string) => {
       page: pageMain,
       noteId,
       markdown: syncedPageMarkdown,
-    }).catch(console.error);
+    })
+      .then(() => {
+        // Add synced block - self
+        pageMain.addBlock(
+          'affine:paragraph',
+          {
+            text: new Text('Cyclic / Matryoshka synced block 👇'),
+            type: 'h4',
+          },
+          noteId
+        );
 
-    // Add synced block - self
-    pageMain.addBlock(
-      'affine:paragraph',
-      {
-        text: new Text('Cyclic / Matryoshka synced block 👇'),
-        type: 'h4',
-      },
-      noteId
-    );
+        // Add synced block - self
+        pageMain.addBlock(
+          'affine:embed-synced-doc',
+          {
+            pageId: id,
+          },
+          noteId
+        );
 
-    // Add synced block - self
-    pageMain.addBlock(
-      'affine:embed-synced-doc',
-      {
-        pageId: id,
-      },
-      noteId
-    );
+        // Add synced block - page view
+        pageMain.addBlock(
+          'affine:embed-synced-doc',
+          {
+            pageId: 'synced-page',
+          },
+          noteId
+        );
 
-    // Add synced block - page view
-    pageMain.addBlock(
-      'affine:embed-synced-doc',
-      {
-        pageId: 'synced-page',
-      },
-      noteId
-    );
+        // Add synced block - edgeless view
+        pageMain.addBlock(
+          'affine:embed-synced-doc',
+          {
+            pageId: 'synced-edgeless',
+          },
+          noteId
+        );
 
-    // Add synced block - edgeless view
-    pageMain.addBlock(
-      'affine:embed-synced-doc',
-      {
-        pageId: 'synced-edgeless',
-      },
-      noteId
-    );
+        // Add synced block - page view
+        pageMain.addBlock(
+          'affine:embed-synced-doc',
+          {
+            pageId: 'synced-page',
+            xywh: '[-1000, 0, 752, 455]',
+          },
+          surfaceId
+        );
 
-    // Add synced block - page view
-    pageMain.addBlock(
-      'affine:embed-synced-doc',
-      {
-        pageId: 'synced-page',
-        xywh: '[-1000, 0, 752, 455]',
-      },
-      surfaceId
-    );
+        // Add synced block - edgeless view
+        pageMain.addBlock(
+          'affine:embed-synced-doc',
+          {
+            pageId: 'synced-edgeless',
+            xywh: '[-1000, 500, 752, 455]',
+          },
+          surfaceId
+        );
 
-    // Add synced block - edgeless view
-    pageMain.addBlock(
-      'affine:embed-synced-doc',
-      {
-        pageId: 'synced-edgeless',
-        xywh: '[-1000, 500, 752, 455]',
-      },
-      surfaceId
-    );
+        // Add synced block - self
+        pageMain.addBlock(
+          'affine:embed-synced-doc',
+          {
+            pageId: id,
+            xywh: '[-1000, 1000, 752, 455]',
+          },
+          surfaceId
+        );
 
-    // Add synced block - self
-    pageMain.addBlock(
-      'affine:embed-synced-doc',
-      {
-        pageId: id,
-        xywh: '[-1000, 1000, 752, 455]',
-      },
-      surfaceId
-    );
-
-    // Add synced block - self
-    pageMain.addBlock(
-      'affine:embed-synced-doc',
-      {
-        pageId: 'deleted-page',
-      },
-      noteId
-    );
+        // Add synced block - self
+        pageMain.addBlock(
+          'affine:embed-synced-doc',
+          {
+            pageId: 'deleted-page',
+          },
+          noteId
+        );
+      })
+      .catch(console.error);
   });
 
   pageSyncedEdgeless.resetHistory();
