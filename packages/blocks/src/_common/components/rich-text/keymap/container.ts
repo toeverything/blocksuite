@@ -401,17 +401,14 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     });
     inlineEditor.setInlineRange({ index: inlineRange.index - 1, length: 0 });
 
-    createDefaultPage(blockElement.page.workspace, {
+    const page = createDefaultPage(blockElement.page.workspace, {
       title: pageName,
-    })
-      .then(page => {
-        insertLinkedNode({
-          editorHost: blockElement.host,
-          model: blockElement.model,
-          pageId: page.id,
-        });
-      })
-      .catch(e => console.error(e));
+    });
+    insertLinkedNode({
+      editorHost: blockElement.host,
+      model: blockElement.model,
+      pageId: page.id,
+    });
     return true;
   }
 
@@ -443,7 +440,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           // [[Selected text]] should automatically be converted to a Linked page with the title "Selected text".
           // See https://github.com/toeverything/blocksuite/issues/2730
           const success = tryConvertToLinkedDoc();
-          if (success) return;
+          if (success) return true;
         }
         inlineEditor.insertText(
           inlineRange,

@@ -309,7 +309,7 @@ export async function getEdgelessSelectedRect(page: Page) {
 }
 
 export async function getEdgelessSelectedRectModel(page: Page): Promise<Bound> {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     const bound = container.service.selection.selectedBound;
@@ -535,7 +535,7 @@ export async function getNoteBoundBoxInEdgeless(page: Page, noteId: string) {
 }
 
 export async function getAllNoteIds(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     return Array.from(document.querySelectorAll('affine-note')).map(
       note => note.model.id
     );
@@ -543,7 +543,7 @@ export async function getAllNoteIds(page: Page) {
 }
 
 export async function countBlock(page: Page, flavour: string) {
-  return await page.evaluate(
+  return page.evaluate(
     ([flavour]) => {
       return Array.from(document.querySelectorAll(flavour)).length;
     },
@@ -716,7 +716,7 @@ export async function deleteAll(page: Page) {
 }
 
 export async function deleteAllConnectors(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     container.service.getElementsByType('connector').forEach(c => {
@@ -1144,7 +1144,7 @@ export async function initThreeNotes(page: Page) {
 }
 
 export async function toViewCoord(page: Page, point: number[]) {
-  return await page.evaluate(point => {
+  return page.evaluate(point => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     return container.service.viewport.toViewCoord(point[0], point[1]);
@@ -1162,7 +1162,7 @@ export async function dragBetweenViewCoords(
 }
 
 export async function toModelCoord(page: Page, point: number[]) {
-  return await page.evaluate(point => {
+  return page.evaluate(point => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     return container.service.viewport.toModelCoord(point[0], point[1]);
@@ -1170,7 +1170,7 @@ export async function toModelCoord(page: Page, point: number[]) {
 }
 
 export async function getConnectorSourceConnection(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     return container.service.getElementsByType('connector')[0].source;
@@ -1178,7 +1178,7 @@ export async function getConnectorSourceConnection(page: Page) {
 }
 
 export async function getConnectorPath(page: Page, index = 0): Promise<IVec[]> {
-  return await page.evaluate(
+  return page.evaluate(
     ([index]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
@@ -1193,7 +1193,7 @@ export async function getSelectedBound(
   page: Page,
   index = 0
 ): Promise<[number, number, number, number]> {
-  return await page.evaluate(
+  return page.evaluate(
     ([index]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
@@ -1205,7 +1205,7 @@ export async function getSelectedBound(
 }
 
 export async function getGroupOfElements(page: Page, ids: string[]) {
-  return await page.evaluate(
+  return page.evaluate(
     ([ids]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
@@ -1217,7 +1217,7 @@ export async function getGroupOfElements(page: Page, ids: string[]) {
 }
 
 export async function getGroupIds(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     return container.service.elements.map(el => el.group?.id ?? 'null');
@@ -1225,7 +1225,7 @@ export async function getGroupIds(page: Page) {
 }
 
 export async function getGroupChildrenIds(page: Page, id: string) {
-  return await page.evaluate(
+  return page.evaluate(
     ([id]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
@@ -1240,7 +1240,7 @@ export async function getGroupChildrenIds(page: Page, id: string) {
 }
 
 export async function getCanvasElementsCount(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     return container.service.elements.length;
@@ -1248,7 +1248,7 @@ export async function getCanvasElementsCount(page: Page) {
 }
 
 export async function getSortedIds(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     return container.service.layer.canvasElements.map(e => e.id);
@@ -1256,7 +1256,7 @@ export async function getSortedIds(page: Page) {
 }
 
 export async function getIds(page: Page, filterGroup = false) {
-  return await page.evaluate(
+  return page.evaluate(
     ([filterGroup]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
@@ -1269,7 +1269,7 @@ export async function getIds(page: Page, filterGroup = false) {
 }
 
 export async function getFirstGroupId(page: Page, exclude: string[] = []) {
-  return await page.evaluate(
+  return page.evaluate(
     ([exclude]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
@@ -1284,7 +1284,7 @@ export async function getFirstGroupId(page: Page, exclude: string[] = []) {
 }
 
 export async function getIndexes(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     return container.service.elements.map(e => e.index);
@@ -1292,7 +1292,7 @@ export async function getIndexes(page: Page) {
 }
 
 export async function getSortedIdsInViewport(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
     const { service } = container;

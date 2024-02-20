@@ -24,7 +24,7 @@ const pageSchema = defineBlockSchema({
 type PageModel = SchemaToModel<typeof pageSchema>;
 schema.register([pageSchema]);
 
-test('init block without props should add default props', async () => {
+test('init block without props should add default props', () => {
   const doc = new Y.Doc();
   const yBlock = doc.getMap('yBlock');
   yBlock.set('sys:id', '0');

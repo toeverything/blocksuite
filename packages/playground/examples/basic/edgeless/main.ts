@@ -3,7 +3,7 @@ import '@blocksuite/presets/themes/affine.css';
 
 import { createEmptyPage, EdgelessEditor } from '@blocksuite/presets';
 
-const page = await createEmptyPage().init();
+const page = createEmptyPage().init();
 const editor = new EdgelessEditor();
 editor.page = page;
 document.body.appendChild(editor);

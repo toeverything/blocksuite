@@ -6,7 +6,7 @@ export class MemoryBlobManager {
   private readonly _map = new Map<string, Blob>();
   private readonly _blobsRef = new Map<string, number>();
 
-  async get(key: string) {
+  get(key: string) {
     return this._map.get(key) ?? null;
   }
 
@@ -16,20 +16,20 @@ export class MemoryBlobManager {
     return _key;
   }
 
-  async delete(key: string) {
+  delete(key: string) {
     this._map.delete(key);
   }
 
-  async list() {
+  list() {
     return Array.from(this._map.keys());
   }
 
-  async gc() {
-    const blobs = await this.list();
+  gc() {
+    const blobs = this.list();
     blobs.forEach(blobId => {
       const ref = this._blobsRef.get(blobId);
       if (!ref || ref <= 0) {
-        this.delete(blobId).catch(console.error);
+        this.delete(blobId);
         this._blobsRef.delete(blobId);
       }
     });

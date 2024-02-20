@@ -565,7 +565,7 @@ export async function assertKanbanCardSelected(
   expect(border).toEqual('1px solid var(--affine-primary-color)');
 }
 
-export async function getKanbanCard(
+export function getKanbanCard(
   page: Page,
   {
     groupIndex,

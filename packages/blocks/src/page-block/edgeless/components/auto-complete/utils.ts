@@ -324,7 +324,7 @@ export function createEdgelessElement(
   return id;
 }
 
-export async function createShapeElement(
+export function createShapeElement(
   edgeless: EdgelessPageBlockComponent,
   current: ShapeElementModel,
   targetType: TARGET_SHAPE_TYPE
@@ -344,7 +344,7 @@ export async function createShapeElement(
   return id;
 }
 
-export async function createTextElement(
+export function createTextElement(
   edgeless: EdgelessPageBlockComponent,
   current: ShapeElementModel
 ) {

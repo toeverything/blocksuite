@@ -122,7 +122,7 @@ function setEndRange(editableContainer: Element) {
   return newRange;
 }
 
-async function setNewTop(y: number, editableContainer: Element, zoom = 1) {
+function setNewTop(y: number, editableContainer: Element, zoom = 1) {
   const SCROLL_THRESHOLD = 100;
 
   const scrollContainer = editableContainer.closest('.affine-doc-viewport');
@@ -177,7 +177,7 @@ export function focusTitle(editorHost: EditorHost, index = Infinity, len = 0) {
   titleInlineEditor.setInlineRange({ index, length: len });
 }
 
-async function focusRichText(
+function focusRichText(
   editableContainer: Element,
   position: SelectionPosition = 'end',
   zoom = 1
@@ -203,7 +203,7 @@ async function focusRichText(
     default: {
       const { x, y } = position;
       let newLeft = x;
-      const newTop = await setNewTop(y, editableContainer, zoom);
+      const newTop = setNewTop(y, editableContainer, zoom);
       if (x <= left) {
         newLeft = left + 1;
       }
@@ -240,7 +240,7 @@ export function focusBlockByModel(
   assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
-    focusRichText(editableContainer, position, zoom).catch(console.error);
+    focusRichText(editableContainer, position, zoom);
   }
 }
 

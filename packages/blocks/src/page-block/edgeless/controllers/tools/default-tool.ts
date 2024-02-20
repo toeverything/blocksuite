@@ -329,7 +329,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     const bound = edgelessElementsBound(this._toBeMoved);
     const [elements, blocks] =
-      await clipboardController.createElementsFromClipboardData(
+      clipboardController.createElementsFromClipboardData(
         data as Record<string, unknown>[],
         bound.center
       );

@@ -281,7 +281,7 @@ export class TemplateJob {
     return modelDataList;
   }
 
-  private async _insertToPage(
+  private _insertToPage(
     modelDataList: {
       flavour: string;
       json: BlockSnapshot;
@@ -357,7 +357,7 @@ export class TemplateJob {
 
     const modelDataList = await this._jsonToModelData(template.blocks);
 
-    this._insertToPage(modelDataList).catch(console.error);
+    this._insertToPage(modelDataList);
 
     return templateBound;
   }

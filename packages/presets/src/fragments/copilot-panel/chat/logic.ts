@@ -420,7 +420,7 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Create mind-map',
-      action: this.createAction('Create mind-map', async input => {
+      action: this.createAction('Create mind-map', input => {
         const service = getEdgelessService(this.host);
         const [x, y] = [service.viewport.centerX, service.viewport.centerY];
         const reactiveData = this.reactiveData;
@@ -442,7 +442,7 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Create presentation',
-      action: this.createAction('Create mind-map', async input => {
+      action: this.createAction('Create mind-map', input => {
         const reactiveData = this.reactiveData;
         const build = pptBuilder(this.host);
         return (async function* () {
@@ -521,7 +521,7 @@ export class AIChatLogic {
             return oldTree;
           }
         );
-        await this.createAction('Part analysis', async input => {
+        await this.createAction('Part analysis', input => {
           return (async function* () {
             const strings = runPartAnalysisAction({ input, path });
             let text = '';

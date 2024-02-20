@@ -75,7 +75,7 @@ import {
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
-test.beforeEach(async ({ page }, testInfo) => {
+test.beforeEach(({ page }, testInfo) => {
   page;
   testInfo.snapshotSuffix = '';
 });
@@ -386,12 +386,8 @@ test(scoped`copy clipItems format`, async ({ page }) => {
   await pasteContent(page, { 'text/plain': clipData });
   await page.waitForTimeout(100);
   await setSelection(page, 4, 1, 5, 1);
-  await assertClipItems(page, 'text/plain', 'bc');
-  await assertClipItems(
-    page,
-    'text/html',
-    '<ul><li>b<ul><li>c</li></ul></li></ul>'
-  );
+  assertClipItems(page, 'text/plain', 'bc');
+  assertClipItems(page, 'text/html', '<ul><li>b<ul><li>c</li></ul></li></ul>');
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 });
@@ -406,7 +402,7 @@ test(scoped`copy partially selected text`, async ({ page }) => {
   // select 456
   await setInlineRangeInSelectedRichText(page, 4, 3);
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '456');
+  assertClipItems(page, 'text/plain', '456');
 
   // move to line end
   await setInlineRangeInSelectedRichText(page, 11, 0);
