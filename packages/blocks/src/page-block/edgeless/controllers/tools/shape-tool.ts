@@ -167,13 +167,17 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     });
   }
 
-  onPressShiftKey(_pressed: boolean) {}
+  onPressShiftKey(pressed: boolean) {
+    const id = this._draggingElementId;
+    if (!id) return;
+    this._resize(pressed);
+  }
 
-  onPressSpaceBar(_pressed: boolean): void {
+  onPressSpaceBar(pressed: boolean): void {
     const { tools } = this._edgeless;
-
-    if (tools.dragging && this._draggingArea) {
-      if (_pressed) {
+    assertExists(this._draggingArea);
+    if (tools.dragging) {
+      if (pressed) {
         const x = this._draggingArea.end.x;
         const y = this._draggingArea.end.y;
         this._moveWithSpaceStartPos = [x, y];

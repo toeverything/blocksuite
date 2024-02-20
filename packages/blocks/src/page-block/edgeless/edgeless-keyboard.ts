@@ -258,9 +258,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     const isKeyDown = event.type === 'keydown';
 
     if (isKeyDown) {
-      edgeless.slots.pressSpaceBarUpdated.emit(true);
+      edgeless.tools.spaceBar = true;
     } else {
-      edgeless.slots.pressSpaceBarUpdated.emit(false);
+      edgeless.tools.spaceBar = false;
     }
 
     if (edgeless.service.tool.dragging) {
@@ -288,17 +288,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     }
   }
 
-  /*
-    Bug?? : This function is actually called with key repeat
-    I think the first call is just enough as it is just setting the shift key pressed state to true..
-    */
   private _shift(event: KeyboardEvent) {
     const edgeless = this.pageElement;
-
-    if (event.key.toLowerCase() === 'shift' && event.shiftKey) {
-      edgeless.slots.pressShiftKeyUpdated.emit(true);
-    } else {
-      edgeless.slots.pressShiftKeyUpdated.emit(false);
+    if (!event.repeat) {
+      if (event.key.toLowerCase() === 'shift' && event.shiftKey) {
+        edgeless.slots.pressShiftKeyUpdated.emit(true);
+      } else {
+        edgeless.slots.pressShiftKeyUpdated.emit(false);
+      }
     }
   }
 
