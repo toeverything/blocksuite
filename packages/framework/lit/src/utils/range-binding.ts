@@ -55,7 +55,7 @@ export class RangeBinding {
   }
 
   isComposing = false;
-  private _prevSelection: BaseSelection | null = null;
+  private _prevTextSelection: TextSelection | null = null;
   private _onStdSelectionChanged = (selections: BaseSelection[]) => {
     // wait for lit updated
     this.host.updateComplete
@@ -66,14 +66,14 @@ export class RangeBinding {
           ) ?? null;
 
         const eq =
-          text && this._prevSelection
-            ? text.equals(this._prevSelection)
-            : text === this._prevSelection;
+          text && this._prevTextSelection
+            ? text.equals(this._prevTextSelection)
+            : text === this._prevTextSelection;
         if (eq) {
           return;
         }
 
-        this._prevSelection = text;
+        this._prevTextSelection = text;
         if (text) {
           this.rangeManager.syncTextSelectionToRange(text);
         } else {
@@ -117,13 +117,13 @@ export class RangeBinding {
       );
       if (inlineEditor?.isComposing) return;
 
-      this._prevSelection = this.rangeManager.rangeToTextSelection(
+      this._prevTextSelection = this.rangeManager.rangeToTextSelection(
         range,
         isRangeReversed
       );
       this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
     } else {
-      this._prevSelection = null;
+      this._prevTextSelection = null;
       this.selectionManager.clear(['text']);
     }
   };

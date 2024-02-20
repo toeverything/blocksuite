@@ -35,6 +35,9 @@ export class RangeManager {
     if (topContenteditableElement instanceof HTMLElement) {
       topContenteditableElement.blur();
     }
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   }
 
   set(range: Range) {
