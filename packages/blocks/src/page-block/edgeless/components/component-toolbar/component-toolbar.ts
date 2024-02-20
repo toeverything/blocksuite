@@ -113,6 +113,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       border-radius: 8px;
       padding: 0 8px;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      user-select: none;
     }
 
     component-toolbar-menu-divider {
