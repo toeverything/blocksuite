@@ -208,12 +208,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     const selection = this.edgeless.service.selection;
     switch (type) {
       case 'copy': {
-        document.dispatchEvent(
-          new Event('copy', {
-            bubbles: true,
-            cancelable: true,
-          })
-        );
+        this.edgeless.clipboardController.copy();
         break;
       }
       case 'duplicate': {
