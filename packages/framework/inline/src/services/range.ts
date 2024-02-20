@@ -73,7 +73,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
       // range change may happen before the editor is prepared
       await this.editor.waitForUpdate();
       // improve performance
-      setTimeout(() => {
+      requestIdleCallback(() => {
         this.editor.requestUpdate(false);
       });
     }

@@ -106,7 +106,10 @@ export class RangeBinding {
       const inlineEditor = this.rangeManager.getClosestInlineEditor(
         range.commonAncestorContainer
       );
-      if (inlineEditor && inlineEditor.isComposing) return;
+      if (!inlineEditor || inlineEditor.isComposing) {
+        this._prevSelection = null;
+        return;
+      }
 
       this._prevSelection = this.rangeManager.rangeToTextSelection(
         range,
