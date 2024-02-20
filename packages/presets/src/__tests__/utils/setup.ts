@@ -27,6 +27,7 @@ function createWorkspaceOptions() {
     idGenerator,
     blobStorages,
     defaultFlags: {
+      enable_synced_doc_block: true,
       enable_transformer_clipboard: true,
       enable_bultin_ledits: true,
       readonly: {
