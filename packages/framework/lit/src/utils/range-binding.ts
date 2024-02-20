@@ -3,7 +3,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, throttle } from '@blocksuite/global/utils';
 
 import { BlockElement } from '../element/block-element.js';
-import type { RangeManager } from './range-manager.js';
+import { RangeManager } from './range-manager.js';
 
 /**
  * Two-way binding between native range and text selection
@@ -32,7 +32,7 @@ export class RangeBinding {
         'selectionChange',
         throttle(() => {
           this._onNativeSelectionChanged().catch(console.error);
-        }, 30)
+        }, 10)
       )
     );
 
@@ -64,7 +64,7 @@ export class RangeBinding {
           selections.find((selection): selection is TextSelection =>
             selection.is('text')
           ) ?? null;
-
+        console.log(text);
         const eq =
           text && this._prevSelection
             ? text.equals(this._prevSelection)
@@ -103,13 +103,19 @@ export class RangeBinding {
           Node.DOCUMENT_POSITION_PRECEDING);
 
     if (range) {
+      const el =
+        range.commonAncestorContainer instanceof Element
+          ? range.commonAncestorContainer
+          : range.commonAncestorContainer.parentElement;
+      if (!el) return;
+      const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+      if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
+        return;
+
       const inlineEditor = this.rangeManager.getClosestInlineEditor(
         range.commonAncestorContainer
       );
-      if (!inlineEditor || inlineEditor.isComposing) {
-        this._prevSelection = null;
-        return;
-      }
+      if (inlineEditor?.isComposing) return;
 
       this._prevSelection = this.rangeManager.rangeToTextSelection(
         range,

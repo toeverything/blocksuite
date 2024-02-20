@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { BlockElement, RangeManager } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -25,8 +25,6 @@ export class NoteBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
 
     this.keymapController.bind();
   }
