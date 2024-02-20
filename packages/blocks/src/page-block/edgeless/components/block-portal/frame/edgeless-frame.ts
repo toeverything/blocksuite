@@ -8,6 +8,7 @@ import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { isFrameInner } from '../../../frame-manager.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const FRAME_OFFSET = 8;
@@ -25,12 +26,6 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
 
   @state()
   private _isNavigator = false;
-
-  private _isInner = false;
-
-  get isInner() {
-    return this._isInner;
-  }
 
   private _updateElement = () => {
     this.requestUpdate();
@@ -90,23 +85,23 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     const model = this.frame;
     const bound = Bound.deserialize(model.xywh);
 
-    const { frames, viewport } = this.edgeless.service;
+    const { viewport, frame } = this.edgeless.service;
     const { zoom } = viewport;
 
-    this._isInner = frames.some(
-      frame =>
-        frame.id !== model.id && Bound.deserialize(frame.xywh).contains(bound)
-    );
-
-    const { _isNavigator, _editing, _isInner } = this;
+    const { _isNavigator, _editing } = this;
+    let isInner = frame.getFrameInner(model);
+    if (isInner === undefined) {
+      isInner = isFrameInner(model, this.edgeless.service.frames);
+      frame.setFrameInner(model, isInner);
+    }
 
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const left = (_isInner ? FRAME_OFFSET : 0) + x;
-    const top = (_isInner ? FRAME_OFFSET : -(29 + FRAME_OFFSET)) + y;
-    const maxWidth = _isInner
+    const left = (isInner ? FRAME_OFFSET : 0) + x;
+    const top = (isInner ? FRAME_OFFSET : -(29 + FRAME_OFFSET)) + y;
+    const maxWidth = isInner
       ? bound.w * zoom - FRAME_OFFSET / zoom
       : bound.w * zoom;
-    const hidden = 32 / zoom > bound.h && _isInner;
+    const hidden = 32 / zoom > bound.h && isInner;
 
     const text = model.title.toString();
 
@@ -126,17 +121,17 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
                 maxWidth: maxWidth + 'px',
                 padding: '8px 10px',
                 fontSize: '14px',
-                background: _isInner
+                background: isInner
                   ? 'var(--affine-white)'
                   : 'var(--affine-text-primary-color)',
-                color: _isInner
+                color: isInner
                   ? 'var(--affine-text-secondary-color)'
                   : 'var(--affine-white)',
                 cursor: 'default',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                border: _isInner
+                border: isInner
                   ? '1px solid var(--affine-border-color)'
                   : 'none',
               })}

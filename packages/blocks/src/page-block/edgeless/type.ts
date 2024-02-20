@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/lit';
 import { BlockModel } from '@blocksuite/store';
 
 import type { EdgelessSelectableProps } from '../../_common/edgeless/mixin/edgeless-selectable.js';
@@ -55,7 +56,12 @@ export interface IEdgelessElement {
   getNearestPoint(point: IVec): IVec;
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
   getRelativePointLocation(point: IVec): PointLocation;
-  hitTest(x: number, y: number, options: HitTestOptions): boolean;
+  hitTest(
+    x: number,
+    y: number,
+    options: HitTestOptions,
+    host: EditorHost
+  ): boolean;
   boxSelect(bound: Bound): boolean;
 }
 
@@ -87,7 +93,7 @@ export class EdgelessBlockModel<
     return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));
   }
 
-  hitTest(x: number, y: number, _: HitTestOptions): boolean {
+  hitTest(x: number, y: number, _: HitTestOptions, __: EditorHost): boolean {
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
   }

@@ -22,11 +22,6 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     );
   }
 
-  get isInner() {
-    const title = this.titleElement;
-    return !!title?.isInner;
-  }
-
   private get _surface() {
     return this.closest('affine-edgeless-page')!.surface;
   }

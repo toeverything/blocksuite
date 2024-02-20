@@ -57,8 +57,38 @@ export class FrameOverlay extends Overlay {
   }
 }
 
+export function isFrameInner(
+  frame: FrameBlockModel,
+  frames: FrameBlockModel[]
+) {
+  const bound = Bound.deserialize(frame.xywh);
+  return frames.some(
+    f => f.id !== frame.id && Bound.deserialize(f.xywh).contains(bound)
+  );
+}
+
 export class EdgelessFrameManager {
-  constructor(private _pageService: EdgelessPageService) {}
+  constructor(private _pageService: EdgelessPageService) {
+    this._pageService.page.slots.blockUpdated.on(e => {
+      const { id, type } = e;
+      const element = this._pageService.getElementById(id);
+      if (!isFrameBlock(element)) return;
+      if (type === 'add') {
+        this._innerMap.set(id, isFrameInner(element, this._pageService.frames));
+      } else if (type === 'update' && e.props.key === 'xywh') {
+        this._innerMap.set(id, isFrameInner(element, this._pageService.frames));
+      }
+    });
+  }
+  private _innerMap = new Map<string, boolean>();
+
+  getFrameInner(frame: FrameBlockModel) {
+    return this._innerMap.get(frame.id);
+  }
+
+  setFrameInner(frame: FrameBlockModel, isInner: boolean) {
+    this._innerMap.set(frame.id, isInner);
+  }
 
   selectFrame(eles: Selectable[]) {
     const frames = this._pageService.frames;
