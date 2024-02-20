@@ -302,43 +302,38 @@ export class InlineEditor<
 
     this.slots.textChange.emit();
 
-    Promise.resolve()
-      .then(() => {
-        this.deltaService.render().catch(console.error);
+    this.deltaService.render().catch(console.error);
 
-        const inlineRange = this.rangeService.getInlineRange();
-        if (!inlineRange || transaction.local) return;
+    const inlineRange = this.rangeService.getInlineRange();
+    if (!inlineRange || transaction.local) return;
 
-        const lastStartRelativePosition =
-          this.rangeService.lastStartRelativePosition;
-        const lastEndRelativePosition =
-          this.rangeService.lastEndRelativePosition;
-        if (!lastStartRelativePosition || !lastEndRelativePosition) return;
+    const lastStartRelativePosition =
+      this.rangeService.lastStartRelativePosition;
+    const lastEndRelativePosition = this.rangeService.lastEndRelativePosition;
+    if (!lastStartRelativePosition || !lastEndRelativePosition) return;
 
-        const doc = this.yText.doc;
-        assertExists(doc);
-        const absoluteStart = Y.createAbsolutePositionFromRelativePosition(
-          lastStartRelativePosition,
-          doc
-        );
-        const absoluteEnd = Y.createAbsolutePositionFromRelativePosition(
-          lastEndRelativePosition,
-          doc
-        );
+    const doc = this.yText.doc;
+    assertExists(doc);
+    const absoluteStart = Y.createAbsolutePositionFromRelativePosition(
+      lastStartRelativePosition,
+      doc
+    );
+    const absoluteEnd = Y.createAbsolutePositionFromRelativePosition(
+      lastEndRelativePosition,
+      doc
+    );
 
-        const startIndex = absoluteStart?.index;
-        const endIndex = absoluteEnd?.index;
-        if (!startIndex || !endIndex) return;
+    const startIndex = absoluteStart?.index;
+    const endIndex = absoluteEnd?.index;
+    if (!startIndex || !endIndex) return;
 
-        const newInlineRange: InlineRange = {
-          index: startIndex,
-          length: endIndex - startIndex,
-        };
-        if (!this.isValidInlineRange(newInlineRange)) return;
+    const newInlineRange: InlineRange = {
+      index: startIndex,
+      length: endIndex - startIndex,
+    };
+    if (!this.isValidInlineRange(newInlineRange)) return;
 
-        this.setInlineRange(newInlineRange);
-      })
-      .catch(console.error);
+    this.setInlineRange(newInlineRange);
   };
 
   private _bindYTextObserver() {

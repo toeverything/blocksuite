@@ -1,6 +1,6 @@
 import type { BaseSelection, TextSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, throttle } from '@blocksuite/global/utils';
 
 import { BlockElement } from '../element/block-element.js';
 import type { RangeManager } from './range-manager.js';
@@ -28,9 +28,12 @@ export class RangeBinding {
     );
 
     this.host.disposables.add(
-      this.host.event.add('selectionChange', () => {
-        this._onNativeSelectionChanged().catch(console.error);
-      })
+      this.host.event.add(
+        'selectionChange',
+        throttle(() => {
+          this._onNativeSelectionChanged().catch(console.error);
+        }, 30)
+      )
     );
 
     this.host.disposables.add(
