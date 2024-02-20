@@ -166,6 +166,15 @@ export class EdgelessClipboardController extends PageClipboard {
     );
   };
 
+  copy() {
+    document.dispatchEvent(
+      new Event('copy', {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+  }
+
   private _onCopy = (
     _context: UIEventStateContext,
     surfaceSelection: SurfaceSelection[]
