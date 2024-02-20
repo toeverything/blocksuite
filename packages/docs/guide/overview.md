@@ -37,7 +37,7 @@ With BlockSuite editors, you can selectively reuse all the editing features in [
 And under the hood, the vanilla BlockSuite framework supports:
 
 - Defining [custom blocks](./working-with-block-tree#defining-new-blocks) and inline embeds.
-- Incremental updates, real-time collaboration, and even decentralized data synchronization based on the [document streaming](./data-synchronization#document-streaming) mechanism.
+- Incremental updates, [real-time collaboration](https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#test-collaboration), and even decentralized data synchronization based on the [document streaming](./data-synchronization#document-streaming) mechanism.
 - Writing type-safe complex editing logic based on the [command](./command) mechanism, similar to react hooks designed for document editing.
 - Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](./data-synchronization#snapshot-api) and transformer.
 - State scheduling across multiple documents and reusing one document in multiple editors.
