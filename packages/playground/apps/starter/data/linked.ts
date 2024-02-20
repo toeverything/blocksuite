@@ -2,8 +2,7 @@ import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-export const linked: InitFn = async (workspace: Workspace, id: string) => {
+export const linked: InitFn = (workspace: Workspace, id: string) => {
   const pageA = workspace.getPage(id) ?? workspace.createPage({ id });
 
   const pageBId = 'page:page-linked-doc';
@@ -18,7 +17,7 @@ export const linked: InitFn = async (workspace: Workspace, id: string) => {
   pageB.clear();
   pageC.clear();
 
-  await pageB.load(() => {
+  pageB.load(() => {
     const pageBlockId = pageB.addBlock('affine:page', {
       title: new Text(''),
     });
@@ -31,7 +30,7 @@ export const linked: InitFn = async (workspace: Workspace, id: string) => {
     pageB.addBlock('affine:paragraph', {}, noteId);
   });
 
-  await pageC.load(() => {
+  pageC.load(() => {
     const pageBlockId = pageC.addBlock('affine:page', {
       title: new Text(''),
     });

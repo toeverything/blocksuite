@@ -82,7 +82,7 @@ export class ExportManager {
         }
       }, 100);
     });
-    return await promise;
+    return promise;
   }
 
   private _drawEdgelessBackground(
@@ -157,7 +157,7 @@ export class ExportManager {
           }
         });
 
-        await this._replaceRichTextWithSvgElement(element);
+        this._replaceRichTextWithSvgElement(element);
         await this.replaceImgSrcWithSvg(element);
       },
       useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
@@ -352,7 +352,7 @@ export class ExportManager {
       },
       onclone: async function (_documentClone: Document, element: HTMLElement) {
         element.style.height = `${viewportHeight}px`;
-        await replaceRichTextWithSvgElement(element);
+        replaceRichTextWithSvgElement(element);
         await replaceImgSrcWithSvg(element);
       },
       backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
@@ -371,22 +371,20 @@ export class ExportManager {
     return data;
   }
 
-  private _replaceRichTextWithSvgElement = async (element: HTMLElement) => {
+  private _replaceRichTextWithSvgElement = (element: HTMLElement) => {
     const richList = Array.from(element.querySelectorAll('.inline-editor'));
-    await Promise.all(
-      richList.map(async rich => {
-        const svgEle = await this._elementToSvgElement(
-          rich.cloneNode(true) as HTMLElement,
-          rich.clientWidth,
-          rich.clientHeight + 1
-        );
-        rich.parentElement?.appendChild(svgEle);
-        rich.parentElement?.removeChild(rich);
-      })
-    );
+    richList.map(rich => {
+      const svgEle = this._elementToSvgElement(
+        rich.cloneNode(true) as HTMLElement,
+        rich.clientWidth,
+        rich.clientHeight + 1
+      );
+      rich.parentElement?.appendChild(svgEle);
+      rich.parentElement?.removeChild(rich);
+    });
   };
 
-  private async _elementToSvgElement(
+  private _elementToSvgElement(
     node: HTMLElement,
     width: number,
     height: number
@@ -423,7 +421,7 @@ export class ExportManager {
     await this._checkReady();
 
     if (isInsideDocEditor(this.editorHost)) {
-      return await this._docToCanvas();
+      return this._docToCanvas();
     } else {
       const root = this.page.root;
       if (!root) return;
@@ -434,7 +432,7 @@ export class ExportManager {
       ) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      return await this.edgelessToCanvas(
+      return this.edgelessToCanvas(
         edgeless.surface.renderer,
         bound,
         (model: BlockModel) => blockElementGetter(model, this.editorHost.view),

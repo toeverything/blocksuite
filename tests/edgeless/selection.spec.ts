@@ -352,7 +352,7 @@ test('should also update dragging area when viewport changes', async ({
   await page.mouse.click(200, 300);
 
   const selectedRectClass = '.affine-edgeless-selected-rect';
-  let selectedRect = await page.locator(selectedRectClass);
+  let selectedRect = page.locator(selectedRectClass);
   await expect(selectedRect).toBeHidden();
   // set up initial dragging area
   await page.mouse.move(200, 300);
@@ -366,7 +366,7 @@ test('should also update dragging area when viewport changes', async ({
   await page.mouse.up();
 
   // Expect to select the empty note
-  selectedRect = await page.locator(selectedRectClass);
+  selectedRect = page.locator(selectedRectClass);
   await page.waitForTimeout(300);
   await expect(selectedRect).toBeVisible();
   await page.waitForTimeout(300);

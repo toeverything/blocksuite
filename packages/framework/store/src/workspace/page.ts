@@ -802,7 +802,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   /** @deprecated use page.load() instead */
-  async waitForLoaded() {
-    await this.load();
+  waitForLoaded() {
+    this.load();
   }
 }

@@ -151,7 +151,7 @@ export class AttachmentBlockComponent extends BlockElement<
   };
 
   download = () => {
-    downloadAttachmentBlob(this).catch(console.error);
+    downloadAttachmentBlob(this);
   };
 
   refreshData = () => {

@@ -51,15 +51,11 @@ export function openLeditsEditor(blockElement: ImageBlockComponent) {
           }
 
           const blobManager = model.page.blob;
-          blobManager
-            .set(newBlob)
-            .then(sourceId => {
-              model.page.updateBlock(model, {
-                sourceId,
-              });
-              modal.close();
-            })
-            .catch(console.error);
+          const sourceId = await blobManager.set(newBlob);
+          model.page.updateBlock(model, {
+            sourceId,
+          });
+          modal.close();
         },
       },
     ],

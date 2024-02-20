@@ -83,4 +83,4 @@ Furthermore, by connecting multiple providers, documents can automatically be sy
 
 ![pluggable-providers](../images/pluggable-providers.png)
 
-This brings great flexibility and is the pattern currently being used in [AFFiNE](https://github.com/toeverything/AFFiNE).
+As an example, when testing real-time collabortion in BlockSuite [following the steps](https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#test-collaboration), all the clients would connect to the WebSocket provider. The first client should enter case 1, and the clients joining the room afterwards would run into case 2.

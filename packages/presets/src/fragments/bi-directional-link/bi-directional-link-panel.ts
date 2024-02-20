@@ -520,7 +520,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       </style>
       ${this._divider(!this._show)}
       <div class="title-line">
-        <div class="title text">Bi-directional link</div>
+        <div class="title text">Bi-directional links</div>
         <div class="show-button" @click=${this._toggleShow}>
           ${this._show ? 'Hide' : 'Show'}
         </div>

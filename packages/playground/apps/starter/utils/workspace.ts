@@ -59,6 +59,7 @@ export function createStarterPageWorkspace() {
     idGenerator,
     blobStorages,
     defaultFlags: {
+      enable_synced_doc_block: true,
       enable_bultin_ledits: featureArgs.includes('ledits'),
     },
     awarenessSources: [new BroadcastChannelAwarenessSource()],
@@ -102,7 +103,7 @@ export async function initStarterPageWorkspace(workspace: Workspace) {
   // use built-in init function
   const functionMap = new Map<
     string,
-    (workspace: Workspace, id: string) => Promise<void>
+    (workspace: Workspace, id: string) => Promise<void> | void
   >();
   Object.values(
     (await import('../data/index.js')) as Record<string, InitFn>

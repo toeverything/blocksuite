@@ -50,22 +50,28 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 
   abstract fromPageSnapshot(
     payload: FromPageSnapshotPayload
-  ): Promise<FromPageSnapshotResult<AdapterTarget>>;
+  ):
+    | Promise<FromPageSnapshotResult<AdapterTarget>>
+    | FromPageSnapshotResult<AdapterTarget>;
   abstract fromBlockSnapshot(
     payload: FromBlockSnapshotPayload
-  ): Promise<FromBlockSnapshotResult<AdapterTarget>>;
+  ):
+    | Promise<FromBlockSnapshotResult<AdapterTarget>>
+    | FromBlockSnapshotResult<AdapterTarget>;
   abstract fromSliceSnapshot(
     payload: FromSliceSnapshotPayload
-  ): Promise<FromSliceSnapshotResult<AdapterTarget>>;
+  ):
+    | Promise<FromSliceSnapshotResult<AdapterTarget>>
+    | FromSliceSnapshotResult<AdapterTarget>;
   abstract toPageSnapshot(
     payload: ToPageSnapshotPayload<AdapterTarget>
-  ): Promise<PageSnapshot>;
+  ): Promise<PageSnapshot> | PageSnapshot;
   abstract toBlockSnapshot(
     payload: ToBlockSnapshotPayload<AdapterTarget>
-  ): Promise<BlockSnapshot>;
+  ): Promise<BlockSnapshot> | BlockSnapshot;
   abstract toSliceSnapshot(
     payload: ToSliceSnapshotPayload<AdapterTarget>
-  ): Promise<SliceSnapshot | null>;
+  ): Promise<SliceSnapshot | null> | SliceSnapshot | null;
 
   applyConfigs(configs: Map<string, unknown>) {
     this.configs = new Map([...configs]);
@@ -77,7 +83,7 @@ type Keyof<T> = T extends unknown ? keyof T : never;
 type WalkerFn<ONode extends object, TNode extends object> = (
   o: NodeProps<ONode>,
   context: ASTWalkerContext<TNode>
-) => Promise<void>;
+) => Promise<void> | void;
 
 type NodeProps<Node extends object> = {
   node: Node;

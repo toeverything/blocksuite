@@ -6,7 +6,7 @@ import type { InlineRange } from '@blocksuite/inline';
 import type { BlockElement } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
-import { html, LitElement } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { PageBlockComponent } from '../../../../../page-block/types.js';
@@ -108,6 +108,12 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     return std;
   }
 
+  get page() {
+    const page = this.blockElement.page;
+    assertExists(page);
+    return page;
+  }
+
   private _openPage() {
     const refPageId = this.referencePageId;
     const blockElement = this.blockElement;
@@ -189,6 +195,11 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   }
 
   override render() {
+    // synced doc entry controlled by awareness flag
+    const isSyncedDocEnabled = this.page.awarenessStore.getFlag(
+      'enable_synced_doc_block'
+    );
+
     return html`
       <div class="overlay-root blocksuite-overlay">
         <div class="affine-reference-popover-container">
@@ -222,15 +233,21 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
               </icon-button>
 
-              <icon-button
-                size="24px"
-                class="affine-reference-popover-view-selector-button embed"
-                hover="false"
-                @click=${() => this._convertToEmbedView()}
-              >
-                ${EmbedWebIcon}
-                <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
-              </icon-button>
+              ${isSyncedDocEnabled
+                ? html`
+                    <icon-button
+                      size="24px"
+                      class="affine-reference-popover-view-selector-button embed"
+                      hover="false"
+                      @click=${() => this._convertToEmbedView()}
+                    >
+                      ${EmbedWebIcon}
+                      <affine-tooltip .offset=${12}
+                        >${'Embed view'}</affine-tooltip
+                      >
+                    </icon-button>
+                  `
+                : nothing}
             </div>
 
             <span class="affine-reference-popover-dividing-line"></span>

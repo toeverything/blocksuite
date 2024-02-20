@@ -650,7 +650,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         }
       }
     });
-    walker.setLeave(async (o, context) => {
+    walker.setLeave((o, context) => {
       switch (o.node.flavour) {
         case 'affine:page': {
           context.closeNode().closeNode().closeNode();
@@ -991,7 +991,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         }
       }
     });
-    walker.setLeave(async (o, context) => {
+    walker.setLeave((o, context) => {
       if (o.node.type !== 'element') {
         return;
       }

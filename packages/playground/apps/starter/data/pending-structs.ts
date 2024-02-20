@@ -3,15 +3,11 @@ import { Text } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-export const pendingStructs: InitFn = async (
-  workspace: Workspace,
-  id: string
-) => {
+export const pendingStructs: InitFn = (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
   const tempPage = workspace.createPage({ id: 'tempPage' });
-  await page.load();
-  await tempPage.load(() => {
+  page.load();
+  tempPage.load(() => {
     const pageBlockId = tempPage.addBlock('affine:page', {
       title: new Text('Pending Structs'),
     });

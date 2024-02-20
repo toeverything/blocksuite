@@ -55,6 +55,7 @@ export async function createDefaultPageWorkspace() {
     docSources,
     awarenessSources,
     defaultFlags: {
+      enable_synced_doc_block: true,
       enable_bultin_ledits: true,
     },
   };

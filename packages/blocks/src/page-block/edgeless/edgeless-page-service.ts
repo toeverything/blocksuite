@@ -169,6 +169,7 @@ export class EdgelessPageService extends PageService {
     disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
+        if (!this.std.event.isActive) this.std.event.activate();
       })
     );
 

@@ -1052,7 +1052,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
   await assertRichTexts(page, ['123', '456', '789']);
   await dragBetweenIndices(page, [1, 2], [1, 0]);
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '45');
+  assertClipItems(page, 'text/plain', '45');
 
   // `456`
   const prefixIconRect = await page.evaluate(() => {
@@ -1081,7 +1081,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
   );
 
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '45');
+  assertClipItems(page, 'text/plain', '45');
 });
 
 test('should set the last block to end the range after when leaving the affine-note', async ({
@@ -1094,7 +1094,7 @@ test('should set the last block to end the range after when leaving the affine-n
 
   await dragBetweenIndices(page, [0, 2], [2, 1]);
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '34567');
+  assertClipItems(page, 'text/plain', '34567');
   // blur
   await page.mouse.click(0, 0);
 
@@ -1106,7 +1106,7 @@ test('should set the last block to end the range after when leaving the affine-n
     { x: 0, y: 30 } // drag below the bottom of the last block
   );
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '3456789');
+  assertClipItems(page, 'text/plain', '3456789');
 });
 
 test('should set the first block to start the range before when leaving the affine-note-block-container', async ({
@@ -1119,7 +1119,7 @@ test('should set the first block to start the range before when leaving the affi
 
   await dragBetweenIndices(page, [2, 1], [0, 2]);
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '34567');
+  assertClipItems(page, 'text/plain', '34567');
   // blur
   await page.mouse.click(0, 0);
 
@@ -1131,7 +1131,7 @@ test('should set the first block to start the range before when leaving the affi
     { x: 0, y: -30 } // drag above the top of the first block
   );
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '1234567');
+  assertClipItems(page, 'text/plain', '1234567');
 });
 
 test('should select texts on cross-note dragging', async ({ page }) => {
@@ -1169,7 +1169,7 @@ test('should select texts on cross-note dragging', async ({ page }) => {
   );
 
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '3456789ABC');
+  assertClipItems(page, 'text/plain', '3456789ABC');
 });
 
 test('should select full text of the first block when leaving the affine-note-block-container in edgeless mode', async ({
@@ -1186,7 +1186,7 @@ test('should select full text of the first block when leaving the affine-note-bl
     click: true,
   });
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '34567');
+  assertClipItems(page, 'text/plain', '34567');
 
   const containerRect = await page.evaluate(() => {
     const container = document.querySelector('.affine-note-block-container');
@@ -1544,7 +1544,7 @@ test('should keep native range selection when scrolling backward with the scroll
   );
 
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '987654321');
+  assertClipItems(page, 'text/plain', '987654321');
 });
 
 // ↓
@@ -1617,7 +1617,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   );
 
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '123456789');
+  assertClipItems(page, 'text/plain', '123456789');
 });
 
 test('should not show option menu of image on native selection', async ({
@@ -1648,7 +1648,7 @@ test('should not show option menu of image on native selection', async ({
   await waitNextFrame(page);
 
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '123');
+  assertClipItems(page, 'text/plain', '123');
 
   await page.mouse.click(0, 0);
 
@@ -1663,7 +1663,7 @@ test('should not show option menu of image on native selection', async ({
   await waitNextFrame(page);
 
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '123');
+  assertClipItems(page, 'text/plain', '123');
 
   await expect(
     page.locator('.affine-embed-editing-state-container')

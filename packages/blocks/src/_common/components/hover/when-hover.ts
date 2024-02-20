@@ -106,7 +106,15 @@ export const whenHover = (
       signal: abortController.signal,
     });
     element.addEventListener('mouseleave', onHoverChange, {
-      capture: true,
+      // Please refrain use `capture: true` here.
+      // It will cause the `mouseleave` trigger incorrectly when the pointer is still within the element.
+      // The issue is detailed in https://github.com/toeverything/blocksuite/issues/6241
+      //
+      // The `mouseleave` does not **bubble**.
+      // This means that `mouseleave` is fired when the pointer has exited the element and all of its descendants,
+      // If `capture` is used, all `mouseleave` events will be received when the pointer leaves the element or leaves one of the element's descendants (even if the pointer is still within the element).
+      //
+      // capture: true,
       signal: abortController.signal,
     });
   };

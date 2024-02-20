@@ -137,7 +137,7 @@ export async function checkAttachmentBlob(block: AttachmentBlockComponent) {
  * Since the size of the attachment may be very large,
  * the download process may take a long time!
  */
-export async function downloadAttachmentBlob(block: AttachmentBlockComponent) {
+export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
   const { host, model, loading, error, downloading, blobUrl } = block;
   if (downloading) {
     toast(host, 'Download in progress...');

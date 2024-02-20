@@ -85,9 +85,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     };
   }
 
-  async toPageSnapshot(
-    payload: ToPageSnapshotPayload<MixText>
-  ): Promise<PageSnapshot> {
+  toPageSnapshot(payload: ToPageSnapshotPayload<MixText>): PageSnapshot {
     payload.file = payload.file.replaceAll('\r', '');
     return {
       type: 'page',
@@ -157,9 +155,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     };
   }
 
-  async toBlockSnapshot(
-    payload: ToBlockSnapshotPayload<MixText>
-  ): Promise<BlockSnapshot> {
+  toBlockSnapshot(payload: ToBlockSnapshotPayload<MixText>): BlockSnapshot {
     payload.file = payload.file.replaceAll('\r', '');
     return {
       type: 'block',
@@ -222,7 +218,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
       (node): node is BlockSnapshot =>
         BlockSnapshotSchema.safeParse(node).success
     );
-    walker.setEnter(async o => {
+    walker.setEnter(o => {
       const text = (o.node.props.text ?? { delta: [] }) as {
         delta: DeltaInsert[];
       };

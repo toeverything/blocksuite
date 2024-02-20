@@ -40,7 +40,7 @@ export function createSimpleServerStorage(id: string): BlobStorage {
           method: 'DELETE',
         });
       },
-      list: async () => {
+      list: () => {
         return Array.from(localCache.keys());
       },
     },

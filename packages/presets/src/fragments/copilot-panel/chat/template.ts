@@ -48,7 +48,7 @@ const getImageUrlByKeyword =
     return image.toString();
   };
 const getImages = async (
-  images: Record<string, (w: number, h: number) => Promise<string>>,
+  images: Record<string, (w: number, h: number) => Promise<string> | string>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   template: any
 ): Promise<TemplateImage[]> => {
@@ -129,7 +129,7 @@ const createBasicCover = async (
     images: await getImages(
       {
         'section1.image': getImageUrlByKeyword(section1.keywords),
-        background: async () =>
+        background: () =>
           'https://cdn.affine.pro/ppt-images/background/basic_cover_background.png',
       },
       template
@@ -154,7 +154,7 @@ const basic1section = async (
     images: await getImages(
       {
         'section1.image': getImageUrlByKeyword(section1.keywords),
-        background: async () =>
+        background: () =>
           'https://cdn.affine.pro/ppt-images/background/basic_1_selection_background.png',
       },
       template
@@ -183,7 +183,7 @@ const basic2section = async (
       {
         'section1.image': getImageUrlByKeyword(section1.keywords),
         'section2.image': getImageUrlByKeyword(section2.keywords),
-        background: async () =>
+        background: () =>
           'https://cdn.affine.pro/ppt-images/background/basic_2_selection_background.png',
       },
       template
@@ -216,7 +216,7 @@ const basic3section = async (
         'section1.image': getImageUrlByKeyword(section1.keywords),
         'section2.image': getImageUrlByKeyword(section2.keywords),
         'section3.image': getImageUrlByKeyword(section3.keywords),
-        background: async () =>
+        background: () =>
           'https://cdn.affine.pro/ppt-images/background/basic_3_selection_background.png',
       },
       template
@@ -253,7 +253,7 @@ const basic4section = async (
         'section2.image': getImageUrlByKeyword(section2.keywords),
         'section3.image': getImageUrlByKeyword(section3.keywords),
         'section4.image': getImageUrlByKeyword(section4.keywords),
-        background: async () =>
+        background: () =>
           'https://cdn.affine.pro/ppt-images/background/basic_4_selection_background.png',
       },
       template

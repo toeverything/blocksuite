@@ -2,12 +2,11 @@ import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-export const embed: InitFn = async (workspace: Workspace, id: string) => {
+export const embed: InitFn = (workspace: Workspace, id: string) => {
   const page = workspace.getPage(id) ?? workspace.createPage({ id });
   page.clear();
 
-  await page.load(() => {
+  page.load(() => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text(),

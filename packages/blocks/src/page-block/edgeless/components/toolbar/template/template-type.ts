@@ -14,11 +14,11 @@ export type TemplateCategory = {
 };
 
 export interface TemplateManager {
-  list(category: string): Promise<Template[]>;
+  list(category: string): Promise<Template[]> | Template[];
 
-  categories(): Promise<string[]>;
+  categories(): Promise<string[]> | string[];
 
-  search(keyword: string, category?: string): Promise<Template[]>;
+  search(keyword: string, category?: string): Promise<Template[]> | Template[];
 
   extend?(manager: TemplateManager): void;
 }
