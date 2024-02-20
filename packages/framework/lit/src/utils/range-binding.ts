@@ -64,7 +64,7 @@ export class RangeBinding {
           selections.find((selection): selection is TextSelection =>
             selection.is('text')
           ) ?? null;
-        console.log(text);
+
         const eq =
           text && this._prevSelection
             ? text.equals(this._prevSelection)
