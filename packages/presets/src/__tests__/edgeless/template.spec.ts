@@ -19,13 +19,13 @@ test('extension api', async () => {
     type: 'template',
   } as Template;
   const customTemplate = {
-    list: async () => {
+    list: () => {
       return [mockTemplate];
     },
-    categories: async () => {
+    categories: () => {
       return ['custom'];
     },
-    search: async (_, __) => {
+    search: (_, __) => {
       return [mockTemplate];
     },
   } satisfies TemplateManager;

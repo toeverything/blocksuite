@@ -80,7 +80,7 @@ export function createStarterPageWorkspace() {
 
 export async function initStarterPageWorkspace(workspace: Workspace) {
   // init from other clients
-  if (room && !params.get('init')) {
+  if (room && !params.has('init')) {
     let fistPage = workspace.pages.values().next().value as Page | undefined;
     if (!fistPage) {
       await new Promise<string>(resolve =>
@@ -102,7 +102,7 @@ export async function initStarterPageWorkspace(workspace: Workspace) {
   // use built-in init function
   const functionMap = new Map<
     string,
-    (workspace: Workspace, id: string) => Promise<void>
+    (workspace: Workspace, id: string) => Promise<void> | void
   >();
   Object.values(
     (await import('../data/index.js')) as Record<string, InitFn>

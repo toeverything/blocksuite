@@ -4,12 +4,11 @@ import { type InitFn } from './utils.js';
 
 const params = new URLSearchParams(location.search);
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-export const heavy: InitFn = async (workspace: Workspace, pageId: string) => {
+export const heavy: InitFn = (workspace: Workspace, pageId: string) => {
   const count = Number(params.get('count')) || 1000;
 
   const page = workspace.createPage({ id: pageId });
-  await page.load(() => {
+  page.load(() => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text(),

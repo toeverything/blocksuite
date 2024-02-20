@@ -160,7 +160,7 @@ export class EdgelessToolsManager {
       controller.mount(container);
     });
 
-    this._initMouseAndWheelEvents().catch(console.error);
+    this._initMouseAndWheelEvents();
   }
 
   register(Tool: EdgelessToolConstructor) {
@@ -180,7 +180,7 @@ export class EdgelessToolsManager {
     };
   }
 
-  private async _initMouseAndWheelEvents() {
+  private _initMouseAndWheelEvents() {
     this._add('dragStart', ctx => {
       this._dragging = true;
       const event = ctx.get('pointerState');

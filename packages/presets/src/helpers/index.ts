@@ -8,7 +8,7 @@ export function createEmptyPage() {
 
   return {
     page,
-    async init() {
+    init() {
       page.load();
       const pageBlockId = page.addBlock('affine:page', {});
       page.addBlock('affine:surface', {}, pageBlockId);

@@ -627,7 +627,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
       }
     });
-    walker.setLeave(async (o, context) => {
+    walker.setLeave((o, context) => {
       const currentTNode = context.currentNode();
       const previousTNode = context.previousNode();
       switch (o.node.flavour) {
@@ -992,7 +992,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
       }
     });
-    walker.setLeave(async (o, context) => {
+    walker.setLeave((o, context) => {
       switch (o.node.type) {
         case 'listItem': {
           context.closeNode();

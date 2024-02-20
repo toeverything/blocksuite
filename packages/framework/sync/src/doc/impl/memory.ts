@@ -5,10 +5,7 @@ export class MemoryDocSource implements DocSource {
   memory = new Map<string, Uint8Array>();
 
   name: string = 'testing';
-  async pull(
-    docId: string,
-    _: Uint8Array
-  ): Promise<{ data: Uint8Array; state?: Uint8Array | undefined } | null> {
+  pull(docId: string, _: Uint8Array) {
     const key = docId;
     const data = this.memory.get(key);
     if (data) {
@@ -17,16 +14,16 @@ export class MemoryDocSource implements DocSource {
       return null;
     }
   }
-  async push(docId: string, data: Uint8Array): Promise<void> {
+  push(docId: string, data: Uint8Array) {
     const key = docId;
     const oldData = this.memory.get(key);
     const update = mergeUpdates(oldData ? [oldData, data] : [data]);
     this.memory.set(key, update);
   }
-  async subscribe(
+  subscribe(
     _cb: (docId: string, data: Uint8Array) => void,
     _disconnect: (reason: string) => void
-  ): Promise<() => void> {
+  ) {
     return () => {};
   }
 }

@@ -5,7 +5,6 @@ import { type InitFn } from './utils.js';
 
 const presetMarkdown = `Click the 🔁 button to switch between editors dynamically - they are fully compatible!`;
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
   page.load();

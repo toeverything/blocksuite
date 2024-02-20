@@ -97,7 +97,7 @@ export class IndexedDBDocSource implements DocSource {
     } satisfies ChannelMessage);
   }
 
-  async subscribe(cb: (docId: string, data: Uint8Array) => void) {
+  subscribe(cb: (docId: string, data: Uint8Array) => void) {
     function onMessage(event: MessageEvent<ChannelMessage>) {
       const { type, payload } = event.data;
       if (type === 'db-updated') {

@@ -28,7 +28,7 @@ export async function duplicate(
     JSON.stringify(await prepareClipboardData(copyElements, edgeless.std))
   );
   const [canvasElements, blocks] =
-    await clipboardController.createElementsFromClipboardData(
+    clipboardController.createElementsFromClipboardData(
       data as Record<string, unknown>[],
       totalBound.center
     );

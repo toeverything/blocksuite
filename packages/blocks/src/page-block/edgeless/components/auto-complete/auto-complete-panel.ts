@@ -283,7 +283,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       this.edgeless.surface.renderer.removeOverlay(this._overlay);
   }
 
-  private async _addShape(targetType: TARGET_SHAPE_TYPE) {
+  private _addShape(targetType: TARGET_SHAPE_TYPE) {
     const edgeless = this.edgeless;
     const currentShape = this.currentShape;
     const result = this._generateTarget(this.connector);
@@ -291,7 +291,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     const { nextBound, position } = result;
     const { service } = edgeless;
-    const id = await createShapeElement(edgeless, currentShape, targetType);
+    const id = createShapeElement(edgeless, currentShape, targetType);
 
     service.updateElement(id, { xywh: nextBound.serialize() });
     service.updateElement(this.connector.id, {
@@ -387,12 +387,12 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     });
   }
 
-  private async _addText() {
+  private _addText() {
     const target = this._getTargetXYWH(DEFAULT_TEXT_WIDTH, DEFAULT_TEXT_HEIGHT);
     if (!target) return;
 
     const { xywh, position } = target;
-    const id = await createTextElement(this.edgeless, this.currentShape);
+    const id = createTextElement(this.edgeless, this.currentShape);
     const { service } = this.edgeless;
 
     service.updateElement(id, { xywh: serializeXYWH(...xywh) });
@@ -411,13 +411,13 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     }
   }
 
-  private async _autoComplete(targetType: AUTO_COMPLETE_TARGET_TYPE) {
+  private _autoComplete(targetType: AUTO_COMPLETE_TARGET_TYPE) {
     this._removeOverlay();
     if (!this._connectorExist()) return;
 
     switch (targetType) {
       case 'text':
-        await this._addText();
+        this._addText();
         break;
       case 'note':
         this._addNote();
@@ -426,7 +426,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         this._addFrame();
         break;
       default:
-        await this._addShape(targetType);
+        this._addShape(targetType);
     }
 
     this.remove();

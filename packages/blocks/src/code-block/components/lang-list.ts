@@ -1,3 +1,5 @@
+import '../../_common/components/button.js';
+
 import type { Placement } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
@@ -143,7 +145,7 @@ export class LangList extends LitElement {
   @query('#filter-input')
   filterInput!: HTMLInputElement;
 
-  override async connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
 
     setTimeout(() => {

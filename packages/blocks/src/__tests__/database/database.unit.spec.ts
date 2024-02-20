@@ -30,11 +30,11 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, schema };
 }
 
-async function createTestPage(pageId = 'page0') {
+function createTestPage(pageId = 'page0') {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
-  await page.load();
+  page.load();
   return page;
 }
 
@@ -57,10 +57,10 @@ describe('DatabaseManager', () => {
     { id: '3', value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
 
-    page = await createTestPage();
+    page = createTestPage();
 
     pageBlockId = page.addBlock('affine:page', {
       title: new page.Text('database test'),

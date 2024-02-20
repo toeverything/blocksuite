@@ -193,8 +193,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'New Doc',
         icon: NewPageIcon,
-        action: async ({ pageElement, model }) => {
-          const newPage = await createDefaultPage(pageElement.page.workspace);
+        action: ({ pageElement, model }) => {
+          const newPage = createDefaultPage(pageElement.page.workspace);
           insertContent(pageElement.host, model, REFERENCE_NODE, {
             reference: {
               type: 'LinkedPage',
@@ -464,7 +464,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: async ({ pageElement, model }) => {
+        action: ({ pageElement, model }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
@@ -503,7 +503,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: async ({ model, pageElement }) => {
+        action: ({ model, pageElement }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
@@ -540,7 +540,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         return {
           name: 'Frame: ' + frameModel.title,
           icon: FrameIcon,
-          action: async ({ pageElement, model }) => {
+          action: ({ pageElement, model }) => {
             const { page } = pageElement;
             const noteModel = page.getParent(model) as NoteBlockModel;
             const insertIdx = noteModel.children.indexOf(model);
@@ -586,7 +586,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return {
             name: 'Group: ' + element.get('title'),
             icon: GroupingIcon,
-            action: async ({ pageElement, model }) => {
+            action: ({ pageElement, model }) => {
               const { page } = pageElement;
               const noteModel = page.getParent(model) as NoteBlockModel;
               const insertIdx = noteModel.children.indexOf(model);
@@ -620,7 +620,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'Move Up',
         icon: ArrowUpBigIcon,
-        action: async ({ pageElement, model }) => {
+        action: ({ pageElement, model }) => {
           const page = pageElement.page;
           const previousSiblingModel = page.getPreviousSibling(model);
           if (!previousSiblingModel) return;
@@ -634,7 +634,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'Move Down',
         icon: ArrowDownBigIcon,
-        action: async ({ pageElement, model }) => {
+        action: ({ pageElement, model }) => {
           const page = pageElement.page;
           const nextSiblingModel = page.getNextSibling(model);
           if (!nextSiblingModel) return;
@@ -648,7 +648,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'Copy',
         icon: CopyIcon,
-        action: async ({ pageElement, model }) => {
+        action: ({ pageElement, model }) => {
           const slice = Slice.fromModels(pageElement.std.page, [model]);
 
           pageElement.std.clipboard

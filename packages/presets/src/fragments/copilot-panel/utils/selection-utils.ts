@@ -82,7 +82,7 @@ export async function getSelectedTextContent(editorHost: EditorHost) {
     editorHost.std.page,
     getPageService(editorHost).selectedModels
   );
-  return await getMarkdownFromSlice(editorHost, slice);
+  return getMarkdownFromSlice(editorHost, slice);
 }
 
 export const stopPropagation = (e: Event) => {

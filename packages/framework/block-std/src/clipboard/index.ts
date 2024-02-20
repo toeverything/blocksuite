@@ -166,7 +166,7 @@ export class Clipboard {
   async writeToClipboard(
     updateItems: (
       items: Record<string, unknown>
-    ) => Promise<Record<string, unknown>>
+    ) => Promise<Record<string, unknown>> | Record<string, unknown>
   ) {
     const _items = {
       'text/plain': '',

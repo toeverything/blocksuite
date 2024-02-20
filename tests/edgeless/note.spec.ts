@@ -539,7 +539,7 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
   await selectNoteInEdgeless(page, noteId);
   await triggerComponentToolbarAction(page, 'changeNoteSlicerSetting');
 
-  const button = await page.locator('.note-slicer-button');
+  const button = page.locator('.note-slicer-button');
   await button.click();
   await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
 

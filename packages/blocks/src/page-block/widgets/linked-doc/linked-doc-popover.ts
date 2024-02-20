@@ -1,3 +1,5 @@
+import '../../../_common/components/button.js';
+
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
