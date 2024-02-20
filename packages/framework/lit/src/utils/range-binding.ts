@@ -1,9 +1,9 @@
 import type { BaseSelection, TextSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, throttle } from '@blocksuite/global/utils';
 
 import { BlockElement } from '../element/block-element.js';
-import type { RangeManager } from './range-manager.js';
+import { RangeManager } from './range-manager.js';
 
 /**
  * Two-way binding between native range and text selection
@@ -28,9 +28,12 @@ export class RangeBinding {
     );
 
     this.host.disposables.add(
-      this.host.event.add('selectionChange', () => {
-        this._onNativeSelectionChanged().catch(console.error);
-      })
+      this.host.event.add(
+        'selectionChange',
+        throttle(() => {
+          this._onNativeSelectionChanged().catch(console.error);
+        }, 10)
+      )
     );
 
     this.host.disposables.add(
@@ -52,7 +55,7 @@ export class RangeBinding {
   }
 
   isComposing = false;
-  private _prevSelection: BaseSelection | null = null;
+  private _prevTextSelection: TextSelection | null = null;
   private _onStdSelectionChanged = (selections: BaseSelection[]) => {
     // wait for lit updated
     this.host.updateComplete
@@ -63,14 +66,14 @@ export class RangeBinding {
           ) ?? null;
 
         const eq =
-          text && this._prevSelection
-            ? text.equals(this._prevSelection)
-            : text === this._prevSelection;
+          text && this._prevTextSelection
+            ? text.equals(this._prevTextSelection)
+            : text === this._prevTextSelection;
         if (eq) {
           return;
         }
 
-        this._prevSelection = text;
+        this._prevTextSelection = text;
         if (text) {
           this.rangeManager.syncTextSelectionToRange(text);
         } else {
@@ -100,18 +103,27 @@ export class RangeBinding {
           Node.DOCUMENT_POSITION_PRECEDING);
 
     if (range) {
+      const el =
+        range.commonAncestorContainer instanceof Element
+          ? range.commonAncestorContainer
+          : range.commonAncestorContainer.parentElement;
+      if (!el) return;
+      const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+      if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
+        return;
+
       const inlineEditor = this.rangeManager.getClosestInlineEditor(
         range.commonAncestorContainer
       );
-      if (inlineEditor && inlineEditor.isComposing) return;
+      if (inlineEditor?.isComposing) return;
 
-      this._prevSelection = this.rangeManager.rangeToTextSelection(
+      this._prevTextSelection = this.rangeManager.rangeToTextSelection(
         range,
         isRangeReversed
       );
       this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
     } else {
-      this._prevSelection = null;
+      this._prevTextSelection = null;
       this.selectionManager.clear(['text']);
     }
   };
