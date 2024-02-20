@@ -119,7 +119,7 @@ export class SearchIndexer {
 
     setTimeout(() => {
       if (!this._reindexMap) return;
-      if (requestIdleCallback) {
+      if (globalThis.requestIdleCallback !== undefined) {
         requestIdleCallback(this._reindex, { timeout: 1000 });
       } else {
         setTimeout(this._reindex, 1000);
