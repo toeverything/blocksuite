@@ -11,6 +11,7 @@ import {
   type EdgelessTool,
   isMiddleButtonPressed,
   isPinchEvent,
+  NoteDisplayMode,
   Point,
 } from '../../../_common/utils/index.js';
 import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
@@ -20,6 +21,7 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { EdgelessPageService } from '../edgeless-page-service.js';
 import type { EdgelessModel } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { isNoteBlock } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -158,7 +160,7 @@ export class EdgelessToolsManager {
       controller.mount(container);
     });
 
-    this._initMouseAndWheelEvents().catch(console.error);
+    this._initMouseAndWheelEvents();
   }
 
   register(Tool: EdgelessToolConstructor) {
@@ -178,7 +180,7 @@ export class EdgelessToolsManager {
     };
   }
 
-  private async _initMouseAndWheelEvents() {
+  private _initMouseAndWheelEvents() {
     this._add('dragStart', ctx => {
       this._dragging = true;
       const event = ctx.get('pointerState');
@@ -378,6 +380,15 @@ export class EdgelessToolsManager {
     }
   };
 
+  private _isDocOnlyNote(selectedId: string) {
+    const selected = this.service.page.getBlockById(selectedId);
+    if (!selected) return false;
+
+    return (
+      isNoteBlock(selected) && selected.displayMode === NoteDisplayMode.DocOnly
+    );
+  }
+
   getHoverState(): EdgelessHoverState | null {
     if (!this.currentController.enableHover) {
       return null;
@@ -412,12 +423,23 @@ export class EdgelessToolsManager {
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[type].beforeModeSwitch(edgelessTool);
 
+    const isDefaultType = type === 'default';
+    const isEmptyState = Array.isArray(state)
+      ? this.selection.isEmpty(state)
+      : state.elements.length === 0;
+    const hasLastState = !!this.selection.lastState;
+    const isNotSingleDocOnlyNote = !(
+      this.selection.lastState &&
+      this.selection.lastState[0] &&
+      this.selection.lastState[0].elements.length === 1 &&
+      this._isDocOnlyNote(this.selection.lastState[0].elements[0])
+    );
+
     if (
-      type === 'default' &&
-      (Array.isArray(state)
-        ? this.selection.isEmpty(state)
-        : state.elements.length === 0) &&
-      this.selection.lastState
+      isDefaultType &&
+      isEmptyState &&
+      hasLastState &&
+      isNotSingleDocOnlyNote
     ) {
       state = this.selection.lastState;
     }

@@ -22,7 +22,7 @@ export function fineTuneHmr({
     async configureServer() {
       await init;
     },
-    transform: async (code, id) => {
+    transform: (code, id) => {
       // only handle js/ts files
       const includeGlob = include.map(i => path.resolve(root, i));
       const excludeGlob = exclude.map(i => path.resolve(root, i));

@@ -16,6 +16,7 @@ import {
 } from '../../../../../_common/utils/index.js';
 import { FigmaIcon } from '../../../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../../../embed-github-block/styles.js';
+import { LoomIcon } from '../../../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../../../embed-youtube-block/styles.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { NOTE_MENU_ITEMS, NOTE_MENU_WIDTH } from './note-menu-config.js';
@@ -202,6 +203,23 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                 )}
             >
               ${GithubIcon}
+            </edgeless-tool-icon-button>
+
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
+              .tooltip=${'Loom'}
+              @click=${() =>
+                toggleEmbedCardCreateModal(
+                  this.edgeless.host,
+                  'Loom',
+                  'The added Loom video link will be displayed as an embed view.',
+                  {
+                    mode: 'edgeless',
+                  }
+                )}
+            >
+              ${LoomIcon}
             </edgeless-tool-icon-button>
           </div>
         </div>

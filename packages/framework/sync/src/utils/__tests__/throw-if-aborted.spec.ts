@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { throwIfAborted } from '../throw-if-aborted.js';
 
 describe('throw-if-aborted', () => {
-  test('basic', async () => {
+  test('basic', () => {
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
     expect(throwIfAborted(abortSignal)).toBe(true);

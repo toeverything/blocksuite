@@ -99,7 +99,7 @@ export function renderEmbedView(model: AttachmentBlockModel, blobUrl: string) {
 /**
  * Turn the attachment block into an image block.
  */
-export async function turnIntoImageBlock(model: AttachmentBlockModel) {
+export function turnIntoImageBlock(model: AttachmentBlockModel) {
   if (!model.page.schema.flavourSchemaMap.has('affine:image'))
     throw new Error('The image flavour is not supported!');
 

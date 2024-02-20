@@ -71,13 +71,13 @@ async function initEmptyEditor({
   multiEditor?: boolean;
 }) {
   await page.evaluate(
-    async ([flags, noInit, multiEditor]) => {
+    ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
 
       async function waitForMountPageEditor(
         page: ReturnType<typeof workspace.createPage>
       ) {
-        if (!page.ready) await page.load();
+        if (!page.ready) void page.load();
 
         if (!page.root) {
           await new Promise(resolve => page.slots.rootAdded.once(resolve));
@@ -162,7 +162,7 @@ async function initEmptyEditor({
           window.page = firstPage;
           waitForMountPageEditor(firstPage).catch;
         } else {
-          workspace.slots.pageAdded.on(async pageId => {
+          workspace.slots.pageAdded.on(pageId => {
             const page = workspace.getPage(pageId);
             if (!page) {
               throw new Error(`Failed to get page ${pageId}`);
@@ -369,7 +369,7 @@ export async function enterPlaygroundWithList(
   await initEmptyEditor({ page });
 
   await page.evaluate(
-    async ({ contents, type }: { contents: string[]; type: ListType }) => {
+    ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
       const pageId = page.addBlock('affine:page', {
         title: new page.Text(),
@@ -392,7 +392,7 @@ export async function enterPlaygroundWithList(
 
 // XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
 export async function initEmptyParagraphState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(async pageId => {
+  const ids = await page.evaluate(pageId => {
     const { page } = window;
     page.captureSync();
     if (!pageId) {
@@ -412,7 +412,7 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
 }
 
 export async function initEmptyEdgelessState(page: Page) {
-  const ids = await page.evaluate(async () => {
+  const ids = await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
@@ -429,7 +429,7 @@ export async function initEmptyEdgelessState(page: Page) {
 }
 
 export async function initEmptyDatabaseState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(async pageId => {
+  const ids = await page.evaluate(pageId => {
     const { page } = window;
     page.captureSync();
     if (!pageId) {
@@ -464,7 +464,7 @@ export async function initKanbanViewState(
   pageId?: string
 ) {
   const ids = await page.evaluate(
-    async ({ pageId, config }) => {
+    ({ pageId, config }) => {
       const { page } = window;
 
       page.captureSync();
@@ -522,7 +522,7 @@ export async function initEmptyDatabaseWithParagraphState(
   page: Page,
   pageId?: string
 ) {
-  const ids = await page.evaluate(async pageId => {
+  const ids = await page.evaluate(pageId => {
     const { page } = window;
 
     page.captureSync();
@@ -612,7 +612,7 @@ export async function initEmptyCodeBlockState(
   page: Page,
   codeBlockProps = {} as { language?: string }
 ) {
-  const ids = await page.evaluate(async codeBlockProps => {
+  const ids = await page.evaluate(codeBlockProps => {
     const { page } = window;
     page.captureSync();
     const pageId = page.addBlock('affine:page');
@@ -730,7 +730,7 @@ export async function initParagraphsByCount(page: Page, count: number) {
 }
 
 export async function getInlineSelectionIndex(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const selection = window.getSelection() as Selection;
 
     const range = selection.getRangeAt(0);
@@ -741,7 +741,7 @@ export async function getInlineSelectionIndex(page: Page) {
 }
 
 export async function getInlineSelectionText(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
@@ -750,7 +750,7 @@ export async function getInlineSelectionText(page: Page) {
 }
 
 export async function getSelectedTextByInlineEditor(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
@@ -767,7 +767,7 @@ export async function getSelectedTextByInlineEditor(page: Page) {
 }
 
 export async function getSelectedText(page: Page) {
-  return await page.evaluate(() => {
+  return page.evaluate(() => {
     let content = '';
     const selection = window.getSelection() as Selection;
 
@@ -1089,7 +1089,7 @@ export const getBoundingClientRect: (
   page: Page,
   selector: string
 ) => Promise<DOMRect> = async (page: Page, selector: string) => {
-  return await page.evaluate((selector: string) => {
+  return page.evaluate((selector: string) => {
     return document.querySelector(selector)?.getBoundingClientRect() as DOMRect;
   }, selector);
 };
@@ -1212,7 +1212,7 @@ export async function shamefullyBlurActiveElement(page: Page) {
  *
  */
 export async function waitForInlineEditorStateUpdated(page: Page) {
-  return await page.evaluate(async () => {
+  return page.evaluate(async () => {
     const selection = window.getSelection() as Selection;
 
     if (selection.rangeCount === 0) return;
@@ -1261,7 +1261,7 @@ export async function initImageState(page: Page) {
 }
 
 export async function getCurrentEditorPageId(page: Page) {
-  return await page.evaluate(index => {
+  return page.evaluate(index => {
     const editor = document.querySelectorAll('affine-editor-container')[index];
     if (!editor) throw new Error("Can't find affine-editor-container");
     const pageId = editor.page.id;
@@ -1271,7 +1271,7 @@ export async function getCurrentEditorPageId(page: Page) {
 
 export async function getCurrentHTMLTheme(page: Page) {
   const root = page.locator('html');
-  return await root.getAttribute('data-theme');
+  return root.getAttribute('data-theme');
 }
 
 export async function getCurrentEditorTheme(page: Page) {

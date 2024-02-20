@@ -4,6 +4,7 @@ import type { EmbedFigmaModel } from '../embed-figma-block/embed-figma-model.js'
 import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
 import type { EmbedHtmlModel } from '../embed-html-block/embed-html-model.js';
 import type { EmbedLinkedDocModel } from '../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedLoomModel } from '../embed-loom-block/embed-loom-model.js';
 import type { EmbedSyncedDocModel } from '../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../frame-block/frame-model.js';
@@ -22,6 +23,7 @@ export type EdgelessBlockModelMap = {
   'affine:embed-linked-doc': EmbedLinkedDocModel;
   'affine:embed-synced-doc': EmbedSyncedDocModel;
   'affine:embed-html': EmbedHtmlModel;
+  'affine:embed-loom': EmbedLoomModel;
 };
 
 export type EdgelessBlockType =
@@ -36,6 +38,7 @@ export type EdgelessBlockType =
   | 'affine:embed-linked-doc'
   | 'affine:embed-synced-doc'
   | 'affine:embed-html'
+  | 'affine:embed-loom'
   | 'affine:pdf';
 
 export type EdgelessElementType =

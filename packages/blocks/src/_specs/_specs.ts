@@ -14,10 +14,11 @@ import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { EmbedFigmaBlockSpec } from '../embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
-import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/index.js';
+import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/embed-linked-doc-spec.js';
+import { EmbedLoomBlockSpec } from '../embed-loom-block/embed-loom-spec.js';
 import { EmbedSyncedDocBlockSpec } from '../embed-synced-doc-block/embed-synced-doc-spec.js';
-import { EmbedYoutubeBlockSpec } from '../embed-youtube-block/index.js';
-import { FrameBlockSchema } from '../frame-block/index.js';
+import { EmbedYoutubeBlockSpec } from '../embed-youtube-block/embed-youtube-spec.js';
+import { FrameBlockSchema } from '../frame-block/frame-model.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
@@ -203,6 +204,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedHtmlBlockSpec,
   EmbedLinkedDocBlockSpec,
   EmbedSyncedDocBlockSpec,
+  EmbedLoomBlockSpec,
 ];
 
 export const DocEditorBlockSpecs: BlockSpec[] = [

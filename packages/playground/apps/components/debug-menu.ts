@@ -388,7 +388,7 @@ export class DebugMenu extends ShadowlessElement {
     HtmlTransformer.exportPage(this.page).catch(console.error);
   }
 
-  private async _exportMarkDown() {
+  private _exportMarkDown() {
     MarkdownTransformer.exportPage(this.page).catch(console.error);
   }
 

@@ -28,12 +28,12 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, schema };
 }
 
-test('trigger props updated', async () => {
+test('trigger props updated', () => {
   const options = createTestOptions();
   const workspace = new Workspace(options);
 
   const page = workspace.createPage({ id: 'home' });
-  await page.load();
+  page.load();
 
   page.addBlock('page');
 
@@ -87,12 +87,12 @@ test('trigger props updated', async () => {
   expect((getItems().get(0) as Y.Map<unknown>).get('id')).toBe('1');
 });
 
-test('stash and pop', async () => {
+test('stash and pop', () => {
   const options = createTestOptions();
   const workspace = new Workspace(options);
 
   const page = workspace.createPage({ id: 'home' });
-  await page.load();
+  page.load();
 
   page.addBlock('page');
 
@@ -156,12 +156,12 @@ test('stash and pop', async () => {
   expect(onPropsUpdated).toHaveBeenNthCalledWith(11, { key: 'style' });
 });
 
-test('always get latest value in onChange', async () => {
+test('always get latest value in onChange', () => {
   const options = createTestOptions();
   const workspace = new Workspace(options);
 
   const page = workspace.createPage({ id: 'home' });
-  await page.load();
+  page.load();
 
   page.addBlock('page');
 

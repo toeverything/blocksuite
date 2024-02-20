@@ -24,6 +24,7 @@ import { EmbedFigmaBlockSpec } from './embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from './embed-github-block/embed-github-spec.js';
 import { EmbedHtmlBlockSpec } from './embed-html-block/embed-html-spec.js';
 import { EmbedLinkedDocBlockSpec } from './embed-linked-doc-block/embed-linked-doc-spec.js';
+import { EmbedLoomBlockSpec } from './embed-loom-block/embed-loom-spec.js';
 import { EmbedSyncedDocBlockSpec } from './embed-synced-doc-block/embed-synced-doc-spec.js';
 import { EmbedYoutubeBlockSpec } from './embed-youtube-block/embed-youtube-spec.js';
 import type { FrameBlockModel } from './frame-block/frame-model.js';
@@ -88,6 +89,7 @@ export const __unstableSchemas = [
   EmbedHtmlBlockSpec.schema,
   EmbedLinkedDocBlockSpec.schema,
   EmbedSyncedDocBlockSpec.schema,
+  EmbedLoomBlockSpec.schema,
 ] satisfies z.infer<typeof BlockSchema>[];
 
 // TODO support dynamic register

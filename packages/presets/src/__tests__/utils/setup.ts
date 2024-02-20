@@ -27,6 +27,7 @@ function createWorkspaceOptions() {
     idGenerator,
     blobStorages,
     defaultFlags: {
+      enable_synced_doc_block: true,
       enable_transformer_clipboard: true,
       enable_bultin_ledits: true,
       readonly: {
@@ -36,7 +37,7 @@ function createWorkspaceOptions() {
   };
 }
 
-async function initWorkspace(workspace: Workspace) {
+function initWorkspace(workspace: Workspace) {
   const page = workspace.createPage({ id: 'page:home' });
 
   page.load(() => {
@@ -76,7 +77,7 @@ export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
 
   window.workspace = workspace;
 
-  await initWorkspace(workspace);
+  initWorkspace(workspace);
   const appElement = await createEditor(workspace, mode);
 
   return () => {

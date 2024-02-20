@@ -60,26 +60,44 @@ function createRoot(page: Page) {
   return page.root;
 }
 
-async function createTestPage(pageId = defaultPageId) {
+function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
-  await page.load();
+  page.load();
   return page;
 }
 
+function requestIdleCallbackPolyfill(
+  callback: IdleRequestCallback,
+  options?: IdleRequestOptions
+) {
+  const timeout = options?.timeout ?? 1000;
+  const start = Date.now();
+  return setTimeout(function () {
+    callback({
+      didTimeout: false,
+      timeRemaining: function () {
+        return Math.max(0, timeout - (Date.now() - start));
+      },
+    });
+  }, timeout) as unknown as number;
+}
+
 beforeEach(() => {
-  vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
+  if (globalThis.requestIdleCallback === undefined) {
+    globalThis.requestIdleCallback = requestIdleCallbackPolyfill;
+  }
 });
 
 describe('basic', () => {
-  it('can init workspace', async () => {
+  it('can init workspace', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
     const page = workspace.createPage({ id: 'page:home' });
-    await page.load();
+    page.load();
     const actual = serializeWorkspace(workspace.doc);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
@@ -113,7 +131,7 @@ describe('basic', () => {
     });
   });
 
-  it('init workspace with custom id generator', async () => {
+  it('init workspace with custom id generator', () => {
     const options = createTestOptions();
     let id = 100;
     const workspace = new Workspace({
@@ -132,7 +150,7 @@ describe('basic', () => {
     }
   });
 
-  it('page ready lifecycle', async () => {
+  it('page ready lifecycle', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({
@@ -144,7 +162,7 @@ describe('basic', () => {
     page.slots.ready.on(readyCallback);
     page.slots.rootAdded.on(rootAddedCallback);
 
-    await page.load(() => {
+    page.load(() => {
       expect(page.ready).toBe(false);
       const rootId = page.addBlock('affine:page', {
         title: new page.Text(),
@@ -159,14 +177,14 @@ describe('basic', () => {
     expect(readyCallback).toBeCalledTimes(1);
   });
 
-  it('workspace pages with yjs applyUpdate', async () => {
+  it('workspace pages with yjs applyUpdate', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const workspace2 = new Workspace(options);
     const page = workspace.createPage({
       id: 'space:0',
     });
-    await page.load(() => {
+    page.load(() => {
       page.addBlock('affine:page', {
         title: new page.Text(),
       });
@@ -214,15 +232,15 @@ describe('basic', () => {
       });
       workspace2.doc.once('subdocs', fn);
       expect(fn).toBeCalledTimes(0);
-      await page2.load();
+      page2.load();
       expect(fn).toBeCalledTimes(1);
     }
   });
 });
 
 describe('addBlock', () => {
-  it('can add single model', async () => {
-    const page = await createTestPage();
+  it('can add single model', () => {
+    const page = createTestPage();
     page.addBlock('affine:page', {
       title: new page.Text(),
     });
@@ -238,8 +256,8 @@ describe('addBlock', () => {
     });
   });
 
-  it('can add model with props', async () => {
-    const page = await createTestPage();
+  it('can add model with props', () => {
+    const page = createTestPage();
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
     assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
@@ -253,8 +271,8 @@ describe('addBlock', () => {
     });
   });
 
-  it('can add multi models', async () => {
-    const page = await createTestPage();
+  it('can add multi models', () => {
+    const page = createTestPage();
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
@@ -310,7 +328,7 @@ describe('addBlock', () => {
   });
 
   it('can observe slot events', async () => {
-    const page = await createTestPage();
+    const page = createTestPage();
 
     queueMicrotask(() =>
       page.addBlock('affine:page', {
@@ -322,7 +340,7 @@ describe('addBlock', () => {
   });
 
   it('can add block to root', async () => {
-    const page = await createTestPage();
+    const page = createTestPage();
 
     let noteId: string;
 
@@ -372,7 +390,7 @@ describe('addBlock', () => {
     assert.equal(workspace.pages.size, 0);
   });
 
-  it('can remove page that has not been loaded', async () => {
+  it('can remove page that has not been loaded', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
 
@@ -440,8 +458,8 @@ describe('addBlock', () => {
 });
 
 describe('deleteBlock', () => {
-  it('delete children recursively by default', async () => {
-    const page = await createTestPage();
+  it('delete children recursively by default', () => {
+    const page = createTestPage();
 
     const pageId = page.addBlock('affine:page', {});
     const noteId = page.addBlock('affine:note', {}, pageId);
@@ -493,8 +511,8 @@ describe('deleteBlock', () => {
     });
   });
 
-  it('bring children to parent', async () => {
-    const page = await createTestPage();
+  it('bring children to parent', () => {
+    const page = createTestPage();
 
     const pageId = page.addBlock('affine:page', {});
     const noteId = page.addBlock('affine:note', {}, pageId);
@@ -581,8 +599,8 @@ describe('deleteBlock', () => {
     });
   });
 
-  it('bring children to other block', async () => {
-    const page = await createTestPage();
+  it('bring children to other block', () => {
+    const page = createTestPage();
 
     const pageId = page.addBlock('affine:page', {});
     const noteId = page.addBlock('affine:note', {}, pageId);
@@ -703,8 +721,8 @@ describe('deleteBlock', () => {
     });
   });
 
-  it('can delete model with parent', async () => {
-    const page = await createTestPage();
+  it('can delete model with parent', () => {
+    const page = createTestPage();
     const root = createRoot(page);
     const noteId = page.addBlock('affine:note', {}, root.id);
 
@@ -758,8 +776,8 @@ describe('deleteBlock', () => {
 });
 
 describe('getBlock', () => {
-  it('can get block by id', async () => {
-    const page = await createTestPage();
+  it('can get block by id', () => {
+    const page = createTestPage();
     const root = createRoot(page);
     const noteId = page.addBlock('affine:note', {}, root.id);
 
@@ -774,8 +792,8 @@ describe('getBlock', () => {
     assert.equal(invalid, null);
   });
 
-  it('can get parent', async () => {
-    const page = await createTestPage();
+  it('can get parent', () => {
+    const page = createTestPage();
     const root = createRoot(page);
     const noteId = page.addBlock('affine:note', {}, root.id);
 
@@ -789,8 +807,8 @@ describe('getBlock', () => {
     assert.equal(invalid, null);
   });
 
-  it('can get previous sibling', async () => {
-    const page = await createTestPage();
+  it('can get previous sibling', () => {
+    const page = createTestPage();
     const root = createRoot(page);
     const noteId = page.addBlock('affine:note', {}, root.id);
 
@@ -831,11 +849,11 @@ describe('workspace.exportJSX works', () => {
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
 
-  it('workspace with multiple blocks children matches snapshot', async () => {
+  it('workspace with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page:home' });
-    await page.load(() => {
+    page.load(() => {
       const pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
@@ -860,11 +878,11 @@ describe('workspace.exportJSX works', () => {
 });
 
 describe('workspace search', () => {
-  it('search page meta title', async () => {
+  it('search page meta title', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page:home' });
-    await page.load(() => {
+    page.load(() => {
       const pageId = page.addBlock('affine:page', {
         title: new page.Text('test123'),
       });

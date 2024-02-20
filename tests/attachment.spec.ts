@@ -47,7 +47,7 @@ function getAttachment(page: Page) {
   const renameInput = page.locator('.affine-attachment-rename-container input');
 
   const insertAttachment = async () => {
-    await page.evaluate(async () => {
+    await page.evaluate(() => {
       // Force fallback to input[type=file] in tests
       // See https://github.com/microsoft/playwright/issues/8850
       window.showOpenFilePicker = undefined;

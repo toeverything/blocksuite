@@ -7,6 +7,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
+import type { EmbedLoomModel } from '../../../../embed-loom-block/embed-loom-model.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
@@ -15,7 +16,8 @@ type EmbedCardModel =
   | BookmarkBlockModel
   | EmbedGithubModel
   | EmbedYoutubeModel
-  | EmbedFigmaModel;
+  | EmbedFigmaModel
+  | EmbedLoomModel;
 
 @customElement('embed-card-edit-modal')
 export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {

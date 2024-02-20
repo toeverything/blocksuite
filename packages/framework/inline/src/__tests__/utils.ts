@@ -45,7 +45,7 @@ export async function getDeltaFromInlineRichText(
   index = 0
 ): Promise<DeltaInsert> {
   await page.waitForTimeout(100);
-  return await page.evaluate(index => {
+  return page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
       ?.querySelectorAll('test-rich-text');
@@ -65,7 +65,7 @@ export async function getInlineRangeFromInlineRichText(
   index = 0
 ): Promise<InlineRange | null> {
   await page.waitForTimeout(100);
-  return await page.evaluate(index => {
+  return page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
       ?.querySelectorAll('test-rich-text');
@@ -109,7 +109,7 @@ export async function getInlineRichTextLine(
   index: number,
   i = 0
 ): Promise<readonly [string, number]> {
-  return await page.evaluate(
+  return page.evaluate(
     ([index, i]) => {
       const richTexts = document.querySelectorAll('test-rich-text');
 
