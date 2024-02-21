@@ -30,6 +30,7 @@ export const multiEditor: InitFn = (workspace: Workspace, id: string) => {
       if (!target) {
         throw new Error(`Failed to jump to page ${pageId}`);
       }
+      target.load();
       editor.page = target;
     });
 
@@ -77,6 +78,7 @@ export const multiEditorVertical: InitFn = (
       if (!target) {
         throw new Error(`Failed to jump to page ${pageId}`);
       }
+      target.load();
       editor.page = target;
     });
     app.append(editor);

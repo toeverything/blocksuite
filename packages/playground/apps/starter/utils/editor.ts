@@ -31,6 +31,7 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
     if (!target) {
       throw new Error(`Failed to jump to page ${pageId}`);
     }
+    target.load();
     editor.page = target;
   });
 
