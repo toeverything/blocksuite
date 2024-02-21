@@ -69,7 +69,9 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
             const inlineRoot = el.querySelector<
               InlineRootElement<AffineTextAttributes>
             >(`[${INLINE_ROOT_ATTR}]`);
-            if (inlineRoot && inlineRoot.inlineEditor.getInlineRange()) {
+            if (inlineRoot) {
+              const inlineRange = inlineRoot.inlineEditor.getInlineRange();
+              if (!inlineRange || inlineRange.length === 0) return [];
               return inlineRoot.inlineEditor;
             }
             return [];
