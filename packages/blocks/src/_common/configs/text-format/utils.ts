@@ -99,7 +99,7 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
             const inlineRoot = el.querySelector<
               InlineRootElement<AffineTextAttributes>
             >(`[${INLINE_ROOT_ATTR}]`);
-            if (inlineRoot) {
+            if (inlineRoot && inlineRoot.inlineEditor.yTextLength > 0) {
               return inlineRoot.inlineEditor;
             }
             return [];
