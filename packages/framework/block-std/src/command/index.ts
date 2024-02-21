@@ -36,7 +36,10 @@ type OutDataOfCommand<C> =
   C extends Command<any, infer K, any> ? CommandKeyToData<K> : never;
 // eslint-disable-next-line @typescript-eslint/ban-types
 type CommonMethods<In extends object = {}> = {
-  run(): boolean;
+  run(): [
+    result: boolean,
+    ctx: CommandKeyToData<Extract<keyof In, BlockSuite.CommandDataName>>,
+  ];
   with<T extends Partial<BlockSuite.CommandContext>>(value: T): Chain<In & T>;
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
@@ -92,19 +95,23 @@ export class CommandManager {
       ctx: BlockSuite.CommandContext,
       [cmd, ...rest]: Command[]
     ) => {
+      let _ctx = ctx;
       if (cmd) {
-        cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
+        cmd(ctx, data => {
+          _ctx = runCmds({ ...ctx, ...data }, rest);
+        });
       }
+      return _ctx;
     };
 
     return {
       [cmdSymbol]: _cmds,
       run: function (this: Chain) {
-        const ctx = getCommandCtx();
+        let ctx = getCommandCtx();
         let success = false;
         try {
           const cmds = this[cmdSymbol];
-          runCmds(ctx as BlockSuite.CommandContext, [
+          ctx = runCmds(ctx as BlockSuite.CommandContext, [
             ...cmds,
             (_, next) => {
               success = true;
@@ -115,7 +122,7 @@ export class CommandManager {
           console.error(err);
         }
 
-        return success;
+        return [success, ctx];
       },
       with: function (this: Chain, value) {
         const cmds = this[cmdSymbol];
@@ -145,7 +152,7 @@ export class CommandManager {
                 ...chain[cmdSymbol],
               ];
 
-              const success = chain
+              const [success] = chain
                 .inline((branchCtx, next) => {
                   ctx = { ...ctx, ...branchCtx };
                   next();
@@ -177,7 +184,7 @@ export class CommandManager {
                 ...chain[cmdSymbol],
               ];
 
-              const success = chain
+              const [success] = chain
                 .inline((branchCtx, next) => {
                   ctx = { ...ctx, ...branchCtx };
                   next();
@@ -215,7 +222,7 @@ export class CommandManager {
       };
     }
 
-    return createChain(methods, []);
+    return createChain(methods, []) as never;
   };
   getChainCtx = <T extends BlockSuite.CommandContext>(chain: Chain<T>) => {
     const ctx = {} as T;
@@ -239,6 +246,6 @@ declare global {
     type CommandDataName = keyof CommandContext;
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    type CommandChain<In extends object = {}> = Chain<In>;
+    type CommandChain<In extends object = {}> = Chain<In & InitCommandCtx>;
   }
 }
