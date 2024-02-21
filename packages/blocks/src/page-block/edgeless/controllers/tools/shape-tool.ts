@@ -7,7 +7,11 @@ import type {
 } from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
 import type { ShapeElementModel } from '../../../../surface-block/index.js';
-import { Bound, CanvasElementType } from '../../../../surface-block/index.js';
+import {
+  Bound,
+  CanvasElementType,
+  type IVec,
+} from '../../../../surface-block/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
@@ -31,6 +35,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   private _shapeOverlay: ShapeOverlay | null = null;
 
   protected override _draggingArea: SelectionArea | null = null;
+
+  // For moving selection with space with mouse
+  private _moveWithSpaceStartPos: IVec = [0, 0];
+  private _moveWithSpaceShapePosTemp: SelectionArea | null = null;
 
   private _addNewShape(
     e: PointerEventState,
@@ -112,6 +120,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
 
+    if (this._edgeless.tools.spaceBar) {
+      this._move();
+    }
+
     this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
   }
 
@@ -148,6 +160,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const element = this._service.getElementById(id);
     assertExists(element);
+
     this._edgeless.tools.switchToDefaultMode({
       elements: [element.id],
       editing: false,
@@ -157,8 +170,51 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   onPressShiftKey(pressed: boolean) {
     const id = this._draggingElementId;
     if (!id) return;
-
     this._resize(pressed);
+  }
+
+  onPressSpaceBar(pressed: boolean): void {
+    const { tools } = this._edgeless;
+    assertExists(this._draggingArea);
+    if (tools.dragging) {
+      if (pressed) {
+        const x = this._draggingArea.end.x;
+        const y = this._draggingArea.end.y;
+        this._moveWithSpaceStartPos = [x, y];
+
+        // Keep a temp version of the _draggingArea
+        const {
+          start: { x: startX, y: startY },
+          end: { x: endX, y: endY },
+        } = this._draggingArea;
+
+        this._moveWithSpaceShapePosTemp = {
+          start: new DOMPoint(startX, startY),
+          end: new DOMPoint(endX, endY),
+        };
+      }
+    }
+  }
+
+  private _move() {
+    const {
+      _draggingArea,
+      _moveWithSpaceStartPos,
+      _moveWithSpaceShapePosTemp,
+    } = this;
+    assertExists(_draggingArea);
+    assertExists(_moveWithSpaceShapePosTemp);
+
+    const { x: moveCurX, y: moveCurY } = _draggingArea.end;
+
+    const dx = moveCurX - _moveWithSpaceStartPos[0];
+    const dy = moveCurY - _moveWithSpaceStartPos[1];
+
+    const { start, end } = _moveWithSpaceShapePosTemp;
+    _draggingArea.start.x = start.x + dx;
+    _draggingArea.start.y = start.y + dy;
+    _draggingArea.end.x = end.x + dx;
+    _draggingArea.end.y = end.y + dy;
   }
 
   private _resize(shift = false) {
@@ -221,7 +277,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   onContainerMouseMove(e: PointerEventState) {
     if (!this._shapeOverlay) return;
-    // shpae options, like stroke color, fill color, etc.
+    // shape options, like stroke color, fill color, etc.
     if (this._shapeOverlay.globalAlpha === 0)
       this._shapeOverlay.globalAlpha = 1;
     const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);

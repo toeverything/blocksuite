@@ -92,6 +92,11 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   override onPressShiftKey(): void {
     noop();
   }
+
+  override onPressSpaceBar(_pressed: boolean): void {
+    noop();
+  }
+
   override beforeModeSwitch(): void {
     noop();
   }
