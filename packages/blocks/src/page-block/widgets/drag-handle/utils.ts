@@ -312,15 +312,7 @@ export const getDropResult = (
   scale: number = 1
 ): DropResult | null => {
   let dropIndicator = null;
-
-  const target = captureEventTarget(event.target);
-  const rootElement = target?.closest('editor-host');
-  const offset = {
-    x: rootElement?.getBoundingClientRect().left ?? 0,
-    y: rootElement?.getBoundingClientRect().top ?? 0,
-  };
-
-  const point = new Point(event.x + offset.x, event.y + offset.y);
+  const point = new Point(event.x, event.y);
   const closestBlockElement = getClosestBlockElementByPoint(
     point
   ) as BlockElement;
