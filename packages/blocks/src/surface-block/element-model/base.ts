@@ -256,7 +256,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     );
   }
 
-  hitTest(x: number, y: number, _: HitTestOptions, __?: EditorHost): boolean {
+  hitTest(x: number, y: number, _: HitTestOptions, __: EditorHost): boolean {
     return this.elementBound.isPointInBound([x, y]);
   }
 

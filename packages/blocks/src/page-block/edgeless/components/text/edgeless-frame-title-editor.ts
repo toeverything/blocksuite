@@ -107,10 +107,9 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   override render() {
     const viewport = this.edgeless.service.viewport;
-    const frameBlock = this.frameBlock;
     const bound = Bound.deserialize(this.frameModel.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const { isInner } = frameBlock;
+    const isInner = this.edgeless.service.frame.getFrameInner(this.frameModel);
 
     const inlineEditorStyle = styleMap({
       transformOrigin: 'top left',
