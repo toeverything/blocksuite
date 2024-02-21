@@ -15,7 +15,7 @@ export default {
     return h(Theme.Layout, null, {
       // https://vitepress.dev/guide/extending-default-theme#layout-slots
       'home-hero-image': () => h(Logo),
-      'home-features-after': () => h(Playground),
+      // 'home-features-after': () => h(Playground),
     });
   },
   enhanceApp({ app, router, siteData }) {
