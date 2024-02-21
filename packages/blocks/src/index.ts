@@ -94,6 +94,7 @@ export type {
 } from './page-block/edgeless/components/toolbar/template/template-type.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
+export { PDFService } from './pdf-block/pdf-service.js';
 export {
   Bound,
   BrushElementModel,

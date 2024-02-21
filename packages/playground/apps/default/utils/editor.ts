@@ -1,8 +1,10 @@
+import { PDFService } from '@blocksuite/blocks';
 import { __unstableSchemas } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { Workspace } from '@blocksuite/store';
+import pdfWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 import { LeftSidePanel } from '../../components/left-side-panel.js';
 import { PagesPanel } from '../../components/pages-panel.js';
@@ -69,4 +71,12 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
   });
 
   return editor;
+}
+
+export function setupPDFModule() {
+  PDFService.setPDFModule([
+    () => import('pdfjs-dist'),
+    () => import('pdfjs-dist/web/pdf_viewer.mjs').then(m => m.TextLayerBuilder),
+    pdfWorkerSrc,
+  ]);
 }

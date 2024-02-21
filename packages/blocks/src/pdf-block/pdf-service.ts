@@ -1,5 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/lit';
+import { Slot } from '@blocksuite/store';
 
 import {
   FileDropManager,
@@ -7,26 +8,42 @@ import {
 } from '../_common/components/file-drop-manager.js';
 import { toast } from '../_common/components/toast.js';
 import { matchFlavours } from '../_common/utils/model.js';
+import type { EdgelessPageService } from '../index.js';
 import type { PDFBlockModel } from './pdf-model.js';
-import { getPDFDimensions, parsePDF, pdfModule, savePDFFile } from './utils.js';
+import type { PDFJSModule, TextLayerBuilder } from './utils.js';
+import {
+  getPDFDimensions,
+  loadPDFModule,
+  loadTextLayerBuilder,
+  moduleLoaded,
+  parsePDF,
+  savePDFFile,
+  setPDFModule,
+} from './utils.js';
 
 export { PDFException } from './utils.js';
 
-export const TextLayerBuilder = () => {
-  return import('pdfjs-dist/web/pdf_viewer.mjs').then(
-    module => module.TextLayerBuilder
-  );
-};
-
 export class PDFService extends BlockService<PDFBlockModel> {
+  static PDFModule: PDFJSModule;
+  static TextLayerBuilder: TextLayerBuilder;
+  static setPDFModule(args: Parameters<typeof setPDFModule>) {
+    setPDFModule(...args);
+    this.moduleUpdated.emit();
+  }
+  static moduleUpdated = new Slot();
+
   fileDropManager!: FileDropManager;
 
+  get moduleLoaded() {
+    return moduleLoaded();
+  }
+
   get pdfModule() {
-    return pdfModule();
+    return loadPDFModule();
   }
 
   get TextLayerBuilder() {
-    return TextLayerBuilder();
+    return loadTextLayerBuilder();
   }
 
   parsePDF(fileURL: string | ArrayBuffer) {
@@ -36,6 +53,8 @@ export class PDFService extends BlockService<PDFBlockModel> {
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
     onDrop: async ({ files, point, targetModel, place }) => {
+      if (!this.moduleLoaded) return false;
+
       const pdfFile = files.filter(file =>
         file.type.startsWith('application/pdf')
       )[0];
@@ -62,13 +81,19 @@ export class PDFService extends BlockService<PDFBlockModel> {
       try {
         const { blob, sourceId } = await savePDFFile(this.page, pdfFile);
         const fileBuffer = await blob.arrayBuffer();
-        const fileSize = await getPDFDimensions(fileBuffer);
+        const pageDimension = await getPDFDimensions(fileBuffer);
+        const service = this.std.spec.getService(
+          'affine:page'
+        ) as EdgelessPageService;
+
+        const targetPoint =
+          service?.viewport?.toModelCoord?.(point.x, point.y) ?? point;
 
         this.page.addBlock(
           'affine:pdf',
           {
             sourceId,
-            xywh: `[${point.x},${point.y},${fileSize.width},${fileSize.height}]`,
+            xywh: `[${targetPoint[0] - pageDimension.width / 2},${targetPoint[1] - pageDimension.height / 3},${pageDimension.width},${pageDimension.height}]`,
           },
           parentModel,
           targetIdx

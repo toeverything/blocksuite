@@ -8,8 +8,28 @@ import {
   FrameNavigatorPrevIcon,
 } from '../_common/icons/edgeless.js';
 import type { PDFBlockModel } from './pdf-model.js';
-import type { PDFService } from './pdf-service.js';
+import { PDFService } from './pdf-service.js';
 import { PDFException } from './pdf-service.js';
+
+type PDFStatus =
+  | 'loaded'
+  | 'module-failed'
+  | 'file-failed'
+  | 'render-failed'
+  | 'loading';
+
+const getUserFriendlyInfo = (status: PDFStatus) => {
+  switch (status) {
+    case 'module-failed':
+      return 'Failed at loading PDF module';
+    case 'file-failed':
+      return 'Failed at loading file';
+    case 'render-failed':
+      return 'Failed at rendering PDF';
+    default:
+      return '';
+  }
+};
 
 @customElement('affine-pdf')
 export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
@@ -64,12 +84,7 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     }
   `;
 
-  private _status:
-    | 'loaded'
-    | 'module-failed'
-    | 'file-failed'
-    | 'render-failed'
-    | 'loading' = 'loading';
+  private _status: PDFStatus = 'loading';
   private _pdfDoc!: PDFDocumentProxy;
 
   @state()
@@ -129,6 +144,8 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
   }
 
   private async _setupPDF() {
+    if (!this.service.moduleLoaded) return;
+
     const blob = await this.page.blob.get(this.model.sourceId);
 
     if (!blob) {
@@ -170,6 +187,20 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     this._renderPage(++this._pdfPageNum).catch(() => {});
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._disposables.add(
+      PDFService.moduleUpdated.on(() => {
+        this.requestUpdate();
+
+        if (this._status !== 'loaded') {
+          this._setupPDF().catch(() => {});
+        }
+      })
+    );
+  }
+
   override firstUpdated() {
     this._setupPDF().catch(() => {});
   }
@@ -183,8 +214,17 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
   }
 
   override render() {
-    if (this._status !== 'loaded' && this._status !== 'loading') {
-      return html`<div class="affine-pdf-block">${'Failed to load PDF'}</div>`;
+    if (!this.service.moduleLoaded) {
+      return html`<div class="affine-pdf-block">PDF module is not loaded</div>`;
+    }
+
+    switch (this._status) {
+      case 'module-failed':
+      case 'file-failed':
+      case 'render-failed':
+        return html`<div class="affine-pdf-block">
+          Failed to render PDF (Detail: ${getUserFriendlyInfo(this._status)})
+        </div>`;
     }
 
     return html`<div class="affine-pdf-block">
