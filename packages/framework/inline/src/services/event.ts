@@ -1,4 +1,3 @@
-import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange, NativePoint } from '../types.js';
 import {
@@ -107,19 +106,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     }
 
     const range = selection.getRangeAt(0);
-
-    if (
-      range.startContainer === range.endContainer &&
-      range.startContainer.textContent === ZERO_WIDTH_SPACE &&
-      range.startOffset === 1
-    ) {
-      range.setStart(range.startContainer, 0);
-      range.setEnd(range.endContainer, 0);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      return;
-    }
-
     if (!range.intersectsNode(rootElement)) {
       const isContainerSelected =
         range.endContainer.contains(rootElement) &&
