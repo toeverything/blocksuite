@@ -121,11 +121,10 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     .embed-card-toolbar-button.page-info {
       display: flex;
       align-items: center;
+      width: max-content;
       max-width: 180px;
-      padding: var(--1, 0px);
 
       gap: 4px;
-      border-radius: var(--1, 0px);
       opacity: var(--add, 1);
       user-select: none;
       cursor: pointer;
@@ -527,20 +526,12 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
           : nothing}
         ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
           ? html`
-              <div
+              <icon-button
+                size="32px"
                 class="embed-card-toolbar-button page-info"
                 @click=${() => this.block.open()}
               >
-                ${this._pageIcon}
-                <span>${this._pageTitle}</span>
-              </div>
-
-              <icon-button
-                size="32px"
-                class="embed-card-toolbar-button open"
-                @click=${() => this.block.open()}
-              >
-                ${OpenIcon}
+                ${this._pageIcon} <span>${this._pageTitle}</span> ${OpenIcon}
                 <affine-tooltip .offset=${12}>${'Open'}</affine-tooltip>
               </icon-button>
 
