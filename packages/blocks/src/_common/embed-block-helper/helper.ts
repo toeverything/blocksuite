@@ -58,11 +58,11 @@ export function createEmbedBlock<
 // ========== Link Preview ==========
 
 export class LinkPreviewer {
-  endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
+  private _endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
 
-  setEndpoint(endpoint: string) {
-    this.endpoint = endpoint;
-  }
+  setEndpoint = (endpoint: string) => {
+    this._endpoint = endpoint;
+  };
 
   async query(url: string): Promise<Partial<LinkPreviewData>> {
     if (
@@ -87,7 +87,7 @@ export class LinkPreviewer {
         throw new Error('Failed to fetch tweet');
       }
     } else {
-      const response = await fetch(this.endpoint, {
+      const response = await fetch(this._endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
