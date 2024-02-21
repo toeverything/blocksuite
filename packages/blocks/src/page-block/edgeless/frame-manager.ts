@@ -68,6 +68,8 @@ export function isFrameInner(
 }
 
 export class EdgelessFrameManager {
+  private _innerMap = new Map<string, boolean>();
+
   constructor(private _pageService: EdgelessPageService) {
     this._pageService.page.slots.blockUpdated.on(e => {
       const { id, type } = e;
@@ -80,7 +82,6 @@ export class EdgelessFrameManager {
       }
     });
   }
-  private _innerMap = new Map<string, boolean>();
 
   getFrameInner(frame: FrameBlockModel) {
     return this._innerMap.get(frame.id);
