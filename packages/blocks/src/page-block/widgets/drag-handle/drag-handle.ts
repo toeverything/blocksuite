@@ -1121,10 +1121,11 @@ export class AffineDragHandleWidget extends WidgetElement<
     // handle drop of blocks from note onto edgeless container
     if (!targetBlockId) {
       const target = captureEventTarget(state.raw.target);
+      if (!target) return false;
 
       const isTargetEdgelessContainer =
-        target?.classList.contains('edgeless') &&
-        target?.classList.contains('affine-block-children-container');
+        target.classList.contains('edgeless') &&
+        target.classList.contains('affine-block-children-container');
       if (!isTargetEdgelessContainer) return false;
 
       const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
@@ -1327,6 +1328,11 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const state = ctx.get('pointerState');
+    const { target } = state.raw;
+    if (!this.host.contains(target as Node)) {
+      this._hide(true);
+      return true;
+    }
 
     for (const option of this.optionRunner.options) {
       if (
@@ -1608,7 +1614,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.handleEvent('click', this._clickHandler);
     this.handleEvent('dragStart', this._dragStartHandler);
     this.handleEvent('dragMove', this._dragMoveHandler);
-    this.handleEvent('dragEnd', this._dragEndHandler);
+    this.handleEvent('dragEnd', this._dragEndHandler, { global: true });
     this.handleEvent('pointerOut', this._pointerOutHandler);
     this.handleEvent('beforeInput', () => this._hide());
     this.handleEvent('keyDown', this._keyboardHandler, { global: true });
