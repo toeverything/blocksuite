@@ -1,6 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
 import {
   FileDropManager,
@@ -263,8 +263,8 @@ export class PageService extends BlockService<PageBlockModel> {
       noteId = page.addBlock('affine:note', {}, page.root.id);
     }
     const id = page.addBlock('affine:paragraph', {}, noteId);
-    const host = document.querySelector('editor-host');
-    if (!host) return;
-    asyncFocusRichText(host, this.page, id)?.catch(console.error);
+    asyncFocusRichText(this.std.host as EditorHost, this.page, id)?.catch(
+      console.error
+    );
   };
 }
