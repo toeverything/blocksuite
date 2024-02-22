@@ -9,7 +9,6 @@ import type { ImageBlockModel, NoteBlockModel } from '../../models.js';
 import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';
-import type { SurfaceRefBlockService } from '../../surface-ref-block/surface-ref-service.js';
 import { matchFlavours } from './model.js';
 
 export function renderDocInCard(
@@ -60,9 +59,7 @@ async function addCover(
 function prepareSurfaceRefRenderer(
   card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
 ) {
-  const surfaceRedService = card.std.spec.getService(
-    'affine:surface-ref'
-  ) as SurfaceRefBlockService;
+  const surfaceRedService = card.std.spec.getService('affine:surface-ref');
   assertExists(surfaceRedService, `Surface ref service not found.`);
   card.surfaceRefService = surfaceRedService;
 

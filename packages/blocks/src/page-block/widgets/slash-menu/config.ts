@@ -1,4 +1,4 @@
-import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
@@ -34,15 +34,12 @@ import {
   openFileOrFiles,
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
-import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
-import type { DatabaseService } from '../../../database-block/database-service.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import { ImageService } from '../../../image-block/image-service.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
@@ -261,8 +258,6 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const imageFiles = await getImageFilesFromLocal();
 
           const imageService = pageElement.host.spec.getService('affine:image');
-          assertExists(imageService);
-          assertInstanceOf(imageService, ImageService);
           const maxFileSize = imageService.maxFileSize;
 
           addSiblingImageBlock(
@@ -314,7 +309,6 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const attachmentService =
             pageElement.host.spec.getService('affine:attachment');
           assertExists(attachmentService);
-          assertInstanceOf(attachmentService, AttachmentService);
           const maxFileSize = attachmentService.maxFileSize;
 
           addSiblingAttachmentBlocks(
@@ -500,9 +494,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             pageElement.page.getParent(model),
             index + 1
           );
-          const service = pageElement.std.spec.getService(
-            'affine:database'
-          ) as DatabaseService;
+          const service = pageElement.std.spec.getService('affine:database');
           service.initDatabaseBlock(
             pageElement.page,
             model,
@@ -539,9 +531,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             pageElement.page.getParent(model),
             index + 1
           );
-          const service = pageElement.std.spec.getService(
-            'affine:database'
-          ) as DatabaseService;
+          const service = pageElement.std.spec.getService('affine:database');
           service.initDatabaseBlock(
             pageElement.page,
             model,

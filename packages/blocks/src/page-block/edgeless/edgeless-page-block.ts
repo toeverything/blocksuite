@@ -3,11 +3,7 @@ import '../../surface-block/surface-block.js';
 import './components/block-portal/frame/edgeless-frame.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
-import {
-  assertExists,
-  assertInstanceOf,
-  throttle,
-} from '@blocksuite/global/utils';
+import { assertExists, throttle } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { type BlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -34,7 +30,6 @@ import {
   on,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
-import { AttachmentService } from '../../attachment-block/attachment-service.js';
 import {
   setAttachmentUploaded,
   setAttachmentUploading,
@@ -44,7 +39,6 @@ import {
   SURFACE_IMAGE_CARD_WIDTH,
 } from '../../image-block/components/image-card.js';
 import type { ImageBlockProps } from '../../image-block/image-model.js';
-import { ImageService } from '../../image-block/image-service.js';
 import type { AttachmentBlockProps } from '../../index.js';
 import type { ImageBlockModel } from '../../models.js';
 import {
@@ -372,8 +366,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     if (!imageFiles.length) return [];
 
     const imageService = this.host.spec.getService('affine:image');
-    assertExists(imageService);
-    assertInstanceOf(imageService, ImageService);
     const maxFileSize = imageService.maxFileSize;
     const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
     if (isSizeExceeded) {
@@ -450,8 +442,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     if (!files.length) return [];
 
     const attachmentService = this.host.spec.getService('affine:attachment');
-    assertExists(attachmentService);
-    assertInstanceOf(attachmentService, AttachmentService);
     const maxFileSize = attachmentService.maxFileSize;
     const isSizeExceeded = files.some(file => file.size > maxFileSize);
     if (isSizeExceeded) {

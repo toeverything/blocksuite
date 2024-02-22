@@ -212,7 +212,7 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.service = this.host.std.spec.getService(this.model.flavour) as Service;
+    this.service = this.host.std.spec.getService(this.model.flavour);
     this.path = this.host.view.calculatePath(this);
 
     this._disposables.add(

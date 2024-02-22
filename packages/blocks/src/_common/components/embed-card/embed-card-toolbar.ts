@@ -31,10 +31,7 @@ import {
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../../page-block/edgeless/utils/query.js';
-import type {
-  EmbedOptions,
-  PageService,
-} from '../../../page-block/page-service.js';
+import type { EmbedOptions } from '../../../page-block/page-service.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../icons/edgeless.js';
 import {
   CaptionIcon,
@@ -204,11 +201,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   }
 
   private get _pageService() {
-    const pageService = this._std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    return pageService;
+    return this._std.spec.getService('affine:page');
   }
 
   private get _canShowUrlOptions() {

@@ -1,4 +1,3 @@
-import type { PageService } from '@blocksuite/blocks';
 import { type EdgelessPageBlockComponent } from '@blocksuite/blocks';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
@@ -87,7 +86,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   hideToolbar = false;
 
   private get _pageService() {
-    return this.editorHost.spec.getService('affine:page') as PageService;
+    return this.editorHost.spec.getService('affine:page');
   }
 
   private _tryRestoreSettings() {

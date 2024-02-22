@@ -49,9 +49,8 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
 
     if (hit) return true;
 
-    const pageService = host.std.spec.getService(
-      'affine:page'
-    ) as EdgelessPageService;
+    const pageService =
+      host.std.spec.getService<EdgelessPageService>('affine:page');
     const isInner = pageService.frame.getFrameInner(this);
 
     const titleRect = getTextRect(this.title.toString(), 'Inter', 14);
