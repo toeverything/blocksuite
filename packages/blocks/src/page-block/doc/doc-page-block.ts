@@ -149,7 +149,7 @@ export class DocPageBlockComponent extends BlockElement<
     const { page } = this;
 
     const noteId = page.addBlock('affine:note', {}, page.root?.id);
-    return page.getBlockById(noteId);
+    return page.getBlockById(noteId) as NoteBlockModel;
   }
 
   private _getDefaultNoteBlock() {
@@ -157,6 +157,26 @@ export class DocPageBlockComponent extends BlockElement<
       this.page.root?.children.find(child => child.flavour === 'affine:note') ??
       this._createDefaultNoteBlock()
     );
+  }
+
+  private _getLastNoteBlock() {
+    let note: NoteBlockModel | null = null;
+    if (!this.page.root) return null;
+    const { children } = this.page.root;
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i];
+      if (
+        matchFlavours(child, ['affine:note']) &&
+        child.displayMode !== NoteDisplayMode.EdgelessOnly
+      ) {
+        note = child as NoteBlockModel;
+        break;
+      }
+    }
+    if (!note) {
+      note = this._createDefaultNoteBlock();
+    }
+    return note;
   }
 
   private _initViewportResizeEffect() {
@@ -186,6 +206,13 @@ export class DocPageBlockComponent extends BlockElement<
       console.error
     );
   };
+
+  appendParagraph() {
+    const note = this._getLastNoteBlock();
+    if (!note) return;
+    const id = this.page.addBlock('affine:paragraph', {}, note);
+    asyncFocusRichText(this.host, this.page, id)?.catch(console.error);
+  }
 
   focusFirstParagraph = () => {
     const defaultNote = this._getDefaultNoteBlock();
