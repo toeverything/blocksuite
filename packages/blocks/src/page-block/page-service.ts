@@ -252,17 +252,17 @@ export class PageService extends BlockService<PageBlockModel> {
         break;
       }
     }
-    if (!note) {
-      const noteId = page.addBlock('affine:note', {}, page.root?.id);
-      note = page.getBlockById(noteId) as NoteBlockModel;
-    }
     return note;
   }
 
   appendParagraph = () => {
-    const note = this._getLastNoteBlock();
-    if (!note) return;
-    const id = this.page.addBlock('affine:paragraph', {}, note);
+    const { page } = this;
+    if (!page.root) return;
+    let noteId = this._getLastNoteBlock()?.id;
+    if (!noteId) {
+      noteId = page.addBlock('affine:note', {}, page.root.id);
+    }
+    const id = page.addBlock('affine:paragraph', {}, noteId);
     const host = document.querySelector('editor-host');
     if (!host) return;
     asyncFocusRichText(host, this.page, id)?.catch(console.error);
