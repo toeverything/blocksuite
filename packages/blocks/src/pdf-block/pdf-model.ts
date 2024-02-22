@@ -15,9 +15,9 @@ type TextAnnotation = {
   /**
    * hightlighted rects in each page
    *
-   * Map<page, [x, y, w, h]>
+   * Rect<page, [x, y, w, h]>
    */
-  highlightRects: Y.Map<[number, number, number, number]>;
+  highlightRects: Record<number, [number, number, number, number]>;
 };
 
 type ClipAnnotation = {
