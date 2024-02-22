@@ -19,7 +19,6 @@ import {
 } from '@blocksuite/store';
 
 import { NoteDisplayMode } from '../types.js';
-import { MarkdownAdapter } from './markdown.js';
 
 export type PlainText = string;
 
@@ -34,11 +33,6 @@ type PlainTextToSliceSnapshotPayload = {
 };
 
 export class PlainTextAdapter extends BaseAdapter<PlainText> {
-  private _markdownAdapter: MarkdownAdapter;
-  constructor() {
-    super();
-    this._markdownAdapter = new MarkdownAdapter();
-  }
   async fromPageSnapshot({
     snapshot,
     assets,
@@ -193,7 +187,6 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
   toSliceSnapshot(
     payload: PlainTextToSliceSnapshotPayload
   ): SliceSnapshot | null {
-    this._markdownAdapter.applyConfigs(this.configs);
     if (payload.file.trim().length === 0) {
       return null;
     }
