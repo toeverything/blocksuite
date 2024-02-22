@@ -22,45 +22,52 @@ export const MoreMenu = ({
   abortController: AbortController;
 }) => {
   const readonly = model.page.readonly;
-  return html`<style>
+  return html`
+    <style>
       ${moreMenuStyles}
     </style>
+
     <div ${ref(moreMenuRef)} class="affine-attachment-options-more">
-      <icon-button
-        width="126px"
-        height="32px"
-        text="Download"
-        @click="${() => downloadAttachment(model)}"
-      >
-        ${DownloadIcon}
-      </icon-button>
-      <icon-button
-        width="126px"
-        height="32px"
-        text="Duplicate"
-        ?hidden=${readonly}
-        @click="${() => {
-          const prop: { flavour: 'affine:attachment' } = {
-            flavour: 'affine:attachment',
-            ...cloneAttachmentProperties(model),
-          };
-          model.page.addSiblingBlocks(model, [prop]);
-        }}"
-      >
-        ${DuplicateIcon}
-      </icon-button>
-      <icon-button
-        width="126px"
-        height="32px"
-        text="Delete"
-        class="danger"
-        ?hidden=${readonly}
-        @click="${() => {
-          model.page.deleteBlock(model);
-          abortController.abort();
-        }}"
-      >
-        ${DeleteIcon}
-      </icon-button>
-    </div>`;
+      <div class="affine-attachment-options-more-container">
+        <icon-button
+          width="126px"
+          height="32px"
+          text="Download"
+          @click="${() => downloadAttachment(model)}"
+        >
+          ${DownloadIcon}
+        </icon-button>
+
+        <icon-button
+          width="126px"
+          height="32px"
+          text="Duplicate"
+          ?hidden=${readonly}
+          @click="${() => {
+            const prop: { flavour: 'affine:attachment' } = {
+              flavour: 'affine:attachment',
+              ...cloneAttachmentProperties(model),
+            };
+            model.page.addSiblingBlocks(model, [prop]);
+          }}"
+        >
+          ${DuplicateIcon}
+        </icon-button>
+
+        <icon-button
+          width="126px"
+          height="32px"
+          text="Delete"
+          class="danger"
+          ?hidden=${readonly}
+          @click="${() => {
+            model.page.deleteBlock(model);
+            abortController.abort();
+          }}"
+        >
+          ${DeleteIcon}
+        </icon-button>
+      </div>
+    </div>
+  `;
 };

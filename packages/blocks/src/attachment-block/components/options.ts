@@ -158,7 +158,7 @@ export function AttachmentOptionsTemplate({
             computePosition: {
               referenceElement: containerEl,
               placement: 'top-end',
-              middleware: [flip(), offset(4)],
+              middleware: [flip()],
             },
           });
         }}

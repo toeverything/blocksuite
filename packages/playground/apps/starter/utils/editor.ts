@@ -25,6 +25,7 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
   if (!app) return;
 
   const editor = new AffineEditorContainer();
+  editor.mode = defaultMode;
   editor.page = page;
   editor.slots.pageLinkClicked.on(({ pageId }) => {
     const target = workspace.getPage(pageId);
@@ -57,7 +58,6 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
   const debugMenu = new DebugMenu();
   debugMenu.workspace = workspace;
   debugMenu.editor = editor;
-  debugMenu.mode = defaultMode;
   debugMenu.outlinePanel = outlinePanel;
   debugMenu.framePanel = framePanel;
   debugMenu.copilotPanel = copilotPanelPanel;

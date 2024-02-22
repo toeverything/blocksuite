@@ -1,9 +1,11 @@
 import { BlockService } from '@blocksuite/block-std';
-import type { Page } from '@blocksuite/store';
+import { type Page, Slot } from '@blocksuite/store';
 
 import { SurfaceRefRenderer } from './surface-ref-renderer.js';
 
 export class SurfaceRefBlockService extends BlockService {
+  static editorModeSwitch = new Slot<'edgeless' | 'page'>();
+
   private _rendererMap = new Map<string, SurfaceRefRenderer>();
 
   getRenderer(id: string, page: Page = this.page, stackingCanvas = false) {

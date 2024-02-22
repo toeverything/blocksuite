@@ -118,7 +118,6 @@ const SessionPropsSchema = z.object({
       zoom: z.number(),
     }),
     z.object({
-      referenceId: z.string(),
       xywh: z.string(),
       padding: z
         .tuple([z.number(), z.number(), z.number(), z.number()])
