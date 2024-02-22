@@ -10,14 +10,18 @@ import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';
 import type { SurfaceRefBlockService } from '../../surface-ref-block/surface-ref-service.js';
+import { EMBED_CARD_HEIGHT } from '../consts.js';
 import { matchFlavours } from './model.js';
 
 export function renderDocInCard(
-  card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard,
-  doc: Page
+  card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
 ) {
-  card.abstractText = getAbstractText(doc);
-  prepareSurfaceRefRenderer(card);
+  renderNoteContent(card).catch(e => {
+    console.error(e);
+    card.isError = true;
+  });
+
+  renderSurfaceRef(card);
 }
 
 function getNoteFromPage(doc: Page) {
@@ -33,11 +37,74 @@ function getNoteFromPage(doc: Page) {
   return note;
 }
 
-function getAbstractText(doc: Page) {
+async function renderNoteContent(
+  card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
+) {
+  card.isNoteContentEmpty = true;
+
+  const doc = card.doc;
+  assertExists(
+    doc,
+    `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
+  );
+
   const note = getNoteFromPage(doc);
-  const blockHasText = note.children.find(child => child.text != null);
-  if (!blockHasText) return '';
-  return blockHasText.text!.toString();
+
+  card.isNoteContentEmpty = note.children.length === 0;
+
+  const noteChildren = note.children.filter(child => {
+    if (matchFlavours(child, ['affine:divider'])) {
+      return true;
+    }
+    if (!matchFlavours(child, ['affine:paragraph', 'affine:list'])) {
+      return false;
+    }
+    return !!child.text && !!child.text.toString().length;
+  });
+  if (!noteChildren.length) {
+    return;
+  }
+
+  const cardStyle = card.model.style;
+  const firstBlock = noteChildren[0];
+
+  if (
+    cardStyle === 'horizontal' &&
+    matchFlavours(firstBlock, ['affine:paragraph']) &&
+    firstBlock.type.match(/^h[1-6]$/)
+  ) {
+    noteChildren.splice(1);
+  }
+
+  const noteContainer = await card.noteContainer;
+  while (noteContainer.firstChild) {
+    noteContainer.removeChild(noteContainer.firstChild);
+  }
+
+  const noteBlocksContainer = document.createElement('div');
+  noteBlocksContainer.classList.add('affine-embed-doc-content-note-blocks');
+  noteBlocksContainer.contentEditable = 'false';
+  noteContainer.appendChild(noteBlocksContainer);
+
+  const cardHeight = EMBED_CARD_HEIGHT[cardStyle];
+
+  for (const block of noteChildren) {
+    const fragment = document.createDocumentFragment();
+    render(card.host.renderModel(block), fragment);
+    noteBlocksContainer.appendChild(fragment);
+
+    await card.updateComplete;
+    const renderHeight = noteBlocksContainer.getBoundingClientRect().height;
+    if (renderHeight >= cardHeight) {
+      break;
+    }
+  }
+  const contentEditableElements = noteBlocksContainer.querySelectorAll(
+    '[contenteditable="true"]'
+  );
+  contentEditableElements.forEach(element => {
+    (element as HTMLElement).contentEditable = 'false';
+  });
 }
 
 async function addCover(
@@ -57,9 +124,11 @@ async function addCover(
   }
 }
 
-function prepareSurfaceRefRenderer(
+function renderSurfaceRef(
   card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
 ) {
+  card.isBannerEmpty = true;
+
   const surfaceRedService = card.std.spec.getService(
     'affine:surface-ref'
   ) as SurfaceRefBlockService;

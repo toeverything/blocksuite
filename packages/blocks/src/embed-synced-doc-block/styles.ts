@@ -204,16 +204,60 @@ export const cardStyles = css`
     line-height: 22px;
   }
 
-  .affine-embed-synced-doc-card-content-description {
+  .affine-embed-synced-doc-content-note.render {
+    display: none;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .affine-embed-doc-content-note-blocks affine-divider,
+  .affine-embed-doc-content-note-blocks affine-divider > * {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h1),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h2),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h3),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h4),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h5),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h6),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h1) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h2) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h3) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h4) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h5) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h6) * {
+    margin-top: 6px !important;
+    margin-bottom: 4px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .affine-embed-doc-content-note-blocks
+    [data-block-id]:not(affine-divider):not(:has(.h1)):not(:has(.h2)):not(
+      :has(.h3)
+    ):not(:has(.h4)):not(:has(.h5)):not(:has(.h6)),
+  .affine-embed-doc-content-note-blocks
+    [data-block-id]:not(affine-divider):not(:has(.h1)):not(:has(.h2)):not(
+      :has(.h3)
+    ):not(:has(.h4)):not(:has(.h5)):not(:has(.h6))
+    * {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 20px !important;
+  }
+
+  .affine-embed-synced-doc-content-note.default {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    flex-grow: 1;
     white-space: normal;
     word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--affine-text-primary-color);
+    color: var(--affine-placeholder-color);
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-xs);
     font-style: normal;
@@ -230,6 +274,7 @@ export const cardStyles = css`
     gap: 8px;
     width: max-content;
     max-width: 100%;
+    line-height: 20px;
   }
 
   .affine-embed-synced-doc-card-content-date > span {
@@ -297,20 +342,15 @@ export const cardStyles = css`
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
-  .affine-embed-synced-doc-card.loading {
-    .affine-embed-synced-doc-card-content-date {
-      display: none;
-    }
-  }
+  .affine-embed-synced-doc-card.loading,
+  .affine-embed-synced-doc-card.deleted,
   .affine-embed-synced-doc-card.error {
-    background: var(--affine-background-secondary-color);
-
-    .affine-embed-synced-doc-card-content-description {
-      color: var(--affine-text-secondary-color);
+    .affine-embed-linked-doc-content-note.render {
+      display: none;
     }
 
-    .affine-embed-synced-doc-card-content-date {
-      display: none;
+    .affine-embed-linked-doc-content-note.default {
+      display: block;
     }
 
     .affine-embed-synced-doc-card-banner.render {
@@ -319,27 +359,20 @@ export const cardStyles = css`
 
     .affine-embed-synced-doc-card-banner.default {
       display: block;
+    }
+
+    .affine-embed-synced-doc-card-content-date {
+      display: none;
     }
   }
-  .affine-embed-synced-doc-card:not(.loading):not(.error).deleted {
-    height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
+  .affine-embed-synced-doc-card:not(.loading).deleted,
+  .affine-embed-synced-doc-card:not(.loading).error {
     background: var(--affine-background-secondary-color);
-
-    .affine-embed-synced-doc-card-content-description {
-      color: var(--affine-text-secondary-color);
-    }
-
-    .affine-embed-synced-doc-card-content-date {
-      display: none;
-    }
-
-    .affine-embed-synced-doc-card-banner.render {
-      display: none;
-    }
-
-    .affine-embed-synced-doc-card-banner.default {
-      display: block;
-    }
+  }
+  .affine-embed-synced-doc-card:not(.loading):not(.error):not(
+      .surface
+    ).deleted {
+    height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
 
     .affine-embed-synced-doc-card-banner {
       height: 66px;
@@ -355,9 +388,19 @@ export const cardStyles = css`
       gap: 12px;
     }
   }
-  .affine-embed-synced-doc-card:not(.loading):not(.error):not(
-      .deleted
-    ).cycle:not(.banner-empty) {
+  .affine-embed-synced-doc-card:not(.loading):not(.error):not(.deleted):not(
+      .note-empty
+    ).cycle {
+    .affine-embed-synced-doc-content-note.render {
+      display: block;
+    }
+    .affine-embed-synced-doc-content-note.default {
+      display: none;
+    }
+  }
+  .affine-embed-synced-doc-card:not(.loading):not(.error):not(.deleted):not(
+      .banner-empty
+    ).cycle {
     .affine-embed-synced-doc-card-banner.render {
       display: block;
     }
@@ -416,7 +459,7 @@ export const cardStyles = css`
       margin: 0 auto;
     }
 
-    .affine-embed-synced-doc-card-content-description {
+    .affine-embed-synced-doc-card-content-note {
       margin: 0 auto;
       flex-grow: 0;
     }
@@ -441,7 +484,7 @@ export const cardStyles = css`
       width: 100%;
     }
 
-    .affine-embed-synced-doc-card-content-description {
+    .affine-embed-synced-doc-card-content-note {
       -webkit-line-clamp: 6;
       max-height: 120px;
     }
@@ -480,7 +523,7 @@ export const cardStyles = css`
       display: none;
     }
 
-    .affine-embed-synced-doc-card-content-description {
+    .affine-embed-synced-doc-card-content-note {
       -webkit-line-clamp: 16;
       max-height: 320px;
     }
