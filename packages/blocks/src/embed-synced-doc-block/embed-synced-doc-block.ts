@@ -65,14 +65,14 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   @state()
   private _empty = false;
 
-  @query('affine-embed-synced-doc-card')
+  @query(':scope > .embed-block-container > affine-embed-synced-doc-card')
   syncedDocCard?: EmbedSyncedDocCard;
 
-  @query('embed-card-caption')
+  @query(':scope > .embed-block-container > embed-card-caption')
   captionElement?: EmbedCardCaption;
 
   @query(
-    '.affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
+    ':scope > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
   )
   syncedDocEditorHost?: EditorHost;
 
@@ -214,6 +214,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
+    const isSelected = !!this.selected?.is('block');
+    if (!isSelected) {
+      return null;
+    }
+
     UIEventDispatcher.slots.activeChanged.once(() => {
       if (!this.std.event.isActive) {
         abortController.abort();
@@ -423,15 +428,17 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         });
       }
 
-      return html`
-        <affine-embed-synced-doc-card
-          ${isInSurface || !isCycle
-            ? nothing
-            : ref(this._whenHover.setReference)}
-          style=${cardStyleMap}
-          .block=${this}
-        ></affine-embed-synced-doc-card>
-      `;
+      return this.renderEmbed(
+        () => html`
+          <affine-embed-synced-doc-card
+            ${isInSurface || !isCycle
+              ? nothing
+              : ref(this._whenHover.setReference)}
+            style=${cardStyleMap}
+            .block=${this}
+          ></affine-embed-synced-doc-card>
+        `
+      );
     }
 
     let containerStyleMap = styleMap({
