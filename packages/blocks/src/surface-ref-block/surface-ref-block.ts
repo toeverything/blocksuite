@@ -490,8 +490,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     if (!this._referencedModel) return;
 
     const viewport = {
-      xywh: '', // FIXME
-      referenceId: this.model.reference,
+      xywh: this._referencedModel.xywh,
       padding: [60, 20, 20, 20] as [number, number, number, number],
     };
     (<PageService>this.std.spec.getService('affine:page')).editSession.setItem(
