@@ -143,9 +143,13 @@ export const getMenus: (ctx: {
                 pageId: pageId,
               });
             };
+            const onFail = (message: string) => {
+              toast(editorHost, message);
+            };
             showImportModal({
               workspace: page.workspace,
               onSuccess,
+              onFail,
             });
           },
         },

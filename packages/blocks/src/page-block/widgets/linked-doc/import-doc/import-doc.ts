@@ -26,6 +26,8 @@ export type OnSuccessHandler = (
   isWorkspaceFile: boolean
 ) => void;
 
+export type OnFailHandler = (message: string) => void;
+
 const SHOW_LOADING_SIZE = 1024 * 200;
 
 export async function importMarkDown(workspace: Workspace, text: string) {
@@ -55,6 +57,7 @@ export async function importHtml(workspace: Workspace, text: string) {
 export async function importNotion(workspace: Workspace, file: File) {
   const pageIds: string[] = [];
   let isWorkspaceFile = false;
+  let hasMarkdown = false;
   const parseZipFile = async (file: File | Blob) => {
     const zip = new JSZip();
     const zipFile = await zip.loadAsync(file);
@@ -68,7 +71,11 @@ export async function importNotion(workspace: Workspace, file: File) {
       const lastSplitIndex = file.lastIndexOf('/');
 
       const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+      if (fileName.endsWith('.md')) {
+        hasMarkdown = true;
+        continue;
+      }
+      if (fileName.endsWith('.html')) {
         if (file.endsWith('/index.html')) {
           isWorkspaceFile = true;
           continue;
@@ -117,13 +124,9 @@ export async function importNotion(workspace: Workspace, file: File) {
   };
   const allPromises = await parseZipFile(file);
   await Promise.all(allPromises.flat());
-  return { pageIds, isWorkspaceFile };
+  return { pageIds, isWorkspaceFile, hasMarkdown };
 }
 
-/**
- * @deprecated Waiting for migration
- * See https://github.com/toeverything/blocksuite/issues/3316
- */
 @customElement('import-doc')
 export class ImportDoc extends WithDisposable(LitElement) {
   static override styles = styles;
@@ -149,6 +152,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
   constructor(
     private workspace: Workspace,
     private onSuccess?: OnSuccessHandler,
+    private onFail?: OnFailHandler,
     private abortController = new AbortController()
   ) {
     super();
@@ -191,6 +195,10 @@ export class ImportDoc extends WithDisposable(LitElement) {
 
   private _onImportSuccess(pageIds: string[], isWorkspaceFile = false) {
     this.onSuccess?.(pageIds, isWorkspaceFile);
+  }
+
+  private _onFail(message: string) {
+    this.onFail?.(message);
   }
 
   private async _importMarkDown() {
@@ -245,11 +253,17 @@ export class ImportDoc extends WithDisposable(LitElement) {
     } else {
       this.abortController.abort();
     }
-    const { pageIds, isWorkspaceFile } = await importNotion(
+    const { pageIds, isWorkspaceFile, hasMarkdown } = await importNotion(
       this.workspace,
       file
     );
     needLoading && this.abortController.abort();
+    if (hasMarkdown) {
+      this._onFail(
+        'Importing markdown files from Notion is deprecated. Please export your Notion pages as HTML.'
+      );
+      return;
+    }
     this._onImportSuccess(pageIds, isWorkspaceFile);
   }
 
