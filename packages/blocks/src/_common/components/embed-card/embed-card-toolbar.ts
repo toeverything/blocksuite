@@ -5,7 +5,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
-import { flip, offset } from '@floating-ui/dom';
+import { flip } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -447,7 +447,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       computePosition: {
         referenceElement,
         placement: 'top',
-        middleware: [flip(), offset(8)],
+        middleware: [flip()],
         autoUpdate: true,
       },
       abortController: this._cardStyleMenuAbortController,
@@ -475,7 +475,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       computePosition: {
         referenceElement: this.embedCardToolbarElement,
         placement: 'top-end',
-        middleware: [flip(), offset(4)],
+        middleware: [flip()],
         autoUpdate: true,
       },
       abortController: this._moreMenuAbortController,
