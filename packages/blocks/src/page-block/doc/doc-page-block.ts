@@ -149,7 +149,7 @@ export class DocPageBlockComponent extends BlockElement<
     const { page } = this;
 
     const noteId = page.addBlock('affine:note', {}, page.root?.id);
-    return page.getBlockById(noteId);
+    return page.getBlockById(noteId) as NoteBlockModel;
   }
 
   private _getDefaultNoteBlock() {

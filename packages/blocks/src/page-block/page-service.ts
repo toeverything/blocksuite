@@ -1,6 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
 import {
   FileDropManager,
@@ -13,7 +13,10 @@ import {
   MarkdownTransformer,
   ZipTransformer,
 } from '../_common/transformers/index.js';
-import type { EmbedCardStyle } from '../_common/types.js';
+import { type EmbedCardStyle, NoteDisplayMode } from '../_common/types.js';
+import { matchFlavours } from '../_common/utils/model.js';
+import { asyncFocusRichText } from '../_common/utils/selection.js';
+import type { NoteBlockModel } from '../note-block/note-model.js';
 import { CanvasTextFonts } from '../surface-block/consts.js';
 import { EditSessionStorage } from '../surface-block/managers/edit-session.js';
 import {
@@ -233,4 +236,35 @@ export class PageService extends BlockService<PageBlockModel> {
   loadFonts() {
     this.fontLoader.load(CanvasTextFonts);
   }
+
+  private _getLastNoteBlock() {
+    const { page } = this;
+    let note: NoteBlockModel | null = null;
+    if (!page.root) return null;
+    const { children } = page.root;
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i];
+      if (
+        matchFlavours(child, ['affine:note']) &&
+        child.displayMode !== NoteDisplayMode.EdgelessOnly
+      ) {
+        note = child as NoteBlockModel;
+        break;
+      }
+    }
+    return note;
+  }
+
+  appendParagraph = () => {
+    const { page } = this;
+    if (!page.root) return;
+    let noteId = this._getLastNoteBlock()?.id;
+    if (!noteId) {
+      noteId = page.addBlock('affine:note', {}, page.root.id);
+    }
+    const id = page.addBlock('affine:paragraph', {}, noteId);
+    asyncFocusRichText(this.std.host as EditorHost, this.page, id)?.catch(
+      console.error
+    );
+  };
 }
