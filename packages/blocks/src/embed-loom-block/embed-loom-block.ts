@@ -183,7 +183,7 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
       `,
       computePosition: {
         referenceElement: this._loomBlockEl,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },

@@ -112,7 +112,7 @@ export class AttachmentBlockComponent extends BlockElement<
       }),
       computePosition: {
         referenceElement: this,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },
