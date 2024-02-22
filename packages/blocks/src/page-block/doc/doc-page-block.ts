@@ -207,12 +207,12 @@ export class DocPageBlockComponent extends BlockElement<
     );
   };
 
-  appendParagraph() {
+  appendParagraph = () => {
     const note = this._getLastNoteBlock();
     if (!note) return;
     const id = this.page.addBlock('affine:paragraph', {}, note);
     asyncFocusRichText(this.host, this.page, id)?.catch(console.error);
-  }
+  };
 
   focusFirstParagraph = () => {
     const defaultNote = this._getDefaultNoteBlock();
