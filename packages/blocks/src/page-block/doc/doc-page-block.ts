@@ -159,26 +159,6 @@ export class DocPageBlockComponent extends BlockElement<
     );
   }
 
-  private _getLastNoteBlock() {
-    let note: NoteBlockModel | null = null;
-    if (!this.page.root) return null;
-    const { children } = this.page.root;
-    for (let i = children.length - 1; i >= 0; i--) {
-      const child = children[i];
-      if (
-        matchFlavours(child, ['affine:note']) &&
-        child.displayMode !== NoteDisplayMode.EdgelessOnly
-      ) {
-        note = child as NoteBlockModel;
-        break;
-      }
-    }
-    if (!note) {
-      note = this._createDefaultNoteBlock();
-    }
-    return note;
-  }
-
   private _initViewportResizeEffect() {
     // when observe viewportElement resize, emit viewport update event
     const resizeObserver = new ResizeObserver(
@@ -205,13 +185,6 @@ export class DocPageBlockComponent extends BlockElement<
     asyncFocusRichText(this.host, this.page, newFirstParagraphId)?.catch(
       console.error
     );
-  };
-
-  appendParagraph = () => {
-    const note = this._getLastNoteBlock();
-    if (!note) return;
-    const id = this.page.addBlock('affine:paragraph', {}, note);
-    asyncFocusRichText(this.host, this.page, id)?.catch(console.error);
   };
 
   focusFirstParagraph = () => {

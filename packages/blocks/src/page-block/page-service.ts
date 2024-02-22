@@ -13,7 +13,10 @@ import {
   MarkdownTransformer,
   ZipTransformer,
 } from '../_common/transformers/index.js';
-import type { EmbedCardStyle } from '../_common/types.js';
+import { type EmbedCardStyle, NoteDisplayMode } from '../_common/types.js';
+import { matchFlavours } from '../_common/utils/model.js';
+import { asyncFocusRichText } from '../_common/utils/selection.js';
+import type { NoteBlockModel } from '../note-block/note-model.js';
 import { CanvasTextFonts } from '../surface-block/consts.js';
 import { EditSessionStorage } from '../surface-block/managers/edit-session.js';
 import {
@@ -233,4 +236,35 @@ export class PageService extends BlockService<PageBlockModel> {
   loadFonts() {
     this.fontLoader.load(CanvasTextFonts);
   }
+
+  private _getLastNoteBlock() {
+    const { page } = this;
+    let note: NoteBlockModel | null = null;
+    if (!page.root) return null;
+    const { children } = page.root;
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i];
+      if (
+        matchFlavours(child, ['affine:note']) &&
+        child.displayMode !== NoteDisplayMode.EdgelessOnly
+      ) {
+        note = child as NoteBlockModel;
+        break;
+      }
+    }
+    if (!note) {
+      const noteId = page.addBlock('affine:note', {}, page.root?.id);
+      note = page.getBlockById(noteId) as NoteBlockModel;
+    }
+    return note;
+  }
+
+  appendParagraph = () => {
+    const note = this._getLastNoteBlock();
+    if (!note) return;
+    const id = this.page.addBlock('affine:paragraph', {}, note);
+    const host = document.querySelector('editor-host');
+    if (!host) return;
+    asyncFocusRichText(host, this.page, id)?.catch(console.error);
+  };
 }
