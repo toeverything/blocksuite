@@ -10,7 +10,6 @@ export const styles = css`
     gap: 12px;
 
     width: 100%;
-    max-width: ${EMBED_CARD_WIDTH.horizontalThin}px;
     height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
 
     padding: 12px;
