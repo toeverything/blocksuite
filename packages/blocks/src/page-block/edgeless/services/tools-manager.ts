@@ -1,9 +1,9 @@
 import type { SurfaceSelection } from '@blocksuite/block-std';
-import {
-  type EventName,
+import type {
+  EventName,
   PointerEventState,
-  type UIEventHandler,
-  type UIEventState,
+  UIEventHandler,
+  UIEventState,
 } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
@@ -72,12 +72,6 @@ export class EdgelessToolsManager {
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
-
-  private _rightClickTimer: {
-    edgelessTool: EdgelessTool;
-    timer: number;
-    timeStamp: number;
-  } | null = null;
 
   // pressed shift key
   private _shiftKey = false;
@@ -322,25 +316,6 @@ export class EdgelessToolsManager {
 
   private _onContainerContextMenu = (e: UIEventState) => {
     e.event.preventDefault();
-    const pointerEventState = new PointerEventState({
-      event: e.event as PointerEvent,
-      rect: this.dispatcher.host.getBoundingClientRect(),
-      startX: 0,
-      startY: 0,
-      last: null,
-      cumulativeParentScale: 1,
-    });
-
-    const edgelessTool = this.edgelessTool;
-    if (edgelessTool.type !== 'pan' && !this._rightClickTimer) {
-      this._rightClickTimer = {
-        edgelessTool: edgelessTool,
-        timeStamp: e.event.timeStamp,
-        timer: window.setTimeout(() => {
-          this._controllers['pan'].onContainerDragStart(pointerEventState);
-        }, 233),
-      };
-    }
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
@@ -373,21 +348,7 @@ export class EdgelessToolsManager {
     this.setEdgelessTool({ type: 'pan', panning: true });
   };
 
-  private _onContainerPointerUp = (e: PointerEventState) => {
-    if (e.button === 2 && this._rightClickTimer) {
-      const {
-        timer,
-        timeStamp,
-        edgelessTool: edgelessTool,
-      } = this._rightClickTimer;
-      if (e.raw.timeStamp - timeStamp > 233) {
-        this.setEdgelessTool(edgelessTool);
-      } else {
-        clearTimeout(timer);
-      }
-      this._rightClickTimer = null;
-    }
-  };
+  private _onContainerPointerUp = (_ev: PointerEventState) => {};
 
   private _isDocOnlyNote(selectedId: string) {
     const selected = this.service.page.getBlockById(selectedId);
