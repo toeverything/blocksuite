@@ -720,8 +720,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
         this._getSavedViewport() ?? this.service.getFitToScreenData();
       if ('xywh' in viewport) {
         const { xywh, padding } = viewport;
-        const bound = Bound.deserialize(xywh);
-        this.service.viewport.setViewportByBound(bound, padding);
+        try {
+          const bound = Bound.deserialize(xywh);
+          this.service.viewport.setViewportByBound(bound, padding);
+        } catch {
+          /* empty */
+        }
       } else {
         const { zoom, centerX, centerY } = viewport;
         this.service.viewport.setViewport(zoom, [centerX, centerY]);
