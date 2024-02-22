@@ -163,11 +163,12 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
   }
 
   private _convertToDatabase(viewType: DataViewTypes) {
-    const selectedModels = this.host.command.getChainCtx(
-      getChainWithHost(this.host.std).getSelectedModels({
+    const [_, ctx] = getChainWithHost(this.host.std)
+      .getSelectedModels({
         types: ['block', 'text'],
       })
-    ).selectedModels;
+      .run();
+    const { selectedModels } = ctx;
     if (!selectedModels || selectedModels.length === 0) return;
 
     this.page.captureSync();

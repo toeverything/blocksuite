@@ -33,7 +33,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const model = blockElement.model;
   const editorHost = blockElement.host;
   const std = editorHost.std;
-  const command = std.command;
   const leftBrackets = bracketPairs.map(pair => pair.left);
 
   const _selectBlock = () => {
@@ -195,26 +194,30 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       )
         return;
 
-      const textModels = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text'],
-        })
-      ).selectedModels;
-      if (textModels && textModels.length === 1) {
-        const inlineEditor = _getInlineEditor();
-        const inilneRange = inlineEditor.getInlineRange();
-        assertExists(inilneRange);
-        handleIndent(blockElement.host, model, inilneRange.index);
-        _preventDefault(ctx);
+      {
+        const [_, context] = getChainWithHost(std)
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const textModels = context.selectedModels;
+        if (textModels && textModels.length === 1) {
+          const inlineEditor = _getInlineEditor();
+          const inilneRange = inlineEditor.getInlineRange();
+          assertExists(inilneRange);
+          handleIndent(blockElement.host, model, inilneRange.index);
+          _preventDefault(ctx);
 
-        return true;
+          return true;
+        }
       }
 
-      const models = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
+      const [_, context] = getChainWithHost(std)
+        .getSelectedModels({
           types: ['text', 'block'],
         })
-      ).selectedModels;
+        .run();
+      const models = context.selectedModels;
       if (!models) return;
       handleMultiBlockIndent(blockElement.host, models);
       return true;
@@ -233,28 +236,32 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text'],
-        })
-      ).selectedModels;
-      if (textModels && textModels.length === 1) {
-        const inlineEditor = _getInlineEditor();
-        const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
-        if (inlineRange.index === 0) {
-          handleRemoveAllIndent(blockElement.host, model, inlineRange.index);
-          _preventDefault(ctx);
-        }
+      {
+        const [_, context] = getChainWithHost(std)
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const textModels = context.selectedModels;
+        if (textModels && textModels.length === 1) {
+          const inlineEditor = _getInlineEditor();
+          const inlineRange = inlineEditor.getInlineRange();
+          assertExists(inlineRange);
+          if (inlineRange.index === 0) {
+            handleRemoveAllIndent(blockElement.host, model, inlineRange.index);
+            _preventDefault(ctx);
+          }
 
-        return true;
+          return true;
+        }
       }
 
-      const models = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
+      const [_, context] = getChainWithHost(std)
+        .getSelectedModels({
           types: ['text', 'block'],
         })
-      ).selectedModels;
+        .run();
+      const models = context.selectedModels;
       if (!models) return;
       handleRemoveAllIndentForMultiBlocks(blockElement.host, models);
       return true;
@@ -273,26 +280,31 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text'],
-        })
-      ).selectedModels;
-      if (textModels && textModels.length === 1) {
-        const inlineEditor = _getInlineEditor();
-        const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
-        handleUnindent(blockElement.host, model, inlineRange.index);
-        _preventDefault(ctx);
+      {
+        const [_, context] = getChainWithHost(std)
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const textModels = context.selectedModels;
 
-        return true;
+        if (textModels && textModels.length === 1) {
+          const inlineEditor = _getInlineEditor();
+          const inlineRange = inlineEditor.getInlineRange();
+          assertExists(inlineRange);
+          handleUnindent(blockElement.host, model, inlineRange.index);
+          _preventDefault(ctx);
+
+          return true;
+        }
       }
 
-      const models = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
+      const [_, context] = getChainWithHost(std)
+        .getSelectedModels({
           types: ['text', 'block'],
         })
-      ).selectedModels;
+        .run();
+      const models = context.selectedModels;
       if (!models) return;
       handleMultiBlockOutdent(blockElement.host, models);
       return true;
