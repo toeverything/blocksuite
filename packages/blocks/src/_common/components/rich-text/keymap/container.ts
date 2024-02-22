@@ -80,6 +80,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _getPrefixText = (inlineEditor: InlineEditor) => {
     const inlineRange = inlineEditor.getInlineRange();
     assertExists(inlineRange);
+    const firstLineEnd = inlineEditor.yTextString.search(/\n/);
+    if (firstLineEnd !== -1 && inlineRange.index > firstLineEnd) {
+      return '';
+    }
     const [leafStart, offsetStart] = inlineEditor.getTextPoint(
       inlineRange.index
     );
