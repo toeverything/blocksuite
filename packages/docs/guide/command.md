@@ -156,3 +156,32 @@ std.command
   })
   .run();
 ```
+
+## Command Returns
+
+After `.run`, the command chain will return two values: `success` and `ctx`.
+
+```ts
+const [success, ctx] = std.command.pipe().commandA().commandB().run();
+```
+
+If all commands passed, the `success` will be `true`, otherwise it will be `false`.
+
+The `ctx` will be the last argument called by `.next`.
+
+For example:
+
+```ts
+const command1 = (ctx, next) => {
+  return next({ data: 0 });
+};
+
+const command2 = (ctx, next) => {
+  return next({ data: 1 });
+};
+
+const [sucess, ctx] = std.command.pipe().command1().command2().run();
+
+// This will pass
+expect(ctx.data).toBe(1);
+```
