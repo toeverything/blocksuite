@@ -4,9 +4,32 @@ import { BlockModel, defineBlockSchema, Workspace } from '@blocksuite/store';
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { SerializedXYWH } from '../surface-block/index.js';
 
+enum AnnotationType {
+  Text = 0,
+  Clip = 1,
+}
+
+type TextAnnotation = {
+  type: AnnotationType.Text;
+  content: string;
+  /**
+   * hightlighted rects in each page
+   *
+   * Map<page, [x, y, w, h]>
+   */
+  highlightRects: Y.Map<[number, number, number, number]>;
+};
+
+type ClipAnnotation = {
+  type: AnnotationType.Clip;
+  highlightRect: [number, number, number, number];
+};
+
+type Annotation = TextAnnotation | ClipAnnotation;
+
 type PDFProps = {
   sourceId: string;
-  annotations: Boxed<Y.Map<unknown>>;
+  annotations: Boxed<Y.Map<Annotation>>;
   xywh: SerializedXYWH;
   index: string;
 };
