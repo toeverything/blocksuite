@@ -57,9 +57,7 @@ export class EdgelessToolsManager {
     return manager;
   }
 
-  private _edgelessTool: EdgelessTool = {
-    type: 'default',
-  };
+  private _edgelessTool: EdgelessTool = this._getToolFromLocalStorage();
 
   private _container!: EdgelessPageBlockComponent;
   private _service!: EdgelessPageService;
@@ -181,6 +179,12 @@ export class EdgelessToolsManager {
       x: e.x,
       y: e.y,
     };
+  }
+
+  private _getToolFromLocalStorage(): EdgelessTool {
+    const type = localStorage.defaultTool;
+    if (type === 'pan') return { type: 'pan', panning: false };
+    return { type: 'default' };
   }
 
   private _initMouseAndWheelEvents() {
