@@ -128,7 +128,11 @@ export function createButtonPopper(
   };
 }
 
-export function getTooltipWithShortcut(tip: string, shortcut: string) {
+export function getTooltipWithShortcut(
+  tip: string,
+  shortcut: string,
+  postfix?: string
+) {
   // style for shortcut tooltip
   const styles = css`
     .tooltip-with-shortcut {
@@ -155,6 +159,9 @@ export function getTooltipWithShortcut(tip: string, shortcut: string) {
       background: currentColor;
       opacity: 0.2;
     }
+    .tooltip__label {
+      white-space: pre;
+    }
   `;
   return html`<style>
       ${styles}
@@ -162,6 +169,7 @@ export function getTooltipWithShortcut(tip: string, shortcut: string) {
     <div class="tooltip-with-shortcut">
       <span class="tooltip__label">${tip}</span>
       <span class="tooltip__shortcut">${shortcut}</span>
+      ${postfix ? html`<span class="tooltip__postfix">${postfix}</span>` : ''}
     </div>`;
 }
 

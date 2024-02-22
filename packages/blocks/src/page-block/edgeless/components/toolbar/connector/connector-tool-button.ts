@@ -12,6 +12,7 @@ import {
 import { LineWidth } from '../../../../../_common/utils/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
+import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
 import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
 import type { EdgelessConnectorMenu } from './connector-menu.js';
@@ -92,10 +93,10 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
         .tooltip=${this._menu
           ? ''
           : html`<div>
-              <div>Straight : L</div>
-              <div>Elbowed : X (Default)</div>
-              <div>Curve : C</div>
-            </div>`}
+              ${getTooltipWithShortcut('Straight ', 'L')}
+              ${getTooltipWithShortcut('Elbowed', 'X', '(Default)')}
+              ${getTooltipWithShortcut('Curve    ', 'C')}
+            </div> `}
         .tooltipOffset=${17}
         .active=${active}
         .iconContainerPadding=${8}
