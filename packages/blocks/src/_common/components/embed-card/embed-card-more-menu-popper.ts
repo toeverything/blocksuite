@@ -19,36 +19,41 @@ import type { EmbedToolbarBlock } from './embed-card-toolbar.js';
 export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .embed-card-more-menu {
+      box-sizing: border-box;
+      padding-bottom: 4px;
+    }
+
+    .embed-card-more-menu-container {
       border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
     }
 
-    .embed-card-more-menu .menu-item {
+    .embed-card-more-menu-container > .menu-item {
       display: flex;
       justify-content: flex-start;
       align-items: center;
       width: 100%;
     }
 
-    .embed-card-more-menu .menu-item:hover {
+    .embed-card-more-menu-container > .menu-item:hover {
       background: var(--affine-hover-color);
     }
 
-    .embed-card-more-menu .menu-item:hover.delete {
+    .embed-card-more-menu-container > .menu-item:hover.delete {
       background: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }
-    .embed-card-more-menu .menu-item:hover.delete > svg {
+    .embed-card-more-menu-container > .menu-item:hover.delete > svg {
       color: var(--affine-error-color);
     }
 
-    .embed-card-more-menu .menu-item svg {
+    .embed-card-more-menu-container > .menu-item svg {
       margin: 0 8px;
     }
 
-    .embed-card-more-menu .divider {
+    .embed-card-more-menu-container > .divider {
       width: 148px;
       height: 1px;
       margin: 8px;
@@ -109,62 +114,66 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="embed-card-more-menu">
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item open"
-        text="Open"
-        @click=${() => this._open()}
-      >
-        ${OpenIcon}
-      </icon-button>
+    return html`
+      <div class="embed-card-more-menu">
+        <div class="embed-card-more-menu-container">
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item open"
+            text="Open"
+            @click=${() => this._open()}
+          >
+            ${OpenIcon}
+          </icon-button>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item copy"
-        text="Copy"
-        @click=${() => this._copyBlock()}
-      >
-        ${CopyIcon}
-      </icon-button>
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item copy"
+            text="Copy"
+            @click=${() => this._copyBlock()}
+          >
+            ${CopyIcon}
+          </icon-button>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item duplicate"
-        text="Duplicate"
-        ?disabled=${this._page.readonly}
-        @click=${() => this._duplicateBlock()}
-      >
-        ${DuplicateIcon}
-      </icon-button>
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item duplicate"
+            text="Duplicate"
+            ?disabled=${this._page.readonly}
+            @click=${() => this._duplicateBlock()}
+          >
+            ${DuplicateIcon}
+          </icon-button>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item reload"
-        text="Reload"
-        ?disabled=${this._page.readonly}
-        @click=${() => this._refreshData()}
-      >
-        ${RefreshIcon}
-      </icon-button>
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item reload"
+            text="Reload"
+            ?disabled=${this._page.readonly}
+            @click=${() => this._refreshData()}
+          >
+            ${RefreshIcon}
+          </icon-button>
 
-      <div class="divider"></div>
+          <div class="divider"></div>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item delete"
-        text="Delete"
-        ?disabled=${this._page.readonly}
-        @click=${() => this._page.deleteBlock(this._model)}
-      >
-        ${DeleteIcon}
-      </icon-button>
-    </div> `;
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item delete"
+            text="Delete"
+            ?disabled=${this._page.readonly}
+            @click=${() => this._page.deleteBlock(this._model)}
+          >
+            ${DeleteIcon}
+          </icon-button>
+        </div>
+      </div>
+    `;
   }
 }
 
