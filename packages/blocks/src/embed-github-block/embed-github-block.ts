@@ -171,7 +171,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       `,
       computePosition: {
         referenceElement: this,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },

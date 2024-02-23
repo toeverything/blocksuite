@@ -209,55 +209,60 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
   }
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    const isSelected = !!this.selected?.is('block');
-    if (!isSelected) {
-      return null;
-    }
-
-    UIEventDispatcher.slots.activeChanged.once(() => {
-      if (!this.std.event.isActive) {
-        abortController.abort();
+  private _whenHover = new HoverController(
+    this,
+    ({ abortController }) => {
+      if (this._editing) {
+        return null;
       }
-    });
 
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
+      UIEventDispatcher.slots.activeChanged.once(() => {
+        if (!this.std.event.isActive) {
+          abortController.abort();
+        }
+      });
+
+      const selection = this.host.selection;
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || !!textSelection.from.length)
+      ) {
+        return null;
+      }
+
+      const blockSelections = selection.filter('block');
+      if (
+        blockSelections.length > 1 ||
+        (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+      ) {
+        return null;
+      }
+
+      return {
+        template: html`
+          <style>
+            :host {
+              z-index: 1;
+            }
+          </style>
+          <embed-card-toolbar
+            .block=${this}
+            .abortController=${abortController}
+          ></embed-card-toolbar>
+        `,
+        computePosition: {
+          referenceElement: this,
+          placement: 'top-start',
+          middleware: [flip(), offset(4)],
+          autoUpdate: true,
+        },
+      };
+    },
+    {
+      allowMultiple: true,
     }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-    ) {
-      return null;
-    }
-
-    return {
-      template: html`
-        <style>
-          :host {
-            z-index: 1;
-          }
-        </style>
-        <embed-card-toolbar
-          .block=${this}
-          .abortController=${abortController}
-        ></embed-card-toolbar>
-      `,
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    };
-  });
+  );
 
   private _handlePointerDown = (event: MouseEvent) => {
     if (this._editing) {
@@ -409,7 +414,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         position: 'relative',
         display: 'block',
         width: '100%',
-        margin: '18px 0px',
       });
       if (isInSurface) {
         const bound = Bound.deserialize(this.model.xywh);
@@ -433,6 +437,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
             style=${cardStyleMap}
             .block=${this}
           ></affine-embed-synced-doc-card>
+
+          <embed-card-caption .block=${this}></embed-card-caption>
         `
       );
     }

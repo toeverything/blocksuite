@@ -342,11 +342,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
-    const isSelected = !!this.selected?.is('block');
-    if (!isSelected) {
-      return null;
-    }
-
     const selection = this.host.selection;
     const textSelection = selection.find('text');
     if (

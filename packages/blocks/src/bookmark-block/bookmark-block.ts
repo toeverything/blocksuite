@@ -113,7 +113,7 @@ export class BookmarkBlockComponent extends BlockElement<
       `,
       computePosition: {
         referenceElement: this.bookmarkCard,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },
