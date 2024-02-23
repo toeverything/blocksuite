@@ -492,10 +492,9 @@ export class SurfaceRefBlockComponent extends BlockElement<
       xywh: this._referencedModel.xywh,
       padding: [60, 20, 20, 20] as [number, number, number, number],
     };
-    this.std.spec.getService('affine:page').editSession.setItem(
-      'viewport',
-      viewport
-    );
+    this.std.spec
+      .getService('affine:page')
+      .editSession.setItem('viewport', viewport);
 
     SurfaceRefBlockService.editorModeSwitch.emit('edgeless');
   }
