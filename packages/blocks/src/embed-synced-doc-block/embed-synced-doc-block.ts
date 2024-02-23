@@ -27,7 +27,7 @@ import {
   EdgelessEditorBlockSpecs,
 } from '../_specs/_specs.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import type { PageBlockComponent, PageService } from '../page-block/index.js';
+import type { PageBlockComponent } from '../page-block/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
@@ -105,11 +105,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   private get _pageService() {
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService, `Page service not found.`);
-    return pageService;
+    return this.std.spec.getService('affine:page');
   }
 
   private _checkCycle() {

@@ -1,5 +1,8 @@
 import './commands/index.js';
 
+import type { EdgelessPageService } from './edgeless/edgeless-page-service.js';
+import type { PageService } from './page-service.js';
+
 export * from './doc/doc-page-block.js';
 export { DocPageService } from './doc/doc-page-service.js';
 export { getAllowSelectedBlocks } from './doc/utils.js';
@@ -14,3 +17,11 @@ export { PageService } from './page-service.js';
 export * from './types.js';
 export * from './utils/index.js';
 export * from './widgets/index.js';
+
+declare global {
+  namespace BlockSuite {
+    interface BlockServices {
+      'affine:page': PageService | EdgelessPageService;
+    }
+  }
+}

@@ -1,6 +1,5 @@
 import type { EditorHost } from '@blocksuite/lit';
 
-import type { PageService } from '../page-service.js';
 import { multiPlayersColor } from './color-picker.js';
 
 export class RemoteColorManager {
@@ -9,7 +8,7 @@ export class RemoteColorManager {
   }
 
   private get pageService() {
-    return this.host.spec.getService('affine:page') as PageService;
+    return this.host.spec.getService('affine:page');
   }
 
   constructor(public readonly host: EditorHost) {

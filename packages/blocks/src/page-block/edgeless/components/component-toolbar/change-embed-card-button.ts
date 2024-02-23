@@ -66,7 +66,7 @@ import {
   type EdgelessBlockType,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EmbedOptions, PageService } from '../../../page-service.js';
+import type { EmbedOptions } from '../../../page-service.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
@@ -248,11 +248,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   private _cardStylePopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private get _pageService() {
-    const pageService = this.surface.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    return pageService;
+    return this.surface.std.spec.getService('affine:page');
   }
 
   private get _blockElement() {

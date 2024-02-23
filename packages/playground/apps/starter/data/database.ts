@@ -1,5 +1,4 @@
 import type { ListType, ParagraphType } from '@blocksuite/blocks';
-import type { DatabaseService } from '@blocksuite/blocks';
 import { checkboxPureColumnConfig } from '@blocksuite/blocks';
 import { datePureColumnConfig } from '@blocksuite/blocks';
 import { linkPureColumnConfig } from '@blocksuite/blocks';
@@ -41,9 +40,7 @@ export const database: InitFn = (workspace: Workspace, id: string) => {
 
     new Promise(resolve => requestAnimationFrame(resolve))
       .then(() => {
-        const service = window.host.std.spec.getService(
-          'affine:database'
-        ) as DatabaseService;
+        const service = window.host.std.spec.getService('affine:database');
         service.initDatabaseBlock(page, model, databaseId, 'table', true);
         const database = page.getBlockById(databaseId) as DatabaseBlockModel;
         database.addColumn(

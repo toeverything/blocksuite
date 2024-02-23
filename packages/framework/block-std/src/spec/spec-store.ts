@@ -42,8 +42,12 @@ export class SpecStore {
     return spec.view;
   }
 
-  getService(flavour: string) {
-    return this._services.get(flavour);
+  getService<Key extends BlockSuite.ServiceKeys>(
+    flavour: Key
+  ): BlockSuite.BlockServices[Key];
+  getService<Service extends BlockService>(flavour: string): Service;
+  getService(flavour: string): BlockService {
+    return this._services.get(flavour) as never;
   }
 
   private _diffServices(
@@ -91,5 +95,13 @@ export class SpecStore {
       specMap.set(spec.schema.model.flavour, spec);
     });
     return specMap;
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface BlockServices {}
+
+    type ServiceKeys = string & keyof BlockServices;
   }
 }

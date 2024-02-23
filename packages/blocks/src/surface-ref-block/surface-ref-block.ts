@@ -16,7 +16,6 @@ import {
 } from '../_common/icons/index.js';
 import { requestConnectedFrame } from '../_common/utils/event.js';
 import { buildPath } from '../_common/utils/query.js';
-import type { PageService } from '../index.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
@@ -493,10 +492,9 @@ export class SurfaceRefBlockComponent extends BlockElement<
       xywh: this._referencedModel.xywh,
       padding: [60, 20, 20, 20] as [number, number, number, number],
     };
-    (<PageService>this.std.spec.getService('affine:page')).editSession.setItem(
-      'viewport',
-      viewport
-    );
+    this.std.spec
+      .getService('affine:page')
+      .editSession.setItem('viewport', viewport);
 
     SurfaceRefBlockService.editorModeSwitch.emit('edgeless');
   }

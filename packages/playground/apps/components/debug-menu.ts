@@ -17,11 +17,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 import './side-panel.js';
 
-import type {
-  AffineTextAttributes,
-  PageService,
-  TreeNode,
-} from '@blocksuite/blocks';
+import type { AffineTextAttributes, TreeNode } from '@blocksuite/blocks';
 import {
   BlocksUtils,
   ColorVariables,
@@ -265,7 +261,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   get pageService() {
-    return this.editor.host.spec.getService('affine:page') as PageService;
+    return this.editor.host.spec.getService('affine:page');
   }
 
   override createRenderRoot() {

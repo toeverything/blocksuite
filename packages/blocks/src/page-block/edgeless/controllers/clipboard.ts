@@ -62,7 +62,6 @@ import type { SurfaceBlockComponent } from '../../../surface-block/surface-block
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 import { PageClipboard } from '../../clipboard/index.js';
-import type { PageService } from '../../index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { deleteElements } from '../utils/crud.js';
@@ -118,11 +117,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private get _pageService() {
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    return pageService;
+    return this.std.spec.getService('affine:page');
   }
 
   private get _exportManager() {
