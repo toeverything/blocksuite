@@ -47,7 +47,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
-import { getEdgelessService } from '../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
+import { getEdgelessService } from '../../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';

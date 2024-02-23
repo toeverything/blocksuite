@@ -27,7 +27,7 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { notify } from '../default/utils/notify.js';
+import { notify } from '../../default/utils/notify.js';
 import { generateRoomId } from '../sync/websocket/utils.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { PagesPanel } from './pages-panel.js';
