@@ -868,11 +868,13 @@ function handleParagraphBlockForwardDelete(
       'affine:code',
       'affine:attachment',
     ];
+
     if (
       nextSibling &&
-      ignoreForwardDeleteFlavourList.includes(nextSibling.flavour as Flavour)
-    )
+      matchFlavours(nextSibling, ignoreForwardDeleteFlavourList)
+    ) {
       return true;
+    }
 
     return (
       handleParagraphOrList(page, model, nextSibling, firstChild) ||
