@@ -5,7 +5,6 @@ import type { EditorHost } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { EmbedLinkedDocService } from '../../../embed-linked-doc-block/embed-linked-doc-service.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
 import {
@@ -181,10 +180,7 @@ export const quickActionConfig: QuickActionConfig[] = [
         });
       });
 
-      const linkedDocService = host.spec.getService(
-        'affine:embed-linked-doc'
-      ) as EmbedLinkedDocService | null;
-      assertExists(linkedDocService);
+      const linkedDocService = host.spec.getService('affine:embed-linked-doc');
       linkedDocService.slots.linkedDocCreated.emit({ pageId: linkedPage.id });
     },
   },

@@ -18,11 +18,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 
 import type { AffineTextAttributes } from '@blocksuite/blocks';
-import {
-  ColorVariables,
-  extractCssVariables,
-  type PageService,
-} from '@blocksuite/blocks';
+import { ColorVariables, extractCssVariables } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
@@ -31,7 +27,7 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { notify } from '../default/utils/notify.js';
+import { notify } from '../../default/utils/notify.js';
 import { generateRoomId } from '../sync/websocket/utils.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 import type { PagesPanel } from './pages-panel.js';
@@ -97,7 +93,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   get pageService() {
-    return this.editor.host.spec.getService('affine:page') as PageService;
+    return this.editor.host.spec.getService('affine:page');
   }
 
   override createRenderRoot() {

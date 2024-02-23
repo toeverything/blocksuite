@@ -1,4 +1,3 @@
-import { type PageService } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -87,7 +86,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   }
 
   private get _pageService() {
-    return this.host.spec.getService('affine:page') as PageService;
+    return this.host.spec.getService('affine:page');
   }
 
   get mode() {

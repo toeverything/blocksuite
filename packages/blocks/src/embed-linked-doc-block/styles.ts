@@ -8,7 +8,6 @@ export const styles = css`
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    max-width: ${EMBED_CARD_WIDTH.horizontal}px;
     height: ${EMBED_CARD_HEIGHT.horizontal}px;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
@@ -19,7 +18,7 @@ export const styles = css`
   }
 
   .affine-embed-linked-doc-content {
-    width: 536px;
+    width: calc(100% - 204px);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -265,7 +264,7 @@ export const styles = css`
     }
 
     .affine-embed-linked-doc-content-title {
-      width: 536px;
+      width: calc(100% - 204px);
     }
 
     .affine-embed-linked-doc-content-note {

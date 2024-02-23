@@ -186,7 +186,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       `,
       computePosition: {
         referenceElement: this._youtubeBlockEl,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },

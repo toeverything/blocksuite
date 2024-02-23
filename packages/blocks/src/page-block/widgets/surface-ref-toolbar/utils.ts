@@ -6,7 +6,6 @@ import { isTopLevelBlock } from '../../../page-block/edgeless/utils/query.js';
 import type { Renderer } from '../../../surface-block/canvas-renderer/renderer.js';
 import { Bound } from '../../../surface-block/utils/bound.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
-import type { PageService } from '../../page-service.js';
 
 export const edgelessToBlob = async (
   host: EditorHost,
@@ -18,7 +17,7 @@ export const edgelessToBlob = async (
   }
 ): Promise<Blob> => {
   const { edgelessElement, blockContainer } = options;
-  const pageService = host.spec.getService('affine:page') as PageService;
+  const pageService = host.spec.getService('affine:page');
   const exportManager = pageService.exportManager;
   const bound = Bound.deserialize(edgelessElement.xywh);
   const isBlock = isTopLevelBlock(edgelessElement);

@@ -143,7 +143,6 @@ export const cardStyles = css`
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    max-width: ${EMBED_CARD_WIDTH.horizontal}px;
     height: ${EMBED_CARD_HEIGHT.horizontal}px;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
@@ -154,7 +153,7 @@ export const cardStyles = css`
   }
 
   .affine-embed-synced-doc-card-content {
-    width: 536px;
+    width: calc(100% - 204px);
     height: 100%;
     display: flex;
     flex-direction: column;

@@ -116,7 +116,7 @@ export function AttachmentOptionsTemplate({
             }),
             computePosition: {
               referenceElement: anchor,
-              placement: 'top-end',
+              placement: 'top-start',
               middleware: [flip(), offset(4)],
               // It has a overlay mask, so we don't need to update the position.
               // autoUpdate: true,

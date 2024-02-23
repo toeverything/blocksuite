@@ -59,7 +59,7 @@ export class CommandManager {
             let ctx = beforeCtx;
             const chains = fn(pipe());
 
-            for (const chain of chains) {
+            chains.some(chain => {
               // inject ctx in the beginning
               chain[cmdSymbol] = [
                 (_, next) => {
@@ -76,9 +76,10 @@ export class CommandManager {
                 .run();
               if (success) {
                 next(ctx);
-                break;
+                return true;
               }
-            }
+              return false;
+            });
           },
         ]) as never;
       },
@@ -91,7 +92,7 @@ export class CommandManager {
             const chains = fn(pipe());
 
             let allFail = true;
-            for (const chain of chains) {
+            chains.forEach(chain => {
               // inject ctx in the beginning
               chain[cmdSymbol] = [
                 (_, next) => {
@@ -109,7 +110,7 @@ export class CommandManager {
               if (success) {
                 allFail = false;
               }
-            }
+            });
             if (!allFail) {
               next(ctx);
             }

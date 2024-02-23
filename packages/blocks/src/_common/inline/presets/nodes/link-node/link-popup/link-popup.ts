@@ -9,10 +9,7 @@ import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type {
-  EmbedOptions,
-  PageService,
-} from '../../../../../../page-block/page-service.js';
+import type { EmbedOptions } from '../../../../../../page-block/page-service.js';
 import type { IconButton } from '../../../../../components/button.js';
 import { createLitPortal } from '../../../../../components/portal.js';
 import { toast } from '../../../../../components/toast.js';
@@ -155,11 +152,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private get _pageService() {
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    return pageService;
+    return this.std.spec.getService('affine:page');
   }
 
   get host() {

@@ -7,7 +7,6 @@ import type { EdgelessModel, TopLevelBlockModel } from '../_common/types.js';
 import type { NoteBlockModel } from '../note-block/index.js';
 import { Renderer } from '../surface-block/index.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
-import type { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { getSurfaceBlock } from './utils.js';
 
 export class SurfaceRefRenderer {
@@ -25,7 +24,7 @@ export class SurfaceRefRenderer {
   };
 
   get surfaceService() {
-    return this.std.spec.getService('affine:surface') as SurfacePageService;
+    return this.std.spec.getService('affine:surface');
   }
 
   get surfaceRenderer() {
