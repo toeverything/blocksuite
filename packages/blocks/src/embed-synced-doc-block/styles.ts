@@ -57,7 +57,7 @@ export const blockStyles = css`
   }
   .affine-embed-synced-doc-container:hover.light,
   .affine-embed-synced-doc-container.selected.light,
-  aaffine-embed-synced-doc-block.with-drag-handle
+  affine-embed-synced-doc-block.with-drag-handle
     > .affine-embed-synced-doc-container.light {
     box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.08);
   }
