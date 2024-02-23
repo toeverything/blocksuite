@@ -11,10 +11,10 @@ import {
 import { assertExists } from '@global/utils.js';
 import { type InlineRange, type InlineRootElement } from '@inline/index.js';
 import type { EditorHost } from '@lit/element/lit-host.js';
-import type { CustomFramePanel } from '@playground/apps/components/custom-frame-panel.js';
-import type { CustomOutlinePanel } from '@playground/apps/components/custom-outline-panel.js';
-import type { DebugMenu } from '@playground/apps/components/debug-menu.js';
-import type { PagesPanel } from '@playground/apps/components/pages-panel.js';
+import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
+import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
+import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
+import type { PagesPanel } from '@playground/apps/_common/components/pages-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { BlockModel } from '@store/schema/index.js';
