@@ -37,6 +37,9 @@ export class PresentToolController extends EdgelessToolController<FrameNavigator
   override onPressShiftKey(): void {
     noop();
   }
+  override onPressSpaceBar(_pressed: boolean): void {
+    noop();
+  }
   override beforeModeSwitch(): void {
     noop();
   }

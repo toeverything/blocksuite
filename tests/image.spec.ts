@@ -200,7 +200,7 @@ test('popup menu should follow position of image when scrolling', async ({
   await expect(menu).toBeVisible();
 
   await page.evaluate(
-    async ([rect]) => {
+    ([rect]) => {
       const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();

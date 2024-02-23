@@ -3,16 +3,12 @@ import { Workspace } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-export const versionMismatch: InitFn = async (
-  workspace: Workspace,
-  id: string
-) => {
+export const versionMismatch: InitFn = (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
   const tempPage = workspace.createPage({ id: 'tempPage' });
-  await page.load();
+  page.load();
 
-  await tempPage.load(() => {
+  tempPage.load(() => {
     const pageBlockId = tempPage.addBlock('affine:page', {});
     tempPage.addBlock('affine:surface', {}, pageBlockId);
     const noteId = tempPage.addBlock(

@@ -4,7 +4,7 @@ export async function getRichTextBoundingBox(
   page: Page,
   blockId: string
 ): Promise<DOMRect> {
-  return await page.evaluate(id => {
+  return page.evaluate(id => {
     const paragraph = document.querySelector(
       `[data-block-id="${id}"] .inline-editor`
     );

@@ -840,9 +840,14 @@ export class ConnectionOverlay extends Overlay {
       // if not, check if in inside of the element
 
       if (
-        connectable.hitTest(point[0], point[1], {
-          ignoreTransparent: false,
-        })
+        connectable.hitTest(
+          point[0],
+          point[1],
+          {
+            ignoreTransparent: false,
+          },
+          this._service.host
+        )
       ) {
         result = {
           id: connectable.id,

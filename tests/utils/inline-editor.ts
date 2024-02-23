@@ -7,7 +7,7 @@ export async function getStringFromRichText(
   index = 0
 ): Promise<string> {
   await page.waitForTimeout(50);
-  return await page.evaluate(
+  return page.evaluate(
     ([index, currentEditorIndex]) => {
       const editorHost =
         document.querySelectorAll('editor-host')[currentEditorIndex];

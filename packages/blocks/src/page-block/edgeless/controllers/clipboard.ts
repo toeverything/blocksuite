@@ -38,6 +38,7 @@ import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-mod
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedHtmlModel } from '../../../embed-html-block/embed-html-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedLoomModel } from '../../../embed-loom-block/embed-loom-model.js';
 import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-synced-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
@@ -61,7 +62,6 @@ import type { SurfaceBlockComponent } from '../../../surface-block/surface-block
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 import { PageClipboard } from '../../clipboard/index.js';
-import type { PageService } from '../../index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { deleteElements } from '../utils/crud.js';
@@ -73,6 +73,7 @@ import {
   isEmbedGithubBlock,
   isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
+  isEmbedLoomBlock,
   isEmbedSyncedDocBlock,
   isEmbedYoutubeBlock,
   isFrameBlock,
@@ -116,11 +117,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private get _pageService() {
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    return pageService;
+    return this.std.spec.getService('affine:page');
   }
 
   private get _exportManager() {
@@ -143,7 +140,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
         if (selectedIds.length === 0) return false;
 
-        this._onCopy(ctx, selections).catch(console.error);
+        this._onCopy(ctx, selections);
         return;
       },
       { global: true }
@@ -166,7 +163,16 @@ export class EdgelessClipboardController extends PageClipboard {
     );
   };
 
-  private _onCopy = async (
+  copy() {
+    document.dispatchEvent(
+      new Event('copy', {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+  }
+
+  private _onCopy = (
     _context: UIEventStateContext,
     surfaceSelection: SurfaceSelection[]
   ) => {
@@ -290,7 +296,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const json = this.std.clipboard.readFromClipboard(data);
     const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
-    this._pasteShapesAndBlocks(elementsRawData).catch(console.error);
+    this._pasteShapesAndBlocks(elementsRawData);
   };
 
   private _onCut = (_context: UIEventStateContext) => {
@@ -301,7 +307,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const event = _context.get('clipboardState').event;
     event.preventDefault();
 
-    this._onCopy(_context, selections).catch(console.error);
+    this._onCopy(_context, selections);
 
     if (selections[0]?.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
@@ -668,6 +674,30 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedHtmlIds;
   }
 
+  private _createLoomEmbedBlocks(loomEmbeds: BlockSnapshot[]) {
+    const embedLoomIds = loomEmbeds.map(({ props }) => {
+      const { xywh, style, url, caption, videoId, image, title, description } =
+        props;
+
+      const embedLoomId = this.host.service.addBlock(
+        'affine:embed-loom',
+        {
+          xywh,
+          style,
+          url,
+          caption,
+          videoId,
+          image,
+          title,
+          description,
+        },
+        this.surface.model.id
+      );
+      return embedLoomId;
+    });
+    return embedLoomIds;
+  }
+
   private _emitSelectionChangeAfterPaste(
     canvasElementIds: string[],
     blockIds: string[]
@@ -685,7 +715,7 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
-  async createElementsFromClipboardData(
+  createElementsFromClipboardData(
     elementsRawData: Record<string, unknown>[],
     pasteCenter?: IVec
   ) {
@@ -712,7 +742,9 @@ export class EdgelessClipboardController extends PageClipboard {
                           ? 'syncedDocEmbeds'
                           : isEmbedHtmlBlock(data as unknown as Selectable)
                             ? 'htmlEmbeds'
-                            : 'elements'
+                            : isEmbedLoomBlock(data as unknown as Selectable)
+                              ? 'loomEmbeds'
+                              : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
@@ -725,6 +757,7 @@ export class EdgelessClipboardController extends PageClipboard {
       linkedDocEmbeds?: BlockSnapshot[];
       syncedDocEmbeds?: BlockSnapshot[];
       htmlEmbeds?: BlockSnapshot[];
+      loomEmbeds?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
     pasteCenter =
@@ -769,6 +802,9 @@ export class EdgelessClipboardController extends PageClipboard {
     );
     const embedHtmlIds = this._createHtmlEmbedBlocks(
       groupedByType.htmlEmbeds ?? []
+    );
+    const embedLoomIds = this._createLoomEmbedBlocks(
+      groupedByType.loomEmbeds ?? []
     );
 
     const notes = noteIds.map(id =>
@@ -815,6 +851,10 @@ export class EdgelessClipboardController extends PageClipboard {
       this.host.service.getElementById(id)
     ) as EmbedHtmlModel[];
 
+    const loomEmbeds = embedLoomIds.map(id =>
+      this.host.service.getElementById(id)
+    ) as EmbedLoomModel[];
+
     const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
@@ -835,6 +875,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...linkedDocEmbeds,
       ...syncedDocEmbeds,
       ...htmlEmbeds,
+      ...loomEmbeds,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -868,6 +909,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...linkedDocEmbeds,
       ...syncedDocEmbeds,
       ...htmlEmbeds,
+      ...loomEmbeds,
     ];
     blocks.forEach(block => {
       const bound = Bound.deserialize(block.xywh);
@@ -882,11 +924,9 @@ export class EdgelessClipboardController extends PageClipboard {
     return [elements, blocks] as const;
   }
 
-  private async _pasteShapesAndBlocks(
-    elementsRawData: Record<string, unknown>[]
-  ) {
+  private _pasteShapesAndBlocks(elementsRawData: Record<string, unknown>[]) {
     const [elements, blocks] =
-      await this.createElementsFromClipboardData(elementsRawData);
+      this.createElementsFromClipboardData(elementsRawData);
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),
       blocks.map(block => block.id)
@@ -939,7 +979,7 @@ export class EdgelessClipboardController extends PageClipboard {
       assertExists(blob);
 
       this.std.clipboard
-        .writeToClipboard(async _items => {
+        .writeToClipboard(_items => {
           return {
             ..._items,
             [IMAGE_PNG]: blob,
@@ -952,8 +992,8 @@ export class EdgelessClipboardController extends PageClipboard {
   private async _replaceRichTextWithSvgElement(element: HTMLElement) {
     const richList = Array.from(element.querySelectorAll('.inline-editor'));
     await Promise.all(
-      richList.map(async rich => {
-        const svgEle = await this._elementToSvgElement(
+      richList.map(rich => {
+        const svgEle = this._elementToSvgElement(
           rich.cloneNode(true) as HTMLElement,
           rich.clientWidth,
           rich.clientHeight + 1
@@ -964,7 +1004,7 @@ export class EdgelessClipboardController extends PageClipboard {
     );
   }
 
-  private async _elementToSvgElement(
+  private _elementToSvgElement(
     node: HTMLElement,
     width: number,
     height: number
@@ -1240,10 +1280,13 @@ export async function prepareClipboardData(
       } else if (isEmbedLinkedDocBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
+      } else if (isEmbedSyncedDocBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
       } else if (isEmbedHtmlBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
-      } else if (isEmbedSyncedDocBlock(selected)) {
+      } else if (isEmbedLoomBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (selected instanceof ConnectorElementModel) {

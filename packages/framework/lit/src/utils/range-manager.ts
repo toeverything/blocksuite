@@ -35,6 +35,9 @@ export class RangeManager {
     if (topContenteditableElement instanceof HTMLElement) {
       topContenteditableElement.blur();
     }
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   }
 
   set(range: Range) {
@@ -131,7 +134,7 @@ export class RangeManager {
   }
 
   textSelectionToRange(selection: TextSelection): Range | null {
-    const { from, to, isReverse } = selection;
+    const { from, to } = selection;
 
     const fromInlineEditor = this.queryInlineEditorByPath(from.path);
     if (!fromInlineEditor) return null;
@@ -158,21 +161,13 @@ export class RangeManager {
       if (!fromRange || !toRange) return null;
 
       const range = document.createRange();
-      if (!isReverse) {
-        const startContainer = fromRange.startContainer;
-        const startOffset = fromRange.startOffset;
-        const endContainer = toRange.endContainer;
-        const endOffset = toRange.endOffset;
-        range.setStart(startContainer, startOffset);
-        range.setEnd(endContainer, endOffset);
-      } else {
-        const startContainer = toRange.endContainer;
-        const startOffset = toRange.endOffset;
-        const endContainer = fromRange.startContainer;
-        const endOffset = fromRange.startOffset;
-        range.setStart(startContainer, startOffset);
-        range.setEnd(endContainer, endOffset);
-      }
+      const startContainer = fromRange.startContainer;
+      const startOffset = fromRange.startOffset;
+      const endContainer = toRange.endContainer;
+      const endOffset = toRange.endOffset;
+      range.setStart(startContainer, startOffset);
+      range.setEnd(endContainer, endOffset);
+
       return range;
     }
   }
@@ -212,7 +207,7 @@ export class RangeManager {
               index: endInlineRange.index,
               length: endInlineRange.length,
             },
-      isReverse: reverse,
+      reverse,
     });
   }
 

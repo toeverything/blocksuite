@@ -78,6 +78,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _dragging = false;
   private _draggingAreaDisposables: DisposableGroup | null = null;
 
+  // For moving selection with space with mouse
+  private _moveSelectionStartPos: IVec = [0, 0];
+  private _moveSelectionDragStartTemp: IVec = [0, 0];
+
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
       const [startX, startY] = this._service.viewport.toViewCoord(
@@ -329,7 +333,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     const bound = edgelessElementsBound(this._toBeMoved);
     const [elements, blocks] =
-      await clipboardController.createElementsFromClipboardData(
+      clipboardController.createElementsFromClipboardData(
         data as Record<string, unknown>[],
         bound.center
       );
@@ -344,13 +348,32 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _updateSelectingState = () => {
     const { tools, service } = this._edgeless;
     const { selection } = service;
+
+    if (tools.spaceBar) {
+      /* Move the selection if space is pressed */
+      const [moveCurX, moveCurY] = this._dragLastPos;
+      const zoom = service.viewport.zoom;
+
+      const dx = (moveCurX - this._moveSelectionStartPos[0]) / zoom;
+      const dy = (moveCurY - this._moveSelectionStartPos[1]) / zoom;
+
+      const [startX, startY] = service.viewport.toModelCoord(
+        this._moveSelectionDragStartTemp[0],
+        this._moveSelectionDragStartTemp[1]
+      );
+      this._dragStartModelCoord[0] = startX + dx;
+      this._dragStartModelCoord[1] = startY + dy;
+    }
+
     const startX = this._dragStartModelCoord[0];
     const startY = this._dragStartModelCoord[1];
+
     // Should convert the last drag position to model coordinate
     const [curX, curY] = service.viewport.toModelCoord(
       this._dragLastPos[0],
       this._dragLastPos[1]
     );
+
     const x = Math.min(startX, curX);
     const y = Math.min(startY, curY);
 
@@ -406,11 +429,16 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _clearSelectingState = () => {
     this._stopAutoPanning();
     this._clearDraggingAreaDisposable();
+
     this._dragging = false;
     this._dragLastPos = [0, 0];
     this._dragStartModelCoord = [0, 0];
     this._dragLastModelCoord = [0, 0];
     this._edgeless.slots.draggingAreaUpdated.emit();
+
+    // Move Selection with space
+    this._moveSelectionDragStartTemp = [0, 0];
+    this._moveSelectionStartPos = [0, 0];
   };
 
   async onContainerDragStart(e: PointerEventState) {
@@ -470,7 +498,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._toBeMoved = Array.from(toBeMoved);
   }
 
-  initializeDragState(e: PointerEventState, dragType: DefaultModeDragType) {
+  private initializeDragState(
+    e: PointerEventState,
+    dragType: DefaultModeDragType
+  ) {
     const { x, y } = e;
     this.dragType = dragType;
     this._dragging = true;
@@ -516,6 +547,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       case DefaultModeDragType.Selecting: {
         // Record the last drag pointer position for auto panning and view port updating
         this._dragLastPos = [e.x, e.y];
+
         this._updateSelectingState();
         const moveDelta = calPanDelta(viewport, e);
         if (moveDelta) {
@@ -610,6 +642,27 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onPressShiftKey(_: boolean) {
     noop();
+  }
+
+  onPressSpaceBar(_pressed: boolean): void {
+    const { service } = this._edgeless;
+
+    if (this._dragging) {
+      if (_pressed) {
+        const [lastX, lastY] = this._dragLastPos;
+        this._moveSelectionStartPos = [lastX, lastY];
+
+        const [startX, startY] = this._dragStartPos;
+        this._moveSelectionDragStartTemp = [startX, startY];
+      } else {
+        // To reuse space with the same selection, update the drag start to the current start position from dragStartModelCoord.
+        const [mX, mY] = this._dragStartModelCoord;
+
+        this._dragStartPos = service.viewport.toViewCoord(mX, mY);
+
+        this._moveSelectionDragStartTemp = [...this._dragStartPos];
+      }
+    }
   }
 
   beforeModeSwitch() {

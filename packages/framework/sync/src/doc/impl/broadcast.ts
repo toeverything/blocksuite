@@ -27,10 +27,7 @@ export class BroadcastChannelDocSource implements DocSource {
     });
   }
 
-  async pull(
-    docId: string,
-    state: Uint8Array
-  ): Promise<{ data: Uint8Array; state?: Uint8Array | undefined } | null> {
+  pull(docId: string, state: Uint8Array) {
     const update = this.docMap.get(docId);
     if (!update) return null;
 
@@ -38,7 +35,7 @@ export class BroadcastChannelDocSource implements DocSource {
     return { data: diff, state: encodeStateVectorFromUpdate(update) };
   }
 
-  async push(docId: string, data: Uint8Array): Promise<void> {
+  push(docId: string, data: Uint8Array) {
     const update = this.docMap.get(docId);
     if (update) {
       this.docMap.set(docId, mergeUpdates([update, data]));
@@ -54,7 +51,7 @@ export class BroadcastChannelDocSource implements DocSource {
     } satisfies ChannelMessage);
   }
 
-  async subscribe(cb: (docId: string, data: Uint8Array) => void) {
+  subscribe(cb: (docId: string, data: Uint8Array) => void) {
     const abortController = new AbortController();
     this.channel.addEventListener(
       'message',

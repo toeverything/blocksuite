@@ -1,9 +1,9 @@
 import type { SurfaceSelection } from '@blocksuite/block-std';
-import {
-  type EventName,
+import type {
+  EventName,
   PointerEventState,
-  type UIEventHandler,
-  type UIEventState,
+  UIEventHandler,
+  UIEventState,
 } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
@@ -11,6 +11,7 @@ import {
   type EdgelessTool,
   isMiddleButtonPressed,
   isPinchEvent,
+  NoteDisplayMode,
   Point,
 } from '../../../_common/utils/index.js';
 import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
@@ -20,6 +21,7 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { EdgelessPageService } from '../edgeless-page-service.js';
 import type { EdgelessModel } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { isNoteBlock } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,9 +57,7 @@ export class EdgelessToolsManager {
     return manager;
   }
 
-  private _edgelessTool: EdgelessTool = {
-    type: 'default',
-  };
+  private _edgelessTool: EdgelessTool = this._getToolFromLocalStorage();
 
   private _container!: EdgelessPageBlockComponent;
   private _service!: EdgelessPageService;
@@ -71,14 +71,10 @@ export class EdgelessToolsManager {
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
 
-  private _rightClickTimer: {
-    edgelessTool: EdgelessTool;
-    timer: number;
-    timeStamp: number;
-  } | null = null;
-
   // pressed shift key
   private _shiftKey = false;
+
+  private _spaceBar = false;
 
   private _dragging = false;
 
@@ -118,7 +114,9 @@ export class EdgelessToolsManager {
     const maxY = Math.max(start.y, end.y);
     return new DOMRect(minX, minY, maxX - minX, maxY - minY);
   }
-
+  get spaceBar() {
+    return this._spaceBar;
+  }
   get shiftKey() {
     return this._shiftKey;
   }
@@ -126,6 +124,11 @@ export class EdgelessToolsManager {
   set shiftKey(pressed: boolean) {
     this._shiftKey = pressed;
     this.currentController.onPressShiftKey(pressed);
+  }
+
+  set spaceBar(pressed: boolean) {
+    this._spaceBar = pressed;
+    this.currentController.onPressSpaceBar(pressed);
   }
 
   get page() {
@@ -158,7 +161,7 @@ export class EdgelessToolsManager {
       controller.mount(container);
     });
 
-    this._initMouseAndWheelEvents().catch(console.error);
+    this._initMouseAndWheelEvents();
   }
 
   register(Tool: EdgelessToolConstructor) {
@@ -178,7 +181,13 @@ export class EdgelessToolsManager {
     };
   }
 
-  private async _initMouseAndWheelEvents() {
+  private _getToolFromLocalStorage(): EdgelessTool {
+    const type = localStorage.defaultTool;
+    if (type === 'pan') return { type: 'pan', panning: false };
+    return { type: 'default' };
+  }
+
+  private _initMouseAndWheelEvents() {
     this._add('dragStart', ctx => {
       this._dragging = true;
       const event = ctx.get('pointerState');
@@ -311,25 +320,6 @@ export class EdgelessToolsManager {
 
   private _onContainerContextMenu = (e: UIEventState) => {
     e.event.preventDefault();
-    const pointerEventState = new PointerEventState({
-      event: e.event as PointerEvent,
-      rect: this.dispatcher.host.getBoundingClientRect(),
-      startX: 0,
-      startY: 0,
-      last: null,
-      cumulativeParentScale: 1,
-    });
-
-    const edgelessTool = this.edgelessTool;
-    if (edgelessTool.type !== 'pan' && !this._rightClickTimer) {
-      this._rightClickTimer = {
-        edgelessTool: edgelessTool,
-        timeStamp: e.event.timeStamp,
-        timer: window.setTimeout(() => {
-          this._controllers['pan'].onContainerDragStart(pointerEventState);
-        }, 233),
-      };
-    }
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
@@ -362,21 +352,16 @@ export class EdgelessToolsManager {
     this.setEdgelessTool({ type: 'pan', panning: true });
   };
 
-  private _onContainerPointerUp = (e: PointerEventState) => {
-    if (e.button === 2 && this._rightClickTimer) {
-      const {
-        timer,
-        timeStamp,
-        edgelessTool: edgelessTool,
-      } = this._rightClickTimer;
-      if (e.raw.timeStamp - timeStamp > 233) {
-        this.setEdgelessTool(edgelessTool);
-      } else {
-        clearTimeout(timer);
-      }
-      this._rightClickTimer = null;
-    }
-  };
+  private _onContainerPointerUp = (_ev: PointerEventState) => {};
+
+  private _isDocOnlyNote(selectedId: string) {
+    const selected = this.service.page.getBlockById(selectedId);
+    if (!selected) return false;
+
+    return (
+      isNoteBlock(selected) && selected.displayMode === NoteDisplayMode.DocOnly
+    );
+  }
 
   getHoverState(): EdgelessHoverState | null {
     if (!this.currentController.enableHover) {
@@ -412,12 +397,23 @@ export class EdgelessToolsManager {
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[type].beforeModeSwitch(edgelessTool);
 
+    const isDefaultType = type === 'default';
+    const isEmptyState = Array.isArray(state)
+      ? this.selection.isEmpty(state)
+      : state.elements.length === 0;
+    const hasLastState = !!this.selection.lastState;
+    const isNotSingleDocOnlyNote = !(
+      this.selection.lastState &&
+      this.selection.lastState[0] &&
+      this.selection.lastState[0].elements.length === 1 &&
+      this._isDocOnlyNote(this.selection.lastState[0].elements[0])
+    );
+
     if (
-      type === 'default' &&
-      (Array.isArray(state)
-        ? this.selection.isEmpty(state)
-        : state.elements.length === 0) &&
-      this.selection.lastState
+      isDefaultType &&
+      isEmptyState &&
+      hasLastState &&
+      isNotSingleDocOnlyNote
     ) {
       state = this.selection.lastState;
     }

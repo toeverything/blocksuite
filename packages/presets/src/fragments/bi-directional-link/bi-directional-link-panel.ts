@@ -1,8 +1,6 @@
 import type {
   AffineReference,
   DocPageBlockComponent,
-  ListService,
-  PageService,
 } from '@blocksuite/blocks';
 import {
   type AffineTextAttributes,
@@ -231,17 +229,13 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       })
     );
 
-    const pageService = this._host.spec.getService(
-      'affine:page'
-    ) as PageService;
+    const pageService = this._host.spec.getService('affine:page');
     this._show = !!pageService.editSession.getItem('showBidirectional');
   }
 
   private _toggleShow() {
     this._show = !this._show;
-    const pageService = this._host.spec.getService(
-      'affine:page'
-    ) as PageService;
+    const pageService = this._host.spec.getService('affine:page');
     pageService.editSession.setItem('showBidirectional', this._show);
   }
 
@@ -343,9 +337,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
           assertExists(page);
           const show = this._backLinkShow[index] ?? false;
 
-          const listService = this._host!.spec.getService(
-            'affine:list'
-          ) as ListService;
+          const listService = this._host!.spec.getService('affine:list');
 
           return html`<style>
               .affine-list-block__prefix{
@@ -422,9 +414,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
     let icon: TemplateResult<1> | null = null;
     if (matchFlavours(model, ['affine:list'])) {
-      const listService = this._host!.spec.getService(
-        'affine:list'
-      ) as ListService;
+      const listService = this._host!.spec.getService('affine:list');
 
       icon = listService.styles.icon(model, false, () => {});
     }
@@ -520,7 +510,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       </style>
       ${this._divider(!this._show)}
       <div class="title-line">
-        <div class="title text">Bi-directional link</div>
+        <div class="title text">Bi-directional links</div>
         <div class="show-button" @click=${this._toggleShow}>
           ${this._show ? 'Hide' : 'Show'}
         </div>

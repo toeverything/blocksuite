@@ -19,7 +19,6 @@ import {
 } from '@blocksuite/store';
 
 import { NoteDisplayMode } from '../types.js';
-import { MarkdownAdapter } from './markdown.js';
 
 export type PlainText = string;
 
@@ -34,11 +33,6 @@ type PlainTextToSliceSnapshotPayload = {
 };
 
 export class PlainTextAdapter extends BaseAdapter<PlainText> {
-  private _markdownAdapter: MarkdownAdapter;
-  constructor() {
-    super();
-    this._markdownAdapter = new MarkdownAdapter();
-  }
   async fromPageSnapshot({
     snapshot,
     assets,
@@ -85,9 +79,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     };
   }
 
-  async toPageSnapshot(
-    payload: ToPageSnapshotPayload<PlainText>
-  ): Promise<PageSnapshot> {
+  toPageSnapshot(payload: ToPageSnapshotPayload<PlainText>): PageSnapshot {
     payload.file = payload.file.replaceAll('\r', '');
     return {
       type: 'page',
@@ -157,9 +149,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     };
   }
 
-  async toBlockSnapshot(
-    payload: ToBlockSnapshotPayload<PlainText>
-  ): Promise<BlockSnapshot> {
+  toBlockSnapshot(payload: ToBlockSnapshotPayload<PlainText>): BlockSnapshot {
     payload.file = payload.file.replaceAll('\r', '');
     return {
       type: 'block',
@@ -194,10 +184,9 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     };
   }
 
-  async toSliceSnapshot(
+  toSliceSnapshot(
     payload: PlainTextToSliceSnapshotPayload
-  ): Promise<SliceSnapshot | null> {
-    this._markdownAdapter.applyConfigs(this.configs);
+  ): SliceSnapshot | null {
     if (payload.file.trim().length === 0) {
       return null;
     }
@@ -252,7 +241,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
       (node): node is BlockSnapshot =>
         BlockSnapshotSchema.safeParse(node).success
     );
-    walker.setEnter(async o => {
+    walker.setEnter(o => {
       const text = (o.node.props.text ?? { delta: [] }) as {
         delta: DeltaInsert[];
       };

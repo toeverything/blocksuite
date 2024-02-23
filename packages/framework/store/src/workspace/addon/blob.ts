@@ -28,24 +28,22 @@ export const blob = addOnFactory<keyof BlobAddon>(
             let found = false;
             let count = 0;
             return new Promise(res => {
-              this._storages.forEach(storage => {
-                storage.crud
-                  .get(id)
-                  .then(result => {
-                    if (result && !found) {
-                      found = true;
-                      res(result);
-                    }
-                    if (++count === this._storages.length && !found) {
-                      res(null);
-                    }
-                  })
-                  .catch(e => {
-                    console.error(e);
-                    if (++count === this._storages.length && !found) {
-                      res(null);
-                    }
-                  });
+              void this._storages.map(async storage => {
+                try {
+                  const blob = await storage.crud.get(id);
+                  if (blob && !found) {
+                    found = true;
+                    res(blob);
+                  }
+                  if (++count === this._storages.length && !found) {
+                    res(null);
+                  }
+                } catch (e) {
+                  console.error(e);
+                  if (++count === this._storages.length && !found) {
+                    res(null);
+                  }
+                }
               });
             });
           },
@@ -72,7 +70,7 @@ export const blob = addOnFactory<keyof BlobAddon>(
             blobs.forEach(blobId => {
               const ref = this._blobsRef.get(blobId);
               if (!ref || ref <= 0) {
-                this.blob.delete(blobId).catch(console.error);
+                this.blob.delete(blobId)?.catch(console.error);
                 this._blobsRef.delete(blobId);
               }
             });

@@ -14,36 +14,41 @@ import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .reference-popup-more-menu {
+      box-sizing: border-box;
+      padding-bottom: 4px;
+    }
+
+    .reference-popup-more-menu-container {
       border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
     }
 
-    .menu-item {
+    .reference-popup-more-menu-container > .menu-item {
       display: flex;
       justify-content: flex-start;
       align-items: center;
       width: 100%;
     }
 
-    .menu-item:hover {
+    .reference-popup-more-menu-container > .menu-item:hover {
       background: var(--affine-hover-color);
     }
 
-    .menu-item:hover.delete {
+    .reference-popup-more-menu-container > .menu-item:hover.delete {
       background: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }
-    .menu-item:hover.delete > svg {
+    .reference-popup-more-menu-container > .menu-item:hover.delete > svg {
       color: var(--affine-error-color);
     }
 
-    .menu-item svg {
+    .reference-popup-more-menu-container > .menu-item svg {
       margin: 0 8px;
     }
 
-    .divider {
+    .reference-popup-more-menu-container > .divider {
       width: 148px;
       height: 1px;
       margin: 8px;
@@ -102,29 +107,33 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="reference-popup-more-menu">
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item open"
-        text="Open"
-        @click=${() => this._openPage()}
-      >
-        ${OpenIcon}
-      </icon-button>
+    return html`
+      <div class="reference-popup-more-menu">
+        <div class="reference-popup-more-menu-container">
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item open"
+            text="Open"
+            @click=${() => this._openPage()}
+          >
+            ${OpenIcon}
+          </icon-button>
 
-      <div class="divider"></div>
+          <div class="divider"></div>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item delete"
-        text="Delete"
-        @click=${() => this._delete()}
-      >
-        ${DeleteIcon}
-      </icon-button>
-    </div> `;
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item delete"
+            text="Delete"
+            @click=${() => this._delete()}
+          >
+            ${DeleteIcon}
+          </icon-button>
+        </div>
+      </div>
+    `;
   }
 }
 

@@ -112,7 +112,7 @@ export class AttachmentBlockComponent extends BlockElement<
       }),
       computePosition: {
         referenceElement: this,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },
@@ -151,7 +151,7 @@ export class AttachmentBlockComponent extends BlockElement<
   };
 
   download = () => {
-    downloadAttachmentBlob(this).catch(console.error);
+    downloadAttachmentBlob(this);
   };
 
   refreshData = () => {

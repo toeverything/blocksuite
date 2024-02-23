@@ -15,8 +15,7 @@ import {
   MoreDeleteIcon,
 } from '../_common/icons/index.js';
 import { requestConnectedFrame } from '../_common/utils/event.js';
-import { buildPath, getEditorContainer } from '../_common/utils/query.js';
-import type { PageService } from '../index.js';
+import { buildPath } from '../_common/utils/query.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
@@ -26,7 +25,7 @@ import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
 import { SurfaceRefPortal } from './surface-ref-portal.js';
 import type { SurfaceRefRenderer } from './surface-ref-renderer.js';
-import type { SurfaceRefBlockService } from './surface-ref-service.js';
+import { SurfaceRefBlockService } from './surface-ref-service.js';
 import { noContentPlaceholder } from './utils.js';
 
 noop(SurfaceRefPortal);
@@ -489,24 +488,15 @@ export class SurfaceRefBlockComponent extends BlockElement<
   viewInEdgeless() {
     if (!this._referencedModel) return;
 
-    const editorContainer = getEditorContainer(this.host);
+    const viewport = {
+      xywh: this._referencedModel.xywh,
+      padding: [60, 20, 20, 20] as [number, number, number, number],
+    };
+    this.std.spec
+      .getService('affine:page')
+      .editSession.setItem('viewport', viewport);
 
-    if (editorContainer.mode !== 'edgeless') {
-      editorContainer.mode = 'edgeless';
-
-      const viewport = {
-        xywh: '', // FIXME
-        referenceId: this.model.reference,
-        padding: [60, 20, 20, 20] as [number, number, number, number],
-      };
-      (<PageService>(
-        this.std.spec.getService('affine:page')
-      )).editSession.setItem('viewport', viewport);
-    }
-
-    this.selection.update(selections => {
-      return selections.filter(sel => !PathFinder.equals(sel.path, this.path));
-    });
+    SurfaceRefBlockService.editorModeSwitch.emit('edgeless');
   }
 
   private _renderMask(referencedModel: RefElement, flavourOrType: string) {

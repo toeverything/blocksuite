@@ -34,6 +34,10 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._resize(pressed);
   }
 
+  onPressSpaceBar(_pressed: boolean): void {
+    noop();
+  }
+
   private _resize(shift = false) {
     const { _draggingArea, _draggingNoteOverlay, _edgeless } = this;
     assertExists(_draggingArea);

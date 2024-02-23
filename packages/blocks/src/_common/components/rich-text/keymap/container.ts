@@ -33,7 +33,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const model = blockElement.model;
   const editorHost = blockElement.host;
   const std = editorHost.std;
-  const command = std.command;
   const leftBrackets = bracketPairs.map(pair => pair.left);
 
   const _selectBlock = () => {
@@ -80,6 +79,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _getPrefixText = (inlineEditor: InlineEditor) => {
     const inlineRange = inlineEditor.getInlineRange();
     assertExists(inlineRange);
+    const firstLineEnd = inlineEditor.yTextString.search(/\n/);
+    if (firstLineEnd !== -1 && inlineRange.index > firstLineEnd) {
+      return '';
+    }
     const [leafStart, offsetStart] = inlineEditor.getTextPoint(
       inlineRange.index
     );
@@ -191,26 +194,30 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       )
         return;
 
-      const textModels = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text'],
-        })
-      ).selectedModels;
-      if (textModels && textModels.length === 1) {
-        const inlineEditor = _getInlineEditor();
-        const inilneRange = inlineEditor.getInlineRange();
-        assertExists(inilneRange);
-        handleIndent(blockElement.host, model, inilneRange.index);
-        _preventDefault(ctx);
+      {
+        const [_, context] = getChainWithHost(std)
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const textModels = context.selectedModels;
+        if (textModels && textModels.length === 1) {
+          const inlineEditor = _getInlineEditor();
+          const inilneRange = inlineEditor.getInlineRange();
+          assertExists(inilneRange);
+          handleIndent(blockElement.host, model, inilneRange.index);
+          _preventDefault(ctx);
 
-        return true;
+          return true;
+        }
       }
 
-      const models = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
+      const [_, context] = getChainWithHost(std)
+        .getSelectedModels({
           types: ['text', 'block'],
         })
-      ).selectedModels;
+        .run();
+      const models = context.selectedModels;
       if (!models) return;
       handleMultiBlockIndent(blockElement.host, models);
       return true;
@@ -229,28 +236,32 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text'],
-        })
-      ).selectedModels;
-      if (textModels && textModels.length === 1) {
-        const inlineEditor = _getInlineEditor();
-        const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
-        if (inlineRange.index === 0) {
-          handleRemoveAllIndent(blockElement.host, model, inlineRange.index);
-          _preventDefault(ctx);
-        }
+      {
+        const [_, context] = getChainWithHost(std)
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const textModels = context.selectedModels;
+        if (textModels && textModels.length === 1) {
+          const inlineEditor = _getInlineEditor();
+          const inlineRange = inlineEditor.getInlineRange();
+          assertExists(inlineRange);
+          if (inlineRange.index === 0) {
+            handleRemoveAllIndent(blockElement.host, model, inlineRange.index);
+            _preventDefault(ctx);
+          }
 
-        return true;
+          return true;
+        }
       }
 
-      const models = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
+      const [_, context] = getChainWithHost(std)
+        .getSelectedModels({
           types: ['text', 'block'],
         })
-      ).selectedModels;
+        .run();
+      const models = context.selectedModels;
       if (!models) return;
       handleRemoveAllIndentForMultiBlocks(blockElement.host, models);
       return true;
@@ -269,26 +280,31 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text'],
-        })
-      ).selectedModels;
-      if (textModels && textModels.length === 1) {
-        const inlineEditor = _getInlineEditor();
-        const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
-        handleUnindent(blockElement.host, model, inlineRange.index);
-        _preventDefault(ctx);
+      {
+        const [_, context] = getChainWithHost(std)
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const textModels = context.selectedModels;
 
-        return true;
+        if (textModels && textModels.length === 1) {
+          const inlineEditor = _getInlineEditor();
+          const inlineRange = inlineEditor.getInlineRange();
+          assertExists(inlineRange);
+          handleUnindent(blockElement.host, model, inlineRange.index);
+          _preventDefault(ctx);
+
+          return true;
+        }
       }
 
-      const models = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
+      const [_, context] = getChainWithHost(std)
+        .getSelectedModels({
           types: ['text', 'block'],
         })
-      ).selectedModels;
+        .run();
+      const models = context.selectedModels;
       if (!models) return;
       handleMultiBlockOutdent(blockElement.host, models);
       return true;
@@ -401,17 +417,14 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     });
     inlineEditor.setInlineRange({ index: inlineRange.index - 1, length: 0 });
 
-    createDefaultPage(blockElement.page.workspace, {
+    const page = createDefaultPage(blockElement.page.workspace, {
       title: pageName,
-    })
-      .then(page => {
-        insertLinkedNode({
-          editorHost: blockElement.host,
-          model: blockElement.model,
-          pageId: page.id,
-        });
-      })
-      .catch(e => console.error(e));
+    });
+    insertLinkedNode({
+      editorHost: blockElement.host,
+      model: blockElement.model,
+      pageId: page.id,
+    });
     return true;
   }
 
@@ -443,7 +456,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           // [[Selected text]] should automatically be converted to a Linked page with the title "Selected text".
           // See https://github.com/toeverything/blocksuite/issues/2730
           const success = tryConvertToLinkedDoc();
-          if (success) return;
+          if (success) return true;
         }
         inlineEditor.insertText(
           inlineRange,

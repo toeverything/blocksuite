@@ -15,13 +15,10 @@ import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
 
 import type { AffineTextAttributes } from '@blocksuite/blocks';
-import {
-  ColorVariables,
-  extractCssVariables,
-  type PageService,
-} from '@blocksuite/blocks';
+import { ColorVariables, extractCssVariables } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
@@ -96,7 +93,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   get pageService() {
-    return this.editor.host.spec.getService('affine:page') as PageService;
+    return this.editor.host.spec.getService('affine:page');
   }
 
   override createRenderRoot() {
@@ -300,7 +297,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.leftSidePanel.toggle(this.pagesPanel);
   }
 
-  override async firstUpdated() {
+  override firstUpdated() {
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;

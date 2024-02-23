@@ -109,9 +109,9 @@ export const getMenus: (ctx: {
           key: 'create',
           name: `Create "${displayPageName}" doc`,
           icon: NewPageIcon,
-          action: async () => {
+          action: () => {
             const pageName = query;
-            const newPage = await createDefaultPage(page.workspace, {
+            const newPage = createDefaultPage(page.workspace, {
               title: pageName,
             });
             insertLinkedNode({
@@ -143,9 +143,13 @@ export const getMenus: (ctx: {
                 pageId: pageId,
               });
             };
+            const onFail = (message: string) => {
+              toast(editorHost, message);
+            };
             showImportModal({
               workspace: page.workspace,
               onSuccess,
+              onFail,
             });
           },
         },

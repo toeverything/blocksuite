@@ -5,7 +5,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
-import { flip, offset } from '@floating-ui/dom';
+import { flip } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -22,6 +22,7 @@ import type {
   EmbedLinkedDocBlockComponent,
   EmbedLinkedDocModel,
 } from '../../../embed-linked-doc-block/index.js';
+import type { EmbedLoomBlockComponent } from '../../../embed-loom-block/embed-loom-block.js';
 import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import {
@@ -30,10 +31,7 @@ import {
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../../page-block/edgeless/utils/query.js';
-import type {
-  EmbedOptions,
-  PageService,
-} from '../../../page-block/page-service.js';
+import type { EmbedOptions } from '../../../page-block/page-service.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../icons/edgeless.js';
 import {
   CaptionIcon,
@@ -60,7 +58,8 @@ export type EmbedToolbarBlock =
   | EmbedYoutubeBlockComponent
   | EmbedFigmaBlockComponent
   | EmbedLinkedDocBlockComponent
-  | EmbedSyncedDocBlockComponent;
+  | EmbedSyncedDocBlockComponent
+  | EmbedLoomBlockComponent;
 
 @customElement('embed-card-toolbar')
 export class EmbedCardToolbar extends WithDisposable(LitElement) {
@@ -119,11 +118,10 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     .embed-card-toolbar-button.page-info {
       display: flex;
       align-items: center;
+      width: max-content;
       max-width: 180px;
-      padding: var(--1, 0px);
 
       gap: 4px;
-      border-radius: var(--1, 0px);
       opacity: var(--add, 1);
       user-select: none;
       cursor: pointer;
@@ -203,11 +201,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   }
 
   private get _pageService() {
-    const pageService = this._std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    return pageService;
+    return this._std.spec.getService('affine:page');
   }
 
   private get _canShowUrlOptions() {
@@ -224,12 +218,23 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
 
   private get _isEmbedView() {
     return (
-      isEmbedSyncedDocBlock(this._model) ||
-      this._embedOptions?.viewType === 'embed'
+      !isBookmarkBlock(this._model) &&
+      (isEmbedSyncedDocBlock(this._model) ||
+        this._embedOptions?.viewType === 'embed')
     );
   }
 
   private get _canConvertToEmbedView() {
+    // synced doc entry controlled by awareness flag
+    if (isEmbedLinkedDocBlock(this._model)) {
+      const isSyncedDocEnabled = this._model.page.awarenessStore.getFlag(
+        'enable_synced_doc_block'
+      );
+      if (!isSyncedDocEnabled) {
+        return false;
+      }
+    }
+
     return (
       'convertToEmbed' in this.block || this._embedOptions?.viewType === 'embed'
     );
@@ -435,7 +440,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       computePosition: {
         referenceElement,
         placement: 'top',
-        middleware: [flip(), offset(8)],
+        middleware: [flip()],
         autoUpdate: true,
       },
       abortController: this._cardStyleMenuAbortController,
@@ -463,7 +468,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       computePosition: {
         referenceElement: this.embedCardToolbarElement,
         placement: 'top-end',
-        middleware: [flip(), offset(4)],
+        middleware: [flip()],
         autoUpdate: true,
       },
       abortController: this._moreMenuAbortController,
@@ -514,20 +519,12 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
           : nothing}
         ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
           ? html`
-              <div
+              <icon-button
+                size="32px"
                 class="embed-card-toolbar-button page-info"
                 @click=${() => this.block.open()}
               >
-                ${this._pageIcon}
-                <span>${this._pageTitle}</span>
-              </div>
-
-              <icon-button
-                size="32px"
-                class="embed-card-toolbar-button open"
-                @click=${() => this.block.open()}
-              >
-                ${OpenIcon}
+                ${this._pageIcon} <span>${this._pageTitle}</span> ${OpenIcon}
                 <affine-tooltip .offset=${12}>${'Open'}</affine-tooltip>
               </icon-button>
 

@@ -27,7 +27,7 @@ import {
   EdgelessEditorBlockSpecs,
 } from '../_specs/_specs.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import type { PageBlockComponent, PageService } from '../page-block/index.js';
+import type { PageBlockComponent } from '../page-block/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
@@ -65,14 +65,14 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   @state()
   private _empty = false;
 
-  @query('affine-embed-synced-doc-card')
+  @query(':scope > .embed-block-container > affine-embed-synced-doc-card')
   syncedDocCard?: EmbedSyncedDocCard;
 
-  @query('embed-card-caption')
+  @query(':scope > .embed-block-container > embed-card-caption')
   captionElement?: EmbedCardCaption;
 
   @query(
-    '.affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
+    ':scope > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
   )
   syncedDocEditorHost?: EditorHost;
 
@@ -105,11 +105,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   private get _pageService() {
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService, `Page service not found.`);
-    return pageService;
+    return this.std.spec.getService('affine:page');
   }
 
   private _checkCycle() {
@@ -213,50 +209,60 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
   }
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    UIEventDispatcher.slots.activeChanged.once(() => {
-      if (!this.std.event.isActive) {
-        abortController.abort();
+  private _whenHover = new HoverController(
+    this,
+    ({ abortController }) => {
+      if (this._editing) {
+        return null;
       }
-    });
 
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
+      UIEventDispatcher.slots.activeChanged.once(() => {
+        if (!this.std.event.isActive) {
+          abortController.abort();
+        }
+      });
+
+      const selection = this.host.selection;
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || !!textSelection.from.length)
+      ) {
+        return null;
+      }
+
+      const blockSelections = selection.filter('block');
+      if (
+        blockSelections.length > 1 ||
+        (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+      ) {
+        return null;
+      }
+
+      return {
+        template: html`
+          <style>
+            :host {
+              z-index: 1;
+            }
+          </style>
+          <embed-card-toolbar
+            .block=${this}
+            .abortController=${abortController}
+          ></embed-card-toolbar>
+        `,
+        computePosition: {
+          referenceElement: this,
+          placement: 'top-start',
+          middleware: [flip(), offset(4)],
+          autoUpdate: true,
+        },
+      };
+    },
+    {
+      allowMultiple: true,
     }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-    ) {
-      return null;
-    }
-
-    return {
-      template: html`
-        <style>
-          :host {
-            z-index: 1;
-          }
-        </style>
-        <embed-card-toolbar
-          .block=${this}
-          .abortController=${abortController}
-        ></embed-card-toolbar>
-      `,
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    };
-  });
+  );
 
   private _handlePointerDown = (event: MouseEvent) => {
     if (this._editing) {
@@ -408,7 +414,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         position: 'relative',
         display: 'block',
         width: '100%',
-        margin: '18px 0px',
       });
       if (isInSurface) {
         const bound = Bound.deserialize(this.model.xywh);
@@ -423,15 +428,19 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         });
       }
 
-      return html`
-        <affine-embed-synced-doc-card
-          ${isInSurface || !isCycle
-            ? nothing
-            : ref(this._whenHover.setReference)}
-          style=${cardStyleMap}
-          .block=${this}
-        ></affine-embed-synced-doc-card>
-      `;
+      return this.renderEmbed(
+        () => html`
+          <affine-embed-synced-doc-card
+            ${isInSurface || !isCycle
+              ? nothing
+              : ref(this._whenHover.setReference)}
+            style=${cardStyleMap}
+            .block=${this}
+          ></affine-embed-synced-doc-card>
+
+          <embed-card-caption .block=${this}></embed-card-caption>
+        `
+      );
     }
 
     let containerStyleMap = styleMap({

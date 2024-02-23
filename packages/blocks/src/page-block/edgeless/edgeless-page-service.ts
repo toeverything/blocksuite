@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
 import type { EdgelessTool, TopLevelBlockModel } from '../../_common/types.js';
@@ -162,12 +163,17 @@ export class EdgelessPageService extends PageService {
     return this.viewport.zoom;
   }
 
+  get host() {
+    return this.std.host as EditorHost;
+  }
+
   private _initSlotEffects() {
     const { disposables, slots } = this;
 
     disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
+        if (!this.std.event.isActive) this.std.event.activate();
       })
     );
 
@@ -286,7 +292,7 @@ export class EdgelessPageService extends PageService {
       const candidates = this._layer.canvasGrid.search(hitTestBound);
       const picked = candidates.filter(
         element =>
-          element.hitTest(x, y, options) ||
+          element.hitTest(x, y, options, this.host) ||
           element.externalBound?.isPointInBound([x, y])
       );
       return picked as EdgelessModel[];
@@ -295,7 +301,7 @@ export class EdgelessPageService extends PageService {
       const candidates = this._layer.blocksGrid.search(hitTestBound);
       const picked = candidates.filter(
         element =>
-          element.hitTest(x, y, options) ||
+          element.hitTest(x, y, options, this.host) ||
           element.externalBound?.isPointInBound([x, y])
       );
       return picked as EdgelessModel[];
@@ -303,7 +309,7 @@ export class EdgelessPageService extends PageService {
     const pickFrames = () => {
       return this._layer.frames.filter(
         frame =>
-          frame.hitTest(x, y, options) ||
+          frame.hitTest(x, y, options, this.host) ||
           frame.externalBound?.isPointInBound([x, y])
       ) as EdgelessModel[];
     };

@@ -1,5 +1,6 @@
 import {
   activeNoteInEdgeless,
+  assertEdgelessTool,
   locatorEdgelessToolButton,
   setEdgelessTool,
   switchEditorMode,
@@ -15,7 +16,6 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertEdgelessSelectedRect,
-  assertHasClass,
   assertNotHasClass,
   assertRichTexts,
 } from '../utils/asserts.js';
@@ -61,8 +61,7 @@ test('pan tool shortcut', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 
   await page.keyboard.down('Space');
-  const defaultButton = locatorEdgelessToolButton(page, 'pan', false);
-  await assertHasClass(defaultButton, 'pan');
+  await assertEdgelessTool(page, 'pan');
 
   await dragBetweenCoords(
     page,
@@ -78,6 +77,62 @@ test('pan tool shortcut', async ({ page }) => {
 
   await page.keyboard.up('Space');
   await assertEdgelessSelectedRect(page, [120, 120, 100, 100]);
+});
+
+test('pan tool shortcut should revert to the previous tool on keyup', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await page.mouse.click(100, 100);
+
+  await setEdgelessTool(page, 'brush');
+  {
+    await page.keyboard.down('Space');
+    await assertEdgelessTool(page, 'pan');
+
+    await page.keyboard.up('Space');
+    await assertEdgelessTool(page, 'brush');
+  }
+});
+
+test('pan tool shortcut does not affect other tools while using the tool', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  // Test if while drawing shortcut  does not switch to pan tool
+  await setEdgelessTool(page, 'brush');
+  await dragBetweenCoords(
+    page,
+    { x: 100, y: 110 },
+    { x: 200, y: 300 },
+    {
+      click: true,
+      beforeMouseUp: async () => {
+        await page.keyboard.down('Space');
+        await assertEdgelessTool(page, 'brush');
+      },
+    }
+  );
+
+  await setEdgelessTool(page, 'eraser');
+  await dragBetweenCoords(
+    page,
+    { x: 100, y: 110 },
+    { x: 200, y: 300 },
+    {
+      click: true,
+      beforeMouseUp: async () => {
+        await page.keyboard.down('Space');
+        await assertEdgelessTool(page, 'eraser');
+      },
+    }
+  );
+  // Maybe add other tools too
 });
 
 test('pan tool shortcut when user is editing', async ({ page }) => {

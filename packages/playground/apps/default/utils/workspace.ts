@@ -55,6 +55,7 @@ export async function createDefaultPageWorkspace() {
     docSources,
     awarenessSources,
     defaultFlags: {
+      enable_synced_doc_block: true,
       enable_bultin_ledits: true,
     },
   };
@@ -73,6 +74,9 @@ export async function createDefaultPageWorkspace() {
 
 export async function initDefaultPageWorkspace(workspace: Workspace) {
   const params = new URLSearchParams(location.search);
+
+  await workspace.waitForSynced();
+
   const shouldInit = workspace.pages.size === 0 && !params.get('room');
   if (shouldInit) {
     const page = workspace.createPage({ id: 'page:home' });

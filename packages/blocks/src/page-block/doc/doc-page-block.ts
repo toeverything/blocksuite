@@ -49,6 +49,16 @@ export class DocPageBlockComponent extends BlockElement<
   DocPageBlockWidgetName
 > {
   static override styles = css`
+    editor-host:has(> affine-doc-page) {
+      display: block;
+      height: 100%;
+    }
+
+    affine-doc-page {
+      display: block;
+      height: 100%;
+    }
+
     .affine-doc-page-block-container {
       display: flex;
       flex-direction: column;
@@ -139,7 +149,7 @@ export class DocPageBlockComponent extends BlockElement<
     const { page } = this;
 
     const noteId = page.addBlock('affine:note', {}, page.root?.id);
-    return page.getBlockById(noteId);
+    return page.getBlockById(noteId) as NoteBlockModel;
   }
 
   private _getDefaultNoteBlock() {

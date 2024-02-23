@@ -1,5 +1,5 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
-import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
@@ -26,8 +26,6 @@ import {
   Rect,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
-import type { DatabaseService } from '../../../../database-block/database-service.js';
-import { ImageService } from '../../../../image-block/image-service.js';
 import {
   addImageBlocks,
   addSiblingImageBlock,
@@ -465,8 +463,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       const imageFiles = await getImageFilesFromLocal();
 
       const imageService = this._editorHost.spec.getService('affine:image');
-      assertExists(imageService);
-      assertInstanceOf(imageService, ImageService);
       const maxFileSize = imageService.maxFileSize;
 
       addSiblingImageBlock(
@@ -522,9 +518,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       // database init basic structure
       if (isDatabase) {
-        const service = this._pageBlockElement.std.spec?.getService(
-          'affine:database'
-        ) as DatabaseService;
+        const service =
+          this._pageBlockElement.std.spec?.getService('affine:database');
         service.initDatabaseBlock(page, model, model.id, 'table');
       }
     }
@@ -562,9 +557,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       const model = page.getBlockById(focusId);
       assertExists(model);
       if (isDatabase) {
-        const service = pageBlockElement.std.spec?.getService(
-          'affine:database'
-        ) as DatabaseService;
+        const service =
+          pageBlockElement.std.spec?.getService('affine:database');
         service.initDatabaseBlock(page, model, model.id, 'table');
       }
     }
@@ -599,8 +593,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       const imageFiles = await getImageFilesFromLocal();
 
       const imageService = this._editorHost.spec.getService('affine:image');
-      assertExists(imageService);
-      assertInstanceOf(imageService, ImageService);
       const maxFileSize = imageService.maxFileSize;
 
       const blockIds = addImageBlocks(

@@ -15,7 +15,7 @@ describe('group', () => {
     return cleanup;
   });
 
-  test('remove group without children', async () => {
+  test('remove group without children', () => {
     const map = new Workspace.Y.Map<boolean>();
     const ids = Array.from({ length: 2 }).map(() => {
       const id = service.addElement('shape', {

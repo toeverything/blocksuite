@@ -22,7 +22,7 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { renderDocInCard } from '../_common/utils/render-doc.js';
-import type { PageBlockComponent, PageService } from '../page-block/index.js';
+import type { PageBlockComponent } from '../page-block/index.js';
 import { Bound } from '../surface-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
@@ -89,11 +89,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private get _pageService() {
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService, `Page service not found.`);
-    return pageService;
+    return this.std.spec.getService('affine:page');
   }
 
   private async _load() {
@@ -203,6 +199,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   convertToEmbed = () => {
     const { page, pageId, caption, xywh } = this.model;
+
+    // synced doc entry controlled by awareness flag
+    const isSyncedDocEnabled = page.awarenessStore.getFlag(
+      'enable_synced_doc_block'
+    );
+    if (!isSyncedDocEnabled) {
+      return;
+    }
 
     if (this.isInSurface) {
       const style = 'syncedDoc';

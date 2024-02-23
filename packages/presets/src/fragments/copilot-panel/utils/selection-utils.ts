@@ -1,4 +1,3 @@
-import type { PageService } from '@blocksuite/blocks';
 import {
   BlocksUtils,
   type EdgelessBlock,
@@ -14,7 +13,7 @@ import { Slice } from '@blocksuite/store';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
 export const getPageService = (host: EditorHost) => {
-  return host.std.spec.getService('affine:page') as PageService;
+  return host.std.spec.getService('affine:page');
 };
 
 export function getEdgelessPageBlockFromEditor(editor: EditorHost) {
@@ -82,7 +81,7 @@ export async function getSelectedTextContent(editorHost: EditorHost) {
     editorHost.std.page,
     getPageService(editorHost).selectedModels
   );
-  return await getMarkdownFromSlice(editorHost, slice);
+  return getMarkdownFromSlice(editorHost, slice);
 }
 
 export const stopPropagation = (e: Event) => {

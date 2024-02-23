@@ -22,7 +22,7 @@ describe('apply last props', () => {
     return cleanup;
   });
 
-  test('shape', async () => {
+  test('shape', () => {
     const id = service.addElement('shape', { shapeType: 'rect' });
     const shape = service.getElementById(id) as ShapeElementModel;
     expect(shape.fillColor).toBe('--affine-palette-shape-yellow');
@@ -35,7 +35,7 @@ describe('apply last props', () => {
     expect(secondShape.fillColor).toBe('--affine-palette-shape-orange');
   });
 
-  test('connector', async () => {
+  test('connector', () => {
     const id = service.addElement('connector', { mode: 0 });
     const connector = service.getElementById(id) as ConnectorElementModel;
     expect(connector.stroke).toBe('--affine-palette-line-black');
@@ -50,7 +50,7 @@ describe('apply last props', () => {
     expect(secondConnector.strokeWidth).toBe(10);
   });
 
-  test('brush', async () => {
+  test('brush', () => {
     const id = service.addElement('brush', {});
     const brush = service.getElementById(id) as BrushElementModel;
     expect(brush.color).toBe('--affine-palette-line-black');
@@ -62,7 +62,7 @@ describe('apply last props', () => {
     expect(secondBrush.lineWidth).toBe(10);
   });
 
-  test('text', async () => {
+  test('text', () => {
     const id = service.addElement('text', {});
     const text = service.getElementById(id) as TextElementModel;
     expect(text.fontSize).toBe(24);

@@ -11,6 +11,7 @@ import {
   pressBackspace,
   pressBackspaceWithShortKey,
   pressEnter,
+  pressShiftEnter,
   pressShiftTab,
   pressSpace,
   pressTab,
@@ -700,6 +701,20 @@ test('add number prefix to a todo item should not forcefully change it into numb
   await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
   await type(page, '1. ');
   await assertListPrefix(page, ['']);
+});
+
+test('should not convert to a list when pressing space at the second line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+  await pressShiftEnter(page);
+  await type(page, '-');
+  await pressSpace(page);
+  await type(page, 'bbb');
+  await assertRichTexts(page, ['aaa\n- bbb']);
 });
 
 test.describe('toggle list', () => {

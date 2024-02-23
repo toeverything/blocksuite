@@ -3,10 +3,9 @@ import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-export const multiEditor: InitFn = async (workspace: Workspace, id: string) => {
+export const multiEditor: InitFn = (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  await page.load(() => {
+  page.load(() => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text(),
@@ -31,6 +30,7 @@ export const multiEditor: InitFn = async (workspace: Workspace, id: string) => {
       if (!target) {
         throw new Error(`Failed to jump to page ${pageId}`);
       }
+      target.load();
       editor.page = target;
     });
 
@@ -48,13 +48,12 @@ multiEditor.id = 'multiple-editor';
 multiEditor.displayName = 'Multiple Editor Example';
 multiEditor.description = 'Multiple Editor basic example';
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-export const multiEditorVertical: InitFn = async (
+export const multiEditorVertical: InitFn = (
   workspace: Workspace,
   pageId: string
 ) => {
   const page = workspace.createPage({ id: pageId });
-  await page.load(() => {
+  page.load(() => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text(),
@@ -79,6 +78,7 @@ export const multiEditorVertical: InitFn = async (
       if (!target) {
         throw new Error(`Failed to jump to page ${pageId}`);
       }
+      target.load();
       editor.page = target;
     });
     app.append(editor);

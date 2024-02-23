@@ -7,7 +7,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EdgelessPageBlockComponent } from '../../../../page-block/edgeless/edgeless-page-block.js';
-import type { PageService } from '../../../../page-block/page-service.js';
 import type { EdgelessElementType } from '../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../surface-block/utils/vec.js';
@@ -87,10 +86,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    const pageService = this.host.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
+    const pageService = this.host.spec.getService('affine:page');
 
     const embedOptions = pageService.getEmbedBlockOptions(url);
 

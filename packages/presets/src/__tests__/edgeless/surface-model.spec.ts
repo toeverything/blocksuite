@@ -132,7 +132,7 @@ describe('group', () => {
     expect(shape2.group).toBe(group);
   });
 
-  test('should return null if children property is updated', async () => {
+  test('should return null if children property is updated', () => {
     const id = model.addElement({
       type: 'shape',
     });
@@ -350,7 +350,7 @@ describe('stash/pop', () => {
     expect(elementModel.yMap.get('strokeWidth')).toBe(6);
   });
 
-  test('assign stashed property should emit event', async () => {
+  test('assign stashed property should emit event', () => {
     const id = model.addElement({
       type: 'shape',
       strokeWidth: 4,
@@ -366,7 +366,7 @@ describe('stash/pop', () => {
     expect(onchange).toHaveBeenCalledWith(id);
   });
 
-  test('stashed property should also trigger derive decorator', async () => {
+  test('stashed property should also trigger derive decorator', () => {
     const id = model.addElement({
       type: 'brush',
       points: [

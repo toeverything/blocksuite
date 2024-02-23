@@ -367,8 +367,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
   }
 
-  override updated() {
-    if (this._inlineEditor) {
+  override updated(changedProperties: Map<string | number | symbol, unknown>) {
+    if (this._inlineEditor && changedProperties.has('readonly')) {
       this._inlineEditor.setReadonly(this.readonly);
     }
   }

@@ -24,7 +24,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       align-items: center;
       width: var(--menu-width);
       overflow-x: auto;
-      overscroll-behavior-x: none;
+      overscroll-behavior: none;
       position: relative;
       height: calc(var(--menu-height) + 1px);
       box-sizing: border-box;
@@ -37,7 +37,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       position: absolute;
       left: 0;
       top: 0;
-      height: var(--menu-height);
+      height: 100%;
       transition: left 0.5s ease-in-out;
       padding: 0 16px;
     }

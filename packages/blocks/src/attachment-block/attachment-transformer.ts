@@ -9,7 +9,7 @@ import type { AttachmentBlockProps } from './attachment-model.js';
 
 export class AttachmentBlockTransformer extends BaseBlockTransformer<AttachmentBlockProps> {
   override async toSnapshot(payload: ToSnapshotPayload<AttachmentBlockProps>) {
-    const snapshot = await super.toSnapshot(payload);
+    const snapshot = super.toSnapshot(payload);
     const sourceId = payload.model.sourceId;
     if (sourceId) await payload.assets.readFromBlob(sourceId);
 

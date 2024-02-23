@@ -1496,7 +1496,7 @@ test('should scroll page properly by wheel after inserting a new block and selec
   await clickBlockDragHandle(page, lastBlockId);
 
   async function getViewportScrollTop() {
-    return await page.evaluate(() => {
+    return page.evaluate(() => {
       const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
@@ -1567,7 +1567,7 @@ test('scroll should update dragging area and select blocks when dragging', async
 
   await page.mouse.click(0, 0);
   async function getViewportScrollTop() {
-    return await page.evaluate(() => {
+    return page.evaluate(() => {
       const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();

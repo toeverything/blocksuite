@@ -100,7 +100,7 @@ export class AIEdgelessLogic {
     );
   };
 
-  htmlBlockDemo = async () => {
+  htmlBlockDemo = () => {
     const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
     edgelessPage.page.addBlock(
       EmbedHtmlBlockSpec.schema.model.flavour,
@@ -182,7 +182,7 @@ export class AIEdgelessLogic {
       return;
     }
     const callback = (blob: Blob | null) => {
-      const run = async () => {
+      const run = () => {
         if (blob) {
           const dataURL = canvas.toDataURL();
           const genImage = async (model: FrameBlockModel) => {
@@ -235,12 +235,12 @@ export class AIEdgelessLogic {
           });
         }
       };
-      run().catch(console.error);
+      run();
     };
     canvas.toBlob(callback);
   };
 
-  async convertToMindMap() {
+  convertToMindMap() {
     const blocks = getPageService(this.host).selectedBlocks;
     const toTreeNode = (block: BlockModel): TreeNode => {
       return {
@@ -272,10 +272,10 @@ export class AIEdgelessLogic {
         children: blocks.map(v => toTreeNode(v.model)),
       };
     }
-    await this.drawMindMap(node);
+    this.drawMindMap(node);
   }
 
-  async drawMindMap(
+  drawMindMap(
     treeNode: TreeNode,
     options?: { rootId?: string; x?: number; y?: number }
   ) {

@@ -43,10 +43,7 @@ function reject(message: string) {
   addMessage(`❌ ${message}`);
 }
 
-export async function testSerial(
-  name: string,
-  callback: () => Promise<boolean>
-) {
+export function testSerial(name: string, callback: () => Promise<boolean>) {
   testCases.push({ name, callback });
 }
 
@@ -82,7 +79,7 @@ export async function nextFrame() {
 // Test image source: https://en.wikipedia.org/wiki/Test_card
 export async function loadTestImageBlob(name: string): Promise<Blob> {
   const resp = await fetch(`/${name}.png`);
-  return await resp.blob();
+  return resp.blob();
 }
 
 export async function loadImage(blobUrl: string) {

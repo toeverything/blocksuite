@@ -4,7 +4,7 @@ import '../../database-block/table/define.js';
 
 import type { BlockModel, Page } from '@blocksuite/store';
 import { Generator, Schema, Workspace } from '@blocksuite/store';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 
 import { numberPureColumnConfig } from '../../database-block/common/columns/number/define.js';
 import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
@@ -30,11 +30,11 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, schema };
 }
 
-async function createTestPage(pageId = 'page0') {
+function createTestPage(pageId = 'page0') {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
-  await page.load();
+  page.load();
   return page;
 }
 
@@ -57,10 +57,8 @@ describe('DatabaseManager', () => {
     { id: '3', value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
 
-  beforeEach(async () => {
-    vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
-
-    page = await createTestPage();
+  beforeEach(() => {
+    page = createTestPage();
 
     pageBlockId = page.addBlock('affine:page', {
       title: new page.Text('database test'),

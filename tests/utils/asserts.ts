@@ -79,6 +79,7 @@ export const defaultStore: SerializedStore = {
       'affine:embed-youtube': 1,
       'affine:embed-figma': 1,
       'affine:embed-github': 1,
+      'affine:embed-loom': 1,
       'affine:embed-html': 1,
       'affine:embed-linked-doc': 1,
       'affine:embed-synced-doc': 1,
@@ -633,11 +634,7 @@ export async function assertStoreMatchJSX(
 
 type MimeType = 'text/plain' | 'blocksuite/x-c+w' | 'text/html';
 
-export async function assertClipItems(
-  _page: Page,
-  _key: MimeType,
-  _value: unknown
-) {
+export function assertClipItems(_page: Page, _key: MimeType, _value: unknown) {
   // FIXME: use original clipboard API
   // const clipItems = await page.evaluate(() => {
   //   return document
@@ -788,6 +785,21 @@ export function assertDOMRectEqual(a: DOMRect, b: DOMRect) {
   expect(a.height).toBeCloseTo(b.height, 0);
 }
 
+export async function assertEdgelessDraggingArea(page: Page, xywh: number[]) {
+  const [x, y, w, h] = xywh;
+  const editor = getEditorLocator(page);
+  const draggingArea = editor
+    .locator('edgeless-dragging-area-rect')
+    .locator('.affine-edgeless-dragging-area');
+
+  const box = await draggingArea.boundingBox();
+  if (!box) throw new Error('Missing edgeless dragging area');
+
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
 export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const [x, y, w, h] = xywh;
   const editor = getEditorLocator(page);

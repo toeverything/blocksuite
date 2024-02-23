@@ -20,6 +20,7 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertBlockCount,
+  assertEdgelessDraggingArea,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
   assertSelectionInNote,
@@ -351,7 +352,7 @@ test('should also update dragging area when viewport changes', async ({
   await page.mouse.click(200, 300);
 
   const selectedRectClass = '.affine-edgeless-selected-rect';
-  let selectedRect = await page.locator(selectedRectClass);
+  let selectedRect = page.locator(selectedRectClass);
   await expect(selectedRect).toBeHidden();
   // set up initial dragging area
   await page.mouse.move(200, 300);
@@ -365,8 +366,196 @@ test('should also update dragging area when viewport changes', async ({
   await page.mouse.up();
 
   // Expect to select the empty note
-  selectedRect = await page.locator(selectedRectClass);
+  selectedRect = page.locator(selectedRectClass);
   await page.waitForTimeout(300);
   await expect(selectedRect).toBeVisible();
   await page.waitForTimeout(300);
+});
+
+test('should move selection drag area when holding spaceBar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
+  await setEdgelessTool(page, 'default');
+
+  // Click to start the initial dragging area
+  await page.mouse.click(100, 100);
+
+  const initialX = 100,
+    initialY = 100;
+  const finalX = 300,
+    finalY = 300;
+
+  await dragBetweenCoords(
+    page,
+    { x: initialX, y: initialY },
+    { x: finalX, y: finalY },
+    {
+      beforeMouseUp: async () => {
+        await page.keyboard.down('Space');
+
+        const dx = 100,
+          dy = 100;
+        await page.mouse.move(finalX + dx, finalY + dy);
+        await assertEdgelessDraggingArea(page, [
+          initialX + dx,
+          initialY + dy,
+          // width and height should be same
+          finalX - initialX,
+          finalY - initialY,
+        ]);
+
+        await page.keyboard.up('Space');
+      },
+    }
+  );
+});
+
+test('should be able to update selection dragging area after releasing space', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
+  await setEdgelessTool(page, 'default');
+
+  // Click to start the initial dragging area
+  await page.mouse.click(100, 100);
+
+  const initialX = 100,
+    initialY = 100;
+  const finalX = 300,
+    finalY = 300;
+
+  await dragBetweenCoords(
+    page,
+    { x: initialX, y: initialY },
+    { x: finalX, y: finalY },
+    {
+      beforeMouseUp: async () => {
+        await page.keyboard.down('Space');
+
+        const dx = 100,
+          dy = 100;
+
+        // Move the mouse to simulate dragging with spaceBar held
+        await page.mouse.move(finalX + dx, finalY + dy);
+
+        await page.keyboard.up('Space');
+        // scale after moving
+        const dSx = 100;
+        const dSy = 100;
+
+        await page.mouse.move(finalX + dx + dSx, finalY + dy + dSy);
+
+        await assertEdgelessDraggingArea(page, [
+          initialX + dx,
+          initialY + dy,
+          // In the second scale it should scale by dS(.)
+          finalX - initialX + dSx,
+          finalY - initialY + dSy,
+        ]);
+      },
+    }
+  );
+});
+
+test('should select shapes while moving selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
+
+  await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+  // Make the selection out side the rect and move the selection to the rect
+  await dragBetweenCoords(
+    page,
+    // Make the selection not selecting the rect
+    { x: 70, y: 70 },
+    { x: 90, y: 90 },
+    {
+      beforeMouseUp: async () => {
+        await page.keyboard.down('Space');
+        // Move the selection over to the rect
+        await page.mouse.move(120, 120);
+        await page.keyboard.up('Space');
+      },
+    }
+  );
+
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+  await addBasicBrushElement(page, { x: 210, y: 100 }, { x: 310, y: 300 });
+  await page.mouse.click(211, 101);
+
+  // Make a wide selection and move it to select both of the shapes
+  await dragBetweenCoords(
+    page,
+    // Make the selection above the spaces
+    { x: 70, y: 70 },
+    { x: 400, y: 90 },
+    {
+      beforeMouseUp: async () => {
+        await page.keyboard.down('Space');
+        // Move the selection over both of the shapes
+        await page.mouse.move(400, 120);
+        await page.keyboard.up('Space');
+      },
+    }
+  );
+
+  await assertEdgelessSelectedRect(page, [100, 98, 212, 204]);
+});
+
+test('selection drag-area start should be same when space is pressed again', async ({
+  page,
+}) => {
+  //? This test is to check whether there is any flicker or jump when using the space again in the same selection
+
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
+
+  // Make the selection out side the rect and move the selection to the rect
+  await dragBetweenCoords(
+    page,
+    // Make the selection not selecting the rect
+    { x: 100, y: 100 },
+    { x: 200, y: 200 },
+    {
+      beforeMouseUp: async () => {
+        await page.keyboard.down('Space');
+        // Move the selection over to the rect
+        await page.mouse.move(300, 300);
+
+        let draggingArea = page.locator('.affine-edgeless-dragging-area');
+        const firstBound = await draggingArea.boundingBox();
+
+        await page.keyboard.up('Space');
+
+        await page.mouse.move(400, 400);
+        await page.keyboard.down('Space');
+
+        await page.mouse.move(410, 410);
+        await page.mouse.move(400, 400);
+
+        draggingArea = page.locator('.affine-edgeless-dragging-area');
+        const newBound = await draggingArea.boundingBox();
+
+        expect(firstBound).not.toBe(null);
+        expect(newBound).not.toBe(null);
+
+        const { x: fx, y: fy } = firstBound!;
+        const { x: nx, y: ny } = newBound!;
+
+        expect([fx, fy]).toStrictEqual([nx, ny]);
+      },
+    }
+  );
 });

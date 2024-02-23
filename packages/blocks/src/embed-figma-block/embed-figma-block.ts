@@ -165,7 +165,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
       `,
       computePosition: {
         referenceElement: this._figmaBlockEl,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },

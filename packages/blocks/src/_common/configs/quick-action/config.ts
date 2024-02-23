@@ -5,7 +5,6 @@ import type { EditorHost } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { EmbedLinkedDocService } from '../../../embed-linked-doc-block/embed-linked-doc-service.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
 import {
@@ -57,11 +56,12 @@ export const quickActionConfig: QuickActionConfig[] = [
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
     showWhen: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block', 'text'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       if (!selectedModels || selectedModels.length === 0) return false;
 
       const firstBlock = selectedModels[0];
@@ -73,11 +73,12 @@ export const quickActionConfig: QuickActionConfig[] = [
       return true;
     },
     enabledWhen: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block', 'text'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       if (!selectedModels || selectedModels.length === 0) return false;
 
       return selectedModels.every(block =>
@@ -98,27 +99,30 @@ export const quickActionConfig: QuickActionConfig[] = [
     icon: FontLinkedPageIcon,
     hotkey: `Mod-Shift-l`,
     showWhen: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       return !!selectedModels && selectedModels.length > 0;
     },
     enabledWhen: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       return !!selectedModels && selectedModels.length > 0;
     },
     action: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       assertExists(selectedModels);
 
       host.selection.clear();
@@ -176,10 +180,7 @@ export const quickActionConfig: QuickActionConfig[] = [
         });
       });
 
-      const linkedDocService = host.spec.getService(
-        'affine:embed-linked-doc'
-      ) as EmbedLinkedDocService | null;
-      assertExists(linkedDocService);
+      const linkedDocService = host.spec.getService('affine:embed-linked-doc');
       linkedDocService.slots.linkedDocCreated.emit({ pageId: linkedPage.id });
     },
   },

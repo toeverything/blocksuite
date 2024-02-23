@@ -64,7 +64,7 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onArrowDown = () => {
-    return this._std.command
+    const [result] = this._std.command
       .pipe()
       .inline((_, next) => {
         this._reset();
@@ -75,6 +75,8 @@ export class KeymapController implements ReactiveController {
         this._onBlockDown(cmd),
       ])
       .run();
+
+    return result;
   };
 
   private _onBlockDown = (cmd: BlockSuite.CommandChain) => {
@@ -106,7 +108,7 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onArrowUp = () => {
-    return this._std.command
+    const [result] = this._std.command
       .pipe()
       .inline((_, next) => {
         this._reset();
@@ -117,6 +119,8 @@ export class KeymapController implements ReactiveController {
         this._onBlockUp(cmd),
       ])
       .run();
+
+    return result;
   };
 
   private _onBlockUp = (cmd: BlockSuite.CommandChain) => {
@@ -148,13 +152,15 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onShiftArrowDown = () => {
-    return this._std.command
+    const [result] = this._std.command
       .pipe()
       .try(cmd => [
         // block selection
         this._onBlockShiftDown(cmd),
       ])
       .run();
+
+    return result;
   };
 
   private _onBlockShiftDown = (cmd: BlockSuite.CommandChain) => {
@@ -197,13 +203,15 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onShiftArrowUp = () => {
-    return this._std.command
+    const [result] = this._std.command
       .pipe()
       .try(cmd => [
         // block selection
         this._onBlockShiftUp(cmd),
       ])
       .run();
+
+    return result;
   };
 
   private _onBlockShiftUp = (cmd: BlockSuite.CommandChain) => {
@@ -245,7 +253,7 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onEsc = () => {
-    return this._std.command
+    const [result] = this._std.command
       .pipe()
       .getBlockSelections()
       .inline((ctx, next) => {
@@ -261,10 +269,12 @@ export class KeymapController implements ReactiveController {
         return next();
       })
       .run();
+
+    return result;
   };
 
   private _onEnter = () => {
-    return this._std.command
+    const [result] = this._std.command
       .pipe()
       .getBlockSelections()
       .inline((ctx, next) => {
@@ -309,6 +319,8 @@ export class KeymapController implements ReactiveController {
         return next();
       })
       .run();
+
+    return result;
   };
 
   private _onSelectAll: UIEventHandler = ctx => {
@@ -368,7 +380,7 @@ export class KeymapController implements ReactiveController {
           [key]: ctx => {
             ctx.get('defaultState').event.preventDefault();
 
-            return this._std.command
+            const [result] = this._std.command
               .pipe()
               .withHost()
               .tryAll(chain => [
@@ -418,6 +430,8 @@ export class KeymapController implements ReactiveController {
                 next();
               })
               .run();
+
+            return result;
           },
         });
       });

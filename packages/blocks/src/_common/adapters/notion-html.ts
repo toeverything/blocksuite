@@ -789,7 +789,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         }
       }
     });
-    walker.setLeave(async (o, context) => {
+    walker.setLeave((o, context) => {
       if (o.node.type !== 'element') {
         return;
       }

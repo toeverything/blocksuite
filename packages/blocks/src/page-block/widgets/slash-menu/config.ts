@@ -1,4 +1,4 @@
-import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
@@ -34,14 +34,12 @@ import {
   openFileOrFiles,
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
-import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
-import type { DatabaseService } from '../../../database-block/database-service.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
+import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import { ImageService } from '../../../image-block/image-service.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
@@ -193,8 +191,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'New Doc',
         icon: NewPageIcon,
-        action: async ({ pageElement, model }) => {
-          const newPage = await createDefaultPage(pageElement.page.workspace);
+        action: ({ pageElement, model }) => {
+          const newPage = createDefaultPage(pageElement.page.workspace);
           insertContent(pageElement.host, model, REFERENCE_NODE, {
             reference: {
               type: 'LinkedPage',
@@ -260,8 +258,6 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const imageFiles = await getImageFilesFromLocal();
 
           const imageService = pageElement.host.spec.getService('affine:image');
-          assertExists(imageService);
-          assertInstanceOf(imageService, ImageService);
           const maxFileSize = imageService.maxFileSize;
 
           addSiblingImageBlock(
@@ -313,7 +309,6 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const attachmentService =
             pageElement.host.spec.getService('affine:attachment');
           assertExists(attachmentService);
-          assertInstanceOf(attachmentService, AttachmentService);
           const maxFileSize = attachmentService.maxFileSize;
 
           addSiblingAttachmentBlocks(
@@ -397,6 +392,30 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           tryRemoveEmptyLine(model);
         },
       },
+      {
+        name: 'Loom',
+        icon: LoomIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-loom')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: async ({ pageElement, model }) => {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
+            return;
+          }
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
+            pageElement.host,
+            'Loom',
+            'The added Loom video link will be displayed as an embed view.',
+            { mode: 'page', parentModel, index }
+          );
+          tryRemoveEmptyLine(model);
+        },
+      },
     ],
   },
   {
@@ -464,7 +483,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: async ({ pageElement, model }) => {
+        action: ({ pageElement, model }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
@@ -475,9 +494,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             pageElement.page.getParent(model),
             index + 1
           );
-          const service = pageElement.std.spec.getService(
-            'affine:database'
-          ) as DatabaseService;
+          const service = pageElement.std.spec.getService('affine:database');
           service.initDatabaseBlock(
             pageElement.page,
             model,
@@ -503,7 +520,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: async ({ model, pageElement }) => {
+        action: ({ model, pageElement }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
@@ -514,9 +531,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             pageElement.page.getParent(model),
             index + 1
           );
-          const service = pageElement.std.spec.getService(
-            'affine:database'
-          ) as DatabaseService;
+          const service = pageElement.std.spec.getService('affine:database');
           service.initDatabaseBlock(
             pageElement.page,
             model,
@@ -540,7 +555,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         return {
           name: 'Frame: ' + frameModel.title,
           icon: FrameIcon,
-          action: async ({ pageElement, model }) => {
+          action: ({ pageElement, model }) => {
             const { page } = pageElement;
             const noteModel = page.getParent(model) as NoteBlockModel;
             const insertIdx = noteModel.children.indexOf(model);
@@ -586,7 +601,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return {
             name: 'Group: ' + element.get('title'),
             icon: GroupingIcon,
-            action: async ({ pageElement, model }) => {
+            action: ({ pageElement, model }) => {
               const { page } = pageElement;
               const noteModel = page.getParent(model) as NoteBlockModel;
               const insertIdx = noteModel.children.indexOf(model);
@@ -620,7 +635,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'Move Up',
         icon: ArrowUpBigIcon,
-        action: async ({ pageElement, model }) => {
+        action: ({ pageElement, model }) => {
           const page = pageElement.page;
           const previousSiblingModel = page.getPreviousSibling(model);
           if (!previousSiblingModel) return;
@@ -634,7 +649,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'Move Down',
         icon: ArrowDownBigIcon,
-        action: async ({ pageElement, model }) => {
+        action: ({ pageElement, model }) => {
           const page = pageElement.page;
           const nextSiblingModel = page.getNextSibling(model);
           if (!nextSiblingModel) return;
@@ -648,7 +663,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'Copy',
         icon: CopyIcon,
-        action: async ({ pageElement, model }) => {
+        action: ({ pageElement, model }) => {
           const slice = Slice.fromModels(pageElement.std.page, [model]);
 
           pageElement.std.clipboard

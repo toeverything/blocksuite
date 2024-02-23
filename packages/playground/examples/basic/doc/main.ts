@@ -4,7 +4,7 @@ import '@blocksuite/presets/themes/affine.css';
 import { createEmptyPage, DocEditor } from '@blocksuite/presets';
 import { Text } from '@blocksuite/store';
 
-const page = await createEmptyPage().init();
+const page = createEmptyPage().init();
 const editor = new DocEditor();
 editor.page = page;
 document.body.appendChild(editor);

@@ -50,6 +50,10 @@ import type {
   EmbedLinkedDocModel,
 } from '../../../../embed-linked-doc-block/index.js';
 import type {
+  EmbedLoomBlockComponent,
+  EmbedLoomModel,
+} from '../../../../embed-loom-block/index.js';
+import type {
   EmbedSyncedDocBlockComponent,
   EmbedSyncedDocModel,
 } from '../../../../embed-synced-doc-block/index.js';
@@ -62,7 +66,7 @@ import {
   type EdgelessBlockType,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EmbedOptions, PageService } from '../../../page-service.js';
+import type { EmbedOptions } from '../../../page-service.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
@@ -213,7 +217,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedFigmaModel
     | EmbedLinkedDocModel
     | EmbedSyncedDocModel
-    | EmbedHtmlModel;
+    | EmbedHtmlModel
+    | EmbedLoomModel;
 
   @property({ attribute: false })
   std!: BlockStdScope;
@@ -243,11 +248,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   private _cardStylePopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private get _pageService() {
-    const pageService = this.surface.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    return pageService;
+    return this.surface.std.spec.getService('affine:page');
   }
 
   private get _blockElement() {
@@ -269,6 +270,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | EmbedFigmaBlockComponent
       | EmbedLinkedDocBlockComponent
       | EmbedSyncedDocBlockComponent
+      | EmbedLoomBlockComponent
       | null;
     assertExists(blockElement);
 
@@ -297,13 +299,25 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
   private get _isEmbedView() {
     return (
-      isEmbedSyncedDocBlock(this.model) ||
-      this._embedOptions?.viewType === 'embed'
+      !isBookmarkBlock(this.model) &&
+      (isEmbedSyncedDocBlock(this.model) ||
+        this._embedOptions?.viewType === 'embed')
     );
   }
 
   private get _canConvertToEmbedView() {
     const block = this._blockElement;
+
+    // synced doc entry controlled by awareness flag
+    if (!!block && isEmbedLinkedDocBlock(block.model)) {
+      const isSyncedDocEnabled = block.page.awarenessStore.getFlag(
+        'enable_synced_doc_block'
+      );
+      if (!isSyncedDocEnabled) {
+        return false;
+      }
+    }
+
     return (
       (block && 'convertToEmbed' in block) ||
       this._embedOptions?.viewType === 'embed'

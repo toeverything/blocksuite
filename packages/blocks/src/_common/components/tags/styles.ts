@@ -3,11 +3,7 @@ import { css, unsafeCSS } from 'lit';
 
 export const styles = css`
   affine-multi-tag-select {
-    position: fixed;
-    top: 290px !important;
-    left: 50% !important;
-    width: 75% !important;
-    transform: translate(-50%, -50%);
+    position: absolute;
     z-index: 2;
     border: 1px solid var(--affine-border-color);
     border-radius: 8px;

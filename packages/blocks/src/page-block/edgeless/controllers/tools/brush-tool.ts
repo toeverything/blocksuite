@@ -129,6 +129,10 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     noop();
   }
 
+  onPressSpaceBar(_pressed: boolean): void {
+    noop();
+  }
+
   beforeModeSwitch() {
     noop();
   }

@@ -3,6 +3,18 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Command } from '../command/index.js';
 import { CommandManager } from '../command/index.js';
 
+type Command1 = Command<
+  never,
+  'commandData1',
+  {
+    command1Option?: string;
+  }
+>;
+
+type Command2 = Command<'commandData1', 'commandData2'>;
+
+type Command3 = Command<'commandData1' | 'commandData2', 'commandData3'>;
+
 declare global {
   namespace BlockSuite {
     interface CommandContext {
@@ -12,15 +24,9 @@ declare global {
     }
 
     interface Commands {
-      command1: Command<
-        never,
-        never,
-        {
-          command1Option?: string;
-        }
-      >;
-      command2: Command;
-      command3: Command;
+      command1: Command1;
+      command2: Command2;
+      command3: Command3;
       command4: Command;
     }
   }
@@ -42,8 +48,8 @@ describe('CommandManager', () => {
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
 
-    const success1 = commandManager.pipe().command1().run();
-    const success2 = commandManager.pipe().command2().run();
+    const [success1] = commandManager.pipe().command1().run();
+    const [success2] = commandManager.pipe().command2().run();
 
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
@@ -60,7 +66,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success] = commandManager
       .pipe()
       .command1()
       .command2()
@@ -82,7 +88,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success] = commandManager
       .pipe()
       .command1()
       .command2()
@@ -108,7 +114,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success] = commandManager
       .pipe()
       .command1()
       .command2()
@@ -127,7 +133,7 @@ describe('CommandManager', () => {
 
     commandManager.add('command1', command1);
 
-    const success = commandManager
+    const [success] = commandManager
       .pipe()
       .command1({ command1Option: 'test' })
       .run();
@@ -144,7 +150,7 @@ describe('CommandManager', () => {
 
     commandManager.add('command1', command1);
 
-    const success = commandManager
+    const [success, ctx] = commandManager
       .pipe()
       .with({ commandData1: 'test' })
       .command1()
@@ -155,25 +161,27 @@ describe('CommandManager', () => {
       expect.any(Function)
     );
     expect(success).toBeTruthy();
+    expect(ctx.commandData1).toBe('test');
   });
 
   test('passes and updates context across commands', () => {
-    const command1: Command = vi.fn((_ctx, next) =>
+    const command1: Command<'std', 'commandData1'> = vi.fn((_ctx, next) =>
       next({ commandData1: '123' })
     );
     const command2: Command<'commandData1'> = vi.fn((ctx, next) => {
       expect(ctx.commandData1).toBe('123');
-      next();
+      next({ commandData1: '456' });
     });
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
 
-    const success = commandManager.pipe().command1().command2().run();
+    const [success, ctx] = commandManager.pipe().command1().command2().run();
 
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
     expect(success).toBeTruthy();
+    expect(ctx.commandData1).toBe('456');
   });
 
   test('can execute an inline command', () => {
@@ -186,7 +194,7 @@ describe('CommandManager', () => {
   });
 
   test('should not continue with the rest of the chain if all commands in `try` fail', () => {
-    const command1: Command = vi.fn((_ctx, _next) => {});
+    const command1: Command<never, 'commandData1'> = vi.fn((_ctx, _next) => {});
     const command2: Command = vi.fn((_ctx, _next) => {});
     const command3: Command = vi.fn((_ctx, next) => next());
 
@@ -194,7 +202,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success] = commandManager
       .pipe()
       .try(cmd => [cmd.command1(), cmd.command2()])
       .command3()
@@ -207,7 +215,9 @@ describe('CommandManager', () => {
   });
 
   test('should not re-execute previous commands in the chain before `try`', () => {
-    const command1: Command = vi.fn((_ctx, next) => next());
+    const command1: Command1 = vi.fn((_ctx, next) =>
+      next({ commandData1: '123' })
+    );
     const command2: Command = vi.fn((_ctx, _next) => {});
     const command3: Command = vi.fn((_ctx, next) => next());
 
@@ -215,7 +225,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success, ctx] = commandManager
       .pipe()
       .command1()
       .try(cmd => [cmd.command2(), cmd.command3()])
@@ -225,18 +235,23 @@ describe('CommandManager', () => {
     expect(command2).toHaveBeenCalled();
     expect(command3).toHaveBeenCalled();
     expect(success).toBeTruthy();
+    expect(ctx.commandData1).toBe('123');
   });
 
   test('should continue with the rest of the chain if one command in `try` succeeds', () => {
-    const command1: Command = vi.fn((_ctx, _next) => {});
-    const command2: Command = vi.fn((_ctx, next) => next());
-    const command3: Command = vi.fn((_ctx, next) => next());
+    const command1: Command1 = vi.fn((_ctx, _next) => {});
+    const command2: Command2 = vi.fn((_ctx, next) =>
+      next({ commandData2: '123' })
+    );
+    const command3: Command3 = vi.fn((_ctx, next) =>
+      next({ commandData3: '456' })
+    );
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success, ctx] = commandManager
       .pipe()
       .try(cmd => [cmd.command1(), cmd.command2()])
       .command3()
@@ -246,22 +261,32 @@ describe('CommandManager', () => {
     expect(command2).toHaveBeenCalled();
     expect(command3).toHaveBeenCalled();
     expect(success).toBeTruthy();
+    expect(ctx.commandData1).toBeUndefined();
+    expect(ctx.commandData2).toBe('123');
+    expect(ctx.commandData3).toBe('456');
   });
 
   test('should not execute any further commands in `try` after one succeeds', () => {
-    const command1: Command = vi.fn((_ctx, next) => next());
-    const command2: Command = vi.fn((_ctx, next) => next());
+    const command1: Command1 = vi.fn((_ctx, next) =>
+      next({ commandData1: '123' })
+    );
+    const command2: Command2 = vi.fn((_ctx, next) =>
+      next({ commandData2: '456' })
+    );
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
 
-    commandManager
+    const [success, ctx] = commandManager
       .pipe()
       .try(cmd => [cmd.command1(), cmd.command2()])
       .run();
 
     expect(command1).toHaveBeenCalled();
     expect(command2).not.toHaveBeenCalled();
+    expect(success).toBeTruthy();
+    expect(ctx.commandData1).toBe('123');
+    expect(ctx.commandData2).toBeUndefined();
   });
 
   test('should pass context correctly in `try` when a command succeeds', () => {
@@ -288,7 +313,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success] = commandManager
       .pipe()
       .command1()
       .try(cmd => [cmd.command2()])
@@ -310,7 +335,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success] = commandManager
       .pipe()
       .tryAll(cmd => [cmd.command1(), cmd.command2()])
       .command3()
@@ -323,15 +348,21 @@ describe('CommandManager', () => {
   });
 
   test('should execute all commands in `tryAll` even if one has already succeeded', () => {
-    const command1: Command = vi.fn((_ctx, next) => next());
-    const command2: Command = vi.fn((_ctx, next) => next());
-    const command3: Command = vi.fn((_ctx, next) => next());
+    const command1: Command1 = vi.fn((_ctx, next) =>
+      next({ commandData1: '123' })
+    );
+    const command2: Command2 = vi.fn((_ctx, next) =>
+      next({ commandData2: '456' })
+    );
+    const command3: Command3 = vi.fn((_ctx, next) =>
+      next({ commandData3: '789' })
+    );
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success, ctx] = commandManager
       .pipe()
       .tryAll(cmd => [cmd.command1(), cmd.command2(), cmd.command3()])
       .run();
@@ -339,19 +370,24 @@ describe('CommandManager', () => {
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
     expect(command3).toHaveBeenCalled();
+    expect(ctx.commandData1).toBe('123');
+    expect(ctx.commandData2).toBe('456');
+    expect(ctx.commandData3).toBe('789');
     expect(success).toBeTruthy();
   });
 
   test('should not continue with the rest of the chain if all commands in `tryAll` fail', () => {
-    const command1: Command = vi.fn((_ctx, _next) => {});
-    const command2: Command = vi.fn((_ctx, _next) => {});
-    const command3: Command = vi.fn((_ctx, next) => next());
+    const command1: Command1 = vi.fn((_ctx, _next) => {});
+    const command2: Command2 = vi.fn((_ctx, _next) => {});
+    const command3: Command3 = vi.fn((_ctx, next) =>
+      next({ commandData3: '123' })
+    );
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    const success = commandManager
+    const [success, ctx] = commandManager
       .pipe()
       .tryAll(cmd => [cmd.command1(), cmd.command2()])
       .command3()
@@ -360,6 +396,7 @@ describe('CommandManager', () => {
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
     expect(command3).not.toHaveBeenCalled();
+    expect(ctx.commandData3).toBeUndefined();
     expect(success).toBeFalsy();
   });
 
@@ -396,7 +433,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
     commandManager.add('command4', command4);
 
-    const success = commandManager
+    const [success, ctx] = commandManager
       .pipe()
       .command1()
       .tryAll(cmd => [cmd.command2(), cmd.command3()])
@@ -408,6 +445,9 @@ describe('CommandManager', () => {
     expect(command3).toHaveBeenCalled();
     expect(command4).toHaveBeenCalled();
     expect(success).toBeTruthy();
+    expect(ctx.commandData1).toBe('fromCommand2');
+    expect(ctx.commandData2).toBe('fromCommand3');
+    expect(ctx.commandData3).toBe('fromCommand3');
   });
 
   test('should not re-execute commands before `tryAll` after executing `tryAll`', () => {
@@ -421,7 +461,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
     commandManager.add('command4', command4);
 
-    const success = commandManager
+    const [success] = commandManager
       .pipe()
       .command1()
       .tryAll(cmd => [cmd.command2(), cmd.command3()])
