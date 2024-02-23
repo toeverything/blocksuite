@@ -385,7 +385,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       computePosition: {
         referenceElement: this.popupContainer,
         placement: 'top-end',
-        middleware: [flip(), offset(4)],
+        middleware: [flip()],
         autoUpdate: true,
       },
       abortController: this._moreMenuAbortController,

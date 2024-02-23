@@ -238,9 +238,6 @@ export class DebugMenu extends ShadowlessElement {
   private _canRedo = false;
 
   @property({ attribute: false })
-  mode: 'page' | 'edgeless' = 'page';
-
-  @property({ attribute: false })
   readonly = false;
 
   @state()
@@ -251,6 +248,14 @@ export class DebugMenu extends ShadowlessElement {
 
   private _styleMenu!: Pane;
   private _showStyleDebugMenu = false;
+
+  get mode() {
+    return this.editor.mode;
+  }
+
+  set mode(value: 'page' | 'edgeless') {
+    this.editor.mode = value;
+  }
 
   @state()
   private _dark = getDarkModeConfig();
@@ -305,8 +310,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
-    this.mode = mode;
+    this.mode = this.mode === 'page' ? 'edgeless' : 'page';
   }
 
   private _toggleOutlinePanel() {
@@ -546,13 +550,13 @@ export class DebugMenu extends ShadowlessElement {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
+
+    this.editor.slots.pageModeSwitched.on(() => {
+      this.requestUpdate();
+    });
   }
 
   override update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mode')) {
-      const mode = this.mode;
-      this.editor.mode = mode;
-    }
     if (changedProperties.has('_hasOffset')) {
       const appRoot = document.getElementById('app');
       if (!appRoot) return;

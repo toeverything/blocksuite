@@ -11,6 +11,7 @@ import type {
 import {
   DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
+  SurfaceRefBlockService,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { assertExists, Slot } from '@blocksuite/global/utils';
@@ -166,6 +167,11 @@ export class AffineEditorContainer
 
     this.themeObserver.observe(document.documentElement);
     this._disposables.add(this.themeObserver);
+    this._disposables.add(
+      SurfaceRefBlockService.editorModeSwitch.on(mode => {
+        this.mode = mode;
+      })
+    );
   }
 
   /**

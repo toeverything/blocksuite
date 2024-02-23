@@ -48,7 +48,6 @@ import {
   serializeXYWH,
   Vec,
 } from '../../surface-block/index.js';
-import type { SerializedViewport } from '../../surface-block/managers/edit-session.js';
 import type {
   IndexedCanvasUpdateEvent,
   SurfaceBlockComponent,
@@ -675,30 +674,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }, this);
   }
 
-  private _getSavedViewport(): SerializedViewport | null {
-    let result: SerializedViewport | null = null;
-    const storedViewport = this.service.editSession.getItem('viewport');
-    if (!storedViewport) return null;
-
-    if ('referenceId' in storedViewport) {
-      const block = this.service.getElementById(storedViewport.referenceId);
-
-      if (block) {
-        this.service.viewport.setViewportByBound(
-          Bound.deserialize(block.xywh),
-          storedViewport.padding
-        );
-        result = storedViewport;
-      } else {
-        result = null;
-      }
-    } else {
-      result = storedViewport;
-    }
-
-    return result;
-  }
-
   private _initViewport() {
     this.service.viewport.setContainer(this);
     this.service.viewport.setCumulativeParentScale(
@@ -707,11 +682,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     const run = () => {
       const viewport =
-        this._getSavedViewport() ?? this.service.getFitToScreenData();
+        this.service.editSession.getItem('viewport') ??
+        this.service.getFitToScreenData();
+
       if ('xywh' in viewport) {
-        const { xywh, padding } = viewport;
-        const bound = Bound.deserialize(xywh);
-        this.service.viewport.setViewportByBound(bound, padding);
+        const bound = Bound.deserialize(viewport.xywh);
+        this.service.viewport.setViewportByBound(bound, viewport.padding);
       } else {
         const { zoom, centerX, centerY } = viewport;
         this.service.viewport.setViewport(zoom, [centerX, centerY]);
