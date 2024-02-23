@@ -23,6 +23,7 @@ import {
   focusTitle,
 } from '../../../_common/utils/selection.js';
 import type { ListBlockModel } from '../../../list-block/index.js';
+import type { Flavour } from '../../../models.js';
 import type { PageBlockModel } from '../../../page-block/index.js';
 import type { ExtendedModel } from '../../types.js';
 
@@ -861,6 +862,18 @@ function handleParagraphBlockForwardDelete(
     // TODO
     return false;
   } else {
+    const ignoreForwardDeleteFlavourList: Flavour[] = [
+      'affine:database',
+      'affine:image',
+      'affine:code',
+      'affine:attachment',
+    ];
+    if (
+      nextSibling &&
+      ignoreForwardDeleteFlavourList.includes(nextSibling.flavour as Flavour)
+    )
+      return true;
+
     return (
       handleParagraphOrList(page, model, nextSibling, firstChild) ||
       handleEmbedDividerCode(nextSibling, firstChild)
