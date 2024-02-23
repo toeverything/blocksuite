@@ -5,7 +5,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import * as examples from '../starter/data/index.js';
+import * as examples from '../../starter/data/index.js';
 
 const initFunctions = Object.values(examples);
 
