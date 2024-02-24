@@ -134,7 +134,6 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
       console.warn(`Cannot find schema for ${flavour}.`);
       return html`${nothing}`;
     }
-
     const view = this.std.spec.getView(flavour);
     if (!view) {
       console.warn(`Cannot find view for ${flavour}.`);

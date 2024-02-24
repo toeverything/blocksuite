@@ -722,4 +722,61 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       },
     ],
   },
+  {
+    name: 'Layout',
+    items: [
+      {
+        name: 'Columns',
+        alias: ['column', 'grid'],
+        icon: BookmarkIcon,
+        showWhen: model => {
+          return !insideDatabase(model);
+        },
+        action: ({ model, pageElement }) => {
+          const parent = pageElement.page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+
+          const id = pageElement.page.addBlock(
+            'affine:columns',
+            {
+              columnNumber: 2,
+            },
+            pageElement.page.getParent(model),
+            index + 1
+          );
+
+          const ids = pageElement.page.addBlocks(
+            [
+              {
+                flavour: 'affine:note',
+              },
+              {
+                flavour: 'affine:note',
+              },
+            ] as NoteBlockModel[],
+            id
+          );
+
+          ids.forEach(id => {
+            const noteModel = pageElement.page.getBlockById(id);
+            assertExists(noteModel);
+            const note = noteModel as NoteBlockModel;
+            pageElement.page.addBlock(
+              'affine:paragraph',
+              {
+                flavour: 'affine:paragraph',
+                type: 'text',
+                text: pageElement.page.Text.fromDelta([{ insert: 'Column 2' }]),
+              },
+              note,
+              0
+            );
+          });
+
+          tryRemoveEmptyLine(model);
+        },
+      },
+    ],
+  },
 ];

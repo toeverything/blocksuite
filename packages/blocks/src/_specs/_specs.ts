@@ -7,6 +7,7 @@ import { AttachmentService } from '../attachment-block/attachment-service.js';
 import { BookmarkService } from '../bookmark-block/bookmark-service.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
+import { ColumnsBlockSchema } from '../columns-block/columns-model.js';
 import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
@@ -156,6 +157,12 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     schema: CodeBlockSchema,
     view: {
       component: literal`affine-code`,
+    },
+  },
+  {
+    schema: ColumnsBlockSchema,
+    view: {
+      component: literal`affine-columns`,
     },
   },
   {

@@ -33,11 +33,12 @@ export const NoteBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'hub',
-    parent: ['affine:page'],
+    parent: ['affine:page', 'affine:columns'],
     children: [
       'affine:paragraph',
       'affine:list',
       'affine:code',
+      'affine:columns',
       'affine:divider',
       'affine:database',
       'affine:data-view',

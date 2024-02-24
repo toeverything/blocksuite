@@ -14,6 +14,10 @@ import {
   type CodeBlockModel,
   CodeBlockSchema,
 } from './code-block/code-model.js';
+import {
+  type ColumnsBlockModel,
+  ColumnsBlockSchema,
+} from './columns-block/columns-model.js';
 import type { DataViewBlockModel } from './data-view-block/data-view-model.js';
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
 import type { DatabaseBlockModel } from './database-block/database-model.js';
@@ -48,6 +52,7 @@ export type {
   AttachmentBlockModel,
   BookmarkBlockModel,
   CodeBlockModel,
+  ColumnsBlockModel,
   DatabaseBlockModel,
   DataViewBlockModel,
   DividerBlockModel,
@@ -63,6 +68,7 @@ export type {
 /** Built-in first party block models built for affine */
 export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   CodeBlockSchema,
+  ColumnsBlockSchema,
   ParagraphBlockSchema,
   PageBlockSchema,
   ListBlockSchema,
@@ -91,6 +97,7 @@ export const __unstableSchemas = [
 // TODO support dynamic register
 export type BlockSchemas = {
   'affine:code': CodeBlockModel;
+  'affine:columns': ColumnsBlockModel;
   'affine:paragraph': ParagraphBlockModel;
   'affine:page': PageBlockModel;
   'affine:list': ListBlockModel;

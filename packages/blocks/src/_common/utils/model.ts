@@ -7,6 +7,8 @@ import type {
   BookmarkBlockSchema,
   CodeBlockModel,
   CodeBlockSchema,
+  ColumnsBlockModel,
+  ColumnsBlockSchema,
   DatabaseBlockModel,
   DatabaseBlockSchema,
   DataViewBlockModel,
@@ -43,6 +45,7 @@ export type BlockModels = {
   'affine:list': ListBlockModel;
   'affine:note': NoteBlockModel;
   'affine:code': CodeBlockModel;
+  'affine:columns': ColumnsBlockModel;
   'affine:divider': DividerBlockModel;
   'affine:image': ImageBlockModel;
   'affine:surface': SurfaceBlockModel;
@@ -67,6 +70,7 @@ export type BlockSchemas = {
   'affine:list': typeof ListBlockSchema;
   'affine:note': typeof NoteBlockSchema;
   'affine:code': typeof CodeBlockSchema;
+  'affine:columns': typeof ColumnsBlockSchema;
   'affine:divider': typeof DividerBlockSchema;
   'affine:image': typeof ImageBlockSchema;
   'affine:surface': typeof SurfaceBlockSchema;
