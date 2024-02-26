@@ -1,13 +1,13 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
 type Props = {
-  columnNumber: number;
+  sizes: number[];
 };
 
 export const ColumnsBlockSchema = defineBlockSchema({
   flavour: 'affine:columns',
   props: (): Props => ({
-    columnNumber: 2,
+    sizes: [50, 50],
   }),
   metadata: {
     role: 'hub',

@@ -740,7 +740,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const id = pageElement.page.addBlock(
             'affine:columns',
             {
-              columnNumber: 2,
+              sizes: [50, 50],
             },
             pageElement.page.getParent(model),
             index + 1
