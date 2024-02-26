@@ -4,6 +4,7 @@ import type { HitTestOptions } from '../../page-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import type { SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
+import { isPointIn } from '../utils/math-utils.js';
 import type { PointLocation } from '../utils/point-location.js';
 import { type IVec2 } from '../utils/vec.js';
 import { type BaseProps, ElementModel } from './base.js';
@@ -139,6 +140,13 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   textVerticalAlign!: VerticalAlign;
 
   override hitTest(x: number, y: number, options: HitTestOptions) {
+    // If pierce is false, only check if the point is in the bounding box
+    const pierce = options.pierce ?? true;
+    if (!pierce) {
+      return isPointIn(this, x, y);
+    }
+
+    options.ignoreTransparent = options.ignoreTransparent ?? true;
     return shapeMethods[this.shapeType].hitTest.call(this, x, y, options);
   }
 
