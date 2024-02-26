@@ -101,7 +101,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             this.requestUpdate();
           };
           return html`<div class="doc-item" @click="${click}" style="${style}">
-            ${doc.meta.title || 'Untitled'}
+            ${doc.meta?.title || 'Untitled'}
             <div @click="${deleteDoc}" class="delete-doc-icon">
               ${CloseIcon}
             </div>

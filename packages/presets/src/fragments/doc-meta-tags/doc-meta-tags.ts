@@ -305,10 +305,11 @@ export class DocMetaTags extends WithDisposable(LitElement) {
   }
 
   get tags() {
-    return this.doc.meta.tags ?? [];
+    return this.doc.meta?.tags ?? [];
   }
 
   set tags(tags: string[]) {
+    assertExists(this.doc.meta);
     this.doc.meta.tags = tags;
   }
 

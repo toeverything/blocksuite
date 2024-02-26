@@ -85,7 +85,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   get docTitle() {
-    return this.linkedDoc?.meta.title.length
+    return this.linkedDoc?.meta?.title.length
       ? this.linkedDoc.meta.title
       : 'Untitled';
   }
@@ -139,7 +139,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       return false;
     }
     return (
-      !!linkedDoc && !linkedDoc.meta.title.length && !this.abstractText.length
+      !!linkedDoc && !linkedDoc.meta?.title.length && !this.abstractText.length
     );
   }
 
@@ -420,7 +420,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       ? 'Loading...'
       : isDeleted
         ? `Deleted ${editorMode}`
-        : linkedDoc?.meta.title.length
+        : linkedDoc?.meta?.title.length
           ? linkedDoc.meta.title
           : 'Untitled';
 

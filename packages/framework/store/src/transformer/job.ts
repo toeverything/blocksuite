@@ -114,6 +114,7 @@ export class Job {
 
   private _importDocMeta(doc: Doc, meta: DocSnapshot['meta']) {
     const docMeta = doc.meta;
+    assertExists(docMeta);
 
     const workspaceTags = this._workspace.meta.properties.tags?.options;
     assertExists(workspaceTags);

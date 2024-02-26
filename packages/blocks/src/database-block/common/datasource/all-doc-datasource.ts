@@ -29,15 +29,17 @@ export class AllDocDatasource extends BaseDataSource {
   > = {
     title: {
       type: textPureColumnConfig.type,
-      getValue: doc => doc.meta.title,
+      getValue: doc => doc.meta?.title,
       setValue: (doc, value) => {
+        assertExists(doc.meta);
         doc.meta.title = `${value ?? ''}`;
       },
     },
     tags: {
       type: multiSelectPureColumnConfig.type,
-      getValue: doc => doc.meta.tags,
+      getValue: doc => doc.meta?.tags,
       setValue: (doc, value) => {
+        assertExists(doc.meta);
         doc.meta.tags = value as string[];
       },
       getData: () => ({
@@ -52,7 +54,7 @@ export class AllDocDatasource extends BaseDataSource {
     },
     createDate: {
       type: numberPureColumnConfig.type,
-      getValue: doc => doc.meta.createDate,
+      getValue: doc => doc.meta?.createDate,
     },
   };
 

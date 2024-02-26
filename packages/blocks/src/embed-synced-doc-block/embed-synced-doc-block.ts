@@ -101,7 +101,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   get docTitle() {
-    return this.syncedDoc?.meta.title.length
+    return this.syncedDoc?.meta?.title.length
       ? this.syncedDoc.meta.title
       : 'Untitled';
   }

@@ -18,7 +18,7 @@ async function exportDoc(doc: Doc) {
   });
 
   let downloadBlob: Blob;
-  const docTitle = doc.meta.title || 'Untitled';
+  const docTitle = doc.meta?.title || 'Untitled';
   let name: string;
   const contentBlob = new Blob([markdownResult.file], { type: 'plain/text' });
   if (markdownResult.assetsIds.length > 0) {

@@ -10,7 +10,6 @@ import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
 import type { YBlock } from './block/index.js';
 import { BlockTree } from './block/index.js';
-import type { DocMeta } from './meta.js';
 import { Space } from './space.js';
 import type { Workspace } from './workspace.js';
 
@@ -120,7 +119,7 @@ export class Doc extends Space<FlatBlockMap> {
   }
 
   get meta() {
-    return this.workspace.meta.getDocMeta(this.id) as DocMeta;
+    return this.workspace.meta.getDocMeta(this.id);
   }
 
   get blob() {

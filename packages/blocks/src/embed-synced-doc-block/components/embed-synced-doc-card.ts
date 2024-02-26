@@ -71,7 +71,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       return false;
     }
     return (
-      !!syncedDoc && !syncedDoc.meta.title.length && !this.abstractText.length
+      !!syncedDoc && !syncedDoc.meta?.title.length && !this.abstractText.length
     );
   }
 

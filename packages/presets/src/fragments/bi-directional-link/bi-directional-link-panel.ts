@@ -206,7 +206,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     config.setInteractable(false);
     config.setDoc(this.doc);
     config.setCustomContent((reference: AffineReference) => {
-      const title = reference.doc.meta.title
+      const title = reference.doc.meta?.title
         ? reference.doc.meta.title
         : 'Untitled';
       return html`<style>
@@ -287,7 +287,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         id => {
           const doc = workspace.getDoc(id);
           assertExists(doc);
-          const title = doc.meta.title ? doc.meta.title : 'Untitled';
+          const title = doc.meta?.title ? doc.meta.title : 'Untitled';
           return html`<div
             class="link"
             @click=${() => {
@@ -368,7 +368,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                   ${ArrowLeftIcon}
                 </div>
                 <div>
-                  ${SmallLinkedDocIcon}${doc.meta.title
+                  ${SmallLinkedDocIcon}${doc.meta?.title
                     ? doc.meta.title
                     : 'Untitled'}
                 </div>
@@ -440,7 +440,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
               ></rich-text>`
           : html`<div class="linked-doc-container">
               ${SmallLinkedDocIcon}
-              ${this.doc.meta.title ? this.doc.meta.title : 'Untitled'}
+              ${this.doc.meta?.title ? this.doc.meta?.title : 'Untitled'}
             </div>`}
       </div>
 

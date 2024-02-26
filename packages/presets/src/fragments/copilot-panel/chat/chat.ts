@@ -210,7 +210,7 @@ export class CopilotChatPanel
                     if (!doc) {
                       return;
                     }
-                    const title = doc.meta.title || 'Untitled';
+                    const title = doc.meta?.title || 'Untitled';
                     const jumpTo = () => {
                       this.host.doc = doc;
                     };
