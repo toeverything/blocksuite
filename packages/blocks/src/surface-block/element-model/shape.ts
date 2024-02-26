@@ -2,8 +2,9 @@ import { Workspace, type Y } from '@blocksuite/store';
 
 import type { HitTestOptions } from '../../page-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
-import { isPointIn, type SerializedXYWH } from '../index.js';
+import type { SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
+import { isPointIn } from '../utils/math-utils.js';
 import type { PointLocation } from '../utils/point-location.js';
 import { type IVec2 } from '../utils/vec.js';
 import { type BaseProps, ElementModel } from './base.js';
