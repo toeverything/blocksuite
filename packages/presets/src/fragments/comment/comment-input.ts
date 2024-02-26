@@ -1,0 +1,124 @@
+import type { TextSelection } from '@blocksuite/block-std';
+import type { RichText } from '@blocksuite/blocks';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { Workspace } from '@blocksuite/store';
+import { css, html, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+
+import type { Comment, CommentManager } from './comment-manager.js';
+
+@customElement('comment-input')
+export class CommentInput extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    .comment-input-container {
+      padding: 16px;
+    }
+
+    .comment-quote {
+      font-size: 10px;
+      color: var(--affine-text-secondary-color);
+      padding-left: 8px;
+      border-left: 2px solid var(--affine-text-secondary-color);
+      margin-bottom: 8px;
+    }
+
+    .comment-author {
+      font-size: 12px;
+    }
+
+    .comment-editor {
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      min-height: 24px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+
+    .comment-control {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+  `;
+
+  @property({ attribute: false })
+  manager!: CommentManager;
+
+  @property({ attribute: false })
+  onSubmit?: (comment: Comment) => void;
+
+  @query('rich-text')
+  private _editor!: RichText;
+
+  get host() {
+    return this.manager.host;
+  }
+
+  private _submit = (textSelection: TextSelection) => {
+    const deltas = this._editor.inlineEditor?.yTextDeltas;
+    if (!deltas) {
+      this.remove();
+      return;
+    }
+
+    const yText = new Workspace.Y.Text();
+    yText.applyDelta(deltas);
+    const comment = this.manager.addComment(textSelection, {
+      author: 'Anonymous',
+      text: yText,
+    });
+
+    this.onSubmit?.(comment);
+
+    this.remove();
+  };
+
+  private _cancel = () => {
+    this.remove();
+  };
+
+  override render() {
+    const textSelection = this.host.selection.find('text');
+    if (!textSelection) {
+      this.remove();
+      return nothing;
+    }
+    const parseResult = this.manager.parseTextSelection(textSelection);
+    if (!parseResult) {
+      this.remove();
+      return nothing;
+    }
+
+    const { quote } = parseResult;
+
+    const tmpYDoc = new Workspace.Y.Doc();
+    const tmpYText = tmpYDoc.getText('comment');
+
+    return html`<div class="comment-input-container">
+      <div class="comment-state">
+        <div class="comment-quote">${quote}</div>
+        <div class="comment-author">Anonymous</div>
+      </div>
+      <rich-text
+        @blur=${() => this._submit(textSelection)}
+        .yText=${tmpYText}
+        class="comment-editor"
+      ></rich-text>
+      <div class="comment-control">
+        <button
+          @click=${() => this._submit(textSelection)}
+          class="comment-submit"
+        >
+          Submit
+        </button>
+        <button @click=${this._cancel} class="comment-cancel">Cancel</button>
+      </div>
+    </div>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'comment-input': CommentInput;
+  }
+}

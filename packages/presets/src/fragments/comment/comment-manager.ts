@@ -23,32 +23,29 @@ export interface CommentContent {
   text: Y.Text;
 }
 
-export interface Comment {
-  meta: CommentMeta;
-  range: CommentRange;
-  content: CommentContent;
-}
+export type Comment = CommentMeta & CommentRange & CommentContent;
 
 export class CommentManager {
   constructor(public readonly host: EditorHost) {}
 
   get commentsMap() {
-    return this.host.page.spaceDoc.getMap<Comment>('comments');
+    return this.host.page.spaceDoc.getMap<Y.Map<unknown>>('comments');
   }
 
-  addComment(selection: TextSelection, content: CommentContent) {
-    const blocks = this._command.getChainCtx(
-      this._command
-        .pipe()
-        .withHost()
-        .getSelectedBlocks({
-          currentTextSelection: selection,
-          types: ['text'],
-        })
-    ).selectedBlocks;
-    if (!blocks || blocks.length === 0) {
-      return;
-    }
+  parseTextSelection(selection: TextSelection): {
+    quote: CommentContent['quote'];
+    range: CommentRange;
+  } | null {
+    const [_, ctx] = this._command
+      .pipe()
+      .withHost()
+      .getSelectedBlocks({
+        currentTextSelection: selection,
+        types: ['text'],
+      })
+      .run();
+    const blocks = ctx.selectedBlocks;
+    if (!blocks || blocks.length === 0) return null;
 
     const { from, to } = selection;
     const fromBlock = blocks[0];
@@ -70,12 +67,25 @@ export class CommentManager {
       toBlockText.yText,
       to ? to.index + to.length : from.index + from.length
     );
-    const id = this.host.page.workspace.idGenerator();
-    this.commentsMap.set(id, {
-      meta: {
-        id,
-        date: Date.now(),
-      },
+    const quote = blocks.reduce((acc, block, index) => {
+      const text = block.model.text;
+      if (!text) return acc;
+
+      if (index === 0) {
+        return (
+          acc +
+          text.yText.toString().slice(from.index, from.index + from.length)
+        );
+      }
+      if (index === blocks.length - 1 && to) {
+        return acc + ' ' + text.yText.toString().slice(0, to.index + to.length);
+      }
+
+      return acc + ' ' + text.yText.toString();
+    }, '');
+
+    return {
+      quote,
       range: {
         start: {
           path: fromBlockPath,
@@ -86,15 +96,40 @@ export class CommentManager {
           index: endIndex,
         },
       },
-      content,
-    });
+    };
   }
 
-  getComments() {
+  addComment(
+    selection: TextSelection,
+    payload: Pick<CommentContent, 'author' | 'text'>
+  ): Comment {
+    const parseResult = this.parseTextSelection(selection);
+    if (!parseResult) {
+      throw new Error('Invalid selection');
+    }
+
+    const { quote, range } = parseResult;
+    const id = this.host.page.workspace.idGenerator();
+    const comment: Comment = {
+      id,
+      date: Date.now(),
+      start: range.start,
+      end: range.end,
+      quote,
+      ...payload,
+    };
+    this.commentsMap.set(
+      id,
+      new Workspace.Y.Map<unknown>(Object.entries(comment))
+    );
+    return comment;
+  }
+
+  getComments(): Comment[] {
     const comments: Comment[] = [];
     this.commentsMap.forEach((comment, key) => {
-      const { range } = comment;
-      const { start, end } = range;
+      const start = comment.get('start') as Comment['start'];
+      const end = comment.get('end') as Comment['end'];
 
       const startIndex = Workspace.Y.createAbsolutePositionFromRelativePosition(
         start.index,
@@ -113,7 +148,16 @@ export class CommentManager {
         return;
       }
 
-      comments.push(comment);
+      const result: Comment = {
+        id: comment.get('id') as Comment['id'],
+        date: comment.get('date') as Comment['date'],
+        start,
+        end,
+        quote: comment.get('quote') as Comment['quote'],
+        author: comment.get('author') as Comment['author'],
+        text: comment.get('text') as Comment['text'],
+      };
+      comments.push(result);
     });
     return comments;
   }

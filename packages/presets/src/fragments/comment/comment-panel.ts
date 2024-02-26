@@ -2,8 +2,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
+import { CommentInput } from './comment-input.js';
 import { CommentManager } from './comment-manager.js';
 
 @customElement('comment-panel')
@@ -41,13 +42,15 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
     }
 
     .comment-panel-comment-quote {
-      font-size: 14px;
-      font-weight: bold;
+      font-size: 10px;
+      color: var(--affine-text-secondary-color);
+      padding-left: 8px;
+      border-left: 2px solid var(--affine-text-secondary-color);
+      margin-bottom: 8px;
     }
 
     .comment-panel-comment-author {
       font-size: 12px;
-      color: var(--affine-text-secondary-color);
     }
 
     .comment-panel-comment-text {
@@ -57,6 +60,9 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   host!: EditorHost;
+
+  @query('.comment-panel-container')
+  private _container!: HTMLDivElement;
 
   commentManager: CommentManager | null = null;
 
@@ -73,24 +79,18 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
 
     return html`<div class="comment-panel-container">
       <div class="comment-panel-head">
-        <sl-button>Add</sl-button>
-        <sl-button>Close</sl-button>
+        <button @click=${this._addComment}>Add Comment</button>
       </div>
       <div class="comment-panel-comments">
-        ${comments.map(
-          comment =>
-            html`<div class="comment-panel-comment">
-              <div class="comment-panel-comment-quote">
-                ${comment.content.quote}
-              </div>
-              <div class="comment-panel-comment-author">
-                ${comment.content.author}
-              </div>
-              <div class="comment-panel-comment-text">
-                ${comment.content.text}
-              </div>
-            </div>`
-        )}
+        ${comments.map(comment => {
+          return html`<div class="comment-panel-comment">
+            <div class="comment-panel-comment-quote">${comment.quote}</div>
+            <div class="comment-panel-comment-author">${comment.author}</div>
+            <div class="comment-panel-comment-text">
+              <rich-text .yText=${comment.text} .readonly=${true}></rich-text>
+            </div>
+          </div>`;
+        })}
       </div>
     </div>`;
   }
@@ -98,6 +98,14 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
   private _addComment() {
     const textSelection = this.host.selection.find('text');
     if (!textSelection) return;
+
+    const commentInput = new CommentInput();
+    assertExists(this.commentManager);
+    commentInput.manager = this.commentManager;
+    commentInput.onSubmit = () => {
+      this.requestUpdate();
+    };
+    this._container.appendChild(commentInput);
   }
 }
 
