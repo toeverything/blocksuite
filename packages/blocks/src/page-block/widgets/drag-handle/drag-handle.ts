@@ -19,6 +19,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   buildPath,
   type EdgelessTool,
+  getAllParents,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
   getModelByBlockComponent,
@@ -174,6 +175,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (!closestBlockElement) {
       return null;
     }
+
+    const parents = getAllParents(closestBlockElement);
+    const isInsideDragPreview = parents.some(el => el instanceof DragPreview);
+    if (isInsideDragPreview) return null;
 
     const blockId = closestBlockElement.model.id;
     const blockPath = closestBlockElement.path;

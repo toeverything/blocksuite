@@ -922,3 +922,12 @@ export function getEdgelessCanvasTextEditor(element: Element | Document) {
 export function hasClassNameInList(element: Element, classList: string[]) {
   return classList.some(className => element.classList.contains(className));
 }
+
+export function getAllParents(elem: HTMLElement | null | ParentNode) {
+  const parents: ParentNode[] = [];
+  while (elem && elem !== document) {
+    parents.push(elem);
+    elem = elem.parentNode;
+  }
+  return parents as HTMLElement[];
+}

@@ -754,24 +754,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
               {
                 flavour: 'affine:note',
               },
-            ] as NoteBlockModel[],
+            ],
             id
           );
 
           ids.forEach(id => {
-            const noteModel = pageElement.page.getBlockById(id);
-            assertExists(noteModel);
-            const note = noteModel as NoteBlockModel;
-            pageElement.page.addBlock(
-              'affine:paragraph',
-              {
-                flavour: 'affine:paragraph',
-                type: 'text',
-                text: pageElement.page.Text.fromDelta([{ insert: 'Column 2' }]),
-              },
-              note,
-              0
-            );
+            pageElement.page.addBlock('affine:paragraph', {}, id);
           });
 
           tryRemoveEmptyLine(model);
