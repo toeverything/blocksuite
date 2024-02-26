@@ -17,7 +17,11 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 import './side-panel.js';
 
-import type { AffineTextAttributes, TreeNode } from '@blocksuite/blocks';
+import type {
+  AffineTextAttributes,
+  SerializedXYWH,
+  TreeNode,
+} from '@blocksuite/blocks';
 import {
   BlocksUtils,
   ColorVariables,
@@ -374,7 +378,7 @@ export class DebugMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},800,95]`;
+    const xywh: SerializedXYWH = `[0,${count * 60},800,95]`;
 
     const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, noteId);

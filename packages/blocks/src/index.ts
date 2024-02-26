@@ -103,6 +103,7 @@ export {
   ElementModel,
   generateKeyBetween,
   GroupElementModel,
+  type SerializedXYWH,
   ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
