@@ -29,8 +29,13 @@ export class SurfaceBlockComponent extends BlockElement<
   SurfaceService
 > {
   static override styles = css`
-    .affine-edgeless-surface-block-container {
+    affine-surface {
       position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .affine-edgeless-surface-block-container {
       width: 100%;
       height: 100%;
     }

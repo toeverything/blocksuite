@@ -38,7 +38,8 @@ export type EdgelessBlockType =
   | 'affine:embed-linked-doc'
   | 'affine:embed-synced-doc'
   | 'affine:embed-html'
-  | 'affine:embed-loom';
+  | 'affine:embed-loom'
+  | 'affine:pdf';
 
 export type EdgelessElementType =
   | EdgelessBlockType

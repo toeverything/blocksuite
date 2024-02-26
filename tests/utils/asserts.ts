@@ -90,6 +90,7 @@ export const defaultStore: SerializedStore = {
       'affine:bookmark': 1,
       'affine:attachment': 1,
       'affine:surface-ref': 1,
+      'affine:pdf': 1,
     },
     workspaceVersion: WORKSPACE_VERSION,
     pageVersion: PAGE_VERSION,

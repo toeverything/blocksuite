@@ -77,7 +77,7 @@ async function initEmptyEditor({
       async function waitForMountPageEditor(
         page: ReturnType<typeof workspace.createPage>
       ) {
-        if (!page.ready) page.load();
+        if (!page.ready) void page.load();
 
         if (!page.root) {
           await new Promise(resolve => page.slots.rootAdded.once(resolve));

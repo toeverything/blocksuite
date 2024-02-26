@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/presets/themes/affine.css';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import 'pdfjs-dist/web/pdf_viewer.css';
 import '../dev-format.js';
 
 import * as blocks from '@blocksuite/blocks';
@@ -7,7 +9,7 @@ import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import * as store from '@blocksuite/store';
 
-import { mountDefaultPageEditor } from './utils/editor.js';
+import { mountDefaultPageEditor, setupPDFModule } from './utils/editor.js';
 import {
   createStarterPageWorkspace,
   initStarterPageWorkspace,
@@ -35,6 +37,7 @@ async function main() {
 
   await initStarterPageWorkspace(workspace);
   await mountDefaultPageEditor(workspace);
+  setupPDFModule();
 }
 
 main().catch(console.error);

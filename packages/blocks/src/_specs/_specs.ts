@@ -43,6 +43,8 @@ import { AFFINE_MODAL_WIDGET } from '../page-block/widgets/modal/modal.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../page-block/widgets/slash-menu/index.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { ParagraphService } from '../paragraph-block/paragraph-service.js';
+import { PDFBlockSchema } from '../pdf-block/pdf-model.js';
+import { PDFService } from '../pdf-block/pdf-service.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
@@ -189,6 +191,13 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     },
     service: AttachmentService,
   },
+  {
+    schema: PDFBlockSchema,
+    view: {
+      component: literal`affine-pdf`,
+    },
+    service: PDFService,
+  },
   EmbedFigmaBlockSpec,
   EmbedYoutubeBlockSpec,
   EmbedGithubBlockSpec,
@@ -204,7 +213,7 @@ export const DocEditorBlockSpecs: BlockSpec[] = [
   {
     schema: SurfaceBlockSchema,
     view: {
-      component: literal`affine-surface`,
+      component: literal`affine-doc-surface`,
     },
     service: SurfacePageService,
   },

@@ -422,13 +422,6 @@ function hasBlockId(element: Element): element is BlockComponent {
 }
 
 /**
- * Returns `true` if element is doc page.
- */
-function isDocPage({ tagName }: Element) {
-  return tagName === 'AFFINE-DOC-PAGE';
-}
-
-/**
  * Returns `true` if element is edgeless page.
  *
  * @deprecated Use context instead. The edgeless page may be customized by the user so it's not recommended to use this method. \
@@ -439,32 +432,19 @@ export function isEdgelessPage(
   return element.tagName === 'AFFINE-EDGELESS-PAGE';
 }
 
-/**
- * Returns `true` if element is default/edgeless page or note.
- */
-function isPageOrNoteOrSurface(element: Element) {
-  return (
-    isDocPage(element) ||
-    isEdgelessPage(element) ||
-    isNote(element) ||
-    isSurface(element)
-  );
-}
+function isBlock(element: BlockComponent, includes: string[] = []) {
+  const exclude = ['affine:page', 'affine:note', 'affine:surface'];
+  const targetFlavour = element?.model?.flavour;
 
-function isBlock(element: BlockComponent) {
-  return !isPageOrNoteOrSurface(element);
+  return (
+    targetFlavour &&
+    (exclude.every(flavour => targetFlavour !== flavour) ||
+      includes.some(flavour => targetFlavour === flavour))
+  );
 }
 
 function isImage({ tagName }: Element) {
   return tagName === 'AFFINE-IMAGE';
-}
-
-function isNote({ tagName }: Element) {
-  return tagName === 'AFFINE-NOTE';
-}
-
-function isSurface({ tagName }: Element) {
-  return tagName === 'AFFINE-SURFACE';
 }
 
 function isDatabase({ tagName }: Element) {
@@ -508,7 +488,12 @@ export function getClosestBlockElementByPoint(
       y: boolean;
     };
   } | null = null,
-  scale = 1
+  scale = 1,
+  /**
+   * by default, the note block, page block, and surface block are not included.
+   * If you want to include them, you can pass their flavour in `includes` parameter.
+   */
+  includes = [] as string[]
 ): Element | null {
   const { y } = point;
 
@@ -548,7 +533,8 @@ export function getClosestBlockElementByPoint(
   // find block element
   element = findBlockElement(
     document.elementsFromPoint(point.x, point.y),
-    container
+    container,
+    includes
   );
 
   // Horizontal direction: for nested structures
@@ -600,7 +586,8 @@ export function getClosestBlockElementByPoint(
     // find block element
     element = findBlockElement(
       document.elementsFromPoint(point.x, point.y),
-      container
+      container,
+      includes
     );
 
     if (element) {
@@ -729,7 +716,11 @@ export function getBlockElementsExcludeSubtrees(
  * Find block element from an `Element[]`.
  * In Chrome/Safari, `document.elementsFromPoint` does not include `affine-image`.
  */
-function findBlockElement(elements: Element[], parent?: Element) {
+function findBlockElement(
+  elements: Element[],
+  parent?: Element,
+  includes: string[] = []
+) {
   const len = elements.length;
   let element = null;
   let i = 0;
@@ -738,10 +729,10 @@ function findBlockElement(elements: Element[], parent?: Element) {
     i++;
     // if parent does not contain element, it's ignored
     if (parent && !contains(parent, element)) continue;
-    if (hasBlockId(element) && isBlock(element)) return element;
+    if (hasBlockId(element) && isBlock(element, includes)) return element;
     if (isImage(element)) {
       const element = elements[i];
-      if (i < len && hasBlockId(element) && isBlock(element)) {
+      if (i < len && hasBlockId(element) && isBlock(element, includes)) {
         return elements[i];
       }
       return getClosestBlockElementByElement(element);

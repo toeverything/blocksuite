@@ -120,7 +120,12 @@ export class FileDropManager {
 
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
-    const element = getClosestBlockElementByPoint(point.clone());
+    const element = getClosestBlockElementByPoint(
+      point.clone(),
+      undefined,
+      undefined,
+      ['affine:surface']
+    );
 
     let result: DropResult | null = null;
     if (element) {
@@ -130,22 +135,26 @@ export class FileDropManager {
         result = calcDropTarget(point, model, element);
       }
     }
-    if (result) {
-      FileDropManager._dropResult = result;
-      this._indicator.rect = result.rect;
-    } else {
-      FileDropManager._dropResult = null;
-      this._indicator.rect = null;
-    }
+
+    FileDropManager._dropResult = result ?? null;
+    this._setIndicatorRect(result);
   };
 
   onDragLeave = () => {
     FileDropManager._dropResult = null;
-    this._indicator.rect = null;
+    this._setIndicatorRect(null);
+  };
+
+  private _setIndicatorRect = (result: DropResult | null) => {
+    if (result?.modelState.model.flavour === 'affine:surface') {
+      this._indicator.rect = null;
+    } else {
+      this._indicator.rect = result?.rect ?? null;
+    }
   };
 
   private _onDrop = (event: DragEvent) => {
-    this._indicator.rect = null;
+    this._setIndicatorRect(null);
 
     const { onDrop } = this._fileDropOptions;
     if (!onDrop) {

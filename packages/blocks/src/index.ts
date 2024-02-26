@@ -10,6 +10,7 @@ import './code-block/affine-code-line.js';
 import './image-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
+import './pdf-block/index.js';
 
 import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours, Point } from './_common/utils/index.js';
@@ -93,6 +94,7 @@ export type {
 } from './page-block/edgeless/components/toolbar/template/template-type.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
+export { PDFService } from './pdf-block/pdf-service.js';
 export {
   Bound,
   BrushElementModel,
@@ -110,6 +112,7 @@ export {
   TextElementModel,
 } from './surface-block/index.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
+export { SurfaceDocBlockComponent } from './surface-block/surface-doc-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
