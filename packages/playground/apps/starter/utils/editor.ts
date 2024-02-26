@@ -8,12 +8,12 @@ import {
 } from '@blocksuite/presets';
 import type { Workspace } from '@blocksuite/store';
 
-import { CustomFramePanel } from '../../components/custom-frame-panel.js';
-import { CustomOutlinePanel } from '../../components/custom-outline-panel.js';
-import { DebugMenu } from '../../components/debug-menu.js';
-import { LeftSidePanel } from '../../components/left-side-panel.js';
-import { PagesPanel } from '../../components/pages-panel.js';
-import { SidePanel } from '../../components/side-panel.js';
+import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
+import { CustomOutlinePanel } from '../../_common/components/custom-outline-panel.js';
+import { DebugMenu } from '../../_common/components/debug-menu.js';
+import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
+import { PagesPanel } from '../../_common/components/pages-panel.js';
+import { SidePanel } from '../../_common/components/side-panel.js';
 
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'edgeless' ? 'edgeless' : 'page';

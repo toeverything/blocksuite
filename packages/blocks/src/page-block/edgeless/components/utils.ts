@@ -1,5 +1,5 @@
 import { assertExists, type Disposable } from '@blocksuite/global/utils';
-import { computePosition, flip, offset } from '@floating-ui/dom';
+import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { css, html } from 'lit';
 
 import {
@@ -80,6 +80,9 @@ export function createButtonPopper(
         }),
         flip({
           fallbackPlacements: ['bottom'],
+        }),
+        shift({
+          padding: 10,
         }),
       ],
     })

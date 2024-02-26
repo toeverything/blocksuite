@@ -124,7 +124,7 @@ export class PageKeyboardManager {
       return null;
     }
 
-    const blockId = this._page.addBlock(flavour, props, parent, index);
+    const blockId = this._page.addBlock(flavour as never, props, parent, index);
 
     return {
       blockId,

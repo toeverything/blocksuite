@@ -13,8 +13,8 @@ import {
 } from '@blocksuite/store';
 import { IndexedDBDocSource } from '@blocksuite/sync';
 
-import { WebSocketAwarenessSource } from '../../sync/websocket/awareness';
-import { WebSocketDocSource } from '../../sync/websocket/doc';
+import { WebSocketAwarenessSource } from '../../_common/sync/websocket/awareness';
+import { WebSocketDocSource } from '../../_common/sync/websocket/doc';
 
 const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 

@@ -4,7 +4,6 @@ import type { Page } from '@blocksuite/store';
 import { type BlockModel } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
-import type { BlockModelProps } from '../../../_common/utils/model.js';
 import {
   isInsideBlockByFlavour,
   matchFlavours,
@@ -23,6 +22,7 @@ import {
   focusTitle,
 } from '../../../_common/utils/selection.js';
 import type { ListBlockModel } from '../../../list-block/index.js';
+import type { Flavour } from '../../../models.js';
 import type { PageBlockModel } from '../../../page-block/index.js';
 import type { ExtendedModel } from '../../types.js';
 
@@ -61,8 +61,14 @@ export function handleBlockEndEnter(
   }
 
   const getProps = ():
-    | ['affine:list', Partial<BlockModelProps['affine:list']>]
-    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
+    | [
+        'affine:list',
+        BlockSuite.ModelProps<BlockSuite.BlockModels['affine:list']>,
+      ]
+    | [
+        'affine:paragraph',
+        BlockSuite.ModelProps<BlockSuite.BlockModels['affine:paragraph']>,
+      ] => {
     const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
     if (shouldInheritFlavour) {
       return [model.flavour, { type: model.type }];
@@ -169,7 +175,7 @@ export function handleBlockSplit(
   const children = [...model.children];
   page.updateBlock(model, { children: [] });
   const id = page.addBlock(
-    model.flavour,
+    model.flavour as never,
     {
       text: right,
       type: model.type,
@@ -861,6 +867,20 @@ function handleParagraphBlockForwardDelete(
     // TODO
     return false;
   } else {
+    const ignoreForwardDeleteFlavourList: Flavour[] = [
+      'affine:database',
+      'affine:image',
+      'affine:code',
+      'affine:attachment',
+    ];
+
+    if (
+      nextSibling &&
+      matchFlavours(nextSibling, ignoreForwardDeleteFlavourList)
+    ) {
+      return true;
+    }
+
     return (
       handleParagraphOrList(page, model, nextSibling, firstChild) ||
       handleEmbedDividerCode(nextSibling, firstChild)

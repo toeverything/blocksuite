@@ -269,7 +269,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const parent = page.getParent(blockElement.model);
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
-    page.addBlock(targetFlavour, props, parent, index + 1);
+    page.addBlock(targetFlavour as never, props, parent, index + 1);
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
@@ -296,7 +296,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
 
-    page.addBlock(flavour, { url }, parent, index + 1);
+    page.addBlock(flavour as never, { url }, parent, index + 1);
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;

@@ -66,7 +66,7 @@ describe('DatabaseManager', () => {
     noteBlockId = page.addBlock('affine:note', {}, pageBlockId);
 
     databaseBlockId = page.addBlock(
-      'affine:database',
+      'affine:database' as BlockSuite.ModelKeys,
       {
         columns: [],
         titleColumn: 'Title',

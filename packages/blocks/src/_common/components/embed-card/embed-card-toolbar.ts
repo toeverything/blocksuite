@@ -354,7 +354,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     const index = parent.children.indexOf(this._model);
 
     page.addBlock(
-      targetFlavour,
+      targetFlavour as never,
       { url, style: targetStyle, caption },
       parent,
       index
@@ -392,7 +392,12 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     assertExists(parent);
     const index = parent.children.indexOf(this._model);
 
-    page.addBlock(flavour, { url, style: targetStyle, caption }, parent, index);
+    page.addBlock(
+      flavour as never,
+      { url, style: targetStyle, caption },
+      parent,
+      index
+    );
 
     this._std.selection.setGroup('note', []);
     page.deleteBlock(this._model);

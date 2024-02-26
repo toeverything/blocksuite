@@ -4,9 +4,9 @@ import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { Workspace } from '@blocksuite/store';
 
-import { LeftSidePanel } from '../../components/left-side-panel.js';
-import { PagesPanel } from '../../components/pages-panel.js';
-import { QuickEdgelessMenu } from '../../components/quick-edgeless-menu.js';
+import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
+import { PagesPanel } from '../../_common/components/pages-panel.js';
+import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
 const params = new URLSearchParams(location.search);

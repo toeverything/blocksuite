@@ -17,7 +17,11 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 import './side-panel.js';
 
-import type { AffineTextAttributes, TreeNode } from '@blocksuite/blocks';
+import type {
+  AffineTextAttributes,
+  SerializedXYWH,
+  TreeNode,
+} from '@blocksuite/blocks';
 import {
   BlocksUtils,
   ColorVariables,
@@ -47,7 +51,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
-import { getEdgelessService } from '../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
+import { getEdgelessService } from '../../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
@@ -369,7 +373,7 @@ export class DebugMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},800,95]`;
+    const xywh: SerializedXYWH = `[0,${count * 60},800,95]`;
 
     const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, noteId);
