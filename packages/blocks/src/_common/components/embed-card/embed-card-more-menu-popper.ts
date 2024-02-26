@@ -104,7 +104,12 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     const { page } = model;
     const parent = page.getParent(model);
     const index = parent?.children.indexOf(model);
-    page.addBlock(model.flavour, duplicateProps, parent, index);
+    page.addBlock(
+      model.flavour as BlockSuite.ModelKeys,
+      duplicateProps,
+      parent,
+      index
+    );
     this.abortController.abort();
   }
 

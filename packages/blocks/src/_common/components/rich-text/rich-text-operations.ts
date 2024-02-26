@@ -4,7 +4,6 @@ import type { Page } from '@blocksuite/store';
 import { type BlockModel } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
-import type { BlockModelProps } from '../../../_common/utils/model.js';
 import {
   isInsideBlockByFlavour,
   matchFlavours,
@@ -62,8 +61,14 @@ export function handleBlockEndEnter(
   }
 
   const getProps = ():
-    | ['affine:list', Partial<BlockModelProps['affine:list']>]
-    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
+    | [
+        'affine:list',
+        BlockSuite.ModelProps<BlockSuite.BlockModels['affine:list']>,
+      ]
+    | [
+        'affine:paragraph',
+        BlockSuite.ModelProps<BlockSuite.BlockModels['affine:paragraph']>,
+      ] => {
     const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
     if (shouldInheritFlavour) {
       return [model.flavour, { type: model.type }];
@@ -170,7 +175,7 @@ export function handleBlockSplit(
   const children = [...model.children];
   page.updateBlock(model, { children: [] });
   const id = page.addBlock(
-    model.flavour,
+    model.flavour as never,
     {
       text: right,
       type: model.type,

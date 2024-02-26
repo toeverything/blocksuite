@@ -94,7 +94,7 @@ export class AIEdgelessLogic {
       return;
     }
     edgelessPage.page.addBlock(
-      EmbedHtmlBlockSpec.schema.model.flavour,
+      EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
       { html, design: png, xywh: '[0, 400, 400, 200]' },
       edgelessPage.surface.model.id
     );
@@ -103,7 +103,7 @@ export class AIEdgelessLogic {
   htmlBlockDemo = () => {
     const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
     edgelessPage.page.addBlock(
-      EmbedHtmlBlockSpec.schema.model.flavour,
+      EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
       { html: demoScript, xywh: '[0, 400, 400, 200]' },
       edgelessPage.surface.model.id
     );

@@ -701,7 +701,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
 
           // TODO add clone model util
           pageElement.page.addBlock(
-            model.flavour,
+            model.flavour as never,
             {
               type: (model as ParagraphBlockModel).type,
               text: pageElement.page.Text.fromDelta(model.text.toDelta()),

@@ -1,6 +1,7 @@
 import './commands/index.js';
 
 import type { EdgelessPageService } from './edgeless/edgeless-page-service.js';
+import type { PageBlockModel } from './page-model.js';
 import type { PageService } from './page-service.js';
 
 export * from './doc/doc-page-block.js';
@@ -20,6 +21,9 @@ export * from './widgets/index.js';
 
 declare global {
   namespace BlockSuite {
+    interface BlockModels {
+      'affine:page': PageBlockModel;
+    }
     interface BlockServices {
       'affine:page': PageService | EdgelessPageService;
     }

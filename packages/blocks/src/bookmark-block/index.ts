@@ -1,3 +1,4 @@
+import type { BookmarkBlockModel } from './bookmark-model.js';
 import type { BookmarkService } from './bookmark-service.js';
 
 export * from './bookmark-block.js';
@@ -8,6 +9,9 @@ declare global {
   namespace BlockSuite {
     interface BlockServices {
       'affine:bookmark': BookmarkService;
+    }
+    interface BlockModels {
+      'affine:bookmark': BookmarkBlockModel;
     }
   }
 }

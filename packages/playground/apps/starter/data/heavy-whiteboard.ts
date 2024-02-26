@@ -1,9 +1,11 @@
+import type { SerializedXYWH } from '@blocksuite/blocks';
 import {
   Boxed,
   nanoid,
   native2Y,
   Text,
   type Workspace,
+  type Y,
 } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
@@ -54,7 +56,11 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
 
     page.addBlock(
       'affine:surface',
-      { elements: new Boxed(native2Y(surfaceBlockElements, { deep: false })) },
+      {
+        elements: new Boxed(
+          native2Y(surfaceBlockElements, { deep: false })
+        ) as Boxed<Y.Map<Y.Map<unknown>>>,
+      },
       pageBlockId
     );
 
@@ -65,7 +71,7 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
       const noteId = page.addBlock(
         'affine:note',
         {
-          xywh: `[${x}, ${y}, 100, 50]`,
+          xywh: `[${x}, ${y}, 100, 50]` as SerializedXYWH,
         },
         pageBlockId
       );

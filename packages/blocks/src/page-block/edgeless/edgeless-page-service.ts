@@ -227,7 +227,7 @@ export class EdgelessPageService extends PageService {
 
     this.editSession.apply(flavour as EdgelessElementType, props);
 
-    return this.page.addBlock(flavour, props, parent, parentIndex);
+    return this.page.addBlock(flavour as never, props, parent, parentIndex);
   }
 
   getElementsByType<

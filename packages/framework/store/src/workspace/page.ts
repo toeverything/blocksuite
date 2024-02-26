@@ -323,7 +323,7 @@ export class Page extends Space<FlatBlockMap> {
     const ids: string[] = [];
     blocks.forEach(block => {
       const id = this.addBlock(
-        block.flavour,
+        block.flavour as never,
         block.blockProps ?? {},
         parent,
         parentIndex
@@ -335,6 +335,18 @@ export class Page extends Space<FlatBlockMap> {
     return ids;
   }
 
+  addBlock<Key extends BlockSuite.ModelKeys>(
+    flavour: Key,
+    blockProps?: BlockSuite.ModelProps<BlockSuite.BlockModels[Key]>,
+    parent?: BlockModel | string | null,
+    parentIndex?: number
+  ): string;
+  addBlock(
+    flavour: never,
+    blockProps?: Partial<BlockProps & Omit<BlockProps, 'flavour'>>,
+    parent?: BlockModel | string | null,
+    parentIndex?: number
+  ): string;
   addBlock(
     flavour: string,
     blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour'>> = {},
@@ -553,7 +565,12 @@ export class Page extends Space<FlatBlockMap> {
     } else {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
-      const id = this.addBlock(flavour, blockProps, parent.id, insertIndex);
+      const id = this.addBlock(
+        flavour as never,
+        blockProps,
+        parent.id,
+        insertIndex
+      );
       return [id];
     }
   }
@@ -800,9 +817,16 @@ export class Page extends Space<FlatBlockMap> {
       }
     }
   }
+}
 
-  /** @deprecated use page.load() instead */
-  waitForLoaded() {
-    this.load();
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {}
+
+    type ModelKeys = string & keyof BlockModels;
+
+    type ModelProps<Model> = Partial<
+      Model extends BlockModel<infer U> ? U : never
+    >;
   }
 }
