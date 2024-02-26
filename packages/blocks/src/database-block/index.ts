@@ -1,3 +1,4 @@
+import type { DatabaseBlockModel } from './database-model.js';
 import type { DatabaseService } from './database-service.js';
 
 export { checkboxPureColumnConfig } from './common/columns/checkbox/define.js';
@@ -18,6 +19,9 @@ declare global {
   namespace BlockSuite {
     interface BlockServices {
       'affine:database': DatabaseService;
+    }
+    interface BlockModels {
+      'affine:database': DatabaseBlockModel;
     }
   }
 }

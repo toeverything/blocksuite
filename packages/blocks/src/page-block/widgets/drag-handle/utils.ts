@@ -463,7 +463,12 @@ export function convertDragPreviewEdgelessToDoc({
     blockProps.style = style;
   }
 
-  page.addBlock(blockModel.flavour, blockProps, parentBlock, parentIndex);
+  page.addBlock(
+    blockModel.flavour as never,
+    blockProps,
+    parentBlock,
+    parentIndex
+  );
 
   const altKey = state.raw.altKey;
   if (!altKey) {

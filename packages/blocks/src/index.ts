@@ -63,7 +63,6 @@ export * from './_common/transformers/index.js';
 export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
 export { on, once } from './_common/utils/event.js';
 export { createDefaultPage } from './_common/utils/init.js';
-export type { BlockModels } from './_common/utils/model.js';
 export { getThemeMode } from './_common/utils/query.js';
 export * from './_specs/_specs.js';
 export * from './attachment-block/index.js';

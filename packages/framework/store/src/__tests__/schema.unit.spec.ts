@@ -4,7 +4,7 @@ import { literal } from 'lit/static-html.js';
 import { describe, expect, it } from 'vitest';
 
 // import some blocks
-import { defineBlockSchema } from '../schema/base.js';
+import { type BlockModel, defineBlockSchema } from '../schema/base.js';
 import { SchemaValidateError } from '../schema/error.js';
 import { Schema } from '../schema/index.js';
 import { Workspace } from '../workspace/index.js';
@@ -105,3 +105,12 @@ describe('schema', () => {
     ).toThrow();
   });
 });
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'affine:note-block-video': BlockModel;
+      'affine:note-invalid-block-video': BlockModel;
+    }
+  }
+}

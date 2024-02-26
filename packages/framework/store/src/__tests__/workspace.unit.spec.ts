@@ -903,3 +903,13 @@ describe('workspace search', () => {
     });
   });
 });
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'affine:page': BlockModel;
+      'affine:paragraph': BlockModel;
+      'affine:note': BlockModel;
+    }
+  }
+}

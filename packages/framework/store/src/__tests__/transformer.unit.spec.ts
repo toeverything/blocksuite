@@ -4,6 +4,7 @@ import * as Y from 'yjs';
 import { MemoryBlobManager } from '../adapter/index.js';
 import { Text } from '../reactive/index.js';
 import {
+  type BlockModel,
   defineBlockSchema,
   Schema,
   type SchemaToModel,
@@ -130,3 +131,11 @@ test('snapshot to model', async () => {
     expect(item.content.toString()).toBe(`item ${index + 1}`);
   });
 });
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      page: BlockModel;
+    }
+  }
+}
