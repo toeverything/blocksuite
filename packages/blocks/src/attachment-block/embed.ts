@@ -3,7 +3,7 @@ import { html, type TemplateResult } from 'lit';
 
 import { withTempBlobData } from '../_common/utils/filesys.js';
 import type { ImageBlockProps } from '../image-block/image-model.js';
-import { transformModel } from '../page-block/utils/operations/model.js';
+import { transformModel } from '../root-block/utils/operations/model.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 
 type EmbedConfig = {
@@ -32,7 +32,7 @@ const embedConfig: EmbedConfig[] = [
   {
     name: 'image',
     check: model =>
-      model.page.schema.flavourSchemaMap.has('affine:image') &&
+      model.doc.schema.flavourSchemaMap.has('affine:image') &&
       model.type.startsWith('image/'),
     action: model => turnIntoImageBlock(model),
   },
@@ -79,7 +79,7 @@ export function allowEmbed(model: AttachmentBlockModel) {
 export function convertToEmbed(model: AttachmentBlockModel) {
   const config = embedConfig.find(config => config.check(model));
   if (!config || !config.action) {
-    model.page.updateBlock<Partial<AttachmentBlockModel>>(model, {
+    model.doc.updateBlock<Partial<AttachmentBlockModel>>(model, {
       embed: true,
     });
     return;
@@ -100,7 +100,7 @@ export function renderEmbedView(model: AttachmentBlockModel, blobUrl: string) {
  * Turn the attachment block into an image block.
  */
 export function turnIntoImageBlock(model: AttachmentBlockModel) {
-  if (!model.page.schema.flavourSchemaMap.has('affine:image'))
+  if (!model.doc.schema.flavourSchemaMap.has('affine:image'))
     throw new Error('The image flavour is not supported!');
 
   const sourceId = model.sourceId;

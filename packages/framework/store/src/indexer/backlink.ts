@@ -4,11 +4,11 @@ import { Text } from 'yjs';
 
 import type { BlockIndexer, IndexBlockEvent } from './base.js';
 
-type PageId = string;
+type DocId = string;
 type BlockId = string;
 type LinkedNode = {
   type: 'LinkedPage' | 'Subpage';
-  pageId: PageId;
+  pageId: DocId;
   blockId: BlockId;
 };
 /**
@@ -21,12 +21,12 @@ type TextDelta = DeltaInsert<
 export type IndexUpdatedEvent =
   | {
       action: 'delete';
-      pageId: PageId;
+      docId: DocId;
       blockId?: BlockId;
     }
   | {
       action: 'add' | 'update';
-      pageId: PageId;
+      docId: DocId;
       blockId: BlockId;
     };
 
@@ -67,7 +67,7 @@ function diffArray<T>(
 export class BacklinkIndexer {
   private _disposables = new DisposableGroup();
 
-  private _linkIndexMap: Record<PageId, Record<BlockId, LinkedNode[]>> = {};
+  private _linkIndexMap: Record<DocId, Record<BlockId, LinkedNode[]>> = {};
   get linkIndexMap() {
     return this._linkIndexMap;
   }
@@ -85,7 +85,7 @@ export class BacklinkIndexer {
     );
 
     this._disposables.add(
-      blockIndexer.slots.pageRemoved.on(pageId => this._onPageRemoved(pageId))
+      blockIndexer.slots.docRemoved.on(docId => this._onDocRemoved(docId))
     );
 
     this._disposables.add(
@@ -98,23 +98,23 @@ export class BacklinkIndexer {
   }
 
   // TODO use inverted index
-  private _backlinkIndexMapCache: Record<PageId, LinkedNode[]> | null = null;
+  private _backlinkIndexMapCache: Record<DocId, LinkedNode[]> | null = null;
   /**
-   * Get the list of backlinks for a given page
+   * Get the list of backlinks for a given doc
    */
-  public getBacklink(targetPageId: PageId) {
+  public getBacklink(targetDocId: DocId) {
     if (this._backlinkIndexMapCache) {
-      return this._backlinkIndexMapCache[targetPageId] ?? [];
+      return this._backlinkIndexMapCache[targetDocId] ?? [];
     }
-    const backlinkIndexMapCache: Record<PageId, LinkedNode[]> = {};
-    for (const [fromPageId, blockMap] of Object.entries(this._linkIndexMap)) {
+    const backlinkIndexMapCache: Record<DocId, LinkedNode[]> = {};
+    for (const [fromDocId, blockMap] of Object.entries(this._linkIndexMap)) {
       for (const [fromBlockId, links] of Object.entries(blockMap)) {
         links.forEach(({ pageId, type }) => {
           if (!(pageId in backlinkIndexMapCache)) {
             backlinkIndexMapCache[pageId] = [];
           }
           backlinkIndexMapCache[pageId].push({
-            pageId: fromPageId,
+            pageId: fromDocId,
             blockId: fromBlockId,
             type,
           });
@@ -122,22 +122,22 @@ export class BacklinkIndexer {
       }
     }
     this._backlinkIndexMapCache = backlinkIndexMapCache;
-    return this._backlinkIndexMapCache[targetPageId] ?? [];
+    return this._backlinkIndexMapCache[targetDocId] ?? [];
   }
 
   private _onRefreshIndex() {
     this._linkIndexMap = {};
   }
 
-  private _onPageRemoved(pageId: PageId) {
-    if (!this._linkIndexMap[pageId]) {
+  private _onDocRemoved(docId: DocId) {
+    if (!this._linkIndexMap[docId]) {
       return;
     }
-    this._linkIndexMap[pageId] = {};
-    this.slots.indexUpdated.emit({ action: 'delete', pageId });
+    this._linkIndexMap[docId] = {};
+    this.slots.indexUpdated.emit({ action: 'delete', docId });
   }
 
-  private _onBlockUpdated({ action, pageId, block, blockId }: IndexBlockEvent) {
+  private _onBlockUpdated({ action, docId, block, blockId }: IndexBlockEvent) {
     switch (action) {
       case 'add':
       case 'update': {
@@ -172,11 +172,11 @@ export class BacklinkIndexer {
           }
         }
 
-        this._indexDelta({ action, pageId, blockId, links });
+        this._indexDelta({ action, docId, blockId, links });
         return;
       }
       case 'delete': {
-        this._removeIndex(pageId, blockId);
+        this._removeIndex(docId, blockId);
         break;
       }
     }
@@ -184,36 +184,36 @@ export class BacklinkIndexer {
 
   private _indexDelta({
     action,
-    pageId,
+    docId,
     blockId,
     links,
   }: {
     action: IndexBlockEvent['action'];
-    pageId: PageId;
+    docId: DocId;
     blockId: BlockId;
     links: LinkedNode[];
   }) {
-    const before = this._linkIndexMap[pageId]?.[blockId] ?? [];
+    const before = this._linkIndexMap[docId]?.[blockId] ?? [];
     const diff = diffArray(before, links);
     if (!diff.changed) return;
 
-    this._linkIndexMap[pageId] = {
-      ...this._linkIndexMap[pageId],
+    this._linkIndexMap[docId] = {
+      ...this._linkIndexMap[docId],
       [blockId]: links,
     };
-    this.slots.indexUpdated.emit({ action, pageId, blockId });
+    this.slots.indexUpdated.emit({ action, docId, blockId });
   }
 
-  private _removeIndex(pageId: PageId, blockId: BlockId) {
-    if (!this._linkIndexMap[pageId] || !this._linkIndexMap[pageId][blockId]) {
+  private _removeIndex(docId: DocId, blockId: BlockId) {
+    if (!this._linkIndexMap[docId] || !this._linkIndexMap[docId][blockId]) {
       return;
     }
-    const previousLink = this._linkIndexMap[pageId][blockId];
-    delete this._linkIndexMap[pageId][blockId];
+    const previousLink = this._linkIndexMap[docId][blockId];
+    delete this._linkIndexMap[docId][blockId];
     if (previousLink.length) {
       this.slots.indexUpdated.emit({
         action: 'delete',
-        pageId,
+        docId,
         blockId,
       });
     }

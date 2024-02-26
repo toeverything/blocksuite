@@ -1,4 +1,4 @@
-import type { EdgelessModel } from '../../page-block/edgeless/type.js';
+import type { EdgelessModel } from '../../root-block/edgeless/type.js';
 import type { ConnectorElementModel } from '../index.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
@@ -6,7 +6,7 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 export function connectorMiddleware(surface: SurfaceBlockModel) {
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
-    (surface.page.getBlockById(id) as EdgelessModel);
+    (surface.doc.getBlockById(id) as EdgelessModel);
   const pathGenerator = new ConnectorPathGenerator({
     getElementById: getElementById,
   });
@@ -64,7 +64,7 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
         addToUpdateList(element as ConnectorElementModel);
       }
     }),
-    surface.page.slots.blockUpdated.on(payload => {
+    surface.doc.slots.blockUpdated.on(payload => {
       if (payload.type === 'update' && payload.props.key === 'xywh') {
         surface.getConnectors(payload.id).forEach(addToUpdateList);
       }

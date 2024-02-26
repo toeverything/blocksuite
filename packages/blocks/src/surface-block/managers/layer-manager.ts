@@ -1,5 +1,5 @@
 import { assertType, DisposableGroup, Slot } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import type { BlockModel } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 
@@ -9,7 +9,7 @@ import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import {
   EdgelessBlockModel,
   type EdgelessModel,
-} from '../../page-block/edgeless/type.js';
+} from '../../root-block/edgeless/type.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { ElementModel } from '../element-model/base.js';
 import type { GroupElementModel } from '../element-model/group.js';
@@ -64,20 +64,20 @@ export type Layer = BlockLayer | CanvasLayer;
 
 export class LayerManager {
   static INITAL_INDEX = 'a0';
-  static create(page: Page, surface: SurfaceBlockModel) {
+  static create(doc: Doc, surface: SurfaceBlockModel) {
     const layerManager = new LayerManager(
       (
-        page
+        doc
           .getBlocks()
           .filter(
             model =>
               model instanceof EdgelessBlockModel &&
-              renderableInEdgeless(page, surface, model)
+              renderableInEdgeless(doc, surface, model)
           ) as EdgelessModel[]
       ).concat(surface.elementModels)
     );
 
-    layerManager.listen(page, surface);
+    layerManager.listen(doc, surface);
 
     return layerManager;
   }
@@ -117,27 +117,27 @@ export class LayerManager {
     }
   }
 
-  private listen(page: Page, surface: SurfaceBlockModel) {
+  private listen(doc: Doc, surface: SurfaceBlockModel) {
     this._disposables.add(
-      page.slots.blockUpdated.on(payload => {
+      doc.slots.blockUpdated.on(payload => {
         if (payload.type === 'add') {
-          const block = page.getBlockById(payload.id)!;
+          const block = doc.getBlockById(payload.id)!;
 
           if (
             block instanceof EdgelessBlockModel &&
-            renderableInEdgeless(page, surface, block)
+            renderableInEdgeless(doc, surface, block)
           ) {
             this.add(block as EdgelessBlockModel);
           }
         }
         if (payload.type === 'update') {
-          const block = page.getBlockById(payload.id)!;
+          const block = doc.getBlockById(payload.id)!;
 
           if (
             payload.props.key === 'index' ||
             (payload.props.key === 'xywh' &&
               block instanceof EdgelessBlockModel &&
-              renderableInEdgeless(page, surface, block))
+              renderableInEdgeless(doc, surface, block))
           ) {
             this.update(block as EdgelessBlockModel, {
               [payload.props.key]: true,

@@ -40,7 +40,7 @@ import {
   assertBlockType,
   assertClassName,
   assertDivider,
-  assertPageTitleFocus,
+  assertDocTitleFocus,
   assertRichTextInlineRange,
   assertRichTexts,
   assertStoreMatchJSX,
@@ -1192,7 +1192,7 @@ test('handling keyup when cursor located in first paragraph', async ({
   await pressArrowUp(page);
   await waitNextFrame(page);
   await pressArrowUp(page);
-  await assertPageTitleFocus(page);
+  await assertDocTitleFocus(page);
 });
 
 test('after deleting a text row, cursor should jump to the end of previous list row', async ({
@@ -1254,22 +1254,22 @@ test('press arrow down should move caret to the start of line', async ({
 }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    const note = page.addBlock('affine:note', {}, pageId);
-    page.addBlock(
+    const note = doc.addBlock('affine:note', {}, rootId);
+    doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text('0'.repeat(100)),
+        text: new doc.Text('0'.repeat(100)),
       },
       note
     );
-    page.addBlock(
+    doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text('1'),
+        text: new doc.Text('1'),
       },
       note
     );
@@ -1289,19 +1289,19 @@ test('press arrow up in the second line should move caret to the first line', as
 }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    const note = page.addBlock('affine:note', {}, pageId);
+    const note = doc.addBlock('affine:note', {}, rootId);
     const delta = Array.from({ length: 150 }, (_, i) => {
       return i % 2 === 0
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
     });
-    const text = page.Text.fromDelta(delta);
-    page.addBlock('affine:paragraph', { text }, note);
-    page.addBlock('affine:paragraph', {}, note);
+    const text = doc.Text.fromDelta(delta);
+    doc.addBlock('affine:paragraph', { text }, note);
+    doc.addBlock('affine:paragraph', {}, note);
   });
 
   // Focus the empty paragraph
@@ -1350,18 +1350,18 @@ test('press arrow down in indent line should not move caret to the start of line
 }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    const note = page.addBlock('affine:note', {}, pageId);
-    const p1 = page.addBlock('affine:paragraph', {}, note);
-    const p2 = page.addBlock('affine:paragraph', {}, p1);
-    page.addBlock('affine:paragraph', {}, p2);
-    page.addBlock(
+    const note = doc.addBlock('affine:note', {}, rootId);
+    const p1 = doc.addBlock('affine:paragraph', {}, note);
+    const p2 = doc.addBlock('affine:paragraph', {}, p1);
+    doc.addBlock('affine:paragraph', {}, p2);
+    doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text('0'),
+        text: new doc.Text('0'),
       },
       note
     );
@@ -1421,22 +1421,22 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
   test.beforeEach(async ({ page }) => {
     await enterPlaygroundRoom(page);
     await page.evaluate(() => {
-      const { page } = window;
-      const pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
+      const { doc } = window;
+      const rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
       });
-      const note = page.addBlock('affine:note', {}, pageId);
-      page.addBlock(
+      const note = doc.addBlock('affine:note', {}, rootId);
+      doc.addBlock(
         'affine:paragraph',
         {
-          text: new page.Text('This is the 2nd last block.'),
+          text: new doc.Text('This is the 2nd last block.'),
         },
         note
       );
-      page.addBlock(
+      doc.addBlock(
         'affine:paragraph',
         {
-          text: new page.Text('This is the last block.'),
+          text: new doc.Text('This is the last block.'),
         },
         note
       );
@@ -1785,25 +1785,25 @@ test('paragraph indent and delete in line start', async ({ page }) => {
 test('delete at the start of paragraph (multiple notes)', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
-    const { page } = window;
+    const { doc } = window;
 
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    page.addBlock('affine:surface', {}, pageId);
+    doc.addBlock('affine:surface', {}, rootId);
 
     ['123', '456'].forEach(text => {
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      page.addBlock(
+      const noteId = doc.addBlock('affine:note', {}, rootId);
+      doc.addBlock(
         'affine:paragraph',
         {
-          text: new page.Text(text),
+          text: new doc.Text(text),
         },
         noteId
       );
     });
 
-    page.resetHistory();
+    doc.resetHistory();
   });
 
   await assertBlockCount(page, 'note', 2);

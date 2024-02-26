@@ -3,7 +3,7 @@ import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
-const syncedPageMarkdown = `We share some of our findings from developing local-first software prototypes at [Ink & Switch](https://www.inkandswitch.com/) over the course of several years. These experiments test the viability of CRDTs in practice, and explore the user interface challenges for this new data model. Lastly, we suggest some next steps for moving towards local-first software: for researchers, for app developers, and a startup opportunity for entrepreneurs.
+const syncedDocMarkdown = `We share some of our findings from developing local-first software prototypes at [Ink & Switch](https://www.inkandswitch.com/) over the course of several years. These experiments test the viability of CRDTs in practice, and explore the user interface challenges for this new data model. Lastly, we suggest some next steps for moving towards local-first software: for researchers, for app developers, and a startup opportunity for entrepreneurs.
 
 This article has also been published [in PDF format](https://www.inkandswitch.com/local-first/static/local-first.pdf) in the proceedings of the [Onward! 2019 conference](https://2019.splashcon.org/track/splash-2019-Onward-Essays). Please cite it as:
 
@@ -12,69 +12,74 @@ This article has also been published [in PDF format](https://www.inkandswitch.co
 We welcome your feedback: [@inkandswitch](https://twitter.com/inkandswitch) or hello@inkandswitch.com.`;
 
 export const synced: InitFn = (workspace: Workspace, id: string) => {
-  const pageMain = workspace.getPage(id) ?? workspace.createPage({ id });
-  const pageSyncedPage = workspace.createPage({ id: 'synced-page' });
-  const pageSyncedEdgeless = workspace.createPage({ id: 'synced-edgeless' });
-  pageMain.clear();
-  pageSyncedPage.clear();
-  pageSyncedEdgeless.clear();
+  const docMain = workspace.getDoc(id) ?? workspace.createDoc({ id });
 
-  pageSyncedPage.load(() => {
-    // Add page block and surface block at root level
-    const pageBlockId = pageSyncedPage.addBlock('affine:page', {
+  const docSyncedPageId = 'doc:synced-page';
+  const docSyncedPage = workspace.createDoc({ id: docSyncedPageId });
+
+  const docSyncedEdgelessId = 'doc:synced-edgeless';
+  const docSyncedEdgeless = workspace.createDoc({ id: docSyncedEdgelessId });
+
+  docMain.clear();
+  docSyncedPage.clear();
+  docSyncedEdgeless.clear();
+
+  docSyncedPage.load(() => {
+    // Add root block and surface block at root level
+    const rootId = docSyncedPage.addBlock('affine:page', {
       title: new Text('Synced - Page View'),
     });
 
-    pageSyncedPage.addBlock('affine:surface', {}, pageBlockId);
+    docSyncedPage.addBlock('affine:surface', {}, rootId);
 
-    // Add note block inside page block
-    const noteId = pageSyncedPage.addBlock('affine:note', {}, pageBlockId);
+    // Add note block inside root block
+    const noteId = docSyncedPage.addBlock('affine:note', {}, rootId);
 
     // Add markdown to note block
     MarkdownTransformer.importMarkdown({
-      page: pageSyncedPage,
+      doc: docSyncedPage,
       noteId,
-      markdown: syncedPageMarkdown,
+      markdown: syncedDocMarkdown,
     }).catch(console.error);
   });
 
-  pageSyncedEdgeless.load(() => {
-    // Add page block and surface block at root level
-    const pageBlockId = pageSyncedEdgeless.addBlock('affine:page', {
+  docSyncedEdgeless.load(() => {
+    // Add root block and surface block at root level
+    const rootId = docSyncedEdgeless.addBlock('affine:page', {
       title: new Text('Synced - Edgeless View'),
     });
 
-    pageSyncedEdgeless.addBlock('affine:surface', {}, pageBlockId);
+    docSyncedEdgeless.addBlock('affine:surface', {}, rootId);
 
-    // Add note block inside page block
-    const noteId = pageSyncedEdgeless.addBlock('affine:note', {}, pageBlockId);
+    // Add note block inside root block
+    const noteId = docSyncedEdgeless.addBlock('affine:note', {}, rootId);
 
     // Add markdown to note block
     MarkdownTransformer.importMarkdown({
-      page: pageSyncedEdgeless,
+      doc: docSyncedEdgeless,
       noteId,
-      markdown: syncedPageMarkdown,
+      markdown: syncedDocMarkdown,
     }).catch(console.error);
   });
 
-  pageMain.load(() => {
-    // Add page block and surface block at root level
-    const pageBlockId = pageMain.addBlock('affine:page', {
-      title: new Text('Home page, having synced blocks'),
+  docMain.load(() => {
+    // Add root block and surface block at root level
+    const rootId = docMain.addBlock('affine:page', {
+      title: new Text('Home doc, having synced blocks'),
     });
 
-    const surfaceId = pageMain.addBlock('affine:surface', {}, pageBlockId);
-    const noteId = pageMain.addBlock('affine:note', {}, pageBlockId);
+    const surfaceId = docMain.addBlock('affine:surface', {}, rootId);
+    const noteId = docMain.addBlock('affine:note', {}, rootId);
 
     // Add markdown to note block
     MarkdownTransformer.importMarkdown({
-      page: pageMain,
+      doc: docMain,
       noteId,
-      markdown: syncedPageMarkdown,
+      markdown: syncedDocMarkdown,
     })
       .then(() => {
         // Add synced block - self
-        pageMain.addBlock(
+        docMain.addBlock(
           'affine:paragraph',
           {
             text: new Text('Cyclic / Matryoshka synced block 👇'),
@@ -84,7 +89,7 @@ export const synced: InitFn = (workspace: Workspace, id: string) => {
         );
 
         // Add synced block - self
-        pageMain.addBlock(
+        docMain.addBlock(
           'affine:embed-synced-doc',
           {
             pageId: id,
@@ -93,45 +98,45 @@ export const synced: InitFn = (workspace: Workspace, id: string) => {
         );
 
         // Add synced block - page view
-        pageMain.addBlock(
+        docMain.addBlock(
           'affine:embed-synced-doc',
           {
-            pageId: 'synced-page',
+            pageId: docSyncedPageId,
           },
           noteId
         );
 
         // Add synced block - edgeless view
-        pageMain.addBlock(
+        docMain.addBlock(
           'affine:embed-synced-doc',
           {
-            pageId: 'synced-edgeless',
+            pageId: docSyncedEdgelessId,
           },
           noteId
         );
 
         // Add synced block - page view
-        pageMain.addBlock(
+        docMain.addBlock(
           'affine:embed-synced-doc',
           {
-            pageId: 'synced-page',
+            pageId: docSyncedPageId,
             xywh: '[-1000, 0, 752, 455]',
           },
           surfaceId
         );
 
         // Add synced block - edgeless view
-        pageMain.addBlock(
+        docMain.addBlock(
           'affine:embed-synced-doc',
           {
-            pageId: 'synced-edgeless',
+            pageId: docSyncedEdgelessId,
             xywh: '[-1000, 500, 752, 455]',
           },
           surfaceId
         );
 
         // Add synced block - self
-        pageMain.addBlock(
+        docMain.addBlock(
           'affine:embed-synced-doc',
           {
             pageId: id,
@@ -141,10 +146,10 @@ export const synced: InitFn = (workspace: Workspace, id: string) => {
         );
 
         // Add synced block - self
-        pageMain.addBlock(
+        docMain.addBlock(
           'affine:embed-synced-doc',
           {
-            pageId: 'deleted-page',
+            pageId: 'doc:deleted-page',
           },
           noteId
         );
@@ -152,9 +157,9 @@ export const synced: InitFn = (workspace: Workspace, id: string) => {
       .catch(console.error);
   });
 
-  pageSyncedEdgeless.resetHistory();
-  pageSyncedPage.resetHistory();
-  pageMain.resetHistory();
+  docSyncedEdgeless.resetHistory();
+  docSyncedPage.resetHistory();
+  docMain.resetHistory();
 };
 
 synced.id = 'synced';

@@ -1,4 +1,4 @@
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 
 export function assertFlavours(model: { flavour: string }, allowed: string[]) {
   if (!allowed.includes(model.flavour)) {
@@ -16,16 +16,16 @@ export function matchFlavours<Key extends (keyof BlockSuite.BlockModels)[]>(
 }
 
 export function isInsideBlockByFlavour(
-  page: Page,
+  doc: Doc,
   block: BlockModel | string,
   flavour: string
 ): boolean {
-  const parent = page.getParent(block);
+  const parent = doc.getParent(block);
   if (parent === null) {
     return false;
   }
   if (flavour === parent.flavour) {
     return true;
   }
-  return isInsideBlockByFlavour(page, parent, flavour);
+  return isInsideBlockByFlavour(doc, parent, flavour);
 }

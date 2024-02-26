@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BlockModel } from '../schema/index.js';
-import type { Page } from '../workspace/index.js';
+import type { Doc } from '../workspace/index.js';
 
 type SliceData = {
   content: BlockModel[];
@@ -12,15 +12,15 @@ type SliceData = {
 };
 
 export class Slice {
-  static fromModels(page: Page, models: BlockModel[]) {
-    const meta = page.workspace.meta;
+  static fromModels(doc: Doc, models: BlockModel[]) {
+    const meta = doc.workspace.meta;
     const { pageVersion, workspaceVersion } = meta;
     assertExists(pageVersion);
     assertExists(workspaceVersion);
     return new Slice({
       content: models,
-      workspaceId: page.workspace.id,
-      pageId: page.id,
+      workspaceId: doc.workspace.id,
+      pageId: doc.id,
       pageVersion,
       workspaceVersion,
     });
@@ -44,7 +44,7 @@ export class Slice {
     return this.data.workspaceId;
   }
 
-  get pageId() {
+  get docId() {
     return this.data.pageId;
   }
 }

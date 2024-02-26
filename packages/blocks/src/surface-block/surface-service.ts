@@ -9,22 +9,20 @@ export class SurfaceService extends BlockService<SurfaceBlockModel> {
 
   override mounted(): void {
     super.mounted();
-    this.surface = this.page.getBlockByFlavour(
+    this.surface = this.doc.getBlockByFlavour(
       'affine:surface'
     )[0] as SurfaceBlockModel;
 
     if (!this.surface) {
-      const disposable = this.page.slots.blockUpdated.on(payload => {
+      const disposable = this.doc.slots.blockUpdated.on(payload => {
         if (payload.flavour === 'affine:surface') {
           disposable.dispose();
-          this.surface = this.page.getBlockById(
-            payload.id
-          ) as SurfaceBlockModel;
-          this.layer = LayerManager.create(this.page, this.surface);
+          this.surface = this.doc.getBlockById(payload.id) as SurfaceBlockModel;
+          this.layer = LayerManager.create(this.doc, this.surface);
         }
       });
     } else {
-      this.layer = LayerManager.create(this.page, this.surface);
+      this.layer = LayerManager.create(this.doc, this.surface);
     }
   }
 

@@ -13,8 +13,8 @@ import {
   DividerBlockSchema,
   ListBlockSchema,
   NoteBlockSchema,
-  PageBlockSchema,
   ParagraphBlockSchema,
+  RootBlockSchema,
 } from './test-schema.js';
 
 function createTestOptions() {
@@ -51,8 +51,8 @@ const TestInvalidNoteBlockSchema = defineBlockSchema({
 });
 
 const BlockSchemas = [
+  RootBlockSchema,
   ParagraphBlockSchema,
-  PageBlockSchema,
   ListBlockSchema,
   NoteBlockSchema,
   DividerBlockSchema,
@@ -60,48 +60,48 @@ const BlockSchemas = [
   TestInvalidNoteBlockSchema,
 ];
 
-const defaultPageId = 'page0';
-function createTestPage(pageId = defaultPageId) {
+const defaultDocId = 'doc0';
+function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
   const workspace = new Workspace(options);
-  const page = workspace.createPage({ id: pageId });
-  page.load();
-  return page;
+  const doc = workspace.createDoc({ id: docId });
+  doc.load();
+  return doc;
 }
 
 describe('schema', () => {
   it('should be able to validate schema by role', () => {
-    const page = createTestPage();
-    const pageId = page.addBlock('affine:page', {});
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+    const doc = createTestDoc();
+    const rootId = doc.addBlock('affine:page', {});
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    const paragraphId = doc.addBlock('affine:paragraph', {}, noteId);
 
     // add note to root should throw
-    expect(() => page.addBlock('affine:note', {})).toThrow(SchemaValidateError);
+    expect(() => doc.addBlock('affine:note', {})).toThrow(SchemaValidateError);
 
     // add paragraph to root should throw
-    expect(() => page.addBlock('affine:paragraph', {}, pageId)).toThrow(
+    expect(() => doc.addBlock('affine:paragraph', {}, rootId)).toThrow(
       SchemaValidateError
     );
 
-    expect(() => page.addBlock('affine:note', {}, pageId)).not.toThrow();
-    expect(() => page.addBlock('affine:paragraph', {}, noteId)).not.toThrow();
+    expect(() => doc.addBlock('affine:note', {}, rootId)).not.toThrow();
+    expect(() => doc.addBlock('affine:paragraph', {}, noteId)).not.toThrow();
     expect(() =>
-      page.addBlock('affine:paragraph', {}, paragraphId)
+      doc.addBlock('affine:paragraph', {}, paragraphId)
     ).not.toThrow();
   });
 
   it('should glob match works', () => {
-    const page = createTestPage();
-    const pageId = page.addBlock('affine:page', {});
-    const noteId = page.addBlock('affine:note', {}, pageId);
+    const doc = createTestDoc();
+    const rootId = doc.addBlock('affine:page', {});
+    const noteId = doc.addBlock('affine:note', {}, rootId);
 
     expect(() =>
-      page.addBlock('affine:note-block-video', {}, noteId)
+      doc.addBlock('affine:note-block-video', {}, noteId)
     ).not.toThrow();
 
     expect(() =>
-      page.addBlock('affine:note-invalid-block-video', {}, noteId)
+      doc.addBlock('affine:note-invalid-block-video', {}, noteId)
     ).toThrow();
   });
 });

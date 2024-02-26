@@ -56,14 +56,14 @@ export function tryConvertBlock(
       return KEYBOARD_ALLOW_DEFAULT;
     }
 
-    const page = model.page;
-    page.captureSync();
+    const doc = model.doc;
+    doc.captureSync();
 
-    const parent = page.getParent(model);
+    const parent = doc.getParent(model);
     assertExists(parent);
     const index = parent.children.indexOf(model);
 
-    const codeId = page.addBlock(
+    const codeId = doc.addBlock(
       'affine:code',
       {
         language:
@@ -74,14 +74,14 @@ export function tryConvertBlock(
     );
     if (model.text && model.text.length > prefixText.length) {
       const text = model.text.clone();
-      page.addBlock('affine:paragraph', { text }, parent, index + 1);
+      doc.addBlock('affine:paragraph', { text }, parent, index + 1);
       text.delete(0, prefixText.length);
     }
-    page.deleteBlock(model, {
+    doc.deleteBlock(model, {
       bringChildrenTo: parent,
     });
 
-    const codeBlock = page.getBlockById(codeId);
+    const codeBlock = doc.getBlockById(codeId);
     assertExists(codeBlock);
     asyncSetInlineRange(element.host, codeBlock, { index: 0, length: 0 }).catch(
       console.error

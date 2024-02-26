@@ -5,7 +5,7 @@ import { keys } from '../../_common/utils/iterable.js';
 import type {
   EdgelessBlockModel,
   IEdgelessElement,
-} from '../../page-block/edgeless/type.js';
+} from '../../root-block/edgeless/type.js';
 import { Bound } from '../utils/bound.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
 import type { PointLocation } from '../utils/point-location.js';
@@ -89,7 +89,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     for (const key of keys) {
       const element =
         this.surface.getElementById(key) ||
-        (this.surface.page.getBlockById(key) as EdgelessBlockModel);
+        (this.surface.doc.getBlockById(key) as EdgelessBlockModel);
 
       element && elements.push(element);
     }
@@ -109,7 +109,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
   addChild(element: IEdgelessElement | string) {
     const id = typeof element === 'string' ? element : element.id;
 
-    this.surface.page.transact(() => {
+    this.surface.doc.transact(() => {
       this.children.set(id, true);
     });
   }
@@ -117,7 +117,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
   removeChild(element: IEdgelessElement | string) {
     const id = typeof element === 'string' ? element : element.id;
 
-    this.surface.page.transact(() => {
+    this.surface.doc.transact(() => {
       this.children.delete(id);
     });
   }

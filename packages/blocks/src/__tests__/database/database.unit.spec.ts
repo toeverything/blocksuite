@@ -2,7 +2,7 @@
 import '../../database-block/kanban/define.js';
 import '../../database-block/table/define.js';
 
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 import { Generator, Schema, Workspace } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -13,13 +13,13 @@ import type { DatabaseBlockModel } from '../../database-block/database-model.js'
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
 import type { Cell, Column } from '../../database-block/types.js';
 import { NoteBlockSchema } from '../../note-block/note-model.js';
-import { PageBlockSchema } from '../../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../paragraph-block/paragraph-model.js';
+import { RootBlockSchema } from '../../root-block/root-model.js';
 
 const AffineSchemas = [
-  ParagraphBlockSchema,
-  PageBlockSchema,
+  RootBlockSchema,
   NoteBlockSchema,
+  ParagraphBlockSchema,
   DatabaseBlockSchema,
 ];
 
@@ -30,19 +30,19 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, schema };
 }
 
-function createTestPage(pageId = 'page0') {
+function createTestDoc(docId = 'doc0') {
   const options = createTestOptions();
   const workspace = new Workspace(options);
-  const page = workspace.createPage({ id: pageId });
-  page.load();
-  return page;
+  const doc = workspace.createDoc({ id: docId });
+  doc.load();
+  return doc;
 }
 
 describe('DatabaseManager', () => {
-  let page: Page;
+  let doc: Doc;
   let db: DatabaseBlockModel;
 
-  let pageBlockId: BlockModel['id'];
+  let rootId: BlockModel['id'];
   let noteBlockId: BlockModel['id'];
   let databaseBlockId: BlockModel['id'];
   let p1: BlockModel['id'];
@@ -58,14 +58,14 @@ describe('DatabaseManager', () => {
   ];
 
   beforeEach(() => {
-    page = createTestPage();
+    doc = createTestDoc();
 
-    pageBlockId = page.addBlock('affine:page', {
-      title: new page.Text('database test'),
+    rootId = doc.addBlock('affine:page', {
+      title: new doc.Text('database test'),
     });
-    noteBlockId = page.addBlock('affine:note', {}, pageBlockId);
+    noteBlockId = doc.addBlock('affine:note', {}, rootId);
 
-    databaseBlockId = page.addBlock(
+    databaseBlockId = doc.addBlock(
       'affine:database' as BlockSuite.ModelKeys,
       {
         columns: [],
@@ -74,7 +74,7 @@ describe('DatabaseManager', () => {
       noteBlockId
     );
 
-    const databaseModel = page.getBlockById(
+    const databaseModel = doc.getBlockById(
       databaseBlockId
     ) as DatabaseBlockModel;
     db = databaseModel;
@@ -86,21 +86,21 @@ describe('DatabaseManager', () => {
     );
     col3 = db.addColumn('end', richTextPureColumnConfig.create('Rich Text'));
 
-    page.updateBlock(databaseModel, {
+    doc.updateBlock(databaseModel, {
       columns: [col1, col2, col3],
     });
 
-    p1 = page.addBlock(
+    p1 = doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text('text1'),
+        text: new doc.Text('text1'),
       },
       databaseBlockId
     );
-    p2 = page.addBlock(
+    p2 = doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text('text2'),
+        text: new doc.Text('text2'),
       },
       databaseBlockId
     );
@@ -148,10 +148,10 @@ describe('DatabaseManager', () => {
   });
 
   test('getCell', () => {
-    const modelId = page.addBlock(
+    const modelId = doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text('paragraph'),
+        text: new doc.Text('paragraph'),
       },
       noteBlockId
     );
@@ -167,7 +167,7 @@ describe('DatabaseManager', () => {
     db.addColumn('end', column);
     db.updateCell(modelId, cell);
 
-    const model = page.getBlockById(modelId);
+    const model = doc.getBlockById(modelId);
 
     expect(model).not.toBeNull();
 
@@ -177,10 +177,10 @@ describe('DatabaseManager', () => {
   });
 
   test('updateCell', () => {
-    const newRowId = page.addBlock(
+    const newRowId = doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text('text3'),
+        text: new doc.Text('text3'),
       },
       databaseBlockId
     );

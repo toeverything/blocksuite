@@ -9,8 +9,8 @@ BlockSuite is a toolkit for building editors and collaborative applications. It 
 You can consider BlockSuite as a [UI component library](../components/overview) for building various editors, based on a minimized vanilla framework as their runtime. With BlockSuite, you can:
 
 - Reuse multiple first-party BlockSuite editors:
-  - [**`DocEditor`**](../components/editors/doc-editor): A comprehensive block-based document editor, offering extensive customization and flexibility.
-  - [**`EdgelessEditor`**](../components/editors/edgeless-editor): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `DocEditor`.
+  - [**`PageEditor`**](../components/editors/page-editor): A comprehensive block-based document editor, offering extensive customization and flexibility.
+  - [**`EdgelessEditor`**](../components/editors/edgeless-editor): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `PageEditor`.
 - Customize, extend and enhance these editors with a rich set of [BlockSuite components](../components/overview). All BlockSuite components (including editors) are native web components, making them framework-agnostic and easy to interop with popular frameworks.
 - Or, build new editors from scratch based on the underlying vallina framework.
 
@@ -87,7 +87,7 @@ To that end, the BlockSuite project is structured around key packages that are c
   </tr>
   <tr>
     <td><code>@blocksuite/presets</code></td>
-    <td>Plug-and-play editable components including <i>editors</i> (<code>DocEditor</code> / <code>EdgelessEditor</code>) and auxiliary UI components named <i>fragments</i> (<code>CopilotPanel</code>, <code>DocTitle</code>...).</td>
+    <td>Plug-and-play editable components including <i>editors</i> (<code>PageEditor</code> / <code>EdgelessEditor</code>) and auxiliary UI components named <i>fragments</i> (<code>CopilotPanel</code>, <code>DocTitle</code>...).</td>
   </tr>
 </table>
 

@@ -34,7 +34,7 @@ class MyBlockService extends BlockService<MyBlockModel> {
   }
 
   private _addMyBlock = () => {
-    this.page.addBlock('my-block', {});
+    this.doc.addBlock('my-block', {});
   };
 }
 ```

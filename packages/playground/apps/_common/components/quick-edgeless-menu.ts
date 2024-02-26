@@ -29,8 +29,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { notify } from '../../default/utils/notify.js';
 import { generateRoomId } from '../sync/websocket/utils.js';
+import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
-import type { PagesPanel } from './pages-panel.js';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -71,7 +71,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   @property({ attribute: false })
   leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
-  pagesPanel!: PagesPanel;
+  docsPanel!: DocsPanel;
 
   @state()
   private _canUndo = false;
@@ -88,11 +88,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   @state()
   private _dark = localStorage.getItem('blocksuite:dark') === 'true';
 
-  get page() {
-    return this.editor.page;
+  get doc() {
+    return this.editor.doc;
   }
 
-  get pageService() {
+  get rootService() {
     return this.editor.host.spec.getService('affine:page');
   }
 
@@ -138,44 +138,44 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _addNote() {
-    const root = this.page.root;
-    if (!root) return;
-    const pageId = root.id;
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
+    const rootId = rootModel.id;
 
-    this.page.captureSync();
+    this.doc.captureSync();
 
-    const count = root.children.length;
+    const count = rootModel.children.length;
     const xywh: SerializedXYWH = `[0,${count * 60},800,95]`;
 
-    const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
-    this.page.addBlock('affine:paragraph', {}, noteId);
+    const noteId = this.doc.addBlock('affine:note', { xywh }, rootId);
+    this.doc.addBlock('affine:paragraph', {}, noteId);
   }
 
   private _exportPdf() {
-    this.pageService.exportManager.exportPdf().catch(console.error);
+    this.rootService.exportManager.exportPdf().catch(console.error);
   }
 
   private _exportHtml() {
-    const htmlTransformer = this.pageService.transformers.html;
-    htmlTransformer.exportPage(this.page).catch(console.error);
+    const htmlTransformer = this.rootService.transformers.html;
+    htmlTransformer.exportDoc(this.doc).catch(console.error);
   }
 
   private _exportMarkDown() {
-    const markdownTransformer = this.pageService.transformers.markdown;
-    markdownTransformer.exportPage(this.page).catch(console.error);
+    const markdownTransformer = this.rootService.transformers.markdown;
+    markdownTransformer.exportDoc(this.doc).catch(console.error);
   }
 
   private _exportPng() {
-    this.pageService.exportManager.exportPng().catch(console.error);
+    this.rootService.exportManager.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {
-    const zipTransformer = this.pageService.transformers.zip;
-    const file = await zipTransformer.exportPages(this.workspace, [this.page]);
+    const zipTransformer = this.rootService.transformers.zip;
+    const file = await zipTransformer.exportDocs(this.workspace, [this.doc]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
-    a.setAttribute('download', `${this.page.id}.bs.zip`);
+    a.setAttribute('download', `${this.doc.id}.bs.zip`);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
@@ -192,11 +192,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         return;
       }
       try {
-        const zipTransformer = this.pageService.transformers.zip;
-        const pages = await zipTransformer.importPages(this.workspace, file);
-        for (const page of pages) {
-          const noteBlock = window.page.getBlockByFlavour('affine:note');
-          window.page.addBlock(
+        const zipTransformer = this.rootService.transformers.zip;
+        const docs = await zipTransformer.importDocs(this.workspace, file);
+        for (const doc of docs) {
+          const noteBlock = window.doc.getBlockByFlavour('affine:note');
+          window.doc.addBlock(
             'affine:paragraph',
             {
               type: 'text',
@@ -206,7 +206,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   attributes: {
                     reference: {
                       type: 'LinkedPage',
-                      pageId: page.id,
+                      pageId: doc.id,
                     },
                   },
                 } as DeltaInsert<AffineTextAttributes>,
@@ -293,14 +293,14 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     url.search = params.toString();
     location.href = url.href;
   };
-  private _togglePagesPanel() {
-    this.leftSidePanel.toggle(this.pagesPanel);
+  private _toggleDocsPanel() {
+    this.leftSidePanel.toggle(this.docsPanel);
   }
 
   override firstUpdated() {
-    this.page.slots.historyUpdated.on(() => {
-      this._canUndo = this.page.canUndo;
-      this._canRedo = this.page.canRedo;
+    this.doc.slots.historyUpdated.on(() => {
+      this._canUndo = this.doc.canUndo;
+      this._canRedo = this.doc.canRedo;
     });
   }
 
@@ -449,7 +449,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   content="Undo"
                   .disabled=${!this._canUndo}
                   @click=${() => {
-                    this.page.undo();
+                    this.doc.undo();
                   }}
                 >
                   <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
@@ -463,7 +463,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   content="Redo"
                   .disabled=${!this._canRedo}
                   @click=${() => {
-                    this.page.redo();
+                    this.doc.redo();
                   }}
                 >
                   <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
@@ -476,9 +476,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 <sl-icon name="people" label="Collaboration"></sl-icon>
               </sl-button>
             </sl-tooltip>
-            <sl-tooltip content="Pages" placement="bottom" hoist>
-              <sl-button @click=${this._togglePagesPanel} size="small" circle>
-                <sl-icon name="filetype-doc" label="Page"></sl-icon>
+            <sl-tooltip content="Docs" placement="bottom" hoist>
+              <sl-button @click=${this._toggleDocsPanel} size="small" circle>
+                <sl-icon name="filetype-doc" label="Doc"></sl-icon>
               </sl-button>
             </sl-tooltip>
 

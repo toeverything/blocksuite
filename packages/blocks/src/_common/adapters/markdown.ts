@@ -2,18 +2,18 @@ import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
-  FromPageSnapshotPayload,
-  FromPageSnapshotResult,
+  FromDocSnapshotPayload,
+  FromDocSnapshotResult,
   FromSliceSnapshotPayload,
   FromSliceSnapshotResult,
   ToBlockSnapshotPayload,
-  ToPageSnapshotPayload,
+  ToDocSnapshotPayload,
 } from '@blocksuite/store';
 import { type AssetsManager, getAssetName } from '@blocksuite/store';
 import {
   type BlockSnapshot,
   BlockSnapshotSchema,
-  type PageSnapshot,
+  type DocSnapshot,
   type SliceSnapshot,
 } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
@@ -53,10 +53,10 @@ type MarkdownToSliceSnapshotPayload = {
 };
 
 export class MarkdownAdapter extends BaseAdapter<Markdown> {
-  async fromPageSnapshot({
+  async fromDocSnapshot({
     snapshot,
     assets,
-  }: FromPageSnapshotPayload): Promise<FromPageSnapshotResult<Markdown>> {
+  }: FromDocSnapshotPayload): Promise<FromDocSnapshotResult<Markdown>> {
     let buffer = '';
     const { file, assetsIds } = await this.fromBlockSnapshot({
       snapshot: snapshot.blocks,
@@ -115,9 +115,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     };
   }
 
-  async toPageSnapshot(
-    payload: ToPageSnapshotPayload<Markdown>
-  ): Promise<PageSnapshot> {
+  async toDocSnapshot(
+    payload: ToDocSnapshotPayload<Markdown>
+  ): Promise<DocSnapshot> {
     const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',

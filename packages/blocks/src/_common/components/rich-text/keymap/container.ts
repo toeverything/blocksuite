@@ -10,11 +10,11 @@ import {
 import type { BlockElement } from '@blocksuite/lit';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
-import type { PageBlockComponent } from '../../../../page-block/types.js';
-import { insertLinkedNode } from '../../../../page-block/widgets/linked-doc/config.js';
+import type { RootBlockComponent } from '../../../../root-block/types.js';
+import { insertLinkedNode } from '../../../../root-block/widgets/linked-doc/config.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { getChainWithHost } from '../../../utils/command.js';
-import { createDefaultPage } from '../../../utils/init.js';
+import { createDefaultDoc } from '../../../utils/init.js';
 import { buildPath } from '../../../utils/query.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
@@ -132,7 +132,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       if (!blockElement.selected?.is('text')) return;
 
-      blockElement.model.page.captureSync();
+      blockElement.doc.captureSync();
 
       const inlineEditor = _getInlineEditor();
       const inlineRange = inlineEditor.getInlineRange();
@@ -231,10 +231,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       )
         return;
 
-      const page = blockElement.closest<PageBlockComponent>(
-        'affine-doc-page,affine-edgeless-page'
+      const rootElement = blockElement.closest<RootBlockComponent>(
+        'affine-page-root,affine-edgeless-root'
       );
-      if (!page) return;
+      if (!rootElement) return;
 
       {
         const [_, context] = getChainWithHost(std)
@@ -275,10 +275,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       )
         return;
 
-      const page = blockElement.closest<PageBlockComponent>(
-        'affine-doc-page,affine-edgeless-page'
+      const rootElement = blockElement.closest<RootBlockComponent>(
+        'affine-page-root,affine-edgeless-root'
       );
-      if (!page) return;
+      if (!rootElement) return;
 
       {
         const [_, context] = getChainWithHost(std)
@@ -349,7 +349,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
     blockElement.bindHotKey({
       [config.hotkey]: ctx => {
-        if (blockElement.page.readonly) return;
+        if (blockElement.doc.readonly) return;
 
         const textSelection = blockElement.selection.find('text');
         if (!textSelection) return;
@@ -389,13 +389,13 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   }
 
   function tryConvertToLinkedDoc() {
-    const pageBlock = blockElement.host.view.viewFromPath(
+    const docBlock = blockElement.host.view.viewFromPath(
       'block',
-      buildPath(model.page.root)
+      buildPath(model.doc.root)
     );
-    assertExists(pageBlock);
+    assertExists(docBlock);
     const linkedDocWidgetEle =
-      pageBlock.widgetElements['affine-linked-doc-widget'];
+      docBlock.widgetElements['affine-linked-doc-widget'];
     if (!linkedDocWidgetEle) return false;
 
     const inlineEditor = _getInlineEditor();
@@ -407,7 +407,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     const needConvert = left === '[' && right === ']';
     if (!needConvert) return false;
 
-    const pageName = text.slice(
+    const docName = text.slice(
       inlineRange.index,
       inlineRange.index + inlineRange.length
     );
@@ -417,13 +417,13 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     });
     inlineEditor.setInlineRange({ index: inlineRange.index - 1, length: 0 });
 
-    const page = createDefaultPage(blockElement.page.workspace, {
-      title: pageName,
+    const doc = createDefaultDoc(blockElement.doc.workspace, {
+      title: docName,
     });
     insertLinkedNode({
       editorHost: blockElement.host,
       model: blockElement.model,
-      pageId: page.id,
+      docId: doc.id,
     });
     return true;
   }
@@ -432,7 +432,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   bracketPairs.forEach(pair => {
     blockElement.bindHotKey({
       [pair.left]: ctx => {
-        if (blockElement.page.readonly) return;
+        if (blockElement.doc.readonly) return;
 
         const textSelection = blockElement.selection.find('text');
         if (!textSelection) return;
@@ -453,7 +453,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           .toString()
           .slice(inlineRange.index, inlineRange.index + inlineRange.length);
         if (pair.name === 'square bracket') {
-          // [[Selected text]] should automatically be converted to a Linked page with the title "Selected text".
+          // [[Selected text]] should automatically be converted to a Linked doc with the title "Selected text".
           // See https://github.com/toeverything/blocksuite/issues/2730
           const success = tryConvertToLinkedDoc();
           if (success) return true;
@@ -497,7 +497,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   // Convert the selected text into inline code
   blockElement.bindHotKey({
     '`': ctx => {
-      if (blockElement.page.readonly) return;
+      if (blockElement.doc.readonly) return;
 
       const textSelection = blockElement.selection.find('text');
       if (!textSelection || textSelection.isCollapsed()) return;

@@ -61,7 +61,7 @@ It's easy to get and set props in a block view.
 @customElements('my-block')
 class MyBlockView extends BlockElement<MyBlockModel> {
   private _onClick = () => {
-    this.page.updateBlock(this.model, {
+    this.doc.updateBlock(this.model, {
       count: this.model.count + 1,
     });
   };

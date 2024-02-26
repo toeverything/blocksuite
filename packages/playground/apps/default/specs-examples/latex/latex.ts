@@ -1,11 +1,11 @@
 import './latex-node.js';
 
 import {
-  DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
   type InlineMarkdownMatch,
   type InlineSpecs,
   ListService,
+  PageEditorBlockSpecs,
   ParagraphService,
 } from '@blocksuite/blocks';
 import {
@@ -121,7 +121,7 @@ class CustomListService extends ListService<TextAttributesWithLatex> {
 }
 
 export function getLatexSpecs() {
-  const docModeSpecs = DocEditorBlockSpecs.map(spec => {
+  const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:paragraph') {
       return {
         ...spec,
@@ -153,7 +153,7 @@ export function getLatexSpecs() {
   });
 
   return {
-    docModeSpecs,
+    pageModeSpecs,
     edgelessModeSpecs,
   };
 }

@@ -78,8 +78,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     super.connectedCallback();
 
     if (!this.model.description && !this.model.title) {
-      this.page.withoutTransact(() => {
-        this.page.updateBlock(this.model, {
+      this.doc.withoutTransact(() => {
+        this.doc.updateBlock(this.model, {
           title: 'Figma',
           description: this.model.url,
         });

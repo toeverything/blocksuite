@@ -1,4 +1,4 @@
-import { type Page, Schema, Workspace } from '@blocksuite/store';
+import { type Doc, Schema, Workspace } from '@blocksuite/store';
 
 import {
   type TodoContainerBlockModel,
@@ -6,24 +6,24 @@ import {
   TodoSchema,
 } from './schema';
 
-function initPage() {
+function initDoc() {
   const schema = new Schema();
   schema.register(TodoSchema);
   const workspace = new Workspace({ schema });
-  const page = workspace.createPage({ id: 'page:home' });
-  page.addBlock('todo:container');
-  return page;
+  const doc = workspace.createDoc({ id: 'doc:home' });
+  doc.addBlock('todo:container');
+  return doc;
 }
 
-function bindEvents(page: Page, container: TodoContainerBlockModel) {
+function bindEvents(doc: Doc, container: TodoContainerBlockModel) {
   const addInput = document.querySelector('.input-add') as HTMLInputElement;
   const addButton = document.querySelector('.button-add') as HTMLButtonElement;
   const containerDiv = document.querySelector('.container') as HTMLDivElement;
   addButton.addEventListener('click', () => {
     const content = addInput.value;
     if (content !== '') {
-      const id = page.addBlock('todo:item', { content }, container);
-      const todoItemBlock = page.getBlockById(id) as TodoItemBlockModel;
+      const id = doc.addBlock('todo:item', { content }, container);
+      const todoItemBlock = doc.getBlockById(id) as TodoItemBlockModel;
       todoItemBlock.propsUpdated.on(() => {
         render(container);
       });
@@ -34,10 +34,10 @@ function bindEvents(page: Page, container: TodoContainerBlockModel) {
   containerDiv.addEventListener('click', event => {
     const target = event.target as HTMLElement;
     if (target.classList.contains('button-done')) {
-      const todoItemBlock = page.getBlockById(
+      const todoItemBlock = doc.getBlockById(
         target.parentElement?.dataset.id as string
       ) as TodoItemBlockModel;
-      page.updateBlock(todoItemBlock, { done: !todoItemBlock.done });
+      doc.updateBlock(todoItemBlock, { done: !todoItemBlock.done });
     }
   });
 }
@@ -59,11 +59,11 @@ function render(container: TodoContainerBlockModel) {
 }
 
 function main() {
-  const page = initPage();
-  const container = page.getBlockByFlavour(
+  const doc = initDoc();
+  const container = doc.getBlockByFlavour(
     'todo:container'
   )[0] as TodoContainerBlockModel;
-  bindEvents(page, container);
+  bindEvents(doc, container);
   container.childrenUpdated.on(() => {
     render(container);
   });

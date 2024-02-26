@@ -1,7 +1,7 @@
 export const basic4 = () => ({
   type: 'page',
   meta: {
-    id: 'page:home',
+    id: 'doc:home',
     title: '4 selection page',
     createDate: 1706097560407,
     tags: [],

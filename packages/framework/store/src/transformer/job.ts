@@ -2,9 +2,9 @@ import { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
-import type { PageMeta, Workspace } from '../workspace/index.js';
-import type { Page } from '../workspace/index.js';
-import type { PagesPropertiesMeta } from '../workspace/meta.js';
+import type { DocMeta, Workspace } from '../workspace/index.js';
+import type { Doc } from '../workspace/index.js';
+import type { DocsPropertiesMeta } from '../workspace/meta.js';
 import { AssetsManager } from './assets.js';
 import { BaseBlockTransformer } from './base.js';
 import type {
@@ -17,13 +17,13 @@ import type {
 import { Slice } from './slice.js';
 import type {
   BlockSnapshot,
-  PageSnapshot,
+  DocSnapshot,
   SliceSnapshot,
   WorkspaceInfoSnapshot,
 } from './type.js';
 import {
   BlockSnapshotSchema,
-  PageSnapshotSchema,
+  DocSnapshotSchema,
   SliceSnapshotSchema,
   WorkspaceInfoSnapshotSchema,
 } from './type.js';
@@ -87,33 +87,33 @@ export class Job {
 
   private _getWorkspaceMeta() {
     const { meta } = this._workspace;
-    const { pageVersion, workspaceVersion, properties, pages } = meta;
+    const { pageVersion, workspaceVersion, properties, docs } = meta;
     assertExists(pageVersion);
     assertExists(workspaceVersion);
     assertExists(properties);
-    assertExists(pages);
+    assertExists(docs);
     return {
       pageVersion,
       workspaceVersion,
-      properties: JSON.parse(JSON.stringify(properties)) as PagesPropertiesMeta,
-      pages: JSON.parse(JSON.stringify(pages)) as PageMeta[],
+      properties: JSON.parse(JSON.stringify(properties)) as DocsPropertiesMeta,
+      pages: JSON.parse(JSON.stringify(docs)) as DocMeta[],
     };
   }
 
-  private _exportPageMeta(page: Page): PageSnapshot['meta'] {
-    const pageMeta = page.meta;
+  private _exportDocMeta(doc: Doc): DocSnapshot['meta'] {
+    const docMeta = doc.meta;
 
-    assertExists(pageMeta);
+    assertExists(docMeta);
     return {
-      id: pageMeta.id,
-      title: pageMeta.title,
-      createDate: pageMeta.createDate,
-      tags: [...pageMeta.tags],
+      id: docMeta.id,
+      title: docMeta.title,
+      createDate: docMeta.createDate,
+      tags: [...docMeta.tags],
     };
   }
 
-  private _importPageMeta(page: Page, meta: PageSnapshot['meta']) {
-    const pageMeta = page.meta;
+  private _importDocMeta(doc: Doc, meta: DocSnapshot['meta']) {
+    const docMeta = doc.meta;
 
     const workspaceTags = this._workspace.meta.properties.tags?.options;
     assertExists(workspaceTags);
@@ -122,7 +122,7 @@ export class Job {
       if (!exists) {
         throw new Error(`Tag ${tag} is not in workspace options`);
       }
-      pageMeta.tags.push(tag);
+      docMeta.tags.push(tag);
     });
   }
 
@@ -165,7 +165,7 @@ export class Job {
 
   private async _snapshotToBlock(
     snapshot: BlockSnapshot,
-    page: Page,
+    doc: Doc,
     parent?: string,
     index?: number
   ) {
@@ -190,7 +190,7 @@ export class Job {
       children,
     });
 
-    page.addBlock(
+    doc.addBlock(
       modelData.flavour as BlockSuite.ModelKeys,
       { ...modelData.props, id: modelData.id },
       parent,
@@ -198,10 +198,10 @@ export class Job {
     );
 
     for (const [index, child] of children.entries()) {
-      await this._snapshotToBlock(child, page, id, index);
+      await this._snapshotToBlock(child, doc, id, index);
     }
 
-    const model = page.getBlockById(id);
+    const model = doc.getBlockById(id);
     assertExists(model);
     this._slots.afterImport.emit({
       type: 'block',
@@ -235,58 +235,58 @@ export class Job {
 
   snapshotToBlock = async (
     snapshot: BlockSnapshot,
-    page: Page,
+    doc: Doc,
     parent?: string,
     index?: number
   ): Promise<BlockModel> => {
     BlockSnapshotSchema.parse(snapshot);
-    const model = await this._snapshotToBlock(snapshot, page, parent, index);
+    const model = await this._snapshotToBlock(snapshot, doc, parent, index);
 
     return model;
   };
 
-  pageToSnapshot = async (page: Page): Promise<PageSnapshot> => {
+  docToSnapshot = async (doc: Doc): Promise<DocSnapshot> => {
     this._slots.beforeExport.emit({
       type: 'page',
-      page,
+      page: doc,
     });
-    const root = page.root;
-    const meta = this._exportPageMeta(page);
-    assertExists(root, 'Root block not found in page');
-    const blocks = await this.blockToSnapshot(root);
-    const pageSnapshot: PageSnapshot = {
+    const rootModel = doc.root;
+    const meta = this._exportDocMeta(doc);
+    assertExists(rootModel, 'Root block not found in doc');
+    const blocks = await this.blockToSnapshot(rootModel);
+    const docSnapshot: DocSnapshot = {
       type: 'page',
       meta,
       blocks,
     };
     this._slots.afterExport.emit({
       type: 'page',
-      page,
-      snapshot: pageSnapshot,
+      page: doc,
+      snapshot: docSnapshot,
     });
-    PageSnapshotSchema.parse(pageSnapshot);
+    DocSnapshotSchema.parse(docSnapshot);
 
-    return pageSnapshot;
+    return docSnapshot;
   };
 
-  snapshotToPage = async (snapshot: PageSnapshot): Promise<Page> => {
+  snapshotToDoc = async (snapshot: DocSnapshot): Promise<Doc> => {
     this._slots.beforeImport.emit({
       type: 'page',
       snapshot,
     });
-    PageSnapshotSchema.parse(snapshot);
+    DocSnapshotSchema.parse(snapshot);
     const { meta, blocks } = snapshot;
-    const page = this._workspace.createPage({ id: meta.id });
-    page.load();
-    this._importPageMeta(page, meta);
-    await this.snapshotToBlock(blocks, page);
+    const doc = this._workspace.createDoc({ id: meta.id });
+    doc.load();
+    this._importDocMeta(doc, meta);
+    await this.snapshotToBlock(blocks, doc);
     this._slots.afterImport.emit({
       type: 'page',
       snapshot,
-      page,
+      page: doc,
     });
 
-    return page;
+    return doc;
   };
 
   workspaceInfoToSnapshot = (): WorkspaceInfoSnapshot => {
@@ -361,7 +361,7 @@ export class Job {
 
   snapshotToSlice = async (
     snapshot: SliceSnapshot,
-    page: Page,
+    doc: Doc,
     parent?: string,
     index?: number
   ): Promise<Slice> => {
@@ -375,7 +375,7 @@ export class Job {
     const contentBlocks = [];
     for (const [i, block] of content.entries()) {
       contentBlocks.push(
-        await this._snapshotToBlock(block, page, parent, (index ?? 0) + i)
+        await this._snapshotToBlock(block, doc, parent, (index ?? 0) + i)
       );
     }
     const slice = new Slice({

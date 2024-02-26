@@ -1,20 +1,20 @@
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 
 import { HtmlAdapter } from '../adapters/index.js';
 import { createAssetsArchive, download } from './utils.js';
 
-async function exportPage(page: Page) {
-  const job = new Job({ workspace: page.workspace });
-  const snapshot = await job.pageToSnapshot(page);
+async function exportDoc(doc: Doc) {
+  const job = new Job({ workspace: doc.workspace });
+  const snapshot = await job.docToSnapshot(doc);
   const adapter = new HtmlAdapter();
-  const htmlResult = await adapter.fromPageSnapshot({
+  const htmlResult = await adapter.fromDocSnapshot({
     snapshot,
     assets: job.assetsManager,
   });
 
   let downloadBlob: Blob;
-  const pageTitle = page.meta.title || 'Untitled';
+  const docTitle = doc.meta.title || 'Untitled';
   let name: string;
   const contentBlob = new Blob([htmlResult.file], { type: 'plain/text' });
   if (htmlResult.assetsIds.length > 0) {
@@ -23,14 +23,14 @@ async function exportPage(page: Page) {
     zip.file('index.html', contentBlob);
 
     downloadBlob = await zip.generateAsync({ type: 'blob' });
-    name = `${pageTitle}.zip`;
+    name = `${docTitle}.zip`;
   } else {
     downloadBlob = contentBlob;
-    name = `${pageTitle}.html`;
+    name = `${docTitle}.html`;
   }
   download(downloadBlob, name);
 }
 
 export const HtmlTransformer = {
-  exportPage,
+  exportDoc,
 };

@@ -1,10 +1,10 @@
-import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
+import { updateBlockElementType } from '../../root-block/utils/operations/element/block-level.js';
 import {
   mergeToCodeModel,
   transformModel,
-} from '../../page-block/utils/operations/model.js';
+} from '../../root-block/utils/operations/model.js';
 
-class PageTestUtils {
+class DocTestUtils {
   // block element operations (ui layer)
   updateBlockElementType = updateBlockElementType;
 
@@ -14,7 +14,7 @@ class PageTestUtils {
 }
 
 export class TestUtils {
-  pageBlock = new PageTestUtils();
+  docTestUtils = new DocTestUtils();
 }
 
 import type { BlockSnapshot } from '@blocksuite/store';

@@ -34,7 +34,7 @@ import { ArrowDownIcon } from '../_common/icons/index.js';
 import { listenToThemeChange } from '../_common/theme/utils.js';
 import { getThemeMode } from '../_common/utils/index.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
-import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
@@ -153,15 +153,15 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   get readonly() {
-    return this.model.page.readonly;
+    return this.doc.readonly;
   }
 
   override get topContenteditableElement() {
-    if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
       return note;
     }
-    return this.rootBlockElement;
+    return this.rootElement;
   }
 
   highlightOptionsGetter: HighlightOptionsGetter = null;
@@ -504,7 +504,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   setLang(lang: string | null) {
     const standardLang = lang ? getStandardLanguage(lang) : null;
     const langName = standardLang?.id ?? FALLBACK_LANG;
-    this.page.updateBlock(this.model, {
+    this.doc.updateBlock(this.model, {
       language: langName,
     });
   }
@@ -634,10 +634,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
-            .undoManager=${this.model.page.history}
+            .undoManager=${this.doc.history}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.getAttributeRenderer()}
-            .readonly=${this.model.page.readonly}
+            .readonly=${this.doc.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}

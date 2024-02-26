@@ -1,6 +1,6 @@
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import type { EdgelessModel, TopLevelBlockModel } from '../_common/types.js';
@@ -37,7 +37,7 @@ export class SurfaceRefRenderer {
 
   constructor(
     public readonly id: string,
-    public readonly page: Page,
+    public readonly doc: Doc,
     public readonly std: BlockStdScope,
     options: {
       enableStackingCanvas?: boolean;
@@ -79,7 +79,7 @@ export class SurfaceRefRenderer {
 
   getModel(id: string): EdgelessModel | null {
     return (
-      (this.page.getBlockById(id) as Exclude<
+      (this.doc.getBlockById(id) as Exclude<
         TopLevelBlockModel,
         NoteBlockModel
       >) ??
@@ -94,7 +94,7 @@ export class SurfaceRefRenderer {
 
   private _initSurfaceModel() {
     const init = () => {
-      const model = getSurfaceBlock(this.page);
+      const model = getSurfaceBlock(this.doc);
       this._surfaceModel = model;
       this.slots.surfaceModelChanged.emit(model);
 
@@ -105,11 +105,11 @@ export class SurfaceRefRenderer {
 
     if (!this._surfaceModel) {
       this._disposables.add(
-        this.page.slots.blockUpdated.on(({ type }) => {
+        this.doc.slots.blockUpdated.on(({ type }) => {
           if (
             type === 'add' &&
             !this._surfaceModel &&
-            getSurfaceBlock(this.page)
+            getSurfaceBlock(this.doc)
           ) {
             init();
           }

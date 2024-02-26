@@ -4,34 +4,34 @@ import { Text, type Workspace } from '@blocksuite/store';
 import { type InitFn } from './utils.js';
 
 export const multiEditor: InitFn = (workspace: Workspace, id: string) => {
-  const page = workspace.createPage({ id });
-  page.load(() => {
-    // Add page block and surface block at root level
-    const pageBlockId = page.addBlock('affine:page', {
+  const doc = workspace.createDoc({ id });
+  doc.load(() => {
+    // Add root block and surface block at root level
+    const rootId = doc.addBlock('affine:page', {
       title: new Text(),
     });
 
-    page.addBlock('affine:surface', {}, pageBlockId);
+    doc.addBlock('affine:surface', {}, rootId);
 
-    // Add note block inside page block
-    const noteId = page.addBlock('affine:note', {}, pageBlockId);
+    // Add note block inside root block
+    const noteId = doc.addBlock('affine:note', {}, rootId);
     // Add paragraph block inside note block
-    page.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
   });
 
-  page.resetHistory();
+  doc.resetHistory();
 
   const app = document.getElementById('app');
   if (app) {
     const editor = new AffineEditorContainer();
-    editor.page = page;
-    editor.slots.pageLinkClicked.on(({ pageId }) => {
-      const target = workspace.getPage(pageId);
+    editor.doc = doc;
+    editor.slots.docLinkClicked.on(({ docId }) => {
+      const target = workspace.getDoc(docId);
       if (!target) {
-        throw new Error(`Failed to jump to page ${pageId}`);
+        throw new Error(`Failed to jump to doc ${docId}`);
       }
       target.load();
-      editor.page = target;
+      editor.doc = target;
     });
 
     app.append(editor);
@@ -50,36 +50,36 @@ multiEditor.description = 'Multiple Editor basic example';
 
 export const multiEditorVertical: InitFn = (
   workspace: Workspace,
-  pageId: string
+  docId: string
 ) => {
-  const page = workspace.createPage({ id: pageId });
-  page.load(() => {
-    // Add page block and surface block at root level
-    const pageBlockId = page.addBlock('affine:page', {
+  const doc = workspace.createDoc({ id: docId });
+  doc.load(() => {
+    // Add root block and surface block at root level
+    const rootId = doc.addBlock('affine:page', {
       title: new Text(),
     });
 
-    page.addBlock('affine:surface', {}, pageBlockId);
+    doc.addBlock('affine:surface', {}, rootId);
 
-    // Add note block inside page block
-    const noteId = page.addBlock('affine:note', {}, pageBlockId);
+    // Add note block inside root block
+    const noteId = doc.addBlock('affine:note', {}, rootId);
     // Add paragraph block inside note block
-    page.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
   });
 
-  page.resetHistory();
+  doc.resetHistory();
 
   const app = document.getElementById('app');
   if (app) {
     const editor = new AffineEditorContainer();
-    editor.page = page;
-    editor.slots.pageLinkClicked.on(({ pageId }) => {
-      const target = workspace.getPage(pageId);
+    editor.doc = doc;
+    editor.slots.docLinkClicked.on(({ docId }) => {
+      const target = workspace.getDoc(docId);
       if (!target) {
-        throw new Error(`Failed to jump to page ${pageId}`);
+        throw new Error(`Failed to jump to doc ${docId}`);
       }
       target.load();
-      editor.page = target;
+      editor.doc = target;
     });
     app.append(editor);
   }

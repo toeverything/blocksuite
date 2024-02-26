@@ -108,14 +108,14 @@ type TemplateImage = {
   id: string;
   url: string;
 };
-type PageTemplate = {
+type DocTemplate = {
   images: TemplateImage[];
   content: unknown;
 };
 const createBasicCover = async (
   title: string,
   section1: PPTSection
-): Promise<PageTemplate> => {
+): Promise<DocTemplate> => {
   const template = basicCover();
   replaceText(
     {
@@ -140,7 +140,7 @@ const createBasicCover = async (
 const basic1section = async (
   title: string,
   section1: PPTSection
-): Promise<PageTemplate> => {
+): Promise<DocTemplate> => {
   const template = basic1();
   replaceText(
     {
@@ -166,7 +166,7 @@ const basic2section = async (
   title: string,
   section1: PPTSection,
   section2: PPTSection
-): Promise<PageTemplate> => {
+): Promise<DocTemplate> => {
   const template = basic2();
   replaceText(
     {
@@ -196,7 +196,7 @@ const basic3section = async (
   section1: PPTSection,
   section2: PPTSection,
   section3: PPTSection
-): Promise<PageTemplate> => {
+): Promise<DocTemplate> => {
   const template = basic3();
   replaceText(
     {
@@ -230,7 +230,7 @@ const basic4section = async (
   section2: PPTSection,
   section3: PPTSection,
   section4: PPTSection
-): Promise<PageTemplate> => {
+): Promise<DocTemplate> => {
   const template = basic4();
   replaceText(
     {
@@ -261,34 +261,34 @@ const basic4section = async (
     content: template,
   };
 };
-export type PPTPage = {
+export type PPTDoc = {
   isCover: boolean;
   title: string;
   sections: PPTSection[];
 };
-export const basicTheme = (page: PPTPage) => {
-  if (page.isCover) {
-    return createBasicCover(page.title, page.sections[0]);
+export const basicTheme = (doc: PPTDoc) => {
+  if (doc.isCover) {
+    return createBasicCover(doc.title, doc.sections[0]);
   }
-  if (page.sections.length === 1) {
-    return basic1section(page.title, page.sections[0]);
+  if (doc.sections.length === 1) {
+    return basic1section(doc.title, doc.sections[0]);
   }
-  if (page.sections.length === 2) {
-    return basic2section(page.title, page.sections[0], page.sections[1]);
+  if (doc.sections.length === 2) {
+    return basic2section(doc.title, doc.sections[0], doc.sections[1]);
   }
-  if (page.sections.length === 3) {
+  if (doc.sections.length === 3) {
     return basic3section(
-      page.title,
-      page.sections[0],
-      page.sections[1],
-      page.sections[2]
+      doc.title,
+      doc.sections[0],
+      doc.sections[1],
+      doc.sections[2]
     );
   }
   return basic4section(
-    page.title,
-    page.sections[0],
-    page.sections[1],
-    page.sections[2],
-    page.sections[3]
+    doc.title,
+    doc.sections[0],
+    doc.sections[1],
+    doc.sections[2],
+    doc.sections[3]
   );
 };

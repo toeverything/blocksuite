@@ -2,7 +2,7 @@ import type { SurfaceBlockComponent } from '@blocksuite/blocks';
 import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
@@ -38,7 +38,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   @property({ attribute: false })
   specs = EdgelessEditorBlockSpecs;
@@ -54,7 +54,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
       <div class="affine-edgeless-viewport">
         <editor-host
           ${ref(this._host)}
-          .page=${this.page}
+          .doc=${this.doc}
           .specs=${this.specs}
         ></editor-host>
       </div>
@@ -64,9 +64,9 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   override disconnectedCallback(): void {
     const host = this.host;
     if (!host) return;
-    const surfaceModel = host.page.getBlockByFlavour('affine:surface')[0];
+    const surfaceModel = host.doc.getBlockByFlavour('affine:surface')[0];
     const surface = host.view.viewFromPath('block', [
-      this.page.root!.id,
+      this.doc.root!.id,
       surfaceModel.id,
     ]) as SurfaceBlockComponent;
 

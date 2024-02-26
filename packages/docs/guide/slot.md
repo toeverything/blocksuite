@@ -28,21 +28,21 @@ const disposable = slot.on(myHandler);
 disposable.dispose();
 ```
 
-Under the `page` instance, you can subscribe to common events using `page.slots`:
+Under the `doc` instance, you can subscribe to common events using `doc.slots`:
 
 ```ts
-page.slots.ready.on(() => {
-  // The `page.root` should be ready to use at this moment
-  console.log('page ready!');
+doc.slots.ready.on(() => {
+  // The `doc.root` should be ready to use at this moment
+  console.log('doc ready!');
 });
 
-page.addBlock('affine:page');
+doc.addBlock('affine:page');
 ```
 
 Moreover, for any node in the block tree, events can be triggered when the node is updated:
 
 ```ts
-const model = page.root[0];
+const model = doc.root[0];
 
 // Triggered when the `props` of the block model is updated
 model.propsUpdated.on(() => updateMyComponent());

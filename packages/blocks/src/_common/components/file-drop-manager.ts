@@ -8,7 +8,7 @@ import {
   type DropResult,
   getClosestBlockElementByPoint,
   getModelByBlockComponent,
-  isInsideDocEditor,
+  isInsidePageEditor,
   matchFlavours,
   Point,
 } from '../../_common/utils/index.js';
@@ -65,8 +65,8 @@ export class FileDropManager {
     return this._blockService.std.host as EditorHost;
   }
 
-  get page() {
-    return this._blockService.page;
+  get doc() {
+    return this._blockService.doc;
   }
 
   get type(): 'before' | 'after' {
@@ -79,14 +79,14 @@ export class FileDropManager {
   get targetModel(): BlockModel | null {
     let targetModel = FileDropManager._dropResult?.modelState.model || null;
 
-    if (!targetModel && isInsideDocEditor(this.editorHost)) {
-      const pageModel = this.page.root;
-      assertExists(pageModel);
+    if (!targetModel && isInsidePageEditor(this.editorHost)) {
+      const rootModel = this.doc.root;
+      assertExists(rootModel);
 
-      let lastNote = pageModel.children[pageModel.children.length - 1];
+      let lastNote = rootModel.children[rootModel.children.length - 1];
       if (!lastNote || !matchFlavours(lastNote, ['affine:note'])) {
-        const newNoteId = this.page.addBlock('affine:note', {}, pageModel.id);
-        const newNote = this.page.getBlockById(newNoteId);
+        const newNoteId = this.doc.addBlock('affine:note', {}, rootModel.id);
+        const newNote = this.doc.getBlockById(newNoteId);
         assertExists(newNote);
         lastNote = newNote;
       }
@@ -95,13 +95,13 @@ export class FileDropManager {
       if (lastItem && !matchFlavours(lastItem, ['affine:note'])) {
         targetModel = lastItem;
       } else {
-        const newParagraphId = this.page.addBlock(
+        const newParagraphId = this.doc.addBlock(
           'affine:paragraph',
           {},
           lastNote,
           0
         );
-        const newParagraph = this.page.getBlockById(newParagraphId);
+        const newParagraph = this.doc.getBlockById(newParagraphId);
         assertExists(newParagraph);
         targetModel = newParagraph;
       }
@@ -125,7 +125,7 @@ export class FileDropManager {
     let result: DropResult | null = null;
     if (element) {
       const model = getModelByBlockComponent(element);
-      const parent = this.page.getParent(model);
+      const parent = this.doc.getParent(model);
       if (!matchFlavours(parent, ['affine:surface'])) {
         result = calcDropTarget(point, model, element);
       }

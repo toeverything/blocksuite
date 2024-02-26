@@ -3,7 +3,7 @@ import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 import { HtmlAdapter, PlainTextAdapter } from '../../_common/adapters/index.js';
-import { pasteMiddleware } from '../../page-block/clipboard/middlewares/index.js';
+import { pasteMiddleware } from '../../root-block/clipboard/middlewares/index.js';
 
 export class CodeClipboardController {
   protected _disposables = new DisposableGroup();
@@ -53,7 +53,7 @@ export class CodeClipboardController {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._std.page.captureSync();
+    this._std.doc.captureSync();
     this._std.command
       .pipe()
       .try(cmd => [
@@ -79,7 +79,7 @@ export class CodeClipboardController {
         this._clipboard
           .paste(
             e,
-            this._std.page,
+            this._std.doc,
             ctx.parentBlock.model.id,
             ctx.blockIndex ? ctx.blockIndex + 1 : undefined
           )

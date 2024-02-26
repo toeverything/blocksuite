@@ -7,7 +7,7 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { type BlockSnapshot, Job, type Page } from '@blocksuite/store';
+import { type BlockSnapshot, type Doc, Job } from '@blocksuite/store';
 
 import { LANGUAGE, TONE } from '../config.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
@@ -36,16 +36,16 @@ import {
 } from '../utils/markdown-utils.js';
 import {
   getEdgelessService,
-  getPageService,
+  getRootService,
   getSelectedTextContent,
   getSurfaceElementFromEditor,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
-import { basicTheme, type PPTPage, type PPTSection } from './template.js';
+import { basicTheme, type PPTDoc, type PPTSection } from './template.js';
 
 export type ChatReactiveData = {
   history: ChatMessage[];
-  syncedPages: EmbeddedPage[];
+  syncedDocs: EmbeddedDoc[];
   value: string;
   currentRequest?: number;
   tempMessage?: string;
@@ -123,17 +123,17 @@ export class AIChatLogic {
     });
   };
 
-  splitPage = async (page: Page): Promise<string[]> => {
-    const markdown = await pageToMarkdown(page);
+  splitDoc = async (doc: Doc): Promise<string[]> => {
+    const markdown = await docToMarkdown(doc);
     return splitText(markdown);
   };
 
-  embeddingPages = async (pageList: Page[]): Promise<EmbeddedPage[]> => {
-    const result: Record<string, EmbeddedPage> = {};
+  embeddingDocs = async (docList: Doc[]): Promise<EmbeddedDoc[]> => {
+    const result: Record<string, EmbeddedDoc> = {};
     const list = (
       await Promise.all(
-        pageList.map(async page =>
-          (await this.splitPage(page)).map(v => ({ id: page.id, text: v }))
+        docList.map(async doc =>
+          (await this.splitDoc(doc)).map(v => ({ id: doc.id, text: v }))
         )
       )
     ).flat();
@@ -141,15 +141,15 @@ export class AIChatLogic {
       .getService('chat with workspace', EmbeddingServiceKind)
       .generateEmbeddings(list.map(v => v.text));
     list.forEach((v, i) => {
-      const page = result[v.id] ?? (result[v.id] = { id: v.id, sections: [] });
-      page.sections.push({ vector: vectors[i], text: v.text });
+      const doc = result[v.id] ?? (result[v.id] = { id: v.id, sections: [] });
+      doc.sections.push({ vector: vectors[i], text: v.text });
     });
     return Object.values(result);
   };
 
   syncWorkspace = async () => {
-    this.reactiveData.syncedPages = await this.embeddingPages([
-      ...this.host.page.workspace.pages.values(),
+    this.reactiveData.syncedDocs = await this.embeddingDocs([
+      ...this.host.doc.workspace.docs.values(),
     ]);
   };
 
@@ -193,7 +193,7 @@ export class AIChatLogic {
     messages: ChatMessage[];
     sources: BackgroundSource[];
   }> {
-    if (this.reactiveData.syncedPages.length === 0) {
+    if (this.reactiveData.syncedDocs.length === 0) {
       return {
         messages: [],
         sources: [],
@@ -202,10 +202,10 @@ export class AIChatLogic {
     const [result] = await copilotConfig
       .getService('chat with workspace', EmbeddingServiceKind)
       .generateEmbeddings([this.reactiveData.value]);
-    const list = this.reactiveData.syncedPages
-      .flatMap(page => {
-        return page.sections.map(section => ({
-          id: page.id,
+    const list = this.reactiveData.syncedDocs
+      .flatMap(doc => {
+        return doc.sections.map(section => ({
+          id: doc.id,
           distance: distance(result, section.vector),
           text: section.text,
         }));
@@ -238,7 +238,7 @@ export class AIChatLogic {
 
   async replaceSelectedContent(text: string) {
     if (!text) return;
-    const selectedBlocks = getPageService(this.host).selectedBlocks;
+    const selectedBlocks = getRootService(this.host).selectedBlocks;
     if (!selectedBlocks.length) return;
 
     const firstBlock = selectedBlocks[0];
@@ -249,7 +249,7 @@ export class AIChatLogic {
       child => child.id === firstBlock.model.id
     ) as number;
     selectedBlocks.forEach(block => {
-      this.host.page.deleteBlock(block.model);
+      this.host.doc.deleteBlock(block.model);
     });
 
     const models = await insertFromMarkdown(
@@ -270,7 +270,7 @@ export class AIChatLogic {
   async insertBelowSelectedContent(text: string) {
     if (!text) return;
 
-    const selectedBlocks = getPageService(this.host).selectedBlocks;
+    const selectedBlocks = getRootService(this.host).selectedBlocks;
     const blockLength = selectedBlocks.length;
     if (!blockLength) return;
 
@@ -583,10 +583,10 @@ export type ChatMessage =
       sources: BackgroundSource[];
     };
 
-const pageToMarkdown = async (page: Page) => {
-  const job = new Job({ workspace: page.workspace });
-  const snapshot = await job.pageToSnapshot(page);
-  const result = await new MarkdownAdapter().fromPageSnapshot({
+const docToMarkdown = async (doc: Doc) => {
+  const job = new Job({ workspace: doc.workspace });
+  const snapshot = await job.docToSnapshot(doc);
+  const result = await new MarkdownAdapter().fromDocSnapshot({
     snapshot,
     assets: job.assetsManager,
   });
@@ -630,7 +630,7 @@ const splitText = (text: string) => {
   }
   return result;
 };
-export type EmbeddedPage = {
+export type EmbeddedDoc = {
   id: string;
   sections: {
     vector: number[];
@@ -706,8 +706,8 @@ const createTaskQueue = () => {
 const addPPTTaskQueue = createTaskQueue();
 const pptBuilder = (host: EditorHost) => {
   const service = getEdgelessService(host);
-  const pages: PPTPage[] = [];
-  const addPage = async (block: BlockSnapshot) => {
+  const docs: PPTDoc[] = [];
+  const addDoc = async (block: BlockSnapshot) => {
     const sections = block.children.map(v => {
       const title = getText(v);
       const keywords = getText(v.children[0]);
@@ -718,14 +718,14 @@ const pptBuilder = (host: EditorHost) => {
         content,
       } satisfies PPTSection;
     });
-    const page: PPTPage = {
-      isCover: pages.length === 0,
+    const doc: PPTDoc = {
+      isCover: docs.length === 0,
       title: getText(block),
       sections,
     };
-    pages.push(page);
+    docs.push(doc);
     const job = service.createTemplateJob('template');
-    const { images, content } = await basicTheme(page);
+    const { images, content } = await basicTheme(doc);
     if (images.length) {
       await Promise.all(
         images.map(({ id, url }) =>
@@ -742,15 +742,15 @@ const pptBuilder = (host: EditorHost) => {
     process: async (text: string) => {
       const snapshot = await markdownToSnapshot(text, host);
       const block = snapshot.snapshot.content[0];
-      if (block.children.length > pages.length + 1) {
-        addPPTTaskQueue.add(() => addPage(block.children[pages.length]));
+      if (block.children.length > docs.length + 1) {
+        addPPTTaskQueue.add(() => addDoc(block.children[docs.length]));
       }
     },
     done: async (text: string) => {
       const snapshot = await markdownToSnapshot(text, host);
       const block = snapshot.snapshot.content[0];
       addPPTTaskQueue.add(() =>
-        addPage(block.children[block.children.length - 1])
+        addDoc(block.children[block.children.length - 1])
       );
     },
   };

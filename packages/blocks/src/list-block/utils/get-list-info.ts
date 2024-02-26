@@ -1,7 +1,7 @@
 import type { ListBlockModel } from '../list-model.js';
 
 const getIndex = (model: ListBlockModel) => {
-  const siblings = (model.page.getParent(model)?.children ||
+  const siblings = (model.doc.getParent(model)?.children ||
     []) as ListBlockModel[];
   const fakeIndex = siblings.findIndex(v => v === model);
 
@@ -24,10 +24,10 @@ const getIndex = (model: ListBlockModel) => {
 
 const getListDeep = (model: ListBlockModel): number => {
   let deep = 0;
-  let parent = model.page.getParent(model);
+  let parent = model.doc.getParent(model);
   while (parent?.flavour === model.flavour) {
     deep++;
-    parent = model.page.getParent(parent);
+    parent = model.doc.getParent(parent);
   }
   return deep;
 };
