@@ -1,6 +1,7 @@
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 
 import {
@@ -10,6 +11,8 @@ import {
 import type { PDFBlockModel } from './pdf-model.js';
 import { PDFService } from './pdf-service.js';
 import { PDFException } from './pdf-service.js';
+
+export type PageChangeEvent = CustomEvent<{ page: number }>;
 
 type PDFStatus =
   | 'loaded'
@@ -41,11 +44,24 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
 
     .pdf-renderer-container {
       text-align: center;
+      position: relative;
+
+      isolation: isolate;
     }
 
     .pdf-canvas {
       display: block;
       font-size: 1px;
+    }
+
+    .pdf-annotation-canvas {
+      display: block;
+
+      position: absolute;
+      left: 0;
+      top: 0;
+
+      opacity: 0.5;
     }
 
     .pdf-pagination {
@@ -61,6 +77,7 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
       color: white;
       font-size: 0.75rem;
       user-select: none;
+      z-index: 3;
     }
 
     .affine-pdf-block:hover .pdf-pagination {
@@ -99,6 +116,50 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
   @query('.pdf-textlayer')
   pdfTextLayer!: HTMLDivElement;
 
+  @query('.pdf-annotation-canvas')
+  pdfAnnotationCanvas!: HTMLCanvasElement;
+
+  @query('.affine-pdf-block')
+  pdfContainer!: HTMLDivElement;
+
+  private _pdfLayerRect: DOMRect | null = null;
+
+  get currentPage() {
+    return this._pdfPageNum;
+  }
+
+  private async _setupPDF() {
+    if (!this.service.moduleLoaded) return;
+
+    const blob = await this.page.blob.get(this.model.sourceId);
+
+    if (!blob) {
+      this._status = 'file-failed';
+      return;
+    }
+
+    try {
+      const pdfDoc = await this.service.parsePDF(URL.createObjectURL(blob));
+
+      if (!this.isConnected || !this.pdfCanvas) return;
+
+      this._pdfDoc = pdfDoc;
+
+      await this._renderPage(1);
+    } catch (err) {
+      this._status =
+        err instanceof PDFException
+          ? err.type === 'module'
+            ? 'module-failed'
+            : 'file-failed'
+          : 'render-failed';
+
+      console.error(err);
+    } finally {
+      this.isConnected && this.requestUpdate();
+    }
+  }
+
   private async _renderPage(num: number) {
     try {
       const { RENDERING_SCALE } = PDFBlockComponent;
@@ -135,6 +196,7 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
         this.rendererConatiner.append(div);
       textLayer.setTextContentSource(textContent);
       await textLayer.render(textLayerViewport);
+      this._renderAnnotation();
     } catch (e) {
       console.error(e);
       this._status = 'render-failed';
@@ -143,48 +205,80 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     }
   }
 
-  private async _setupPDF() {
-    if (!this.service.moduleLoaded) return;
+  private _renderAnnotation() {
+    const annotations = this.model.getAnnotationsByPage(this._pdfPageNum);
+    const { pdfAnnotationCanvas, pdfCanvas } = this;
+    const context = pdfAnnotationCanvas.getContext('2d')!;
 
-    const blob = await this.page.blob.get(this.model.sourceId);
+    context.clearRect(
+      0,
+      0,
+      pdfAnnotationCanvas.width,
+      pdfAnnotationCanvas.height
+    );
 
-    if (!blob) {
-      this._status = 'file-failed';
-      return;
+    if (!annotations.length) return;
+
+    if (pdfAnnotationCanvas.width !== pdfCanvas.width) {
+      pdfAnnotationCanvas.width = pdfCanvas.width;
+      pdfAnnotationCanvas.height = pdfCanvas.height;
     }
 
-    try {
-      const pdfDoc = await this.service.parsePDF(URL.createObjectURL(blob));
+    pdfAnnotationCanvas.style.width = pdfCanvas.style.width;
+    pdfAnnotationCanvas.style.height = pdfCanvas.style.height;
 
-      if (!this.isConnected || !this.pdfCanvas) return;
+    const renderingScale =
+      pdfAnnotationCanvas.width /
+        parseInt(pdfAnnotationCanvas.style.width.replace('px', '')) ?? 1;
+    context.fillStyle = 'rgba(255, 255, 0, 1)';
 
-      this._pdfDoc = pdfDoc;
+    annotations.forEach(({ annotation }) => {
+      const rects = annotation.get('highlightRects')?.[this._pdfPageNum] ?? [];
 
-      await this._renderPage(1);
-    } catch (err) {
-      this._status =
-        err instanceof PDFException
-          ? err.type === 'module'
-            ? 'module-failed'
-            : 'file-failed'
-          : 'render-failed';
+      rects.forEach(([x, y, w, h]) => {
+        context.fillRect(
+          x * renderingScale,
+          y * renderingScale,
+          w * renderingScale,
+          h * renderingScale
+        );
+      });
+    });
+  }
 
-      console.error(err);
-    } finally {
-      this.isConnected && this.requestUpdate();
-    }
+  private _setPage(num: number) {
+    if (num < 1 || num > this._pdfDoc.numPages) return;
+
+    this._pdfPageNum = num;
+    this._renderPage(num).catch(() => {});
+    this.dispatchEvent(
+      new CustomEvent('pagechange', {
+        detail: {
+          page: num,
+        },
+      })
+    );
   }
 
   private _prev() {
     if (this._pdfPageNum === 1) return;
 
-    this._renderPage(--this._pdfPageNum).catch(() => {});
+    this._setPage(this._pdfPageNum - 1);
   }
 
   private _next() {
     if (this._pdfPageNum === this._pdfDoc.numPages) return;
 
-    this._renderPage(++this._pdfPageNum).catch(() => {});
+    this._setPage(this._pdfPageNum + 1);
+  }
+
+  toPDFCoords(x: number, y: number) {
+    this._pdfLayerRect = this.pdfCanvas.getBoundingClientRect();
+
+    return {
+      x: x - this._pdfLayerRect.x,
+      y: y - this._pdfLayerRect.y,
+    };
   }
 
   override connectedCallback() {
@@ -197,6 +291,11 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
         if (this._status !== 'loaded') {
           this._setupPDF().catch(() => {});
         }
+      })
+    );
+    this._disposables.add(
+      this.model.annotationUpdated.on(() => {
+        this._renderAnnotation();
       })
     );
   }
@@ -218,6 +317,12 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
       return html`<div class="affine-pdf-block">PDF module is not loaded</div>`;
     }
 
+    const widgets = html`${repeat(
+      Object.entries(this.widgets),
+      ([id]) => id,
+      ([_, widget]) => widget
+    )}`;
+
     switch (this._status) {
       case 'module-failed':
       case 'file-failed':
@@ -230,6 +335,7 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     return html`<div class="affine-pdf-block">
       <div class="pdf-renderer-container">
         <canvas class="pdf-canvas"></canvas>
+        <canvas class="pdf-annotation-canvas"></canvas>
       </div>
       ${this._pdfDoc
         ? html`<div class="pdf-pagination">
@@ -242,6 +348,7 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
             </button>
           </div>`
         : nothing}
+      ${widgets}
     </div>`;
   }
 }

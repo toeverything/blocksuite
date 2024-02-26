@@ -1,46 +1,27 @@
 import type { Boxed, Y } from '@blocksuite/store';
-import { BlockModel, defineBlockSchema, Workspace } from '@blocksuite/store';
+import {
+  BlockModel,
+  defineBlockSchema,
+  Slot,
+  Workspace,
+} from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { SerializedXYWH } from '../surface-block/index.js';
-import type { YDict } from './utils/y-utils.js';
+import type {
+  AnnotationYMap,
+  ClipAnnotation,
+  TextAnnotation,
+  ToPlain,
+} from './type.js';
+import { AnnotationType } from './type.js';
+import { generateAnnotationKey } from './utils/model.js';
 
-enum AnnotationType {
-  Text = 0,
-  Clip = 1,
-}
-
-type TextAnnotation = YDict<{
-  key: string;
-  type: AnnotationType.Text;
-  comment: Y.Text;
-
-  /**
-   * The selected text
-   */
-  text: string;
-
-  /**
-   * hightlighted rects in each page
-   *
-   * Rect<page, [x, y, w, h]>
-   */
-  highlightRects: Record<number, [number, number, number, number]>;
-}>;
-
-type ClipAnnotation = YDict<{
-  key: string;
-  type: AnnotationType.Clip;
-  comment: Y.Text;
-
-  highlightRect: [number, number, number, number];
-}>;
-
-type Annotation = TextAnnotation | ClipAnnotation;
+export { AnnotationType };
 
 type PDFProps = {
   sourceId: string;
-  annotations: Boxed<Y.Array<Annotation>>;
+  annotations: Boxed<Y.Map<AnnotationYMap>>;
   xywh: SerializedXYWH;
   index: string;
 };
@@ -48,7 +29,9 @@ type PDFProps = {
 export const PDFBlockSchema = defineBlockSchema({
   flavour: 'affine:pdf',
   props: (internalPrimitives): PDFProps => ({
-    annotations: internalPrimitives.Boxed(new Workspace.Y.Array()),
+    annotations: internalPrimitives.Boxed(
+      new Workspace.Y.Map<AnnotationYMap>()
+    ),
     sourceId: '',
     xywh: `[0,0,100,100]`,
     index: 'a0',
@@ -63,4 +46,61 @@ export const PDFBlockSchema = defineBlockSchema({
   },
 });
 
-export class PDFBlockModel extends selectable<PDFProps>(BlockModel) {}
+export class PDFBlockModel extends selectable<PDFProps>(BlockModel) {
+  annotationUpdated = new Slot();
+
+  constructor() {
+    super();
+
+    this.created.once(() => {
+      this.annotations.getValue()?.observe(event => {
+        if (event.changes) {
+          this.annotationUpdated.emit();
+        }
+      });
+    });
+  }
+
+  addAnnotation(annotation: ToPlain<ClipAnnotation> | ToPlain<TextAnnotation>) {
+    const key = generateAnnotationKey();
+    const yMap = new Workspace.Y.Map();
+
+    Object.entries(annotation).forEach(([key, value]) => {
+      yMap.set(key, value);
+    });
+
+    this.annotations.getValue()?.set(key, yMap as AnnotationYMap);
+
+    return key;
+  }
+
+  removeAnnotation(key: string) {
+    this.annotations.getValue()?.delete(key);
+  }
+
+  getAnnotation(key: string) {
+    return this.annotations.getValue()?.get(key);
+  }
+
+  getAnnotationsByPage(page: number) {
+    const annotations = this.annotations.getValue();
+    const candidates: { key: string; annotation: AnnotationYMap }[] = [];
+
+    annotations?.forEach((annotation, key) => {
+      const rectRecords = annotation.get('highlightRects');
+
+      if (rectRecords?.[page]) {
+        candidates.push({
+          key,
+          annotation,
+        });
+      }
+    });
+
+    return candidates;
+  }
+
+  override dispose(): void {
+    this.annotationUpdated.dispose();
+  }
+}

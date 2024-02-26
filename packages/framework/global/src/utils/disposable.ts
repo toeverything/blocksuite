@@ -45,6 +45,12 @@ export class DisposableGroup implements Disposable {
     eventOptions?: boolean | AddEventListenerOptions
   ): void;
   addFromEvent(
+    element: HTMLElement,
+    eventName: string,
+    handler: (e: Event | CustomEvent) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): void;
+  addFromEvent(
     target: HTMLElement | Window | Document,
     type: string,
     handler: (e: Event) => void,

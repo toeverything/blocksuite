@@ -45,6 +45,8 @@ import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { ParagraphService } from '../paragraph-block/paragraph-service.js';
 import { PDFBlockSchema } from '../pdf-block/pdf-model.js';
 import { PDFService } from '../pdf-block/pdf-service.js';
+import { AFFINE_ANNOTATION_PREVIEW_WIDGET } from '../pdf-block/widget/annotation-preview.js';
+import { AFFINE_PDF_ANNOTATION_TOOLBAR_WIDGET } from '../pdf-block/widget/annotation-toolbar.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
@@ -195,6 +197,10 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     schema: PDFBlockSchema,
     view: {
       component: literal`affine-pdf`,
+      widgets: {
+        [AFFINE_PDF_ANNOTATION_TOOLBAR_WIDGET]: literal`affine-pdf-annotation-toolbar`,
+        [AFFINE_ANNOTATION_PREVIEW_WIDGET]: literal`affine-annotation-preview`,
+      },
     },
     service: PDFService,
   },

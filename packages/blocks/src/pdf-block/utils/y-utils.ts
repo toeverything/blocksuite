@@ -1,10 +1,9 @@
-import type { Y } from '@blocksuite/store';
-
+/**
+ * YDict is just a Y.Map with a more accurate type
+ */
 export type YDict<T> = {
-  get(key: keyof T): Y.Item | undefined;
-  set(key: keyof T, value: T[keyof T]): void;
+  get<K extends keyof T>(key: K): T[K];
+  set<K extends keyof T>(key: K, value: T[K]): void;
 };
 
-export function toYDict<T>(yMap: Y.Map<unknown>) {
-  return yMap as YDict<T>;
-}
+export type UnwrapYDict<T> = T extends YDict<infer U> ? U : T;
