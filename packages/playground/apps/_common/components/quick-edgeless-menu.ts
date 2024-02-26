@@ -17,7 +17,7 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 
-import type { AffineTextAttributes } from '@blocksuite/blocks';
+import type { AffineTextAttributes, SerializedXYWH } from '@blocksuite/blocks';
 import { ColorVariables, extractCssVariables } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
@@ -145,7 +145,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},800,95]`;
+    const xywh: SerializedXYWH = `[0,${count * 60},800,95]`;
 
     const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, noteId);

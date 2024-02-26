@@ -9,11 +9,11 @@ export const EmbedLinkedDocStyles: EmbedCardStyle[] = [
   'list',
   'cube',
   'horizontalThin',
-] as const;
+];
 
 export type EmbedLinkedDocBlockProps = {
   pageId: string;
-  style: (typeof EmbedLinkedDocStyles)[number];
+  style: EmbedCardStyle;
   caption: string | null;
 };
 

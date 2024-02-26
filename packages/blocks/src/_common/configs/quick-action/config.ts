@@ -175,7 +175,7 @@ export const quickActionConfig: QuickActionConfig[] = [
           const blockProps = Object.fromEntries(
             keys.map((key, i) => [key, values[i]])
           );
-          linkedPage.addBlock(model.flavour, blockProps, noteId);
+          linkedPage.addBlock(model.flavour as never, blockProps, noteId);
           page.deleteBlock(model);
         });
       });

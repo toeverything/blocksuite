@@ -325,7 +325,7 @@ export class TemplateJob {
         assertExists(modelData);
 
         page.addBlock(
-          modelData.flavour,
+          modelData.flavour as BlockSuite.ModelKeys,
           {
             ...modelData.props,
             id: modelData.id,

@@ -100,7 +100,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       }
 
       this.host.page.addBlock(
-        flavour,
+        flavour as never,
         {
           url,
         },

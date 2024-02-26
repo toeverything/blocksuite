@@ -1,3 +1,4 @@
+import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceService } from './surface-service.js';
 
 export { normalizeShapeBound } from './canvas-renderer/element-renderer/index.js';
@@ -69,6 +70,9 @@ declare global {
   namespace BlockSuite {
     interface BlockServices {
       'affine:surface': SurfaceService;
+    }
+    interface BlockModels {
+      'affine:surface': SurfaceBlockModel;
     }
   }
 }

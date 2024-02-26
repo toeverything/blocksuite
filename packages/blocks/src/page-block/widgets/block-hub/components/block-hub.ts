@@ -619,7 +619,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     models.forEach(model => {
       lastId = page.addBlock(
-        model.flavour ?? 'affine:paragraph',
+        (model.flavour ?? 'affine:paragraph') as never,
         model,
         defaultNoteBlock
       );

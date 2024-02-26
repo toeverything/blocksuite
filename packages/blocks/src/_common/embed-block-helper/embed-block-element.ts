@@ -19,11 +19,7 @@ import {
 import { Bound } from '../../surface-block/index.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
-import {
-  type BlockModels,
-  type EmbedCardStyle,
-  matchFlavours,
-} from '../utils/index.js';
+import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
 
 export class EmbedBlockElement<
   Model extends
@@ -71,7 +67,7 @@ export class EmbedBlockElement<
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [
-          this.flavour as keyof BlockModels,
+          this.flavour as keyof BlockSuite.BlockModels,
         ])
       )
         return false;
@@ -117,7 +113,7 @@ export class EmbedBlockElement<
       if (
         draggingElements.length !== 1 ||
         !matchFlavours(draggingElements[0].model, [
-          this.flavour as keyof BlockModels,
+          this.flavour as keyof BlockSuite.BlockModels,
         ])
       )
         return false;

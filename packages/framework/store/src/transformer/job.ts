@@ -191,7 +191,7 @@ export class Job {
     });
 
     page.addBlock(
-      modelData.flavour,
+      modelData.flavour as BlockSuite.ModelKeys,
       { ...modelData.props, id: modelData.id },
       parent,
       index
