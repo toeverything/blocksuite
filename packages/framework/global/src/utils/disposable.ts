@@ -31,37 +31,40 @@ export class DisposableGroup implements Disposable {
     eventName: N,
     handler: (e: WindowEventMap[N]) => void,
     options?: boolean | AddEventListenerOptions
-  ): void;
+  ): () => void;
   addFromEvent<N extends keyof DocumentEventMap>(
     element: Document,
     eventName: N,
     handler: (e: DocumentEventMap[N]) => void,
     eventOptions?: boolean | AddEventListenerOptions
-  ): void;
+  ): () => void;
   addFromEvent<N extends keyof HTMLElementEventMap>(
     element: HTMLElement,
     eventName: N,
     handler: (e: HTMLElementEventMap[N]) => void,
     eventOptions?: boolean | AddEventListenerOptions
-  ): void;
+  ): () => void;
   addFromEvent(
     element: HTMLElement,
     eventName: string,
     handler: (e: Event | CustomEvent) => void,
     eventOptions?: boolean | AddEventListenerOptions
-  ): void;
+  ): () => void;
   addFromEvent(
     target: HTMLElement | Window | Document,
     type: string,
     handler: (e: Event) => void,
     eventOptions?: boolean | AddEventListenerOptions
-  ) {
+  ): () => void {
+    const dispose = () => {
+      target.removeEventListener(type, handler as () => void, eventOptions);
+    };
     this.add({
-      dispose: () => {
-        target.removeEventListener(type, handler as () => void, eventOptions);
-      },
+      dispose,
     });
     target.addEventListener(type, handler as () => void, eventOptions);
+
+    return dispose;
   }
 
   dispose() {

@@ -109,7 +109,7 @@ export class AnnotationPreview extends WidgetElement<PDFBlockComponent> {
 
           if (
             position.x >= firstRect[0] &&
-            position.x <= firstRect[0] + 22 &&
+            position.x <= firstRect[0] + firstRect[2] &&
             position.y >= firstRect[1] - 22 &&
             position.y <= firstRect[1]
           ) {
@@ -119,19 +119,19 @@ export class AnnotationPreview extends WidgetElement<PDFBlockComponent> {
 
         let showingFlag = false;
 
-        this._annotationPositions.forEach(annotation => {
+        for (const annotation of this._annotationPositions) {
           annotation.hightRects.forEach(rect => {
             if (
               position.x >= rect[0] &&
               position.x <= rect[0] + rect[2] &&
-              position.y >= rect[1] &&
+              position.y >= rect[1] - 22 &&
               position.y <= rect[1] + rect[3]
             ) {
               showingFlag = true;
               this._showAnnotation(annotation);
             }
           });
-        });
+        }
 
         if (!showingFlag) {
           this._hoveredAnnotation = null;

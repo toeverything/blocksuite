@@ -197,10 +197,6 @@ export class AnnotationToolbar extends WidgetElement<PDFBlockComponent> {
                   this._display = false;
                   this._displayCommentPanel = false;
                 }}
-                .position=${{
-                  x: this._highlightInfo.x,
-                  y: this._highlightInfo.y + 40,
-                }}
               ></annotation-comment-panel>`
             : nothing}
         </icon-button>

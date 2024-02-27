@@ -10,7 +10,7 @@ import {
 } from '../_common/icons/edgeless.js';
 import type { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
 import type { PageService } from '../page-block/page-service.js';
-import type { PDFBlockModel } from './pdf-model.js';
+import { AnnotationType, type PDFBlockModel } from './pdf-model.js';
 import { PDFService } from './pdf-service.js';
 import { PDFException } from './pdf-service.js';
 
@@ -239,17 +239,31 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
       pdfAnnotationCanvas.width /
         parseInt(pdfAnnotationCanvas.style.width.replace('px', '')) ?? 1;
     context.fillStyle = 'rgba(255, 255, 0, 1)';
+    context.strokeStyle = 'rgba(0, 0, 255, 1)';
+    context.lineWidth = 2;
+    context.setLineDash([16, 5]);
 
     annotations.forEach(({ annotation }) => {
       const rects = annotation.get('highlightRects')?.[this._pdfPageNum] ?? [];
 
       rects.forEach(([x, y, w, h]) => {
-        context.fillRect(
-          x * renderingScale,
-          y * renderingScale,
-          w * renderingScale,
-          h * renderingScale
-        );
+        if (annotation.get('type') === AnnotationType.Text) {
+          context.fillRect(
+            x * renderingScale,
+            y * renderingScale,
+            w * renderingScale,
+            h * renderingScale
+          );
+        }
+
+        if (annotation.get('type') === AnnotationType.Clip) {
+          context.strokeRect(
+            x * renderingScale,
+            y * renderingScale,
+            w * renderingScale,
+            h * renderingScale
+          );
+        }
       });
     });
   }
@@ -296,6 +310,10 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
       x: x - this._pdfLayerRect.x,
       y: y - this._pdfLayerRect.y,
     };
+  }
+
+  enableTextSelection(enable: boolean) {
+    this.pdfTextLayer.style.pointerEvents = enable ? 'auto' : 'none';
   }
 
   override connectedCallback() {

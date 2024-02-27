@@ -1,6 +1,7 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   requestConnectedFrame,
@@ -49,14 +50,23 @@ export class AnnotationCommentPanel extends LitElement {
   override firstUpdated(): void {
     requestConnectedFrame(() => {
       this._disposable.addFromEvent(document, 'click', () => {
-        this.remove();
+        this.onCancel();
       });
     }, this);
   }
 
   override render() {
     return html`
-      <div class="pdf-annotation-comment-panel" @click=${stopPropagation}>
+      <div
+        class="pdf-annotation-comment-panel"
+        style=${this.position
+          ? styleMap({
+              left: `${this.position.x}px`,
+              top: `${this.position.y}px`,
+            })
+          : ''}
+        @click=${stopPropagation}
+      >
         <form>
           <textarea name="comment"></textarea>
           <button
