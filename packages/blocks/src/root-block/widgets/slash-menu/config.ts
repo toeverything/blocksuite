@@ -727,21 +727,21 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         showWhen: model => {
           return !insideDatabase(model);
         },
-        action: ({ model, pageElement }) => {
-          const parent = pageElement.page.getParent(model);
+        action: ({ model, rootElement }) => {
+          const parent = rootElement.doc.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          const columnsId = pageElement.page.addBlock(
+          const columnsId = rootElement.doc.addBlock(
             'affine:columns',
             {
               sizes: [50, 50],
             },
-            pageElement.page.getParent(model),
+            rootElement.doc.getParent(model),
             index + 1
           );
 
-          const noteIds = pageElement.page.addBlocks(
+          const noteIds = rootElement.doc.addBlocks(
             [
               {
                 flavour: 'affine:note',
@@ -754,11 +754,11 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           );
 
           const firstParagraphId = noteIds.map(id =>
-            pageElement.page.addBlock('affine:paragraph', {}, id)
+            rootElement.doc.addBlock('affine:paragraph', {}, id)
           )[0];
 
-          void pageElement.host.updateComplete.then(() => {
-            const node = pageElement.host.querySelector(
+          void rootElement.host.updateComplete.then(() => {
+            const node = rootElement.host.querySelector(
               `[data-block-id="${firstParagraphId}"] rich-text`
             ) as RichText;
             node?.inlineEditor?.focusStart();

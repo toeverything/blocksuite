@@ -5,8 +5,8 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { DeleteIcon } from '../_common/icons/text.js';
-import type { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from '../page-block/widgets/drag-handle/drag-handle.js';
+import type { AffineDragHandleWidget } from '../index.js';
+import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
 import { SPLIT_BAR_WIDTH } from './column-split-bar.js';
 import type { ColumnsBlockModel } from './columns-model.js';
 import { normalSizes } from './utils.js';
@@ -118,7 +118,7 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
   }
 
   _addColumn(index: number) {
-    if (this.page.readonly && this.model.children.length === MAX_COLUMN_NUMBER)
+    if (this.doc.readonly && this.model.children.length === MAX_COLUMN_NUMBER)
       return;
     const sizes =
       this.model.sizes.length === 1
@@ -135,13 +135,13 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
           );
 
     let noteId: string | undefined;
-    this.page.transact(() => {
-      noteId = this.page.addBlock('affine:note', {}, this.model.id, index + 1);
+    this.doc.transact(() => {
+      noteId = this.doc.addBlock('affine:note', {}, this.model.id, index + 1);
       this.model.sizes = sizes;
     });
 
     if (noteId) {
-      const id = this.page.addBlock('affine:paragraph', {}, noteId);
+      const id = this.doc.addBlock('affine:paragraph', {}, noteId);
       this.host.selection.setGroup('note', [
         this.host.selection.create('text', {
           from: {
@@ -157,7 +157,7 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
 
   _removeColumn(child: BlockModel<object>) {
     if (this.model.children.length === 1) {
-      this.page.deleteBlock(this.model);
+      this.doc.deleteBlock(this.model);
       return;
     }
 
@@ -175,9 +175,9 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
             MAX_COLUMN_WIDTH_PERCENT
           );
 
-    this.page.transact(() => {
+    this.doc.transact(() => {
       this.model.sizes = sizes;
-      this.page.deleteBlock(child);
+      this.doc.deleteBlock(child);
     });
   }
 
@@ -249,7 +249,7 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
         this.grid.getBoundingClientRect().width -
         (this.model.children.length + 1) * SPLIT_BAR_WIDTH;
 
-      this.page.transact(() => {
+      this.doc.transact(() => {
         this.model.sizes = this.pixelSizes.map(
           size => (size / gridWidth) * 100
         );
@@ -289,14 +289,14 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
       child => child.id,
       child => {
         if ('type' in child && child.type === 'columns-split-bar') {
-          return this.page.readonly
+          return this.doc.readonly
             ? nothing
             : html`<affine-columns-split-bar
                 id=${child.id}
                 contenteditable="false"
                 ?disabledaddcolumn=${this.pixelSizes.length >=
                 MAX_COLUMN_NUMBER}
-                ?disabled=${this.page.readonly}
+                ?disabled=${this.doc.readonly}
                 ?disabledDrag=${child.disabledDrag}
                 @pointerdown=${(e: PointerEvent) => {
                   if (child.disabledDrag) return;
@@ -309,7 +309,7 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
         } else {
           return html`<div class="affine-block-column-item">
             ${this.renderModel(child as BlockModel<object>)}
-            ${this.hoverChildId === child.id && !this.page.readonly
+            ${this.hoverChildId === child.id && !this.doc.readonly
               ? html`<div
                   class="affine-block-column-delete-button"
                   contenteditable="false"
@@ -332,7 +332,7 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
       <div class="affine-block-columns-grid" style=${this._getGridStyles()}>
         <affine-columns-split-bar
           ?disabledaddcolumn=${this.pixelSizes.length >= MAX_COLUMN_NUMBER}
-          ?disabled=${this.page.readonly}
+          ?disabled=${this.doc.readonly}
           ?disabledDrag=${true}
           @add-column=${() => {
             this._addColumn(-1);
