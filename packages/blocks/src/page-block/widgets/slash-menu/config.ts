@@ -41,6 +41,7 @@ import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
+import type { RichText } from '../../../index.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { onModelTextUpdated } from '../../../page-block/utils/index.js';
@@ -737,7 +738,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          const id = pageElement.page.addBlock(
+          const columnsId = pageElement.page.addBlock(
             'affine:columns',
             {
               sizes: [50, 50],
@@ -746,7 +747,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             index + 1
           );
 
-          const ids = pageElement.page.addBlocks(
+          const noteIds = pageElement.page.addBlocks(
             [
               {
                 flavour: 'affine:note',
@@ -755,11 +756,18 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                 flavour: 'affine:note',
               },
             ],
-            id
+            columnsId
           );
 
-          ids.forEach(id => {
-            pageElement.page.addBlock('affine:paragraph', {}, id);
+          const firstParagraphId = noteIds.map(id =>
+            pageElement.page.addBlock('affine:paragraph', {}, id)
+          )[0];
+
+          void pageElement.host.updateComplete.then(() => {
+            const node = pageElement.host.querySelector(
+              `[data-block-id="${firstParagraphId}"] rich-text`
+            ) as RichText;
+            node?.inlineEditor?.focusStart();
           });
 
           tryRemoveEmptyLine(model);

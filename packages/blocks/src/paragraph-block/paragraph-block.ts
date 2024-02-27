@@ -145,6 +145,11 @@ export class ParagraphBlockComponent extends BlockElement<
       pointer-events: none;
       color: var(--affine-black-30);
       fill: var(--affine-black-30);
+
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .affine-paragraph-placeholder.visible {
       display: block;

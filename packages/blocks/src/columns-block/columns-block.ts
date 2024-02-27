@@ -1,17 +1,19 @@
 import { BlockElement } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { matchFlavours } from '../_common/utils/index.js';
+import { DeleteIcon } from '../_common/icons/text.js';
 import type { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../page-block/widgets/drag-handle/drag-handle.js';
 import { SPLIT_BAR_WIDTH } from './column-split-bar.js';
 import type { ColumnsBlockModel } from './columns-model.js';
+import { normalSizes } from './utils.js';
 
 const MIN_COLUMN_WIDTH_PERCENT = 20;
 const MAX_COLUMN_WIDTH_PERCENT = 80;
+const MAX_COLUMN_NUMBER = 4;
 
 @customElement('affine-columns')
 export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
@@ -27,6 +29,7 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
       }
 
       .affine-block-column-item {
+        position: relative;
         background-color: var(--affine-background-secondary-color);
         padding: 0px 16px;
         border-radius: 8px;
@@ -36,22 +39,43 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
           min-height: 100px;
         }
       }
+
+      .affine-block-column-delete-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+        padding: 4px;
+
+        icon-button {
+          background-color: #fff;
+        }
+
+        &:hover {
+          icon-button {
+            background: var(--affine-background-error-color);
+            color: var(--affine-error-color);
+
+            svg {
+              color: var(--affine-error-color);
+            }
+          }
+        }
+      }
     }
   `;
 
   @state()
   pixelSizes: number[] = [];
 
+  @state()
+  hoverChildId: string | null = null;
+
   @query('.affine-block-columns-grid')
   grid!: HTMLElement;
 
   override async connectedCallback() {
     super.connectedCallback();
-    this.disposables.add(
-      this.page.slots.blockUpdated.on(
-        this._checkLastBlockIsParagraph.bind(this)
-      )
-    );
 
     this.disposables.add(
       this.model.propsUpdated.on(() => {
@@ -59,80 +83,121 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
       })
     );
 
-    this._checkLastBlockIsParagraph();
+    this.handleEvent('pointerMove', ctx => {
+      const state = ctx.get('pointerState');
+      const { clientX: x, clientY: y } = state.raw;
+      const rect = this.getBoundingClientRect();
+
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        this.hoverChildId = null;
+      }
+
+      const children = this.model.children;
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        const childRect = this.grid.children[1 + i * 2].getBoundingClientRect();
+        if (x > childRect.left && x < childRect.right) {
+          this.hoverChildId = child.id;
+          return;
+        }
+      }
+    });
+
+    this.handleEvent('pointerOut', ctx => {
+      const state = ctx.get('pointerState');
+      const { clientX: x, clientY: y } = state.raw;
+      const rect = this.getBoundingClientRect();
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        this.hoverChildId = null;
+      }
+    });
 
     await this.updateComplete;
 
     this._refreshPixelSizes();
   }
 
-  _checkLastBlockIsParagraph() {
-    this.model.children.forEach(note => {
-      if (matchFlavours(note, ['affine:note'])) {
-        const lastChild = note.children[note.children.length - 1];
-        if (!lastChild || !matchFlavours(lastChild, ['affine:paragraph'])) {
-          this.page.addBlock('affine:paragraph', {}, note.id);
-        }
-      }
+  _addColumn(index: number) {
+    if (this.page.readonly && this.model.children.length === MAX_COLUMN_NUMBER)
+      return;
+    const sizes =
+      this.model.sizes.length === 1
+        ? [50, 50]
+        : normalSizes(
+            [
+              ...this.model.sizes.slice(0, index + 1),
+              100 / (this.model.children.length + 1),
+              ...this.model.sizes.slice(index + 1),
+            ],
+            100,
+            MIN_COLUMN_WIDTH_PERCENT,
+            MAX_COLUMN_WIDTH_PERCENT
+          );
+
+    let noteId: string | undefined;
+    this.page.transact(() => {
+      noteId = this.page.addBlock('affine:note', {}, this.model.id, index + 1);
+      this.model.sizes = sizes;
     });
+
+    if (noteId) {
+      const id = this.page.addBlock('affine:paragraph', {}, noteId);
+      this.host.selection.setGroup('note', [
+        this.host.selection.create('text', {
+          from: {
+            path: [...this.path, noteId, id],
+            index: 0,
+            length: 0,
+          },
+          to: null,
+        }),
+      ]);
+    }
   }
 
-  _addColumn(index: number) {
-    const noteId = this.page.addBlock(
-      'affine:note',
-      {},
-      this.model.id,
-      index + 1
-    );
-    const avgSize = 100 / (this.model.sizes.length + 1);
-    const left = this.model.sizes[index] - avgSize / 2;
-    const right = this.model.sizes[index] - avgSize / 2;
-
-    let sizes: number[] = [];
-    if (index !== 0) {
-      sizes = this.model.sizes.slice(0, index - 1);
-    }
-    sizes.push(left);
-    sizes.push(avgSize);
-    sizes.push(right);
-    if (this.model.sizes.length > 2) {
-      sizes = sizes.concat(this.model.sizes.slice(index + 2));
+  _removeColumn(child: BlockModel<object>) {
+    if (this.model.children.length === 1) {
+      this.page.deleteBlock(this.model);
+      return;
     }
 
-    this.model.sizes = sizes;
+    const index = this.model.children.indexOf(child);
+    const sizes =
+      this.model.sizes.length === 2
+        ? [100]
+        : normalSizes(
+            [
+              ...this.model.sizes.slice(0, index),
+              ...this.model.sizes.slice(index + 1),
+            ],
+            100,
+            MIN_COLUMN_WIDTH_PERCENT,
+            MAX_COLUMN_WIDTH_PERCENT
+          );
 
-    this.page.addBlock(
-      'affine:paragraph',
-      {
-        type: 'text',
-        text: this.page.Text.fromDelta([{ insert: 'New column ' }]),
-      },
-      noteId,
-      0
-    );
+    this.page.transact(() => {
+      this.model.sizes = sizes;
+      this.page.deleteBlock(child);
+    });
   }
 
   _refreshPixelSizes() {
     const gridWidth =
       this.grid.getBoundingClientRect().width -
-      this.model.children.length * SPLIT_BAR_WIDTH;
+      (this.model.children.length + 1) * SPLIT_BAR_WIDTH;
     this.pixelSizes = this.model.sizes.map(size => (size / 100) * gridWidth);
   }
 
   _getGridStyles() {
-    return `grid-template-columns: ${this.pixelSizes
-      .slice(0, -1)
-      .flatMap((size, index) => {
-        return [
-          size,
-          index !== this.pixelSizes.length - 1 ? SPLIT_BAR_WIDTH : null,
-        ];
+    return `grid-template-columns: ${SPLIT_BAR_WIDTH}px ${this.pixelSizes
+      .flatMap(size => {
+        return [size, SPLIT_BAR_WIDTH];
       })
       .filter(Boolean)
       .map(size => {
         return size + 'px';
       })
-      .join(' ')} auto;`;
+      .join(' ')};`;
   }
 
   _onSplitBarPointerDown(e: PointerEvent, index: number) {
@@ -140,8 +205,10 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
     const bar = e.target as HTMLElement;
     bar.setAttribute('data-dragging', 'true');
 
-    const leftChild = this.grid.children.item(index * 2) as HTMLElement;
-    const rightChild = this.grid.children.item((index + 1) * 2) as HTMLElement;
+    const leftChild = this.grid.children.item(1 + index * 2) as HTMLElement;
+    const rightChild = this.grid.children.item(
+      1 + (index + 1) * 2
+    ) as HTMLElement;
 
     const startX = e.clientX;
     const leftWidth = leftChild.getBoundingClientRect().width;
@@ -180,11 +247,13 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
       bar.removeAttribute('data-dragging');
       const gridWidth =
         this.grid.getBoundingClientRect().width -
-        this.model.children.length * SPLIT_BAR_WIDTH;
+        (this.model.children.length + 1) * SPLIT_BAR_WIDTH;
 
-      this.model.sizes = this.pixelSizes.map(size =>
-        Math.floor((size / gridWidth) * 100)
-      );
+      this.page.transact(() => {
+        this.model.sizes = this.pixelSizes.map(
+          size => (size / gridWidth) * 100
+        );
+      });
 
       window.removeEventListener('pointermove', onMouseMove);
       window.removeEventListener('pointerup', onMouseUp);
@@ -200,40 +269,75 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
         .flatMap((child, index) => {
           return [
             child,
-            index !== this.model.children.length - 1
-              ? {
-                  type: 'columns-split-bar',
-                  id: `split-bar-${index}`,
-                  index,
-                }
-              : null,
+            {
+              type: 'columns-split-bar',
+              id: `split-bar-${index}`,
+              index,
+              disabledDrag: index === this.model.children.length - 1,
+            },
           ];
         })
         .filter(Boolean) as Array<
         | BlockModel<object>
-        | { type: 'columns-split-bar'; id: string; index: number }
+        | {
+            type: 'columns-split-bar';
+            id: string;
+            index: number;
+            disabledDrag: boolean;
+          }
       >,
       child => child.id,
       child => {
         if ('type' in child && child.type === 'columns-split-bar') {
-          return html`<affine-columns-split-bar
-            id=${child.id}
-            @pointerdown=${(e: PointerEvent) => {
-              this._onSplitBarPointerDown(e, child.index);
-            }}
-            @add-column=${() => {
-              this._addColumn(child.index);
-            }}
-          ></affine-columns-split-bar>`;
+          return this.page.readonly
+            ? nothing
+            : html`<affine-columns-split-bar
+                id=${child.id}
+                contenteditable="false"
+                ?disabledaddcolumn=${this.pixelSizes.length >=
+                MAX_COLUMN_NUMBER}
+                ?disabled=${this.page.readonly}
+                ?disabledDrag=${child.disabledDrag}
+                @pointerdown=${(e: PointerEvent) => {
+                  if (child.disabledDrag) return;
+                  this._onSplitBarPointerDown(e, child.index);
+                }}
+                @add-column=${() => {
+                  this._addColumn(child.index);
+                }}
+              ></affine-columns-split-bar>`;
         } else {
           return html`<div class="affine-block-column-item">
             ${this.renderModel(child as BlockModel<object>)}
+            ${this.hoverChildId === child.id && !this.page.readonly
+              ? html`<div
+                  class="affine-block-column-delete-button"
+                  contenteditable="false"
+                >
+                  <icon-button
+                    @click=${() => {
+                      this._removeColumn(child as BlockModel<object>);
+                    }}
+                  >
+                    ${DeleteIcon}
+                  </icon-button>
+                </div>`
+              : nothing}
           </div>`;
         }
       }
     )}`;
+
     return html`<div class="affine-columns-container">
       <div class="affine-block-columns-grid" style=${this._getGridStyles()}>
+        <affine-columns-split-bar
+          ?disabledaddcolumn=${this.pixelSizes.length >= MAX_COLUMN_NUMBER}
+          ?disabled=${this.page.readonly}
+          ?disabledDrag=${true}
+          @add-column=${() => {
+            this._addColumn(-1);
+          }}
+        ></affine-columns-split-bar>
         ${children}
       </div>
       <affine-block-selection .block=${this}></affine-block-selection>
