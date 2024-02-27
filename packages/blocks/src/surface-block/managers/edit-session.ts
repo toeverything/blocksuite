@@ -32,6 +32,7 @@ import { TextAlign, TextVerticalAlign } from '../elements/consts.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  DEFAULT_SHAPE_TEXT_COLOR,
   FillColorsSchema,
   SHAPE_TEXT_FONT_SIZE,
   ShapeType,
@@ -155,6 +156,7 @@ export class EditSessionStorage {
       lineWidth: LineWidth.Thin,
     },
     shape: {
+      color: DEFAULT_SHAPE_TEXT_COLOR,
       shapeType: ShapeType.Rect,
       fillColor: DEFAULT_SHAPE_FILL_COLOR,
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
