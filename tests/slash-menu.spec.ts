@@ -255,8 +255,8 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashMenu).toBeVisible();
 
     const slashItems = slashMenu.locator('icon-button');
-    const maybeActivatedItem = slashItems.nth(-5);
-    await expect(maybeActivatedItem).toHaveText(['Move Up']);
+    const maybeActivatedItem = slashItems.nth(-1);
+    await expect(maybeActivatedItem).toHaveText(['Columns']);
     await expect(maybeActivatedItem).toHaveAttribute('hover', 'true');
     await assertRichTexts(page, ['/']);
   });
@@ -392,14 +392,14 @@ test.describe('slash search', () => {
 
     // search should reset the active item
     await type(page, 'co');
-    await expect(slashItems).toHaveCount(2);
-    await expect(slashItems).toHaveText(['Code Block', 'Copy']);
+    await expect(slashItems).toHaveCount(3);
+    await expect(slashItems).toHaveText(['Code Block', 'Copy', 'Columns']);
     await expect(slashItems.first()).toHaveAttribute('hover', 'true');
     await type(page, 'p');
     await expect(slashItems).toHaveCount(1);
     // assert backspace works
     await page.keyboard.press('Backspace');
-    await expect(slashItems).toHaveCount(2);
+    await expect(slashItems).toHaveCount(3);
   });
 
   test('slash menu supports fuzzy search', async ({ page }) => {
@@ -421,6 +421,7 @@ test.describe('slash search', () => {
       'File',
       'Copy',
       'Duplicate',
+      'Columns',
     ]);
     await type(page, 'b');
     await expect(slashItems).toHaveText(['Code Block']);
