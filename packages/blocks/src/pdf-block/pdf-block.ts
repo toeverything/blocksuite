@@ -8,6 +8,8 @@ import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
 } from '../_common/icons/edgeless.js';
+import type { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
+import type { PageService } from '../page-block/page-service.js';
 import type { PDFBlockModel } from './pdf-model.js';
 import { PDFService } from './pdf-service.js';
 import { PDFException } from './pdf-service.js';
@@ -126,6 +128,12 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
 
   get currentPage() {
     return this._pdfPageNum;
+  }
+
+  get pageService() {
+    return this.std.spec.getService('affine:page') as
+      | PageService
+      | EdgelessPageService;
   }
 
   private async _setupPDF() {
@@ -274,6 +282,15 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
 
   toPDFCoords(x: number, y: number) {
     this._pdfLayerRect = this.pdfCanvas.getBoundingClientRect();
+
+    if ('viewport' in this.pageService) {
+      const zoom = this.pageService.viewport.zoom;
+
+      return {
+        x: (x - this._pdfLayerRect.x) / zoom,
+        y: (y - this._pdfLayerRect.y) / zoom,
+      };
+    }
 
     return {
       x: x - this._pdfLayerRect.x,
