@@ -6,6 +6,8 @@ import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
 import { AttachmentService } from '../attachment-block/attachment-service.js';
 import { BookmarkService } from '../bookmark-block/bookmark-service.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
+import { CalloutBlockSchema } from '../callout-block/callout-model.js';
+import { CalloutService } from '../callout-block/callout-service.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
@@ -188,6 +190,13 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
       component: literal`affine-attachment`,
     },
     service: AttachmentService,
+  },
+  {
+    schema: CalloutBlockSchema,
+    view: {
+      component: literal`affine-callout`,
+    },
+    service: CalloutService,
   },
   EmbedFigmaBlockSpec,
   EmbedYoutubeBlockSpec,

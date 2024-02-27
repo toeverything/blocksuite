@@ -121,4 +121,11 @@ export const textConversionConfigs: TextConversionConfig[] = [
     hotkey: [`Mod-Alt-d`, `Mod-Shift-d`],
     icon: DividerIcon,
   },
+  {
+    flavour: 'affine:callout',
+    type: 'callout',
+    name: 'Callout',
+    hotkey: null,
+    icon: TextIcon,
+  },
 ];

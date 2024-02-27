@@ -11,6 +11,10 @@ import {
 import type { BookmarkBlockModel } from './bookmark-block/bookmark-model.js';
 import { BookmarkBlockSchema } from './bookmark-block/bookmark-model.js';
 import {
+  type CalloutBlockModel,
+  CalloutBlockSchema,
+} from './callout-block/callout-model.js';
+import {
   type CodeBlockModel,
   CodeBlockSchema,
 } from './code-block/code-model.js';
@@ -47,6 +51,7 @@ import { SurfaceRefBlockSchema } from './surface-ref-block/surface-ref-model.js'
 export type {
   AttachmentBlockModel,
   BookmarkBlockModel,
+  CalloutBlockModel,
   CodeBlockModel,
   DatabaseBlockModel,
   DataViewBlockModel,
@@ -63,6 +68,7 @@ export type {
 /** Built-in first party block models built for affine */
 export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   CodeBlockSchema,
+  CalloutBlockSchema,
   ParagraphBlockSchema,
   RootBlockSchema,
   ListBlockSchema,
@@ -91,6 +97,7 @@ export const __unstableSchemas = [
 // TODO support dynamic register
 export type BlockSchemas = {
   'affine:code': CodeBlockModel;
+  'affine:callout': CalloutBlockModel;
   'affine:paragraph': ParagraphBlockModel;
   'affine:page': RootBlockModel;
   'affine:list': ListBlockModel;

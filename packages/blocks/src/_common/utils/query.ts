@@ -345,6 +345,7 @@ export async function asyncGetRichTextByModel(
   const blockComponent = await asyncGetBlockComponentByModel(editorHost, model);
   if (!blockComponent) return null;
   await blockComponent.updateComplete;
+  console.log('blockComponent', blockComponent);
   const richText = blockComponent?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;

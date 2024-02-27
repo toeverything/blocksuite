@@ -69,9 +69,15 @@ export function updateBlockElementType(
     return [newModel];
   }
 
+  console.log('blockModels', blockModels);
   const newModels: BlockModel[] = [];
   blockModels.forEach(model => {
-    assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
+    assertFlavours(model, [
+      'affine:paragraph',
+      'affine:list',
+      'affine:code',
+      'affine:callout',
+    ]);
     if (model.flavour === flavour) {
       doc.updateBlock(model, { type });
       newModels.push(model);

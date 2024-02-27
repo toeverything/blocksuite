@@ -10,6 +10,7 @@ import './code-block/affine-code-line.js';
 import './image-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
+import './callout-block/index.js';
 
 import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours, Point } from './_common/utils/index.js';
@@ -67,6 +68,7 @@ export { getThemeMode } from './_common/utils/query.js';
 export * from './_specs/_specs.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
+export * from './callout-block/index.js';
 export * from './code-block/index.js';
 export * from './data-view-block/index.js';
 export * from './database-block/index.js';

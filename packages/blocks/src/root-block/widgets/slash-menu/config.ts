@@ -62,7 +62,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
     name: 'Text',
     items: [
       ...textConversionConfigs
-        .filter(i => i.flavour !== 'affine:list')
+        .filter(
+          i => i.flavour !== 'affine:list' && i.flavour !== 'affine:callout'
+        )
         .map<Omit<SlashItem, 'groupName'>>(({ name, icon, flavour, type }) => ({
           name,
           icon,
@@ -184,7 +186,40 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         },
       })),
   },
+  {
+    name: 'Callout',
+    items: textConversionConfigs
+      .filter(i => i.flavour === 'affine:callout')
+      .map(({ name, icon, flavour, type }) => ({
+        name,
+        icon,
+        showWhen: model => {
+          if (!model.doc.schema.flavourSchemaMap.has(flavour)) {
+            return false;
+          }
+          return true;
+        },
+        action: ({ rootElement }) => {
+          rootElement.host.std.command
+            .pipe()
+            .withHost()
+            .tryAll(chain => [
+              chain.getTextSelection(),
+              chain.getBlockSelections(),
+            ])
+            .getSelectedBlocks({
+              types: ['text', 'block'],
+            })
+            .inline(ctx => {
+              const { selectedBlocks } = ctx;
+              assertExists(selectedBlocks);
 
+              updateBlockElementType(selectedBlocks, flavour, type);
+            })
+            .run();
+        },
+      })),
+  },
   {
     name: 'Docs',
     items: [
