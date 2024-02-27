@@ -32,7 +32,7 @@ export async function refreshBookmarkUrlData(
     console.error(error);
     bookmarkElement.error = true;
   } finally {
-    bookmarkElement.page.updateBlock(bookmarkElement.model, {
+    bookmarkElement.doc.updateBlock(bookmarkElement.model, {
       title,
       description,
       icon,

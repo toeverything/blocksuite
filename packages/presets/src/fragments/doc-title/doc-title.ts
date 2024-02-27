@@ -1,12 +1,12 @@
 import type { RichText } from '@blocksuite/blocks';
-import { type PageBlockModel } from '@blocksuite/blocks';
+import { type RootBlockModel } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-const PAGE_BLOCK_CHILD_PADDING = 24;
+const DOC_BLOCK_CHILD_PADDING = 24;
 
 @customElement('doc-title')
 export class DocTitle extends WithDisposable(ShadowlessElement) {
@@ -32,19 +32,19 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
 
       padding-left: var(
         --affine-editor-side-padding,
-        ${PAGE_BLOCK_CHILD_PADDING}px
+        ${DOC_BLOCK_CHILD_PADDING}px
       );
       padding-right: var(
         --affine-editor-side-padding,
-        ${PAGE_BLOCK_CHILD_PADDING}px
+        ${DOC_BLOCK_CHILD_PADDING}px
       );
     }
 
     /* Extra small devices (phones, 640px and down) */
     @container viewport (width <= 640px) {
       .doc-title-container {
-        padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
-        padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
+        padding-left: ${DOC_BLOCK_CHILD_PADDING}px;
+        padding-right: ${DOC_BLOCK_CHILD_PADDING}px;
       }
     }
 
@@ -62,7 +62,7 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   @state()
   private _isReadonly = false;
@@ -73,25 +73,25 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
   @query('rich-text')
   private _richTextElement!: RichText;
 
-  private get _pageModel() {
-    return this.page.root as PageBlockModel;
+  private get _rootModel() {
+    return this.doc.root as RootBlockModel;
   }
 
   private get _inlineEditor() {
     return this._richTextElement.inlineEditor;
   }
 
-  private get _docPageElement() {
-    const docViewport = this.closest('.affine-doc-viewport') as HTMLElement;
+  private get _pageRoot() {
+    const docViewport = this.closest('.affine-page-viewport') as HTMLElement;
     assertExists(docViewport);
-    const docPageElement = docViewport.querySelector('affine-doc-page');
-    assertExists(docPageElement);
-    return docPageElement;
+    const pageRoot = docViewport.querySelector('affine-page-root');
+    assertExists(pageRoot);
+    return pageRoot;
   }
 
   private _onTitleKeyDown = (event: KeyboardEvent) => {
-    if (event.isComposing || this.page.readonly) return;
-    const hasContent = !this.page.isEmpty;
+    if (event.isComposing || this.doc.readonly) return;
+    const hasContent = !this.doc.isEmpty;
 
     if (event.key === 'Enter' && hasContent && !event.isComposing) {
       event.preventDefault();
@@ -101,31 +101,31 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       const inlineRange = inlineEditor.getInlineRange();
       assertExists(inlineRange);
 
-      const rightText = this._pageModel.title.split(inlineRange.index);
-      this._docPageElement.prependParagraphWithText(rightText);
+      const rightText = this._rootModel.title.split(inlineRange.index);
+      this._pageRoot.prependParagraphWithText(rightText);
     } else if (event.key === 'ArrowDown' && hasContent) {
       event.preventDefault();
 
-      this._docPageElement.focusFirstParagraph();
+      this._pageRoot.focusFirstParagraph();
     } else if (event.key === 'Tab') {
       event.preventDefault();
     }
   };
 
   private _updateTitleInMeta = () => {
-    this.page.workspace.setPageMeta(this.page.id, {
-      title: this._pageModel.title.toString(),
+    this.doc.workspace.setDocMeta(this.doc.id, {
+      title: this._rootModel.title.toString(),
     });
   };
 
   override connectedCallback() {
     super.connectedCallback();
 
-    this._isReadonly = this.page.readonly;
+    this._isReadonly = this.doc.readonly;
     this._disposables.add(
-      this.page.awarenessStore.slots.update.on(() => {
-        if (this._isReadonly !== this.page.readonly) {
-          this._isReadonly = this.page.readonly;
+      this.doc.awarenessStore.slots.update.on(() => {
+        if (this._isReadonly !== this.doc.readonly) {
+          this._isReadonly = this.doc.readonly;
           this.requestUpdate();
         }
       })
@@ -146,14 +146,14 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       () => (this._isComposing = false)
     );
 
-    this._pageModel.title.yText.observe(() => {
+    this._rootModel.title.yText.observe(() => {
       this._updateTitleInMeta();
       this.requestUpdate();
     });
   }
 
   override render() {
-    const isEmpty = !this._pageModel.title.length && !this._isComposing;
+    const isEmpty = !this._rootModel.title.length && !this._isComposing;
 
     return html`
       <div
@@ -163,9 +163,9 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
         data-block-is-title="true"
       >
         <rich-text
-          .yText=${this._pageModel.title.yText}
-          .undoManager=${this.page.history}
-          .readonly=${this.page.readonly}
+          .yText=${this._rootModel.title.yText}
+          .undoManager=${this.doc.history}
+          .readonly=${this.doc.readonly}
           .enableFormat=${false}
         ></rich-text>
       </div>

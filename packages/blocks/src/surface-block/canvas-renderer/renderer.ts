@@ -1,7 +1,7 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { requestConnectedFrame } from '../../_common/utils/event.js';
-import { Viewport } from '../../page-block/edgeless/utils/viewport.js';
+import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import { type IBound } from '../consts.js';
 import type { ElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';

@@ -1,4 +1,4 @@
-import type { HitTestOptions } from '../../../../page-block/edgeless/type.js';
+import type { HitTestOptions } from '../../../../root-block/edgeless/type.js';
 import type { IBound } from '../../../consts.js';
 import { Bound } from '../../../utils/bound.js';
 import {

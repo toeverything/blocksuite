@@ -18,7 +18,7 @@ export class ParagraphService<
   override mounted(): void {
     super.mounted();
 
-    this.referenceNodeConfig.setPage(this.page);
+    this.referenceNodeConfig.setDoc(this.doc);
 
     const inlineSpecs = getAffineInlineSpecsWithReference(
       this.referenceNodeConfig

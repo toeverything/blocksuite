@@ -90,12 +90,12 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     super.connectedCallback();
 
     if (!this.model.owner || !this.model.repo || !this.model.githubId) {
-      this.page.withoutTransact(() => {
+      this.doc.withoutTransact(() => {
         const url = this.model.url;
         const urlMatch = url.match(githubUrlRegex);
         if (urlMatch) {
           const [, owner, repo, githubType, githubId] = urlMatch;
-          this.page.updateBlock(this.model, {
+          this.doc.updateBlock(this.model, {
             owner,
             repo,
             githubType: githubType === 'issue' ? 'issue' : 'pr',
@@ -105,7 +105,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       });
     }
 
-    this.page.withoutTransact(() => {
+    this.doc.withoutTransact(() => {
       if (!this.model.description && !this.model.title) {
         this.refreshData();
       } else {

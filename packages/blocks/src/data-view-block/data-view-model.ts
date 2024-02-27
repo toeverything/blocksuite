@@ -30,9 +30,9 @@ export class DataViewBlockModel extends BlockModel<Props> {
   }
 
   addView(mode: DataView['mode']) {
-    this.page.captureSync();
-    const id = this.page.generateBlockId();
-    this.page.transact(() => {
+    this.doc.captureSync();
+    const id = this.doc.generateBlockId();
+    this.doc.transact(() => {
       this.views.push({
         id,
         mode,
@@ -45,14 +45,14 @@ export class DataViewBlockModel extends BlockModel<Props> {
   }
 
   deleteView(id: string) {
-    this.page.captureSync();
-    this.page.transact(() => {
+    this.doc.captureSync();
+    this.doc.transact(() => {
       this.views = this.views.filter(v => v.id !== id);
     });
   }
 
   updateView(id: string, update: (data: DataView) => Partial<DataView>) {
-    this.page.transact(() => {
+    this.doc.transact(() => {
       this.views = this.views.map(v => {
         if (v.id !== id) {
           return v;
@@ -64,7 +64,7 @@ export class DataViewBlockModel extends BlockModel<Props> {
   }
 
   applyViewsUpdate() {
-    this.page.updateBlock(this, {
+    this.doc.updateBlock(this, {
       views: this.views,
     });
   }

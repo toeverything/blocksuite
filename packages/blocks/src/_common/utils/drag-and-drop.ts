@@ -35,7 +35,7 @@ export function calcDropTarget(
   scale: number = 1,
   flavour: string | null = null // for block-hub
 ): DropResult | null {
-  const schema = model.page.getSchemaByFlavour('affine:database');
+  const schema = model.doc.getSchemaByFlavour('affine:database');
   assertExists(schema);
   const children = schema.model.children ?? [];
 

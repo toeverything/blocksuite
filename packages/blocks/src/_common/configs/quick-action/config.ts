@@ -10,7 +10,7 @@ import { toast } from '../../components/toast.js';
 import {
   CopyIcon,
   DatabaseTableViewIcon20,
-  FontLinkedPageIcon,
+  FontLinkedDocIcon,
 } from '../../icons/index.js';
 import { getChainWithHost } from '../../utils/command.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
@@ -96,7 +96,7 @@ export const quickActionConfig: QuickActionConfig[] = [
   {
     id: 'convert-to-linked-doc',
     name: 'Create Linked Doc',
-    icon: FontLinkedPageIcon,
+    icon: FontLinkedDocIcon,
     hotkey: `Mod-Shift-l`,
     showWhen: host => {
       const [_, ctx] = getChainWithHost(host.std)
@@ -127,24 +127,24 @@ export const quickActionConfig: QuickActionConfig[] = [
 
       host.selection.clear();
 
-      const page = host.page;
-      const linkedPage = page.workspace.createPage({});
-      linkedPage.load(() => {
-        const pageBlockId = linkedPage.addBlock('affine:page', {
-          title: new page.Text(''),
+      const doc = host.doc;
+      const linkedDoc = doc.workspace.createDoc({});
+      linkedDoc.load(() => {
+        const rootId = linkedDoc.addBlock('affine:page', {
+          title: new doc.Text(''),
         });
-        linkedPage.addBlock('affine:surface', {}, pageBlockId);
-        const noteId = linkedPage.addBlock('affine:note', {}, pageBlockId);
+        linkedDoc.addBlock('affine:surface', {}, rootId);
+        const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
 
         const firstBlock = selectedModels[0];
         assertExists(firstBlock);
 
-        page.addSiblingBlocks(
+        doc.addSiblingBlocks(
           firstBlock,
           [
             {
               flavour: 'affine:embed-linked-doc',
-              pageId: linkedPage.id,
+              pageId: linkedDoc.id,
             },
           ],
           'before'
@@ -155,17 +155,17 @@ export const quickActionConfig: QuickActionConfig[] = [
           firstBlock.type.match(/^h[1-6]$/)
         ) {
           const title = firstBlock.text.toString();
-          linkedPage.workspace.setPageMeta(linkedPage.id, {
+          linkedDoc.workspace.setDocMeta(linkedDoc.id, {
             title,
           });
 
-          const pageBlock = linkedPage.getBlockById(pageBlockId);
-          assertExists(pageBlock);
-          linkedPage.updateBlock(pageBlock, {
-            title: new page.Text(title),
+          const linkedDocRootModel = linkedDoc.getBlockById(rootId);
+          assertExists(linkedDocRootModel);
+          linkedDoc.updateBlock(linkedDocRootModel, {
+            title: new doc.Text(title),
           });
 
-          page.deleteBlock(firstBlock);
+          doc.deleteBlock(firstBlock);
           selectedModels.shift();
         }
 
@@ -175,13 +175,13 @@ export const quickActionConfig: QuickActionConfig[] = [
           const blockProps = Object.fromEntries(
             keys.map((key, i) => [key, values[i]])
           );
-          linkedPage.addBlock(model.flavour as never, blockProps, noteId);
-          page.deleteBlock(model);
+          linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
+          doc.deleteBlock(model);
         });
       });
 
       const linkedDocService = host.spec.getService('affine:embed-linked-doc');
-      linkedDocService.slots.linkedDocCreated.emit({ pageId: linkedPage.id });
+      linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
     },
   },
 ];

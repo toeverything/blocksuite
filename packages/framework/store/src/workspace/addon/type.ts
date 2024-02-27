@@ -8,6 +8,6 @@ export class WorkspaceAddonType implements BlobAddon, IndexerAddon, TestAddon {
   indexer!: IndexerAddon['indexer'];
   search!: IndexerAddon['search'];
 
-  importPageSnapshot!: TestAddon['importPageSnapshot'];
+  importDocSnapshot!: TestAddon['importDocSnapshot'];
   exportJSX!: TestAddon['exportJSX'];
 }

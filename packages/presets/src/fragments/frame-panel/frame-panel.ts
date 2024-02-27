@@ -77,8 +77,8 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   fitPadding: number[] = [50, 380, 50, 50];
 
-  get page() {
-    return this.editor.page;
+  get doc() {
+    return this.editor.doc;
   }
 
   get host() {
@@ -86,7 +86,7 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
   }
 
   get edgeless() {
-    return this.editor.querySelector('affine-edgeless-page');
+    return this.editor.querySelector('affine-edgeless-root');
   }
 
   private _changeEditorMode = (mode: 'page' | 'edgeless') => {
@@ -104,14 +104,14 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
     this._clearEditorDisposables();
     this._editorDisposables = new DisposableGroup();
     this._editorDisposables.add(
-      this.editor.slots.pageModeSwitched.on(() => {
+      this.editor.slots.editorModeSwitched.on(() => {
         this.editor.updateComplete
           .then(() => this.requestUpdate())
           .catch(console.error);
       })
     );
     this._editorDisposables.add(
-      this.editor.slots.pageUpdated.on(() => {
+      this.editor.slots.docUpdated.on(() => {
         this.editor.updateComplete
           .then(() => {
             this.requestUpdate();
@@ -149,7 +149,7 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
       <frame-panel-body
         class="frame-panel-body"
         .edgeless=${this.edgeless}
-        .page=${this.page}
+        .doc=${this.doc}
         .editorHost=${this.host}
         .changeEditorMode=${this._changeEditorMode}
         .fitPadding=${this.fitPadding}

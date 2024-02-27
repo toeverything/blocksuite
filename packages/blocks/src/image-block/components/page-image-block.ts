@@ -48,8 +48,8 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     return this.block.host;
   }
 
-  private get _page() {
-    return this.block.page;
+  private get _doc() {
+    return this.block.doc;
   }
 
   private get _model() {
@@ -89,11 +89,11 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     const selection = this._host.selection;
 
     const addParagraph = () => {
-      const parent = this._page.getParent(this._model);
+      const parent = this._doc.getParent(this._model);
       if (!parent) return;
 
       const index = parent.children.indexOf(this._model);
-      const blockId = this._page.addBlock(
+      const blockId = this._doc.addBlock(
         'affine:paragraph',
         {},
         parent,
@@ -136,14 +136,14 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         if (!this._isSelected) return;
 
         addParagraph();
-        this._page.deleteBlock(this._model);
+        this._doc.deleteBlock(this._model);
         return true;
       },
       Backspace: () => {
         if (!this._isSelected) return;
 
         addParagraph();
-        this._page.deleteBlock(this._model);
+        this._doc.deleteBlock(this._model);
         return true;
       },
       Enter: () => {
@@ -267,7 +267,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     const imageSize = this._normalizeImageSize();
 
     const imageSelectedRect = this._isSelected
-      ? ImageSelectedRect(this._page.readonly)
+      ? ImageSelectedRect(this._doc.readonly)
       : null;
 
     return html`

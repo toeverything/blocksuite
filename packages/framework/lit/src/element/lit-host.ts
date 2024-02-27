@@ -10,7 +10,7 @@ import type {
 } from '@blocksuite/block-std';
 import { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 import {
   LitElement,
   nothing,
@@ -34,7 +34,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   specs!: BlockSpec[];
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   @property({ attribute: false })
   blockIdAttr = 'data-block-id';
@@ -75,9 +75,9 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
-    const root = this.page.root;
-    assertExists(root);
-    const view = this.std.spec.getView(root.flavour);
+    const rootModel = this.doc.root;
+    assertExists(rootModel);
+    const view = this.std.spec.getView(rootModel.flavour);
     assertExists(view);
     const widgetTags = Object.values(view.widgets ?? {});
     const elementsTags = [view.component, ...widgetTags];
@@ -96,16 +96,16 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!this.page.root) {
+    if (!this.doc.root) {
       throw new Error(
-        'This page is missing root block. Please initialize the default block structure before connecting the editor to DOM.'
+        'This doc is missing root block. Please initialize the default block structure before connecting the editor to DOM.'
       );
     }
 
     this.std = new BlockStdScope({
       host: this,
-      workspace: this.page.workspace,
-      page: this.page,
+      workspace: this.doc.workspace,
+      doc: this.doc,
     });
     this._registerView();
 
@@ -121,7 +121,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { root } = this.page;
+    const { root } = this.doc;
     if (!root) return nothing;
 
     return this.renderModel(root);
@@ -129,7 +129,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
   renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
-    const schema = this.page.schema.flavourSchemaMap.get(flavour);
+    const schema = this.doc.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
       console.warn(`Cannot find schema for ${flavour}.`);
       return html`${nothing}`;
@@ -145,7 +145,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
           const template = html`<${tag} ${unsafeStatic(
             this.widgetIdAttr
-          )}=${key} .host=${this} .page=${this.page}></${tag}>`;
+          )}=${key} .host=${this} .doc=${this.doc}></${tag}>`;
 
           return {
             ...mapping,
@@ -157,16 +157,16 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     return html`<${tag}
       ${unsafeStatic(this.blockIdAttr)}=${model.id}
       .host=${this}
-      .page=${this.page}
+      .doc=${this.doc}
       .model=${model}
       .widgets=${widgets}
     ></${tag}>`;
   };
 
-  renderSpecPortal = (page: Page, specs: BlockSpec[]) => {
+  renderSpecPortal = (doc: Doc, specs: BlockSpec[]) => {
     return html`
       <editor-host
-        .page=${page}
+        .doc=${doc}
         .specs=${specs}
         contenteditable="false"
       ></editor-host>

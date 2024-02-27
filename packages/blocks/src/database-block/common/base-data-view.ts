@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { UniComponent } from '../../_common/components/uni-component/uni-component.js';
@@ -49,7 +49,7 @@ export abstract class BaseDataView<
   onDrag?: (evt: MouseEvent, id: string) => () => void;
 
   @property({ attribute: false })
-  getFlag!: Page['awarenessStore']['getFlag'];
+  getFlag!: Doc['awarenessStore']['getFlag'];
 
   addRow?(position: InsertToPosition): void;
 

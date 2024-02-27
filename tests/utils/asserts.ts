@@ -8,8 +8,8 @@ import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
   AffineInlineEditor,
   NoteBlockModel,
-  PageBlockModel,
   RichText,
+  RootBlockModel,
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils/index.js';
 import type { InlineRootElement } from '@inline/inline-editor.js';
@@ -49,7 +49,7 @@ import {
 import {
   captureHistory,
   getClipboardCustomData,
-  getCurrentEditorPageId,
+  getCurrentEditorDocId,
   getCurrentThemeCSSPropertyValue,
   getEditorLocator,
   inlineEditorInnerTextToString,
@@ -63,7 +63,7 @@ export const defaultStore: SerializedStore = {
   meta: {
     pages: [
       {
-        id: 'page:home',
+        id: 'doc:home',
         title: '',
         tags: [],
       },
@@ -95,7 +95,7 @@ export const defaultStore: SerializedStore = {
     pageVersion: PAGE_VERSION,
   },
   spaces: {
-    'page:home': {
+    'doc:home': {
       blocks: {
         '0': {
           'prop:title': '',
@@ -256,7 +256,7 @@ export async function assertImageOption(page: Page) {
   await expect(locator).toBeVisible();
 }
 
-export async function assertPageTitleFocus(page: Page) {
+export async function assertDocTitleFocus(page: Page) {
   const locator = page.locator('doc-title .inline-editor').nth(0);
   await expect(locator).toBeFocused();
 }
@@ -328,8 +328,8 @@ export async function assertNoteXYWH(
   expected: [number, number, number, number]
 ) {
   const actual = await page.evaluate(() => {
-    const root = window.page.root as PageBlockModel;
-    const note = root.children.find(
+    const rootModel = window.doc.root as RootBlockModel;
+    const note = rootModel.children.find(
       x => x.flavour === 'affine:note'
     ) as NoteBlockModel;
     return JSON.parse(note.xywh) as number[];
@@ -538,7 +538,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
     window.workspace.doc.toJSON()
   )) as SerializedStore;
-  const titleNode = jsonDoc['page:home']['0'] as Record<string, unknown>;
+  const titleNode = jsonDoc['doc:home']['0'] as Record<string, unknown>;
 
   const markdownVisitor = (node: Record<string, unknown>): string => {
     // TODO use schema
@@ -568,7 +568,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
       // return visitor(node);
     }
 
-    const children = node['sys:children'].map(id => jsonDoc['page:home'][id]);
+    const children = node['sys:children'].map(id => jsonDoc['doc:home'][id]);
     return [
       visitor(node),
       ...children.flatMap(child =>
@@ -594,10 +594,10 @@ export async function assertStoreMatchJSX(
   snapshot: string,
   blockId?: string
 ) {
-  const pageId = await getCurrentEditorPageId(page);
+  const docId = await getCurrentEditorDocId(page);
   const element = (await page.evaluate(
-    ([blockId, pageId]) => window.workspace.exportJSX(blockId, pageId),
-    [blockId, pageId]
+    ([blockId, docId]) => window.workspace.exportJSX(blockId, docId),
+    [blockId, docId]
   )) as JSXElement;
 
   // Fix symbol can not be serialized, we need to set $$typeof manually

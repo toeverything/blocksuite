@@ -11,7 +11,7 @@ import { bindContainerHotkey } from '../_common/components/rich-text/keymap/inde
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
-import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 import type { ParagraphService } from './paragraph-service.js';
 
@@ -183,11 +183,11 @@ export class ParagraphBlockComponent extends BlockElement<
   private _placeholderContainer?: HTMLElement;
 
   override get topContenteditableElement() {
-    if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
       return note;
     }
-    return this.rootBlockElement;
+    return this.rootElement;
   }
 
   get inlineEditor() {
@@ -274,12 +274,12 @@ export class ParagraphBlockComponent extends BlockElement<
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
-            .undoManager=${this.model.page.history}
+            .undoManager=${this.doc.history}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.attributeRenderer}
             .markdownShortcutHandler=${this.markdownShortcutHandler}
             .embedChecker=${this.embedChecker}
-            .readonly=${this.model.page.readonly}
+            .readonly=${this.doc.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}

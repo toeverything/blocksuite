@@ -7,33 +7,33 @@ import type { Workspace } from '@blocksuite/store';
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
 import { CustomOutlinePanel } from '../../_common/components/custom-outline-panel.js';
 import { DebugMenu } from '../../_common/components/debug-menu.js';
+import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
-import { PagesPanel } from '../../_common/components/pages-panel.js';
 import { SidePanel } from '../../_common/components/side-panel.js';
 
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 
-export async function mountDefaultPageEditor(workspace: Workspace) {
-  const page = workspace.pages.values().next().value;
-  assertExists(page, 'Need to create a page first');
+export async function mountDefaultDocEditor(workspace: Workspace) {
+  const doc = workspace.docs.values().next().value;
+  assertExists(doc, 'Need to create a doc first');
 
-  assertExists(page.ready, 'Page is not ready');
-  assertExists(page.root, 'Page root is not ready');
+  assertExists(doc.ready, 'Doc is not ready');
+  assertExists(doc.root, 'Doc root is not ready');
 
   const app = document.getElementById('app');
   if (!app) return;
 
   const editor = new AffineEditorContainer();
   editor.mode = defaultMode;
-  editor.page = page;
-  editor.slots.pageLinkClicked.on(({ pageId }) => {
-    const target = workspace.getPage(pageId);
+  editor.doc = doc;
+  editor.slots.docLinkClicked.on(({ docId }) => {
+    const target = workspace.getDoc(docId);
     if (!target) {
-      throw new Error(`Failed to jump to page ${pageId}`);
+      throw new Error(`Failed to jump to doc ${docId}`);
     }
     target.load();
-    editor.page = target;
+    editor.doc = target;
   });
 
   app.append(editor);
@@ -52,8 +52,8 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
 
   const leftSidePanel = new LeftSidePanel();
 
-  const pagesPanel = new PagesPanel();
-  pagesPanel.editor = editor;
+  const docsPanel = new DocsPanel();
+  docsPanel.editor = editor;
 
   const debugMenu = new DebugMenu();
   debugMenu.workspace = workspace;
@@ -63,7 +63,7 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
   debugMenu.copilotPanel = copilotPanelPanel;
   debugMenu.sidePanel = sidePanel;
   debugMenu.leftSidePanel = leftSidePanel;
-  debugMenu.pagesPanel = pagesPanel;
+  debugMenu.docsPanel = docsPanel;
 
   document.body.appendChild(outlinePanel);
   document.body.appendChild(framePanel);
@@ -73,7 +73,7 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
 
   // debug info
   window.editor = editor;
-  window.page = page;
+  window.doc = doc;
   Object.defineProperty(globalThis, 'host', {
     get() {
       return document.querySelector<EditorHost>('editor-host');

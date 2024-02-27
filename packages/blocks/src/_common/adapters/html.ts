@@ -3,12 +3,12 @@ import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
-  FromPageSnapshotPayload,
-  FromPageSnapshotResult,
+  FromDocSnapshotPayload,
+  FromDocSnapshotResult,
   FromSliceSnapshotPayload,
   FromSliceSnapshotResult,
   ToBlockSnapshotPayload,
-  ToPageSnapshotPayload,
+  ToDocSnapshotPayload,
 } from '@blocksuite/store';
 import {
   type AssetsManager,
@@ -20,7 +20,7 @@ import {
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import {
   type BlockSnapshot,
-  type PageSnapshot,
+  type DocSnapshot,
   type SliceSnapshot,
 } from '@blocksuite/store';
 import type { ElementContent, Root, Text } from 'hast';
@@ -60,16 +60,16 @@ type HtmlToSliceSnapshotPayload = {
 };
 
 export class HtmlAdapter extends BaseAdapter<Html> {
-  override async fromPageSnapshot(
-    payload: FromPageSnapshotPayload
-  ): Promise<FromPageSnapshotResult<string>> {
+  override async fromDocSnapshot(
+    payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<string>> {
     const { file, assetsIds } = await this.fromBlockSnapshot({
       snapshot: payload.snapshot.blocks,
       assets: payload.assets,
     });
     return {
       file: file.replace(
-        '<!--BlockSuitePageTitlePlaceholder-->',
+        '<!--BlockSuiteDocTitlePlaceholder-->',
         `<h1>${payload.snapshot.meta.title}</h1>`
       ),
       assetsIds,
@@ -120,9 +120,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       assetsIds: sliceAssetsIds,
     };
   }
-  override async toPageSnapshot(
-    payload: ToPageSnapshotPayload<string>
-  ): Promise<PageSnapshot> {
+  override async toDocSnapshot(
+    payload: ToDocSnapshotPayload<string>
+  ): Promise<DocSnapshot> {
     const htmlAst = this._htmlToAst(payload.file);
     const titleAst = hastQuerySelector(htmlAst, 'title');
     const blockSnapshotRoot = {
@@ -346,7 +346,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             )
             .openNode({
               type: 'comment',
-              value: 'BlockSuitePageTitlePlaceholder',
+              value: 'BlockSuiteDocTitlePlaceholder',
             })
             .closeNode();
           break;

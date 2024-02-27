@@ -3,8 +3,8 @@ import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
-  FromPageSnapshotPayload,
-  FromPageSnapshotResult,
+  FromDocSnapshotPayload,
+  FromDocSnapshotResult,
   FromSliceSnapshotPayload,
   FromSliceSnapshotResult,
 } from '@blocksuite/store';
@@ -12,7 +12,7 @@ import { type AssetsManager, getAssetName, sha } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import {
   type BlockSnapshot,
-  type PageSnapshot,
+  type DocSnapshot,
   type SliceSnapshot,
 } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
@@ -43,14 +43,14 @@ type NotionHtmlToSliceSnapshotPayload = {
   pageId: string;
 };
 
-type NotionHtmlToPageSnapshotPayload = {
+type NotionHtmlToDocSnapshotPayload = {
   file: NotionHtml;
   assets?: AssetsManager;
   pageId?: string;
   pageMap?: Map<string, string>;
 };
 
-type NotionHtmlToBlockSnapshotPayload = NotionHtmlToPageSnapshotPayload;
+type NotionHtmlToBlockSnapshotPayload = NotionHtmlToDocSnapshotPayload;
 
 const ColumnClassMap: Record<string, string> = {
   typesSelect: 'select',
@@ -82,9 +82,9 @@ type BlocksuiteTableRow = {
 };
 
 export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
-  override fromPageSnapshot(
-    _payload: FromPageSnapshotPayload
-  ): Promise<FromPageSnapshotResult<NotionHtml>> {
+  override fromDocSnapshot(
+    _payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<NotionHtml>> {
     throw new Error('Method not implemented.');
   }
   override fromBlockSnapshot(
@@ -97,9 +97,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   ): Promise<FromSliceSnapshotResult<NotionHtml>> {
     throw new Error('Method not implemented.');
   }
-  override async toPageSnapshot(
-    payload: NotionHtmlToPageSnapshotPayload
-  ): Promise<PageSnapshot> {
+  override async toDocSnapshot(
+    payload: NotionHtmlToDocSnapshotPayload
+  ): Promise<DocSnapshot> {
     const notionHtmlAst = this._htmlToAst(payload.file);
     const titleAst = hastQuerySelector(notionHtmlAst, 'title');
     const blockSnapshotRoot = {

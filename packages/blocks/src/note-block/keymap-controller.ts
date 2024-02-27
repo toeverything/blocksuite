@@ -8,8 +8,8 @@ import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { buildPath } from '../_common/utils/index.js';
-import { onModelElementUpdated } from '../page-block/utils/callback.js';
-import { updateBlockElementType } from '../page-block/utils/operations/element/block-level.js';
+import { onModelElementUpdated } from '../root-block/utils/callback.js';
+import { updateBlockElementType } from '../root-block/utils/operations/element/block-level.js';
 import { ensureBlockInContainer } from './utils.js';
 
 export class KeymapController implements ReactiveController {
@@ -283,7 +283,7 @@ export class KeymapController implements ReactiveController {
           return;
         }
 
-        const { view, page, selection } = ctx.std;
+        const { view, doc, selection } = ctx.std;
 
         const element = view.viewFromPath('block', blockSelection.path);
         if (!element) {
@@ -291,19 +291,14 @@ export class KeymapController implements ReactiveController {
         }
 
         const { model } = element;
-        const parent = page.getParent(model);
+        const parent = doc.getParent(model);
         if (!parent) {
           return;
         }
 
         const index = parent.children.indexOf(model) ?? undefined;
 
-        const blockId = page.addBlock(
-          'affine:paragraph',
-          {},
-          parent,
-          index + 1
-        );
+        const blockId = doc.addBlock('affine:paragraph', {}, parent, index + 1);
 
         const sel = selection.create('text', {
           from: {

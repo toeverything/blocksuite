@@ -39,10 +39,10 @@ import type { ListBlockModel } from './list-block/list-model.js';
 import { ListBlockSchema } from './list-block/list-model.js';
 import type { NoteBlockModel } from './note-block/note-model.js';
 import { NoteBlockSchema } from './note-block/note-model.js';
-import type { PageBlockModel } from './page-block/page-model.js';
-import { PageBlockSchema } from './page-block/page-model.js';
 import type { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ParagraphBlockSchema } from './paragraph-block/paragraph-model.js';
+import type { RootBlockModel } from './root-block/root-model.js';
+import { RootBlockSchema } from './root-block/root-model.js';
 import type { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 import type { SurfaceRefBlockModel } from './surface-ref-block/surface-ref-model.js';
@@ -60,8 +60,8 @@ export type {
   ImageBlockModel,
   ListBlockModel,
   NoteBlockModel,
-  PageBlockModel,
   ParagraphBlockModel,
+  RootBlockModel,
   SurfaceBlockModel,
 };
 
@@ -70,7 +70,7 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   CodeBlockSchema,
   ColumnsBlockSchema,
   ParagraphBlockSchema,
-  PageBlockSchema,
+  RootBlockSchema,
   ListBlockSchema,
   NoteBlockSchema,
   DividerBlockSchema,
@@ -99,7 +99,7 @@ export type BlockSchemas = {
   'affine:code': CodeBlockModel;
   'affine:columns': ColumnsBlockModel;
   'affine:paragraph': ParagraphBlockModel;
-  'affine:page': PageBlockModel;
+  'affine:page': RootBlockModel;
   'affine:list': ListBlockModel;
   'affine:note': NoteBlockModel;
   'affine:divider': DividerBlockModel;

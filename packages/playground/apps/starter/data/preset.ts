@@ -6,29 +6,29 @@ import { type InitFn } from './utils.js';
 const presetMarkdown = `Click the 🔁 button to switch between editors dynamically - they are fully compatible!`;
 
 export const preset: InitFn = async (workspace: Workspace, id: string) => {
-  const page = workspace.createPage({ id });
-  page.load();
-  // Add page block and surface block at root level
-  const pageBlockId = page.addBlock('affine:page', {
+  const doc = workspace.createDoc({ id });
+  doc.load();
+  // Add root block and surface block at root level
+  const rootId = doc.addBlock('affine:page', {
     title: new Text('BlockSuite Playground'),
   });
-  page.addBlock('affine:surface', {}, pageBlockId);
+  doc.addBlock('affine:surface', {}, rootId);
 
-  // Add note block inside page block
-  const noteId = page.addBlock(
+  // Add note block inside root block
+  const noteId = doc.addBlock(
     'affine:note',
     { xywh: '[0, 100, 800, 640]' },
-    pageBlockId
+    rootId
   );
 
   // Import preset markdown content inside note block
   await MarkdownTransformer.importMarkdown({
-    page,
+    doc,
     noteId,
     markdown: presetMarkdown,
   });
 
-  page.resetHistory();
+  doc.resetHistory();
 };
 
 preset.id = 'preset';

@@ -10,36 +10,36 @@ import {
 import { setImageProxyMiddlewareURL } from '../_common/transformers/middlewares.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import {
-  getEdgelessPageByElement,
+  getEdgelessRootByElement,
   isInsideEdgelessEditor,
 } from '../_common/utils/query.js';
-import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
-import type { PageBlockComponent } from '../page-block/types.js';
-import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
+import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import type { RootBlockComponent } from '../root-block/types.js';
+import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
-} from '../page-block/widgets/drag-handle/drag-handle.js';
+} from '../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
-} from '../page-block/widgets/drag-handle/utils.js';
+} from '../root-block/widgets/drag-handle/utils.js';
 import type { ImageBlockComponent } from './image-block.js';
 import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 import { addSiblingImageBlock } from './utils.js';
 
 export class ImageService extends BlockService<ImageBlockModel> {
-  get pageBlockComponent(): PageBlockComponent {
-    const pageBlock = this.page.root;
-    assertExists(pageBlock);
+  get rootElement(): RootBlockComponent {
+    const rootModel = this.doc.root;
+    assertExists(rootModel);
 
-    const pageElement = this.std.view.viewFromPath('block', [
-      pageBlock.id,
-    ]) as PageBlockComponent | null;
-    assertExists(pageElement);
-    return pageElement;
+    const rootElement = this.std.view.viewFromPath('block', [
+      rootModel.id,
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
+    return rootElement;
   }
 
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
@@ -52,16 +52,15 @@ export class ImageService extends BlockService<ImageBlockModel> {
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
         addSiblingImageBlock(
-          this.std.host as EditorHost,
+          this.host as EditorHost,
           imageFiles,
           this.maxFileSize,
           targetModel,
           place
         );
-      } else if (isInsideEdgelessEditor(this.std.host as EditorHost)) {
-        const edgelessPage = this
-          .pageBlockComponent as EdgelessPageBlockComponent;
-        await edgelessPage.addImages(imageFiles, point);
+      } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
+        const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+        await edgelessRoot.addImages(imageFiles, point);
       }
 
       return true;
@@ -105,8 +104,8 @@ export class ImageService extends BlockService<ImageBlockModel> {
         startDragging([blockComponent], state);
         return true;
       } else if (isInSurface && isDraggingByDragHandle) {
-        const edgelessPage = getEdgelessPageByElement(blockComponent);
-        const scale = edgelessPage ? edgelessPage.service.viewport.zoom : 1;
+        const edgelessRoot = getEdgelessRootByElement(blockComponent);
+        const scale = edgelessRoot ? edgelessRoot.service.viewport.zoom : 1;
         const width = blockComponent.getBoundingClientRect().width;
 
         const dragPreviewEl = document.createElement('div');

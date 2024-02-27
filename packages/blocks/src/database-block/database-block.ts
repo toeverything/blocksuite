@@ -26,12 +26,12 @@ import {
 import type { DataViewSelection } from '../_common/utils/index.js';
 import { Rect } from '../_common/utils/index.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
-import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
-import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   getDropResult,
-} from '../page-block/widgets/drag-handle/utils.js';
+} from '../root-block/widgets/drag-handle/utils.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
@@ -96,18 +96,18 @@ export class DatabaseBlockComponent extends BlockElement<
       );
       return () => {
         this.indicator.remove();
-        const model = this.page.getBlockById(id);
-        const target = this.page.getBlockById(result.dropBlockId);
-        let parent = this.page.getParent(result.dropBlockId);
+        const model = this.doc.getBlockById(id);
+        const target = this.doc.getBlockById(result.dropBlockId);
+        let parent = this.doc.getParent(result.dropBlockId);
         const shouldInsertIn = result.dropType === 'in';
         if (shouldInsertIn) {
           parent = target;
         }
         if (model && target && parent) {
           if (shouldInsertIn) {
-            this.page.moveBlocks([model], parent);
+            this.doc.moveBlocks([model], parent);
           } else {
-            this.page.moveBlocks(
+            this.doc.moveBlocks(
               [model],
               parent,
               target,
@@ -136,7 +136,7 @@ export class DatabaseBlockComponent extends BlockElement<
             icon: CopyIcon,
             name: 'Copy',
             select: () => {
-              const slice = Slice.fromModels(this.page, [this.model]);
+              const slice = Slice.fromModels(this.doc, [this.model]);
               this.std.clipboard.copySlice(slice).catch(console.error);
             },
           },
@@ -158,9 +158,9 @@ export class DatabaseBlockComponent extends BlockElement<
                 name: 'Delete Database',
                 select: () => {
                   this.model.children.slice().forEach(block => {
-                    this.page.deleteBlock(block);
+                    this.doc.deleteBlock(block);
                   });
-                  this.page.deleteBlock(this.model);
+                  this.doc.deleteBlock(this.model);
                 },
               },
             ],
@@ -170,7 +170,7 @@ export class DatabaseBlockComponent extends BlockElement<
     });
   };
   private renderDatabaseOps() {
-    if (this.page.readonly) {
+    if (this.doc.readonly) {
       return nothing;
     }
     return html`<div class="database-ops" @click="${this._clickDatabaseOps}">
@@ -179,11 +179,11 @@ export class DatabaseBlockComponent extends BlockElement<
   }
 
   override get topContenteditableElement() {
-    if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
       return note;
     }
-    return this.rootBlockElement;
+    return this.rootElement;
   }
 
   override connectedCallback() {
@@ -237,7 +237,7 @@ export class DatabaseBlockComponent extends BlockElement<
             this.parentElement?.contains(target)
           ) {
             const blocks = draggingElements.map(v => v.model);
-            this.model.page.moveBlocks(blocks, this.model);
+            this.doc.moveBlocks(blocks, this.model);
             blocks.forEach(model => {
               view.moveTo?.(model.id, state.raw);
             });
@@ -265,7 +265,7 @@ export class DatabaseBlockComponent extends BlockElement<
     if (!this._dataSource) {
       this._dataSource = new DatabaseBlockDatasource(this.host, {
         type: 'database-block',
-        pageId: this.host.page.id,
+        pageId: this.host.doc.id,
         blockId: this.model.id,
       });
     }
@@ -287,7 +287,7 @@ export class DatabaseBlockComponent extends BlockElement<
     return html` <affine-database-title
       style="overflow: hidden"
       .titleText="${this.model.title}"
-      .readonly="${this.model.page.readonly}"
+      .readonly="${this.doc.readonly}"
       .onPressEnterKey="${addRow}"
     ></affine-database-title>`;
   };
@@ -339,8 +339,8 @@ export class DatabaseBlockComponent extends BlockElement<
   selectionUpdated = new Slot<DataViewSelection | undefined>();
 
   get getFlag() {
-    return this.host.page.awarenessStore.getFlag.bind(
-      this.host.page.awarenessStore
+    return this.host.doc.awarenessStore.getFlag.bind(
+      this.host.doc.awarenessStore
     );
   }
 
@@ -420,11 +420,11 @@ class DatabaseBlockViewSource implements ViewSource {
   }
 
   public get readonly(): boolean {
-    return this.model.page.readonly;
+    return this.model.doc.readonly;
   }
 
   public viewAdd(type: DataViewTypes): string {
-    this.model.page.captureSync();
+    this.model.doc.captureSync();
     const view = this.model.addView(type);
     this.model.applyViewsUpdate();
     return view.id;
@@ -456,14 +456,14 @@ class DatabaseBlockViewSource implements ViewSource {
           return view;
         },
         updateView: updater => {
-          this.model.page.captureSync();
+          this.model.doc.captureSync();
           this.model.updateView(id, updater);
           this.model.applyViewsUpdate();
         },
         delete: () => {
-          this.model.page.captureSync();
+          this.model.doc.captureSync();
           if (this.model.getViewList().length === 1) {
-            this.model.page.deleteBlock(this.model);
+            this.model.doc.deleteBlock(this.model);
             return;
           }
           this.model.deleteView(id);
@@ -471,7 +471,7 @@ class DatabaseBlockViewSource implements ViewSource {
           this.model.applyViewsUpdate();
         },
         get readonly() {
-          return self.model.page.readonly;
+          return self.model.doc.readonly;
         },
         updateSlot: slot,
         isDeleted() {

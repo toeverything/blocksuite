@@ -1,9 +1,6 @@
 import './frames-setting-menu.js';
 
-import type {
-  EdgelessPageBlockComponent,
-  PageService,
-} from '@blocksuite/blocks';
+import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 import { type NavigatorMode } from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
@@ -109,7 +106,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   editorHost!: EditorHost;
 
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent | null;
+  edgeless!: EdgelessRootBlockComponent | null;
 
   @property({ attribute: false })
   changeEditorMode!: (mode: 'page' | 'edgeless') => void;
@@ -143,9 +140,9 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   };
 
   private _tryLoadNavigatorStateLocalRecord() {
-    this._navigatorMode = (<PageService>(
-      this.editorHost.spec.getService('affine:page')
-    )).editSession.getItem('presentFillScreen')
+    this._navigatorMode = this.editorHost.spec
+      .getService('affine:page')
+      .editSession.getItem('presentFillScreen')
       ? 'fill'
       : 'fit';
   }

@@ -9,7 +9,7 @@ import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { EmbedOptions } from '../../../../../../page-block/page-service.js';
+import type { EmbedOptions } from '../../../../../../root-block/root-service.js';
 import type { IconButton } from '../../../../../components/button.js';
 import { createLitPortal } from '../../../../../components/portal.js';
 import { toast } from '../../../../../components/toast.js';
@@ -83,7 +83,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       });
     }
 
-    const parent = this.blockElement.page.getParent(this.blockElement.model);
+    const parent = this.blockElement.doc.getParent(this.blockElement.model);
     assertExists(parent);
     this.disposables.add(
       parent.childrenUpdated.on(() => {
@@ -151,7 +151,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       .catch(console.error);
   }
 
-  private get _pageService() {
+  private get _rootService() {
     return this.std.spec.getService('affine:page');
   }
 
@@ -186,8 +186,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   private get _isBookmarkAllowed() {
     const blockElement = this.blockElement;
-    const schema = blockElement.host.page.schema;
-    const parent = blockElement.host.page.getParent(blockElement.model);
+    const schema = blockElement.doc.schema;
+    const parent = blockElement.doc.getParent(blockElement.model);
     assertExists(parent);
     const bookmarkSchema = schema.flavourSchemaMap.get('affine:bookmark');
     assertExists(bookmarkSchema);
@@ -265,16 +265,16 @@ export class LinkPopup extends WithDisposable(LitElement) {
       url,
       title: title === url ? '' : title,
     };
-    const page = blockElement.host.page;
-    const parent = page.getParent(blockElement.model);
+    const doc = blockElement.doc;
+    const parent = doc.getParent(blockElement.model);
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
-    page.addBlock(targetFlavour as never, props, parent, index + 1);
+    doc.addBlock(targetFlavour as never, props, parent, index + 1);
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      page.deleteBlock(blockElement.model);
+      doc.deleteBlock(blockElement.model);
     } else {
       this.inlineEditor.formatText(this.targetInlineRange, { link: null });
     }
@@ -291,17 +291,17 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const url = this.currentLink;
 
     const blockElement = this.blockElement;
-    const page = blockElement.page;
-    const parent = page.getParent(blockElement.model);
+    const doc = blockElement.doc;
+    const parent = doc.getParent(blockElement.model);
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
 
-    page.addBlock(flavour as never, { url }, parent, index + 1);
+    doc.addBlock(flavour as never, { url }, parent, index + 1);
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      page.deleteBlock(blockElement.model);
+      doc.deleteBlock(blockElement.model);
     } else {
       this.inlineEditor.formatText(this.targetInlineRange, { link: null });
     }
@@ -393,7 +393,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _viewTemplate() {
-    this._embedOptions = this._pageService.getEmbedBlockOptions(
+    this._embedOptions = this._rootService.getEmbedBlockOptions(
       this.currentLink
     );
 

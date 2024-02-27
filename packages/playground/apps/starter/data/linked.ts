@@ -3,80 +3,78 @@ import { Text, type Workspace } from '@blocksuite/store';
 import { type InitFn } from './utils.js';
 
 export const linked: InitFn = (workspace: Workspace, id: string) => {
-  const pageA = workspace.getPage(id) ?? workspace.createPage({ id });
+  const docA = workspace.getDoc(id) ?? workspace.createDoc({ id });
 
-  const pageBId = 'page:page-linked-doc';
-  const pageB =
-    workspace.getPage('pageB') ?? workspace.createPage({ id: pageBId });
+  const docBId = 'doc:linked-page';
+  const docB = workspace.createDoc({ id: docBId });
 
-  const pageCId = 'page:page-linked-edgeless';
-  const pageC =
-    workspace.getPage('pageC') ?? workspace.createPage({ id: pageCId });
+  const docCId = 'doc:linked-edgeless';
+  const docC = workspace.createDoc({ id: docCId });
 
-  pageA.clear();
-  pageB.clear();
-  pageC.clear();
+  docA.clear();
+  docB.clear();
+  docC.clear();
 
-  pageB.load(() => {
-    const pageBlockId = pageB.addBlock('affine:page', {
+  docB.load(() => {
+    const rootId = docB.addBlock('affine:page', {
       title: new Text(''),
     });
 
-    pageB.addBlock('affine:surface', {}, pageBlockId);
+    docB.addBlock('affine:surface', {}, rootId);
 
-    // Add note block inside page block
-    const noteId = pageB.addBlock('affine:note', {}, pageBlockId);
+    // Add note block inside root block
+    const noteId = docB.addBlock('affine:note', {}, rootId);
     // Add paragraph block inside note block
-    pageB.addBlock('affine:paragraph', {}, noteId);
+    docB.addBlock('affine:paragraph', {}, noteId);
   });
 
-  pageC.load(() => {
-    const pageBlockId = pageC.addBlock('affine:page', {
+  docC.load(() => {
+    const rootId = docC.addBlock('affine:page', {
       title: new Text(''),
     });
 
-    pageC.addBlock('affine:surface', {}, pageBlockId);
+    docC.addBlock('affine:surface', {}, rootId);
 
-    // Add note block inside page block
-    const noteId = pageC.addBlock('affine:note', {}, pageBlockId);
+    // Add note block inside root block
+    const noteId = docC.addBlock('affine:note', {}, rootId);
     // Add paragraph block inside note block
-    pageC.addBlock('affine:paragraph', {}, noteId);
+    docC.addBlock('affine:paragraph', {}, noteId);
   });
 
-  pageA.load();
-  // Add page block and surface block at root level
-  const pageBlockId = pageA.addBlock('affine:page', {
-    title: new Text('Page A'),
+  docA.load();
+  // Add root block and surface block at root level
+  const rootId = docA.addBlock('affine:page', {
+    title: new Text('Doc A'),
   });
 
-  pageA.addBlock('affine:surface', {}, pageBlockId);
+  docA.addBlock('affine:surface', {}, rootId);
 
-  // Add note block inside page block
-  const noteId = pageA.addBlock('affine:note', {}, pageBlockId);
+  // Add note block inside root block
+  const noteId = docA.addBlock('affine:note', {}, rootId);
   // Add paragraph block inside note block
-  pageA.addBlock('affine:paragraph', {}, noteId);
+  docA.addBlock('affine:paragraph', {}, noteId);
 
-  pageA.addBlock('affine:embed-linked-doc', { pageId: pageBId }, noteId);
+  docA.addBlock('affine:embed-linked-doc', { pageId: docBId }, noteId);
 
-  pageA.addBlock(
+  docA.addBlock(
     'affine:embed-linked-doc',
-    { pageId: 'page:deleted-example' },
+    { pageId: 'doc:deleted-example' },
     noteId
   );
 
-  pageA.addBlock('affine:embed-linked-doc', { pageId: pageCId }, noteId);
+  docA.addBlock('affine:embed-linked-doc', { pageId: docCId }, noteId);
 
-  pageA.addBlock(
+  docA.addBlock(
     'affine:embed-linked-doc',
-    { pageId: 'page:deleted-example-edgeless' },
+    { pageId: 'doc:deleted-example-edgeless' },
     noteId
   );
 
-  pageA.resetHistory();
-  pageB.resetHistory();
-  pageC.resetHistory();
+  docA.resetHistory();
+  docB.resetHistory();
+  docC.resetHistory();
 };
 
 linked.id = 'linked';
-linked.displayName = 'Linked Page Editor';
-linked.description = 'A demo with linked pages';
+linked.displayName = 'Linked Doc Editor';
+linked.description = 'A demo with linked docs';

@@ -22,7 +22,7 @@ export const blockStyles = css`
 
   .edgeless-block-portal-embed
     .affine-embed-synced-doc-editor
-    .affine-doc-page-block-container {
+    .affine-page-root-block-container {
     padding: 12px 24px;
     width: 100%;
   }
@@ -126,11 +126,11 @@ export const blockStyles = css`
   }
 
   .affine-embed-synced-doc-container
-    > .affine-embed-synced-doc-editor.affine-doc-viewport {
+    > .affine-embed-synced-doc-editor.affine-page-viewport {
     background: transparent;
   }
 
-  .affine-embed-synced-doc-editor .affine-doc-page-block-container {
+  .affine-embed-synced-doc-editor .affine-page-root-block-container {
     padding: 0 24px;
     width: 100%;
     max-width: 100%;

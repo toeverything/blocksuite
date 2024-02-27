@@ -55,8 +55,8 @@ import { getEdgelessService } from '../../../../presets/src/fragments/copilot-pa
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
+import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
-import type { PagesPanel } from './pages-panel.js';
 import type { SidePanel } from './side-panel.js';
 
 const basePath = import.meta.env.DEV
@@ -65,8 +65,8 @@ const basePath = import.meta.env.DEV
 setBasePath(basePath);
 
 export function getSurfaceElementFromEditor(editorHost: EditorHost) {
-  const { page } = editorHost;
-  const surfaceModel = page.getBlockByFlavour('affine:surface')[0];
+  const { doc } = editorHost;
+  const surfaceModel = doc.getBlockByFlavour('affine:surface')[0];
   assertExists(surfaceModel);
 
   const surfaceId = surfaceModel.id;
@@ -229,7 +229,7 @@ export class DebugMenu extends ShadowlessElement {
   @property({ attribute: false })
   leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
-  pagesPanel!: PagesPanel;
+  docsPanel!: DocsPanel;
 
   @state()
   private _canUndo = false;
@@ -260,11 +260,11 @@ export class DebugMenu extends ShadowlessElement {
   @state()
   private _dark = getDarkModeConfig();
 
-  get page() {
-    return this.editor.page;
+  get doc() {
+    return this.editor.doc;
   }
 
-  get pageService() {
+  get rootService() {
     return this.editor.host.spec.getService('affine:page');
   }
 
@@ -281,8 +281,8 @@ export class DebugMenu extends ShadowlessElement {
     super.connectedCallback();
 
     const readSelectionFromURL = async () => {
-      const root = this.editor.host;
-      if (!root) {
+      const editorHost = this.editor.host;
+      if (!editorHost) {
         await new Promise(resolve => {
           setTimeout(resolve, 500);
         });
@@ -294,7 +294,7 @@ export class DebugMenu extends ShadowlessElement {
       if (!sel) return;
       try {
         const json = JSON.parse(lz.decompressFromEncodedURIComponent(sel));
-        root.std.selection.fromJSON(json);
+        editorHost.std.selection.fromJSON(json);
       } catch {
         return;
       }
@@ -325,8 +325,8 @@ export class DebugMenu extends ShadowlessElement {
     this.sidePanel.toggle(this.copilotPanel);
   }
 
-  private _togglePagesPanel() {
-    this.leftSidePanel.toggle(this.pagesPanel);
+  private _toggleDocsPanel() {
+    this.leftSidePanel.toggle(this.docsPanel);
   }
 
   private _createMindMap() {
@@ -371,43 +371,43 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _addNote() {
-    const root = this.page.root;
-    if (!root) return;
-    const pageId = root.id;
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
+    const rootId = rootModel.id;
 
-    this.page.captureSync();
+    this.doc.captureSync();
 
-    const count = root.children.length;
+    const count = rootModel.children.length;
     const xywh: SerializedXYWH = `[0,${count * 60},800,95]`;
 
-    const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
-    this.page.addBlock('affine:paragraph', {}, noteId);
+    const noteId = this.doc.addBlock('affine:note', { xywh }, rootId);
+    this.doc.addBlock('affine:paragraph', {}, noteId);
   }
 
   private _exportPdf() {
-    this.pageService.exportManager.exportPdf().catch(console.error);
+    this.rootService.exportManager.exportPdf().catch(console.error);
   }
 
   private _exportHtml() {
-    HtmlTransformer.exportPage(this.page).catch(console.error);
+    HtmlTransformer.exportDoc(this.doc).catch(console.error);
   }
 
   private _exportMarkDown() {
-    MarkdownTransformer.exportPage(this.page).catch(console.error);
+    MarkdownTransformer.exportDoc(this.doc).catch(console.error);
   }
 
   private _exportPng() {
-    this.pageService.exportManager.exportPng().catch(console.error);
+    this.rootService.exportManager.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {
-    const file = await ZipTransformer.exportPages(this.workspace, [
-      ...this.workspace.pages.values(),
+    const file = await ZipTransformer.exportDocs(this.workspace, [
+      ...this.workspace.docs.values(),
     ]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
-    a.setAttribute('download', `${this.page.id}.bs.zip`);
+    a.setAttribute('download', `${this.doc.id}.bs.zip`);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
@@ -424,10 +424,10 @@ export class DebugMenu extends ShadowlessElement {
         return;
       }
       try {
-        const pages = await ZipTransformer.importPages(this.workspace, file);
-        for (const page of pages) {
-          const noteBlock = window.page.getBlockByFlavour('affine:note');
-          window.page.addBlock(
+        const docs = await ZipTransformer.importDocs(this.workspace, file);
+        for (const doc of docs) {
+          const noteBlock = window.doc.getBlockByFlavour('affine:note');
+          window.doc.addBlock(
             'affine:paragraph',
             {
               type: 'text',
@@ -437,7 +437,7 @@ export class DebugMenu extends ShadowlessElement {
                   attributes: {
                     reference: {
                       type: 'LinkedPage',
-                      pageId: page.id,
+                      pageId: doc.id,
                     },
                   },
                 } as DeltaInsert<AffineTextAttributes>,
@@ -481,8 +481,8 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _toggleReadonly() {
-    const page = this.page;
-    page.awarenessStore.setReadonly(page, !page.readonly);
+    const doc = this.doc;
+    doc.awarenessStore.setReadonly(doc, !doc.readonly);
   }
 
   private _shareSelection() {
@@ -546,12 +546,12 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
-    this.page.slots.historyUpdated.on(() => {
-      this._canUndo = this.page.canUndo;
-      this._canRedo = this.page.canRedo;
+    this.doc.slots.historyUpdated.on(() => {
+      this._canUndo = this.doc.canUndo;
+      this._canRedo = this.doc.canRedo;
     });
 
-    this.editor.slots.pageModeSwitched.on(() => {
+    this.editor.slots.editorModeSwitched.on(() => {
       this.requestUpdate();
     });
   }
@@ -633,7 +633,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-button
                 size="small"
                 .disabled="${!this._canUndo}"
-                @click="${() => this.page.undo()}"
+                @click="${() => this.doc.undo()}"
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
               </sl-button>
@@ -643,7 +643,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-button
                 size="small"
                 .disabled="${!this._canRedo}"
-                @click="${() => this.page.redo()}"
+                @click="${() => this.doc.redo()}"
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
               </sl-button>
@@ -728,11 +728,11 @@ export class DebugMenu extends ShadowlessElement {
           </sl-tooltip>
 
           <sl-button
-            data-testid="pages-button"
+            data-testid="docs-button"
             size="small"
-            @click="${this._togglePagesPanel}"
+            @click="${this._toggleDocsPanel}"
           >
-            Pages
+            Docs
           </sl-button>
         </div>
       </div>

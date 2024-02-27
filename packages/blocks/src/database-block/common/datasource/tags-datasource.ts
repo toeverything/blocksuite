@@ -84,8 +84,8 @@ export class TagsDatasource extends BaseDataSource {
 
   constructor(host: EditorHost, _config: TagsDatasourceConfig) {
     super();
-    this.meta = host.page.workspace.meta;
-    host.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
+    this.meta = host.doc.workspace.meta;
+    host.doc.workspace.meta.docMetaUpdated.pipe(this.slots.update);
   }
 
   public cellChangeValue(

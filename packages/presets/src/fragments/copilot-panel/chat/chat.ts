@@ -10,7 +10,7 @@ import {
 } from '../copilot-service/service-base.js';
 import { ChatFeatureKey } from '../doc/api.js';
 import type { AILogic } from '../logic.js';
-import type { ChatMessage, ChatReactiveData, EmbeddedPage } from './logic.js';
+import type { ChatMessage, ChatReactiveData, EmbeddedDoc } from './logic.js';
 
 @customElement('copilot-chat-panel')
 export class CopilotChatPanel
@@ -68,7 +68,7 @@ export class CopilotChatPanel
       cursor: pointer;
     }
 
-    .synced-page-list {
+    .synced-doc-list {
       margin-bottom: 14px;
       color: var(--affine-text-secondary-color);
       font-size: 12px;
@@ -130,7 +130,7 @@ export class CopilotChatPanel
   @state()
   value = '';
   @state()
-  syncedPages: EmbeddedPage[] = [];
+  syncedDocs: EmbeddedDoc[] = [];
   @state()
   surfaceSelection = false;
   @state()
@@ -140,7 +140,7 @@ export class CopilotChatPanel
     super.connectedCallback();
     this.logic.chat.reactiveData = this;
     this.disposables.add(
-      this.host.page.workspace.slots.pagesUpdated.on(() => {
+      this.host.doc.workspace.slots.docUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -206,13 +206,13 @@ export class CopilotChatPanel
                   style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
                 >
                   ${repeat(message.sources, ref => {
-                    const page = this.host.page.workspace.getPage(ref.id);
-                    if (!page) {
+                    const doc = this.host.doc.workspace.getDoc(ref.id);
+                    if (!doc) {
                       return;
                     }
-                    const title = page.meta.title || 'Untitled';
+                    const title = doc.meta?.title || 'Untitled';
                     const jumpTo = () => {
-                      this.host.page = page;
+                      this.host.doc = doc;
                     };
                     return html` <a @click="${jumpTo}" style="cursor: pointer"
                       >${title}</a

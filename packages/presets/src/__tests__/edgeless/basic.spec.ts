@@ -10,9 +10,9 @@ beforeEach(async () => {
 });
 
 test('basic assert', () => {
-  expect(window.page).toBeDefined();
+  expect(window.doc).toBeDefined();
   expect(window.editor).toBeDefined();
   expect(window.editor.mode).toBe('edgeless');
 
-  expect(getSurface(window.page, window.editor)).toBeDefined();
+  expect(getSurface(window.doc, window.editor)).toBeDefined();
 });

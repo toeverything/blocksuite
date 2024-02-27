@@ -2,18 +2,18 @@ import type { AssetsManager } from '@blocksuite/store';
 import {
   BaseAdapter,
   type BlockSnapshot,
+  type DocSnapshot,
   type FromBlockSnapshotPayload,
   type FromBlockSnapshotResult,
-  type FromPageSnapshotPayload,
-  type FromPageSnapshotResult,
+  type FromDocSnapshotPayload,
+  type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
   nanoid,
-  type PageSnapshot,
   sha,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
-  type ToPageSnapshotPayload,
+  type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 
 export type Image = File[];
@@ -29,9 +29,9 @@ type ImageToSliceSnapshotPayload = {
 };
 
 export class ImageAdapter extends BaseAdapter<Image> {
-  override fromPageSnapshot(
-    _payload: FromPageSnapshotPayload
-  ): Promise<FromPageSnapshotResult<Image>> {
+  override fromDocSnapshot(
+    _payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<Image>> {
     throw new Error('Method not implemented.');
   }
   override fromBlockSnapshot(
@@ -59,9 +59,9 @@ export class ImageAdapter extends BaseAdapter<Image> {
     }
     return Promise.resolve({ file: images, assetsIds: [] });
   }
-  override toPageSnapshot(
-    _payload: ToPageSnapshotPayload<Image>
-  ): Promise<PageSnapshot> {
+  override toDocSnapshot(
+    _payload: ToDocSnapshotPayload<Image>
+  ): Promise<DocSnapshot> {
     throw new Error('Method not implemented.');
   }
   override toBlockSnapshot(

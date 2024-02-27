@@ -3,7 +3,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { html, type TemplateResult } from 'lit';
 
-import { getPageByEditorHost } from '../utils/query.js';
+import { getRootByEditorHost } from '../utils/query.js';
 
 let ToastContainer: HTMLDivElement | null = null;
 
@@ -41,9 +41,9 @@ const createToastContainer = (editorHost: EditorHost) => {
     style="${styles}"
   ></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
-  const pageElement = getPageByEditorHost(editorHost);
-  assertExists(pageElement);
-  const viewportElement = pageElement.viewportElement;
+  const rootElement = getRootByEditorHost(editorHost);
+  assertExists(rootElement);
+  const viewportElement = rootElement.viewportElement;
   viewportElement.appendChild(element);
   return element;
 };

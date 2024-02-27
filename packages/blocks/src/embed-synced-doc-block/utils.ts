@@ -31,13 +31,13 @@ type SyncedCardImages = {
 };
 
 export function getSyncedDocIcons(
-  pageMode: 'page' | 'edgeless'
+  editorMode: 'page' | 'edgeless'
 ): SyncedCardImages {
   const theme = getThemeMode();
   if (theme === 'light') {
     return {
       LoadingIcon: LightLoadingIcon,
-      SyncedDocIcon: pageMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
+      SyncedDocIcon: editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
       SyncedDocErrorIcon,
       SyncedDocDeletedIcon,
       ReloadIcon,
@@ -48,7 +48,7 @@ export function getSyncedDocIcons(
   } else {
     return {
       LoadingIcon: DarkLoadingIcon,
-      SyncedDocIcon: pageMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
+      SyncedDocIcon: editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon,
       SyncedDocErrorIcon,
       SyncedDocDeletedIcon,
       ReloadIcon,

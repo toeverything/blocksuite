@@ -9,7 +9,7 @@ import { html } from 'lit/static-html.js';
 
 import { positionToVRect } from '../../_common/components/menu/index.js';
 import { MoreHorizontalIcon, NewEditIcon } from '../../_common/icons/index.js';
-import { getPageByElement } from '../../_common/utils/query.js';
+import { getRootByElement } from '../../_common/utils/query.js';
 import { popSideDetail } from '../common/detail/layout.js';
 import type {
   DataViewKanbanColumnManager,
@@ -157,9 +157,9 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       if (selection) {
         selection.selection = undefined;
       }
-      const pageElement = getPageByElement(this);
+      const rootElement = getRootByElement(this);
       popSideDetail({
-        pageElement,
+        rootElement,
         view: this.view,
         rowId: this.cardId,
         onClose: () => {
@@ -266,9 +266,9 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   private clickEdit = (e: MouseEvent) => {
     e.stopPropagation();
     const selection = this.getSelection();
-    const pageElement = getPageByElement(this);
+    const rootElement = getRootByElement(this);
     if (selection) {
-      openDetail(pageElement, this.cardId, selection);
+      openDetail(rootElement, this.cardId, selection);
     }
   };
 
@@ -290,8 +290,8 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
           },
         ],
       };
-      const pageElement = getPageByElement(this);
-      popCardMenu(pageElement, ele, this.cardId, selection);
+      const rootElement = getRootByElement(this);
+      popCardMenu(rootElement, ele, this.cardId, selection);
     }
   };
   private contextMenu = (e: MouseEvent) => {
@@ -308,9 +308,9 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
           },
         ],
       };
-      const pageElement = getPageByElement(this);
+      const rootElement = getRootByElement(this);
       popCardMenu(
-        pageElement,
+        rootElement,
         positionToVRect(e.x, e.y),
         this.cardId,
         selection

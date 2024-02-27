@@ -5,7 +5,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { PageBlockComponent } from '../../../../../page-block/types.js';
+import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { DeleteIcon, OpenIcon } from '../../../../icons/index.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
@@ -65,11 +65,11 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   abortController!: AbortController;
 
-  get referencePageId() {
-    const pageId = this.inlineEditor.getFormat(this.targetInlineRange).reference
+  get referenceDocId() {
+    const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference
       ?.pageId;
-    assertExists(pageId);
-    return pageId;
+    assertExists(docId);
+    return docId;
   }
 
   get blockElement() {
@@ -86,17 +86,17 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
     return std;
   }
 
-  private _openPage() {
-    const refPageId = this.referencePageId;
+  private _openDoc() {
+    const refDocId = this.referenceDocId;
     const blockElement = this.blockElement;
-    if (refPageId === blockElement.model.page.id) return;
+    if (refDocId === blockElement.doc.id) return;
 
-    const pageElement = this.std.view.viewFromPath('block', [
-      blockElement.model.page.root?.id ?? '',
-    ]) as PageBlockComponent | null;
-    assertExists(pageElement);
+    const rootElement = this.std.view.viewFromPath('block', [
+      blockElement.model.doc.root?.id ?? '',
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
 
-    pageElement.slots.pageLinkClicked.emit({ pageId: refPageId });
+    rootElement.slots.docLinkClicked.emit({ docId: refDocId });
   }
 
   private _delete() {
@@ -115,7 +115,7 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
             height="32px"
             class="menu-item open"
             text="Open"
-            @click=${() => this._openPage()}
+            @click=${() => this._openDoc()}
           >
             ${OpenIcon}
           </icon-button>

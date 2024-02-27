@@ -1,6 +1,6 @@
 import { Workspace } from '@blocksuite/store';
 
-import type { EdgelessPageService } from '../../page-block/edgeless/edgeless-page-service.js';
+import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import type { ShapeElementModel } from '../../surface-block/index.js';
 import {
@@ -74,7 +74,7 @@ const directionMap: Record<string, { from: number[]; to: number[] }> = {
 
 const drawAllNode = (
   node: TreeNode,
-  service: EdgelessPageService,
+  service: EdgelessRootService,
   options?: {
     rootId?: string;
     x?: number;
@@ -148,7 +148,7 @@ const drawAllNode = (
 };
 const layoutAllNode = (
   node: TreeNodeWithId,
-  service: EdgelessPageService,
+  service: EdgelessRootService,
   options?: {
     rootId?: string;
     x?: number;
@@ -194,7 +194,7 @@ const layoutAllNode = (
   updatePosition(layoutNode, result);
 };
 export function drawMindMap(
-  service: EdgelessPageService,
+  service: EdgelessRootService,
   mindMap: TreeNode,
   ops?: {
     rootId?: string;
@@ -211,7 +211,7 @@ export function drawMindMap(
   service.createGroupFromSelected();
 }
 export function layoutMindMap(
-  service: EdgelessPageService,
+  service: EdgelessRootService,
   mindMap: TreeNodeWithId,
   ops?: {
     rootId?: string;
@@ -223,7 +223,7 @@ export function layoutMindMap(
 }
 export const createNode = (
   text: string,
-  service: EdgelessPageService,
+  service: EdgelessRootService,
   connector?: Connector
 ) => {
   const id = service.addElement(CanvasElementType.SHAPE, {
@@ -265,7 +265,7 @@ export const createNode = (
 export const changeText = (
   id: string,
   text: string,
-  service: EdgelessPageService
+  service: EdgelessRootService
 ) => {
   service.updateElement(id, {
     text: new Workspace.Y.Text(text),

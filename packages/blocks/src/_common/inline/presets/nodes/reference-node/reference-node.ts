@@ -9,27 +9,27 @@ import {
 } from '@blocksuite/inline';
 import type { BlockElement } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page, PageMeta } from '@blocksuite/store';
+import type { Doc, DocMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
-import type { PageBlockComponent } from '../../../../../page-block/types.js';
+import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import { HoverController } from '../../../../components/hover/controller.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
-import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/text.js';
+import { FontDocIcon, FontLinkedDocIcon } from '../../../../icons/text.js';
 import {
   getModelByElement,
-  getPageByElement,
+  getRootByElement,
 } from '../../../../utils/query.js';
 import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import { affineTextStyles } from '../affine-text.js';
-import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../consts.js';
+import { DEFAULT_DOC_NAME, REFERENCE_NODE } from '../consts.js';
 import type { ReferenceNodeConfig } from './reference-config.js';
 import { toggleReferencePopup } from './reference-popup.js';
 
 export type RefNodeSlots = {
-  pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
+  docLinkClicked: Slot<{ docId: string; blockId?: string }>;
   tagClicked: Slot<{ tagId: string }>;
 };
 @customElement('affine-reference')
@@ -80,9 +80,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   config!: ReferenceNodeConfig;
 
-  // Since the linked page may be deleted, the `_refMeta` could be undefined.
+  // Since the linked doc may be deleted, the `_refMeta` could be undefined.
   @state()
-  private _refMeta?: PageMeta;
+  private _refMeta?: DocMeta;
 
   private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
     type: 'LinkedPage',
@@ -117,10 +117,10 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     return std;
   }
 
-  get page() {
-    const page = this.config.page;
-    assertExists(page, '`reference-node` need `Page`.');
-    return page;
+  get doc() {
+    const doc = this.config.doc;
+    assertExists(doc, '`reference-node` need `Doc`.');
+    return doc;
   }
 
   get customIcon() {
@@ -146,28 +146,28 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       );
     }
 
-    const page = this.page;
-    this._updateRefMeta(page);
+    const doc = this.doc;
+    this._updateRefMeta(doc);
     this._disposables.add(
-      page.workspace.slots.pagesUpdated.on(() => this._updateRefMeta(page))
+      doc.workspace.slots.docUpdated.on(() => this._updateRefMeta(doc))
     );
 
     this.updateComplete
       .then(() => {
         // observe yText update
         this.disposables.add(
-          this.inlineEditor.slots.textChange.on(() => this._updateRefMeta(page))
+          this.inlineEditor.slots.textChange.on(() => this._updateRefMeta(doc))
         );
       })
       .catch(console.error);
   }
 
-  private _updateRefMeta = (page: Page) => {
+  private _updateRefMeta = (doc: Doc) => {
     const refAttribute = this.delta.attributes?.reference;
     assertExists(refAttribute, 'Failed to get reference attribute!');
     this._refAttribute = refAttribute;
-    const refMeta = page.workspace.meta.pageMetas.find(
-      page => page.id === refAttribute.pageId
+    const refMeta = doc.workspace.meta.docMetas.find(
+      doc => doc.id === refAttribute.pageId
     );
     this._refMeta = refMeta
       ? {
@@ -182,24 +182,24 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const refMeta = this._refMeta;
     const model = getModelByElement(this);
     if (!refMeta) {
-      // The page is deleted
-      console.warn('The page is deleted', this._refAttribute.pageId);
+      // The doc is deleted
+      console.warn('The doc is deleted', this._refAttribute.pageId);
       return;
     }
-    if (refMeta.id === model.page.id) {
-      // the page is the current page.
+    if (refMeta.id === model.doc.id) {
+      // the doc is the current doc.
       return;
     }
-    const targetPageId = refMeta.id;
-    const root = model.page.root;
-    assertExists(root);
-    const pageElement = getPageByElement(this) as PageBlockComponent;
-    assertExists(pageElement);
-    pageElement.slots.pageLinkClicked.emit({ pageId: targetPageId });
+    const targetDocId = refMeta.id;
+    const rootModel = model.doc.root;
+    assertExists(rootModel);
+    const rootElement = getRootByElement(this) as RootBlockComponent;
+    assertExists(rootElement);
+    rootElement.slots.docLinkClicked.emit({ docId: targetDocId });
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
-    if (this.page.readonly) {
+    if (this.doc.readonly) {
       return null;
     }
 
@@ -221,7 +221,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       template: toggleReferencePopup(
         this.inlineEditor,
         this.selfInlineRange,
-        this._refMeta?.title ?? DEFAULT_PAGE_NAME,
+        this._refMeta?.title ?? DEFAULT_DOC_NAME,
         abortController
       ),
     };
@@ -240,15 +240,15 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const title = this.customTitle
       ? this.customTitle(this)
       : isDeleted
-        ? 'Deleted page'
+        ? 'Deleted doc'
         : refMeta.title.length > 0
           ? refMeta.title
-          : DEFAULT_PAGE_NAME;
+          : DEFAULT_DOC_NAME;
     const icon = this.customIcon
       ? this.customIcon(this)
       : type === 'LinkedPage'
-        ? FontLinkedPageIcon
-        : FontPageIcon;
+        ? FontLinkedDocIcon
+        : FontDocIcon;
 
     const style = affineTextStyles(
       attributes,

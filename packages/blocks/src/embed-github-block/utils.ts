@@ -99,7 +99,7 @@ export async function refreshEmbedGithubUrlData(
   } catch (error) {
     console.error(error);
   } finally {
-    embedGithubElement.page.updateBlock(embedGithubElement.model, {
+    embedGithubElement.doc.updateBlock(embedGithubElement.model, {
       image,
       status,
       statusReason,
@@ -122,7 +122,7 @@ export async function refreshEmbedGithubStatus(
 
   if (!githubApiData.status) return;
 
-  embedGithubElement.page.updateBlock(embedGithubElement.model, {
+  embedGithubElement.doc.updateBlock(embedGithubElement.model, {
     status: githubApiData.status,
     statusReason: githubApiData.statusReason,
     createdAt: githubApiData.createdAt,
