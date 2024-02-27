@@ -8,9 +8,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { HighLightDuotoneIcon } from '../../_common/icons/text.js';
 import { requestConnectedFrame } from '../../_common/utils/event.js';
+import type { EdgelessPageService, PageService } from '../../index.js';
 import type { PDFBlockComponent } from '../pdf-block.js';
 import { AnnotationType } from '../pdf-model.js';
-import { isEmptyRange } from '../utils/selection.js';
 
 export const AFFINE_PDF_ANNOTATION_TOOLBAR_WIDGET =
   'affine-pdf-annotation-toolbar';
@@ -59,7 +59,7 @@ export class AnnotationToolbar extends WidgetElement<PDFBlockComponent> {
     x: number;
     y: number;
     layerRect: DOMRect;
-    highlightRects: DOMRect[];
+    highlightRects: { x: number; y: number; w: number; h: number }[];
     highlightText: string;
   } = {
     x: 0,
@@ -69,15 +69,21 @@ export class AnnotationToolbar extends WidgetElement<PDFBlockComponent> {
     highlightText: '',
   };
 
+  get pageService() {
+    return this.blockElement.std.spec.getService('affine:page') as
+      | PageService
+      | EdgelessPageService;
+  }
+
   private _onSelectionChange() {
     if (this._displayCommentPanel) return;
 
     const selection = document.getSelection();
+    const range = selection?.type === 'Range' ? selection?.getRangeAt(0) : null;
 
     if (
-      isEmptyRange(selection) ||
-      !this.blockElement?.pdfTextLayer?.contains(selection.anchorNode) ||
-      !this.blockElement?.pdfTextLayer?.contains(selection.focusNode)
+      !range ||
+      !this.blockElement.pdfTextLayer.contains(range.commonAncestorContainer)
     ) {
       this._display = false;
       this._displayCommentPanel = false;
@@ -86,24 +92,46 @@ export class AnnotationToolbar extends WidgetElement<PDFBlockComponent> {
 
     const pdfTextLayerRect =
       this.blockElement.pdfTextLayer.getBoundingClientRect();
-    const range = selection.getRangeAt(0);
-    const rects = Array.from(range.getClientRects());
+    const rects = Array.from(range.getClientRects())
+      .filter((current, idx, rects) => {
+        if (current.width === 0 || current.height === 0) return false;
+        if (idx === 0) return true;
+
+        const previous = rects[idx - 1]!;
+
+        return (
+          current.x !== previous.x ||
+          current.y !== previous.y ||
+          current.width !== previous.width ||
+          current.height !== previous.height
+        );
+      })
+      .map(rect => ({
+        x: rect.x - pdfTextLayerRect.x,
+        y: rect.y - pdfTextLayerRect.y,
+        w: rect.width,
+        h: rect.height,
+      }));
+
+    if ('viewport' in this.pageService) {
+      const zoom = this.pageService.viewport.zoom;
+
+      rects.forEach(rect => {
+        rect.x /= zoom;
+        rect.y /= zoom;
+        rect.w /= zoom;
+        rect.h /= zoom;
+      });
+    }
+
     const position = rects[0];
 
     this._highlightInfo = {
-      x: position.x - pdfTextLayerRect.x,
-      y: position.y - pdfTextLayerRect.y - 40,
-      highlightRects: rects.map(
-        rect =>
-          new DOMRect(
-            rect.x - pdfTextLayerRect.x,
-            rect.y - pdfTextLayerRect.y,
-            rect.width,
-            rect.height
-          )
-      ),
+      x: position.x,
+      y: position.y - 40,
+      highlightRects: rects,
       layerRect: pdfTextLayerRect,
-      highlightText: selection.toString(),
+      highlightText: selection!.toString(),
     };
     this._display = true;
   }
@@ -122,8 +150,8 @@ export class AnnotationToolbar extends WidgetElement<PDFBlockComponent> {
         [this.blockElement.currentPage]: highlightRects.map(rect => [
           rect.x,
           rect.y,
-          rect.width,
-          rect.height,
+          rect.w,
+          rect.h,
         ]),
       },
     });
@@ -187,8 +215,8 @@ export class AnnotationToolbar extends WidgetElement<PDFBlockComponent> {
                 position: 'absolute',
                 top: `${rect.y}px`,
                 left: `${rect.x}px`,
-                width: `${rect.width}px`,
-                height: `${rect.height}px`,
+                width: `${rect.w}px`,
+                height: `${rect.h}px`,
                 background: 'gray',
                 pointerEvents: 'none',
               })}
