@@ -14,7 +14,7 @@ import {
   GET_DEFAULT_LINE_COLOR,
   GET_DEFAULT_TEXT_COLOR,
   LineColorsSchema,
-} from '../../page-block/edgeless/components/panel/color-panel.js';
+} from '../../root-block/edgeless/components/panel/color-panel.js';
 import {
   CanvasTextFontFamily,
   CanvasTextFontStyle,
@@ -235,7 +235,7 @@ export class EditSessionStorage {
   }
 
   private _getKey<T extends keyof SessionProps>(key: T) {
-    const id = this._service.page.id;
+    const id = this._service.doc.id;
     switch (key) {
       case 'viewport':
         return 'blocksuite:' + id + ':edgelessViewport';

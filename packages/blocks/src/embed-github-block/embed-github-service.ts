@@ -25,8 +25,8 @@ export class EmbedGithubService extends BlockService<EmbedGithubModel> {
   override mounted() {
     super.mounted();
 
-    const pageService = this.std.spec.getService('affine:page');
-    pageService.registerEmbedBlockOptions({
+    const rootService = this.std.spec.getService('affine:page');
+    rootService.registerEmbedBlockOptions({
       flavour: this.flavour,
       urlRegex: githubUrlRegex,
       styles: EmbedGithubStyles,

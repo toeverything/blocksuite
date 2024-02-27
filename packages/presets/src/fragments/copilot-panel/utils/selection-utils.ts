@@ -1,7 +1,7 @@
 import {
   BlocksUtils,
   type EdgelessBlock,
-  EdgelessPageService,
+  EdgelessRootService,
   type FrameBlockModel,
   type ImageBlockModel,
   type SurfaceBlockComponent,
@@ -12,36 +12,36 @@ import { Slice } from '@blocksuite/store';
 
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
-export const getPageService = (host: EditorHost) => {
+export const getRootService = (host: EditorHost) => {
   return host.std.spec.getService('affine:page');
 };
 
-export function getEdgelessPageBlockFromEditor(editor: EditorHost) {
-  const edgelessPage = editor.getElementsByTagName('affine-edgeless-page')[0];
-  if (!edgelessPage) {
+export function getEdgelessRootFromEditor(editor: EditorHost) {
+  const edgelessRoot = editor.getElementsByTagName('affine-edgeless-root')[0];
+  if (!edgelessRoot) {
     alert('Please switch to edgeless mode');
     throw new Error('Please open switch to edgeless mode');
   }
-  return edgelessPage;
+  return edgelessRoot;
 }
 export function getEdgelessService(editor: EditorHost) {
-  const service = editor.std.spec.getService('affine:page');
-  if (service instanceof EdgelessPageService) {
-    return service;
+  const rootService = editor.std.spec.getService('affine:page');
+  if (rootService instanceof EdgelessRootService) {
+    return rootService;
   }
   alert('Please switch to edgeless mode');
   throw new Error('Please open switch to edgeless mode');
 }
 
 export async function selectedToCanvas(editor: EditorHost) {
-  const edgelessPage = getEdgelessPageBlockFromEditor(editor);
+  const edgelessRoot = getEdgelessRootFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
-    edgelessPage.service.selection.elements
+    edgelessRoot.service.selection.elements
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;
   }
-  const canvas = await edgelessPage.clipboardController.toCanvas(
+  const canvas = await edgelessRoot.clipboardController.toCanvas(
     [...notes, ...frames, ...images],
     shapes
   );
@@ -55,14 +55,14 @@ export async function frameToCanvas(
   frame: FrameBlockModel,
   editor: EditorHost
 ) {
-  const edgelessPage = getEdgelessPageBlockFromEditor(editor);
+  const edgelessRoot = getEdgelessRootFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
-    edgelessPage.service.frame.getElementsInFrame(frame, true)
+    edgelessRoot.service.frame.getElementsInFrame(frame, true)
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;
   }
-  const canvas = await edgelessPage.clipboardController.toCanvas(
+  const canvas = await edgelessRoot.clipboardController.toCanvas(
     [...notes, ...frames, ...images],
     shapes
   );
@@ -78,8 +78,8 @@ export async function selectedToPng(editor: EditorHost) {
 
 export async function getSelectedTextContent(editorHost: EditorHost) {
   const slice = Slice.fromModels(
-    editorHost.std.page,
-    getPageService(editorHost).selectedModels
+    editorHost.std.doc,
+    getRootService(editorHost).selectedModels
   );
   return getMarkdownFromSlice(editorHost, slice);
 }
@@ -89,8 +89,8 @@ export const stopPropagation = (e: Event) => {
 };
 
 export function getSurfaceElementFromEditor(editor: EditorHost) {
-  const { page } = editor;
-  const surfaceModel = page.getBlockByFlavour('affine:surface')[0];
+  const { doc } = editor;
+  const surfaceModel = doc.getBlockByFlavour('affine:surface')[0];
   assertExists(surfaceModel);
 
   const surfaceId = surfaceModel.id;
@@ -106,8 +106,8 @@ export const getFirstImageInFrame = (
   frame: FrameBlockModel,
   editor: EditorHost
 ) => {
-  const edgelessPage = getEdgelessPageBlockFromEditor(editor);
-  const elements = edgelessPage.service.frame.getElementsInFrame(frame, false);
+  const edgelessRoot = getEdgelessRootFromEditor(editor);
+  const elements = edgelessRoot.service.frame.getElementsInFrame(frame, false);
   const image = elements.find(ele => {
     if (!BlocksUtils.isCanvasElement(ele)) {
       return (ele as EdgelessBlock).flavour === 'affine:image';

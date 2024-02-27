@@ -12,9 +12,9 @@ import type { BlockElement } from '../element/block-element.js';
 export const getInlineRangeProvider: (
   element: BlockElement
 ) => InlineRangeProvider = element => {
-  const root = element.host;
-  const selectionManager = root.selection;
-  const rangeManager = root.rangeManager;
+  const editorHost = element.host;
+  const selectionManager = editorHost.selection;
+  const rangeManager = editorHost.rangeManager;
   const inlineRangeUpdatedSlot = new Slot<InlineRangeUpdatedProp>();
 
   assertExists(selectionManager);
@@ -31,7 +31,7 @@ export const getInlineRangeProvider: (
       const inlineRoot = startElement?.closest(`[${INLINE_ROOT_ATTR}]`);
       if (!inlineRoot) return false;
 
-      const blockElement = startElement?.closest(`[${root.blockIdAttr}]`);
+      const blockElement = startElement?.closest(`[${editorHost.blockIdAttr}]`);
       if (!blockElement || blockElement !== element) return false;
     } else {
       if (!range.intersectsNode(element)) return false;

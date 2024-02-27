@@ -1,8 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type {
+  Doc,
+  DocSnapshot,
   JobMiddleware,
-  Page,
-  PageSnapshot,
   Workspace,
   WorkspaceInfoSnapshot,
 } from '@blocksuite/store';
@@ -11,11 +11,11 @@ import JSZip from 'jszip';
 
 import { replaceIdMiddleware } from './middlewares.js';
 
-async function exportPages(workspace: Workspace, pages: Page[]) {
+async function exportDocs(workspace: Workspace, docs: Doc[]) {
   const zip = new JSZip();
 
   const job = new Job({ workspace });
-  const snapshots = await Promise.all(pages.map(job.pageToSnapshot));
+  const snapshots = await Promise.all(docs.map(job.docToSnapshot));
 
   const workspaceInfo = job.workspaceInfoToSnapshot();
   zip.file('info.json', JSON.stringify(workspaceInfo, null, 2));
@@ -38,7 +38,7 @@ async function exportPages(workspace: Workspace, pages: Page[]) {
   return zip.generateAsync({ type: 'blob' });
 }
 
-async function importPages(workspace: Workspace, imported: Blob) {
+async function importDocs(workspace: Workspace, imported: Blob) {
   const zip = new JSZip();
   const { files } = await zip.loadAsync(imported);
 
@@ -77,7 +77,7 @@ async function importPages(workspace: Workspace, imported: Blob) {
   const migrationMiddleware: JobMiddleware = ({ slots, workspace }) => {
     slots.afterImport.on(payload => {
       if (payload.type === 'page') {
-        workspace.schema.upgradePage(
+        workspace.schema.upgradeDoc(
           info?.pageVersion ?? 0,
           {},
           payload.page.spaceDoc
@@ -106,14 +106,14 @@ async function importPages(workspace: Workspace, imported: Blob) {
   return Promise.all(
     snapshotsObjs.map(async fileObj => {
       const json = await fileObj.async('text');
-      const snapshot = JSON.parse(json) as PageSnapshot;
+      const snapshot = JSON.parse(json) as DocSnapshot;
 
-      return job.snapshotToPage(snapshot);
+      return job.snapshotToDoc(snapshot);
     })
   );
 }
 
 export const ZipTransformer = {
-  exportPages,
-  importPages,
+  exportDocs,
+  importDocs,
 };

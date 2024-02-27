@@ -26,7 +26,11 @@ export async function updateBlockType(
         })
         .run();
 
-      window.testUtils.pageBlock.updateBlockElementType(blocks, flavour, type);
+      window.testUtils.docTestUtils.updateBlockElementType(
+        blocks,
+        flavour,
+        type
+      );
     },
     [flavour, type] as [Flavour, string?]
   );

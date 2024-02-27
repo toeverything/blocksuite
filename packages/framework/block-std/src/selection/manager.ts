@@ -158,8 +158,8 @@ export class SelectionManager {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();
     }
-    this.std.page.history.on('stack-item-added', this._itemAdded);
-    this.std.page.history.on('stack-item-popped', this._itemPopped);
+    this.std.doc.history.on('stack-item-added', this._itemAdded);
+    this.std.doc.history.on('stack-item-popped', this._itemPopped);
     this.disposables.add(
       this._store.slots.update.on(({ id }) => {
         if (id === this._store.awareness.clientID) return;
@@ -169,8 +169,8 @@ export class SelectionManager {
   }
 
   unmount() {
-    this.std.page.history.off('stack-item-added', this._itemAdded);
-    this.std.page.history.off('stack-item-popped', this._itemPopped);
+    this.std.doc.history.off('stack-item-added', this._itemAdded);
+    this.std.doc.history.off('stack-item-popped', this._itemPopped);
     this.slots.changed.dispose();
     this.disposables.dispose();
     this.clear();

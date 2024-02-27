@@ -1,6 +1,6 @@
 /// <reference types="@blocksuite/global" />
 // manual import to avoid being tree-shaken
-import './page-block/index.js';
+import './root-block/index.js';
 import './paragraph-block/index.js';
 import './list-block/index.js';
 import './note-block/index.js';
@@ -13,8 +13,8 @@ import './surface-ref-block/index.js';
 
 import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours, Point } from './_common/utils/index.js';
-import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
-import { isCanvasElement } from './page-block/edgeless/utils/query.js';
+import { splitElements } from './root-block/edgeless/utils/clipboard-utils.js';
+import { isCanvasElement } from './root-block/edgeless/utils/query.js';
 import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
@@ -33,9 +33,9 @@ export {
 export {
   ArrowDownSmallIcon,
   CloseIcon,
+  DocIcon,
   DualLinkIcon16,
-  LinkedPageIcon,
-  PageIcon,
+  LinkedDocIcon,
   PlusIcon,
   TagsIcon,
 } from './_common/icons/index.js';
@@ -62,7 +62,7 @@ export {
 export * from './_common/transformers/index.js';
 export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
 export { on, once } from './_common/utils/event.js';
-export { createDefaultPage } from './_common/utils/init.js';
+export { createDefaultDoc } from './_common/utils/init.js';
 export { getThemeMode } from './_common/utils/query.js';
 export * from './_specs/_specs.js';
 export * from './attachment-block/index.js';
@@ -83,15 +83,15 @@ export * from './image-block/index.js';
 export * from './list-block/index.js';
 export * from './models.js';
 export * from './note-block/index.js';
-export { EdgelessComponentToolbar } from './page-block/edgeless/components/component-toolbar/component-toolbar.js';
-export { EdgelessTemplatePanel } from './page-block/edgeless/components/toolbar/template/template-panel.js';
+export * from './paragraph-block/index.js';
+export { EdgelessComponentToolbar } from './root-block/edgeless/components/component-toolbar/component-toolbar.js';
+export { EdgelessTemplatePanel } from './root-block/edgeless/components/toolbar/template/template-panel.js';
 export type {
   Template,
   TemplateCategory,
   TemplateManager,
-} from './page-block/edgeless/components/toolbar/template/template-type.js';
-export * from './page-block/index.js';
-export * from './paragraph-block/index.js';
+} from './root-block/edgeless/components/toolbar/template/template-type.js';
+export * from './root-block/index.js';
 export {
   Bound,
   BrushElementModel,

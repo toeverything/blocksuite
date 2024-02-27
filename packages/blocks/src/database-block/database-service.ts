@@ -1,6 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 
 import { InlineManager } from '../_common/inline/inline-manager.js';
 import {
@@ -23,7 +23,7 @@ export class DatabaseService<
     super.mounted();
     this.selectionManager.register(DatabaseSelection);
 
-    this.referenceNodeConfig.setPage(this.page);
+    this.referenceNodeConfig.setDoc(this.doc);
 
     const inlineSpecs = getAffineInlineSpecsWithReference(
       this.referenceNodeConfig
@@ -33,20 +33,20 @@ export class DatabaseService<
   }
 
   initDatabaseBlock(
-    page: Page,
+    doc: Doc,
     model: BlockModel,
     databaseId: string,
     viewType: DataViewTypes,
     isAppendNewRow = true
   ) {
-    const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
+    const blockModel = doc.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
     blockModel.initTemplate(viewType);
     if (isAppendNewRow) {
       // Add a paragraph after database
-      const parent = page.getParent(model);
+      const parent = doc.getParent(model);
       assertExists(parent);
-      page.addBlock('affine:paragraph', {}, parent.id);
+      doc.addBlock('affine:paragraph', {}, parent.id);
     }
     blockModel.applyColumnUpdate();
   }

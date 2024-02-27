@@ -1000,25 +1000,25 @@ test('should clear the currently selected block when clicked again', async ({
 test('should support moving blocks from multiple notes', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
-    const { page } = window;
+    const { doc } = window;
 
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    page.addBlock('affine:surface', {}, pageId);
+    doc.addBlock('affine:surface', {}, rootId);
 
     ['123', '456', '789', '987', '654', '321'].forEach(text => {
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      page.addBlock(
+      const noteId = doc.addBlock('affine:note', {}, rootId);
+      doc.addBlock(
         'affine:paragraph',
         {
-          text: new page.Text(text),
+          text: new doc.Text(text),
         },
         noteId
       );
     });
 
-    page.resetHistory();
+    doc.resetHistory();
   });
 
   await dragBetweenIndices(

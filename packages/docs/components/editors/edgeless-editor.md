@@ -6,7 +6,7 @@ This editor component offers a canvas with infinite logical dimensions, suitable
 
 ## Features
 
-- All the rich text editing capabilities in the [doc editor](./doc-editor).
+- All the rich text editing capabilities in the [page editor](./page-editor).
 - `CanvasElement` rendered to HTML5 canvas, including shapes, brushes, connectors, and text.
 - Use of [frames](../blocks/frame-block) to denote canvas areas of any size.
 - Presentation mode achieved by switching between multiple frames in sequence.
@@ -20,7 +20,7 @@ Moreover, this editor inherits capabilities built into the BlockSuite framework,
 - Real-time collaboration
 - [Document streaming](../../guide/data-synchronization#document-streaming)
 
-Notably, the BlockSuite framework allows runtime compatibility between the doc editor and the edgeless editor, beyond mere static file format compatibility. This means you can dynamically attach the same page object to different instances of the doc editor and edgeless editor.
+Notably, the BlockSuite framework allows runtime compatibility between the page editor and the edgeless editor, beyond mere static file format compatibility. This means you can dynamically attach the same doc object to different instances of the page editor and edgeless editor.
 
 ## Usage
 
@@ -32,7 +32,7 @@ const editor = new EdgelessEditor();
 
 ## Integration
 
-Like all BlockSuite editors, the editor UI is entirely composed of the combination of [block specs](../../guide/block-spec). A specialized [page block](../blocks/page-block) spec serves as the root node of the document and implements all top-level document UI, with main widgets also mounted on the page block. Accordingly, commonly used editing APIs are provided in the page service.
+Like all BlockSuite editors, the editor UI is entirely composed of the combination of [block specs](../../guide/block-spec). A specialized [root block](../blocks/root-block) spec serves as the root node of the document and implements all top-level document UI, with main widgets also mounted on the root block. Accordingly, commonly used editing APIs are provided in the root service.
 
 Specifically, the canvas element and some blocks that appear on the top layer of the canvas are located on the [surface block](../blocks/surface-block). Therefore, operating the edgeless editor also requires accessing the model and service mounted on this block.
 
@@ -47,7 +47,7 @@ To integrate and customize this editor, you can:
 ## Reference
 
 - [`EdgelessEditor`](/api/@blocksuite/presets/classes/EdgelessEditor.html)
-- [`EdgelessPageService`](/api/@blocksuite/blocks/classes/EdgelessPageService.html)
+- [`EdgelessRootService`](/api/@blocksuite/blocks/classes/EdgelessRootService.html)
 - [`SurfaceBlockModel`](/api/@blocksuite/blocks/classes/SurfaceBlockModel.html)
 - [`SurfaceService`](/api/@blocksuite/blocks/classes/SurfaceService.html)
 

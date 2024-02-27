@@ -1,4 +1,4 @@
-import type { EdgelessPageService } from '@blocksuite/blocks';
+import type { EdgelessRootService } from '@blocksuite/blocks';
 import {
   type ConnectorElementModel,
   SurfaceBlockComponent,
@@ -7,18 +7,18 @@ import { assertExists } from '@blocksuite/global/utils';
 
 export const getConnectorFromId = (
   id: string,
-  surface: EdgelessPageService
+  surface: EdgelessRootService
 ) => {
   return surface.elements.filter(
     v => SurfaceBlockComponent.isConnector(v) && v.source.id === id
   ) as ConnectorElementModel[];
 };
-export const getConnectorToId = (id: string, surface: EdgelessPageService) => {
+export const getConnectorToId = (id: string, surface: EdgelessRootService) => {
   return surface.elements.filter(
     v => SurfaceBlockComponent.isConnector(v) && v.target.id === id
   ) as ConnectorElementModel[];
 };
-export const getConnectorPath = (id: string, surface: EdgelessPageService) => {
+export const getConnectorPath = (id: string, surface: EdgelessRootService) => {
   let current: string | undefined = id;
   const set = new Set<string>();
   const result: string[] = [];
@@ -44,7 +44,7 @@ type ElementTree = {
 };
 export const findTree = (
   rootId: string,
-  surface: EdgelessPageService
+  surface: EdgelessRootService
 ): ElementTree => {
   const set = new Set<string>();
   const run = (id: string): ElementTree | undefined => {

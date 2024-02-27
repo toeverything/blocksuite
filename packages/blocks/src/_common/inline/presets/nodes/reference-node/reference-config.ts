@@ -1,4 +1,4 @@
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { AffineReference } from './reference-node.js';
@@ -10,7 +10,7 @@ export class ReferenceNodeConfig {
   private _customContent:
     | ((reference: AffineReference) => TemplateResult)
     | null = null;
-  private _page: Page | null = null;
+  private _Doc: Doc | null = null;
   private _interactable = true;
 
   get customIcon() {
@@ -21,8 +21,8 @@ export class ReferenceNodeConfig {
     return this._customTitle;
   }
 
-  get page() {
-    return this._page;
+  get doc() {
+    return this._Doc;
   }
 
   get customContent() {
@@ -49,7 +49,7 @@ export class ReferenceNodeConfig {
     this._customTitle = title;
   }
 
-  setPage(page: Page | null) {
-    this._page = page;
+  setDoc(doc: Doc | null) {
+    this._Doc = doc;
   }
 }

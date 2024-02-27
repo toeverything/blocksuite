@@ -1,5 +1,5 @@
 import { type Slot } from '@blocksuite/global/utils';
-import { type BlockModel, type Page } from '@blocksuite/store';
+import { type BlockModel, type Doc } from '@blocksuite/store';
 
 import type { BookmarkBlockModel } from '../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../embed-figma-block/embed-figma-model.js';
@@ -12,7 +12,7 @@ import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-mod
 import type { FrameBlockModel } from '../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../image-block/image-model.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import type { EdgelessModel } from '../page-block/edgeless/type.js';
+import type { EdgelessModel } from '../root-block/edgeless/type.js';
 import type {
   ConnectorElementModel,
   ConnectorMode,
@@ -111,12 +111,12 @@ export type CommonSlots = RefNodeSlots;
 
 type EditorMode = 'page' | 'edgeless';
 type EditorSlots = {
-  pageModeSwitched: Slot<EditorMode>;
-  pageUpdated: Slot<{ newPageId: string }>;
+  editorModeSwitched: Slot<EditorMode>;
+  docUpdated: Slot<{ newDocId: string }>;
 };
 
 export type AbstractEditor = {
-  page: Page;
+  doc: Doc;
   mode: EditorMode;
   readonly slots: CommonSlots & EditorSlots;
 } & HTMLElement;

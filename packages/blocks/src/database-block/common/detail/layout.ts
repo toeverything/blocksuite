@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import { createModal } from '../../../_common/components/menu/index.js';
 import { CrossIcon } from '../../../_common/icons/index.js';
-import type { PageBlockComponent } from '../../../index.js';
+import type { RootBlockComponent } from '../../../index.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import { RecordDetail } from './detail.js';
 
@@ -89,15 +89,15 @@ class SideLayoutModal extends ShadowlessElement {
 }
 
 export const popSideDetail = (ops: {
-  pageElement: PageBlockComponent | null;
+  rootElement: RootBlockComponent | null;
   view: DataViewManager;
   rowId: string;
   onClose?: () => void;
 }) => {
-  const page = ops.pageElement;
-  assertExists(page);
-  const block = findFirstBlockParent(page) ?? page;
-  const modal = createModal(page);
+  const rootElement = ops.rootElement;
+  assertExists(rootElement);
+  const block = findFirstBlockParent(rootElement) ?? rootElement;
+  const modal = createModal(rootElement);
   // fit to the size of the page element
   const cancel = autoUpdate(block, modal, () => {
     computePosition(block, modal, {

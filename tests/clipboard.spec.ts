@@ -754,7 +754,7 @@ test(scoped`cut should work for multi-block selection`, async ({ page }) => {
   await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await cutByKeyboard(page);
-  await page.locator('.affine-doc-viewport').click();
+  await page.locator('.affine-page-viewport').click();
   await waitNextFrame(page);
   await assertText(page, '');
 });

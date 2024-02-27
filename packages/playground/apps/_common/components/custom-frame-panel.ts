@@ -44,7 +44,7 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
     });
 
     this.disposables.add(
-      this.editor.slots.pageModeSwitched.on(() => {
+      this.editor.slots.editorModeSwitched.on(() => {
         this.editor.updateComplete
           .then(() => this.requestUpdate())
           .catch(console.error);

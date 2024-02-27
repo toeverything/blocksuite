@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import {
   css,
@@ -211,7 +211,7 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   @property({ attribute: false })
   editorMode: 'page' | 'edgeless' = 'page';

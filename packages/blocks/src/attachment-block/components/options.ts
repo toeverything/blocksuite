@@ -53,7 +53,7 @@ export function AttachmentOptionsTemplate({
   };
 
   const disableEmbed = !allowEmbed(model);
-  const readonly = model.page.readonly;
+  const readonly = model.doc.readonly;
   let moreMenuAbortController: AbortController | null = null;
   return html`<style>
       ${styles}
@@ -80,7 +80,7 @@ export function AttachmentOptionsTemplate({
         ?hidden=${!model.embed}
         ?disabled=${readonly}
         @click="${() => {
-          model.page.updateBlock(model, { embed: false });
+          model.doc.updateBlock(model, { embed: false });
           abortController.abort();
         }}"
       >

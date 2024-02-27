@@ -83,7 +83,7 @@ export async function refreshEmbedYoutubeUrlData(
   } catch (error) {
     console.error(error);
   } finally {
-    embedYoutubeElement.page.updateBlock(embedYoutubeElement.model, {
+    embedYoutubeElement.doc.updateBlock(embedYoutubeElement.model, {
       image,
       title,
       description,

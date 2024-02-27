@@ -12,10 +12,10 @@ The selection model contains a list of atomic selections. Each selection represe
 >
 > World
 
-In the default `DocEditor`, it will be modeled as following block tree nodes:
+In the default `PageEditor`, it will be modeled as following block tree nodes:
 
 ```
-Page Block
+Root Block
   Note Block
     Paragraph Block 1
     Paragraph Block 2
@@ -33,12 +33,12 @@ The selection model will be:
     type: 'text',
     group: 'note',
     from: {
-      path: ['page_id', 'note_id', 'paragraph_1_id'],
+      path: ['root_id', 'note_id', 'paragraph_1_id'],
       index: 1,
       length: 5,
     },
     to: {
-      path: ['page_id', 'note_id', 'paragraph_2_id'],
+      path: ['root_id', 'note_id', 'paragraph_2_id'],
       index: 0,
       length: 4,
     },
@@ -57,12 +57,12 @@ The selection model will be:
   {
     type: 'block',
     group: 'note',
-    path: ['page_id', 'note_id', 'paragraph_1_id'],
+    path: ['root_id', 'note_id', 'paragraph_1_id'],
   },
   {
     type: 'block',
     group: 'note',
-    path: ['page_id', 'note_id', 'paragraph_2_id'],
+    path: ['root_id', 'note_id', 'paragraph_2_id'],
   },
 ];
 ```

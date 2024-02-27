@@ -21,7 +21,7 @@ export const MoreMenu = ({
   downloadAttachment: (model: AttachmentBlockModel) => Promise<void> | void;
   abortController: AbortController;
 }) => {
-  const readonly = model.page.readonly;
+  const readonly = model.doc.readonly;
   return html`
     <style>
       ${moreMenuStyles}
@@ -48,7 +48,7 @@ export const MoreMenu = ({
               flavour: 'affine:attachment',
               ...cloneAttachmentProperties(model),
             };
-            model.page.addSiblingBlocks(model, [prop]);
+            model.doc.addSiblingBlocks(model, [prop]);
           }}"
         >
           ${DuplicateIcon}
@@ -61,7 +61,7 @@ export const MoreMenu = ({
           class="danger"
           ?hidden=${readonly}
           @click="${() => {
-            model.page.deleteBlock(model);
+            model.doc.deleteBlock(model);
             abortController.abort();
           }}"
         >

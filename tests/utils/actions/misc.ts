@@ -14,7 +14,7 @@ import type { EditorHost } from '@lit/element/lit-host.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
-import type { PagesPanel } from '@playground/apps/_common/components/pages-panel.js';
+import type { DocsPanel } from '@playground/apps/_common/components/docs-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { BlockModel } from '@store/schema/index.js';
@@ -31,7 +31,7 @@ import {
 
 declare global {
   interface WindowEventMap {
-    'blocksuite:page-ready': CustomEvent<string>;
+    'blocksuite:doc-ready': CustomEvent<string>;
   }
 }
 
@@ -75,16 +75,16 @@ async function initEmptyEditor({
       const { workspace } = window;
 
       async function waitForMountPageEditor(
-        page: ReturnType<typeof workspace.createPage>
+        doc: ReturnType<typeof workspace.createDoc>
       ) {
-        if (!page.ready) page.load();
+        if (!doc.ready) doc.load();
 
-        if (!page.root) {
-          await new Promise(resolve => page.slots.rootAdded.once(resolve));
+        if (!doc.root) {
+          await new Promise(resolve => doc.slots.rootAdded.once(resolve));
         }
 
         for (const [key, value] of Object.entries(flags)) {
-          page.awarenessStore.setFlag(key as keyof typeof flags, value);
+          doc.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
         // add app root from https://github.com/toeverything/blocksuite/commit/947201981daa64c5ceeca5fd549460c34e2dabfa
         const appRoot = document.querySelector('#app');
@@ -93,14 +93,14 @@ async function initEmptyEditor({
         }
         const createEditor = () => {
           const editor = document.createElement('affine-editor-container');
-          editor.page = page;
+          editor.doc = doc;
           editor.autofocus = true;
-          editor.slots.pageLinkClicked.on(({ pageId }) => {
-            const newPage = workspace.getPage(pageId);
-            if (!newPage) {
-              throw new Error(`Failed to jump to page ${pageId}`);
+          editor.slots.docLinkClicked.on(({ docId }) => {
+            const newDoc = workspace.getDoc(docId);
+            if (!newDoc) {
+              throw new Error(`Failed to jump to page ${docId}`);
             }
-            editor.page = newPage;
+            editor.doc = newDoc;
           });
           appRoot.append(editor);
           return editor;
@@ -112,19 +112,18 @@ async function initEmptyEditor({
         editor.updateComplete
           .then(() => {
             const debugMenu: DebugMenu = document.createElement('debug-menu');
-            const pagesPanel: PagesPanel =
-              document.createElement('pages-panel');
+            const docsPanel: DocsPanel = document.createElement('docs-panel');
             const framePanel: CustomFramePanel =
               document.createElement('custom-frame-panel');
             const outlinePanel: CustomOutlinePanel = document.createElement(
               'custom-outline-panel'
             );
-            pagesPanel.editor = editor;
+            docsPanel.editor = editor;
             framePanel.editor = editor;
             outlinePanel.editor = editor;
             debugMenu.workspace = workspace;
             debugMenu.editor = editor;
-            debugMenu.pagesPanel = pagesPanel;
+            debugMenu.docsPanel = docsPanel;
             debugMenu.framePanel = framePanel;
             debugMenu.outlinePanel = outlinePanel;
             const leftSidePanel = document.createElement('left-side-panel');
@@ -136,7 +135,7 @@ async function initEmptyEditor({
 
             window.debugMenu = debugMenu;
             window.editor = editor;
-            window.page = page;
+            window.doc = doc;
             Object.defineProperty(globalThis, 'host', {
               get() {
                 return document.querySelector<EditorHost>('editor-host');
@@ -148,33 +147,33 @@ async function initEmptyEditor({
               },
             });
             window.dispatchEvent(
-              new CustomEvent('blocksuite:page-ready', { detail: page.id })
+              new CustomEvent('blocksuite:doc-ready', { detail: doc.id })
             );
           })
           .catch(console.error);
       }
 
       if (noInit) {
-        const firstPage = workspace.pages.values().next().value as
-          | ReturnType<typeof workspace.createPage>
+        const firstDoc = workspace.docs.values().next().value as
+          | ReturnType<typeof workspace.createDoc>
           | undefined;
-        if (firstPage) {
-          window.page = firstPage;
-          waitForMountPageEditor(firstPage).catch;
+        if (firstDoc) {
+          window.doc = firstDoc;
+          waitForMountPageEditor(firstDoc).catch;
         } else {
-          workspace.slots.pageAdded.on(pageId => {
-            const page = workspace.getPage(pageId);
-            if (!page) {
-              throw new Error(`Failed to get page ${pageId}`);
+          workspace.slots.docAdded.on(docId => {
+            const doc = workspace.getDoc(docId);
+            if (!doc) {
+              throw new Error(`Failed to get doc ${docId}`);
             }
-            window.page = page;
-            waitForMountPageEditor(page).catch(console.error);
+            window.doc = doc;
+            waitForMountPageEditor(doc).catch(console.error);
           });
         }
       } else {
-        const page = workspace.createPage({ id: 'page:home' });
-        window.page = page;
-        waitForMountPageEditor(page).catch(console.error);
+        const doc = workspace.createDoc({ id: 'doc:home' });
+        window.doc = doc;
+        waitForMountPageEditor(doc).catch(console.error);
       }
     },
     [flags, noInit, multiEditor] as const
@@ -317,7 +316,7 @@ export async function enterPlaygroundRoom(
 }
 
 export async function waitDefaultPageLoaded(page: Page) {
-  await page.waitForSelector('affine-doc-page[data-block-id="0"]');
+  await page.waitForSelector('affine-page-root[data-block-id="0"]');
 }
 
 export async function waitEmbedLoaded(page: Page) {
@@ -334,7 +333,7 @@ export async function waitNextFrame(
 export async function waitForPageReady(page: Page) {
   await page.evaluate(async () => {
     return new Promise<void>(resolve => {
-      window.addEventListener('blocksuite:page-ready', () => resolve(), {
+      window.addEventListener('blocksuite:doc-ready', () => resolve(), {
         once: true,
       });
     });
@@ -347,13 +346,13 @@ export async function clearLog(page: Page) {
 
 export async function captureHistory(page: Page) {
   await page.evaluate(() => {
-    window.page.captureSync();
+    window.doc.captureSync();
   });
 }
 
 export async function resetHistory(page: Page) {
   await page.evaluate(() => {
-    const space = window.page;
+    const space = window.doc;
     space.resetHistory();
   });
 }
@@ -370,16 +369,16 @@ export async function enterPlaygroundWithList(
 
   await page.evaluate(
     ({ contents, type }: { contents: string[]; type: ListType }) => {
-      const { page } = window;
-      const pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
+      const { doc } = window;
+      const rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
       });
-      const noteId = page.addBlock('affine:note', {}, pageId);
+      const noteId = doc.addBlock('affine:note', {}, rootId);
       for (let i = 0; i < contents.length; i++) {
-        page.addBlock(
+        doc.addBlock(
           'affine:list',
           contents.length > 0
-            ? { text: new page.Text(contents[i]), type }
+            ? { text: new doc.Text(contents[i]), type }
             : { type },
           noteId
         );
@@ -390,68 +389,68 @@ export async function enterPlaygroundWithList(
   await waitNextFrame(page);
 }
 
-// XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
-export async function initEmptyParagraphState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(pageId => {
-    const { page } = window;
-    page.captureSync();
-    if (!pageId) {
-      pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
+// XXX: This doesn't add surface yet, the doc state should not be switched to edgeless.
+export async function initEmptyParagraphState(page: Page, rootId?: string) {
+  const ids = await page.evaluate(rootId => {
+    const { doc } = window;
+    doc.captureSync();
+    if (!rootId) {
+      rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
       });
     }
 
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
-    // page.addBlock('affine:surface', {}, pageId);
-    page.captureSync();
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    const paragraphId = doc.addBlock('affine:paragraph', {}, noteId);
+    // doc.addBlock('affine:surface', {}, rootId);
+    doc.captureSync();
 
-    return { pageId, noteId, paragraphId };
-  }, pageId);
+    return { rootId, noteId, paragraphId };
+  }, rootId);
   return ids;
 }
 
 export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    page.addBlock('affine:surface', {}, pageId);
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:surface', {}, rootId);
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    const paragraphId = doc.addBlock('affine:paragraph', {}, noteId);
 
-    page.resetHistory();
+    doc.resetHistory();
 
-    return { pageId, noteId, paragraphId };
+    return { rootId, noteId, paragraphId };
   });
   return ids;
 }
 
-export async function initEmptyDatabaseState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(pageId => {
-    const { page } = window;
-    page.captureSync();
-    if (!pageId) {
-      pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
+export async function initEmptyDatabaseState(page: Page, rootId?: string) {
+  const ids = await page.evaluate(rootId => {
+    const { doc } = window;
+    doc.captureSync();
+    if (!rootId) {
+      rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
       });
     }
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const databaseId = page.addBlock(
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    const databaseId = doc.addBlock(
       'affine:database',
       {
-        title: new page.Text('Database 1'),
+        title: new doc.Text('Database 1'),
       },
       noteId
     );
-    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
     model.initEmpty('table');
     model.applyColumnUpdate();
 
-    page.captureSync();
-    return { pageId, noteId, databaseId };
-  }, pageId);
+    doc.captureSync();
+    return { rootId, noteId, databaseId };
+  }, rootId);
   return ids;
 }
 
@@ -461,33 +460,33 @@ export async function initKanbanViewState(
     rows: string[];
     columns: { type: string; value?: unknown[] }[];
   },
-  pageId?: string
+  rootId?: string
 ) {
   const ids = await page.evaluate(
-    ({ pageId, config }) => {
-      const { page } = window;
+    ({ rootId, config }) => {
+      const { doc } = window;
 
-      page.captureSync();
-      if (!pageId) {
-        pageId = page.addBlock('affine:page', {
-          title: new page.Text(),
+      doc.captureSync();
+      if (!rootId) {
+        rootId = doc.addBlock('affine:page', {
+          title: new doc.Text(),
         });
       }
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      const databaseId = page.addBlock(
+      const noteId = doc.addBlock('affine:note', {}, rootId);
+      const databaseId = doc.addBlock(
         'affine:database',
         {
-          title: new page.Text('Database 1'),
+          title: new doc.Text('Database 1'),
         },
         noteId
       );
-      const model = page.getBlockById(databaseId) as DatabaseBlockModel;
-      const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+      const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
+      const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
 
       const rowIds = config.rows.map(rowText => {
-        const rowId = page.addBlock(
+        const rowId = doc.addBlock(
           'affine:paragraph',
-          { type: 'text', text: new page.Text(rowText) },
+          { type: 'text', text: new doc.Text(rowText) },
           databaseId
         );
         return rowId;
@@ -510,43 +509,43 @@ export async function initKanbanViewState(
       });
       model.initEmpty('kanban');
       model.applyColumnUpdate();
-      page.captureSync();
-      return { pageId, noteId, databaseId };
+      doc.captureSync();
+      return { rootId, noteId, databaseId };
     },
-    { pageId, config }
+    { rootId, config }
   );
   return ids;
 }
 
 export async function initEmptyDatabaseWithParagraphState(
   page: Page,
-  pageId?: string
+  rootId?: string
 ) {
-  const ids = await page.evaluate(pageId => {
-    const { page } = window;
+  const ids = await page.evaluate(rootId => {
+    const { doc } = window;
 
-    page.captureSync();
-    if (!pageId) {
-      pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
+    doc.captureSync();
+    if (!rootId) {
+      rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
       });
     }
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const databaseId = page.addBlock(
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    const databaseId = doc.addBlock(
       'affine:database',
       {
-        title: new page.Text('Database 1'),
+        title: new doc.Text('Database 1'),
       },
       noteId
     );
-    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
     model.initEmpty('table');
     model.applyColumnUpdate();
-    page.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
 
-    page.captureSync();
-    return { pageId, noteId, databaseId };
-  }, pageId);
+    doc.captureSync();
+    return { rootId, noteId, databaseId };
+  }, rootId);
   return ids;
 }
 
@@ -613,14 +612,14 @@ export async function initEmptyCodeBlockState(
   codeBlockProps = {} as { language?: string }
 ) {
   const ids = await page.evaluate(codeBlockProps => {
-    const { page } = window;
-    page.captureSync();
-    const pageId = page.addBlock('affine:page');
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const codeBlockId = page.addBlock('affine:code', codeBlockProps, noteId);
-    page.captureSync();
+    const { doc } = window;
+    doc.captureSync();
+    const rootId = doc.addBlock('affine:page');
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    const codeBlockId = doc.addBlock('affine:code', codeBlockProps, noteId);
+    doc.captureSync();
 
-    return { pageId, noteId, codeBlockId };
+    return { rootId, noteId, codeBlockId };
   }, codeBlockProps);
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
@@ -1105,7 +1104,7 @@ export async function getBlockModel<Model extends BlockModel>(
   blockId: string
 ) {
   const result: BlockModel | null | undefined = await page.evaluate(blockId => {
-    return window.page?.getBlockById(blockId);
+    return window.doc?.getBlockById(blockId);
   }, blockId);
   expect(result).not.toBeNull();
   return result as Model;
@@ -1152,7 +1151,7 @@ export async function focusTitle(page: Page) {
   // click to ensure editor is active
   await page.mouse.move(0, 0);
   const editor = getEditorHostLocator(page);
-  const locator = editor.locator('affine-doc-page').first();
+  const locator = editor.locator('affine-page-root').first();
   // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true });
   // avoid trigger double click
@@ -1228,22 +1227,22 @@ export async function initImageState(page: Page) {
   // await focusRichText(page);
 
   await page.evaluate(async () => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    const noteId = page.addBlock('affine:note', {}, pageId);
+    const noteId = doc.addBlock('affine:note', {}, rootId);
 
     await new Promise(res => setTimeout(res, 200));
 
-    const docPage = document.querySelector('affine-doc-page');
-    if (!docPage) throw new Error('Cannot find doc page');
+    const pageRoot = document.querySelector('affine-page-root');
+    if (!pageRoot) throw new Error('Cannot find doc page');
     const imageBlob = await fetch(`${location.origin}/test-card-1.png`).then(
       response => response.blob()
     );
-    const storage = docPage.page.blob;
+    const storage = pageRoot.doc.blob;
     const sourceId = await storage.set(imageBlob);
-    const imageId = page.addBlock(
+    const imageId = doc.addBlock(
       'affine:image',
       {
         sourceId,
@@ -1251,21 +1250,21 @@ export async function initImageState(page: Page) {
       noteId
     );
 
-    page.resetHistory();
+    doc.resetHistory();
 
-    return { pageId, noteId, imageId };
+    return { rootId, noteId, imageId };
   });
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.
   await page.waitForTimeout(500);
 }
 
-export async function getCurrentEditorPageId(page: Page) {
+export async function getCurrentEditorDocId(page: Page) {
   return page.evaluate(index => {
     const editor = document.querySelectorAll('affine-editor-container')[index];
     if (!editor) throw new Error("Can't find affine-editor-container");
-    const pageId = editor.page.id;
-    return pageId;
+    const docId = editor.doc.id;
+    return docId;
   }, currentEditorIndex);
 }
 
@@ -1303,7 +1302,7 @@ export async function getCopyClipItemsInPage(page: Page) {
   const clipItems = await page.evaluate(() => {
     return (
       document
-        .getElementsByTagName('affine-doc-page')[0]
+        .getElementsByTagName('affine-page-root')[0]
         // @ts-ignore
         .clipboard['_copyBlocksInPage']()
     );
@@ -1315,7 +1314,7 @@ export async function scrollToTop(page: Page) {
   await page.mouse.wheel(0, -1000);
 
   await page.waitForFunction(() => {
-    const scrollContainer = document.querySelector('.affine-doc-viewport');
+    const scrollContainer = document.querySelector('.affine-page-viewport');
     if (!scrollContainer) {
       throw new Error("Can't find scroll container");
     }
@@ -1327,14 +1326,14 @@ export async function scrollToBottom(page: Page) {
   // await page.mouse.wheel(0, 1000);
 
   await page
-    .locator('.affine-doc-viewport')
+    .locator('.affine-page-viewport')
     .evaluate(node =>
       node.scrollTo({ left: 0, top: 1000, behavior: 'smooth' })
     );
   // TODO switch to `scrollend`
   // See https://developer.chrome.com/en/blog/scrollend-a-new-javascript-event/
   await page.waitForFunction(() => {
-    const scrollContainer = document.querySelector('.affine-doc-viewport');
+    const scrollContainer = document.querySelector('.affine-page-viewport');
     if (!scrollContainer) {
       throw new Error("Can't find scroll container");
     }

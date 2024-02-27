@@ -100,7 +100,7 @@ export class RangeControl {
         paths
           .flatMap(path => {
             return path.map(blockId => {
-              return this._dispatcher.std.page.getBlockById(blockId)?.flavour;
+              return this._dispatcher.std.doc.getBlockById(blockId)?.flavour;
             });
           })
           .filter((flavour): flavour is string => {

@@ -13,9 +13,7 @@ let model: SurfaceBlockModel;
 
 beforeEach(async () => {
   const cleanup = await setupEditor('edgeless');
-  const models = page.getBlockByFlavour(
-    'affine:surface'
-  ) as SurfaceBlockModel[];
+  const models = doc.getBlockByFlavour('affine:surface') as SurfaceBlockModel[];
 
   model = models[0];
 
@@ -153,7 +151,7 @@ describe('group', () => {
     });
     const group = model.getElementById(groupId) as GroupElementModel;
 
-    model.page.transact(() => {
+    model.doc.transact(() => {
       group.children.delete(id);
       group.children.delete(id2);
     });

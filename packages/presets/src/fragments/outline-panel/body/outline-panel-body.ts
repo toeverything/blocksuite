@@ -1,14 +1,14 @@
 import './outline-notice.js';
 
 import type {
-  EdgelessPageBlockComponent,
+  EdgelessRootBlockComponent,
   NoteBlockModel,
 } from '@blocksuite/blocks';
 import { BlocksUtils, Bound, NoteDisplayMode } from '@blocksuite/blocks';
 import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { type BlockModel, type Page } from '@blocksuite/store';
+import { type BlockModel, type Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -113,10 +113,10 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   private _edgelessOnlyNotes: OutlineNoteItem[] = [];
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent | null;
+  edgeless!: EdgelessRootBlockComponent | null;
 
   @property({ attribute: false })
   editorHost!: EditorHost;
@@ -160,7 +160,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   @property({ attribute: false })
   domHost!: Document | HTMLElement;
 
-  private _pageDisposables: DisposableGroup | null = null;
+  private _docDisposables: DisposableGroup | null = null;
   private _indicatorTranslateY = 0;
   private _changedFlag = false;
   private _oldViewport?: {
@@ -213,13 +213,13 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       );
     }
 
-    this._clearPageDisposables();
+    this._clearDocDisposables();
     this._clearHighlightMask();
   }
 
-  private _clearPageDisposables() {
-    this._pageDisposables?.dispose();
-    this._pageDisposables = null;
+  private _clearDocDisposables() {
+    this._docDisposables?.dispose();
+    this._docDisposables = null;
   }
 
   private _updateNoticeVisibility() {
@@ -239,16 +239,16 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     }
   }
 
-  private _setPageDisposables() {
-    const { slots, root } = this.page;
+  private _setDocDisposables() {
+    const { slots, root } = this.doc;
     const slotsForUpdate = root
       ? [root.childrenUpdated, slots.blockUpdated]
       : [slots.blockUpdated];
 
     slots.rootAdded.on(root => {
-      this._clearPageDisposables();
-      this._pageDisposables = new DisposableGroup();
-      this._pageDisposables.add(
+      this._clearDocDisposables();
+      this._docDisposables = new DisposableGroup();
+      this._docDisposables.add(
         root.childrenUpdated.on(() => {
           this._updateNotes();
           this._updateNoticeVisibility();
@@ -257,9 +257,9 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     });
 
     slotsForUpdate.forEach(slot => {
-      this._clearPageDisposables();
-      this._pageDisposables = new DisposableGroup();
-      this._pageDisposables.add(
+      this._clearDocDisposables();
+      this._docDisposables = new DisposableGroup();
+      this._docDisposables.add(
         slot.on(() => {
           this._updateNotes();
           this._updateNoticeVisibility();
@@ -272,8 +272,8 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   }
 
   override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('page') || _changedProperties.has('edgeless')) {
-      this._setPageDisposables();
+    if (_changedProperties.has('doc') || _changedProperties.has('edgeless')) {
+      this._setDocDisposables();
     }
 
     if (
@@ -289,11 +289,11 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   }
 
   private _updateNotes() {
-    const root = this.page.root;
+    const rootModel = this.doc.root;
 
     if (this._dragging) return;
 
-    if (!root) {
+    if (!rootModel) {
       this._pageVisibleNotes = [];
       return;
     }
@@ -306,7 +306,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     }, new Set<string>());
     const newSelected: string[] = [];
 
-    root.children.forEach((block, index) => {
+    rootModel.children.forEach((block, index) => {
       if (!['affine:note'].includes(block.flavour)) return;
 
       const blockModel = block as NoteBlockModel;
@@ -338,7 +338,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     notes: OutlineNoteItem[],
     children: NoteBlockModel[]
   ) {
-    if (!this._isEdgelessMode() || !children.length || !this.page.root) return;
+    if (!this._isEdgelessMode() || !children.length || !this.doc.root) return;
 
     const blocks = selected.map(
       id => (notesMap.get(id) as OutlineNoteItem).note
@@ -356,10 +356,10 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     const newChildren = [...leftPart, ...blocks, ...rightPart];
 
     this._changedFlag = true;
-    this.page.updateBlock(this.page.root, {
+    this.doc.updateBlock(this.doc.root, {
       children: newChildren,
     });
-    this.page.root.childrenUpdated.emit();
+    this.doc.root.childrenUpdated.emit();
   }
 
   private _selectNote(e: SelectEvent) {
@@ -397,14 +397,14 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     if (
       !this._selected.length ||
       !this._pageVisibleNotes.length ||
-      !this.page.root
+      !this.doc.root
     )
       return;
 
     this._dragging = true;
 
     // cache the notes in case it is changed by other peers
-    const children = this.page.root.children.slice() as NoteBlockModel[];
+    const children = this.doc.root.children.slice() as NoteBlockModel[];
     const notes = this._pageVisibleNotes;
     const notesMap = this._pageVisibleNotes.reduce((map, note, index) => {
       map.set(note.note.id, {
@@ -417,9 +417,9 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
     startDragging({
       container: this,
-      doc: this.ownerDocument,
+      document: this.ownerDocument,
       host: this.domHost ?? this.ownerDocument,
-      page: this.page,
+      doc: this.doc,
       outlineListContainer: this.panelListElement,
       onDragEnd: insertIdx => {
         this._dragging = false;
@@ -535,9 +535,9 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       return;
     }
 
-    this.page.updateBlock(note, { displayMode: newMode });
+    this.doc.updateBlock(note, { displayMode: newMode });
 
-    const noteParent = this.page.getParent(note);
+    const noteParent = this.doc.getParent(note);
     assertExists(noteParent);
     const noteParentChildNotes = noteParent.children.filter(block =>
       BlocksUtils.matchFlavours(block, ['affine:note'])
@@ -551,7 +551,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       currentMode === NoteDisplayMode.EdgelessOnly &&
       note !== noteParentLastNote
     ) {
-      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
+      this.doc.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
 
     // When the display mode of a note changed to page only
@@ -565,11 +565,11 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   private _scrollToBlock(e: ClickBlockEvent) {
     if (this._isEdgelessMode() || !this.editorHost) return;
 
-    const pageBlock = this.editorHost.querySelector('affine-doc-page');
-    if (!pageBlock) return;
+    const rootElement = this.editorHost.querySelector('affine-page-root');
+    if (!rootElement) return;
 
     const { blockPath } = e.detail;
-    const path = [pageBlock.model.id, ...blockPath];
+    const path = [rootElement.model.id, ...blockPath];
     const blockElement = this.editorHost.view.viewFromPath('block', path);
     if (!blockElement) return;
 
@@ -587,11 +587,11 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
         left: offsetX,
         scrollTop,
         scrollLeft,
-      } = pageBlock.viewport;
+      } = rootElement.viewport;
 
       if (!this._highlightMask) {
         this._highlightMask = document.createElement('div');
-        pageBlock.appendChild(this._highlightMask);
+        rootElement.appendChild(this._highlightMask);
       }
 
       Object.assign(this._highlightMask.style, {
@@ -674,7 +674,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
                 .note=${note.note}
                 .number=${idx + 1}
                 .index=${note.index}
-                .page=${this.page}
+                .doc=${this.doc}
                 .editorMode=${this.mode}
                 .status=${selectedNotesSet.has(note.note.id)
                   ? this._dragging
@@ -703,7 +703,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
                   .note=${note.note}
                   .number=${idx + 1}
                   .index=${note.index}
-                  .page=${this.page}
+                  .doc=${this.doc}
                   .invisible=${true}
                   .showPreviewIcon=${this.showPreviewIcon}
                   .enableNotesSorting=${this.enableNotesSorting}

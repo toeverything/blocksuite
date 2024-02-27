@@ -2,8 +2,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 
-import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
-import type { AffineModalWidget } from '../../page-block/widgets/modal/modal.js';
+import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
+import type { AffineModalWidget } from '../../root-block/widgets/modal/modal.js';
 import type { ImageBlockComponent } from '../image-block.js';
 import { GradioApp } from './gradio-app.js';
 
@@ -13,14 +13,14 @@ function createGradioApp() {
   return app;
 }
 
-function getPageElement(host: EditorHost) {
-  assertExists(host.page.root?.id);
+function getRootElement(host: EditorHost) {
+  assertExists(host.doc.root?.id);
 
-  const page = host.view.viewFromPath('block', [
-    host.page.root.id,
-  ]) as DocPageBlockComponent;
+  const rootElement = host.view.viewFromPath('block', [
+    host.doc.root.id,
+  ]) as PageRootBlockComponent;
 
-  return page;
+  return rootElement;
 }
 
 export function openLeditsEditor(blockElement: ImageBlockComponent) {
@@ -28,10 +28,10 @@ export function openLeditsEditor(blockElement: ImageBlockComponent) {
   if (!blob) {
     return;
   }
-  const pageElement = getPageElement(host);
+  const rootElement = getRootElement(host);
   const app = createGradioApp();
   const modal = (
-    pageElement.widgetElements['affine-modal-widget'] as AffineModalWidget
+    rootElement.widgetElements['affine-modal-widget'] as AffineModalWidget
   ).open({
     footer: [
       {
@@ -50,9 +50,9 @@ export function openLeditsEditor(blockElement: ImageBlockComponent) {
             modal.close();
           }
 
-          const blobManager = model.page.blob;
+          const blobManager = model.doc.blob;
           const sourceId = await blobManager.set(newBlob);
-          model.page.updateBlock(model, {
+          model.doc.updateBlock(model, {
             sourceId,
           });
           modal.close();

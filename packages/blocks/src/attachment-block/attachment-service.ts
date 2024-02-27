@@ -11,18 +11,18 @@ import {
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { isInsideEdgelessEditor } from '../_common/utils/query.js';
-import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
-import type { PageBlockComponent } from '../page-block/types.js';
-import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
+import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import type { RootBlockComponent } from '../root-block/types.js';
+import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
-} from '../page-block/widgets/drag-handle/drag-handle.js';
+} from '../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
-} from '../page-block/widgets/drag-handle/utils.js';
+} from '../root-block/widgets/drag-handle/utils.js';
 import type { AttachmentBlockComponent } from './attachment-block.js';
 import {
   type AttachmentBlockModel,
@@ -31,15 +31,15 @@ import {
 import { addSiblingAttachmentBlocks } from './utils.js';
 
 export class AttachmentService extends BlockService<AttachmentBlockModel> {
-  get pageBlockComponent(): PageBlockComponent {
-    const pageBlock = this.page.root;
-    assertExists(pageBlock);
+  get rootElement(): RootBlockComponent {
+    const rootModel = this.doc.root;
+    assertExists(rootModel);
 
-    const pageElement = this.std.view.viewFromPath('block', [
-      pageBlock.id,
-    ]) as PageBlockComponent | null;
-    assertExists(pageElement);
-    return pageElement;
+    const rootElement = this.std.view.viewFromPath('block', [
+      rootModel.id,
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
+    return rootElement;
   }
 
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
@@ -60,16 +60,15 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
         addSiblingAttachmentBlocks(
-          this.std.host as EditorHost,
+          this.host as EditorHost,
           attachmentFiles,
           this.maxFileSize,
           targetModel,
           place
         );
-      } else if (isInsideEdgelessEditor(this.std.host as EditorHost)) {
-        const edgelessPage = this
-          .pageBlockComponent as EdgelessPageBlockComponent;
-        await edgelessPage.addAttachments(attachmentFiles, point);
+      } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
+        const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+        await edgelessRoot.addAttachments(attachmentFiles, point);
       }
 
       this.slots.onFilesDropped.emit(attachmentFiles);
@@ -162,7 +161,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
         const embed = blockComponent.model.embed;
         if (embed) {
           style = 'cubeThick';
-          editorHost.page.updateBlock(blockComponent.model, {
+          editorHost.doc.updateBlock(blockComponent.model, {
             style,
             embed: false,
           });

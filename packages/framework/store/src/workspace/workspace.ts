@@ -4,8 +4,8 @@ import * as Y from 'yjs';
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
 import { blob, indexer, test, WorkspaceAddonType } from './addon/index.js';
-import { type PageMeta, WorkspaceMeta } from './meta.js';
-import { Page } from './page.js';
+import { Doc } from './doc.js';
+import { type DocMeta, WorkspaceMeta } from './meta.js';
 import { Store, type StoreOptions } from './store.js';
 
 export type WorkspaceOptions = StoreOptions & {
@@ -24,9 +24,9 @@ export class Workspace extends WorkspaceAddonType {
   meta: WorkspaceMeta;
 
   slots = {
-    pagesUpdated: new Slot(),
-    pageAdded: new Slot<string>(),
-    pageRemoved: new Slot<string>(),
+    docAdded: new Slot<string>(),
+    docUpdated: new Slot(),
+    docRemoved: new Slot<string>(),
   };
 
   constructor(storeOptions: WorkspaceOptions) {
@@ -36,7 +36,7 @@ export class Workspace extends WorkspaceAddonType {
     this._store = new Store(storeOptions);
 
     this.meta = new WorkspaceMeta(this.doc);
-    this._bindPageMetaEvents();
+    this._bindDocMetaEvents();
   }
 
   get id() {
@@ -65,8 +65,8 @@ export class Workspace extends WorkspaceAddonType {
     return this._store.awarenessStore;
   }
 
-  get pages() {
-    return this._store.spaces as Map<string, Page>;
+  get docs() {
+    return this._store.spaces as Map<string, Doc>;
   }
 
   get doc() {
@@ -89,50 +89,50 @@ export class Workspace extends WorkspaceAddonType {
     return this.store.awarenessSync;
   }
 
-  private _hasPage(pageId: string) {
-    return this.pages.has(pageId);
+  private _hasDoc(docId: string) {
+    return this.docs.has(docId);
   }
 
-  getPage(pageId: string): Page | null {
-    const space = this.pages.get(pageId) as Page | undefined;
+  getDoc(docId: string): Doc | null {
+    const space = this.docs.get(docId) as Doc | undefined;
 
     return space ?? null;
   }
 
-  private _bindPageMetaEvents() {
-    this.meta.pageMetaAdded.on(pageId => {
-      const page = new Page({
-        id: pageId,
+  private _bindDocMetaEvents() {
+    this.meta.docMetaAdded.on(docId => {
+      const doc = new Doc({
+        id: docId,
         workspace: this,
         doc: this.doc,
         awarenessStore: this.awarenessStore,
         idGenerator: this._store.idGenerator,
       });
-      this._store.addSpace(page);
-      this.slots.pageAdded.emit(page.id);
+      this._store.addSpace(doc);
+      this.slots.docAdded.emit(doc.id);
     });
 
-    this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
+    this.meta.docMetaUpdated.on(() => this.slots.docUpdated.emit());
 
-    this.meta.pageMetaRemoved.on(id => {
-      const page = this.getPage(id) as Page;
-      this._store.removeSpace(page);
-      page.remove();
-      this.slots.pageRemoved.emit(id);
+    this.meta.docMetaRemoved.on(id => {
+      const doc = this.getDoc(id) as Doc;
+      this._store.removeSpace(doc);
+      doc.remove();
+      this.slots.docRemoved.emit(id);
     });
   }
 
   /**
-   * By default, only an empty page will be created.
+   * By default, only an empty doc will be created.
    * If the `init` parameter is passed, a `surface`, `note`, and `paragraph` block
-   * will be created in the page simultaneously.
+   * will be created in the doc simultaneously.
    */
-  createPage(options: { id?: string } | string = {}) {
+  createDoc(options: { id?: string } | string = {}) {
     // Migration guide
     if (typeof options === 'string') {
       options = { id: options };
       console.warn(
-        '`createPage(pageId)` is deprecated, use `createPage()` directly or `createPage({ id: pageId })` instead'
+        '`createDoc(docId)` is deprecated, use `createDoc()` directly or `createDoc({ id: docId })` instead'
       );
       console.warn(
         'More details see https://github.com/toeverything/blocksuite/pull/2272'
@@ -140,39 +140,39 @@ export class Workspace extends WorkspaceAddonType {
     }
     // End of migration guide. Remove this in the next major version
 
-    const { id: pageId = this.idGenerator() } = options;
-    if (this._hasPage(pageId)) {
-      throw new Error('page already exists');
+    const { id: docId = this.idGenerator() } = options;
+    if (this._hasDoc(docId)) {
+      throw new Error('dac already exists');
     }
 
-    this.meta.addPageMeta({
-      id: pageId,
+    this.meta.addDocMeta({
+      id: docId,
       title: '',
       createDate: +new Date(),
       tags: [],
     });
-    return this.getPage(pageId) as Page;
+    return this.getDoc(docId) as Doc;
   }
 
-  /** Update page meta state. Note that this intentionally does not mutate page state. */
-  setPageMeta(
-    pageId: string,
-    // You should not update subpageIds directly.
-    props: Partial<PageMeta>
+  /** Update doc meta state. Note that this intentionally does not mutate doc state. */
+  setDocMeta(
+    docId: string,
+    // You should not update subDocIds directly.
+    props: Partial<DocMeta>
   ) {
-    this.meta.setPageMeta(pageId, props);
+    this.meta.setDocMeta(docId, props);
   }
 
-  removePage(pageId: string) {
-    const pageMeta = this.meta.getPageMeta(pageId);
-    assertExists(pageMeta);
+  removeDoc(docId: string) {
+    const docMeta = this.meta.getDocMeta(docId);
+    assertExists(docMeta);
 
-    const page = this.getPage(pageId);
-    if (!page) return;
+    const doc = this.getDoc(docId);
+    if (!doc) return;
 
-    page.dispose();
-    this.meta.removePageMeta(pageId);
-    this._store.removeSpace(page);
+    doc.dispose();
+    this.meta.removeDocMeta(docId);
+    this._store.removeSpace(doc);
   }
 
   /**

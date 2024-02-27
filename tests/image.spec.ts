@@ -201,7 +201,7 @@ test('popup menu should follow position of image when scrolling', async ({
 
   await page.evaluate(
     ([rect]) => {
-      const viewport = document.querySelector('.affine-doc-viewport');
+      const viewport = document.querySelector('.affine-page-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -249,11 +249,11 @@ const mockImageId = '_e2e_test_image_id_';
 
 async function initMockImage(page: Page) {
   await page.evaluate(() => {
-    const { page } = window;
-    page.captureSync();
-    const pageId = page.addBlock('affine:page');
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    page.addBlock(
+    const { doc } = window;
+    doc.captureSync();
+    const rootId = doc.addBlock('affine:page');
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    doc.addBlock(
       'affine:image',
       {
         sourceId: '_e2e_test_image_id_',
@@ -262,7 +262,7 @@ async function initMockImage(page: Page) {
       },
       noteId
     );
-    page.captureSync();
+    doc.captureSync();
   });
 }
 

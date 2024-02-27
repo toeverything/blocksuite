@@ -53,9 +53,9 @@ export function hardEnter(
   e: KeyboardEvent,
   shortKey = false
 ) {
-  const page = model.page;
+  const doc = model.doc;
   e.stopPropagation();
-  const parent = page.getParent(model);
+  const parent = doc.getParent(model);
   const isLastChild = parent?.lastChild() === model;
   const isEmptyList =
     matchFlavours(model, ['affine:list']) && model.text.length === 0;

@@ -6,7 +6,7 @@ import { Boxed } from '../reactive/boxed.js';
 import { Text } from '../reactive/text.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
 import type { YBlock } from '../workspace/block/block.js';
-import type { Page } from '../workspace/index.js';
+import type { Doc } from '../workspace/index.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();
@@ -177,7 +177,10 @@ export class BlockModel<
   version!: number;
   flavour!: string;
   role!: RoleType;
-  page!: Page;
+  /**
+   * @deprecated use doc instead
+   */
+  page!: Doc;
   id!: string;
   yBlock!: YBlock;
   keys!: string[];
@@ -192,6 +195,14 @@ export class BlockModel<
   deleted = new Slot();
   propsUpdated = new Slot<{ key: string }>();
   childrenUpdated = new Slot();
+
+  get doc() {
+    return this.page;
+  }
+
+  set doc(doc: Doc) {
+    this.page = doc;
+  }
 
   get childMap() {
     return this.children.reduce((map, child, index) => {
@@ -208,7 +219,7 @@ export class BlockModel<
 
     const children: BlockModel[] = [];
     block.forEach(id => {
-      const child = this.page.getBlockById(id);
+      const child = this.doc.getBlockById(id);
       if (!child) {
         return;
       }

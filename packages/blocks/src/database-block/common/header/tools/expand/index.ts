@@ -21,9 +21,9 @@ import { DatabaseSelection } from '../../../selection.js';
 export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
   const viewComponent = new DatabaseBlockModalPreview();
   viewComponent.database = database;
-  const root = document.querySelector('editor-host');
-  assertExists(root);
-  const modal = createModal(root);
+  const editorHost = document.querySelector('editor-host');
+  assertExists(editorHost);
+  const modal = createModal(editorHost);
   const close = () => {
     modal.remove();
   };
@@ -98,9 +98,7 @@ export class ExpandDatabaseBlockModal extends WithDisposable(
   protected override render(): unknown {
     if (
       this.closest('database-block-modal-preview') ||
-      !this.database?.page.awarenessStore.getFlag(
-        'enable_expand_database_block'
-      )
+      !this.database?.doc.awarenessStore.getFlag('enable_expand_database_block')
     ) {
       return;
     }

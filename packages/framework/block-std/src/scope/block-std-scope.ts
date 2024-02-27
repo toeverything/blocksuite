@@ -1,4 +1,4 @@
-import type { Page, Workspace } from '@blocksuite/store';
+import type { Doc, Workspace } from '@blocksuite/store';
 
 import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
@@ -10,11 +10,11 @@ import { ViewStore } from '../view/index.js';
 export interface BlockStdOptions {
   host: HTMLElement;
   workspace: Workspace;
-  page: Page;
+  doc: Doc;
 }
 
 export class BlockStdScope {
-  readonly page: Page;
+  readonly doc: Doc;
   readonly workspace: Workspace;
   readonly event: UIEventDispatcher;
   readonly selection: SelectionManager;
@@ -27,7 +27,7 @@ export class BlockStdScope {
   constructor(options: BlockStdOptions) {
     this.host = options.host;
     this.workspace = options.workspace;
-    this.page = options.page;
+    this.doc = options.doc;
     this.event = new UIEventDispatcher(this);
     this.selection = new SelectionManager(this);
     this.command = new CommandManager(this);

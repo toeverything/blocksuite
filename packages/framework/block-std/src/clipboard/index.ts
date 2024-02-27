@@ -2,8 +2,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type {
   BaseAdapter,
   BlockSnapshot,
+  Doc,
   JobMiddleware,
-  Page,
   Slice,
 } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
@@ -84,7 +84,7 @@ export class Clipboard {
 
   private _getSnapshotByPriority = async (
     getItem: (type: string) => string | File[],
-    page: Page,
+    doc: Doc,
     parent?: string,
     index?: number
   ) => {
@@ -112,15 +112,15 @@ export class Clipboard {
         const payload = {
           file: item,
           assets: job.assetsManager,
-          blockVersions: page.workspace.meta.blockVersions,
-          pageVersion: page.workspace.meta.pageVersion,
-          workspaceVersion: page.workspace.meta.workspaceVersion,
-          workspaceId: page.workspace.id,
-          pageId: page.id,
+          blockVersions: doc.workspace.meta.blockVersions,
+          pageVersion: doc.workspace.meta.pageVersion,
+          workspaceVersion: doc.workspace.meta.workspaceVersion,
+          workspaceId: doc.workspace.id,
+          pageId: doc.id,
         };
         const sliceSnapshot = await adapter.toSliceSnapshot(payload);
         if (sliceSnapshot) {
-          return job.snapshotToSlice(sliceSnapshot, page, parent, index);
+          return job.snapshotToSlice(sliceSnapshot, doc, parent, index);
         }
       }
     }
@@ -133,7 +133,7 @@ export class Clipboard {
 
   paste = async (
     event: ClipboardEvent,
-    page: Page,
+    doc: Doc,
     parent?: string,
     index?: number
   ) => {
@@ -144,7 +144,7 @@ export class Clipboard {
       const json = this.readFromClipboard(data);
       const slice = await this._getSnapshotByPriority(
         type => json[type],
-        page,
+        doc,
         parent,
         index
       );
@@ -154,7 +154,7 @@ export class Clipboard {
       const getDataByType = this._getDataByType(data);
       const slice = await this._getSnapshotByPriority(
         type => getDataByType(type),
-        page,
+        doc,
         parent,
         index
       );
@@ -226,12 +226,12 @@ export class Clipboard {
 
   pasteBlockSnapshot = async (
     snapshot: BlockSnapshot,
-    page: Page,
+    doc: Doc,
     parent?: string,
     index?: number
   ) => {
     const job = this._getJob();
-    return job.snapshotToBlock(snapshot, page, parent, index);
+    return job.snapshotToBlock(snapshot, doc, parent, index);
   };
 
   copySlice = async (slice: Slice) => {

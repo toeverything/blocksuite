@@ -136,22 +136,22 @@ The blue part owns the full capability to drive UI in complex collaborative appl
 
 Embracing the document-centric philosophy, we created the [BlockSuite](https://github.com/toeverything/blocksuite) project.
 
-In BlockSuite, documents are modeled as `page` objects. Each page holds a tree of blocks. Some editor presets can be used upon connecting to a page as following:
+In BlockSuite, documents are modeled as `doc` objects. Each doc holds a tree of blocks. Some editor presets can be used upon connecting to a doc as following:
 
 ```ts
-import { createEmptyPage, DocEditor } from '@blocksuite/presets';
+import { createEmptyDoc, PageEditor } from '@blocksuite/presets';
 
-// Initialize a `page` document
-const page = createEmptyPage().init();
+// Initialize a `doc` document
+const doc = createEmptyDoc().init();
 
 // Create an editor, then attach it to the document
-const editor = new DocEditor();
-editor.page = page;
+const editor = new PageEditor();
+editor.doc = doc;
 
 document.body.appendChild(editor);
 ```
 
-BlockSuite advocates for assembling the top-level `DocEditor` component from smaller editable components, as all editable components can connect to different nodes in the block tree document. For example, instead of using existing complex rich text editors, BlockSuite implemented a `@blocksuite/inline` rich text component that only supports rendering linear text sequences. Complex rich text content can be assembled from atomic inline editor components, as illustrated:
+BlockSuite advocates for assembling the top-level `PageEditor` component from smaller editable components, as all editable components can connect to different nodes in the block tree document. For example, instead of using existing complex rich text editors, BlockSuite implemented a `@blocksuite/inline` rich text component that only supports rendering linear text sequences. Complex rich text content can be assembled from atomic inline editor components, as illustrated:
 
 ![inline-example](../images/inline-example.png)
 
@@ -159,15 +159,15 @@ In the diagram, each inline editor instance connects to a `Y.Text` node in the d
 
 ![flat-inlines](../images/flat-inlines.png)
 
-Since various editors can be loaded and unloaded independently of the document, this allows BlockSuite to support switching between different editors using the same block tree document. Thus, when switching content between document editors and whiteboard editors (which we call `EdgelessEditor`), all operation history recorded on the page can be preserved, rather than reset:
+Since various editors can be loaded and unloaded independently of the document, this allows BlockSuite to support switching between different editors using the same block tree document. Thus, when switching content between document editors and whiteboard editors (which we call `EdgelessEditor`), all operation history recorded on the doc can be preserved, rather than reset:
 
-![showcase-doc-edgeless-editors](../images/showcase-doc-edgeless-editors.jpg)
+![showcase-page-edgeless-editors](../images/showcase-page-edgeless-editors.jpg)
 
-Moreover, the separation of document and editor also allows pages to be used independently of editors. This is why BlockSuite not only provides various editor UI components but also many peripheral UI components that rely on page state yet are not part of the editor. We refer to these components as _fragments_. The lifecycle of a fragment can be completely independent of the editor, and it can be implemented with a different technology stack than that used for the editor. For example, the right sidebar in the following diagram belongs to `OutlineFragment`, which facilitates panel arrangement by the application layer (rather than an all-in-one editor):
+Moreover, the separation of document and editor also allows docs to be used independently of editors. This is why BlockSuite not only provides various editor UI components but also many peripheral UI components that rely on doc state yet are not part of the editor. We refer to these components as _fragments_. The lifecycle of a fragment can be completely independent of the editor, and it can be implemented with a different technology stack than that used for the editor. For example, the right sidebar in the following diagram belongs to `OutlineFragment`, which facilitates panel arrangement by the application layer (rather than an all-in-one editor):
 
 ![showcase-fragments-1](../images/showcase-fragments-1.jpg)
 
-Furthermore, by supporting a document data layer independent of the editor, we are also able to split traditionally editor-embedded components into independent fragments, thus providing a more unopinionated and reusable `DocEditor`. Areas like the title and page info panel, intuitively part of the editor's internals, can also become examples of fragments:
+Furthermore, by supporting a document data layer independent of the editor, we are also able to split traditionally editor-embedded components into independent fragments, thus providing a more unopinionated and reusable `PageEditor`. Areas like the title and doc info panel, intuitively part of the editor's internals, can also become examples of fragments:
 
 ![showcase-fragments-2](../images/showcase-fragments-2.jpg)
 

@@ -5,16 +5,16 @@ import { render } from 'lit';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
-import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
+import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
-} from '../page-block/widgets/drag-handle/drag-handle.js';
+} from '../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
-} from '../page-block/widgets/drag-handle/utils.js';
+} from '../root-block/widgets/drag-handle/utils.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import {
   type BookmarkBlockModel,

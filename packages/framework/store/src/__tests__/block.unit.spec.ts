@@ -21,7 +21,7 @@ const pageSchema = defineBlockSchema({
     version: 1,
   },
 });
-type PageModel = SchemaToModel<typeof pageSchema>;
+type RootModel = SchemaToModel<typeof pageSchema>;
 schema.register([pageSchema]);
 
 test('init block without props should add default props', () => {
@@ -32,7 +32,7 @@ test('init block without props should add default props', () => {
   yBlock.set('sys:children', new Y.Array());
 
   const block = new Block(schema, yBlock);
-  const model = block.model as PageModel;
+  const model = block.model as RootModel;
 
   expect(yBlock.get('prop:count')).toBe(0);
   expect(model.count).toBe(0);

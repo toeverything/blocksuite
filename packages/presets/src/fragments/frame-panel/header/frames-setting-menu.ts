@@ -1,4 +1,4 @@
-import { type EdgelessPageBlockComponent } from '@blocksuite/blocks';
+import { type EdgelessRootBlockComponent } from '@blocksuite/blocks';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, type PropertyValues } from 'lit';
@@ -71,7 +71,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent | null;
+  edgeless!: EdgelessRootBlockComponent | null;
 
   @property({ attribute: false })
   editorHost!: EditorHost;
@@ -85,12 +85,12 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   @state()
   hideToolbar = false;
 
-  private get _pageService() {
+  private get _rootService() {
     return this.editorHost.spec.getService('affine:page');
   }
 
   private _tryRestoreSettings() {
-    const { editSession } = this._pageService;
+    const { editSession } = this._rootService;
     const blackBackground = editSession.getItem('presentBlackBackground');
 
     this.blackBackground = blackBackground ? blackBackground : true;
@@ -110,7 +110,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       fillScreen: this.fillScreen,
     });
-    this._pageService.editSession.setItem('presentFillScreen', this.fillScreen);
+    this._rootService.editSession.setItem('presentFillScreen', this.fillScreen);
   };
 
   private _onHideToolBarChange = (checked: boolean) => {
@@ -118,7 +118,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       hideToolbar: this.hideToolbar,
     });
-    this._pageService.editSession.setItem(
+    this._rootService.editSession.setItem(
       'presentHideToolbar',
       this.hideToolbar
     );

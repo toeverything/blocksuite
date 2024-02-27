@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
-  EdgelessPageBlockComponent,
+  EdgelessRootBlockComponent,
   ElementModel,
   NoteBlockModel,
 } from '@blocksuite/blocks';
@@ -9,14 +9,14 @@ import type { BlockElement } from '@blocksuite/lit';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
-import { addNote, getPageRootBlock, getSurface } from '../utils/edgeless.js';
+import { addNote, getDocRootBlock, getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
-let service!: EdgelessPageBlockComponent['service'];
+let service!: EdgelessRootBlockComponent['service'];
 
 beforeEach(async () => {
   const cleanup = await setupEditor('edgeless');
-  service = getPageRootBlock(window.page, window.editor, 'edgeless').service;
+  service = getDocRootBlock(window.doc, window.editor, 'edgeless').service;
 
   return async () => {
     await wait(100);
@@ -46,7 +46,7 @@ test('new added frame should not affect layer', async () => {
 });
 
 test('add new edgeless blocks or canvas elements should update layer automatically', async () => {
-  addNote(page);
+  addNote(doc);
 
   service.addElement('shape', {
     shapeType: 'rect',
@@ -58,7 +58,7 @@ test('add new edgeless blocks or canvas elements should update layer automatical
 });
 
 test('delete element should update layer automatically', () => {
-  const id = addNote(page);
+  const id = addNote(doc);
   const canvasElId = service.addElement('shape', {
     shapeType: 'rect',
   });
@@ -73,7 +73,7 @@ test('delete element should update layer automatically', () => {
 });
 
 test('change element should update layer automatically', async () => {
-  const id = addNote(page);
+  const id = addNote(doc);
   const canvasElId = service.addElement('shape', {
     shapeType: 'rect',
   });
@@ -108,13 +108,13 @@ test('new added notes should be placed under the topmost canvas layer', async ()
   service.addElement('shape', {
     shapeType: 'rect',
   });
-  addNote(page, {
+  addNote(doc, {
     index: service.layer.generateIndex('affine:note'),
   });
-  addNote(page, {
+  addNote(doc, {
     index: service.layer.generateIndex('affine:note'),
   });
-  addNote(page, {
+  addNote(doc, {
     index: service.layer.generateIndex('affine:note'),
   });
 
@@ -125,7 +125,7 @@ test('new added notes should be placed under the topmost canvas layer', async ()
 });
 
 test('new added canvas elements should be placed in the topmost canvas layer', async () => {
-  addNote(page);
+  addNote(doc);
   service.addElement('shape', {
     shapeType: 'rect',
   });
@@ -137,17 +137,17 @@ test('new added canvas elements should be placed in the topmost canvas layer', a
 });
 
 test("there should be at lease one layer in canvasLayers property even there's no canvas element", () => {
-  addNote(page);
+  addNote(doc);
 
   expect(service.layer.canvasLayers.length).toBe(1);
 });
 
 test('if the topmost layer is canvas layer, the number of layers in the canvasLayers prop should has the same with the number of canvas layer in the layers prop', () => {
-  addNote(page);
+  addNote(doc);
   service.addElement('shape', {
     shapeType: 'rect',
   });
-  addNote(page, {
+  addNote(doc, {
     index: service.layer.generateIndex('shape'),
   });
   service.addElement('shape', {
@@ -164,13 +164,13 @@ test('a new layer should be created in canvasLayers prop when the topmost layer 
   service.addElement('shape', {
     shapeType: 'rect',
   });
-  addNote(page, {
+  addNote(doc, {
     index: service.layer.generateIndex('shape'),
   });
   service.addElement('shape', {
     shapeType: 'rect',
   });
-  addNote(page, {
+  addNote(doc, {
     index: service.layer.generateIndex('shape'),
   });
 
@@ -185,13 +185,13 @@ describe('layer reorder functionality', () => {
       service.addElement('shape', {
         shapeType: 'rect',
       }),
-      addNote(page, {
+      addNote(doc, {
         index: service.layer.generateIndex('shape'),
       }),
       service.addElement('shape', {
         shapeType: 'rect',
       }),
-      addNote(page, {
+      addNote(doc, {
         index: service.layer.generateIndex('shape'),
       }),
     ];
@@ -339,13 +339,13 @@ describe('layer reorder functionality', () => {
 });
 
 test('indexed canvas should be inserted into edgeless portal when switch to edgeless mode', async () => {
-  let surface = getSurface(page, editor);
+  let surface = getSurface(doc, editor);
 
   service.addElement('shape', {
     shapeType: 'rect',
   });
 
-  addNote(page, {
+  addNote(doc, {
     index: service.layer.generateIndex('shape'),
   });
 
@@ -360,13 +360,13 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
   editor.mode = 'edgeless';
   await wait();
 
-  surface = getSurface(page, editor);
+  surface = getSurface(doc, editor);
   expect(
-    getSurface(page, editor).edgeless.pageBlockContainer.canvasSlot.children
+    getSurface(doc, editor).edgeless.rootElementContainer.canvasSlot.children
       .length
   ).toBe(1);
 
-  const indexedCanvas = getSurface(page, editor).edgeless.pageBlockContainer
+  const indexedCanvas = getSurface(doc, editor).edgeless.rootElementContainer
     .canvasSlot.children[0] as HTMLCanvasElement;
 
   expect(indexedCanvas.width).toBe(surface.renderer.canvas.width);
@@ -401,7 +401,7 @@ test('the actual rendering order of blocks should satisfy the logic order of the
   ];
 
   indexes.forEach(index => {
-    addNote(page, {
+    addNote(doc, {
       index,
     });
   });
@@ -411,9 +411,11 @@ test('the actual rendering order of blocks should satisfy the logic order of the
   editor.mode = 'edgeless';
   await wait();
 
-  const edgeless = getPageRootBlock(page, editor, 'edgeless');
+  const edgeless = getDocRootBlock(doc, editor, 'edgeless');
   const blocks = Array.from(
-    edgeless.pageBlockContainer.layer.querySelectorAll('[data-portal-block-id]')
+    edgeless.rootElementContainer.layer.querySelectorAll(
+      '[data-portal-block-id]'
+    )
   ) as BlockElement[];
 
   expect(blocks.length).toBe(indexes.length);
@@ -437,7 +439,7 @@ describe('index generator', () => {
     const shapeId = service.addElement('shape', {
       shapeType: 'rect',
     });
-    const noteId = addNote(page, {
+    const noteId = addNote(doc, {
       index: service.layer.generateIndex('affine:block'),
     });
 
