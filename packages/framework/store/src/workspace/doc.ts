@@ -334,7 +334,7 @@ export class Doc extends Space<FlatBlockMap> {
     return ids;
   }
 
-  addBlock<Key extends BlockSuite.ModelKeys>(
+  addBlock<Key extends BlockSuite.Flavour>(
     flavour: Key,
     blockProps?: BlockSuite.ModelProps<BlockSuite.BlockModels[Key]>,
     parent?: BlockModel | string | null,
@@ -822,7 +822,7 @@ declare global {
   namespace BlockSuite {
     interface BlockModels {}
 
-    type ModelKeys = string & keyof BlockModels;
+    type Flavour = string & keyof BlockModels;
 
     type ModelProps<Model> = Partial<
       Model extends BlockModel<infer U> ? U : never

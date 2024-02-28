@@ -14,12 +14,11 @@ import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js'
 import { createDefaultDoc } from '../../../_common/utils/init.js';
 import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';
-import type { Flavour } from '../../../models.js';
 import { showImportModal } from './import-doc/index.js';
 
 export type LinkedDocOptions = {
   triggerKeys: string[];
-  ignoreBlockTypes: Flavour[];
+  ignoreBlockTypes: BlockSuite.Flavour[];
   convertTriggerKey: boolean;
   getMenus: (ctx: {
     editorHost: EditorHost;

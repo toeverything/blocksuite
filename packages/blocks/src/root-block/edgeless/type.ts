@@ -2,7 +2,6 @@ import type { EditorHost } from '@blocksuite/lit';
 import { BlockModel } from '@blocksuite/store';
 
 import type { EdgelessSelectableProps } from '../../_common/edgeless/mixin/edgeless-selectable.js';
-import type { SurfaceBlockModel } from '../../models.js';
 import type { ElementModel } from '../../surface-block/element-model/base.js';
 import type { GroupElementModel } from '../../surface-block/element-model/group.js';
 import {
@@ -13,6 +12,7 @@ import {
   polygonNearestPoint,
   rotatePoints,
 } from '../../surface-block/index.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PointLocation } from '../../surface-block/utils/point-location.js';
 import type { IVec } from '../../surface-block/utils/vec.js';

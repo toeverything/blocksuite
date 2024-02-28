@@ -10,12 +10,12 @@ import {
   isInsidePageEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import type { RootBlockModel } from '../../models.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import { getBlocksInFrame } from '../../root-block/edgeless/frame-manager.js';
 import type { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
+import type { RootBlockModel } from '../../root-block/index.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { ElementModel } from '../../surface-block/element-model/index.js';
 import type { Renderer } from '../../surface-block/index.js';

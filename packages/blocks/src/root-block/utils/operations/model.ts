@@ -2,8 +2,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { type BlockModel, Text } from '@blocksuite/store';
 
-import type { Flavour } from '../../../models.js';
-
 /**
  * This file should only contain functions that are used to
  * operate on block models in store, which means that this operations
@@ -41,7 +39,7 @@ export function mergeToCodeModel(models: BlockModel[]) {
 
 export function transformModel(
   model: BlockModel,
-  flavour: Flavour,
+  flavour: BlockSuite.Flavour,
   props?: Parameters<Doc['addBlock']>[1]
 ) {
   const doc = model.doc;
