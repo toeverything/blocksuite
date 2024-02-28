@@ -72,10 +72,6 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
-  static slots = {
-    activeChanged: new Slot(),
-  };
-
   slots = {
     parentScaleChanged: new Slot<number>(),
     editorHostPanned: new Slot(),
@@ -100,31 +96,6 @@ export class UIEventDispatcher {
   get cumulativeParentScale() {
     return this._pointerControl.cumulativeParentScale;
   }
-
-  private static _activeDispatcher: UIEventDispatcher | null = null;
-
-  get isActive() {
-    return UIEventDispatcher._activeDispatcher === this;
-  }
-
-  activate = () => {
-    const prevDispatcher = UIEventDispatcher._activeDispatcher;
-    if (prevDispatcher === this) return;
-
-    UIEventDispatcher._activeDispatcher = this;
-    UIEventDispatcher.slots.activeChanged.emit();
-    prevDispatcher?.std.selection.clear();
-  };
-
-  deactivate = () => {
-    const prevDispatcher = UIEventDispatcher._activeDispatcher;
-    if (!prevDispatcher) return;
-    if (prevDispatcher !== this) return;
-
-    UIEventDispatcher._activeDispatcher = null;
-    UIEventDispatcher.slots.activeChanged.emit();
-    prevDispatcher.std.selection.clear();
-  };
 
   mount() {
     if (this.disposables.disposed) {

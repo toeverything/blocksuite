@@ -19,6 +19,7 @@ import { isCanvasElement, isNoteBlock } from './utils/query.js';
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override rootElement: EdgelessRootBlockComponent) {
     super(rootElement);
+
     this.rootElement.bindHotKey(
       {
         v: () => {
@@ -219,7 +220,40 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         global: true,
       }
     );
+
+    this._bindUndoRedo();
+
     this._bindToggleHand();
+  }
+
+  private _undoRedoActive = false;
+  private _bindUndoRedo() {
+    this.rootElement.disposables.addFromEvent(
+      this.rootElement,
+      'mouseenter',
+      () => {
+        this._undoRedoActive = true;
+      }
+    );
+    this.rootElement.disposables.addFromEvent(
+      this.rootElement,
+      'mouseleave',
+      () => {
+        this._undoRedoActive = false;
+      }
+    );
+    this.rootElement.disposables.addFromEvent(document, 'keydown', event => {
+      if (this._undoRedoActive) {
+        if (event.key === 'z' && event.metaKey) {
+          event.preventDefault();
+          if (event.shiftKey) {
+            this.rootElement.doc.redo();
+          } else {
+            this.rootElement.doc.undo();
+          }
+        }
+      }
+    });
   }
 
   private _bindToggleHand() {

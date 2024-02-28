@@ -17,17 +17,17 @@ export class RangeControl {
       this._selectionChange
     );
     this._dispatcher.disposables.addFromEvent(
-      document,
+      this._dispatcher.host,
       'compositionstart',
       this._compositionStart
     );
     this._dispatcher.disposables.addFromEvent(
-      document,
+      this._dispatcher.host,
       'compositionend',
       this._compositionEnd
     );
     this._dispatcher.disposables.addFromEvent(
-      document,
+      this._dispatcher.host,
       'compositionupdate',
       this._compositionUpdate
     );
@@ -56,7 +56,11 @@ export class RangeControl {
   };
 
   private _selectionChange = (event: Event) => {
-    if (!this._dispatcher.isActive) return;
+    const selection = document.getSelection();
+    if (!selection) return;
+
+    if (!selection.containsNode(this._dispatcher.host, true)) return;
+    if (selection.containsNode(this._dispatcher.host)) return;
 
     const scope = this._buildScope('selectionChange');
 

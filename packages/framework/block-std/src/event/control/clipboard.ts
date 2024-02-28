@@ -18,14 +18,24 @@ export class ClipboardControl {
   }
 
   listen() {
-    this._dispatcher.disposables.addFromEvent(document, 'cut', this._cut);
-    this._dispatcher.disposables.addFromEvent(document, 'copy', this._copy);
-    this._dispatcher.disposables.addFromEvent(document, 'paste', this._paste);
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'cut',
+      this._cut
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'copy',
+      this._copy
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'paste',
+      this._paste
+    );
   }
 
   private _cut = (event: ClipboardEvent) => {
-    if (!this._dispatcher.isActive) return;
-
     const clipboardEventState = new ClipboardEventState({
       event,
     });
@@ -36,8 +46,6 @@ export class ClipboardControl {
   };
 
   private _copy = (event: ClipboardEvent) => {
-    if (!this._dispatcher.isActive) return;
-
     const clipboardEventState = new ClipboardEventState({
       event,
     });
@@ -48,8 +56,6 @@ export class ClipboardControl {
   };
 
   private _paste = (event: ClipboardEvent) => {
-    if (!this._dispatcher.isActive) return;
-
     const clipboardEventState = new ClipboardEventState({
       event,
     });

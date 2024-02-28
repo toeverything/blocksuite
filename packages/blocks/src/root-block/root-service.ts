@@ -121,53 +121,6 @@ export class RootService extends BlockService<RootBlockModel> {
   override mounted() {
     super.mounted();
 
-    this.handleEvent(
-      'selectionChange',
-      () => {
-        const viewport = this.viewportElement;
-        if (!viewport) return;
-
-        const selection = document.getSelection();
-        if (!selection || !selection.rangeCount) return;
-        const range = selection.getRangeAt(0);
-
-        const startElement =
-          range.startContainer instanceof Element
-            ? range.startContainer
-            : range.startContainer.parentElement;
-        if (!startElement) return;
-
-        if (
-          startElement === document.documentElement ||
-          startElement === document.body
-        )
-          return;
-
-        if (startElement.closest('.blocksuite-overlay')) return;
-
-        if (!viewport.contains(startElement)) {
-          this.std.event.deactivate();
-          return;
-        }
-
-        const endElement =
-          range.endContainer instanceof Element
-            ? range.endContainer
-            : range.endContainer.parentElement;
-        if (!endElement) return;
-
-        if (!viewport.contains(endElement)) {
-          this.std.event.deactivate();
-          return;
-        }
-
-        this.std.event.activate();
-      },
-      {
-        global: true,
-      }
-    );
-
     this.std.command
       .add('getBlockIndex', getBlockIndexCommand)
       .add('getNextBlock', getNextBlockCommand)

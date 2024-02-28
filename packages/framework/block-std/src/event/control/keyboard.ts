@@ -24,17 +24,25 @@ export class KeyboardControl {
   }
 
   listen() {
-    this._dispatcher.disposables.addFromEvent(document, 'keydown', this._down);
-    this._dispatcher.disposables.addFromEvent(document, 'keyup', this._up);
     this._dispatcher.disposables.addFromEvent(
-      document,
+      this._dispatcher.host,
+      'keydown',
+      this._down
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'keyup',
+      this._up
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
       'compositionstart',
       () => {
         this.composition = true;
       }
     );
     this._dispatcher.disposables.addFromEvent(
-      document,
+      this._dispatcher.host,
       'compositionend',
       () => {
         this.composition = false;
@@ -57,8 +65,6 @@ export class KeyboardControl {
   }
 
   private _down = (event: KeyboardEvent) => {
-    if (!this._dispatcher.isActive) return;
-
     const keyboardEventState = new KeyboardEventState({
       event,
       composing: this.composition,
@@ -70,8 +76,6 @@ export class KeyboardControl {
   };
 
   private _up = (event: KeyboardEvent) => {
-    if (!this._dispatcher.isActive) return;
-
     const keyboardEventState = new KeyboardEventState({
       event,
       composing: this.composition,

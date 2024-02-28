@@ -733,7 +733,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
       const el = this.service.getElementById(surface.elements[0]);
       if (isCanvasElement(el)) {
-        this.host.event.activate();
         return true;
       }
 
