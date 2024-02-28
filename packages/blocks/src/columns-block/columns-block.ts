@@ -80,6 +80,9 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
   @state()
   dragTargetIndex: number | null = null;
 
+  @state()
+  dragging = false;
+
   @query('.affine-block-columns-grid')
   grid!: HTMLElement;
 
@@ -127,7 +130,10 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
     this.disposables.add(
       AffineDragHandleWidget.registerOption({
         flavour: ColumnsBlockSchema.model.flavour,
-
+        onDragStart: () => {
+          this.dragging = true;
+          return false;
+        },
         onDragMove: state => {
           if (this.model.children.length === MAX_COLUMN_NUMBER) return false;
 
@@ -169,6 +175,7 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
         onDragEnd: ({ state, draggingElements }) => {
           const targetIndex = this.dragTargetIndex;
           this.dragTargetIndex = null;
+          this.dragging = false;
 
           if (targetIndex !== null) {
             const columnNoteId = this._addColumn(targetIndex, false);
@@ -392,8 +399,7 @@ export class ColumnsBlockComponent extends BlockElement<ColumnsBlockModel> {
                 ?disabledaddcolumn=${this.pixelSizes.length >=
                 MAX_COLUMN_NUMBER}
                 ?disabled=${this.doc.readonly}
-                ?disabledResize=${child.disabledResize ||
-                this.dragTargetIndex !== null}
+                ?disabledResize=${child.disabledResize || this.dragging}
                 ?isDragTarget=${this.dragTargetIndex === child.index}
                 @pointerdown=${(e: PointerEvent) => {
                   if (child.disabledResize) return;
