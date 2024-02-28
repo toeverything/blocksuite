@@ -1,4 +1,3 @@
-import { __unstableSchemas } from '@blocksuite/blocks/schemas';
 import * as globalUtils from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 

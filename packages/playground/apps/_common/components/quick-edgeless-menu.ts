@@ -420,7 +420,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   </sl-menu>
                 </sl-menu-item>
                 <sl-menu-item @click=${this._toggleDarkMode}>
-                  Toggle Dark Mode
+                  Toggle ${this._dark ? 'Light' : 'Dark'} Mode
                   <sl-icon
                     slot="prefix"
                     name=${this._dark ? 'moon' : 'brightness-high'}

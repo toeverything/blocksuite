@@ -40,9 +40,6 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   FrameBlockSchema,
   DatabaseBlockSchema,
   SurfaceRefBlockSchema,
-];
-
-export const __unstableSchemas = [
   DataViewBlockSchema,
   AttachmentBlockSchema,
   EmbedYoutubeBlockSpec.schema,
@@ -52,4 +49,4 @@ export const __unstableSchemas = [
   EmbedLinkedDocBlockSpec.schema,
   EmbedSyncedDocBlockSpec.schema,
   EmbedLoomBlockSpec.schema,
-] satisfies z.infer<typeof BlockSchema>[];
+];

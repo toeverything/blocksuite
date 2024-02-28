@@ -131,9 +131,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     if (this._draggingElement) {
       const draggingElement = this._draggingElement;
 
-      this._doc.transact(() => {
-        draggingElement.pop('xywh');
-      });
+      draggingElement.pop('xywh');
     }
 
     const id = this._draggingElementId;

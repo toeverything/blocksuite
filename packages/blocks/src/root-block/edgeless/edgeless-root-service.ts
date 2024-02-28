@@ -33,10 +33,10 @@ import {
 } from './services/template-middlewares.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
-import type {
+import {
   EdgelessBlockModel,
-  EdgelessModel,
-  HitTestOptions,
+  type EdgelessModel,
+  type HitTestOptions,
 } from './type.js';
 import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
 import { getCursorMode } from './utils/query.js';
@@ -421,7 +421,14 @@ export class EdgelessRootService extends RootService {
   reorderElement(element: EdgelessModel, direction: ReorderingDirection) {
     const index = this._layer.getReorderedIndex(element, direction);
 
-    element.index = index;
+    // block should be updated in transaction
+    if (element instanceof EdgelessBlockModel) {
+      this.doc.transact(() => {
+        element.index = index;
+      });
+    } else {
+      element.index = index;
+    }
   }
 
   createGroup(elements: EdgelessModel[] | string[]) {
