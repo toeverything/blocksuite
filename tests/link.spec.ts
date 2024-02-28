@@ -125,17 +125,17 @@ test('basic link', async ({ page }) => {
 async function createLinkBlock(page: Page, str: string, link: string) {
   const id = await page.evaluate(
     ([str, link]) => {
-      const { page } = window;
-      const pageId = page.addBlock('affine:page', {
-        title: new page.Text('title'),
+      const { doc } = window;
+      const rootId = doc.addBlock('affine:page', {
+        title: new doc.Text('title'),
       });
-      const noteId = page.addBlock('affine:note', {}, pageId);
+      const noteId = doc.addBlock('affine:note', {}, rootId);
 
-      const text = page.Text.fromDelta([
+      const text = doc.Text.fromDelta([
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);
-      const id = page.addBlock(
+      const id = doc.addBlock(
         'affine:paragraph',
         { type: 'text', text: text },
         noteId

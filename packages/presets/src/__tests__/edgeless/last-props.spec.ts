@@ -1,24 +1,24 @@
 import type {
   BrushElementModel,
   ConnectorElementModel,
-  EdgelessPageBlockComponent,
+  EdgelessRootBlockComponent,
   ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { getPageRootBlock } from '../utils/edgeless.js';
+import { getDocRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 describe('apply last props', () => {
-  let edgelessPage!: EdgelessPageBlockComponent;
-  let service!: EdgelessPageBlockComponent['service'];
+  let edgelessRoot!: EdgelessRootBlockComponent;
+  let service!: EdgelessRootBlockComponent['service'];
 
   beforeEach(async () => {
     sessionStorage.removeItem('blocksuite:prop:record');
     const cleanup = await setupEditor('edgeless');
-    edgelessPage = getPageRootBlock(window.page, window.editor, 'edgeless');
-    service = edgelessPage.service;
+    edgelessRoot = getDocRootBlock(window.doc, window.editor, 'edgeless');
+    service = edgelessRoot.service;
     return cleanup;
   });
 

@@ -5,6 +5,6 @@ import type { EmbedLinkedDocModel } from './embed-linked-doc-model.js';
 
 export class EmbedLinkedDocService extends BlockService<EmbedLinkedDocModel> {
   slots = {
-    linkedDocCreated: new Slot<{ pageId: string }>(),
+    linkedDocCreated: new Slot<{ docId: string }>(),
   };
 }

@@ -1,7 +1,5 @@
 import { BlockService } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 
-import type { PageService } from '../index.js';
 import {
   type EmbedFigmaModel,
   EmbedFigmaStyles,
@@ -12,11 +10,8 @@ export class EmbedFigmaService extends BlockService<EmbedFigmaModel> {
   override mounted() {
     super.mounted();
 
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    pageService.registerEmbedBlockOptions({
+    const rootService = this.std.spec.getService('affine:page');
+    rootService.registerEmbedBlockOptions({
       flavour: this.flavour,
       urlRegex: figmaUrlRegex,
       styles: EmbedFigmaStyles,

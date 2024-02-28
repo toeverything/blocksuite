@@ -1,3 +1,6 @@
+import type { SurfaceBlockModel } from './surface-model.js';
+import type { SurfaceService } from './surface-service.js';
+
 export { normalizeShapeBound } from './canvas-renderer/element-renderer/index.js';
 export { Overlay, Renderer } from './canvas-renderer/renderer.js';
 export {
@@ -62,3 +65,14 @@ export {
 export { PointLocation } from './utils/point-location.js';
 export { type IVec, Vec } from './utils/vec.js';
 export * from './utils/xywh.js';
+
+declare global {
+  namespace BlockSuite {
+    interface BlockServices {
+      'affine:surface': SurfaceService;
+    }
+    interface BlockModels {
+      'affine:surface': SurfaceBlockModel;
+    }
+  }
+}

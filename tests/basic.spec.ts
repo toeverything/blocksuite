@@ -64,23 +64,23 @@ test(scoped`basic init with external text`, async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text('hello'),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text('hello'),
     });
-    const note = page.addBlock('affine:note', {}, pageId);
+    const note = doc.addBlock('affine:note', {}, rootId);
 
-    const text = new page.Text('world');
-    page.addBlock('affine:paragraph', { text }, note);
+    const text = new doc.Text('world');
+    doc.addBlock('affine:paragraph', { text }, note);
 
     const delta = [
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
-    page.addBlock(
+    doc.addBlock(
       'affine:paragraph',
       {
-        text: page.Text.fromDelta(delta),
+        text: doc.Text.fromDelta(delta),
       },
       note
     );

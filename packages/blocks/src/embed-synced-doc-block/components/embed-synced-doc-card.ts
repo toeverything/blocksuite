@@ -5,7 +5,7 @@ import { html, nothing } from 'lit';
 import { customElement, property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { renderDocInCard } from '../../_common/utils/render-doc.js';
+import { renderLinkedDocInCard } from '../../_common/utils/render-linked-doc.js';
 import type { SurfaceRefRenderer } from '../../surface-ref-block/surface-ref-renderer.js';
 import type { SurfaceRefBlockService } from '../../surface-ref-block/surface-ref-service.js';
 import type { EmbedSyncedDocBlockComponent } from '../embed-synced-doc-block.js';
@@ -53,25 +53,25 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
     return this.block.path;
   }
 
-  get doc() {
-    return this.block.doc;
+  get linkedDoc() {
+    return this.block.syncedDoc;
   }
 
-  get pageMode() {
-    return this.block.pageMode;
+  get editorMode() {
+    return this.block.editorMode;
   }
 
   get blockState() {
     return this.block.blockState;
   }
 
-  private _isPageEmpty() {
-    const syncedDoc = this.doc;
+  private _isDocEmpty() {
+    const syncedDoc = this.block.syncedDoc;
     if (!syncedDoc) {
       return false;
     }
     return (
-      !!syncedDoc && !syncedDoc.meta.title.length && !this.abstractText.length
+      !!syncedDoc && !syncedDoc.meta?.title.length && !this.abstractText.length
     );
   }
 
@@ -100,19 +100,19 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     const { isCycle } = this.block.blockState;
-    const syncedDoc = this.doc;
+    const syncedDoc = this.block.syncedDoc;
     if (isCycle && syncedDoc) {
       if (syncedDoc.root) {
-        renderDocInCard(this, syncedDoc);
+        renderLinkedDocInCard(this);
       } else {
         syncedDoc.slots.rootAdded.once(() => {
-          renderDocInCard(this, syncedDoc);
+          renderLinkedDocInCard(this);
         });
       }
 
       this.disposables.add(
-        syncedDoc.workspace.meta.pageMetasUpdated.on(() => {
-          renderDocInCard(this, syncedDoc);
+        syncedDoc.workspace.meta.docMetaUpdated.on(() => {
+          renderLinkedDocInCard(this);
         })
       );
       this.disposables.add(
@@ -123,7 +123,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
           ) {
             return;
           }
-          renderDocInCard(this, syncedDoc);
+          renderLinkedDocInCard(this);
         })
       );
     }
@@ -138,7 +138,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
     const { isLoading, isDeleted, isError, isCycle } = this.blockState;
     const error = this.isError || isError;
 
-    const isEmpty = this._isPageEmpty() && this.isBannerEmpty;
+    const isEmpty = this._isDocEmpty() && this.isBannerEmpty;
 
     const cardClassMap = classMap({
       loading: isLoading,
@@ -159,7 +159,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       SyncedDocEmptyBanner,
       SyncedDocErrorBanner,
       SyncedDocDeletedBanner,
-    } = getSyncedDocIcons(this.pageMode);
+    } = getSyncedDocIcons(this.editorMode);
 
     const titleIcon = isLoading
       ? LoadingIcon
@@ -173,7 +173,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       ? 'Loading...'
       : isDeleted
         ? `Deleted doc`
-        : this.block.pageTitle;
+        : this.block.docTitle;
 
     const descriptionText = isLoading
       ? ''
@@ -185,7 +185,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
             ? 'Preview of the linked doc will be displayed here.'
             : this.abstractText;
 
-    const dateText = this.block.pageUpdatedAt.toLocaleTimeString();
+    const dateText = this.block.docUpdatedAt.toLocaleTimeString();
 
     const showDefaultBanner = isLoading || error || isDeleted || isEmpty;
 

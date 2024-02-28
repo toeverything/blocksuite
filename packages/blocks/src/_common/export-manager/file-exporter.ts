@@ -40,8 +40,8 @@ export const FileExporter = {
 
     document.body.removeChild(element);
   },
-  exportPng(pageTitle: string | undefined, dataURL: string) {
-    const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
+  exportPng(docTitle: string | undefined, dataURL: string) {
+    const title = docTitle?.trim() || UNTITLED_PAGE_NAME;
     FileExporter.exportFile(title + '.png', dataURL);
   },
 };

@@ -16,7 +16,7 @@ function getDebugMenu(page: Page) {
       name: 'Test Operations',
     }),
 
-    pagesBtn: debugMenu.getByTestId('pages-button'),
+    pagesBtn: debugMenu.getByTestId('docs-button'),
   };
 }
 
@@ -69,32 +69,32 @@ export async function addNoteByClick(page: Page) {
 
 export async function addNewPage(page: Page) {
   const { pagesBtn } = getDebugMenu(page);
-  if (!(await page.locator('pages-panel').isVisible())) {
+  if (!(await page.locator('docs-panel').isVisible())) {
     await pagesBtn.click();
   }
-  await page.locator('.new-page-button').click();
-  const pageMetas = await page.evaluate(() => {
+  await page.locator('.new-doc-button').click();
+  const docMetas = await page.evaluate(() => {
     const { workspace } = window;
-    return workspace.meta.pageMetas;
+    return workspace.meta.docMetas;
   });
-  if (!pageMetas.length) throw new Error('Add new page failed');
-  return pageMetas[pageMetas.length - 1];
+  if (!docMetas.length) throw new Error('Add new doc failed');
+  return docMetas[docMetas.length - 1];
 }
 
-export async function switchToPage(page: Page, pageId?: string) {
-  await page.evaluate(pageId => {
+export async function switchToPage(page: Page, docId?: string) {
+  await page.evaluate(docId => {
     const { workspace, editor } = window;
 
-    if (!pageId) {
-      const pageMetas = workspace.meta.pageMetas;
-      if (!pageMetas.length) return;
-      pageId = pageMetas[0].id;
+    if (!docId) {
+      const docMetas = workspace.meta.docMetas;
+      if (!docMetas.length) return;
+      docId = docMetas[0].id;
     }
 
-    const page = workspace.getPage(pageId);
-    if (!page) return;
-    editor.page = page;
-  }, pageId);
+    const doc = workspace.getDoc(docId);
+    if (!doc) return;
+    editor.doc = doc;
+  }, docId);
 }
 
 export async function clickTestOperationsMenuItem(page: Page, name: string) {
@@ -110,14 +110,14 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
 export async function switchReadonly(page: Page) {
   await page.evaluate(() => {
     const defaultPage = document.querySelector(
-      'affine-doc-page'
+      'affine-page-root'
     ) as HTMLElement & {
-      page: {
+      doc: {
         awarenessStore: { setFlag: (key: string, value: unknown) => void };
       };
     };
-    const page = defaultPage.page;
-    page.awarenessStore.setFlag('readonly', { 'page:home': true });
+    const doc = defaultPage.doc;
+    doc.awarenessStore.setFlag('readonly', { 'doc:home': true });
   });
 }
 

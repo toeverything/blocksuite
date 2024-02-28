@@ -109,7 +109,6 @@
       ]
     },
     "overrides": {
-      "typescript": "5.3.3",
       "array-includes": "npm:@nolyfill/array-includes@latest",
       "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
       "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@latest",

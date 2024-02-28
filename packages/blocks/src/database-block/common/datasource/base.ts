@@ -165,7 +165,7 @@ export type DatabaseBlockDatasourceConfig = {
   pageId: string;
   blockId: string;
 };
-export type AllPageDatasourceConfig = {
+export type AllDocDatasourceConfig = {
   type: 'all-pages';
 };
 export type TagsDatasourceConfig = {
@@ -173,7 +173,7 @@ export type TagsDatasourceConfig = {
 };
 export type DataSourceConfig =
   | DatabaseBlockDatasourceConfig
-  | AllPageDatasourceConfig
+  | AllDocDatasourceConfig
   | TagsDatasourceConfig;
 export type GetConfig<
   K extends DataSourceConfig['type'],

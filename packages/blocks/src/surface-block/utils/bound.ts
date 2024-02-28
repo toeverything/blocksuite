@@ -4,6 +4,7 @@ import {
   getBoundsFromPoints,
   getBoundsWithRotation,
   lineIntersects,
+  polygonPointDistance,
 } from './math-utils.js';
 import type { IVec } from './vec.js';
 import {
@@ -261,12 +262,7 @@ export class Bound implements IBound {
   }
 
   isPointNearBound([x, y]: IVec, tolerance = 0.01) {
-    return (
-      Math.abs(x - this.minX) < tolerance ||
-      Math.abs(x - this.maxX) < tolerance ||
-      Math.abs(y - this.minY) < tolerance ||
-      Math.abs(y - this.maxY) < tolerance
-    );
+    return polygonPointDistance(this.points, [x, y]) < tolerance;
   }
 
   contains(bound: Bound) {

@@ -154,7 +154,7 @@ export class RangeBinding {
 
     event.preventDefault();
 
-    this.host.page.transact(() => {
+    this.host.doc.transact(() => {
       startText.delete(from.index, from.length);
       startText.insert(event.data ?? '', from.index);
       endText.delete(0, to.length);
@@ -165,9 +165,9 @@ export class RangeBinding {
         // delete from lowest to highest
         .reverse()
         .forEach(block => {
-          const parent = this.host.page.getParent(block.model);
+          const parent = this.host.doc.getParent(block.model);
           assertExists(parent);
-          this.host.page.deleteBlock(block.model, {
+          this.host.doc.deleteBlock(block.model, {
             bringChildrenTo: parent,
           });
         });
@@ -234,7 +234,7 @@ export class RangeBinding {
         parents.push(parent);
       }
 
-      this.host.page.transact(() => {
+      this.host.doc.transact(() => {
         endText.delete(0, to.length);
         startText.join(endText);
 
@@ -243,9 +243,9 @@ export class RangeBinding {
           // delete from lowest to highest
           .reverse()
           .forEach(block => {
-            const parent = this.host.page.getParent(block.model);
+            const parent = this.host.doc.getParent(block.model);
             assertExists(parent);
-            this.host.page.deleteBlock(block.model, {
+            this.host.doc.deleteBlock(block.model, {
               bringChildrenTo: parent,
             });
           });

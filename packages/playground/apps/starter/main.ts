@@ -9,10 +9,10 @@ import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import * as store from '@blocksuite/store';
 
-import { mountDefaultPageEditor, setupPDFModule } from './utils/editor.js';
+import { mountDefaultDocEditor, setupPDFModule } from './utils/editor.js';
 import {
-  createStarterPageWorkspace,
-  initStarterPageWorkspace,
+  createStarterDocWorkspace,
+  initStarterDocWorkspace,
 } from './utils/workspace.js';
 
 async function main() {
@@ -21,7 +21,7 @@ async function main() {
   const params = new URLSearchParams(location.search);
   const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
   const isE2E = room.startsWith('playwright');
-  const workspace = createStarterPageWorkspace();
+  const workspace = createStarterDocWorkspace();
 
   if (isE2E) {
     Object.defineProperty(window, '$blocksuite', {
@@ -35,8 +35,8 @@ async function main() {
     return;
   }
 
-  await initStarterPageWorkspace(workspace);
-  await mountDefaultPageEditor(workspace);
+  await initStarterDocWorkspace(workspace);
+  await mountDefaultDocEditor(workspace);
   setupPDFModule();
 }
 

@@ -1,7 +1,6 @@
 import type {
   AffineTextAttributes,
   AttachmentBlockModel,
-  BlockModels,
   BookmarkBlockModel,
   CodeBlockModel,
   DatabaseBlockModel,
@@ -16,7 +15,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import { SmallLinkedPageIcon } from '../../_common/icons.js';
+import { SmallLinkedDocIcon } from '../../_common/icons.js';
 import { headingKeys, placeholderMap, previewIconMap } from '../config.js';
 
 type ValuesOf<T, K extends keyof T = keyof T> = T[K];
@@ -144,7 +143,7 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  block!: ValuesOf<BlockModels>;
+  block!: ValuesOf<BlockSuite.BlockModels>;
 
   @property({ attribute: false })
   showPreviewIcon!: boolean;
@@ -165,7 +164,7 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
     this._textDisposables = null;
   };
 
-  private _setTextDisposables = (block: ValuesOf<BlockModels>) => {
+  private _setTextDisposables = (block: ValuesOf<BlockSuite.BlockModels>) => {
     this._clearTextDisposables();
     this._textDisposables = new DisposableGroup();
     block.text?.yText.observe(this._updateElement);
@@ -187,22 +186,22 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
 
     const previewText = deltas.map(delta => {
       if (delta.attributes?.reference) {
-        // If linked page, render linked page icon and the page title.
+        // If linked doc, render linked doc icon and the doc title.
         const refAttribute = delta.attributes.reference;
-        const refMeta = block.page.workspace.meta.pageMetas.find(
-          page => page.id === refAttribute.pageId
+        const refMeta = block.doc.workspace.meta.docMetas.find(
+          doc => doc.id === refAttribute.pageId
         );
         const unavailable = !refMeta;
-        const title = unavailable ? 'Deleted page' : refMeta.title;
+        const title = unavailable ? 'Deleted doc' : refMeta.title;
         return html`<span
           class="linked-doc-preview ${unavailable ? 'unavailable' : ''}"
-          >${SmallLinkedPageIcon}
+          >${SmallLinkedDocIcon}
           <span class="linked-doc-text"
             >${title.length ? title : 'Untitled'}</span
           ></span
         >`;
       } else {
-        // If not linked page, render the text.
+        // If not linked doc, render the text.
         return delta.insert.toString().trim().length > 0
           ? html`<span>${delta.insert.toString()}</span>`
           : nothing;
@@ -248,7 +247,7 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
       headingKeys.has(block.type);
     if (!this.enableNotesSorting && !isHeadingBlock) return nothing;
 
-    switch (block.flavour as keyof BlockModels) {
+    switch (block.flavour as keyof BlockSuite.BlockModels) {
       case 'affine:paragraph':
         assertType<ParagraphBlockModel>(block);
         return this._TextBlockPreview(block);

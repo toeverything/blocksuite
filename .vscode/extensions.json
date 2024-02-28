@@ -3,6 +3,6 @@
     "runem.lit-plugin",
     "ms-playwright.playwright",
     "dbaeumer.vscode-eslint",
-    "zixuanchen.vitest-explorer"
+    "vitest.explorer"
   ]
 }

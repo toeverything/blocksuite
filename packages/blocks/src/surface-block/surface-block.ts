@@ -1,4 +1,4 @@
-import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
+import '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
 import { BlockElement, RangeManager } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
@@ -7,10 +7,10 @@ import { customElement, query } from 'lit/decorators.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { isInsideEdgelessEditor } from '../_common/utils/index.js';
 import { values } from '../_common/utils/iterable.js';
-import { isShape } from '../page-block/edgeless/components/auto-complete/utils.js';
-import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
-import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
-import { FrameOverlay } from '../page-block/edgeless/frame-manager.js';
+import { isShape } from '../root-block/edgeless/components/auto-complete/utils.js';
+import type { EdgelessBlockPortalContainer } from '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
+import type { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import { FrameOverlay } from '../root-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
@@ -111,7 +111,7 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   get edgeless() {
-    return this.parentBlockElement as EdgelessPageBlockComponent;
+    return this.parentBlockElement as EdgelessRootBlockComponent;
   }
 
   private get _isEdgeless() {

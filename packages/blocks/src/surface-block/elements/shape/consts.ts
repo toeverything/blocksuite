@@ -77,6 +77,8 @@ export const STROKE_COLORS = [
 
 export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[0];
 
+export const DEFAULT_SHAPE_TEXT_COLOR = STROKE_COLORS[9];
+
 export const StrokeColorsSchema = z.union([
   z.literal('--affine-palette-line-yellow'),
   z.literal('--affine-palette-line-orange'),

@@ -47,10 +47,10 @@ export class BlockRenderer
   public view!: DataViewTableManager | DataViewKanbanManager;
   @property({ attribute: false })
   public rowId!: string;
-  root?: EditorHost;
+  host?: EditorHost;
 
   get model() {
-    return this.root?.page.getBlockById(this.rowId);
+    return this.host?.doc.getBlockById(this.rowId);
   }
 
   get topContenteditableElement() {
@@ -62,7 +62,7 @@ export class BlockRenderer
 
   public override connectedCallback() {
     super.connectedCallback();
-    this.root = this.closest('editor-host') ?? undefined;
+    this.host = this.closest('editor-host') ?? undefined;
     this._disposables.addFromEvent(
       this.topContenteditableElement ?? this,
       'keydown',
@@ -102,6 +102,6 @@ export class BlockRenderer
     if (!model) {
       return;
     }
-    return html` ${this.root?.renderModel(model)} ${this.renderIcon()} `;
+    return html` ${this.host?.renderModel(model)} ${this.renderIcon()} `;
   }
 }

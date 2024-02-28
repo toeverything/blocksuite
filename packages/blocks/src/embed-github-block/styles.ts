@@ -8,7 +8,6 @@ export const styles = css`
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    max-width: ${EMBED_CARD_WIDTH.horizontal}px;
     height: ${EMBED_CARD_HEIGHT.horizontal}px;
 
     border-radius: 8px;
@@ -21,7 +20,7 @@ export const styles = css`
   }
 
   .affine-embed-github-content {
-    width: 536px;
+    width: calc(100% - 204px);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -388,8 +387,8 @@ export const styles = css`
 `;
 
 export const GithubIcon = html`<svg
-  width="16"
-  height="16"
+  width="20"
+  height="20"
   viewBox="0 0 16 16"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"

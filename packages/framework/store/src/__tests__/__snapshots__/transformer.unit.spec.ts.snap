@@ -48,7 +48,7 @@ exports[`model to snapshot 1`] = `
       "$blocksuite:internal:text$": true,
       "delta": [
         {
-          "insert": "page title",
+          "insert": "doc title",
         },
       ],
     },

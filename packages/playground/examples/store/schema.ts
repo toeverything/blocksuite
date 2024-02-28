@@ -28,3 +28,12 @@ export type TodoContainerBlockModel = SchemaToModel<
   typeof TodoContainerBlockSchema
 >;
 export type TodoItemBlockModel = SchemaToModel<typeof TodoItemBlockSchema>;
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      'todo:container': TodoContainerBlockModel;
+      'todo:item': TodoItemBlockModel;
+    }
+  }
+}

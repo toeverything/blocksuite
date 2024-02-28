@@ -21,8 +21,8 @@ import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
-import { renderDocInCard } from '../_common/utils/render-doc.js';
-import type { PageBlockComponent, PageService } from '../page-block/index.js';
+import { renderLinkedDocInCard } from '../_common/utils/render-linked-doc.js';
+import type { RootBlockComponent } from '../root-block/index.js';
 import { Bound } from '../surface-block/index.js';
 import type { SurfaceRefBlockService } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
@@ -61,10 +61,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   surfaceRefRenderer?: SurfaceRefRenderer;
 
   @state()
-  private _pageMode: 'page' | 'edgeless' = 'page';
+  private _editorMode: 'page' | 'edgeless' = 'page';
 
   @state()
-  private _pageUpdatedAt: Date = new Date();
+  private _docUpdatedAt: Date = new Date();
 
   @state()
   private _loading = false;
@@ -75,25 +75,23 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   @queryAsync('.affine-embed-linked-doc-banner.render')
   bannerContainer!: Promise<HTMLDivElement>;
 
-  get pageMode() {
-    return this._pageMode;
+  get editorMode() {
+    return this._editorMode;
   }
 
-  get doc() {
-    const page = this.std.workspace.getPage(this.model.pageId);
-    return page;
+  get linkedDoc() {
+    const doc = this.std.workspace.getDoc(this.model.pageId);
+    return doc;
   }
 
-  get pageTitle() {
-    return this.doc?.meta.title.length ? this.doc.meta.title : 'Untitled';
+  get docTitle() {
+    return this.linkedDoc?.meta?.title.length
+      ? this.linkedDoc.meta.title
+      : 'Untitled';
   }
 
-  private get _pageService() {
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService, `Page service not found.`);
-    return pageService;
+  private get _rootService() {
+    return this.std.spec.getService('affine:page');
   }
 
   private async _load() {
@@ -102,14 +100,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this.abstractText = '';
     this.isBannerEmpty = true;
 
-    const linkedDoc = this.doc;
+    const linkedDoc = this.linkedDoc;
     if (!linkedDoc) {
       this._loading = false;
       return;
     }
 
-    this._pageMode = this._pageService.getPageMode(this.model.pageId);
-    this._pageUpdatedAt = this._pageService.getPageUpdatedAt(this.model.pageId);
+    this._editorMode = this._rootService.getEditorMode(this.model.pageId);
+    this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
 
     if (!linkedDoc.loaded) {
       try {
@@ -131,17 +129,17 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this._loading = false;
 
     if (!this.isError) {
-      renderDocInCard(this, linkedDoc);
+      renderLinkedDocInCard(this);
     }
   }
 
-  private _isPageEmpty() {
-    const linkedDoc = this.doc;
+  private _isDocEmpty() {
+    const linkedDoc = this.linkedDoc;
     if (!linkedDoc) {
       return false;
     }
     return (
-      !!linkedDoc && !linkedDoc.meta.title.length && !this.abstractText.length
+      !!linkedDoc && !linkedDoc.meta?.title.length && !this.abstractText.length
     );
   }
 
@@ -166,19 +164,19 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   open = () => {
     const linkedDocId = this.model.pageId;
-    if (linkedDocId === this.model.page.id) return;
+    if (linkedDocId === this.doc.id) return;
 
-    const pageElement = this.std.view.viewFromPath('block', [
-      this.model.page.root?.id ?? '',
-    ]) as PageBlockComponent | null;
-    assertExists(pageElement);
+    const rootElement = this.std.view.viewFromPath('block', [
+      this.doc.root?.id ?? '',
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
 
-    pageElement.slots.pageLinkClicked.emit({ pageId: linkedDocId });
+    rootElement.slots.docLinkClicked.emit({ docId: linkedDocId });
   };
 
   covertToInline = () => {
-    const { page, pageId } = this.model;
-    const parent = page.getParent(this.model);
+    const { doc, pageId } = this.model;
+    const parent = doc.getParent(this.model);
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
@@ -187,9 +185,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     yText.format(0, REFERENCE_NODE.length, {
       reference: { type: 'LinkedPage', pageId },
     });
-    const text = new page.Text(yText);
+    const text = new doc.Text(yText);
 
-    page.addBlock(
+    doc.addBlock(
       'affine:paragraph',
       {
         text,
@@ -198,14 +196,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       index
     );
 
-    page.deleteBlock(this.model);
+    doc.deleteBlock(this.model);
   };
 
   convertToEmbed = () => {
-    const { page, pageId, caption, xywh } = this.model;
+    const { doc, pageId, caption, xywh } = this.model;
 
     // synced doc entry controlled by awareness flag
-    const isSyncedDocEnabled = page.awarenessStore.getFlag(
+    const isSyncedDocEnabled = doc.awarenessStore.getFlag(
       'enable_synced_doc_block'
     );
     if (!isSyncedDocEnabled) {
@@ -230,11 +228,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
         elements: [blockId],
       });
     } else {
-      const parent = page.getParent(this.model);
+      const parent = doc.getParent(this.model);
       assertExists(parent);
       const index = parent.children.indexOf(this.model);
 
-      page.addBlock(
+      doc.addBlock(
         'affine:embed-synced-doc',
         { pageId, caption },
         parent,
@@ -243,7 +241,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
       this.std.selection.setGroup('note', []);
     }
-    page.deleteBlock(this.model);
+    doc.deleteBlock(this.model);
   };
 
   refreshData = () => {
@@ -260,15 +258,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   };
 
   override updated() {
-    // update card style when linked page deleted
-    const linkedDoc = this.doc;
+    // update card style when linked doc deleted
+    const linkedDoc = this.linkedDoc;
     const { xywh, style } = this.model;
     const bound = Bound.deserialize(xywh);
     if (linkedDoc && style === 'horizontalThin') {
       bound.w = EMBED_CARD_WIDTH.horizontal;
       bound.h = EMBED_CARD_HEIGHT.horizontal;
-      this.page.withoutTransact(() => {
-        this.page.updateBlock(this.model, {
+      this.doc.withoutTransact(() => {
+        this.doc.updateBlock(this.model, {
           xywh: bound.serialize(),
           style: 'horizontal',
         });
@@ -276,8 +274,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     } else if (!linkedDoc && style === 'horizontal') {
       bound.w = EMBED_CARD_WIDTH.horizontalThin;
       bound.h = EMBED_CARD_HEIGHT.horizontalThin;
-      this.page.withoutTransact(() => {
-        this.page.updateBlock(this.model, {
+      this.doc.withoutTransact(() => {
+        this.doc.updateBlock(this.model, {
           xywh: bound.serialize(),
           style: 'horizontalThin',
         });
@@ -293,10 +291,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       this.isError = true;
     });
 
-    const linkedDoc = this.doc;
+    const linkedDoc = this.linkedDoc;
     if (linkedDoc) {
       this.disposables.add(
-        linkedDoc.workspace.meta.pageMetasUpdated.on(() => {
+        linkedDoc.workspace.meta.docMetaUpdated.on(() => {
           this._load().catch(e => {
             console.error(e);
             this.isError = true;
@@ -385,16 +383,16 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   });
 
   override renderBlock() {
-    const linkedDoc = this.doc;
+    const linkedDoc = this.linkedDoc;
     const isDeleted = !linkedDoc;
     const isLoading = this._loading;
-    const pageMode = this.pageMode;
+    const editorMode = this.editorMode;
 
     this._cardStyle = this.model.style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
     this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
-    const isEmpty = this._isPageEmpty() && this.isBannerEmpty;
+    const isEmpty = this._isDocEmpty() && this.isBannerEmpty;
 
     const cardClassMap = classMap({
       loading: isLoading,
@@ -410,7 +408,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       LinkedDocDeletedIcon,
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
-    } = getEmbedLinkedDocIcons(pageMode, this._cardStyle);
+    } = getEmbedLinkedDocIcons(editorMode, this._cardStyle);
 
     const titleIcon = isLoading
       ? LoadingIcon
@@ -421,8 +419,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const titleText = isLoading
       ? 'Loading...'
       : isDeleted
-        ? `Deleted ${pageMode}`
-        : linkedDoc?.meta.title.length
+        ? `Deleted ${editorMode}`
+        : linkedDoc?.meta?.title.length
           ? linkedDoc.meta.title
           : 'Untitled';
 
@@ -434,7 +432,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           ? 'Preview of the page will be displayed here.'
           : this.abstractText;
 
-    const dateText = this._pageUpdatedAt.toLocaleTimeString();
+    const dateText = this._docUpdatedAt.toLocaleTimeString();
 
     const showDefaultBanner = isDeleted || isEmpty;
 

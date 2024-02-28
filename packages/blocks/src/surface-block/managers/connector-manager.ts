@@ -5,7 +5,7 @@ import {
   type EdgelessModel,
   type Selectable,
 } from '../../_common/types.js';
-import type { EdgelessPageService } from '../../page-block/edgeless/edgeless-page-service.js';
+import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import { Overlay } from '../canvas-renderer/renderer.js';
 import type { IBound } from '../consts.js';
 import type {
@@ -724,7 +724,7 @@ export class ConnectionOverlay extends Overlay {
   highlightPoint: IVec | null = null;
   bound: Bound | null = null;
 
-  constructor(private _service: EdgelessPageService) {
+  constructor(private _service: EdgelessRootService) {
     super();
   }
 
@@ -840,9 +840,14 @@ export class ConnectionOverlay extends Overlay {
       // if not, check if in inside of the element
 
       if (
-        connectable.hitTest(point[0], point[1], {
-          ignoreTransparent: false,
-        })
+        connectable.hitTest(
+          point[0],
+          point[1],
+          {
+            ignoreTransparent: false,
+          },
+          this._service.host
+        )
       ) {
         result = {
           id: connectable.id,

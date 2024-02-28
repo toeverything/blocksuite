@@ -38,7 +38,7 @@ const template = (html: string) =>
   </style>
 </head>
 <body>
-<div style="width: 70vw; margin: 60px auto;"><!--BlockSuitePageTitlePlaceholder-->
+<div style="width: 70vw; margin: 60px auto;"><!--BlockSuiteDocTitlePlaceholder-->
 <!--HtmlTemplate-->
 </div>
 </body>

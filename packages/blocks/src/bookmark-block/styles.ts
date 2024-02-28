@@ -8,7 +8,6 @@ export const styles = css`
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    max-width: ${EMBED_CARD_WIDTH.horizontal}px;
     height: ${EMBED_CARD_HEIGHT.horizontal}px;
 
     border-radius: 8px;
@@ -21,7 +20,7 @@ export const styles = css`
   }
 
   .affine-bookmark-content {
-    width: 536px;
+    width: calc(100% - 204px);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -194,7 +193,7 @@ export const styles = css`
     }
 
     .affine-bookmark-content-title {
-      width: 536px;
+      width: calc(100% - 204px);
     }
 
     .affine-bookmark-content-url {

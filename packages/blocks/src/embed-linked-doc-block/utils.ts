@@ -37,12 +37,12 @@ type EmbedCardImages = {
 };
 
 export function getEmbedLinkedDocIcons(
-  pageMode: 'page' | 'edgeless',
+  editorMode: 'page' | 'edgeless',
   style: (typeof EmbedLinkedDocStyles)[number]
 ): EmbedCardImages {
   const theme = getThemeMode();
   const small = style !== 'vertical';
-  if (pageMode === 'page') {
+  if (editorMode === 'page') {
     if (theme === 'light') {
       return {
         LoadingIcon: LightLoadingIcon,

@@ -8,8 +8,8 @@ import type { BlockModel } from '../schema/base.js';
 import { type BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { YBlock } from '../workspace/block/block.js';
+import type { BlockProps, YBlocks } from '../workspace/doc.js';
 import type { Workspace } from '../workspace/index.js';
-import type { BlockProps, YBlocks } from '../workspace/page.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,

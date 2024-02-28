@@ -18,36 +18,41 @@ import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
 export class LinkPopupMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .link-popup-more-menu {
+      box-sizing: border-box;
+      padding-bottom: 4px;
+    }
+
+    .link-popup-more-menu-container {
       border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
     }
 
-    .menu-item {
+    .link-popup-more-menu-container > .menu-item {
       display: flex;
       justify-content: flex-start;
       align-items: center;
       width: 100%;
     }
 
-    .menu-item:hover {
+    .link-popup-more-menu-container > .menu-item:hover {
       background: var(--affine-hover-color);
     }
 
-    .menu-item:hover.delete {
+    .link-popup-more-menu-container > .menu-item:hover.delete {
       background: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }
-    .menu-item:hover.delete > svg {
+    .link-popup-more-menu > .menu-item:hover.delete > svg {
       color: var(--affine-error-color);
     }
 
-    .menu-item svg {
+    .link-popup-more-menu-container > .menu-item svg {
       margin: 0 8px;
     }
 
-    .divider {
+    .link-popup-more-menu-container > .divider {
       width: 148px;
       height: 1px;
       margin: 8px;
@@ -105,49 +110,53 @@ export class LinkPopupMoreMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="link-popup-more-menu">
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item open"
-        text="Open"
-        @click=${() => this._openLink()}
-      >
-        ${OpenIcon}
-      </icon-button>
+    return html`
+      <div class="link-popup-more-menu">
+        <div class="link-popup-more-menu-container">
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item open"
+            text="Open"
+            @click=${() => this._openLink()}
+          >
+            ${OpenIcon}
+          </icon-button>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item copy"
-        text="Copy"
-        @click=${() => this._copyUrl()}
-      >
-        ${CopyIcon}
-      </icon-button>
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item copy"
+            text="Copy"
+            @click=${() => this._copyUrl()}
+          >
+            ${CopyIcon}
+          </icon-button>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item unlink"
-        text="Remove link"
-        @click=${() => this._removeLink()}
-      >
-        ${UnlinkIcon}
-      </icon-button>
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item unlink"
+            text="Remove link"
+            @click=${() => this._removeLink()}
+          >
+            ${UnlinkIcon}
+          </icon-button>
 
-      <div class="divider"></div>
+          <div class="divider"></div>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item delete"
-        text="Delete"
-        @click=${() => this._delete()}
-      >
-        ${DeleteIcon}
-      </icon-button>
-    </div> `;
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item delete"
+            text="Delete"
+            @click=${() => this._delete()}
+          >
+            ${DeleteIcon}
+          </icon-button>
+        </div>
+      </div>
+    `;
   }
 }
 

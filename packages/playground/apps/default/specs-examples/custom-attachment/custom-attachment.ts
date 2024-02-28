@@ -1,7 +1,7 @@
 import {
   AttachmentService,
-  DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
+  PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 
 class CustomAttachmentService extends AttachmentService {
@@ -12,7 +12,7 @@ class CustomAttachmentService extends AttachmentService {
 }
 
 export function getCustomAttachmentSpecs() {
-  const docModeSpecs = DocEditorBlockSpecs.map(spec => {
+  const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:attachment') {
       return {
         ...spec,
@@ -32,7 +32,7 @@ export function getCustomAttachmentSpecs() {
   });
 
   return {
-    docModeSpecs,
+    pageModeSpecs,
     edgelessModeSpecs,
   };
 }

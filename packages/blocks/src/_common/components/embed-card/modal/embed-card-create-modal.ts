@@ -6,14 +6,13 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { EdgelessPageBlockComponent } from '../../../../page-block/edgeless/edgeless-page-block.js';
-import type { PageService } from '../../../../page-block/page-service.js';
+import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless/edgeless-root-block.js';
 import type { EdgelessElementType } from '../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../surface-block/utils/vec.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
 import type { EmbedCardStyle } from '../../../types.js';
-import { getPageByEditorHost } from '../../../utils/query.js';
+import { getRootByEditorHost } from '../../../utils/query.js';
 import { isValidUrl } from '../../../utils/url.js';
 import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
@@ -87,12 +86,9 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    const pageService = this.host.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
+    const rootService = this.host.spec.getService('affine:page');
 
-    const embedOptions = pageService.getEmbedBlockOptions(url);
+    const embedOptions = rootService.getEmbedBlockOptions(url);
 
     const { mode } = this.createOptions;
     if (mode === 'page') {
@@ -103,8 +99,8 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
         flavour = embedOptions.flavour;
       }
 
-      this.host.page.addBlock(
-        flavour,
+      this.host.doc.addBlock(
+        flavour as never,
         {
           url,
         },
@@ -120,14 +116,14 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
         targetStyle = embedOptions.styles[0];
       }
 
-      const edgelessPageElement = getPageByEditorHost(
+      const edgelessRoot = getRootByEditorHost(
         this.host
-      ) as EdgelessPageBlockComponent | null;
-      assertExists(edgelessPageElement);
+      ) as EdgelessRootBlockComponent | null;
+      assertExists(edgelessRoot);
 
-      const surface = edgelessPageElement.surface;
+      const surface = edgelessRoot.surface;
       const center = Vec.toVec(surface.renderer.center);
-      edgelessPageElement.service.addBlock(
+      edgelessRoot.service.addBlock(
         flavour as EdgelessElementType,
         {
           url,
@@ -141,7 +137,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
         surface.model
       );
 
-      edgelessPageElement.tools.setEdgelessTool({
+      edgelessRoot.tools.setEdgelessTool({
         type: 'default',
       });
     }

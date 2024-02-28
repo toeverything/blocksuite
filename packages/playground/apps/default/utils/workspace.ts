@@ -13,14 +13,14 @@ import {
 } from '@blocksuite/store';
 import { IndexedDBDocSource } from '@blocksuite/sync';
 
-import { WebSocketAwarenessSource } from '../../sync/websocket/awareness';
-import { WebSocketDocSource } from '../../sync/websocket/doc';
+import { WebSocketAwarenessSource } from '../../_common/sync/websocket/awareness';
+import { WebSocketDocSource } from '../../_common/sync/websocket/doc';
 
 const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
 export const INDEXED_DB_NAME = 'PLAYGROUND_DB';
 
-export async function createDefaultPageWorkspace() {
+export async function createDefaultDocWorkspace() {
   const blobStorages: ((id: string) => BlobStorage)[] = [
     createIndexeddbStorage,
   ];
@@ -72,35 +72,35 @@ export async function createDefaultPageWorkspace() {
   return workspace;
 }
 
-export async function initDefaultPageWorkspace(workspace: Workspace) {
+export async function initDefaultDocWorkspace(workspace: Workspace) {
   const params = new URLSearchParams(location.search);
 
   await workspace.waitForSynced();
 
-  const shouldInit = workspace.pages.size === 0 && !params.get('room');
+  const shouldInit = workspace.docs.size === 0 && !params.get('room');
   if (shouldInit) {
-    const page = workspace.createPage({ id: 'page:home' });
-    page.load();
-    const pageBlockId = page.addBlock('affine:page', {
+    const doc = workspace.createDoc({ id: 'doc:home' });
+    doc.load();
+    const rootId = doc.addBlock('affine:page', {
       title: new Text(),
     });
-    page.addBlock('affine:surface', {}, pageBlockId);
-    page.resetHistory();
+    doc.addBlock('affine:surface', {}, rootId);
+    doc.resetHistory();
   } else {
     // wait for data injected from provider
     const firstPageId =
-      workspace.pages.size > 0
-        ? workspace.pages.keys().next().value
+      workspace.docs.size > 0
+        ? workspace.docs.keys().next().value
         : await new Promise<string>(resolve =>
-            workspace.slots.pageAdded.once(id => resolve(id))
+            workspace.slots.docAdded.once(id => resolve(id))
           );
-    const page = workspace.getPage(firstPageId);
-    assertExists(page);
-    page.load();
+    const doc = workspace.getDoc(firstPageId);
+    assertExists(doc);
+    doc.load();
     // wait for data injected from provider
-    if (!page.root) {
-      await new Promise(resolve => page.slots.rootAdded.once(resolve));
+    if (!doc.root) {
+      await new Promise(resolve => doc.slots.rootAdded.once(resolve));
     }
-    page.resetHistory();
+    doc.resetHistory();
   }
 }

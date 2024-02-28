@@ -45,21 +45,21 @@ export default ({ mode }) => {
         input: {
           main: resolve(__dirname, 'index.html'),
           'starter/': resolve(__dirname, 'starter/index.html'),
-          'examples/basic/doc': resolve(
+          'examples/basic/page': resolve(
             __dirname,
-            'examples/basic/doc/index.html'
+            'examples/basic/page/index.html'
           ),
           'examples/basic/edgeless': resolve(
             __dirname,
             'examples/basic/edgeless/index.html'
           ),
-          'examples/multiple-editors/doc-doc': resolve(
+          'examples/multiple-editors/page-page': resolve(
             __dirname,
-            'examples/multiple-editors/doc-doc/index.html'
+            'examples/multiple-editors/page-page/index.html'
           ),
-          'examples/multiple-editors/doc-edgeless': resolve(
+          'examples/multiple-editors/page-edgeless': resolve(
             __dirname,
-            'examples/multiple-editors/doc-edgeless/index.html'
+            'examples/multiple-editors/page-edgeless/index.html'
           ),
           'examples/multiple-editors/edgeless-edgeless': resolve(
             __dirname,

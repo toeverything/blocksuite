@@ -25,6 +25,7 @@
     "@types/hast": "^3.0.3",
     "@types/mdast": "^4.0.3",
     "@types/webfontloader": "^1.6.38",
+    "@types/sortablejs": "^1.15.7",
     "buffer": "^6.0.3",
     "date-fns": "^3.3.0",
     "file-type": "^16.5.4",
@@ -84,11 +85,5 @@
     "!dist/__tests__",
     "models.d.ts",
     "models.js"
-  ],
-  "devDependencies": {
-    "@blocksuite/block-std": "workspace:*",
-    "@blocksuite/lit": "workspace:*",
-    "@blocksuite/store": "workspace:*",
-    "@types/sortablejs": "^1.15.7"
-  }
+  ]
 }

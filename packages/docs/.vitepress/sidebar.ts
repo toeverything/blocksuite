@@ -70,7 +70,7 @@ export const guide: DefaultTheme.NavItem[] = [
       {
         text: '<code>store</code>',
         items: [
-          { text: 'Page', link: 'guide/store#page' },
+          { text: 'Doc', link: 'guide/store#doc' },
           { text: 'Workspace', link: 'guide/store#workspace' },
           { text: 'Slot', link: 'guide/slot' },
           { text: 'Adapter', link: 'guide/adapter' },
@@ -129,7 +129,7 @@ export const components: DefaultTheme.NavItem[] = [
   {
     text: 'Editors',
     items: [
-      { text: '📝 Doc Editor', link: 'components/editors/doc-editor' },
+      { text: '📝 Page Editor', link: 'components/editors/page-editor' },
       {
         text: '🎨 Edgeless Editor',
         link: 'components/editors/edgeless-editor',
@@ -142,7 +142,7 @@ export const components: DefaultTheme.NavItem[] = [
       {
         text: 'Regular Blocks',
         items: [
-          { text: 'Page Block', link: 'components/blocks/page-block' },
+          { text: 'Root Block', link: 'components/blocks/root-block' },
           { text: 'Note Block', link: 'components/blocks/note-block' },
           {
             text: 'Paragraph Block',

@@ -15,7 +15,12 @@ import { getEmbedCardIcons } from '../../utils/url.js';
 @customElement('embed-card-style-menu')
 export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
+    .embed-card-style-menu {
+      box-sizing: border-box;
+      padding-bottom: 8px;
+    }
+
+    .embed-card-style-menu-container {
       border-radius: 8px;
       padding: 8px;
       gap: 8px;
@@ -26,11 +31,11 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
       box-shadow: var(--affine-shadow-2);
     }
 
-    icon-button {
+    .embed-card-style-menu-container > icon-button {
       padding: var(--1, 0px);
     }
 
-    icon-button.selected {
+    .embed-card-style-menu-container > icon-button.selected {
       border: 1px solid var(--affine-brand-color);
     }
   `;
@@ -42,7 +47,7 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   abortController!: AbortController;
 
   private _setEmbedCardStyle(style: EmbedCardStyle) {
-    this.model.page.updateBlock(this.model, { style });
+    this.model.doc.updateBlock(this.model, { style });
     this.requestUpdate();
     this.abortController.abort();
   }
@@ -50,33 +55,37 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   override render() {
     const { EmbedCardHorizontalIcon, EmbedCardListIcon } = getEmbedCardIcons();
     return html`
-      <icon-button
-        width="76px"
-        height="76px"
-        class=${classMap({
-          selected: this.model.style === 'horizontal',
-        })}
-        @click=${() => this._setEmbedCardStyle('horizontal')}
-      >
-        ${EmbedCardHorizontalIcon}
-        <affine-tooltip .offset=${4}
-          >${'Large horizontal style'}</affine-tooltip
-        >
-      </icon-button>
+      <div class="embed-card-style-menu">
+        <div class="embed-card-style-menu-container">
+          <icon-button
+            width="76px"
+            height="76px"
+            class=${classMap({
+              selected: this.model.style === 'horizontal',
+            })}
+            @click=${() => this._setEmbedCardStyle('horizontal')}
+          >
+            ${EmbedCardHorizontalIcon}
+            <affine-tooltip .offset=${4}
+              >${'Large horizontal style'}</affine-tooltip
+            >
+          </icon-button>
 
-      <icon-button
-        width="76px"
-        height="76px"
-        class=${classMap({
-          selected: this.model.style === 'list',
-        })}
-        @click=${() => this._setEmbedCardStyle('list')}
-      >
-        ${EmbedCardListIcon}
-        <affine-tooltip .offset=${4}
-          >${'Small horizontal style'}</affine-tooltip
-        >
-      </icon-button>
+          <icon-button
+            width="76px"
+            height="76px"
+            class=${classMap({
+              selected: this.model.style === 'list',
+            })}
+            @click=${() => this._setEmbedCardStyle('list')}
+          >
+            ${EmbedCardListIcon}
+            <affine-tooltip .offset=${4}
+              >${'Small horizontal style'}</affine-tooltip
+            >
+          </icon-button>
+        </div>
+      </div>
     `;
   }
 }

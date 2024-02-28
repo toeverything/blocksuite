@@ -6,7 +6,7 @@ import { Boxed } from '../reactive/boxed.js';
 import { Text } from '../reactive/text.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
 import type { YBlock } from '../workspace/block/block.js';
-import type { Page } from '../workspace/index.js';
+import type { Doc } from '../workspace/index.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();
@@ -57,8 +57,6 @@ export type BlockSchemaType = z.infer<typeof BlockSchema>;
 export type PropsGetter<Props> = (
   internalPrimitives: InternalPrimitives
 ) => Props;
-export type PropsFromGetter<T> =
-  T extends PropsGetter<infer Props> ? Props : never;
 
 export type SchemaToModel<
   Schema extends {
@@ -67,7 +65,7 @@ export type SchemaToModel<
       flavour: string;
     };
   },
-> = BlockModel<PropsFromGetter<Schema['model']['props']>> &
+> = BlockModel<ReturnType<Schema['model']['props']>> &
   ReturnType<Schema['model']['props']> & {
     flavour: Schema['model']['flavour'];
   };
@@ -98,7 +96,6 @@ export function defineBlockSchema<
 }): {
   version: number;
   model: {
-    role: Role;
     props: PropsGetter<Props>;
     flavour: Flavour;
   } & Metadata;
@@ -165,18 +162,25 @@ export function defineBlockSchema({
 function MagicProps(): {
   new <Props>(): Props;
 } {
-  // @ts-ignore
-  return class {};
+  return class {} as never;
 }
+
+const modelLabel = Symbol('model_label');
 
 // @ts-ignore
 export class BlockModel<
   Props extends object = object,
 > extends MagicProps()<Props> {
+  // This is used to avoid https://stackoverflow.com/questions/55886792/infer-typescript-generic-class-type
+  [modelLabel]: Props = 'type_info_label' as never;
+
   version!: number;
   flavour!: string;
   role!: RoleType;
-  page!: Page;
+  /**
+   * @deprecated use doc instead
+   */
+  page!: Doc;
   id!: string;
   yBlock!: YBlock;
   keys!: string[];
@@ -191,6 +195,14 @@ export class BlockModel<
   deleted = new Slot();
   propsUpdated = new Slot<{ key: string }>();
   childrenUpdated = new Slot();
+
+  get doc() {
+    return this.page;
+  }
+
+  set doc(doc: Doc) {
+    this.page = doc;
+  }
 
   get childMap() {
     return this.children.reduce((map, child, index) => {
@@ -207,7 +219,7 @@ export class BlockModel<
 
     const children: BlockModel[] = [];
     block.forEach(id => {
-      const child = this.page.getBlockById(id);
+      const child = this.doc.getBlockById(id);
       if (!child) {
         return;
       }
@@ -244,9 +256,5 @@ export class BlockModel<
     this.deleted.dispose();
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
-  }
-
-  clone(): this {
-    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
   }
 }

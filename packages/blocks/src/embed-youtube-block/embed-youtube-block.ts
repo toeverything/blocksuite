@@ -88,12 +88,12 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     super.connectedCallback();
 
     if (!this.model.videoId) {
-      this.page.withoutTransact(() => {
+      this.doc.withoutTransact(() => {
         const url = this.model.url;
         const urlMatch = url.match(youtubeUrlRegex);
         if (urlMatch) {
           const [, videoId] = urlMatch;
-          this.page.updateBlock(this.model, {
+          this.doc.updateBlock(this.model, {
             videoId,
           });
         }
@@ -101,7 +101,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     }
 
     if (!this.model.description && !this.model.title) {
-      this.page.withoutTransact(() => {
+      this.doc.withoutTransact(() => {
         this.refreshData();
       });
     }
@@ -186,7 +186,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       `,
       computePosition: {
         referenceElement: this._youtubeBlockEl,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },

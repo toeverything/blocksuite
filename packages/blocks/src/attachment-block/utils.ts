@@ -47,12 +47,12 @@ async function uploadAttachmentBlob(
     throw new Error('The attachment is already uploading!');
   }
 
-  const page = editorHost.page;
+  const doc = editorHost.doc;
   let sourceId: string | undefined;
 
   try {
     setAttachmentUploading(blockId);
-    sourceId = await page.blob.set(blob);
+    sourceId = await doc.blob.set(blob);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -64,13 +64,13 @@ async function uploadAttachmentBlob(
   } finally {
     setAttachmentUploaded(blockId);
 
-    const attachmentModel = page.getBlockById(
+    const attachmentModel = doc.getBlockById(
       blockId
     ) as AttachmentBlockModel | null;
     assertExists(attachmentModel);
 
-    page.withoutTransact(() => {
-      page.updateBlock(attachmentModel, {
+    doc.withoutTransact(() => {
+      doc.updateBlock(attachmentModel, {
         sourceId,
       } satisfies Partial<AttachmentBlockProps>);
     });
@@ -83,8 +83,8 @@ async function getAttachmentBlob(model: AttachmentBlockModel) {
     return null;
   }
 
-  const page = model.page;
-  const blob = await page.blob.get(sourceId);
+  const doc = model.doc;
+  const blob = await doc.blob.get(sourceId);
   return blob;
 }
 
@@ -198,7 +198,7 @@ export function addSiblingAttachmentBlocks(
     return;
   }
 
-  const page = targetModel.page;
+  const doc = targetModel.doc;
   const attachmentBlockProps: (Partial<AttachmentBlockProps> & {
     flavour: 'affine:attachment';
   })[] = files.map(file => ({
@@ -208,7 +208,7 @@ export function addSiblingAttachmentBlocks(
     type: file.type,
   }));
 
-  const blockIds = page.addSiblingBlocks(
+  const blockIds = doc.addSiblingBlocks(
     targetModel,
     attachmentBlockProps,
     place

@@ -10,9 +10,14 @@ export const fetchImage = async (
     if (!proxy) {
       return await fetch(url, init);
     }
-    return await fetch(proxy + '?url=' + encodeURIComponent(url), init).catch(
-      () => fetch(url, init)
-    );
+    return await fetch(proxy + '?url=' + encodeURIComponent(url), init)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return res;
+      })
+      .catch(() => fetch(url, init));
   } catch (error) {
     console.warn('Error fetching image:', error);
     throw error;

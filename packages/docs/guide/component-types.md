@@ -8,7 +8,7 @@ After getting started, this section outlines the foundational [editing component
 
 ## Editors and Fragments
 
-The `@blocksuite/presets` package includes reusable editors like `DocEditor` and `EdgelessEditor`. Besides these editors, BlockSuite also defines **_fragments_** - UI components that are **NOT** editors but are dependent on the document's state. These fragments, such as sidebars, panels, and toolbars, may be independent in lifecycle from the editors, yet should work out-of-the-box when attached to the block tree.
+The `@blocksuite/presets` package includes reusable editors like `PageEditor` and `EdgelessEditor`. Besides these editors, BlockSuite also defines **_fragments_** - UI components that are **NOT** editors but are dependent on the document's state. These fragments, such as sidebars, panels, and toolbars, may be independent in lifecycle from the editors, yet should work out-of-the-box when attached to the block tree.
 
 The distinction between editors and fragments lies in their complexity and functionality. **Fragments typically offer more simplified capabilities, serving specific UI purposes, whereas editors provide comprehensive editing capabilities over the block tree**. Nevertheless, both editors and fragments shares similar [data flows](/blog/crdt-native-data-flow).
 
@@ -18,7 +18,7 @@ The distinction between editors and fragments lies in their complexity and funct
 
 To address the complexity and diversity of editing needs, BlockSuite architects its editors as assemblies of multiple editable blocks, termed [`BlockSpec`](./block-spec)s. Each block spec encapsulates the data schema, view, service, and logic required to compose the editor. These block specs collectively define the editable components within the editor's environment.
 
-Within each block spec, there can be [`Widget`](./block-widgets)s specific to that block's implementation, enhancing interactivity within the editor. BlockSuite leverages this widget mechanism to register dynamic UI components such as drag handles and slash menus within the doc editor.
+Within each block spec, there can be [`Widget`](./block-widgets)s specific to that block's implementation, enhancing interactivity within the editor. BlockSuite leverages this widget mechanism to register dynamic UI components such as drag handles and slash menus within the page editor.
 
 ![component-types](../images/component-types.png)
 
@@ -30,26 +30,26 @@ BlockSuite by default offers a host based on the [lit](https://lit.dev) framewor
 
 ```ts
 // Default BlockSuite editable blocks
-import { DocEditorBlockSpecs } from '@blocksuite/blocks';
+import { PageEditorBlockSpecs } from '@blocksuite/blocks';
 // The container for mounting block UI components
 import { EditorHost } from '@blocksuite/lit';
 // The store for working with block tree
-import { type Page } from '@blocksuite/store';
+import { type Doc } from '@blocksuite/store';
 
 // Standard lit framework primitives
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('simple-doc-editor')
-export class SimpleDocEditor extends LitElement {
+@customElement('simple-page-editor')
+export class SimplePageEditor extends LitElement {
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   override render() {
     return html`
       <editor-host
-        .page=${this.page}
-        .specs=${DocEditorBlockSpecs}
+        .doc=${this.doc}
+        .specs=${PageEditorBlockSpecs}
       ></editor-host>
     `;
   }
@@ -68,13 +68,13 @@ So, as long as there is a corresponding `host` implementation, you can use the c
 
 ![framework-agnostic](../images/framework-agnostic.png)
 
-Explore the [`DocEditor` source code](https://github.com/toeverything/blocksuite/blob/master/packages/presets/src/editors/doc-editor.ts) to see how this pattern allows composing minimal real-world editors.
+Explore the [`PageEditor` source code](https://github.com/toeverything/blocksuite/blob/master/packages/presets/src/editors/page-editor.ts) to see how this pattern allows composing minimal real-world editors.
 
 ## One Block, Multiple Specs
 
-BlockSuite encourages the derivation of various block spec implementations from a single block model to enrich the editing experience. For instance, the root node of the block tree, the _page block_, is implemented differently for `DocEditor` and `EdgelessEditor` through two different specs **but with the same shared `PageBlockModel`**. The two block specs serve as the top-level UI components for their respective editors:
+BlockSuite encourages the derivation of various block spec implementations from a single block model to enrich the editing experience. For instance, the root node of the block tree, the _root block_, is implemented differently for `PageEditor` and `EdgelessEditor` through two different specs **but with the same shared `RootBlockModel`**. The two block specs serve as the top-level UI components for their respective editors:
 
-![showcase-doc-edgeless-editors](../images/showcase-doc-edgeless-editors.jpg)
+![showcase-page-edgeless-editors](../images/showcase-page-edgeless-editors.jpg)
 
 This allows you to **implement various editors easily on top of the same document**, providing diverse editing experiences and great potentials in customizability.
 

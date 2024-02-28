@@ -5,7 +5,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../_common/theme/css-variables.js';
-import type { EdgelessFrameTitle } from '../page-block/edgeless/components/block-portal/frame/edgeless-frame.js';
+import type { EdgelessFrameTitle } from '../root-block/edgeless/components/block-portal/frame/edgeless-frame.js';
 import { Bound } from '../surface-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
@@ -16,23 +16,18 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
 
   get titleElement(): EdgelessFrameTitle | null {
     return (
-      this.closest('affine-edgeless-page')?.querySelector?.(
+      this.closest('affine-edgeless-root')?.querySelector?.(
         `[data-frame-title-id="${this.model.id}"]`
       ) ?? null
     );
   }
 
-  get isInner() {
-    const title = this.titleElement;
-    return !!title?.isInner;
-  }
-
   private get _surface() {
-    return this.closest('affine-edgeless-page')!.surface;
+    return this.closest('affine-edgeless-root')!.surface;
   }
 
   private get _edgeless() {
-    return this.closest('affine-edgeless-page');
+    return this.closest('affine-edgeless-root');
   }
 
   override connectedCallback() {
@@ -49,7 +44,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     );
 
     this._disposables.add(
-      this.model.page.slots.blockUpdated.on(({ type, id }) => {
+      this.doc.slots.blockUpdated.on(({ type, id }) => {
         if (id === this.model.id && type === 'update') {
           this.requestUpdate();
         }

@@ -2,16 +2,16 @@ import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { type InlineRange, type VLine } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
-import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 import type { SelectionPosition } from '../types.js';
 import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,
   buildPath,
-  getDocPageByElement,
   getDocTitleInlineEditor,
+  getPageRootByElement,
 } from './query.js';
 import { Rect } from './rect.js';
 
@@ -46,11 +46,11 @@ export async function asyncSetInlineRange(
 
 export function asyncFocusRichText(
   editorHost: EditorHost,
-  page: Page,
   id: string,
   inlineRange: InlineRange = { index: 0, length: 0 }
 ) {
-  const model = page.getBlockById(id);
+  const doc = editorHost.doc;
+  const model = doc.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'])) return;
   return asyncSetInlineRange(editorHost, model, inlineRange);
@@ -125,7 +125,7 @@ function setEndRange(editableContainer: Element) {
 function setNewTop(y: number, editableContainer: Element, zoom = 1) {
   const SCROLL_THRESHOLD = 100;
 
-  const scrollContainer = editableContainer.closest('.affine-doc-viewport');
+  const scrollContainer = editableContainer.closest('.affine-page-viewport');
   const { top, bottom } = Rect.fromDOM(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
@@ -182,8 +182,8 @@ function focusRichText(
   position: SelectionPosition = 'end',
   zoom = 1
 ) {
-  const isDocPage = !!getDocPageByElement(editableContainer);
-  if (isDocPage) {
+  const isPageRoot = !!getPageRootByElement(editableContainer);
+  if (isPageRoot) {
     editableContainer
       .querySelector<VLine>('v-line')
       ?.scrollIntoView({ block: 'nearest' });
@@ -227,14 +227,15 @@ export function focusBlockByModel(
   zoom = 1
 ) {
   if (matchFlavours(model, ['affine:note', 'affine:page'])) {
-    throw new Error("Can't focus note or page!");
+    throw new Error("Can't focus note or doc!");
   }
 
-  assertExists(model.page.root);
-  const pageBlock = editorHost.view.viewFromPath('block', [
-    model.page.root.id,
-  ]) as DocPageBlockComponent;
-  assertExists(pageBlock);
+  assertExists(model.doc.root);
+  const rootElement = editorHost.view.viewFromPath('block', [
+    model.doc.root.id,
+  ]) as PageRootBlockComponent;
+  assertExists(rootElement);
+  rootElement;
 
   const element = editorHost.view.viewFromPath('block', buildPath(model));
   assertExists(element);
@@ -278,7 +279,7 @@ export function getCurrentNativeRange(selection = window.getSelection()) {
   if (!selection) {
     throw new Error('Failed to get current range, selection is null');
   }
-  // Before the user has clicked a freshly loaded page, the rangeCount is 0.
+  // Before the user has clicked a freshly loaded doc, the rangeCount is 0.
   // The rangeCount will usually be 1.
   // But scripting can be used to make the selection contain more than one range.
   // See https://developer.mozilla.org/en-US/docs/Web/API/Selection/rangeCount for more details.

@@ -5,7 +5,7 @@ import './portal/generic-block.js';
 
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -14,11 +14,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { FrameBlockModel } from '../models.js';
-import type { EdgelessBlockModel } from '../page-block/edgeless/type.js';
+import type { EdgelessBlockModel } from '../root-block/edgeless/type.js';
 import { type EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
-import type { SurfacePageService } from '../surface-block/surface-page-service.js';
 
 const portalMap = {
   'affine:note': 'surface-ref-note-portal',
@@ -58,7 +57,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   host!: EditorHost;
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   @property({ attribute: false })
   refModel!: GroupElementModel | FrameBlockModel;
@@ -73,9 +72,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   canvasSlot!: HTMLDivElement;
 
   get surfaceService() {
-    return this.host.std.spec.getService(
-      'affine:surface'
-    ) as SurfacePageService;
+    return this.host.std.spec.getService('affine:surface');
   }
 
   setStackingCanvas(canvases: HTMLCanvasElement[]) {
@@ -93,7 +90,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
 
   private _getBlocksInGroup(model: GroupElementModel): EdgelessBlockModel[] {
     return Array.from(model.childIds)
-      .map(id => this.page.getBlockById(id) as EdgelessBlockModel)
+      .map(id => this.doc.getBlockById(id) as EdgelessBlockModel)
       .filter(el => el);
   }
 
@@ -129,7 +126,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
         return staticHtml`<${tag}
           .index=${index}
           .model=${model}
-          .page=${this.page}
+          .doc=${this.doc}
           .host=${this.host}
           .renderModel=${this.renderModel}
           style=${styleMap({

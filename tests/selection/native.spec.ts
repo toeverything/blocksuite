@@ -1136,10 +1136,10 @@ test('should set the first block to start the range before when leaving the affi
 
 test('should select texts on cross-note dragging', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { pageId } = await initEmptyParagraphState(page);
+  const { rootId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
-  await initEmptyParagraphState(page, pageId);
+  await initEmptyParagraphState(page, rootId);
 
   // focus last block in first note
   await setInlineRangeInInlineEditor(
@@ -1500,7 +1500,7 @@ test('should keep native range selection when scrolling backward with the scroll
   await assertRichTexts(page, data);
 
   const blockHeight = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1572,7 +1572,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   await assertRichTexts(page, data);
 
   const blockHeight = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1597,7 +1597,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   await page.waitForTimeout(250);
 
   await page.evaluate(() => {
-    document.querySelector('.affine-doc-viewport')?.scrollTo(0, 0);
+    document.querySelector('.affine-page-viewport')?.scrollTo(0, 0);
   });
   await page.mouse.move(0, 0);
 
@@ -1963,7 +1963,7 @@ test('scroll vertically when inputting long text in a block', async ({
   }
 
   const viewportScrollTop = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error('viewport not found');
     }
@@ -1984,7 +1984,7 @@ test('scroll vertically when adding multiple blocks', async ({ page }) => {
   }
 
   const viewportScrollTop = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error('viewport not found');
     }
@@ -2032,7 +2032,7 @@ test('auto-scroll when creating a new paragraph-block by pressing enter', async 
   await pressEnter(page, 50);
 
   const scrollTop = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }

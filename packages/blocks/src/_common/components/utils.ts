@@ -239,12 +239,12 @@ export function cleanSpecifiedTail(
 }
 
 /**
- * You should add a container before the scrollbar style to prevent the style pollution of the whole page.
+ * You should add a container before the scrollbar style to prevent the style pollution of the whole doc.
  */
 export const scrollbarStyle = (container: string) => {
   if (!container)
     throw new Error(
-      'To prevent style pollution of the whole page, you must add a container before the scrollbar style.'
+      'To prevent style pollution of the whole doc, you must add a container before the scrollbar style.'
     );
 
   // sanitize container name
