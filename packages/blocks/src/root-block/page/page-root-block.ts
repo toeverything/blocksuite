@@ -49,7 +49,7 @@ export class PageRootBlockComponent extends BlockElement<
   PageRootBlockWidgetName
 > {
   static override styles = css`
-    editor-host:has(* > affine-page-root) {
+    editor-host:has(> affine-page-root, * > affine-page-root) {
       display: block;
       height: 100%;
     }
