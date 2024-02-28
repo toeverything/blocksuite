@@ -22,7 +22,6 @@ import {
   focusTitle,
 } from '../../../_common/utils/selection.js';
 import type { ListBlockModel } from '../../../list-block/index.js';
-import type { Flavour } from '../../../models.js';
 import type { RootBlockModel } from '../../../root-block/index.js';
 import type { ExtendedModel } from '../../types.js';
 
@@ -862,7 +861,7 @@ function handleParagraphBlockForwardDelete(
     // TODO
     return false;
   } else {
-    const ignoreForwardDeleteFlavourList: Flavour[] = [
+    const ignoreForwardDeleteFlavourList: BlockSuite.Flavour[] = [
       'affine:database',
       'affine:image',
       'affine:code',

@@ -16,10 +16,11 @@ import {
 } from '../_common/icons/index.js';
 import { requestConnectedFrame } from '../_common/utils/event.js';
 import { buildPath } from '../_common/utils/query.js';
-import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
+import type { FrameBlockModel } from '../frame-block/index.js';
 import { getBackgroundGrid } from '../root-block/edgeless/utils/query.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
 import type { ElementModel } from '../surface-block/element-model/base.js';
+import type { SurfaceBlockModel } from '../surface-block/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';

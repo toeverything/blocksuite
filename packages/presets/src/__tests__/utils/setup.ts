@@ -1,4 +1,4 @@
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
+import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlobStorage, type Doc, Text, Workspace } from '@blocksuite/store';
 import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';

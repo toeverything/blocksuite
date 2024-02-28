@@ -3,7 +3,6 @@ import type {
   EdgelessRootBlockComponent,
   PageRootBlockComponent,
   SurfaceBlockComponent,
-  SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
@@ -17,10 +16,6 @@ export function getSurface(doc: Doc, editor: AffineEditorContainer) {
     doc.root!.id,
     surfaceModel[0]!.id,
   ]) as SurfaceBlockComponent;
-}
-
-export function getSurfaceModel(doc: Doc) {
-  return doc.getBlockByFlavour('affine:surface')[0] as SurfaceBlockModel;
 }
 
 export function getDocRootBlock(
