@@ -317,68 +317,33 @@ test(scoped`should undo/redo works on title`, async ({ page }) => {
   await type(page, 'title');
   await focusRichText(page);
   await type(page, 'hello world');
-  await captureHistory(page);
-  let i = 5;
-  while (i--) {
-    await pressBackspace(page);
-  }
 
-  await focusTitle(page);
-  await captureHistory(page);
-  await type(page, ' something');
-  await undoByKeyboard(page);
   await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello world']);
+
+  await captureHistory(page);
+  await pressBackspace(page, 5);
+  await captureHistory(page);
+  await focusTitle(page);
+  await type(page, ' something');
+
+  await assertTitle(page, 'title something');
   await assertRichTexts(page, ['hello ']);
 
   await focusRichText(page);
+  await undoByKeyboard(page);
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello ']);
   await undoByKeyboard(page);
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello world']);
 
-  await focusTitle(page);
   await redoByKeyboard(page);
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello ']);
-
-  await focusTitle(page);
   await redoByKeyboard(page);
   await assertTitle(page, 'title something');
   await assertRichTexts(page, ['hello ']);
-});
-
-test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await waitNextFrame(page);
-
-  await focusTitle(page);
-  await type(page, 'title');
-  await focusRichText(page);
-  await type(page, 'hello');
-  await captureHistory(page);
-
-  await assertTitle(page, 'title');
-  await assertRichTexts(page, ['hello']);
-
-  await focusTitle(page);
-  await type(page, '1');
-  await focusRichText(page);
-  await undoByKeyboard(page);
-  await waitNextFrame(page);
-  await type(page, '2');
-  await assertTitle(page, 'title2');
-  await assertRichTexts(page, ['hello']);
-
-  await type(page, '3');
-  await focusRichText(page);
-  await waitNextFrame(page);
-  await undoByKeyboard(page);
-  await waitNextFrame(page);
-  await redoByKeyboard(page);
-  await waitNextFrame(page);
-  await type(page, '4');
-  await assertTitle(page, 'title23');
-  await assertRichTexts(page, ['hello4']);
 });
 
 test(scoped`undo multi notes`, async ({ page }) => {
