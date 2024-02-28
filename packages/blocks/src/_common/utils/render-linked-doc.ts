@@ -5,7 +5,8 @@ import { render, type TemplateResult } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
-import type { ImageBlockModel, NoteBlockModel } from '../../models.js';
+import type { ImageBlockModel } from '../../image-block/index.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';

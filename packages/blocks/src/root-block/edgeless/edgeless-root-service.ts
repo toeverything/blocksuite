@@ -5,7 +5,7 @@ import { type BlockModel, Slot } from '@blocksuite/store';
 import type { EdgelessTool, TopLevelBlockModel } from '../../_common/types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { clamp } from '../../_common/utils/math.js';
-import type { FrameBlockModel, SurfaceBlockModel } from '../../models.js';
+import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
 import type {
@@ -13,6 +13,7 @@ import type {
   CanvasElementType,
   ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
+import type { SurfaceBlockModel } from '../../surface-block/index.js';
 import {
   getCommonBound,
   GroupElementModel,

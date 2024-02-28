@@ -1,7 +1,7 @@
 import type { Doc } from '@blocksuite/store';
 import { html } from 'lit';
 
-import type { SurfaceBlockModel } from '../models.js';
+import type { SurfaceBlockModel } from '../surface-block/index.js';
 
 export function getSurfaceBlock(doc: Doc) {
   return (

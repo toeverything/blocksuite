@@ -30,6 +30,7 @@ import {
   isInsidePageEditor,
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
+import type { AttachmentBlockModel } from '../../../attachment-block/index.js';
 import {
   type BookmarkBlockModel,
   BookmarkStyles,
@@ -43,7 +44,6 @@ import type { EmbedSyncedDocModel } from '../../../embed-synced-doc-block/embed-
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
-import type { AttachmentBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';

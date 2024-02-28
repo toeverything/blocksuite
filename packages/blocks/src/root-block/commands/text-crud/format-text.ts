@@ -5,7 +5,6 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
-import type { Flavour } from '../../../models.js';
 
 // for text selection
 export const formatTextCommand: Command<
@@ -35,7 +34,9 @@ export const formatTextCommand: Command<
     .getSelectedBlocks({
       textSelection,
       filter: el =>
-        FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+        FORMAT_TEXT_SUPPORT_FLAVOURS.includes(
+          el.model.flavour as BlockSuite.Flavour
+        ),
       types: ['text'],
     })
     .inline((ctx, next) => {

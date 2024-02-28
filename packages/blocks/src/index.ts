@@ -81,7 +81,6 @@ export * from './embed-youtube-block/index.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
 export * from './list-block/index.js';
-export * from './models.js';
 export * from './note-block/index.js';
 export * from './paragraph-block/index.js';
 export { EdgelessComponentToolbar } from './root-block/edgeless/components/component-toolbar/component-toolbar.js';
@@ -92,6 +91,7 @@ export type {
   TemplateManager,
 } from './root-block/edgeless/components/toolbar/template/template-type.js';
 export * from './root-block/index.js';
+export * from './schemas.js';
 export {
   Bound,
   BrushElementModel,

@@ -28,8 +28,10 @@ import {
   NoteDisplayMode,
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
-import type { SurfaceBlockComponent } from '../../../../index.js';
-import type { FrameBlockModel } from '../../../../models.js';
+import type {
+  FrameBlockModel,
+  SurfaceBlockComponent,
+} from '../../../../index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { GroupElementModel } from '../../../../surface-block/index.js';
 import { type EdgelessBlockType } from '../../../../surface-block/index.js';

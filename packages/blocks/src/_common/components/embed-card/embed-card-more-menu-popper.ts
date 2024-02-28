@@ -105,7 +105,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     const parent = doc.getParent(model);
     const index = parent?.children.indexOf(model);
     doc.addBlock(
-      model.flavour as BlockSuite.ModelKeys,
+      model.flavour as BlockSuite.Flavour,
       duplicateProps,
       parent,
       index

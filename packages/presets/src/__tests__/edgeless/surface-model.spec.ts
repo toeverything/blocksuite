@@ -2,18 +2,19 @@ import type {
   BrushElementModel,
   GroupElementModel,
   ShapeElementModel,
-  SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';
 import { setupEditor } from '../utils/setup.js';
 
-let model: SurfaceBlockModel;
+let model: BlockSuite.BlockModels['affine:surface'];
 
 beforeEach(async () => {
   const cleanup = await setupEditor('edgeless');
-  const models = doc.getBlockByFlavour('affine:surface') as SurfaceBlockModel[];
+  const models = doc.getBlockByFlavour(
+    'affine:surface'
+  ) as BlockSuite.BlockModels['affine:surface'][];
 
   model = models[0];
 
