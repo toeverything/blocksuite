@@ -1,4 +1,3 @@
-import { __unstableSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer, CopilotPanel } from '@blocksuite/presets';
