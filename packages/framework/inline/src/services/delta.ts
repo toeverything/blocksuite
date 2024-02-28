@@ -186,7 +186,7 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
   };
 
   // render current deltas to VLines
-  render = async (syncInlineRange = true) => {
+  render = async (syncInlineRange = true, firstRender = false) => {
     if (!this.editor.mounted) return;
 
     this.editor.slots.render.emit();
@@ -212,12 +212,14 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
         const elements: VLine['elements'] = lineDeltas.map(
           ([delta, normalizedDeltaIndex]) => {
             let selected = false;
-            const inlineRange = this.editor.getInlineRange();
-            if (inlineRange) {
-              selected = this.isNormalizedDeltaSelected(
-                normalizedDeltaIndex,
-                inlineRange
-              );
+            if (!firstRender) {
+              const inlineRange = this.editor.getInlineRange();
+              if (inlineRange) {
+                selected = this.isNormalizedDeltaSelected(
+                  normalizedDeltaIndex,
+                  inlineRange
+                );
+              }
             }
 
             return [

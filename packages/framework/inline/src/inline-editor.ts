@@ -245,7 +245,7 @@ export class InlineEditor<
 
     this._mounted = true;
     this.slots.mounted.emit();
-    this._deltaService.render().catch(console.error);
+    this._deltaService.render(true, true).catch(console.error);
   }
 
   unmount() {

@@ -23,6 +23,9 @@ export default ({ mode }) => {
         process.env.PLAYGROUND_WS ?? 'ws://localhost:8787'
       ),
     },
+    preview: {
+      port: 5173,
+    },
     plugins: [
       hmrPlugin,
       enableIstanbul &&
