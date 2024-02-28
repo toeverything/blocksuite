@@ -38,9 +38,11 @@ import {
   SURFACE_IMAGE_CARD_HEIGHT,
   SURFACE_IMAGE_CARD_WIDTH,
 } from '../../image-block/components/image-card.js';
-import type { ImageBlockProps } from '../../image-block/image-model.js';
+import type {
+  ImageBlockModel,
+  ImageBlockProps,
+} from '../../image-block/image-model.js';
 import type { AttachmentBlockProps } from '../../index.js';
-import type { ImageBlockModel } from '../../models.js';
 import {
   Bound,
   type IBound,

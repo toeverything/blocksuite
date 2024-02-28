@@ -58,7 +58,7 @@
   "exports": {
     "./dist/*": "./dist/*",
     ".": "./src/index.ts",
-    "./models": "./src/models.ts"
+    "./schemas": "./src/schemas.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -71,9 +71,9 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       },
-      "./models": {
-        "types": "./dist/models.d.ts",
-        "default": "./dist/models.js"
+      "./schemas": {
+        "types": "./dist/schemas.d.ts",
+        "default": "./dist/schemas.js"
       }
     }
   },
@@ -82,7 +82,7 @@
     "dist",
     "!src/__tests__",
     "!dist/__tests__",
-    "models.d.ts",
-    "models.js"
+    "schemas.d.ts",
+    "schemas.js"
   ]
 }

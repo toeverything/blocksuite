@@ -4,7 +4,6 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
-import type { Flavour } from '../../../models.js';
 
 // for block selection
 export const formatBlockCommand: Command<
@@ -39,7 +38,9 @@ export const formatBlockCommand: Command<
     .getSelectedBlocks({
       blockSelections,
       filter: el =>
-        FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+        FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(
+          el.model.flavour as BlockSuite.Flavour
+        ),
       types: ['block'],
     })
     .inline((ctx, next) => {

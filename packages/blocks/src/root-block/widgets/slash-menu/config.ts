@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
+import type { RichText } from '../../../_common/components/index.js';
 import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
@@ -41,12 +42,11 @@ import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
-import type { RichText } from '../../../index.js';
-import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import { updateBlockElementType } from '../../../root-block/utils/operations/element/block-level.js';
+import type { SurfaceBlockModel } from '../../../surface-block/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
 import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import {

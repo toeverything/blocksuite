@@ -11,7 +11,7 @@ import {
 } from '../../../../_common/icons/edgeless.js';
 import { SmallDocIcon } from '../../../../_common/icons/text.js';
 import { requestConnectedFrame } from '../../../../_common/utils/event.js';
-import type { NoteBlockModel } from '../../../../models.js';
+import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';

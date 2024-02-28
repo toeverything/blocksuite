@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import type { NoteBlockModel } from '../../../../models.js';
+import type { NoteBlockModel } from '../../../../note-block/index.js';
 import {
   CanvasTextFontFamily,
   CanvasTextFontStyle,
