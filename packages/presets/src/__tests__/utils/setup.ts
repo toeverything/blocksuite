@@ -1,4 +1,4 @@
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlobStorage, type Doc, Text, Workspace } from '@blocksuite/store';
 import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
@@ -10,7 +10,7 @@ function createWorkspaceOptions() {
   const schema = new Schema();
   const room = Math.random().toString(16).slice(2, 8);
 
-  schema.register(AffineSchemas).register(__unstableSchemas);
+  schema.register(AffineSchemas);
 
   const idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 

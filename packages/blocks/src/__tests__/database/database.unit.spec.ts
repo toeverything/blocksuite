@@ -66,7 +66,7 @@ describe('DatabaseManager', () => {
     noteBlockId = doc.addBlock('affine:note', {}, rootId);
 
     databaseBlockId = doc.addBlock(
-      'affine:database' as BlockSuite.ModelKeys,
+      'affine:database' as BlockSuite.Flavour,
       {
         columns: [],
         titleColumn: 'Title',

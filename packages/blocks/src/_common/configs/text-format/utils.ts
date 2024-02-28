@@ -6,7 +6,6 @@ import {
 } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
-import type { Flavour } from '../../../models.js';
 import { BLOCK_ID_ATTR } from '../../consts.js';
 import type {
   AffineInlineEditor,
@@ -59,7 +58,9 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
         .getSelectedBlocks({
           types: ['text'],
           filter: el =>
-            FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+            FORMAT_TEXT_SUPPORT_FLAVOURS.includes(
+              el.model.flavour as BlockSuite.Flavour
+            ),
         })
         .inline((ctx, next) => {
           const { selectedBlocks } = ctx;
@@ -89,7 +90,9 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
         .getSelectedBlocks({
           types: ['block'],
           filter: el =>
-            FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+            FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(
+              el.model.flavour as BlockSuite.Flavour
+            ),
         })
         .inline((ctx, next) => {
           const { selectedBlocks } = ctx;
@@ -133,7 +136,7 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
             const blockElement = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
             if (blockElement) {
               return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(
-                blockElement.model.flavour as Flavour
+                blockElement.model.flavour as BlockSuite.Flavour
               );
             }
             return false;
@@ -195,7 +198,9 @@ export function isFormatSupported(host: EditorHost) {
         .getSelectedBlocks({
           types: ['text'],
           filter: el =>
-            FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+            FORMAT_TEXT_SUPPORT_FLAVOURS.includes(
+              el.model.flavour as BlockSuite.Flavour
+            ),
         })
         .inline((ctx, next) => {
           const { currentTextSelection, selectedBlocks } = ctx;
@@ -223,7 +228,9 @@ export function isFormatSupported(host: EditorHost) {
         .getSelectedBlocks({
           types: ['block'],
           filter: el =>
-            FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+            FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(
+              el.model.flavour as BlockSuite.Flavour
+            ),
         })
         .inline((ctx, next) => {
           const { selectedBlocks } = ctx;
@@ -258,7 +265,7 @@ export function isFormatSupported(host: EditorHost) {
             const blockElement = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
             if (blockElement) {
               return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(
-                blockElement.model.flavour as Flavour
+                blockElement.model.flavour as BlockSuite.Flavour
               );
             }
             return false;

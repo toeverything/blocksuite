@@ -2,7 +2,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
-import type { ListBlockModel, ParagraphBlockModel } from '../../models.js';
+import type { ListBlockModel } from '../../list-block/index.js';
+import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
 export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {

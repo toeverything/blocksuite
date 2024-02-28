@@ -13,7 +13,7 @@ import {
 } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
-import type { CodeBlockModel } from '../../../models.js';
+import type { CodeBlockModel } from '../../../code-block/index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 
 const findLast = (snapshot: BlockSnapshot): BlockSnapshot => {

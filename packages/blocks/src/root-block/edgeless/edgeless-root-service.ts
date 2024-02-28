@@ -5,7 +5,7 @@ import { type BlockModel, Slot } from '@blocksuite/store';
 import type { EdgelessTool, TopLevelBlockModel } from '../../_common/types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { clamp } from '../../_common/utils/math.js';
-import type { FrameBlockModel, SurfaceBlockModel } from '../../models.js';
+import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
 import type {
@@ -13,6 +13,7 @@ import type {
   CanvasElementType,
   ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
+import type { SurfaceBlockModel } from '../../surface-block/index.js';
 import {
   getCommonBound,
   GroupElementModel,
@@ -32,10 +33,10 @@ import {
 } from './services/template-middlewares.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
-import type {
+import {
   EdgelessBlockModel,
-  EdgelessModel,
-  HitTestOptions,
+  type EdgelessModel,
+  type HitTestOptions,
 } from './type.js';
 import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
 import { getCursorMode } from './utils/query.js';
@@ -421,7 +422,14 @@ export class EdgelessRootService extends RootService {
   reorderElement(element: EdgelessModel, direction: ReorderingDirection) {
     const index = this._layer.getReorderedIndex(element, direction);
 
-    element.index = index;
+    // block should be updated in transaction
+    if (element instanceof EdgelessBlockModel) {
+      this.doc.transact(() => {
+        element.index = index;
+      });
+    } else {
+      element.index = index;
+    }
   }
 
   createGroup(elements: EdgelessModel[] | string[]) {

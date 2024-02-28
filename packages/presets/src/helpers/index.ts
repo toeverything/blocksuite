@@ -1,4 +1,4 @@
-import { AffineSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { Schema, Workspace } from '@blocksuite/store';
 
 export function createEmptyDoc() {

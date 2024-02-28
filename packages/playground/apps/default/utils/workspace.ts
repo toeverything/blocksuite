@@ -1,4 +1,4 @@
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks';
+import { AffineSchemas } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlobStorage,
@@ -26,7 +26,7 @@ export async function createDefaultDocWorkspace() {
   ];
   const idGenerator: Generator = Generator.NanoID;
   const schema = new Schema();
-  schema.register(AffineSchemas).register(__unstableSchemas);
+  schema.register(AffineSchemas);
 
   const params = new URLSearchParams(location.search);
   let docSources: StoreOptions['docSources'] = {

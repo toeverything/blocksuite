@@ -1,3 +1,3 @@
 /* eslint-disable */
 // @ts-ignore
-export * from './dist/models';
+export * from './dist/schemas';

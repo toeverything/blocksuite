@@ -6,13 +6,12 @@ import {
   asyncFocusRichText,
   asyncSetInlineRange,
 } from '../../../../_common/utils/selection.js';
-import type { Flavour } from '../../../../models.js';
 import { onModelTextUpdated } from '../../callback.js';
 import { mergeToCodeModel, transformModel } from '../model.js';
 
 export function updateBlockElementType(
   blockElements: BlockElement[],
-  flavour: Flavour,
+  flavour: BlockSuite.Flavour,
   type?: string
 ) {
   if (blockElements.length === 0) {
