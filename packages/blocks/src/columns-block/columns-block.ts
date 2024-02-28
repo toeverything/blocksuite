@@ -9,11 +9,14 @@ import {
   getBlockElementsExcludeSubtrees,
   getModelByBlockComponent,
 } from '../_common/utils/index.js';
-import { AffineDragHandleWidget, ColumnsBlockSchema } from '../index.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../root-block/widgets/drag-handle/drag-handle.js';
 import { getDuplicateBlocks } from '../root-block/widgets/drag-handle/utils.js';
 import { SPLIT_BAR_WIDTH } from './column-split-bar.js';
 import type { ColumnsBlockModel } from './columns-model.js';
+import { ColumnsBlockSchema } from './index.js';
 import { normalSizes } from './utils.js';
 
 const MIN_COLUMN_WIDTH_PERCENT = 20;
