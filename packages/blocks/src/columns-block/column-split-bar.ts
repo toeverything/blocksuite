@@ -30,7 +30,9 @@ export class ColumnsSplitBar extends ShadowlessElement {
       height: calc(100% + ${TOP_OFFSET}px);
       margin-top: -${TOP_OFFSET}px;
       position: relative;
-      &:not(.disabled-drag) {
+
+      &.drag-target,
+      &:not(.disabled-resize) {
         cursor: col-resize;
         &::before {
           content: '';
@@ -43,8 +45,9 @@ export class ColumnsSplitBar extends ShadowlessElement {
           transition: background-color 0.2s;
         }
 
+        &.drag-target,
         &:hover,
-        &[data-dragging] {
+        &[data-resizing] {
           &::before {
             background-color: var(--affine-primary-color);
           }
@@ -107,13 +110,16 @@ export class ColumnsSplitBar extends ShadowlessElement {
   disabledAddColumn = false;
 
   @property({ type: Boolean })
-  disabledDrag = false;
+  disabledResize = false;
+
+  @property({ type: Boolean })
+  isDragTarget = false;
 
   override render() {
     return html`<div
-      class="affine-block-columns-split-bar ${this.disabledDrag
-        ? 'disabled-drag'
-        : ''}"
+      class="affine-block-columns-split-bar ${this.disabledResize
+        ? 'disabled-resize'
+        : ''} ${this.isDragTarget ? 'drag-target' : ''}"
       contenteditable="false"
     >
       ${this.disabledAddColumn

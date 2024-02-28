@@ -296,14 +296,38 @@ export class AffineDragHandleWidget extends WidgetElement<
       this.rootElement,
       point
     );
-    if (
-      !closestNoteBlock ||
-      isOutOfNoteBlock(this.host, closestNoteBlock, point, this.scale)
-    ) {
-      this._resetDropResult();
-    } else {
-      const dropResult = this._getDropResult(state);
-      this._updateDropResult(dropResult);
+
+    let isHandled = false;
+    if (this.optionRunner.options.length) {
+      for (const option of this.optionRunner.options) {
+        const hook = option.onUpdateInsertion;
+        if (hook) {
+          if (
+            hook({
+              state,
+              editorHost: this.host,
+              closestNoteBlock,
+              resetInsertion: () => this._resetDropResult(),
+              setInsertion: result => this._updateDropResult(result),
+            })
+          ) {
+            isHandled = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!isHandled) {
+      if (
+        !closestNoteBlock ||
+        isOutOfNoteBlock(this.host, closestNoteBlock, point, this.scale)
+      ) {
+        this._resetDropResult();
+      } else {
+        const dropResult = this._getDropResult(state);
+        this._updateDropResult(dropResult);
+      }
     }
 
     this.lastDragPointerState = state;

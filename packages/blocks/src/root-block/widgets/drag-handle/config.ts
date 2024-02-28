@@ -2,7 +2,11 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
-import type { Point, Rect } from '../../../_common/utils/index.js';
+import type {
+  BlockComponent,
+  Point,
+  Rect,
+} from '../../../_common/utils/index.js';
 import type { DragPreview } from './components/drag-preview.js';
 
 export const DRAG_HANDLE_CONTAINER_HEIGHT = 24;
@@ -57,6 +61,15 @@ export type OnDragEndProps = {
   editorHost: EditorHost;
 };
 
+export type OnUpdateInsertionProps = {
+  state: PointerEventState;
+  editorHost: EditorHost;
+  closestNoteBlock?: BlockComponent | null;
+
+  resetInsertion: () => void;
+  setInsertion: (insertion: DropResult) => void;
+};
+
 export type DragHandleOption = {
   flavour: string | RegExp;
   edgeless?: boolean;
@@ -66,6 +79,7 @@ export type DragHandleOption = {
     draggingElements?: BlockElement[]
   ) => boolean;
   onDragEnd?: (props: OnDragEndProps) => boolean;
+  onUpdateInsertion?: (props: OnUpdateInsertionProps) => boolean;
 };
 
 export class DragHandleOptionsRunner {
