@@ -1,8 +1,4 @@
-import {
-  __unstableSchemas,
-  AffineSchemas,
-  TestUtils,
-} from '@blocksuite/blocks';
+import { AffineSchemas, TestUtils } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import {
@@ -43,7 +39,7 @@ export function createStarterDocWorkspace() {
   }
 
   const schema = new Schema();
-  schema.register(AffineSchemas).register(__unstableSchemas);
+  schema.register(AffineSchemas);
   const idGenerator = isE2E ? Generator.AutoIncrement : Generator.NanoID;
 
   let docSources: StoreOptions['docSources'];
