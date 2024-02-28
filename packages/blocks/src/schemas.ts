@@ -7,7 +7,6 @@ import type { z } from 'zod';
 import { AttachmentBlockSchema } from './attachment-block/attachment-model.js';
 import { BookmarkBlockSchema } from './bookmark-block/bookmark-model.js';
 import { CodeBlockSchema } from './code-block/code-model.js';
-import { ColumnsBlockSchema } from './columns-block/columns-model.js';
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
@@ -30,7 +29,6 @@ import { SurfaceRefBlockSchema } from './surface-ref-block/surface-ref-model.js'
 /** Built-in first party block models built for affine */
 export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   CodeBlockSchema,
-  ColumnsBlockSchema,
   ParagraphBlockSchema,
   RootBlockSchema,
   ListBlockSchema,
