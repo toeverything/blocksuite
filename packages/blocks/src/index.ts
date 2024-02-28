@@ -107,6 +107,7 @@ export {
   ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
+  SurfaceBlockModel,
   TextElementModel,
 } from './surface-block/index.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
