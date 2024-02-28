@@ -5,8 +5,8 @@ import { html } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { whenHover } from '../../../../_common/components/hover/index.js';
-import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
+import type { CalloutBlockComponent } from '../../../../index.js';
 import { isRootElement } from '../../../../root-block/utils/guard.js';
 import { updateBlockElementType } from '../../../../root-block/utils/operations/element/block-level.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
@@ -51,6 +51,21 @@ const updateCalloutType = (
   updateBlockElementType(selectedBlockElements, 'affine:callout', type);
 };
 
+// funtion to get the most selected callout block element's type
+// If there are no type which is the most selected, return the first type
+const getMostSelectedType = (selectedBlockElements: BlockElement[]) => {
+  const typeMap = new Map<string, number>();
+  selectedBlockElements.forEach(el => {
+    if (el.flavour !== 'affine:callout') return;
+    const type = (el as CalloutBlockComponent).model.type;
+    typeMap.set(type, (typeMap.get(type) ?? 0) + 1);
+  });
+  const maxType = [...typeMap.entries()].reduce((a, e) =>
+    e[1] > a[1] ? e : a
+  );
+  return maxType[0];
+};
+
 const CalloutTypePanel = ({
   selectedBlockElements,
   ref: containerRef,
@@ -62,7 +77,7 @@ const CalloutTypePanel = ({
           width="100%"
           height="32px"
           style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
-          text="${type}"
+          text="${type.charAt(0).toUpperCase() + type.slice(1)}"
           data-testid="${type}"
           @click="${() => updateCalloutType(selectedBlockElements, type)}"
         >
@@ -81,8 +96,6 @@ export const CalloutButton = (formatBar: AffineFormatBarWidget) => {
   if (!selectedBlockElements.every(el => el.flavour === 'affine:callout')) {
     return null;
   }
-
-  const paragraphIcon = textConversionConfigs[0].icon;
 
   const rootElement = formatBar.blockElement;
   if (!isRootElement(rootElement)) {
@@ -131,9 +144,12 @@ export const CalloutButton = (formatBar: AffineFormatBarWidget) => {
     ref: setFloating,
   });
 
+  // TODO: button style
+  const mostSelectedType = getMostSelectedType(selectedBlockElements);
   return html`<div ${ref(setReference)} class="callout-type-button">
-    <icon-button class="callout-type-button-icon" width="52px" height="32px">
-      ${paragraphIcon} ${ArrowDownIcon}</icon-button
+    <icon-button class="callout-type-button-icon" width="120px" height="28px">
+      <span class="callout-type-button-label">${mostSelectedType}</span>
+      ${ArrowDownIcon}</icon-button
     >
     ${calloutTypePanel}
   </div>`;

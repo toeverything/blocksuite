@@ -11,27 +11,14 @@ export const styles = css`
     padding: 16px;
   }
 
-  .affine-callout-block-title-container {
-    font-size: calc(var(--affine-font-base) + 2px);
+  .affine-callout-block-header-container {
+    font-size: var(--affine-font-base);
     margin-bottom: 8px;
+    font-weight: 600;
   }
 
   .affine-paragraph-rich-text-wrapper {
     position: relative;
     font-size: var(--affine-font-base);
-  }
-
-  .affine-callout-placeholder {
-    position: absolute;
-    display: none;
-    left: 0;
-    bottom: 0;
-    pointer-events: none;
-    color: var(--affine-black-30);
-    fill: var(--affine-black-30);
-  }
-
-  .affine-paragraph-placeholder.visible {
-    display: block;
   }
 `;

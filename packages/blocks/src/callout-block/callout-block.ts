@@ -90,7 +90,7 @@ export class CalloutBlockComponent extends BlockElement<
       <div class="affine-callout-block-container" style=${containerStyles}>
         <div
           contenteditable="false"
-          class="affine-callout-block-title-container"
+          class="affine-callout-block-header-container"
         >
           ${type.toLocaleUpperCase()}
         </div>
@@ -111,7 +111,6 @@ export class CalloutBlockComponent extends BlockElement<
         </div>
 
         ${children}
-
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>
     `;
