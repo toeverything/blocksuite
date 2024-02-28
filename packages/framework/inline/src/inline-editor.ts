@@ -16,6 +16,7 @@ import type {
   InlineRange,
   InlineRangeUpdatedProp,
 } from './types.js';
+import { fastdom } from './utils/fastdom.js';
 import {
   type BaseTextAttributes,
   nativePointToTextPoint,
@@ -233,19 +234,24 @@ export class InlineEditor<
     this._rootElement = inlineRoot;
     this._eventSource = eventSource;
     render(nothing, this._rootElement);
-    this._rootElement.contentEditable = 'true';
-    this._rootElement.style.outline = 'none';
-    this._eventSource.contentEditable = 'true';
-    this._eventSource.style.outline = 'none';
-    this._rootElement.dataset.vRoot = 'true';
+    fastdom.mutate(() => this.updateDom());
+  }
 
-    this._bindYTextObserver();
+  updateDom() {
+    this._rootElement!.contentEditable = 'true';
+    this._rootElement!.style.outline = 'none';
+    this._eventSource!.contentEditable = 'true';
+    this._eventSource!.style.outline = 'none';
+    this._rootElement!.dataset.vRoot = 'true';
+    return () => {
+      this._bindYTextObserver();
 
-    this._eventService.mount();
+      this._eventService.mount();
 
-    this._mounted = true;
-    this.slots.mounted.emit();
-    this._deltaService.render().catch(console.error);
+      this._mounted = true;
+      this.slots.mounted.emit();
+      this._deltaService.render().catch(console.error);
+    };
   }
 
   unmount() {
