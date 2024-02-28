@@ -69,7 +69,6 @@ export function updateBlockElementType(
     return [newModel];
   }
 
-  console.log('blockModels', blockModels);
   const newModels: BlockModel[] = [];
   blockModels.forEach(model => {
     assertFlavours(model, [

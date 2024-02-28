@@ -123,7 +123,7 @@ export const textConversionConfigs: TextConversionConfig[] = [
   },
   {
     flavour: 'affine:callout',
-    type: 'callout',
+    type: 'info',
     name: 'Callout',
     hotkey: null,
     icon: TextIcon,

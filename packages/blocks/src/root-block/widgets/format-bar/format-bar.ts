@@ -20,6 +20,7 @@ import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
 import { ActionItems } from './components/action-items.js';
+import { CalloutButton } from './components/callout-button.js';
 import { InlineItems } from './components/inline-items.js';
 import { ParagraphButton } from './components/paragraph-button.js';
 import { formatBarStyle } from './styles.js';
@@ -142,7 +143,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     ) {
       const selectedBlock = this._selectedBlockElements[0];
       if (
-        !matchFlavours(selectedBlock.model, ['affine:paragraph', 'affine:list'])
+        !matchFlavours(selectedBlock.model, [
+          'affine:paragraph',
+          'affine:list',
+          'affine:callout',
+        ])
       ) {
         return false;
       }
@@ -451,11 +456,13 @@ export class AffineFormatBarWidget extends WidgetElement {
       return nothing;
     }
 
+    const calloutTypeButton = CalloutButton(this);
     const paragraphButton = ParagraphButton(this);
     const inlineItems = InlineItems(this);
     const actionItems = ActionItems(this);
     const renderList = [
       this._customRender(),
+      calloutTypeButton,
       paragraphButton,
       inlineItems,
       actionItems,

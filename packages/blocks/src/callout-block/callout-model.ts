@@ -1,6 +1,6 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
-export type CalloutTitle =
+export type CalloutType =
   | 'info'
   | 'warning'
   | 'danger'
@@ -10,20 +10,19 @@ export type CalloutTitle =
 
 // define and export a background map with callout types as keys and string as values
 export const backgroundMap = {
-  info: '--affine-blue-100',
-  warning: '--affine-yellow-100',
-  danger: '--affine-red-100',
-  success: '--affine-green-100',
-  primary: '--affine-primary-100',
-  secondary: '--affine-secondary-100',
+  info: '--affine-background-tertiary-color',
+  warning: '--affine-background-warning-color',
+  danger: '--affine-background-error-color',
+  success: '--affine-background-success-color',
+  primary: '--affine-background-primary-color',
+  secondary: '--affine-background-secondary-color',
 } as const;
 
 export const CalloutBlockSchema = defineBlockSchema({
   flavour: 'affine:callout',
   props: internal => ({
-    title: 'info' as CalloutTitle,
+    type: 'info' as CalloutType,
     text: internal.Text(),
-    background: backgroundMap['info'],
   }),
   metadata: {
     version: 1,

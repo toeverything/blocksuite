@@ -12,7 +12,7 @@ export const styles = css`
   }
 
   .affine-callout-block-title-container {
-    font-size: calc(var(--affine-font-base) + 3px);
+    font-size: calc(var(--affine-font-base) + 2px);
     margin-bottom: 8px;
   }
 

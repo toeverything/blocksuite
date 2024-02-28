@@ -59,6 +59,31 @@ const paragraphButtonStyle = css`
   }
 `;
 
+const CalloutButtonStyle = css`
+  .callout-button-icon > svg:nth-child(2) {
+    transition-duration: 0.3s;
+  }
+  .callout-button-icon:is(:hover, :focus-visible, :active) > svg:nth-child(2) {
+    transform: rotate(180deg);
+  }
+
+  .callout-type-panel {
+    display: none;
+
+    font-size: var(--affine-font-sm);
+    box-sizing: border-box;
+    position: absolute;
+    min-width: 100px;
+    padding: 8px 4px;
+    overflow-y: auto;
+
+    background: var(--affine-background-overlay-panel-color);
+    box-shadow: var(--affine-shadow-2);
+    border-radius: 8px;
+    z-index: var(--affine-z-index-popover);
+  }
+`;
+
 export const formatBarStyle = css`
   .affine-format-bar-widget {
     box-sizing: border-box;
@@ -84,4 +109,5 @@ export const formatBarStyle = css`
   }
 
   ${paragraphButtonStyle}
+  ${CalloutButtonStyle}
 `;

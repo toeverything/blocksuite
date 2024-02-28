@@ -13,13 +13,9 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import type { CalloutBlockModel } from './callout-model.js';
+import { backgroundMap, type CalloutBlockModel } from './callout-model.js';
 import type { CalloutService } from './callout-service.js';
 import { styles } from './styles.js';
-
-const getPlaceholder = () => {
-  return 'Type something.';
-};
 
 @customElement('affine-callout')
 export class CalloutBlockComponent extends BlockElement<
@@ -51,9 +47,6 @@ export class CalloutBlockComponent extends BlockElement<
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  @query('.affine-callout-placeholder')
-  private _placeholderContainer?: HTMLElement;
-
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
@@ -79,58 +72,8 @@ export class CalloutBlockComponent extends BlockElement<
     this._inlineRangeProvider = getInlineRangeProvider(this);
   }
 
-  override firstUpdated() {
-    this.model.propsUpdated.on(this._updatePlaceholder);
-    this.host.selection.slots.changed.on(this._updatePlaceholder);
-
-    this.updateComplete
-      .then(() => {
-        this._updatePlaceholder();
-
-        const inlineEditor = this.inlineEditor;
-        if (!inlineEditor) return;
-        this.disposables.add(
-          inlineEditor.slots.inputting.on(this._updatePlaceholder)
-        );
-      })
-      .catch(console.error);
-  }
-
-  //TODO(@Flrande) wrap placeholder in `rich-text` or inline-editor to make it more developer-friendly
-  private _updatePlaceholder = () => {
-    if (
-      !this._placeholderContainer ||
-      !this._richTextElement ||
-      !this.inlineEditor
-    )
-      return;
-
-    if (
-      this.inlineEditor.yTextLength > 0 ||
-      this.inlineEditor.isComposing ||
-      !this.selected ||
-      this._isInDatabase()
-    ) {
-      this._placeholderContainer.classList.remove('visible');
-    } else {
-      this._placeholderContainer.classList.add('visible');
-    }
-  };
-
-  private _isInDatabase = () => {
-    let parent = this.parentElement;
-    while (parent && parent !== document.body) {
-      if (parent.tagName.toLowerCase() === 'affine-database') {
-        return true;
-      }
-      parent = parent.parentElement;
-    }
-    return false;
-  };
-
   override renderBlock(): TemplateResult<1> {
-    console.log('render callout block');
-    const { title, background } = this.model;
+    const { type } = this.model;
     const children = html`<div
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
@@ -138,6 +81,7 @@ export class CalloutBlockComponent extends BlockElement<
       ${this.renderModelChildren(this.model)}
     </div>`;
 
+    const background = backgroundMap[type];
     const containerStyles = styleMap({
       backgroundColor: `var(${background})`,
     });
@@ -148,12 +92,9 @@ export class CalloutBlockComponent extends BlockElement<
           contenteditable="false"
           class="affine-callout-block-title-container"
         >
-          ${title.toLocaleUpperCase()}
+          ${type.toLocaleUpperCase()}
         </div>
         <div class="affine-callout-rich-text-wrapper">
-          <div contenteditable="false" class="affine-callout-placeholder">
-            ${getPlaceholder()}
-          </div>
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
