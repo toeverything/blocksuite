@@ -114,6 +114,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     return doc;
   }
 
+  get _isInsideEmbedSyncedDocBlock() {
+    return !!this.blockElement.closest('affine-embed-synced-doc-block');
+  }
+
   private _openDoc() {
     const refDocId = this.referenceDocId;
     const blockElement = this.blockElement;
@@ -227,7 +231,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               <icon-button
                 size="24px"
                 class="affine-reference-popover-view-selector-button link current-view"
-                hover="false"
+                .hover=${false}
               >
                 ${LinkIcon}
                 <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
@@ -236,7 +240,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               <icon-button
                 size="24px"
                 class="affine-reference-popover-view-selector-button embed"
-                hover="false"
+                .hover=${false}
                 @click=${() => this._convertToCardView()}
               >
                 ${BookmarkIcon}
@@ -248,8 +252,9 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                     <icon-button
                       size="24px"
                       class="affine-reference-popover-view-selector-button embed"
-                      hover="false"
+                      .hover=${false}
                       @click=${() => this._convertToEmbedView()}
+                      ?disabled=${this._isInsideEmbedSyncedDocBlock}
                     >
                       ${EmbedWebIcon}
                       <affine-tooltip .offset=${12}
