@@ -1,4 +1,4 @@
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 
 import type {
   AttachmentBlockModel,
@@ -28,11 +28,11 @@ import type {
   ListBlockSchema,
   NoteBlockModel,
   NoteBlockSchema,
-  PageBlockModel,
-  PageBlockSchema,
   ParagraphBlockModel,
   ParagraphBlockSchema,
   PDFBlockModel,
+  RootBlockModel,
+  RootBlockSchema,
   SurfaceBlockModel,
   SurfaceBlockSchema,
   SurfaceRefBlockModel,
@@ -40,7 +40,7 @@ import type {
 
 export type BlockModels = {
   'affine:paragraph': ParagraphBlockModel;
-  'affine:page': PageBlockModel;
+  'affine:page': RootBlockModel;
   'affine:list': ListBlockModel;
   'affine:note': NoteBlockModel;
   'affine:code': CodeBlockModel;
@@ -65,7 +65,7 @@ export type BlockModels = {
 
 export type BlockSchemas = {
   'affine:paragraph': typeof ParagraphBlockSchema;
-  'affine:page': typeof PageBlockSchema;
+  'affine:page': typeof RootBlockSchema;
   'affine:list': typeof ListBlockSchema;
   'affine:note': typeof NoteBlockSchema;
   'affine:code': typeof CodeBlockSchema;
@@ -89,24 +89,26 @@ export function assertFlavours(model: { flavour: string }, allowed: string[]) {
   }
 }
 
-export function matchFlavours<Key extends (keyof BlockModels)[]>(
+export function matchFlavours<Key extends (keyof BlockSuite.BlockModels)[]>(
   model: BlockModel | null,
   expected: Key
-): model is BlockModels[Key[number]] {
-  return !!model && expected.includes(model.flavour as keyof BlockModels);
+): model is BlockSuite.BlockModels[Key[number]] {
+  return (
+    !!model && expected.includes(model.flavour as keyof BlockSuite.BlockModels)
+  );
 }
 
 export function isInsideBlockByFlavour(
-  page: Page,
+  doc: Doc,
   block: BlockModel | string,
   flavour: string
 ): boolean {
-  const parent = page.getParent(block);
+  const parent = doc.getParent(block);
   if (parent === null) {
     return false;
   }
   if (flavour === parent.flavour) {
     return true;
   }
-  return isInsideBlockByFlavour(page, parent, flavour);
+  return isInsideBlockByFlavour(doc, parent, flavour);
 }

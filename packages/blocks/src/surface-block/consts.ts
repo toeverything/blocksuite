@@ -1,4 +1,4 @@
-import type { FontConfig } from '../page-block/font-loader/font-loader.js';
+import type { FontConfig } from '../root-block/font-loader/font-loader.js';
 
 export const ZOOM_MAX = 6.0;
 export const ZOOM_MIN = 0.1;

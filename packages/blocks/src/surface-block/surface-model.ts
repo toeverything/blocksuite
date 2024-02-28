@@ -486,7 +486,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   addElement<T extends object = Record<string, unknown>>(
     props: Partial<T> & { type: string }
   ) {
-    if (this.page.readonly) {
+    if (this.doc.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
 
@@ -501,7 +501,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this._elementModels.set(id, elementModel);
 
-    this.page.transact(() => {
+    this.doc.transact(() => {
       this.elements.getValue()!.set(id, elementModel.model.yMap);
     });
 
@@ -509,11 +509,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   }
 
   removeElement(id: string) {
-    if (this.page.readonly) {
+    if (this.doc.readonly) {
       throw new Error('Cannot remove element in readonly mode');
     }
 
-    this.page.transact(() => {
+    this.doc.transact(() => {
       this.elements.getValue()!.delete(id);
     });
   }
@@ -522,7 +522,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     id: string,
     props: Partial<T>
   ) {
-    if (this.page.readonly) {
+    if (this.doc.readonly) {
       throw new Error('Cannot update element in readonly mode');
     }
 
@@ -532,7 +532,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       throw new Error(`Element ${id} is not found`);
     }
 
-    this.page.transact(() => {
+    this.doc.transact(() => {
       props = propsToY(
         elementModel.type,
         props as Record<string, unknown>

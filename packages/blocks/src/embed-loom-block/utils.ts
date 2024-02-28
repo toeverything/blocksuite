@@ -59,7 +59,7 @@ export async function refreshEmbedLoomUrlData(
   } catch (error) {
     console.error(error);
   } finally {
-    embedLoomElement.page.updateBlock(embedLoomElement.model, {
+    embedLoomElement.doc.updateBlock(embedLoomElement.model, {
       title,
       description,
       image,

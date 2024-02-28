@@ -4,6 +4,7 @@ import * as Y from 'yjs';
 import { MemoryBlobManager } from '../adapter/index.js';
 import { Text } from '../reactive/index.js';
 import {
+  type BlockModel,
   defineBlockSchema,
   Schema,
   type SchemaToModel,
@@ -11,10 +12,10 @@ import {
 import { AssetsManager, BaseBlockTransformer } from '../transformer/index.js';
 import { Generator, Workspace } from '../workspace/index.js';
 
-const pageSchema = defineBlockSchema({
+const docSchema = defineBlockSchema({
   flavour: 'page',
   props: internal => ({
-    title: internal.Text('page title'),
+    title: internal.Text('doc title'),
     count: 3,
     style: {
       color: 'red',
@@ -40,12 +41,12 @@ const pageSchema = defineBlockSchema({
   },
 });
 
-type PageBlockModel = SchemaToModel<typeof pageSchema>;
+type RootBlockModel = SchemaToModel<typeof docSchema>;
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
-  schema.register([pageSchema]);
+  schema.register([docSchema]);
   return { id: 'test-workspace', idGenerator, schema };
 }
 
@@ -56,14 +57,14 @@ const assets = new AssetsManager({ blob: blobManager });
 test('model to snapshot', () => {
   const options = createTestOptions();
   const workspace = new Workspace(options);
-  const page = workspace.createPage({ id: 'home' });
-  page.load();
-  page.addBlock('page');
-  const root = page.root as PageBlockModel;
+  const doc = workspace.createDoc({ id: 'home' });
+  doc.load();
+  doc.addBlock('page');
+  const rootModel = doc.root as RootBlockModel;
 
-  expect(root).not.toBeNull();
+  expect(rootModel).not.toBeNull();
   const snapshot = transformer.toSnapshot({
-    model: root,
+    model: rootModel,
     assets,
   });
   expect(snapshot).toMatchSnapshot();
@@ -72,17 +73,17 @@ test('model to snapshot', () => {
 test('snapshot to model', async () => {
   const options = createTestOptions();
   const workspace = new Workspace(options);
-  const page = workspace.createPage({ id: 'home' });
-  page.load();
-  page.addBlock('page');
-  const root = page.root as PageBlockModel;
+  const doc = workspace.createDoc({ id: 'home' });
+  doc.load();
+  doc.addBlock('page');
+  const rootModel = doc.root as RootBlockModel;
 
   const tempDoc = new Y.Doc();
   const map = tempDoc.getMap('temp');
 
-  expect(root).not.toBeNull();
+  expect(rootModel).not.toBeNull();
   const snapshot = await transformer.toSnapshot({
-    model: root,
+    model: rootModel,
     assets,
   });
 
@@ -91,7 +92,7 @@ test('snapshot to model', async () => {
     assets,
     children: [],
   });
-  expect(model.flavour).toBe(root.flavour);
+  expect(model.flavour).toBe(rootModel.flavour);
 
   // @ts-ignore
   expect(model.props.title).toBeInstanceOf(Text);
@@ -99,7 +100,7 @@ test('snapshot to model', async () => {
   // @ts-ignore
   map.set('title', model.props.title.yText);
   // @ts-ignore
-  expect(model.props.title.toString()).toBe('page title');
+  expect(model.props.title.toString()).toBe('doc title');
 
   // @ts-ignore
   expect(model.props.style).toEqual({
@@ -130,3 +131,11 @@ test('snapshot to model', async () => {
     expect(item.content.toString()).toBe(`item ${index + 1}`);
   });
 });
+
+declare global {
+  namespace BlockSuite {
+    interface BlockModels {
+      page: BlockModel;
+    }
+  }
+}

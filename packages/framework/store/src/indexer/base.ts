@@ -5,17 +5,17 @@ import { YArrayEvent, YMapEvent, YTextEvent } from 'yjs';
 import type { YBlock } from '../workspace/block/block.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 
-type PageId = string;
+type DocId = string;
 
 export type IndexBlockEvent =
   | {
-      pageId: PageId;
+      docId: DocId;
       blockId: string;
       action: 'add' | 'update';
       block: YBlock;
     }
   | {
-      pageId: PageId;
+      docId: DocId;
       blockId: string;
       action: 'delete';
       block?: undefined;
@@ -24,13 +24,13 @@ export type IndexBlockEvent =
 export class BlockIndexer {
   private readonly _doc: BlockSuiteDoc;
   private readonly _workspaceSlots: {
-    pageAdded: Slot<string>;
-    pageRemoved: Slot<string>;
+    docAdded: Slot<string>;
+    docRemoved: Slot<string>;
   };
   private _disposables = new DisposableGroup();
 
   public slots = {
-    pageRemoved: new Slot<PageId>(),
+    docRemoved: new Slot<DocId>(),
     /**
      * Note: sys:children update will not trigger event
      */
@@ -45,8 +45,8 @@ export class BlockIndexer {
       slots,
     }: {
       readonly slots: {
-        pageAdded: Slot<string>;
-        pageRemoved: Slot<string>;
+        docAdded: Slot<string>;
+        docRemoved: Slot<string>;
       };
       immediately?: boolean;
     }
@@ -78,47 +78,47 @@ export class BlockIndexer {
     });
 
     Array.from(doc.spaces.keys())
-      .map(pageId => ({ pageId, page: this._getPage(pageId) }))
-      .forEach(({ pageId, page }) => {
-        assertExists(page, `Failed to find page '${pageId}'`);
-        if (disposeMap[pageId]) {
+      .map(docId => ({ docId, doc: this._getDoc(docId) }))
+      .forEach(({ docId, doc }) => {
+        assertExists(doc, `Failed to find doc '${docId}'`);
+        if (disposeMap[docId]) {
           console.warn(
-            `Duplicated pageAdded event! ${pageId} already observed`,
+            `Duplicated docAdded event! ${docId} already observed`,
             disposeMap
           );
           return;
         }
-        const dispose = this._indexPage(pageId, page);
-        disposeMap[pageId] = dispose;
+        const dispose = this._indexDoc(docId, doc);
+        disposeMap[docId] = dispose;
       });
 
-    this._workspaceSlots.pageAdded.on(pageId => {
-      const page = this._getPage(pageId);
-      assertExists(page, `Failed to find page '${pageId}'`);
-      if (disposeMap[pageId]) {
-        // It's possible because the `pageAdded` event is emitted once a new block is added to the page
+    this._workspaceSlots.docAdded.on(docId => {
+      const doc = this._getDoc(docId);
+      assertExists(doc, `Failed to find doc '${docId}'`);
+      if (disposeMap[docId]) {
+        // It's possible because the `docAdded` event is emitted once a new block is added to the doc
         return;
       }
-      const dispose = this._indexPage(pageId, page);
-      disposeMap[pageId] = dispose;
+      const dispose = this._indexDoc(docId, doc);
+      disposeMap[docId] = dispose;
     });
-    this._workspaceSlots.pageRemoved.on(pageId => {
-      disposeMap[pageId]?.();
-      disposeMap[pageId] = null;
-      this.slots.pageRemoved.emit(pageId);
+    this._workspaceSlots.docRemoved.on(docId => {
+      disposeMap[docId]?.();
+      disposeMap[docId] = null;
+      this.slots.docRemoved.emit(docId);
     });
   }
 
-  private _indexPage(pageId: string, yPage: Y.Doc) {
-    const yBlocks = yPage.getMap<YBlock>('blocks');
+  private _indexDoc(docId: string, yDoc: Y.Doc) {
+    const yBlocks = yDoc.getMap<YBlock>('blocks');
     yBlocks.forEach((block, blockId) => {
-      this._indexBlock({ action: 'add', pageId, blockId, block });
+      this._indexBlock({ action: 'add', docId, blockId, block });
     });
 
     const observer = (
       events: Y.YEvent<Y.AbstractType<unknown>>[],
       transaction: Y.Transaction
-    ) => this._yPageObserver(events, transaction, { pageId, yPage: yBlocks });
+    ) => this._yDocObserver(events, transaction, { docId, yDoc: yBlocks });
 
     yBlocks.observeDeep(observer);
     return () => {
@@ -130,10 +130,10 @@ export class BlockIndexer {
     this.slots.blockUpdated.emit(indexEvent);
   }
 
-  private _yPageObserver = (
+  private _yDocObserver = (
     events: Y.YEvent<Y.AbstractType<unknown>>[],
     _transaction: Y.Transaction,
-    { pageId, yPage }: { pageId: PageId; yPage: Y.Map<YBlock> }
+    { docId, yDoc }: { docId: DocId; yDoc: Y.Map<YBlock> }
   ) => {
     events.forEach(e => {
       if (e instanceof YArrayEvent) {
@@ -145,13 +145,13 @@ export class BlockIndexer {
         if (e.target !== e.currentTarget) {
           // add 'elements' to 'affine:surface' or add 'prop:xywh' to 'affine:note'
           if (e.keysChanged.has('prop:text')) {
-            // update block text by `page.updateBlock(paragraph, { text: new page.Text() })` API
+            // update block text by `doc.updateBlock(paragraph, { text: new doc.Text() })` API
             const blockId = e.path[0] as string;
-            const block = yPage.get(blockId);
+            const block = yDoc.get(blockId);
             assertExists(block);
             this._indexBlock({
               action: 'update',
-              pageId,
+              docId,
               blockId,
               block,
             });
@@ -164,17 +164,17 @@ export class BlockIndexer {
             if (action === 'delete') {
               this._indexBlock({
                 action,
-                pageId,
+                docId,
                 blockId,
               });
               return;
             }
             // add or update
-            const block = yPage.get(blockId);
+            const block = yDoc.get(blockId);
             assertExists(block);
             this._indexBlock({
               action,
-              pageId,
+              docId,
               blockId,
               block,
             });
@@ -187,11 +187,11 @@ export class BlockIndexer {
         if (!blockId || typeof blockId !== 'string') {
           throw new Error('Failed to update index! Unexpected YText Event!');
         }
-        const block = yPage.get(blockId);
+        const block = yDoc.get(blockId);
         assertExists(block);
         this._indexBlock({
           action: 'update',
-          pageId,
+          docId,
           blockId,
           block,
         });
@@ -200,8 +200,8 @@ export class BlockIndexer {
     });
   };
 
-  private _getPage(pageId: PageId): Y.Doc | undefined {
-    return this._doc.spaces.get(pageId) as Y.Doc | undefined;
+  private _getDoc(docId: DocId): Y.Doc | undefined {
+    return this._doc.spaces.get(docId) as Y.Doc | undefined;
   }
 
   refreshIndex() {

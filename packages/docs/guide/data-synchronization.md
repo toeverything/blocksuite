@@ -13,19 +13,19 @@ Traditionally, you might expect a JSON-based API that works somewhat like `edito
 ```ts
 import { Job } from '@blocksuite/store';
 
-const { workspace } = page;
+const { workspace } = doc;
 
 // A job is required for performing the tasks
 const job = new Job({ workspace });
 
-// Export current page content to snapshot JSON
-const json = await job.pageToSnapshot(page);
+// Export current doc content to snapshot JSON
+const json = await job.docToSnapshot(doc);
 
-// Import snapshot JSON to a new page
-const newPage = await job.snapshotToPage(json);
+// Import snapshot JSON to a new doc
+const newDoc = await job.snapshotToDoc(json);
 ```
 
-The snapshot stores the JSON representation of the `page` block tree, preserving its nested structure. Additionally, BlockSuite has designed an [Adapter](./adapter) API on top of the snapshot to handle conversions between the block tree and third-party formats like markdown and HTML.
+The snapshot stores the JSON representation of the `doc` block tree, preserving its nested structure. Additionally, BlockSuite has designed an [Adapter](./adapter) API on top of the snapshot to handle conversions between the block tree and third-party formats like markdown and HTML.
 
 ## Document Streaming
 
@@ -49,35 +49,35 @@ In contrast, traditional editors typically only support APIs like `editor.load()
 
 In BlockSuite, the data-driven synchronization strategy is implemented through providers:
 
-- When creating a new document, you only need to connect the `page` to a specific provider (or multiple providers) to expect the CRDT data of the block tree to be synchronized via these providers.
-- Similarly, when loading an existing document, the method is to create a new empty `page` object and connect it to the corresponding provider. At this time, the block tree data will also flow in from the provider data source:
+- When creating a new document, you only need to connect the `doc` to a specific provider (or multiple providers) to expect the CRDT data of the block tree to be synchronized via these providers.
+- Similarly, when loading an existing document, the method is to create a new empty `doc` object and connect it to the corresponding provider. At this time, the block tree data will also flow in from the provider data source:
 
 ```ts
 // IndexedDB provider from Yjs community
 import { IndexeddbPersistence } from 'y-indexeddb';
 
-// Let's start from an empty page
-const { page } = createEmptyPage();
+// Let's start from an empty doc
+const doc = createEmptyDoc();
 
-// `page.spaceDoc` is the underlying CRDT data structure.
+// `doc.spaceDoc` is the underlying CRDT data structure.
 // Here we connect the doc to the IndexedDB table named 'my-doc'
-const provider = new IndexeddbPersistence('my-doc', page.spaceDoc);
+const provider = new IndexeddbPersistence('my-doc', doc.spaceDoc);
 
 // Case 1.
-// If you are creating a new page,
+// If you are creating a new doc,
 // init here and the block will be automatically written to IndexedDB
-page.load(() => {
-  page.addBlock('affine:page');
+doc.load(() => {
+  doc.addBlock('affine:page');
   // ...
 });
 
 // Case 2.
-// If you are loading an existing page,
+// If you are loading an existing doc,
 // simply wait here and your content will be ready
-await page.load();
+await doc.load();
 ```
 
-In both cases, whether the document is **loaded** or **created**, the [`page.slots.ready`](/api/@blocksuite/store/classes/Page.html#ready-1) slot will be triggered, indicating that the document has been initialized.
+In both cases, whether the document is **loaded** or **created**, the [`doc.slots.ready`](/api/@blocksuite/store/classes/Doc.html#ready-1) slot will be triggered, indicating that the document has been initialized.
 
 Furthermore, by connecting multiple providers, documents can automatically be synchronized to a variety of different backends:
 

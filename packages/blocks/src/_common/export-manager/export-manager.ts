@@ -1,21 +1,21 @@
 import type { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 
 import {
   blockElementGetter,
   getBlockComponentByModel,
-  getPageByEditorHost,
-  isInsideDocEditor,
+  getRootByEditorHost,
+  isInsidePageEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import type { PageBlockModel } from '../../models.js';
-import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
-import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
-import type { EdgelessBlockModel } from '../../page-block/edgeless/type.js';
-import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
-import { getBackgroundGrid } from '../../page-block/edgeless/utils/query.js';
+import type { RootBlockModel } from '../../models.js';
+import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
+import { getBlocksInFrame } from '../../root-block/edgeless/frame-manager.js';
+import type { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
+import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
+import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { ElementModel } from '../../surface-block/element-model/index.js';
 import type { Renderer } from '../../surface-block/index.js';
@@ -43,8 +43,8 @@ export class ExportManager {
     this._blockService = blockService;
   }
 
-  get page(): Page {
-    return this._blockService.std.page;
+  get doc(): Doc {
+    return this._blockService.std.doc;
   }
 
   get editorHost(): EditorHost {
@@ -53,25 +53,25 @@ export class ExportManager {
 
   private async _checkReady() {
     const pathname = location.pathname;
-    const pageMode = isInsideDocEditor(this.editorHost);
+    const editorMode = isInsidePageEditor(this.editorHost);
 
     const promise = new Promise((resolve, reject) => {
       let count = 0;
       const checkReactRender = setInterval(() => {
         try {
-          this._checkCanContinueToCanvas(pathname, pageMode);
+          this._checkCanContinueToCanvas(pathname, editorMode);
         } catch (e) {
           clearInterval(checkReactRender);
           reject(e);
         }
-        const root = this.page.root;
-        const pageBlock = root
-          ? getBlockComponentByModel(this.editorHost, root)
+        const rootModel = this.doc.root;
+        const rootElement = this.doc.root
+          ? getBlockComponentByModel(this.editorHost, rootModel)
           : null;
-        const imageCard = pageBlock?.querySelector('affine-image-block-card');
+        const imageCard = rootElement?.querySelector('affine-image-block-card');
         const isReady =
           !imageCard || imageCard.getAttribute('imageState') === '0';
-        if (pageBlock && isReady) {
+        if (rootElement && isReady) {
           clearInterval(checkReactRender);
           resolve(true);
         }
@@ -186,21 +186,21 @@ export class ExportManager {
     surfaceRenderer: Renderer,
     bound: IBound,
     blockElementGetter: (model: BlockModel) => Element | null = () => null,
-    edgeless?: EdgelessPageBlockComponent,
+    edgeless?: EdgelessRootBlockComponent,
     nodes?: EdgelessBlockModel[],
     surfaces?: ElementModel[],
     edgelessBackground?: {
       zoom: number;
     }
   ): Promise<HTMLCanvasElement | undefined> {
-    const root = this.page.root;
-    if (!root) return;
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
 
     const pathname = location.pathname;
-    const pageMode = isInsideDocEditor(this.editorHost);
-    const pageElement = getPageByEditorHost(this.editorHost);
-    assertExists(pageElement);
-    const viewportElement = pageElement.viewportElement;
+    const editorMode = isInsidePageEditor(this.editorHost);
+    const rootElement = getRootByEditorHost(this.editorHost);
+    assertExists(rootElement);
+    const viewportElement = rootElement.viewportElement;
 
     const containerComputedStyle = window.getComputedStyle(viewportElement);
 
@@ -208,7 +208,7 @@ export class ExportManager {
       this._html2canvas(element, {
         backgroundColor: containerComputedStyle.backgroundColor,
       });
-    const container = pageElement.querySelector(
+    const container = rootElement.querySelector(
       '.affine-block-children-container'
     );
 
@@ -238,7 +238,7 @@ export class ExportManager {
       if (matchFlavours(block, ['affine:image'])) {
         if (!block.sourceId) return;
 
-        const blob = await block.page.blob.get(block.sourceId);
+        const blob = await block.doc.blob.get(block.sourceId);
         if (!blob) return;
 
         const blobToImage = (blob: Blob) =>
@@ -275,7 +275,7 @@ export class ExportManager {
       }
 
       if (matchFlavours(block, ['affine:frame'])) {
-        const blocksInsideFrame = getBlocksInFrame(this.page, block, false);
+        const blocksInsideFrame = getBlocksInFrame(this.doc, block, false);
         const frameBound = Bound.deserialize(block.xywh);
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
@@ -297,7 +297,7 @@ export class ExportManager {
         ctx.drawImage(surfaceCanvas, 50, 50, frameBound.w, frameBound.h);
       }
 
-      this._checkCanContinueToCanvas(pathname, pageMode);
+      this._checkCanContinueToCanvas(pathname, editorMode);
     }
 
     const surfaceCanvas = surfaceRenderer.getCanvasByBound(bound, surfaces);
@@ -311,17 +311,17 @@ export class ExportManager {
     if (!(html2canvas instanceof Function)) return;
 
     const pathname = location.pathname;
-    const pageMode = isInsideDocEditor(this.editorHost);
+    const editorMode = isInsidePageEditor(this.editorHost);
 
-    const pageElement = getPageByEditorHost(this.editorHost);
-    assertExists(pageElement);
-    const viewportElement = pageElement.viewportElement;
+    const rootElement = getRootByEditorHost(this.editorHost);
+    assertExists(rootElement);
+    const viewportElement = rootElement.viewportElement;
 
     const pageContainer = viewportElement.querySelector(
-      '.affine-doc-page-block-container'
+      '.affine-page-root-block-container'
     );
     const rect = pageContainer?.getBoundingClientRect();
-    const { viewport } = pageElement;
+    const { viewport } = rootElement;
     const pageWidth = rect?.width;
     const pageLeft = rect?.left ?? 0;
     const viewportHeight = viewportElement?.scrollHeight;
@@ -344,7 +344,7 @@ export class ExportManager {
           (element.classList.contains('expand') &&
             element.parentElement?.classList.contains('meta-data'))
         ) {
-          // the close and expand buttons in affine-page-meta-data is not needed to be showed
+          // the close and expand buttons in affine-doc-meta-data is not needed to be showed
           return true;
         } else {
           return false;
@@ -367,7 +367,7 @@ export class ExportManager {
       viewportElement as HTMLElement,
       html2canvasOption
     );
-    this._checkCanContinueToCanvas(pathname, pageMode);
+    this._checkCanContinueToCanvas(pathname, editorMode);
     return data;
   }
 
@@ -408,10 +408,10 @@ export class ExportManager {
     return svg;
   }
 
-  private _checkCanContinueToCanvas(pathName: string, pageMode: boolean) {
+  private _checkCanContinueToCanvas(pathName: string, editorMode: boolean) {
     if (
       location.pathname !== pathName ||
-      isInsideDocEditor(this.editorHost) !== pageMode
+      isInsidePageEditor(this.editorHost) !== editorMode
     ) {
       throw new Error('Unable to export content to canvas');
     }
@@ -420,16 +420,16 @@ export class ExportManager {
   private async _toCanvas(): Promise<HTMLCanvasElement | void> {
     await this._checkReady();
 
-    if (isInsideDocEditor(this.editorHost)) {
+    if (isInsidePageEditor(this.editorHost)) {
       return this._docToCanvas();
     } else {
-      const root = this.page.root;
-      if (!root) return;
+      const rootModel = this.doc.root;
+      if (!rootModel) return;
 
       const edgeless = getBlockComponentByModel(
         this.editorHost,
-        root
-      ) as EdgelessPageBlockComponent;
+        rootModel
+      ) as EdgelessRootBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
       return this.edgelessToCanvas(
@@ -442,15 +442,15 @@ export class ExportManager {
   }
 
   public async exportPng() {
-    const root = this.page.root;
-    if (!root) return;
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
     const canvasImage = await this._toCanvas();
     if (!canvasImage) {
       return;
     }
 
     FileExporter.exportPng(
-      (this.page.root as PageBlockModel).title.toString(),
+      (this.doc.root as RootBlockModel).title.toString(),
       canvasImage.toDataURL('image/png')
     );
   }
@@ -518,8 +518,8 @@ export class ExportManager {
   }
 
   public async exportPdf() {
-    const root = this.page.root;
-    if (!root) return;
+    const rootModel = this.doc.root;
+    if (!rootModel) return;
     const canvasImage = await this._toCanvas();
     if (!canvasImage) {
       return;
@@ -539,7 +539,7 @@ export class ExportManager {
     const pdfBase64 = await pdfDoc.saveAsBase64({ dataUri: true });
 
     FileExporter.exportFile(
-      (root as PageBlockModel).title.toString() + '.pdf',
+      (rootModel as RootBlockModel).title.toString() + '.pdf',
       pdfBase64
     );
   }

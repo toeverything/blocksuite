@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { TestUtils } from '@blocks/index.js';
 import type { EditorHost } from '@lit/element/index.js';
-import type { DebugMenu } from '@playground/apps/components/debug-menu.js';
+import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { AffineEditorContainer } from '@presets/editors/index.js';
-import type { BlockModel, Page, Workspace } from '@store/index.js';
+import type { BlockModel, Doc, Workspace } from '@store/index.js';
 
 declare global {
   interface Window {
@@ -18,7 +18,7 @@ declare global {
     };
     workspace: Workspace;
     blockSchema: Record<string, typeof BlockModel>;
-    page: Page;
+    doc: Doc;
     debugMenu: DebugMenu;
     editor: AffineEditorContainer;
     host: EditorHost;

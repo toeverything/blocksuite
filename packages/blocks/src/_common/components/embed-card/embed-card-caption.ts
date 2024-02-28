@@ -54,7 +54,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
   private _onInputChange(e: InputEvent) {
     const target = e.target as HTMLInputElement;
     this.caption = target.value;
-    this.block.model.page.updateBlock(this.block.model, {
+    this.block.doc.updateBlock(this.block.model, {
       caption: this.caption,
     });
   }
@@ -78,7 +78,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
 
     if (event.key === 'Enter') {
       event.preventDefault();
-      const page = this.block.page;
+      const doc = this.block.doc;
       const target = event.target as HTMLInputElement;
       const start = target.selectionStart;
       if (start === null) {
@@ -86,25 +86,25 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
       }
 
       const model = this.block.model;
-      const parent = page.getParent(model);
+      const parent = doc.getParent(model);
       if (!parent) {
         return;
       }
 
       const value = target.value;
       const caption = value.slice(0, start);
-      page.updateBlock(model, { caption });
+      doc.updateBlock(model, { caption });
 
       const nextBlockText = value.slice(start);
       const index = parent.children.indexOf(model);
-      const id = page.addBlock(
+      const id = doc.addBlock(
         'affine:paragraph',
         { text: new Text(nextBlockText) },
         parent,
         index + 1
       );
 
-      asyncFocusRichText(this.block.host, model.page, id)?.catch(console.error);
+      asyncFocusRichText(this.block.host, id)?.catch(console.error);
     }
   }
 
@@ -136,7 +136,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     }
 
     return html`<input
-      .disabled=${this.block.page.readonly}
+      .disabled=${this.block.doc.readonly}
       placeholder="Write a caption"
       class="affine-embed-card-caption"
       .value=${this.caption ?? ''}

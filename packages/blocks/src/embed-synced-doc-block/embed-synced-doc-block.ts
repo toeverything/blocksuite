@@ -23,11 +23,11 @@ import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
 import {
-  DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
+  PageEditorBlockSpecs,
 } from '../_specs/_specs.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import type { PageBlockComponent, PageService } from '../page-block/index.js';
+import type { RootBlockComponent } from '../root-block/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
@@ -42,10 +42,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   static override styles = blockStyles;
 
   @state()
-  private _pageMode: 'page' | 'edgeless' = 'page';
+  private _editorMode: 'page' | 'edgeless' = 'page';
 
   @state()
-  private _pageUpdatedAt: Date = new Date();
+  private _docUpdatedAt: Date = new Date();
 
   @state()
   private _loading = false;
@@ -65,20 +65,20 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   @state()
   private _empty = false;
 
-  @query('affine-embed-synced-doc-card')
+  @query(':scope > .embed-block-container > affine-embed-synced-doc-card')
   syncedDocCard?: EmbedSyncedDocCard;
 
-  @query('embed-card-caption')
+  @query(':scope > .embed-block-container > embed-card-caption')
   captionElement?: EmbedCardCaption;
 
   @query(
-    '.affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
+    ':scope > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
   )
   syncedDocEditorHost?: EditorHost;
 
-  get doc() {
-    const page = this.std.workspace.getPage(this.model.pageId);
-    return page;
+  get syncedDoc() {
+    const doc = this.std.workspace.getDoc(this.model.pageId);
+    return doc;
   }
 
   get blockState() {
@@ -92,51 +92,49 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     };
   }
 
-  get pageMode() {
-    return this._pageMode;
+  get editorMode() {
+    return this._editorMode;
   }
 
-  get pageUpdatedAt() {
-    return this._pageUpdatedAt;
+  get docUpdatedAt() {
+    return this._docUpdatedAt;
   }
 
-  get pageTitle() {
-    return this.doc?.meta.title.length ? this.doc.meta.title : 'Untitled';
+  get docTitle() {
+    return this.syncedDoc?.meta?.title.length
+      ? this.syncedDoc.meta.title
+      : 'Untitled';
   }
 
-  private get _pageService() {
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService, `Page service not found.`);
-    return pageService;
+  private get _rootService() {
+    return this.std.spec.getService('affine:page');
   }
 
   private _checkCycle() {
     let editorHost: EditorHost | null = this.host;
     while (editorHost && !this._cycle) {
-      this._cycle = !!editorHost && editorHost.page.id === this.model.pageId;
+      this._cycle = !!editorHost && editorHost.doc.id === this.model.pageId;
       editorHost =
         editorHost.parentElement?.closest<EditorHost>('editor-host') ?? null;
     }
   }
 
   private _checkEmpty() {
-    const syncedDoc = this.doc;
-    const root = syncedDoc?.root;
-    if (!syncedDoc || !root) {
+    const syncedDoc = this.syncedDoc;
+    const rootModel = syncedDoc?.root;
+    if (!syncedDoc || !rootModel) {
       this._empty = false;
       return;
     }
 
-    const noteBlocks = root.children.filter(child =>
+    const noteBlocks = rootModel.children.filter(child =>
       matchFlavours(child, ['affine:note'])
     ) as NoteBlockModel[];
     if (noteBlocks.length === 0) {
       this._empty = true;
 
       syncedDoc.withoutTransact(() => {
-        const noteId = syncedDoc.addBlock('affine:note', {}, root.id);
+        const noteId = syncedDoc.addBlock('affine:note', {}, rootModel.id);
         syncedDoc.addBlock('affine:paragraph', {}, noteId);
       });
 
@@ -165,7 +163,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this._cycle = false;
     this._empty = false;
 
-    const syncedDoc = this.doc;
+    const syncedDoc = this.syncedDoc;
     if (!syncedDoc) {
       this._deleted = true;
       this._loading = false;
@@ -173,8 +171,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
 
     this._checkCycle();
-    this._pageMode = this._pageService.getPageMode(this.model.pageId);
-    this._pageUpdatedAt = this._pageService.getPageUpdatedAt(this.model.pageId);
+    this._editorMode = this._rootService.getEditorMode(this.model.pageId);
+    this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
 
     if (!syncedDoc.loaded) {
       try {
@@ -191,7 +189,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       });
     }
 
-    if (this._pageMode === 'page') {
+    if (this._editorMode === 'page') {
       this._checkEmpty();
     }
 
@@ -205,7 +203,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       this._disposables.add(
         UIEventDispatcher.slots.activeChanged.on(() => {
           this._editing = syncedDocEditorHost.std.event.isActive;
-          if (!this._editing && this._pageMode === 'page') {
+          if (!this._editing && this._editorMode === 'page') {
             this._checkEmpty();
           }
         })
@@ -213,50 +211,60 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
   }
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    UIEventDispatcher.slots.activeChanged.once(() => {
-      if (!this.std.event.isActive) {
-        abortController.abort();
+  private _whenHover = new HoverController(
+    this,
+    ({ abortController }) => {
+      if (this._editing) {
+        return null;
       }
-    });
 
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
+      UIEventDispatcher.slots.activeChanged.once(() => {
+        if (!this.std.event.isActive) {
+          abortController.abort();
+        }
+      });
+
+      const selection = this.host.selection;
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || !!textSelection.from.length)
+      ) {
+        return null;
+      }
+
+      const blockSelections = selection.filter('block');
+      if (
+        blockSelections.length > 1 ||
+        (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+      ) {
+        return null;
+      }
+
+      return {
+        template: html`
+          <style>
+            :host {
+              z-index: 1;
+            }
+          </style>
+          <embed-card-toolbar
+            .block=${this}
+            .abortController=${abortController}
+          ></embed-card-toolbar>
+        `,
+        computePosition: {
+          referenceElement: this,
+          placement: 'top-start',
+          middleware: [flip(), offset(4)],
+          autoUpdate: true,
+        },
+      };
+    },
+    {
+      allowMultiple: true,
     }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-    ) {
-      return null;
-    }
-
-    return {
-      template: html`
-        <style>
-          :host {
-            z-index: 1;
-          }
-        </style>
-        <embed-card-toolbar
-          .block=${this}
-          .abortController=${abortController}
-        ></embed-card-toolbar>
-      `,
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    };
-  });
+  );
 
   private _handlePointerDown = (event: MouseEvent) => {
     if (this._editing) {
@@ -273,19 +281,19 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
   open = () => {
     const syncedDocId = this.model.pageId;
-    if (syncedDocId === this.model.page.id) return;
+    if (syncedDocId === this.doc.id) return;
 
-    const pageElement = this.std.view.viewFromPath('block', [
-      this.model.page.root?.id ?? '',
-    ]) as PageBlockComponent | null;
-    assertExists(pageElement);
+    const rootElement = this.std.view.viewFromPath('block', [
+      this.doc.root?.id ?? '',
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
 
-    pageElement.slots.pageLinkClicked.emit({ pageId: syncedDocId });
+    rootElement.slots.docLinkClicked.emit({ docId: syncedDocId });
   };
 
   covertToInline = () => {
-    const { page, pageId } = this.model;
-    const parent = page.getParent(this.model);
+    const { doc, pageId } = this.model;
+    const parent = doc.getParent(this.model);
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
@@ -294,9 +302,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     yText.format(0, REFERENCE_NODE.length, {
       reference: { type: 'LinkedPage', pageId },
     });
-    const text = new page.Text(yText);
+    const text = new doc.Text(yText);
 
-    page.addBlock(
+    doc.addBlock(
       'affine:paragraph',
       {
         text,
@@ -305,11 +313,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       index
     );
 
-    page.deleteBlock(this.model);
+    doc.deleteBlock(this.model);
   };
 
   convertToCard = () => {
-    const { page, pageId, caption, xywh } = this.model;
+    const { doc, pageId, caption, xywh } = this.model;
 
     if (this.isInSurface) {
       const style = 'vertical';
@@ -329,11 +337,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         elements: [blockId],
       });
     } else {
-      const parent = page.getParent(this.model);
+      const parent = doc.getParent(this.model);
       assertExists(parent);
       const index = parent.children.indexOf(this.model);
 
-      page.addBlock(
+      doc.addBlock(
         'affine:embed-linked-doc',
         { pageId, caption },
         parent,
@@ -342,7 +350,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
       this.std.selection.setGroup('note', []);
     }
-    page.deleteBlock(this.model);
+    doc.deleteBlock(this.model);
   };
 
   refreshData = () => {
@@ -389,6 +397,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   override render() {
+    this.removeAttribute('data-nested-editor');
+
     const { style, xywh } = this.model;
 
     this._cardStyle = style;
@@ -397,18 +407,17 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this._width = this.isInSurface ? bound.w : EMBED_CARD_WIDTH[style];
     this._height = this.isInSurface ? bound.h : EMBED_CARD_HEIGHT[style];
 
-    const syncedDoc = this.doc;
+    const syncedDoc = this.syncedDoc;
     const { isLoading, isError, isDeleted, isCycle, isEditing, isEmpty } =
       this.blockState;
     const isInSurface = this.isInSurface;
-    const pageMode = this.pageMode;
+    const editorMode = this.editorMode;
 
     if (isLoading || isError || isDeleted || isCycle || !syncedDoc) {
       let cardStyleMap = styleMap({
         position: 'relative',
         display: 'block',
         width: '100%',
-        margin: '18px 0px',
       });
       if (isInSurface) {
         const bound = Bound.deserialize(this.model.xywh);
@@ -423,15 +432,19 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         });
       }
 
-      return html`
-        <affine-embed-synced-doc-card
-          ${isInSurface || !isCycle
-            ? nothing
-            : ref(this._whenHover.setReference)}
-          style=${cardStyleMap}
-          .block=${this}
-        ></affine-embed-synced-doc-card>
-      `;
+      return this.renderEmbed(
+        () => html`
+          <affine-embed-synced-doc-card
+            ${isInSurface || !isCycle
+              ? nothing
+              : ref(this._whenHover.setReference)}
+            style=${cardStyleMap}
+            .block=${this}
+          ></affine-embed-synced-doc-card>
+
+          <embed-card-caption .block=${this}></embed-card-caption>
+        `
+      );
     }
 
     let containerStyleMap = styleMap({
@@ -448,7 +461,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       const height = bound.h / scale;
       containerStyleMap = styleMap({
         width: `${width}px`,
-        height: `${pageMode === 'page' && isEditing ? `max-content` : `${height}px`}`,
+        height: `${editorMode === 'page' && isEditing ? `max-content` : `${height}px`}`,
         minHeight: `${height}px`,
         transform: `scale(${scale})`,
         transformOrigin: '0 0',
@@ -458,7 +471,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     const isSelected = !!this.selected?.is('block');
     const theme = getThemeMode();
     const EditorBlockSpec =
-      pageMode === 'page' ? DocEditorBlockSpecs : EdgelessEditorBlockSpecs;
+      editorMode === 'page' ? PageEditorBlockSpecs : EdgelessEditorBlockSpecs;
 
     this.setAttribute('data-nested-editor', 'true');
     const scale = isInSurface ? this.model.scale ?? 1 : undefined;
@@ -471,7 +484,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
             : ref(this._whenHover.setReference)}
           class=${classMap({
             'affine-embed-synced-doc-container': true,
-            [pageMode]: true,
+            [editorMode]: true,
             [theme]: true,
             selected: isSelected,
             editing: isEditing,
@@ -484,12 +497,12 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
           <div
             class=${classMap({
               'affine-embed-synced-doc-editor': true,
-              'affine-doc-viewport': pageMode === 'page',
-              'affine-edgeless-viewport': pageMode === 'edgeless',
+              'affine-page-viewport': editorMode === 'page',
+              'affine-edgeless-viewport': editorMode === 'edgeless',
             })}
           >
             ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
-            ${isEmpty && !isEditing && pageMode === 'page'
+            ${isEmpty && !isEditing && editorMode === 'page'
               ? html`
                   <div class="affine-embed-synced-doc-editor-empty">
                     <span>This is a linked doc, you can add content here.</span>

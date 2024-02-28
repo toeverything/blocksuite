@@ -6,10 +6,10 @@ import type { BlockModel } from '@blocksuite/store';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
-import type { PageBlockComponent } from '../../index.js';
-import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
-import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
-import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import type { RootBlockComponent } from '../../index.js';
+import type { EdgelessCanvasTextEditor } from '../../root-block/edgeless/components/text/types.js';
+import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
+import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
   BLOCK_ID_ATTR as ATTR,
@@ -59,13 +59,13 @@ export function getNextBlock(
   }
   map[model.id] = true;
 
-  const page = model.page;
+  const doc = model.doc;
   if (model.children.length) {
     return model.children[0];
   }
   let currentBlock: typeof model | null = model;
   while (currentBlock) {
-    const nextSibling = page.getNextSibling(currentBlock);
+    const nextSibling = doc.getNextSibling(currentBlock);
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
       if (matchFlavours(nextSibling, ['affine:note'])) {
@@ -78,7 +78,7 @@ export function getNextBlock(
       }
       return nextSibling;
     }
-    currentBlock = page.getParent(currentBlock);
+    currentBlock = doc.getParent(currentBlock);
   }
   return null;
 }
@@ -87,7 +87,7 @@ export function getNextBlock(
  *
  * @example
  * ```md
- * page
+ * doc
  * - note
  *   - paragraph <- 5
  * - note <- 4 (will be skipped)
@@ -104,7 +104,7 @@ export function getPreviousBlock(
   model: BlockModel
 ): BlockModel | null {
   const getPrev = (model: BlockModel) => {
-    const parent = model.page.getParent(model);
+    const parent = model.doc.getParent(model);
     if (!parent) return null;
 
     const index = parent.children.indexOf(model);
@@ -163,7 +163,7 @@ export function buildPath(model: BlockModel | null): string[] {
   let current = model;
   while (current) {
     path.unshift(current.id);
-    current = current.page.getParent(current);
+    current = current.doc.getParent(current);
   }
   return path;
 }
@@ -173,11 +173,11 @@ export function blockElementGetter(model: BlockModel, view: ViewStore) {
     let current: BlockModel | null = model;
     const path: string[] = [];
     while (current) {
-      // Top level image render under page block not surface block
+      // Top level image render under root block not surface block
       if (!matchFlavours(current, ['affine:surface'])) {
         path.unshift(current.id);
       }
-      current = current.page.getParent(current);
+      current = current.doc.getParent(current);
     }
 
     return view.viewFromPath('block', path);
@@ -186,48 +186,48 @@ export function blockElementGetter(model: BlockModel, view: ViewStore) {
   }
 }
 
-export function getPageByElement(element: Element): PageBlockComponent | null {
-  const docPageElement = getDocPageByElement(element);
-  if (docPageElement) return docPageElement;
+export function getRootByElement(element: Element): RootBlockComponent | null {
+  const pageRoot = getPageRootByElement(element);
+  if (pageRoot) return pageRoot;
 
-  const edgelessPageElement = getEdgelessPageByElement(element);
-  if (edgelessPageElement) return edgelessPageElement;
+  const edgelessRoot = getEdgelessRootByElement(element);
+  if (edgelessRoot) return edgelessRoot;
 
   return null;
 }
 
-export function getPageByEditorHost(
+export function getRootByEditorHost(
   editorHost: EditorHost
-): PageBlockComponent | null {
-  if (isInsideDocEditor(editorHost)) {
-    return getDocPageByEditorHost(editorHost);
+): RootBlockComponent | null {
+  if (isInsidePageEditor(editorHost)) {
+    return getPageRootByEditorHost(editorHost);
   }
 
   if (isInsideEdgelessEditor(editorHost)) {
-    return getEdgelessPageByEditorHost(editorHost);
+    return getEdgelessRootByEditorHost(editorHost);
   }
 
   return null;
 }
 
 /** If it's not in the page mode, it will return `null` directly */
-export function getDocPageByElement(element: Element) {
-  return element.closest('affine-doc-page');
+export function getPageRootByElement(element: Element) {
+  return element.closest('affine-page-root');
 }
 
 /** If it's not in the page mode, it will return `null` directly */
-export function getDocPageByEditorHost(editorHost: EditorHost) {
-  return editorHost.querySelector('affine-doc-page');
+export function getPageRootByEditorHost(editorHost: EditorHost) {
+  return editorHost.querySelector('affine-page-root');
 }
 
 /** If it's not in the edgeless mode, it will return `null` directly */
-export function getEdgelessPageByElement(element: Element) {
-  return element.closest('affine-edgeless-page');
+export function getEdgelessRootByElement(element: Element) {
+  return element.closest('affine-edgeless-root');
 }
 
 /** If it's not in the edgeless mode, it will return `null` directly */
-export function getEdgelessPageByEditorHost(editorHost: EditorHost) {
-  return editorHost.querySelector('affine-edgeless-page');
+export function getEdgelessRootByEditorHost(editorHost: EditorHost) {
+  return editorHost.querySelector('affine-edgeless-root');
 }
 
 /** @deprecated */
@@ -237,12 +237,12 @@ export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
   return editorContainer as AbstractEditor;
 }
 
-export function isInsideDocEditor(host: EditorHost) {
+export function isInsidePageEditor(host: EditorHost) {
   const hostParentEl = host.parentElement;
   return (
     !!hostParentEl &&
-    (hostParentEl.classList.contains('affine-doc-viewport') ||
-      hostParentEl.classList.contains('doc-editor-container'))
+    (hostParentEl.classList.contains('affine-page-viewport') ||
+      hostParentEl.classList.contains('page-editor-container'))
   );
 }
 
@@ -258,7 +258,7 @@ export function isInsideEdgelessEditor(host: EditorHost) {
  * Get editor viewport element.
  * @example
  * ```ts
- * const viewportElement = getViewportElement(this.model.page);
+ * const viewportElement = getViewportElement(this.model.doc);
  * if (!viewportElement) return;
  * this._disposables.addFromEvent(viewportElement, 'scroll', () => {
  *   updatePosition();
@@ -266,18 +266,15 @@ export function isInsideEdgelessEditor(host: EditorHost) {
  * ```
  */
 export function getViewportElement(editorHost: EditorHost) {
-  if (!isInsideDocEditor(editorHost)) return null;
-  const page = editorHost.page;
-  assertExists(page.root);
-  const pageComponent = editorHost.view.viewFromPath('block', [page.root.id]);
+  if (!isInsidePageEditor(editorHost)) return null;
+  const doc = editorHost.doc;
+  assertExists(doc.root);
+  const rootElement = editorHost.view.viewFromPath('block', [doc.root.id]);
 
-  if (
-    !pageComponent ||
-    pageComponent.closest('affine-doc-page') !== pageComponent
-  ) {
+  if (!rootElement || rootElement.closest('affine-page-root') !== rootElement) {
     throw new Error('Failed to get viewport element!');
   }
-  return (pageComponent as DocPageBlockComponent).viewportElement;
+  return (rootElement as PageRootBlockComponent).viewportElement;
 }
 
 /**
@@ -302,7 +299,7 @@ export function getBlockComponentByPath(
 }
 
 /**
- * Get block component by its model and wait for the page element to finish updating.
+ * Get block component by its model and wait for the doc element to finish updating.
  * Note that this function is used for compatibility only, and may be removed in the future.
  *
  * Use `root.view.viewFromPath` instead.
@@ -312,13 +309,13 @@ export async function asyncGetBlockComponentByModel(
   editorHost: EditorHost,
   model: BlockModel
 ): Promise<BlockComponent | null> {
-  assertExists(model.page.root);
-  const pageComponent = getPageByEditorHost(editorHost);
-  if (!pageComponent) return null;
-  await pageComponent.updateComplete;
+  assertExists(model.doc.root);
+  const rootElement = getRootByEditorHost(editorHost);
+  if (!rootElement) return null;
+  await rootElement.updateComplete;
 
-  if (model.id === model.page.root.id) {
-    return pageComponent;
+  if (model.id === model.doc.root.id) {
+    return rootElement;
   }
 
   const blockComponent = editorHost.view.viewFromPath(
@@ -389,7 +386,7 @@ export function getModelByElement(element: Element): BlockModel {
 export function getDocTitleByEditorHost(
   editorHost: EditorHost
 ): HTMLElement | null {
-  const docViewport = editorHost.closest('.affine-doc-viewport');
+  const docViewport = editorHost.closest('.affine-page-viewport');
   if (!docViewport) return null;
   return docViewport.querySelector('doc-title');
 }
@@ -428,10 +425,14 @@ function hasBlockId(element: Element): element is BlockComponent {
  */
 export function isEdgelessPage(
   element: Element
-): element is EdgelessPageBlockComponent {
-  return element.tagName === 'AFFINE-EDGELESS-PAGE';
+): element is EdgelessRootBlockComponent {
+  return element.tagName === 'AFFINE-EDGELESS-ROOT';
 }
 
+/**
+ * Returns `true` if a element is a block. It will exclude the note block, page block, and surface block by default.
+ * If you want to include them, you can pass their flavour in `includes` parameter.
+ */
 function isBlock(element: BlockComponent, includes: string[] = []) {
   const exclude = ['affine:page', 'affine:note', 'affine:surface'];
   const targetFlavour = element?.model?.flavour;

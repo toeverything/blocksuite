@@ -22,15 +22,6 @@
     "skipLibCheck": true,
     "incremental": true,
     "composite": true,
-    "plugins": [
-      {
-        "name": "ts-lit-plugin",
-        "strict": true,
-        "rules": {
-          "no-incompatible-type-binding": "off",
-        },
-      },
-    ],
   },
   "files": [],
   "references": [

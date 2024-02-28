@@ -4,7 +4,7 @@ import {
   TestUtils,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import {
   type BlobStorage,
   createIndexeddbStorage,
@@ -30,7 +30,7 @@ const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 const isE2E = room?.startsWith('playwright');
 
-export function createStarterPageWorkspace() {
+export function createStarterDocWorkspace() {
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   if (blobStorageArgs.includes('memory')) {
     blobStorages.push(createMemoryStorage);
@@ -79,24 +79,24 @@ export function createStarterPageWorkspace() {
   return workspace;
 }
 
-export async function initStarterPageWorkspace(workspace: Workspace) {
+export async function initStarterDocWorkspace(workspace: Workspace) {
   // init from other clients
   if (room && !params.has('init')) {
-    let fistPage = workspace.pages.values().next().value as Page | undefined;
-    if (!fistPage) {
+    let firstDoc = workspace.docs.values().next().value as Doc | undefined;
+    if (!firstDoc) {
       await new Promise<string>(resolve =>
-        workspace.slots.pageAdded.once(resolve)
+        workspace.slots.docAdded.once(resolve)
       );
-      fistPage = workspace.pages.values().next().value;
+      firstDoc = workspace.docs.values().next().value;
     }
-    assertExists(fistPage);
-    const page = fistPage;
+    assertExists(firstDoc);
+    const doc = firstDoc;
 
-    page.load();
-    if (!page.root) {
-      await new Promise(resolve => page.slots.rootAdded.once(resolve));
+    doc.load();
+    if (!doc.root) {
+      await new Promise(resolve => doc.slots.rootAdded.once(resolve));
     }
-    page.resetHistory();
+    doc.resetHistory();
     return;
   }
 
@@ -110,11 +110,11 @@ export async function initStarterPageWorkspace(workspace: Workspace) {
   ).forEach(fn => functionMap.set(fn.id, fn));
   const init = params.get('init') || 'preset';
   if (functionMap.has(init)) {
-    await functionMap.get(init)?.(workspace, 'page:home');
-    const page = workspace.getPage('page:home');
-    if (!page?.loaded) {
-      page?.load();
+    await functionMap.get(init)?.(workspace, 'doc:home');
+    const doc = workspace.getDoc('doc:home');
+    if (!doc?.loaded) {
+      doc?.load();
     }
-    page?.resetHistory();
+    doc?.resetHistory();
   }
 }

@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
   assertEdgelessTool,
@@ -86,6 +86,52 @@ test.describe('add shape', () => {
 
     await assertEdgelessTool(page, 'default');
     await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+  });
+  test('with holding space bar', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    const start0 = { x: 100, y: 100 };
+    const end0 = { x: 200, y: 200 };
+    await setEdgelessTool(page, 'shape');
+    await dragBetweenCoords(page, start0, end0, {
+      steps: 50,
+      beforeMouseUp: async () => {
+        // move the shape
+        await page.keyboard.down('Space');
+        await page.mouse.move(300, 300);
+        await page.keyboard.up('Space');
+
+        await page.mouse.move(500, 600);
+      },
+    });
+
+    await assertEdgelessSelectedRect(page, [200, 200, 300, 400]);
+  });
+
+  test('with holding space bar + shift', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    const start0 = { x: 100, y: 100 };
+    const end0 = { x: 200, y: 200 };
+    await setEdgelessTool(page, 'shape');
+    await page.keyboard.down('Shift');
+    await dragBetweenCoords(page, start0, end0, {
+      steps: 50,
+      beforeMouseUp: async () => {
+        // move the shape
+        await page.keyboard.down('Space');
+        await page.mouse.move(300, 300);
+        await page.keyboard.up('Space');
+
+        await page.mouse.move(500, 600);
+      },
+    });
+
+    await assertEdgelessSelectedRect(page, [200, 200, 400, 400]);
   });
 });
 
@@ -481,4 +527,71 @@ test('change shape style', async ({ page }) => {
   const [picked] = await pickColorAtPoints(page, [[start.x + 1, start.y + 1]]);
 
   await assertEdgelessColorSameWithHexColor(page, color, picked);
+});
+
+test.describe('shape hit test', () => {
+  async function addTransparentRect(
+    page: Page,
+    start: { x: number; y: number },
+    end: { x: number; y: number }
+  ) {
+    const rect = {
+      start,
+      end,
+    };
+    await addBasicRectShapeElement(page, rect.start, rect.end);
+
+    await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
+    await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+    const color = '--affine-palette-transparent';
+    await changeShapeFillColor(page, color);
+    await page.waitForTimeout(50);
+  }
+
+  test.beforeEach(async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+  });
+
+  const rect = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+
+  test('can select hollow shape by clicking center area', async ({ page }) => {
+    await addTransparentRect(page, rect.start, rect.end);
+    await page.mouse.click(rect.start.x - 20, rect.start.y - 20);
+    await assertEdgelessNonSelectedRect(page);
+
+    await page.mouse.click(rect.start.x + 50, rect.start.y + 50);
+    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+  });
+
+  test('double click can add text in shape hollow area', async ({ page }) => {
+    await addTransparentRect(page, rect.start, rect.end);
+    await page.mouse.click(rect.start.x - 20, rect.start.y - 20);
+    await assertEdgelessNonSelectedRect(page);
+
+    await assertEdgelessTool(page, 'default');
+    await page.mouse.dblclick(rect.start.x + 20, rect.start.y + 20);
+    await waitNextFrame(page);
+
+    await type(page, 'hello');
+    await assertEdgelessCanvasText(page, 'hello');
+  });
+
+  test('using text tool to add text in shape hollow area', async ({ page }) => {
+    await addTransparentRect(page, rect.start, rect.end);
+    await page.mouse.click(rect.start.x - 20, rect.start.y - 20);
+    await assertEdgelessNonSelectedRect(page);
+
+    await assertEdgelessTool(page, 'default');
+    await setEdgelessTool(page, 'text');
+    await page.mouse.click(rect.start.x + 20, rect.start.y + 20);
+    await waitNextFrame(page);
+
+    await type(page, 'hello');
+    await assertEdgelessCanvasText(page, 'hello');
+  });
 });

@@ -27,8 +27,12 @@ export class BlockService<_Model extends BlockModel = BlockModel> {
     return this.std.workspace;
   }
 
-  get page() {
-    return this.std.page;
+  get doc() {
+    return this.std.doc;
+  }
+
+  get host() {
+    return this.std.host;
   }
 
   get selectionManager() {

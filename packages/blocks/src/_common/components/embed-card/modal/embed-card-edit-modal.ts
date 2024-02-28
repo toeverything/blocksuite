@@ -75,7 +75,7 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    this.model.page.updateBlock(this.model, {
+    this.model.doc.updateBlock(this.model, {
       title,
       description: this.descInput.value,
     });

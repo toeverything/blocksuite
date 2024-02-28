@@ -11,7 +11,7 @@ import {
   NewEditIcon,
 } from '../../../_common/icons/index.js';
 import {
-  getPageByElement,
+  getRootByElement,
   type TableViewSelection,
 } from '../../../_common/utils/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
@@ -135,8 +135,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       },
       isEditing: false,
     };
-    const pageElement = getPageByElement(this);
-    popRowMenu(pageElement, positionToVRect(e.x, e.y), this.rowId, selection);
+    const rootElement = getRootByElement(this);
+    popRowMenu(rootElement, positionToVRect(e.x, e.y), this.rowId, selection);
   };
 
   public override connectedCallback() {
@@ -209,8 +209,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               },
               isEditing: false,
             });
-            const pageElement = getPageByElement(this);
-            openDetail(pageElement, this.rowId, this.selectionController);
+            const rootElement = getRootByElement(this);
+            openDetail(rootElement, this.rowId, this.selectionController);
           };
           const openMenu = (e: MouseEvent) => {
             if (!this.selectionController) {
@@ -228,8 +228,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               },
               isEditing: false,
             });
-            const pageElement = getPageByElement(this);
-            popRowMenu(pageElement, ele, this.rowId, this.selectionController);
+            const rootElement = getRootByElement(this);
+            popRowMenu(rootElement, ele, this.rowId, this.selectionController);
           };
           return html`
             <div>

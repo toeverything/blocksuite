@@ -1,8 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 
 import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
-import type { PageService } from '../index.js';
 import {
   type EmbedLoomModel,
   EmbedLoomStyles,
@@ -20,11 +18,8 @@ export class EmbedLoomService extends BlockService<EmbedLoomModel> {
   override mounted() {
     super.mounted();
 
-    const pageService = this.std.spec.getService(
-      'affine:page'
-    ) as PageService | null;
-    assertExists(pageService);
-    pageService.registerEmbedBlockOptions({
+    const rootService = this.std.spec.getService('affine:page');
+    rootService.registerEmbedBlockOptions({
       flavour: this.flavour,
       urlRegex: loomUrlRegex,
       styles: EmbedLoomStyles,

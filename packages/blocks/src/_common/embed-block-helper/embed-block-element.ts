@@ -6,24 +6,20 @@ import type { TemplateResult } from 'lit';
 import { html, render } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { DragHandleOption } from '../../page-block/widgets/drag-handle/config.js';
+import type { DragHandleOption } from '../../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
-} from '../../page-block/widgets/drag-handle/drag-handle.js';
+} from '../../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
-} from '../../page-block/widgets/drag-handle/utils.js';
+} from '../../root-block/widgets/drag-handle/utils.js';
 import { Bound } from '../../surface-block/index.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
-import {
-  type BlockModels,
-  type EmbedCardStyle,
-  matchFlavours,
-} from '../utils/index.js';
+import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
 
 export class EmbedBlockElement<
   Model extends
@@ -45,7 +41,7 @@ export class EmbedBlockElement<
     if (!this._isInSurface) {
       return null;
     }
-    return this.host.querySelector('affine-edgeless-page');
+    return this.host.querySelector('affine-edgeless-root');
   }
 
   get surface() {
@@ -71,7 +67,7 @@ export class EmbedBlockElement<
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [
-          this.flavour as keyof BlockModels,
+          this.flavour as keyof BlockSuite.BlockModels,
         ])
       )
         return false;
@@ -117,7 +113,7 @@ export class EmbedBlockElement<
       if (
         draggingElements.length !== 1 ||
         !matchFlavours(draggingElements[0].model, [
-          this.flavour as keyof BlockModels,
+          this.flavour as keyof BlockSuite.BlockModels,
         ])
       )
         return false;
@@ -159,7 +155,7 @@ export class EmbedBlockElement<
 
     this.contentEditable = 'false';
 
-    const parent = this.host.page.getParent(this.model);
+    const parent = this.host.doc.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     this.disposables.add(

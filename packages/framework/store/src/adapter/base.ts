@@ -3,13 +3,13 @@ import { assertEquals } from '@blocksuite/global/utils';
 import type { AssetsManager } from '../transformer/assets.js';
 import type {
   BlockSnapshot,
-  PageSnapshot,
+  DocSnapshot,
   SliceSnapshot,
 } from '../transformer/type.js';
 import { ASTWalkerContext } from './context.js';
 
-export type FromPageSnapshotPayload = {
-  snapshot: PageSnapshot;
+export type FromDocSnapshotPayload = {
+  snapshot: DocSnapshot;
   assets?: AssetsManager;
 };
 export type FromBlockSnapshotPayload = {
@@ -20,7 +20,7 @@ export type FromSliceSnapshotPayload = {
   snapshot: SliceSnapshot;
   assets?: AssetsManager;
 };
-export type FromPageSnapshotResult<Target> = {
+export type FromDocSnapshotResult<Target> = {
   file: Target;
   assetsIds: string[];
 };
@@ -32,7 +32,7 @@ export type FromSliceSnapshotResult<Target> = {
   file: Target;
   assetsIds: string[];
 };
-export type ToPageSnapshotPayload<Target> = {
+export type ToDocSnapshotPayload<Target> = {
   file: Target;
   assets?: AssetsManager;
 };
@@ -48,11 +48,11 @@ export type ToSliceSnapshotPayload<Target> = {
 export abstract class BaseAdapter<AdapterTarget = unknown> {
   protected configs: Map<string, unknown> = new Map();
 
-  abstract fromPageSnapshot(
-    payload: FromPageSnapshotPayload
+  abstract fromDocSnapshot(
+    payload: FromDocSnapshotPayload
   ):
-    | Promise<FromPageSnapshotResult<AdapterTarget>>
-    | FromPageSnapshotResult<AdapterTarget>;
+    | Promise<FromDocSnapshotResult<AdapterTarget>>
+    | FromDocSnapshotResult<AdapterTarget>;
   abstract fromBlockSnapshot(
     payload: FromBlockSnapshotPayload
   ):
@@ -63,9 +63,9 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   ):
     | Promise<FromSliceSnapshotResult<AdapterTarget>>
     | FromSliceSnapshotResult<AdapterTarget>;
-  abstract toPageSnapshot(
-    payload: ToPageSnapshotPayload<AdapterTarget>
-  ): Promise<PageSnapshot> | PageSnapshot;
+  abstract toDocSnapshot(
+    payload: ToDocSnapshotPayload<AdapterTarget>
+  ): Promise<DocSnapshot> | DocSnapshot;
   abstract toBlockSnapshot(
     payload: ToBlockSnapshotPayload<AdapterTarget>
   ): Promise<BlockSnapshot> | BlockSnapshot;

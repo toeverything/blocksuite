@@ -5,13 +5,12 @@ import type { EditorHost } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { EmbedLinkedDocService } from '../../../embed-linked-doc-block/embed-linked-doc-service.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
 import {
   CopyIcon,
   DatabaseTableViewIcon20,
-  FontLinkedPageIcon,
+  FontLinkedDocIcon,
 } from '../../icons/index.js';
 import { getChainWithHost } from '../../utils/command.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
@@ -57,11 +56,12 @@ export const quickActionConfig: QuickActionConfig[] = [
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
     showWhen: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block', 'text'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       if (!selectedModels || selectedModels.length === 0) return false;
 
       const firstBlock = selectedModels[0];
@@ -73,11 +73,12 @@ export const quickActionConfig: QuickActionConfig[] = [
       return true;
     },
     enabledWhen: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block', 'text'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       if (!selectedModels || selectedModels.length === 0) return false;
 
       return selectedModels.every(block =>
@@ -95,52 +96,55 @@ export const quickActionConfig: QuickActionConfig[] = [
   {
     id: 'convert-to-linked-doc',
     name: 'Create Linked Doc',
-    icon: FontLinkedPageIcon,
+    icon: FontLinkedDocIcon,
     hotkey: `Mod-Shift-l`,
     showWhen: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       return !!selectedModels && selectedModels.length > 0;
     },
     enabledWhen: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       return !!selectedModels && selectedModels.length > 0;
     },
     action: host => {
-      const selectedModels = host.command.getChainCtx(
-        getChainWithHost(host.std).getSelectedModels({
+      const [_, ctx] = getChainWithHost(host.std)
+        .getSelectedModels({
           types: ['block'],
         })
-      ).selectedModels;
+        .run();
+      const { selectedModels } = ctx;
       assertExists(selectedModels);
 
       host.selection.clear();
 
-      const page = host.page;
-      const linkedPage = page.workspace.createPage({});
-      linkedPage.load(() => {
-        const pageBlockId = linkedPage.addBlock('affine:page', {
-          title: new page.Text(''),
+      const doc = host.doc;
+      const linkedDoc = doc.workspace.createDoc({});
+      linkedDoc.load(() => {
+        const rootId = linkedDoc.addBlock('affine:page', {
+          title: new doc.Text(''),
         });
-        linkedPage.addBlock('affine:surface', {}, pageBlockId);
-        const noteId = linkedPage.addBlock('affine:note', {}, pageBlockId);
+        linkedDoc.addBlock('affine:surface', {}, rootId);
+        const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
 
         const firstBlock = selectedModels[0];
         assertExists(firstBlock);
 
-        page.addSiblingBlocks(
+        doc.addSiblingBlocks(
           firstBlock,
           [
             {
               flavour: 'affine:embed-linked-doc',
-              pageId: linkedPage.id,
+              pageId: linkedDoc.id,
             },
           ],
           'before'
@@ -151,17 +155,17 @@ export const quickActionConfig: QuickActionConfig[] = [
           firstBlock.type.match(/^h[1-6]$/)
         ) {
           const title = firstBlock.text.toString();
-          linkedPage.workspace.setPageMeta(linkedPage.id, {
+          linkedDoc.workspace.setDocMeta(linkedDoc.id, {
             title,
           });
 
-          const pageBlock = linkedPage.getBlockById(pageBlockId);
-          assertExists(pageBlock);
-          linkedPage.updateBlock(pageBlock, {
-            title: new page.Text(title),
+          const linkedDocRootModel = linkedDoc.getBlockById(rootId);
+          assertExists(linkedDocRootModel);
+          linkedDoc.updateBlock(linkedDocRootModel, {
+            title: new doc.Text(title),
           });
 
-          page.deleteBlock(firstBlock);
+          doc.deleteBlock(firstBlock);
           selectedModels.shift();
         }
 
@@ -171,16 +175,13 @@ export const quickActionConfig: QuickActionConfig[] = [
           const blockProps = Object.fromEntries(
             keys.map((key, i) => [key, values[i]])
           );
-          linkedPage.addBlock(model.flavour, blockProps, noteId);
-          page.deleteBlock(model);
+          linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
+          doc.deleteBlock(model);
         });
       });
 
-      const linkedDocService = host.spec.getService(
-        'affine:embed-linked-doc'
-      ) as EmbedLinkedDocService | null;
-      assertExists(linkedDocService);
-      linkedDocService.slots.linkedDocCreated.emit({ pageId: linkedPage.id });
+      const linkedDocService = host.spec.getService('affine:embed-linked-doc');
+      linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
     },
   },
 ];

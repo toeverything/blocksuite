@@ -9,19 +9,19 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../_common/icons/index.js';
-import type { PageBlockComponent } from '../../index.js';
+import type { RootBlockComponent } from '../../index.js';
 import { popSideDetail } from '../common/detail/layout.js';
 import type { KanbanSelectionController } from './controller/selection.js';
 
 export const openDetail = (
-  pageElement: PageBlockComponent | null,
+  rootElement: RootBlockComponent | null,
   rowId: string,
   selection: KanbanSelectionController
 ) => {
   const old = selection.selection;
   selection.selection = undefined;
   popSideDetail({
-    pageElement,
+    rootElement,
     view: selection.view,
     rowId: rowId,
     onClose: () => {
@@ -31,7 +31,7 @@ export const openDetail = (
 };
 
 export const popCardMenu = (
-  pageElement: PageBlockComponent | null,
+  rootElement: RootBlockComponent | null,
   ele: ReferenceElement,
   rowId: string,
   selection: KanbanSelectionController
@@ -42,7 +42,7 @@ export const popCardMenu = (
       name: 'Expand Card',
       icon: ExpandFullIcon,
       select: () => {
-        openDetail(pageElement, rowId, selection);
+        openDetail(rootElement, rowId, selection);
       },
     },
     {

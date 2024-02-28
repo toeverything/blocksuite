@@ -1,13 +1,13 @@
-import type { EdgelessPageBlockComponent } from '@blocksuite/blocks';
+import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
-import { addNote, getPageRootBlock } from '../utils/edgeless.js';
+import { addNote, getDocRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 describe('basic', () => {
-  let service: EdgelessPageBlockComponent['service'];
-  let edgelessPage: EdgelessPageBlockComponent;
+  let service: EdgelessRootBlockComponent['service'];
+  let edgelessRoot: EdgelessRootBlockComponent;
   let noteA = '';
   let noteB = '';
   let shapeA = '';
@@ -16,17 +16,17 @@ describe('basic', () => {
 
   beforeEach(async () => {
     const cleanup = await setupEditor('edgeless');
-    edgelessPage = getPageRootBlock(page, editor, 'edgeless');
-    service = edgelessPage.service;
+    edgelessRoot = getDocRootBlock(doc, editor, 'edgeless');
+    service = edgelessRoot.service;
 
-    noteA = addNote(page, {
+    noteA = addNote(doc, {
       index: service.generateIndex('affine:note'),
     });
     shapeA = service.addElement('shape', {
       type: 'rect',
       xywh: '[0, 0, 100, 100]',
     });
-    noteB = addNote(page, {
+    noteB = addNote(doc, {
       // force to be the last note
       index: service.generateIndex('shape'),
     });
@@ -46,7 +46,7 @@ describe('basic', () => {
   });
 
   test('surface-ref should be rendered in page mode', async () => {
-    const surfaceRefId = page.addBlock(
+    const surfaceRefId = doc.addBlock(
       'affine:surface-ref',
       {
         reference: frame,
@@ -65,7 +65,7 @@ describe('basic', () => {
   });
 
   test('surface-ref should be rendered as empty surface-ref-block-edgeless component page mode', async () => {
-    const surfaceRefId = page.addBlock(
+    const surfaceRefId = doc.addBlock(
       'affine:surface-ref',
       {
         reference: frame,
@@ -84,7 +84,7 @@ describe('basic', () => {
   });
 
   test('content in frame should be rendered in the correct order', async () => {
-    const surfaceRefId = page.addBlock(
+    const surfaceRefId = doc.addBlock(
       'affine:surface-ref',
       {
         reference: frame,
@@ -121,7 +121,7 @@ describe('basic', () => {
         [noteB]: true,
       },
     });
-    const surfaceRefId = page.addBlock(
+    const surfaceRefId = doc.addBlock(
       'affine:surface-ref',
       {
         reference: groupId,

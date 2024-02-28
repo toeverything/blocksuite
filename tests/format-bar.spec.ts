@@ -909,13 +909,13 @@ test('should format quick bar position correct at the start of second line', asy
 }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    const note = page.addBlock('affine:note', {}, pageId);
-    const text = new page.Text('a'.repeat(100));
-    const paragraphId = page.addBlock('affine:paragraph', { text }, note);
+    const note = doc.addBlock('affine:note', {}, rootId);
+    const text = new doc.Text('a'.repeat(100));
+    const paragraphId = doc.addBlock('affine:paragraph', { text }, note);
     return paragraphId;
   });
   // await focusRichText(page);
@@ -1357,18 +1357,18 @@ test('buttons in format quick bar should have correct active styles', async ({
 test('should format bar style active correctly', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    const note = page.addBlock('affine:note', {}, pageId);
+    const note = doc.addBlock('affine:note', {}, rootId);
     const delta = [
       { insert: '1', attributes: { bold: true, italic: true } },
       { insert: '2', attributes: { bold: true, underline: true } },
       { insert: '3', attributes: { bold: true, code: true } },
     ];
-    const text = page.Text.fromDelta(delta);
-    page.addBlock('affine:paragraph', { text }, note);
+    const text = doc.Text.fromDelta(delta);
+    doc.addBlock('affine:paragraph', { text }, note);
   });
 
   const { boldBtn, codeBtn, underlineBtn } = getFormatBar(page);
@@ -1514,18 +1514,18 @@ test('should update the format quick bar state when there is a change in keyboar
 }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const { doc } = window;
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    const note = page.addBlock('affine:note', {}, pageId);
+    const note = doc.addBlock('affine:note', {}, rootId);
     const delta = [
       { insert: '1', attributes: { bold: true } },
       { insert: '2', attributes: { bold: true } },
       { insert: '3', attributes: { bold: false } },
     ];
-    const text = page.Text.fromDelta(delta);
-    page.addBlock('affine:paragraph', { text }, note);
+    const text = doc.Text.fromDelta(delta);
+    doc.addBlock('affine:paragraph', { text }, note);
   });
   await focusTitle(page);
   await pressArrowDown(page);

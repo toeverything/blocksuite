@@ -30,10 +30,10 @@ BlockSuite is a toolkit for building editors and collaborative applications. It 
 You can consider BlockSuite as a [UI component library](https://blocksuite.io/components/overview.html) for building various editors, based on a minimized vanilla framework as their runtime. With BlockSuite, you can:
 
 - Reuse multiple first-party BlockSuite editors:
-  - [**`DocEditor`**](https://blocksuite.io/components/editors/doc-editor.html): A comprehensive block-based document editor, offering extensive customization and flexibility.
-  - [**`EdgelessEditor`**](https://blocksuite.io/components/editors/edgeless-editor.html): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `DocEditor`.
+  - [**`PageEditor`**](https://blocksuite.io/components/editors/page-editor.html): A comprehensive block-based document editor, offering extensive customization and flexibility.
+  - [**`EdgelessEditor`**](https://blocksuite.io/components/editors/edgeless-editor.html): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `PageEditor`.
 - Customize, extend and enhance these editors with a rich set of [BlockSuite components](https://blocksuite.io/components/overview.html). All BlockSuite components (including editors) are native web components, making them framework-agnostic and easy to interop with popular frameworks.
-- Or, build new editors from scratch based on the underlying vallina framework.
+- Or, build new editors from scratch based on the underlying vanilla framework.
 
 > 🚧 BlockSuite is currently in its early stage, with components and extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
 
@@ -108,7 +108,7 @@ To that end, the BlockSuite project is structured around key packages that are c
   </tr>
   <tr>
     <td><code>@blocksuite/presets</code></td>
-    <td>Plug-and-play editable components including <i>editors</i> (<code>DocEditor</code> / <code>EdgelessEditor</code>) and auxiliary UI components named <i>fragments</i> (<code>CopilotPanel</code>, <code>DocTitle</code>...).</td>
+    <td>Plug-and-play editable components including <i>editors</i> (<code>PageEditor</code> / <code>EdgelessEditor</code>) and auxiliary UI components named <i>fragments</i> (<code>CopilotPanel</code>, <code>DocTitle</code>...).</td>
   </tr>
 </table>
 

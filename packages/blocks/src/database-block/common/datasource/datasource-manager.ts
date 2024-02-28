@@ -1,9 +1,9 @@
 import type { EditorHost } from '@blocksuite/lit';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
-import { AllPageDatasource } from './all-page-datasource.js';
+import { AllDocDatasource } from './all-doc-datasource.js';
 import type {
-  AllPageDatasourceConfig,
+  AllDocDatasourceConfig,
   DatabaseBlockDatasourceConfig,
   DataSource,
   DataSourceConfig,
@@ -21,18 +21,18 @@ const datasourceMap: {
 } = {
   'database-block': {
     title: (host: EditorHost, config: DatabaseBlockDatasourceConfig) => {
-      const dbblock = host.page.workspace
-        .getPage(config.pageId)
+      const dbblock = host.doc.workspace
+        .getDoc(config.pageId)
         ?.getBlockById(config.blockId) as DatabaseBlockModel;
       return dbblock?.title.toString() ?? '';
     },
     constructor: DatabaseBlockDatasource,
   },
   'all-pages': {
-    title: (_host: EditorHost, _config: AllPageDatasourceConfig) => {
+    title: (_host: EditorHost, _config: AllDocDatasourceConfig) => {
       return 'All Pages';
     },
-    constructor: AllPageDatasource,
+    constructor: AllDocDatasource,
   },
   tags: {
     title: (_host: EditorHost, _config: TagsDatasourceConfig) => {

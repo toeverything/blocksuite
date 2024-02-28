@@ -76,7 +76,7 @@ export class AttachmentBlockComponent extends BlockElement<
     if (!this._isInSurface) {
       return null;
     }
-    return this.host.querySelector('affine-edgeless-page');
+    return this.host.querySelector('affine-edgeless-root');
   }
 
   private get _embedView() {
@@ -112,7 +112,7 @@ export class AttachmentBlockComponent extends BlockElement<
       }),
       computePosition: {
         referenceElement: this,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },
@@ -165,12 +165,12 @@ export class AttachmentBlockComponent extends BlockElement<
 
     this.contentEditable = 'false';
 
-    const parent = this.host.page.getParent(this.model);
+    const parent = this.host.doc.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     if (!this.model.style) {
-      this.page.withoutTransact(() => {
-        this.page.updateBlock(this.model, {
+      this.doc.withoutTransact(() => {
+        this.doc.updateBlock(this.model, {
           style: AttachmentBlockStyles[1],
         });
       });

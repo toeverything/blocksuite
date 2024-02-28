@@ -6,8 +6,8 @@ import { Buffer } from 'buffer';
 import { downloadBlob, withTempBlobData } from '../_common/utils/filesys.js';
 import { humanFileSize } from '../_common/utils/math.js';
 import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
-import { readImageSize } from '../page-block/edgeless/components/utils.js';
-import { transformModel } from '../page-block/utils/operations/model.js';
+import { readImageSize } from '../root-block/edgeless/components/utils.js';
+import { transformModel } from '../root-block/utils/operations/model.js';
 import { toast } from './../_common/components/toast.js';
 import type { ImageBlockComponent } from './image-block.js';
 import type { ImageBlockModel, ImageBlockProps } from './image-model.js';
@@ -35,12 +35,12 @@ export async function uploadBlobForImage(
     throw new Error('The image is already uploading!');
   }
   setImageUploading(blockId);
-  const page = editorHost.page;
+  const doc = editorHost.doc;
   let sourceId: string | undefined;
 
   try {
     setImageUploaded(blockId);
-    sourceId = await page.blob.set(blob);
+    sourceId = await doc.blob.set(blob);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -52,11 +52,11 @@ export async function uploadBlobForImage(
   } finally {
     setImageUploaded(blockId);
 
-    const imageModel = page.getBlockById(blockId) as ImageBlockModel | null;
+    const imageModel = doc.getBlockById(blockId) as ImageBlockModel | null;
     assertExists(imageModel);
 
-    page.withoutTransact(() => {
-      page.updateBlock(imageModel, {
+    doc.withoutTransact(() => {
+      doc.updateBlock(imageModel, {
         sourceId,
       } satisfies Partial<ImageBlockProps>);
     });
@@ -69,8 +69,8 @@ async function getImageBlob(model: ImageBlockModel) {
     return null;
   }
 
-  const page = model.page;
-  const blob = await page.blob.get(sourceId);
+  const doc = model.doc;
+  const blob = await doc.blob.get(sourceId);
 
   if (!blob) {
     return null;
@@ -114,7 +114,7 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
     }
 
     const { model } = block;
-    const { id, sourceId, page } = model;
+    const { id, sourceId, doc } = model;
 
     if (isImageUploading(id)) {
       return;
@@ -124,7 +124,7 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
       throw new Error('Image sourceId is missing!');
     }
 
-    const blob = await page.blob.get(sourceId);
+    const blob = await doc.blob.get(sourceId);
     if (!blob) {
       throw new Error('Image blob is missing!');
     }
@@ -178,7 +178,7 @@ export async function resetImageSize(block: ImageBlockComponent) {
 
   const file = new File([blob], 'image.png', { type: blob.type });
   const size = await readImageSize(file);
-  block.page.updateBlock(model, {
+  block.doc.updateBlock(model, {
     width: size.width,
     height: size.height,
   });
@@ -292,8 +292,8 @@ export function addSiblingImageBlock(
     size: file.size,
   }));
 
-  const page = editorHost.page;
-  const blockIds = page.addSiblingBlocks(targetModel, imageBlockProps, place);
+  const doc = editorHost.doc;
+  const blockIds = doc.addSiblingBlocks(targetModel, imageBlockProps, place);
   blockIds.map(
     (blockId, index) =>
       void uploadBlobForImage(editorHost, blockId, imageFiles[index])
@@ -326,9 +326,9 @@ export function addImageBlocks(
     return;
   }
 
-  const page = editorHost.page;
+  const doc = editorHost.doc;
   const blockIds = imageFiles.map(file =>
-    page.addBlock('affine:image', { size: file.size }, parent, parentIndex)
+    doc.addBlock('affine:image', { size: file.size }, parent, parentIndex)
   );
   blockIds.map(
     (blockId, index) =>
@@ -341,8 +341,8 @@ export function addImageBlocks(
  * Turn the image block into a attachment block.
  */
 export async function turnImageIntoCardView(block: ImageBlockComponent) {
-  const page = block.page;
-  if (!page.schema.flavourSchemaMap.has('affine:attachment')) {
+  const doc = block.doc;
+  if (!doc.schema.flavourSchemaMap.has('affine:attachment')) {
     throw new Error('The attachment flavour is not supported!');
   }
 

@@ -14,8 +14,8 @@ hero:
       text: Get Started
       link: /guide/overview
     - theme: alt
-      text: Explore Components
-      link: /components/overview
+      text: Try Playground
+      link: https://try-blocksuite.vercel.app/starter?init
 
 features:
   - title: 🧩 Headless Editor Framework

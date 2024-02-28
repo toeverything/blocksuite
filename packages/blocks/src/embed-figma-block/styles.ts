@@ -1,13 +1,12 @@
 import { css, html } from 'lit';
 
-import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { EMBED_CARD_HEIGHT } from '../_common/consts.js';
 
 export const styles = css`
   .affine-embed-figma-block {
     margin: 0 auto;
     box-sizing: border-box;
     width: 100%;
-    max-width: ${EMBED_CARD_WIDTH.figma}px;
     height: ${EMBED_CARD_HEIGHT.figma}px;
     display: flex;
     flex-direction: column;

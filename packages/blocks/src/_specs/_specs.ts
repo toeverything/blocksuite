@@ -25,22 +25,6 @@ import { ListBlockSchema } from '../list-block/list-model.js';
 import { ListService } from '../list-block/list-service.js';
 import { NoteService } from '../note-block/index.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
-import { DocPageService } from '../page-block/doc/doc-page-service.js';
-import { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
-import {
-  type DocPageBlockWidgetName,
-  type EdgelessPageBlockWidgetName,
-} from '../page-block/index.js';
-import { PageBlockSchema } from '../page-block/page-model.js';
-import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../page-block/widgets/doc-dragging-area/doc-dragging-area.js';
-import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/doc-remote-selection/doc-remote-selection.js';
-import { AFFINE_DRAG_HANDLE_WIDGET } from '../page-block/widgets/drag-handle/drag-handle.js';
-import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/edgeless-remote-selection/index.js';
-import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../page-block/widgets/edgeless-zoom-toolbar/index.js';
-import { AFFINE_FORMAT_BAR_WIDGET } from '../page-block/widgets/format-bar/format-bar.js';
-import { AFFINE_LINKED_DOC_WIDGET } from '../page-block/widgets/linked-doc/index.js';
-import { AFFINE_MODAL_WIDGET } from '../page-block/widgets/modal/modal.js';
-import { AFFINE_SLASH_MENU_WIDGET } from '../page-block/widgets/slash-menu/index.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { ParagraphService } from '../paragraph-block/paragraph-service.js';
 import { PDFBlockSchema } from '../pdf-block/pdf-model.js';
@@ -48,6 +32,22 @@ import { PDFService } from '../pdf-block/pdf-service.js';
 import { AFFINE_ANNOTATION_PREVIEW_WIDGET } from '../pdf-block/widget/annotation-preview.js';
 import { AFFINE_PDF_ANNOTATION_TOOLBAR_WIDGET } from '../pdf-block/widget/annotation-toolbar.js';
 import { AFFINE_PDF_TOOLBAR_WIDGET } from '../pdf-block/widget/pdf-toolbar.js';
+import { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
+import {
+  type EdgelessRootBlockWidgetName,
+  type PageRootBlockWidgetName,
+} from '../root-block/index.js';
+import { PageRootService } from '../root-block/page/page-root-service.js';
+import { RootBlockSchema } from '../root-block/root-model.js';
+import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/doc-remote-selection/doc-remote-selection.js';
+import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/edgeless-remote-selection/index.js';
+import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../root-block/widgets/edgeless-zoom-toolbar/index.js';
+import { AFFINE_FORMAT_BAR_WIDGET } from '../root-block/widgets/format-bar/format-bar.js';
+import { AFFINE_LINKED_DOC_WIDGET } from '../root-block/widgets/linked-doc/index.js';
+import { AFFINE_MODAL_WIDGET } from '../root-block/widgets/modal/modal.js';
+import { AFFINE_PAGE_DRAGGING_AREA_WIDGET } from '../root-block/widgets/page-dragging-area/page-dragging-area.js';
+import { AFFINE_SLASH_MENU_WIDGET } from '../root-block/widgets/slash-menu/index.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
@@ -56,11 +56,11 @@ import {
   SurfaceRefBlockService,
 } from '../surface-ref-block/index.js';
 
-const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
-  schema: PageBlockSchema,
-  service: DocPageService,
+const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
+  schema: RootBlockSchema,
+  service: PageRootService,
   view: {
-    component: literal`affine-doc-page`,
+    component: literal`affine-page-root`,
     widgets: {
       // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
       //   AFFINE_BLOCK_HUB_WIDGET
@@ -72,9 +72,6 @@ const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
       [AFFINE_LINKED_DOC_WIDGET]: literal`${unsafeStatic(
         AFFINE_LINKED_DOC_WIDGET
       )}`,
-      [AFFINE_DOC_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(
-        AFFINE_DOC_DRAGGING_AREA_WIDGET
-      )}`,
       [AFFINE_DRAG_HANDLE_WIDGET]: literal`${unsafeStatic(
         AFFINE_DRAG_HANDLE_WIDGET
       )}`,
@@ -84,15 +81,18 @@ const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
       [AFFINE_DOC_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
         AFFINE_DOC_REMOTE_SELECTION_WIDGET
       )}`,
+      [AFFINE_PAGE_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(
+        AFFINE_PAGE_DRAGGING_AREA_WIDGET
+      )}`,
     },
   },
 };
 
-const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
-  schema: PageBlockSchema,
-  service: EdgelessPageService,
+const EdgelessPageSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
+  schema: RootBlockSchema,
+  service: EdgelessRootService,
   view: {
-    component: literal`affine-edgeless-page`,
+    component: literal`affine-edgeless-root`,
     widgets: {
       // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
       //   AFFINE_BLOCK_HUB_WIDGET
@@ -215,7 +215,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedLoomBlockSpec,
 ];
 
-export const DocEditorBlockSpecs: BlockSpec[] = [
+export const PageEditorBlockSpecs: BlockSpec[] = [
   DocPageSpec,
   ...CommonFirstPartyBlockSpecs,
   {

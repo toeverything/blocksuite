@@ -81,7 +81,7 @@ export class AffineLink extends ShadowlessElement {
   `;
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
-    if (this.blockElement.page.readonly) {
+    if (this.blockElement.doc.readonly) {
       return null;
     }
 

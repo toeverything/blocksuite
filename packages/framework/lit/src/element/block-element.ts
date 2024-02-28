@@ -4,7 +4,7 @@ import type { BaseSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
@@ -45,7 +45,7 @@ export class BlockElement<
   widgets!: Record<WidgetName, TemplateResult>;
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   @property({ attribute: false })
   dirty = false;
@@ -83,16 +83,16 @@ export class BlockElement<
       .map(child => child.view as BlockElement);
   }
 
-  get rootBlockElement() {
+  get rootElement() {
     const rootElement = this.host.view.viewFromPath('block', [
-      this.page.root!.id,
+      this.doc.root!.id,
     ]);
     assertExists(rootElement);
     return rootElement;
   }
 
   get topContenteditableElement(): BlockElement | null {
-    return this.rootBlockElement;
+    return this.rootElement;
   }
 
   get flavour(): string {
@@ -117,7 +117,7 @@ export class BlockElement<
   }
 
   get isVersionMismatch() {
-    const schema = this.page.schema.flavourSchemaMap.get(this.model.flavour);
+    const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
     assertExists(
       schema,
       `Cannot find schema for flavour ${this.model.flavour}`
@@ -212,7 +212,7 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.service = this.host.std.spec.getService(this.model.flavour) as Service;
+    this.service = this.host.std.spec.getService(this.model.flavour);
     this.path = this.host.view.calculatePath(this);
 
     this._disposables.add(
@@ -285,9 +285,7 @@ export class BlockElement<
     return when(
       this.isVersionMismatch,
       () => {
-        const schema = this.page.schema.flavourSchemaMap.get(
-          this.model.flavour
-        );
+        const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
         assertExists(
           schema,
           `Cannot find schema for flavour ${this.model.flavour}`

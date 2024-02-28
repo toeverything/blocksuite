@@ -78,8 +78,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     super.connectedCallback();
 
     if (!this.model.description && !this.model.title) {
-      this.page.withoutTransact(() => {
-        this.page.updateBlock(this.model, {
+      this.doc.withoutTransact(() => {
+        this.doc.updateBlock(this.model, {
           title: 'Figma',
           description: this.model.url,
         });
@@ -165,7 +165,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
       `,
       computePosition: {
         referenceElement: this._figmaBlockEl,
-        placement: 'top-end',
+        placement: 'top-start',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },

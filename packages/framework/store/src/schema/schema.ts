@@ -3,7 +3,7 @@ import { minimatch } from 'minimatch';
 import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
-import { pageMigrations, workspaceMigrations } from '../migration/index.js';
+import { docMigrations, workspaceMigrations } from '../migration/index.js';
 import { Block } from '../workspace/block/block.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
@@ -120,13 +120,13 @@ export class Schema {
     });
   };
 
-  upgradePage = (
+  upgradeDoc = (
     oldPageVersion: number,
     oldBlockVersions: Record<string, number>,
-    pageData: Y.Doc
+    docData: Y.Doc
   ) => {
     // block migrations
-    const blocks = pageData.getMap('blocks') as Y.Map<Y.Map<unknown>>;
+    const blocks = docData.getMap('blocks') as Y.Map<Y.Map<unknown>>;
     Array.from(blocks.values()).forEach(block => {
       const flavour = block.get('sys:flavour') as string;
       const currentVersion = oldBlockVersions[flavour] ?? 0;
@@ -137,11 +137,11 @@ export class Schema {
       this.upgradeBlock(flavour, currentVersion, block);
     });
 
-    // page migrations
-    pageMigrations.forEach(migration => {
+    // doc migrations
+    docMigrations.forEach(migration => {
       try {
-        if (migration.condition(oldPageVersion, pageData)) {
-          migration.migrate(oldPageVersion, pageData);
+        if (migration.condition(oldPageVersion, docData)) {
+          migration.migrate(oldPageVersion, docData);
         }
       } catch (err) {
         throw new MigrationError(`${migration.desc}

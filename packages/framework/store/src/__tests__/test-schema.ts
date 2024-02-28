@@ -1,6 +1,6 @@
 import { defineBlockSchema } from '../schema/index.js';
 
-export const PageBlockSchema = defineBlockSchema({
+export const RootBlockSchema = defineBlockSchema({
   flavour: 'affine:page',
   props: internal => ({
     title: internal.Text(),

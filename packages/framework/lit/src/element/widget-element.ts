@@ -1,7 +1,7 @@
 import type { BlockService } from '@blocksuite/block-std';
 import { type EventName, type UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -16,7 +16,7 @@ export class WidgetElement<
   host!: EditorHost;
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   path!: string[];
 

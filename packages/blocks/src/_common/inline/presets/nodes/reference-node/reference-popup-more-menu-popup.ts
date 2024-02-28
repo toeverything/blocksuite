@@ -5,7 +5,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { PageBlockComponent } from '../../../../../page-block/types.js';
+import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { DeleteIcon, OpenIcon } from '../../../../icons/index.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
@@ -14,36 +14,41 @@ import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .reference-popup-more-menu {
+      box-sizing: border-box;
+      padding-bottom: 4px;
+    }
+
+    .reference-popup-more-menu-container {
       border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
     }
 
-    .menu-item {
+    .reference-popup-more-menu-container > .menu-item {
       display: flex;
       justify-content: flex-start;
       align-items: center;
       width: 100%;
     }
 
-    .menu-item:hover {
+    .reference-popup-more-menu-container > .menu-item:hover {
       background: var(--affine-hover-color);
     }
 
-    .menu-item:hover.delete {
+    .reference-popup-more-menu-container > .menu-item:hover.delete {
       background: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }
-    .menu-item:hover.delete > svg {
+    .reference-popup-more-menu-container > .menu-item:hover.delete > svg {
       color: var(--affine-error-color);
     }
 
-    .menu-item svg {
+    .reference-popup-more-menu-container > .menu-item svg {
       margin: 0 8px;
     }
 
-    .divider {
+    .reference-popup-more-menu-container > .divider {
       width: 148px;
       height: 1px;
       margin: 8px;
@@ -60,11 +65,11 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   abortController!: AbortController;
 
-  get referencePageId() {
-    const pageId = this.inlineEditor.getFormat(this.targetInlineRange).reference
+  get referenceDocId() {
+    const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference
       ?.pageId;
-    assertExists(pageId);
-    return pageId;
+    assertExists(docId);
+    return docId;
   }
 
   get blockElement() {
@@ -81,17 +86,17 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
     return std;
   }
 
-  private _openPage() {
-    const refPageId = this.referencePageId;
+  private _openDoc() {
+    const refDocId = this.referenceDocId;
     const blockElement = this.blockElement;
-    if (refPageId === blockElement.model.page.id) return;
+    if (refDocId === blockElement.doc.id) return;
 
-    const pageElement = this.std.view.viewFromPath('block', [
-      blockElement.model.page.root?.id ?? '',
-    ]) as PageBlockComponent | null;
-    assertExists(pageElement);
+    const rootElement = this.std.view.viewFromPath('block', [
+      blockElement.model.doc.root?.id ?? '',
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
 
-    pageElement.slots.pageLinkClicked.emit({ pageId: refPageId });
+    rootElement.slots.docLinkClicked.emit({ docId: refDocId });
   }
 
   private _delete() {
@@ -102,29 +107,33 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="reference-popup-more-menu">
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item open"
-        text="Open"
-        @click=${() => this._openPage()}
-      >
-        ${OpenIcon}
-      </icon-button>
+    return html`
+      <div class="reference-popup-more-menu">
+        <div class="reference-popup-more-menu-container">
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item open"
+            text="Open"
+            @click=${() => this._openDoc()}
+          >
+            ${OpenIcon}
+          </icon-button>
 
-      <div class="divider"></div>
+          <div class="divider"></div>
 
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item delete"
-        text="Delete"
-        @click=${() => this._delete()}
-      >
-        ${DeleteIcon}
-      </icon-button>
-    </div> `;
+          <icon-button
+            width="126px"
+            height="32px"
+            class="menu-item delete"
+            text="Delete"
+            @click=${() => this._delete()}
+          >
+            ${DeleteIcon}
+          </icon-button>
+        </div>
+      </div>
+    `;
   }
 }
 

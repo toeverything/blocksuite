@@ -25,7 +25,7 @@ export function CodeOptionTemplate({
   abortController: AbortController;
   onClickWrap: () => void;
 }) {
-  const page = model.page;
+  const page = model.doc;
   const readonly = page.readonly;
 
   return html`
@@ -54,7 +54,7 @@ export function CodeOptionTemplate({
         size="32px"
         data-testid="copy-button"
         @click=${() => {
-          const slice = Slice.fromModels(model.page, [model]);
+          const slice = Slice.fromModels(model.doc, [model]);
           anchor.std.clipboard
             .copySlice(slice)
             .then(() => {
@@ -90,7 +90,7 @@ export function CodeOptionTemplate({
             class="delete-code-button"
             @click=${() => {
               if (readonly) return;
-              model.page.deleteBlock(model);
+              model.doc.deleteBlock(model);
             }}
           >
             ${DeleteIcon}
