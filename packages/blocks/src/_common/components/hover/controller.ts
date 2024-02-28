@@ -70,6 +70,12 @@ export class HoverController implements ReactiveController {
     return this._portal;
   }
 
+  /**
+   * HoverController is a controller that creates portal when the refrence element is hovered.
+   * @param host The element that host that portal, usually a LitElement.
+   * @param onHover A function that returns the portal position and portal content when the host is hovered. Called when the reference element is hovered.
+   * @param hoverOptions
+   */
   constructor(
     host: ReactiveControllerHost,
     onHover: (options: OptionsParams) => HoverPortalOptions | null,

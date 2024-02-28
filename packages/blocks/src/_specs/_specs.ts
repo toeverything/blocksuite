@@ -29,6 +29,9 @@ import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { ParagraphService } from '../paragraph-block/paragraph-service.js';
 import { PDFBlockSchema } from '../pdf-block/pdf-model.js';
 import { PDFService } from '../pdf-block/pdf-service.js';
+import { AFFINE_ANNOTATION_PREVIEW_WIDGET } from '../pdf-block/widget/annotation-preview.js';
+import { AFFINE_PDF_ANNOTATION_TOOLBAR_WIDGET } from '../pdf-block/widget/annotation-toolbar.js';
+import { AFFINE_PDF_TOOLBAR_WIDGET } from '../pdf-block/widget/pdf-toolbar.js';
 import { EdgelessRootService } from '../root-block/edgeless/edgeless-root-service.js';
 import {
   type EdgelessRootBlockWidgetName,
@@ -195,6 +198,11 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     schema: PDFBlockSchema,
     view: {
       component: literal`affine-pdf`,
+      widgets: {
+        [AFFINE_PDF_ANNOTATION_TOOLBAR_WIDGET]: literal`affine-pdf-annotation-toolbar`,
+        [AFFINE_ANNOTATION_PREVIEW_WIDGET]: literal`affine-annotation-preview`,
+        [AFFINE_PDF_TOOLBAR_WIDGET]: literal`affine-pdf-toolbar-widget`,
+      },
     },
     service: PDFService,
   },
