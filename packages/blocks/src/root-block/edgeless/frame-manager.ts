@@ -8,13 +8,11 @@ import type {
   TopLevelBlockModel,
 } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
+import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessRootService } from '../../index.js';
-import type {
-  FrameBlockModel,
-  NoteBlockModel,
-  SurfaceBlockModel,
-} from '../../models.js';
+import type { NoteBlockModel } from '../../note-block/note-model.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
 

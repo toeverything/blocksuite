@@ -8,7 +8,7 @@ import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 import { whenHover } from '../../../../_common/components/hover/index.js';
 import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
-import type { Flavour, ParagraphBlockModel } from '../../../../models.js';
+import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
 import { isRootElement } from '../../../../root-block/utils/guard.js';
 import { updateBlockElementType } from '../../../../root-block/utils/operations/element/block-level.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
@@ -21,7 +21,7 @@ interface ParagraphPanelProps {
 
 const updateParagraphType = (
   selectedBlockElements: BlockElement[],
-  flavour: Flavour,
+  flavour: BlockSuite.Flavour,
   type?: string
 ) => {
   if (selectedBlockElements.length === 0) {

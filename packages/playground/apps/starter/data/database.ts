@@ -1,4 +1,8 @@
-import type { ListType, ParagraphType } from '@blocksuite/blocks';
+import type {
+  DatabaseBlockModel,
+  ListType,
+  ParagraphType,
+} from '@blocksuite/blocks';
 import { checkboxPureColumnConfig } from '@blocksuite/blocks';
 import { datePureColumnConfig } from '@blocksuite/blocks';
 import { linkPureColumnConfig } from '@blocksuite/blocks';
@@ -6,7 +10,6 @@ import { multiSelectColumnConfig } from '@blocksuite/blocks';
 import { numberPureColumnConfig } from '@blocksuite/blocks';
 import { progressPureColumnConfig } from '@blocksuite/blocks';
 import { richTextPureColumnConfig } from '@blocksuite/blocks';
-import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
 import { Text, type Workspace } from '@blocksuite/store';
 

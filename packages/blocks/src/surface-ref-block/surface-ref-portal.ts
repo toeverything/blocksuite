@@ -13,7 +13,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 
-import type { FrameBlockModel } from '../models.js';
+import type { FrameBlockModel } from '../frame-block/index.js';
 import type { EdgelessBlockModel } from '../root-block/edgeless/type.js';
 import { type EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';

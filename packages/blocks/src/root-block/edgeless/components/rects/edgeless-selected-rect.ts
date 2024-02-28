@@ -28,8 +28,11 @@ import {
   SYNCED_MIN_HEIGHT,
   SYNCED_MIN_WIDTH,
 } from '../../../../embed-synced-doc-block/styles.js';
-import type { EmbedHtmlModel, EmbedSyncedDocModel } from '../../../../index.js';
-import type { BookmarkBlockModel } from '../../../../models.js';
+import type {
+  BookmarkBlockModel,
+  EmbedHtmlModel,
+  EmbedSyncedDocModel,
+} from '../../../../index.js';
 import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { TextElementModel } from '../../../../surface-block/element-model/text.js';
