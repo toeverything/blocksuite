@@ -4,6 +4,8 @@ import '../panel/color-panel.js';
 import './component-toolbar-menu-divider.js';
 import '../panel/note-shadow-panel.js';
 import '../panel/note-display-mode-panel.js';
+import '../panel/scale-panel.js';
+import '../panel/size-panel.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -86,7 +88,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         align-items: center;
         gap: 4px;
         padding: 2px;
-        font-size: 12px;
+        font-size: var(--affine-font-xs);
         font-weight: 500;
         line-height: 20px;
       }
@@ -95,7 +97,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         white-space: nowrap;
       }
 
-      .display-mode-button {
+      .display-mode-button,
+      .note-scale-button {
         display: flex;
         border-radius: 4px;
         background-color: var(--affine-hover-color);
@@ -104,13 +107,22 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         padding: 2px;
       }
 
-      .current-mode-label {
+      .note-scale-button {
+        font-size: var(--affine-font-sm);
+        font-weight: 500;
+        color: var(--affine-text-secondary-color);
+        height: 26px;
+      }
+
+      .current-mode-label,
+      .current-scale-label {
         display: flex;
         padding: 2px 0px 2px 4px;
         align-items: center;
       }
 
-      edgeless-size-panel {
+      edgeless-size-panel,
+      edgeless-scale-panel {
         border-radius: 8px;
       }
 
@@ -126,14 +138,16 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
       note-display-mode-panel,
       edgeless-note-shadow-panel,
-      edgeless-size-panel {
+      edgeless-size-panel,
+      edgeless-scale-panel {
         display: none;
       }
 
       note-display-mode-panel[data-show],
       edgeless-note-shadow-panel[data-show],
       edgeless-color-panel[data-show],
-      edgeless-size-panel[data-show] {
+      edgeless-size-panel[data-show],
+      edgeless-scale-panel[data-show] {
         display: flex;
       }
 
@@ -205,6 +219,12 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _displayModePanel!: HTMLDivElement;
   private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
     null;
+
+  @query('.note-scale-button')
+  private _noteScaleButton!: HTMLDivElement;
+  @query('edgeless-scale-panel')
+  private _noteScalePanel!: HTMLDivElement;
+  private _noteScalePopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private get doc() {
     return this.surface.doc;
@@ -302,6 +322,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     });
   };
 
+  private _setNoteScale = (scale: number) => {
+    this.notes.forEach(note => {
+      this.doc.updateBlock(note, () => {
+        note.edgeless.scale = scale;
+      });
+    });
+  };
+
   private _setCollapse() {
     this.notes.forEach(note => {
       const { collapse, collapsedHeight } = note.edgeless;
@@ -341,6 +369,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       default:
         return 'Both';
     }
+  }
+
+  private _getScaleLabel(scale: number) {
+    return Math.round(scale * 100) + '%';
   }
 
   override updated(_changedProperties: PropertyValues) {
@@ -391,6 +423,15 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         }
       );
       _disposables.add(this._borderRadiusPopper);
+
+      this._noteScalePopper = createButtonPopper(
+        this._noteScaleButton,
+        this._noteScalePanel,
+        ({ display }) => {
+          this._showPopper = display === 'show';
+        }
+      );
+      _disposables.add(this._noteScalePopper);
     }
   }
 
@@ -417,6 +458,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       edgeless.style;
 
     const { collapse } = edgeless;
+    const scale = edgeless.scale ?? 1;
     const currentMode = this._getCurrentModeLabel(displayMode);
 
     return html`
@@ -533,7 +575,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="edgeless-auto-height-button"
-        .tooltip=${collapse ? 'Auto Size' : 'Customized Size'}
+        .tooltip=${collapse ? 'Auto Height' : 'Customized Height'}
         .iconContainerPadding=${2}
         @click=${() => {
           this._setCollapse();
@@ -541,6 +583,27 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       >
         ${collapse ? ExpandIcon : ShrinkIcon}
       </edgeless-tool-icon-button>
+
+      <edgeless-tool-icon-button
+        .tooltip=${this._showPopper ? '' : 'Scale'}
+        .iconContainerPadding=${0}
+        @click=${() => this._noteScalePopper?.toggle()}
+      >
+        <div class="note-scale-button">
+          <span class="current-scale-label">${this._getScaleLabel(scale)}</span>
+          ${SmallArrowDownIcon}
+        </div>
+      </edgeless-tool-icon-button>
+
+      <edgeless-scale-panel
+        .scale=${Math.round(scale * 100)}
+        .scales=${[50, 100, 200]}
+        .minSize=${0}
+        .onSelect=${(scale: number) => {
+          this._setNoteScale(scale);
+        }}
+        .onPopperCose=${() => this._noteScalePopper?.hide()}
+      ></edgeless-scale-panel>
 
       ${length === 1
         ? html`<component-toolbar-menu-divider
