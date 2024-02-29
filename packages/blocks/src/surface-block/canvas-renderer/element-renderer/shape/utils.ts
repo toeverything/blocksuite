@@ -22,8 +22,8 @@ export function drawGeneralShape(
   renderer: Renderer
 ) {
   const sizeOffset = Math.max(shapeModel.strokeWidth, 0);
-  const w = shapeModel.w - sizeOffset;
-  const h = shapeModel.h - sizeOffset;
+  const w = Math.max(shapeModel.w - sizeOffset, 0);
+  const h = Math.max(shapeModel.h - sizeOffset, 0);
 
   switch (shapeModel.shapeType) {
     case 'rect':
