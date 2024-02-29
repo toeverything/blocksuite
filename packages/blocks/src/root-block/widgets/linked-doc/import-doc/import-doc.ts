@@ -37,7 +37,10 @@ export async function importMarkDown(workspace: Workspace, text: string) {
   });
   const mdAdapter = new MarkdownAdapter();
   mdAdapter.applyConfigs(job.adapterConfigs);
-  const snapshot = await mdAdapter.toDocSnapshot({ file: text });
+  const snapshot = await mdAdapter.toDocSnapshot({
+    file: text,
+    assets: job.assetsManager,
+  });
   const page = await job.snapshotToDoc(snapshot);
   return [page.id];
 }
@@ -49,7 +52,10 @@ export async function importHtml(workspace: Workspace, text: string) {
   });
   const htmlAdapter = new NotionHtmlAdapter();
   htmlAdapter.applyConfigs(job.adapterConfigs);
-  const snapshot = await htmlAdapter.toDocSnapshot({ file: text });
+  const snapshot = await htmlAdapter.toDocSnapshot({
+    file: text,
+    assets: job.assetsManager,
+  });
   const page = await job.snapshotToDoc(snapshot);
   return [page.id];
 }
