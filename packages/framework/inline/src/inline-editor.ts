@@ -275,10 +275,8 @@ export class InlineEditor<
   }
 
   setReadonly(isReadonly: boolean): void {
-    fastdom.mutate(() => {
-      this.rootElement.contentEditable = isReadonly ? 'false' : 'true';
-      this.eventSource.contentEditable = isReadonly ? 'false' : 'true';
-    });
+    this.rootElement.contentEditable = isReadonly ? 'false' : 'true';
+    this.eventSource.contentEditable = isReadonly ? 'false' : 'true';
     this._isReadonly = isReadonly;
   }
 
