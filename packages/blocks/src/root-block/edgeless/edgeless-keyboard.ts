@@ -1,13 +1,4 @@
-import {
-  bindKeymap,
-  EventScopeSourceType,
-  EventSourceState,
-  KeyboardEventState,
-  type UIEventHandler,
-  UIEventState,
-  UIEventStateContext,
-} from '@blocksuite/block-std';
-import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
+import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool } from '../../_common/types.js';
 import {
@@ -30,28 +21,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override rootElement: EdgelessRootBlockComponent) {
     super(rootElement);
 
-    this.bindEdgelessHotKey({
-      'Mod-z': ctx => {
-        ctx.get('defaultState').event.preventDefault();
-
-        if (this.rootElement.doc.canUndo) {
-          this.rootElement.doc.undo();
-        }
-      },
-      'Shift-Mod-z': ctx => {
-        ctx.get('defaultState').event.preventDefault();
-        if (this.rootElement.doc.canRedo) {
-          this.rootElement.doc.redo();
-        }
-      },
-      'Control-y': ctx => {
-        if (!IS_WINDOWS) return;
-
-        ctx.get('defaultState').event.preventDefault();
-        if (this.rootElement.doc.canRedo) {
-          this.rootElement.doc.redo();
-        }
-      },
+    this.rootElement.bindHotKey({
       v: () => {
         this._setEdgelessTool(rootElement, {
           type: 'default',
@@ -248,51 +218,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     );
 
     this._bindToggleHand();
-  }
-
-  /**
-   * The Event Dispatcher will only listen to keyboard events that bubble up to the host element,
-   * which means that when we do not have focus on the editor, we can only listen to keyboard events on the document.
-   * That's why we need this function to bind hotkeys that need to be triggered even when the editor does not have focus.
-   *
-   * To support multiple editors, we determine whether to activate the event callback based on the user's mouse position.
-   */
-  private _edgelessHotKeyActive = false;
-  bindEdgelessHotKey(keymap: Record<string, UIEventHandler>) {
-    this.rootElement.disposables.addFromEvent(document, 'keydown', event => {
-      if (!this._edgelessHotKeyActive) return;
-
-      const keyboardEventState = new KeyboardEventState({
-        event,
-        composing: event.isComposing,
-      });
-      const ctx = UIEventStateContext.from(
-        new UIEventState(event),
-        new EventSourceState({
-          event,
-          sourceType: EventScopeSourceType.Selection,
-        }),
-        keyboardEventState
-      );
-
-      const binding = bindKeymap(keymap);
-      binding(ctx);
-    });
-
-    this.rootElement.disposables.addFromEvent(
-      this.rootElement,
-      'mouseenter',
-      () => {
-        this._edgelessHotKeyActive = true;
-      }
-    );
-    this.rootElement.disposables.addFromEvent(
-      this.rootElement,
-      'mouseleave',
-      () => {
-        this._edgelessHotKeyActive = false;
-      }
-    );
   }
 
   private _bindToggleHand() {

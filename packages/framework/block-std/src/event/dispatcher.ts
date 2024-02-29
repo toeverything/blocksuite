@@ -86,6 +86,11 @@ export class UIEventDispatcher {
   private _rangeControl: RangeControl;
   private _clipboardControl: ClipboardControl;
 
+  private _active = false;
+  get active() {
+    return this._active;
+  }
+
   constructor(public std: BlockSuite.Std) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
@@ -113,6 +118,8 @@ export class UIEventDispatcher {
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
+    if (!this.active) return;
+
     const sourceState = context.get('sourceState');
     if (!scope) {
       scope = this._getEventScope(name, sourceState);
@@ -280,5 +287,18 @@ export class UIEventDispatcher {
     this._keyboardControl.listen();
     this._rangeControl.listen();
     this._clipboardControl.listen();
+
+    this.disposables.addFromEvent(this.host, 'focus', () => {
+      this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'mouseenter', () => {
+      this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'mouseleave', () => {
+      const activeElement = document.activeElement;
+      if (!this.host.contains(activeElement)) {
+        this._active = false;
+      }
+    });
   }
 }

@@ -24,25 +24,17 @@ export class KeyboardControl {
   }
 
   listen() {
+    this._dispatcher.disposables.addFromEvent(document, 'keydown', this._down);
+    this._dispatcher.disposables.addFromEvent(document, 'keyup', this._up);
     this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'keydown',
-      this._down
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'keyup',
-      this._up
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
+      document,
       'compositionstart',
       () => {
         this.composition = true;
       }
     );
     this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
+      document,
       'compositionend',
       () => {
         this.composition = false;
