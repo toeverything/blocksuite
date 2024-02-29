@@ -203,15 +203,16 @@ export class Renderer extends Viewport {
     }
 
     const cache = this._cacheCanvas.get(model.id)!;
-    const { canvas, deps: oldDeps } = cache;
+    const { canvas, deps: oldDeps, scale: oldScale } = cache;
 
     cache.deps = deps;
+    cache.scale = window.devicePixelRatio * this.zoom;
 
     return {
       canvas,
       ctx: canvas.getContext('2d') as CanvasRenderingContext2D,
       dirty:
-        cache.scale < window.devicePixelRatio * this.zoom ||
+        oldScale < cache.scale ||
         !oldDeps.every((dep, idx) => dep === deps[idx]),
     };
   }
