@@ -5,7 +5,6 @@ import {
   getFontString,
   getLineHeight,
   getTextWidth,
-  isRTL,
   wrapTextDeltas,
 } from './utils.js';
 
@@ -39,34 +38,60 @@ export function text(
     fontSize,
     fontFamily,
   });
-  // const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
+
+  const cacheContent = renderer.requestCacheContent(model, [
+    model.text.toString(),
+    font,
+    color,
+    textAlign,
+    w,
+    h,
+    fontFamily,
+    fontSize,
+  ]);
+
+  if (cacheContent.dirty) {
+    renderAtCache(cacheContent.ctx, renderer, model, {
+      font,
+    });
+  }
+
+  ctx.drawImage(cacheContent.canvas, 0, 0, w, h);
+}
+
+export function renderAtCache(
+  ctx: CanvasRenderingContext2D,
+  renderer: Renderer,
+  model: TextElementModel,
+  params: {
+    font: string;
+  }
+) {
+  const { font } = params;
+  const { w, h, textAlign, color, fontFamily, fontSize } = model;
   const deltas = wrapTextDeltas(model.text, font, w);
   const lines = deltaInsertsToChunks(deltas);
-
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
   const horizontalOffset =
     textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
+  const scale = window.devicePixelRatio * renderer.zoom;
+
+  ctx.canvas.width = w * scale;
+  ctx.canvas.height = h * scale;
+
+  ctx.scale(scale, scale);
+
+  ctx.save();
+  ctx.font = font;
+  ctx.fillStyle = renderer.getVariableColor(color);
+  ctx.textAlign = textAlign;
+  ctx.textBaseline = 'ideographic';
 
   for (const [lineIndex, line] of lines.entries()) {
     let beforeTextWidth = 0;
 
     for (const delta of line) {
-      ctx.save();
-
       const str = delta.insert;
-      const rtl = isRTL(str);
-      const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
-      if (shouldTemporarilyAttach) {
-        // to correctly render RTL text mixed with LTR, we have to append it
-        // to the DOM
-        document.body.appendChild(ctx.canvas);
-      }
-      ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
-      ctx.font = font;
-      ctx.fillStyle = renderer.getVariableColor(color);
-      ctx.textAlign = textAlign;
-      ctx.textBaseline = 'ideographic';
-
       // 0.5 comes from v-line padding
       const offset =
         textAlign === 'center' ? 0 : textAlign === 'right' ? -0.5 : 0.5;
@@ -78,12 +103,8 @@ export function text(
       );
 
       beforeTextWidth += getTextWidth(str, font);
-
-      if (shouldTemporarilyAttach) {
-        ctx.canvas.remove();
-      }
-
-      ctx.restore();
     }
   }
+
+  ctx.restore();
 }

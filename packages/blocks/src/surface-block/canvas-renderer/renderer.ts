@@ -53,6 +53,10 @@ export class Renderer extends Viewport {
   private _overlays: Set<Overlay> = new Set();
   private _shouldUpdate = false;
   private _disposables = new DisposableGroup();
+  private _cacheCanvas: Map<
+    string,
+    { canvas: HTMLCanvasElement; deps: unknown[]; scale: number }
+  > = new Map();
 
   get stackingCanvas() {
     return this._stackingCanvas;
@@ -173,6 +177,43 @@ export class Renderer extends Viewport {
 
     this._resetSize();
     this._loop();
+  }
+
+  requestCacheContent(
+    model: ElementModel,
+    deps: unknown[] = []
+  ): {
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    dirty: boolean;
+  } {
+    if (!this._cacheCanvas.has(model.id)) {
+      const canvas = document.createElement('canvas');
+      this._cacheCanvas.set(model.id, {
+        canvas: canvas,
+        deps: deps,
+        scale: window.devicePixelRatio * this.zoom,
+      });
+
+      return {
+        canvas,
+        ctx: canvas.getContext('2d') as CanvasRenderingContext2D,
+        dirty: true,
+      };
+    }
+
+    const cache = this._cacheCanvas.get(model.id)!;
+    const { canvas, deps: oldDeps } = cache;
+
+    cache.deps = deps;
+
+    return {
+      canvas,
+      ctx: canvas.getContext('2d') as CanvasRenderingContext2D,
+      dirty:
+        cache.scale < window.devicePixelRatio * this.zoom ||
+        !oldDeps.every((dep, idx) => dep === deps[idx]),
+    };
   }
 
   private _resetSize() {

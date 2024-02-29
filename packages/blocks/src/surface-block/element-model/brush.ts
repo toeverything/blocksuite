@@ -36,7 +36,7 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   }
 
   @watch((_, instance: BrushElementModel) => {
-    instance['_local'].delete('path2d');
+    instance['_local'].delete('commands');
   })
   @derive((points: number[][], instance: BrushElementModel) => {
     const lineWidth = instance.lineWidth;
@@ -89,22 +89,21 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   color: string = '#000000';
 
   /**
-   * path2d is local property and its value is calculated lazily.
+   * The SVG path commands for the brush.
    */
-  get path2d() {
-    if (!this._local.has('path2d')) {
+  get commands() {
+    if (!this._local.has('commands')) {
       const stroke = getSolidStrokePoints(this.points, this.lineWidth);
       const commands = getSvgPathFromStroke(stroke);
-      const path = new Path2D(commands);
 
-      this._local.set('path2d', path);
+      this._local.set('commands', commands);
     }
 
-    return this._local.get('path2d');
+    return this._local.get('commands') as string;
   }
 
   @watch((_, instance: BrushElementModel) => {
-    instance['_local'].delete('path2d');
+    instance['_local'].delete('commands');
   })
   @derive((lineWidth: number, instance: BrushElementModel) => {
     if (lineWidth === instance.lineWidth) return {};

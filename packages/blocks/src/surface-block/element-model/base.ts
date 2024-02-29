@@ -19,7 +19,11 @@ import {
 } from '../utils/math-utils.js';
 import { PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
-import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  type XYWH,
+} from '../utils/xywh.js';
 import {
   convertProps,
   getDeriveProperties,
@@ -120,8 +124,16 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     return true;
   }
 
+  private _lastXYWH: SerializedXYWH = '[0,0,0,0]';
+
   get deserializedXYWH() {
-    return deserializeXYWH(this.xywh);
+    if (this.xywh !== this._lastXYWH) {
+      const xywh = this.xywh;
+      this._local.set('deserializedXYWH', deserializeXYWH(xywh));
+      this._lastXYWH = xywh;
+    }
+
+    return this._local.get('deserializedXYWH') as XYWH;
   }
 
   get x() {
