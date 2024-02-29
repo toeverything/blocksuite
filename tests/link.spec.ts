@@ -251,6 +251,7 @@ test('should keyboard work in link popover', async ({ page }) => {
   await pressCreateLinkShortCut(page);
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await assertKeyboardWorkInInput(page, linkPopoverInput);
+  await page.mouse.click(500, 500);
 
   const linkLocator = page.locator(`text="${linkText}"`);
   const linkPopover = page.locator('.affine-link-popover');
