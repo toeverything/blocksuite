@@ -295,6 +295,14 @@ export class UIEventDispatcher {
         this._active = false;
       }
     });
+    this.disposables.addFromEvent(document, 'focusout', e => {
+      if (
+        this.host.contains(e.target as Node) &&
+        !this.host.contains(e.relatedTarget as Node)
+      ) {
+        this._active = false;
+      }
+    });
     this.disposables.addFromEvent(this.host, 'mouseenter', () => {
       this._active = true;
     });
