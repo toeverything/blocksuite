@@ -288,29 +288,14 @@ export class UIEventDispatcher {
     this._rangeControl.listen();
     this._clipboardControl.listen();
 
-    this.disposables.addFromEvent(document, 'focusin', e => {
-      if (this.host.contains(e.target as Node)) {
-        this._active = true;
-      } else {
-        this._active = false;
-      }
-    });
-    this.disposables.addFromEvent(document, 'focusout', e => {
-      if (
-        this.host.contains(e.target as Node) &&
-        !this.host.contains(e.relatedTarget as Node)
-      ) {
-        this._active = false;
-      }
+    this.disposables.addFromEvent(this.host, 'focusin', () => {
+      this._active = true;
     });
     this.disposables.addFromEvent(this.host, 'mouseenter', () => {
       this._active = true;
     });
     this.disposables.addFromEvent(this.host, 'mouseleave', () => {
-      const activeElement = document.activeElement;
-      if (!this.host.contains(activeElement)) {
-        this._active = false;
-      }
+      this._active = false;
     });
   }
 }
