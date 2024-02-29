@@ -88,7 +88,6 @@ export class RangeBinding {
     await this.host.updateComplete;
 
     const selection = document.getSelection();
-    console.log(selection);
     if (!selection) {
       this.selectionManager.clear(['text']);
       return;
