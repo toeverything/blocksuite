@@ -40,7 +40,7 @@ export class EdgelessScalePanel extends LitElement {
       height: 22px;
       border: 1px solid var(--affine-border-color);
       border-radius: 4px;
-      padding: 6px 12px;
+      padding: 6px 14px;
     }
 
     .scale-input::placeholder {
