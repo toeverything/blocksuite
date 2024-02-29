@@ -459,7 +459,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
           align-items: center;
         }
         .divider {
-          background: var(--affine-divider-color);
+          background: var(--affine-border-color);
           height: 0.5px;
           width: 100%;
         }

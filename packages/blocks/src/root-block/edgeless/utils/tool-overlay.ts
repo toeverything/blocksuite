@@ -2,7 +2,9 @@ import { DisposableGroup, noop, Slot } from '@blocksuite/global/utils';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { ShapeStyle } from '../../../surface-block/element-model/shape.js';
+import { shapeMethods } from '../../../surface-block/element-model/shape.js';
 import {
+  Bound,
   type Options,
   Overlay,
   type RoughCanvas,
@@ -22,31 +24,6 @@ import {
   SHAPE_OVERLAY_OFFSET_Y,
   SHAPE_OVERLAY_WIDTH,
 } from '../utils/consts.js';
-
-const drawRectangle = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
-  const [x, y, w, h] = xywh;
-  ctx.rect(x, y, w, h);
-};
-
-const drawTriangle = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
-  const [x, y, w, h] = xywh;
-  ctx.moveTo(x + w / 2, y);
-  ctx.lineTo(x, y + h);
-  ctx.lineTo(x + w, y + h);
-};
-
-const drawDiamond = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
-  const [x, y, w, h] = xywh;
-  ctx.lineTo(x + w / 2, y);
-  ctx.lineTo(x + w, y + h / 2);
-  ctx.lineTo(x + w / 2, y + h);
-  ctx.lineTo(x, y + h / 2);
-};
-
-const drawEllipse = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
-  const [x, y, w, h] = xywh;
-  ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, 2 * Math.PI);
-};
 
 const drawRoundedRect = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
   const [x, y, w, h] = xywh;
@@ -74,18 +51,19 @@ const drawGeneralShape = (
 
   ctx.beginPath();
 
+  const bound = Bound.fromXYWH(xywh);
   switch (type) {
     case 'rect':
-      drawRectangle(ctx, xywh);
+      shapeMethods.rect.draw(ctx, bound);
       break;
     case 'triangle':
-      drawTriangle(ctx, xywh);
+      shapeMethods.rect.draw(ctx, bound);
       break;
     case 'diamond':
-      drawDiamond(ctx, xywh);
+      shapeMethods.diamond.draw(ctx, bound);
       break;
     case 'ellipse':
-      drawEllipse(ctx, xywh);
+      shapeMethods.ellipse.draw(ctx, bound);
       break;
     case 'roundedRect':
       drawRoundedRect(ctx, xywh);
@@ -191,13 +169,13 @@ export class RoundedRectShape extends Shape {
       const y0 = y + r;
       const y1 = y + h - r;
       const path = `
-          M${x0},${y} L${x1},${y} 
-          A${r},${r} 0 0 1 ${x1},${y0} 
-          L${x1},${y1} 
-          A${r},${r} 0 0 1 ${x1 - r},${y1} 
-          L${x0 + r},${y1} 
-          A${r},${r} 0 0 1 ${x0},${y1 - r} 
-          L${x0},${y0} 
+          M${x0},${y} L${x1},${y}
+          A${r},${r} 0 0 1 ${x1},${y0}
+          L${x1},${y1}
+          A${r},${r} 0 0 1 ${x1 - r},${y1}
+          L${x0 + r},${y1}
+          A${r},${r} 0 0 1 ${x0},${y1 - r}
+          L${x0},${y0}
           A${r},${r} 0 0 1 ${x0 + r},${y}
         `;
 
