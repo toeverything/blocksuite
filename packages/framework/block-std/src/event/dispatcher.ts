@@ -288,8 +288,12 @@ export class UIEventDispatcher {
     this._rangeControl.listen();
     this._clipboardControl.listen();
 
-    this.disposables.addFromEvent(this.host, 'focus', () => {
-      this._active = true;
+    this.disposables.addFromEvent(document, 'focusin', e => {
+      if (this.host.contains(e.target as Node)) {
+        this._active = true;
+      } else {
+        this._active = false;
+      }
     });
     this.disposables.addFromEvent(this.host, 'mouseenter', () => {
       this._active = true;
