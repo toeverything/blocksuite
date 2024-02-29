@@ -255,6 +255,7 @@ export function convertProps(
 }
 
 const observeSymbol = Symbol('observe');
+const observerDisposableSymbol = Symbol('observerDisposable');
 
 /**
  * A decorator to observe the y type property.
@@ -295,7 +296,10 @@ function startObserve(
 ) {
   const observeFn = getObserveMeta(prototype, prop as string)!;
   // @ts-ignore
-  const observerDisposable = receiver[observeSymbol] ?? {};
+  const observerDisposable = receiver[observerDisposableSymbol] ?? {};
+
+  // @ts-ignore
+  receiver[observerDisposableSymbol] = observerDisposable;
 
   if (observerDisposable[prop]) {
     observerDisposable[prop]();
@@ -345,7 +349,7 @@ export function initializedObservers(
 
   receiver['_disposable'].add(() => {
     // @ts-ignore
-    Object.values(receiver[observeSymbol] ?? {}).forEach(dispose =>
+    Object.values(receiver[observerDisposableSymbol] ?? {}).forEach(dispose =>
       (dispose as () => void)()
     );
   });
