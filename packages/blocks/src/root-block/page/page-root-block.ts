@@ -299,7 +299,10 @@ export class PageRootBlockComponent extends BlockElement<
         parseFloat(paddingLeft),
         parseFloat(paddingRight)
       );
-      if (isClickOnBlankArea) {
+      if (
+        event.event.target === this.rootElementContainer ||
+        isClickOnBlankArea
+      ) {
         this.host.selection.clear(['block']);
         return;
       }
