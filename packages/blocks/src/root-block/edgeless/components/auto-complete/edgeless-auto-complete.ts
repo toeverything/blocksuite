@@ -26,7 +26,6 @@ import {
   CanvasElementType,
   type IVec,
   Overlay,
-  rotatePoints,
   type RoughCanvas,
   Vec,
 } from '../../../../surface-block/index.js';
@@ -47,10 +46,11 @@ import {
 
 class AutoCompleteOverlay extends Overlay {
   linePoints: IVec[] = [];
-  shapePoints: IVec[] = [];
   stroke = '';
+  renderShape: ((ctx: CanvasRenderingContext2D) => void) | null = null;
+
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
-    if (this.linePoints.length && this.shapePoints.length) {
+    if (this.linePoints.length && this.renderShape) {
       ctx.setLineDash([2, 2]);
       ctx.strokeStyle = this.stroke;
       ctx.beginPath();
@@ -58,11 +58,9 @@ class AutoCompleteOverlay extends Overlay {
         if (index === 0) ctx.moveTo(p[0], p[1]);
         else ctx.lineTo(p[0], p[1]);
       });
-      this.shapePoints.forEach((p, index) => {
-        if (index === 0) ctx.moveTo(p[0], p[1]);
-        else ctx.lineTo(p[0], p[1]);
-      });
-      ctx.closePath();
+      ctx.stroke();
+
+      this.renderShape(ctx);
       ctx.stroke();
     }
   }
@@ -159,7 +157,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     _disposables.add(
       this.edgeless.service.selection.slots.updated.on(() => {
         this._autoCompleteOverlay.linePoints = [];
-        this._autoCompleteOverlay.shapePoints = [];
+        this._autoCompleteOverlay.renderShape = null;
       })
     );
     _disposables.add(() => this.removeOverlay());
@@ -320,11 +318,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     this._autoCompleteOverlay.stroke =
       this._surface.themeObserver.getVariableValue(current.strokeColor);
     this._autoCompleteOverlay.linePoints = path;
-    this._autoCompleteOverlay.shapePoints = rotatePoints(
-      shapeMethods[targetType].points(bound),
-      bound.center,
-      current.rotate
-    );
+    this._autoCompleteOverlay.renderShape = ctx => {
+      shapeMethods[targetType].draw(ctx, { ...bound, rotate: current.rotate });
+    };
     surface.refresh();
   }
 

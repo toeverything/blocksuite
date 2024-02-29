@@ -25,6 +25,24 @@ export const diamond = {
       [x + w / 2, y + h],
     ];
   },
+  draw(ctx: CanvasRenderingContext2D, { x, y, w, h, rotate = 0 }: IBound) {
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate((rotate * Math.PI) / 180);
+    ctx.translate(-cx, -cy);
+
+    ctx.beginPath();
+    ctx.moveTo(x, y + h / 2);
+    ctx.lineTo(x + w / 2, y);
+    ctx.lineTo(x + w, y + h / 2);
+    ctx.lineTo(x + w / 2, y + h);
+    ctx.closePath();
+
+    ctx.restore();
+  },
 
   hitTest(
     this: ShapeElementModel,
