@@ -43,6 +43,7 @@
     "micromark-extension-gfm-table": "^2.0.0",
     "micromark-extension-gfm-task-list-item": "^2.0.1",
     "micromark-util-combine-extensions": "^2.0.0",
+    "minimatch": "^9.0.3",
     "nanoid": "^5.0.4",
     "pdf-lib": "^1.17.1",
     "rehype-parse": "^9.0.0",
