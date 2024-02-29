@@ -118,9 +118,6 @@ export class UIEventDispatcher {
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
-    if (name === 'click') {
-      console.log(this.active, context.get('defaultState').event);
-    }
     if (!this.active) return;
 
     const sourceState = context.get('sourceState');
