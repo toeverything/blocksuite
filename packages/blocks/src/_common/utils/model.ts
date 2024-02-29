@@ -1,4 +1,5 @@
 import type { BlockModel, Doc } from '@blocksuite/store';
+import { minimatch } from 'minimatch';
 
 export function assertFlavours(model: { flavour: string }, allowed: string[]) {
   if (!allowed.includes(model.flavour)) {
@@ -11,7 +12,10 @@ export function matchFlavours<Key extends (keyof BlockSuite.BlockModels)[]>(
   expected: Key
 ): model is BlockSuite.BlockModels[Key[number]] {
   return (
-    !!model && expected.includes(model.flavour as keyof BlockSuite.BlockModels)
+    !!model &&
+    expected.some(key =>
+      minimatch(model.flavour as keyof BlockSuite.BlockModels, key)
+    )
   );
 }
 

@@ -25,6 +25,14 @@ export const rect = {
       [x, y + h],
     ];
   },
+  draw(ctx: CanvasRenderingContext2D, { x, y, w, h, rotate = 0 }: IBound) {
+    ctx.save();
+    ctx.translate(x + w / 2, y + h / 2);
+    ctx.rotate((rotate * Math.PI) / 180);
+    ctx.translate(-x - w / 2, -y - h / 2);
+    ctx.rect(x, y, w, h);
+    ctx.restore();
+  },
   hitTest(
     this: ShapeElementModel,
     x: number,
