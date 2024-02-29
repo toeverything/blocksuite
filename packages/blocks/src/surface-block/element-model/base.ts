@@ -1,3 +1,4 @@
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
 
@@ -63,7 +64,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     props: Record<string, unknown>;
     oldValues: Record<string, unknown>;
   }) => void;
-  protected _observerDisposable: Record<string | symbol, () => void> = {};
+  protected _disposable = new DisposableGroup();
 
   yMap: Y.Map<unknown>;
   surface!: SurfaceBlockModel;
@@ -109,7 +110,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     this._stashed = stashedStore as Map<keyof Props, unknown>;
     this._onChange = onChange;
 
-    // base class property field is assigned before yMap is set
+    // base class properties is initialized before yMap has been set
     // so we need to manually assign the default value here
     this.index = 'a0';
     this.seed = randomSeed();

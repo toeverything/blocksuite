@@ -1,7 +1,5 @@
 import type { BrushElementModel } from '../../../element-model/brush.js';
-import { getSvgPathFromStroke } from '../../../utils/math-utils.js';
 import type { Renderer } from '../../renderer.js';
-import { getSolidStrokePoints } from './utils.js';
 
 export function brush(
   model: BrushElementModel,
@@ -9,7 +7,7 @@ export function brush(
   matrix: DOMMatrix,
   renderer: Renderer
 ) {
-  const { points, lineWidth, color, rotate } = model;
+  const { color, rotate } = model;
   const [, , w, h] = model.deserializedXYWH;
   const cx = w / 2;
   const cy = h / 2;
@@ -18,10 +16,6 @@ export function brush(
     matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
   );
 
-  const stroke = getSolidStrokePoints(points, lineWidth);
-  const commands = getSvgPathFromStroke(stroke);
-  const path = new Path2D(commands);
-
   ctx.fillStyle = renderer.getVariableColor(color);
-  ctx.fill(path);
+  ctx.fill(model.path2d);
 }

@@ -1,4 +1,5 @@
 import type { HitTestOptions } from '../../root-block/edgeless/type.js';
+import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 import {
   Bound,
   getBoundFromPoints,
@@ -8,6 +9,7 @@ import {
 import {
   getPointsFromBoundsWithRotation,
   getQuadBoundsWithRotation,
+  getSvgPathFromStroke,
   isPointOnlines,
   lineIntersects,
   polyLineNearestPoint,
@@ -17,7 +19,7 @@ import type { IVec2 } from '../utils/vec.js';
 import { Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import { type BaseProps, ElementModel } from './base.js';
-import { convert, derive, yfield } from './decorators.js';
+import { convert, derive, watch, yfield } from './decorators.js';
 
 export type BrushProps = BaseProps & {
   /**
@@ -33,6 +35,9 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     return props;
   }
 
+  @watch((_, instance: BrushElementModel) => {
+    instance['_local'].delete('path2d');
+  })
   @derive((points: number[][], instance: BrushElementModel) => {
     const lineWidth = instance.lineWidth;
     const bound = getBoundFromPoints(points);
@@ -58,7 +63,10 @@ export class BrushElementModel extends ElementModel<BrushProps> {
 
   @derive((xywh: SerializedXYWH, instance: BrushElementModel) => {
     const bound = Bound.deserialize(xywh);
+    if (bound.w === instance.w && bound.h === instance.h) return {};
+
     const { lineWidth } = instance;
+
     const transformed = transformPointsToNewBound(
       instance.points.map(([x, y]) => ({ x, y })),
       instance,
@@ -80,6 +88,24 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   @yfield()
   color: string = '#000000';
 
+  /**
+   * path2d is local property and its value is calculated lazily.
+   */
+  get path2d() {
+    if (!this._local.has('path2d')) {
+      const stroke = getSolidStrokePoints(this.points, this.lineWidth);
+      const commands = getSvgPathFromStroke(stroke);
+      const path = new Path2D(commands);
+
+      this._local.set('path2d', path);
+    }
+
+    return this._local.get('path2d');
+  }
+
+  @watch((_, instance: BrushElementModel) => {
+    instance['_local'].delete('path2d');
+  })
   @derive((lineWidth: number, instance: BrushElementModel) => {
     if (lineWidth === instance.lineWidth) return {};
 
