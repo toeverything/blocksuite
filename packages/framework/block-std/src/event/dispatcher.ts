@@ -291,6 +291,11 @@ export class UIEventDispatcher {
     this.disposables.addFromEvent(this.host, 'focusin', () => {
       this._active = true;
     });
+    this.disposables.addFromEvent(this.host, 'focusout', e => {
+      if (e.relatedTarget && !this.host.contains(e.relatedTarget as Node)) {
+        this._active = false;
+      }
+    });
     this.disposables.addFromEvent(this.host, 'mouseenter', () => {
       this._active = true;
     });
