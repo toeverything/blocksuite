@@ -25,8 +25,11 @@ type VendorPack<T extends AllServiceKind> = {
   vendor: VendorConfig;
   impl: ServiceImpl<GetMethod<T>, unknown>;
 };
-// A simple PRNG, using a linear congruential generator.
-// reference link: https://en.wikipedia.org/wiki/Linear_congruential_generator
+
+/**
+ * A simple PRNG, using a linear congruential generator.
+ * reference link: https://en.wikipedia.org/wiki/Linear_congruential_generator
+ */
 class SimplePRNG {
   constructor(private seed: number) {}
 
