@@ -49,6 +49,7 @@ function shuffleArray(array: number[], seed: number) {
     [array[i], array[j]] = [array[j], array[i]];
   }
 }
+
 /**
  * It's used for encoding the OpenAI key in the URL.
  */
@@ -68,6 +69,8 @@ function decode(encodedStr: string, seed: number) {
     .map(pair => pair[1]);
   return inverseIndexArray.map(index => encodedStr[index]).join('');
 }
+
+const seed = 1234567890;
 
 export class CopilotConfig {
   _config?: CopilotConfigDataType;
@@ -92,7 +95,7 @@ export class CopilotConfig {
         vendorKey: 'OpenAI',
         name: 'url',
         data: {
-          apiKey: 'sk-' + decode(openAIKey, 1234567890),
+          apiKey: 'sk-' + decode(openAIKey, seed),
         },
       });
     }
