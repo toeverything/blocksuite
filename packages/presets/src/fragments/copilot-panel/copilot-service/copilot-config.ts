@@ -25,10 +25,11 @@ type VendorPack<T extends AllServiceKind> = {
   vendor: VendorConfig;
   impl: ServiceImpl<GetMethod<T>, unknown>;
 };
-
+// A simple PRNG, using a linear congruential generator.
+// reference link: https://en.wikipedia.org/wiki/Linear_congruential_generator
 class SimplePRNG {
   constructor(private seed: number) {}
-  // 一个简单的PRNG，使用线性同余生成器
+
   next() {
     const a = 1664525;
     const c = 1013904223;
