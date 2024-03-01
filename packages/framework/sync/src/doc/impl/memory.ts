@@ -1,4 +1,5 @@
-import { mergeUpdates } from '../../utils/merge-updates.js';
+import { mergeUpdates } from 'yjs';
+
 import type { DocSource } from '../source.js';
 
 export class MemoryDocSource implements DocSource {

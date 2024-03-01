@@ -14,7 +14,8 @@
         "presets",
         "playground",
         "inline",
-        "lit"
+        "lit",
+        "sync"
       ]
     ]
   }
