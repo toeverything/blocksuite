@@ -1,6 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { AffineEditorContainer, CopilotPanel } from '@blocksuite/presets';
+import {
+  AffineEditorContainer,
+  CommentPanel,
+  CopilotPanel,
+} from '@blocksuite/presets';
 import type { Workspace } from '@blocksuite/store';
 
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
@@ -54,6 +58,9 @@ export async function mountDefaultDocEditor(workspace: Workspace) {
   const docsPanel = new DocsPanel();
   docsPanel.editor = editor;
 
+  const commentPanel = new CommentPanel();
+  commentPanel.host = editor.host;
+
   const debugMenu = new DebugMenu();
   debugMenu.workspace = workspace;
   debugMenu.editor = editor;
@@ -63,6 +70,7 @@ export async function mountDefaultDocEditor(workspace: Workspace) {
   debugMenu.sidePanel = sidePanel;
   debugMenu.leftSidePanel = leftSidePanel;
   debugMenu.docsPanel = docsPanel;
+  debugMenu.commentPanel = commentPanel;
 
   document.body.appendChild(outlinePanel);
   document.body.appendChild(framePanel);

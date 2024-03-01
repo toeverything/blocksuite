@@ -260,7 +260,7 @@ test('should database title and rich-text support undo/redo', async ({
   await focusDatabaseTitle(page);
   await type(page, 'abc');
   await assertDatabaseTitleText(page, 'Database 1abc');
-  await undoByClick(page);
+  await undoByKeyboard(page);
   await assertDatabaseTitleText(page, 'Database 1');
   await redoByKeyboard(page);
   await assertDatabaseTitleText(page, 'Database 1abc');

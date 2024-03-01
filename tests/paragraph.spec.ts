@@ -117,6 +117,7 @@ test('backspace and arrow on title', async ({ page }) => {
   await assertTitle(page, 'hell');
 
   await pressArrowLeft(page, 2);
+  await captureHistory(page);
   await pressBackspace(page);
   await assertTitle(page, 'hll');
 
@@ -124,9 +125,9 @@ test('backspace and arrow on title', async ({ page }) => {
   await assertRichTextInlineRange(page, 0, 0, 0);
 
   await undoByKeyboard(page);
-  await assertTitle(page, 'hello');
+  await assertTitle(page, 'hell');
 
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertTitle(page, 'hll');
 });
 

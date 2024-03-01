@@ -14,7 +14,8 @@
   "exports": {
     ".": "./index.d.ts",
     "./utils": "./src/utils.ts",
-    "./env": "./src/env/index.ts"
+    "./env": "./src/env/index.ts",
+    "./exceptions": "./src/exceptions/index.ts"
   },
   "typesVersions": {
     "*": {
@@ -23,6 +24,9 @@
       ],
       "env": [
         "dist/env/index.d.ts"
+      ],
+      "exceptions": [
+        "dist/exceptions/index.d.ts"
       ]
     }
   },
@@ -33,7 +37,8 @@
     "exports": {
       ".": "./index.d.ts",
       "./utils": "./dist/utils.js",
-      "./env": "./dist/env/index.js"
+      "./env": "./dist/env/index.js",
+      "./exceptions": "./dist/exceptions/index.js"
     }
   },
   "files": [
