@@ -226,6 +226,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
         { mode: 'replace' }
       );
       this.inlineEditor.setInlineRange(this.targetInlineRange);
+      const textSelection = this.host.selection.find('text');
+      assertExists(textSelection);
+      this.host.rangeManager?.syncTextSelectionToRange(textSelection);
     } else if (this.type === 'edit') {
       const text = this.textInput?.value ?? link;
       this.inlineEditor.insertText(this.targetInlineRange, text, {
@@ -236,6 +239,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
         index: this.targetInlineRange.index,
         length: text.length,
       });
+      const textSelection = this.host.selection.find('text');
+      assertExists(textSelection);
+      this.host.rangeManager?.syncTextSelectionToRange(textSelection);
     }
 
     this.abortController.abort();
@@ -529,7 +535,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
       this.type === 'edit' || this.type === 'create'
         ? html`<div
             class="affine-link-popover-overlay-mask"
-            @click=${() => this.abortController.abort()}
+            @click=${() => {
+              this.abortController.abort();
+              this.host.selection.clear();
+            }}
           ></div>`
         : nothing;
 
