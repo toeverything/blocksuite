@@ -6,7 +6,15 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type TemplateResult,
+  unsafeCSS,
+} from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -16,7 +24,10 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../../_common/consts.js';
-import { BookmarkIcon } from '../../../../_common/icons/edgeless.js';
+import {
+  BookmarkIcon,
+  SmallArrowDownIcon,
+} from '../../../../_common/icons/edgeless.js';
 import {
   CaptionIcon,
   CopyIcon,
@@ -121,7 +132,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       font-feature-settings:
         'clig' off,
         'liga' off;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: 15px;
       font-style: normal;
       font-weight: 400;
@@ -161,7 +172,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         'clig' off,
         'liga' off;
       word-break: break-all;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: 14px;
       font-style: normal;
       font-weight: 400;
@@ -201,10 +212,30 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       height: 24px;
     }
 
-    card-style-panel {
+    .embed-synced-doc-scale-button {
+      display: flex;
+      border-radius: 4px;
+      align-items: center;
+      gap: 2px;
+      padding: 2px;
+      font-size: var(--affine-font-sm);
+      font-weight: 500;
+      color: var(--affine-text-secondary-color);
+      height: 26px;
+    }
+
+    .embed-synced-doc-scale-label {
+      display: flex;
+      padding: 2px 0px 2px 4px;
+      align-items: center;
+    }
+
+    card-style-panel,
+    edgeless-scale-panel {
       display: none;
     }
-    card-style-panel[data-show] {
+    card-style-panel[data-show],
+    edgeless-scale-panel[data-show] {
       display: flex;
     }
   `;
@@ -234,6 +265,14 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
   @query('card-style-panel')
   private _cardStylePanel!: HTMLDivElement;
+
+  @query('.embed-synced-doc-scale-button')
+  private _embedSyncedDocScaleButton!: HTMLDivElement;
+  @query('edgeless-scale-panel')
+  private _embedSyncedDocScalePanel!: HTMLDivElement;
+  private _embedSyncedDocScalePopper: ReturnType<
+    typeof createButtonPopper
+  > | null = null;
 
   private get _doc() {
     return this.model.doc;
@@ -512,6 +551,21 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._doc.deleteBlock(this.model);
   }
 
+  private _getScale(model: EmbedSyncedDocModel) {
+    return model.scale ?? 1;
+  }
+
+  private _setEmbedSyncedDocScale(scale: number) {
+    if (!isEmbedSyncedDocBlock(this.model)) return;
+    const bound = Bound.deserialize(this.model.xywh);
+    const oldScale = this.model.scale ?? 1;
+    const ratio = scale / oldScale;
+    bound.w *= ratio;
+    bound.h *= ratio;
+    const xywh = bound.serialize();
+    this.model.doc.updateBlock(this.model, { scale, xywh });
+  }
+
   override updated(changedProperties: Map<string, unknown>) {
     this._cardStylePopper?.dispose();
     if (this._canShowCardStylePanel) {
@@ -523,6 +577,17 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         }
       );
       this._disposables.add(this._cardStylePopper);
+    }
+
+    if (isEmbedSyncedDocBlock(this.model)) {
+      this._embedSyncedDocScalePopper = createButtonPopper(
+        this._embedSyncedDocScaleButton,
+        this._embedSyncedDocScalePanel,
+        ({ display }) => {
+          this._showPopper = display === 'show';
+        }
+      );
+      this._disposables.add(this._embedSyncedDocScalePopper);
     }
 
     super.updated(changedProperties);
@@ -676,6 +741,37 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         >
           ${CaptionIcon}
         </edgeless-tool-icon-button>
+
+        ${isEmbedSyncedDocBlock(model)
+          ? html`
+              <component-toolbar-menu-divider
+                .vertical=${true}
+              ></component-toolbar-menu-divider>
+
+              <edgeless-tool-icon-button
+                .tooltip=${this._showPopper ? '' : 'Scale'}
+                .iconContainerPadding=${0}
+                @click=${() => this._embedSyncedDocScalePopper?.toggle()}
+              >
+                <div class="embed-synced-doc-scale-button">
+                  <span class="embed-synced-doc-scale-label"
+                    >${Math.round(this._getScale(model) * 100) + '%'}</span
+                  >
+                  ${SmallArrowDownIcon}
+                </div>
+              </edgeless-tool-icon-button>
+              <edgeless-scale-panel
+                class="embed-synced-doc-scale-popper"
+                .scale=${Math.round(this._getScale(model) * 100)}
+                .scales=${[50, 100, 200]}
+                .minSize=${0}
+                .onSelect=${(scale: number) => {
+                  this._setEmbedSyncedDocScale(scale);
+                }}
+                .onPopperCose=${() => this._embedSyncedDocScalePopper?.hide()}
+              ></edgeless-scale-panel>
+            `
+          : nothing}
 
         <component-toolbar-menu-divider
           .vertical=${true}
