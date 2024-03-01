@@ -82,7 +82,7 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   @yfield()
   xywh: SerializedXYWH = '[0,0,100,100]';
 
-  @yfield()
+  @yfield(0)
   rotate: number = 0;
 
   @yfield()

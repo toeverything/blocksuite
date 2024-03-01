@@ -82,7 +82,7 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   @yfield()
   xywh: SerializedXYWH = '[0,0,0,0]';
 
-  @yfield()
+  @yfield(0)
   rotate: number = 0;
 
   @yfield()
