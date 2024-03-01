@@ -5,6 +5,7 @@ import {
   getFontString,
   getLineHeight,
   getTextWidth,
+  isRTL,
   wrapTextDeltas,
 } from './utils.js';
 
@@ -38,25 +39,48 @@ export function text(
     fontSize,
     fontFamily,
   });
+  const horizontalOffset =
+    textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
+  const deltas = wrapTextDeltas(model.text, font, w);
+  const lines = deltaInsertsToChunks(deltas);
+  const lineHeightPx = getLineHeight(fontFamily, fontSize);
 
-  const cacheContent = renderer.requestCacheContent(model, [
-    model.text.toString(),
-    font,
-    color,
-    textAlign,
-    w,
-    h,
-    fontFamily,
-    fontSize,
-  ]);
+  ctx.font = font;
+  ctx.fillStyle = renderer.getVariableColor(color);
+  ctx.textAlign = textAlign;
+  ctx.textBaseline = 'ideographic';
 
-  if (cacheContent.dirty) {
-    renderAtCache(cacheContent.ctx, renderer, model, {
-      font,
-    });
+  for (const [lineIndex, line] of lines.entries()) {
+    let beforeTextWidth = 0;
+
+    for (const delta of line) {
+      const str = delta.insert;
+      const rtl = isRTL(str);
+      const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
+      if (shouldTemporarilyAttach) {
+        // to correctly render RTL text mixed with LTR, we have to append it
+        // to the DOM
+        document.body.appendChild(ctx.canvas);
+      }
+
+      ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+
+      // 0.5 comes from v-line padding
+      const offset =
+        textAlign === 'center' ? 0 : textAlign === 'right' ? -0.5 : 0.5;
+      ctx.fillText(
+        str,
+        horizontalOffset + beforeTextWidth + offset,
+        (lineIndex + 1) * lineHeightPx
+      );
+
+      beforeTextWidth += getTextWidth(str, font);
+
+      if (shouldTemporarilyAttach) {
+        ctx.canvas.remove();
+      }
+    }
   }
-
-  ctx.drawImage(cacheContent.canvas, 0, 0, w, h);
 }
 
 export function renderAtCache(

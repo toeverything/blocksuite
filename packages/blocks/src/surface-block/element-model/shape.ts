@@ -106,10 +106,10 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   @yfield()
   strokeStyle: StrokeStyle = 'solid';
 
-  @yfield()
+  @yfield('General')
   shapeStyle: ShapeStyle = 'General';
 
-  @yfield()
+  @yfield(DEFAULT_ROUGHNESS)
   roughness: number = DEFAULT_ROUGHNESS;
 
   @yfield()
