@@ -28,3 +28,5 @@ export function handleError(error: Error) {
   );
   console.error(error.stack);
 }
+
+export * from './code.js';

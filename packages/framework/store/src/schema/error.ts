@@ -1,20 +1,4 @@
-enum ErrorCode {
-  MIGRATION_ERROR = 100,
-  SCHEMA_VALIDATE_ERROR,
-}
-
-export const kInternalError = Symbol('internal_error');
-
-export abstract class BlockSuiteError extends Error {
-  [kInternalError] = true;
-
-  code: ErrorCode;
-
-  constructor(code: ErrorCode, message: string) {
-    super(message);
-    this.code = code;
-  }
-}
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 
 export class MigrationError extends BlockSuiteError {
   constructor(description: string) {
