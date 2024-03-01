@@ -157,21 +157,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   @query('affine-note')
   private _affineNote!: HTMLDivElement;
 
-  private _handleEditingTransition() {
-    const selection = this.edgeless.service.selection;
-
-    this._editing = selection.has(this.model.id) && selection.editing;
-    this._disposables.add(
-      selection.slots.updated.on(() => {
-        if (selection.has(this.model.id) && selection.editing) {
-          this._editing = true;
-        } else {
-          this._editing = false;
-        }
-      })
-    );
-  }
-
   private get _isShowCollapsedContent() {
     return this.model.edgeless.collapse && (this._isResizing || this._isHover);
   }
@@ -255,8 +240,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const { _disposables, edgeless } = this;
     const selection = this.edgeless.service.selection;
 
-    this._handleEditingTransition();
-
     _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
         if (selection.elements.includes(this.model as EdgelessBlockModel)) {
@@ -282,6 +265,23 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     });
     observer.observe(this, { childList: true, subtree: true });
     _disposables.add(() => observer.disconnect());
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    const selection = this.edgeless.service.selection;
+
+    this._editing = selection.has(this.model.id) && selection.editing;
+    this._disposables.add(
+      selection.slots.updated.on(() => {
+        if (selection.has(this.model.id) && selection.editing) {
+          this._editing = true;
+        } else {
+          this._editing = false;
+        }
+      })
+    );
   }
 
   override render() {
