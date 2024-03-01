@@ -18,8 +18,6 @@ import { WebSocketDocSource } from '../../_common/sync/websocket/doc';
 
 const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
-export const INDEXED_DB_NAME = 'PLAYGROUND_DB';
-
 export async function createDefaultDocWorkspace() {
   const blobStorages: ((id: string) => BlobStorage)[] = [
     createIndexeddbStorage,

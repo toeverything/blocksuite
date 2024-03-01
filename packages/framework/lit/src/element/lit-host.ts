@@ -9,6 +9,7 @@ import type {
   ViewStore,
 } from '@blocksuite/block-std';
 import { BlockStdScope } from '@blocksuite/block-std';
+import { handleError } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 import {
@@ -74,23 +75,32 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   }
 
   override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    const rootModel = this.doc.root;
-    assertExists(rootModel);
-    const view = this.std.spec.getView(rootModel.flavour);
-    assertExists(view);
-    const widgetTags = Object.values(view.widgets ?? {});
-    const elementsTags = [view.component, ...widgetTags];
-    await Promise.all(
-      elementsTags.map(tag => {
-        const element = this.renderRoot.querySelector(tag._$litStatic$);
-        if (element instanceof LitElement) {
-          return element.updateComplete;
-        }
-        return;
-      })
-    );
-    return result;
+    try {
+      const result = await super.getUpdateComplete();
+      const rootModel = this.doc.root;
+      assertExists(rootModel);
+      const view = this.std.spec.getView(rootModel.flavour);
+      assertExists(view);
+      const widgetTags = Object.values(view.widgets ?? {});
+      const elementsTags = [view.component, ...widgetTags];
+      await Promise.all(
+        elementsTags.map(tag => {
+          const element = this.renderRoot.querySelector(tag._$litStatic$);
+          if (element instanceof LitElement) {
+            return element.updateComplete;
+          }
+          return;
+        })
+      );
+      return result;
+    } catch (e) {
+      if (e instanceof Error) {
+        handleError(e);
+      } else {
+        console.error(e);
+      }
+      return true;
+    }
   }
 
   override connectedCallback() {
