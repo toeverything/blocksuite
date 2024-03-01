@@ -9,7 +9,7 @@ export function brush(
   matrix: DOMMatrix,
   renderer: Renderer
 ) {
-  const { points, lineWidth, color, rotate } = model;
+  const { points, pressures, lineWidth, color, rotate } = model;
   const [, , w, h] = model.deserializedXYWH;
   const cx = w / 2;
   const cy = h / 2;
@@ -18,7 +18,7 @@ export function brush(
     matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
   );
 
-  const stroke = getSolidStrokePoints(points, lineWidth);
+  const stroke = getSolidStrokePoints(points, pressures, lineWidth);
   const commands = getSvgPathFromStroke(stroke);
   const path = new Path2D(commands);
 

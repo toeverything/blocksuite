@@ -24,6 +24,8 @@ export type BrushProps = BaseProps & {
    * [[x0,y0],[x1,y1]...]
    */
   points: number[][];
+  // empty if the hardware dose not suppot pressure such as mouse.
+  pressures: number[];
   color: string;
   lineWidth: number;
 };
@@ -55,6 +57,9 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   })
   @yfield()
   points: number[][] = [];
+
+  @yfield()
+  pressures: number[] = [];
 
   @derive((xywh: SerializedXYWH, instance: BrushElementModel) => {
     const bound = Bound.deserialize(xywh);
