@@ -6,7 +6,15 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type TemplateResult,
+  unsafeCSS,
+} from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -124,7 +132,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       font-feature-settings:
         'clig' off,
         'liga' off;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: 15px;
       font-style: normal;
       font-weight: 400;
@@ -164,7 +172,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         'clig' off,
         'liga' off;
       word-break: break-all;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: 14px;
       font-style: normal;
       font-weight: 400;
@@ -207,7 +215,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     .embed-synced-doc-scale-button {
       display: flex;
       border-radius: 4px;
-      background-color: var(--affine-hover-color);
       align-items: center;
       gap: 2px;
       padding: 2px;
