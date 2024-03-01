@@ -4,6 +4,7 @@ import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
   isInEmbedElement,
+  isInEmbedGap,
 } from '../utils/index.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
@@ -239,16 +240,32 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
     if (!this.editor.getInlineRange()) return;
 
-    const targetRanges = event.getTargetRanges();
-    if (targetRanges.length > 0) {
-      const staticRange = targetRanges[0];
-      const range = document.createRange();
-      range.setStart(staticRange.startContainer, staticRange.startOffset);
-      range.setEnd(staticRange.endContainer, staticRange.endOffset);
-      const inlineRange = this.editor.toInlineRange(range);
+    if (
+      isInEmbedGap(range.commonAncestorContainer) &&
+      event.inputType.startsWith('delete')
+    ) {
+      const inlineRange = this.editor.getInlineRange();
+      if (!inlineRange) return;
+      if (inlineRange.length === 0 && inlineRange.index > 0) {
+        this.editor.setInlineRange({
+          index: inlineRange.index - 1,
+          length: 1,
+        });
+      }
+    } else {
+      const targetRanges = event.getTargetRanges();
+      if (targetRanges.length > 0) {
+        const staticRange = targetRanges[0];
+        const range = document.createRange();
+        range.setStart(staticRange.startContainer, staticRange.startOffset);
+        range.setEnd(staticRange.endContainer, staticRange.endOffset);
+        const inlineRange = this.editor.toInlineRange(range);
 
-      if (!isMaybeInlineRangeEqual(this.editor.getInlineRange(), inlineRange)) {
-        this.editor.setInlineRange(inlineRange, false);
+        if (
+          !isMaybeInlineRangeEqual(this.editor.getInlineRange(), inlineRange)
+        ) {
+          this.editor.setInlineRange(inlineRange, false);
+        }
       }
     }
 

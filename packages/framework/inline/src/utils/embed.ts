@@ -17,19 +17,9 @@ export function isInEmbedElement(node: Node): boolean {
 }
 
 export function isInEmbedGap(node: Node): boolean {
-  if (node instanceof Element) {
-    const vText = node.closest('[data-v-text="true"]');
-    if (vText && (vText as HTMLElement).dataset.vEmbedGap === 'true') {
-      return true;
-    }
-    return false;
-  } else {
-    const vText = node.parentElement?.closest('[data-v-text="true"]');
-    if (vText && (vText as HTMLElement).dataset.vEmbedGap === 'true') {
-      return true;
-    }
-    return false;
-  }
+  const el = node instanceof Element ? node : node.parentElement;
+  if (!el) return false;
+  return !!el.closest('[data-v-embed-gap="true"]');
 }
 
 export function transformDeltasToEmbedDeltas<
