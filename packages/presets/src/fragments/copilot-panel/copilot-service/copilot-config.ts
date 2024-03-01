@@ -1,5 +1,3 @@
-import { noop } from '@blocksuite/global/utils';
-
 import type { AllServiceKind, GetMethod, ServiceImpl } from './service-base.js';
 
 export type VendorConfig = {
@@ -49,16 +47,6 @@ function shuffleArray(array: number[], seed: number) {
     [array[i], array[j]] = [array[j], array[i]];
   }
 }
-
-/**
- * It's used for encoding the OpenAI key in the URL.
- */
-function encode(str: string, seed: number) {
-  const indexArray = Array.from(str).map((_, index) => index);
-  shuffleArray(indexArray, seed);
-  return indexArray.map(index => str[index]).join('');
-}
-noop(encode);
 
 function decode(encodedStr: string, seed: number) {
   const indexArray = Array.from(encodedStr).map((_, index) => index);
