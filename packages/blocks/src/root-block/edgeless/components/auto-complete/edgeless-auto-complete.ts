@@ -200,6 +200,8 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _onPointerDown = (e: PointerEvent, type: Direction) => {
+    if (!isShape(this.current)) return;
+
     const { service } = this.edgeless;
     const viewportRect = service.viewport.boundingClientRect;
     const start = service.viewport.toModelCoord(
@@ -218,7 +220,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       );
       if (Vec.dist(start, point) > 8 && !this._isMoving) {
         this._isMoving = true;
-        if (!isShape(this.current)) return;
         const { startPosition } = getPosition(type);
         connector = this._addConnector(
           {

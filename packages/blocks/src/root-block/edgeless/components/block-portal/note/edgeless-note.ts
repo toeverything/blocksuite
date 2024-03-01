@@ -159,6 +159,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   private _handleEditingTransition() {
     const selection = this.edgeless.service.selection;
+
+    this._editing = selection.has(this.model.id) && selection.editing;
     this._disposables.add(
       selection.slots.updated.on(() => {
         if (selection.has(this.model.id) && selection.editing) {
