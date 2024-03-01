@@ -29,6 +29,7 @@ import {
   getDeriveProperties,
   local,
   updateDerivedProp,
+  watch,
   yfield,
 } from './decorators.js';
 import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
@@ -91,11 +92,22 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   @local()
   opacity: number = 1;
 
+  @watch((_, instance) => {
+    instance['_local'].delete('externalBound');
+  })
   @local()
   externalXYWH: SerializedXYWH | undefined = undefined;
 
   get externalBound(): Bound | null {
-    return this.externalXYWH ? Bound.deserialize(this.externalXYWH) : null;
+    if (!this._local.has('externalBound')) {
+      const bound = this.externalXYWH
+        ? Bound.deserialize(this.externalXYWH)
+        : null;
+
+      this._local.set('externalBound', bound);
+    }
+
+    return this._local.get('externalBound') as Bound | null;
   }
 
   constructor(options: {
