@@ -39,11 +39,11 @@ export function text(
     fontSize,
     fontFamily,
   });
-  const horizontalOffset =
-    textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
   const deltas = wrapTextDeltas(model.text, font, w);
   const lines = deltaInsertsToChunks(deltas);
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
+  const horizontalOffset =
+    textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
   ctx.font = font;
   ctx.fillStyle = renderer.getVariableColor(color);
@@ -81,54 +81,4 @@ export function text(
       }
     }
   }
-}
-
-export function renderAtCache(
-  ctx: CanvasRenderingContext2D,
-  renderer: Renderer,
-  model: TextElementModel,
-  params: {
-    font: string;
-  }
-) {
-  const { font } = params;
-  const { w, h, textAlign, color, fontFamily, fontSize } = model;
-  const deltas = wrapTextDeltas(model.text, font, w);
-  const lines = deltaInsertsToChunks(deltas);
-  const lineHeightPx = getLineHeight(fontFamily, fontSize);
-  const horizontalOffset =
-    textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
-  const scale = window.devicePixelRatio * renderer.zoom;
-
-  ctx.canvas.width = w * scale;
-  ctx.canvas.height = h * scale;
-
-  ctx.scale(scale, scale);
-
-  ctx.save();
-  ctx.font = font;
-  ctx.fillStyle = renderer.getVariableColor(color);
-  ctx.textAlign = textAlign;
-  ctx.textBaseline = 'ideographic';
-
-  for (const [lineIndex, line] of lines.entries()) {
-    let beforeTextWidth = 0;
-
-    for (const delta of line) {
-      const str = delta.insert;
-      // 0.5 comes from v-line padding
-      const offset =
-        textAlign === 'center' ? 0 : textAlign === 'right' ? -0.5 : 0.5;
-
-      ctx.fillText(
-        str,
-        horizontalOffset + beforeTextWidth + offset,
-        (lineIndex + 1) * lineHeightPx
-      );
-
-      beforeTextWidth += getTextWidth(str, font);
-    }
-  }
-
-  ctx.restore();
 }
