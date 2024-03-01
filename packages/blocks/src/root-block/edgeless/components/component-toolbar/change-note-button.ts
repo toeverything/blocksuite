@@ -325,6 +325,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _setNoteScale = (scale: number) => {
     this.notes.forEach(note => {
       this.doc.updateBlock(note, () => {
+        const bound = Bound.deserialize(note.xywh);
+        const oldScale = note.edgeless.scale ?? 1;
+        const ratio = scale / oldScale;
+        bound.w *= ratio;
+        bound.h *= ratio;
+        const xywh = bound.serialize();
+        note.xywh = xywh;
         note.edgeless.scale = scale;
       });
     });
