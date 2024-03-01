@@ -1,4 +1,3 @@
-import type { Flavour } from '@blocks/models.js';
 import type { BlockElement } from '@lit/element/index.js';
 import type { Page } from '@playwright/test';
 
@@ -6,7 +5,7 @@ import { waitNextFrame } from './misc.js';
 
 export async function updateBlockType(
   page: Page,
-  flavour: Flavour,
+  flavour: BlockSuite.Flavour,
   type?: string
 ) {
   await page.evaluate(
@@ -26,9 +25,13 @@ export async function updateBlockType(
         })
         .run();
 
-      window.testUtils.pageBlock.updateBlockElementType(blocks, flavour, type);
+      window.testUtils.docTestUtils.updateBlockElementType(
+        blocks,
+        flavour,
+        type
+      );
     },
-    [flavour, type] as [Flavour, string?]
+    [flavour, type] as [BlockSuite.Flavour, string?]
   );
   await waitNextFrame(page, 400);
 }

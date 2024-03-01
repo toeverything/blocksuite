@@ -21,8 +21,8 @@ export class EmbedYoutubeService extends BlockService<EmbedYoutubeModel> {
   override mounted() {
     super.mounted();
 
-    const pageService = this.std.spec.getService('affine:page');
-    pageService.registerEmbedBlockOptions({
+    const rootService = this.std.spec.getService('affine:page');
+    rootService.registerEmbedBlockOptions({
       flavour: this.flavour,
       urlRegex: youtubeUrlRegex,
       styles: EmbedYoutubeStyles,

@@ -46,23 +46,23 @@ The advantage of this approach is that the application-layer code can **complete
 As an example, suppose the current block tree structure is as follows:
 
 ```
-PageBlock
+RootBlock
   NoteBlock
     ParagraphBlock 0
     ParagraphBlock 1
     ParagraphBlock 2
 ```
 
-Now user A selects `ParagraphBlock 2` and presses the delete key to delete it. At this point, `page.deleteBlock` should be called to delete this block model instance:
+Now user A selects `ParagraphBlock 2` and presses the delete key to delete it. At this point, `doc.deleteBlock` should be called to delete this block model instance:
 
 ```ts
-const blockModel = page.root.children[0].children[2];
-page.deleteBlock(blockModel);
+const blockModel = doc.root.children[0].children[2];
+doc.deleteBlock(blockModel);
 ```
 
-At this point, BlockSuite does not directly modify the block tree under page.root, but instead first modifies the underlying YBlock. After the CRDT state is changed, Yjs generates a corresponding [Y.Event](https://docs.yjs.dev/api/y.event) data structure, which contains all the incremental state changes in this update (similar to patches in git and virtual DOM). BlockSuite will always use this as the basis
+At this point, BlockSuite does not directly modify the block tree under doc.root, but instead first modifies the underlying YBlock. After the CRDT state is changed, Yjs generates a corresponding [Y.Event](https://docs.yjs.dev/api/y.event) data structure, which contains all the incremental state changes in this update (similar to patches in git and virtual DOM). BlockSuite will always use this as the basis
 
-At this point, BlockSuite does not directly modify the block tree under `page.root`, but will instead firstly modify the underlying YBlock. After the CRDT state is changed, Yjs will generate the corresponding `Y.Event`, which is similar to incremental patches in git and virtual DOM. BlockSuite will always use this as the basis to synchronize the block models, then trigger the corresponding slot events for UI updates.
+At this point, BlockSuite does not directly modify the block tree under `doc.root`, but will instead firstly modify the underlying YBlock. After the CRDT state is changed, Yjs will generate the corresponding `Y.Event`, which is similar to incremental patches in git and virtual DOM. BlockSuite will always use this as the basis to synchronize the block models, then trigger the corresponding slot events for UI updates.
 
 In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated` slot event of `NoteBlock` will be triggered. This will enable the corresponding component in the UI framework component tree to refresh itself. Since each child block has an ID, this is very conducive to combining the common list key optimizations in UI frameworks, achieving on-demand block component updates.
 

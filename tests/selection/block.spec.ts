@@ -423,7 +423,7 @@ test('should keep selection state when scrolling backward', async ({
   await assertRichTexts(page, data);
 
   const [, container, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -464,7 +464,7 @@ test('should keep selection state when scrolling backward', async ({
   );
 
   const scrollTop = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -499,7 +499,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
   await assertRichTexts(page, data);
 
   const [viewport, container, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -539,7 +539,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
   );
 
   const scrollTop = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -577,7 +577,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   await assertRichTexts(page, data);
 
   const [last, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -622,7 +622,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   const rects = page.locator('affine-block-selection').locator('visible=true');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -632,7 +632,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   await page.mouse.move(0, 0);
 
   await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -656,7 +656,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   // get count with moving mouse
   const count1 = await rects.count();
   const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -693,7 +693,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await assertRichTexts(page, data);
 
   const [first, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -736,7 +736,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   const rects = page.locator('affine-block-selection').locator('visible=true');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -746,7 +746,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await page.mouse.move(0, 0);
 
   await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -769,7 +769,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   // get count with moving mouse
   const count1 = await rects.count();
   const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -800,7 +800,7 @@ test('should not clear selected rects when clicking on scrollbar', async ({
   await type(page, '321');
 
   const [viewport, first, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -840,7 +840,7 @@ test('should not clear selected rects when clicking on scrollbar', async ({
   const rects = page.locator('affine-block-selection').locator('visible=true');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -851,7 +851,7 @@ test('should not clear selected rects when clicking on scrollbar', async ({
 
   const count1 = await rects.count();
   const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -883,7 +883,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
   await type(page, '321');
 
   const [viewport, first, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -935,7 +935,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
   await waitNextFrame(page);
 
   const count2 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -969,7 +969,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
   await type(page, '321');
 
   const [viewport, first, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1009,7 +1009,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
   const rects = page.locator('affine-block-selection').locator('visible=true');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1032,7 +1032,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
 
   const count1 = await rects.count();
   const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1107,7 +1107,7 @@ test('should not be misaligned when the editor container has padding or margin',
 
   // `123`, `789`
   const [first, last] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport');
+    const viewport = document.querySelector('.affine-page-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1481,7 +1481,7 @@ test('should scroll page properly by wheel after inserting a new block and selec
   await type(page, 'new block');
 
   const lastBlockId = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport')!;
+    const viewport = document.querySelector('.affine-page-viewport')!;
     const container = viewport.querySelector(
       'affine-note .affine-block-children-container'
     );
@@ -1497,7 +1497,7 @@ test('should scroll page properly by wheel after inserting a new block and selec
 
   async function getViewportScrollTop() {
     return page.evaluate(() => {
-      const viewport = document.querySelector('.affine-doc-viewport');
+      const viewport = document.querySelector('.affine-page-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -1512,7 +1512,7 @@ test('should scroll page properly by wheel after inserting a new block and selec
 
   // scroll to end by wheel
   const distanceToEnd = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport')!;
+    const viewport = document.querySelector('.affine-page-viewport')!;
     return viewport.scrollHeight - viewport.clientHeight;
   });
   await page.mouse.wheel(0, distanceToEnd * 2);
@@ -1568,7 +1568,7 @@ test('scroll should update dragging area and select blocks when dragging', async
   await page.mouse.click(0, 0);
   async function getViewportScrollTop() {
     return page.evaluate(() => {
-      const viewport = document.querySelector('.affine-doc-viewport');
+      const viewport = document.querySelector('.affine-page-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -1594,7 +1594,7 @@ test('scroll should update dragging area and select blocks when dragging', async
 
   // scroll to end by wheel
   const distanceToEnd = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-doc-viewport')!;
+    const viewport = document.querySelector('.affine-page-viewport')!;
     return viewport.scrollHeight - viewport.clientHeight;
   });
   await page.mouse.wheel(0, distanceToEnd * 2);

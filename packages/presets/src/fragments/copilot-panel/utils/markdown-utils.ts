@@ -5,7 +5,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
-  const job = new Job({ workspace: host.std.page.workspace });
+  const job = new Job({ workspace: host.std.doc.workspace });
   const snapshot = await job.sliceToSnapshot(slice);
   const markdownAdapter = new MarkdownAdapter();
   const markdown = await markdownAdapter.fromSliceSnapshot({
@@ -19,10 +19,10 @@ export const markdownToSnapshot = async (
   markdown: string,
   host: EditorHost
 ) => {
-  const job = new Job({ workspace: host.std.page.workspace });
+  const job = new Job({ workspace: host.std.doc.workspace });
   const markdownAdapter = new MarkdownAdapter();
   const { blockVersions, workspaceVersion, pageVersion } =
-    host.std.page.workspace.meta;
+    host.std.doc.workspace.meta;
   if (!blockVersions || !workspaceVersion || !pageVersion)
     throw new Error(
       'Need blockVersions, workspaceVersion, pageVersion meta information to get slice'
@@ -34,8 +34,8 @@ export const markdownToSnapshot = async (
     blockVersions,
     pageVersion,
     workspaceVersion,
-    workspaceId: host.std.page.workspace.id,
-    pageId: host.std.page.id,
+    workspaceId: host.std.doc.workspace.id,
+    pageId: host.std.doc.id,
   };
 
   const snapshot = await markdownAdapter.toSliceSnapshot(payload);
@@ -61,7 +61,7 @@ export async function insertFromMarkdown(
     const blockSnapshot = snapshots[i];
     const model = await job.snapshotToBlock(
       blockSnapshot,
-      host.std.page,
+      host.std.doc,
       parent,
       (index ?? 0) + i
     );

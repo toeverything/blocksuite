@@ -6,20 +6,20 @@ import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
-import type { BlockModel, BlockSchemaType, Page } from '../index.js';
+import type { BlockModel, BlockSchemaType, Doc } from '../index.js';
 import { Generator, Schema, Workspace } from '../index.js';
-import type { PageMeta } from '../workspace/index.js';
+import type { DocMeta } from '../workspace/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import {
   NoteBlockSchema,
-  PageBlockSchema,
   ParagraphBlockSchema,
+  RootBlockSchema,
 } from './test-schema.js';
 import { assertExists } from './test-utils-dom.js';
 
 export const BlockSchemas = [
   ParagraphBlockSchema,
-  PageBlockSchema,
+  RootBlockSchema,
   NoteBlockSchema,
 ] as BlockSchemaType[];
 
@@ -30,8 +30,8 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, schema };
 }
 
-const defaultPageId = 'page:home';
-const spaceId = defaultPageId;
+const defaultDocId = 'doc:home';
+const spaceId = defaultDocId;
 const spaceMetaId = 'meta';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,18 +54,18 @@ function waitOnce<T>(slot: Slot<T>) {
   return new Promise<T>(resolve => slot.once(val => resolve(val)));
 }
 
-function createRoot(page: Page) {
-  page.addBlock('affine:page');
-  if (!page.root) throw new Error('root not found');
-  return page.root;
+function createRoot(doc: Doc) {
+  doc.addBlock('affine:page');
+  if (!doc.root) throw new Error('root not found');
+  return doc.root;
 }
 
-function createTestPage(pageId = defaultPageId) {
+function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
   const workspace = new Workspace(options);
-  const page = workspace.createPage({ id: pageId });
-  page.load();
-  return page;
+  const doc = workspace.createDoc({ id: docId });
+  doc.load();
+  return doc;
 }
 
 function requestIdleCallbackPolyfill(
@@ -96,21 +96,21 @@ describe('basic', () => {
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
-    const page = workspace.createPage({ id: 'page:home' });
-    page.load();
+    const doc = workspace.createDoc({ id: 'doc:home' });
+    doc.load();
     const actual = serializeWorkspace(workspace.doc);
-    const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
+    const actualDoc = actual[spaceMetaId].pages[0] as DocMeta;
 
     assert.equal(workspace.isEmpty, false);
-    assert.equal(typeof actualPage.createDate, 'number');
+    assert.equal(typeof actualDoc.createDate, 'number');
     // @ts-ignore
-    delete actualPage.createDate;
+    delete actualDoc.createDate;
 
     assert.deepEqual(actual, {
       [spaceMetaId]: {
         pages: [
           {
-            id: 'page:home',
+            id: 'doc:home',
             title: '',
             tags: [],
           },
@@ -141,52 +141,52 @@ describe('basic', () => {
       },
     });
     {
-      const page = workspace.createPage();
-      assert.equal(page.id, '100');
+      const doc = workspace.createDoc();
+      assert.equal(doc.id, '100');
     }
     {
-      const page = workspace.createPage();
-      assert.equal(page.id, '101');
+      const doc = workspace.createDoc();
+      assert.equal(doc.id, '101');
     }
   });
 
-  it('page ready lifecycle', () => {
+  it('doc ready lifecycle', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({
+    const doc = workspace.createDoc({
       id: 'space:0',
     });
 
     const readyCallback = vi.fn();
     const rootAddedCallback = vi.fn();
-    page.slots.ready.on(readyCallback);
-    page.slots.rootAdded.on(rootAddedCallback);
+    doc.slots.ready.on(readyCallback);
+    doc.slots.rootAdded.on(rootAddedCallback);
 
-    page.load(() => {
-      expect(page.ready).toBe(false);
-      const rootId = page.addBlock('affine:page', {
-        title: new page.Text(),
+    doc.load(() => {
+      expect(doc.ready).toBe(false);
+      const rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
       });
       expect(rootAddedCallback).toBeCalledTimes(1);
-      expect(page.ready).toBe(false);
+      expect(doc.ready).toBe(false);
 
-      page.addBlock('affine:note', {}, rootId);
+      doc.addBlock('affine:note', {}, rootId);
     });
 
-    expect(page.ready).toBe(true);
+    expect(doc.ready).toBe(true);
     expect(readyCallback).toBeCalledTimes(1);
   });
 
-  it('workspace pages with yjs applyUpdate', () => {
+  it('workspace docs with yjs applyUpdate', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const workspace2 = new Workspace(options);
-    const page = workspace.createPage({
+    const doc = workspace.createDoc({
       id: 'space:0',
     });
-    page.load(() => {
-      page.addBlock('affine:page', {
-        title: new page.Text(),
+    doc.load(() => {
+      doc.addBlock('affine:page', {
+        title: new doc.Text(),
       });
     });
     {
@@ -196,7 +196,7 @@ describe('basic', () => {
       // only apply root update
       workspace2.doc.once('subdocs', subdocsTester);
       expect(subdocsTester).toBeCalledTimes(0);
-      expect(workspace2.pages.size).toBe(0);
+      expect(workspace2.docs.size).toBe(0);
       const update = encodeStateAsUpdate(workspace.doc);
       applyUpdate(workspace2.doc, update);
       expect(workspace2.doc.toJSON()['spaces']).toEqual({
@@ -204,16 +204,16 @@ describe('basic', () => {
           blocks: {},
         },
       });
-      expect(workspace2.pages.size).toBe(1);
+      expect(workspace2.docs.size).toBe(1);
       expect(subdocsTester).toBeCalledTimes(1);
     }
     {
-      // apply page update
-      const update = encodeStateAsUpdate(page.spaceDoc);
-      expect(workspace2.pages.size).toBe(1);
-      const page2 = workspace2.getPage('space:0');
-      assertExists(page2);
-      applyUpdate(page2.spaceDoc, update);
+      // apply doc update
+      const update = encodeStateAsUpdate(doc.spaceDoc);
+      expect(workspace2.docs.size).toBe(1);
+      const doc2 = workspace2.getDoc('space:0');
+      assertExists(doc2);
+      applyUpdate(doc2.spaceDoc, update);
       expect(workspace2.doc.toJSON()['spaces']).toEqual({
         'space:0': {
           blocks: {
@@ -232,7 +232,7 @@ describe('basic', () => {
       });
       workspace2.doc.once('subdocs', fn);
       expect(fn).toBeCalledTimes(0);
-      page2.load();
+      doc2.load();
       expect(fn).toBeCalledTimes(1);
     }
   });
@@ -240,12 +240,12 @@ describe('basic', () => {
 
 describe('addBlock', () => {
   it('can add single model', () => {
-    const page = createTestPage();
-    page.addBlock('affine:page', {
-      title: new page.Text(),
+    const doc = createTestDoc();
+    doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
 
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': [],
@@ -257,10 +257,10 @@ describe('addBlock', () => {
   });
 
   it('can add model with props', () => {
-    const page = createTestPage();
-    page.addBlock('affine:page', { title: new page.Text('hello') });
+    const doc = createTestDoc();
+    doc.addBlock('affine:page', { title: new doc.Text('hello') });
 
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -272,13 +272,13 @@ describe('addBlock', () => {
   });
 
   it('can add multi models', () => {
-    const page = createTestPage();
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    const doc = createTestDoc();
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(),
     });
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlocks(
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    doc.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlocks(
       [
         { flavour: 'affine:paragraph', blockProps: { type: 'h1' } },
         { flavour: 'affine:paragraph', blockProps: { type: 'h2' } },
@@ -286,7 +286,7 @@ describe('addBlock', () => {
       noteId
     );
 
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -328,113 +328,113 @@ describe('addBlock', () => {
   });
 
   it('can observe slot events', async () => {
-    const page = createTestPage();
+    const doc = createTestDoc();
 
     queueMicrotask(() =>
-      page.addBlock('affine:page', {
-        title: new page.Text(),
+      doc.addBlock('affine:page', {
+        title: new doc.Text(),
       })
     );
-    const block = await waitOnce(page.slots.rootAdded);
+    const block = await waitOnce(doc.slots.rootAdded);
     assert.equal(block.flavour, 'affine:page');
   });
 
   it('can add block to root', async () => {
-    const page = createTestPage();
+    const doc = createTestDoc();
 
     let noteId: string;
 
     queueMicrotask(() => {
-      const pageId = page.addBlock('affine:page');
-      noteId = page.addBlock('affine:note', {}, pageId);
+      const rootId = doc.addBlock('affine:page');
+      noteId = doc.addBlock('affine:note', {}, rootId);
     });
-    await waitOnce(page.slots.rootAdded);
-    const { root } = page;
+    await waitOnce(doc.slots.rootAdded);
+    const { root } = doc;
     if (!root) throw new Error('root is null');
 
     assert.equal(root.flavour, 'affine:page');
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    page.addBlock('affine:paragraph', {}, noteId!);
+    doc.addBlock('affine:paragraph', {}, noteId!);
     assert.equal(root.children[0].flavour, 'affine:note');
     assert.equal(root.children[0].children[0].flavour, 'affine:paragraph');
     assert.equal(root.childMap.get('1'), 0);
 
-    const serializedChildren = serializeWorkspace(page.rootDoc).spaces[spaceId]
+    const serializedChildren = serializeWorkspace(doc.rootDoc).spaces[spaceId]
       .blocks['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
     assert.equal(root.children[0].id, '1');
   });
 
-  it('can add and remove multi pages', async () => {
+  it('can add and remove multi docs', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
 
-    const page0 = workspace.createPage({ id: 'page:home' });
-    const page1 = workspace.createPage({ id: 'space:page1' });
-    await Promise.all([page0.load(), page1.load()]);
-    assert.equal(workspace.pages.size, 2);
+    const doc0 = workspace.createDoc({ id: 'doc:home' });
+    const doc1 = workspace.createDoc({ id: 'space:doc1' });
+    await Promise.all([doc0.load(), doc1.load()]);
+    assert.equal(workspace.docs.size, 2);
 
-    page0.addBlock('affine:page', {
-      title: new page0.Text(),
+    doc0.addBlock('affine:page', {
+      title: new doc0.Text(),
     });
-    workspace.removePage(page0.id);
+    workspace.removeDoc(doc0.id);
 
-    assert.equal(workspace.pages.size, 1);
+    assert.equal(workspace.docs.size, 1);
     assert.equal(
-      serializeWorkspace(page0.rootDoc).spaces['page:home'],
+      serializeWorkspace(doc0.rootDoc).spaces['doc:home'],
       undefined
     );
 
-    workspace.removePage(page1.id);
-    assert.equal(workspace.pages.size, 0);
+    workspace.removeDoc(doc1.id);
+    assert.equal(workspace.docs.size, 0);
   });
 
-  it('can remove page that has not been loaded', () => {
+  it('can remove doc that has not been loaded', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
 
-    const page0 = workspace.createPage({ id: 'page:home' });
+    const doc0 = workspace.createDoc({ id: 'doc:home' });
 
-    workspace.removePage(page0.id);
-    assert.equal(workspace.pages.size, 0);
+    workspace.removeDoc(doc0.id);
+    assert.equal(workspace.docs.size, 0);
   });
 
-  it('can set page state', () => {
+  it('can set doc state', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    workspace.createPage({ id: 'page:home' });
+    workspace.createDoc({ id: 'doc:home' });
 
     assert.deepEqual(
-      workspace.meta.pageMetas.map(({ id, title }) => ({
+      workspace.meta.docMetas.map(({ id, title }) => ({
         id,
         title,
       })),
       [
         {
-          id: 'page:home',
+          id: 'doc:home',
           title: '',
         },
       ]
     );
 
     let called = false;
-    workspace.meta.pageMetasUpdated.on(() => {
+    workspace.meta.docMetaUpdated.on(() => {
       called = true;
     });
 
     // @ts-ignore
-    workspace.setPageMeta('page:home', { favorite: true });
+    workspace.setDocMeta('doc:home', { favorite: true });
     assert.deepEqual(
       // @ts-ignore
-      workspace.meta.pageMetas.map(({ id, title, favorite }) => ({
+      workspace.meta.docMetas.map(({ id, title, favorite }) => ({
         id,
         title,
         favorite,
       })),
       [
         {
-          id: 'page:home',
+          id: 'doc:home',
           title: '',
           favorite: true,
         },
@@ -459,13 +459,13 @@ describe('addBlock', () => {
 
 describe('deleteBlock', () => {
   it('delete children recursively by default', () => {
-    const page = createTestPage();
+    const doc = createTestDoc();
 
-    const pageId = page.addBlock('affine:page', {});
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    const rootId = doc.addBlock('affine:page', {});
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    doc.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -497,10 +497,10 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = page.getBlockById('1') as BlockModel;
-    page.deleteBlock(deletedModel);
+    const deletedModel = doc.getBlockById('1') as BlockModel;
+    doc.deleteBlock(deletedModel);
 
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': [],
@@ -512,15 +512,15 @@ describe('deleteBlock', () => {
   });
 
   it('bring children to parent', () => {
-    const page = createTestPage();
+    const doc = createTestDoc();
 
-    const pageId = page.addBlock('affine:page', {});
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const p1 = page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, p1);
-    page.addBlock('affine:paragraph', {}, p1);
+    const rootId = doc.addBlock('affine:page', {});
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    const p1 = doc.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, p1);
+    doc.addBlock('affine:paragraph', {}, p1);
 
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -560,13 +560,13 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = page.getBlockById('2') as BlockModel;
-    const deletedModelParent = page.getBlockById('1') as BlockModel;
-    page.deleteBlock(deletedModel, {
+    const deletedModel = doc.getBlockById('2') as BlockModel;
+    const deletedModelParent = doc.getBlockById('1') as BlockModel;
+    doc.deleteBlock(deletedModel, {
       bringChildrenTo: deletedModelParent,
     });
 
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -600,17 +600,17 @@ describe('deleteBlock', () => {
   });
 
   it('bring children to other block', () => {
-    const page = createTestPage();
+    const doc = createTestDoc();
 
-    const pageId = page.addBlock('affine:page', {});
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const p1 = page.addBlock('affine:paragraph', {}, noteId);
-    const p2 = page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, p1);
-    page.addBlock('affine:paragraph', {}, p1);
-    page.addBlock('affine:paragraph', {}, p2);
+    const rootId = doc.addBlock('affine:page', {});
+    const noteId = doc.addBlock('affine:note', {}, rootId);
+    const p1 = doc.addBlock('affine:paragraph', {}, noteId);
+    const p2 = doc.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, p1);
+    doc.addBlock('affine:paragraph', {}, p1);
+    doc.addBlock('affine:paragraph', {}, p2);
 
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -666,13 +666,13 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = page.getBlockById('2') as BlockModel;
-    const moveToModel = page.getBlockById('3') as BlockModel;
-    page.deleteBlock(deletedModel, {
+    const deletedModel = doc.getBlockById('2') as BlockModel;
+    const moveToModel = doc.getBlockById('3') as BlockModel;
+    doc.deleteBlock(deletedModel, {
       bringChildrenTo: moveToModel,
     });
 
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -722,14 +722,14 @@ describe('deleteBlock', () => {
   });
 
   it('can delete model with parent', () => {
-    const page = createTestPage();
-    const root = createRoot(page);
-    const noteId = page.addBlock('affine:note', {}, root.id);
+    const doc = createTestDoc();
+    const rootModel = createRoot(doc);
+    const noteId = doc.addBlock('affine:note', {}, rootModel.id);
 
-    page.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
 
     // before delete
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -753,10 +753,10 @@ describe('deleteBlock', () => {
       },
     });
 
-    page.deleteBlock(root.children[0].children[0]);
+    doc.deleteBlock(rootModel.children[0].children[0]);
 
     // after delete
-    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -771,56 +771,58 @@ describe('deleteBlock', () => {
         'sys:version': 1,
       },
     });
-    assert.equal(root.children.length, 1);
+    assert.equal(rootModel.children.length, 1);
   });
 });
 
 describe('getBlock', () => {
   it('can get block by id', () => {
-    const page = createTestPage();
-    const root = createRoot(page);
-    const noteId = page.addBlock('affine:note', {}, root.id);
+    const doc = createTestDoc();
+    const rootModel = createRoot(doc);
+    const noteId = doc.addBlock('affine:note', {}, rootModel.id);
 
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
 
-    const text = page.getBlockById('3') as BlockModel;
+    const text = doc.getBlockById('3') as BlockModel;
     assert.equal(text.flavour, 'affine:paragraph');
-    assert.equal(root.children[0].children.indexOf(text), 1);
+    assert.equal(rootModel.children[0].children.indexOf(text), 1);
 
-    const invalid = page.getBlockById('😅');
+    const invalid = doc.getBlockById('😅');
     assert.equal(invalid, null);
   });
 
   it('can get parent', () => {
-    const page = createTestPage();
-    const root = createRoot(page);
-    const noteId = page.addBlock('affine:note', {}, root.id);
+    const doc = createTestDoc();
+    const rootModel = createRoot(doc);
+    const noteId = doc.addBlock('affine:note', {}, rootModel.id);
 
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
 
-    const result = page.getParent(root.children[0].children[1]) as BlockModel;
-    assert.equal(result, root.children[0]);
+    const result = doc.getParent(
+      rootModel.children[0].children[1]
+    ) as BlockModel;
+    assert.equal(result, rootModel.children[0]);
 
-    const invalid = page.getParent(root);
+    const invalid = doc.getParent(rootModel);
     assert.equal(invalid, null);
   });
 
   it('can get previous sibling', () => {
-    const page = createTestPage();
-    const root = createRoot(page);
-    const noteId = page.addBlock('affine:note', {}, root.id);
+    const doc = createTestDoc();
+    const rootModel = createRoot(doc);
+    const noteId = doc.addBlock('affine:note', {}, rootModel.id);
 
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
+    doc.addBlock('affine:paragraph', {}, noteId);
 
-    const result = page.getPreviousSibling(
-      root.children[0].children[1]
+    const result = doc.getPreviousSibling(
+      rootModel.children[0].children[1]
     ) as BlockModel;
-    assert.equal(result, root.children[0].children[0]);
+    assert.equal(result, rootModel.children[0].children[0]);
 
-    const invalid = page.getPreviousSibling(root.children[0].children[0]);
+    const invalid = doc.getPreviousSibling(rootModel.children[0].children[0]);
     assert.equal(invalid, null);
   });
 });
@@ -830,9 +832,9 @@ describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'page:home' });
+    const doc = workspace.createDoc({ id: 'doc:home' });
 
-    page.addBlock('affine:page', { title: new page.Text('hello') });
+    doc.addBlock('affine:page', { title: new doc.Text('hello') });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(`
       <affine:page
@@ -844,7 +846,7 @@ describe('workspace.exportJSX works', () => {
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    workspace.createPage({ id: 'page:home' });
+    workspace.createDoc({ id: 'doc:home' });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
@@ -852,14 +854,14 @@ describe('workspace.exportJSX works', () => {
   it('workspace with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'page:home' });
-    page.load(() => {
-      const pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
+    const doc = workspace.createDoc({ id: 'doc:home' });
+    doc.load(() => {
+      const rootId = doc.addBlock('affine:page', {
+        title: new doc.Text(),
       });
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      page.addBlock('affine:paragraph', {}, noteId);
-      page.addBlock('affine:paragraph', {}, noteId);
+      const noteId = doc.addBlock('affine:note', {}, rootId);
+      doc.addBlock('affine:paragraph', {}, noteId);
+      doc.addBlock('affine:paragraph', {}, noteId);
     });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
@@ -878,16 +880,16 @@ describe('workspace.exportJSX works', () => {
 });
 
 describe('workspace search', () => {
-  it('search page meta title', () => {
+  it('search doc meta title', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'page:home' });
-    page.load(() => {
-      const pageId = page.addBlock('affine:page', {
-        title: new page.Text('test123'),
+    const doc = workspace.createDoc({ id: 'doc:home' });
+    doc.load(() => {
+      const rootId = doc.addBlock('affine:page', {
+        title: new doc.Text('test123'),
       });
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      page.addBlock('affine:paragraph', {}, noteId);
+      const noteId = doc.addBlock('affine:note', {}, rootId);
+      doc.addBlock('affine:paragraph', {}, noteId);
     });
 
     requestIdleCallback(() => {
@@ -896,7 +898,7 @@ describe('workspace search', () => {
       Map {
         "0" => {
           "content": "test123",
-          "space": "page:home",
+          "space": "doc:home",
         },
       }
     `);

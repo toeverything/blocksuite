@@ -1,5 +1,5 @@
 import type {
-  EdgelessPageBlockComponent,
+  EdgelessRootBlockComponent,
   SurfaceBlockComponent,
 } from '@blocksuite/blocks';
 import type {} from '@blocksuite/blocks';
@@ -7,19 +7,19 @@ import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
 import { click, drag } from '../utils/common.js';
-import { addNote, getPageRootBlock, getSurface } from '../utils/edgeless.js';
+import { addNote, getDocRootBlock, getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 describe('default tool', () => {
   let surface!: SurfaceBlockComponent;
-  let edgeless!: EdgelessPageBlockComponent;
-  let service!: EdgelessPageBlockComponent['service'];
+  let edgeless!: EdgelessRootBlockComponent;
+  let service!: EdgelessRootBlockComponent['service'];
 
   beforeEach(async () => {
     const cleanup = await setupEditor('edgeless');
 
-    edgeless = getPageRootBlock(page, editor, 'edgeless');
-    surface = getSurface(window.page, window.editor);
+    edgeless = getDocRootBlock(doc, editor, 'edgeless');
+    surface = getSurface(window.doc, window.editor);
     service = edgeless.service;
 
     edgeless.tools.edgelessTool = {
@@ -71,7 +71,7 @@ describe('default tool', () => {
   });
 
   test('block drag moving', async () => {
-    const noteId = addNote(page);
+    const noteId = addNote(doc);
 
     await wait();
 

@@ -29,7 +29,7 @@ export class CommentManager {
   constructor(public readonly host: EditorHost) {}
 
   get commentsMap() {
-    return this.host.page.spaceDoc.getMap<Y.Map<unknown>>('comments');
+    return this.host.doc.spaceDoc.getMap<Y.Map<unknown>>('comments');
   }
 
   parseTextSelection(selection: TextSelection): {
@@ -109,7 +109,7 @@ export class CommentManager {
     }
 
     const { quote, range } = parseResult;
-    const id = this.host.page.workspace.idGenerator();
+    const id = this.host.doc.workspace.idGenerator();
     const comment: Comment = {
       id,
       date: Date.now(),
@@ -133,12 +133,12 @@ export class CommentManager {
 
       const startIndex = Workspace.Y.createAbsolutePositionFromRelativePosition(
         start.index,
-        this.host.page.spaceDoc
+        this.host.doc.spaceDoc
       );
       const startBlock = this.host.view.viewFromPath('block', start.path);
       const endIndex = Workspace.Y.createAbsolutePositionFromRelativePosition(
         end.index,
-        this.host.page.spaceDoc
+        this.host.doc.spaceDoc
       );
       const endBlock = this.host.view.viewFromPath('block', end.path);
 

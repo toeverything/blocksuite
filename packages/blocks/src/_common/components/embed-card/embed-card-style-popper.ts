@@ -47,7 +47,7 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   abortController!: AbortController;
 
   private _setEmbedCardStyle(style: EmbedCardStyle) {
-    this.model.page.updateBlock(this.model, { style });
+    this.model.doc.updateBlock(this.model, { style });
     this.requestUpdate();
     this.abortController.abort();
   }

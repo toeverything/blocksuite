@@ -9,7 +9,7 @@ import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { PageBlockComponent } from '../../../../../page-block/types.js';
+import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import { createLitPortal } from '../../../../components/portal.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../../../icons/index.js';
@@ -29,7 +29,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   targetInlineRange!: InlineRange;
 
   @property({ attribute: false })
-  pageTitle!: string;
+  docTitle!: string;
 
   @property({ attribute: false })
   abortController!: AbortController;
@@ -37,11 +37,11 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   @query('.affine-reference-popover-container')
   popupContainer!: HTMLDivElement;
 
-  get referencePageId() {
-    const pageId = this.inlineEditor.getFormat(this.targetInlineRange).reference
+  get referenceDocId() {
+    const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference
       ?.pageId;
-    assertExists(pageId);
-    return pageId;
+    assertExists(docId);
+    return docId;
   }
 
   private _moreMenuAbortController: AbortController | null = null;
@@ -53,7 +53,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       throw new Error('Cannot toggle reference popup on empty range');
     }
 
-    const parent = this.blockElement.host.page.getParent(
+    const parent = this.blockElement.host.doc.getParent(
       this.blockElement.model
     );
     assertExists(parent);
@@ -108,41 +108,50 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     return std;
   }
 
-  get page() {
-    const page = this.blockElement.page;
-    assertExists(page);
-    return page;
+  get doc() {
+    const doc = this.blockElement.doc;
+    assertExists(doc);
+    return doc;
   }
 
-  private _openPage() {
-    const refPageId = this.referencePageId;
+  get _isInsideEmbedSyncedDocBlock() {
+    return !!this.blockElement.closest('affine-embed-synced-doc-block');
+  }
+
+  private _openDoc() {
+    const refDocId = this.referenceDocId;
     const blockElement = this.blockElement;
-    if (refPageId === blockElement.model.page.id) return;
+    if (refDocId === blockElement.doc.id) return;
 
-    const pageElement = this.std.view.viewFromPath('block', [
-      blockElement.model.page.root?.id ?? '',
-    ]) as PageBlockComponent | null;
-    assertExists(pageElement);
+    const rootElement = this.std.view.viewFromPath('block', [
+      blockElement.doc.root?.id ?? '',
+    ]) as RootBlockComponent | null;
+    assertExists(rootElement);
 
-    pageElement.slots.pageLinkClicked.emit({ pageId: refPageId });
+    rootElement.slots.docLinkClicked.emit({ docId: refDocId });
   }
 
   private _convertToCardView() {
     const blockElement = this.blockElement;
-    const page = blockElement.host.page;
-    const parent = page.getParent(blockElement.model);
+    const doc = blockElement.host.doc;
+    const parent = doc.getParent(blockElement.model);
     assertExists(parent);
 
     const index = parent.children.indexOf(blockElement.model);
-    const pageId = this.referencePageId;
-    page.addBlock('affine:embed-linked-doc', { pageId }, parent, index + 1);
+    const docId = this.referenceDocId;
+    doc.addBlock(
+      'affine:embed-linked-doc',
+      { pageId: docId },
+      parent,
+      index + 1
+    );
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      page.deleteBlock(blockElement.model);
+      doc.deleteBlock(blockElement.model);
     } else {
-      this.inlineEditor.insertText(this.targetInlineRange, this.pageTitle);
+      this.inlineEditor.insertText(this.targetInlineRange, this.docTitle);
     }
 
     this.abortController.abort();
@@ -150,20 +159,25 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
   private _convertToEmbedView() {
     const blockElement = this.blockElement;
-    const page = blockElement.host.page;
-    const parent = page.getParent(blockElement.model);
+    const doc = blockElement.host.doc;
+    const parent = doc.getParent(blockElement.model);
     assertExists(parent);
 
     const index = parent.children.indexOf(blockElement.model);
-    const pageId = this.referencePageId;
-    page.addBlock('affine:embed-synced-doc', { pageId }, parent, index + 1);
+    const docId = this.referenceDocId;
+    doc.addBlock(
+      'affine:embed-synced-doc',
+      { pageId: docId },
+      parent,
+      index + 1
+    );
 
     const totalTextLength = this.inlineEditor.yTextLength;
     const inlineTextLength = this.targetInlineRange.length;
     if (totalTextLength === inlineTextLength) {
-      page.deleteBlock(blockElement.model);
+      doc.deleteBlock(blockElement.model);
     } else {
-      this.inlineEditor.insertText(this.targetInlineRange, this.pageTitle);
+      this.inlineEditor.insertText(this.targetInlineRange, this.docTitle);
     }
 
     this.abortController.abort();
@@ -196,7 +210,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
   override render() {
     // synced doc entry controlled by awareness flag
-    const isSyncedDocEnabled = this.page.awarenessStore.getFlag(
+    const isSyncedDocEnabled = this.doc.awarenessStore.getFlag(
       'enable_synced_doc_block'
     );
 
@@ -204,10 +218,10 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       <div class="overlay-root blocksuite-overlay">
         <div class="affine-reference-popover-container">
           <div class="affine-reference-popover view">
-            <icon-button size="32px" @click=${this._openPage}>
+            <icon-button size="32px" @click=${this._openDoc}>
               ${OpenIcon}
               <affine-tooltip .offset=${12}
-                >${'Click to open page'}</affine-tooltip
+                >${'Click to open doc'}</affine-tooltip
               >
             </icon-button>
 
@@ -217,7 +231,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               <icon-button
                 size="24px"
                 class="affine-reference-popover-view-selector-button link current-view"
-                hover="false"
+                .hover=${false}
               >
                 ${LinkIcon}
                 <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
@@ -226,7 +240,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               <icon-button
                 size="24px"
                 class="affine-reference-popover-view-selector-button embed"
-                hover="false"
+                .hover=${false}
                 @click=${() => this._convertToCardView()}
               >
                 ${BookmarkIcon}
@@ -238,8 +252,9 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                     <icon-button
                       size="24px"
                       class="affine-reference-popover-view-selector-button embed"
-                      hover="false"
+                      .hover=${false}
                       @click=${() => this._convertToEmbedView()}
+                      ?disabled=${this._isInsideEmbedSyncedDocBlock}
                     >
                       ${EmbedWebIcon}
                       <affine-tooltip .offset=${12}
@@ -272,13 +287,13 @@ declare global {
 export function toggleReferencePopup(
   inlineEditor: AffineInlineEditor,
   targetInlineRange: InlineRange,
-  pageTitle: string,
+  docTitle: string,
   abortController: AbortController
 ): ReferencePopup {
   const popup = new ReferencePopup();
   popup.inlineEditor = inlineEditor;
   popup.targetInlineRange = targetInlineRange;
-  popup.pageTitle = pageTitle;
+  popup.docTitle = docTitle;
   popup.abortController = abortController;
 
   document.body.appendChild(popup);

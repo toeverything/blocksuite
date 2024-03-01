@@ -663,13 +663,13 @@ test.describe('slash menu with customize menu', () => {
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
       customElements.define('affine-custom-slash-menu', CustomSlashMenu);
 
-      const docSpecs = window.$blocksuite.blocks.DocEditorBlockSpecs;
-      const pageBlockSpec = docSpecs.shift();
-      if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
+      const pageSpecs = window.$blocksuite.blocks.PageEditorBlockSpecs;
+      const rootBlockSpec = pageSpecs.shift();
+      if (!rootBlockSpec) throw new Error("Can't find rootBlockSpec");
       // @ts-ignore
-      pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
+      rootBlockSpec.view.widgets['affine-slash-menu-widget'] =
         fakeLiteral`affine-custom-slash-menu`;
-      editor.docSpecs = [pageBlockSpec, ...docSpecs];
+      editor.pageSpecs = [rootBlockSpec, ...pageSpecs];
       await editor.updateComplete;
     });
 
@@ -723,13 +723,13 @@ test.describe('slash menu with customize menu', () => {
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
       customElements.define('affine-custom-slash-menu', CustomSlashMenu);
 
-      const docSpecs = window.$blocksuite.blocks.DocEditorBlockSpecs;
-      const pageBlockSpec = docSpecs.shift();
-      if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
+      const pageSpecs = window.$blocksuite.blocks.PageEditorBlockSpecs;
+      const rootBlockSpec = pageSpecs.shift();
+      if (!rootBlockSpec) throw new Error("Can't find rootBlockSpec");
       // @ts-ignore
-      pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
+      rootBlockSpec.view.widgets['affine-slash-menu-widget'] =
         fakeLiteral`affine-custom-slash-menu`;
-      editor.docSpecs = [pageBlockSpec, ...docSpecs];
+      editor.pageSpecs = [rootBlockSpec, ...pageSpecs];
       await editor.updateComplete;
     });
 

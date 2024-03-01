@@ -1,11 +1,11 @@
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 import { html } from 'lit';
 
-import type { SurfaceBlockModel } from '../models.js';
+import type { SurfaceBlockModel } from '../surface-block/index.js';
 
-export function getSurfaceBlock(page: Page) {
+export function getSurfaceBlock(doc: Doc) {
   return (
-    (page.getBlockByFlavour('affine:surface')[0] as SurfaceBlockModel) ?? null
+    (doc.getBlockByFlavour('affine:surface')[0] as SurfaceBlockModel) ?? null
   );
 }
 

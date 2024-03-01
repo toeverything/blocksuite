@@ -40,7 +40,7 @@ import { customElement } from 'lit/decorators.js';
 @customElements('my-widget')
 class CodeLanguagePicker extends WidgetElement<CodeBlockElement> {
   private _onChange = e => {
-    this.page.updateBlock(this.blockElement.model, {
+    this.doc.updateBlock(this.blockElement.model, {
       language: e.target.value,
     });
   };

@@ -43,6 +43,7 @@
     "micromark-extension-gfm-table": "^2.0.0",
     "micromark-extension-gfm-task-list-item": "^2.0.1",
     "micromark-util-combine-extensions": "^2.0.0",
+    "minimatch": "^9.0.3",
     "nanoid": "^5.0.4",
     "pdf-lib": "^1.17.1",
     "rehype-parse": "^9.0.0",
@@ -58,7 +59,7 @@
   "exports": {
     "./dist/*": "./dist/*",
     ".": "./src/index.ts",
-    "./models": "./src/models.ts"
+    "./schemas": "./src/schemas.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -71,9 +72,9 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       },
-      "./models": {
-        "types": "./dist/models.d.ts",
-        "default": "./dist/models.js"
+      "./schemas": {
+        "types": "./dist/schemas.d.ts",
+        "default": "./dist/schemas.js"
       }
     }
   },
@@ -82,7 +83,7 @@
     "dist",
     "!src/__tests__",
     "!dist/__tests__",
-    "models.d.ts",
-    "models.js"
+    "schemas.d.ts",
+    "schemas.js"
   ]
 }

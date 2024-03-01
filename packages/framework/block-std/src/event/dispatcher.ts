@@ -248,7 +248,7 @@ export class UIEventDispatcher {
 
     const flavours = path
       .map(blockId => {
-        return this.std.page.getBlockById(blockId)?.flavour;
+        return this.std.doc.getBlockById(blockId)?.flavour;
       })
       .filter((flavour): flavour is string => {
         return !!flavour;
@@ -269,7 +269,7 @@ export class UIEventDispatcher {
       .map(selection => selection.path)
       .flatMap(path => {
         return path.map(blockId => {
-          return this.std.page.getBlockById(blockId)?.flavour;
+          return this.std.doc.getBlockById(blockId)?.flavour;
         });
       })
       .filter((flavour): flavour is string => {

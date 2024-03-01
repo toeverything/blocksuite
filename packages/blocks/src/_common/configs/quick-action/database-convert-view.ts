@@ -158,8 +158,8 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
   @property({ attribute: false })
   host!: EditorHost;
 
-  get page() {
-    return this.host.page;
+  get doc() {
+    return this.host.doc;
   }
 
   private _convertToDatabase(viewType: DataViewTypes) {
@@ -171,22 +171,22 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     const { selectedModels } = ctx;
     if (!selectedModels || selectedModels.length === 0) return;
 
-    this.page.captureSync();
+    this.doc.captureSync();
 
-    const parentModel = this.page.getParent(selectedModels[0]);
+    const parentModel = this.doc.getParent(selectedModels[0]);
     assertExists(parentModel);
 
-    const id = this.page.addBlock(
+    const id = this.doc.addBlock(
       'affine:database',
       {},
       parentModel,
       parentModel.children.indexOf(selectedModels[0])
     );
-    const databaseModel = this.page.getBlockById(id) as DatabaseBlockModel;
+    const databaseModel = this.doc.getBlockById(id) as DatabaseBlockModel;
     assertExists(databaseModel);
     databaseModel.initConvert(viewType);
     databaseModel.applyColumnUpdate();
-    this.page.moveBlocks(selectedModels, databaseModel);
+    this.doc.moveBlocks(selectedModels, databaseModel);
 
     const selectionManager = this.host.selection;
     selectionManager.clear();

@@ -16,10 +16,10 @@ const params = new URLSearchParams(location.search);
 export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
   const count = Number(params.get('count')) || 100;
 
-  const page = workspace.createPage({ id });
-  page.load(() => {
-    // Add page block and surface block at root level
-    const pageBlockId = page.addBlock('affine:page', {
+  const doc = workspace.createDoc({ id });
+  doc.load(() => {
+    // Add root block and surface block at root level
+    const rootId = doc.addBlock('affine:page', {
       title: new Text(),
     });
 
@@ -27,7 +27,7 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
 
     let i = 0;
 
-    // Add note block inside page block
+    // Add note block inside root block
     for (; i < count; i++) {
       const x = Math.random() * count * 2;
       const y = Math.random() * count * 2;
@@ -54,29 +54,29 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
       );
     }
 
-    page.addBlock(
+    doc.addBlock(
       'affine:surface',
       {
         elements: new Boxed(
           native2Y(surfaceBlockElements, { deep: false })
         ) as Boxed<Y.Map<Y.Map<unknown>>>,
       },
-      pageBlockId
+      rootId
     );
 
-    // Add note block inside page block
+    // Add note block inside root block
     for (i = 0; i < count; i++) {
       const x = Math.random() * -count * 2 - 100;
       const y = Math.random() * count * 2;
-      const noteId = page.addBlock(
+      const noteId = doc.addBlock(
         'affine:note',
         {
           xywh: `[${x}, ${y}, 100, 50]` as SerializedXYWH,
         },
-        pageBlockId
+        rootId
       );
       // Add paragraph block inside note block
-      page.addBlock(
+      doc.addBlock(
         'affine:paragraph',
         {
           text: new Text('Note #' + i),

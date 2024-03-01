@@ -22,8 +22,8 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
     return this.block.model;
   }
 
-  private get _page() {
-    return this.block.page;
+  private get _doc() {
+    return this.block.doc;
   }
 
   override connectedCallback() {
@@ -50,7 +50,7 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
 
   private _onSave() {
     const caption = this.captionInput.value;
-    this._page.updateBlock(this._model, {
+    this._doc.updateBlock(this._model, {
       caption,
     });
     this.remove();

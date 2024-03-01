@@ -45,7 +45,7 @@ export class BookmarkBlockComponent extends BlockElement<
     if (!this._isInSurface) {
       return null;
     }
-    return this.host.querySelector('affine-edgeless-page');
+    return this.host.querySelector('affine-edgeless-root');
   }
 
   open = () => {
@@ -65,7 +65,7 @@ export class BookmarkBlockComponent extends BlockElement<
 
     this.contentEditable = 'false';
 
-    const parent = this.host.page.getParent(this.model);
+    const parent = this.host.doc.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     if (!this.model.description && !this.model.title) {

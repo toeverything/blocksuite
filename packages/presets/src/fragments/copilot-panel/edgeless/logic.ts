@@ -18,10 +18,10 @@ import {
 import { demoScript } from '../demo-script.js';
 import {
   frameToCanvas,
-  getEdgelessPageBlockFromEditor,
+  getEdgelessRootFromEditor,
   getEdgelessService,
   getFirstImageInFrame,
-  getPageService,
+  getRootService,
   getSurfaceElementFromEditor,
   selectedToCanvas,
   selectedToPng,
@@ -50,14 +50,14 @@ export class AIEdgelessLogic {
       this.unsub = undefined;
       return;
     }
-    const edgeless = getEdgelessPageBlockFromEditor(this.host);
+    const edgeless = getEdgelessRootFromEditor(this.host);
     this.unsub = edgeless.surfaceBlockModel.elementUpdated.on(() => {
       this.createImageFromFrame().catch(console.error);
     }).dispose;
   };
 
   get workspace(): Workspace {
-    return this.host.page.workspace;
+    return this.host.doc.workspace;
   }
 
   constructor(private getHost: () => EditorHost) {}
@@ -72,9 +72,9 @@ export class AIEdgelessLogic {
       alert('Please select some shapes first');
       return;
     }
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
+    const edgelessRoot = getEdgelessRootFromEditor(this.host);
     const { notes } = BlocksUtils.splitElements(
-      edgelessPage.service.selection.elements
+      edgelessRoot.service.selection.elements
     );
     // @ts-ignore
     const htmlBlock: {
@@ -93,19 +93,19 @@ export class AIEdgelessLogic {
     if (!html) {
       return;
     }
-    edgelessPage.page.addBlock(
+    edgelessRoot.doc.addBlock(
       EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
       { html, design: png, xywh: '[0, 400, 400, 200]' },
-      edgelessPage.surface.model.id
+      edgelessRoot.surface.model.id
     );
   };
 
   htmlBlockDemo = () => {
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
-    edgelessPage.page.addBlock(
+    const edgelessRoot = getEdgelessRootFromEditor(this.host);
+    edgelessRoot.doc.addBlock(
       EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
       { html: demoScript, xywh: '[0, 400, 400, 200]' },
-      edgelessPage.surface.model.id
+      edgelessRoot.surface.model.id
     );
   };
 
@@ -129,8 +129,8 @@ export class AIEdgelessLogic {
               return;
             }
             const imgFile = jpegBase64ToFile(b64, 'img');
-            const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
-            edgelessPage.addImages([imgFile]).catch(console.error);
+            const edgelessRoot = getEdgelessRootFromEditor(this.host);
+            edgelessRoot.addImages([imgFile]).catch(console.error);
           })
           .catch(console.error);
       }
@@ -138,7 +138,7 @@ export class AIEdgelessLogic {
   };
 
   createImage = async () => {
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
+    const edgelessRoot = getEdgelessRootFromEditor(this.host);
     const prompt =
       (
         document.getElementById(
@@ -153,11 +153,11 @@ export class AIEdgelessLogic {
       .getService('text to image', Text2ImageServiceKind)
       .generateImage(prompt);
     if (file) {
-      await edgelessPage.addImages([file]);
+      await edgelessRoot.addImages([file]);
     }
   };
   createImageFromFrame = async () => {
-    const from = this.host.page.getBlockById(
+    const from = this.host.doc.getBlockById(
       this.fromFrame ?? ''
     ) as FrameBlockModel;
     if (!from) {
@@ -171,7 +171,7 @@ export class AIEdgelessLogic {
     )
       .filter(v => v.source.id === from.id)
       .flatMap(v => {
-        const block = this.host.page.getBlockById(v.target.id ?? '');
+        const block = this.host.doc.getBlockById(v.target.id ?? '');
         if (block instanceof FrameBlockModel) {
           return [block];
         }
@@ -215,7 +215,7 @@ export class AIEdgelessLogic {
             const surface = getSurfaceElementFromEditor(this.host);
             let image = getFirstImageInFrame(model, this.host);
             const imgFile = jpegBase64ToFile(b64, 'img');
-            const sourceId = await this.host.page.workspace.blob.set(imgFile);
+            const sourceId = await this.host.doc.workspace.blob.set(imgFile);
             if (!image) {
               image = surface.edgeless.service.addBlock(
                 'affine:image',
@@ -241,7 +241,7 @@ export class AIEdgelessLogic {
   };
 
   convertToMindMap() {
-    const blocks = getPageService(this.host).selectedBlocks;
+    const blocks = getRootService(this.host).selectedBlocks;
     const toTreeNode = (block: BlockModel): TreeNode => {
       return {
         text: block.text?.toString() ?? '',

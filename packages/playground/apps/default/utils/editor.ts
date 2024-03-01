@@ -1,23 +1,22 @@
-import { __unstableSchemas } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { Workspace } from '@blocksuite/store';
 
+import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
-import { PagesPanel } from '../../_common/components/pages-panel.js';
 import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
-export async function mountDefaultPageEditor(workspace: Workspace) {
-  const page = workspace.pages.values().next().value;
-  assertExists(page, 'Need to create a page first');
+export async function mountDefaultDocEditor(workspace: Workspace) {
+  const doc = workspace.docs.values().next().value;
+  assertExists(doc, 'Need to create a doc first');
 
-  assertExists(page.ready, 'Page is not ready');
-  assertExists(page.root, 'Page root is not ready');
+  assertExists(doc.ready, 'Doc is not ready');
+  assertExists(doc.root, 'Doc root is not ready');
 
   const app = document.getElementById('app');
   if (!app) return;
@@ -25,16 +24,16 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
   const specs = getExampleSpecs();
 
   const editor = new AffineEditorContainer();
-  editor.docSpecs = specs.docModeSpecs;
+  editor.pageSpecs = specs.pageModeSpecs;
   editor.edgelessSpecs = specs.edgelessModeSpecs;
-  editor.page = page;
-  editor.slots.pageLinkClicked.on(({ pageId }) => {
-    const target = workspace.getPage(pageId);
+  editor.doc = doc;
+  editor.slots.docLinkClicked.on(({ docId }) => {
+    const target = workspace.getDoc(docId);
     if (!target) {
-      throw new Error(`Failed to jump to page ${pageId}`);
+      throw new Error(`Failed to jump to doc ${docId}`);
     }
     target.load();
-    editor.page = target;
+    editor.doc = target;
   });
 
   app.append(editor);
@@ -42,22 +41,22 @@ export async function mountDefaultPageEditor(workspace: Workspace) {
 
   const leftSidePanel = new LeftSidePanel();
 
-  const pagesPanel = new PagesPanel();
-  pagesPanel.editor = editor;
+  const docsPanel = new DocsPanel();
+  docsPanel.editor = editor;
 
   const quickEdgelessMenu = new QuickEdgelessMenu();
-  quickEdgelessMenu.workspace = page.workspace;
+  quickEdgelessMenu.workspace = doc.workspace;
   quickEdgelessMenu.editor = editor;
   quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
-  quickEdgelessMenu.pagesPanel = pagesPanel;
+  quickEdgelessMenu.docsPanel = docsPanel;
 
   document.body.appendChild(leftSidePanel);
   document.body.appendChild(quickEdgelessMenu);
 
   // debug info
   window.editor = editor;
-  window.page = page;
+  window.doc = doc;
   Object.defineProperty(globalThis, 'host', {
     get() {
       return document.querySelector<EditorHost>('editor-host');

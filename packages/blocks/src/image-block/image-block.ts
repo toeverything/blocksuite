@@ -70,7 +70,7 @@ export class ImageBlockComponent extends BlockElement<
     if (!this._isInSurface) {
       return null;
     }
-    return this.host.querySelector('affine-edgeless-page');
+    return this.host.querySelector('affine-edgeless-root');
   }
 
   private get _imageElement() {
@@ -143,7 +143,7 @@ export class ImageBlockComponent extends BlockElement<
 
     this.contentEditable = 'false';
 
-    const parent = this.host.page.getParent(this.model);
+    const parent = this.host.doc.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     this.model.propsUpdated.on(({ key }) => {

@@ -28,17 +28,17 @@ export function convertToList(
   prefix: string,
   otherProperties?: Record<string, unknown>
 ): boolean {
-  const { page, model } = element;
+  const { doc, model } = element;
   if (matchFlavours(model, ['affine:list'])) {
     return false;
   }
   if (matchFlavours(model, ['affine:paragraph'])) {
-    const parent = page.getParent(model);
+    const parent = doc.getParent(model);
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
     addSpace(element, prefix.length);
-    page.captureSync();
+    doc.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
@@ -47,12 +47,12 @@ export function convertToList(
       children: model.children,
       ...otherProperties,
     };
-    page.deleteBlock(model, {
+    doc.deleteBlock(model, {
       deleteChildren: false,
     });
 
-    const id = page.addBlock('affine:list', blockProps, parent, index);
-    asyncFocusRichText(element.host, page, id)?.catch(console.error);
+    const id = doc.addBlock('affine:list', blockProps, parent, index);
+    asyncFocusRichText(element.host, id)?.catch(console.error);
   }
   return true;
 }
@@ -62,17 +62,17 @@ export function convertToParagraph(
   type: 'text' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
   prefix: string
 ): boolean {
-  const { page, model } = element;
+  const { doc, model } = element;
   if (matchFlavours(model, ['affine:paragraph']) && model['type'] === type) {
     return false;
   }
   if (!matchFlavours(model, ['affine:paragraph'])) {
-    const parent = page.getParent(model);
+    const parent = doc.getParent(model);
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
     addSpace(element, prefix.length);
-    page.captureSync();
+    doc.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
@@ -80,18 +80,18 @@ export function convertToParagraph(
       text: model.text?.clone(),
       children: model.children,
     };
-    page.deleteBlock(model, {
+    doc.deleteBlock(model, {
       deleteChildren: false,
     });
 
-    const id = page.addBlock('affine:paragraph', blockProps, parent, index);
-    asyncFocusRichText(element.host, page, id)?.catch(console.error);
+    const id = doc.addBlock('affine:paragraph', blockProps, parent, index);
+    asyncFocusRichText(element.host, id)?.catch(console.error);
   } else if (
     matchFlavours(model, ['affine:paragraph']) &&
     model['type'] !== type
   ) {
     addSpace(element, prefix.length);
-    page.captureSync();
+    doc.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const inlineEditor = getInlineEditorByModel(element.host, model);
@@ -101,7 +101,7 @@ export function convertToParagraph(
         length: 0,
       });
     }
-    page.updateBlock(model, { type: type });
+    doc.updateBlock(model, { type: type });
   }
   return true;
 }
@@ -110,7 +110,7 @@ export function convertToDivider(
   element: BlockElement,
   prefix: string
 ): boolean {
-  const { page, model } = element;
+  const { doc, model } = element;
   if (
     matchFlavours(model, ['affine:divider']) ||
     (matchFlavours(model, ['affine:paragraph']) && model.type === 'quote')
@@ -118,27 +118,25 @@ export function convertToDivider(
     return false;
   }
   if (!matchFlavours(model, ['affine:divider'])) {
-    const parent = page.getParent(model);
+    const parent = doc.getParent(model);
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
     addSpace(element, prefix.length);
-    page.captureSync();
+    doc.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
       children: model.children,
     };
-    page.addBlock('affine:divider', blockProps, parent, index);
+    doc.addBlock('affine:divider', blockProps, parent, index);
 
     const nextBlock = parent.children[index + 1];
     if (nextBlock) {
-      asyncFocusRichText(element.host, page, nextBlock.id)?.catch(
-        console.error
-      );
+      asyncFocusRichText(element.host, nextBlock.id)?.catch(console.error);
     } else {
-      const nextId = page.addBlock('affine:paragraph', {}, parent);
-      asyncFocusRichText(element.host, page, nextId)?.catch(console.error);
+      const nextId = doc.addBlock('affine:paragraph', {}, parent);
+      asyncFocusRichText(element.host, nextId)?.catch(console.error);
     }
   }
   return true;

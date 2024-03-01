@@ -6,7 +6,7 @@ import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { Workspace } from './workspace.js';
 
 // please use `declare module '@blocksuite/store'` to extend this interface
-export interface PageMeta {
+export interface DocMeta {
   id: string;
   title: string;
   tags: string[];
@@ -18,14 +18,14 @@ export type Tag = {
   value: string;
   color: string;
 };
-export type PagesPropertiesMeta = {
+export type DocsPropertiesMeta = {
   tags?: {
     options: Tag[];
   };
 };
 export type WorkspaceMetaState = {
   pages?: unknown[];
-  properties?: PagesPropertiesMeta;
+  properties?: DocsPropertiesMeta;
   workspaceVersion?: number;
   pageVersion?: number;
   blockVersions?: Record<string, number>;
@@ -37,11 +37,11 @@ export class WorkspaceMeta {
   readonly id: string = 'meta';
   readonly doc: BlockSuiteDoc;
 
-  private _prevPages = new Set<string>();
+  private _prevDocs = new Set<string>();
 
-  pageMetaAdded = new Slot<string>();
-  pageMetaRemoved = new Slot<string>();
-  pageMetasUpdated = new Slot();
+  docMetaAdded = new Slot<string>();
+  docMetaRemoved = new Slot<string>();
+  docMetaUpdated = new Slot();
   commonFieldsUpdated = new Slot();
 
   protected readonly _yMap: Y.Map<WorkspaceMetaState[keyof WorkspaceMetaState]>;
@@ -54,11 +54,11 @@ export class WorkspaceMeta {
     this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
   }
 
-  get yPages() {
+  get yDocs() {
     return this._yMap.get('pages') as unknown as Y.Array<unknown>;
   }
 
-  get pages() {
+  get docs() {
     return this._proxy.pages;
   }
 
@@ -94,63 +94,63 @@ export class WorkspaceMeta {
     }, this.doc.clientID);
   }
 
-  get pageMetas() {
+  get docMetas() {
     if (!this._proxy.pages) {
-      return [] as PageMeta[];
+      return [] as DocMeta[];
     }
-    return [...(this._proxy.pages as PageMeta[])];
+    return [...(this._proxy.pages as DocMeta[])];
   }
 
-  getPageMeta(id: string) {
-    return this.pageMetas.find(page => page.id === id);
+  getDocMeta(id: string) {
+    return this.docMetas.find(doc => doc.id === id);
   }
 
-  addPageMeta(page: PageMeta, index?: number) {
+  addDocMeta(doc: DocMeta, index?: number) {
     this.doc.transact(() => {
-      if (!this.pages) {
+      if (!this.docs) {
         this._proxy.pages = [];
       }
-      const pages = this.pages as unknown[];
+      const docs = this.docs as unknown[];
       if (index === undefined) {
-        pages.push(page);
+        docs.push(doc);
       } else {
-        pages.splice(index, 0, page);
+        docs.splice(index, 0, doc);
       }
     }, this.doc.clientID);
   }
 
   /**
-   * @internal Use {@link Workspace.setPageMeta} instead
+   * @internal Use {@link Workspace.setDocMeta} instead
    */
-  setPageMeta(id: string, props: Partial<PageMeta>) {
-    const pages = (this.pages as PageMeta[]) ?? [];
-    const index = pages.findIndex((page: PageMeta) => id === page.id);
+  setDocMeta(id: string, props: Partial<DocMeta>) {
+    const docs = (this.docs as DocMeta[]) ?? [];
+    const index = docs.findIndex((doc: DocMeta) => id === doc.id);
 
     this.doc.transact(() => {
-      if (!this.pages) {
+      if (!this.docs) {
         this._proxy.pages = [];
       }
       if (index === -1) return;
-      assertExists(this.pages);
+      assertExists(this.docs);
 
-      const page = this.pages[index] as Record<string, unknown>;
+      const doc = this.docs[index] as Record<string, unknown>;
       Object.entries(props).forEach(([key, value]) => {
-        page[key] = value;
+        doc[key] = value;
       });
     }, this.doc.clientID);
   }
 
-  removePageMeta(id: string) {
-    // you cannot delete a page if there's no page
-    assertExists(this.pages);
-    const pageMetas = this.pageMetas as PageMeta[];
-    const index = pageMetas.findIndex((page: PageMeta) => id === page.id);
+  removeDocMeta(id: string) {
+    // you cannot delete a doc if there's no doc
+    assertExists(this.docs);
+    const docMeta = this.docMetas as DocMeta[];
+    const index = docMeta.findIndex((doc: DocMeta) => id === doc.id);
     if (index === -1) {
       return;
     }
     this.doc.transact(() => {
-      assertExists(this.pages);
-      this.pages.splice(index, 1);
+      assertExists(this.docs);
+      this.docs.splice(index, 1);
     }, this.doc.clientID);
   }
 
@@ -162,7 +162,7 @@ export class WorkspaceMeta {
   }
 
   /**
-   * @internal Only for page initialization
+   * @internal Only for doc initialization
    */
   writeVersion(workspace: Workspace) {
     const { blockVersions, pageVersion, workspaceVersion } = this._proxy;
@@ -176,7 +176,7 @@ export class WorkspaceMeta {
     if (!pageVersion) {
       this._proxy.pageVersion = PAGE_VERSION;
     } else {
-      console.error('Page version is already set');
+      console.error('Doc version is already set');
     }
 
     if (!blockVersions) {
@@ -203,7 +203,7 @@ export class WorkspaceMeta {
   }
 
   /**
-   * @deprecated Only used for legacy page version validation
+   * @deprecated Only used for legacy doc version validation
    */
   validateVersion(workspace: Workspace) {
     const workspaceVersion = this._proxy.workspaceVersion;
@@ -226,7 +226,7 @@ export class WorkspaceMeta {
     }
     if (pageVersion < PAGE_VERSION) {
       throw new Error(
-        `Page version ${pageVersion} is outdated. Please upgrade the editor.`
+        `Doc version ${pageVersion} is outdated. Please upgrade the editor.`
       );
     }
 
@@ -263,26 +263,26 @@ export class WorkspaceMeta {
     });
   }
 
-  private _handlePageMetaEvent() {
-    const { pageMetas, _prevPages } = this;
+  private _handleDocMetaEvent() {
+    const { docMetas, _prevDocs } = this;
 
-    pageMetas.forEach(pageMeta => {
-      if (!_prevPages.has(pageMeta.id)) {
-        this.pageMetaAdded.emit(pageMeta.id);
+    docMetas.forEach(docMeta => {
+      if (!_prevDocs.has(docMeta.id)) {
+        this.docMetaAdded.emit(docMeta.id);
       }
     });
 
-    _prevPages.forEach(prevPageId => {
-      const isRemoved = !pageMetas.find(p => p.id === prevPageId);
+    _prevDocs.forEach(prevDocId => {
+      const isRemoved = !docMetas.find(p => p.id === prevDocId);
       if (isRemoved) {
-        this.pageMetaRemoved.emit(prevPageId);
+        this.docMetaRemoved.emit(prevDocId);
       }
     });
 
-    _prevPages.clear();
-    pageMetas.forEach(page => _prevPages.add(page.id));
+    _prevDocs.clear();
+    docMetas.forEach(doc => _prevDocs.add(doc.id));
 
-    this.pageMetasUpdated.emit();
+    this.docMetaUpdated.emit();
   }
 
   private _handleCommonFieldsEvent() {
@@ -297,11 +297,11 @@ export class WorkspaceMeta {
         e.target === this._yMap && e.changes.keys.has(k);
 
       if (
-        e.target === this.yPages ||
-        e.target.parent === this.yPages ||
+        e.target === this.yDocs ||
+        e.target.parent === this.yDocs ||
         hasKey('pages')
       ) {
-        this._handlePageMetaEvent();
+        this._handleDocMetaEvent();
       }
 
       if (hasKey('name') || hasKey('avatar')) {
@@ -310,7 +310,7 @@ export class WorkspaceMeta {
     });
   };
 
-  get properties(): PagesPropertiesMeta {
+  get properties(): DocsPropertiesMeta {
     const meta = this._proxy.properties;
     if (!meta) {
       return {
@@ -322,8 +322,8 @@ export class WorkspaceMeta {
     return meta;
   }
 
-  setProperties(meta: PagesPropertiesMeta) {
+  setProperties(meta: DocsPropertiesMeta) {
     this._proxy.properties = meta;
-    this.pageMetasUpdated.emit();
+    this.docMetaUpdated.emit();
   }
 }

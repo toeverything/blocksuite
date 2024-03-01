@@ -10,18 +10,18 @@ Adapter works as a bridge between different formats of data and the BlockSuite [
 export abstract class BaseAdapter<AdapterTarget = unknown> {
   protected configs: Map<string, unknown> = new Map();
 
-  abstract fromPageSnapshot(
-    payload: FromPageSnapshotPayload
-  ): Promise<FromPageSnapshotResult<AdapterTarget>>;
+  abstract fromDocSnapshot(
+    payload: FromDocSnapshotPayload
+  ): Promise<FromDocSnapshotResult<AdapterTarget>>;
   abstract fromBlockSnapshot(
     payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<AdapterTarget>>;
   abstract fromSliceSnapshot(
     payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<AdapterTarget>>;
-  abstract toPageSnapshot(
-    payload: ToPageSnapshotPayload<AdapterTarget>
-  ): Promise<PageSnapshot>;
+  abstract toDocSnapshot(
+    payload: ToDocSnapshotPayload<AdapterTarget>
+  ): Promise<DocSnapshot>;
   abstract toBlockSnapshot(
     payload: ToBlockSnapshotPayload<AdapterTarget>
   ): Promise<BlockSnapshot>;
@@ -35,7 +35,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 }
 ```
 
-Methods `fromPageSnapshot`, `fromBlockSnapshot`, `fromSliceSnapshot` are used to convert the data from the BlockSuite Snapshot to the target format. Methods `toPageSnapshot`, `toBlockSnapshot`, `toSliceSnapshot` are used to convert the data from the target format to the BlockSuite Snapshot.
+Methods `fromDocSnapshot`, `fromBlockSnapshot`, `fromSliceSnapshot` are used to convert the data from the BlockSuite Snapshot to the target format. Methods `toDocSnapshot`, `toBlockSnapshot`, `toSliceSnapshot` are used to convert the data from the target format to the BlockSuite Snapshot.
 
 Method `toSliceSnapshot` can return `null` if the target format cannot be converted to a slice using this adapter. It enables some components like clipboard to determine whether the adapter can handle the data. If not, it will try other adapters according to the priority.
 
@@ -46,15 +46,15 @@ These six core methods are expected to be purely functional. They should not hav
 Sample usage:
 
 ```ts
-const job = new Job({ workspace: page.workspace });
-const snapshot = await job.pageToSnapshot(page);
+const job = new Job({ workspace: doc.workspace });
+const snapshot = await job.docToSnapshot(doc);
 
 const adapter = new MarkdownAdapter();
 // Sometimes jobs have some middlewares which needs to modify adapter's configs.
 // Apply the configs to the adapter.
 adapter.applyConfigs(job.adapterConfigs);
 
-const markdownResult = await adapter.fromPageSnapshot({
+const markdownResult = await adapter.fromDocSnapshot({
   snapshot,
   assets: job.assetsManager,
 });

@@ -5,17 +5,17 @@ import {
   BaseAdapter,
   type BlockSnapshot,
   BlockSnapshotSchema,
+  type DocSnapshot,
   type FromBlockSnapshotPayload,
   type FromBlockSnapshotResult,
-  type FromPageSnapshotPayload,
-  type FromPageSnapshotResult,
+  type FromDocSnapshotPayload,
+  type FromDocSnapshotResult,
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
   nanoid,
-  type PageSnapshot,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
-  type ToPageSnapshotPayload,
+  type ToDocSnapshotPayload,
 } from '@blocksuite/store';
 
 import { NoteDisplayMode } from '../types.js';
@@ -33,10 +33,10 @@ type PlainTextToSliceSnapshotPayload = {
 };
 
 export class PlainTextAdapter extends BaseAdapter<PlainText> {
-  async fromPageSnapshot({
+  async fromDocSnapshot({
     snapshot,
     assets,
-  }: FromPageSnapshotPayload): Promise<FromPageSnapshotResult<PlainText>> {
+  }: FromDocSnapshotPayload): Promise<FromDocSnapshotResult<PlainText>> {
     let buffer = '';
     if (snapshot.meta.title) {
       buffer += `${snapshot.meta.title}\n\n`;
@@ -79,7 +79,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     };
   }
 
-  toPageSnapshot(payload: ToPageSnapshotPayload<PlainText>): PageSnapshot {
+  toDocSnapshot(payload: ToDocSnapshotPayload<PlainText>): DocSnapshot {
     payload.file = payload.file.replaceAll('\r', '');
     return {
       type: 'page',

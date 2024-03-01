@@ -240,6 +240,9 @@ importers:
       micromark-util-combine-extensions:
         specifier: ^2.0.0
         version: 2.0.0
+      minimatch:
+        specifier: ^9.0.3
+        version: 9.0.3
       nanoid:
         specifier: ^5.0.4
         version: 5.0.4

@@ -5,7 +5,7 @@ import type { Doc } from 'yjs';
 import { Text as YText } from 'yjs';
 
 import type { YBlock } from '../workspace/block/block.js';
-import type { YBlocks } from '../workspace/page.js';
+import type { YBlocks } from '../workspace/doc.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 
 const DocumentIndexer = FlexSearch.Document;
@@ -84,12 +84,12 @@ export class SearchIndexer {
     this._reindexMap = new Map();
     this._reindex();
 
-    // fixme(Mirone): use better way to listen to page changes
+    // fixme(Mirone): use better way to listen to doc changes
     doc.spaces.observe(event => {
-      event.keysChanged.forEach(pageId => {
-        const page = this._getPage(pageId);
-        if (page != null) {
-          this._handlePageIndexing(pageId, page);
+      event.keysChanged.forEach(docId => {
+        const doc = this._getDoc(docId);
+        if (doc != null) {
+          this._handleDocIndexing(docId, doc);
         }
       });
     });
@@ -148,19 +148,19 @@ export class SearchIndexer {
     }
   }
 
-  public refreshPageIndex(pageId: string, page: Doc) {
-    const yBlocks = page.getMap('blocks') as YBlocks;
+  public refreshDocIndex(docId: string, doc: Doc) {
+    const yBlocks = doc.getMap('blocks') as YBlocks;
     yBlocks.forEach((_, key) => {
-      this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
+      this._refreshIndex(docId, key, 'add', yBlocks.get(key));
     });
   }
 
-  private _handlePageIndexing(pageId: string, page: Doc) {
-    if (!page) {
+  private _handleDocIndexing(docId: string, doc: Doc) {
+    if (!doc) {
       return;
     }
-    const yBlocks = page.getMap('blocks') as YBlocks;
-    this.refreshPageIndex(pageId, page);
+    const yBlocks = doc.getMap('blocks') as YBlocks;
+    this.refreshDocIndex(docId, doc);
     yBlocks.observeDeep(events => {
       const keys = events.flatMap(e => {
         // eslint-disable-next-line no-bitwise
@@ -174,14 +174,14 @@ export class SearchIndexer {
 
       if (keys.length) {
         keys.forEach(([key, action]) => {
-          this._refreshIndex(pageId, key, action, yBlocks.get(key));
+          this._refreshIndex(docId, key, action, yBlocks.get(key));
         });
       }
     });
   }
 
   private _refreshIndex(
-    page: string,
+    doc: string,
     id: string,
     action: 'add' | 'update' | 'delete',
     block?: YBlock
@@ -196,8 +196,8 @@ export class SearchIndexer {
           if (content) {
             this._reindexMap?.set(id, {
               content,
-              space: page,
-              tags: [page],
+              space: doc,
+              tags: [doc],
             });
           }
         }
@@ -222,7 +222,7 @@ export class SearchIndexer {
     return undefined;
   }
 
-  private _getPage(key: string): Doc | undefined {
+  private _getDoc(key: string): Doc | undefined {
     try {
       return this._doc.spaces.get(key);
     } catch (_) {

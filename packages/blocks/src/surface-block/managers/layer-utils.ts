@@ -1,9 +1,9 @@
-import type { Page } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 
 import type {
   EdgelessBlockModel,
   EdgelessModel,
-} from '../../page-block/edgeless/type.js';
+} from '../../root-block/edgeless/type.js';
 import { GroupElementModel } from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
@@ -86,13 +86,13 @@ export function isInRange(
 }
 
 export function renderableInEdgeless(
-  page: Page,
+  doc: Doc,
   surface: SurfaceBlockModel,
   block: EdgelessBlockModel
 ) {
-  const parent = page.getParent(block);
+  const parent = doc.getParent(block);
 
-  return parent === page.root || parent === surface;
+  return parent === doc.root || parent === surface;
 }
 
 export function compare(a: EdgelessModel, b: EdgelessModel) {

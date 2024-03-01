@@ -2906,7 +2906,7 @@ export const EdgelessIcon = svg`
   </svg>
 `;
 
-export const DocIcon = svg`
+export const PageIcon = svg`
   <svg 
     width="20" 
     height="20" 

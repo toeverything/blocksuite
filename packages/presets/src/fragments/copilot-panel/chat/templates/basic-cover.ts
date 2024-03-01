@@ -1,7 +1,7 @@
 export const basicCover = () => ({
   type: 'page',
   meta: {
-    id: 'page:home',
+    id: 'doc:home',
     title: '',
     createDate: 1706086837052,
     tags: [],

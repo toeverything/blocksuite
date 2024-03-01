@@ -3,15 +3,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
 import { matchFlavours } from '../_common/utils/model.js';
-import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
+import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
   AFFINE_DRAG_HANDLE_WIDGET,
   AffineDragHandleWidget,
-} from '../page-block/widgets/drag-handle/drag-handle.js';
+} from '../root-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   getDuplicateBlocks,
-} from '../page-block/widgets/drag-handle/utils.js';
+} from '../root-block/widgets/drag-handle/utils.js';
 import { selectBlock, selectBlocksBetween } from './commands/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
@@ -89,8 +89,8 @@ export class NoteService extends BlockService<NoteBlockModel> {
       }
 
       const noteBlock = draggingElements[0].model as NoteBlockModel;
-      const targetBlock = editorHost.page.getBlockById(dropBlockId);
-      const parentBlock = editorHost.page.getParent(dropBlockId);
+      const targetBlock = editorHost.doc.getBlockById(dropBlockId);
+      const parentBlock = editorHost.doc.getParent(dropBlockId);
       if (!targetBlock || !parentBlock) {
         return true;
       }
@@ -103,16 +103,16 @@ export class NoteService extends BlockService<NoteBlockModel> {
           parentBlock.children.indexOf(targetBlock) +
           (dropType === 'after' ? 1 : 0);
 
-        editorHost.page.addBlocks(duplicateBlocks, parentBlock, parentIndex);
+        editorHost.doc.addBlocks(duplicateBlocks, parentBlock, parentIndex);
       } else {
-        editorHost.page.moveBlocks(
+        editorHost.doc.moveBlocks(
           noteBlock.children,
           parentBlock,
           targetBlock,
           dropType === 'before'
         );
 
-        editorHost.page.deleteBlock(noteBlock);
+        editorHost.doc.deleteBlock(noteBlock);
         editorHost.selection.setGroup('edgeless', []);
       }
 

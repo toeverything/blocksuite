@@ -1,4 +1,4 @@
-import type { EdgelessModel } from '../page-block/edgeless/type.js';
+import type { EdgelessModel } from '../root-block/edgeless/type.js';
 import { GRID_SIZE, type IBound } from './consts.js';
 import { compare } from './managers/layer-utils.js';
 import { Bound } from './utils/bound.js';

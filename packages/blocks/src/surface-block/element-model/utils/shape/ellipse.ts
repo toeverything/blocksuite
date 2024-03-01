@@ -1,4 +1,4 @@
-import type { HitTestOptions } from '../../../../page-block/edgeless/type.js';
+import type { HitTestOptions } from '../../../../root-block/edgeless/type.js';
 import type { IBound } from '../../../consts.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -20,6 +20,20 @@ export const ellipse = {
       [x + w, y + h / 2],
       [x + w / 2, y + h],
     ];
+  },
+  draw(ctx: CanvasRenderingContext2D, { x, y, w, h, rotate = 0 }: IBound) {
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate((rotate * Math.PI) / 180);
+    ctx.translate(-cx, -cy);
+
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, w / 2, h / 2, 0, 0, 2 * Math.PI);
+
+    ctx.restore();
   },
   hitTest(
     this: ShapeElementModel,

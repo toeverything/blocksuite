@@ -1,6 +1,5 @@
 import type { TemplateResult } from 'lit';
 
-import type { BlockSchemas } from '../../models.js';
 import {
   BulletedListIcon,
   CheckBoxIcon,
@@ -22,7 +21,7 @@ import {
  * which are also used for registering hotkeys for converting block flavours.
  */
 interface TextConversionConfig {
-  flavour: keyof BlockSchemas;
+  flavour: BlockSuite.Flavour;
   type?: string;
   name: string;
   hotkey: string[] | null;

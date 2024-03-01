@@ -12,7 +12,7 @@ import { bindContainerHotkey } from '../_common/components/rich-text/keymap/inde
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
-import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ListBlockModel } from './list-model.js';
 import type { ListService } from './list-service.js';
 import { styles } from './styles.js';
@@ -64,9 +64,9 @@ export class ListBlockComponent extends BlockElement<
       this._toggleChildren();
       return;
     } else if (this.model.type === 'todo') {
-      this.model.page.captureSync();
+      this.doc.captureSync();
       const checkedPropObj = { checked: !this.model.checked };
-      this.model.page.updateBlock(this.model, checkedPropObj);
+      this.doc.updateBlock(this.model, checkedPropObj);
       if (this.model.checked) {
         const checkEl = this.querySelector('.affine-list-block__todo-prefix');
         assertExists(checkEl);
@@ -83,11 +83,11 @@ export class ListBlockComponent extends BlockElement<
   private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   override get topContenteditableElement() {
-    if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
+    if (this.rootElement instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
       return note;
     }
-    return this.rootBlockElement;
+    return this.rootElement;
   }
 
   override async getUpdateComplete() {
@@ -126,14 +126,14 @@ export class ListBlockComponent extends BlockElement<
   }
 
   private _toggleChildren() {
-    if (this.page.readonly) {
+    if (this.doc.readonly) {
       this._isCollapsedWhenReadOnly = !this._isCollapsedWhenReadOnly;
       return;
     }
     const newCollapsedState = !this.model.collapsed;
     this._isCollapsedWhenReadOnly = newCollapsedState;
-    this.page.captureSync();
-    this.page.updateBlock(this.model, {
+    this.doc.captureSync();
+    this.doc.updateBlock(this.model, {
       collapsed: newCollapsedState,
     } as Partial<ListBlockModel>);
   }
@@ -164,7 +164,7 @@ export class ListBlockComponent extends BlockElement<
   override renderBlock(): TemplateResult<1> {
     const { deep, index } = getListInfo(this.model);
     const { model, _onClickIcon } = this;
-    const collapsed = this.page.readonly
+    const collapsed = this.doc.readonly
       ? this._isCollapsedWhenReadOnly
       : !!model.collapsed;
     const listIcon = ListIcon(model, !collapsed, _onClickIcon);
@@ -191,12 +191,12 @@ export class ListBlockComponent extends BlockElement<
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
-            .undoManager=${this.model.page.history}
+            .undoManager=${this.doc.history}
             .attributeRenderer=${this.attributeRenderer}
             .attributesSchema=${this.attributesSchema}
             .markdownShortcutHandler=${this.markdownShortcutHandler}
             .embedChecker=${this.embedChecker}
-            .readonly=${this.model.page.readonly}
+            .readonly=${this.doc.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}

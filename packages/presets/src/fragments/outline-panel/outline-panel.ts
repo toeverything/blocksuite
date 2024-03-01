@@ -73,8 +73,8 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   @state()
   _noticeVisible = false;
 
-  get page() {
-    return this.editor.page;
+  get doc() {
+    return this.editor.doc;
   }
 
   get host() {
@@ -82,10 +82,10 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   }
 
   get edgeless() {
-    return this.editor.querySelector('affine-edgeless-page');
+    return this.editor.querySelector('affine-edgeless-root');
   }
 
-  private get _pageService() {
+  private get _rootService() {
     return this.host.spec.getService('affine:page');
   }
 
@@ -94,9 +94,9 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   }
 
   private _tryToRestoreSettings() {
-    if (!this.host || !this._pageService) return;
+    if (!this.host || !this._rootService) return;
 
-    const { editSession } = this._pageService;
+    const { editSession } = this._rootService;
     this._showPreviewIcon = editSession.getItem('outlineShowIcon') ?? false;
     this._enableNotesSorting =
       editSession.getItem('outlineEnableSorting') ?? false;
@@ -104,7 +104,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
 
   private _toggleShowPreviewIcon = (on: boolean) => {
     this._showPreviewIcon = on;
-    this._pageService.editSession.setItem(
+    this._rootService.editSession.setItem(
       'outlineShowIcon',
       this._showPreviewIcon
     );
@@ -112,7 +112,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
 
   private _toggleNotesSorting = () => {
     this._enableNotesSorting = !this._enableNotesSorting;
-    this._pageService.editSession.setItem(
+    this._rootService.editSession.setItem(
       'outlineEnableSorting',
       this._showPreviewIcon
     );
@@ -133,7 +133,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
     this._clearEditorDisposables();
     this._editorDisposables = new DisposableGroup();
     this._editorDisposables.add(
-      this.editor.slots.pageModeSwitched.on(() => {
+      this.editor.slots.editorModeSwitched.on(() => {
         this.editor.updateComplete
           .then(() => {
             this.requestUpdate();
@@ -142,7 +142,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
       })
     );
     this._editorDisposables.add(
-      this.editor.slots.pageUpdated.on(() => {
+      this.editor.slots.docUpdated.on(() => {
         this.editor.updateComplete
           .then(() => {
             this.requestUpdate();
@@ -179,7 +179,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
         ></outline-panel-header>
         <outline-panel-body
           class="outline-panel-body"
-          .page=${this.page}
+          .doc=${this.doc}
           .fitPadding=${this.fitPadding}
           .edgeless=${this.edgeless}
           .editorHost=${this.host}

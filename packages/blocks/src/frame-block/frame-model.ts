@@ -3,8 +3,8 @@ import type { Text } from '@blocksuite/store';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import type { HitTestOptions } from '../page-block/edgeless/type.js';
-import type { EdgelessPageService } from '../page-block/index.js';
+import type { HitTestOptions } from '../root-block/edgeless/type.js';
+import type { EdgelessRootService } from '../root-block/index.js';
 import { getTextRect } from '../surface-block/elements/text/utils.js';
 import { Bound, type SerializedXYWH } from '../surface-block/index.js';
 
@@ -49,9 +49,9 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
 
     if (hit) return true;
 
-    const pageService =
-      host.std.spec.getService<EdgelessPageService>('affine:page');
-    const isInner = pageService.frame.getFrameInner(this);
+    const rootService =
+      host.std.spec.getService<EdgelessRootService>('affine:page');
+    const isInner = rootService.frame.getFrameInner(this);
 
     const titleRect = getTextRect(this.title.toString(), 'Inter', 14);
 

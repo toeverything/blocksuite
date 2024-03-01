@@ -75,8 +75,8 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     return this.block.std;
   }
 
-  private get _page() {
-    return this.block.page;
+  private get _doc() {
+    return this.block.doc;
   }
 
   private _open() {
@@ -85,7 +85,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   }
 
   private async _copyBlock() {
-    const slice = Slice.fromModels(this._page, [this._model]);
+    const slice = Slice.fromModels(this._doc, [this._model]);
     await this._std.clipboard.copySlice(slice);
     toast(this.block.host, 'Copied link to clipboard');
     this.abortController.abort();
@@ -101,11 +101,11 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     const { width, height, xywh, rotate, zIndex, ...duplicateProps } =
       blockProps;
 
-    const { page } = model;
-    const parent = page.getParent(model);
+    const { doc } = model;
+    const parent = doc.getParent(model);
     const index = parent?.children.indexOf(model);
-    page.addBlock(
-      model.flavour as BlockSuite.ModelKeys,
+    doc.addBlock(
+      model.flavour as BlockSuite.Flavour,
       duplicateProps,
       parent,
       index
@@ -147,7 +147,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
             height="32px"
             class="menu-item duplicate"
             text="Duplicate"
-            ?disabled=${this._page.readonly}
+            ?disabled=${this._doc.readonly}
             @click=${() => this._duplicateBlock()}
           >
             ${DuplicateIcon}
@@ -158,7 +158,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
             height="32px"
             class="menu-item reload"
             text="Reload"
-            ?disabled=${this._page.readonly}
+            ?disabled=${this._doc.readonly}
             @click=${() => this._refreshData()}
           >
             ${RefreshIcon}
@@ -171,8 +171,8 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
             height="32px"
             class="menu-item delete"
             text="Delete"
-            ?disabled=${this._page.readonly}
-            @click=${() => this._page.deleteBlock(this._model)}
+            ?disabled=${this._doc.readonly}
+            @click=${() => this._doc.deleteBlock(this._model)}
           >
             ${DeleteIcon}
           </icon-button>

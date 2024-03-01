@@ -15,9 +15,12 @@ import {
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
+  captureHistory,
   clickView,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
+  redoByKeyboard,
+  undoByKeyboard,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -185,6 +188,44 @@ test.describe('reordering', () => {
       await page.mouse.click(180, 180);
       await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
     });
+
+    test('undo and redo', async ({ page }) => {
+      await init(page);
+
+      // should be rect2
+      await page.mouse.click(180, 180);
+      await assertEdgelessSelectedRect(page, [160, 160, 100, 100]);
+
+      // send rect2 to back
+      await triggerComponentToolbarAction(page, 'sendToBack');
+
+      // click outside to clear selection
+      await page.mouse.click(50, 50);
+
+      // should be rect1
+      await page.mouse.click(180, 180);
+      await assertEdgelessSelectedRect(page, [130, 130, 100, 100]);
+
+      // undo
+      await undoByKeyboard(page);
+
+      // clear selection
+      await page.mouse.click(50, 50);
+
+      // should be rect2
+      await page.mouse.click(180, 180);
+      await assertEdgelessSelectedRect(page, [160, 160, 100, 100]);
+
+      // redo
+      await redoByKeyboard(page);
+
+      // clear selection
+      await page.mouse.click(50, 50);
+
+      // should be rect2
+      await page.mouse.click(180, 180);
+      await assertEdgelessSelectedRect(page, [130, 130, 100, 100]);
+    });
   });
 
   test.describe('reordering notes', () => {
@@ -299,6 +340,45 @@ test.describe('reordering', () => {
       // should be note0
       await page.mouse.click(180, 140);
       await assertEdgelessSelectedRect(page, [100, 100, 448, 91]);
+    });
+
+    test('undo and redo', async ({ page }) => {
+      await init(page);
+
+      // click outside to clear selection
+      await page.mouse.click(50, 50);
+
+      // should be note2
+      await page.mouse.click(180, 140);
+      await assertEdgelessSelectedRect(page, [160, 100, 448, 91]);
+
+      await captureHistory(page);
+
+      // bring note2 to back
+      await triggerComponentToolbarAction(page, 'sendToBack');
+
+      // click outside to clear selection
+      await page.mouse.click(50, 50);
+
+      // should be note1
+      await page.mouse.click(180, 140);
+      await assertEdgelessSelectedRect(page, [130, 100, 448, 91]);
+
+      // undo
+      await undoByKeyboard(page);
+      // clear selection
+      await page.mouse.click(50, 50);
+      // should be note2
+      await page.mouse.click(180, 140);
+      await assertEdgelessSelectedRect(page, [160, 100, 448, 91]);
+
+      // redo
+      await redoByKeyboard(page);
+      // clear selection
+      await page.mouse.click(50, 50);
+      // should be note1
+      await page.mouse.click(180, 140);
+      await assertEdgelessSelectedRect(page, [130, 100, 448, 91]);
     });
   });
 });

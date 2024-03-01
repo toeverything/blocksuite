@@ -14,7 +14,7 @@ import {
   GET_DEFAULT_LINE_COLOR,
   GET_DEFAULT_TEXT_COLOR,
   LineColorsSchema,
-} from '../../page-block/edgeless/components/panel/color-panel.js';
+} from '../../root-block/edgeless/components/panel/color-panel.js';
 import {
   CanvasTextFontFamily,
   CanvasTextFontStyle,
@@ -32,6 +32,7 @@ import { TextAlign, TextVerticalAlign } from '../elements/consts.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  DEFAULT_SHAPE_TEXT_COLOR,
   FillColorsSchema,
   SHAPE_TEXT_FONT_SIZE,
   ShapeType,
@@ -155,6 +156,7 @@ export class EditSessionStorage {
       lineWidth: LineWidth.Thin,
     },
     shape: {
+      color: DEFAULT_SHAPE_TEXT_COLOR,
       shapeType: ShapeType.Rect,
       fillColor: DEFAULT_SHAPE_FILL_COLOR,
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
@@ -235,7 +237,7 @@ export class EditSessionStorage {
   }
 
   private _getKey<T extends keyof SessionProps>(key: T) {
-    const id = this._service.page.id;
+    const id = this._service.doc.id;
     switch (key) {
       case 'viewport':
         return 'blocksuite:' + id + ':edgelessViewport';

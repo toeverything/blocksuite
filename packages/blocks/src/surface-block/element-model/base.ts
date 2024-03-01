@@ -4,7 +4,7 @@ import { type Y } from '@blocksuite/store';
 import type {
   HitTestOptions,
   IEdgelessElement,
-} from '../../page-block/edgeless/type.js';
+} from '../../root-block/edgeless/type.js';
 import { randomSeed } from '../rough/math.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
@@ -210,7 +210,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
 
     // @ts-ignore
     if (this['_yProps']?.has(prop)) {
-      this.surface.page.transact(() => {
+      this.surface.doc.transact(() => {
         this.yMap.set(prop as string, value);
       });
     }

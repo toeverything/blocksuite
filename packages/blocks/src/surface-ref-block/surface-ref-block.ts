@@ -16,10 +16,11 @@ import {
 } from '../_common/icons/index.js';
 import { requestConnectedFrame } from '../_common/utils/event.js';
 import { buildPath } from '../_common/utils/query.js';
-import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
-import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
+import type { FrameBlockModel } from '../frame-block/index.js';
+import { getBackgroundGrid } from '../root-block/edgeless/utils/query.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
 import type { ElementModel } from '../surface-block/element-model/base.js';
+import type { SurfaceBlockModel } from '../surface-block/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
@@ -263,7 +264,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
     this.contentEditable = 'false';
 
-    const parent = this.host.page.getParent(this.model);
+    const parent = this.host.doc.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     if (!this._shouldRender) return;
@@ -272,7 +273,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     assertExists(service, `Surface ref block must run with its service.`);
     this._surfaceRefRenderer = service.getRenderer(
       PathFinder.id(this.path),
-      this.page,
+      this.doc,
       true
     );
     this._disposables.add(() => {
@@ -350,14 +351,14 @@ export class SurfaceRefBlockComponent extends BlockElement<
   private _initHotkey() {
     const selection = this.host.selection;
     const addParagraph = () => {
-      if (!this.page.getParent(this.model)) return;
+      if (!this.doc.getParent(this.model)) return;
 
-      const [paragraphId] = this.page.addSiblingBlocks(this.model, [
+      const [paragraphId] = this.doc.addSiblingBlocks(this.model, [
         {
           flavour: 'affine:paragraph',
         },
       ]);
-      const path = buildPath(this.page.getBlockById(paragraphId));
+      const path = buildPath(this.doc.getBlockById(paragraphId));
 
       requestConnectedFrame(() => {
         selection.update(selList => {
@@ -402,7 +403,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
       if ('propsUpdated' in referencedModel) {
         refWatcher = referencedModel.propsUpdated.on(() => {
           if (referencedModel.flavour !== this.model.refFlavour) {
-            this.page.updateBlock(this.model, {
+            this.doc.updateBlock(this.model, {
               refFlavour: referencedModel.flavour,
             });
           }
@@ -421,7 +422,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     init();
 
     this._disposables.add(() => {
-      this.page.slots.blockUpdated.on(({ type, id }) => {
+      this.doc.slots.blockUpdated.on(({ type, id }) => {
         if (type === 'delete' && id === this.model.reference) {
           init();
         }
@@ -476,7 +477,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
   }
 
   private _deleteThis() {
-    this.page.deleteBlock(this.model);
+    this.doc.deleteBlock(this.model);
   }
 
   private _focusBlock() {
@@ -548,7 +549,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     const edgelessBlocks =
       flavourOrType === 'affine:frame' || flavourOrType === 'group'
         ? html`<surface-ref-portal
-            .page=${this.page}
+            .doc=${this.doc}
             .host=${this.host}
             .refModel=${referencedModel}
             .renderModel=${this.renderModel}

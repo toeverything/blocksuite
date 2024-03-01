@@ -1,6 +1,6 @@
 import type {
   AffineReference,
-  DocPageBlockComponent,
+  PageRootBlockComponent,
 } from '@blocksuite/blocks';
 import {
   type AffineTextAttributes,
@@ -11,7 +11,7 @@ import { BlocksUtils, InlineManager, RichText } from '@blocksuite/blocks';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { WithDisposable } from '@blocksuite/lit';
-import type { BlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -20,7 +20,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   ArrowJumpIcon,
   ArrowLeftIcon,
-  SmallLinkedPageIcon,
+  SmallLinkedDocIcon,
 } from '../_common/icons.js';
 
 noop(RichText);
@@ -175,13 +175,13 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       border-radius: 18px;
     }
 
-    .linked-page-container {
+    .linked-doc-container {
       display: flex;
       align-items: center;
       padding-left: 2px;
       gap: 2px;
     }
-    .linked-page-container svg {
+    .linked-doc-container svg {
       scale: 1.2;
     }
   `;
@@ -193,10 +193,10 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   private _backLinkShow: boolean[] = [];
 
   @property({ attribute: false })
-  page!: Page;
+  doc!: Doc;
 
   @property({ attribute: false })
-  docPageBlock!: DocPageBlockComponent;
+  pageRoot!: PageRootBlockComponent;
 
   private _inlineManager = new InlineManager();
 
@@ -204,10 +204,10 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     super.connectedCallback();
     const config = new ReferenceNodeConfig();
     config.setInteractable(false);
-    config.setPage(this.page);
+    config.setDoc(this.doc);
     config.setCustomContent((reference: AffineReference) => {
-      const title = reference.page.meta.title
-        ? reference.page.meta.title
+      const title = reference.doc.meta?.title
+        ? reference.doc.meta.title
         : 'Untitled';
       return html`<style>
           .custom-reference-content svg {
@@ -216,7 +216,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
           }
         </style>
         <span class="custom-reference-content">
-          ${SmallLinkedPageIcon} ${title}
+          ${SmallLinkedDocIcon} ${title}
         </span> `;
     });
     this._inlineManager.registerSpecs(
@@ -224,30 +224,30 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     );
     const { _disposables } = this;
     _disposables.add(
-      this.page.workspace.indexer.backlink.slots.indexUpdated.on(() => {
+      this.doc.workspace.indexer.backlink.slots.indexUpdated.on(() => {
         this.requestUpdate();
       })
     );
 
-    const pageService = this._host.spec.getService('affine:page');
-    this._show = !!pageService.editSession.getItem('showBidirectional');
+    const rootService = this._host.spec.getService('affine:page');
+    this._show = !!rootService.editSession.getItem('showBidirectional');
   }
 
   private _toggleShow() {
     this._show = !this._show;
-    const pageService = this._host.spec.getService('affine:page');
-    pageService.editSession.setItem('showBidirectional', this._show);
+    const rootService = this._host.spec.getService('affine:page');
+    rootService.editSession.setItem('showBidirectional', this._show);
   }
 
   private get _host() {
-    return this.docPageBlock.host;
+    return this.pageRoot.host;
   }
 
   private get _links() {
-    const { page } = this;
+    const { doc } = this;
 
     const ids = new Set<string>();
-    page
+    doc
       .getBlockByFlavour([
         'affine:paragraph',
         'affine:list',
@@ -277,7 +277,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   private _renderLinks(ids: string[]) {
-    const { workspace } = this.page;
+    const { workspace } = this.doc;
 
     return html`<div class="links">
       <div class="links-title">Outgoing links · ${ids.length}</div>
@@ -285,18 +285,18 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         ids,
         id => id,
         id => {
-          const page = workspace.getPage(id);
-          assertExists(page);
-          const title = page.meta.title ? page.meta.title : 'Untitled';
+          const doc = workspace.getDoc(id);
+          assertExists(doc);
+          const title = doc.meta?.title ? doc.meta.title : 'Untitled';
           return html`<div
             class="link"
             @click=${() => {
-              this.docPageBlock.slots.pageLinkClicked.emit({
-                pageId: id,
+              this.pageRoot.slots.docLinkClicked.emit({
+                docId: id,
               });
             }}
           >
-            ${SmallLinkedPageIcon}
+            ${SmallLinkedDocIcon}
             <div>${title}</div>
           </div>`;
         }
@@ -305,10 +305,10 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   private get _backLinks() {
-    const { page } = this;
-    const { workspace } = page;
+    const { doc } = this;
+    const { workspace } = doc;
     const backLinks = new Map<string, string[]>();
-    workspace.indexer.backlink.getBacklink(page.id).reduce((map, link) => {
+    workspace.indexer.backlink.getBacklink(doc.id).reduce((map, link) => {
       const { pageId } = link;
       if (map.has(pageId)) {
         map.get(pageId)!.push(link.blockId);
@@ -322,8 +322,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   private _renderBackLinks(backLinks: Map<string, string[]>) {
-    const { page } = this;
-    const { workspace } = page;
+    const { doc } = this;
+    const { workspace } = doc;
     const length = backLinks.size;
 
     return html` <div class="back-links">
@@ -331,10 +331,10 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       ${repeat(
         backLinks.keys(),
         id => id,
-        (pageId, index) => {
-          const page = workspace.getPage(pageId);
-          const blocks = backLinks.get(pageId)!;
-          assertExists(page);
+        (docId, index) => {
+          const doc = workspace.getDoc(docId);
+          const blocks = backLinks.get(docId)!;
+          assertExists(doc);
           const show = this._backLinkShow[index] ?? false;
 
           const listService = this._host!.spec.getService('affine:list');
@@ -368,8 +368,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                   ${ArrowLeftIcon}
                 </div>
                 <div>
-                  ${SmallLinkedPageIcon}${page.meta.title
-                    ? page.meta.title
+                  ${SmallLinkedDocIcon}${doc.meta?.title
+                    ? doc.meta.title
                     : 'Untitled'}
                 </div>
               </div>
@@ -383,9 +383,9 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                         blocks,
                         blockId => blockId,
                         blockId => {
-                          const model = page.getBlockById(blockId);
+                          const model = doc.getBlockById(blockId);
                           if (!model) return nothing;
-                          return this._backlink(model, pageId, blockId);
+                          return this._backlink(model, docId, blockId);
                         }
                       )
                     : nothing}
@@ -397,11 +397,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     </div>`;
   }
 
-  private _backlink(
-    model: BlockModel<object>,
-    pageId: string,
-    blockId: string
-  ) {
+  private _backlink(model: BlockModel<object>, docId: string, blockId: string) {
     if (
       !matchFlavours(model, [
         'affine:paragraph',
@@ -428,8 +424,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     return html` <div
       class=${`rich-text-container ${type}`}
       @click=${() =>
-        this.docPageBlock.slots.pageLinkClicked.emit({
-          pageId,
+        this.pageRoot.slots.docLinkClicked.emit({
+          docId,
           blockId,
         })}
     >
@@ -442,9 +438,9 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                 .attributesSchema=${this._inlineManager.getSchema()}
                 .attributeRenderer=${this._inlineManager.getRenderer()}
               ></rich-text>`
-          : html`<div class="linked-page-container">
-              ${SmallLinkedPageIcon}
-              ${this.page.meta.title ? this.page.meta.title : 'Untitled'}
+          : html`<div class="linked-doc-container">
+              ${SmallLinkedDocIcon}
+              ${this.doc.meta?.title ? this.doc.meta?.title : 'Untitled'}
             </div>`}
       </div>
 
@@ -463,7 +459,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
           align-items: center;
         }
         .divider {
-          background: var(--affine-divider-color);
+          background: var(--affine-border-color);
           height: 0.5px;
           width: 100%;
         }

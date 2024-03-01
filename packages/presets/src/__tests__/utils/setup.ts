@@ -1,11 +1,6 @@
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  type BlobStorage,
-  type Page,
-  Text,
-  Workspace,
-} from '@blocksuite/store';
+import { type BlobStorage, type Doc, Text, Workspace } from '@blocksuite/store';
 import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
 
 import { AffineEditorContainer } from '../../index.js';
@@ -15,7 +10,7 @@ function createWorkspaceOptions() {
   const schema = new Schema();
   const room = Math.random().toString(16).slice(2, 8);
 
-  schema.register(AffineSchemas).register(__unstableSchemas);
+  schema.register(AffineSchemas);
 
   const idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
@@ -31,22 +26,22 @@ function createWorkspaceOptions() {
       enable_transformer_clipboard: true,
       enable_bultin_ledits: true,
       readonly: {
-        'page:home': false,
+        'doc:home': false,
       },
     },
   };
 }
 
 function initWorkspace(workspace: Workspace) {
-  const page = workspace.createPage({ id: 'page:home' });
+  const doc = workspace.createDoc({ id: 'doc:home' });
 
-  page.load(() => {
-    const pageBlockId = page.addBlock('affine:page', {
+  doc.load(() => {
+    const rootId = doc.addBlock('affine:page', {
       title: new Text(),
     });
-    page.addBlock('affine:surface', {}, pageBlockId);
+    doc.addBlock('affine:surface', {}, rootId);
   });
-  page.resetHistory();
+  doc.resetHistory();
 }
 
 async function createEditor(
@@ -54,15 +49,15 @@ async function createEditor(
   mode: 'edgeless' | 'page' = 'page'
 ) {
   const app = document.createElement('div');
-  const page = workspace.pages.values().next().value as Page | undefined;
-  assertExists(page, 'Need to create a page first');
+  const doc = workspace.docs.values().next().value as Doc | undefined;
+  assertExists(doc, 'Need to create a doc first');
   const editor = new AffineEditorContainer();
-  editor.page = page;
+  editor.doc = doc;
   editor.mode = mode;
   app.append(editor);
 
   window.editor = editor;
-  window.page = page;
+  window.doc = doc;
 
   app.style.width = '100%';
   app.style.height = '1280px';
@@ -94,5 +89,5 @@ export function cleanup() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (window as any).editor;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (window as any).page;
+  delete (window as any).doc;
 }

@@ -7,13 +7,13 @@ import { Generator, Schema, Workspace } from '../index.js';
 // Use manual per-module import/export to support vitest environment on Node.js
 import {
   NoteBlockSchema,
-  PageBlockSchema,
   ParagraphBlockSchema,
+  RootBlockSchema,
 } from './test-schema.js';
 
 export const BlockSchemas = [
+  RootBlockSchema,
   ParagraphBlockSchema,
-  PageBlockSchema,
   NoteBlockSchema,
 ];
 
@@ -24,12 +24,12 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, schema };
 }
 
-function createTestPage(pageId = 'page:home', workspace?: Workspace) {
+function createTestDoc(pageId = 'doc:home', workspace?: Workspace) {
   const options = createTestOptions();
   const _workspace = workspace || new Workspace(options);
-  const page = _workspace.createPage({ id: pageId });
-  page.load();
-  return page;
+  const doc = _workspace.createDoc({ id: pageId });
+  doc.load();
+  return doc;
 }
 
 function requestIdleCallbackPolyfill(
@@ -56,13 +56,13 @@ beforeEach(() => {
 
 describe('workspace.search works', () => {
   it('workspace search matching', () => {
-    const page = createTestPage();
-    const workspace = page.workspace;
+    const doc = createTestDoc();
+    const workspace = doc.workspace;
 
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(''),
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(''),
     });
-    const noteId = page.addBlock('affine:note', {}, pageId);
+    const noteId = doc.addBlock('affine:note', {}, rootId);
     const text1 =
       '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz';
     const text2 = '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台';
@@ -71,7 +71,7 @@ describe('workspace.search works', () => {
         '2',
         {
           content: text1,
-          space: page.id,
+          space: doc.id,
         },
       ],
     ]);
@@ -80,22 +80,22 @@ describe('workspace.search works', () => {
         '3',
         {
           content: text2,
-          space: page.id,
+          space: doc.id,
         },
       ],
     ]);
-    page.addBlock(
+    doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text(text1),
+        text: new doc.Text(text1),
       },
       noteId
     );
 
-    page.addBlock(
+    doc.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text(text2),
+        text: new doc.Text(text2),
       },
       noteId
     );
@@ -107,17 +107,17 @@ describe('workspace.search works', () => {
       });
     });
 
-    const update = encodeStateAsUpdate(page.spaceDoc);
+    const update = encodeStateAsUpdate(doc.spaceDoc);
     const schema = new Schema();
     const workspace2 = new Workspace({
       schema,
       id: 'test',
     });
-    const page2 = workspace2.createPage({
-      id: 'page:home',
+    const doc2 = workspace2.createDoc({
+      id: 'doc:home',
     });
-    applyUpdate(page2.spaceDoc, update);
-    expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
+    applyUpdate(doc2.spaceDoc, update);
+    expect(doc2.spaceDoc.toJSON()).toEqual(doc.spaceDoc.toJSON());
 
     requestIdleCallback(() => {
       queueMicrotask(() => {
@@ -130,23 +130,23 @@ describe('workspace.search works', () => {
 
 describe('backlink works', () => {
   it('backlink indexer works with subpage', async () => {
-    const page = createTestPage();
-    const workspace = page.workspace;
-    const subpage = createTestPage('page1', workspace);
+    const doc = createTestDoc();
+    const workspace = doc.workspace;
+    const subpage = createTestDoc('doc1', workspace);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(''),
+    const rootId = doc.addBlock('affine:page', {
+      title: new doc.Text(''),
     });
-    const noteId = page.addBlock('affine:note', {}, pageId);
+    const noteId = doc.addBlock('affine:note', {}, rootId);
 
-    const text = page.Text.fromDelta([
+    const text = doc.Text.fromDelta([
       {
         insert: ' ',
         attributes: { reference: { type: 'Subpage', pageId: subpage.id } },
       },
     ]);
-    page.addBlock(
+    doc.addBlock(
       'affine:paragraph',
       {
         text,
@@ -157,132 +157,132 @@ describe('backlink works', () => {
     // wait for the backlink index to be updated
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    expect(backlinkIndexer.getBacklink(page.id)).toStrictEqual([]);
+    expect(backlinkIndexer.getBacklink(doc.id)).toStrictEqual([]);
     expect(backlinkIndexer.getBacklink(subpage.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'page:home',
+        pageId: 'doc:home',
         type: 'Subpage',
       },
     ]);
 
     text.format(0, 1, { reference: null });
 
-    expect(backlinkIndexer.getBacklink(page.id)).toStrictEqual([]);
+    expect(backlinkIndexer.getBacklink(doc.id)).toStrictEqual([]);
 
     expect(backlinkIndexer.getBacklink(subpage.id)).toStrictEqual([]);
   });
 
-  it('backlink indexer works with linked page', async () => {
-    const page0 = createTestPage();
-    const workspace = page0.workspace;
-    const page1 = createTestPage('space:page1', workspace);
+  it('backlink indexer works with linked doc', async () => {
+    const doc0 = createTestDoc();
+    const workspace = doc0.workspace;
+    const doc1 = createTestDoc('space:doc1', workspace);
     const backlinkIndexer = workspace.indexer.backlink;
 
-    const page0Id = page0.addBlock('affine:page');
-    const note0Id = page0.addBlock('affine:note', {}, page0Id);
+    const doc0Id = doc0.addBlock('affine:page');
+    const note0Id = doc0.addBlock('affine:note', {}, doc0Id);
 
-    page0.addBlock(
+    doc0.addBlock(
       'affine:paragraph',
       {
-        text: page0.Text.fromDelta([
+        text: doc0.Text.fromDelta([
           {
             insert: ' ',
-            attributes: { reference: { type: 'LinkedPage', pageId: page0.id } },
+            attributes: { reference: { type: 'LinkedPage', pageId: doc0.id } },
           },
         ]),
       },
       note0Id
     );
-    const paragraphId2 = page0.addBlock(
+    const paragraphId2 = doc0.addBlock(
       'affine:paragraph',
       {
-        text: page1.Text.fromDelta([
+        text: doc1.Text.fromDelta([
           {
             insert: ' ',
-            attributes: { reference: { type: 'LinkedPage', pageId: page1.id } },
+            attributes: { reference: { type: 'LinkedPage', pageId: doc1.id } },
           },
         ]),
       },
       note0Id
     );
-    const paragraph2 = page0.getBlockById(paragraphId2);
+    const paragraph2 = doc0.getBlockById(paragraphId2);
 
-    const page1Id = page1.addBlock('affine:page');
-    const note1Id = page1.addBlock('affine:note', {}, page1Id);
+    const doc1Id = doc1.addBlock('affine:page');
+    const note1Id = doc1.addBlock('affine:note', {}, doc1Id);
 
-    page1.addBlock(
+    doc1.addBlock(
       'affine:paragraph',
       {
-        text: page1.Text.fromDelta([
+        text: doc1.Text.fromDelta([
           {
             insert: ' ',
-            attributes: { reference: { type: 'LinkedPage', pageId: page0.id } },
+            attributes: { reference: { type: 'LinkedPage', pageId: doc0.id } },
           },
         ]),
       },
       note1Id
     );
-    const paragraphId4 = page1.addBlock(
+    const paragraphId4 = doc1.addBlock(
       'affine:paragraph',
       {
-        text: page1.Text.fromDelta([
+        text: doc1.Text.fromDelta([
           {
             insert: ' ',
-            attributes: { reference: { type: 'LinkedPage', pageId: page1.id } },
+            attributes: { reference: { type: 'LinkedPage', pageId: doc1.id } },
           },
         ]),
       },
       note1Id
     );
-    const paragraph4 = page1.getBlockById(paragraphId4);
+    const paragraph4 = doc1.getBlockById(paragraphId4);
 
     // wait for the backlink index to be updated
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
+    expect(backlinkIndexer.getBacklink(doc0.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'page:home',
+        pageId: 'doc:home',
         type: 'LinkedPage',
       },
       {
         blockId: '6',
-        pageId: 'space:page1',
+        pageId: 'space:doc1',
         type: 'LinkedPage',
       },
     ]);
 
-    expect(backlinkIndexer.getBacklink(page1.id)).toStrictEqual([
+    expect(backlinkIndexer.getBacklink(doc1.id)).toStrictEqual([
       {
         blockId: '3',
-        pageId: 'page:home',
+        pageId: 'doc:home',
         type: 'LinkedPage',
       },
       {
         blockId: '7',
-        pageId: 'space:page1',
+        pageId: 'space:doc1',
         type: 'LinkedPage',
       },
     ]);
 
     paragraph2?.text?.delete(0, paragraph2.text.length);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    page1.updateBlock(paragraph4!, { text: new page1.Text() });
+    doc1.updateBlock(paragraph4!, { text: new doc1.Text() });
 
-    expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
+    expect(backlinkIndexer.getBacklink(doc0.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'page:home',
+        pageId: 'doc:home',
         type: 'LinkedPage',
       },
       {
         blockId: '6',
-        pageId: 'space:page1',
+        pageId: 'space:doc1',
         type: 'LinkedPage',
       },
     ]);
 
-    expect(backlinkIndexer.getBacklink(page1.id)).toStrictEqual([]);
+    expect(backlinkIndexer.getBacklink(doc1.id)).toStrictEqual([]);
   });
 });

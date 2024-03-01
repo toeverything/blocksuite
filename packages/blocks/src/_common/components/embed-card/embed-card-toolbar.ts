@@ -30,8 +30,8 @@ import {
   isEmbedGithubBlock,
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
-} from '../../../page-block/edgeless/utils/query.js';
-import type { EmbedOptions } from '../../../page-block/page-service.js';
+} from '../../../root-block/edgeless/utils/query.js';
+import type { EmbedOptions } from '../../../root-block/root-service.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../icons/edgeless.js';
 import {
   CaptionIcon,
@@ -115,7 +115,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       opacity: var(--add, 1);
     }
 
-    .embed-card-toolbar-button.page-info {
+    .embed-card-toolbar-button.doc-info {
       display: flex;
       align-items: center;
       width: max-content;
@@ -127,13 +127,13 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       cursor: pointer;
     }
 
-    .embed-card-toolbar-button.page-info > svg {
+    .embed-card-toolbar-button.doc-info > svg {
       width: 20px;
       height: 20px;
       flex-shrink: 0;
     }
 
-    .embed-card-toolbar-button.page-info > span {
+    .embed-card-toolbar-button.doc-info > span {
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
@@ -200,7 +200,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     return this.block.std;
   }
 
-  private get _pageService() {
+  private get _rootService() {
     return this._std.spec.getService('affine:page');
   }
 
@@ -227,7 +227,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   private get _canConvertToEmbedView() {
     // synced doc entry controlled by awareness flag
     if (isEmbedLinkedDocBlock(this._model)) {
-      const isSyncedDocEnabled = this._model.page.awarenessStore.getFlag(
+      const isSyncedDocEnabled = this._model.doc.awarenessStore.getFlag(
         'enable_synced_doc_block'
       );
       if (!isSyncedDocEnabled) {
@@ -237,6 +237,13 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
 
     return (
       'convertToEmbed' in this.block || this._embedOptions?.viewType === 'embed'
+    );
+  }
+
+  private get _embedViewButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this._model) &&
+      !!this.block.closest('affine-embed-synced-doc-block')
     );
   }
 
@@ -271,10 +278,10 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       | EmbedLinkedDocBlockComponent
       | EmbedSyncedDocBlockComponent;
 
-    return block.pageMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon;
+    return block.editorMode === 'page' ? EmbedPageIcon : EmbedEdgelessIcon;
   }
 
-  private get _pageTitle() {
+  private get _docTitle() {
     if (
       !isEmbedLinkedDocBlock(this._model) &&
       !isEmbedSyncedDocBlock(this._model)
@@ -284,7 +291,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     const block = this.block as
       | EmbedLinkedDocBlockComponent
       | EmbedSyncedDocBlockComponent;
-    return block.pageTitle;
+    return block.docTitle;
   }
 
   private _turnIntoInlineView() {
@@ -297,16 +304,16 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       return;
     }
 
-    const { page } = this._model;
-    const parent = page.getParent(this._model);
+    const { doc } = this._model;
+    const parent = doc.getParent(this._model);
     const index = parent?.children.indexOf(this._model);
 
     const yText = new Workspace.Y.Text();
     const insert = this._model.title || this._model.caption || this._model.url;
     yText.insert(0, insert);
     yText.format(0, insert.length, { link: this._model.url });
-    const text = new page.Text(yText);
-    page.addBlock(
+    const text = new doc.Text(yText);
+    doc.addBlock(
       'affine:paragraph',
       {
         text,
@@ -315,7 +322,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       index
     );
 
-    page.deleteBlock(this._model);
+    doc.deleteBlock(this._model);
   }
 
   private _convertToCardView() {
@@ -332,7 +339,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       return;
     }
 
-    const { page, url, style, caption } = this._model;
+    const { doc, url, style, caption } = this._model;
 
     let targetFlavour = 'affine:bookmark',
       targetStyle = style;
@@ -349,18 +356,18 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
           )[0];
     }
 
-    const parent = page.getParent(this._model);
+    const parent = doc.getParent(this._model);
     assertExists(parent);
     const index = parent.children.indexOf(this._model);
 
-    page.addBlock(
+    doc.addBlock(
       targetFlavour as never,
       { url, style: targetStyle, caption },
       parent,
       index
     );
     this._std.selection.setGroup('note', []);
-    page.deleteBlock(this._model);
+    doc.deleteBlock(this._model);
   }
 
   private _convertToEmbedView() {
@@ -377,7 +384,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       return;
     }
 
-    const { page, url, style, caption } = this._model;
+    const { doc, url, style, caption } = this._model;
 
     if (!this._embedOptions || this._embedOptions.viewType !== 'embed') {
       return;
@@ -388,11 +395,11 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
       ? style
       : styles.filter(style => style !== 'vertical' && style !== 'cube')[0];
 
-    const parent = page.getParent(this._model);
+    const parent = doc.getParent(this._model);
     assertExists(parent);
     const index = parent.children.indexOf(this._model);
 
-    page.addBlock(
+    doc.addBlock(
       flavour as never,
       { url, style: targetStyle, caption },
       parent,
@@ -400,7 +407,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     );
 
     this._std.selection.setGroup('note', []);
-    page.deleteBlock(this._model);
+    doc.deleteBlock(this._model);
   }
 
   private _showCaption() {
@@ -483,7 +490,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   override render() {
     const model = this._model;
     this._embedOptions =
-      'url' in model ? this._pageService.getEmbedBlockOptions(model.url) : null;
+      'url' in model ? this._rootService.getEmbedBlockOptions(model.url) : null;
 
     return html`
       <div class="embed-card-toolbar">
@@ -499,7 +506,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               <icon-button
                 size="32px"
                 class="embed-card-toolbar-button copy"
-                ?disabled=${model.page.readonly}
+                ?disabled=${model.doc.readonly}
                 @click=${() => this._copyUrl()}
               >
                 ${CopyIcon}
@@ -511,7 +518,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               <icon-button
                 size="32px"
                 class="embed-card-toolbar-button edit"
-                ?disabled=${model.page.readonly}
+                ?disabled=${model.doc.readonly}
                 @click=${() =>
                   toggleEmbedCardEditModal(this._host as EditorHost, model)}
               >
@@ -526,10 +533,10 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
           ? html`
               <icon-button
                 size="32px"
-                class="embed-card-toolbar-button page-info"
+                class="embed-card-toolbar-button doc-info"
                 @click=${() => this.block.open()}
               >
-                ${this._pageIcon} <span>${this._pageTitle}</span> ${OpenIcon}
+                ${this._pageIcon} <span>${this._docTitle}</span> ${OpenIcon}
                 <affine-tooltip .offset=${12}>${'Open'}</affine-tooltip>
               </icon-button>
 
@@ -541,8 +548,8 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
           <icon-button
             size="24px"
             class="embed-card-toolbar-button link"
-            hover="false"
-            ?disabled=${model.page.readonly}
+            .hover=${false}
+            ?disabled=${model.doc.readonly}
             @click=${() => this._turnIntoInlineView()}
           >
             ${LinkIcon}
@@ -556,8 +563,8 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               card: true,
               'current-view': this._isCardView,
             })}
-            hover="false"
-            ?disabled=${model.page.readonly}
+            .hover=${false}
+            ?disabled=${model.doc.readonly}
             @click=${() => this._convertToCardView()}
           >
             ${BookmarkIcon}
@@ -573,8 +580,9 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
                     embed: true,
                     'current-view': this._isEmbedView,
                   })}
-                  hover="false"
-                  ?disabled=${model.page.readonly}
+                  .hover=${false}
+                  ?disabled=${model.doc.readonly ||
+                  this._embedViewButtonDisabled}
                   @click=${() => this._convertToEmbedView()}
                 >
                   ${EmbedWebIcon}
@@ -589,7 +597,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               <icon-button
                 size="32px"
                 class="embed-card-toolbar-button card-style"
-                ?disabled=${model.page.readonly}
+                ?disabled=${model.doc.readonly}
                 @click=${() => this._toggleCardStyleMenu()}
               >
                 ${PaletteIcon}
@@ -603,7 +611,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
         <icon-button
           size="32px"
           class="embed-card-toolbar-button caption"
-          ?disabled=${model.page.readonly}
+          ?disabled=${model.doc.readonly}
           @click=${() => this._showCaption()}
         >
           ${CaptionIcon}
@@ -615,7 +623,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
         <icon-button
           size="32px"
           class="embed-card-toolbar-button reload"
-          ?disabled=${model.page.readonly}
+          ?disabled=${model.doc.readonly}
           @click=${() => this._refreshData()}
         >
           ${RefreshIcon}

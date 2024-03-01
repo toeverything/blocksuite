@@ -4,60 +4,60 @@
 🌐 This documentation has a [Chinese translation](https://insider.affine.pro/share/af3478a2-9c9c-4d16-864d-bffa1eb10eb6/-3bEQPBoOEkNH13ULW9Ed).
 :::
 
-In previous examples, we demonstrated how a `page` collaborates with an `editor`. In this document, we will introduce the basic structure of the block tree within the `page` and the common methods for controlling it in an editor environment.
+In previous examples, we demonstrated how a `doc` collaborates with an `editor`. In this document, we will introduce the basic structure of the block tree within the `doc` and the common methods for controlling it in an editor environment.
 
 ## Block Tree Basics
 
-In BlockSuite, each `page` object manages an independent block tree composed of various types of blocks. These blocks can be defined through the [`BlockSchema`](./block-schema.md), which specifies their fields and permissible nesting relationships among different block types. Each block type has a unique `block.flavour`, following a `namespace:name` naming structure. Since the preset editors in BlockSuite are derived from the [AFFiNE](https://github.com/toeverything/AFFiNE) project, the default editable blocks use the `affine` prefix.
+In BlockSuite, each `doc` object manages an independent block tree composed of various types of blocks. These blocks can be defined through the [`BlockSchema`](./block-schema.md), which specifies their fields and permissible nesting relationships among different block types. Each block type has a unique `block.flavour`, following a `namespace:name` naming structure. Since the preset editors in BlockSuite are derived from the [AFFiNE](https://github.com/toeverything/AFFiNE) project, the default editable blocks use the `affine` prefix.
 
-To manipulate blocks, you can utilize several primary APIs under `page`:
+To manipulate blocks, you can utilize several primary APIs under `doc`:
 
-- [`page.addBlock`](/api/@blocksuite/store/classes/Page.html#addblock)
-- [`page.updateBlock`](/api/@blocksuite/store/classes/Page.html#updateblock)
-- [`page.deleteBlock`](/api/@blocksuite/store/classes/Page.html#deleteblock)
-- [`page.getBlockById`](/api/@blocksuite/store/classes/Page.html#getblockbyid)
+- [`doc.addBlock`](/api/@blocksuite/store/classes/Doc.html#addblock)
+- [`doc.updateBlock`](/api/@blocksuite/store/classes/Doc.html#updateblock)
+- [`doc.deleteBlock`](/api/@blocksuite/store/classes/Doc.html#deleteblock)
+- [`doc.getBlockById`](/api/@blocksuite/store/classes/Doc.html#getblockbyid)
 
 Here is an example demonstrating the manipulation of the block tree through these APIs:
 
 ```ts
 // The first block will be added as root
-const rootId = page.addBlock('affine:page');
+const rootId = doc.addBlock('affine:page');
 
 // Insert second block as a child of the root with empty props
 const props = {};
-const noteId = page.addBlock('affine:note', props, rootId);
+const noteId = doc.addBlock('affine:note', props, rootId);
 
 // You can also provide an optional `parentIndex`
-const paragraphId = page.addBlock('affine:paragraph', props, noteId, 0);
+const paragraphId = doc.addBlock('affine:paragraph', props, noteId, 0);
 
-const modelA = page.root!.children[0].children[0];
-const modelB = page.getBlockById(paragraphId);
+const modelA = doc.root!.children[0].children[0];
+const modelB = doc.getBlockById(paragraphId);
 console.log(modelA === modelB); // true
 
 // Update the paragraph type to 'h1'
-page.updateBlock(modelA, { type: 'h1' });
+doc.updateBlock(modelA, { type: 'h1' });
 
-page.deleteBlock(modelA);
+doc.deleteBlock(modelA);
 ```
 
 This example creates a subset of the block tree hierarchy defaultly used in `@blocksuite/presets`, illustrated as follows:
 
 ![block-nesting](../images/block-nesting.png)
 
-In BlockSuite, you need to initialize a valid document structure before attaching it to editors, which is also why it requires `init()` after `createEmptyPage()`.
+In BlockSuite, you need to initialize a valid document structure before attaching it to editors, which is also why it requires `init()` after `createEmptyDoc()`.
 
 ::: info
 The block tree hierarchy is specific to the preset editors. At the framework level, `@blocksuite/store` does **NOT** treat the "first-party" `affine:*` blocks with any special way. Feel free to add blocks from different namespaces for the block tree!
 :::
 
-All block operations on `page` are automatically recorded and can be reversed using [`page.undo()`](/api/@blocksuite/store/classes/Page.html#undo) and [`page.redo()`](/api/@blocksuite/store/classes/Page.html#redo). By default, operations within a certain period are automatically merged into a single record. However, you can explicitly add a history record during operations by inserting [`page.captureSync()`](/api/@blocksuite/store/classes/Page.html#capturesync) between block operations:
+All block operations on `doc` are automatically recorded and can be reversed using [`doc.undo()`](/api/@blocksuite/store/classes/Doc.html#undo) and [`doc.redo()`](/api/@blocksuite/store/classes/Doc.html#redo). By default, operations within a certain period are automatically merged into a single record. However, you can explicitly add a history record during operations by inserting [`doc.captureSync()`](/api/@blocksuite/store/classes/Doc.html#capturesync) between block operations:
 
 ```ts
-const rootId = page.addBlock('affine:page');
-const noteId = page.addBlock('affine:note', props, rootId);
+const rootId = doc.addBlock('affine:page');
+const noteId = doc.addBlock('affine:note', props, rootId);
 
 // Capture a history record now
-page.captureSync();
+doc.captureSync();
 
 // ...
 ```
@@ -80,7 +80,7 @@ Firstly, let's explain the newly introduced `host` and `std`, which are determin
 
 ::: tip
 
-- To access `host` after attaching page to an editor, wait for a [slot](./slot) named [`page.slots.ready`](/api/@blocksuite/store/classes/Page.html#ready-1).
+- To access `host` after attaching doc to an editor, wait for a [slot](./slot) named [`doc.slots.ready`](/api/@blocksuite/store/classes/Doc.html#ready-1).
 - We usually access `host.spec` instead of `host.std.spec` to simplify the code.
 
 :::
@@ -113,19 +113,19 @@ This allows the selection manager to handle different types of selections, as sh
 
 ![selection-types](../images/selection-types.png)
 
-In `selection.value`, different types of selection states can coexist simultaneously. Each selection object records at least the `id` and `path` of the corresponding selected block (i.e., the sequence of ids of all blocks from the root block to that block). Moreover, you can further categorize different types of selections using the `group` field. For example in `DocEditor`, both `TextSelection` and `BlockSelection` belong to the `note` group. Hence, the example structure of block selection in the above image is as follows:
+In `selection.value`, different types of selection states can coexist simultaneously. Each selection object records at least the `id` and `path` of the corresponding selected block (i.e., the sequence of ids of all blocks from the root block to that block). Moreover, you can further categorize different types of selections using the `group` field. For example in `PageEditor`, both `TextSelection` and `BlockSelection` belong to the `note` group. Hence, the example structure of block selection in the above image is as follows:
 
 ```ts
 [
   {
     type: 'block',
     group: 'note',
-    path: ['page_id', 'note_id', 'paragraph_1_id'],
+    path: ['root_id', 'note_id', 'paragraph_1_id'],
   },
   {
     type: 'block',
     group: 'note',
-    path: ['page_id', 'note_id', 'paragraph_2_id'],
+    path: ['root_id', 'note_id', 'paragraph_2_id'],
   },
 ];
 ```
@@ -144,11 +144,11 @@ In many cases, operations on the block tree within an editor environment need fu
 
 ```ts
 function getFirstSelectedModel(host: EditorHost) {
-  const { selection, page } = host;
+  const { selection, doc } = host;
   const firstSelection = selection.value[0];
   const { path } = firstSelection;
   const leafId = path[path.length - 1];
-  const blockModel = page.getBlockById(leafId);
+  const blockModel = doc.getBlockById(leafId);
   return blockModel;
 }
 ```
@@ -157,15 +157,15 @@ This direct usage is not very convenient. Also, as BlockSuite encourages complet
 
 ### Service
 
-In BlockSuite, service is used for registering state or methods specific to a certain block type. For example, instead of implementing the `getFirstSelectedModel` method yourself, you can use shortcuts predefined on `PageService`:
+In BlockSuite, service is used for registering state or methods specific to a certain block type. For example, instead of implementing the `getFirstSelectedModel` method yourself, you can use shortcuts predefined on `RootService`:
 
 ```ts
-const pageService = host.spec.getService('affine:page');
+const rootService = host.spec.getService('affine:page');
 
 // Get models of selected blocks
-pageService.selectedModel;
+rootService.selectedModel;
 // Get UI components of selected blocks
-pageService.selectedBlocks;
+rootService.selectedBlocks;
 ```
 
 Here, `getService` is used to obtain the service corresponding to a certain block spec. Each service is a plain class, existing as a singleton throughout the lifecycle of the `host` (with a corresponding [`mounted`](/api/@blocksuite/block-std/classes/BlockService.html#mounted) lifecycle hook). Some typical uses of service include:
@@ -179,9 +179,9 @@ As an example, the following code more specifically shows how the two getters `s
 ```ts
 import { BlockService } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
-import type { PageBlockModel } from './page-model.js';
+import type { RootBlockModel } from './root-model.js';
 
-export class PageService extends BlockService<PageBlockModel> {
+export class RootService extends BlockService<RootBlockModel> {
   // ...
 
   // A plain getter in service
@@ -217,7 +217,7 @@ export class PageService extends BlockService<PageBlockModel> {
 
 Besides the service, this code snippet also utilizes the chain of commands occurring on `this.std.command` (the [`CommandManager`](/api/@blocksuite/block-std/classes/CommandManager)). This is about using predefined [`Command`](./command)s.
 
-In BlockSuite, you can always control the editor solely through direct operations on `host` and `page`. However, in the real world, it's often necessary to treat some operations as variables, dynamically constructing control flow (e.g., dynamically combining different subsequent processing logics based on current selection states). This is where commands really shines. **It allows complex sequences of operations to be recorded as reusable chains, and also simplifies the context sharing between operations**.
+In BlockSuite, you can always control the editor solely through direct operations on `host` and `doc`. However, in the real world, it's often necessary to treat some operations as variables, dynamically constructing control flow (e.g., dynamically combining different subsequent processing logics based on current selection states). This is where commands really shines. **It allows complex sequences of operations to be recorded as reusable chains, and also simplifies the context sharing between operations**.
 
 The code at the end of the previous section demonstrates the basic usage of commands:
 
@@ -242,7 +242,7 @@ export const withHostCommand: Command<never, 'host'> = (ctx, next) => {
 };
 
 // ...
-class PageService {
+class RootService {
   // ...
   mounted() {
     // ...
@@ -274,7 +274,7 @@ We plan to continue supplementing and documenting some of the most commonly used
 
 So far, we have introduced almost all the main parts that make up a block spec. Now, it's time to learn how to create new block types.
 
-In BlockSuite, the block spec is built from three main components: [`schema`](./block-schema), [`service`](./block-service), and [`view`](./block-view). Among these, the definition of the `view` part is specific to the frontend framework used. For example, in the case of `DocEditor` and `EdgelessEditor` based on `@blocksuite/lit`, the block specs are defined with lit primitives in this way:
+In BlockSuite, the block spec is built from three main components: [`schema`](./block-schema), [`service`](./block-service), and [`view`](./block-view). Among these, the definition of the `view` part is specific to the frontend framework used. For example, in the case of `PageEditor` and `EdgelessEditor` based on `@blocksuite/lit`, the block specs are defined with lit primitives in this way:
 
 ```ts
 import type { BlockSpec } from '@blocksuite/block-std';
@@ -296,7 +296,7 @@ const MyBlockSpec: BlockSpec = {
 
 This design aims at balancing ease of use with customizability. Both the service and view are built around the schema, which allows for different components, services, and widgets to be implemented for the same block model, enabling:
 
-- A single block to have multiple component views. For example, `DocEditor` and `EdgelessEditor` have different implementations of the page block ([recall here](./component-types#one-block-multiple-specs)).
+- A single block to have multiple component views. For example, `PageEditor` and `EdgelessEditor` have different implementations of the root block ([recall here](./component-types#one-block-multiple-specs)).
 - A single block to be configured with different widget combinations. For instance, you can remove all widgets to compose read-only editors.
 - A single block to even be implemented based on different frontend frameworks, by simply providing an `EditorHost` middleware implementation for the respective framework.
 
@@ -308,7 +308,7 @@ This design aims at balancing ease of use with customizability. Both the service
 - The reason BlockSuite uses lit by default is that as a web component framework, the lit component tree IS the DOM tree natively. This simplifies the three-phase update process of `block tree -> component tree -> DOM tree` to just `block tree -> component (DOM) tree`.
   :::
 
-Furthermore, BlockSuite also supports defining the most commonly used type of custom block in a more straightforward way: the _embed block_. **This type of block does not nest other blocks and manages its internal area's state entirely on its own**. For example, to create a GitHub link card that can be displayed in `DocEditor`, you can start by defining the model:
+Furthermore, BlockSuite also supports defining the most commonly used type of custom block in a more straightforward way: the _embed block_. **This type of block does not nest other blocks and manages its internal area's state entirely on its own**. For example, to create a GitHub link card that can be displayed in `PageEditor`, you can start by defining the model:
 
 ```ts
 import { BlockModel } from '@blocksuite/store';
@@ -372,12 +372,12 @@ Finally, by inserting this `BlockSpec` into the `host.specs` array, you can expa
 
 ```ts
 // ...
-import { DocEditorBlockSpecs } from '@blocksuite/blocks';
+import { PageEditorBlockSpecs } from '@blocksuite/blocks';
 import { EmbedGithubBlockSpec } from './embed-block-spec.js';
 
-const editor = new DocEditor();
-editor.specs = [...DocEditorBlockSpecs, EmbedGithubBlockSpec];
-editor.page = page;
+const editor = new PageEditor();
+editor.specs = [...PageEditorBlockSpecs, EmbedGithubBlockSpec];
+editor.doc = doc;
 ```
 
 After completing the above steps, you can insert the new block type into the block tree:
@@ -389,9 +389,9 @@ const props = {
 };
 
 // The 'affine' prefix is kept by default, but you can also override it.
-page.addBlock('affine:embed-github', props, parentId);
+doc.addBlock('affine:embed-github', props, parentId);
 ```
 
 You can view the [source code](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/embed-github-block) for the above example in BlockSuite repository.
 
-Combining the earlier example of composing `DocEditor` entirely based on block spec ([recall here](./component-types#composing-editors-by-blocks)), this should give you a more direct understanding of BlockSuite's extensibility.
+Combining the earlier example of composing `PageEditor` entirely based on block spec ([recall here](./component-types#composing-editors-by-blocks)), this should give you a more direct understanding of BlockSuite's extensibility.

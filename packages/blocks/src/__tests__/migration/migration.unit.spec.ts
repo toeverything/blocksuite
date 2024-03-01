@@ -11,8 +11,8 @@ import { DatabaseBlockSchema } from '../../database-block/database-model.js';
 import { FrameBlockSchema } from '../../frame-block/frame-model.js';
 import { ListBlockSchema } from '../../list-block/list-model.js';
 import { NoteBlockSchema } from '../../note-block/note-model.js';
-import { PageBlockSchema } from '../../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../paragraph-block/paragraph-model.js';
+import { RootBlockSchema } from '../../root-block/root-model.js';
 import { SurfaceBlockSchema } from '../../surface-block/surface-model.js';
 
 async function loadBinary(name: string) {
@@ -27,7 +27,7 @@ async function loadBinary(name: string) {
 
 const schema = new Schema();
 schema.register([
-  PageBlockSchema,
+  RootBlockSchema,
   SurfaceBlockSchema,
   NoteBlockSchema,
   ParagraphBlockSchema,
@@ -76,7 +76,7 @@ describe('block migration', () => {
     assert.isUndefined(shape.get('bold'));
     assert.isUndefined(shape.get('italic'));
 
-    schema.upgradePage(
+    schema.upgradeDoc(
       0,
       {
         'affine:page': 1,
@@ -121,7 +121,7 @@ describe('block migration', () => {
 
     assert.exists(connector);
 
-    schema.upgradePage(
+    schema.upgradeDoc(
       0,
       {
         'affine:list': 1,
@@ -152,7 +152,7 @@ describe('block migration', () => {
       .get('value') as Y.Map<unknown>;
     assert.exists(surfaceElements.get('2'));
 
-    schema.upgradePage(
+    schema.upgradeDoc(
       0,
       {
         'affine:surface': 5,
@@ -182,7 +182,7 @@ describe('block migration', () => {
     ).toBeUndefined();
     expect(databaseBlock['prop:views'].length).toBe(2);
 
-    schema.upgradePage(
+    schema.upgradeDoc(
       0,
       {
         'affine:page': 1,
