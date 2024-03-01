@@ -268,7 +268,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
       y: 600,
     },
     {
-      x: 960,
+      x: 1000,
       y: 600,
     }
   );
@@ -280,8 +280,8 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   // Click to start selection and hold the mouse to trigger auto panning to the right
   await page.mouse.move(800, 600);
   await page.mouse.down();
-  await page.mouse.move(960, 200, { steps: 20 });
-  await page.waitForTimeout(800);
+  await page.mouse.move(950, 200, { steps: 20 });
+  await page.waitForTimeout(600);
   await page.mouse.up();
 
   // Expect to select the empty note
@@ -300,22 +300,22 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
     },
     {
       x: 400,
-      y: 800,
+      y: 850,
     },
     {
       click: true,
     }
   );
   await setEdgelessTool(page, 'default');
-  await page.mouse.click(700, 800);
+  await page.mouse.click(200, 800);
   selectedRect = page.locator(selectedRectClass);
   await page.waitForTimeout(100);
   await expect(selectedRect).toBeHidden();
 
   // Click to start selection and hold the mouse to trigger auto panning to the right
-  await page.mouse.move(700, 800);
+  await page.mouse.move(800, 300);
   await page.mouse.down();
-  await page.mouse.move(700, 1200, { steps: 20 });
+  await page.mouse.move(820, 1150, { steps: 20 });
   await page.waitForTimeout(500);
   await page.mouse.up();
 

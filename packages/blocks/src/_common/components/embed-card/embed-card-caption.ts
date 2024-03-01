@@ -70,7 +70,6 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
 
   private _onCaptionKeydown(event: KeyboardEvent) {
     event.stopPropagation();
-    this.block.std.event.activate();
 
     if (this.block.isInSurface || event.isComposing) {
       return;

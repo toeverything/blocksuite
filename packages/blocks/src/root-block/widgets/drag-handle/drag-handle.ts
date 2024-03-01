@@ -1,7 +1,6 @@
 import {
   PathFinder,
   type PointerEventState,
-  UIEventDispatcher,
   type UIEventHandler,
 } from '@blocksuite/block-std';
 import {
@@ -1524,14 +1523,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     this._disposables.addFromEvent(this.host, 'pointerleave', () => {
       this._hide();
     });
-
-    this._disposables.add(
-      UIEventDispatcher.slots.activeChanged.on(() => {
-        if (!this.std.event.isActive) {
-          this._hide(true);
-        }
-      })
-    );
 
     if (isInsidePageEditor(this.host)) {
       this._disposables.add(this.doc.slots.blockUpdated.on(() => this._hide()));

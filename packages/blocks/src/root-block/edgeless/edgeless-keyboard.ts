@@ -16,6 +16,7 @@ import {
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
 import { isCanvasElement, isNoteBlock } from './utils/query.js';
+
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override rootElement: EdgelessRootBlockComponent) {
     super(rootElement);
