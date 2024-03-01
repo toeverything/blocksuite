@@ -27,13 +27,12 @@ export class RangeBinding {
       this.selectionManager.slots.changed.on(this._onStdSelectionChanged)
     );
 
-    this.host.disposables.add(
-      this.host.event.add(
-        'selectionChange',
-        throttle(() => {
-          this._onNativeSelectionChanged().catch(console.error);
-        }, 10)
-      )
+    this.host.disposables.addFromEvent(
+      document,
+      'selectionchange',
+      throttle(() => {
+        this._onNativeSelectionChanged().catch(console.error);
+      }, 10)
     );
 
     this.host.disposables.add(

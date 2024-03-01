@@ -105,7 +105,6 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       this._pageRoot.prependParagraphWithText(rightText);
     } else if (event.key === 'ArrowDown' && hasContent) {
       event.preventDefault();
-
       this._pageRoot.focusFirstParagraph();
     } else if (event.key === 'Tab') {
       event.preventDefault();

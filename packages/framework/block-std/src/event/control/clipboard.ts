@@ -24,8 +24,6 @@ export class ClipboardControl {
   }
 
   private _cut = (event: ClipboardEvent) => {
-    if (!this._dispatcher.isActive) return;
-
     const clipboardEventState = new ClipboardEventState({
       event,
     });
@@ -36,8 +34,6 @@ export class ClipboardControl {
   };
 
   private _copy = (event: ClipboardEvent) => {
-    if (!this._dispatcher.isActive) return;
-
     const clipboardEventState = new ClipboardEventState({
       event,
     });
@@ -48,8 +44,6 @@ export class ClipboardControl {
   };
 
   private _paste = (event: ClipboardEvent) => {
-    if (!this._dispatcher.isActive) return;
-
     const clipboardEventState = new ClipboardEventState({
       event,
     });

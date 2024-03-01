@@ -248,14 +248,15 @@ test('should keyboard work in link popover', async ({ page }) => {
   await createLinkBlock(page, linkText, 'http://example.com');
 
   await dragBetweenIndices(page, [0, 0], [0, 8]);
-  await page.mouse.move(0, 0);
   await pressCreateLinkShortCut(page);
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await assertKeyboardWorkInInput(page, linkPopoverInput);
-  await page.mouse.click(1, 1);
+  await page.mouse.click(500, 500);
 
   const linkLocator = page.locator(`text="${linkText}"`);
   const linkPopover = page.locator('.affine-link-popover');
+  await linkLocator.hover();
+  await waitNextFrame(page, 200);
   await expect(linkLocator).toBeVisible();
   // Hover link
   await linkLocator.hover();
@@ -290,15 +291,16 @@ test('link bar should not be appear when the range is collapsed', async ({
   await pressCreateLinkShortCut(page);
   await expect(linkPopoverLocator).toBeVisible();
 
+  await focusRichText(page); // click to cancel the link popover
   await focusRichTextEnd(page);
   await pressShiftEnter(page);
   await waitNextFrame(page);
   await type(page, 'bbb');
   await dragBetweenIndices(page, [0, 1], [0, 5]);
   await pressCreateLinkShortCut(page);
-  await expect(linkPopoverLocator).toBeVisible();
+  await expect(linkPopoverLocator).not.toBeVisible();
 
-  await focusRichTextEnd(page, 0);
+  await focusRichTextEnd(page);
   await pressEnter(page);
   // create auto line-break in span element
   await type(page, 'd'.repeat(67));
