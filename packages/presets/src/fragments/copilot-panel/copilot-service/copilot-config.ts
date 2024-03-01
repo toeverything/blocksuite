@@ -24,6 +24,43 @@ type VendorPack<T extends AllServiceKind> = {
   impl: ServiceImpl<GetMethod<T>, unknown>;
 };
 
+class SimplePRNG {
+  constructor(private seed: number) {}
+  // 一个简单的PRNG，使用线性同余生成器
+  next() {
+    const a = 1664525;
+    const c = 1013904223;
+    const m = 2 ** 32;
+    this.seed = (a * this.seed + c) % m;
+    return this.seed / m;
+  }
+}
+
+function shuffleArray(array: number[], seed: number) {
+  const prng = new SimplePRNG(seed);
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(prng.next() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function encode(str: string, seed: number) {
+  const indexArray = Array.from(str).map((_, index) => index);
+  shuffleArray(indexArray, seed);
+  return indexArray.map(index => str[index]).join('');
+}
+
+function decode(encodedStr: string, seed: number) {
+  const indexArray = Array.from(encodedStr).map((_, index) => index);
+  shuffleArray(indexArray, seed);
+  const inverseIndexArray = indexArray
+    .map((originalIndex, newIndex) => [originalIndex, newIndex])
+    .sort((a, b) => a[0] - b[0])
+    .map(pair => pair[1]);
+  return inverseIndexArray.map(index => encodedStr[index]).join('');
+}
+
 export class CopilotConfig {
   _config?: CopilotConfigDataType;
 
@@ -47,7 +84,7 @@ export class CopilotConfig {
         vendorKey: 'OpenAI',
         name: 'url',
         data: {
-          apiKey: openAIKey,
+          apiKey: 'sk-' + decode(openAIKey, 1234567890),
         },
       });
     }
