@@ -306,7 +306,12 @@ export class UIEventDispatcher {
       this._active = true;
     });
     this.disposables.addFromEvent(this.host, 'mouseleave', () => {
-      this._active = false;
+      if (
+        !document.activeElement ||
+        !this.host.contains(document.activeElement)
+      ) {
+        this._active = false;
+      }
     });
   }
 }
