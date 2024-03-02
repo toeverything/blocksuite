@@ -52,13 +52,11 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
     const id = this._service.addElement(CanvasElementType.BRUSH, {
       points,
-      // pressures support will be detected in onContainerDragMove
     });
 
     const element = this._service.getElementById(id) as BrushElementModel;
 
     element.stash('points');
-    element.stash('pressures');
     element.stash('xywh');
 
     this._lastPoint = [e.point.x, e.point.y];
@@ -102,8 +100,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._draggingPathPoints = points;
 
     this._edgeless.service.updateElement(this._draggingElementId, {
-      points,
-      pressures: this._tryGetPressures(e),
+      points: this._tryGetPressurePoints(e),
     });
   }
 
@@ -112,7 +109,6 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       const { _draggingElement } = this;
       this._doc.transact(() => {
         _draggingElement.pop('points');
-        _draggingElement.pop('pressures');
         _draggingElement.pop('xywh');
       });
     }
@@ -162,9 +158,8 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       : 'vertical';
   }
 
-  private _tryGetPressures(e: PointerEventState) {
+  private _tryGetPressurePoints(e: PointerEventState) {
     assertExists(this._draggingPathPressures);
-
     const pressures = [...this._draggingPathPressures, e.pressure];
     this._draggingPathPressures = pressures;
 
@@ -179,6 +174,12 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       this._pressureSupportedPointerIds.add(pointerId);
     }
 
-    return this._pressureSupportedPointerIds.has(pointerId) ? pressures : [];
+    assertExists(this._draggingPathPoints);
+    const points = this._draggingPathPoints;
+    if (this._pressureSupportedPointerIds.has(pointerId)) {
+      return points.map(([x, y], i) => [x, y, pressures[i]]);
+    } else {
+      return points;
+    }
   }
 }
