@@ -907,7 +907,7 @@ test('embed', async ({ page }) => {
   await press(page, 'ArrowLeft');
   await assertSelection(page, 0, 3, 1);
 
-  // try to update cursor position and select embed element using mouse click
+  // try to update cursor position and select embed element by clicking embed element
   let rect = await getInlineRangeIndexRect(page, [0, 1]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 1, 1);
@@ -919,6 +919,51 @@ test('embed', async ({ page }) => {
   rect = await getInlineRangeIndexRect(page, [0, 3]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 3, 1);
+});
+
+test('delete embed when pressing backspace after embed', async ({ page }) => {
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
+
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorAEmbed = page.getByText('embed').nth(0);
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  await page.waitForTimeout(100);
+  await type(page, 'ab');
+  expect(await editorA.innerText()).toBe('ab');
+
+  await page.keyboard.down('Shift');
+  await press(page, 'ArrowLeft');
+  await page.keyboard.up('Shift');
+  await page.waitForTimeout(100);
+  await assertSelection(page, 0, 1, 1);
+  await editorAEmbed.click();
+
+  let delta = await getDeltaFromInlineRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'a',
+    },
+    {
+      insert: 'b',
+      attributes: {
+        embed: true,
+      },
+    },
+  ]);
+
+  const rect = await getInlineRangeIndexRect(page, [0, 2]);
+  // use click to select right side of the embed instead of use arrow key
+  await page.mouse.click(rect.x + 3, rect.y);
+  await assertSelection(page, 0, 2, 0);
+  await press(page, 'Backspace');
+
+  delta = await getDeltaFromInlineRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'a',
+    },
+  ]);
 });
 
 test('markdown shortcut using keyboard util', async ({ page }) => {
