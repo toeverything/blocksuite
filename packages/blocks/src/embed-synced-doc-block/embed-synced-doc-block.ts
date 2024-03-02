@@ -155,6 +155,29 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       contentBlocks.length === 1 && contentBlocks[0].text?.length === 0;
   }
 
+  private _handleFocusEventsInLoad = () => {
+    const syncedDocEditorHost = this.syncedDocEditorHost;
+    assertExists(syncedDocEditorHost);
+
+    this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', () => {
+      this._editing = true;
+    });
+    this.disposables.addFromEvent(syncedDocEditorHost, 'focusout', () => {
+      this._editing = false;
+      if (this._editorMode === 'page') {
+        this._checkEmpty();
+      }
+    });
+  };
+
+  private _handleFocusEventsInHover = (abortController: AbortController) => {
+    const syncedDocEditorHost = this.syncedDocEditorHost;
+    assertExists(syncedDocEditorHost);
+    this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', () => {
+      abortController.abort();
+    });
+  };
+
   private async _load() {
     this._loading = true;
     this._error = false;
@@ -200,15 +223,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       const syncedDocEditorHost = this.syncedDocEditorHost;
       assertExists(syncedDocEditorHost);
 
-      this.disposables.addFromEvent(syncedDocEditorHost, 'focus', () => {
-        this._editing = true;
-      });
-      this.disposables.addFromEvent(syncedDocEditorHost, 'blur', () => {
-        this._editing = false;
-        if (this._editorMode === 'page') {
-          this._checkEmpty();
-        }
-      });
+      this._handleFocusEventsInLoad();
     }
   }
 
@@ -235,6 +250,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       ) {
         return null;
       }
+
+      this._handleFocusEventsInHover(abortController);
 
       return {
         template: html`
