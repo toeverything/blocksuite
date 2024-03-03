@@ -30,6 +30,7 @@ class LRUCache<K, V> {
 
 export type highlightCacheKey = `${string}-${string}-${string}`;
 
-export const highlightCache = new LRUCache<highlightCacheKey, ThemedToken[]>(
-  4000
-);
+export const highlightCache = new LRUCache<
+  highlightCacheKey,
+  Omit<ThemedToken, 'offset'>[]
+>(4000);

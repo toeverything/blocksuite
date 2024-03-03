@@ -47,10 +47,9 @@ export class AffineCodeLine extends ShadowlessElement {
     const cacheKey: highlightCacheKey = `${this.delta.insert}-${lang}-${mode}`;
     const cache = highlightCache.get(cacheKey);
 
-    let tokens: ThemedToken[] = [
+    let tokens: Omit<ThemedToken, 'offset'>[] = [
       {
         content: this.delta.insert,
-        offset: 0,
       },
     ];
     if (cache) {
