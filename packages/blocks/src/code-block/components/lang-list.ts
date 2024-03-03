@@ -254,6 +254,81 @@ export class LangList extends LitElement {
   }
 }
 
+export function createLangList({
+  abortController,
+  currentLanguage,
+  onSelectLanguage,
+  referenceElement,
+}: {
+  referenceElement: Element;
+  abortController: AbortController;
+  currentLanguage: BundledLanguageInfo;
+  onSelectLanguage: (lang: BundledLanguageInfo | null) => void;
+}) {
+  const MAX_LANG_SELECT_HEIGHT = 440;
+  const portalPadding = {
+    top: PAGE_HEADER_HEIGHT + 12,
+    bottom: 12,
+  } as const;
+  createLitPortal({
+    closeOnClickAway: true,
+    template: ({ positionSlot }) => {
+      const langList = new LangList();
+      langList.currentLanguageId = currentLanguage.id as BundledLanguage;
+      langList.onSelectLanguage = (lang: BundledLanguageInfo | null) => {
+        onSelectLanguage(lang);
+      };
+      langList.onClose = () => abortController.abort();
+      positionSlot.on(({ placement }) => {
+        langList.placement = placement;
+      });
+      return html`
+        <style>
+          :host {
+            z-index: var(--affine-z-index-popover);
+          }
+        </style>
+        ${langList}
+      `;
+    },
+    computePosition: {
+      referenceElement,
+      placement: 'bottom-start',
+      middleware: [
+        offset(4),
+        autoPlacement({
+          allowedPlacements: ['top-start', 'bottom-start'],
+          padding: portalPadding,
+        }),
+        size({
+          padding: portalPadding,
+          apply({ availableHeight, elements, placement }) {
+            Object.assign(elements.floating.style, {
+              height: '100%',
+              maxHeight: `${Math.min(
+                MAX_LANG_SELECT_HEIGHT,
+                availableHeight
+              )}px`,
+              pointerEvents: 'none',
+              ...(placement.startsWith('top')
+                ? {
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                  }
+                : {
+                    display: null,
+                    alignItems: null,
+                  }),
+            });
+          },
+        }),
+      ],
+      autoUpdate: true,
+    },
+    abortController,
+  });
+}
+
 declare global {
   interface HTMLElementTagNameMap {
     'lang-list': LangList;

@@ -9,13 +9,7 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
-import {
-  autoPlacement,
-  limitShift,
-  offset,
-  shift,
-  size,
-} from '@floating-ui/dom';
+import { limitShift, offset, shift } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -26,7 +20,6 @@ import { type Highlighter, type ILanguageRegistration, type Lang } from 'shiki';
 import { z } from 'zod';
 
 import { HoverController } from '../_common/components/index.js';
-import { createLitPortal } from '../_common/components/portal.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { PAGE_HEADER_HEIGHT } from '../_common/consts.js';
@@ -38,7 +31,7 @@ import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root
 import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
-import { LangList } from './components/lang-list.js';
+import { createLangList } from './components/lang-list.js';
 import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
@@ -518,68 +511,14 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       this._langListAbortController = undefined;
     });
 
-    const MAX_LANG_SELECT_HEIGHT = 440;
-    const portalPadding = {
-      top: PAGE_HEADER_HEIGHT + 12,
-      bottom: 12,
-    } as const;
-    createLitPortal({
-      closeOnClickAway: true,
-      template: ({ positionSlot }) => {
-        const langList = new LangList();
-        langList.currentLanguageId = this._perviousLanguage.id as Lang;
-        langList.onSelectLanguage = (lang: ILanguageRegistration | null) => {
-          this.setLang(lang ? lang.id : null);
-          abortController.abort();
-        };
-        langList.onClose = () => abortController.abort();
-        positionSlot.on(({ placement }) => {
-          langList.placement = placement;
-        });
-        return html`
-          <style>
-            :host {
-              z-index: var(--affine-z-index-popover);
-            }
-          </style>
-          ${langList}
-        `;
-      },
-      computePosition: {
-        referenceElement: this._langButton,
-        placement: 'bottom-start',
-        middleware: [
-          offset(4),
-          autoPlacement({
-            allowedPlacements: ['top-start', 'bottom-start'],
-            padding: portalPadding,
-          }),
-          size({
-            padding: portalPadding,
-            apply({ availableHeight, elements, placement }) {
-              Object.assign(elements.floating.style, {
-                height: '100%',
-                maxHeight: `${Math.min(
-                  MAX_LANG_SELECT_HEIGHT,
-                  availableHeight
-                )}px`,
-                pointerEvents: 'none',
-                ...(placement.startsWith('top')
-                  ? {
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                    }
-                  : {
-                      display: null,
-                      alignItems: null,
-                    }),
-              });
-            },
-          }),
-        ],
-        autoUpdate: true,
-      },
+    createLangList({
       abortController,
+      currentLanguage: this._perviousLanguage,
+      onSelectLanguage: lang => {
+        this.setLang(lang ? lang.id : null);
+        abortController.abort();
+      },
+      referenceElement: this._langButton,
     });
   }
 
