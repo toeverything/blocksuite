@@ -1,8 +1,8 @@
 import type { Slot } from '@blocksuite/global/utils';
-import type { ILanguageRegistration, Lang } from 'shiki';
-import { BUNDLED_LANGUAGES } from 'shiki';
+import type { BundledLanguage, BundledLanguageInfo } from 'shiki';
+import { bundledLanguagesInfo, isPlainLang } from 'shiki';
 
-import { PLAIN_TEXT_REGISTRATION } from './consts.js';
+import { PLAIN_TEXT_LANG_INFO } from './consts.js';
 
 export interface selectedLanguageChangedSlots {
   selectedLanguageChanged: Slot<{ language: string | null }>;
@@ -10,7 +10,7 @@ export interface selectedLanguageChangedSlots {
 }
 // TIOBE Index for May 2023
 // ref https://www.tiobe.com/tiobe-index/
-const PopularLanguages: Lang[] = [
+const PopularLanguages: BundledLanguage[] = [
   // 1-20
   'python',
   'c',
@@ -77,7 +77,7 @@ const PopularLanguages: Lang[] = [
   'vue',
 ];
 
-const POPULAR_LANGUAGES_MAP: Partial<Record<Lang, number>> =
+const POPULAR_LANGUAGES_MAP: Partial<Record<BundledLanguage, number>> =
   PopularLanguages.reduce((acc, lang, i) => {
     return {
       [lang]: i,
@@ -85,7 +85,10 @@ const POPULAR_LANGUAGES_MAP: Partial<Record<Lang, number>> =
     };
   }, {});
 
-export function getLanguagePriority(lang: Lang, isCurrentLanguage = false) {
+export function getLanguagePriority(
+  lang: BundledLanguage,
+  isCurrentLanguage = false
+) {
   if (isCurrentLanguage) {
     // Important to show the current language first
     return -Infinity;
@@ -93,11 +96,8 @@ export function getLanguagePriority(lang: Lang, isCurrentLanguage = false) {
   return POPULAR_LANGUAGES_MAP[lang] ?? Infinity;
 }
 
-function isPlaintext(lang: string) {
-  return [
-    PLAIN_TEXT_REGISTRATION.id,
-    ...PLAIN_TEXT_REGISTRATION.aliases,
-  ].includes(lang.toLowerCase());
+export function isPlaintext(lang: string) {
+  return isPlainLang(lang) || PLAIN_TEXT_LANG_INFO.id === lang;
 }
 
 /**
@@ -109,19 +109,19 @@ function isPlaintext(lang: string) {
 export const getStandardLanguage = (
   languageName: string,
   strict = false
-): ILanguageRegistration | null => {
+): BundledLanguageInfo | null => {
   if (!languageName) return null;
   if (isPlaintext(languageName)) {
     return null;
   }
 
-  const language = BUNDLED_LANGUAGES.find(
+  const language = bundledLanguagesInfo.find(
     codeLanguage => codeLanguage.id.toLowerCase() === languageName.toLowerCase()
   );
   if (language) return language;
   if (strict) return null;
 
-  const aliasLanguage = BUNDLED_LANGUAGES.find(codeLanguage =>
+  const aliasLanguage = bundledLanguagesInfo.find(codeLanguage =>
     codeLanguage.aliases?.includes(languageName.toLowerCase())
   );
   return aliasLanguage ?? null;

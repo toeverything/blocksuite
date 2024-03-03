@@ -3,7 +3,7 @@ import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { IThemedToken } from 'shiki';
+import type { ThemedToken } from 'shiki';
 
 import type { AffineTextAttributes } from '../_common/inline/presets/affine-inline-specs.js';
 import { getThemeMode } from '../_common/utils/query.js';
@@ -22,7 +22,7 @@ export class AffineCodeLine extends ShadowlessElement {
   };
 
   @property({ attribute: false })
-  highlightOptionsGetter: HighlightOptionsGetter = null;
+  highlightOptionsGetter: HighlightOptionsGetter | null = null;
 
   override render() {
     assertExists(
@@ -47,19 +47,19 @@ export class AffineCodeLine extends ShadowlessElement {
     const cacheKey: highlightCacheKey = `${this.delta.insert}-${lang}-${mode}`;
     const cache = highlightCache.get(cacheKey);
 
-    let tokens: IThemedToken[] = [
+    let tokens: ThemedToken[] = [
       {
         content: this.delta.insert,
+        offset: 0,
       },
     ];
     if (cache) {
       tokens = cache;
     } else {
-      tokens = highlighter.codeToThemedTokens(
-        this.delta.insert,
+      tokens = highlighter.codeToTokensBase(this.delta.insert, {
         lang,
-        mode === 'dark' ? DARK_THEME : LIGHT_THEME
-      )[0];
+        theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
+      })[0];
       highlightCache.set(cacheKey, tokens);
     }
 

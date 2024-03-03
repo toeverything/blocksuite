@@ -1,12 +1,10 @@
 import type { AttributeRenderer } from '@blocksuite/inline';
 import { html } from 'lit';
-import type { Highlighter, Lang } from 'shiki';
+
+import type { HighlightOptionsGetter } from '../code-model.js';
 
 export const getCodeLineRenderer: (
-  highlightOptionsGetter: () => {
-    lang: Lang;
-    highlighter: Highlighter | null;
-  }
+  highlightOptionsGetter: HighlightOptionsGetter
 ) => AttributeRenderer = highlightOptionsGetter => delta => {
   return html`<affine-code-line
     .delta=${delta}

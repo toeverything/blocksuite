@@ -1,21 +1,31 @@
-import type { ILanguageRegistration } from 'shiki';
+import type {
+  BundledLanguage,
+  BundledLanguageInfo,
+  PlainTextLanguage,
+} from 'shiki';
+import type { BundledTheme } from 'shiki';
 
-export const DARK_THEME = 'npm/shiki@0.14.1/themes/dark-plus';
-export const LIGHT_THEME = 'npm/shiki@0.14.1/themes/light-plus';
+export const DARK_THEME = 'dark-plus' satisfies BundledTheme;
+export const LIGHT_THEME = 'light-plus' satisfies BundledTheme;
+// Since shiki special treatment the `plaintext` language as `PlainTextLanguage`
+// It is better to use the it but now is late to change it.
+// export const FALLBACK_LANG: PlainTextLanguage = 'plaintext';
 export const FALLBACK_LANG = 'Plain Text';
 
 /**
- * Note: Use it carefully because it is not a valid language registration.
+ * Note: Use it carefully because it is not a valid language.
  */
-export const PLAIN_TEXT_REGISTRATION = {
+export const PLAIN_TEXT_LANG_INFO = {
   id: FALLBACK_LANG,
-  displayName: FALLBACK_LANG,
-  scopeName: 'source.plaintext',
-  /**
-   * Do not use this path. It is only used to match the type of `ILanguageRegistration`
-   *
-   * @deprecated
-   */
-  path: 'PLEASE-DO-NOT-USE-THIS' as const,
-  aliases: ['plaintext', 'txt', 'text'],
-} satisfies ILanguageRegistration;
+  name: FALLBACK_LANG,
+  aliases: ['plaintext', 'txt', 'text'] satisfies PlainTextLanguage[],
+  import: () =>
+    Promise.resolve({
+      default: [],
+    }),
+} satisfies BundledLanguageInfo;
+
+// TODO migrate `BundledLanguageInfo` to `StrictLanguageInfo`
+export type StrictLanguageInfo = BundledLanguageInfo & {
+  name: BundledLanguage;
+};

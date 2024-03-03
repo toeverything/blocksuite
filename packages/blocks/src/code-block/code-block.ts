@@ -16,7 +16,11 @@ import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { type Highlighter, type ILanguageRegistration, type Lang } from 'shiki';
+import {
+  type BundledLanguage,
+  type BundledLanguageInfo,
+  type Highlighter,
+} from 'shiki';
 import { z } from 'zod';
 
 import { HoverController } from '../_common/components/index.js';
@@ -25,20 +29,19 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { PAGE_HEADER_HEIGHT } from '../_common/consts.js';
 import { ArrowDownIcon } from '../_common/icons/index.js';
 import { listenToThemeChange } from '../_common/theme/utils.js';
-import { getThemeMode } from '../_common/utils/index.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { createLangList } from './components/lang-list.js';
-import { getStandardLanguage } from './utils/code-languages.js';
+import { getStandardLanguage, isPlaintext } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
   DARK_THEME,
   FALLBACK_LANG,
   LIGHT_THEME,
-  PLAIN_TEXT_REGISTRATION,
+  PLAIN_TEXT_LANG_INFO,
 } from './utils/consts.js';
 import { getHighLighter } from './utils/high-lighter.js';
 
@@ -157,12 +160,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     return this.rootElement;
   }
 
-  highlightOptionsGetter: HighlightOptionsGetter = null;
+  highlightOptionsGetter: HighlightOptionsGetter | null = null;
 
   readonly attributesSchema = z.object({});
   readonly getAttributeRenderer = () =>
     getCodeLineRenderer(() => ({
-      lang: this.model.language.toLowerCase() as Lang,
+      lang: this.model.language.toLowerCase() as BundledLanguage,
       highlighter: this._highlighter,
     }));
 
@@ -170,14 +173,29 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._updateLineNumbers();
   });
 
-  private _perviousLanguage: ILanguageRegistration = PLAIN_TEXT_REGISTRATION;
+  /**
+   * Given the high cost associated with updating the highlight,
+   * it is preferable to do so only when a change in language occurs.
+   *
+   * The variable is used to store the "current" language info,
+   * also known as the "previous" language
+   * when a language change occurs and the highlighter is not updated.
+   *
+   * In most cases, the language will be equal to normalizing the language of the model.
+   *
+   * See {@link updated}
+   */
+  private _perviousLanguage: BundledLanguageInfo = PLAIN_TEXT_LANG_INFO;
   private _highlighter: Highlighter | null = null;
-  private async _startHighlight(lang: ILanguageRegistration) {
+  private async _startHighlight(lang: BundledLanguageInfo) {
     if (this._highlighter) {
       const loadedLangs = this._highlighter.getLoadedLanguages();
-      if (!loadedLangs.includes(lang.id as Lang)) {
+      if (
+        !isPlaintext(lang.id) &&
+        !loadedLangs.includes(lang.id as BundledLanguage)
+      ) {
         this._highlighter
-          .loadLanguage(lang)
+          .loadLanguage(lang.id as BundledLanguage)
           .then(() => {
             const richText = this.querySelector('rich-text');
             const inlineEditor = richText?.inlineEditor;
@@ -189,17 +207,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
       return;
     }
-    const mode = getThemeMode();
     this._highlighter = await getHighLighter({
-      theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
       themes: [LIGHT_THEME, DARK_THEME],
-      langs: [lang],
-      paths: {
-        // TODO: use local path
-        wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
-        themes: 'https://cdn.jsdelivr.net/',
-        languages: 'https://cdn.jsdelivr.net/npm/shiki/languages',
-      },
+      langs: [lang.id as BundledLanguage],
     });
 
     const richText = this.querySelector('rich-text');
@@ -293,7 +303,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this.clipboardController.hostConnected();
     this.setHighlightOptionsGetter(() => {
       return {
-        lang: this._perviousLanguage.id as Lang,
+        lang: this._perviousLanguage.id as BundledLanguage,
         highlighter: this._highlighter,
       };
     });
@@ -471,7 +481,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override updated() {
     if (this.model.language !== this._perviousLanguage.id) {
       const lang = getStandardLanguage(this.model.language);
-      this._perviousLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
+      this._perviousLanguage = lang ?? PLAIN_TEXT_LANG_INFO;
       if (lang) {
         this._startHighlight(lang).catch(console.error);
       } else {
@@ -524,8 +534,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   private _curLanguageButtonTemplate() {
     const curLanguage =
-      getStandardLanguage(this.model.language) ?? PLAIN_TEXT_REGISTRATION;
-    const curLanguageDisplayName = curLanguage.displayName ?? curLanguage.id;
+      getStandardLanguage(this.model.language) ?? PLAIN_TEXT_LANG_INFO;
+    const curLanguageDisplayName = curLanguage.name ?? curLanguage.id;
     return html`<div
       contenteditable="false"
       class="lang-list-wrapper caret-ignore"
