@@ -16,7 +16,6 @@ import {
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import {
-  getFontFacesByFontFamily,
   isFontStyleSupported,
   isFontWeightSupported,
 } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
@@ -35,6 +34,10 @@ import {
   normalizeShapeBound,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import {
+  getFontFacesByFontFamily,
+  wrapFontFamily,
+} from '../../../../surface-block/utils/font.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
 import {
   type ColorEvent,
@@ -461,7 +464,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         @click=${() => this._textFontFamilyPopper?.toggle()}
       >
         <div class="button-with-arrow-group">
-          <span style=${`font-family:"${selectedFontFamily}";`}>Aa</span
+          <span style=${`font-family:${wrapFontFamily(selectedFontFamily)};`}
+            >Aa</span
           >${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>

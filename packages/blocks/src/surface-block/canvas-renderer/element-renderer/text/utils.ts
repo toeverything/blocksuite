@@ -8,6 +8,10 @@ import type {
 import type { TextElementModel } from '../../../element-model/text.js';
 import type { Bound } from '../../../utils/bound.js';
 import {
+  getFontFacesByFontFamily,
+  wrapFontFamily,
+} from '../../../utils/font.js';
+import {
   getPointsFromBoundsWithRotation,
   rotatePoints,
 } from '../../../utils/math-utils.js';
@@ -78,10 +82,6 @@ export function getLineHeight(fontFamily: string, fontSize: number) {
   }
 
   return lineHeight;
-}
-
-export function wrapFontFamily(fontFamily: string): string {
-  return `"${fontFamily}"`;
 }
 
 function transformDelta(delta: TextDelta): (TextDelta | '\n')[] {
@@ -481,28 +481,6 @@ export function normalizeTextBound(
   bound.h = lineHeightPx * lines.length;
 
   return bound;
-}
-
-export function getFontFacesByFontFamily(
-  fontFamily: FontFamily | string
-): FontFace[] {
-  const fonts = document.fonts;
-  return (
-    [...fonts.keys()]
-      .filter(fontFace => {
-        return fontFace.family === fontFamily;
-      })
-      // remove duplicate font faces
-      .filter(
-        (item, index, arr) =>
-          arr.findIndex(
-            fontFace =>
-              fontFace.family === item.family &&
-              fontFace.weight === item.weight &&
-              fontFace.style === item.style
-          ) === index
-      )
-  );
 }
 
 export function isFontWeightSupported(
