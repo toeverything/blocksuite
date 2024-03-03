@@ -16,11 +16,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import {
-  type BundledLanguage,
-  type BundledLanguageInfo,
-  type Highlighter,
-} from 'shiki';
+import { type BundledLanguage, type Highlighter } from 'shiki';
 import { z } from 'zod';
 
 import { HoverController } from '../_common/components/index.js';
@@ -42,6 +38,7 @@ import {
   FALLBACK_LANG,
   LIGHT_THEME,
   PLAIN_TEXT_LANG_INFO,
+  type StrictLanguageInfo,
 } from './utils/consts.js';
 import { getHighLighter } from './utils/high-lighter.js';
 
@@ -165,7 +162,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   readonly attributesSchema = z.object({});
   readonly getAttributeRenderer = () =>
     getCodeLineRenderer(() => ({
-      lang: this.model.language.toLowerCase() as BundledLanguage,
+      lang:
+        getStandardLanguage(this.model.language.toLowerCase())?.id ??
+        'plaintext',
       highlighter: this._highlighter,
     }));
 
@@ -185,17 +184,14 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
    *
    * See {@link updated}
    */
-  private _perviousLanguage: BundledLanguageInfo = PLAIN_TEXT_LANG_INFO;
+  private _perviousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
   private _highlighter: Highlighter | null = null;
-  private async _startHighlight(lang: BundledLanguageInfo) {
+  private async _startHighlight(lang: StrictLanguageInfo) {
     if (this._highlighter) {
       const loadedLangs = this._highlighter.getLoadedLanguages();
-      if (
-        !isPlaintext(lang.id) &&
-        !loadedLangs.includes(lang.id as BundledLanguage)
-      ) {
+      if (!isPlaintext(lang.id) && !loadedLangs.includes(lang.id)) {
         this._highlighter
-          .loadLanguage(lang.id as BundledLanguage)
+          .loadLanguage(lang.id)
           .then(() => {
             const richText = this.querySelector('rich-text');
             const inlineEditor = richText?.inlineEditor;
@@ -209,7 +205,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
     this._highlighter = await getHighLighter({
       themes: [LIGHT_THEME, DARK_THEME],
-      langs: [lang.id as BundledLanguage],
+      langs: [lang.id],
     });
 
     const richText = this.querySelector('rich-text');

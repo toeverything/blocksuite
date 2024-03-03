@@ -1,8 +1,8 @@
 import type { Slot } from '@blocksuite/global/utils';
-import type { BundledLanguage, BundledLanguageInfo } from 'shiki';
+import type { BundledLanguage } from 'shiki';
 import { bundledLanguagesInfo, isPlainLang } from 'shiki';
 
-import { PLAIN_TEXT_LANG_INFO } from './consts.js';
+import { PLAIN_TEXT_LANG_INFO, type StrictLanguageInfo } from './consts.js';
 
 export interface selectedLanguageChangedSlots {
   selectedLanguageChanged: Slot<{ language: string | null }>;
@@ -109,7 +109,7 @@ export function isPlaintext(lang: string) {
 export const getStandardLanguage = (
   languageName: string,
   strict = false
-): BundledLanguageInfo | null => {
+): StrictLanguageInfo | null => {
   if (!languageName) return null;
   if (isPlaintext(languageName)) {
     return null;
@@ -118,11 +118,13 @@ export const getStandardLanguage = (
   const language = bundledLanguagesInfo.find(
     codeLanguage => codeLanguage.id.toLowerCase() === languageName.toLowerCase()
   );
-  if (language) return language;
+  // The language is found from the bundledLanguagesInfo,
+  // so it is safe to cast it to `StrictLanguageInfo`.
+  if (language) return language as StrictLanguageInfo;
   if (strict) return null;
 
   const aliasLanguage = bundledLanguagesInfo.find(codeLanguage =>
     codeLanguage.aliases?.includes(languageName.toLowerCase())
   );
-  return aliasLanguage ?? null;
+  return (aliasLanguage as StrictLanguageInfo) ?? null;
 };

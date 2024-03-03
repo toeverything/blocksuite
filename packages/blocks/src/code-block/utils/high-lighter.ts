@@ -3,13 +3,15 @@ import {
   type BundledLanguage,
   getHighlighter,
   type Highlighter,
+  type PlainTextLanguage,
 } from 'shiki';
 
 let _highLighter: Highlighter | null = null;
 
 export const getHighLighter = async (
   options: BundledHighlighterOptions<BundledLanguage, string> & {
-    langs: BundledLanguage[];
+    // Only support bundled languages
+    langs: (BundledLanguage | PlainTextLanguage)[];
   }
 ) => {
   if (_highLighter) {

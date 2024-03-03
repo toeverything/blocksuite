@@ -4,7 +4,7 @@ import { autoPlacement, offset, type Placement, size } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { type BundledLanguageInfo } from 'shiki';
+import { type PlainTextLanguage } from 'shiki';
 import { type BundledLanguage, bundledLanguagesInfo } from 'shiki/langs';
 
 import { createLitPortal } from '../../_common/components/portal.js';
@@ -12,7 +12,10 @@ import { scrollbarStyle } from '../../_common/components/utils.js';
 import { PAGE_HEADER_HEIGHT } from '../../_common/consts.js';
 import { DoneIcon, SearchIcon } from '../../_common/icons/index.js';
 import { getLanguagePriority } from '../utils/code-languages.js';
-import { PLAIN_TEXT_LANG_INFO } from '../utils/consts.js';
+import {
+  PLAIN_TEXT_LANG_INFO,
+  type StrictLanguageInfo,
+} from '../utils/consts.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
@@ -124,13 +127,13 @@ export class LangList extends LitElement {
   }
 
   @property({ attribute: false })
-  currentLanguageId!: BundledLanguage;
+  currentLanguageId!: BundledLanguage | PlainTextLanguage;
 
   @property({ attribute: false })
   onClose?: () => void;
 
   @property({ attribute: false })
-  onSelectLanguage?: (lang: BundledLanguageInfo | null) => void;
+  onSelectLanguage?: (lang: StrictLanguageInfo | null) => void;
 
   @property({ attribute: false })
   placement?: Placement;
@@ -157,14 +160,16 @@ export class LangList extends LitElement {
     this.onClose?.();
   }
 
-  private _onLanguageClicked(language: BundledLanguageInfo | null) {
+  private _onLanguageClicked(language: StrictLanguageInfo | null) {
     this.onSelectLanguage?.(language);
   }
 
   override render() {
     const isFlip = this.placement?.startsWith('top');
 
-    const filteredLanguages = [PLAIN_TEXT_LANG_INFO, ...bundledLanguagesInfo]
+    const filteredLanguages = (
+      [PLAIN_TEXT_LANG_INFO, ...bundledLanguagesInfo] as StrictLanguageInfo[]
+    )
       .filter(language => {
         if (!this._filterText) {
           return true;
@@ -267,8 +272,8 @@ export function createLangList({
 }: {
   referenceElement: Element;
   abortController: AbortController;
-  currentLanguage: BundledLanguageInfo;
-  onSelectLanguage: (lang: BundledLanguageInfo | null) => void;
+  currentLanguage: StrictLanguageInfo;
+  onSelectLanguage: (lang: StrictLanguageInfo | null) => void;
 }) {
   const MAX_LANG_SELECT_HEIGHT = 440;
   const portalPadding = {
@@ -279,8 +284,8 @@ export function createLangList({
     closeOnClickAway: true,
     template: ({ positionSlot }) => {
       const langList = new LangList();
-      langList.currentLanguageId = currentLanguage.id as BundledLanguage;
-      langList.onSelectLanguage = (lang: BundledLanguageInfo | null) => {
+      langList.currentLanguageId = currentLanguage.id;
+      langList.onSelectLanguage = (lang: StrictLanguageInfo | null) => {
         onSelectLanguage(lang);
       };
       langList.onClose = () => abortController.abort();
