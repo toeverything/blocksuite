@@ -23,7 +23,8 @@ import { convert, derive, watch, yfield } from './decorators.js';
 
 export type BrushProps = BaseProps & {
   /**
-   * [[x0,y0],[x1,y1]...]
+   * [[x0,y0,pressure0?],[x1,y1,pressure1?]...]
+   * pressure is optional and exsits when pressure sensitivity is supported, otherwise not.
    */
   points: number[][];
   color: string;
@@ -51,9 +52,10 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     const lineWidth = instance.lineWidth;
     const bound = getBoundFromPoints(points);
     const boundWidthLineWidth = inflateBound(bound, lineWidth);
-    const relativePoints = points.map(([x, y]) => [
+    const relativePoints = points.map(([x, y, pressure]) => [
       x - boundWidthLineWidth.x,
       y - boundWidthLineWidth.y,
+      ...(pressure !== undefined ? [pressure] : []),
     ]);
 
     return relativePoints;
@@ -76,7 +78,11 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     );
 
     return {
-      points: transformed.points.map(p => [p.x, p.y]),
+      points: transformed.points.map((p, i) => [
+        p.x,
+        p.y,
+        ...(instance.points[i][2] !== undefined ? [instance.points[i][2]] : []),
+      ]),
     };
   })
   @yfield()
@@ -119,7 +125,11 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     );
 
     return {
-      points: transformed.points.map(p => [p.x, p.y]),
+      points: transformed.points.map((p, i) => [
+        p.x,
+        p.y,
+        ...(points[i][2] !== undefined ? [points[i][2]] : []),
+      ]),
       xywh: transformed.bound.serialize(),
     };
   })

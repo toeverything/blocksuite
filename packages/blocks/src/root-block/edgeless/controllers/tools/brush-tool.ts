@@ -17,8 +17,10 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   private _draggingElement: BrushElementModel | null = null;
   private _draggingElementId: string | null = null;
   protected _draggingPathPoints: number[][] | null = null;
+  protected _draggingPathPressures: number[] | null = null;
   private _lastPoint: IVec | null = null;
   private _straightLineType: 'horizontal' | 'vertical' | null = null;
+  private _pressureSupportedPointerIds: Set<number> = new Set();
 
   onContainerPointerDown(): void {
     noop();
@@ -61,6 +63,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._draggingElementId = id;
     this._draggingElement = element;
     this._draggingPathPoints = points;
+    this._draggingPathPressures = [e.pressure];
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -97,7 +100,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._draggingPathPoints = points;
 
     this._edgeless.service.updateElement(this._draggingElementId, {
-      points,
+      points: this._tryGetPressurePoints(e),
     });
   }
 
@@ -112,6 +115,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._draggingElement = null;
     this._draggingElementId = null;
     this._draggingPathPoints = null;
+    this._draggingPathPressures = null;
     this._lastPoint = null;
     this._straightLineType = null;
     this._doc.captureSync();
@@ -152,5 +156,30 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     return absAngleRadius < Math.PI / 4 || absAngleRadius > 3 * (Math.PI / 4)
       ? 'horizontal'
       : 'vertical';
+  }
+
+  private _tryGetPressurePoints(e: PointerEventState) {
+    assertExists(this._draggingPathPressures);
+    const pressures = [...this._draggingPathPressures, e.pressure];
+    this._draggingPathPressures = pressures;
+
+    // we do not use the `e.raw.pointerType` to detect because it is not reliable,
+    // such as some digital pens do not support pressure even thought the `e.raw.pointerType` is equal to `'pen'`
+    const pointerId = e.raw.pointerId;
+    const pressureChanged = pressures.some(
+      pressure => pressure !== pressures[0]
+    );
+
+    if (pressureChanged) {
+      this._pressureSupportedPointerIds.add(pointerId);
+    }
+
+    assertExists(this._draggingPathPoints);
+    const points = this._draggingPathPoints;
+    if (this._pressureSupportedPointerIds.has(pointerId)) {
+      return points.map(([x, y], i) => [x, y, pressures[i]]);
+    } else {
+      return points;
+    }
   }
 }
