@@ -42,7 +42,7 @@ export async function importMarkDown(workspace: Workspace, text: string) {
     assets: job.assetsManager,
   });
   const page = await job.snapshotToDoc(snapshot);
-  return [page.id];
+  return page.id;
 }
 
 export async function importHtml(workspace: Workspace, text: string) {
@@ -57,7 +57,7 @@ export async function importHtml(workspace: Workspace, text: string) {
     assets: job.assetsManager,
   });
   const page = await job.snapshotToDoc(snapshot);
-  return [page.id];
+  return page.id;
 }
 
 export async function importNotion(workspace: Workspace, file: File) {
@@ -208,34 +208,45 @@ export class ImportDoc extends WithDisposable(LitElement) {
   }
 
   private async _importMarkDown() {
-    const file = await openFileOrFiles({ acceptType: 'Markdown' });
-    if (!file) return;
-    const text = await file.text();
-    const needLoading = file.size > SHOW_LOADING_SIZE;
-    if (needLoading) {
-      this.hidden = false;
-      this._loading = true;
-    } else {
-      this.abortController.abort();
+    const files = await openFileOrFiles({
+      acceptType: 'Markdown',
+      multiple: true,
+    });
+    if (!files) return;
+    const pageIds: string[] = [];
+    for (const file of files) {
+      const text = await file.text();
+      const needLoading = file.size > SHOW_LOADING_SIZE;
+      if (needLoading) {
+        this.hidden = false;
+        this._loading = true;
+      } else {
+        this.abortController.abort();
+      }
+      const pageId = await importMarkDown(this.workspace, text);
+      needLoading && this.abortController.abort();
+      pageIds.push(pageId);
     }
-    const pageIds = await importMarkDown(this.workspace, text);
-    needLoading && this.abortController.abort();
     this._onImportSuccess(pageIds);
   }
 
   private async _importHtml() {
-    const file = await openFileOrFiles({ acceptType: 'Html' });
-    if (!file) return;
-    const text = await file.text();
-    const needLoading = file.size > SHOW_LOADING_SIZE;
-    if (needLoading) {
-      this.hidden = false;
-      this._loading = true;
-    } else {
-      this.abortController.abort();
+    const files = await openFileOrFiles({ acceptType: 'Html', multiple: true });
+    if (!files) return;
+    const pageIds: string[] = [];
+    for (const file of files) {
+      const text = await file.text();
+      const needLoading = file.size > SHOW_LOADING_SIZE;
+      if (needLoading) {
+        this.hidden = false;
+        this._loading = true;
+      } else {
+        this.abortController.abort();
+      }
+      const pageId = await importHtml(this.workspace, text);
+      needLoading && this.abortController.abort();
+      pageIds.push(pageId);
     }
-    const pageIds = await importHtml(this.workspace, text);
-    needLoading && this.abortController.abort();
     this._onImportSuccess(pageIds);
   }
 
