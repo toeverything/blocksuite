@@ -63,6 +63,7 @@ module.exports = {
     '**/*.cjs',
     'tests/snapshots/*',
     '__snapshots__/*',
+    'examples/**',
   ],
   overrides: [
     {
