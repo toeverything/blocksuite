@@ -11,7 +11,6 @@ import { createLitPortal } from '../../_common/components/portal.js';
 import { scrollbarStyle } from '../../_common/components/utils.js';
 import { PAGE_HEADER_HEIGHT } from '../../_common/consts.js';
 import { DoneIcon, SearchIcon } from '../../_common/icons/index.js';
-import { getLanguagePriority } from '../utils/code-languages.js';
 import {
   PLAIN_TEXT_LANG_INFO,
   type StrictLanguageInfo,
@@ -126,6 +125,14 @@ export class LangList extends LitElement {
     `;
   }
 
+  /**
+   * A function to get the priority of a language.
+   *
+   * The higher the number, the higher the priority.
+   */
+  @property({ attribute: false })
+  getLangPriority: (lang: StrictLanguageInfo) => number = () => 0;
+
   @property({ attribute: false })
   currentLanguageId!: BundledLanguage | PlainTextLanguage;
 
@@ -181,17 +188,7 @@ export class LangList extends LitElement {
           )
         );
       })
-      .sort(
-        (a, b) =>
-          getLanguagePriority(
-            a.id as BundledLanguage,
-            this.currentLanguageId === a.id
-          ) -
-          getLanguagePriority(
-            b.id as BundledLanguage,
-            this.currentLanguageId === b.id
-          )
-      );
+      .sort((a, b) => this.getLangPriority(b) - this.getLangPriority(a));
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
@@ -269,11 +266,13 @@ export function createLangList({
   currentLanguage,
   onSelectLanguage,
   referenceElement,
+  getLangPriority,
 }: {
   referenceElement: Element;
   abortController: AbortController;
   currentLanguage: StrictLanguageInfo;
   onSelectLanguage: (lang: StrictLanguageInfo | null) => void;
+  getLangPriority?: (l: StrictLanguageInfo) => number;
 }) {
   const MAX_LANG_SELECT_HEIGHT = 440;
   const portalPadding = {
@@ -289,6 +288,9 @@ export function createLangList({
         onSelectLanguage(lang);
       };
       langList.onClose = () => abortController.abort();
+      if (getLangPriority) {
+        langList.getLangPriority = getLangPriority;
+      }
       positionSlot.on(({ placement }) => {
         langList.placement = placement;
       });

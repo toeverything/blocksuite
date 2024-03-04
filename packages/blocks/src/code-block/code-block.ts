@@ -29,9 +29,14 @@ import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
+import type { CodeService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { createLangList } from './components/lang-list.js';
-import { getStandardLanguage, isPlaintext } from './utils/code-languages.js';
+import {
+  getPopularLangPriority,
+  getStandardLanguage,
+  isPlaintext,
+} from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
   DARK_THEME,
@@ -298,6 +303,7 @@ export class CodeBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    void this.service.loadLanguageDetector();
     // set highlight options getter used by "exportToHtml"
     this.clipboardController.hostConnected();
     this.setHighlightOptionsGetter(() => {
@@ -511,7 +517,7 @@ export class CodeBlockComponent extends BlockElement<
     });
   }
 
-  private _onClickLangBtn() {
+  private async _onClickLangBtn() {
     if (this.readonly) return;
     if (this._langListAbortController) return;
     const abortController = new AbortController();
@@ -520,9 +526,26 @@ export class CodeBlockComponent extends BlockElement<
       this._langListAbortController = undefined;
     });
 
+    const curLanguage = this._perviousLanguage;
+    const detectionResults = await this.service.queryLangConfidence(this.model);
+    const getLangPriority = (lang: StrictLanguageInfo) => {
+      let priority = 0;
+      // Important to show the current language first
+      if (curLanguage.id === lang.id) {
+        priority += 10000;
+      }
+      priority += getPopularLangPriority(lang.id);
+      if (detectionResults[lang.id] > 0.1) {
+        // Ignore languages with low confidence
+        priority += 1000 * detectionResults[lang.id];
+      }
+      return priority;
+    };
+
     createLangList({
       abortController,
-      currentLanguage: this._perviousLanguage,
+      currentLanguage: curLanguage,
+      getLangPriority,
       onSelectLanguage: lang => {
         this.setLang(lang ? lang.id : null);
         abortController.abort();
