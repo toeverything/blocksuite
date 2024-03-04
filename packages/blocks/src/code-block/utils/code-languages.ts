@@ -77,23 +77,19 @@ const PopularLanguages: BundledLanguage[] = [
   'vue',
 ];
 
-const POPULAR_LANGUAGES_MAP: Partial<Record<BundledLanguage, number>> =
-  PopularLanguages.reduce((acc, lang, i) => {
+const POPULAR_LANGUAGES_MAP: Partial<Record<string, number>> =
+  PopularLanguages.reverse().reduce((acc, lang, i) => {
     return {
       [lang]: i,
       ...acc,
     };
   }, {});
 
-export function getLanguagePriority(
-  lang: BundledLanguage,
-  isCurrentLanguage = false
-) {
-  if (isCurrentLanguage) {
-    // Important to show the current language first
-    return -Infinity;
-  }
-  return POPULAR_LANGUAGES_MAP[lang] ?? Infinity;
+/**
+ * Bigger number means more popular.
+ */
+export function getPopularLangPriority(lang: string) {
+  return POPULAR_LANGUAGES_MAP[lang] ?? 0;
 }
 
 export function isPlaintext(lang: string) {

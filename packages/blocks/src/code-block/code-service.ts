@@ -65,7 +65,6 @@ export class CodeService extends BlockService<CodeBlockModel> {
     const detectionResults =
       await this._languageDetector.queryLangConfidence(text);
 
-    // console.log(detectionResults.sort((a, b) => b.confidence - a.confidence));
     return detectionResults.reduce(
       (acc, { language, confidence }) => {
         acc[language.id] = confidence;

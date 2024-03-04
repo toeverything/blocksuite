@@ -14,6 +14,7 @@ import {
 
 import { matchFlavours } from '../../../_common/utils/index.js';
 import type { CodeBlockModel } from '../../../code-block/index.js';
+import { FALLBACK_LANG } from '../../../code-block/utils/consts.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 
 const findLast = (snapshot: BlockSnapshot): BlockSnapshot => {
@@ -129,7 +130,7 @@ class PasteTr {
 
     this.firstSnapshot.flavour = this.fromPointState.model.flavour;
     const toLanguage = (this.fromPointState.model as CodeBlockModel).language;
-    if (toLanguage !== 'Plain Text') {
+    if (toLanguage !== FALLBACK_LANG) {
       this.firstSnapshot.props.language = toLanguage;
     }
     const deltas: DeltaOperation[] = [...fromDelta];
