@@ -293,7 +293,6 @@ export const cardStyles = css`
     max-width: 100%;
     height: 102px;
     object-fit: cover;
-    object-position: left top;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
