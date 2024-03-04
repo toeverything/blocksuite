@@ -215,8 +215,8 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         e.clientY - viewportRect.top
       );
       if (Vec.dist(start, point) > 8 && !this._isMoving) {
-        this._isMoving = true;
         if (!isShape(this.current)) return;
+        this._isMoving = true;
         const { startPosition } = getPosition(type);
         connector = this._addConnector(
           {

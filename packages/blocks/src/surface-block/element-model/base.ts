@@ -1,3 +1,4 @@
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
 
@@ -18,12 +19,17 @@ import {
 } from '../utils/math-utils.js';
 import { PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
-import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  type XYWH,
+} from '../utils/xywh.js';
 import {
   convertProps,
   getDeriveProperties,
   local,
   updateDerivedProp,
+  watch,
   yfield,
 } from './decorators.js';
 import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
@@ -63,7 +69,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     props: Record<string, unknown>;
     oldValues: Record<string, unknown>;
   }) => void;
-  protected _observerDisposable: Record<string | symbol, () => void> = {};
+  protected _disposable = new DisposableGroup();
 
   yMap: Y.Map<unknown>;
   surface!: SurfaceBlockModel;
@@ -86,11 +92,22 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   @local()
   opacity: number = 1;
 
+  @watch((_, instance) => {
+    instance['_local'].delete('externalBound');
+  })
   @local()
   externalXYWH: SerializedXYWH | undefined = undefined;
 
   get externalBound(): Bound | null {
-    return this.externalXYWH ? Bound.deserialize(this.externalXYWH) : null;
+    if (!this._local.has('externalBound')) {
+      const bound = this.externalXYWH
+        ? Bound.deserialize(this.externalXYWH)
+        : null;
+
+      this._local.set('externalBound', bound);
+    }
+
+    return this._local.get('externalBound') as Bound | null;
   }
 
   constructor(options: {
@@ -109,7 +126,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     this._stashed = stashedStore as Map<keyof Props, unknown>;
     this._onChange = onChange;
 
-    // base class property field is assigned before yMap is set
+    // base class properties is initialized before yMap has been set
     // so we need to manually assign the default value here
     this.index = 'a0';
     this.seed = randomSeed();
@@ -119,8 +136,16 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     return true;
   }
 
+  private _lastXYWH: SerializedXYWH = '[0,0,0,0]';
+
   get deserializedXYWH() {
-    return deserializeXYWH(this.xywh);
+    if (this.xywh !== this._lastXYWH) {
+      const xywh = this.xywh;
+      this._local.set('deserializedXYWH', deserializeXYWH(xywh));
+      this._lastXYWH = xywh;
+    }
+
+    return this._local.get('deserializedXYWH') as XYWH;
   }
 
   get x() {

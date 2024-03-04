@@ -41,7 +41,7 @@ export class TextElementModel extends ElementModel<TextElementProps> {
   @yfield()
   xywh: SerializedXYWH = '[0,0,16,16]';
 
-  @yfield()
+  @yfield(0)
   rotate: number = 0;
 
   @yfield()

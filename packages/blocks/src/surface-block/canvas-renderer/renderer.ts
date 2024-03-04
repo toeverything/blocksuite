@@ -331,6 +331,10 @@ export class Renderer extends Viewport {
   }
 
   public removeOverlay(overlay: Overlay) {
+    if (!this._overlays.has(overlay)) {
+      return;
+    }
+
     overlay.setRenderer(null);
     this._overlays.delete(overlay);
     this._shouldUpdate = true;

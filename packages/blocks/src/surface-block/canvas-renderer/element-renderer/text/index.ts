@@ -39,20 +39,21 @@ export function text(
     fontSize,
     fontFamily,
   });
-  // const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
   const deltas = wrapTextDeltas(model.text, font, w);
   const lines = deltaInsertsToChunks(deltas);
-
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
   const horizontalOffset =
     textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
+
+  ctx.font = font;
+  ctx.fillStyle = renderer.getVariableColor(color);
+  ctx.textAlign = textAlign;
+  ctx.textBaseline = 'ideographic';
 
   for (const [lineIndex, line] of lines.entries()) {
     let beforeTextWidth = 0;
 
     for (const delta of line) {
-      ctx.save();
-
       const str = delta.insert;
       const rtl = isRTL(str);
       const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
@@ -61,16 +62,12 @@ export function text(
         // to the DOM
         document.body.appendChild(ctx.canvas);
       }
+
       ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
-      ctx.font = font;
-      ctx.fillStyle = renderer.getVariableColor(color);
-      ctx.textAlign = textAlign;
-      ctx.textBaseline = 'ideographic';
 
       // 0.5 comes from v-line padding
       const offset =
         textAlign === 'center' ? 0 : textAlign === 'right' ? -0.5 : 0.5;
-
       ctx.fillText(
         str,
         horizontalOffset + beforeTextWidth + offset,
@@ -82,8 +79,6 @@ export function text(
       if (shouldTemporarilyAttach) {
         ctx.canvas.remove();
       }
-
-      ctx.restore();
     }
   }
 }
