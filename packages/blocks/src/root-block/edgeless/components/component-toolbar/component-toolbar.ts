@@ -388,9 +388,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   protected override async updated(_changedProperties: PropertyValues) {
-    const [left, top] = this._computePosition();
-
     await this.updateComplete;
+    const [left, top] = this._computePosition();
     this.left = left;
     this.top = top;
   }
