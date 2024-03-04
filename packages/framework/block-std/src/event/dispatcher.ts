@@ -72,10 +72,6 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
-  static slots = {
-    activeChanged: new Slot(),
-  };
-
   slots = {
     parentScaleChanged: new Slot<number>(),
     editorHostPanned: new Slot(),
@@ -90,6 +86,11 @@ export class UIEventDispatcher {
   private _rangeControl: RangeControl;
   private _clipboardControl: ClipboardControl;
 
+  private _active = false;
+  get active() {
+    return this._active;
+  }
+
   constructor(public std: BlockSuite.Std) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
@@ -100,31 +101,6 @@ export class UIEventDispatcher {
   get cumulativeParentScale() {
     return this._pointerControl.cumulativeParentScale;
   }
-
-  private static _activeDispatcher: UIEventDispatcher | null = null;
-
-  get isActive() {
-    return UIEventDispatcher._activeDispatcher === this;
-  }
-
-  activate = () => {
-    const prevDispatcher = UIEventDispatcher._activeDispatcher;
-    if (prevDispatcher === this) return;
-
-    UIEventDispatcher._activeDispatcher = this;
-    UIEventDispatcher.slots.activeChanged.emit();
-    prevDispatcher?.std.selection.clear();
-  };
-
-  deactivate = () => {
-    const prevDispatcher = UIEventDispatcher._activeDispatcher;
-    if (!prevDispatcher) return;
-    if (prevDispatcher !== this) return;
-
-    UIEventDispatcher._activeDispatcher = null;
-    UIEventDispatcher.slots.activeChanged.emit();
-    prevDispatcher.std.selection.clear();
-  };
 
   mount() {
     if (this.disposables.disposed) {
@@ -142,6 +118,8 @@ export class UIEventDispatcher {
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
+    if (!this.active) return;
+
     const sourceState = context.get('sourceState');
     if (!scope) {
       scope = this._getEventScope(name, sourceState);
@@ -309,5 +287,31 @@ export class UIEventDispatcher {
     this._keyboardControl.listen();
     this._rangeControl.listen();
     this._clipboardControl.listen();
+
+    this.disposables.addFromEvent(this.host, 'pointerdown', () => {
+      this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'click', () => {
+      this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'focusin', () => {
+      this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'focusout', e => {
+      if (e.relatedTarget && !this.host.contains(e.relatedTarget as Node)) {
+        this._active = false;
+      }
+    });
+    this.disposables.addFromEvent(this.host, 'mouseenter', () => {
+      this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'mouseleave', () => {
+      if (
+        !document.activeElement ||
+        !this.host.contains(document.activeElement)
+      ) {
+        this._active = false;
+      }
+    });
   }
 }

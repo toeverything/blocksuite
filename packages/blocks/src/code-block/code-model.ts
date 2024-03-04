@@ -1,5 +1,5 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
-import type { Highlighter, Lang } from 'shiki';
+import type { BundledLanguage, Highlighter, PlainTextLanguage } from 'shiki';
 
 import { FALLBACK_LANG } from './utils/consts.js';
 
@@ -18,9 +18,7 @@ export const CodeBlockSchema = defineBlockSchema({
 });
 
 export type CodeBlockModel = SchemaToModel<typeof CodeBlockSchema>;
-export type HighlightOptionsGetter =
-  | (() => {
-      lang: Lang;
-      highlighter: Highlighter | null;
-    })
-  | null;
+export type HighlightOptionsGetter = () => {
+  lang: BundledLanguage | PlainTextLanguage;
+  highlighter: Highlighter | null;
+};

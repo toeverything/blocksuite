@@ -147,6 +147,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       <rich-text
         .yText=${this.titleText.yText}
         .inlineEventSource=${this.topContenteditableElement}
+        .undoManager=${this.topContenteditableElement?.doc.history}
         .enableFormat=${false}
         .readonly=${this.readonly}
         class="${classList}"

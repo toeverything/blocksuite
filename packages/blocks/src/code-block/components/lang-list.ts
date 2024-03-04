@@ -1,19 +1,21 @@
 import '../../_common/components/button.js';
 
-import type { Placement } from '@floating-ui/dom';
+import { autoPlacement, offset, type Placement, size } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import {
-  BUNDLED_LANGUAGES,
-  type ILanguageRegistration,
-  type Lang,
-} from 'shiki';
+import { type PlainTextLanguage } from 'shiki';
+import { type BundledLanguage, bundledLanguagesInfo } from 'shiki/langs';
 
+import { createLitPortal } from '../../_common/components/portal.js';
 import { scrollbarStyle } from '../../_common/components/utils.js';
+import { PAGE_HEADER_HEIGHT } from '../../_common/consts.js';
 import { DoneIcon, SearchIcon } from '../../_common/icons/index.js';
 import { getLanguagePriority } from '../utils/code-languages.js';
-import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
+import {
+  PLAIN_TEXT_LANG_INFO,
+  type StrictLanguageInfo,
+} from '../utils/consts.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
@@ -125,13 +127,13 @@ export class LangList extends LitElement {
   }
 
   @property({ attribute: false })
-  currentLanguageId!: Lang;
+  currentLanguageId!: BundledLanguage | PlainTextLanguage;
 
   @property({ attribute: false })
   onClose?: () => void;
 
   @property({ attribute: false })
-  onSelectLanguage?: (lang: ILanguageRegistration | null) => void;
+  onSelectLanguage?: (lang: StrictLanguageInfo | null) => void;
 
   @property({ attribute: false })
   placement?: Placement;
@@ -158,14 +160,16 @@ export class LangList extends LitElement {
     this.onClose?.();
   }
 
-  private _onLanguageClicked(language: ILanguageRegistration | null) {
+  private _onLanguageClicked(language: StrictLanguageInfo | null) {
     this.onSelectLanguage?.(language);
   }
 
   override render() {
     const isFlip = this.placement?.startsWith('top');
 
-    const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
+    const filteredLanguages = (
+      [PLAIN_TEXT_LANG_INFO, ...bundledLanguagesInfo] as StrictLanguageInfo[]
+    )
       .filter(language => {
         if (!this._filterText) {
           return true;
@@ -179,8 +183,14 @@ export class LangList extends LitElement {
       })
       .sort(
         (a, b) =>
-          getLanguagePriority(a.id as Lang, this.currentLanguageId === a.id) -
-          getLanguagePriority(b.id as Lang, this.currentLanguageId === b.id)
+          getLanguagePriority(
+            a.id as BundledLanguage,
+            this.currentLanguageId === a.id
+          ) -
+          getLanguagePriority(
+            b.id as BundledLanguage,
+            this.currentLanguageId === b.id
+          )
       );
 
     const onLanguageSelect = (e: KeyboardEvent) => {
@@ -239,7 +249,7 @@ export class LangList extends LitElement {
                   isActive ? 'lang-item-active' : null,
                 ].join(' ')}
               >
-                ${language.displayName ?? language.id}
+                ${language.name ?? language.id}
                 <slot name="suffix"
                   >${this.currentLanguageId === language.id
                     ? DoneIcon
@@ -252,6 +262,81 @@ export class LangList extends LitElement {
       </div>
     `;
   }
+}
+
+export function createLangList({
+  abortController,
+  currentLanguage,
+  onSelectLanguage,
+  referenceElement,
+}: {
+  referenceElement: Element;
+  abortController: AbortController;
+  currentLanguage: StrictLanguageInfo;
+  onSelectLanguage: (lang: StrictLanguageInfo | null) => void;
+}) {
+  const MAX_LANG_SELECT_HEIGHT = 440;
+  const portalPadding = {
+    top: PAGE_HEADER_HEIGHT + 12,
+    bottom: 12,
+  } as const;
+  createLitPortal({
+    closeOnClickAway: true,
+    template: ({ positionSlot }) => {
+      const langList = new LangList();
+      langList.currentLanguageId = currentLanguage.id;
+      langList.onSelectLanguage = (lang: StrictLanguageInfo | null) => {
+        onSelectLanguage(lang);
+      };
+      langList.onClose = () => abortController.abort();
+      positionSlot.on(({ placement }) => {
+        langList.placement = placement;
+      });
+      return html`
+        <style>
+          :host {
+            z-index: var(--affine-z-index-popover);
+          }
+        </style>
+        ${langList}
+      `;
+    },
+    computePosition: {
+      referenceElement,
+      placement: 'bottom-start',
+      middleware: [
+        offset(4),
+        autoPlacement({
+          allowedPlacements: ['top-start', 'bottom-start'],
+          padding: portalPadding,
+        }),
+        size({
+          padding: portalPadding,
+          apply({ availableHeight, elements, placement }) {
+            Object.assign(elements.floating.style, {
+              height: '100%',
+              maxHeight: `${Math.min(
+                MAX_LANG_SELECT_HEIGHT,
+                availableHeight
+              )}px`,
+              pointerEvents: 'none',
+              ...(placement.startsWith('top')
+                ? {
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                  }
+                : {
+                    display: null,
+                    alignItems: null,
+                  }),
+            });
+          },
+        }),
+      ],
+      autoUpdate: true,
+    },
+    abortController,
+  });
 }
 
 declare global {

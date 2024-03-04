@@ -75,6 +75,7 @@ export class EdgelessRootService extends RootService {
     elementResizeStart: new Slot(),
     elementResizeEnd: new Slot(),
     toggleNoteSlicer: new Slot(),
+    editorModeSwitch: new Slot<'edgeless' | 'page'>(),
   };
 
   private _surface!: SurfaceBlockModel;
@@ -174,7 +175,6 @@ export class EdgelessRootService extends RootService {
     disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
-        if (!this.std.event.isActive) this.std.event.activate();
       })
     );
 

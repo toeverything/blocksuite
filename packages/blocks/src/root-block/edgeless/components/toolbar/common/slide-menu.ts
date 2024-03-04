@@ -25,6 +25,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       width: var(--menu-width);
       overflow-x: auto;
       overscroll-behavior: none;
+      scrollbar-width: none;
       position: relative;
       height: calc(var(--menu-height) + 1px);
       box-sizing: border-box;
@@ -129,7 +130,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   private _handleWheel(event: WheelEvent) {
     event.stopPropagation();
     this._menuContainer.scrollBy({
-      left: event.deltaY,
+      left: event.deltaX,
     });
   }
 
@@ -155,7 +156,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
           ${ArrowRightSmallIcon}
         </div>
         <div class="menu-container" style=${menuContainerStyles}>
-          <div class="slide-menu-content" @wheel="${this._handleWheel}">
+          <div class="slide-menu-content" @wheel=${this._handleWheel}>
             <slot></slot>
           </div>
         </div>

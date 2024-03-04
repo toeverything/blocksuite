@@ -240,6 +240,13 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     );
   }
 
+  private get _embedViewButtonDisabled() {
+    return (
+      isEmbedLinkedDocBlock(this._model) &&
+      !!this.block.closest('affine-embed-synced-doc-block')
+    );
+  }
+
   private _canShowCardStylePanel(
     model: BlockModel
   ): model is BookmarkBlockModel | EmbedGithubModel | EmbedLinkedDocModel {
@@ -541,7 +548,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
           <icon-button
             size="24px"
             class="embed-card-toolbar-button link"
-            hover="false"
+            .hover=${false}
             ?disabled=${model.doc.readonly}
             @click=${() => this._turnIntoInlineView()}
           >
@@ -556,7 +563,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               card: true,
               'current-view': this._isCardView,
             })}
-            hover="false"
+            .hover=${false}
             ?disabled=${model.doc.readonly}
             @click=${() => this._convertToCardView()}
           >
@@ -573,8 +580,9 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
                     embed: true,
                     'current-view': this._isEmbedView,
                   })}
-                  hover="false"
-                  ?disabled=${model.doc.readonly}
+                  .hover=${false}
+                  ?disabled=${model.doc.readonly ||
+                  this._embedViewButtonDisabled}
                   @click=${() => this._convertToEmbedView()}
                 >
                   ${EmbedWebIcon}

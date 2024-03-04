@@ -6,7 +6,7 @@ import type {
   Workspace,
   WorkspaceInfoSnapshot,
 } from '@blocksuite/store';
-import { getAssetName, Job } from '@blocksuite/store';
+import { getAssetName, Job, sha } from '@blocksuite/store';
 import JSZip from 'jszip';
 
 import { replaceIdMiddleware } from './middlewares.js';
@@ -107,6 +107,31 @@ async function importDocs(workspace: Workspace, imported: Blob) {
     snapshotsObjs.map(async fileObj => {
       const json = await fileObj.async('text');
       const snapshot = JSON.parse(json) as DocSnapshot;
+      const tasks: Promise<void>[] = [];
+
+      job.walk(snapshot, block => {
+        const sourceId = block.props?.sourceId as string | undefined;
+
+        if (sourceId && sourceId.startsWith('/')) {
+          const removeSlashId = sourceId.replace(/^\//, '');
+
+          if (assetsMap.has(removeSlashId)) {
+            const blob = assetsMap.get(removeSlashId)!;
+
+            tasks.push(
+              blob
+                .arrayBuffer()
+                .then(buffer => sha(buffer))
+                .then(hash => {
+                  assetsMap.set(hash, blob);
+                  block.props.sourceId = hash;
+                })
+            );
+          }
+        }
+      });
+
+      await Promise.all(tasks);
 
       return job.snapshotToDoc(snapshot);
     })

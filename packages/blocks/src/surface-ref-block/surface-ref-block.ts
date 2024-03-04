@@ -26,7 +26,7 @@ import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
 import { SurfaceRefPortal } from './surface-ref-portal.js';
 import type { SurfaceRefRenderer } from './surface-ref-renderer.js';
-import { SurfaceRefBlockService } from './surface-ref-service.js';
+import type { SurfaceRefBlockService } from './surface-ref-service.js';
 import { noContentPlaceholder } from './utils.js';
 
 noop(SurfaceRefPortal);
@@ -493,11 +493,10 @@ export class SurfaceRefBlockComponent extends BlockElement<
       xywh: this._referencedModel.xywh,
       padding: [60, 20, 20, 20] as [number, number, number, number],
     };
-    this.std.spec
-      .getService('affine:page')
-      .editSession.setItem('viewport', viewport);
+    const pageService = this.std.spec.getService('affine:page');
 
-    SurfaceRefBlockService.editorModeSwitch.emit('edgeless');
+    pageService.editSession.setItem('viewport', viewport);
+    pageService.slots.editorModeSwitch.emit('edgeless');
   }
 
   private _renderMask(referencedModel: RefElement, flavourOrType: string) {

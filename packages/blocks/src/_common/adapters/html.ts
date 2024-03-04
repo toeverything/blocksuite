@@ -26,9 +26,11 @@ import {
 import type { ElementContent, Root, Text } from 'hast';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
-import { type IThemedToken, type Lang } from 'shiki';
+import { type BundledLanguage, type ThemedToken } from 'shiki';
 import { unified } from 'unified';
 
+import { isPlaintext } from '../../code-block/utils/code-languages.js';
+import { DARK_THEME, LIGHT_THEME } from '../../code-block/utils/consts.js';
 import { getHighLighter } from '../../code-block/utils/high-lighter.js';
 import {
   highlightCache,
@@ -1057,7 +1059,13 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     }, [] as DeltaInsert<object>[]);
     assertEquals(deltas.length, 1, 'Delta length should be 1 in code block');
     const delta = deltas[0];
-    if (rawLang === 'Plain Text' || rawLang === 'Text' || !rawLang) {
+    if (
+      !rawLang ||
+      typeof rawLang !== 'string' ||
+      isPlaintext(rawLang) ||
+      // The rawLang should not be 'Text' here
+      rawLang === 'Text'
+    ) {
       return [
         {
           type: 'text',
@@ -1065,26 +1073,29 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         } as Text,
       ];
     }
-    const lang = rawLang as Lang;
+    const lang = rawLang as BundledLanguage;
+
     const highlighter = await getHighLighter({
       langs: [lang],
+      themes: [LIGHT_THEME, DARK_THEME],
     });
     const cacheKey: highlightCacheKey = `${delta.insert}-${rawLang}-light`;
     const cache = highlightCache.get(cacheKey);
 
-    let tokens: IThemedToken[];
+    let tokens: Omit<ThemedToken, 'offset'>[];
     if (cache) {
       tokens = cache;
     } else {
-      tokens = highlighter
-        .codeToThemedTokens(delta.insert, lang)
-        .reduce((acc, cur, index) => {
+      tokens = highlighter.codeToTokensBase(delta.insert, { lang }).reduce(
+        (acc, cur, index) => {
           if (index === 0) {
             return cur;
           }
 
           return [...acc, { content: '\n', color: 'inherit' }, ...cur];
-        }, []);
+        },
+        [] as Omit<ThemedToken, 'offset'>[]
+      );
       highlightCache.set(cacheKey, tokens);
     }
 

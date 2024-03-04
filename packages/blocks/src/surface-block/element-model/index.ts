@@ -1,11 +1,14 @@
 import { Workspace, type Y } from '@blocksuite/store';
 
-import { values } from '../../_common/utils/iterable.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { ElementModel } from './base.js';
 import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
-import { initFieldObservers, setCreateState } from './decorators.js';
+import {
+  initializedObservers,
+  initializeWatchers,
+  setCreateState,
+} from './decorators.js';
 import { GroupElementModel } from './group.js';
 import { ShapeElementModel } from './shape.js';
 import { TextElementModel } from './text.js';
@@ -55,25 +58,23 @@ export function createElementModel(
 
   setCreateState(false, false);
 
-  let disposable: () => void;
-
   const unmount = () => {
     mounted = false;
-    values(elementModel['_observerDisposable'] ?? {}).forEach(dispose =>
-      dispose()
-    );
-    disposable?.();
+    elementModel['_disposable'].dispose();
   };
 
   const mount = () => {
-    initFieldObservers(Ctor.prototype, elementModel);
-    disposable = onElementChange(yMap, payload => {
-      mounted &&
-        options.onChange({
-          id,
-          ...payload,
-        });
-    });
+    initializedObservers(Ctor.prototype, elementModel);
+    initializeWatchers(Ctor.prototype, elementModel);
+    elementModel['_disposable'].add(
+      onElementChange(yMap, payload => {
+        mounted &&
+          options.onChange({
+            id,
+            ...payload,
+          });
+      })
+    );
     elementModel['_preserved'].clear();
     mounted = true;
   };

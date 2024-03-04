@@ -1,4 +1,7 @@
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
+import { ErrorCode } from '../exceptions/code.js';
+import { BlockSuiteError } from '../exceptions/index.js';
+
 export function isPrimitive(
   a: unknown
 ): a is null | undefined | boolean | number | string {
@@ -15,7 +18,7 @@ export function assertExists<T>(
     if (message instanceof Error) {
       throw message;
     }
-    throw new Error(message);
+    throw new BlockSuiteError(ErrorCode.ValueNotExists, message);
   }
 }
 
@@ -24,7 +27,7 @@ export function assertNotExists<T>(
   message = 'val exists'
 ): asserts val is null | undefined {
   if (val !== null && val !== undefined) {
-    throw new Error(message);
+    throw new BlockSuiteError(ErrorCode.ValueNotExists, message);
   }
 }
 
@@ -79,7 +82,7 @@ export function assertEquals<T extends Allowed, U extends T>(
   message = 'val is not same as expected'
 ): asserts val is U {
   if (!isEqual(val, expected)) {
-    throw new Error(message);
+    throw new BlockSuiteError(ErrorCode.ValueNotEqual, message);
   }
 }
 
@@ -92,6 +95,6 @@ export function assertInstanceOf<T>(
   message = 'val is not instance of expected'
 ): asserts val is T {
   if (!(val instanceof expected)) {
-    throw new Error(message);
+    throw new BlockSuiteError(ErrorCode.ValueNotInstanceOf, message);
   }
 }

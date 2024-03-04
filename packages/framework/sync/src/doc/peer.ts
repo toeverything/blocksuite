@@ -1,13 +1,17 @@
 import { type Logger, Slot } from '@blocksuite/global/utils';
 import { isEqual } from '@blocksuite/global/utils';
 import type { Doc } from 'yjs';
-import { applyUpdate, encodeStateAsUpdate, encodeStateVector } from 'yjs';
+import {
+  applyUpdate,
+  encodeStateAsUpdate,
+  encodeStateVector,
+  mergeUpdates,
+} from 'yjs';
 
 import {
   PriorityAsyncQueue,
   SharedPriorityTarget,
 } from '../utils/async-queue.js';
-import { mergeUpdates } from '../utils/merge-updates.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
 import { DocPeerStep } from './consts.js';
 import type { DocSource } from './source.js';

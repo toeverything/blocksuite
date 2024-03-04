@@ -3,7 +3,6 @@ import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
 
-import { UIEventDispatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
@@ -156,6 +155,29 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       contentBlocks.length === 1 && contentBlocks[0].text?.length === 0;
   }
 
+  private _handleFocusEventsInLoad = () => {
+    const syncedDocEditorHost = this.syncedDocEditorHost;
+    assertExists(syncedDocEditorHost);
+
+    this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', () => {
+      this._editing = true;
+    });
+    this.disposables.addFromEvent(syncedDocEditorHost, 'focusout', () => {
+      this._editing = false;
+      if (this._editorMode === 'page') {
+        this._checkEmpty();
+      }
+    });
+  };
+
+  private _handleFocusEventsInHover = (abortController: AbortController) => {
+    const syncedDocEditorHost = this.syncedDocEditorHost;
+    assertExists(syncedDocEditorHost);
+    this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', () => {
+      abortController.abort();
+    });
+  };
+
   private async _load() {
     this._loading = true;
     this._error = false;
@@ -200,14 +222,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
       const syncedDocEditorHost = this.syncedDocEditorHost;
       assertExists(syncedDocEditorHost);
-      this._disposables.add(
-        UIEventDispatcher.slots.activeChanged.on(() => {
-          this._editing = syncedDocEditorHost.std.event.isActive;
-          if (!this._editing && this._editorMode === 'page') {
-            this._checkEmpty();
-          }
-        })
-      );
+
+      this._handleFocusEventsInLoad();
     }
   }
 
@@ -217,12 +233,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       if (this._editing) {
         return null;
       }
-
-      UIEventDispatcher.slots.activeChanged.once(() => {
-        if (!this.std.event.isActive) {
-          abortController.abort();
-        }
-      });
 
       const selection = this.host.selection;
       const textSelection = selection.find('text');
@@ -240,6 +250,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       ) {
         return null;
       }
+
+      this._handleFocusEventsInHover(abortController);
 
       return {
         template: html`
@@ -276,7 +288,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     event.stopPropagation();
     const syncedDocEditorHost = this.syncedDocEditorHost;
     assertExists(syncedDocEditorHost);
-    syncedDocEditorHost.std.event.activate();
   };
 
   open = () => {

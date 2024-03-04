@@ -346,7 +346,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     });
     this.edgeless.service.selection.set({
       elements: [id],
-      editing: true,
+      editing: false,
     });
   }
 
