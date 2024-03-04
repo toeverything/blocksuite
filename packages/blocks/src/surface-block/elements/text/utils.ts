@@ -1,6 +1,7 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
 import type { CanvasTextFontFamily } from '../../consts.js';
+import { wrapFontFamily } from '../../utils/font.js';
 
 const RS_LTR_CHARS =
   'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF' +
@@ -23,10 +24,6 @@ const getMeasureCtx = (function initMeasureContext() {
     return ctx!;
   };
 })();
-
-export function wrapFontFamily(fontFamily: CanvasTextFontFamily): string {
-  return `"${fontFamily}"`;
-}
 
 const cachedFontFamily = new Map<
   string,
@@ -302,26 +299,4 @@ export function wrapText(text: string, font: string, maxWidth: number): string {
     }
   });
   return lines.join('\n');
-}
-
-export function getFontFacesByFontFamily(
-  fontFamily: CanvasTextFontFamily
-): FontFace[] {
-  const fonts = document.fonts;
-  return (
-    [...fonts.keys()]
-      .filter(fontFace => {
-        return fontFace.family === fontFamily;
-      })
-      // remove duplicate font faces
-      .filter(
-        (item, index, arr) =>
-          arr.findIndex(
-            fontFace =>
-              fontFace.family === item.family &&
-              fontFace.weight === item.weight &&
-              fontFace.style === item.style
-          ) === index
-      )
-  );
 }

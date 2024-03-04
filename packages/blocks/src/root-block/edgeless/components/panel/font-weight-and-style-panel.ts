@@ -7,7 +7,11 @@ import {
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../../../surface-block/consts.js';
-import { getFontFacesByFontFamily } from '../../../../surface-block/elements/text/utils.js';
+import {
+  getFontFaces,
+  getFontFacesByFontFamily,
+  isSameFontFamily,
+} from '../../../../surface-block/utils/font.js';
 
 @customElement('edgeless-font-weight-and-style-panel')
 export class EdgelessFontWeightAndStylePanel extends LitElement {
@@ -67,14 +71,11 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
     // Compatible with old data
     if (!CanvasTextFontFamilies.includes(this.fontFamily)) return false;
 
-    const fonts = document.fonts;
-    const fontFace = [...fonts.keys()].find(fontFace => {
-      return (
-        fontFace.family === this.fontFamily &&
-        fontFace.weight === fontWeight &&
-        fontFace.style === fontStyle
-      );
-    });
+    const fontFace = getFontFaces()
+      .filter(isSameFontFamily(this.fontFamily))
+      .find(fontFace => {
+        return fontFace.weight === fontWeight && fontFace.style === fontStyle;
+      });
 
     return !fontFace;
   }
