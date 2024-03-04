@@ -1,7 +1,7 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-// import { AFFINE_BLOCK_HUB_WIDGET } from '../_common/widgets/block-hub/index.js';
+// import { AFFINE_BLOCK_HUB_WIDGET } from '../root-block/widgets/block-hub/block-hub.js';
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
 import { AttachmentService } from '../attachment-block/attachment-service.js';
 import { BookmarkService } from '../bookmark-block/bookmark-service.js';
