@@ -37,6 +37,16 @@ export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
   syncedDoc: 455,
 };
 
+export const EMBED_BLOCK_FLAVOUR_LIST = [
+  'affine:embed-github',
+  'affine:embed-youtube',
+  'affine:embed-figma',
+  'affine:embed-linked-doc',
+  'affine:embed-synced-doc',
+  'affine:embed-html',
+  'affine:embed-loom',
+] as const;
+
 export const DEFAULT_IMAGE_PROXY_ENDPOINT =
   'https://affine-worker.toeverything.workers.dev/api/worker/image-proxy';
 

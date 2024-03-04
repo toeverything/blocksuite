@@ -15,7 +15,8 @@
         "playground",
         "inline",
         "lit",
-        "sync"
+        "sync",
+        "examples"
       ]
     ]
   }

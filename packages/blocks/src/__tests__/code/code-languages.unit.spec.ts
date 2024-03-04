@@ -8,7 +8,7 @@ describe('getStandardLanguage', () => {
     const language = getStandardLanguage('js');
     expect(language).not.toBeNull();
     expect(language?.id).toBe('javascript');
-    expect(language?.displayName).toBe('JavaScript');
+    expect(language?.name).toBe('JavaScript');
 
     expect(getStandardLanguage('javascript')).not.toBeNull();
     expect(getStandardLanguage('c')).not.toBeNull();

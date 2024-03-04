@@ -27,6 +27,7 @@ export class PointerEventState extends UIEventState {
   button: number;
   dragging: boolean;
   cumulativeParentScale: number;
+  pressure: number;
 
   get x() {
     return this.point.x;
@@ -64,6 +65,7 @@ export class PointerEventState extends UIEventState {
     this.button = last?.button || event.button;
     this.dragging = !!last;
     this.cumulativeParentScale = cumulativeParentScale;
+    this.pressure = event.pressure;
   }
 }
 

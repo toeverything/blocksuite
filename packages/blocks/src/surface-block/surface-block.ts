@@ -160,7 +160,9 @@ export class SurfaceBlockComponent extends BlockElement<
     });
 
     this._disposables.add(
-      this.model.elementUpdated.on(() => {
+      this.model.elementUpdated.on(payload => {
+        // ignore externalXYWH update cause it's updated by the renderer
+        if (payload.props['externalXYWH']) return;
         this._renderer.refresh();
       })
     );
@@ -171,11 +173,6 @@ export class SurfaceBlockComponent extends BlockElement<
     );
     this._disposables.add(
       this.model.elementRemoved.on(() => {
-        this._renderer.refresh();
-      })
-    );
-    this._disposables.add(
-      this.edgeless.service.selection.slots.updated.on(() => {
         this._renderer.refresh();
       })
     );

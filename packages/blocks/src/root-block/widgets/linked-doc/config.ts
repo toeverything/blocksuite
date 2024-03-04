@@ -135,12 +135,13 @@ export const getMenus: (ctx: {
               if (docIds.length === 0) {
                 return;
               }
-              const docId = docIds[0];
-              insertLinkedNode({
-                editorHost,
-                model,
-                docId,
-              });
+              for (const docId of docIds) {
+                insertLinkedNode({
+                  editorHost,
+                  model,
+                  docId,
+                });
+              }
             };
             const onFail = (message: string) => {
               toast(editorHost, message);

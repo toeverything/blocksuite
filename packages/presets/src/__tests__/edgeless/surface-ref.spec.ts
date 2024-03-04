@@ -1,5 +1,8 @@
-import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
-import { beforeEach, describe, expect, test } from 'vitest';
+import type {
+  EdgelessRootBlockComponent,
+  SurfaceRefBlockComponent,
+} from '@blocksuite/blocks';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';
 import { addNote, getDocRootBlock } from '../utils/edgeless.js';
@@ -147,5 +150,40 @@ describe('basic', () => {
     expect(stackingCanvas[1].style.zIndex > refBlocks[0].style.zIndex).toBe(
       true
     );
+  });
+
+  test('view in edgeless mode button', async () => {
+    const groupId = service.addElement('group', {
+      children: {
+        [shapeA]: true,
+        [shapeB]: true,
+        [noteA]: true,
+        [noteB]: true,
+      },
+    });
+    const surfaceRefId = doc.addBlock(
+      'affine:surface-ref',
+      {
+        reference: groupId,
+      },
+      noteA
+    );
+
+    editor.mode = 'page';
+    await wait();
+
+    const surfaceRef = document.querySelector(
+      `affine-surface-ref[data-block-id="${surfaceRefId}"]`
+    ) as HTMLElement;
+
+    const switchEditor = vi.fn(() => {});
+    const pageService = editor.host.std.spec.getService('affine:page');
+
+    pageService.slots.editorModeSwitch.once(switchEditor);
+
+    expect(surfaceRef).instanceOf(Element);
+    (surfaceRef as SurfaceRefBlockComponent).viewInEdgeless();
+    expect(switchEditor).toBeCalledWith('edgeless');
+    await wait();
   });
 });

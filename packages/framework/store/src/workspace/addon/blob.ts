@@ -12,7 +12,6 @@ export const blob = addOnFactory<keyof BlobAddon>(
   originalClass =>
     class extends originalClass {
       private readonly _storages: BlobStorage[] = [];
-      private readonly _blobsRef = new Map<string, number>();
 
       readonly blob: BlobManager;
 
@@ -65,40 +64,7 @@ export const blob = addOnFactory<keyof BlobAddon>(
             );
             return Array.from(keys);
           },
-          gc: async () => {
-            const blobs = await this.blob.list();
-            blobs.forEach(blobId => {
-              const ref = this._blobsRef.get(blobId);
-              if (!ref || ref <= 0) {
-                this.blob.delete(blobId)?.catch(console.error);
-                this._blobsRef.delete(blobId);
-              }
-            });
-          },
-          increaseRef: blobId => {
-            const ref = this._blobsRef.get(blobId) ?? 0;
-            this._blobsRef.set(blobId, ref + 1);
-          },
-          decreaseRef: blobId => {
-            const ref = this._blobsRef.get(blobId) ?? 0;
-            this._blobsRef.set(blobId, Math.max(ref - 1, 0));
-          },
         };
-
-        //FIXME: Each page might be lazy-loaded and could clear away blobs used by other pages.
-        // if (
-        //   typeof window !== 'undefined' &&
-        //   typeof window.addEventListener === 'function'
-        // ) {
-        //   window.addEventListener('beforeunload', () => {
-        //     this.blob.gc();
-        //   });
-        // }
-        // if (typeof process !== 'undefined') {
-        //   process.on('exit', () => {
-        //     this.blob.gc();
-        //   });
-        // }
       }
     }
 );

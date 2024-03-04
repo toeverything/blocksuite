@@ -6,10 +6,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
-import { wrapFontFamily } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import type { ShapeElementModel } from '../../../../surface-block/element-model/index.js';
 import { SHAPE_TEXT_PADDING } from '../../../../surface-block/elements/shape/consts.js';
 import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
+import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 
