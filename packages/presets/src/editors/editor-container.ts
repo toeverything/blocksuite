@@ -7,11 +7,11 @@ import type {
   AbstractEditor,
   EdgelessRootBlockComponent,
   PageRootBlockComponent,
+  PageRootService,
 } from '@blocksuite/blocks';
 import {
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
-  SurfaceRefBlockService,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { assertExists, Slot } from '@blocksuite/global/utils';
@@ -81,10 +81,42 @@ export class AffineEditorContainer
   mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  pageSpecs = PageEditorBlockSpecs;
+  pageSpecs = [...PageEditorBlockSpecs].map(spec => {
+    if (spec.schema.model.flavour === 'affine:page') {
+      spec = {
+        ...spec,
+        setup: (slots, disposable) => {
+          slots.mounted.once(({ service }) => {
+            disposable.add(
+              (<PageRootService>service).slots.editorModeSwitch.on(mode => {
+                this.mode = mode;
+              })
+            );
+          });
+        },
+      };
+    }
+    return spec;
+  });
 
   @property({ attribute: false })
-  edgelessSpecs = EdgelessEditorBlockSpecs;
+  edgelessSpecs = [...EdgelessEditorBlockSpecs].map(spec => {
+    if (spec.schema.model.flavour === 'affine:page') {
+      spec = {
+        ...spec,
+        setup: (slots, disposable) => {
+          slots.mounted.once(({ service }) => {
+            disposable.add(
+              (<PageRootService>service).slots.editorModeSwitch.on(mode => {
+                this.mode = mode;
+              })
+            );
+          });
+        },
+      };
+    }
+    return spec;
+  });
 
   @property({ attribute: false })
   override autofocus = false;
@@ -166,11 +198,6 @@ export class AffineEditorContainer
 
     this.themeObserver.observe(document.documentElement);
     this._disposables.add(this.themeObserver);
-    this._disposables.add(
-      SurfaceRefBlockService.editorModeSwitch.on(mode => {
-        this.mode = mode;
-      })
-    );
   }
 
   /**

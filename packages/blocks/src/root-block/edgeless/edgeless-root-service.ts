@@ -75,6 +75,7 @@ export class EdgelessRootService extends RootService {
     elementResizeStart: new Slot(),
     elementResizeEnd: new Slot(),
     toggleNoteSlicer: new Slot(),
+    editorModeSwitch: new Slot<'edgeless' | 'page'>(),
   };
 
   private _surface!: SurfaceBlockModel;
