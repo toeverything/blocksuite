@@ -23,7 +23,8 @@ import {
 } from '../../../_common/utils/selection.js';
 import type { ListBlockModel } from '../../../list-block/index.js';
 import type { RootBlockModel } from '../../../root-block/index.js';
-import type { ExtendedModel } from '../../types.js';
+import { EMBED_BLOCK_FLAVOUR_LIST } from '../../consts.js';
+import { type ExtendedModel } from '../../types.js';
 
 /**
  * Whether the block supports rendering its children.
@@ -647,6 +648,7 @@ function handleParagraphDeleteActions(
       'affine:bookmark',
       'affine:code',
       'affine:image',
+      ...EMBED_BLOCK_FLAVOUR_LIST,
     ])
   ) {
     doc.deleteBlock(model, {
@@ -866,6 +868,8 @@ function handleParagraphBlockForwardDelete(
       'affine:image',
       'affine:code',
       'affine:attachment',
+      'affine:bookmark',
+      ...EMBED_BLOCK_FLAVOUR_LIST,
     ];
 
     if (
