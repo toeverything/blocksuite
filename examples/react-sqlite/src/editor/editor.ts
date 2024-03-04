@@ -35,10 +35,7 @@ export async function initEditor() {
   const editor = new AffineEditorContainer();
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ docId }) => {
-    const target = workspace.getDoc(docId);
-    if (!target) {
-      throw new Error(`Failed to jump to doc ${docId}`);
-    }
+    const target = <Doc>workspace.getDoc(docId);
     editor.doc = target;
   });
   return { editor, provider, workspace };
