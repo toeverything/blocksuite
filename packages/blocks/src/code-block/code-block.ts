@@ -43,7 +43,10 @@ import {
 import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
+export class CodeBlockComponent extends BlockElement<
+  CodeBlockModel,
+  CodeService
+> {
   static override styles = css`
     code-block {
       position: relative;
