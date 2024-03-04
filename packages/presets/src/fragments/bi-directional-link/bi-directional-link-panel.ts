@@ -22,6 +22,7 @@ import {
   ArrowLeftIcon,
   SmallLinkedDocIcon,
 } from '../_common/icons.js';
+import { DOC_BLOCK_CHILD_PADDING } from '../doc-meta-tags/utils.js';
 
 noop(RichText);
 
@@ -35,9 +36,23 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       max-width: var(--affine-editor-width);
       margin-left: auto;
       margin-right: auto;
-      padding-left: var(--affine-editor-side-padding, 24px);
-      padding-right: var(--affine-editor-side-padding, 24px);
+      padding-left: var(
+        --affine-editor-side-padding,
+        ${DOC_BLOCK_CHILD_PADDING}
+      );
+      padding-right: var(
+        --affine-editor-side-padding,
+        ${DOC_BLOCK_CHILD_PADDING}
+      );
       font-size: var(--affine-font-base);
+    }
+
+    /* Extra small devices (phones, 640px and down) */
+    @container viewport (width <= 640px) {
+      :host {
+        padding-left: ${DOC_BLOCK_CHILD_PADDING}px;
+        padding-right: ${DOC_BLOCK_CHILD_PADDING}px;
+      }
     }
 
     .title-line {

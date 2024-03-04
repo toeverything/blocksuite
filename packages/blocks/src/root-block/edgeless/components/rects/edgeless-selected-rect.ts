@@ -896,7 +896,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const [width, height] = [rect.width * zoom, rect.height * zoom];
 
     let rotate = 0;
-    if (elements.length === 1) {
+    if (elements.length === 1 && elements[0].rotate) {
       rotate = elements[0].rotate;
     }
 
@@ -905,8 +905,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height: height,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: 'solid',
-      left: left,
-      top: top,
+      left,
+      top,
       rotate,
     };
   }, this);
@@ -942,6 +942,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _updateOnViewportChange = () => {
+    if (this.selection.empty) {
+      return;
+    }
+
     this._updateSelectedRect();
     this._updateMode();
   };

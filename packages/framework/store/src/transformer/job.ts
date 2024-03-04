@@ -234,6 +234,18 @@ export class Job {
     return modelData;
   };
 
+  walk = (snapshot: DocSnapshot, callback: (block: BlockSnapshot) => void) => {
+    const walk = (block: BlockSnapshot) => {
+      callback(block);
+
+      if (block.children) {
+        block.children.forEach(walk);
+      }
+    };
+
+    walk(snapshot.blocks);
+  };
+
   snapshotToBlock = async (
     snapshot: BlockSnapshot,
     doc: Doc,
