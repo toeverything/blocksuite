@@ -97,11 +97,7 @@ export const createLanguageDetector = <Lang extends BundledLanguageInfo>({
   // See https://github.com/microsoft/vscode-languagedetection#advanced-options
   const modelOperations = new ModelOperations({
     modelJsonLoaderFunc: async () => {
-      return import('@vscode/vscode-languagedetection/model/model.json', {
-        with: {
-          type: 'json',
-        },
-      });
+      return import('@vscode/vscode-languagedetection/model/model.json');
     },
     weightsLoaderFunc: async () => {
       const url =
