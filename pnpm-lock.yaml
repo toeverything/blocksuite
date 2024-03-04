@@ -192,6 +192,9 @@ importers:
       '@types/webfontloader':
         specifier: ^1.6.38
         version: 1.6.38
+      '@vscode/vscode-languagedetection':
+        specifier: ^1.0.22
+        version: 1.0.22
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -2499,6 +2502,11 @@ packages:
       loupe: 2.3.7
       pretty-format: 29.7.0
     dev: true
+
+  /@vscode/vscode-languagedetection@1.0.22:
+    resolution: {integrity: sha512-rQ/BgMyLuIXSmbA0MSkIPHtcOw14QkeDbAq19sjvaS9LTRr905yij0S8lsyqN5JgOsbtIx7pAcyOxFMzPmqhZQ==}
+    hasBin: true
+    dev: false
 
   /@vscode/web-custom-data@0.4.9:
     resolution: {integrity: sha512-QeCJFISE/RiTG0NECX6DYmVRPVb0jdyaUrhY0JqNMv9ruUYtYqxxQfv3PSjogb+zNghmwgXLSYuQKk6G+Xnaig==}
