@@ -33,7 +33,8 @@ export const styles = css`
   .affine-embed-loom-video svg {
     width: 100%;
     height: 100%;
-    object-fit: fill;
+    object-fit: cover;
+    object-position: left top;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
