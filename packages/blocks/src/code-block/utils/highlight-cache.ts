@@ -1,4 +1,4 @@
-import type { IThemedToken } from 'shiki';
+import type { ThemedToken } from 'shiki';
 
 class LRUCache<K, V> {
   private maxSize: number;
@@ -30,6 +30,7 @@ class LRUCache<K, V> {
 
 export type highlightCacheKey = `${string}-${string}-${string}`;
 
-export const highlightCache = new LRUCache<highlightCacheKey, IThemedToken[]>(
-  4000
-);
+export const highlightCache = new LRUCache<
+  highlightCacheKey,
+  Omit<ThemedToken, 'offset'>[]
+>(4000);
