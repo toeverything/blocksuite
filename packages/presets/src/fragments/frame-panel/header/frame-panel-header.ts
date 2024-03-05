@@ -108,9 +108,6 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessRootBlockComponent | null;
 
-  @property({ attribute: false })
-  changeEditorMode!: (mode: 'page' | 'edgeless') => void;
-
   @state()
   private _settingPopperShow = false;
 
@@ -127,16 +124,24 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   private _navigatorMode: NavigatorMode = 'fit';
   private _edgelessDisposables: DisposableGroup | null = null;
 
+  get rootService() {
+    return this.editorHost.spec.getService('affine:page');
+  }
+
   private _enterPresentationMode = () => {
-    if (!this.edgeless) this.changeEditorMode('edgeless');
-    this.edgeless?.updateComplete
-      .then(() => {
-        this.edgeless?.tools.setEdgelessTool({
-          type: 'frameNavigator',
-          mode: this._navigatorMode,
-        });
-      })
-      .catch(console.error);
+    if (!this.edgeless)
+      this.rootService.slots.editorModeSwitch.emit('edgeless');
+
+    setTimeout(() => {
+      this.edgeless?.updateComplete
+        .then(() => {
+          this.edgeless?.tools.setEdgelessTool({
+            type: 'frameNavigator',
+            mode: this._navigatorMode,
+          });
+        })
+        .catch(console.error);
+    }, 100);
   };
 
   private _tryLoadNavigatorStateLocalRecord() {
