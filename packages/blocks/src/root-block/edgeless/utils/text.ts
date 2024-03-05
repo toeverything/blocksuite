@@ -45,7 +45,7 @@ export function mountTextElementEditor(
   textEditor.element = textElement;
   const rootElementContainer = edgeless.rootElementContainer;
 
-  rootElementContainer.appendChild(textEditor);
+  rootElementContainer.append(textEditor);
   textEditor.updateComplete
     .then(() => {
       textEditor.inlineEditor?.focusIndex(cursorIndex);
@@ -87,7 +87,7 @@ export function mountShapeTextEditor(
   shapeEditor.edgeless = edgeless;
   const rootElementContainer = edgeless.rootElementContainer;
 
-  rootElementContainer.appendChild(shapeEditor);
+  rootElementContainer.append(shapeEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [shapeElement.id],
     editing: true,
@@ -102,7 +102,7 @@ export function mountFrameTitleEditor(
   frameEditor.frameModel = frame;
   frameEditor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.appendChild(frameEditor);
+  edgeless.rootElementContainer.append(frameEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [frame.id],
     editing: true,
@@ -117,7 +117,7 @@ export function mountGroupTitleEditor(
   groupEditor.group = group;
   groupEditor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.appendChild(groupEditor);
+  edgeless.rootElementContainer.append(groupEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [group.id],
     editing: true,

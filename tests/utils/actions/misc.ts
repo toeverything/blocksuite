@@ -128,10 +128,10 @@ async function initEmptyEditor({
             debugMenu.outlinePanel = outlinePanel;
             const leftSidePanel = document.createElement('left-side-panel');
             debugMenu.leftSidePanel = leftSidePanel;
-            document.body.appendChild(debugMenu);
-            document.body.appendChild(leftSidePanel);
-            document.body.appendChild(framePanel);
-            document.body.appendChild(outlinePanel);
+            document.body.append(debugMenu);
+            document.body.append(leftSidePanel);
+            document.body.append(framePanel);
+            document.body.append(outlinePanel);
 
             window.debugMenu = debugMenu;
             window.editor = editor;
@@ -892,7 +892,7 @@ export async function getClipboardHTML(page: Page) {
 
         if (node.lastElementChild == node.children[i]) {
           textNode = document.createTextNode('\n' + indentAfter);
-          node.appendChild(textNode);
+          node.append(textNode);
         }
       }
 
@@ -1027,7 +1027,7 @@ export async function readClipboardText(
     ({ type, id }) => {
       const input = document.createElement(type);
       input.setAttribute('id', id);
-      document.body.appendChild(input);
+      document.body.append(input);
     },
     { type, id }
   );

@@ -103,7 +103,7 @@ export function toggleEmbedCardCaptionEditModal(block: BlockComponent) {
   host.selection.clear();
   const embedCardEditCaptionEditModal = new EmbedCardEditCaptionEditModal();
   embedCardEditCaptionEditModal.block = block;
-  document.body.appendChild(embedCardEditCaptionEditModal);
+  document.body.append(embedCardEditCaptionEditModal);
 }
 
 declare global {

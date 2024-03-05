@@ -100,6 +100,7 @@ module.exports = {
         'no-constant-binary-expression': 'error',
         'unicorn/no-useless-spread': 'error',
         'unicorn/no-useless-fallback-in-spread': 'error',
+        'unicorn/prefer-dom-node-append': 'error',
       },
     },
     ...allPackages.map(pkg => ({

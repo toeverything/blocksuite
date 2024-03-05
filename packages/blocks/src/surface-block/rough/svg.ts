@@ -61,7 +61,7 @@ export class RoughSVG {
         }
       }
       if (path) {
-        g.appendChild(path);
+        g.append(path);
       }
     }
     return g;

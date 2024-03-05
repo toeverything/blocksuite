@@ -218,7 +218,7 @@ export async function toggleEmbedCardCreateModal(
   embedCardCreateModal.descriptionText = descriptionText;
   embedCardCreateModal.createOptions = createOptions;
 
-  document.body.appendChild(embedCardCreateModal);
+  document.body.append(embedCardCreateModal);
 
   return new Promise(resolve => {
     embedCardCreateModal.onConfirm = () => resolve();

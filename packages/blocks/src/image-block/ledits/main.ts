@@ -61,7 +61,7 @@ export function openLeditsEditor(blockElement: ImageBlockComponent) {
     ],
     entry(div) {
       app.imageBlob = blob;
-      div.appendChild(app);
+      div.append(app);
     },
   });
 }

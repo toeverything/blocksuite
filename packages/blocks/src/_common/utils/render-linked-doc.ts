@@ -56,7 +56,7 @@ async function addCover(
   }
 
   if (cover instanceof HTMLElement) {
-    coverContainer.appendChild(cover);
+    coverContainer.append(cover);
   } else {
     render(cover, coverContainer);
   }

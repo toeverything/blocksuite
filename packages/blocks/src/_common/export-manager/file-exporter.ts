@@ -34,7 +34,7 @@ export const FileExporter = {
     element.setAttribute('download', safeFilename);
 
     element.style.display = 'none';
-    document.body.appendChild(element);
+    document.body.append(element);
 
     element.click();
 

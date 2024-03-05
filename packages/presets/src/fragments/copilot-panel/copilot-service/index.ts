@@ -168,7 +168,7 @@ export class VendorServiceSelect extends WithDisposable(ShadowlessElement) {
       this.requestUpdate();
     };
     const target = e.target as HTMLElement;
-    document.body.appendChild(options);
+    document.body.append(options);
     computePosition(target, options)
       .then(pos => {
         options.style.left = `${pos.x}px`;

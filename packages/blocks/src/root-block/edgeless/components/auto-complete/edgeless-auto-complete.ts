@@ -194,7 +194,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     );
 
     const rootElementContainer = this.edgeless.rootElementContainer;
-    rootElementContainer.appendChild(autoCompletePanel);
+    rootElementContainer.append(autoCompletePanel);
   }
 
   private _onPointerDown = (e: PointerEvent, type: Direction) => {

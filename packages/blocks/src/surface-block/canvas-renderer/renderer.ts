@@ -169,7 +169,7 @@ export class Renderer extends Viewport {
    */
   attach(container: HTMLElement) {
     this.setContainer(container);
-    container.appendChild(this.canvas);
+    container.append(this.canvas);
 
     this._resetSize();
     this._loop();

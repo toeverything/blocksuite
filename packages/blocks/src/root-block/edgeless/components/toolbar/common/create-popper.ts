@@ -45,7 +45,7 @@ export function createPopper<T extends keyof HTMLElementTagNameMap>(
 
   const menu = document.createElement(tagName);
   assertExists(reference.shadowRoot);
-  reference.shadowRoot.appendChild(menu);
+  reference.shadowRoot.append(menu);
 
   // apply enter transition
   menu.style.transition = `transform ${duration}ms ease`;

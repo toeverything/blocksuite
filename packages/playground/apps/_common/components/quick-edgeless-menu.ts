@@ -260,7 +260,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       key => `--${key}: ${duration}ms`
     )} }`;
 
-    $html.appendChild($style);
+    $html.append($style);
     $html.classList.add(classKey);
 
     setTimeout(() => {

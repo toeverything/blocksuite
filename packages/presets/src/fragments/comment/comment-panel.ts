@@ -105,7 +105,7 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
     commentInput.onSubmit = () => {
       this.requestUpdate();
     };
-    this._container.appendChild(commentInput);
+    this._container.append(commentInput);
   }
 }
 

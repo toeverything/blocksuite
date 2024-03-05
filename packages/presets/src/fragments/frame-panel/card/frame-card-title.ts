@@ -87,7 +87,7 @@ export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
     const left = this.titleIndexElement.offsetWidth + 6;
     titleEditor.left = left;
     titleEditor.maxWidth = this.titleContainer.offsetWidth - left - 6;
-    this.titleContainer.appendChild(titleEditor);
+    this.titleContainer.append(titleEditor);
   };
 
   private _clearTitleDisposables = () => {
