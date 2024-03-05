@@ -7,3 +7,5 @@ This example encapsulates the BlockSuite editor and workspace in Angular, demons
 ```sh
 pnpm dev
 ```
+
+This project is created using the `ng` cli.

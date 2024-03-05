@@ -1,8 +1,10 @@
 # BlockSuite Examples
 
-This collection showcases how to integrate, use, and configure BlockSuite across various common project setups. These examples are built and maintained independently from the packages in the monorepo.
+This collection showcases how to integrate, use, and configure BlockSuite across various common project setups.
 
 ## Install
+
+These examples are built and maintained independently from the packages in the monorepo. It's a standalone [workspace](https://pnpm.io/workspaces) that installs BlockSuite canary versions published on npm, instead of using the `workspace:*` reference.
 
 ```sh
 pnpm install
