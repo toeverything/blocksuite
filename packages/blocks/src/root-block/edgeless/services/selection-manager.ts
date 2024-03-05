@@ -317,6 +317,10 @@ export class EdgelessSelectionManager {
     });
   }
 
+  clearLast() {
+    this.lastState = [];
+  }
+
   dispose() {
     this.disposable.dispose();
   }

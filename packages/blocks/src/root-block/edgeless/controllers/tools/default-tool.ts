@@ -1,6 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
+import { type EdgelessTool } from '../../../../_common/utils/index.js';
 import {
   type DefaultTool,
   handleNativeRangeAtPoint,
@@ -409,6 +410,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   };
 
+  private _clearLastSelecton = () => {
+    if (this.selection.empty) {
+      this.selection.clearLast();
+    }
+  };
+
   private _clearDraggingAreaDisposable = () => {
     if (this._draggingAreaDisposables) {
       this._draggingAreaDisposables.dispose();
@@ -665,7 +672,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  beforeModeSwitch() {
+  beforeModeSwitch(edgelessTool?: EdgelessTool) {
+    if (edgelessTool?.type === 'pan') {
+      this._clearLastSelecton();
+    }
     this._stopAutoPanning();
     this._clearDraggingAreaDisposable();
     noop();

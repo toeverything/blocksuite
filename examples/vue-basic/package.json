@@ -1,0 +1,24 @@
+{
+  "name": "vue-basic",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@blocksuite/blocks": "canary",
+    "@blocksuite/presets": "canary",
+    "@blocksuite/store": "canary",
+    "sql.js": "^1.10.2",
+    "vue": "^3.4.19"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.4",
+    "vue-tsc": "^1.8.27"
+  }
+}
