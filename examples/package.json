@@ -4,7 +4,11 @@
   "description": "",
   "private": true,
   "scripts": {
-    "dev": "./dev.sh"
+    "dev": "./dev.sh",
+    "start:angular-basic": "pnpm i && cd angular-basic && pnpm dev",
+    "start:react-basic": "pnpm i && cd react-basic && pnpm dev",
+    "start:react-sqlite": "pnpm i && cd react-sqlite && pnpm dev",
+    "start:vue-basic": "pnpm i && cd vue-basic && pnpm dev"
   },
   "keywords": [],
   "author": "toeverything",

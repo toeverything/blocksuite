@@ -6,6 +6,8 @@ settings:
 
 importers:
 
+  .: {}
+
   angular-basic:
     dependencies:
       '@angular/animations':
@@ -84,6 +86,58 @@ importers:
       typescript:
         specifier: ~5.3.2
         version: 5.3.3
+
+  react-basic:
+    dependencies:
+      '@blocksuite/blocks':
+        specifier: canary
+        version: 0.12.0-canary-202403050308-3789d0e(yjs@13.6.14)
+      '@blocksuite/presets':
+        specifier: canary
+        version: 0.12.0-canary-202403050308-3789d0e(yjs@13.6.14)
+      '@blocksuite/store':
+        specifier: canary
+        version: 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+    devDependencies:
+      '@types/react':
+        specifier: ^18.2.56
+        version: 18.2.61
+      '@types/react-dom':
+        specifier: ^18.2.19
+        version: 18.2.19
+      '@types/sql.js':
+        specifier: ^1.4.9
+        version: 1.4.9
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^7.0.2
+        version: 7.1.0(@typescript-eslint/parser@7.1.0)(eslint@8.57.0)(typescript@5.3.3)
+      '@typescript-eslint/parser':
+        specifier: ^7.0.2
+        version: 7.1.0(eslint@8.57.0)(typescript@5.3.3)
+      '@vitejs/plugin-react':
+        specifier: ^4.2.1
+        version: 4.2.1(vite@5.1.4)
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.0
+      eslint-plugin-react-hooks:
+        specifier: ^4.6.0
+        version: 4.6.0(eslint@8.57.0)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.5
+        version: 0.4.5(eslint@8.57.0)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.3.3
+      vite:
+        specifier: ^5.1.4
+        version: 5.1.4
 
   react-sqlite:
     dependencies:
@@ -1786,6 +1840,18 @@ packages:
       zod: 3.22.4
     dev: false
 
+  /@blocksuite/block-std@0.12.0-canary-202403050308-3789d0e(@blocksuite/store@0.12.0-canary-202403050308-3789d0e):
+    resolution: {integrity: sha512-RVz6n6ykHsu4TkO0qHGkaiwN7blvjNtxp+hixHq8E7j0R4kRlZErJSc1ZB5dCAcd6voCEZzg5Fkwu4zdot6HgQ==}
+    peerDependencies:
+      '@blocksuite/store': 0.12.0-canary-202403050308-3789d0e
+    dependencies:
+      '@blocksuite/global': 0.12.0-canary-202403050308-3789d0e
+      '@blocksuite/store': 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
+      lz-string: 1.5.0
+      w3c-keyname: 2.2.8
+      zod: 3.22.4
+    dev: false
+
   /@blocksuite/blocks@0.12.0-canary-202403030405-22b9597(yjs@13.6.14):
     resolution: {integrity: sha512-oV6CLVByTKuiPo3/ic1lDd7lxyz04IiUyFs4p81pGl5FGTyrnsyt1/OP7ElOQBuds4uMG7LdKtJHLRPAKa6EeA==}
     dependencies:
@@ -1834,8 +1900,62 @@ packages:
       - yjs
     dev: false
 
+  /@blocksuite/blocks@0.12.0-canary-202403050308-3789d0e(yjs@13.6.14):
+    resolution: {integrity: sha512-uu7mUWev4rzm0hnRB6vy6k8aZvePT+EcANHntiwc2zu6rNkOEn2nnZlVzDayuGGmmC9Vni7OgMPW4TtHgrjYlA==}
+    dependencies:
+      '@blocksuite/block-std': 0.12.0-canary-202403050308-3789d0e(@blocksuite/store@0.12.0-canary-202403050308-3789d0e)
+      '@blocksuite/global': 0.12.0-canary-202403050308-3789d0e
+      '@blocksuite/inline': 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
+      '@blocksuite/lit': 0.12.0-canary-202403050308-3789d0e(@blocksuite/block-std@0.12.0-canary-202403050308-3789d0e)(@blocksuite/store@0.12.0-canary-202403050308-3789d0e)(yjs@13.6.14)
+      '@blocksuite/store': 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
+      '@floating-ui/dom': 1.6.3
+      '@toeverything/theme': 0.7.29
+      '@types/hast': 3.0.4
+      '@types/mdast': 4.0.3
+      '@types/sortablejs': 1.15.8
+      '@types/webfontloader': 1.6.38
+      buffer: 6.0.3
+      date-fns: 3.3.1
+      file-type: 16.5.4
+      fractional-indexing: 3.2.0
+      html2canvas: 1.4.1
+      jszip: 3.10.1
+      lit: 3.1.2
+      mdast-util-gfm-autolink-literal: 2.0.0
+      mdast-util-gfm-strikethrough: 2.0.0
+      mdast-util-gfm-table: 2.0.0
+      mdast-util-gfm-task-list-item: 2.0.0
+      merge: 2.1.1
+      micromark-extension-gfm-autolink-literal: 2.0.0
+      micromark-extension-gfm-strikethrough: 2.0.0
+      micromark-extension-gfm-table: 2.0.0
+      micromark-extension-gfm-task-list-item: 2.0.1
+      micromark-util-combine-extensions: 2.0.0
+      minimatch: 9.0.3
+      nanoid: 5.0.6
+      pdf-lib: 1.17.1
+      rehype-parse: 9.0.0
+      rehype-stringify: 10.0.0
+      remark-parse: 11.0.0
+      remark-stringify: 11.0.0
+      shiki: 1.1.7
+      sortablejs: 1.15.2
+      unified: 11.0.4
+      webfontloader: 1.6.28
+      zod: 3.22.4
+    transitivePeerDependencies:
+      - supports-color
+      - yjs
+    dev: false
+
   /@blocksuite/global@0.12.0-canary-202403030405-22b9597:
     resolution: {integrity: sha512-CEHq14YBPOWVhm3P1oCUsNy8UULASJW4Dte0r87oXtf9shGBW3T66a3duDX69oUVcrScsY+z+DuZErMgwslb6Q==}
+    dependencies:
+      zod: 3.22.4
+    dev: false
+
+  /@blocksuite/global@0.12.0-canary-202403050308-3789d0e:
+    resolution: {integrity: sha512-ihSu48q2dQrBrod/ijASe3siC7QGHFgQ7GQPWom7MZ1js0rl0xkwIq+hZSiqGGDzXdSSU92s53AwikqPaZ5BMg==}
     dependencies:
       zod: 3.22.4
     dev: false
@@ -1847,6 +1967,18 @@ packages:
       yjs: ^13
     dependencies:
       '@blocksuite/global': 0.12.0-canary-202403030405-22b9597
+      lit: 3.1.2
+      yjs: 13.6.14
+      zod: 3.22.4
+    dev: false
+
+  /@blocksuite/inline@0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14):
+    resolution: {integrity: sha512-eJtusRiYw72OG3Q8UC3azFb2Slu6dxqq4qKsqOUtcs00Rwr3IQr0GwV/YUcKmC3sSln9PLEtg5AzGvqkFgtxxQ==}
+    peerDependencies:
+      lit: ^3.1.1
+      yjs: ^13
+    dependencies:
+      '@blocksuite/global': 0.12.0-canary-202403050308-3789d0e
       lit: 3.1.2
       yjs: 13.6.14
       zod: 3.22.4
@@ -1867,6 +1999,21 @@ packages:
       - yjs
     dev: false
 
+  /@blocksuite/lit@0.12.0-canary-202403050308-3789d0e(@blocksuite/block-std@0.12.0-canary-202403050308-3789d0e)(@blocksuite/store@0.12.0-canary-202403050308-3789d0e)(yjs@13.6.14):
+    resolution: {integrity: sha512-tWf5c4AqIhAsOQUKkyvllTYK3ujFe6Y6jDRxt9fmqaIgpRcadAl8w1c8PeDgnBfUd1eS1PDWtBEgqfs1lmiglw==}
+    peerDependencies:
+      '@blocksuite/block-std': 0.12.0-canary-202403050308-3789d0e
+      '@blocksuite/store': 0.12.0-canary-202403050308-3789d0e
+    dependencies:
+      '@blocksuite/block-std': 0.12.0-canary-202403050308-3789d0e(@blocksuite/store@0.12.0-canary-202403050308-3789d0e)
+      '@blocksuite/global': 0.12.0-canary-202403050308-3789d0e
+      '@blocksuite/inline': 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
+      '@blocksuite/store': 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
+      lit: 3.1.2
+    transitivePeerDependencies:
+      - yjs
+    dev: false
+
   /@blocksuite/presets@0.12.0-canary-202403030405-22b9597(yjs@13.6.14):
     resolution: {integrity: sha512-n21Had6k6J2ry6KfjVUxKePJqx2TR7BaHl3KbFU39o21Fc5kX0wtge0hwmXC1Pwi1NevUWo5rPG/la0yX244eg==}
     dependencies:
@@ -1876,6 +2023,26 @@ packages:
       '@blocksuite/inline': 0.12.0-canary-202403030405-22b9597(lit@3.1.2)(yjs@13.6.14)
       '@blocksuite/lit': 0.12.0-canary-202403030405-22b9597(@blocksuite/block-std@0.12.0-canary-202403030405-22b9597)(@blocksuite/store@0.12.0-canary-202403030405-22b9597)(yjs@13.6.14)
       '@blocksuite/store': 0.12.0-canary-202403030405-22b9597(lit@3.1.2)(yjs@13.6.14)
+      '@fal-ai/serverless-client': 0.8.6
+      '@floating-ui/dom': 1.6.3
+      '@toeverything/theme': 0.7.29
+      lit: 3.1.2
+      openai: 4.28.4
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+      - yjs
+    dev: false
+
+  /@blocksuite/presets@0.12.0-canary-202403050308-3789d0e(yjs@13.6.14):
+    resolution: {integrity: sha512-rxuq5qvJuqfBxtZR+md/16C9Ri4XaqalUEeP2rHSkk4cJmdsWZveSrfT7cc/IHWwr7n1dbzejDg6Mt39JeJwHQ==}
+    dependencies:
+      '@blocksuite/block-std': 0.12.0-canary-202403050308-3789d0e(@blocksuite/store@0.12.0-canary-202403050308-3789d0e)
+      '@blocksuite/blocks': 0.12.0-canary-202403050308-3789d0e(yjs@13.6.14)
+      '@blocksuite/global': 0.12.0-canary-202403050308-3789d0e
+      '@blocksuite/inline': 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
+      '@blocksuite/lit': 0.12.0-canary-202403050308-3789d0e(@blocksuite/block-std@0.12.0-canary-202403050308-3789d0e)(@blocksuite/store@0.12.0-canary-202403050308-3789d0e)(yjs@13.6.14)
+      '@blocksuite/store': 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
       '@fal-ai/serverless-client': 0.8.6
       '@floating-ui/dom': 1.6.3
       '@toeverything/theme': 0.7.29
@@ -1909,12 +2076,45 @@ packages:
       - lit
     dev: false
 
+  /@blocksuite/store@0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14):
+    resolution: {integrity: sha512-9b0wtm+23SxwlFt0VooVzOiB1kQUxfKkLGEcA4c7qYIxLtHXtrFOHwrA4qFfVAaEb4Kh0m/2Lea5vjkahAmnKQ==}
+    peerDependencies:
+      yjs: ^13
+    dependencies:
+      '@blocksuite/global': 0.12.0-canary-202403050308-3789d0e
+      '@blocksuite/inline': 0.12.0-canary-202403050308-3789d0e(lit@3.1.2)(yjs@13.6.14)
+      '@blocksuite/sync': 0.12.0-canary-202403050308-3789d0e(yjs@13.6.14)
+      '@types/flexsearch': 0.7.6
+      flexsearch: 0.7.43
+      idb-keyval: 6.2.1
+      lib0: 0.2.90
+      merge: 2.1.1
+      minimatch: 9.0.3
+      nanoid: 5.0.6
+      y-protocols: 1.0.6(yjs@13.6.14)
+      yjs: 13.6.14
+      zod: 3.22.4
+    transitivePeerDependencies:
+      - lit
+    dev: false
+
   /@blocksuite/sync@0.12.0-canary-202403030405-22b9597(yjs@13.6.14):
     resolution: {integrity: sha512-FTU+L+rSqwAL5MbtPLC7aMnlCZ6L0teThPfZ210QCLKnHB6pOpQWDiyiXZo8XVDLvLuPFsh95t3U5/ILky6KmA==}
     peerDependencies:
       yjs: ^13
     dependencies:
       '@blocksuite/global': 0.12.0-canary-202403030405-22b9597
+      idb: 8.0.0
+      y-protocols: 1.0.6(yjs@13.6.14)
+      yjs: 13.6.14
+    dev: false
+
+  /@blocksuite/sync@0.12.0-canary-202403050308-3789d0e(yjs@13.6.14):
+    resolution: {integrity: sha512-D+Ggke7FAblnFSEM6DPeSWeZDTTiOfHpixrWFwDP0SHdq8j0Z9cq13aYTlh0tNuj0g5nF/6okOewxI1EWj6jQA==}
+    peerDependencies:
+      yjs: ^13
+    dependencies:
+      '@blocksuite/global': 0.12.0-canary-202403050308-3789d0e
       idb: 8.0.0
       y-protocols: 1.0.6(yjs@13.6.14)
       yjs: 13.6.14
@@ -2775,6 +2975,10 @@ packages:
     transitivePeerDependencies:
       - chokidar
     dev: true
+
+  /@shikijs/core@1.1.7:
+    resolution: {integrity: sha512-gTYLUIuD1UbZp/11qozD3fWpUTuMqPSf3svDMMrL0UmlGU7D9dPw/V1FonwAorCUJBltaaESxq90jrSjQyGixg==}
+    dev: false
 
   /@sigstore/bundle@2.2.0:
     resolution: {integrity: sha512-5VI58qgNs76RDrwXNhpmyN/jKpq9evV/7f1XrcqcAfvxDl5SeVY/I5Rmfe96ULAV7/FK5dge9RBKGBJPhL1WsQ==}
@@ -8171,6 +8375,12 @@ packages:
       jsonc-parser: 3.2.1
       vscode-oniguruma: 1.7.0
       vscode-textmate: 8.0.0
+    dev: false
+
+  /shiki@1.1.7:
+    resolution: {integrity: sha512-9kUTMjZtcPH3i7vHunA6EraTPpPOITYTdA5uMrvsJRexktqP0s7P3s9HVK80b4pP42FRVe03D7fT3NmJv2yYhw==}
+    dependencies:
+      '@shikijs/core': 1.1.7
     dev: false
 
   /side-channel@1.0.6:
