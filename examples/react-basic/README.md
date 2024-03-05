@@ -1,4 +1,4 @@
-# React SQLite Example
+# React Basic Example
 
 This example encapsulates the BlockSuite editor and workspace in React, demonstrating basic document and workspace management.
 
