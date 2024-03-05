@@ -1,6 +1,3 @@
 <template>
-  <div class="top-bar">
-    <button disabled>Export</button>
-    <button disabled>Import</button>
-  </div>
+  <div class="top-bar">Vue Basic</div>
 </template>
