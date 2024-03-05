@@ -22,6 +22,7 @@ pnpm dev example-name
 - [react-sqlite](./react-sqlite/)
 - [vue-basic](./vue-basic/)
 - [angular-basic](./angular-basic/)
+- [preact-basic](./preact-basic/)
 
 ## Contribution
 
