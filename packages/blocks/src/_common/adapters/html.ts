@@ -723,10 +723,10 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                   getFilenameFromContentDisposition(
                     res.headers.get('Content-Disposition') ?? ''
                   ) ??
-                  imageURL.split('/').at(-1) ??
-                  'image' +
-                    res.headers.get('Content-Type')?.split('/').at(-1) ??
-                  '.png';
+                  (imageURL.split('/').at(-1) ?? 'image') +
+                    '.' +
+                    (res.headers.get('Content-Type')?.split('/').at(-1) ??
+                      'png');
                 const file = new File([await res.blob()], name);
                 blobId = await sha(await clonedRes.arrayBuffer());
                 assets?.getAssets().set(blobId, file);
