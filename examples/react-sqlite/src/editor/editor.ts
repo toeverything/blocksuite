@@ -1,9 +1,9 @@
-import '@blocksuite/presets/themes/affine.css';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { Provider } from './provider/provider';
 import { Doc } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 import { createContext, useContext } from 'react';
+import '@blocksuite/presets/themes/affine.css';
 
 export interface EditorContextType {
   editor: AffineEditorContainer | null;
