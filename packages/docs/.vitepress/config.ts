@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress';
 import wasm from 'vite-plugin-wasm';
 import container from 'markdown-it-container';
 import { renderSandbox } from 'vitepress-plugin-sandpack';
-import { guide, reference, components } from './sidebar';
+import { guide, reference, components, examples } from './sidebar';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -60,7 +60,8 @@ export default defineConfig({
       },
       {
         text: 'Examples',
-        link: 'https://github.com/toeverything/blocksuite/tree/master/examples',
+        link: '/examples/angular-basic',
+        activeMatch: '/examples/*',
       },
       { text: 'Blog', link: '/blog/', activeMatch: '/blog/*' },
       {
@@ -83,6 +84,7 @@ export default defineConfig({
       '/guide/': { base: '/', items: guide },
       '/api/': { base: '/', items: reference },
       '/components/': { base: '/', items: components },
+      'examples/': { base: '/', items: examples },
     },
 
     socialLinks: [

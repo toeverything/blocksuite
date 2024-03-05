@@ -121,6 +121,22 @@ export const reference: DefaultTheme.NavItem[] = [
   },
 ];
 
+export const examples: DefaultTheme.NavItem[] = [
+  {
+    text: 'Framework integration',
+    items: [
+      {
+        text: 'Angular Basic',
+        link: 'examples/angular-basic',
+      },
+      { text: 'Preact Basic', link: 'examples/preact-basic' },
+      { text: 'React Basic', link: 'examples/react-basic' },
+      { text: 'React Sqlite', link: 'examples/react-sqlite' },
+      { text: 'Vue Basic', link: 'examples/vue-basic' },
+    ],
+  },
+];
+
 export const components: DefaultTheme.NavItem[] = [
   {
     text: 'Introduction',

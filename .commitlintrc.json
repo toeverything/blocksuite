@@ -16,7 +16,8 @@
         "inline",
         "lit",
         "sync",
-        "examples"
+        "examples",
+        "docs"
       ]
     ]
   }
