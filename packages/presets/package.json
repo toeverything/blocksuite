@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/presets",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Prebuilt BlockSuite editors and opt-in additional UI components.",
   "type": "module",
   "repository": "toeverything/blocksuite",

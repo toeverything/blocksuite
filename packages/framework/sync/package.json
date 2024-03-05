@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/sync",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "BlockSuite data synchronization engine abstraction and implementation.",
   "type": "module",
   "repository": "toeverything/blocksuite",

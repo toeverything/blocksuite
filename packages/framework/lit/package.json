@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/lit",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Lit renderer for blocksuite store",
   "type": "module",
   "repository": "toeverything/blocksuite",
