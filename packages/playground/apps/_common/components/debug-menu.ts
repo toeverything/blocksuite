@@ -498,7 +498,7 @@ export class DebugMenu extends ShadowlessElement {
     this._dark = dark;
     localStorage.setItem('blocksuite:dark', dark ? 'true' : 'false');
     if (!html) return;
-    html.setAttribute('data-theme', dark ? 'dark' : 'light');
+    html.dataset.theme = dark ? 'dark' : 'light';
 
     this._insertTransitionStyle('color-transition', 0);
 

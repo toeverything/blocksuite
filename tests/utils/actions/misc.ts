@@ -1270,6 +1270,7 @@ export async function getCurrentEditorDocId(page: Page) {
 
 export async function getCurrentHTMLTheme(page: Page) {
   const root = page.locator('html');
+  // eslint-disable-next-line unicorn/prefer-dom-node-dataset
   return root.getAttribute('data-theme');
 }
 

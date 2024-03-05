@@ -73,7 +73,7 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
       this._isNavigator = tool.type === 'frameNavigator';
     });
 
-    this.setAttribute('data-frame-title-id', this.frame.id);
+    this.dataset.frameTitleId = this.frame.id;
 
     this.frame.title.yText.observe(this._updateElement);
     _disposables.add(() => {
