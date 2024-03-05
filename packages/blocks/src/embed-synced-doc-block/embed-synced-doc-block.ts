@@ -159,10 +159,12 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     const syncedDocEditorHost = this.syncedDocEditorHost;
     assertExists(syncedDocEditorHost);
 
-    this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', () => {
+    this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', e => {
+      e.stopPropagation();
       this._editing = true;
     });
-    this.disposables.addFromEvent(syncedDocEditorHost, 'focusout', () => {
+    this.disposables.addFromEvent(syncedDocEditorHost, 'focusout', e => {
+      e.stopPropagation();
       this._editing = false;
       if (this._editorMode === 'page') {
         this._checkEmpty();
@@ -172,7 +174,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
   private _handleFocusEventsInHover = (abortController: AbortController) => {
     const syncedDocEditorHost = this.syncedDocEditorHost;
-    assertExists(syncedDocEditorHost);
+    if (!syncedDocEditorHost) return;
     this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', () => {
       abortController.abort();
     });
@@ -371,6 +373,33 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     });
   };
 
+  private _isClickAtBorder(
+    event: MouseEvent,
+    element: HTMLElement,
+    tolerance = 8
+  ): boolean {
+    const { x, y } = event;
+    const rect = element.getBoundingClientRect();
+    if (!rect) {
+      return false;
+    }
+
+    return (
+      Math.abs(x - rect.left) < tolerance ||
+      Math.abs(x - rect.right) < tolerance ||
+      Math.abs(y - rect.top) < tolerance ||
+      Math.abs(y - rect.bottom) < tolerance
+    );
+  }
+
+  private _selectBlock() {
+    const selectionManager = this.host.selection;
+    const blockSelection = selectionManager.create('block', {
+      path: this.path,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -400,6 +429,16 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         })
       );
     }
+  }
+
+  override firstUpdated() {
+    this.disposables.addFromEvent(this, 'click', e => {
+      e.stopPropagation();
+      if (this._isClickAtBorder(e, this)) {
+        e.preventDefault();
+        this._selectBlock();
+      }
+    });
   }
 
   override updated(changedProperties: PropertyValues) {
