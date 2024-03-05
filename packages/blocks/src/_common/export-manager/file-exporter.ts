@@ -38,7 +38,7 @@ export const FileExporter = {
 
     element.click();
 
-    document.body.removeChild(element);
+    element.remove();
   },
   exportPng(docTitle: string | undefined, dataURL: string) {
     const title = docTitle?.trim() || UNTITLED_PAGE_NAME;

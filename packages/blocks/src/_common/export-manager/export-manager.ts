@@ -380,7 +380,7 @@ export class ExportManager {
         rich.clientHeight + 1
       );
       rich.parentElement?.append(svgEle);
-      rich.parentElement?.removeChild(rich);
+      rich.remove();
     });
   };
 

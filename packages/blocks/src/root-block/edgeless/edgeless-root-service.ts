@@ -468,6 +468,7 @@ export class EdgelessRootService extends RootService {
 
     if (parent !== null) {
       selection.elements.forEach(element => {
+        // eslint-disable-next-line unicorn/prefer-dom-node-remove
         parent.removeChild(element.id);
       });
     }
@@ -492,6 +493,7 @@ export class EdgelessRootService extends RootService {
     const parent = group.group;
 
     if (parent !== null) {
+      // eslint-disable-next-line unicorn/prefer-dom-node-remove
       parent.removeChild(group.id);
     }
 
