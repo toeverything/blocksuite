@@ -31,6 +31,7 @@
     "vite": "^5.1.4"
   },
   "stackblitz": {
+    "installDependencies": false,
     "startCommand": "pnpm i && pnpm dev"
   }
 }
