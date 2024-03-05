@@ -77,7 +77,7 @@ export class Loader extends LitElement {
     super.connectedCallback();
     if (this.hostModel) {
       this.setAttribute(BLOCK_ID_ATTR, this.hostModel.id);
-      this.setAttribute('data-service-loading', 'true');
+      this.dataset.serviceLoading = 'true';
     }
 
     const width = this.width;

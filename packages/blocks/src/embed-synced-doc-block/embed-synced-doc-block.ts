@@ -447,7 +447,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   override render() {
-    this.removeAttribute('data-nested-editor');
+    delete this.dataset.nestedEditor;
 
     const { style, xywh } = this.model;
 
@@ -523,7 +523,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     const EditorBlockSpec =
       editorMode === 'page' ? PageEditorBlockSpecs : EdgelessEditorBlockSpecs;
 
-    this.setAttribute('data-nested-editor', 'true');
+    this.dataset.nestedEditor = 'true';
     const scale = isInSurface ? this.model.scale ?? 1 : undefined;
 
     return this.renderEmbed(

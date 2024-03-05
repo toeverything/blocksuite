@@ -177,7 +177,7 @@ export async function getCursorBlockIdAndHeight(
 
     const startComponent = startContainer.closest(`[data-block-id]`);
     const { height } = (startComponent as HTMLElement).getBoundingClientRect();
-    const id = (startComponent as HTMLElement).getAttribute('data-block-id');
+    const id = startComponent as HTMLElement.dataset.blockId;
     return [id, height];
   });
 }
