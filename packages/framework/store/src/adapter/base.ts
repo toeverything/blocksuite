@@ -74,7 +74,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   ): Promise<SliceSnapshot | null> | SliceSnapshot | null;
 
   applyConfigs(configs: Map<string, unknown>) {
-    this.configs = new Map([...configs]);
+    this.configs = new Map(configs);
   }
 }
 
