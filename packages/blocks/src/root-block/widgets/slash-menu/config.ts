@@ -60,62 +60,60 @@ import {
 export const menuGroups: SlashMenuOptions['menus'] = [
   {
     name: 'Text',
-    items: [
-      ...textConversionConfigs
-        .filter(i => i.flavour !== 'affine:list')
-        .map<Omit<SlashItem, 'groupName'>>(({ name, icon, flavour, type }) => ({
-          name,
-          icon,
-          showWhen: model => {
-            if (!model.doc.schema.flavourSchemaMap.has(flavour)) {
-              return false;
-            }
+    items: textConversionConfigs
+      .filter(i => i.flavour !== 'affine:list')
+      .map<Omit<SlashItem, 'groupName'>>(({ name, icon, flavour, type }) => ({
+        name,
+        icon,
+        showWhen: model => {
+          if (!model.doc.schema.flavourSchemaMap.has(flavour)) {
+            return false;
+          }
 
-            if (['Quote', 'Code Block', 'Divider'].includes(name)) {
-              return !insideDatabase(model);
-            }
-            return true;
-          },
-          action: ({ rootElement }) => {
-            rootElement.host.std.command
-              .pipe()
-              .withHost()
-              .tryAll(chain => [
-                chain.getTextSelection(),
-                chain.getBlockSelections(),
-              ])
-              .getSelectedBlocks({
-                types: ['text', 'block'],
-              })
-              .inline(ctx => {
-                const { selectedBlocks } = ctx;
-                assertExists(selectedBlocks);
+          if (['Quote', 'Code Block', 'Divider'].includes(name)) {
+            return !insideDatabase(model);
+          }
+          return true;
+        },
+        action: ({ rootElement }) => {
+          rootElement.host.std.command
+            .pipe()
+            .withHost()
+            .tryAll(chain => [
+              chain.getTextSelection(),
+              chain.getBlockSelections(),
+            ])
+            .getSelectedBlocks({
+              types: ['text', 'block'],
+            })
+            .inline(ctx => {
+              const { selectedBlocks } = ctx;
+              assertExists(selectedBlocks);
 
-                const newModels = updateBlockElementType(
-                  selectedBlocks,
-                  flavour,
-                  type
-                );
+              const newModels = updateBlockElementType(
+                selectedBlocks,
+                flavour,
+                type
+              );
 
-                // Reset selection if the target is code block
-                if (flavour === 'affine:code') {
-                  if (newModels.length !== 1) {
-                    throw new Error(
-                      "Failed to reset selection! New model length isn't 1"
-                    );
-                  }
-                  const codeModel = newModels[0];
-                  onModelTextUpdated(rootElement.host, codeModel, richText => {
-                    const inlineEditor = richText.inlineEditor;
-                    assertExists(inlineEditor);
-                    inlineEditor.focusEnd();
-                  }).catch(console.error);
+              // Reset selection if the target is code block
+              if (flavour === 'affine:code') {
+                if (newModels.length !== 1) {
+                  throw new Error(
+                    "Failed to reset selection! New model length isn't 1"
+                  );
                 }
-              })
-              .run();
-          },
-        })),
-    ],
+                const codeModel = newModels[0];
+                onModelTextUpdated(rootElement.host, codeModel, richText => {
+                  const inlineEditor = richText.inlineEditor;
+                  assertExists(inlineEditor);
+                  inlineEditor.focusEnd();
+                }).catch(console.error);
+              }
+            })
+            .run();
+        },
+      })),
   },
   {
     name: 'Style',
