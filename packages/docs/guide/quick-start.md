@@ -42,6 +42,7 @@ As the next step, you can choose to:
 
 - Explore how BlockSuite break down editors into different [component types](./component-types). Taking a look at the list of [BlockSuite components](../components/overview) may also be helpful.
 - Try collaborative editing [following the steps](https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#test-collaboration).
-- Alternatively, learn about [basic concepts](./working-with-block-tree) in BlockSuite framework that are used throughout the development of editors.
+- Learn about [basic concepts](./working-with-block-tree) in BlockSuite framework that are used throughout the development of editors.
+- Run [examples](https://github.com/toeverything/blocksuite/tree/master/examples) integrating BlockSuite into common environments and UI frameworks.
 
 Note that BlockSuite is still under rapid development. For any questions or feedback, feel free to let us know!

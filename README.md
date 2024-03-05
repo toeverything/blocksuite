@@ -32,7 +32,7 @@ You can consider BlockSuite as a [UI component library](https://blocksuite.io/co
 - Reuse multiple first-party BlockSuite editors:
   - [**`PageEditor`**](https://blocksuite.io/components/editors/page-editor.html): A comprehensive block-based document editor, offering extensive customization and flexibility.
   - [**`EdgelessEditor`**](https://blocksuite.io/components/editors/edgeless-editor.html): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `PageEditor`.
-- Customize, extend and enhance these editors with a rich set of [BlockSuite components](https://blocksuite.io/components/overview.html). All BlockSuite components (including editors) are native web components, making them framework-agnostic and easy to interop with popular frameworks.
+- Customize, extend and enhance these editors with a rich set of [BlockSuite components](https://blocksuite.io/components/overview.html) and [examples](./examples/). All BlockSuite components (including editors) are native web components, making them framework-agnostic and easy to interop with popular frameworks.
 - Or, build new editors from scratch based on the underlying vanilla framework.
 
 > 🚧 BlockSuite is currently in its early stage, with components and extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
@@ -120,6 +120,7 @@ This can be illustrated as the diagram below:
 
 - 🚚 Resources
   - [Canary Playground](https://try-blocksuite.vercel.app/starter/?init)
+  - [Examples](./examples/)
   - [BlockSuite in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
   - [Testing Real-Time Collaboration](https://github.com/toeverything/blocksuite/blob/master/BUILDING.md#test-collaboration)
   - [BlockSuite Ecosystem CI](https://github.com/toeverything/blocksuite-ecosystem-ci)
