@@ -18,5 +18,8 @@
     "@preact/preset-vite": "^2.8.1",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
+  },
+  "stackblitz": {
+    "startCommand": "pnpm i && pnpm dev"
   }
 }
