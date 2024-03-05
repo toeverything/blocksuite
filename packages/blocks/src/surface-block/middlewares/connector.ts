@@ -57,7 +57,8 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
       if (
         'type' in element &&
         element.type === 'connector' &&
-        (props['target'] ||
+        (props['mode'] !== undefined ||
+          props['target'] ||
           props['source'] ||
           (props['xywh'] && !(element as ConnectorElementModel).updatingPath))
       ) {
