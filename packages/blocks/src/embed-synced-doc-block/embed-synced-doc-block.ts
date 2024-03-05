@@ -3,7 +3,6 @@ import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
 
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
@@ -393,25 +392,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     );
   }
 
-  private _toggleSelectBlock() {
-    if (this._editing) return;
+  private _selectBlock() {
     const selectionManager = this.host.selection;
-    // Check if the block is already selected
-    const selectedBlocks = selectionManager.filter('block');
-    // If the selected blocks include the current block, deselect it
-    if (
-      selectedBlocks.some(block => PathFinder.equals(block.path, this.path))
-    ) {
-      // Deselect the block, but keep the other selections
-      selectionManager.setGroup(
-        'note',
-        selectedBlocks.filter(
-          block => !PathFinder.equals(block.path, this.path)
-        )
-      );
-      return;
-    }
-    // If the selected blocks do not include the current block, select it
     const blockSelection = selectionManager.create('block', {
       path: this.path,
     });
@@ -454,7 +436,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       e.stopPropagation();
       if (this._isClickAtBorder(e, this)) {
         e.preventDefault();
-        this._toggleSelectBlock();
+        this._selectBlock();
       }
     });
   }
