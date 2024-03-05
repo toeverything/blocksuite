@@ -876,9 +876,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               getFilenameFromContentDisposition(
                 res.headers.get('Content-Disposition') ?? ''
               ) ??
-                o.node.url.split('/').at(-1) ??
-                'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
-                '.png'
+                (o.node.url.split('/').at(-1) ?? 'image') +
+                  '.' +
+                  (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png')
             );
             blobId = await sha(await clonedRes.arrayBuffer());
             assets?.getAssets().set(blobId, file);

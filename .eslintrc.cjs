@@ -97,6 +97,7 @@ module.exports = {
           'error',
           { allowDeclarations: true },
         ],
+        'no-constant-binary-expression': 'error',
       },
     },
     ...allPackages.map(pkg => ({
