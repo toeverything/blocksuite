@@ -99,6 +99,7 @@ module.exports = {
         ],
         'no-constant-binary-expression': 'error',
         'unicorn/no-useless-spread': 'error',
+        'unicorn/no-useless-fallback-in-spread': 'error',
       },
     },
     ...allPackages.map(pkg => ({

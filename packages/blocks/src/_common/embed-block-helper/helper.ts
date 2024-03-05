@@ -37,7 +37,7 @@ export function createEmbedBlock<
         index: 'a0',
         xywh: '[0,0,0,0]',
         rotate: 0,
-        ...(userProps || {}),
+        ...userProps,
       } as unknown as EmbedProps<Props>;
     },
     metadata: {
