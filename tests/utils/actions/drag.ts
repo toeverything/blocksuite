@@ -37,7 +37,7 @@ export async function dragBetweenIndices(
 ) {
   const finalOptions = {
     steps: 50,
-    ...(options || {}),
+    ...options,
   };
   const startCoord = await getIndexCoordinate(
     page,
