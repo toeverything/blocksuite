@@ -199,8 +199,8 @@ export class PointerControl {
 
     let element: HTMLElement | null = this._dispatcher.host;
     while (element) {
-      if (element.hasAttribute('data-scale')) {
-        const scale = parseFloat(element.getAttribute('data-scale')!);
+      if (Object.hasOwn(element.dataset, 'scale')) {
+        const scale = parseFloat(element.dataset.scale!);
         this._cumulativeParentScale *= scale;
 
         scaledElements.push(element);
@@ -211,7 +211,7 @@ export class PointerControl {
     scaledElements.forEach(element => {
       const observer = new MutationObserver(mutation => {
         const oldScale = parseFloat(mutation[0].oldValue!);
-        const newScale = parseFloat(element.getAttribute('data-scale')!);
+        const newScale = parseFloat(element.dataset.scale!);
         this._cumulativeParentScale *= newScale / oldScale;
 
         this._dispatcher.slots.parentScaleChanged.emit(
@@ -239,7 +239,7 @@ export class PointerControl {
 
     let element: HTMLElement | null = this._dispatcher.host;
     while (element) {
-      if (element.hasAttribute('data-translate')) {
+      if (Object.hasOwn(element.dataset, 'translate')) {
         translatedElements.push(element);
       }
       element = element.parentElement;
