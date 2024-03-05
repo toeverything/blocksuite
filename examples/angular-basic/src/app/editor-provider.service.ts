@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Workspace } from '@blocksuite/store';
+import { BehaviorSubject } from 'rxjs';
 import { AffineSchemas } from '@blocksuite/blocks';
-import { Schema, Doc } from '@blocksuite/store';
+import { Schema, Doc, Workspace } from '@blocksuite/store';
 import { AffineEditorContainer } from '@blocksuite/presets';
 
 @Injectable({
@@ -10,6 +10,8 @@ import { AffineEditorContainer } from '@blocksuite/presets';
 export class EditorProviderService {
   private editor: AffineEditorContainer;
   private workspace: Workspace;
+  private docUpdatedSubject = new BehaviorSubject<Doc[]>([]);
+  docUpdated$ = this.docUpdatedSubject.asObservable();
 
   constructor() {
     const schema = new Schema().register(AffineSchemas);
@@ -29,6 +31,14 @@ export class EditorProviderService {
       const target = <Doc>this.workspace.getDoc(docId);
       this.editor.doc = target;
     });
+
+    this.workspace.slots.docUpdated.on(() => this.updateDocs());
+    this.editor.slots.docLinkClicked.on(() => this.updateDocs());
+  }
+
+  private updateDocs() {
+    const docs = [...this.workspace.docs.values()];
+    this.docUpdatedSubject.next(docs);
   }
 
   getEditor() {
