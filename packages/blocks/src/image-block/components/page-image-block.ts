@@ -159,7 +159,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     const selection = this._host.selection;
     this._disposables.add(
       selection.slots.changed.on(selList => {
-        this._isSelected = !!selList.find(
+        this._isSelected = selList.some(
           sel => PathFinder.equals(sel.path, this.block.path) && sel.is('image')
         );
       })

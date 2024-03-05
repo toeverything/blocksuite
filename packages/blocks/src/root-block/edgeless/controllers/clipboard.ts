@@ -1232,10 +1232,10 @@ function prepareConnectorClipboardData(
   const sourceId = connector.source?.id;
   const targetId = connector.target?.id;
   const serialized = connector.serialize();
-  if (sourceId && !selected.find(s => s.id === sourceId)) {
+  if (sourceId && selected.every(s => s.id !== sourceId)) {
     serialized.source = { position: connector.absolutePath[0] };
   }
-  if (targetId && !selected.find(s => s.id === targetId)) {
+  if (targetId && selected.every(s => s.id !== targetId)) {
     serialized.target = {
       position: connector.absolutePath[connector.absolutePath.length - 1],
     };

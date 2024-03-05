@@ -273,7 +273,7 @@ export class WorkspaceMeta {
     });
 
     _prevDocs.forEach(prevDocId => {
-      const isRemoved = !docMetas.find(p => p.id === prevDocId);
+      const isRemoved = docMetas.every(p => p.id !== prevDocId);
       if (isRemoved) {
         this.docMetaRemoved.emit(prevDocId);
       }

@@ -92,7 +92,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       }
       return;
     }
-    if (this._model.columns.find(v => v.id === propertyId)) {
+    if (this._model.columns.some(v => v.id === propertyId)) {
       this._model.updateCell(rowId, {
         columnId: propertyId,
         value,
@@ -146,7 +146,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
 
   private newColumnName() {
     let i = 1;
-    while (this._model.columns.find(column => column.name === `Column ${i}`)) {
+    while (this._model.columns.some(column => column.name === `Column ${i}`)) {
       i++;
     }
     return `Column ${i}`;

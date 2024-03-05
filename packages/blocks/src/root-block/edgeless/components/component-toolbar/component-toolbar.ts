@@ -416,7 +416,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
 
     let offset = 34;
-    if (this.selection.elements.find(ele => isFrameBlock(ele))) {
+    if (this.selection.elements.some(ele => isFrameBlock(ele))) {
       offset += 10;
     }
     top = y - rect.height - offset;

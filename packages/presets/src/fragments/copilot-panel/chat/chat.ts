@@ -153,10 +153,10 @@ export class CopilotChatPanel
   }
 
   checkSelection() {
-    this.surfaceSelection =
-      this.host.selection.value.find(v => v.type === 'surface') != null;
-    this.docSelection =
-      this.host.selection.value.find(v => v.type === 'block') != null;
+    this.surfaceSelection = this.host.selection.value.some(
+      v => v.type === 'surface'
+    );
+    this.docSelection = this.host.selection.value.some(v => v.type === 'block');
   }
 
   addSelectionBackground = async () => {
