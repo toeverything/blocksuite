@@ -999,11 +999,7 @@ export class EdgelessClipboardController extends PageClipboard {
           rich.clientHeight + 1
         );
         rich.parentElement?.append(svgEle);
-<<<<<<< HEAD
         rich.remove();
-=======
-        rich.parentElement?.removeChild(rich);
->>>>>>> a1db1a659 (style: add prefer-dom-node-append rule)
       })
     );
   }
