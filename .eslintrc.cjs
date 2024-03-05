@@ -98,6 +98,7 @@ module.exports = {
           { allowDeclarations: true },
         ],
         'no-constant-binary-expression': 'error',
+        'unicorn/no-useless-spread': 'error',
       },
     },
     ...allPackages.map(pkg => ({
@@ -119,7 +120,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'simple-import-sort', 'prettier'],
+  plugins: ['@typescript-eslint', 'simple-import-sort', 'prettier', 'unicorn'],
   rules: {
     '@typescript-eslint/consistent-type-imports': [
       'error',

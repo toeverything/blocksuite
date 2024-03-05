@@ -50,7 +50,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   public get properties(): string[] {
-    return [...this._model.columns.map(column => column.id)];
+    return this._model.columns.map(column => column.id);
   }
 
   public slots = {
