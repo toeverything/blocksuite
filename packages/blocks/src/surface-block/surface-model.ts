@@ -63,11 +63,11 @@ const migration = {
           const target = element.get('target');
           const sourceId = source['id'];
           const targetId = target['id'];
-          if (!source['position'] && (!sourceId || !value.get(sourceId))) {
+          if (!source['position'] && !sourceId) {
             value.delete(key);
             return;
           }
-          if (!target['position'] && (!targetId || !value.get(targetId))) {
+          if (!target['position'] && !targetId) {
             value.delete(key);
             return;
           }
