@@ -135,9 +135,6 @@ export const getMenus: (ctx: {
                 editorHost,
                 `Successfully imported ${options.importedCount} Doc${options.importedCount > 1 ? 's' : ''}.`
               );
-              if (options.importedCount === 0) {
-                return;
-              }
               for (const docId of docIds) {
                 insertLinkedNode({
                   editorHost,
