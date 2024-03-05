@@ -23,7 +23,7 @@ import { styles } from './styles.js';
 
 export type OnSuccessHandler = (
   pageIds: string[],
-  isWorkspaceFile: boolean
+  options: { isWorkspaceFile: boolean; importedCount: number }
 ) => void;
 
 export type OnFailHandler = (message: string) => void;
@@ -199,8 +199,18 @@ export class ImportDoc extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _onImportSuccess(pageIds: string[], isWorkspaceFile = false) {
-    this.onSuccess?.(pageIds, isWorkspaceFile);
+  private _onImportSuccess(
+    pageIds: string[],
+    options: { isWorkspaceFile?: boolean; importedCount?: number } = {}
+  ) {
+    const {
+      isWorkspaceFile = false,
+      importedCount: pagesImportedCount = pageIds.length,
+    } = options;
+    this.onSuccess?.(pageIds, {
+      isWorkspaceFile,
+      importedCount: pagesImportedCount,
+    });
   }
 
   private _onFail(message: string) {
@@ -281,7 +291,10 @@ export class ImportDoc extends WithDisposable(LitElement) {
       );
       return;
     }
-    this._onImportSuccess(pageIds, isWorkspaceFile);
+    this._onImportSuccess([pageIds[0]], {
+      isWorkspaceFile,
+      importedCount: pageIds.length,
+    });
   }
 
   private _openLearnImportLink(event: MouseEvent) {
