@@ -111,6 +111,7 @@ module.exports = {
         'unicorn/no-new-array': 'error',
         'unicorn/new-for-builtins': 'error',
         'unicorn/prefer-node-protocol': 'error',
+        'unicorn/no-useless-length-check': 'error',
       },
     },
     ...allPackages.map(pkg => ({
