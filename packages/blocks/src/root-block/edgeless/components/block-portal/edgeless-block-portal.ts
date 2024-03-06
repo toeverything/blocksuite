@@ -161,7 +161,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
 
     this.layer.style.setProperty('transform', this._getLayerViewport());
-    this.layer.setAttribute('data-scale', zoom.toString());
+    this.layer.dataset.scale = zoom.toString();
 
     this.canvasSlot.style.setProperty(
       '--canvas-transform-offset',

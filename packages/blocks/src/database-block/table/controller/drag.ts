@@ -39,7 +39,7 @@ export class TableDragController implements ReactiveController {
         return {
           groupKey: row.groupKey,
           position: {
-            id: row.getAttribute('data-row-id') as string,
+            id: row.dataset.rowId as string,
             before: y < mid,
           },
           y: y < mid ? rect.top : rect.bottom,
@@ -185,7 +185,7 @@ const createDragPreview = (row: TableRow, x: number, y: number) => {
 const createDropPreview = () => {
   const div = document.createElement('div');
   div.classList.add('blocksuite-overlay');
-  div.setAttribute('data-is-drop-preview', 'true');
+  div.dataset.isDropPreview = 'true';
   div.style.pointerEvents = 'none';
   div.style.position = 'fixed';
   div.style.zIndex = '9999';
