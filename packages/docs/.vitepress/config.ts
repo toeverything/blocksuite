@@ -59,13 +59,13 @@ export default defineConfig({
         activeMatch: '/guide/*',
       },
       {
-        text: 'Examples',
-        link: 'https://github.com/toeverything/blocksuite/tree/master/examples',
+        text: 'Playground',
+        link: 'https://try-blocksuite.vercel.app/starter?init',
       },
-      { text: 'Blog', link: '/blog/', activeMatch: '/blog/*' },
       {
         text: 'More',
         items: [
+          { text: 'Blog', link: '/blog/', activeMatch: '/blog/*' },
           {
             text: 'API',
             link: '/api/',

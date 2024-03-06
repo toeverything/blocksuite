@@ -5,7 +5,11 @@ This example encapsulates the BlockSuite editor and workspace in Vue, demonstrat
 ## Development
 
 ```sh
-pnpm dev
+git clone https://github.com/toeverything/blocksuite.git
+cd blocksuite/examples
+
+pnpm install
+pnpm dev vue-basic
 ```
 
 This project is created using the `pnpm create vite` cli.

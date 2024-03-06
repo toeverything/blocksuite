@@ -22,5 +22,9 @@
     "tslib": "^2.6.2",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
+  },
+  "stackblitz": {
+    "installDependencies": false,
+    "startCommand": "pnpm i && pnpm dev"
   }
 }
