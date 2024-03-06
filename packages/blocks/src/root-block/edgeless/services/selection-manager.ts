@@ -54,10 +54,7 @@ export class EdgelessSelectionManager {
   private _remoteSelected: Set<string> = new Set();
 
   get empty() {
-    return (
-      this.selections.length === 0 ||
-      this.selections.every(sel => sel.elements.length === 0)
-    );
+    return this.selections.every(sel => sel.elements.length === 0);
   }
 
   get activeGroup() {
@@ -126,10 +123,7 @@ export class EdgelessSelectionManager {
   }
 
   isEmpty(selections: SurfaceSelection[]) {
-    return (
-      selections.length === 0 ||
-      selections.every(sel => sel.elements.length === 0)
-    );
+    return selections.every(sel => sel.elements.length === 0);
   }
 
   equals(selection: SurfaceSelection[]) {
