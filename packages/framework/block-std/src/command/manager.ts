@@ -18,7 +18,7 @@ export class CommandManager {
   ): Chain => {
     const getCommandCtx = this._getCommandCtx;
     const createChain = this._createChain;
-    const pipe = this.pipe;
+    const chain = this.chain;
 
     return {
       [cmdSymbol]: _cmds,
@@ -57,7 +57,7 @@ export class CommandManager {
           ...cmds,
           (beforeCtx, next) => {
             let ctx = beforeCtx;
-            const chains = fn(pipe());
+            const chains = fn(chain());
 
             chains.some(chain => {
               // inject ctx in the beginning
@@ -89,7 +89,7 @@ export class CommandManager {
           ...cmds,
           (beforeCtx, next) => {
             let ctx = beforeCtx;
-            const chains = fn(pipe());
+            const chains = fn(chain());
 
             let allFail = true;
             chains.forEach(chain => {
@@ -130,7 +130,7 @@ export class CommandManager {
     return this;
   }
 
-  pipe = (): Chain<InitCommandCtx> => {
+  chain = (): Chain<InitCommandCtx> => {
     const methods = {} as Record<
       string,
       (data: Record<string, unknown>) => Chain

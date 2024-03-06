@@ -27,13 +27,13 @@ export const textFormatConfigs: TextFormatConfig[] = [
     hotkey: 'Mod-b',
     activeWhen: host => {
       const [result] = host.std.command
-        .pipe()
+        .chain()
         .isTextStyleActive({ key: 'bold' })
         .run();
       return result;
     },
     action: host => {
-      host.std.command.pipe().toggleBold().run();
+      host.std.command.chain().toggleBold().run();
     },
   },
   {
@@ -43,13 +43,13 @@ export const textFormatConfigs: TextFormatConfig[] = [
     hotkey: 'Mod-i',
     activeWhen: host => {
       const [result] = host.std.command
-        .pipe()
+        .chain()
         .isTextStyleActive({ key: 'italic' })
         .run();
       return result;
     },
     action: host => {
-      host.std.command.pipe().toggleItalic().run();
+      host.std.command.chain().toggleItalic().run();
     },
   },
   {
@@ -59,13 +59,13 @@ export const textFormatConfigs: TextFormatConfig[] = [
     hotkey: 'Mod-u',
     activeWhen: host => {
       const [result] = host.std.command
-        .pipe()
+        .chain()
         .isTextStyleActive({ key: 'underline' })
         .run();
       return result;
     },
     action: host => {
-      host.std.command.pipe().toggleUnderline().run();
+      host.std.command.chain().toggleUnderline().run();
     },
   },
   {
@@ -75,13 +75,13 @@ export const textFormatConfigs: TextFormatConfig[] = [
     hotkey: 'Mod-shift-s',
     activeWhen: host => {
       const [result] = host.std.command
-        .pipe()
+        .chain()
         .isTextStyleActive({ key: 'strike' })
         .run();
       return result;
     },
     action: host => {
-      host.std.command.pipe().toggleStrike().run();
+      host.std.command.chain().toggleStrike().run();
     },
   },
   {
@@ -91,13 +91,13 @@ export const textFormatConfigs: TextFormatConfig[] = [
     hotkey: 'Mod-e',
     activeWhen: host => {
       const [result] = host.std.command
-        .pipe()
+        .chain()
         .isTextStyleActive({ key: 'code' })
         .run();
       return result;
     },
     action: host => {
-      host.std.command.pipe().toggleCode().run();
+      host.std.command.chain().toggleCode().run();
     },
   },
   {
@@ -107,13 +107,13 @@ export const textFormatConfigs: TextFormatConfig[] = [
     hotkey: 'Mod-k',
     activeWhen: host => {
       const [result] = host.std.command
-        .pipe()
+        .chain()
         .isTextStyleActive({ key: 'link' })
         .run();
       return result;
     },
     action: host => {
-      host.std.command.pipe().toggleLink().run();
+      host.std.command.chain().toggleLink().run();
     },
   },
 ];

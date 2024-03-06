@@ -100,7 +100,7 @@ export class PageClipboard {
 
   private _copySelected = (onCopy?: () => void) => {
     return this._std.command
-      .pipe()
+      .chain()
       .withHost()
       .with({ onCopy })
       .getSelectedModels()
@@ -120,7 +120,7 @@ export class PageClipboard {
 
     this._copySelected(() => {
       this._std.command
-        .pipe()
+        .chain()
         .withHost()
         .try(cmd => [
           cmd.getTextSelection().deleteText(),
@@ -136,7 +136,7 @@ export class PageClipboard {
 
     this._std.doc.captureSync();
     this._std.command
-      .pipe()
+      .chain()
       .try(cmd => [
         cmd.getTextSelection().inline<'currentSelectionPath'>((ctx, next) => {
           const textSelection = ctx.currentTextSelection;
@@ -178,7 +178,7 @@ export class PageClipboard {
     index?: number
   ) => {
     this._std.command
-      .pipe()
+      .chain()
       .inline((_ctx, next) => {
         this._std.clipboard
           .pasteBlockSnapshot(snapshot, doc, parent, index)

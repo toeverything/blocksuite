@@ -12,7 +12,7 @@ export async function updateBlockType(
     ([flavour, type]) => {
       const blocks: BlockElement[] = [];
       window.host.std.command
-        .pipe()
+        .chain()
         .withHost()
         .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
         .getSelectedBlocks({

@@ -20,7 +20,7 @@ import type {
 } from '../../_common/inline/presets/affine-inline-specs.js';
 
 function isActive(std: BlockSuite.Std, key: keyof AffineTextAttributes) {
-  const [result] = std.command.pipe().isTextStyleActive({ key }).run();
+  const [result] = std.command.chain().isTextStyleActive({ key }).run();
   return result;
 }
 
@@ -41,7 +41,7 @@ function handleCommonStyle(
     },
   };
   return std.command
-    .pipe()
+    .chain()
     .withHost()
     .try(chain => [
       chain.getTextSelection().formatText(payload),
@@ -123,7 +123,7 @@ function getSelectedTextStyle(
 
 export function getCombinedTextStyle(std: BlockSuite.Std) {
   return std.command
-    .pipe()
+    .chain()
     .withHost()
     .try<'textStyle'>(chain => [
       // text selection, corresponding to `formatText` command

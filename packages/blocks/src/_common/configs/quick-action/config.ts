@@ -37,7 +37,7 @@ export const quickActionConfig: QuickActionConfig[] = [
     enabledWhen: () => true,
     action: host => {
       host.std.command
-        .pipe()
+        .chain()
         .withHost()
         .getSelectedModels()
         .with({

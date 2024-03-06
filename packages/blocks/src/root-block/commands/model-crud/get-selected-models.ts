@@ -18,7 +18,7 @@ export const getSelectedModelsCommand: Command<
   const types = ctx.types ?? ['block', 'text', 'image'];
   const selectedModels: BlockModel[] = [];
   host.std.command
-    .pipe()
+    .chain()
     .withHost()
     .tryAll(chain => [
       chain.getTextSelection(),

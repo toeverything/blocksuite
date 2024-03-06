@@ -77,7 +77,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         },
         action: ({ rootElement }) => {
           rootElement.host.std.command
-            .pipe()
+            .chain()
             .withHost()
             .tryAll(chain => [
               chain.getTextSelection(),
@@ -163,7 +163,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         },
         action: ({ rootElement }) => {
           rootElement.host.std.command
-            .pipe()
+            .chain()
             .withHost()
             .tryAll(chain => [
               chain.getTextSelection(),

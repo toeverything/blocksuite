@@ -65,7 +65,7 @@ export class KeymapController implements ReactiveController {
 
   private _onArrowDown = () => {
     const [result] = this._std.command
-      .pipe()
+      .chain()
       .inline((_, next) => {
         this._reset();
         return next();
@@ -109,7 +109,7 @@ export class KeymapController implements ReactiveController {
 
   private _onArrowUp = () => {
     const [result] = this._std.command
-      .pipe()
+      .chain()
       .inline((_, next) => {
         this._reset();
         return next();
@@ -153,7 +153,7 @@ export class KeymapController implements ReactiveController {
 
   private _onShiftArrowDown = () => {
     const [result] = this._std.command
-      .pipe()
+      .chain()
       .try(cmd => [
         // block selection
         this._onBlockShiftDown(cmd),
@@ -204,7 +204,7 @@ export class KeymapController implements ReactiveController {
 
   private _onShiftArrowUp = () => {
     const [result] = this._std.command
-      .pipe()
+      .chain()
       .try(cmd => [
         // block selection
         this._onBlockShiftUp(cmd),
@@ -254,7 +254,7 @@ export class KeymapController implements ReactiveController {
 
   private _onEsc = () => {
     const [result] = this._std.command
-      .pipe()
+      .chain()
       .getBlockSelections()
       .inline((ctx, next) => {
         const blockSelection = ctx.currentBlockSelections?.at(-1);
@@ -275,7 +275,7 @@ export class KeymapController implements ReactiveController {
 
   private _onEnter = () => {
     const [result] = this._std.command
-      .pipe()
+      .chain()
       .getBlockSelections()
       .inline((ctx, next) => {
         const blockSelection = ctx.currentBlockSelections?.at(-1);
@@ -377,7 +377,7 @@ export class KeymapController implements ReactiveController {
             ctx.get('defaultState').event.preventDefault();
 
             const [result] = this._std.command
-              .pipe()
+              .chain()
               .withHost()
               .tryAll(chain => [
                 chain.getTextSelection(),

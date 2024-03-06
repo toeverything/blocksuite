@@ -228,7 +228,7 @@ export class AffineFormatBarWidget extends WidgetElement {
             assertExists(rootElement.host.rangeManager);
 
             this.host.std.command
-              .pipe()
+              .chain()
               .withHost()
               .getTextSelection()
               .getSelectedBlocks({

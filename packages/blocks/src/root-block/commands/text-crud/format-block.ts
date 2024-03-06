@@ -33,7 +33,7 @@ export const formatBlockCommand: Command<
   const mode = ctx.mode ?? 'merge';
 
   const success = host.std.command
-    .pipe()
+    .chain()
     .withHost()
     .getSelectedBlocks({
       blockSelections,
