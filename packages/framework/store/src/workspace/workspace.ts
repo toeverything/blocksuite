@@ -148,7 +148,7 @@ export class Workspace extends WorkspaceAddonType {
     this.meta.addDocMeta({
       id: docId,
       title: '',
-      createDate: +new Date(),
+      createDate: Date.now(),
       tags: [],
     });
     return this.getDoc(docId) as Doc;

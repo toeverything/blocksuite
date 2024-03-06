@@ -86,7 +86,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
       meta: {
         id: nanoid(),
         title: 'Untitled',
-        createDate: +new Date(),
+        createDate: Date.now(),
         tags: [],
       },
       blocks: {

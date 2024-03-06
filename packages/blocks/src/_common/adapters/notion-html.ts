@@ -120,7 +120,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       meta: {
         id: payload.pageId ?? nanoid(),
         title: hastGetTextContent(titleAst, 'Untitled'),
-        createDate: +new Date(),
+        createDate: Date.now(),
         tags: [],
       },
       blocks: {
