@@ -166,7 +166,7 @@ export class RootService extends BlockService<RootBlockModel> {
   get selectedBlocks() {
     let result: BlockElement[] = [];
     this.std.command
-      .pipe()
+      .chain()
       .withHost()
       .tryAll(chain => [
         chain.getTextSelection(),

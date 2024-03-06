@@ -317,7 +317,7 @@ export class DebugMenu extends ShadowlessElement {
 
   private _createMindMap() {
     const [_, ctx] = this.command
-      .pipe()
+      .chain()
       .withHost()
       .getSelectedBlocks({
         types: ['block'],

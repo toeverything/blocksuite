@@ -29,7 +29,7 @@ export const formatTextCommand: Command<
   );
 
   const success = host.std.command
-    .pipe()
+    .chain()
     .withHost()
     .getSelectedBlocks({
       textSelection,

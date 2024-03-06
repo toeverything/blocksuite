@@ -37,7 +37,7 @@ export class CommentManager {
     range: CommentRange;
   } | null {
     const [_, ctx] = this._command
-      .pipe()
+      .chain()
       .withHost()
       .getSelectedBlocks({
         currentTextSelection: selection,

@@ -14,7 +14,7 @@ export function isFormatSupported(host: EditorHost) {
   let result = false;
 
   host.std.command
-    .pipe()
+    .chain()
     .withHost()
     .try(chain => [
       // text selection, corresponding to `formatText` command

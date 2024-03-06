@@ -190,7 +190,7 @@ export class RootService extends BlockService<RootBlockModel> {
     // Here we are using something new...
     // Introducing commands!
     this.std.command
-      .pipe()
+      .chain()
       .withHost()
       .tryAll(chain => [
         chain.getTextSelection(),
