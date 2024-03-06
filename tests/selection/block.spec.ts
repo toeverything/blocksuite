@@ -418,8 +418,8 @@ test('should keep selection state when scrolling backward', async ({
   await type(page, '321');
 
   const data = new Array(5).fill('');
-  data.unshift(...['123', '456', '789']);
-  data.push(...['987', '654', '321']);
+  data.unshift('123', '456', '789');
+  data.push('987', '654', '321');
   await assertRichTexts(page, data);
 
   const [, container, distance] = await page.evaluate(() => {
@@ -494,8 +494,8 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
   await type(page, '321');
 
   const data = new Array(5).fill('');
-  data.unshift(...['123', '456', '789']);
-  data.push(...['987', '654', '321']);
+  data.unshift('123', '456', '789');
+  data.push('987', '654', '321');
   await assertRichTexts(page, data);
 
   const [viewport, container, distance] = await page.evaluate(() => {
@@ -572,8 +572,8 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   await type(page, '321');
 
   const data = new Array(5).fill('');
-  data.unshift(...['123', '456', '789']);
-  data.push(...['987', '654', '321']);
+  data.unshift('123', '456', '789');
+  data.push('987', '654', '321');
   await assertRichTexts(page, data);
 
   const [last, distance] = await page.evaluate(() => {
@@ -688,8 +688,8 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await type(page, '321');
 
   const data = new Array(5).fill('');
-  data.unshift(...['123', '456', '789']);
-  data.push(...['987', '654', '321']);
+  data.unshift('123', '456', '789');
+  data.push('987', '654', '321');
   await assertRichTexts(page, data);
 
   const [first, distance] = await page.evaluate(() => {
