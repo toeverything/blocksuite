@@ -169,7 +169,7 @@ export function handleCommonStyle(
       [key]: active ? null : true,
     },
   };
-  host.std.command
+  return host.std.command
     .pipe()
     .withHost()
     .try(chain => [
