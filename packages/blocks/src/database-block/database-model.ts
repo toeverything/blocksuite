@@ -171,7 +171,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     }
   ): string {
     const id = column.id ?? this.doc.generateBlockId();
-    if (this.columns.find(v => v.id === id)) {
+    if (this.columns.some(v => v.id === id)) {
       return id;
     }
     this.doc.transact(() => {

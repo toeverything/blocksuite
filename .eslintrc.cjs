@@ -102,6 +102,7 @@ module.exports = {
         'unicorn/no-useless-fallback-in-spread': 'error',
         'unicorn/prefer-dom-node-append': 'error',
         'unicorn/prefer-dom-node-remove': 'error',
+        'unicorn/prefer-array-some': 'error',
       },
     },
     ...allPackages.map(pkg => ({

@@ -475,7 +475,7 @@ class DatabaseBlockViewSource implements ViewSource {
         },
         updateSlot: slot,
         isDeleted() {
-          return !self.model.views.find(v => v.id === id);
+          return self.model.views.every(v => v.id !== id);
         },
       };
       this.viewMap.set(id, result);

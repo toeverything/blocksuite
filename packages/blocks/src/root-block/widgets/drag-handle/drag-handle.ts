@@ -136,6 +136,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   get selectedBlocks() {
+    // eslint-disable-next-line unicorn/prefer-array-some
     return this.host.selection.find('text')
       ? this.host.selection.filter('text')
       : this.host.selection.filter('block');

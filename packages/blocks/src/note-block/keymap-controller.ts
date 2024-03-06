@@ -322,6 +322,7 @@ export class KeymapController implements ReactiveController {
     ctx.get('defaultState').event.preventDefault();
     const view = this._std.view;
     const selection = this._std.selection;
+    // eslint-disable-next-line unicorn/prefer-array-some
     if (!selection.find('block')) {
       return;
     }
