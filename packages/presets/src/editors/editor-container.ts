@@ -53,7 +53,6 @@ export class AffineEditorContainer
       height: 100%;
       overflow-x: hidden;
       overflow-y: auto;
-      user-select: none;
       container-name: viewport;
       container-type: inline-size;
       background: var(--affine-background-primary-color);
