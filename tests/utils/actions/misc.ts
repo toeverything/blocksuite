@@ -880,8 +880,8 @@ export async function pasteBlocks(page: Page, json: unknown) {
 export async function getClipboardHTML(page: Page) {
   const dataInClipboard = await page.evaluate(async () => {
     function format(node: HTMLElement, level: number) {
-      const indentBefore = new Array(level++ + 1).join('  ');
-      const indentAfter = new Array(level - 1).join('  ');
+      const indentBefore = '  '.repeat(level++);
+      const indentAfter = '  '.repeat(level >= 2 ? level - 2 : 0);
       let textNode;
 
       for (let i = 0; i < node.children.length; i++) {

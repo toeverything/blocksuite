@@ -108,6 +108,7 @@ module.exports = {
         'unicorn/prefer-blob-reading-methods': 'error',
         'unicorn/no-typeof-undefined': 'error',
         'unicorn/no-useless-promise-resolve-reject': 'error',
+        'unicorn/no-new-array': 'error',
       },
     },
     ...allPackages.map(pkg => ({

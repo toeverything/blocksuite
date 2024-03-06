@@ -9,9 +9,12 @@ export const templates = [
 ];
 
 function lcs(text1: string, text2: string) {
-  const dp: number[][] = new Array(text1.length + 1)
-    .fill(null)
-    .map(() => new Array(text2.length + 1).fill(0));
+  const dp: number[][] = Array.from(
+    {
+      length: text1.length + 1,
+    },
+    () => Array.from({ length: text2.length + 1 }, () => 0)
+  );
 
   for (let i = 1; i <= text1.length; i++) {
     for (let j = 1; j <= text2.length; j++) {
