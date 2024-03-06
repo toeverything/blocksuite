@@ -2,6 +2,7 @@ import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { render } from 'lit';
 
+import { registerTextStyleCommands } from '../_common/components/rich-text/commands/index.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import type { DragHandleOption } from '../root-block/widgets/drag-handle/config.js';
 import {
@@ -126,6 +127,8 @@ export class NoteService extends BlockService<NoteBlockModel> {
     this.std.command
       .add('selectBlocksBetween', selectBlocksBetween)
       .add('selectBlock', selectBlock);
+
+    registerTextStyleCommands(this.std);
 
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
