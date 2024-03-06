@@ -1032,7 +1032,7 @@ test('switch between paragraph types', async ({ page }) => {
   await focusRichText(page);
   await type(page, 'hello');
 
-  const selector = '.affine-paragraph-block-container';
+  const selector = '.affine-paragraph-rich-text-wrapper';
 
   await updateBlockType(page, 'affine:paragraph', 'h1');
   await assertClassName(page, selector, /h1/);
