@@ -58,7 +58,7 @@ export const isTextStyleActive: Command<
   { key: keyof AffineTextAttributes }
 > = (ctx, next) => {
   const [result, innerCtx] = getCombinedTextStyle(ctx.std);
-  if (!result) {
+  if (!result || !innerCtx.textStyle) {
     return false;
   }
 
@@ -84,7 +84,7 @@ export const registerTextStyleCommands = (std: BlockSuite.Std) => {
 declare global {
   namespace BlockSuite {
     interface CommandContext {
-      textStyle: AffineTextAttributes;
+      textStyle?: AffineTextAttributes;
     }
 
     interface Commands {

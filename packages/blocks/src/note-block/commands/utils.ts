@@ -19,10 +19,9 @@ import type {
   AffineTextAttributes,
 } from '../../_common/inline/presets/affine-inline-specs.js';
 
-function isActive(std: BlockSuite.Std, key: string) {
-  const [result, ctx] = std.command.pipe().getTextStyle().run();
-  if (!result) return false;
-  return key in ctx.textStyle;
+function isActive(std: BlockSuite.Std, key: keyof AffineTextAttributes) {
+  const [result] = std.command.pipe().isTextStyleActive({ key }).run();
+  return result;
 }
 
 function handleCommonStyle(
