@@ -1,6 +1,6 @@
 import path, { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { fileURLToPath } from 'url';
 import { defineConfig, loadEnv } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
 import wasm from 'vite-plugin-wasm';

@@ -110,6 +110,7 @@ module.exports = {
         'unicorn/no-useless-promise-resolve-reject': 'error',
         'unicorn/no-new-array': 'error',
         'unicorn/new-for-builtins': 'error',
+        'unicorn/prefer-node-protocol': 'error',
       },
     },
     ...allPackages.map(pkg => ({

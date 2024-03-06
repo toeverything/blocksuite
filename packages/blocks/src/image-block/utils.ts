@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
-import { Buffer } from 'buffer';
 
 import { downloadBlob, withTempBlobData } from '../_common/utils/filesys.js';
 import { humanFileSize } from '../_common/utils/math.js';
@@ -77,14 +76,6 @@ async function getImageBlob(model: ImageBlockModel) {
   }
 
   if (!blob.type) {
-    // FIXME: See https://github.com/toeverything/AFFiNE/issues/3245
-    // https://github.com/toeverything/AFFiNE/pull/4845
-    // https://github.com/toeverything/blocksuite/issues/5097
-    // @ts-ignore
-    if (window.Buffer === undefined) {
-      window.Buffer = Buffer;
-    }
-
     const buffer = await blob.arrayBuffer();
 
     const FileType = await import('file-type/browser.js');

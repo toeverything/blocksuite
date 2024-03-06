@@ -1,9 +1,9 @@
 /**
  * This script converts the GitHub generated release note
  */
-import fs from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 interface PR {
   type: string;
