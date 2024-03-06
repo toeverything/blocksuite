@@ -312,7 +312,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _toggleCommentPanel() {
-    document.body.appendChild(this.commentPanel);
+    document.body.append(this.commentPanel);
   }
 
   private _createMindMap() {
@@ -519,7 +519,7 @@ export class DebugMenu extends ShadowlessElement {
       key => `--${key}: ${duration}ms`
     )} }`;
 
-    $html.appendChild($style);
+    $html.append($style);
     $html.classList.add(classKey);
 
     setTimeout(() => {

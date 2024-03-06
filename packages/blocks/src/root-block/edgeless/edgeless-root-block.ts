@@ -211,7 +211,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
 
-      this.appendChild(toolbar);
+      this.append(toolbar);
       this.components.toolbar = toolbar;
     };
 

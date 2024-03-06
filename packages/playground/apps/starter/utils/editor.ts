@@ -72,11 +72,11 @@ export async function mountDefaultDocEditor(workspace: Workspace) {
   debugMenu.docsPanel = docsPanel;
   debugMenu.commentPanel = commentPanel;
 
-  document.body.appendChild(outlinePanel);
-  document.body.appendChild(framePanel);
-  document.body.appendChild(sidePanel);
-  document.body.appendChild(leftSidePanel);
-  document.body.appendChild(debugMenu);
+  document.body.append(outlinePanel);
+  document.body.append(framePanel);
+  document.body.append(sidePanel);
+  document.body.append(leftSidePanel);
+  document.body.append(debugMenu);
 
   // debug info
   window.editor = editor;

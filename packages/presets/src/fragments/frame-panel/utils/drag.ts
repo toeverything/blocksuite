@@ -84,7 +84,7 @@ export function startDragging(
   let idx: undefined | number;
   let indicatorTranslateY: undefined | number;
 
-  container.renderRoot.appendChild(maskElement);
+  container.renderRoot.append(maskElement);
   container.renderRoot.append(...cardElements);
 
   const insideListContainer = (e: MouseEvent) => {

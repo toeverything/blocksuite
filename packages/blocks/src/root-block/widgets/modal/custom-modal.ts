@@ -139,7 +139,7 @@ export function createCustomModal(
   modal.onOpen = options.entry;
   modal.options = options;
 
-  container.appendChild(modal);
+  container.append(modal);
 
   return modal;
 }

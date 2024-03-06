@@ -60,7 +60,7 @@ export function text(
       if (shouldTemporarilyAttach) {
         // to correctly render RTL text mixed with LTR, we have to append it
         // to the DOM
-        document.body.appendChild(ctx.canvas);
+        document.body.append(ctx.canvas);
       }
 
       ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');

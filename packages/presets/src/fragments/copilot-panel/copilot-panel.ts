@@ -149,7 +149,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
         panel.remove();
       };
-      document.body.appendChild(panel);
+      document.body.append(panel);
     };
     return html`
       <div style="display:flex;flex-direction: column;gap: 32px;">

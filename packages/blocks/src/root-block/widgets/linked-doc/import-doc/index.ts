@@ -28,7 +28,7 @@ export function showImportModal({
     onFail,
     abortController
   );
-  container.appendChild(importDoc);
+  container.append(importDoc);
   abortController.signal.addEventListener('abort', () => importDoc.remove());
   return importDoc;
 }

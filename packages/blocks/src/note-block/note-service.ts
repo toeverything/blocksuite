@@ -59,13 +59,13 @@ export class NoteService extends BlockService<NoteBlockModel> {
       assertExists(noteBackground);
 
       const noteBackgroundClone = noteBackground.cloneNode();
-      dragPreviewEl.appendChild(noteBackgroundClone);
+      dragPreviewEl.append(noteBackgroundClone);
 
       const container = document.createElement('div');
       container.style.width = '100%';
       container.style.height = '100%';
       container.style.overflow = 'hidden';
-      dragPreviewEl.appendChild(container);
+      dragPreviewEl.append(container);
 
       render(noteComponent.host.renderModel(noteComponent.model), container);
 

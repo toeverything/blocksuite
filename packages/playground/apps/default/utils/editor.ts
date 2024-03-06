@@ -51,8 +51,8 @@ export async function mountDefaultDocEditor(workspace: Workspace) {
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.docsPanel = docsPanel;
 
-  document.body.appendChild(leftSidePanel);
-  document.body.appendChild(quickEdgelessMenu);
+  document.body.append(leftSidePanel);
+  document.body.append(quickEdgelessMenu);
 
   // debug info
   window.editor = editor;

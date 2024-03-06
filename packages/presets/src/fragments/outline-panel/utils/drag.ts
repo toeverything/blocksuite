@@ -33,7 +33,7 @@ export function startDragging(options: {
   let idx: undefined | number;
   let indicatorTranslateY: undefined | number;
 
-  container.renderRoot.appendChild(maskElement);
+  container.renderRoot.append(maskElement);
 
   const insideListContainer = (e: MouseEvent) => {
     return (

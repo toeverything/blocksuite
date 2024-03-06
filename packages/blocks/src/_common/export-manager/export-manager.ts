@@ -379,7 +379,7 @@ export class ExportManager {
         rich.clientWidth,
         rich.clientHeight + 1
       );
-      rich.parentElement?.appendChild(svgEle);
+      rich.parentElement?.append(svgEle);
       rich.parentElement?.removeChild(rich);
     });
   };
@@ -403,8 +403,8 @@ export class ExportManager {
     foreignObject.setAttribute('y', '0');
     foreignObject.setAttribute('externalResourcesRequired', 'true');
 
-    svg.appendChild(foreignObject);
-    foreignObject.appendChild(node);
+    svg.append(foreignObject);
+    foreignObject.append(node);
     return svg;
   }
 

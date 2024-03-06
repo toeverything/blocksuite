@@ -60,7 +60,7 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
     });
     this._openedPanel = panel;
 
-    this.renderRoot.appendChild(panel);
+    this.renderRoot.append(panel);
 
     requestAnimationFrame(() => {
       const arrowEl = panel.renderRoot.querySelector('.arrow') as HTMLElement;

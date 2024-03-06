@@ -70,7 +70,7 @@ function showSlashMenu({
   // FIXME(Flrande): It is not a best practice,
   // but merely a temporary measure for reusing previous components.
   // Mount
-  container.appendChild(slashMenu);
+  container.append(slashMenu);
   // Wait for the Node to be mounted
   setTimeout(updatePosition);
   return slashMenu;
