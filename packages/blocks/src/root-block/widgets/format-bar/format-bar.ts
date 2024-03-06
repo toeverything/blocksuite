@@ -451,7 +451,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       (acc, el, i) =>
         i === renderList.length - 1
           ? [...acc, el]
-          : [...acc, el, html` <div class="divider"></div>`],
+          : [...acc, el, html`<div class="divider"></div>`],
       []
     );
 

@@ -2,8 +2,8 @@ import type { Command } from '@blocksuite/block-std';
 import { assertInstanceOf } from '@blocksuite/global/utils';
 import { EditorHost } from '@blocksuite/lit';
 
-import { handleCommonStyle } from '../../../configs/text-format/utils.js';
-import type { AffineTextAttributes } from '../../../inline/presets/affine-inline-specs.js';
+import { handleCommonStyle } from '../../_common/configs/text-format/utils.js';
+import type { AffineTextAttributes } from '../../_common/inline/presets/affine-inline-specs.js';
 
 export function getTextStyleCommand(
   key: Extract<
