@@ -121,6 +121,7 @@ export async function importNotion(workspace: Workspace, file: File) {
         file: await zipFile.files[file].async('text'),
         pageId: pageMap.get(file),
         pageMap,
+        assets: job.assetsManager,
       });
       const page = await job.snapshotToDoc(snapshot);
       pageIds.push(page.id);

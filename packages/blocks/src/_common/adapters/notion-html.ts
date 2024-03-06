@@ -584,7 +584,11 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 }
               });
             } else {
-              const res = await fetch(imageURL);
+              const res = await fetchImage(
+                imageURL,
+                undefined,
+                this.configs.get('imageProxy') as string
+              );
               const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(
