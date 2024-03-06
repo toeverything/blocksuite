@@ -69,7 +69,7 @@ export function pointAlmostEqual(a: IVec, b: IVec, _epsilon = 0.0001) {
 }
 
 export function clamp(n: number, min: number, max?: number): number {
-  return Math.max(min, typeof max !== 'undefined' ? Math.min(n, max) : n);
+  return Math.max(min, max !== undefined ? Math.min(n, max) : n);
 }
 
 export function pointInEllipse(
