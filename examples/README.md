@@ -23,6 +23,7 @@ pnpm dev example-name
 - [vue-basic](./vue-basic/)
 - [angular-basic](./angular-basic/)
 - [preact-basic](./preact-basic/)
+- [svelte-basic](./svelte-basic/)
 
 ## Contribution
 
