@@ -105,6 +105,7 @@ module.exports = {
         'unicorn/prefer-dom-node-remove': 'error',
         'unicorn/prefer-array-some': 'error',
         'unicorn/prefer-date-now': 'error',
+        'unicorn/prefer-blob-reading-methods': 'error',
       },
     },
     ...allPackages.map(pkg => ({
