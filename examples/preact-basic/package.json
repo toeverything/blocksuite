@@ -1,0 +1,26 @@
+{
+  "name": "preact-basic",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@blocksuite/blocks": "canary",
+    "@blocksuite/presets": "canary",
+    "@blocksuite/store": "canary",
+    "preact": "^10.19.5"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.8.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.4"
+  },
+  "stackblitz": {
+    "installDependencies": false,
+    "startCommand": "pnpm i && pnpm dev"
+  }
+}

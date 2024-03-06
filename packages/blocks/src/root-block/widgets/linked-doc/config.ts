@@ -125,16 +125,16 @@ export const getMenus: (ctx: {
           name: 'Import',
           icon: ImportIcon,
           action: () => {
-            const onSuccess = (docIds: string[]) => {
+            const onSuccess = (
+              docIds: string[],
+              options: {
+                importedCount: number;
+              }
+            ) => {
               toast(
                 editorHost,
-                `Successfully imported ${docIds.length} Doc${
-                  docIds.length > 1 ? 's' : ''
-                }.`
+                `Successfully imported ${options.importedCount} Doc${options.importedCount > 1 ? 's' : ''}.`
               );
-              if (docIds.length === 0) {
-                return;
-              }
               for (const docId of docIds) {
                 insertLinkedNode({
                   editorHost,

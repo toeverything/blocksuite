@@ -4,7 +4,7 @@ import {
   type AwarenessSource,
   DocEngine,
   type DocSource,
-  MemoryDocSource,
+  NoopDocSource,
 } from '@blocksuite/sync';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
@@ -88,7 +88,7 @@ export class Store {
       defaultFlags,
       awarenessSources = [],
       docSources = {
-        main: new MemoryDocSource(),
+        main: new NoopDocSource(),
       },
       logger = new NoopLogger(),
     }: StoreOptions = {

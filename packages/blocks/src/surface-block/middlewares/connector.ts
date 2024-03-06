@@ -13,9 +13,9 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
   const updateConnectorPath = (connector: ConnectorElementModel) => {
     if (
       ((connector.source?.id && getElementById(connector.source.id)) ||
-        connector.source?.position) &&
+        (!connector.source?.id && connector.source?.position)) &&
       ((connector.target?.id && getElementById(connector.target.id)) ||
-        connector.target?.position)
+        (!connector.target?.id && connector.target?.position))
     ) {
       pathGenerator.updatePath(connector);
     }
@@ -57,7 +57,8 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
       if (
         'type' in element &&
         element.type === 'connector' &&
-        (props['target'] ||
+        (props['mode'] !== undefined ||
+          props['target'] ||
           props['source'] ||
           (props['xywh'] && !(element as ConnectorElementModel).updatingPath))
       ) {
@@ -65,7 +66,10 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
       }
     }),
     surface.doc.slots.blockUpdated.on(payload => {
-      if (payload.type === 'update' && payload.props.key === 'xywh') {
+      if (
+        payload.type === 'add' ||
+        (payload.type === 'update' && payload.props.key === 'xywh')
+      ) {
         surface.getConnectors(payload.id).forEach(addToUpdateList);
       }
     }),

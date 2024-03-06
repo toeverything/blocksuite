@@ -59,14 +59,23 @@ export default defineConfig({
         activeMatch: '/guide/*',
       },
       {
-        text: 'API',
-        link: '/api/',
-        activeMatch: '/api/*',
+        text: 'Examples',
+        link: 'https://github.com/toeverything/blocksuite/tree/master/examples',
       },
       { text: 'Blog', link: '/blog/', activeMatch: '/blog/*' },
       {
-        text: 'Releases',
-        link: 'https://github.com/toeverything/blocksuite/releases',
+        text: 'More',
+        items: [
+          {
+            text: 'API',
+            link: '/api/',
+            activeMatch: '/api/*',
+          },
+          {
+            text: 'Releases',
+            link: 'https://github.com/toeverything/blocksuite/releases',
+          },
+        ],
       },
     ],
 

@@ -272,8 +272,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   res.headers.get('Content-Disposition') ?? ''
                 ) ??
                 imageURL.split('/').at(-1) ??
-                'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
-                '.png';
+                'image' +
+                  '.' +
+                  (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png');
               const file = new File([await res.blob()], name);
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
@@ -589,9 +590,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 getFilenameFromContentDisposition(
                   res.headers.get('Content-Disposition') ?? ''
                 ) ??
-                imageURL.split('/').at(-1) ??
-                'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
-                '.png';
+                (imageURL.split('/').at(-1) ?? 'image') +
+                  '.' +
+                  (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png');
               const file = new File([await res.blob()], name);
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
@@ -646,9 +647,10 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 getFilenameFromContentDisposition(
                   res.headers.get('Content-Disposition') ?? ''
                 ) ??
-                embededURL.split('/').at(-1) ??
-                'file' + res.headers.get('Content-Type')?.split('/').at(-1) ??
-                '.blob';
+                (embededURL.split('/').at(-1) ?? 'file') +
+                  '.' +
+                  (res.headers.get('Content-Type')?.split('/').at(-1) ??
+                    'blob');
               const file = new File([await res.blob()], name);
               size = file.size;
               type = file.type;

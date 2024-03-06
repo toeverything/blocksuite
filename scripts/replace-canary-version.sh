@@ -19,7 +19,7 @@ packages=(
 replace() {
   mv package-modified.json package.json
 
-  CURRENT_VERSION="0.11.0"
+  CURRENT_VERSION="0.12.0"
   IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
   MINOR=$((MINOR + 1))
   VERSION="$MAJOR.$MINOR.$PATCH"

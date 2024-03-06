@@ -7,3 +7,5 @@ This example encapsulates the BlockSuite editor and workspace in React, demonstr
 ```sh
 pnpm dev
 ```
+
+This project is created using the `pnpm create vite` cli.

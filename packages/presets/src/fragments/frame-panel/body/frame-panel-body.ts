@@ -92,9 +92,6 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   editorHost!: EditorHost;
 
-  @property({ attribute: false })
-  changeEditorMode!: (mode: 'page' | 'edgeless') => void;
-
   // Store the ids of the selected frames
   @state()
   private _selected: string[] = [];
@@ -255,7 +252,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
 
       const rootService = this.editorHost.spec.getService('affine:page');
       rootService.editSession.setItem('viewport', viewport);
-      this.changeEditorMode('edgeless');
+      rootService.slots.editorModeSwitch.emit('edgeless');
     } else {
       this.edgeless.service.viewport.setViewportByBound(
         bound,

@@ -11,7 +11,7 @@ You can consider BlockSuite as a [UI component library](../components/overview) 
 - Reuse multiple first-party BlockSuite editors:
   - [**`PageEditor`**](../components/editors/page-editor): A comprehensive block-based document editor, offering extensive customization and flexibility.
   - [**`EdgelessEditor`**](../components/editors/edgeless-editor): A graphics editor with opt-in canvas rendering support, but also shares the same rich-text capabilities with the `PageEditor`.
-- Customize, extend and enhance these editors with a rich set of [BlockSuite components](../components/overview). All BlockSuite components (including editors) are native web components, making them framework-agnostic and easy to interop with popular frameworks.
+- Customize, extend and enhance these editors with a rich set of [BlockSuite components](../components/overview) and [examples](https://github.com/toeverything/blocksuite/tree/master/examples). All BlockSuite components (including editors) are native web components, making them framework-agnostic and easy to interop with popular frameworks.
 - Or, build new editors from scratch based on the underlying vallina framework.
 
 > 🚧 BlockSuite is currently in its early stage, with components and extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!

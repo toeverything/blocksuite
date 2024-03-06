@@ -89,10 +89,6 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
     return this.editor.querySelector('affine-edgeless-root');
   }
 
-  private _changeEditorMode = (mode: 'page' | 'edgeless') => {
-    this.editor.mode = mode;
-  };
-
   private _editorDisposables: DisposableGroup | null = null;
 
   private _clearEditorDisposables() {
@@ -143,7 +139,6 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
     return html`<div class="frame-panel-container">
       <frame-panel-header
         .edgeless=${this.edgeless}
-        .changeEditorMode=${this._changeEditorMode}
         .editorHost=${this.host}
       ></frame-panel-header>
       <frame-panel-body
@@ -151,7 +146,6 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
         .edgeless=${this.edgeless}
         .doc=${this.doc}
         .editorHost=${this.host}
-        .changeEditorMode=${this._changeEditorMode}
         .fitPadding=${this.fitPadding}
       ></frame-panel-body>
     </div>`;

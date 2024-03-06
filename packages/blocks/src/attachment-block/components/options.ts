@@ -70,7 +70,7 @@ export function AttachmentOptionsTemplate({
       </icon-button>
       <div class="divider" ?hidden=${true}></div>
 
-      <icon-button size="32px" ?hidden=${true || readonly}>
+      <icon-button size="32px" ?hidden=${true}>
         ${LinkIcon}
         <affine-tooltip .offset=${12}>Turn into Link view</affine-tooltip>
       </icon-button>

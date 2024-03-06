@@ -7,3 +7,5 @@ This example encapsulates the BlockSuite editor and workspace in Vue, demonstrat
 ```sh
 pnpm dev
 ```
+
+This project is created using the `pnpm create vite` cli.

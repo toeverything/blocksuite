@@ -11,8 +11,6 @@ on:
       - 'scripts/**'
       - 'packages/docs/**'
   pull_request:
-    branches:
-      - master
     paths-ignore:
       - '.husky'
       - '.vscode'
