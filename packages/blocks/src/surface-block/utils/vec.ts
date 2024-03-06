@@ -557,7 +557,7 @@ export class Vec {
    * @param steps The number of points to return.
    */
   static pointsBetween = (A: number[], B: number[], steps = 6): number[][] => {
-    return Array.from(Array(steps)).map((_, i) => {
+    return Array.from({ length: steps }).map((_, i) => {
       const t = i / (steps - 1);
       const k = Math.min(1, 0.5 + Math.abs(0.5 - t));
       return [...Vec.lrp(A, B, t), k];
