@@ -1,3 +1,1 @@
-<div class="top-bar">
-  Svelte Basic
-</div>
+<div class="top-bar">Svelte Basic</div>
