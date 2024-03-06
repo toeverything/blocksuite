@@ -1255,6 +1255,26 @@ export async function getSortedIds(page: Page) {
   });
 }
 
+export async function getAllSortedIds(page: Page) {
+  return page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-root');
+    if (!container) throw new Error('container not found');
+    return container.service.edgelessElements.map(e => e.id);
+  });
+}
+
+export async function getTypeById(page: Page, id: string) {
+  return page.evaluate(
+    ([id]) => {
+      const container = document.querySelector('affine-edgeless-root');
+      if (!container) throw new Error('container not found');
+      const element = container.service.getElementById(id);
+      return 'flavour' in element ? element.flavour : element.type;
+    },
+    [id]
+  );
+}
+
 export async function getIds(page: Page, filterGroup = false) {
   return page.evaluate(
     ([filterGroup]) => {
@@ -1337,6 +1357,11 @@ export async function createConnectorElement(
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
+}
+
+export async function createNote(page: Page, coord1: number[]) {
+  const start = await toViewCoord(page, coord1);
+  return addNote(page, 'note', start[0], start[1]);
 }
 
 export async function hoverOnNote(page: Page, id: string, offset = [0, 0]) {
