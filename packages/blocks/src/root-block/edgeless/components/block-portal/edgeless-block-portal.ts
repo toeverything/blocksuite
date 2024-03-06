@@ -480,7 +480,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .show=${this._showIndexLabel}
       ></edgeless-index-label>
       ${this._toolbarVisible && !doc.readonly && !this._dragging
-        ? html`<edgeless-component-toolbar .edgeless=${edgeless}>
+        ? html`<edgeless-component-toolbar
+            .edgeless=${edgeless}
+            .enableNoteSlicer=${this._enableNoteSlicer}
+          >
           </edgeless-component-toolbar>`
         : nothing}
       <edgeless-navigator-black-background

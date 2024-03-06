@@ -169,6 +169,9 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessRootBlockComponent;
 
+  @property({ attribute: false })
+  enableNoteSlicer!: boolean;
+
   @state()
   left = 0;
 
@@ -250,6 +253,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       ? html`<edgeless-change-note-button
           .notes=${notes}
           .surface=${this.surface}
+          .enableNoteSlicer=${this.enableNoteSlicer}
         >
         </edgeless-change-note-button>`
       : nothing;
