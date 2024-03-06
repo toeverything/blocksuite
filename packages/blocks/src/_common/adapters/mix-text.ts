@@ -92,7 +92,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
       meta: {
         id: nanoid(),
         title: 'Untitled',
-        createDate: +new Date(),
+        createDate: Date.now(),
         tags: [],
       },
       blocks: {
