@@ -31,7 +31,7 @@ describe('bound utils', () => {
   });
 
   it('getCommonBound basic', () => {
-    const bounds = Array(10)
+    const bounds = Array.from({ length: 10 })
       .fill(0)
       .map((_, index) => {
         return {

@@ -109,6 +109,7 @@ module.exports = {
         'unicorn/no-typeof-undefined': 'error',
         'unicorn/no-useless-promise-resolve-reject': 'error',
         'unicorn/no-new-array': 'error',
+        'unicorn/new-for-builtins': 'error',
       },
     },
     ...allPackages.map(pkg => ({
