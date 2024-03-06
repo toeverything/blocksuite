@@ -12,7 +12,11 @@ import {
   captureEventTarget,
   getDuplicateBlocks,
 } from '../root-block/widgets/drag-handle/utils.js';
-import { selectBlock, selectBlocksBetween } from './commands/index.js';
+import {
+  registerTextStyleCommands,
+  selectBlock,
+  selectBlocksBetween,
+} from './commands/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
 
@@ -126,6 +130,8 @@ export class NoteService extends BlockService<NoteBlockModel> {
     this.std.command
       .add('selectBlocksBetween', selectBlocksBetween)
       .add('selectBlock', selectBlock);
+
+    registerTextStyleCommands(this.std);
 
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
