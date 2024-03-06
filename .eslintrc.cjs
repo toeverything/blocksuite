@@ -106,6 +106,7 @@ module.exports = {
         'unicorn/prefer-array-some': 'error',
         'unicorn/prefer-date-now': 'error',
         'unicorn/prefer-blob-reading-methods': 'error',
+        'unicorn/no-typeof-undefined': 'error',
       },
     },
     ...allPackages.map(pkg => ({

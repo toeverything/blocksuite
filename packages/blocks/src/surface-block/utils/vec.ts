@@ -14,7 +14,7 @@ export class Vec {
   static clamp(n: number, min: number): number;
   static clamp(n: number, min: number, max: number): number;
   static clamp(n: number, min: number, max?: number): number {
-    return Math.max(min, typeof max !== 'undefined' ? Math.min(n, max) : n);
+    return Math.max(min, max !== undefined ? Math.min(n, max) : n);
   }
 
   /**
