@@ -1,5 +1,6 @@
-import { mkdir, writeFile } from 'fs/promises';
-import { resolve } from 'path';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+
 import type { UserConfig } from 'vite';
 import { defineConfig, mergeConfig } from 'vite';
 

@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
 // normal import
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { Schema, Workspace, type Y } from '@blocksuite/store';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-import { fileURLToPath } from 'url';
 import { assert, describe, expect, test } from 'vitest';
 
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
