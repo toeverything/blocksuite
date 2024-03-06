@@ -20,6 +20,7 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
 
     const group = element.group;
 
+    // eslint-disable-next-line unicorn/prefer-dom-node-remove
     group.removeChild(element.id);
 
     element.index = service.layer.generateIndex(

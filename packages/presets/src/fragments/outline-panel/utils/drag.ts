@@ -82,7 +82,7 @@ export function startDragging(options: {
     if (ended) return;
 
     ended = true;
-    container.renderRoot.removeChild(maskElement);
+    maskElement.remove();
 
     disposeMove();
     onDragEnd?.(idx);

@@ -27,6 +27,6 @@ export function download(blob: Blob, name: string) {
   element.style.display = 'none';
   document.body.append(element);
   element.click();
-  document.body.removeChild(element);
+  element.remove();
   URL.revokeObjectURL(fileURL);
 }

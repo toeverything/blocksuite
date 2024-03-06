@@ -145,8 +145,8 @@ export function startDragging(
     if (ended) return;
 
     ended = true;
-    cardElements.forEach(child => container.renderRoot.removeChild(child));
-    container.renderRoot.removeChild(maskElement);
+    cardElements.forEach(child => child.remove());
+    maskElement.remove();
 
     disposeMove();
     onDragEnd?.(idx);

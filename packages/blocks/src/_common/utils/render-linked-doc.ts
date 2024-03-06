@@ -52,7 +52,7 @@ async function addCover(
   const coverContainer = await card.bannerContainer;
   if (!coverContainer) return;
   while (coverContainer.firstChild) {
-    coverContainer.removeChild(coverContainer.firstChild);
+    coverContainer.firstChild.remove();
   }
 
   if (cover instanceof HTMLElement) {
