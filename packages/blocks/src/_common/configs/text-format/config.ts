@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
-import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
 import type { TemplateResult } from 'lit';
 
@@ -11,9 +9,6 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '../../icons/index.js';
-import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
-import { toggleLinkPopup } from '../../inline/presets/nodes/link-node/link-popup/toggle-link-popup.js';
-import { commonActiveWhen, handleCommonStyle } from './utils.js';
 
 export interface TextFormatConfig {
   id: string;
@@ -30,9 +25,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Bold',
     icon: BoldIcon,
     hotkey: 'Mod-b',
-    activeWhen: host => commonActiveWhen(host, 'bold'),
+    activeWhen: host => {
+      const [result] = host.std.command
+        .pipe()
+        .isTextStyleActive({ key: 'bold' })
+        .run();
+      return result;
+    },
     action: host => {
-      handleCommonStyle(host, 'bold');
+      host.std.command.pipe().toggleBold().run();
     },
   },
   {
@@ -40,9 +41,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Italic',
     icon: ItalicIcon,
     hotkey: 'Mod-i',
-    activeWhen: host => commonActiveWhen(host, 'italic'),
+    activeWhen: host => {
+      const [result] = host.std.command
+        .pipe()
+        .isTextStyleActive({ key: 'italic' })
+        .run();
+      return result;
+    },
     action: host => {
-      handleCommonStyle(host, 'italic');
+      host.std.command.pipe().toggleItalic().run();
     },
   },
   {
@@ -50,9 +57,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Underline',
     icon: UnderlineIcon,
     hotkey: 'Mod-u',
-    activeWhen: host => commonActiveWhen(host, 'underline'),
+    activeWhen: host => {
+      const [result] = host.std.command
+        .pipe()
+        .isTextStyleActive({ key: 'underline' })
+        .run();
+      return result;
+    },
     action: host => {
-      handleCommonStyle(host, 'underline');
+      host.std.command.pipe().toggleUnderline().run();
     },
   },
   {
@@ -60,9 +73,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Strikethrough',
     icon: StrikethroughIcon,
     hotkey: 'Mod-shift-s',
-    activeWhen: host => commonActiveWhen(host, 'strike'),
+    activeWhen: host => {
+      const [result] = host.std.command
+        .pipe()
+        .isTextStyleActive({ key: 'strike' })
+        .run();
+      return result;
+    },
     action: host => {
-      handleCommonStyle(host, 'strike');
+      host.std.command.pipe().toggleStrike().run();
     },
   },
   {
@@ -70,9 +89,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Code',
     icon: CodeIcon,
     hotkey: 'Mod-e',
-    activeWhen: host => commonActiveWhen(host, 'code'),
+    activeWhen: host => {
+      const [result] = host.std.command
+        .pipe()
+        .isTextStyleActive({ key: 'code' })
+        .run();
+      return result;
+    },
     action: host => {
-      handleCommonStyle(host, 'code');
+      host.std.command.pipe().toggleCode().run();
     },
   },
   {
@@ -80,37 +105,15 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Link',
     icon: LinkIcon,
     hotkey: 'Mod-k',
-    activeWhen: host => commonActiveWhen(host, 'link'),
-    action: () => {
-      const selection = document.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-      const range = selection.getRangeAt(0);
-
-      const inlineRoot = range.commonAncestorContainer.parentElement?.closest<
-        InlineRootElement<AffineTextAttributes>
-      >(`[${INLINE_ROOT_ATTR}]`);
-      if (!inlineRoot) return;
-
-      const inlineEditor = inlineRoot.inlineEditor;
-      const targetInlineRange = inlineEditor.getInlineRange();
-      assertExists(targetInlineRange);
-
-      if (targetInlineRange.length === 0) return;
-
-      const format = inlineEditor.getFormat(targetInlineRange);
-      if (format.link) {
-        inlineEditor.formatText(targetInlineRange, { link: null });
-        return;
-      }
-
-      const abortController = new AbortController();
-      const popup = toggleLinkPopup(
-        inlineEditor,
-        'create',
-        targetInlineRange,
-        abortController
-      );
-      abortController.signal.addEventListener('abort', () => popup.remove());
+    activeWhen: host => {
+      const [result] = host.std.command
+        .pipe()
+        .isTextStyleActive({ key: 'link' })
+        .run();
+      return result;
+    },
+    action: host => {
+      host.std.command.pipe().toggleLink().run();
     },
   },
 ];
