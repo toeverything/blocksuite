@@ -339,6 +339,15 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
 
+  packages/framework/indexer:
+    dependencies:
+      '@datastructures-js/priority-queue':
+        specifier: ^6.3.1
+        version: 6.3.1
+      fuse.js:
+        specifier: ^7.0.0
+        version: 7.0.0
+
   packages/framework/inline:
     dependencies:
       '@blocksuite/global':
@@ -1200,6 +1209,16 @@ packages:
   /@ctrl/tinycolor@4.0.3:
     resolution: {integrity: sha512-e9nEVehVJwkymQpkGhdSNzLT2Lr9UTTby+JePq4Z2SxBbOQjY7pLgSouAaXvfaGQVSAaY0U4eJdwfSDmCbItcw==}
     engines: {node: '>=14'}
+    dev: false
+
+  /@datastructures-js/heap@4.3.3:
+    resolution: {integrity: sha512-UcUu/DLh/aM4W3C8zZfwxxm6/6FIZUlm3mcAXuNOCa6Aj4iizNvNXQyb8DjZQH2jKSQbMRyNlngP6TPimuGjpQ==}
+    dev: false
+
+  /@datastructures-js/priority-queue@6.3.1:
+    resolution: {integrity: sha512-eoxkWql/j0VJ0UFMFTpnyJz4KbEEVQ6aZ/JuJUgenu0Im4tYKylAycNGsYCHGXiVNEd7OKGVwfx1Ac3oYkuu7A==}
+    dependencies:
+      '@datastructures-js/heap': 4.3.3
     dev: false
 
   /@dependents/detective-less@3.0.2:
@@ -4287,6 +4306,11 @@ packages:
     os: [darwin]
     requiresBuild: true
     optional: true
+
+  /fuse.js@7.0.0:
+    resolution: {integrity: sha512-14F4hBIxqKvD4Zz/XjDc3y94mNZN6pRv3U13Udo0lNLCWRBUsrMv2xwcF/y/Z5sV6+FQW+/ow68cHpm4sunt8Q==}
+    engines: {node: '>=10'}
+    dev: false
 
   /gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}

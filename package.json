@@ -9,6 +9,7 @@
     "packages/framework/lit",
     "packages/framework/store",
     "packages/framework/sync",
+    "packages/framework/indexer",
     "packages/blocks",
     "packages/docs",
     "packages/playground",
