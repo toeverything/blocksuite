@@ -1,0 +1,22 @@
+{
+  "name": "solid-basic",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@blocksuite/blocks": "canary",
+    "@blocksuite/presets": "canary",
+    "@blocksuite/store": "canary",
+    "solid-js": "^1.8.15"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.1.4",
+    "vite-plugin-solid": "^2.10.1"
+  }
+}
