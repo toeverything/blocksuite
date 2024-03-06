@@ -118,12 +118,12 @@ export function drag(
     const xStep = (end.x - start.x) / step;
     const yStep = (end.y - start.y) / step;
 
-    new Array(step).fill(0).forEach((_, i) => {
+    for (const [i] of Array.from({ length: step }).entries()) {
       pointermove(target, {
         x: start.x + xStep * (i + 1),
         y: start.y + yStep * (i + 1),
       });
-    });
+    }
   }
 
   pointermove(target, end);
