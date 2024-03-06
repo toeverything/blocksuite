@@ -177,14 +177,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
+  @property({ attribute: false })
+  enableNoteSlicer!: boolean;
+
   @state()
   private _queryCache = false;
 
   @state()
   private _showPopper = false;
-
-  @state()
-  private _enableNoteSlicer = false;
 
   @query('.fill-color-button')
   private _fillColorButton!: HTMLDivElement;
@@ -442,21 +442,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
   }
 
-  override firstUpdated() {
-    const { edgeless } = this.surface;
-    this.disposables.add(
-      edgeless.slots.toggleNoteSlicer.on(() => {
-        this._enableNoteSlicer = !this._enableNoteSlicer;
-      })
-    );
-
-    this.disposables.add(
-      edgeless.service.selection.slots.updated.on(() => {
-        this._enableNoteSlicer = false;
-      })
-    );
-  }
-
   override render() {
     const length = this.notes.length;
     const note = this.notes[0];
@@ -620,7 +605,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               class="edgeless-note-slicer-button"
               .tooltip=${getTooltipWithShortcut('Cutting Mode', '-')}
               .iconContainerPadding=${2}
-              .active=${this._enableNoteSlicer}
+              .active=${this.enableNoteSlicer}
               @click=${this._handleNoteSlicerButtonClick}
             >
               ${ScissorsIcon}
