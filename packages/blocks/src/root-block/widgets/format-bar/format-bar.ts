@@ -16,6 +16,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 
 import { HoverController, toast } from '../../../_common/components/index.js';
 import { createSimplePortal } from '../../../_common/components/portal.js';
+import { DATABASE_CONVERT_WHITE_LIST } from '../../../_common/configs/quick-action/database-convert-view.js';
 import {
   BoldIcon,
   BulletedListIcon,
@@ -275,13 +276,9 @@ export class AffineFormatBarWidget extends WidgetElement {
         const { selectedModels } = ctx;
         if (!selectedModels || selectedModels.length === 0) return false;
 
-        const firstBlock = selectedModels[0];
-        assertExists(firstBlock);
-        if (matchFlavours(firstBlock, ['affine:database'])) {
-          return false;
-        }
-
-        return true;
+        return selectedModels.every(block =>
+          DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
+        );
       },
     },
     {
