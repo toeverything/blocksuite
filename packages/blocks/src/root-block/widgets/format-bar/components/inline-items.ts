@@ -1,14 +1,15 @@
 import { html } from 'lit';
 
 import { textFormatConfigs } from '../../../../_common/configs/text-format/config.js';
-import { isFormatSupported } from '../../../../_common/configs/text-format/utils.js';
+import { isFormatSupported } from '../../../../note-block/commands/utils.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 import { HighlightButton } from './highlight/highlight-button.js';
 
 export const InlineItems = (formatBar: AffineFormatBarWidget) => {
   const editorHost = formatBar.host;
 
-  if (!isFormatSupported(editorHost)) {
+  const [supported] = isFormatSupported(editorHost.std).run();
+  if (!supported) {
     return null;
   }
 

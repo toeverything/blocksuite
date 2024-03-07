@@ -1,4 +1,4 @@
-import type { Command } from '@blocksuite/block-std';
+import type { Command, CommandKeyToData } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -96,36 +96,37 @@ function getCombinedFormatFromInlineEditors(
   });
 }
 
-function getSelectedTextStyle(
+function getSelectedInlineEditors(
   blocks: BlockElement[],
   filter: (
     inlineRoot: InlineRootElement<AffineTextAttributes>
-  ) => InlineEditor<AffineTextAttributes> | [],
-  mapper: (
-    inlineEditor: InlineEditor<AffineTextAttributes>
-  ) => [AffineInlineEditor, InlineRange | null]
+  ) => InlineEditor<AffineTextAttributes> | []
 ) {
-  const temp = blocks
-    .flatMap(el => {
-      const inlineRoot = el.querySelector<
-        InlineRootElement<AffineTextAttributes>
-      >(`[${INLINE_ROOT_ATTR}]`);
+  return blocks.flatMap(el => {
+    const inlineRoot = el.querySelector<
+      InlineRootElement<AffineTextAttributes>
+    >(`[${INLINE_ROOT_ATTR}]`);
 
-      if (inlineRoot) {
-        return filter(inlineRoot);
-      }
-      return [];
-    })
-    .map(mapper);
-
-  return getCombinedFormatFromInlineEditors(temp);
+    if (inlineRoot) {
+      return filter(inlineRoot);
+    }
+    return [];
+  });
 }
 
-export function getCombinedTextStyle(std: BlockSuite.Std) {
+function handleCurrentSelection<
+  InlineOut extends BlockSuite.CommandDataName = never,
+>(
+  std: BlockSuite.Std,
+  handler: (
+    type: 'text' | 'block' | 'native',
+    inlineEditors: InlineEditor<AffineTextAttributes>[]
+  ) => CommandKeyToData<InlineOut> | boolean | void
+) {
   return std.command
     .chain()
     .withHost()
-    .try<'textStyle'>(chain => [
+    .try<InlineOut>(chain => [
       // text selection, corresponding to `formatText` command
       chain
         .getTextSelection()
@@ -136,21 +137,28 @@ export function getCombinedTextStyle(std: BlockSuite.Std) {
               el.model.flavour as BlockSuite.Flavour
             ),
         })
-        .inline<'textStyle'>((ctx, next) => {
-          const { selectedBlocks } = ctx;
+        .inline<InlineOut>((ctx, next) => {
+          const { selectedBlocks, currentTextSelection } = ctx;
           assertExists(selectedBlocks);
 
-          const textStyle = getSelectedTextStyle(
+          assertExists(currentTextSelection);
+          if (currentTextSelection.isCollapsed()) return false;
+
+          const selectedInlineEditors = getSelectedInlineEditors(
             selectedBlocks,
             inlineRoot => {
               const inlineRange = inlineRoot.inlineEditor.getInlineRange();
-              if (!inlineRange || inlineRange.length === 0) return [];
+              if (!inlineRange) return [];
               return inlineRoot.inlineEditor;
-            },
-            inlineEditor => [inlineEditor, inlineEditor.getInlineRange()]
+            }
           );
 
-          next({ textStyle });
+          const result = handler('text', selectedInlineEditors);
+          if (!result) return false;
+          if (result === true) {
+            return next();
+          }
+          return next(result);
         }),
       // block selection, corresponding to `formatBlock` command
       chain
@@ -162,28 +170,27 @@ export function getCombinedTextStyle(std: BlockSuite.Std) {
               el.model.flavour as BlockSuite.Flavour
             ),
         })
-        .inline<'textStyle'>((ctx, next) => {
+        .inline<InlineOut>((ctx, next) => {
           const { selectedBlocks } = ctx;
           assertExists(selectedBlocks);
 
-          const textStyle = getSelectedTextStyle(
+          const selectedInlineEditors = getSelectedInlineEditors(
             selectedBlocks,
-            inlineRoot => {
-              if (inlineRoot.inlineEditor.yTextLength > 0) {
-                return inlineRoot.inlineEditor;
-              }
-              return [];
-            },
-            inlineEditor => [
-              inlineEditor,
-              { index: 0, length: inlineEditor.yTextLength },
-            ]
+            inlineRoot =>
+              inlineRoot.inlineEditor.yTextLength > 0
+                ? inlineRoot.inlineEditor
+                : []
           );
 
-          next({ textStyle });
+          const result = handler('block', selectedInlineEditors);
+          if (!result) return false;
+          if (result === true) {
+            return next();
+          }
+          return next(result);
         }),
       // native selection, corresponding to `formatNative` command
-      chain.inline<'textStyle'>((ctx, next) => {
+      chain.inline<InlineOut>((ctx, next) => {
         const selectedInlineEditors = Array.from<InlineRootElement>(
           ctx.std.host.querySelectorAll(`[${INLINE_ROOT_ATTR}]`)
         )
@@ -203,14 +210,48 @@ export function getCombinedTextStyle(std: BlockSuite.Std) {
             }
             return false;
           })
-          .map(el => el.inlineEditor);
+          .map((el): AffineInlineEditor => el.inlineEditor);
 
-        const textStyle = getCombinedFormatFromInlineEditors(
-          selectedInlineEditors.map(e => [e, e.getInlineRange()])
-        );
-
-        return next({ textStyle });
+        const result = handler('native', selectedInlineEditors);
+        if (!result) return false;
+        if (result === true) {
+          return next();
+        }
+        return next(result);
       }),
-    ])
-    .run();
+    ]);
+}
+
+export function getCombinedTextStyle(std: BlockSuite.Std) {
+  return handleCurrentSelection<'textStyle'>(std, (type, inlineEditors) => {
+    if (type === 'text') {
+      return {
+        textStyle: getCombinedFormatFromInlineEditors(
+          inlineEditors.map(e => [e, e.getInlineRange()])
+        ),
+      };
+    }
+    if (type === 'block') {
+      return {
+        textStyle: getCombinedFormatFromInlineEditors(
+          inlineEditors.map(e => [e, { index: 0, length: e.yTextLength }])
+        ),
+      };
+    }
+    if (type === 'native') {
+      return {
+        textStyle: getCombinedFormatFromInlineEditors(
+          inlineEditors.map(e => [e, e.getInlineRange()])
+        ),
+      };
+    }
+    return false;
+  });
+}
+
+export function isFormatSupported(std: BlockSuite.Std) {
+  return handleCurrentSelection(
+    std,
+    (_type, inlineEditors) => inlineEditors.length > 0
+  );
 }
