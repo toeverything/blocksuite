@@ -10,10 +10,8 @@ import { textConversionConfigs } from '../../../../_common/configs/text-conversi
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
 import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
 import { isRootElement } from '../../../../root-block/utils/guard.js';
-import type {
-  AffineFormatBarWidget,
-  ParagraphActionConfigItem,
-} from '../format-bar.js';
+import type { ParagraphActionConfigItem } from '../config.js';
+import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
   host: EditorHost;
