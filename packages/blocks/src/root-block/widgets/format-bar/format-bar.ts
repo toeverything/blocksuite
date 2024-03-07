@@ -14,12 +14,16 @@ import {
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { HoverController } from '../../../_common/components/index.js';
+import { HoverController, toast } from '../../../_common/components/index.js';
+import { createSimplePortal } from '../../../_common/components/portal.js';
 import {
   BoldIcon,
   BulletedListIcon,
   CheckBoxIcon,
   CodeIcon,
+  CopyIcon,
+  DatabaseTableViewIcon20,
+  FontLinkedDocIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -227,6 +231,146 @@ export class AffineFormatBarWidget extends WidgetElement {
     },
     {
       type: 'divider',
+    },
+    {
+      id: 'copy',
+      type: 'inline-action',
+      name: 'Copy',
+      icon: CopyIcon,
+      isActive: () => false,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .getSelectedModels()
+          .with({
+            onCopy: () => {
+              toast(formatBar.host, 'Copied to clipboard');
+            },
+          })
+          .copySelectedModels()
+          .run();
+      },
+      showWhen: () => true,
+    },
+    {
+      id: 'convert-to-database',
+      type: 'inline-action',
+      name: 'Group as Database',
+      icon: DatabaseTableViewIcon20,
+      isActive: () => false,
+      action: formatBar => {
+        createSimplePortal({
+          template: html`<database-convert-view
+            .host=${formatBar.host}
+          ></database-convert-view>`,
+        });
+      },
+      showWhen: formatBar => {
+        const [_, ctx] = formatBar.std.command
+          .chain()
+          .getSelectedModels({
+            types: ['block', 'text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || selectedModels.length === 0) return false;
+
+        const firstBlock = selectedModels[0];
+        assertExists(firstBlock);
+        if (matchFlavours(firstBlock, ['affine:database'])) {
+          return false;
+        }
+
+        return true;
+      },
+    },
+    {
+      id: 'convert-to-linked-doc',
+      type: 'inline-action',
+      name: 'Create Linked Doc',
+      icon: FontLinkedDocIcon,
+      isActive: () => false,
+      action: formatBar => {
+        const [_, ctx] = formatBar.std.command
+          .chain()
+          .getSelectedModels({
+            types: ['block'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        assertExists(selectedModels);
+
+        const host = formatBar.host;
+        host.selection.clear();
+
+        const doc = host.doc;
+        const linkedDoc = doc.workspace.createDoc({});
+        linkedDoc.load(() => {
+          const rootId = linkedDoc.addBlock('affine:page', {
+            title: new doc.Text(''),
+          });
+          linkedDoc.addBlock('affine:surface', {}, rootId);
+          const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
+
+          const firstBlock = selectedModels[0];
+          assertExists(firstBlock);
+
+          doc.addSiblingBlocks(
+            firstBlock,
+            [
+              {
+                flavour: 'affine:embed-linked-doc',
+                pageId: linkedDoc.id,
+              },
+            ],
+            'before'
+          );
+
+          if (
+            matchFlavours(firstBlock, ['affine:paragraph']) &&
+            firstBlock.type.match(/^h[1-6]$/)
+          ) {
+            const title = firstBlock.text.toString();
+            linkedDoc.workspace.setDocMeta(linkedDoc.id, {
+              title,
+            });
+
+            const linkedDocRootModel = linkedDoc.getBlockById(rootId);
+            assertExists(linkedDocRootModel);
+            linkedDoc.updateBlock(linkedDocRootModel, {
+              title: new doc.Text(title),
+            });
+
+            doc.deleteBlock(firstBlock);
+            selectedModels.shift();
+          }
+
+          selectedModels.forEach(model => {
+            const keys = model.keys as (keyof typeof model)[];
+            const values = keys.map(key => model[key]);
+            const blockProps = Object.fromEntries(
+              keys.map((key, i) => [key, values[i]])
+            );
+            linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
+            doc.deleteBlock(model);
+          });
+        });
+
+        const linkedDocService = host.spec.getService(
+          'affine:embed-linked-doc'
+        );
+        linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+      },
+      showWhen: formatBar => {
+        const [_, ctx] = formatBar.std.command
+          .chain()
+          .getSelectedModels({
+            types: ['block'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        return !!selectedModels && selectedModels.length > 0;
+      },
     },
     {
       id: 'affine:paragraph/text',
