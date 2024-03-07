@@ -44,7 +44,7 @@ export const toggleLink: Command = (_ctx, next) => {
 };
 
 export const getTextStyle: Command<never, 'textStyle'> = (ctx, next) => {
-  const [result, innerCtx] = getCombinedTextStyle(ctx.std);
+  const [result, innerCtx] = getCombinedTextStyle(ctx.std).run();
   if (!result) {
     return false;
   }
@@ -57,12 +57,20 @@ export const isTextStyleActive: Command<
   never,
   { key: keyof AffineTextAttributes }
 > = (ctx, next) => {
-  const [result, innerCtx] = getCombinedTextStyle(ctx.std);
-  if (!result || !innerCtx.textStyle) {
-    return false;
-  }
+  const key = ctx.key;
+  const [result] = getCombinedTextStyle(ctx.std)
+    .inline((ctx, next) => {
+      const { textStyle } = ctx;
 
-  if (!(ctx.key in innerCtx.textStyle)) {
+      if (!textStyle || !(key in textStyle)) {
+        return next();
+      }
+
+      return false;
+    })
+    .run();
+
+  if (!result) {
     return false;
   }
 
