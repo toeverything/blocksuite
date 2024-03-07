@@ -62,7 +62,7 @@ export const isTextStyleActive: Command<
     .inline((ctx, next) => {
       const { textStyle } = ctx;
 
-      if (!textStyle || !(key in textStyle)) {
+      if (textStyle && key in textStyle) {
         return next();
       }
 
