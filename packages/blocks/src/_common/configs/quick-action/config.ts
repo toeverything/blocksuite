@@ -12,7 +12,6 @@ import {
   DatabaseTableViewIcon20,
   FontLinkedDocIcon,
 } from '../../icons/index.js';
-import { getChainWithHost } from '../../utils/command.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
@@ -38,7 +37,6 @@ export const quickActionConfig: QuickActionConfig[] = [
     action: host => {
       host.std.command
         .chain()
-        .withHost()
         .getSelectedModels()
         .with({
           onCopy: () => {
@@ -56,7 +54,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
     showWhen: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block', 'text'],
         })
@@ -73,7 +72,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       return true;
     },
     enabledWhen: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block', 'text'],
         })
@@ -99,7 +99,8 @@ export const quickActionConfig: QuickActionConfig[] = [
     icon: FontLinkedDocIcon,
     hotkey: `Mod-Shift-l`,
     showWhen: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block'],
         })
@@ -108,7 +109,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       return !!selectedModels && selectedModels.length > 0;
     },
     enabledWhen: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block'],
         })
@@ -117,7 +119,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       return !!selectedModels && selectedModels.length > 0;
     },
     action: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block'],
         })

@@ -1,6 +1,7 @@
 import type { BlockSelection, UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
+import { type BlockElement } from '@blocksuite/lit';
 import type { ReactiveController } from 'lit';
 import type { ReactiveControllerHost } from 'lit';
 
@@ -377,7 +378,6 @@ export class KeymapController implements ReactiveController {
 
             const [result] = this._std.command
               .chain()
-              .withHost()
               .updateBlockType({
                 flavour: item.flavour,
                 props: {
@@ -386,7 +386,7 @@ export class KeymapController implements ReactiveController {
               })
               .inline((ctx, next) => {
                 const newModels = ctx.updatedBlocks;
-                const host = ctx.host;
+                const host = ctx.std.host as EditorHost;
                 assertExists(newModels);
                 assertExists(host);
 

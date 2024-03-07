@@ -42,7 +42,6 @@ function handleCommonStyle(
   };
   return std.command
     .chain()
-    .withHost()
     .try(chain => [
       chain.getTextSelection().formatText(payload),
       chain.getBlockSelections().formatBlock(payload),
@@ -123,103 +122,100 @@ function handleCurrentSelection<
     inlineEditors: InlineEditor<AffineTextAttributes>[]
   ) => CommandKeyToData<InlineOut> | boolean | void
 ) {
-  return std.command
-    .chain()
-    .withHost()
-    .try<InlineOut>(chain => [
-      // text selection, corresponding to `formatText` command
-      chain
-        .getTextSelection()
-        .getSelectedBlocks({
-          types: ['text'],
-          filter: el =>
-            FORMAT_TEXT_SUPPORT_FLAVOURS.includes(
-              el.model.flavour as BlockSuite.Flavour
-            ),
-        })
-        .inline<InlineOut>((ctx, next) => {
-          const { selectedBlocks, currentTextSelection } = ctx;
-          assertExists(selectedBlocks);
+  return std.command.chain().try<InlineOut>(chain => [
+    // text selection, corresponding to `formatText` command
+    chain
+      .getTextSelection()
+      .getSelectedBlocks({
+        types: ['text'],
+        filter: el =>
+          FORMAT_TEXT_SUPPORT_FLAVOURS.includes(
+            el.model.flavour as BlockSuite.Flavour
+          ),
+      })
+      .inline<InlineOut>((ctx, next) => {
+        const { selectedBlocks, currentTextSelection } = ctx;
+        assertExists(selectedBlocks);
 
-          assertExists(currentTextSelection);
-          if (currentTextSelection.isCollapsed()) return false;
+        assertExists(currentTextSelection);
+        if (currentTextSelection.isCollapsed()) return false;
 
-          const selectedInlineEditors = getSelectedInlineEditors(
-            selectedBlocks,
-            inlineRoot => {
-              const inlineRange = inlineRoot.inlineEditor.getInlineRange();
-              if (!inlineRange) return [];
-              return inlineRoot.inlineEditor;
-            }
-          );
-
-          const result = handler('text', selectedInlineEditors);
-          if (!result) return false;
-          if (result === true) {
-            return next();
+        const selectedInlineEditors = getSelectedInlineEditors(
+          selectedBlocks,
+          inlineRoot => {
+            const inlineRange = inlineRoot.inlineEditor.getInlineRange();
+            if (!inlineRange) return [];
+            return inlineRoot.inlineEditor;
           }
-          return next(result);
-        }),
-      // block selection, corresponding to `formatBlock` command
-      chain
-        .getBlockSelections()
-        .getSelectedBlocks({
-          types: ['block'],
-          filter: el =>
-            FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(
-              el.model.flavour as BlockSuite.Flavour
-            ),
-        })
-        .inline<InlineOut>((ctx, next) => {
-          const { selectedBlocks } = ctx;
-          assertExists(selectedBlocks);
+        );
 
-          const selectedInlineEditors = getSelectedInlineEditors(
-            selectedBlocks,
-            inlineRoot =>
-              inlineRoot.inlineEditor.yTextLength > 0
-                ? inlineRoot.inlineEditor
-                : []
-          );
-
-          const result = handler('block', selectedInlineEditors);
-          if (!result) return false;
-          if (result === true) {
-            return next();
-          }
-          return next(result);
-        }),
-      // native selection, corresponding to `formatNative` command
-      chain.inline<InlineOut>((ctx, next) => {
-        const selectedInlineEditors = Array.from<InlineRootElement>(
-          ctx.std.host.querySelectorAll(`[${INLINE_ROOT_ATTR}]`)
-        )
-          .filter(el => {
-            const selection = document.getSelection();
-            if (!selection || selection.rangeCount === 0) return false;
-            const range = selection.getRangeAt(0);
-
-            return range.intersectsNode(el);
-          })
-          .filter(el => {
-            const blockElement = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
-            if (blockElement) {
-              return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(
-                blockElement.model.flavour as BlockSuite.Flavour
-              );
-            }
-            return false;
-          })
-          .map((el): AffineInlineEditor => el.inlineEditor);
-
-        const result = handler('native', selectedInlineEditors);
+        const result = handler('text', selectedInlineEditors);
         if (!result) return false;
         if (result === true) {
           return next();
         }
         return next(result);
       }),
-    ]);
+    // block selection, corresponding to `formatBlock` command
+    chain
+      .getBlockSelections()
+      .getSelectedBlocks({
+        types: ['block'],
+        filter: el =>
+          FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(
+            el.model.flavour as BlockSuite.Flavour
+          ),
+      })
+      .inline<InlineOut>((ctx, next) => {
+        const { selectedBlocks } = ctx;
+        assertExists(selectedBlocks);
+
+        const selectedInlineEditors = getSelectedInlineEditors(
+          selectedBlocks,
+          inlineRoot =>
+            inlineRoot.inlineEditor.yTextLength > 0
+              ? inlineRoot.inlineEditor
+              : []
+        );
+
+        const result = handler('block', selectedInlineEditors);
+        if (!result) return false;
+        if (result === true) {
+          return next();
+        }
+        return next(result);
+      }),
+    // native selection, corresponding to `formatNative` command
+    chain.inline<InlineOut>((ctx, next) => {
+      const selectedInlineEditors = Array.from<InlineRootElement>(
+        ctx.std.host.querySelectorAll(`[${INLINE_ROOT_ATTR}]`)
+      )
+        .filter(el => {
+          const selection = document.getSelection();
+          if (!selection || selection.rangeCount === 0) return false;
+          const range = selection.getRangeAt(0);
+
+          return range.intersectsNode(el);
+        })
+        .filter(el => {
+          const blockElement = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
+          if (blockElement) {
+            return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(
+              blockElement.model.flavour as BlockSuite.Flavour
+            );
+          }
+          return false;
+        })
+        .map((el): AffineInlineEditor => el.inlineEditor);
+
+      const result = handler('native', selectedInlineEditors);
+      if (!result) return false;
+      if (result === true) {
+        return next();
+      }
+      return next(result);
+    }),
+  ]);
 }
 
 export function getCombinedTextStyle(std: BlockSuite.Std) {

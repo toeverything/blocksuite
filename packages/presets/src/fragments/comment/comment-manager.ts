@@ -38,7 +38,6 @@ export class CommentManager {
   } | null {
     const [_, ctx] = this._command
       .chain()
-      .withHost()
       .getSelectedBlocks({
         currentTextSelection: selection,
         types: ['text'],
