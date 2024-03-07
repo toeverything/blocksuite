@@ -5,7 +5,11 @@ This example encapsulates the BlockSuite editor and workspace in Solid, demonstr
 ## Development
 
 ```sh
-pnpm dev
+git clone https://github.com/toeverything/blocksuite.git
+cd blocksuite/examples
+
+pnpm install
+pnpm dev solid-basic
 ```
 
 This project is created using the `pnpm create vite` cli.
