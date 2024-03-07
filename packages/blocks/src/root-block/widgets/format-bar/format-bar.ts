@@ -15,11 +15,30 @@ import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { HoverController } from '../../../_common/components/index.js';
+import {
+  BoldIcon,
+  BulletedListIcon,
+  CheckBoxIcon,
+  CodeIcon,
+  Heading1Icon,
+  Heading2Icon,
+  Heading3Icon,
+  Heading4Icon,
+  Heading5Icon,
+  Heading6Icon,
+  ItalicIcon,
+  LinkIcon,
+  NumberedListIcon,
+  QuoteIcon,
+  StrikethroughIcon,
+  TextIcon,
+  UnderlineIcon,
+} from '../../../_common/icons/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
+import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
-import { ActionItems } from './components/action-items.js';
-import { InlineItems } from './components/inline-items.js';
+import { HighlightButton } from './components/highlight/highlight-button.js';
 import { ParagraphButton } from './components/paragraph-button.js';
 import { formatBarStyle } from './styles.js';
 
@@ -37,9 +56,373 @@ type FormatBarCustomRenderer = {
 };
 export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
+export type DividerConfigItem = {
+  type: 'divider';
+};
+export type HighlighterDropdownConfigItem = {
+  type: 'highlighter-dropdown';
+};
+export type ParagraphDropdownConfigItem = {
+  type: 'paragraph-dropdown';
+};
+export type InlineActionConfigItem = {
+  id: string;
+  name: string;
+  type: 'inline-action';
+  action: (formatBar: AffineFormatBarWidget) => void;
+  icon: TemplateResult | (() => HTMLElement);
+  isActive: (formatBar: AffineFormatBarWidget) => boolean;
+  showWhen: (formatBar: AffineFormatBarWidget) => boolean;
+};
+export type ParagraphActionConfigItem = {
+  id: string;
+  type: 'paragraph-action';
+  name: string;
+  action: (formatBar: AffineFormatBarWidget) => void;
+  icon: TemplateResult | (() => HTMLElement);
+  flavour: string;
+};
+export type FormatBarConfigItem =
+  | DividerConfigItem
+  | HighlighterDropdownConfigItem
+  | ParagraphDropdownConfigItem
+  | ParagraphActionConfigItem
+  | InlineActionConfigItem;
+
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
+  @state()
+  configItems: FormatBarConfigItem[] = [
+    {
+      type: 'paragraph-dropdown',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      id: 'bold',
+      type: 'inline-action',
+      name: 'Bold',
+      icon: BoldIcon,
+      isActive: formatBar => {
+        const [result] = formatBar.std.command
+          .chain()
+          .isTextStyleActive({ key: 'bold' })
+          .run();
+        return result;
+      },
+      action: formatBar => {
+        formatBar.std.command.chain().toggleBold().run();
+      },
+      showWhen: formatBar => {
+        const [result] = isFormatSupported(formatBar.std).run();
+        return result;
+      },
+    },
+    {
+      id: 'italic',
+      type: 'inline-action',
+      name: 'Italic',
+      icon: ItalicIcon,
+      isActive: formatBar => {
+        const [result] = formatBar.std.command
+          .chain()
+          .isTextStyleActive({ key: 'italic' })
+          .run();
+        return result;
+      },
+      action: formatBar => {
+        formatBar.std.command.chain().toggleItalic().run();
+      },
+      showWhen: formatBar => {
+        const [result] = isFormatSupported(formatBar.std).run();
+        return result;
+      },
+    },
+    {
+      id: 'underline',
+      type: 'inline-action',
+      name: 'Underline',
+      icon: UnderlineIcon,
+      isActive: formatBar => {
+        const [result] = formatBar.std.command
+          .chain()
+          .isTextStyleActive({ key: 'underline' })
+          .run();
+        return result;
+      },
+      action: formatBar => {
+        formatBar.std.command.chain().toggleUnderline().run();
+      },
+      showWhen: formatBar => {
+        const [result] = isFormatSupported(formatBar.std).run();
+        return result;
+      },
+    },
+    {
+      id: 'strike',
+      type: 'inline-action',
+      name: 'Strike',
+      icon: StrikethroughIcon,
+      isActive: formatBar => {
+        const [result] = formatBar.std.command
+          .chain()
+          .isTextStyleActive({ key: 'strike' })
+          .run();
+        return result;
+      },
+      action: formatBar => {
+        formatBar.std.command.chain().toggleStrike().run();
+      },
+      showWhen: formatBar => {
+        const [result] = isFormatSupported(formatBar.std).run();
+        return result;
+      },
+    },
+    {
+      id: 'code',
+      type: 'inline-action',
+      name: 'Code',
+      icon: CodeIcon,
+      isActive: formatBar => {
+        const [result] = formatBar.std.command
+          .chain()
+          .isTextStyleActive({ key: 'code' })
+          .run();
+        return result;
+      },
+      action: formatBar => {
+        formatBar.std.command.chain().toggleCode().run();
+      },
+      showWhen: formatBar => {
+        const [result] = isFormatSupported(formatBar.std).run();
+        return result;
+      },
+    },
+    {
+      id: 'link',
+      type: 'inline-action',
+      name: 'Link',
+      icon: LinkIcon,
+      isActive: formatBar => {
+        const [result] = formatBar.std.command
+          .chain()
+          .isTextStyleActive({ key: 'link' })
+          .run();
+        return result;
+      },
+      action: formatBar => {
+        formatBar.std.command.chain().toggleLink().run();
+      },
+      showWhen: formatBar => {
+        const [result] = isFormatSupported(formatBar.std).run();
+        return result;
+      },
+    },
+    {
+      type: 'divider',
+    },
+    {
+      type: 'highlighter-dropdown',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      id: 'affine:paragraph/text',
+      type: 'paragraph-action',
+      flavour: 'affine:paragraph',
+      name: 'Text',
+      icon: TextIcon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:paragraph',
+            props: { type: 'text' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:paragraph/h1',
+      type: 'paragraph-action',
+      flavour: 'affine:paragraph',
+      name: 'Heading 1',
+      icon: Heading1Icon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:paragraph',
+            props: { type: 'h1' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:paragraph/h2',
+      type: 'paragraph-action',
+      flavour: 'affine:paragraph',
+      name: 'Heading 2',
+      icon: Heading2Icon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:paragraph',
+            props: { type: 'h2' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:paragraph/h3',
+      type: 'paragraph-action',
+      flavour: 'affine:paragraph',
+      name: 'Heading 3',
+      icon: Heading3Icon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:paragraph',
+            props: { type: 'h3' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:paragraph/h4',
+      type: 'paragraph-action',
+      flavour: 'affine:paragraph',
+      name: 'Heading 4',
+      icon: Heading4Icon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:paragraph',
+            props: { type: 'h4' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:paragraph/h5',
+      type: 'paragraph-action',
+      flavour: 'affine:paragraph',
+      name: 'Heading 5',
+      icon: Heading5Icon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:paragraph',
+            props: { type: 'h5' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:paragraph/h6',
+      type: 'paragraph-action',
+      flavour: 'affine:paragraph',
+      name: 'Heading 6',
+      icon: Heading6Icon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:paragraph',
+            props: { type: 'h6' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:list/bulleted',
+      type: 'paragraph-action',
+      flavour: 'affine:list',
+      name: 'Bulleted List',
+      icon: BulletedListIcon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:list',
+            props: { type: 'bulleted' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:list/numbered',
+      type: 'paragraph-action',
+      flavour: 'affine:list',
+      name: 'Numbered List',
+      icon: NumberedListIcon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:list',
+            props: { type: 'numbered' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:list/todo',
+      type: 'paragraph-action',
+      flavour: 'affine:list',
+      name: 'To-do List',
+      icon: CheckBoxIcon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:list',
+            props: { type: 'todo' },
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:code/',
+      type: 'paragraph-action',
+      flavour: 'affine:code',
+      name: 'Code Block',
+      icon: CodeIcon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:code',
+          })
+          .run();
+      },
+    },
+    {
+      id: 'affine:paragraph/quote',
+      type: 'paragraph-action',
+      flavour: 'affine:paragraph',
+      name: 'Quote',
+      icon: QuoteIcon,
+      action: formatBar => {
+        formatBar.std.command
+          .chain()
+          .updateBlockType({
+            flavour: 'affine:paragraph',
+            props: { type: 'quote' },
+          })
+          .run();
+      },
+    },
+  ];
+
   static override styles = formatBarStyle;
+
   private static readonly _customElements: Set<FormatBarCustomRenderer> =
     new Set<FormatBarCustomRenderer>();
 
@@ -407,23 +790,6 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
   }
 
-  private _customRender() {
-    const result: TemplateResult[] = [];
-    AffineFormatBarWidget._customElements.forEach(render => {
-      const element = render.render(this);
-      if (element) {
-        result.push(element);
-      }
-    });
-    return result.length > 0
-      ? html` <div
-          style="display: flex;align-items: center;justify-content: center"
-        >
-          ${result}
-        </div>`
-      : null;
-  }
-
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._abortController.abort();
@@ -435,30 +801,76 @@ export class AffineFormatBarWidget extends WidgetElement {
       return nothing;
     }
 
-    const paragraphButton = ParagraphButton(this);
-    const inlineItems = InlineItems(this);
-    const actionItems = ActionItems(this);
-    const renderList = [
-      this._customRender(),
-      paragraphButton,
-      inlineItems,
-      actionItems,
-    ].filter(el => !!el) as (TemplateResult<1> | TemplateResult<1>[])[];
-    const renderListWithDivider = renderList.reduce<
-      (TemplateResult<1> | TemplateResult<1>[])[]
-    >(
-      (acc, el, i) =>
-        i === renderList.length - 1
-          ? [...acc, el]
-          : [...acc, el, html`<div class="divider"></div>`],
-      []
-    );
+    const items = this.configItems
+      .filter(item => {
+        if (item.type === 'paragraph-action') {
+          return false;
+        }
+        if (item.type === 'highlighter-dropdown') {
+          const [supported] = isFormatSupported(this.std).run();
+          return supported;
+        }
+        if (item.type === 'inline-action') {
+          return item.showWhen(this);
+        }
+        return true;
+      })
+      .map(item => {
+        let template: TemplateResult | null = null;
+        switch (item.type) {
+          case 'divider':
+            template = html`<div class="divider"></div>`;
+            break;
+          case 'highlighter-dropdown': {
+            template = HighlightButton(this);
+            break;
+          }
+          case 'paragraph-dropdown':
+            template = ParagraphButton(this);
+            break;
+          case 'inline-action': {
+            template = html`<icon-button
+              size="32px"
+              data-testid=${item.id}
+              ?active=${item.isActive(this)}
+              @click=${() => {
+                item.action(this);
+                this.requestUpdate();
+              }}
+            >
+              ${typeof item.icon === 'function' ? item.icon() : item.icon}
+              <affine-tooltip>${item.name}</affine-tooltip>
+            </icon-button>`;
+            break;
+          }
+          default:
+            template = null;
+        }
+
+        return [template, item] as const;
+      })
+      .filter(([template]) => template !== null && template !== undefined)
+      .filter(([_, item], index, list) => {
+        if (item.type === 'divider') {
+          if (index === 0) {
+            return false;
+          }
+          if (index === list.length - 1) {
+            return false;
+          }
+          if (list[index - 1][1].type === 'divider') {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map(([template]) => template);
 
     return html` <div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
       @pointerdown="${stopPropagation}"
     >
-      ${renderListWithDivider}
+      ${items}
     </div>`;
   }
 }
