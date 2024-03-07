@@ -26,6 +26,7 @@ export async function updateBlockType(
         .run();
 
       window.testUtils.docTestUtils.updateBlockElementType(
+        window.host,
         blocks,
         flavour,
         type

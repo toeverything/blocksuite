@@ -391,6 +391,7 @@ export class KeymapController implements ReactiveController {
                 assertExists(selectedBlocks);
 
                 const newModels = updateBlockElementType(
+                  this.host.host,
                   selectedBlocks,
                   item.flavour,
                   item.type
