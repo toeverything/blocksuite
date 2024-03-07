@@ -1,4 +1,6 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+import { assertInstanceOf } from '@blocksuite/global/utils';
+import { WidgetElement } from '@blocksuite/lit';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 // import { AFFINE_BLOCK_HUB_WIDGET } from '../root-block/widgets/block-hub/block-hub.js';
@@ -54,6 +56,16 @@ import {
 const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
   schema: RootBlockSchema,
   service: PageRootService,
+  setup: (slots, disposableGroup) => {
+    disposableGroup.add(
+      slots.widgetConnected.on(({ component }) => {
+        assertInstanceOf(component, WidgetElement);
+        if (component.widgetName === AFFINE_FORMAT_BAR_WIDGET) {
+          console.log(component);
+        }
+      })
+    );
+  },
   view: {
     component: literal`affine-page-root`,
     widgets: {
