@@ -7,7 +7,7 @@ import {
   asyncFocusRichText,
   asyncSetInlineRange,
 } from '../../_common/utils/index.js';
-import { onModelTextUpdated } from '../../root-block/index.js';
+import { onModelTextUpdated } from '../../root-block/utils/callback.js';
 import {
   mergeToCodeModel,
   transformModel,
