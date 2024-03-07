@@ -79,6 +79,70 @@ export const updateBlockType: Command<
     return next({ updatedBlocks: [newModel] });
   };
 
+  const focusText: Command<'updatedBlocks'> = (ctx, next) => {
+    const { updatedBlocks } = ctx;
+    if (!updatedBlocks || updatedBlocks.length === 0) {
+      return false;
+    }
+
+    const firstNewModel = updatedBlocks[0];
+    const lastNewModel = updatedBlocks[updatedBlocks.length - 1];
+
+    const allTextUpdated = updatedBlocks.map(model =>
+      onModelTextUpdated(host, model)
+    );
+    const selectionManager = host.selection;
+    const textSelection = selectionManager.find('text');
+    if (!textSelection) {
+      return false;
+    }
+    const newTextSelection = selectionManager.create('text', {
+      from: {
+        path: textSelection.from.path.slice(0, -1).concat(firstNewModel.id),
+        index: textSelection.from.index,
+        length: textSelection.from.length,
+      },
+      to: textSelection.to
+        ? {
+            path: textSelection.to.path.slice(0, -1).concat(lastNewModel.id),
+            index: textSelection.to.index,
+            length: textSelection.to.length,
+          }
+        : null,
+    });
+
+    Promise.all(allTextUpdated)
+      .then(() => {
+        selectionManager.setGroup('note', [newTextSelection]);
+      })
+      .catch(console.error);
+    return next();
+  };
+
+  const focusBlock: Command<'updatedBlocks'> = (ctx, next) => {
+    const { updatedBlocks } = ctx;
+    if (!updatedBlocks || updatedBlocks.length === 0) {
+      return false;
+    }
+
+    const selectionManager = host.selection;
+
+    const blockSelections = selectionManager.filter('block');
+    if (blockSelections.length === 0) {
+      return false;
+    }
+    requestAnimationFrame(() => {
+      const selections = updatedBlocks.map(model => {
+        return selectionManager.create('block', {
+          path: blockSelections[0].path.slice(0, -1).concat(model.id),
+        });
+      });
+
+      selectionManager.setGroup('note', selections);
+    });
+    return next();
+  };
+
   const [result, resultCtx] = std.command
     .chain()
     .inline((_, next) => {
@@ -94,6 +158,7 @@ export const updateBlockType: Command<
       doc.captureSync();
       return next();
     })
+    // update block type
     .try<'updatedBlocks'>(chain => [
       chain.inline<'updatedBlocks'>(mergeToCode),
       chain.inline<'updatedBlocks'>(appendDivider),
@@ -119,71 +184,16 @@ export const updateBlockType: Command<
         return next({ updatedBlocks: newModels });
       }),
     ])
+    // focus
     .try(chain => [
-      chain.inline((ctx, next) => {
-        const { updatedBlocks } = ctx;
-        if (!updatedBlocks || updatedBlocks.length === 0) {
-          return false;
+      chain.inline((_, next) => {
+        if (['affine:code', 'affine:divider'].includes(flavour)) {
+          return next();
         }
-
-        const firstNewModel = updatedBlocks[0];
-        const lastNewModel = updatedBlocks[updatedBlocks.length - 1];
-
-        const allTextUpdated = updatedBlocks.map(model =>
-          onModelTextUpdated(host, model)
-        );
-        const selectionManager = host.selection;
-        const textSelection = selectionManager.find('text');
-        if (!textSelection) {
-          return false;
-        }
-        const newTextSelection = selectionManager.create('text', {
-          from: {
-            path: textSelection.from.path.slice(0, -1).concat(firstNewModel.id),
-            index: textSelection.from.index,
-            length: textSelection.from.length,
-          },
-          to: textSelection.to
-            ? {
-                path: textSelection.to.path
-                  .slice(0, -1)
-                  .concat(lastNewModel.id),
-                index: textSelection.to.index,
-                length: textSelection.to.length,
-              }
-            : null,
-        });
-
-        Promise.all(allTextUpdated)
-          .then(() => {
-            selectionManager.setGroup('note', [newTextSelection]);
-          })
-          .catch(console.error);
-        return next();
+        return false;
       }),
-      chain.inline((ctx, next) => {
-        const { updatedBlocks } = ctx;
-        if (!updatedBlocks || updatedBlocks.length === 0) {
-          return false;
-        }
-
-        const selectionManager = host.selection;
-
-        const blockSelections = selectionManager.filter('block');
-        if (blockSelections.length === 0) {
-          return false;
-        }
-        requestAnimationFrame(() => {
-          const selections = updatedBlocks.map(model => {
-            return selectionManager.create('block', {
-              path: blockSelections[0].path.slice(0, -1).concat(model.id),
-            });
-          });
-
-          selectionManager.setGroup('note', selections);
-        });
-        return next();
-      }),
+      chain.inline(focusText),
+      chain.inline(focusBlock),
       chain.inline((_, next) => next()),
     ])
     .run();
