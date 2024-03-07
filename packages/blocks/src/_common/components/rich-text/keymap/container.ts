@@ -13,7 +13,6 @@ import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { RootBlockComponent } from '../../../../root-block/types.js';
 import { insertLinkedNode } from '../../../../root-block/widgets/linked-doc/config.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
-import { getChainWithHost } from '../../../utils/command.js';
 import { createDefaultDoc } from '../../../utils/init.js';
 import { buildPath } from '../../../utils/query.js';
 import { tryConvertBlock } from '../markdown/block.js';
@@ -195,7 +194,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return;
 
       {
-        const [_, context] = getChainWithHost(std)
+        const [_, context] = std.command
+          .chain()
           .getSelectedModels({
             types: ['text'],
           })
@@ -212,7 +212,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         }
       }
 
-      const [_, context] = getChainWithHost(std)
+      const [_, context] = std.command
+        .chain()
         .getSelectedModels({
           types: ['text', 'block'],
         })
@@ -237,7 +238,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!rootElement) return;
 
       {
-        const [_, context] = getChainWithHost(std)
+        const [_, context] = std.command
+          .chain()
           .getSelectedModels({
             types: ['text'],
           })
@@ -256,7 +258,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         }
       }
 
-      const [_, context] = getChainWithHost(std)
+      const [_, context] = std.command
+        .chain()
         .getSelectedModels({
           types: ['text', 'block'],
         })
@@ -281,7 +284,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!rootElement) return;
 
       {
-        const [_, context] = getChainWithHost(std)
+        const [_, context] = std.command
+          .chain()
           .getSelectedModels({
             types: ['text'],
           })
@@ -299,7 +303,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         }
       }
 
-      const [_, context] = getChainWithHost(std)
+      const [_, context] = std.command
+        .chain()
         .getSelectedModels({
           types: ['text', 'block'],
         })

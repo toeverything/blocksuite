@@ -1,12 +1,13 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
 
 export const deleteTextCommand: Command<
-  'currentTextSelection' | 'host',
+  'currentTextSelection',
   never,
   {
     textSelection?: TextSelection;
@@ -18,11 +19,7 @@ export const deleteTextCommand: Command<
     '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
   );
 
-  const host = ctx.host;
-  assertExists(
-    host,
-    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
-  );
+  const host = ctx.std.host as EditorHost;
   assertExists(host.rangeManager);
 
   const range = host.rangeManager.textSelectionToRange(textSelection);

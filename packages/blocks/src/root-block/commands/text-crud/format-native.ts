@@ -1,5 +1,4 @@
 import type { Command } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { BlockElement } from '@blocksuite/lit';
 
@@ -9,7 +8,7 @@ import type { AffineTextAttributes } from '../../../_common/inline/presets/affin
 
 // for native range
 export const formatNativeCommand: Command<
-  'host',
+  never,
   never,
   {
     range?: Range;
@@ -17,11 +16,7 @@ export const formatNativeCommand: Command<
     mode?: 'replace' | 'merge';
   }
 > = (ctx, next) => {
-  const { host, styles, mode = 'merge' } = ctx;
-  assertExists(
-    host,
-    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
-  );
+  const { styles, mode = 'merge' } = ctx;
 
   let range = ctx.range;
   if (!range) {
@@ -32,7 +27,7 @@ export const formatNativeCommand: Command<
   if (!range) return;
 
   const selectedInlineEditors = Array.from<InlineRootElement>(
-    host.querySelectorAll(`[${INLINE_ROOT_ATTR}]`)
+    ctx.std.host.querySelectorAll(`[${INLINE_ROOT_ATTR}]`)
   )
     .filter(el => range?.intersectsNode(el))
     .filter(el => {

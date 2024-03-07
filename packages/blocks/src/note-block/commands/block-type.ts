@@ -33,7 +33,6 @@ export const updateBlockType: Command<
     if (selectedBlocks == null) {
       const [result, ctx] = std.command
         .chain()
-        .withHost()
         .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
         .getSelectedBlocks({ types: ['text', 'block'] })
         .run();

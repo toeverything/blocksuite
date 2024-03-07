@@ -4,16 +4,14 @@ import type {
   TextSelection,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
+import { type BlockElement } from '@blocksuite/lit';
 import type { RoleType } from '@blocksuite/store';
 
 import type { ImageSelection } from '../../../image-block/image-selection.js';
 
 export const getSelectedBlocksCommand: Command<
-  | 'currentTextSelection'
-  | 'currentBlockSelections'
-  | 'currentImageSelections'
-  | 'host',
+  'currentTextSelection' | 'currentBlockSelections' | 'currentImageSelections',
   'selectedBlocks',
   {
     textSelection?: TextSelection;
@@ -24,17 +22,13 @@ export const getSelectedBlocksCommand: Command<
     roles?: RoleType[];
   }
 > = (ctx, next) => {
-  const { host, types = ['block', 'text', 'image'], roles = ['content'] } = ctx;
-  assertExists(
-    host,
-    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
-  );
+  const { types = ['block', 'text', 'image'], roles = ['content'] } = ctx;
 
   let dirtyResult: BlockElement[] = [];
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   if (types.includes('text') && textSelection) {
-    const rangeManager = host.rangeManager;
+    const rangeManager = (ctx.std.host as EditorHost).rangeManager;
     assertExists(rangeManager);
     const range = rangeManager.textSelectionToRange(textSelection);
     if (!range) return;
@@ -51,7 +45,7 @@ export const getSelectedBlocksCommand: Command<
 
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
   if (types.includes('block') && blockSelections) {
-    const viewStore = host.view;
+    const viewStore = ctx.std.view;
     const selectedBlockElements = blockSelections.flatMap(selection => {
       const el = viewStore.viewFromPath('block', selection.path);
       return el ?? [];
@@ -61,7 +55,7 @@ export const getSelectedBlocksCommand: Command<
 
   const imageSelections = ctx.imageSelections ?? ctx.currentImageSelections;
   if (types.includes('image') && imageSelections) {
-    const viewStore = host.view;
+    const viewStore = ctx.std.view;
     const selectedBlockElements = imageSelections.flatMap(selection => {
       const el = viewStore.viewFromPath('block', selection.path);
       return el ?? [];
