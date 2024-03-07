@@ -23,19 +23,41 @@ export const updateBlockType: Command<
   'updatedBlocks',
   UpdateBlockConfig
 > = (ctx, next) => {
-  const { std, selectedBlocks, flavour, props } = ctx;
-
-  if (selectedBlocks == null) {
-    console.error(
-      'No selected blocks found, please call this command after selectedBlocks'
-    );
-    return false;
-  }
-  if (selectedBlocks.length === 0) return false;
-
+  const { std, flavour, props } = ctx;
   const host = std.host as EditorHost;
   const doc = std.doc;
+
+  const getSelectedBlocks = () => {
+    let { selectedBlocks } = ctx;
+
+    if (selectedBlocks == null) {
+      const [result, ctx] = std.command
+        .chain()
+        .withHost()
+        .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
+        .getSelectedBlocks({ types: ['text', 'block'] })
+        .run();
+      if (result) {
+        selectedBlocks = ctx.selectedBlocks;
+      }
+    }
+
+    return selectedBlocks;
+  };
+
+  const selectedBlocks = getSelectedBlocks();
+  if (!selectedBlocks || selectedBlocks.length === 0) return false;
+
   const blockModels = selectedBlocks.map(ele => ele.model);
+
+  const hasSameDoc = selectedBlocks.every(block => block.doc === doc);
+  if (!hasSameDoc) {
+    // doc check
+    console.error(
+      'Not all models have the same doc instance, the result for update text type may not be correct',
+      selectedBlocks
+    );
+  }
 
   const mergeToCode: Command<never, 'updatedBlocks'> = (_, next) => {
     if (flavour !== 'affine:code') {
@@ -146,15 +168,6 @@ export const updateBlockType: Command<
   const [result, resultCtx] = std.command
     .chain()
     .inline((_, next) => {
-      const hasSameDoc = selectedBlocks.every(block => block.doc === doc);
-      if (!hasSameDoc) {
-        // doc check
-        console.error(
-          'Not all models have the same doc instance, the result for update text type may not be correct',
-          selectedBlocks
-        );
-      }
-
       doc.captureSync();
       return next();
     })
