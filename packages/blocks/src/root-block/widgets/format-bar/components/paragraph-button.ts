@@ -10,7 +10,6 @@ import { textConversionConfigs } from '../../../../_common/configs/text-conversi
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
 import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
 import { isRootElement } from '../../../../root-block/utils/guard.js';
-import { updateBlockElementType } from '../../../../root-block/utils/operations/element/block-level.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
@@ -42,12 +41,19 @@ const updateParagraphType = (
   )
     ? defaultType
     : type;
-  updateBlockElementType(
-    host,
-    selectedBlockElements,
-    targetFlavour,
-    targetType
-  );
+
+  host.std.command
+    .chain()
+    .with({
+      selectedBlocks: selectedBlockElements,
+    })
+    .updateBlockType({
+      flavour: targetFlavour,
+      props: {
+        type: targetType,
+      },
+    })
+    .run();
 };
 
 const ParagraphPanel = ({

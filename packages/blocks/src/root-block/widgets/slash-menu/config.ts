@@ -44,7 +44,6 @@ import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
-import { updateBlockElementType } from '../../../root-block/utils/operations/element/block-level.js';
 import type { SurfaceBlockModel } from '../../../surface-block/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
 import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
@@ -78,31 +77,23 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         action: ({ rootElement }) => {
           rootElement.host.std.command
             .chain()
-            .withHost()
-            .tryAll(chain => [
-              chain.getTextSelection(),
-              chain.getBlockSelections(),
-            ])
-            .getSelectedBlocks({
-              types: ['text', 'block'],
+            .updateBlockType({
+              flavour,
+              props: { type },
             })
-            .inline(ctx => {
-              const { selectedBlocks } = ctx;
-              assertExists(selectedBlocks);
-
-              const newModels = updateBlockElementType(
-                rootElement.host,
-                selectedBlocks,
-                flavour,
-                type
-              );
+            .inline((ctx, next) => {
+              const newModels = ctx.updatedBlocks;
+              if (!newModels) {
+                return false;
+              }
 
               // Reset selection if the target is code block
               if (flavour === 'affine:code') {
                 if (newModels.length !== 1) {
-                  throw new Error(
+                  console.error(
                     "Failed to reset selection! New model length isn't 1"
                   );
+                  return false;
                 }
                 const codeModel = newModels[0];
                 onModelTextUpdated(rootElement.host, codeModel, richText => {
@@ -111,6 +102,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                   inlineEditor.focusEnd();
                 }).catch(console.error);
               }
+
+              return next();
             })
             .run();
         },
@@ -173,16 +166,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             .getSelectedBlocks({
               types: ['text', 'block'],
             })
-            .inline(ctx => {
-              const { selectedBlocks } = ctx;
-              assertExists(selectedBlocks);
-
-              updateBlockElementType(
-                rootElement.host,
-                selectedBlocks,
-                flavour,
-                type
-              );
+            .updateBlockType({
+              flavour,
+              props: { type },
             })
             .run();
         },
