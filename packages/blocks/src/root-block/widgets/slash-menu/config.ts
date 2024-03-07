@@ -158,14 +158,6 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         action: ({ rootElement }) => {
           rootElement.host.std.command
             .chain()
-            .withHost()
-            .tryAll(chain => [
-              chain.getTextSelection(),
-              chain.getBlockSelections(),
-            ])
-            .getSelectedBlocks({
-              types: ['text', 'block'],
-            })
             .updateBlockType({
               flavour,
               props: { type },

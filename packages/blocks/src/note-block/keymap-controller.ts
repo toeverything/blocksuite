@@ -1,6 +1,6 @@
 import type { BlockSelection, UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, EditorHost } from '@blocksuite/lit';
+import type { BlockElement } from '@blocksuite/lit';
 import type { ReactiveController } from 'lit';
 import type { ReactiveControllerHost } from 'lit';
 
@@ -386,34 +386,32 @@ export class KeymapController implements ReactiveController {
               })
               .inline((ctx, next) => {
                 const newModels = ctx.updatedBlocks;
+                const host = ctx.host;
                 assertExists(newModels);
+                assertExists(host);
 
                 if (item.flavour !== 'affine:code') {
                   return;
                 }
 
                 const [codeModel] = newModels;
-                onModelElementUpdated(
-                  this._std.host as EditorHost,
-                  codeModel,
-                  () => {
-                    const codeElement = this._std.view.viewFromPath(
-                      'block',
-                      buildPath(codeModel)
-                    );
-                    assertExists(codeElement);
-                    this._std.selection.setGroup('note', [
-                      this._std.selection.create('text', {
-                        from: {
-                          path: codeElement.path,
-                          index: 0,
-                          length: codeModel.text?.length ?? 0,
-                        },
-                        to: null,
-                      }),
-                    ]);
-                  }
-                ).catch(console.error);
+                onModelElementUpdated(host, codeModel, () => {
+                  const codeElement = this._std.view.viewFromPath(
+                    'block',
+                    buildPath(codeModel)
+                  );
+                  assertExists(codeElement);
+                  this._std.selection.setGroup('note', [
+                    this._std.selection.create('text', {
+                      from: {
+                        path: codeElement.path,
+                        index: 0,
+                        length: codeModel.text?.length ?? 0,
+                      },
+                      to: null,
+                    }),
+                  ]);
+                }).catch(console.error);
 
                 next();
               })
