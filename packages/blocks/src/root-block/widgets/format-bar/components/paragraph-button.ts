@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
-import type { Doc } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
+import { type BlockElement } from '@blocksuite/lit';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
@@ -14,12 +14,13 @@ import { updateBlockElementType } from '../../../../root-block/utils/operations/
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
-  doc: Doc;
+  host: EditorHost;
   selectedBlockElements: BlockElement[];
   ref?: RefOrCallback;
 }
 
 const updateParagraphType = (
+  host: EditorHost,
   selectedBlockElements: BlockElement[],
   flavour: BlockSuite.Flavour,
   type?: string
@@ -41,18 +42,23 @@ const updateParagraphType = (
   )
     ? defaultType
     : type;
-  updateBlockElementType(selectedBlockElements, targetFlavour, targetType);
+  updateBlockElementType(
+    host,
+    selectedBlockElements,
+    targetFlavour,
+    targetType
+  );
 };
 
 const ParagraphPanel = ({
-  doc,
+  host,
   selectedBlockElements,
   ref: containerRef,
 }: ParagraphPanelProps) => {
   return html`<div ${ref(containerRef)} class="paragraph-panel">
     ${textConversionConfigs
       .filter(({ flavour }) => flavour !== 'affine:divider')
-      .filter(({ flavour }) => doc.schema.flavourSchemaMap.has(flavour))
+      .filter(({ flavour }) => host.doc.schema.flavourSchemaMap.has(flavour))
       .map(
         ({ flavour, type, name, icon }) =>
           html`<icon-button
@@ -62,7 +68,7 @@ const ParagraphPanel = ({
             text="${name}"
             data-testid="${flavour}/${type}"
             @click="${() =>
-              updateParagraphType(selectedBlockElements, flavour, type)}"
+              updateParagraphType(host, selectedBlockElements, flavour, type)}"
           >
             ${icon}
           </icon-button>`
@@ -132,7 +138,7 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
 
   const paragraphPanel = ParagraphPanel({
     selectedBlockElements,
-    doc: formatBar.host.doc,
+    host: formatBar.host,
     ref: setFloating,
   });
 

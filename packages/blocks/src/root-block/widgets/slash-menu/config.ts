@@ -91,6 +91,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
               assertExists(selectedBlocks);
 
               const newModels = updateBlockElementType(
+                rootElement.host,
                 selectedBlocks,
                 flavour,
                 type
@@ -176,7 +177,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
               const { selectedBlocks } = ctx;
               assertExists(selectedBlocks);
 
-              updateBlockElementType(selectedBlocks, flavour, type);
+              updateBlockElementType(
+                rootElement.host,
+                selectedBlocks,
+                flavour,
+                type
+              );
             })
             .run();
         },
