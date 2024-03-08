@@ -475,16 +475,13 @@ export class AffineFormatBarWidget extends WidgetElement {
       id: key,
       name: camelCaseToWords(key),
       icon: config.icon,
-      isActive: formatBar => {
-        const [result] = formatBar.std.command
-          .chain()
-          .isTextStyleActive({ key })
-          .run();
+      isActive: chain => {
+        const [result] = chain.isTextStyleActive({ key }).run();
         return result;
       },
       action: config.action,
-      showWhen: formatBar => {
-        const [result] = isFormatSupported(formatBar.std).run();
+      showWhen: chain => {
+        const [result] = isFormatSupported(chain).run();
         return result;
       },
     });
@@ -502,9 +499,8 @@ export class AffineFormatBarWidget extends WidgetElement {
       icon,
       flavour,
       name: config.name ?? camelCaseToWords(type ?? flavour),
-      action: formatBar => {
-        formatBar.std.command
-          .chain()
+      action: chain => {
+        chain
           .updateBlockType({
             flavour,
             props: type != null ? { type } : undefined,

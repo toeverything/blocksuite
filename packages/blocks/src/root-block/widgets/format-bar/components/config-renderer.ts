@@ -12,11 +12,13 @@ export function ConfigRenderer(formatBar: AffineFormatBarWidget) {
         return false;
       }
       if (item.type === 'highlighter-dropdown') {
-        const [supported] = isFormatSupported(formatBar.std).run();
+        const [supported] = isFormatSupported(
+          formatBar.std.command.chain()
+        ).run();
         return supported;
       }
       if (item.type === 'inline-action') {
-        return item.showWhen(formatBar);
+        return item.showWhen(formatBar.std.command.chain(), formatBar);
       }
       return true;
     })
@@ -37,7 +39,7 @@ export function ConfigRenderer(formatBar: AffineFormatBarWidget) {
           template = html`<icon-button
             size="32px"
             data-testid=${item.id}
-            ?active=${item.isActive(formatBar)}
+            ?active=${item.isActive(formatBar.std.command.chain(), formatBar)}
             @click=${() => {
               item.action(formatBar.std.command.chain(), formatBar);
               formatBar.requestUpdate();

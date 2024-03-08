@@ -1,4 +1,9 @@
-import type { Command, CommandKeyToData } from '@blocksuite/block-std';
+import type {
+  Chain,
+  Command,
+  CommandKeyToData,
+  InitCommandCtx,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -116,13 +121,13 @@ function getSelectedInlineEditors(
 function handleCurrentSelection<
   InlineOut extends BlockSuite.CommandDataName = never,
 >(
-  std: BlockSuite.Std,
+  chain: Chain<InitCommandCtx>,
   handler: (
     type: 'text' | 'block' | 'native',
     inlineEditors: InlineEditor<AffineTextAttributes>[]
   ) => CommandKeyToData<InlineOut> | boolean | void
 ) {
-  return std.command.chain().try<InlineOut>(chain => [
+  return chain.try<InlineOut>(chain => [
     // text selection, corresponding to `formatText` command
     chain
       .getTextSelection()
@@ -218,8 +223,8 @@ function handleCurrentSelection<
   ]);
 }
 
-export function getCombinedTextStyle(std: BlockSuite.Std) {
-  return handleCurrentSelection<'textStyle'>(std, (type, inlineEditors) => {
+export function getCombinedTextStyle(chain: Chain<InitCommandCtx>) {
+  return handleCurrentSelection<'textStyle'>(chain, (type, inlineEditors) => {
     if (type === 'text') {
       return {
         textStyle: getCombinedFormatFromInlineEditors(
@@ -245,9 +250,9 @@ export function getCombinedTextStyle(std: BlockSuite.Std) {
   });
 }
 
-export function isFormatSupported(std: BlockSuite.Std) {
+export function isFormatSupported(chain: Chain<InitCommandCtx>) {
   return handleCurrentSelection(
-    std,
+    chain,
     (_type, inlineEditors) => inlineEditors.length > 0
   );
 }

@@ -48,14 +48,23 @@ export type InlineActionConfigItem = {
     formatBar: AffineFormatBarWidget
   ) => void;
   icon: TemplateResult | (() => HTMLElement);
-  isActive: (formatBar: AffineFormatBarWidget) => boolean;
-  showWhen: (formatBar: AffineFormatBarWidget) => boolean;
+  isActive: (
+    chain: Chain<InitCommandCtx>,
+    formatBar: AffineFormatBarWidget
+  ) => boolean;
+  showWhen: (
+    chain: Chain<InitCommandCtx>,
+    formatBar: AffineFormatBarWidget
+  ) => boolean;
 };
 export type ParagraphActionConfigItem = {
   id: string;
   type: 'paragraph-action';
   name: string;
-  action: (formatBar: AffineFormatBarWidget) => void;
+  action: (
+    chain: Chain<InitCommandCtx>,
+    formatBar: AffineFormatBarWidget
+  ) => void;
   icon: TemplateResult | (() => HTMLElement);
   flavour: string;
 };
@@ -131,9 +140,8 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
           ></database-convert-view>`,
         });
       },
-      showWhen: formatBar => {
-        const [_, ctx] = formatBar.std.command
-          .chain()
+      showWhen: chain => {
+        const [_, ctx] = chain
           .getSelectedModels({
             types: ['block', 'text'],
           })
@@ -221,9 +229,8 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         );
         linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
       },
-      showWhen: formatBar => {
-        const [_, ctx] = formatBar.std.command
-          .chain()
+      showWhen: chain => {
+        const [_, ctx] = chain
           .getSelectedModels({
             types: ['block'],
           })
