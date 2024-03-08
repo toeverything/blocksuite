@@ -6,7 +6,6 @@ import {
   dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
-  extendFormatBar,
   focusRichText,
   focusTitle,
   getBoundingBox,
@@ -1436,8 +1435,7 @@ test('should the database action icon show correctly', async ({ page }) => {
     { x: position.endX, y: position.endY },
     { steps: 20 }
   );
-  await expect(databaseAction).toBeVisible();
-  await expect(databaseAction).toHaveAttribute('disabled', '');
+  await expect(databaseAction).not.toBeVisible();
 });
 
 test('should convert to database work', async ({ page }) => {
@@ -1538,15 +1536,6 @@ test('should update the format quick bar state when there is a change in keyboar
     await page.keyboard.press('ArrowRight');
     await expect(formatBar.boldBtn).not.toHaveAttribute('active', '');
   });
-});
-
-test('can extend format bar', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await extendFormatBar(page);
-  await dragBetweenIndices(page, [0, 0], [2, 3]);
-  await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });
 
 test('format quick bar should not break cursor jumping', async ({ page }) => {

@@ -15,7 +15,7 @@ import {
 
 type UpdateBlockConfig = {
   flavour: BlockSuite.Flavour;
-  props: Record<string, unknown>;
+  props?: Record<string, unknown>;
 };
 
 export const updateBlockType: Command<
@@ -183,7 +183,7 @@ export const updateBlockType: Command<
             'affine:code',
           ]);
           if (model.flavour === flavour) {
-            doc.updateBlock(model, props);
+            doc.updateBlock(model, props ?? {});
             newModels.push(model);
             return;
           }

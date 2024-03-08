@@ -17,10 +17,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { HoverController } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
+import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
-import { ActionItems } from './components/action-items.js';
-import { InlineItems } from './components/inline-items.js';
+import { HighlightButton } from './components/highlight/highlight-button.js';
 import { ParagraphButton } from './components/paragraph-button.js';
+import { defaultConfig, type FormatBarConfigItem } from './config.js';
 import { formatBarStyle } from './styles.js';
 
 type FormatBarCustomAction = {
@@ -39,7 +40,11 @@ export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
+  @state()
+  configItems: FormatBarConfigItem[] = defaultConfig;
+
   static override styles = formatBarStyle;
+
   private static readonly _customElements: Set<FormatBarCustomRenderer> =
     new Set<FormatBarCustomRenderer>();
 
@@ -407,23 +412,6 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
   }
 
-  private _customRender() {
-    const result: TemplateResult[] = [];
-    AffineFormatBarWidget._customElements.forEach(render => {
-      const element = render.render(this);
-      if (element) {
-        result.push(element);
-      }
-    });
-    return result.length > 0
-      ? html` <div
-          style="display: flex;align-items: center;justify-content: center"
-        >
-          ${result}
-        </div>`
-      : null;
-  }
-
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._abortController.abort();
@@ -435,30 +423,76 @@ export class AffineFormatBarWidget extends WidgetElement {
       return nothing;
     }
 
-    const paragraphButton = ParagraphButton(this);
-    const inlineItems = InlineItems(this);
-    const actionItems = ActionItems(this);
-    const renderList = [
-      this._customRender(),
-      paragraphButton,
-      inlineItems,
-      actionItems,
-    ].filter(el => !!el) as (TemplateResult<1> | TemplateResult<1>[])[];
-    const renderListWithDivider = renderList.reduce<
-      (TemplateResult<1> | TemplateResult<1>[])[]
-    >(
-      (acc, el, i) =>
-        i === renderList.length - 1
-          ? [...acc, el]
-          : [...acc, el, html`<div class="divider"></div>`],
-      []
-    );
+    const items = this.configItems
+      .filter(item => {
+        if (item.type === 'paragraph-action') {
+          return false;
+        }
+        if (item.type === 'highlighter-dropdown') {
+          const [supported] = isFormatSupported(this.std).run();
+          return supported;
+        }
+        if (item.type === 'inline-action') {
+          return item.showWhen(this);
+        }
+        return true;
+      })
+      .map(item => {
+        let template: TemplateResult | null = null;
+        switch (item.type) {
+          case 'divider':
+            template = html`<div class="divider"></div>`;
+            break;
+          case 'highlighter-dropdown': {
+            template = HighlightButton(this);
+            break;
+          }
+          case 'paragraph-dropdown':
+            template = ParagraphButton(this);
+            break;
+          case 'inline-action': {
+            template = html`<icon-button
+              size="32px"
+              data-testid=${item.id}
+              ?active=${item.isActive(this)}
+              @click=${() => {
+                item.action(this);
+                this.requestUpdate();
+              }}
+            >
+              ${typeof item.icon === 'function' ? item.icon() : item.icon}
+              <affine-tooltip>${item.name}</affine-tooltip>
+            </icon-button>`;
+            break;
+          }
+          default:
+            template = null;
+        }
+
+        return [template, item] as const;
+      })
+      .filter(([template]) => template !== null && template !== undefined)
+      .filter(([_, item], index, list) => {
+        if (item.type === 'divider') {
+          if (index === 0) {
+            return false;
+          }
+          if (index === list.length - 1) {
+            return false;
+          }
+          if (list[index - 1][1].type === 'divider') {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map(([template]) => template);
 
     return html` <div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
       @pointerdown="${stopPropagation}"
     >
-      ${renderListWithDivider}
+      ${items}
     </div>`;
   }
 }
