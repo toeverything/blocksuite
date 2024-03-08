@@ -411,6 +411,10 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     this._calculatePlacement();
+
+    if (this.configItems.length === 0) {
+      toolbarDefaultConfig(this);
+    }
   }
 
   override updated() {
@@ -423,12 +427,6 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     this._floatDisposables = new DisposableGroup();
     this._listenFloatingElement();
-  }
-
-  override firstUpdated() {
-    if (this.configItems.length === 0) {
-      toolbarDefaultConfig(this);
-    }
   }
 
   override disconnectedCallback() {
