@@ -309,7 +309,7 @@ export class KeymapController implements ReactiveController {
           to: null,
         });
 
-        selection.setGroup('note', [sel]);
+        requestAnimationFrame(() => selection.setGroup('note', [sel]));
 
         return next();
       })
