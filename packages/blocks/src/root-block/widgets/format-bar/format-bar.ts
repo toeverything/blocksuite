@@ -18,10 +18,8 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { HoverController } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
-import { HighlightButton } from './components/highlight/highlight-button.js';
-import { ParagraphButton } from './components/paragraph-button.js';
+import { ConfigRenderer } from './components/config-renderer.js';
 import { defaultConfig, type FormatBarConfigItem } from './config.js';
 import { formatBarStyle } from './styles.js';
 
@@ -119,6 +117,8 @@ export class AffineFormatBarWidget extends WidgetElement {
   private _abortController = new AbortController();
 
   private _placement: Placement = 'top';
+
+  private _floatDisposables: DisposableGroup | null = null;
 
   private _reset() {
     this._displayType = 'none';
@@ -286,54 +286,19 @@ export class AffineFormatBarWidget extends WidgetElement {
     });
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._abortController = new AbortController();
-
-    const rootElement = this.blockElement;
-    assertExists(rootElement);
-    const widgets = rootElement.widgets;
-
-    // check if the host use the format bar widget
-    if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET)) {
-      return;
-    }
-
-    // check if format bar widget support the host
-    if (!isRootElement(rootElement)) {
-      throw new Error(
-        `format bar not support rootElement: ${rootElement.constructor.name} but its widgets has format bar`
-      );
-    }
-
-    this._calculatePlacement();
-  }
-
-  private _floatDisposables: DisposableGroup | null = null;
-
-  override updated() {
-    if (!this._shouldDisplay()) {
-      if (this._floatDisposables) {
-        this._floatDisposables.dispose();
-      }
-      return;
-    }
-
-    this._floatDisposables = new DisposableGroup();
-
+  private _listenFloatingElement() {
     const formatQuickBarElement = this.formatBarElement;
     assertExists(formatQuickBarElement, 'format quick bar should exist');
 
     const listenFloatingElement = (
       getElement: () => ReferenceElement | void
     ) => {
-      this._floatDisposables = new DisposableGroup();
-
       const initialElement = getElement();
       if (!initialElement) {
         return;
       }
 
+      assertExists(this._floatDisposables);
       HoverController.globalAbortController?.abort();
       this._floatDisposables.add(
         autoUpdate(
@@ -418,77 +383,45 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this._abortController = new AbortController();
+
+    const rootElement = this.blockElement;
+    assertExists(rootElement);
+    const widgets = rootElement.widgets;
+
+    // check if the host use the format bar widget
+    if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET)) {
+      return;
+    }
+
+    // check if format bar widget support the host
+    if (!isRootElement(rootElement)) {
+      throw new Error(
+        `format bar not support rootElement: ${rootElement.constructor.name} but its widgets has format bar`
+      );
+    }
+
+    this._calculatePlacement();
+  }
+
+  override updated() {
+    if (!this._shouldDisplay()) {
+      if (this._floatDisposables) {
+        this._floatDisposables.dispose();
+      }
+      return;
+    }
+
+    this._floatDisposables = new DisposableGroup();
+    this._listenFloatingElement();
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._abortController.abort();
     this._reset();
-  }
-
-  private _renderConfigItems() {
-    return this.configItems
-      .filter(item => {
-        if (item.type === 'paragraph-action') {
-          return false;
-        }
-        if (item.type === 'highlighter-dropdown') {
-          const [supported] = isFormatSupported(this.std).run();
-          return supported;
-        }
-        if (item.type === 'inline-action') {
-          return item.showWhen(this);
-        }
-        return true;
-      })
-      .map(item => {
-        let template: TemplateResult | null = null;
-        switch (item.type) {
-          case 'divider':
-            template = html`<div class="divider"></div>`;
-            break;
-          case 'highlighter-dropdown': {
-            template = HighlightButton(this);
-            break;
-          }
-          case 'paragraph-dropdown':
-            template = ParagraphButton(this);
-            break;
-          case 'inline-action': {
-            template = html`<icon-button
-              size="32px"
-              data-testid=${item.id}
-              ?active=${item.isActive(this)}
-              @click=${() => {
-                item.action(this);
-                this.requestUpdate();
-              }}
-            >
-              ${typeof item.icon === 'function' ? item.icon() : item.icon}
-              <affine-tooltip>${item.name}</affine-tooltip>
-            </icon-button>`;
-            break;
-          }
-          default:
-            template = null;
-        }
-
-        return [template, item] as const;
-      })
-      .filter(([template]) => template !== null && template !== undefined)
-      .filter(([_, item], index, list) => {
-        if (item.type === 'divider') {
-          if (index === 0) {
-            return false;
-          }
-          if (index === list.length - 1) {
-            return false;
-          }
-          if (list[index - 1][1].type === 'divider') {
-            return false;
-          }
-        }
-        return true;
-      })
-      .map(([template]) => template);
   }
 
   override render() {
@@ -496,11 +429,13 @@ export class AffineFormatBarWidget extends WidgetElement {
       return nothing;
     }
 
+    const items = ConfigRenderer(this);
+
     return html` <div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
       @pointerdown="${stopPropagation}"
     >
-      ${this._renderConfigItems()}
+      ${items}
     </div>`;
   }
 }
