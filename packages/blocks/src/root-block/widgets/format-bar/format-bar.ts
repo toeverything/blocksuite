@@ -9,6 +9,7 @@ import {
   inline,
   offset,
   type Placement,
+  type ReferenceElement,
   shift,
 } from '@floating-ui/dom';
 import { html, nothing, type TemplateResult } from 'lit';
@@ -17,10 +18,8 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { HoverController } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
-import { HighlightButton } from './components/highlight/highlight-button.js';
-import { ParagraphButton } from './components/paragraph-button.js';
+import { ConfigRenderer } from './components/config-renderer.js';
 import { defaultConfig, type FormatBarConfigItem } from './config.js';
 import { formatBarStyle } from './styles.js';
 
@@ -40,9 +39,6 @@ export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
-  @state()
-  configItems: FormatBarConfigItem[] = defaultConfig;
-
   static override styles = formatBarStyle;
 
   private static readonly _customElements: Set<FormatBarCustomRenderer> =
@@ -92,12 +88,15 @@ export class AffineFormatBarWidget extends WidgetElement {
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
   formatBarElement?: HTMLElement;
 
-  private get _selectionManager() {
-    return this.host.selection;
-  }
+  @state()
+  configItems: FormatBarConfigItem[] = defaultConfig;
 
   @state()
   private _dragging = false;
+
+  private get _selectionManager() {
+    return this.host.selection;
+  }
 
   private _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
   get displayType() {
@@ -112,13 +111,14 @@ export class AffineFormatBarWidget extends WidgetElement {
   get nativeRange() {
     const sl = document.getSelection();
     if (!sl || sl.rangeCount === 0) return null;
-    const range = sl.getRangeAt(0);
-    return range;
+    return sl.getRangeAt(0);
   }
 
   private _abortController = new AbortController();
 
   private _placement: Placement = 'top';
+
+  private _floatDisposables: DisposableGroup | null = null;
 
   private _reset() {
     this._displayType = 'none';
@@ -153,25 +153,8 @@ export class AffineFormatBarWidget extends WidgetElement {
     return !readonly && this.displayType !== 'none' && !this._dragging;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._abortController = new AbortController();
-
+  private _calculatePlacement() {
     const rootElement = this.blockElement;
-    assertExists(rootElement);
-    const widgets = rootElement.widgets;
-
-    // check if the host use the format bar widget
-    if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET)) {
-      return;
-    }
-
-    // check if format bar widget support the host
-    if (!isRootElement(rootElement)) {
-      throw new Error(
-        `format bar not support rootElement: ${rootElement.constructor.name} but its widgets has format bar`
-      );
-    }
 
     this.handleEvent('pointerMove', ctx => {
       this._dragging = ctx.get('pointerState').dragging;
@@ -216,121 +199,116 @@ export class AffineFormatBarWidget extends WidgetElement {
     this.disposables.add(
       this._selectionManager.slots.changed.on(async () => {
         await this.host.updateComplete;
-        const textSelection = rootElement.selection.find('text');
-        const blockSelections = rootElement.selection.filter('block');
 
-        if (textSelection) {
-          const block = this.host.view.viewFromPath(
-            'block',
-            textSelection.path
-          );
-          if (
-            !textSelection.isCollapsed() &&
-            block &&
-            block.model.role === 'content'
-          ) {
-            this._displayType = 'text';
-            assertExists(rootElement.host.rangeManager);
+        const update = () => {
+          const textSelection = rootElement.selection.find('text');
+          const blockSelections = rootElement.selection.filter('block');
 
-            this.host.std.command
-              .chain()
-              .getTextSelection()
-              .getSelectedBlocks({
-                types: ['text'],
-              })
-              .inline(ctx => {
-                const { selectedBlocks } = ctx;
-                assertExists(selectedBlocks);
-                this._selectedBlockElements = selectedBlocks;
-              })
-              .run();
-          } else {
+          if (textSelection) {
+            const block = this.host.view.viewFromPath(
+              'block',
+              textSelection.path
+            );
+            if (
+              !textSelection.isCollapsed() &&
+              block &&
+              block.model.role === 'content'
+            ) {
+              this._displayType = 'text';
+              assertExists(rootElement.host.rangeManager);
+
+              this.host.std.command
+                .chain()
+                .getTextSelection()
+                .getSelectedBlocks({
+                  types: ['text'],
+                })
+                .inline(ctx => {
+                  const { selectedBlocks } = ctx;
+                  assertExists(selectedBlocks);
+                  this._selectedBlockElements = selectedBlocks;
+                })
+                .run();
+
+              return;
+            }
+
             this._reset();
+            return;
           }
-        } else if (blockSelections.length > 0) {
-          this._displayType = 'block';
-          this._selectedBlockElements = blockSelections
-            .map(selection => {
-              const path = selection.path;
-              return this.blockElement.host.view.viewFromPath('block', path);
-            })
-            .filter((el): el is BlockElement => !!el);
-        } else {
-          this._reset();
-        }
 
+          if (blockSelections.length > 0) {
+            this._displayType = 'block';
+            this._selectedBlockElements = blockSelections
+              .map(selection => {
+                const path = selection.path;
+                return this.blockElement.host.view.viewFromPath('block', path);
+              })
+              .filter((el): el is BlockElement => !!el);
+
+            return;
+          }
+
+          this._reset();
+        };
+
+        update();
         this.requestUpdate();
       })
     );
     this.disposables.addFromEvent(document, 'selectionchange', () => {
       const databaseSelection = this.host.selection.find('database');
+      if (!databaseSelection) {
+        return;
+      }
+
       const reset = () => {
         this._reset();
         this.requestUpdate();
       };
-      if (databaseSelection) {
-        const viewSelection = databaseSelection.viewSelection;
-        // check table selection
-        if (viewSelection.type === 'table' && !viewSelection.isEditing)
-          return reset();
-        // check kanban selection
-        if (
-          (viewSelection.type === 'kanban' &&
-            viewSelection.selectionType !== 'cell') ||
-          !viewSelection.isEditing
-        )
-          return reset();
+      const viewSelection = databaseSelection.viewSelection;
+      // check table selection
+      if (viewSelection.type === 'table' && !viewSelection.isEditing)
+        return reset();
+      // check kanban selection
+      if (
+        (viewSelection.type === 'kanban' &&
+          viewSelection.selectionType !== 'cell') ||
+        !viewSelection.isEditing
+      )
+        return reset();
 
-        const range = this.nativeRange;
+      const range = this.nativeRange;
 
-        if (!range || range.collapsed) return reset();
-        this._displayType = 'native';
-        this.requestUpdate();
-      }
+      if (!range || range.collapsed) return reset();
+      this._displayType = 'native';
+      this.requestUpdate();
     });
   }
 
-  private _floatDisposables: DisposableGroup | null = null;
-
-  override updated() {
-    if (!this._shouldDisplay()) {
-      if (this._floatDisposables) {
-        this._floatDisposables.dispose();
-      }
-      return;
-    }
-
-    this._floatDisposables = new DisposableGroup();
-
+  private _listenFloatingElement() {
     const formatQuickBarElement = this.formatBarElement;
     assertExists(formatQuickBarElement, 'format quick bar should exist');
-    if (this.displayType === 'text' || this.displayType === 'native') {
-      const range = this.nativeRange;
-      if (!range) {
+
+    const listenFloatingElement = (
+      getElement: () => ReferenceElement | void
+    ) => {
+      const initialElement = getElement();
+      if (!initialElement) {
         return;
       }
-      const visualElement = {
-        getBoundingClientRect: () => range.getBoundingClientRect(),
-        getClientRects: () => range.getClientRects(),
-      };
 
+      assertExists(this._floatDisposables);
       HoverController.globalAbortController?.abort();
       this._floatDisposables.add(
         autoUpdate(
-          visualElement,
+          initialElement,
           formatQuickBarElement,
           () => {
-            // Why not use `range` and `visualElement` directly:
-            // https://github.com/toeverything/blocksuite/issues/5144
-            const latestRange = this.nativeRange;
-            if (!latestRange) {
-              return;
-            }
-            const latestVisualElement = {
-              getBoundingClientRect: () => latestRange.getBoundingClientRect(),
-              getClientRects: () => latestRange.getClientRects(),
-            };
-            computePosition(latestVisualElement, formatQuickBarElement, {
+            const element = getElement();
+            if (!element) return;
+
+            computePosition(element, formatQuickBarElement, {
               placement: this._placement,
               middleware: [
                 offset(10),
@@ -353,7 +331,9 @@ export class AffineFormatBarWidget extends WidgetElement {
           }
         )
       );
-    } else if (this.displayType === 'block') {
+    };
+
+    const getReferenceElementFromBlock = () => {
       const firstBlockElement = this._selectedBlockElements[0];
       let rect = firstBlockElement?.getBoundingClientRect();
 
@@ -374,42 +354,68 @@ export class AffineFormatBarWidget extends WidgetElement {
           rect = new DOMRect(rect.left, rect.top, elRect.right, rect.bottom);
         }
       });
-      const visualElement = {
+      return {
         getBoundingClientRect: () => rect,
         getClientRects: () =>
           this._selectedBlockElements.map(el => el.getBoundingClientRect()),
       };
+    };
 
-      HoverController.globalAbortController?.abort();
-      this._floatDisposables.add(
-        autoUpdate(
-          visualElement,
-          formatQuickBarElement,
-          () => {
-            computePosition(visualElement, formatQuickBarElement, {
-              placement: this._placement,
-              middleware: [
-                offset(10),
-                inline(),
-                shift({
-                  padding: 6,
-                }),
-              ],
-            })
-              .then(({ x, y }) => {
-                formatQuickBarElement.style.display = 'flex';
-                formatQuickBarElement.style.top = `${y}px`;
-                formatQuickBarElement.style.left = `${x}px`;
-              })
-              .catch(console.error);
-          },
-          {
-            // follow edgeless viewport update
-            animationFrame: true,
-          }
-        )
+    const getReferenceElementFromText = () => {
+      const range = this.nativeRange;
+      if (!range) {
+        return;
+      }
+      return {
+        getBoundingClientRect: () => range.getBoundingClientRect(),
+        getClientRects: () => range.getClientRects(),
+      };
+    };
+
+    switch (this.displayType) {
+      case 'text':
+      case 'native':
+        return listenFloatingElement(getReferenceElementFromText);
+      case 'block':
+        return listenFloatingElement(getReferenceElementFromBlock);
+      default:
+        return;
+    }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._abortController = new AbortController();
+
+    const rootElement = this.blockElement;
+    assertExists(rootElement);
+    const widgets = rootElement.widgets;
+
+    // check if the host use the format bar widget
+    if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET)) {
+      return;
+    }
+
+    // check if format bar widget support the host
+    if (!isRootElement(rootElement)) {
+      throw new Error(
+        `format bar not support rootElement: ${rootElement.constructor.name} but its widgets has format bar`
       );
     }
+
+    this._calculatePlacement();
+  }
+
+  override updated() {
+    if (!this._shouldDisplay()) {
+      if (this._floatDisposables) {
+        this._floatDisposables.dispose();
+      }
+      return;
+    }
+
+    this._floatDisposables = new DisposableGroup();
+    this._listenFloatingElement();
   }
 
   override disconnectedCallback() {
@@ -423,70 +429,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       return nothing;
     }
 
-    const items = this.configItems
-      .filter(item => {
-        if (item.type === 'paragraph-action') {
-          return false;
-        }
-        if (item.type === 'highlighter-dropdown') {
-          const [supported] = isFormatSupported(this.std).run();
-          return supported;
-        }
-        if (item.type === 'inline-action') {
-          return item.showWhen(this);
-        }
-        return true;
-      })
-      .map(item => {
-        let template: TemplateResult | null = null;
-        switch (item.type) {
-          case 'divider':
-            template = html`<div class="divider"></div>`;
-            break;
-          case 'highlighter-dropdown': {
-            template = HighlightButton(this);
-            break;
-          }
-          case 'paragraph-dropdown':
-            template = ParagraphButton(this);
-            break;
-          case 'inline-action': {
-            template = html`<icon-button
-              size="32px"
-              data-testid=${item.id}
-              ?active=${item.isActive(this)}
-              @click=${() => {
-                item.action(this);
-                this.requestUpdate();
-              }}
-            >
-              ${typeof item.icon === 'function' ? item.icon() : item.icon}
-              <affine-tooltip>${item.name}</affine-tooltip>
-            </icon-button>`;
-            break;
-          }
-          default:
-            template = null;
-        }
-
-        return [template, item] as const;
-      })
-      .filter(([template]) => template !== null && template !== undefined)
-      .filter(([_, item], index, list) => {
-        if (item.type === 'divider') {
-          if (index === 0) {
-            return false;
-          }
-          if (index === list.length - 1) {
-            return false;
-          }
-          if (list[index - 1][1].type === 'divider') {
-            return false;
-          }
-        }
-        return true;
-      })
-      .map(([template]) => template);
+    const items = ConfigRenderer(this);
 
     return html` <div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
