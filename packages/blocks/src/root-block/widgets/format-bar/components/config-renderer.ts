@@ -39,7 +39,7 @@ export function ConfigRenderer(formatBar: AffineFormatBarWidget) {
             data-testid=${item.id}
             ?active=${item.isActive(formatBar)}
             @click=${() => {
-              item.action(formatBar);
+              item.action(formatBar.std.command.chain(), formatBar);
               formatBar.requestUpdate();
             }}
           >

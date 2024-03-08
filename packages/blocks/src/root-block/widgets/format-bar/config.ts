@@ -1,3 +1,4 @@
+import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { html, type TemplateResult } from 'lit';
 
@@ -27,7 +28,6 @@ import {
   UnderlineIcon,
 } from '../../../_common/icons/index.js';
 import { matchFlavours } from '../../../_common/utils/index.js';
-import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import type { AffineFormatBarWidget } from './format-bar.js';
 
 export type DividerConfigItem = {
@@ -43,7 +43,10 @@ export type InlineActionConfigItem = {
   id: string;
   name: string;
   type: 'inline-action';
-  action: (formatBar: AffineFormatBarWidget) => void;
+  action: (
+    chain: Chain<InitCommandCtx>,
+    formatBar: AffineFormatBarWidget
+  ) => void;
   icon: TemplateResult | (() => HTMLElement);
   isActive: (formatBar: AffineFormatBarWidget) => boolean;
   showWhen: (formatBar: AffineFormatBarWidget) => boolean;
@@ -63,465 +66,241 @@ export type FormatBarConfigItem =
   | ParagraphActionConfigItem
   | InlineActionConfigItem;
 
-export const defaultConfig: FormatBarConfigItem[] = [
-  {
-    type: 'paragraph-dropdown',
-  },
-  {
-    type: 'divider',
-  },
-  {
-    id: 'bold',
-    type: 'inline-action',
-    name: 'Bold',
-    icon: BoldIcon,
-    isActive: formatBar => {
-      const [result] = formatBar.std.command
-        .chain()
-        .isTextStyleActive({ key: 'bold' })
-        .run();
-      return result;
-    },
-    action: formatBar => {
-      formatBar.std.command.chain().toggleBold().run();
-    },
-    showWhen: formatBar => {
-      const [result] = isFormatSupported(formatBar.std).run();
-      return result;
-    },
-  },
-  {
-    id: 'italic',
-    type: 'inline-action',
-    name: 'Italic',
-    icon: ItalicIcon,
-    isActive: formatBar => {
-      const [result] = formatBar.std.command
-        .chain()
-        .isTextStyleActive({ key: 'italic' })
-        .run();
-      return result;
-    },
-    action: formatBar => {
-      formatBar.std.command.chain().toggleItalic().run();
-    },
-    showWhen: formatBar => {
-      const [result] = isFormatSupported(formatBar.std).run();
-      return result;
-    },
-  },
-  {
-    id: 'underline',
-    type: 'inline-action',
-    name: 'Underline',
-    icon: UnderlineIcon,
-    isActive: formatBar => {
-      const [result] = formatBar.std.command
-        .chain()
-        .isTextStyleActive({ key: 'underline' })
-        .run();
-      return result;
-    },
-    action: formatBar => {
-      formatBar.std.command.chain().toggleUnderline().run();
-    },
-    showWhen: formatBar => {
-      const [result] = isFormatSupported(formatBar.std).run();
-      return result;
-    },
-  },
-  {
-    id: 'strike',
-    type: 'inline-action',
-    name: 'Strike',
-    icon: StrikethroughIcon,
-    isActive: formatBar => {
-      const [result] = formatBar.std.command
-        .chain()
-        .isTextStyleActive({ key: 'strike' })
-        .run();
-      return result;
-    },
-    action: formatBar => {
-      formatBar.std.command.chain().toggleStrike().run();
-    },
-    showWhen: formatBar => {
-      const [result] = isFormatSupported(formatBar.std).run();
-      return result;
-    },
-  },
-  {
-    id: 'code',
-    type: 'inline-action',
-    name: 'Code',
-    icon: CodeIcon,
-    isActive: formatBar => {
-      const [result] = formatBar.std.command
-        .chain()
-        .isTextStyleActive({ key: 'code' })
-        .run();
-      return result;
-    },
-    action: formatBar => {
-      formatBar.std.command.chain().toggleCode().run();
-    },
-    showWhen: formatBar => {
-      const [result] = isFormatSupported(formatBar.std).run();
-      return result;
-    },
-  },
-  {
-    id: 'link',
-    type: 'inline-action',
-    name: 'Link',
-    icon: LinkIcon,
-    isActive: formatBar => {
-      const [result] = formatBar.std.command
-        .chain()
-        .isTextStyleActive({ key: 'link' })
-        .run();
-      return result;
-    },
-    action: formatBar => {
-      formatBar.std.command.chain().toggleLink().run();
-    },
-    showWhen: formatBar => {
-      const [result] = isFormatSupported(formatBar.std).run();
-      return result;
-    },
-  },
-  {
-    type: 'divider',
-  },
-  {
-    type: 'highlighter-dropdown',
-  },
-  {
-    type: 'divider',
-  },
-  {
-    id: 'copy',
-    type: 'inline-action',
-    name: 'Copy',
-    icon: CopyIcon,
-    isActive: () => false,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .getSelectedModels()
-        .with({
+export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
+  toolbar
+    .clearConfig()
+    .addParagraphDropdown()
+    .addDivider()
+    .addTextStyleToggle({
+      key: 'bold',
+      action: chain => chain.toggleBold().run(),
+      icon: BoldIcon,
+    })
+    .addTextStyleToggle({
+      key: 'italic',
+      action: chain => chain.toggleItalic().run(),
+      icon: ItalicIcon,
+    })
+    .addTextStyleToggle({
+      key: 'underline',
+      action: chain => chain.toggleUnderline().run(),
+      icon: UnderlineIcon,
+    })
+    .addTextStyleToggle({
+      key: 'strike',
+      action: chain => chain.toggleStrike().run(),
+      icon: StrikethroughIcon,
+    })
+    .addTextStyleToggle({
+      key: 'code',
+      action: chain => chain.toggleCode().run(),
+      icon: CodeIcon,
+    })
+    .addTextStyleToggle({
+      key: 'link',
+      action: chain => chain.toggleLink().run(),
+      icon: LinkIcon,
+    })
+    .addDivider()
+    .addHighlighterDropdown()
+    .addDivider()
+    .addInlineAction({
+      id: 'copy',
+      name: 'Copy',
+      icon: CopyIcon,
+      isActive: () => false,
+      action: chain => {
+        chain.getSelectedModels().with({
           onCopy: () => {
-            toast(formatBar.host, 'Copied to clipboard');
+            toast(toolbar.host, 'Copied to clipboard');
           },
-        })
-        .copySelectedModels()
-        .run();
-    },
-    showWhen: () => true,
-  },
-  {
-    id: 'convert-to-database',
-    type: 'inline-action',
-    name: 'Group as Database',
-    icon: DatabaseTableViewIcon20,
-    isActive: () => false,
-    action: formatBar => {
-      createSimplePortal({
-        template: html`<database-convert-view
-          .host=${formatBar.host}
-        ></database-convert-view>`,
-      });
-    },
-    showWhen: formatBar => {
-      const [_, ctx] = formatBar.std.command
-        .chain()
-        .getSelectedModels({
-          types: ['block', 'text'],
-        })
-        .run();
-      const { selectedModels } = ctx;
-      if (!selectedModels || selectedModels.length === 0) return false;
-
-      return selectedModels.every(block =>
-        DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
-      );
-    },
-  },
-  {
-    id: 'convert-to-linked-doc',
-    type: 'inline-action',
-    name: 'Create Linked Doc',
-    icon: FontLinkedDocIcon,
-    isActive: () => false,
-    action: formatBar => {
-      const [_, ctx] = formatBar.std.command
-        .chain()
-        .getSelectedModels({
-          types: ['block'],
-        })
-        .run();
-      const { selectedModels } = ctx;
-      assertExists(selectedModels);
-
-      const host = formatBar.host;
-      host.selection.clear();
-
-      const doc = host.doc;
-      const linkedDoc = doc.workspace.createDoc({});
-      linkedDoc.load(() => {
-        const rootId = linkedDoc.addBlock('affine:page', {
-          title: new doc.Text(''),
         });
-        linkedDoc.addBlock('affine:surface', {}, rootId);
-        const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
+        chain.copySelectedModels().run();
+      },
+      showWhen: () => true,
+    })
+    .addInlineAction({
+      id: 'convert-to-database',
+      name: 'Group as Database',
+      icon: DatabaseTableViewIcon20,
+      isActive: () => false,
+      action: () => {
+        createSimplePortal({
+          template: html`<database-convert-view
+            .host=${toolbar.host}
+          ></database-convert-view>`,
+        });
+      },
+      showWhen: formatBar => {
+        const [_, ctx] = formatBar.std.command
+          .chain()
+          .getSelectedModels({
+            types: ['block', 'text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || selectedModels.length === 0) return false;
 
-        const firstBlock = selectedModels[0];
-        assertExists(firstBlock);
-
-        doc.addSiblingBlocks(
-          firstBlock,
-          [
-            {
-              flavour: 'affine:embed-linked-doc',
-              pageId: linkedDoc.id,
-            },
-          ],
-          'before'
+        return selectedModels.every(block =>
+          DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
         );
+      },
+    })
+    .addInlineAction({
+      id: 'convert-to-linked-doc',
+      name: 'Create Linked Doc',
+      icon: FontLinkedDocIcon,
+      isActive: () => false,
+      action: (chain, formatBar) => {
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['block'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        assertExists(selectedModels);
 
-        if (
-          matchFlavours(firstBlock, ['affine:paragraph']) &&
-          firstBlock.type.match(/^h[1-6]$/)
-        ) {
-          const title = firstBlock.text.toString();
-          linkedDoc.workspace.setDocMeta(linkedDoc.id, {
-            title,
+        const host = formatBar.host;
+        host.selection.clear();
+
+        const doc = host.doc;
+        const linkedDoc = doc.workspace.createDoc({});
+        linkedDoc.load(() => {
+          const rootId = linkedDoc.addBlock('affine:page', {
+            title: new doc.Text(''),
           });
+          linkedDoc.addBlock('affine:surface', {}, rootId);
+          const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
 
-          const linkedDocRootModel = linkedDoc.getBlockById(rootId);
-          assertExists(linkedDocRootModel);
-          linkedDoc.updateBlock(linkedDocRootModel, {
-            title: new doc.Text(title),
-          });
+          const firstBlock = selectedModels[0];
+          assertExists(firstBlock);
 
-          doc.deleteBlock(firstBlock);
-          selectedModels.shift();
-        }
-
-        selectedModels.forEach(model => {
-          const keys = model.keys as (keyof typeof model)[];
-          const values = keys.map(key => model[key]);
-          const blockProps = Object.fromEntries(
-            keys.map((key, i) => [key, values[i]])
+          doc.addSiblingBlocks(
+            firstBlock,
+            [
+              {
+                flavour: 'affine:embed-linked-doc',
+                pageId: linkedDoc.id,
+              },
+            ],
+            'before'
           );
-          linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
-          doc.deleteBlock(model);
-        });
-      });
 
-      const linkedDocService = host.spec.getService('affine:embed-linked-doc');
-      linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
-    },
-    showWhen: formatBar => {
-      const [_, ctx] = formatBar.std.command
-        .chain()
-        .getSelectedModels({
-          types: ['block'],
-        })
-        .run();
-      const { selectedModels } = ctx;
-      return !!selectedModels && selectedModels.length > 0;
-    },
-  },
-  {
-    id: 'affine:paragraph/text',
-    type: 'paragraph-action',
-    flavour: 'affine:paragraph',
-    name: 'Text',
-    icon: TextIcon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:paragraph',
-          props: { type: 'text' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:paragraph/h1',
-    type: 'paragraph-action',
-    flavour: 'affine:paragraph',
-    name: 'Heading 1',
-    icon: Heading1Icon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:paragraph',
-          props: { type: 'h1' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:paragraph/h2',
-    type: 'paragraph-action',
-    flavour: 'affine:paragraph',
-    name: 'Heading 2',
-    icon: Heading2Icon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:paragraph',
-          props: { type: 'h2' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:paragraph/h3',
-    type: 'paragraph-action',
-    flavour: 'affine:paragraph',
-    name: 'Heading 3',
-    icon: Heading3Icon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:paragraph',
-          props: { type: 'h3' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:paragraph/h4',
-    type: 'paragraph-action',
-    flavour: 'affine:paragraph',
-    name: 'Heading 4',
-    icon: Heading4Icon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:paragraph',
-          props: { type: 'h4' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:paragraph/h5',
-    type: 'paragraph-action',
-    flavour: 'affine:paragraph',
-    name: 'Heading 5',
-    icon: Heading5Icon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:paragraph',
-          props: { type: 'h5' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:paragraph/h6',
-    type: 'paragraph-action',
-    flavour: 'affine:paragraph',
-    name: 'Heading 6',
-    icon: Heading6Icon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:paragraph',
-          props: { type: 'h6' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:list/bulleted',
-    type: 'paragraph-action',
-    flavour: 'affine:list',
-    name: 'Bulleted List',
-    icon: BulletedListIcon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:list',
-          props: { type: 'bulleted' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:list/numbered',
-    type: 'paragraph-action',
-    flavour: 'affine:list',
-    name: 'Numbered List',
-    icon: NumberedListIcon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:list',
-          props: { type: 'numbered' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:list/todo',
-    type: 'paragraph-action',
-    flavour: 'affine:list',
-    name: 'To-do List',
-    icon: CheckBoxIcon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:list',
-          props: { type: 'todo' },
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:code/',
-    type: 'paragraph-action',
-    flavour: 'affine:code',
-    name: 'Code Block',
-    icon: CodeIcon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:code',
-        })
-        .run();
-    },
-  },
-  {
-    id: 'affine:paragraph/quote',
-    type: 'paragraph-action',
-    flavour: 'affine:paragraph',
-    name: 'Quote',
-    icon: QuoteIcon,
-    action: formatBar => {
-      formatBar.std.command
-        .chain()
-        .updateBlockType({
-          flavour: 'affine:paragraph',
-          props: { type: 'quote' },
-        })
-        .run();
-    },
-  },
-];
+          if (
+            matchFlavours(firstBlock, ['affine:paragraph']) &&
+            firstBlock.type.match(/^h[1-6]$/)
+          ) {
+            const title = firstBlock.text.toString();
+            linkedDoc.workspace.setDocMeta(linkedDoc.id, {
+              title,
+            });
+
+            const linkedDocRootModel = linkedDoc.getBlockById(rootId);
+            assertExists(linkedDocRootModel);
+            linkedDoc.updateBlock(linkedDocRootModel, {
+              title: new doc.Text(title),
+            });
+
+            doc.deleteBlock(firstBlock);
+            selectedModels.shift();
+          }
+
+          selectedModels.forEach(model => {
+            const keys = model.keys as (keyof typeof model)[];
+            const values = keys.map(key => model[key]);
+            const blockProps = Object.fromEntries(
+              keys.map((key, i) => [key, values[i]])
+            );
+            linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
+            doc.deleteBlock(model);
+          });
+        });
+
+        const linkedDocService = host.spec.getService(
+          'affine:embed-linked-doc'
+        );
+        linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+      },
+      showWhen: formatBar => {
+        const [_, ctx] = formatBar.std.command
+          .chain()
+          .getSelectedModels({
+            types: ['block'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        return !!selectedModels && selectedModels.length > 0;
+      },
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:paragraph',
+      type: 'text',
+      name: 'Text',
+      icon: TextIcon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:paragraph',
+      type: 'h1',
+      name: 'Heading 1',
+      icon: Heading1Icon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:paragraph',
+      type: 'h2',
+      name: 'Heading 2',
+      icon: Heading2Icon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:paragraph',
+      type: 'h3',
+      name: 'Heading 3',
+      icon: Heading3Icon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:paragraph',
+      type: 'h4',
+      name: 'Heading 4',
+      icon: Heading4Icon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:paragraph',
+      type: 'h5',
+      name: 'Heading 5',
+      icon: Heading5Icon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:paragraph',
+      type: 'h6',
+      name: 'Heading 6',
+      icon: Heading6Icon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:list',
+      type: 'bulleted',
+      name: 'Bulleted List',
+      icon: BulletedListIcon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:list',
+      type: 'numbered',
+      name: 'Numbered List',
+      icon: NumberedListIcon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:list',
+      type: 'todo',
+      name: 'To-do List',
+      icon: CheckBoxIcon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:code',
+      name: 'Code Block',
+      icon: CodeIcon,
+    })
+    .addBlockTypeSwitch({
+      flavour: 'affine:paragraph',
+      type: 'quote',
+      name: 'Quote',
+      icon: QuoteIcon,
+    });
+}
