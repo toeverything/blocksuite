@@ -119,12 +119,15 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       icon: CopyIcon,
       isActive: () => false,
       action: chain => {
-        chain.getSelectedModels().with({
-          onCopy: () => {
-            toast(toolbar.host, 'Copied to clipboard');
-          },
-        });
-        chain.copySelectedModels().run();
+        chain
+          .getSelectedModels()
+          .with({
+            onCopy: () => {
+              toast(toolbar.host, 'Copied to clipboard');
+            },
+          })
+          .copySelectedModels()
+          .run();
       },
       showWhen: () => true,
     })
