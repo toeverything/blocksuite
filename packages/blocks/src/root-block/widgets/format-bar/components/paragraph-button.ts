@@ -40,7 +40,7 @@ const ParagraphPanel = ({
         style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
         text="${item.name}"
         data-testid="${item.id}"
-        @click="${() => item.action(formatBar)}"
+        @click="${() => item.action(formatBar.std.command.chain(), formatBar)}"
       >
         ${typeof item.icon === 'function' ? item.icon() : item.icon}
       </icon-button>`

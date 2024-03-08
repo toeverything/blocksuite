@@ -16,11 +16,18 @@ import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { HoverController } from '../../../_common/components/index.js';
+import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
+import { isFormatSupported } from '../../../note-block/commands/utils.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
 import { ConfigRenderer } from './components/config-renderer.js';
-import { defaultConfig, type FormatBarConfigItem } from './config.js';
+import {
+  type FormatBarConfigItem,
+  type InlineActionConfigItem,
+  type ParagraphActionConfigItem,
+  toolbarDefaultConfig,
+} from './config.js';
 import { formatBarStyle } from './styles.js';
 
 type FormatBarCustomAction = {
@@ -89,7 +96,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   formatBarElement?: HTMLElement;
 
   @state()
-  configItems: FormatBarConfigItem[] = defaultConfig;
+  configItems: FormatBarConfigItem[] = [];
 
   @state()
   private _dragging = false;
@@ -404,6 +411,10 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     this._calculatePlacement();
+
+    if (this.configItems.length === 0) {
+      toolbarDefaultConfig(this);
+    }
   }
 
   override updated() {
@@ -424,6 +435,89 @@ export class AffineFormatBarWidget extends WidgetElement {
     this._reset();
   }
 
+  addDivider() {
+    this.configItems.push({ type: 'divider' });
+    return this;
+  }
+
+  addHighlighterDropdown() {
+    this.configItems.push({ type: 'highlighter-dropdown' });
+    return this;
+  }
+
+  addParagraphDropdown() {
+    this.configItems.push({ type: 'paragraph-dropdown' });
+    return this;
+  }
+
+  addInlineAction(config: Omit<InlineActionConfigItem, 'type'>) {
+    this.configItems.push({ ...config, type: 'inline-action' });
+    return this;
+  }
+
+  addParagraphAction(config: Omit<ParagraphActionConfigItem, 'type'>) {
+    this.configItems.push({ ...config, type: 'paragraph-action' });
+    return this;
+  }
+
+  addTextStyleToggle(config: {
+    icon: InlineActionConfigItem['icon'];
+    key: Exclude<
+      keyof AffineTextAttributes,
+      'color' | 'background' | 'reference'
+    >;
+    action: InlineActionConfigItem['action'];
+  }) {
+    const { key } = config;
+    return this.addInlineAction({
+      id: key,
+      name: camelCaseToWords(key),
+      icon: config.icon,
+      isActive: chain => {
+        const [result] = chain.isTextStyleActive({ key }).run();
+        return result;
+      },
+      action: config.action,
+      showWhen: chain => {
+        const [result] = isFormatSupported(chain).run();
+        return result;
+      },
+    });
+  }
+
+  addBlockTypeSwitch(config: {
+    flavour: BlockSuite.Flavour;
+    icon: ParagraphActionConfigItem['icon'];
+    type?: string;
+    name?: string;
+  }) {
+    const { flavour, type, icon } = config;
+    return this.addParagraphAction({
+      id: `${flavour}/${type ?? ''}`,
+      icon,
+      flavour,
+      name: config.name ?? camelCaseToWords(type ?? flavour),
+      action: chain => {
+        chain
+          .updateBlockType({
+            flavour,
+            props: type != null ? { type } : undefined,
+          })
+          .run();
+      },
+    });
+  }
+
+  addRawConfigItems(configItems: FormatBarConfigItem[]) {
+    this.configItems.push(...configItems);
+    return this;
+  }
+
+  clearConfig() {
+    this.configItems = [];
+    return this;
+  }
+
   override render() {
     if (!this._shouldDisplay()) {
       return nothing;
@@ -438,6 +532,11 @@ export class AffineFormatBarWidget extends WidgetElement {
       ${items}
     </div>`;
   }
+}
+
+function camelCaseToWords(s: string) {
+  const result = s.replace(/([A-Z])/g, ' $1');
+  return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
 declare global {
