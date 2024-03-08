@@ -33,7 +33,7 @@ export class NoteBlockComponent extends BlockElement<
     return html`
       <div class="affine-note-block-container">
         <div class="affine-block-children-container">
-          ${this.renderModelChildren(this.model)}
+          ${this.renderChildren(this.model)}
         </div>
       </div>
     `;

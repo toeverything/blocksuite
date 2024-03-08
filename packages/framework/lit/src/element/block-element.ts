@@ -167,12 +167,8 @@ export class BlockElement<
     this._disposables.add(this.host.event.bindHotkey(keymap, config));
   }
 
-  renderModel = (model: BlockModel): TemplateResult => {
-    return this.host.renderModel(model);
-  };
-
-  renderModelChildren = (model: BlockModel): TemplateResult => {
-    return this.host.renderModelChildren(model);
+  renderChildren = (model: BlockModel): TemplateResult => {
+    return this.host.renderChildren(model);
   };
 
   protected override async getUpdateComplete(): Promise<boolean> {

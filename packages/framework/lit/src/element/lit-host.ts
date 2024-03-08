@@ -193,7 +193,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     `;
   };
 
-  renderModelChildren = (model: BlockModel): TemplateResult => {
+  renderChildren = (model: BlockModel): TemplateResult => {
     return html`${repeat(
       model.children,
       child => child.id,
