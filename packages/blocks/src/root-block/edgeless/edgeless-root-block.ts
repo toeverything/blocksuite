@@ -764,7 +764,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       ([_, widget]) => widget
     )}`;
 
-    return html`${this.renderModel(this.surfaceBlockModel)}
+    return html`${this.host.renderModel(this.surfaceBlockModel)}
       <edgeless-block-portal-container .edgeless=${this}>
       </edgeless-block-portal-container>
       <edgeless-frames-container

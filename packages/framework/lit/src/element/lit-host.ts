@@ -134,10 +134,10 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     const { root } = this.doc;
     if (!root) return nothing;
 
-    return this.renderModel(root);
+    return this._renderModel(root);
   }
 
-  renderModel = (model: BlockModel): TemplateResult => {
+  private _renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
     const schema = this.doc.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
@@ -174,6 +174,15 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     ></${tag}>`;
   };
 
+  /**
+   * @deprecated
+   *
+   * This method is deprecated. Use `renderSpecPortal` instead.
+   */
+  renderModel = (model: BlockModel): TemplateResult => {
+    return this._renderModel(model);
+  };
+
   renderSpecPortal = (doc: Doc, specs: BlockSpec[]) => {
     return html`
       <editor-host
@@ -184,11 +193,11 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     `;
   };
 
-  renderModelChildren = (model: BlockModel): TemplateResult => {
+  renderChildren = (model: BlockModel): TemplateResult => {
     return html`${repeat(
       model.children,
       child => child.id,
-      child => this.renderModel(child)
+      child => this._renderModel(child)
     )}`;
   };
 
