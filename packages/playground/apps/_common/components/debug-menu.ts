@@ -43,7 +43,7 @@ import type {
   CopilotPanel,
 } from '@blocksuite/presets';
 import type { BlockModel } from '@blocksuite/store';
-import { Text, Utils, type Workspace } from '@blocksuite/store';
+import { type DocCollection, Text, Utils } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
@@ -181,7 +181,7 @@ export class DebugMenu extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  workspace!: Workspace;
+  workspace!: DocCollection;
 
   @property({ attribute: false })
   editor!: AffineEditorContainer;

@@ -3,7 +3,7 @@ import type { TestUtils } from '@blocks/index.js';
 import type { EditorHost } from '@lit/element/index.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { AffineEditorContainer } from '@presets/editors/index.js';
-import type { BlockModel, Doc, Workspace } from '@store/index.js';
+import type { BlockModel, Doc, DocCollection } from '@store/index.js';
 
 declare global {
   interface Window {
@@ -16,7 +16,7 @@ declare global {
       };
       editor: typeof import('../../packages/presets/src/index.js');
     };
-    workspace: Workspace;
+    workspace: DocCollection;
     blockSchema: Record<string, typeof BlockModel>;
     doc: Doc;
     debugMenu: DebugMenu;

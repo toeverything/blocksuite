@@ -1,7 +1,7 @@
 import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -112,7 +112,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
   }
 }
 
-function createDocBlock(workspace: Workspace) {
+function createDocBlock(workspace: DocCollection) {
   const id = workspace.idGenerator();
   createDefaultDoc(workspace, { id });
 }
