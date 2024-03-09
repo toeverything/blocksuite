@@ -16,7 +16,7 @@ declare global {
       };
       editor: typeof import('../../packages/presets/src/index.js');
     };
-    workspace: DocCollection;
+    collection: DocCollection;
     blockSchema: Record<string, typeof BlockModel>;
     doc: Doc;
     debugMenu: DebugMenu;

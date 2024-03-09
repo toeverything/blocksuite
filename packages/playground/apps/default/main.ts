@@ -9,7 +9,7 @@ import {
 import { mountDefaultDocEditor } from './utils/editor.js';
 
 async function main() {
-  if (window.workspace) return;
+  if (window.collection) return;
 
   const collection = await createDefaultDocCollection();
   await initDefaultDocCollection(collection);

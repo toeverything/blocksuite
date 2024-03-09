@@ -411,7 +411,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() => {
-    const json = window.workspace.doc.toJSON();
+    const json = window.collection.doc.toJSON();
     delete json.meta.pages[0].createDate;
     return json;
   })) as SerializedStore;
@@ -536,7 +536,7 @@ export async function assertBlockTypes(page: Page, blockTypes: string[]) {
  */
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
-    window.workspace.doc.toJSON()
+    window.collection.doc.toJSON()
   )) as SerializedStore;
   const titleNode = jsonDoc['doc:home']['0'] as Record<string, unknown>;
 
@@ -596,7 +596,7 @@ export async function assertStoreMatchJSX(
 ) {
   const docId = await getCurrentEditorDocId(page);
   const element = (await page.evaluate(
-    ([blockId, docId]) => window.workspace.exportJSX(blockId, docId),
+    ([blockId, docId]) => window.collection.exportJSX(blockId, docId),
     [blockId, docId]
   )) as JSXElement;
 

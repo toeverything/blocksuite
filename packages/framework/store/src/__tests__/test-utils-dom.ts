@@ -5,7 +5,7 @@ declare global {
     'test-result': CustomEvent<TestResult>;
   }
   interface Window {
-    workspace: DocCollection;
+    collection: DocCollection;
   }
 }
 

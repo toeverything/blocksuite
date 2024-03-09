@@ -74,7 +74,7 @@ export async function addNewPage(page: Page) {
   }
   await page.locator('.new-doc-button').click();
   const docMetas = await page.evaluate(() => {
-    const { workspace: collection } = window;
+    const { collection: collection } = window;
     return collection.meta.docMetas;
   });
   if (!docMetas.length) throw new Error('Add new doc failed');
@@ -83,7 +83,7 @@ export async function addNewPage(page: Page) {
 
 export async function switchToPage(page: Page, docId?: string) {
   await page.evaluate(docId => {
-    const { workspace: collection, editor } = window;
+    const { collection: collection, editor } = window;
 
     if (!docId) {
       const docMetas = collection.meta.docMetas;

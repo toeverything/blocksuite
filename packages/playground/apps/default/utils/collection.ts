@@ -62,7 +62,7 @@ export async function createDefaultDocCollection() {
   collection.start();
 
   // debug info
-  window.workspace = collection;
+  window.collection = collection;
   window.blockSchemas = AffineSchemas;
   window.job = new Job({ collection });
   window.Y = DocCollection.Y;
@@ -70,14 +70,14 @@ export async function createDefaultDocCollection() {
   return collection;
 }
 
-export async function initDefaultDocCollection(colelction: DocCollection) {
+export async function initDefaultDocCollection(collection: DocCollection) {
   const params = new URLSearchParams(location.search);
 
-  await colelction.waitForSynced();
+  await collection.waitForSynced();
 
-  const shouldInit = colelction.docs.size === 0 && !params.get('room');
+  const shouldInit = collection.docs.size === 0 && !params.get('room');
   if (shouldInit) {
-    const doc = colelction.createDoc({ id: 'doc:home' });
+    const doc = collection.createDoc({ id: 'doc:home' });
     doc.load();
     const rootId = doc.addBlock('affine:page', {
       title: new Text(),
@@ -87,12 +87,12 @@ export async function initDefaultDocCollection(colelction: DocCollection) {
   } else {
     // wait for data injected from provider
     const firstPageId =
-      colelction.docs.size > 0
-        ? colelction.docs.keys().next().value
+      collection.docs.size > 0
+        ? collection.docs.keys().next().value
         : await new Promise<string>(resolve =>
-            colelction.slots.docAdded.once(id => resolve(id))
+            collection.slots.docAdded.once(id => resolve(id))
           );
-    const doc = colelction.getDoc(firstPageId);
+    const doc = collection.getDoc(firstPageId);
     assertExists(doc);
     doc.load();
     // wait for data injected from provider

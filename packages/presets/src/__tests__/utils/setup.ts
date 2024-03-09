@@ -75,7 +75,7 @@ async function createEditor(
 export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
   const collection = new DocCollection(createCollectionOptions());
 
-  window.workspace = collection;
+  window.collection = collection;
 
   initCollection(collection);
   const appElement = await createEditor(collection, mode);
@@ -90,7 +90,7 @@ export function cleanup() {
   window.editor.remove();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (window as any).workspace;
+  delete (window as any).collection;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (window as any).editor;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

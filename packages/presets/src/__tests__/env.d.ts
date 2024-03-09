@@ -6,10 +6,10 @@ import type { AffineEditorContainer } from '../index.js';
 declare global {
   const editor: AffineEditorContainer;
   const doc: Doc;
-  const workspace: DocCollection;
+  const collection: DocCollection;
   interface Window {
     editor: AffineEditorContainer;
     doc: Doc;
-    workspace: DocCollection;
+    collection: DocCollection;
   }
 }

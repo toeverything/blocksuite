@@ -15,7 +15,7 @@ declare global {
   interface Window {
     editor: AffineEditorContainer;
     doc: Doc;
-    workspace: DocCollection;
+    collection: DocCollection;
     blockSchemas: z.infer<typeof BlockSchema>[];
     job: Job;
     Y: typeof DocCollection.Y;

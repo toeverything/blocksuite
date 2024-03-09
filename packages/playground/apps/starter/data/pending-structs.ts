@@ -17,7 +17,7 @@ export const pendingStructs: InitFn = (
     const vec = DocCollection.Y.encodeStateVector(tempDoc.spaceDoc);
 
     // To avoid pending structs, uncomment the following line
-    // const update = Workspace.Y.encodeStateAsUpdate(tempDoc.spaceDoc);
+    // const update = DocCollection.Y.encodeStateAsUpdate(tempDoc.spaceDoc);
 
     tempDoc.addBlock('affine:surface', {}, rootId);
     // Add note block inside root block
@@ -31,7 +31,7 @@ export const pendingStructs: InitFn = (
     );
     const diff = DocCollection.Y.encodeStateAsUpdate(tempDoc.spaceDoc, vec);
     // To avoid pending structs, uncomment the following line
-    // Workspace.Y.applyUpdate(doc.spaceDoc, update);
+    // DocCollection.Y.applyUpdate(doc.spaceDoc, update);
 
     DocCollection.Y.applyUpdate(doc.spaceDoc, diff);
   });

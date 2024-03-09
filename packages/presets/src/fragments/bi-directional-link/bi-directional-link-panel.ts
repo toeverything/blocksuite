@@ -292,7 +292,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   private _renderLinks(ids: string[]) {
-    const { collection: workspace } = this.doc;
+    const { collection } = this.doc;
 
     return html`<div class="links">
       <div class="links-title">Outgoing links · ${ids.length}</div>
@@ -300,7 +300,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         ids,
         id => id,
         id => {
-          const doc = workspace.getDoc(id);
+          const doc = collection.getDoc(id);
           assertExists(doc);
           const title = doc.meta?.title ? doc.meta.title : 'Untitled';
           return html`<div
@@ -321,9 +321,9 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
   private get _backLinks() {
     const { doc } = this;
-    const { collection: workspace } = doc;
+    const { collection } = doc;
     const backLinks = new Map<string, string[]>();
-    workspace.indexer.backlink.getBacklink(doc.id).reduce((map, link) => {
+    collection.indexer.backlink.getBacklink(doc.id).reduce((map, link) => {
       const { pageId } = link;
       if (map.has(pageId)) {
         map.get(pageId)!.push(link.blockId);
@@ -338,7 +338,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
   private _renderBackLinks(backLinks: Map<string, string[]>) {
     const { doc } = this;
-    const { collection: workspace } = doc;
+    const { collection } = doc;
     const length = backLinks.size;
 
     return html` <div class="back-links">
@@ -347,7 +347,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         backLinks.keys(),
         id => id,
         (docId, index) => {
-          const doc = workspace.getDoc(docId);
+          const doc = collection.getDoc(docId);
           const blocks = backLinks.get(docId)!;
           assertExists(doc);
           const show = this._backLinkShow[index] ?? false;

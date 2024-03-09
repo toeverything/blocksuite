@@ -39,7 +39,7 @@ schema.register([
 
 describe('collection migration', () => {
   test('add pageVersion in collection meta', async () => {
-    const doc = await loadBinary('collection-v1-v2');
+    const doc = await loadBinary('workspace-v1-v2');
 
     const meta = doc.getMap('meta');
     const before = meta.toJSON();

@@ -66,7 +66,7 @@ export function createStarterDocCollection() {
   collection.start();
 
   // debug info
-  window.workspace = collection;
+  window.collection = collection;
   window.blockSchemas = AffineSchemas;
   window.job = new Job({ collection: collection });
   window.Y = DocCollection.Y;

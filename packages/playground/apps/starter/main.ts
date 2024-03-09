@@ -14,7 +14,7 @@ import {
 import { mountDefaultDocEditor } from './utils/editor.js';
 
 async function main() {
-  if (window.workspace) return;
+  if (window.collection) return;
 
   const params = new URLSearchParams(location.search);
   const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);

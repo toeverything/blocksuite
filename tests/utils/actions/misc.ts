@@ -72,7 +72,7 @@ async function initEmptyEditor({
 }) {
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
-      const { workspace: collection } = window;
+      const { collection: collection } = window;
 
       async function waitForMountPageEditor(
         doc: ReturnType<typeof collection.createDoc>
