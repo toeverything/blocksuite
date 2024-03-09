@@ -72,10 +72,10 @@ async function initEmptyEditor({
 }) {
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
-      const { workspace } = window;
+      const { collection: collection } = window;
 
       async function waitForMountPageEditor(
-        doc: ReturnType<typeof workspace.createDoc>
+        doc: ReturnType<typeof collection.createDoc>
       ) {
         if (!doc.ready) doc.load();
 
@@ -96,7 +96,7 @@ async function initEmptyEditor({
           editor.doc = doc;
           editor.autofocus = true;
           editor.slots.docLinkClicked.on(({ docId }) => {
-            const newDoc = workspace.getDoc(docId);
+            const newDoc = collection.getDoc(docId);
             if (!newDoc) {
               throw new Error(`Failed to jump to page ${docId}`);
             }
@@ -121,7 +121,7 @@ async function initEmptyEditor({
             docsPanel.editor = editor;
             framePanel.editor = editor;
             outlinePanel.editor = editor;
-            debugMenu.workspace = workspace;
+            debugMenu.collection = collection;
             debugMenu.editor = editor;
             debugMenu.docsPanel = docsPanel;
             debugMenu.framePanel = framePanel;
@@ -154,15 +154,15 @@ async function initEmptyEditor({
       }
 
       if (noInit) {
-        const firstDoc = workspace.docs.values().next().value as
-          | ReturnType<typeof workspace.createDoc>
+        const firstDoc = collection.docs.values().next().value as
+          | ReturnType<typeof collection.createDoc>
           | undefined;
         if (firstDoc) {
           window.doc = firstDoc;
           waitForMountPageEditor(firstDoc).catch;
         } else {
-          workspace.slots.docAdded.on(docId => {
-            const doc = workspace.getDoc(docId);
+          collection.slots.docAdded.on(docId => {
+            const doc = collection.getDoc(docId);
             if (!doc) {
               throw new Error(`Failed to get doc ${docId}`);
             }
@@ -171,7 +171,7 @@ async function initEmptyEditor({
           });
         }
       } else {
-        const doc = workspace.createDoc({ id: 'doc:home' });
+        const doc = collection.createDoc({ id: 'doc:home' });
         window.doc = doc;
         waitForMountPageEditor(doc).catch(console.error);
       }

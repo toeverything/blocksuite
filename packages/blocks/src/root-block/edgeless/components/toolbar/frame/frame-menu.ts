@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -115,7 +115,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                     const id = edgeless.service.addBlock(
                       'affine:frame',
                       {
-                        title: new Workspace.Y.Text(
+                        title: new DocCollection.Y.Text(
                           `Frame ${frames.length + 1}`
                         ),
                         xywh: bound.serialize(),

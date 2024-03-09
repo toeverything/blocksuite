@@ -1,7 +1,7 @@
 import type { TestUtils } from '@blocksuite/blocks';
 import type { EditorHost } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import type { BlockSchema, Doc, Workspace } from '@blocksuite/store';
+import type { BlockSchema, Doc, DocCollection } from '@blocksuite/store';
 import type { Job } from '@blocksuite/store';
 import type { z } from 'zod';
 
@@ -15,10 +15,10 @@ declare global {
   interface Window {
     editor: AffineEditorContainer;
     doc: Doc;
-    workspace: Workspace;
+    collection: DocCollection;
     blockSchemas: z.infer<typeof BlockSchema>[];
     job: Job;
-    Y: typeof Workspace.Y;
+    Y: typeof DocCollection.Y;
     std: typeof std;
     testUtils: TestUtils;
     host: EditorHost;

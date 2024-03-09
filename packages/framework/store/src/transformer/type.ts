@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { DocMeta, DocsPropertiesMeta } from '../workspace/meta.js';
+import type { DocMeta, DocsPropertiesMeta } from '../store/meta.js';
 
 export type BlockSnapshot = {
   type: 'block';
@@ -38,7 +38,7 @@ export const SliceSnapshotSchema: z.ZodType<SliceSnapshot> = z.object({
   pageId: z.string(),
 });
 
-export type WorkspaceInfoSnapshot = {
+export type CollectionInfoSnapshot = {
   id: string;
   type: 'info';
   pageVersion: number;
@@ -46,7 +46,7 @@ export type WorkspaceInfoSnapshot = {
   properties: DocsPropertiesMeta;
 };
 
-export const WorkspaceInfoSnapshotSchema: z.ZodType<WorkspaceInfoSnapshot> =
+export const CollectionInfoSnapshotSchema: z.ZodType<CollectionInfoSnapshot> =
   z.object({
     id: z.string(),
     type: z.literal('info'),

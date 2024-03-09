@@ -284,7 +284,7 @@ test('image loading but failed', async ({ page }) => {
   // block image data request, force wait 100ms for loading test,
   // always return 404
   await page.route(
-    `**/api/workspace/${room}/blob/${mockImageId}`,
+    `**/api/collection/${room}/blob/${mockImageId}`,
     async route => {
       await page.waitForTimeout(timeout);
       // broken image
@@ -331,7 +331,7 @@ test('image loading but success', async ({ page }) => {
   // block image data request, force wait 100ms for loading test,
   // always return 404
   await page.route(
-    `**/api/workspace/${room}/blob/${mockImageId}`,
+    `**/api/collection/${room}/blob/${mockImageId}`,
     async route => {
       await page.waitForTimeout(timeout);
       count++;
@@ -369,7 +369,7 @@ test('image loaded successfully', async ({ page }) => {
     fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))
   );
   await page.route(
-    `**/api/workspace/${room}/blob/${mockImageId}`,
+    `**/api/collection/${room}/blob/${mockImageId}`,
     async route => {
       return route.fulfill({
         status: 200,

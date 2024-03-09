@@ -5,11 +5,11 @@ import {
   type BlockModel,
   type BlockSnapshot,
   type DeltaOperation,
+  DocCollection,
   fromJSON,
   type JobMiddleware,
   type SliceSnapshot,
   type Text,
-  Workspace,
 } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
@@ -73,7 +73,7 @@ class PasteTr {
       this.lastSnapshot.props.text
     ) {
       const text = fromJSON(this.lastSnapshot.props.text) as Text;
-      const doc = new Workspace.Y.Doc();
+      const doc = new DocCollection.Y.Doc();
       const temp = doc.getMap('temp');
       temp.set('text', text.yText);
       this.lastIndex = text.length;

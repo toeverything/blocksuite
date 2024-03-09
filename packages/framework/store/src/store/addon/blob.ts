@@ -1,7 +1,7 @@
 import { createMemoryStorage } from '../../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../../persistence/blob/types.js';
 import { sha } from '../../persistence/blob/utils.js';
-import type { WorkspaceOptions } from '../workspace.js';
+import type { DocCollectionOptions } from '../collection.js';
 import { addOnFactory } from './shared.js';
 
 export interface BlobAddon {
@@ -15,7 +15,7 @@ export const blob = addOnFactory<keyof BlobAddon>(
 
       readonly blob: BlobManager;
 
-      constructor(storeOptions: WorkspaceOptions) {
+      constructor(storeOptions: DocCollectionOptions) {
         super(storeOptions);
 
         this._storages = (

@@ -43,7 +43,7 @@ import type {
   CopilotPanel,
 } from '@blocksuite/presets';
 import type { BlockModel } from '@blocksuite/store';
-import { Text, Utils, type Workspace } from '@blocksuite/store';
+import { type DocCollection, Text, Utils } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
@@ -181,7 +181,7 @@ export class DebugMenu extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  workspace!: Workspace;
+  collection!: DocCollection;
 
   @property({ attribute: false })
   editor!: AffineEditorContainer;
@@ -395,8 +395,8 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await ZipTransformer.exportDocs(this.workspace, [
-      ...this.workspace.docs.values(),
+    const file = await ZipTransformer.exportDocs(this.collection, [
+      ...this.collection.docs.values(),
     ]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
@@ -418,7 +418,7 @@ export class DebugMenu extends ShadowlessElement {
         return;
       }
       try {
-        const docs = await ZipTransformer.importDocs(this.workspace, file);
+        const docs = await ZipTransformer.importDocs(this.collection, file);
         for (const doc of docs) {
           const noteBlock = window.doc.getBlockByFlavour('affine:note');
           window.doc.addBlock(
@@ -452,7 +452,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _shareUrl() {
-    const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
+    const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
     const url = new URL(window.location.toString());
     url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);

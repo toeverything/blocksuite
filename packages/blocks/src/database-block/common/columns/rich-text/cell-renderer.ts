@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
-import { Text, Workspace } from '@blocksuite/store';
+import { DocCollection, Text } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -142,7 +142,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   }
 
   private _initYText = (text?: string) => {
-    const yText = new Workspace.Y.Text(text);
+    const yText = new DocCollection.Y.Text(text);
     this.onChange(yText);
   };
 

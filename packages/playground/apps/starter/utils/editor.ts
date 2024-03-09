@@ -5,7 +5,7 @@ import {
   CommentPanel,
   CopilotPanel,
 } from '@blocksuite/presets';
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
 import { CustomOutlinePanel } from '../../_common/components/custom-outline-panel.js';
@@ -17,8 +17,8 @@ import { SidePanel } from '../../_common/components/side-panel.js';
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 
-export async function mountDefaultDocEditor(workspace: Workspace) {
-  const doc = workspace.docs.values().next().value;
+export async function mountDefaultDocEditor(collection: DocCollection) {
+  const doc = collection.docs.values().next().value;
   assertExists(doc, 'Need to create a doc first');
 
   assertExists(doc.ready, 'Doc is not ready');
@@ -31,7 +31,7 @@ export async function mountDefaultDocEditor(workspace: Workspace) {
   editor.mode = defaultMode;
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ docId }) => {
-    const target = workspace.getDoc(docId);
+    const target = collection.getDoc(docId);
     if (!target) {
       throw new Error(`Failed to jump to doc ${docId}`);
     }
@@ -62,7 +62,7 @@ export async function mountDefaultDocEditor(workspace: Workspace) {
   commentPanel.host = editor.host;
 
   const debugMenu = new DebugMenu();
-  debugMenu.workspace = workspace;
+  debugMenu.collection = collection;
   debugMenu.editor = editor;
   debugMenu.outlinePanel = outlinePanel;
   debugMenu.framePanel = framePanel;

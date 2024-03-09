@@ -1,5 +1,5 @@
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { getDocRootBlock } from '../utils/edgeless.js';
@@ -16,7 +16,7 @@ describe('group', () => {
   });
 
   test('remove group without children', () => {
-    const map = new Workspace.Y.Map<boolean>();
+    const map = new DocCollection.Y.Map<boolean>();
     const ids = Array.from({ length: 2 }).map(() => {
       const id = service.addElement('shape', {
         shapeType: 'rect',

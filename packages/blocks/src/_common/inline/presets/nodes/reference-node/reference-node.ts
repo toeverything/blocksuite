@@ -149,7 +149,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const doc = this.doc;
     this._updateRefMeta(doc);
     this._disposables.add(
-      doc.workspace.slots.docUpdated.on(() => this._updateRefMeta(doc))
+      doc.collection.slots.docUpdated.on(() => this._updateRefMeta(doc))
     );
 
     this.updateComplete
@@ -166,7 +166,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const refAttribute = this.delta.attributes?.reference;
     assertExists(refAttribute, 'Failed to get reference attribute!');
     this._refAttribute = refAttribute;
-    const refMeta = doc.workspace.meta.docMetas.find(
+    const refMeta = doc.collection.meta.docMetas.find(
       doc => doc.id === refAttribute.pageId
     );
     this._refMeta = refMeta

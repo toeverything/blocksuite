@@ -39,7 +39,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     config: DatabaseBlockDatasourceConfig
   ) {
     super();
-    this._model = host.doc.workspace
+    this._model = host.doc.collection
       .getDoc(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);

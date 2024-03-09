@@ -4,7 +4,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { flip } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -308,7 +308,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     const parent = doc.getParent(this._model);
     const index = parent?.children.indexOf(this._model);
 
-    const yText = new Workspace.Y.Text();
+    const yText = new DocCollection.Y.Text();
     const insert = this._model.title || this._model.caption || this._model.url;
     yText.insert(0, insert);
     yText.format(0, insert.length, { link: this._model.url });

@@ -1,9 +1,9 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 
-import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
+import { COLLECTION_VERSION, PAGE_VERSION } from '../consts.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import type { Workspace } from './workspace.js';
+import type { DocCollection } from './collection.js';
 
 // please use `declare module '@blocksuite/store'` to extend this interface
 export interface DocMeta {
@@ -23,7 +23,7 @@ export type DocsPropertiesMeta = {
     options: Tag[];
   };
 };
-export type WorkspaceMetaState = {
+export type DocCollectionMetaState = {
   pages?: unknown[];
   properties?: DocsPropertiesMeta;
   workspaceVersion?: number;
@@ -33,7 +33,7 @@ export type WorkspaceMetaState = {
   avatar?: string;
 };
 
-export class WorkspaceMeta {
+export class DocCollectionMeta {
   readonly id: string = 'meta';
   readonly doc: BlockSuiteDoc;
 
@@ -44,14 +44,16 @@ export class WorkspaceMeta {
   docMetaUpdated = new Slot();
   commonFieldsUpdated = new Slot();
 
-  protected readonly _yMap: Y.Map<WorkspaceMetaState[keyof WorkspaceMetaState]>;
-  protected readonly _proxy: WorkspaceMetaState;
+  protected readonly _yMap: Y.Map<
+    DocCollectionMetaState[keyof DocCollectionMetaState]
+  >;
+  protected readonly _proxy: DocCollectionMetaState;
 
   constructor(doc: BlockSuiteDoc) {
     this.doc = doc;
     this._yMap = doc.getMap(this.id);
-    this._proxy = doc.getMapProxy<string, WorkspaceMetaState>(this.id);
-    this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
+    this._proxy = doc.getMapProxy<string, DocCollectionMetaState>(this.id);
+    this._yMap.observeDeep(this._handleDocCollectionMetaEvents);
   }
 
   get yDocs() {
@@ -120,7 +122,7 @@ export class WorkspaceMeta {
   }
 
   /**
-   * @internal Use {@link Workspace.setDocMeta} instead
+   * @internal Use {@link DocCollection.setDocMeta} instead
    */
   setDocMeta(id: string, props: Partial<DocMeta>) {
     const docs = (this.docs as DocMeta[]) ?? [];
@@ -164,11 +166,11 @@ export class WorkspaceMeta {
   /**
    * @internal Only for doc initialization
    */
-  writeVersion(workspace: Workspace) {
+  writeVersion(collection: DocCollection) {
     const { blockVersions, pageVersion, workspaceVersion } = this._proxy;
 
     if (!workspaceVersion) {
-      this._proxy.workspaceVersion = WORKSPACE_VERSION;
+      this._proxy.workspaceVersion = COLLECTION_VERSION;
     } else {
       console.error('Workspace version is already set');
     }
@@ -181,7 +183,7 @@ export class WorkspaceMeta {
 
     if (!blockVersions) {
       const _versions: Record<string, number> = {};
-      workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
+      collection.schema.flavourSchemaMap.forEach((schema, flavour) => {
         _versions[flavour] = schema.version;
       });
       this._proxy.blockVersions = _versions;
@@ -190,13 +192,13 @@ export class WorkspaceMeta {
     }
   }
 
-  updateVersion(workspace: Workspace) {
-    this._proxy.workspaceVersion = WORKSPACE_VERSION;
+  updateVersion(collection: DocCollection) {
+    this._proxy.workspaceVersion = COLLECTION_VERSION;
 
     this._proxy.pageVersion = PAGE_VERSION;
 
     const _versions: Record<string, number> = {};
-    workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
+    collection.schema.flavourSchemaMap.forEach((schema, flavour) => {
       _versions[flavour] = schema.version;
     });
     this._proxy.blockVersions = _versions;
@@ -205,14 +207,14 @@ export class WorkspaceMeta {
   /**
    * @deprecated Only used for legacy doc version validation
    */
-  validateVersion(workspace: Workspace) {
+  validateVersion(collection: DocCollection) {
     const workspaceVersion = this._proxy.workspaceVersion;
     if (!workspaceVersion) {
       throw new Error(
         'Invalid workspace data, workspace version is missing. Please make sure the data is valid.'
       );
     }
-    if (workspaceVersion < WORKSPACE_VERSION) {
+    if (workspaceVersion < COLLECTION_VERSION) {
       throw new Error(
         `Workspace version ${workspaceVersion} is outdated. Please upgrade the editor.`
       );
@@ -246,7 +248,7 @@ export class WorkspaceMeta {
     dataFlavours.forEach(dataFlavour => {
       const dataVersion = blockVersions[dataFlavour] as number;
       const editorVersion =
-        workspace.schema.flavourSchemaMap.get(dataFlavour)?.version;
+        collection.schema.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {
         throw new Error(
           `Editor missing ${dataFlavour} flavour. Please make sure this block flavour is registered.`
@@ -289,7 +291,7 @@ export class WorkspaceMeta {
     this.commonFieldsUpdated.emit();
   }
 
-  private _handleWorkspaceMetaEvents = (
+  private _handleDocCollectionMetaEvents = (
     events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<unknown>>[]
   ) => {
     events.forEach(e => {

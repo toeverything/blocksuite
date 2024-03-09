@@ -4,8 +4,8 @@ import {
   BlockModel,
   Boxed,
   defineBlockSchema,
+  DocCollection,
   Text,
-  Workspace,
 } from '@blocksuite/store';
 
 import type { ElementModel } from './element-model/base.js';
@@ -111,14 +111,14 @@ const migration = {
   toV5: data => {
     const { elements } = data;
     if (!((elements as object | Boxed) instanceof Boxed)) {
-      const yMap = new Workspace.Y.Map() as Y.Map<Y.Map<unknown>>;
+      const yMap = new DocCollection.Y.Map() as Y.Map<Y.Map<unknown>>;
 
       Object.entries(elements).forEach(([key, value]) => {
-        const map = new Workspace.Y.Map();
+        const map = new DocCollection.Y.Map();
         Object.entries(value).forEach(([_key, _value]) => {
           map.set(
             _key,
-            _value instanceof Workspace.Y.Text
+            _value instanceof DocCollection.Y.Text
               ? _value.clone()
               : _value instanceof Text
                 ? _value.yText.clone()
@@ -136,7 +136,7 @@ const migration = {
 export const SurfaceBlockSchema = defineBlockSchema({
   flavour: 'affine:surface',
   props: (internalPrimitives): SurfaceBlockProps => ({
-    elements: internalPrimitives.Boxed(new Workspace.Y.Map()),
+    elements: internalPrimitives.Boxed(new DocCollection.Y.Map()),
   }),
   metadata: {
     version: 5,

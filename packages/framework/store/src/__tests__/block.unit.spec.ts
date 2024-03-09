@@ -6,7 +6,7 @@ import {
   Schema,
   type SchemaToModel,
 } from '../schema/index.js';
-import { Block } from '../workspace/block/block.js';
+import { Block } from '../store/block/block.js';
 
 const schema = new Schema();
 const pageSchema = defineBlockSchema({

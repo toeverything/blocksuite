@@ -422,7 +422,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     });
     inlineEditor.setInlineRange({ index: inlineRange.index - 1, length: 0 });
 
-    const doc = createDefaultDoc(blockElement.doc.workspace, {
+    const doc = createDefaultDoc(blockElement.doc.collection, {
       title: docName,
     });
     insertLinkedNode({

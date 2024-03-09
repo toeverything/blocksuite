@@ -3,13 +3,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlobStorage,
   createIndexeddbStorage,
+  DocCollection,
+  type DocCollectionOptions,
   Generator,
   Job,
   Schema,
   type StoreOptions,
   Text,
-  Workspace,
-  type WorkspaceOptions,
 } from '@blocksuite/store';
 import { IndexedDBDocSource } from '@blocksuite/sync';
 
@@ -18,7 +18,7 @@ import { WebSocketDocSource } from '../../_common/sync/websocket/doc';
 
 const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
-export async function createDefaultDocWorkspace() {
+export async function createDefaultDocCollection() {
   const blobStorages: ((id: string) => BlobStorage)[] = [
     createIndexeddbStorage,
   ];
@@ -45,7 +45,7 @@ export async function createDefaultDocWorkspace() {
     awarenessSources = [new WebSocketAwarenessSource(ws)];
   }
 
-  const options: WorkspaceOptions = {
+  const options: DocCollectionOptions = {
     id: 'quickEdgeless',
     schema,
     idGenerator,
@@ -57,27 +57,27 @@ export async function createDefaultDocWorkspace() {
       enable_bultin_ledits: true,
     },
   };
-  const workspace = new Workspace(options);
+  const collection = new DocCollection(options);
 
-  workspace.start();
+  collection.start();
 
   // debug info
-  window.workspace = workspace;
+  window.collection = collection;
   window.blockSchemas = AffineSchemas;
-  window.job = new Job({ workspace });
-  window.Y = Workspace.Y;
+  window.job = new Job({ collection });
+  window.Y = DocCollection.Y;
 
-  return workspace;
+  return collection;
 }
 
-export async function initDefaultDocWorkspace(workspace: Workspace) {
+export async function initDefaultDocCollection(collection: DocCollection) {
   const params = new URLSearchParams(location.search);
 
-  await workspace.waitForSynced();
+  await collection.waitForSynced();
 
-  const shouldInit = workspace.docs.size === 0 && !params.get('room');
+  const shouldInit = collection.docs.size === 0 && !params.get('room');
   if (shouldInit) {
-    const doc = workspace.createDoc({ id: 'doc:home' });
+    const doc = collection.createDoc({ id: 'doc:home' });
     doc.load();
     const rootId = doc.addBlock('affine:page', {
       title: new Text(),
@@ -87,12 +87,12 @@ export async function initDefaultDocWorkspace(workspace: Workspace) {
   } else {
     // wait for data injected from provider
     const firstPageId =
-      workspace.docs.size > 0
-        ? workspace.docs.keys().next().value
+      collection.docs.size > 0
+        ? collection.docs.keys().next().value
         : await new Promise<string>(resolve =>
-            workspace.slots.docAdded.once(id => resolve(id))
+            collection.slots.docAdded.once(id => resolve(id))
           );
-    const doc = workspace.getDoc(firstPageId);
+    const doc = collection.getDoc(firstPageId);
     assertExists(doc);
     doc.load();
     // wait for data injected from provider

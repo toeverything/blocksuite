@@ -55,7 +55,7 @@ export enum Shape {
 export async function getNoteRect(page: Page, noteId: string) {
   const xywh: string | null = await page.evaluate(
     ([noteId]) => {
-      const doc = window.workspace.getDoc('doc:home');
+      const doc = window.collection.getDoc('doc:home');
       const block = doc?.getBlockById(noteId);
       if (block?.flavour === 'affine:note') {
         return (block as NoteBlockModel).xywh;
@@ -73,7 +73,7 @@ export async function getNoteRect(page: Page, noteId: string) {
 export async function getNoteProps(page: Page, noteId: string) {
   const props = await page.evaluate(
     ([id]) => {
-      const doc = window.workspace.getDoc('doc:home');
+      const doc = window.collection.getDoc('doc:home');
       const block = doc?.getBlockById(id);
       if (block?.flavour === 'affine:note') {
         return (block as NoteBlockModel).keys.reduce(

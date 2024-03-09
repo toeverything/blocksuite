@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import {
@@ -295,7 +295,7 @@ export function createEdgelessElement(
   if (isShape(current)) {
     id = service.addElement(current.type, {
       ...current.serialize(),
-      text: new Workspace.Y.Text(),
+      text: new DocCollection.Y.Text(),
       xywh: bound.serialize(),
     });
   } else {
@@ -335,7 +335,7 @@ export function createShapeElement(
     ...current.serialize(),
     shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
     radius: targetType === 'roundedRect' ? 0.1 : 0,
-    text: new Workspace.Y.Text(),
+    text: new DocCollection.Y.Text(),
   });
   const group = current.group;
   if (group instanceof GroupElementModel) {
@@ -349,7 +349,7 @@ export function createTextElement(
   current: ShapeElementModel
 ) {
   const id = edgeless.service.addElement(CanvasElementType.TEXT, {
-    text: new Workspace.Y.Text(),
+    text: new DocCollection.Y.Text(),
     textAlign: 'left',
     fontSize: 24,
     fontFamily: CanvasTextFontFamily.Inter,

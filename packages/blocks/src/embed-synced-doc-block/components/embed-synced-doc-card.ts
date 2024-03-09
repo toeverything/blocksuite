@@ -111,7 +111,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       }
 
       this.disposables.add(
-        syncedDoc.workspace.meta.docMetaUpdated.on(() => {
+        syncedDoc.collection.meta.docMetaUpdated.on(() => {
           renderLinkedDocInCard(this);
         })
       );

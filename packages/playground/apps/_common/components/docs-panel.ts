@@ -1,7 +1,7 @@
 import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -57,19 +57,19 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
   public override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
-      this.editor.doc.workspace.slots.docUpdated.on(() => {
+      this.editor.doc.collection.slots.docUpdated.on(() => {
         this.requestUpdate();
       })
     );
   }
 
   createDoc = () => {
-    createDocBlock(this.editor.doc.workspace);
+    createDocBlock(this.editor.doc.collection);
   };
 
   protected override render(): unknown {
-    const workspace = this.editor.doc.workspace;
-    const docs = [...workspace.docs.values()];
+    const collection = this.editor.doc.collection;
+    const docs = [...collection.docs.values()];
     return html`
       <div @click="${this.createDoc}" class="new-doc-button">New Doc</div>
       ${repeat(
@@ -94,9 +94,9 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             this.requestUpdate();
           };
           const deleteDoc = () => {
-            workspace.removeDoc(doc.id);
+            collection.removeDoc(doc.id);
             // When delete a doc, we need to set the editor doc to the first remaining doc
-            const docs = Array.from(workspace.docs.values());
+            const docs = Array.from(collection.docs.values());
             this.editor.doc = docs[0];
             this.requestUpdate();
           };
@@ -112,9 +112,9 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
   }
 }
 
-function createDocBlock(workspace: Workspace) {
-  const id = workspace.idGenerator();
-  createDefaultDoc(workspace, { id });
+function createDocBlock(collection: DocCollection) {
+  const id = collection.idGenerator();
+  createDefaultDoc(collection, { id });
 }
 
 declare global {

@@ -1,4 +1,4 @@
-import type { Doc, Workspace } from '@blocksuite/store';
+import type { Doc, DocCollection } from '@blocksuite/store';
 
 import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
@@ -9,13 +9,13 @@ import { ViewStore } from '../view/index.js';
 
 export interface BlockStdOptions {
   host: HTMLElement;
-  workspace: Workspace;
+  collection: DocCollection;
   doc: Doc;
 }
 
 export class BlockStdScope {
   readonly doc: Doc;
-  readonly workspace: Workspace;
+  readonly collection: DocCollection;
   readonly event: UIEventDispatcher;
   readonly selection: SelectionManager;
   readonly command: CommandManager;
@@ -26,7 +26,7 @@ export class BlockStdScope {
 
   constructor(options: BlockStdOptions) {
     this.host = options.host;
-    this.workspace = options.workspace;
+    this.collection = options.collection;
     this.doc = options.doc;
     this.event = new UIEventDispatcher(this);
     this.selection = new SelectionManager(this);

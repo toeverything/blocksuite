@@ -16,7 +16,7 @@ import type { InlineRootElement } from '@inline/inline-editor.js';
 import type { BlockElement, EditorHost } from '@lit/element/index.js';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
-import { PAGE_VERSION, WORKSPACE_VERSION } from '@store/consts.js';
+import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
 import type { BlockModel, SerializedStore } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
 import {
@@ -91,7 +91,7 @@ export const defaultStore: SerializedStore = {
       'affine:attachment': 1,
       'affine:surface-ref': 1,
     },
-    workspaceVersion: WORKSPACE_VERSION,
+    workspaceVersion: COLLECTION_VERSION,
     pageVersion: PAGE_VERSION,
   },
   spaces: {
@@ -411,7 +411,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() => {
-    const json = window.workspace.doc.toJSON();
+    const json = window.collection.doc.toJSON();
     delete json.meta.pages[0].createDate;
     return json;
   })) as SerializedStore;
@@ -536,7 +536,7 @@ export async function assertBlockTypes(page: Page, blockTypes: string[]) {
  */
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
-    window.workspace.doc.toJSON()
+    window.collection.doc.toJSON()
   )) as SerializedStore;
   const titleNode = jsonDoc['doc:home']['0'] as Record<string, unknown>;
 
@@ -596,7 +596,7 @@ export async function assertStoreMatchJSX(
 ) {
   const docId = await getCurrentEditorDocId(page);
   const element = (await page.evaluate(
-    ([blockId, docId]) => window.workspace.exportJSX(blockId, docId),
+    ([blockId, docId]) => window.collection.exportJSX(blockId, docId),
     [blockId, docId]
   )) as JSXElement;
 

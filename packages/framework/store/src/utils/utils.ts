@@ -7,9 +7,9 @@ import { native2Y } from '../reactive/index.js';
 import type { BlockModel } from '../schema/base.js';
 import { type BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
-import type { YBlock } from '../workspace/block/block.js';
-import type { BlockProps, YBlocks } from '../workspace/doc.js';
-import type { Workspace } from '../workspace/index.js';
+import type { YBlock } from '../store/block/block.js';
+import type { BlockProps, YBlocks } from '../store/doc.js';
+import type { DocCollection } from '../store/index.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -53,6 +53,8 @@ export function syncBlockProps(
   });
 }
 
-export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
-  return toBase64(Y.encodeStateAsUpdateV2(workspace.doc));
+export function encodeCollectionAsYjsUpdateV2(
+  collection: DocCollection
+): string {
+  return toBase64(Y.encodeStateAsUpdateV2(collection.doc));
 }

@@ -38,7 +38,7 @@ export class SelectionManager {
   }
 
   private get _store() {
-    return this.std.workspace.awarenessStore;
+    return this.std.collection.awarenessStore;
   }
 
   private _setupDefaultSelections() {

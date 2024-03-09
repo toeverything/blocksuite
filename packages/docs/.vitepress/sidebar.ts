@@ -71,7 +71,7 @@ export const guide: DefaultTheme.NavItem[] = [
         text: '<code>store</code>',
         items: [
           { text: 'Doc', link: 'guide/store#doc' },
-          { text: 'Workspace', link: 'guide/store#workspace' },
+          { text: 'DocCollection', link: 'guide/store#doccollection' },
           { text: 'Slot', link: 'guide/slot' },
           { text: 'Adapter', link: 'guide/adapter' },
         ],

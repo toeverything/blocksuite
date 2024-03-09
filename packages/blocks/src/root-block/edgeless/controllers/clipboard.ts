@@ -7,9 +7,9 @@ import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import {
   type BlockSnapshot,
+  DocCollection,
   fromJSON,
   Job,
-  Workspace,
 } from '@blocksuite/store';
 
 import {
@@ -331,7 +331,7 @@ export class EdgelessClipboardController extends PageClipboard {
     idMap: Map<string, string>
   ) {
     if (clipboardData.type === GROUP) {
-      const yMap = new Workspace.Y.Map();
+      const yMap = new DocCollection.Y.Map();
       const children = clipboardData.children ?? {};
       for (const [key, value] of Object.entries(children)) {
         const newKey = idMap.get(key);
@@ -1250,7 +1250,7 @@ export async function prepareClipboardData(
   const selected = await Promise.all(
     selectedAll.map(async selected => {
       const job = new Job({
-        workspace: std.workspace,
+        collection: std.collection,
       });
 
       if (isNoteBlock(selected)) {

@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer } from '@blocksuite/presets';
-import type { Workspace } from '@blocksuite/store';
+import type { Doc, DocCollection } from '@blocksuite/store';
 
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
@@ -11,8 +11,8 @@ import { getExampleSpecs } from '../specs-examples/index.js';
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
-export async function mountDefaultDocEditor(workspace: Workspace) {
-  const doc = workspace.docs.values().next().value;
+export async function mountDefaultDocEditor(collection: DocCollection) {
+  const doc = collection.docs.values().next().value as Doc;
   assertExists(doc, 'Need to create a doc first');
 
   assertExists(doc.ready, 'Doc is not ready');
@@ -28,7 +28,7 @@ export async function mountDefaultDocEditor(workspace: Workspace) {
   editor.edgelessSpecs = specs.edgelessModeSpecs;
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ docId }) => {
-    const target = workspace.getDoc(docId);
+    const target = collection.getDoc(docId);
     if (!target) {
       throw new Error(`Failed to jump to doc ${docId}`);
     }
@@ -45,7 +45,7 @@ export async function mountDefaultDocEditor(workspace: Workspace) {
   docsPanel.editor = editor;
 
   const quickEdgelessMenu = new QuickEdgelessMenu();
-  quickEdgelessMenu.workspace = doc.workspace;
+  quickEdgelessMenu.collection = doc.collection;
   quickEdgelessMenu.editor = editor;
   quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;

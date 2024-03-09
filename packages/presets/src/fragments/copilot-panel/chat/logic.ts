@@ -149,7 +149,7 @@ export class AIChatLogic {
 
   syncWorkspace = async () => {
     this.reactiveData.syncedDocs = await this.embeddingDocs([
-      ...this.host.doc.workspace.docs.values(),
+      ...this.host.doc.collection.docs.values(),
     ]);
   };
 
@@ -584,7 +584,7 @@ export type ChatMessage =
     };
 
 const docToMarkdown = async (doc: Doc) => {
-  const job = new Job({ workspace: doc.workspace });
+  const job = new Job({ collection: doc.collection });
   const snapshot = await job.docToSnapshot(doc);
   const result = await new MarkdownAdapter().fromDocSnapshot({
     snapshot,
