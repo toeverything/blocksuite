@@ -110,7 +110,7 @@ export const getMenus: (ctx: {
           icon: NewDocIcon,
           action: () => {
             const docName = query;
-            const newDoc = createDefaultDoc(doc.workspace, {
+            const newDoc = createDefaultDoc(doc.collection, {
               title: docName,
             });
             insertLinkedNode({
@@ -147,7 +147,7 @@ export const getMenus: (ctx: {
               toast(editorHost, message);
             };
             showImportModal({
-              workspace: doc.workspace,
+              workspace: doc.collection,
               onSuccess,
               onFail,
             });

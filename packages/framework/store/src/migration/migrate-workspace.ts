@@ -1,12 +1,12 @@
 import type * as Y from 'yjs';
 
-interface IWorkspaceMigration {
+interface ICollctionMigration {
   desc: string;
   condition: (rootDoc: Y.Doc) => boolean;
   migrate: (rootDoc: Y.Doc) => void;
 }
 
-export const workspaceMigrations: IWorkspaceMigration[] = [
+export const collectionMigrations: ICollctionMigration[] = [
   {
     desc: 'add pageVersion in meta',
     condition: (rootDoc: Y.Doc) => {

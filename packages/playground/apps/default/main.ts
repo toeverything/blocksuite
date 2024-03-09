@@ -2,18 +2,18 @@
 import '@blocksuite/presets/themes/affine.css';
 import '../dev-format.js';
 
-import { mountDefaultDocEditor } from './utils/editor.js';
 import {
-  createDefaultDocWorkspace,
-  initDefaultDocWorkspace,
-} from './utils/workspace.js';
+  createDefaultDocCollection,
+  initDefaultDocCollection,
+} from './utils/collection.js';
+import { mountDefaultDocEditor } from './utils/editor.js';
 
 async function main() {
   if (window.workspace) return;
 
-  const workspace = await createDefaultDocWorkspace();
-  await initDefaultDocWorkspace(workspace);
-  await mountDefaultDocEditor(workspace);
+  const collection = await createDefaultDocCollection();
+  await initDefaultDocCollection(collection);
+  await mountDefaultDocEditor(collection);
 }
 
 main().catch(console.error);

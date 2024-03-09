@@ -57,19 +57,19 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
   public override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
-      this.editor.doc.workspace.slots.docUpdated.on(() => {
+      this.editor.doc.collection.slots.docUpdated.on(() => {
         this.requestUpdate();
       })
     );
   }
 
   createDoc = () => {
-    createDocBlock(this.editor.doc.workspace);
+    createDocBlock(this.editor.doc.collection);
   };
 
   protected override render(): unknown {
-    const workspace = this.editor.doc.workspace;
-    const docs = [...workspace.docs.values()];
+    const collection = this.editor.doc.collection;
+    const docs = [...collection.docs.values()];
     return html`
       <div @click="${this.createDoc}" class="new-doc-button">New Doc</div>
       ${repeat(
@@ -94,9 +94,9 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             this.requestUpdate();
           };
           const deleteDoc = () => {
-            workspace.removeDoc(doc.id);
+            collection.removeDoc(doc.id);
             // When delete a doc, we need to set the editor doc to the first remaining doc
-            const docs = Array.from(workspace.docs.values());
+            const docs = Array.from(collection.docs.values());
             this.editor.doc = docs[0];
             this.requestUpdate();
           };

@@ -64,8 +64,8 @@ export class AllDocDatasource extends BaseDataSource {
 
   constructor(host: EditorHost, _config: AllDocDatasourceConfig) {
     super();
-    this.workspace = host.doc.workspace;
-    host.doc.workspace.meta.docMetaUpdated.pipe(this.slots.update);
+    this.workspace = host.doc.collection;
+    host.doc.collection.meta.docMetaUpdated.pipe(this.slots.update);
   }
 
   public cellChangeValue(

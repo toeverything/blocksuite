@@ -175,7 +175,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         host.selection.clear();
 
         const doc = host.doc;
-        const linkedDoc = doc.workspace.createDoc({});
+        const linkedDoc = doc.collection.createDoc({});
         linkedDoc.load(() => {
           const rootId = linkedDoc.addBlock('affine:page', {
             title: new doc.Text(''),
@@ -202,7 +202,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
             firstBlock.type.match(/^h[1-6]$/)
           ) {
             const title = firstBlock.text.toString();
-            linkedDoc.workspace.setDocMeta(linkedDoc.id, {
+            linkedDoc.collection.setDocMeta(linkedDoc.id, {
               title,
             });
 

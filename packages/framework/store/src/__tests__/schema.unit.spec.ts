@@ -63,8 +63,8 @@ const BlockSchemas = [
 const defaultDocId = 'doc0';
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
-  const workspace = new DocCollection(options);
-  const doc = workspace.createDoc({ id: docId });
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: docId });
   doc.load();
   return doc;
 }

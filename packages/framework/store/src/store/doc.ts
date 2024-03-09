@@ -35,7 +35,7 @@ type DocOptions = {
 };
 
 export class Doc extends Space<FlatBlockMap> {
-  private readonly _workspace: DocCollection;
+  private readonly _collection: DocCollection;
   private readonly _idGenerator: IdGenerator;
   private readonly _blockTree: BlockTree;
   private _history!: Y.UndoManager;
@@ -90,7 +90,7 @@ export class Doc extends Space<FlatBlockMap> {
     idGenerator = uuidv4,
   }: DocOptions) {
     super(id, doc, awarenessStore);
-    this._workspace = workspace;
+    this._collection = workspace;
     this._idGenerator = idGenerator;
     this._blockTree = new BlockTree({
       schema: workspace.schema,
@@ -110,20 +110,20 @@ export class Doc extends Space<FlatBlockMap> {
     return this._history;
   }
 
-  get workspace() {
-    return this._workspace;
+  get collection() {
+    return this._collection;
   }
 
   get schema() {
-    return this.workspace.schema;
+    return this.collection.schema;
   }
 
   get meta() {
-    return this.workspace.meta.getDocMeta(this.id);
+    return this.collection.meta.getDocMeta(this.id);
   }
 
   get blob() {
-    return this.workspace.blob;
+    return this.collection.blob;
   }
 
   get root() {
@@ -659,7 +659,7 @@ export class Doc extends Space<FlatBlockMap> {
 
     super.load();
 
-    if ((this.workspace.meta.docs?.length ?? 0) <= 1) {
+    if ((this.collection.meta.docs?.length ?? 0) <= 1) {
       this._handleVersion();
     }
 
@@ -807,12 +807,12 @@ export class Doc extends Space<FlatBlockMap> {
 
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
-    if (!this.workspace.meta.hasVersion) {
-      this.workspace.meta.writeVersion(this.workspace);
+    if (!this.collection.meta.hasVersion) {
+      this.collection.meta.writeVersion(this.collection);
     } else {
       // Initialization from existing yDoc, indicating that the document is loaded from storage.
       if (this.awarenessStore.getFlag('enable_legacy_validation')) {
-        this.workspace.meta.validateVersion(this.workspace);
+        this.collection.meta.validateVersion(this.collection);
       }
     }
   }

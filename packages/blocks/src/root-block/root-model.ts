@@ -11,9 +11,9 @@ export class RootBlockModel extends BlockModel<RootBlockProps> {
     this.created.on(() => {
       this.doc.slots.rootAdded.on(model => {
         if (model instanceof RootBlockModel) {
-          const newDocMeta = this.doc.workspace.meta.getDocMeta(model.doc.id);
+          const newDocMeta = this.doc.collection.meta.getDocMeta(model.doc.id);
           if (!newDocMeta || newDocMeta.title !== model.title.toString()) {
-            this.doc.workspace.setDocMeta(model.doc.id, {
+            this.doc.collection.setDocMeta(model.doc.id, {
               title: model.title.toString(),
             });
           }

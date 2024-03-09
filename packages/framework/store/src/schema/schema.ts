@@ -3,7 +3,7 @@ import { minimatch } from 'minimatch';
 import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
-import { docMigrations, workspaceMigrations } from '../migration/index.js';
+import { collectionMigrations, docMigrations } from '../migration/index.js';
 import { Block } from '../store/block/block.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
@@ -108,7 +108,7 @@ export class Schema {
 
   upgradeWorkspace = (rootData: Y.Doc) => {
     this._upgradeBlockVersions(rootData);
-    workspaceMigrations.forEach(migration => {
+    collectionMigrations.forEach(migration => {
       try {
         if (migration.condition(rootData)) {
           migration.migrate(rootData);

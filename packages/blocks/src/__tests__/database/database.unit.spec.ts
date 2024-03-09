@@ -32,8 +32,8 @@ function createTestOptions() {
 
 function createTestDoc(docId = 'doc0') {
   const options = createTestOptions();
-  const workspace = new DocCollection(options);
-  const doc = workspace.createDoc({ id: docId });
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: docId });
   doc.load();
   return doc;
 }

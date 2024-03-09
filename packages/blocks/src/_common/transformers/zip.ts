@@ -1,24 +1,24 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type {
+  CollectionInfoSnapshot,
   Doc,
   DocCollection,
   DocSnapshot,
   JobMiddleware,
-  WorkspaceInfoSnapshot,
 } from '@blocksuite/store';
 import { getAssetName, Job, sha } from '@blocksuite/store';
 import JSZip from 'jszip';
 
 import { replaceIdMiddleware } from './middlewares.js';
 
-async function exportDocs(workspace: DocCollection, docs: Doc[]) {
+async function exportDocs(collection: DocCollection, docs: Doc[]) {
   const zip = new JSZip();
 
-  const job = new Job({ workspace });
+  const job = new Job({ collection });
   const snapshots = await Promise.all(docs.map(job.docToSnapshot));
 
-  const workspaceInfo = job.workspaceInfoToSnapshot();
-  zip.file('info.json', JSON.stringify(workspaceInfo, null, 2));
+  const collectionInfo = job.collectionInfoToSnapshot();
+  zip.file('info.json', JSON.stringify(collectionInfo, null, 2));
 
   snapshots.forEach(snapshot => {
     const snapshotName = `${snapshot.meta.id}.snapshot.json`;
@@ -38,14 +38,14 @@ async function exportDocs(workspace: DocCollection, docs: Doc[]) {
   return zip.generateAsync({ type: 'blob' });
 }
 
-async function importDocs(workspace: DocCollection, imported: Blob) {
+async function importDocs(collection: DocCollection, imported: Blob) {
   const zip = new JSZip();
   const { files } = await zip.loadAsync(imported);
 
   const assetObjs: JSZip.JSZipObject[] = [];
   const snapshotsObjs: JSZip.JSZipObject[] = [];
   let infoObj: JSZip.JSZipObject | undefined;
-  let info: WorkspaceInfoSnapshot | undefined;
+  let info: CollectionInfoSnapshot | undefined;
 
   Object.entries(files).map(([name, fileObj]) => {
     if (name.includes('MACOSX') || name.includes('DS_Store')) {
@@ -71,13 +71,13 @@ async function importDocs(workspace: DocCollection, imported: Blob) {
   {
     const json = await infoObj?.async('text');
     assertExists(json);
-    info = JSON.parse(json) as WorkspaceInfoSnapshot;
+    info = JSON.parse(json) as CollectionInfoSnapshot;
   }
 
-  const migrationMiddleware: JobMiddleware = ({ slots, workspace }) => {
+  const migrationMiddleware: JobMiddleware = ({ slots, collection }) => {
     slots.afterImport.on(payload => {
       if (payload.type === 'page') {
-        workspace.schema.upgradeDoc(
+        collection.schema.upgradeDoc(
           info?.pageVersion ?? 0,
           {},
           payload.page.spaceDoc
@@ -86,12 +86,12 @@ async function importDocs(workspace: DocCollection, imported: Blob) {
     });
   };
   const job = new Job({
-    workspace,
+    collection,
     middlewares: [replaceIdMiddleware, migrationMiddleware],
   });
   const assetsMap = job.assets;
 
-  job.snapshotToWorkspaceInfo(info);
+  job.snapshotToCollectionInfo(info);
 
   await Promise.all(
     assetObjs.map(async fileObj => {

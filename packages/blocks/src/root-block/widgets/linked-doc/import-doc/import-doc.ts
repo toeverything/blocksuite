@@ -32,7 +32,7 @@ const SHOW_LOADING_SIZE = 1024 * 200;
 
 export async function importMarkDown(workspace: DocCollection, text: string) {
   const job = new Job({
-    workspace: workspace,
+    collection: workspace,
     middlewares: [defaultImageProxyMiddleware],
   });
   const mdAdapter = new MarkdownAdapter();
@@ -47,7 +47,7 @@ export async function importMarkDown(workspace: DocCollection, text: string) {
 
 export async function importHtml(workspace: DocCollection, text: string) {
   const job = new Job({
-    workspace: workspace,
+    collection: workspace,
     middlewares: [defaultImageProxyMiddleware],
   });
   const htmlAdapter = new NotionHtmlAdapter();
@@ -112,7 +112,7 @@ export async function importNotion(workspace: DocCollection, file: File) {
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
       const job = new Job({
-        workspace: workspace,
+        collection: workspace,
         middlewares: [defaultImageProxyMiddleware],
       });
       const htmlAdapter = new NotionHtmlAdapter();

@@ -7,11 +7,11 @@ import * as globalUtils from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import * as store from '@blocksuite/store';
 
-import { mountDefaultDocEditor } from './utils/editor.js';
 import {
-  createStarterDocWorkspace,
-  initStarterDocWorkspace,
-} from './utils/workspace.js';
+  createStarterDocCollection,
+  initStarterDocCollection,
+} from './utils/collection.js';
+import { mountDefaultDocEditor } from './utils/editor.js';
 
 async function main() {
   if (window.workspace) return;
@@ -19,7 +19,7 @@ async function main() {
   const params = new URLSearchParams(location.search);
   const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
   const isE2E = room.startsWith('playwright');
-  const workspace = createStarterDocWorkspace();
+  const collection = createStarterDocCollection();
 
   if (isE2E) {
     Object.defineProperty(window, '$blocksuite', {
@@ -33,8 +33,8 @@ async function main() {
     return;
   }
 
-  await initStarterDocWorkspace(workspace);
-  await mountDefaultDocEditor(workspace);
+  await initStarterDocCollection(collection);
+  await mountDefaultDocEditor(collection);
 }
 
 main().catch(console.error);

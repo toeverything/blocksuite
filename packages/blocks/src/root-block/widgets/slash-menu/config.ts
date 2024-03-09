@@ -174,7 +174,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'New Doc',
         icon: NewDocIcon,
         action: ({ rootElement, model }) => {
-          const newDoc = createDefaultDoc(rootElement.doc.workspace);
+          const newDoc = createDefaultDoc(rootElement.doc.collection);
           insertContent(rootElement.host, model, REFERENCE_NODE, {
             reference: {
               type: 'LinkedPage',

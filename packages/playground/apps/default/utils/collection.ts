@@ -18,7 +18,7 @@ import { WebSocketDocSource } from '../../_common/sync/websocket/doc';
 
 const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
-export async function createDefaultDocWorkspace() {
+export async function createDefaultDocCollection() {
   const blobStorages: ((id: string) => BlobStorage)[] = [
     createIndexeddbStorage,
   ];
@@ -57,27 +57,27 @@ export async function createDefaultDocWorkspace() {
       enable_bultin_ledits: true,
     },
   };
-  const workspace = new DocCollection(options);
+  const collection = new DocCollection(options);
 
-  workspace.start();
+  collection.start();
 
   // debug info
-  window.workspace = workspace;
+  window.workspace = collection;
   window.blockSchemas = AffineSchemas;
-  window.job = new Job({ workspace });
+  window.job = new Job({ collection });
   window.Y = DocCollection.Y;
 
-  return workspace;
+  return collection;
 }
 
-export async function initDefaultDocWorkspace(workspace: DocCollection) {
+export async function initDefaultDocCollection(colelction: DocCollection) {
   const params = new URLSearchParams(location.search);
 
-  await workspace.waitForSynced();
+  await colelction.waitForSynced();
 
-  const shouldInit = workspace.docs.size === 0 && !params.get('room');
+  const shouldInit = colelction.docs.size === 0 && !params.get('room');
   if (shouldInit) {
-    const doc = workspace.createDoc({ id: 'doc:home' });
+    const doc = colelction.createDoc({ id: 'doc:home' });
     doc.load();
     const rootId = doc.addBlock('affine:page', {
       title: new Text(),
@@ -87,12 +87,12 @@ export async function initDefaultDocWorkspace(workspace: DocCollection) {
   } else {
     // wait for data injected from provider
     const firstPageId =
-      workspace.docs.size > 0
-        ? workspace.docs.keys().next().value
+      colelction.docs.size > 0
+        ? colelction.docs.keys().next().value
         : await new Promise<string>(resolve =>
-            workspace.slots.docAdded.once(id => resolve(id))
+            colelction.slots.docAdded.once(id => resolve(id))
           );
-    const doc = workspace.getDoc(firstPageId);
+    const doc = colelction.getDoc(firstPageId);
     assertExists(doc);
     doc.load();
     // wait for data injected from provider

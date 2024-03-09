@@ -21,7 +21,7 @@ const datasourceMap: {
 } = {
   'database-block': {
     title: (host: EditorHost, config: DatabaseBlockDatasourceConfig) => {
-      const dbblock = host.doc.workspace
+      const dbblock = host.doc.collection
         .getDoc(config.pageId)
         ?.getBlockById(config.blockId) as DatabaseBlockModel;
       return dbblock?.title.toString() ?? '';

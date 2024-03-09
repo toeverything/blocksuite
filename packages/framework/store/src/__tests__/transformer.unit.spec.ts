@@ -56,8 +56,8 @@ const assets = new AssetsManager({ blob: blobManager });
 
 test('model to snapshot', () => {
   const options = createTestOptions();
-  const workspace = new DocCollection(options);
-  const doc = workspace.createDoc({ id: 'home' });
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: 'home' });
   doc.load();
   doc.addBlock('page');
   const rootModel = doc.root as RootBlockModel;
@@ -72,8 +72,8 @@ test('model to snapshot', () => {
 
 test('snapshot to model', async () => {
   const options = createTestOptions();
-  const workspace = new DocCollection(options);
-  const doc = workspace.createDoc({ id: 'home' });
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: 'home' });
   doc.load();
   doc.addBlock('page');
   const rootModel = doc.root as RootBlockModel;

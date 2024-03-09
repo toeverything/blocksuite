@@ -56,7 +56,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       query: this._query,
       doc: this._doc,
       model: this.model,
-      docMetas: this._doc.workspace.meta.docMetas,
+      docMetas: this._doc.collection.meta.docMetas,
     });
   }
 
@@ -85,7 +85,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     // init
     this._updateActionList();
     this._disposables.add(
-      this.model.doc.workspace.slots.docUpdated.on(() => {
+      this.model.doc.collection.slots.docUpdated.on(() => {
         this._updateActionList();
       })
     );

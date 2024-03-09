@@ -10,7 +10,7 @@ import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
 
 import { AffineEditorContainer } from '../../index.js';
 
-function createWorkspaceOptions() {
+function createCollectionOptions() {
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   const schema = new Schema();
   const room = Math.random().toString(16).slice(2, 8);
@@ -37,8 +37,8 @@ function createWorkspaceOptions() {
   };
 }
 
-function initWorkspace(workspace: DocCollection) {
-  const doc = workspace.createDoc({ id: 'doc:home' });
+function initCollection(collection: DocCollection) {
+  const doc = collection.createDoc({ id: 'doc:home' });
 
   doc.load(() => {
     const rootId = doc.addBlock('affine:page', {
@@ -50,11 +50,11 @@ function initWorkspace(workspace: DocCollection) {
 }
 
 async function createEditor(
-  workspace: DocCollection,
+  collection: DocCollection,
   mode: 'edgeless' | 'page' = 'page'
 ) {
   const app = document.createElement('div');
-  const doc = workspace.docs.values().next().value as Doc | undefined;
+  const doc = collection.docs.values().next().value as Doc | undefined;
   assertExists(doc, 'Need to create a doc first');
   const editor = new AffineEditorContainer();
   editor.doc = doc;
@@ -73,12 +73,12 @@ async function createEditor(
 }
 
 export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
-  const workspace = new DocCollection(createWorkspaceOptions());
+  const collection = new DocCollection(createCollectionOptions());
 
-  window.workspace = workspace;
+  window.workspace = collection;
 
-  initWorkspace(workspace);
-  const appElement = await createEditor(workspace, mode);
+  initCollection(collection);
+  const appElement = await createEditor(collection, mode);
 
   return () => {
     appElement.remove();

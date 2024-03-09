@@ -294,7 +294,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const linkedDoc = this.linkedDoc;
     if (linkedDoc) {
       this.disposables.add(
-        linkedDoc.workspace.meta.docMetaUpdated.on(() => {
+        linkedDoc.collection.meta.docMetaUpdated.on(() => {
           this._load().catch(e => {
             console.error(e);
             this.isError = true;

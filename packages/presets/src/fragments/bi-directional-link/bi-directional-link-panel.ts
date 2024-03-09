@@ -239,7 +239,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     );
     const { _disposables } = this;
     _disposables.add(
-      this.doc.workspace.indexer.backlink.slots.indexUpdated.on(() => {
+      this.doc.collection.indexer.backlink.slots.indexUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -292,7 +292,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   private _renderLinks(ids: string[]) {
-    const { workspace } = this.doc;
+    const { collection: workspace } = this.doc;
 
     return html`<div class="links">
       <div class="links-title">Outgoing links · ${ids.length}</div>
@@ -321,7 +321,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
   private get _backLinks() {
     const { doc } = this;
-    const { workspace } = doc;
+    const { collection: workspace } = doc;
     const backLinks = new Map<string, string[]>();
     workspace.indexer.backlink.getBacklink(doc.id).reduce((map, link) => {
       const { pageId } = link;
@@ -338,7 +338,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
   private _renderBackLinks(backLinks: Map<string, string[]>) {
     const { doc } = this;
-    const { workspace } = doc;
+    const { collection: workspace } = doc;
     const length = backLinks.size;
 
     return html` <div class="back-links">

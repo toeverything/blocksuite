@@ -26,7 +26,7 @@ const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 const isE2E = room?.startsWith('playwright');
 
-export function createStarterDocWorkspace() {
+export function createStarterDocCollection() {
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   if (blobStorageArgs.includes('memory')) {
     blobStorages.push(createMemoryStorage);
@@ -61,29 +61,29 @@ export function createStarterDocWorkspace() {
     awarenessSources: [new BroadcastChannelAwarenessSource()],
     docSources,
   };
-  const workspace = new DocCollection(options);
+  const collection = new DocCollection(options);
 
-  workspace.start();
+  collection.start();
 
   // debug info
-  window.workspace = workspace;
+  window.workspace = collection;
   window.blockSchemas = AffineSchemas;
-  window.job = new Job({ workspace });
+  window.job = new Job({ collection: collection });
   window.Y = DocCollection.Y;
   window.testUtils = new TestUtils();
 
-  return workspace;
+  return collection;
 }
 
-export async function initStarterDocWorkspace(workspace: DocCollection) {
+export async function initStarterDocCollection(collection: DocCollection) {
   // init from other clients
   if (room && !params.has('init')) {
-    let firstDoc = workspace.docs.values().next().value as Doc | undefined;
+    let firstDoc = collection.docs.values().next().value as Doc | undefined;
     if (!firstDoc) {
       await new Promise<string>(resolve =>
-        workspace.slots.docAdded.once(resolve)
+        collection.slots.docAdded.once(resolve)
       );
-      firstDoc = workspace.docs.values().next().value;
+      firstDoc = collection.docs.values().next().value;
     }
     assertExists(firstDoc);
     const doc = firstDoc;
@@ -99,15 +99,15 @@ export async function initStarterDocWorkspace(workspace: DocCollection) {
   // use built-in init function
   const functionMap = new Map<
     string,
-    (workspace: DocCollection, id: string) => Promise<void> | void
+    (collection: DocCollection, id: string) => Promise<void> | void
   >();
   Object.values(
     (await import('../data/index.js')) as Record<string, InitFn>
   ).forEach(fn => functionMap.set(fn.id, fn));
   const init = params.get('init') || 'preset';
   if (functionMap.has(init)) {
-    await functionMap.get(init)?.(workspace, 'doc:home');
-    const doc = workspace.getDoc('doc:home');
+    await functionMap.get(init)?.(collection, 'doc:home');
+    const doc = collection.getDoc('doc:home');
     if (!doc?.loaded) {
       doc?.load();
     }

@@ -10,38 +10,38 @@ Besides the block tree, the [selection](./selection) state is also stored in the
 
 ## `Workspace`
 
-In BlockSuite, a [`Workspace`](/api/@blocksuite/store/classes/Workspace.html) is defined as an opt-in collection of multiple docs, providing comprehensive features for managing cross-doc updates and data synchronization. You can access the workspace via the `doc.workspace` getter, or you can also create a workspace manually:
+In BlockSuite, a [`DocCollection`](/api/@blocksuite/store/classes/DocCollection.html) is defined as an opt-in collection of multiple docs, providing comprehensive features for managing cross-doc updates and data synchronization. You can access the workspace via the `doc.collection` getter, or you can also create a workspace manually:
 
 ```ts
-import { Workspace, Schema } from '@blocksuite/store';
+import { DocCollection, Schema } from '@blocksuite/store';
 
 const schema = new Schema();
 
 // You can register a batch of block schemas to the workspace
 schema.register(AffineSchemas);
 
-const workspace = new Workspace({ schema });
+const collection = new DocCollection({ schema });
 ```
 
 Then multiple `doc`s can be created under the workspace:
 
 ```ts
-const workspace = new Workspace({ schema });
+const collection = new DocCollection({ schema });
 
 // This is an empty doc at this moment
-const doc = workspace.createDoc();
+const doc = collection.createDoc();
 ```
 
 As an example, the `createEmptyDoc` is a simple helper implemented exactly in this way ([source](https://github.com/toeverything/blocksuite/blob/master/packages/presets/src/helpers/index.ts)):
 
 ```ts
 import { AffineSchemas } from '@blocksuite/blocks/models';
-import { Schema, Workspace } from '@blocksuite/store';
+import { Schema, DocCollection } from '@blocksuite/store';
 
 export function createEmptyDoc() {
   const schema = new Schema().register(AffineSchemas);
-  const workspace = new Workspace({ schema });
-  const doc = workspace.createDoc();
+  const collection = new DocCollection({ schema });
+  const doc = collection.createDoc();
 
   return {
     doc,

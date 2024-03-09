@@ -25,14 +25,14 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register([docSchema]);
-  return { id: 'test-workspace', idGenerator, schema };
+  return { id: 'test-collection', idGenerator, schema };
 }
 
 test('trigger props updated', () => {
   const options = createTestOptions();
-  const workspace = new DocCollection(options);
+  const collection = new DocCollection(options);
 
-  const doc = workspace.createDoc({ id: 'home' });
+  const doc = collection.createDoc({ id: 'home' });
   doc.load();
 
   doc.addBlock('page');
@@ -89,9 +89,9 @@ test('trigger props updated', () => {
 
 test('stash and pop', () => {
   const options = createTestOptions();
-  const workspace = new DocCollection(options);
+  const collection = new DocCollection(options);
 
-  const doc = workspace.createDoc({ id: 'home' });
+  const doc = collection.createDoc({ id: 'home' });
   doc.load();
 
   doc.addBlock('page');
@@ -158,9 +158,9 @@ test('stash and pop', () => {
 
 test('always get latest value in onChange', () => {
   const options = createTestOptions();
-  const workspace = new DocCollection(options);
+  const collection = new DocCollection(options);
 
-  const doc = workspace.createDoc({ id: 'home' });
+  const doc = collection.createDoc({ id: 'home' });
   doc.load();
 
   doc.addBlock('page');

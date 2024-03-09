@@ -1250,7 +1250,7 @@ export async function prepareClipboardData(
   const selected = await Promise.all(
     selectedAll.map(async selected => {
       const job = new Job({
-        workspace: std.workspace,
+        collection: std.workspace,
       });
 
       if (isNoteBlock(selected)) {

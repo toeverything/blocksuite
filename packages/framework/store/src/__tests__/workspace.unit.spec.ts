@@ -62,8 +62,8 @@ function createRoot(doc: Doc) {
 
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
-  const workspace = new DocCollection(options);
-  const doc = workspace.createDoc({ id: docId });
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: docId });
   doc.load();
   return doc;
 }
@@ -93,15 +93,15 @@ beforeEach(() => {
 describe('basic', () => {
   it('can init workspace', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
-    assert.equal(workspace.isEmpty, true);
+    const collection = new DocCollection(options);
+    assert.equal(collection.isEmpty, true);
 
-    const doc = workspace.createDoc({ id: 'doc:home' });
+    const doc = collection.createDoc({ id: 'doc:home' });
     doc.load();
-    const actual = serializeWorkspace(workspace.doc);
+    const actual = serializeWorkspace(collection.doc);
     const actualDoc = actual[spaceMetaId].pages[0] as DocMeta;
 
-    assert.equal(workspace.isEmpty, false);
+    assert.equal(collection.isEmpty, false);
     assert.equal(typeof actualDoc.createDate, 'number');
     // @ts-ignore
     delete actualDoc.createDate;
@@ -134,26 +134,26 @@ describe('basic', () => {
   it('init workspace with custom id generator', () => {
     const options = createTestOptions();
     let id = 100;
-    const workspace = new DocCollection({
+    const collection = new DocCollection({
       ...options,
       idGenerator: () => {
         return String(id++);
       },
     });
     {
-      const doc = workspace.createDoc();
+      const doc = collection.createDoc();
       assert.equal(doc.id, '100');
     }
     {
-      const doc = workspace.createDoc();
+      const doc = collection.createDoc();
       assert.equal(doc.id, '101');
     }
   });
 
   it('doc ready lifecycle', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
-    const doc = workspace.createDoc({
+    const collection = new DocCollection(options);
+    const doc = collection.createDoc({
       id: 'space:0',
     });
 
@@ -179,9 +179,9 @@ describe('basic', () => {
 
   it('workspace docs with yjs applyUpdate', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
-    const workspace2 = new DocCollection(options);
-    const doc = workspace.createDoc({
+    const collection = new DocCollection(options);
+    const collection2 = new DocCollection(options);
+    const doc = collection.createDoc({
       id: 'space:0',
     });
     doc.load(() => {
@@ -194,27 +194,27 @@ describe('basic', () => {
         expect(added.size).toBe(1);
       });
       // only apply root update
-      workspace2.doc.once('subdocs', subdocsTester);
+      collection2.doc.once('subdocs', subdocsTester);
       expect(subdocsTester).toBeCalledTimes(0);
-      expect(workspace2.docs.size).toBe(0);
-      const update = encodeStateAsUpdate(workspace.doc);
-      applyUpdate(workspace2.doc, update);
-      expect(workspace2.doc.toJSON()['spaces']).toEqual({
+      expect(collection2.docs.size).toBe(0);
+      const update = encodeStateAsUpdate(collection.doc);
+      applyUpdate(collection2.doc, update);
+      expect(collection2.doc.toJSON()['spaces']).toEqual({
         'space:0': {
           blocks: {},
         },
       });
-      expect(workspace2.docs.size).toBe(1);
+      expect(collection2.docs.size).toBe(1);
       expect(subdocsTester).toBeCalledTimes(1);
     }
     {
       // apply doc update
       const update = encodeStateAsUpdate(doc.spaceDoc);
-      expect(workspace2.docs.size).toBe(1);
-      const doc2 = workspace2.getDoc('space:0');
+      expect(collection2.docs.size).toBe(1);
+      const doc2 = collection2.getDoc('space:0');
       assertExists(doc2);
       applyUpdate(doc2.spaceDoc, update);
-      expect(workspace2.doc.toJSON()['spaces']).toEqual({
+      expect(collection2.doc.toJSON()['spaces']).toEqual({
         'space:0': {
           blocks: {
             '0': {
@@ -230,7 +230,7 @@ describe('basic', () => {
       const fn = vi.fn(({ loaded }) => {
         expect(loaded.size).toBe(1);
       });
-      workspace2.doc.once('subdocs', fn);
+      collection2.doc.once('subdocs', fn);
       expect(fn).toBeCalledTimes(0);
       doc2.load();
       expect(fn).toBeCalledTimes(1);
@@ -368,45 +368,45 @@ describe('addBlock', () => {
 
   it('can add and remove multi docs', async () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
+    const collection = new DocCollection(options);
 
-    const doc0 = workspace.createDoc({ id: 'doc:home' });
-    const doc1 = workspace.createDoc({ id: 'space:doc1' });
+    const doc0 = collection.createDoc({ id: 'doc:home' });
+    const doc1 = collection.createDoc({ id: 'space:doc1' });
     await Promise.all([doc0.load(), doc1.load()]);
-    assert.equal(workspace.docs.size, 2);
+    assert.equal(collection.docs.size, 2);
 
     doc0.addBlock('affine:page', {
       title: new doc0.Text(),
     });
-    workspace.removeDoc(doc0.id);
+    collection.removeDoc(doc0.id);
 
-    assert.equal(workspace.docs.size, 1);
+    assert.equal(collection.docs.size, 1);
     assert.equal(
       serializeWorkspace(doc0.rootDoc).spaces['doc:home'],
       undefined
     );
 
-    workspace.removeDoc(doc1.id);
-    assert.equal(workspace.docs.size, 0);
+    collection.removeDoc(doc1.id);
+    assert.equal(collection.docs.size, 0);
   });
 
   it('can remove doc that has not been loaded', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
+    const collection = new DocCollection(options);
 
-    const doc0 = workspace.createDoc({ id: 'doc:home' });
+    const doc0 = collection.createDoc({ id: 'doc:home' });
 
-    workspace.removeDoc(doc0.id);
-    assert.equal(workspace.docs.size, 0);
+    collection.removeDoc(doc0.id);
+    assert.equal(collection.docs.size, 0);
   });
 
   it('can set doc state', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
-    workspace.createDoc({ id: 'doc:home' });
+    const collection = new DocCollection(options);
+    collection.createDoc({ id: 'doc:home' });
 
     assert.deepEqual(
-      workspace.meta.docMetas.map(({ id, title }) => ({
+      collection.meta.docMetas.map(({ id, title }) => ({
         id,
         title,
       })),
@@ -419,15 +419,15 @@ describe('addBlock', () => {
     );
 
     let called = false;
-    workspace.meta.docMetaUpdated.on(() => {
+    collection.meta.docMetaUpdated.on(() => {
       called = true;
     });
 
     // @ts-ignore
-    workspace.setDocMeta('doc:home', { favorite: true });
+    collection.setDocMeta('doc:home', { favorite: true });
     assert.deepEqual(
       // @ts-ignore
-      workspace.meta.docMetas.map(({ id, title, favorite }) => ({
+      collection.meta.docMetas.map(({ id, title, favorite }) => ({
         id,
         title,
         favorite,
@@ -445,15 +445,15 @@ describe('addBlock', () => {
 
   it('can set workspace common meta fields', async () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
+    const collection = new DocCollection(options);
 
-    queueMicrotask(() => workspace.meta.setName('hello'));
-    await waitOnce(workspace.meta.commonFieldsUpdated);
-    assert.deepEqual(workspace.meta.name, 'hello');
+    queueMicrotask(() => collection.meta.setName('hello'));
+    await waitOnce(collection.meta.commonFieldsUpdated);
+    assert.deepEqual(collection.meta.name, 'hello');
 
-    queueMicrotask(() => workspace.meta.setAvatar('gengar.jpg'));
-    await waitOnce(workspace.meta.commonFieldsUpdated);
-    assert.deepEqual(workspace.meta.avatar, 'gengar.jpg');
+    queueMicrotask(() => collection.meta.setAvatar('gengar.jpg'));
+    await waitOnce(collection.meta.commonFieldsUpdated);
+    assert.deepEqual(collection.meta.avatar, 'gengar.jpg');
   });
 });
 
@@ -831,12 +831,12 @@ describe('getBlock', () => {
 describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
-    const doc = workspace.createDoc({ id: 'doc:home' });
+    const collection = new DocCollection(options);
+    const doc = collection.createDoc({ id: 'doc:home' });
 
     doc.addBlock('affine:page', { title: new doc.Text('hello') });
 
-    expect(workspace.exportJSX()).toMatchInlineSnapshot(`
+    expect(collection.exportJSX()).toMatchInlineSnapshot(`
       <affine:page
         prop:title="hello"
       />
@@ -845,16 +845,16 @@ describe('workspace.exportJSX works', () => {
 
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
-    workspace.createDoc({ id: 'doc:home' });
+    const collection = new DocCollection(options);
+    collection.createDoc({ id: 'doc:home' });
 
-    expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
+    expect(collection.exportJSX()).toMatchInlineSnapshot('null');
   });
 
   it('workspace with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
-    const doc = workspace.createDoc({ id: 'doc:home' });
+    const collection = new DocCollection(options);
+    const doc = collection.createDoc({ id: 'doc:home' });
     doc.load(() => {
       const rootId = doc.addBlock('affine:page', {
         title: new doc.Text(),
@@ -864,7 +864,7 @@ describe('workspace.exportJSX works', () => {
       doc.addBlock('affine:paragraph', {}, noteId);
     });
 
-    expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
+    expect(collection.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
         <affine:note>
           <affine:paragraph
@@ -882,8 +882,8 @@ describe('workspace.exportJSX works', () => {
 describe('workspace search', () => {
   it('search doc meta title', () => {
     const options = createTestOptions();
-    const workspace = new DocCollection(options);
-    const doc = workspace.createDoc({ id: 'doc:home' });
+    const collection = new DocCollection(options);
+    const doc = collection.createDoc({ id: 'doc:home' });
     doc.load(() => {
       const rootId = doc.addBlock('affine:page', {
         title: new doc.Text('test123'),
@@ -893,7 +893,7 @@ describe('workspace search', () => {
     });
 
     requestIdleCallback(() => {
-      const result = workspace.search('test');
+      const result = collection.search('test');
       expect(result).toMatchInlineSnapshot(`
       Map {
         "0" => {

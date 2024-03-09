@@ -17,24 +17,24 @@ import type {
 import { Slice } from './slice.js';
 import type {
   BlockSnapshot,
+  CollectionInfoSnapshot,
   DocSnapshot,
   SliceSnapshot,
-  WorkspaceInfoSnapshot,
 } from './type.js';
 import {
   BlockSnapshotSchema,
+  CollectionInfoSnapshotSchema,
   DocSnapshotSchema,
   SliceSnapshotSchema,
-  WorkspaceInfoSnapshotSchema,
 } from './type.js';
 
 export type JobConfig = {
-  workspace: DocCollection;
+  collection: DocCollection;
   middlewares?: JobMiddleware[];
 };
 
 export class Job {
-  private readonly _workspace: DocCollection;
+  private readonly _collection: DocCollection;
   private readonly _assetsManager: AssetsManager;
   private readonly _adapterConfigs: Map<string, string> = new Map();
 
@@ -45,15 +45,15 @@ export class Job {
     afterExport: new Slot<FinalPayload>(),
   };
 
-  constructor({ workspace, middlewares = [] }: JobConfig) {
-    this._workspace = workspace;
-    this._assetsManager = new AssetsManager({ blob: workspace.blob });
+  constructor({ collection, middlewares = [] }: JobConfig) {
+    this._collection = collection;
+    this._assetsManager = new AssetsManager({ blob: collection.blob });
 
     middlewares.forEach(middleware => {
       middleware({
         slots: this._slots,
         assetsManager: this._assetsManager,
-        workspace: this._workspace,
+        collection: this._collection,
         adapterConfigs: this._adapterConfigs,
       });
     });
@@ -76,7 +76,7 @@ export class Job {
   }
 
   private _getSchema(flavour: string) {
-    const schema = this._workspace.schema.flavourSchemaMap.get(flavour);
+    const schema = this._collection.schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Flavour schema not found for ${flavour}`);
     return schema;
   }
@@ -85,8 +85,8 @@ export class Job {
     return schema.transformer?.() ?? new BaseBlockTransformer();
   }
 
-  private _getWorkspaceMeta() {
-    const { meta } = this._workspace;
+  private _getCollectionMeta() {
+    const { meta } = this._collection;
     const { pageVersion, workspaceVersion, properties, docs } = meta;
     assertExists(pageVersion);
     assertExists(workspaceVersion);
@@ -116,12 +116,12 @@ export class Job {
     const docMeta = doc.meta;
     assertExists(docMeta);
 
-    const workspaceTags = this._workspace.meta.properties.tags?.options;
-    assertExists(workspaceTags);
+    const collectionTags = this._collection.meta.properties.tags?.options;
+    assertExists(collectionTags);
     meta.tags.forEach(tag => {
-      const exists = workspaceTags.some(t => t.id === tag);
+      const exists = collectionTags.some(t => t.id === tag);
       if (!exists) {
-        throw new Error(`Tag ${tag} is not in workspace options`);
+        throw new Error(`Tag ${tag} is not in collection options`);
       }
       docMeta.tags.push(tag);
     });
@@ -289,7 +289,7 @@ export class Job {
     });
     DocSnapshotSchema.parse(snapshot);
     const { meta, blocks } = snapshot;
-    const doc = this._workspace.createDoc({ id: meta.id });
+    const doc = this._collection.createDoc({ id: meta.id });
     doc.load();
     this._importDocMeta(doc, meta);
     await this.snapshotToBlock(blocks, doc);
@@ -302,37 +302,37 @@ export class Job {
     return doc;
   };
 
-  workspaceInfoToSnapshot = (): WorkspaceInfoSnapshot => {
+  collectionInfoToSnapshot = (): CollectionInfoSnapshot => {
     this._slots.beforeExport.emit({
       type: 'info',
     });
-    const workspaceMeta = this._getWorkspaceMeta();
-    const snapshot: WorkspaceInfoSnapshot = {
+    const collectionMeta = this._getCollectionMeta();
+    const snapshot: CollectionInfoSnapshot = {
       type: 'info',
-      id: this._workspace.id,
-      ...workspaceMeta,
+      id: this._collection.id,
+      ...collectionMeta,
     };
     this._slots.afterExport.emit({
       type: 'info',
       snapshot,
     });
-    WorkspaceInfoSnapshotSchema.parse(snapshot);
+    CollectionInfoSnapshotSchema.parse(snapshot);
 
     return snapshot;
   };
 
-  snapshotToWorkspaceInfo = (snapshot: WorkspaceInfoSnapshot): void => {
+  snapshotToCollectionInfo = (snapshot: CollectionInfoSnapshot): void => {
     this._slots.beforeImport.emit({
       type: 'info',
       snapshot,
     });
-    WorkspaceInfoSnapshotSchema.parse(snapshot);
+    CollectionInfoSnapshotSchema.parse(snapshot);
     const { properties } = snapshot;
-    const currentProperties = this._workspace.meta.properties;
+    const currentProperties = this._collection.meta.properties;
     const newOptions = properties.tags?.options ?? [];
     const currentOptions = currentProperties.tags?.options ?? [];
     const options = new Set([...newOptions, ...currentOptions]);
-    this._workspace.meta.setProperties({
+    this._collection.meta.setProperties({
       tags: {
         options: Array.from(options),
       },

@@ -6,7 +6,10 @@ import type { ListBlockModel } from '../../list-block/index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
-export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
+export const replaceIdMiddleware: JobMiddleware = ({
+  slots,
+  collection: workspace,
+}) => {
   const idMap = new Map<string, string>();
   slots.afterImport.on(payload => {
     if (

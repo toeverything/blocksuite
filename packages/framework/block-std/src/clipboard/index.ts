@@ -42,7 +42,7 @@ export class Clipboard {
   private _getJob() {
     return new Job({
       middlewares: this._jobMiddlewares,
-      workspace: this.std.workspace,
+      collection: this.std.workspace,
     });
   }
 
@@ -112,10 +112,10 @@ export class Clipboard {
         const payload = {
           file: item,
           assets: job.assetsManager,
-          blockVersions: doc.workspace.meta.blockVersions,
-          pageVersion: doc.workspace.meta.pageVersion,
-          workspaceVersion: doc.workspace.meta.workspaceVersion,
-          workspaceId: doc.workspace.id,
+          blockVersions: doc.collection.meta.blockVersions,
+          pageVersion: doc.collection.meta.pageVersion,
+          workspaceVersion: doc.collection.meta.workspaceVersion,
+          workspaceId: doc.collection.id,
           pageId: doc.id,
         };
         const sliceSnapshot = await adapter.toSliceSnapshot(payload);
