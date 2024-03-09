@@ -4,7 +4,6 @@ import type { IPoint } from '../../../../_common/types.js';
 import {
   Bound,
   getQuadBoundsWithRotation,
-  rotatePoints,
 } from '../../../../surface-block/index.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
@@ -296,9 +295,14 @@ export class HandleResizeManager {
       ) {
         const dpo = draggingPoint.matrixTransform(m0);
         const coorPoint = [0, 0];
-        const [[x1, y1]] = rotatePoints([[dpo.x, dpo.y]], coorPoint, -_rotate);
-        const [[x2, y2]] = rotatePoints([[dp.x, dp.y]], coorPoint, -_rotate);
-        const point = { x: 0, y: 0 };
+        const mc = new DOMMatrix()
+          .translateSelf(...coorPoint)
+          .rotateSelf(-_rotate)
+          .translateSelf(...coorPoint);
+        const { x: x1, y: y1 } = dpo.matrixTransform(mc);
+        const { x: x2, y: y2 } = dp.matrixTransform(mc);
+        const point = new DOMPoint(0, 0);
+
         if (
           _dragDirection === HandleDirection.Left ||
           _dragDirection === HandleDirection.Right
@@ -310,10 +314,11 @@ export class HandleResizeManager {
           point.y = y2;
         }
 
-        const [[x3, y3]] = rotatePoints(
-          [[point.x, point.y]],
-          coorPoint,
-          _rotate
+        const { x: x3, y: y3 } = point.matrixTransform(
+          new DOMMatrix()
+            .translateSelf(...coorPoint)
+            .rotateSelf(_rotate)
+            .translateSelf(...coorPoint)
         );
 
         dp.x = x3;
