@@ -9,7 +9,7 @@ import {
   Schema,
   type SchemaToModel,
 } from '../schema/index.js';
-import { Generator, Workspace } from '../store/index.js';
+import { DocCollection, Generator } from '../store/index.js';
 import { AssetsManager, BaseBlockTransformer } from '../transformer/index.js';
 
 const docSchema = defineBlockSchema({
@@ -56,7 +56,7 @@ const assets = new AssetsManager({ blob: blobManager });
 
 test('model to snapshot', () => {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
   const doc = workspace.createDoc({ id: 'home' });
   doc.load();
   doc.addBlock('page');
@@ -72,7 +72,7 @@ test('model to snapshot', () => {
 
 test('snapshot to model', async () => {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
   const doc = workspace.createDoc({ id: 'home' });
   doc.load();
   doc.addBlock('page');

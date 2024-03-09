@@ -1,7 +1,7 @@
 import type { Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel } from '../schema/index.js';
-import type { Doc, Workspace } from '../store/index.js';
+import type { Doc, DocCollection } from '../store/index.js';
 import type { AssetsManager } from './assets.js';
 import type { Slice } from './slice.js';
 import type {
@@ -79,7 +79,7 @@ export type JobSlots = {
 };
 
 type JobMiddlewareOptions = {
-  workspace: Workspace;
+  workspace: DocCollection;
   assetsManager: AssetsManager;
   slots: JobSlots;
   adapterConfigs: Map<string, string>;

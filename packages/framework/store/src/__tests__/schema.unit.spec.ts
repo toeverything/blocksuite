@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { type BlockModel, defineBlockSchema } from '../schema/base.js';
 import { SchemaValidateError } from '../schema/error.js';
 import { Schema } from '../schema/index.js';
-import { Workspace } from '../store/index.js';
+import { DocCollection } from '../store/index.js';
 import { Generator } from '../store/store.js';
 import {
   DividerBlockSchema,
@@ -63,7 +63,7 @@ const BlockSchemas = [
 const defaultDocId = 'doc0';
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
   const doc = workspace.createDoc({ id: docId });
   doc.load();
   return doc;

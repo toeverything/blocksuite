@@ -2,7 +2,7 @@ import '../buttons/tool-icon-button.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -367,7 +367,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const id = service.addBlock(
       'affine:frame',
       {
-        title: new Workspace.Y.Text(`Frame ${frameIndex}`),
+        title: new DocCollection.Y.Text(`Frame ${frameIndex}`),
         xywh: serializeXYWH(...xywh),
       },
       surfaceBlockModel

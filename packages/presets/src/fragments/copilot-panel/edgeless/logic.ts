@@ -8,7 +8,7 @@ import {
   type TreeNode,
 } from '@blocksuite/blocks';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BlockModel, Workspace } from '@blocksuite/store';
+import type { BlockModel, DocCollection } from '@blocksuite/store';
 
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import {
@@ -56,7 +56,7 @@ export class AIEdgelessLogic {
     }).dispose;
   };
 
-  get workspace(): Workspace {
+  get workspace(): DocCollection {
     return this.host.doc.workspace;
   }
 

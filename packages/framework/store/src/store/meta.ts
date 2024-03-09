@@ -3,7 +3,7 @@ import type * as Y from 'yjs';
 
 import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import type { Workspace } from './workspace.js';
+import type { DocCollection } from './collection.js';
 
 // please use `declare module '@blocksuite/store'` to extend this interface
 export interface DocMeta {
@@ -23,7 +23,7 @@ export type DocsPropertiesMeta = {
     options: Tag[];
   };
 };
-export type WorkspaceMetaState = {
+export type DocCollectionMetaState = {
   pages?: unknown[];
   properties?: DocsPropertiesMeta;
   workspaceVersion?: number;
@@ -33,7 +33,7 @@ export type WorkspaceMetaState = {
   avatar?: string;
 };
 
-export class WorkspaceMeta {
+export class DocCollectionMeta {
   readonly id: string = 'meta';
   readonly doc: BlockSuiteDoc;
 
@@ -44,14 +44,16 @@ export class WorkspaceMeta {
   docMetaUpdated = new Slot();
   commonFieldsUpdated = new Slot();
 
-  protected readonly _yMap: Y.Map<WorkspaceMetaState[keyof WorkspaceMetaState]>;
-  protected readonly _proxy: WorkspaceMetaState;
+  protected readonly _yMap: Y.Map<
+    DocCollectionMetaState[keyof DocCollectionMetaState]
+  >;
+  protected readonly _proxy: DocCollectionMetaState;
 
   constructor(doc: BlockSuiteDoc) {
     this.doc = doc;
     this._yMap = doc.getMap(this.id);
-    this._proxy = doc.getMapProxy<string, WorkspaceMetaState>(this.id);
-    this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
+    this._proxy = doc.getMapProxy<string, DocCollectionMetaState>(this.id);
+    this._yMap.observeDeep(this._handleDocCollectionMetaEvents);
   }
 
   get yDocs() {
@@ -120,7 +122,7 @@ export class WorkspaceMeta {
   }
 
   /**
-   * @internal Use {@link Workspace.setDocMeta} instead
+   * @internal Use {@link DocCollection.setDocMeta} instead
    */
   setDocMeta(id: string, props: Partial<DocMeta>) {
     const docs = (this.docs as DocMeta[]) ?? [];
@@ -164,7 +166,7 @@ export class WorkspaceMeta {
   /**
    * @internal Only for doc initialization
    */
-  writeVersion(workspace: Workspace) {
+  writeVersion(workspace: DocCollection) {
     const { blockVersions, pageVersion, workspaceVersion } = this._proxy;
 
     if (!workspaceVersion) {
@@ -190,7 +192,7 @@ export class WorkspaceMeta {
     }
   }
 
-  updateVersion(workspace: Workspace) {
+  updateVersion(workspace: DocCollection) {
     this._proxy.workspaceVersion = WORKSPACE_VERSION;
 
     this._proxy.pageVersion = PAGE_VERSION;
@@ -205,7 +207,7 @@ export class WorkspaceMeta {
   /**
    * @deprecated Only used for legacy doc version validation
    */
-  validateVersion(workspace: Workspace) {
+  validateVersion(workspace: DocCollection) {
     const workspaceVersion = this._proxy.workspaceVersion;
     if (!workspaceVersion) {
       throw new Error(
@@ -289,7 +291,7 @@ export class WorkspaceMeta {
     this.commonFieldsUpdated.emit();
   }
 
-  private _handleWorkspaceMetaEvents = (
+  private _handleDocCollectionMetaEvents = (
     events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<unknown>>[]
   ) => {
     events.forEach(e => {

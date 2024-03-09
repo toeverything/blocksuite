@@ -1,6 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 
 import {
@@ -16,7 +16,7 @@ import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
 export class TagsDatasource extends BaseDataSource {
-  private meta: Workspace['meta'];
+  private meta: DocCollection['meta'];
 
   public rowMove(rowId: string, position: InsertToPosition): void {
     // not support

@@ -3,25 +3,25 @@ import * as Y from 'yjs';
 
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
-import { blob, indexer, test, WorkspaceAddonType } from './addon/index.js';
+import { blob, DocCollectionAddonType, indexer, test } from './addon/index.js';
 import { Doc } from './doc.js';
-import { type DocMeta, WorkspaceMeta } from './meta.js';
+import { DocCollectionMeta, type DocMeta } from './meta.js';
 import { Store, type StoreOptions } from './store.js';
 
-export type WorkspaceOptions = StoreOptions & {
+export type DocCollectionOptions = StoreOptions & {
   schema: Schema;
 };
 
 @blob
 @indexer
 @test
-export class Workspace extends WorkspaceAddonType {
+export class DocCollection extends DocCollectionAddonType {
   static Y = Y;
   protected _store: Store;
 
   protected readonly _schema: Schema;
 
-  meta: WorkspaceMeta;
+  meta: DocCollectionMeta;
 
   slots = {
     docAdded: new Slot<string>(),
@@ -29,13 +29,13 @@ export class Workspace extends WorkspaceAddonType {
     docRemoved: new Slot<string>(),
   };
 
-  constructor(storeOptions: WorkspaceOptions) {
+  constructor(options: DocCollectionOptions) {
     super();
-    this._schema = storeOptions.schema;
+    this._schema = options.schema;
 
-    this._store = new Store(storeOptions);
+    this._store = new Store(options);
 
-    this.meta = new WorkspaceMeta(this.doc);
+    this.meta = new DocCollectionMeta(this.doc);
     this._bindDocMetaEvents();
   }
 

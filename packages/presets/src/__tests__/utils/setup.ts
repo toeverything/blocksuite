@@ -1,6 +1,11 @@
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlobStorage, type Doc, Text, Workspace } from '@blocksuite/store';
+import {
+  type BlobStorage,
+  type Doc,
+  DocCollection,
+  Text,
+} from '@blocksuite/store';
 import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
 
 import { AffineEditorContainer } from '../../index.js';
@@ -32,7 +37,7 @@ function createWorkspaceOptions() {
   };
 }
 
-function initWorkspace(workspace: Workspace) {
+function initWorkspace(workspace: DocCollection) {
   const doc = workspace.createDoc({ id: 'doc:home' });
 
   doc.load(() => {
@@ -45,7 +50,7 @@ function initWorkspace(workspace: Workspace) {
 }
 
 async function createEditor(
-  workspace: Workspace,
+  workspace: DocCollection,
   mode: 'edgeless' | 'page' = 'page'
 ) {
   const app = document.createElement('div');
@@ -68,7 +73,7 @@ async function createEditor(
 }
 
 export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
-  const workspace = new Workspace(createWorkspaceOptions());
+  const workspace = new DocCollection(createWorkspaceOptions());
 
   window.workspace = workspace;
 

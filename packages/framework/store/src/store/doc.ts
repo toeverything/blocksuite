@@ -10,8 +10,8 @@ import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
 import type { YBlock } from './block/index.js';
 import { BlockTree } from './block/index.js';
+import type { DocCollection } from './collection.js';
 import { Space } from './space.js';
-import type { Workspace } from './workspace.js';
 
 export type YBlocks = Y.Map<YBlock>;
 type FlatBlockMap = Record<string, YBlock>;
@@ -28,14 +28,14 @@ export type BlockProps = BlockSysProps & {
 
 type DocOptions = {
   id: string;
-  workspace: Workspace;
+  workspace: DocCollection;
   doc: BlockSuiteDoc;
   awarenessStore: AwarenessStore;
   idGenerator?: IdGenerator;
 };
 
 export class Doc extends Space<FlatBlockMap> {
-  private readonly _workspace: Workspace;
+  private readonly _workspace: DocCollection;
   private readonly _idGenerator: IdGenerator;
   private readonly _blockTree: BlockTree;
   private _history!: Y.UndoManager;

@@ -3,7 +3,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
-import { Generator, Schema, Workspace } from '../index.js';
+import { DocCollection, Generator, Schema } from '../index.js';
 // Use manual per-module import/export to support vitest environment on Node.js
 import {
   NoteBlockSchema,
@@ -24,9 +24,9 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, schema };
 }
 
-function createTestDoc(pageId = 'doc:home', workspace?: Workspace) {
+function createTestDoc(pageId = 'doc:home', workspace?: DocCollection) {
   const options = createTestOptions();
-  const _workspace = workspace || new Workspace(options);
+  const _workspace = workspace || new DocCollection(options);
   const doc = _workspace.createDoc({ id: pageId });
   doc.load();
   return doc;
@@ -109,7 +109,7 @@ describe('workspace.search works', () => {
 
     const update = encodeStateAsUpdate(doc.spaceDoc);
     const schema = new Schema();
-    const workspace2 = new Workspace({
+    const workspace2 = new DocCollection({
       schema,
       id: 'test',
     });

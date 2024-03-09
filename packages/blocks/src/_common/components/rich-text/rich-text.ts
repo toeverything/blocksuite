@@ -10,7 +10,7 @@ import {
 } from '@blocksuite/inline';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Y } from '@blocksuite/store';
-import { Text, Workspace } from '@blocksuite/store';
+import { DocCollection, Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -318,7 +318,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     assertExists(this._yText.doc, 'yText should be bind to yDoc.');
 
     if (!this.undoManager) {
-      this.undoManager = new Workspace.Y.UndoManager(this._yText, {
+      this.undoManager = new DocCollection.Y.UndoManager(this._yText, {
         trackedOrigins: new Set([this._yText.doc.clientID]),
       });
     }

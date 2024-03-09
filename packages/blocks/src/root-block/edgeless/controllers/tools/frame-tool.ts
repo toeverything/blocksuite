@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 
 import {
   type FrameTool,
@@ -40,7 +40,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       const id = this._service.addBlock(
         'affine:frame',
         {
-          title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
+          title: new DocCollection.Y.Text(`Frame ${frames.length + 1}`),
           xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
         },
         this._service.surface

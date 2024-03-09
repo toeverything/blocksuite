@@ -3,7 +3,7 @@ import '../../database-block/kanban/define.js';
 import '../../database-block/table/define.js';
 
 import type { BlockModel, Doc } from '@blocksuite/store';
-import { Generator, Schema, Workspace } from '@blocksuite/store';
+import { DocCollection, Generator, Schema } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { numberPureColumnConfig } from '../../database-block/common/columns/number/define.js';
@@ -32,7 +32,7 @@ function createTestOptions() {
 
 function createTestDoc(docId = 'doc0') {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
   const doc = workspace.createDoc({ id: docId });
   doc.load();
   return doc;

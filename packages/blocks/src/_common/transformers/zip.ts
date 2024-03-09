@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type {
   Doc,
+  DocCollection,
   DocSnapshot,
   JobMiddleware,
-  Workspace,
   WorkspaceInfoSnapshot,
 } from '@blocksuite/store';
 import { getAssetName, Job, sha } from '@blocksuite/store';
@@ -11,7 +11,7 @@ import JSZip from 'jszip';
 
 import { replaceIdMiddleware } from './middlewares.js';
 
-async function exportDocs(workspace: Workspace, docs: Doc[]) {
+async function exportDocs(workspace: DocCollection, docs: Doc[]) {
   const zip = new JSZip();
 
   const job = new Job({ workspace });
@@ -38,7 +38,7 @@ async function exportDocs(workspace: Workspace, docs: Doc[]) {
   return zip.generateAsync({ type: 'blob' });
 }
 
-async function importDocs(workspace: Workspace, imported: Blob) {
+async function importDocs(workspace: DocCollection, imported: Blob) {
   const zip = new JSZip();
   const { files } = await zip.loadAsync(imported);
 

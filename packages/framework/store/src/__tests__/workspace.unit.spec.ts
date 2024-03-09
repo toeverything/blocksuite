@@ -7,7 +7,7 @@ import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
 import type { BlockModel, BlockSchemaType, Doc } from '../index.js';
-import { Generator, Schema, Workspace } from '../index.js';
+import { DocCollection, Generator, Schema } from '../index.js';
 import type { DocMeta } from '../store/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import {
@@ -62,7 +62,7 @@ function createRoot(doc: Doc) {
 
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
   const doc = workspace.createDoc({ id: docId });
   doc.load();
   return doc;
@@ -93,7 +93,7 @@ beforeEach(() => {
 describe('basic', () => {
   it('can init workspace', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
     assert.equal(workspace.isEmpty, true);
 
     const doc = workspace.createDoc({ id: 'doc:home' });
@@ -134,7 +134,7 @@ describe('basic', () => {
   it('init workspace with custom id generator', () => {
     const options = createTestOptions();
     let id = 100;
-    const workspace = new Workspace({
+    const workspace = new DocCollection({
       ...options,
       idGenerator: () => {
         return String(id++);
@@ -152,7 +152,7 @@ describe('basic', () => {
 
   it('doc ready lifecycle', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
     const doc = workspace.createDoc({
       id: 'space:0',
     });
@@ -179,8 +179,8 @@ describe('basic', () => {
 
   it('workspace docs with yjs applyUpdate', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
-    const workspace2 = new Workspace(options);
+    const workspace = new DocCollection(options);
+    const workspace2 = new DocCollection(options);
     const doc = workspace.createDoc({
       id: 'space:0',
     });
@@ -368,7 +368,7 @@ describe('addBlock', () => {
 
   it('can add and remove multi docs', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
 
     const doc0 = workspace.createDoc({ id: 'doc:home' });
     const doc1 = workspace.createDoc({ id: 'space:doc1' });
@@ -392,7 +392,7 @@ describe('addBlock', () => {
 
   it('can remove doc that has not been loaded', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
 
     const doc0 = workspace.createDoc({ id: 'doc:home' });
 
@@ -402,7 +402,7 @@ describe('addBlock', () => {
 
   it('can set doc state', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
     workspace.createDoc({ id: 'doc:home' });
 
     assert.deepEqual(
@@ -445,7 +445,7 @@ describe('addBlock', () => {
 
   it('can set workspace common meta fields', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
 
     queueMicrotask(() => workspace.meta.setName('hello'));
     await waitOnce(workspace.meta.commonFieldsUpdated);
@@ -831,7 +831,7 @@ describe('getBlock', () => {
 describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
     const doc = workspace.createDoc({ id: 'doc:home' });
 
     doc.addBlock('affine:page', { title: new doc.Text('hello') });
@@ -845,7 +845,7 @@ describe('workspace.exportJSX works', () => {
 
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
     workspace.createDoc({ id: 'doc:home' });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
@@ -853,7 +853,7 @@ describe('workspace.exportJSX works', () => {
 
   it('workspace with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
     const doc = workspace.createDoc({ id: 'doc:home' });
     doc.load(() => {
       const rootId = doc.addBlock('affine:page', {
@@ -882,7 +882,7 @@ describe('workspace.exportJSX works', () => {
 describe('workspace search', () => {
   it('search doc meta title', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new DocCollection(options);
     const doc = workspace.createDoc({ id: 'doc:home' });
     doc.load(() => {
       const rootId = doc.addBlock('affine:page', {

@@ -1,6 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { Doc, Workspace } from '@blocksuite/store';
+import type { Doc, DocCollection } from '@blocksuite/store';
 
 import type { InsertToPosition } from '../../types.js';
 import type { ColumnConfig } from '../columns/manager.js';
@@ -11,7 +11,7 @@ import type { AllDocDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
 export class AllDocDatasource extends BaseDataSource {
-  private workspace: Workspace;
+  private workspace: DocCollection;
 
   public get rows(): string[] {
     return Array.from(this.workspace.docs.keys());

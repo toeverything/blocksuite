@@ -1,11 +1,11 @@
-import type { Workspace } from '../store/index.js';
+import type { DocCollection } from '../store/index.js';
 
 declare global {
   interface WindowEventMap {
     'test-result': CustomEvent<TestResult>;
   }
   interface Window {
-    workspace: Workspace;
+    workspace: DocCollection;
   }
 }
 

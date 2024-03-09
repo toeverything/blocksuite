@@ -4,7 +4,7 @@ import {
   BlockIndexer,
   SearchIndexer,
 } from '../../indexer/index.js';
-import type { WorkspaceOptions } from '../workspace.js';
+import type { DocCollectionOptions } from '../collection.js';
 import { addOnFactory } from './shared.js';
 
 type Indexer = {
@@ -26,7 +26,7 @@ export const indexer = addOnFactory<keyof IndexerAddon>(
         return this.indexer.search.search(query);
       }
 
-      constructor(storeOptions: WorkspaceOptions) {
+      constructor(storeOptions: DocCollectionOptions) {
         super(storeOptions);
         const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
         this.indexer = {

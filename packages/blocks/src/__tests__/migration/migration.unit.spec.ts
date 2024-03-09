@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { Schema, Workspace, type Y } from '@blocksuite/store';
+import { DocCollection, Schema, type Y } from '@blocksuite/store';
 import { assert, describe, expect, test } from 'vitest';
 
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
@@ -21,8 +21,8 @@ async function loadBinary(name: string) {
   const path = join(originPath, `../ydocs/${name}.ydoc`);
   const buffer = await readFile(path);
   const update = new Uint8Array(buffer);
-  const doc = new Workspace.Y.Doc();
-  Workspace.Y.applyUpdate(doc, update);
+  const doc = new DocCollection.Y.Doc();
+  DocCollection.Y.applyUpdate(doc, update);
   return doc;
 }
 

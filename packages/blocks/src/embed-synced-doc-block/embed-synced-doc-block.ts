@@ -5,7 +5,7 @@ import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -310,7 +310,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
-    const yText = new Workspace.Y.Text();
+    const yText = new DocCollection.Y.Text();
     yText.insert(0, REFERENCE_NODE);
     yText.format(0, REFERENCE_NODE.length, {
       reference: { type: 'LinkedPage', pageId },

@@ -2,7 +2,7 @@ import { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
-import type { DocMeta, Workspace } from '../store/index.js';
+import type { DocCollection, DocMeta } from '../store/index.js';
 import type { Doc } from '../store/index.js';
 import type { DocsPropertiesMeta } from '../store/meta.js';
 import { AssetsManager } from './assets.js';
@@ -29,12 +29,12 @@ import {
 } from './type.js';
 
 export type JobConfig = {
-  workspace: Workspace;
+  workspace: DocCollection;
   middlewares?: JobMiddleware[];
 };
 
 export class Job {
-  private readonly _workspace: Workspace;
+  private readonly _workspace: DocCollection;
   private readonly _assetsManager: AssetsManager;
   private readonly _adapterConfigs: Map<string, string> = new Map();
 

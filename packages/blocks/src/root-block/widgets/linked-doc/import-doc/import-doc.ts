@@ -1,7 +1,7 @@
 import '../../../../_common/components/loader.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { type Workspace } from '@blocksuite/store';
+import { type DocCollection } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
@@ -30,7 +30,7 @@ export type OnFailHandler = (message: string) => void;
 
 const SHOW_LOADING_SIZE = 1024 * 200;
 
-export async function importMarkDown(workspace: Workspace, text: string) {
+export async function importMarkDown(workspace: DocCollection, text: string) {
   const job = new Job({
     workspace: workspace,
     middlewares: [defaultImageProxyMiddleware],
@@ -45,7 +45,7 @@ export async function importMarkDown(workspace: Workspace, text: string) {
   return page.id;
 }
 
-export async function importHtml(workspace: Workspace, text: string) {
+export async function importHtml(workspace: DocCollection, text: string) {
   const job = new Job({
     workspace: workspace,
     middlewares: [defaultImageProxyMiddleware],
@@ -60,7 +60,7 @@ export async function importHtml(workspace: Workspace, text: string) {
   return page.id;
 }
 
-export async function importNotion(workspace: Workspace, file: File) {
+export async function importNotion(workspace: DocCollection, file: File) {
   const pageIds: string[] = [];
   let isWorkspaceFile = false;
   let hasMarkdown = false;
@@ -157,7 +157,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
   containerEl!: HTMLElement;
 
   constructor(
-    private workspace: Workspace,
+    private workspace: DocCollection,
     private onSuccess?: OnSuccessHandler,
     private onFail?: OnFailHandler,
     private abortController = new AbortController()

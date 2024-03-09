@@ -1,4 +1,4 @@
-import { Workspace, type Y } from '@blocksuite/store';
+import { DocCollection, type Y } from '@blocksuite/store';
 
 import type { HitTestOptions } from '../../root-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
@@ -65,8 +65,8 @@ export type ShapeProps = BaseProps & {
 
 export class ShapeElementModel extends ElementModel<ShapeProps> {
   static override propsToY(props: ShapeProps) {
-    if (props.text && !(props.text instanceof Workspace.Y.Text)) {
-      props.text = new Workspace.Y.Text(props.text);
+    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
+      props.text = new DocCollection.Y.Text(props.text);
     }
 
     return props;

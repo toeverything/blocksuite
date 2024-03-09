@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 
 import type { SchemaToModel } from '../schema/index.js';
 import { defineBlockSchema, Schema } from '../schema/index.js';
-import { Generator, Workspace } from '../store/index.js';
+import { DocCollection, Generator } from '../store/index.js';
 
 const docSchema = defineBlockSchema({
   flavour: 'page',
@@ -30,7 +30,7 @@ function createTestOptions() {
 
 test('trigger props updated', () => {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
 
   const doc = workspace.createDoc({ id: 'home' });
   doc.load();
@@ -89,7 +89,7 @@ test('trigger props updated', () => {
 
 test('stash and pop', () => {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
 
   const doc = workspace.createDoc({ id: 'home' });
   doc.load();
@@ -158,7 +158,7 @@ test('stash and pop', () => {
 
 test('always get latest value in onChange', () => {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
 
   const doc = workspace.createDoc({ id: 'home' });
   doc.load();
