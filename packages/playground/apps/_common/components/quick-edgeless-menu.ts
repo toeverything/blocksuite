@@ -22,7 +22,7 @@ import { ColorVariables, extractCssVariables } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import { Text, Utils, type Workspace } from '@blocksuite/store';
+import { type DocCollection, Text, Utils } from '@blocksuite/store';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -64,7 +64,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  workspace!: Workspace;
+  workspace!: DocCollection;
 
   @property({ attribute: false })
   editor!: AffineEditorContainer;

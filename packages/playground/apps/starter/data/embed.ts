@@ -1,8 +1,8 @@
-import { Text, type Workspace } from '@blocksuite/store';
+import { type DocCollection, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-export const embed: InitFn = (workspace: Workspace, id: string) => {
+export const embed: InitFn = (workspace: DocCollection, id: string) => {
   const doc = workspace.getDoc(id) ?? workspace.createDoc({ id });
   doc.clear();
 

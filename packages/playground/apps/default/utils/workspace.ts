@@ -3,13 +3,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlobStorage,
   createIndexeddbStorage,
+  DocCollection,
+  type DocCollectionOptions,
   Generator,
   Job,
   Schema,
   type StoreOptions,
   Text,
-  Workspace,
-  type WorkspaceOptions,
 } from '@blocksuite/store';
 import { IndexedDBDocSource } from '@blocksuite/sync';
 
@@ -45,7 +45,7 @@ export async function createDefaultDocWorkspace() {
     awarenessSources = [new WebSocketAwarenessSource(ws)];
   }
 
-  const options: WorkspaceOptions = {
+  const options: DocCollectionOptions = {
     id: 'quickEdgeless',
     schema,
     idGenerator,
@@ -57,7 +57,7 @@ export async function createDefaultDocWorkspace() {
       enable_bultin_ledits: true,
     },
   };
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
 
   workspace.start();
 
@@ -65,12 +65,12 @@ export async function createDefaultDocWorkspace() {
   window.workspace = workspace;
   window.blockSchemas = AffineSchemas;
   window.job = new Job({ workspace });
-  window.Y = Workspace.Y;
+  window.Y = DocCollection.Y;
 
   return workspace;
 }
 
-export async function initDefaultDocWorkspace(workspace: Workspace) {
+export async function initDefaultDocWorkspace(workspace: DocCollection) {
   const params = new URLSearchParams(location.search);
 
   await workspace.waitForSynced();

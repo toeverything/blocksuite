@@ -11,11 +11,11 @@ import { numberPureColumnConfig } from '@blocksuite/blocks';
 import { progressPureColumnConfig } from '@blocksuite/blocks';
 import { richTextPureColumnConfig } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { Text, type Workspace } from '@blocksuite/store';
+import { type DocCollection, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-export const database: InitFn = (workspace: Workspace, id: string) => {
+export const database: InitFn = (workspace: DocCollection, id: string) => {
   const doc = workspace.createDoc({ id });
   doc.awarenessStore.setFlag('enable_expand_database_block', true);
 

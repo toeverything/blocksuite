@@ -6,12 +6,12 @@ import {
   createIndexeddbStorage,
   createMemoryStorage,
   createSimpleServerStorage,
+  DocCollection,
+  type DocCollectionOptions,
   Generator,
   Job,
   Schema,
   type StoreOptions,
-  Workspace,
-  type WorkspaceOptions,
 } from '@blocksuite/store';
 import {
   BroadcastChannelAwarenessSource,
@@ -49,7 +49,7 @@ export function createStarterDocWorkspace() {
     };
   }
 
-  const options: WorkspaceOptions = {
+  const options: DocCollectionOptions = {
     id: room ?? 'starter',
     schema,
     idGenerator,
@@ -61,7 +61,7 @@ export function createStarterDocWorkspace() {
     awarenessSources: [new BroadcastChannelAwarenessSource()],
     docSources,
   };
-  const workspace = new Workspace(options);
+  const workspace = new DocCollection(options);
 
   workspace.start();
 
@@ -69,13 +69,13 @@ export function createStarterDocWorkspace() {
   window.workspace = workspace;
   window.blockSchemas = AffineSchemas;
   window.job = new Job({ workspace });
-  window.Y = Workspace.Y;
+  window.Y = DocCollection.Y;
   window.testUtils = new TestUtils();
 
   return workspace;
 }
 
-export async function initStarterDocWorkspace(workspace: Workspace) {
+export async function initStarterDocWorkspace(workspace: DocCollection) {
   // init from other clients
   if (room && !params.has('init')) {
     let firstDoc = workspace.docs.values().next().value as Doc | undefined;
@@ -99,7 +99,7 @@ export async function initStarterDocWorkspace(workspace: Workspace) {
   // use built-in init function
   const functionMap = new Map<
     string,
-    (workspace: Workspace, id: string) => Promise<void> | void
+    (workspace: DocCollection, id: string) => Promise<void> | void
   >();
   Object.values(
     (await import('../data/index.js')) as Record<string, InitFn>

@@ -1,10 +1,10 @@
 import type { SerializedXYWH } from '@blocksuite/blocks';
 import {
   Boxed,
+  type DocCollection,
   nanoid,
   native2Y,
   Text,
-  type Workspace,
   type Y,
 } from '@blocksuite/store';
 
@@ -13,7 +13,10 @@ import { type InitFn } from './utils.js';
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 const params = new URLSearchParams(location.search);
 
-export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
+export const heavyWhiteboard: InitFn = (
+  workspace: DocCollection,
+  id: string
+) => {
   const count = Number(params.get('count')) || 100;
 
   const doc = workspace.createDoc({ id });

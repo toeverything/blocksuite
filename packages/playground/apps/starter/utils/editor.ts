@@ -5,7 +5,7 @@ import {
   CommentPanel,
   CopilotPanel,
 } from '@blocksuite/presets';
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
 import { CustomOutlinePanel } from '../../_common/components/custom-outline-panel.js';
@@ -17,7 +17,7 @@ import { SidePanel } from '../../_common/components/side-panel.js';
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 
-export async function mountDefaultDocEditor(workspace: Workspace) {
+export async function mountDefaultDocEditor(workspace: DocCollection) {
   const doc = workspace.docs.values().next().value;
   assertExists(doc, 'Need to create a doc first');
 

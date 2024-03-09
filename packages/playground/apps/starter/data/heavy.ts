@@ -1,10 +1,10 @@
-import { Text, type Workspace } from '@blocksuite/store';
+import { type DocCollection, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
 const params = new URLSearchParams(location.search);
 
-export const heavy: InitFn = (workspace: Workspace, docId: string) => {
+export const heavy: InitFn = (workspace: DocCollection, docId: string) => {
   const count = Number(params.get('count')) || 1000;
 
   const doc = workspace.createDoc({ id: docId });

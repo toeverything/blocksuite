@@ -1,9 +1,9 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
-import { Text, type Workspace } from '@blocksuite/store';
+import { type DocCollection, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-export const multiEditor: InitFn = (workspace: Workspace, id: string) => {
+export const multiEditor: InitFn = (workspace: DocCollection, id: string) => {
   const doc = workspace.createDoc({ id });
   doc.load(() => {
     // Add root block and surface block at root level
@@ -49,7 +49,7 @@ multiEditor.displayName = 'Multiple Editor Example';
 multiEditor.description = 'Multiple Editor basic example';
 
 export const multiEditorVertical: InitFn = (
-  workspace: Workspace,
+  workspace: DocCollection,
   docId: string
 ) => {
   const doc = workspace.createDoc({ id: docId });

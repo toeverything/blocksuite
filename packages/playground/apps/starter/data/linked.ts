@@ -1,8 +1,8 @@
-import { Text, type Workspace } from '@blocksuite/store';
+import { type DocCollection, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-export const linked: InitFn = (workspace: Workspace, id: string) => {
+export const linked: InitFn = (workspace: DocCollection, id: string) => {
   const docA = workspace.getDoc(id) ?? workspace.createDoc({ id });
 
   const docBId = 'doc:linked-page';

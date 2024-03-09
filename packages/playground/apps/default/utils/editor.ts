@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer } from '@blocksuite/presets';
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
@@ -11,7 +11,7 @@ import { getExampleSpecs } from '../specs-examples/index.js';
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
-export async function mountDefaultDocEditor(workspace: Workspace) {
+export async function mountDefaultDocEditor(workspace: DocCollection) {
   const doc = workspace.docs.values().next().value;
   assertExists(doc, 'Need to create a doc first');
 
