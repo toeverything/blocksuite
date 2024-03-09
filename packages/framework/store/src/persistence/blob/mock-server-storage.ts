@@ -1,7 +1,7 @@
 import type { BlobStorage } from './types.js';
 
 /**
- * API: /api/workspace/:id/blob/:key
+ * API: /api/collection/:id/blob/:key
  * GET: get blob
  * PUT: set blob
  * DELETE: delete blob
@@ -14,7 +14,7 @@ export function createSimpleServerStorage(id: string): BlobStorage {
         if (localCache.has(key)) {
           return localCache.get(key) as Blob;
         } else {
-          const blob = await fetch(`/api/workspace/${id}/blob/${key}`, {
+          const blob = await fetch(`/api/collection/${id}/blob/${key}`, {
             method: 'GET',
           }).then(response => {
             if (!response.ok) {
@@ -28,7 +28,7 @@ export function createSimpleServerStorage(id: string): BlobStorage {
       },
       set: async (key: string, value: Blob) => {
         localCache.set(key, value);
-        await fetch(`/api/workspace/${id}/blob/${key}`, {
+        await fetch(`/api/collection/${id}/blob/${key}`, {
           method: 'PUT',
           body: await value.arrayBuffer(),
         });
@@ -36,7 +36,7 @@ export function createSimpleServerStorage(id: string): BlobStorage {
       },
       delete: async (key: string) => {
         localCache.delete(key);
-        await fetch(`/api/workspace/${id}/blob/${key}`, {
+        await fetch(`/api/collection/${id}/blob/${key}`, {
           method: 'DELETE',
         });
       },

@@ -53,7 +53,7 @@ export function syncBlockProps(
   });
 }
 
-export function encodeWorkspaceAsYjsUpdateV2(
+export function encodeCollectionAsYjsUpdateV2(
   collection: DocCollection
 ): string {
   return toBase64(Y.encodeStateAsUpdateV2(collection.doc));

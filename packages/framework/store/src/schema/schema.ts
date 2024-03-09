@@ -106,7 +106,7 @@ export class Schema {
     }
   }
 
-  upgradeWorkspace = (rootData: Y.Doc) => {
+  upgradeCollection = (rootData: Y.Doc) => {
     this._upgradeBlockVersions(rootData);
     collectionMigrations.forEach(migration => {
       try {

@@ -37,16 +37,16 @@ schema.register([
   FrameBlockSchema,
 ]);
 
-describe('workspace migration', () => {
-  test('add pageVersion in workspace meta', async () => {
-    const doc = await loadBinary('workspace-v1-v2');
+describe('collection migration', () => {
+  test('add pageVersion in collection meta', async () => {
+    const doc = await loadBinary('collection-v1-v2');
 
     const meta = doc.getMap('meta');
     const before = meta.toJSON();
     assert.equal(before['workspaceVersion'], 1);
     assert.isUndefined(before['pageVersion']);
 
-    schema.upgradeWorkspace(doc);
+    schema.upgradeCollection(doc);
 
     const after = meta.toJSON();
     assert.equal(after['workspaceVersion'], 2);

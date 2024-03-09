@@ -5,7 +5,7 @@ import type { Slot } from '@blocksuite/global/utils';
 import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
-import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
+import { COLLECTION_VERSION, PAGE_VERSION } from '../consts.js';
 import type { BlockModel, BlockSchemaType, Doc } from '../index.js';
 import { DocCollection, Generator, Schema } from '../index.js';
 import type { DocMeta } from '../store/index.js';
@@ -27,7 +27,7 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, schema };
+  return { id: 'test-collection', idGenerator, schema };
 }
 
 const defaultDocId = 'doc:home';
@@ -35,7 +35,7 @@ const spaceId = defaultDocId;
 const spaceMetaId = 'meta';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeWorkspace(doc: BlockSuiteDoc): Record<string, any> {
+function serializCollection(doc: BlockSuiteDoc): Record<string, any> {
   const spaces = {};
   doc.spaces.forEach((subDoc, key) => {
     // @ts-ignore
@@ -91,14 +91,14 @@ beforeEach(() => {
 });
 
 describe('basic', () => {
-  it('can init workspace', () => {
+  it('can init collection', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
     assert.equal(collection.isEmpty, true);
 
     const doc = collection.createDoc({ id: 'doc:home' });
     doc.load();
-    const actual = serializeWorkspace(collection.doc);
+    const actual = serializCollection(collection.doc);
     const actualDoc = actual[spaceMetaId].pages[0] as DocMeta;
 
     assert.equal(collection.isEmpty, false);
@@ -115,7 +115,7 @@ describe('basic', () => {
             tags: [],
           },
         ],
-        workspaceVersion: WORKSPACE_VERSION,
+        workspaceVersion: COLLECTION_VERSION,
         pageVersion: PAGE_VERSION,
         blockVersions: {
           'affine:note': 1,
@@ -131,7 +131,7 @@ describe('basic', () => {
     });
   });
 
-  it('init workspace with custom id generator', () => {
+  it('init collection with custom id generator', () => {
     const options = createTestOptions();
     let id = 100;
     const collection = new DocCollection({
@@ -177,7 +177,7 @@ describe('basic', () => {
     expect(readyCallback).toBeCalledTimes(1);
   });
 
-  it('workspace docs with yjs applyUpdate', () => {
+  it('collection docs with yjs applyUpdate', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
     const collection2 = new DocCollection(options);
@@ -245,7 +245,7 @@ describe('addBlock', () => {
       title: new doc.Text(),
     });
 
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': [],
@@ -260,7 +260,7 @@ describe('addBlock', () => {
     const doc = createTestDoc();
     doc.addBlock('affine:page', { title: new doc.Text('hello') });
 
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -286,7 +286,7 @@ describe('addBlock', () => {
       noteId
     );
 
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -360,7 +360,7 @@ describe('addBlock', () => {
     assert.equal(root.children[0].children[0].flavour, 'affine:paragraph');
     assert.equal(root.childMap.get('1'), 0);
 
-    const serializedChildren = serializeWorkspace(doc.rootDoc).spaces[spaceId]
+    const serializedChildren = serializCollection(doc.rootDoc).spaces[spaceId]
       .blocks['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
     assert.equal(root.children[0].id, '1');
@@ -382,7 +382,7 @@ describe('addBlock', () => {
 
     assert.equal(collection.docs.size, 1);
     assert.equal(
-      serializeWorkspace(doc0.rootDoc).spaces['doc:home'],
+      serializCollection(doc0.rootDoc).spaces['doc:home'],
       undefined
     );
 
@@ -443,7 +443,7 @@ describe('addBlock', () => {
     assert.ok(called);
   });
 
-  it('can set workspace common meta fields', async () => {
+  it('can set collection common meta fields', async () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
 
@@ -465,7 +465,7 @@ describe('deleteBlock', () => {
     const noteId = doc.addBlock('affine:note', {}, rootId);
     doc.addBlock('affine:paragraph', {}, noteId);
     doc.addBlock('affine:paragraph', {}, noteId);
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -500,7 +500,7 @@ describe('deleteBlock', () => {
     const deletedModel = doc.getBlockById('1') as BlockModel;
     doc.deleteBlock(deletedModel);
 
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': [],
@@ -520,7 +520,7 @@ describe('deleteBlock', () => {
     doc.addBlock('affine:paragraph', {}, p1);
     doc.addBlock('affine:paragraph', {}, p1);
 
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -566,7 +566,7 @@ describe('deleteBlock', () => {
       bringChildrenTo: deletedModelParent,
     });
 
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -610,7 +610,7 @@ describe('deleteBlock', () => {
     doc.addBlock('affine:paragraph', {}, p1);
     doc.addBlock('affine:paragraph', {}, p2);
 
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -672,7 +672,7 @@ describe('deleteBlock', () => {
       bringChildrenTo: moveToModel,
     });
 
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -729,7 +729,7 @@ describe('deleteBlock', () => {
     doc.addBlock('affine:paragraph', {}, noteId);
 
     // before delete
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -756,7 +756,7 @@ describe('deleteBlock', () => {
     doc.deleteBlock(rootModel.children[0].children[0]);
 
     // after delete
-    assert.deepEqual(serializeWorkspace(doc.rootDoc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -828,8 +828,8 @@ describe('getBlock', () => {
 });
 
 // Inline snapshot is not supported under describe.parallel config
-describe('workspace.exportJSX works', () => {
-  it('workspace matches snapshot', () => {
+describe('collection.exportJSX works', () => {
+  it('collection matches snapshot', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
     const doc = collection.createDoc({ id: 'doc:home' });
@@ -843,7 +843,7 @@ describe('workspace.exportJSX works', () => {
     `);
   });
 
-  it('empty workspace matches snapshot', () => {
+  it('empty collection matches snapshot', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
     collection.createDoc({ id: 'doc:home' });
@@ -851,7 +851,7 @@ describe('workspace.exportJSX works', () => {
     expect(collection.exportJSX()).toMatchInlineSnapshot('null');
   });
 
-  it('workspace with multiple blocks children matches snapshot', () => {
+  it('collection with multiple blocks children matches snapshot', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);
     const doc = collection.createDoc({ id: 'doc:home' });
@@ -879,7 +879,7 @@ describe('workspace.exportJSX works', () => {
   });
 });
 
-describe('workspace search', () => {
+describe('collection search', () => {
   it('search doc meta title', () => {
     const options = createTestOptions();
     const collection = new DocCollection(options);

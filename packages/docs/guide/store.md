@@ -8,22 +8,22 @@ In BlockSuite, a [`Doc`](/api/@blocksuite/store/classes/Doc.html) is the contain
 
 Besides the block tree, the [selection](./selection) state is also stored in the [`doc.awarenessStore`](/api/@blocksuite/store/classes/Doc.html#awarenessstore) inside the doc. This store is also built on top of the Yjs [awareness](https://docs.yjs.dev/api/about-awareness).
 
-## `Workspace`
+## `DocCollection`
 
-In BlockSuite, a [`DocCollection`](/api/@blocksuite/store/classes/DocCollection.html) is defined as an opt-in collection of multiple docs, providing comprehensive features for managing cross-doc updates and data synchronization. You can access the workspace via the `doc.collection` getter, or you can also create a workspace manually:
+In BlockSuite, a [`DocCollection`](/api/@blocksuite/store/classes/DocCollection.html) is defined as an opt-in collection of multiple docs, providing comprehensive features for managing cross-doc updates and data synchronization. You can access the collection via the `doc.collection` getter, or you can also create a collection manually:
 
 ```ts
 import { DocCollection, Schema } from '@blocksuite/store';
 
 const schema = new Schema();
 
-// You can register a batch of block schemas to the workspace
+// You can register a batch of block schemas to the collection
 schema.register(AffineSchemas);
 
 const collection = new DocCollection({ schema });
 ```
 
-Then multiple `doc`s can be created under the workspace:
+Then multiple `doc`s can be created under the collection:
 
 ```ts
 const collection = new DocCollection({ schema });

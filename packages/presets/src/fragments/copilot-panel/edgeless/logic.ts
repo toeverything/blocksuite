@@ -56,7 +56,7 @@ export class AIEdgelessLogic {
     }).dispose;
   };
 
-  get workspace(): DocCollection {
+  get collection(): DocCollection {
     return this.host.doc.collection;
   }
 

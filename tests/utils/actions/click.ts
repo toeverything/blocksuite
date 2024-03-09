@@ -74,8 +74,8 @@ export async function addNewPage(page: Page) {
   }
   await page.locator('.new-doc-button').click();
   const docMetas = await page.evaluate(() => {
-    const { workspace } = window;
-    return workspace.meta.docMetas;
+    const { workspace: collection } = window;
+    return collection.meta.docMetas;
   });
   if (!docMetas.length) throw new Error('Add new doc failed');
   return docMetas[docMetas.length - 1];
@@ -83,15 +83,15 @@ export async function addNewPage(page: Page) {
 
 export async function switchToPage(page: Page, docId?: string) {
   await page.evaluate(docId => {
-    const { workspace, editor } = window;
+    const { workspace: collection, editor } = window;
 
     if (!docId) {
-      const docMetas = workspace.meta.docMetas;
+      const docMetas = collection.meta.docMetas;
       if (!docMetas.length) return;
       docId = docMetas[0].id;
     }
 
-    const doc = workspace.getDoc(docId);
+    const doc = collection.getDoc(docId);
     if (!doc) return;
     editor.doc = doc;
   }, docId);

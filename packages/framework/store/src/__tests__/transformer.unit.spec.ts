@@ -47,7 +47,7 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register([docSchema]);
-  return { id: 'test-workspace', idGenerator, schema };
+  return { id: 'test-collection', idGenerator, schema };
 }
 
 const transformer = new BaseBlockTransformer();

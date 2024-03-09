@@ -23,7 +23,7 @@ export class BlockService<_Model extends BlockModel = BlockModel> {
     this.specSlots = options.slots;
   }
 
-  get workspace() {
+  get collection() {
     return this.std.collection;
   }
 

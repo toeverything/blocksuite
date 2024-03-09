@@ -16,7 +16,7 @@ import type { InlineRootElement } from '@inline/inline-editor.js';
 import type { BlockElement, EditorHost } from '@lit/element/index.js';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
-import { PAGE_VERSION, WORKSPACE_VERSION } from '@store/consts.js';
+import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';
 import type { BlockModel, SerializedStore } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
 import {
@@ -91,7 +91,7 @@ export const defaultStore: SerializedStore = {
       'affine:attachment': 1,
       'affine:surface-ref': 1,
     },
-    workspaceVersion: WORKSPACE_VERSION,
+    workspaceVersion: COLLECTION_VERSION,
     pageVersion: PAGE_VERSION,
   },
   spaces: {

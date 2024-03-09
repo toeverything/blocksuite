@@ -84,16 +84,16 @@ export class Doc extends Space<FlatBlockMap> {
 
   constructor({
     id,
-    collection: workspace,
+    collection,
     doc,
     awarenessStore,
     idGenerator = uuidv4,
   }: DocOptions) {
     super(id, doc, awarenessStore);
-    this._collection = workspace;
+    this._collection = collection;
     this._idGenerator = idGenerator;
     this._blockTree = new BlockTree({
-      schema: workspace.schema,
+      schema: collection.schema,
       yBlocks: this.yBlocks,
     });
   }

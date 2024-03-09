@@ -9,7 +9,7 @@ import {
 export { importHtml, importMarkDown, importNotion } from './import-doc.js';
 
 export function showImportModal({
-  collection: workspace,
+  collection,
   onSuccess,
   onFail,
   container = document.body,
@@ -23,7 +23,7 @@ export function showImportModal({
   abortController?: AbortController;
 }) {
   const importDoc = new ImportDoc(
-    workspace,
+    collection,
     onSuccess,
     onFail,
     abortController

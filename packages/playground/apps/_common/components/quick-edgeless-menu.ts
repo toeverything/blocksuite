@@ -227,7 +227,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _shareUrl() {
-    const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.collection);
+    const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
     const url = new URL(window.location.toString());
     url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);

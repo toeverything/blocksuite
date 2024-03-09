@@ -1,7 +1,7 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 
-import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
+import { COLLECTION_VERSION, PAGE_VERSION } from '../consts.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { DocCollection } from './collection.js';
 
@@ -170,7 +170,7 @@ export class DocCollectionMeta {
     const { blockVersions, pageVersion, workspaceVersion } = this._proxy;
 
     if (!workspaceVersion) {
-      this._proxy.workspaceVersion = WORKSPACE_VERSION;
+      this._proxy.workspaceVersion = COLLECTION_VERSION;
     } else {
       console.error('Workspace version is already set');
     }
@@ -193,7 +193,7 @@ export class DocCollectionMeta {
   }
 
   updateVersion(collection: DocCollection) {
-    this._proxy.workspaceVersion = WORKSPACE_VERSION;
+    this._proxy.workspaceVersion = COLLECTION_VERSION;
 
     this._proxy.pageVersion = PAGE_VERSION;
 
@@ -214,7 +214,7 @@ export class DocCollectionMeta {
         'Invalid workspace data, workspace version is missing. Please make sure the data is valid.'
       );
     }
-    if (workspaceVersion < WORKSPACE_VERSION) {
+    if (workspaceVersion < COLLECTION_VERSION) {
       throw new Error(
         `Workspace version ${workspaceVersion} is outdated. Please upgrade the editor.`
       );
