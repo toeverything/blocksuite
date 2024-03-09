@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BlockModel } from '../schema/index.js';
-import type { Doc } from '../workspace/index.js';
+import type { Doc } from '../store/index.js';
 
 type SliceData = {
   content: BlockModel[];

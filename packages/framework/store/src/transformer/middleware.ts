@@ -1,7 +1,7 @@
 import type { Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel } from '../schema/index.js';
-import type { Doc, Workspace } from '../workspace/index.js';
+import type { Doc, Workspace } from '../store/index.js';
 import type { AssetsManager } from './assets.js';
 import type { Slice } from './slice.js';
 import type {

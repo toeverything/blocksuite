@@ -2,9 +2,9 @@ import { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BlockModel, BlockSchemaType } from '../schema/index.js';
-import type { DocMeta, Workspace } from '../workspace/index.js';
-import type { Doc } from '../workspace/index.js';
-import type { DocsPropertiesMeta } from '../workspace/meta.js';
+import type { DocMeta, Workspace } from '../store/index.js';
+import type { Doc } from '../store/index.js';
+import type { DocsPropertiesMeta } from '../store/meta.js';
 import { AssetsManager } from './assets.js';
 import { BaseBlockTransformer } from './base.js';
 import type {

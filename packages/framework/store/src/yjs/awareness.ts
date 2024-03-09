@@ -2,8 +2,8 @@ import { Slot } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
-import type { Space } from '../workspace/space.js';
-import type { Store } from '../workspace/store.js';
+import type { Space } from '../store/space.js';
+import type { Store } from '../store/store.js';
 
 export interface UserInfo {
   name: string;

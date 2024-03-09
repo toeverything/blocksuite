@@ -4,9 +4,9 @@ import { z } from 'zod';
 
 import { Boxed } from '../reactive/boxed.js';
 import { Text } from '../reactive/text.js';
+import type { YBlock } from '../store/block/block.js';
+import type { Doc } from '../store/index.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
-import type { YBlock } from '../workspace/block/block.js';
-import type { Doc } from '../workspace/index.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();
