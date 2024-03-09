@@ -2,14 +2,14 @@ import { type DocCollection, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-export const linked: InitFn = (workspace: DocCollection, id: string) => {
-  const docA = workspace.getDoc(id) ?? workspace.createDoc({ id });
+export const linked: InitFn = (collection: DocCollection, id: string) => {
+  const docA = collection.getDoc(id) ?? collection.createDoc({ id });
 
   const docBId = 'doc:linked-page';
-  const docB = workspace.createDoc({ id: docBId });
+  const docB = collection.createDoc({ id: docBId });
 
   const docCId = 'doc:linked-edgeless';
-  const docC = workspace.createDoc({ id: docCId });
+  const docC = collection.createDoc({ id: docCId });
 
   docA.clear();
   docB.clear();

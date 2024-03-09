@@ -9,13 +9,13 @@ import {
 export { importHtml, importMarkDown, importNotion } from './import-doc.js';
 
 export function showImportModal({
-  workspace,
+  collection: workspace,
   onSuccess,
   onFail,
   container = document.body,
   abortController = new AbortController(),
 }: {
-  workspace: DocCollection;
+  collection: DocCollection;
   onSuccess?: OnSuccessHandler;
   onFail?: OnFailHandler;
   multiple?: boolean;

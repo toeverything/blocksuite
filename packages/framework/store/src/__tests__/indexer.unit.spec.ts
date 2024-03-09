@@ -21,13 +21,13 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, schema };
+  return { id: 'test-collection', idGenerator, schema };
 }
 
-function createTestDoc(pageId = 'doc:home', workspace?: DocCollection) {
+function createTestDoc(pageId = 'doc:home', collection?: DocCollection) {
   const options = createTestOptions();
-  const _workspace = workspace || new DocCollection(options);
-  const doc = _workspace.createDoc({ id: pageId });
+  const _collection = collection || new DocCollection(options);
+  const doc = _collection.createDoc({ id: pageId });
   doc.load();
   return doc;
 }
@@ -54,8 +54,8 @@ beforeEach(() => {
   }
 });
 
-describe('workspace.search works', () => {
-  it('workspace search matching', () => {
+describe('collection.search works', () => {
+  it('collection search matching', () => {
     const doc = createTestDoc();
     const collection = doc.collection;
 

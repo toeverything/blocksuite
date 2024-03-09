@@ -46,7 +46,7 @@ These six core methods are expected to be purely functional. They should not hav
 Sample usage:
 
 ```ts
-const job = new Job({ workspace: doc.workspace });
+const job = new Job({ collection: doc.collection });
 const snapshot = await job.docToSnapshot(doc);
 
 const adapter = new MarkdownAdapter();

@@ -15,8 +15,8 @@ import { type DocCollection, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-export const database: InitFn = (workspace: DocCollection, id: string) => {
-  const doc = workspace.createDoc({ id });
+export const database: InitFn = (collection: DocCollection, id: string) => {
+  const doc = collection.createDoc({ id });
   doc.awarenessStore.setFlag('enable_expand_database_block', true);
 
   doc.load(() => {

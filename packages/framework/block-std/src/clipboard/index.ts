@@ -42,7 +42,7 @@ export class Clipboard {
   private _getJob() {
     return new Job({
       middlewares: this._jobMiddlewares,
-      collection: this.std.workspace,
+      collection: this.std.collection,
     });
   }
 

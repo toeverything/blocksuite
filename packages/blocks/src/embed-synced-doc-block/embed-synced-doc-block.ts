@@ -76,7 +76,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   syncedDocEditorHost?: EditorHost;
 
   get syncedDoc() {
-    const doc = this.std.workspace.getDoc(this.model.pageId);
+    const doc = this.std.collection.getDoc(this.model.pageId);
     return doc;
   }
 

@@ -80,7 +80,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   get linkedDoc() {
-    const doc = this.std.workspace.getDoc(this.model.pageId);
+    const doc = this.std.collection.getDoc(this.model.pageId);
     return doc;
   }
 

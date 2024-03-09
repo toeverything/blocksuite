@@ -147,7 +147,7 @@ export const getMenus: (ctx: {
               toast(editorHost, message);
             };
             showImportModal({
-              workspace: doc.collection,
+              collection: doc.collection,
               onSuccess,
               onFail,
             });

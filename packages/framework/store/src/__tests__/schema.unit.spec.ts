@@ -21,7 +21,7 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, schema };
+  return { id: 'test-collection', idGenerator, schema };
 }
 
 const TestCustomNoteBlockSchema = defineBlockSchema({

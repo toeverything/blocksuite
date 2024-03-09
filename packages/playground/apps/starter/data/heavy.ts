@@ -4,10 +4,10 @@ import { type InitFn } from './utils.js';
 
 const params = new URLSearchParams(location.search);
 
-export const heavy: InitFn = (workspace: DocCollection, docId: string) => {
+export const heavy: InitFn = (collection: DocCollection, docId: string) => {
   const count = Number(params.get('count')) || 1000;
 
-  const doc = workspace.createDoc({ id: docId });
+  const doc = collection.createDoc({ id: docId });
   doc.load(() => {
     // Add root block and surface block at root level
     const rootId = doc.addBlock('affine:page', {

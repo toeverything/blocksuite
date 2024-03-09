@@ -30,9 +30,9 @@ export type OnFailHandler = (message: string) => void;
 
 const SHOW_LOADING_SIZE = 1024 * 200;
 
-export async function importMarkDown(workspace: DocCollection, text: string) {
+export async function importMarkDown(collection: DocCollection, text: string) {
   const job = new Job({
-    collection: workspace,
+    collection,
     middlewares: [defaultImageProxyMiddleware],
   });
   const mdAdapter = new MarkdownAdapter();
@@ -45,9 +45,9 @@ export async function importMarkDown(workspace: DocCollection, text: string) {
   return page.id;
 }
 
-export async function importHtml(workspace: DocCollection, text: string) {
+export async function importHtml(collection: DocCollection, text: string) {
   const job = new Job({
-    collection: workspace,
+    collection,
     middlewares: [defaultImageProxyMiddleware],
   });
   const htmlAdapter = new NotionHtmlAdapter();
@@ -60,7 +60,7 @@ export async function importHtml(workspace: DocCollection, text: string) {
   return page.id;
 }
 
-export async function importNotion(workspace: DocCollection, file: File) {
+export async function importNotion(collection: DocCollection, file: File) {
   const pageIds: string[] = [];
   let isWorkspaceFile = false;
   let hasMarkdown = false;
@@ -95,7 +95,7 @@ export async function importNotion(workspace: DocCollection, file: File) {
             continue;
           }
         }
-        pageMap.set(file, workspace.idGenerator());
+        pageMap.set(file, collection.idGenerator());
       }
       if (i === 0 && fileName.endsWith('.csv')) {
         window.open(
@@ -112,7 +112,7 @@ export async function importNotion(workspace: DocCollection, file: File) {
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
       const job = new Job({
-        collection: workspace,
+        collection: collection,
         middlewares: [defaultImageProxyMiddleware],
       });
       const htmlAdapter = new NotionHtmlAdapter();
@@ -157,7 +157,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
   containerEl!: HTMLElement;
 
   constructor(
-    private workspace: DocCollection,
+    private collection: DocCollection,
     private onSuccess?: OnSuccessHandler,
     private onFail?: OnFailHandler,
     private abortController = new AbortController()
@@ -234,7 +234,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
       } else {
         this.abortController.abort();
       }
-      const pageId = await importMarkDown(this.workspace, text);
+      const pageId = await importMarkDown(this.collection, text);
       needLoading && this.abortController.abort();
       pageIds.push(pageId);
     }
@@ -254,7 +254,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
       } else {
         this.abortController.abort();
       }
-      const pageId = await importHtml(this.workspace, text);
+      const pageId = await importHtml(this.collection, text);
       needLoading && this.abortController.abort();
       pageIds.push(pageId);
     }
@@ -282,7 +282,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
       this.abortController.abort();
     }
     const { pageIds, isWorkspaceFile, hasMarkdown } = await importNotion(
-      this.workspace,
+      this.collection,
       file
     );
     needLoading && this.abortController.abort();

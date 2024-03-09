@@ -112,9 +112,9 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
   }
 }
 
-function createDocBlock(workspace: DocCollection) {
-  const id = workspace.idGenerator();
-  createDefaultDoc(workspace, { id });
+function createDocBlock(collection: DocCollection) {
+  const id = collection.idGenerator();
+  createDefaultDoc(collection, { id });
 }
 
 declare global {

@@ -24,7 +24,7 @@ export class BlockService<_Model extends BlockModel = BlockModel> {
   }
 
   get workspace() {
-    return this.std.workspace;
+    return this.std.collection;
   }
 
   get doc() {

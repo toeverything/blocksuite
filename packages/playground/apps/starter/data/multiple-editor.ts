@@ -3,8 +3,8 @@ import { type DocCollection, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils.js';
 
-export const multiEditor: InitFn = (workspace: DocCollection, id: string) => {
-  const doc = workspace.createDoc({ id });
+export const multiEditor: InitFn = (collection: DocCollection, id: string) => {
+  const doc = collection.createDoc({ id });
   doc.load(() => {
     // Add root block and surface block at root level
     const rootId = doc.addBlock('affine:page', {
@@ -26,7 +26,7 @@ export const multiEditor: InitFn = (workspace: DocCollection, id: string) => {
     const editor = new AffineEditorContainer();
     editor.doc = doc;
     editor.slots.docLinkClicked.on(({ docId }) => {
-      const target = workspace.getDoc(docId);
+      const target = collection.getDoc(docId);
       if (!target) {
         throw new Error(`Failed to jump to doc ${docId}`);
       }
@@ -49,10 +49,10 @@ multiEditor.displayName = 'Multiple Editor Example';
 multiEditor.description = 'Multiple Editor basic example';
 
 export const multiEditorVertical: InitFn = (
-  workspace: DocCollection,
+  collection: DocCollection,
   docId: string
 ) => {
-  const doc = workspace.createDoc({ id: docId });
+  const doc = collection.createDoc({ id: docId });
   doc.load(() => {
     // Add root block and surface block at root level
     const rootId = doc.addBlock('affine:page', {
@@ -74,7 +74,7 @@ export const multiEditorVertical: InitFn = (
     const editor = new AffineEditorContainer();
     editor.doc = doc;
     editor.slots.docLinkClicked.on(({ docId }) => {
-      const target = workspace.getDoc(docId);
+      const target = collection.getDoc(docId);
       if (!target) {
         throw new Error(`Failed to jump to doc ${docId}`);
       }

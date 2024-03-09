@@ -17,8 +17,8 @@ import { SidePanel } from '../../_common/components/side-panel.js';
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 
-export async function mountDefaultDocEditor(workspace: DocCollection) {
-  const doc = workspace.docs.values().next().value;
+export async function mountDefaultDocEditor(collection: DocCollection) {
+  const doc = collection.docs.values().next().value;
   assertExists(doc, 'Need to create a doc first');
 
   assertExists(doc.ready, 'Doc is not ready');
@@ -31,7 +31,7 @@ export async function mountDefaultDocEditor(workspace: DocCollection) {
   editor.mode = defaultMode;
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ docId }) => {
-    const target = workspace.getDoc(docId);
+    const target = collection.getDoc(docId);
     if (!target) {
       throw new Error(`Failed to jump to doc ${docId}`);
     }
@@ -62,7 +62,7 @@ export async function mountDefaultDocEditor(workspace: DocCollection) {
   commentPanel.host = editor.host;
 
   const debugMenu = new DebugMenu();
-  debugMenu.workspace = workspace;
+  debugMenu.collection = collection;
   debugMenu.editor = editor;
   debugMenu.outlinePanel = outlinePanel;
   debugMenu.framePanel = framePanel;

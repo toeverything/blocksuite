@@ -121,7 +121,7 @@ async function initEmptyEditor({
             docsPanel.editor = editor;
             framePanel.editor = editor;
             outlinePanel.editor = editor;
-            debugMenu.workspace = workspace;
+            debugMenu.collection = workspace;
             debugMenu.editor = editor;
             debugMenu.docsPanel = docsPanel;
             debugMenu.framePanel = framePanel;

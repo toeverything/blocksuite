@@ -4,11 +4,11 @@ import { DocCollection } from '@blocksuite/store';
 import type { InitFn } from './utils.js';
 
 export const versionMismatch: InitFn = (
-  workspace: DocCollection,
+  collection: DocCollection,
   id: string
 ) => {
-  const doc = workspace.createDoc({ id });
-  const tempDoc = workspace.createDoc({ id: 'tempDoc' });
+  const doc = collection.createDoc({ id });
+  const tempDoc = collection.createDoc({ id: 'tempDoc' });
   doc.load();
 
   tempDoc.load(() => {
@@ -30,7 +30,7 @@ export const versionMismatch: InitFn = (
     doc.addBlock('affine:paragraph', {}, noteId);
   });
 
-  workspace.removeDoc('tempDoc');
+  collection.removeDoc('tempDoc');
   doc.resetHistory();
 };
 

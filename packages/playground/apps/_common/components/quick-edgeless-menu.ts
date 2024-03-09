@@ -64,7 +64,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  workspace!: DocCollection;
+  collection!: DocCollection;
 
   @property({ attribute: false })
   editor!: AffineEditorContainer;
@@ -171,7 +171,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   private async _exportSnapshot() {
     const zipTransformer = this.rootService.transformers.zip;
-    const file = await zipTransformer.exportDocs(this.workspace, [this.doc]);
+    const file = await zipTransformer.exportDocs(this.collection, [this.doc]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -193,7 +193,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       }
       try {
         const zipTransformer = this.rootService.transformers.zip;
-        const docs = await zipTransformer.importDocs(this.workspace, file);
+        const docs = await zipTransformer.importDocs(this.collection, file);
         for (const doc of docs) {
           const noteBlock = window.doc.getBlockByFlavour('affine:note');
           window.doc.addBlock(
@@ -227,7 +227,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _shareUrl() {
-    const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
+    const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.collection);
     const url = new URL(window.location.toString());
     url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);
@@ -493,14 +493,14 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     size="small"
                     @blur=${(e: Event) => {
                       if ((e.target as HTMLInputElement).value.length > 0) {
-                        this.workspace.awarenessStore.awareness.setLocalStateField(
+                        this.collection.awarenessStore.awareness.setLocalStateField(
                           'user',
                           {
                             name: (e.target as HTMLInputElement).value ?? '',
                           }
                         );
                       } else {
-                        this.workspace.awarenessStore.awareness.setLocalStateField(
+                        this.collection.awarenessStore.awareness.setLocalStateField(
                           'user',
                           {
                             name: 'Unknown',

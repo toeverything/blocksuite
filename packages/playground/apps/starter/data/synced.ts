@@ -11,14 +11,14 @@ This article has also been published [in PDF format](https://www.inkandswitch.co
 
 We welcome your feedback: [@inkandswitch](https://twitter.com/inkandswitch) or hello@inkandswitch.com.`;
 
-export const synced: InitFn = (workspace: DocCollection, id: string) => {
-  const docMain = workspace.getDoc(id) ?? workspace.createDoc({ id });
+export const synced: InitFn = (collection: DocCollection, id: string) => {
+  const docMain = collection.getDoc(id) ?? collection.createDoc({ id });
 
   const docSyncedPageId = 'doc:synced-page';
-  const docSyncedPage = workspace.createDoc({ id: docSyncedPageId });
+  const docSyncedPage = collection.createDoc({ id: docSyncedPageId });
 
   const docSyncedEdgelessId = 'doc:synced-edgeless';
-  const docSyncedEdgeless = workspace.createDoc({ id: docSyncedEdgelessId });
+  const docSyncedEdgeless = collection.createDoc({ id: docSyncedEdgelessId });
 
   docMain.clear();
   docSyncedPage.clear();

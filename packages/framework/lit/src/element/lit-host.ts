@@ -114,7 +114,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
     this.std = new BlockStdScope({
       host: this,
-      workspace: this.doc.collection,
+      collection: this.doc.collection,
       doc: this.doc,
     });
     this._registerView();

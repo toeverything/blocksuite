@@ -4,11 +4,11 @@ import { Text } from '@blocksuite/store';
 import type { InitFn } from './utils.js';
 
 export const pendingStructs: InitFn = (
-  workspace: DocCollection,
+  collection: DocCollection,
   id: string
 ) => {
-  const doc = workspace.createDoc({ id });
-  const tempDoc = workspace.createDoc({ id: 'tempDoc' });
+  const doc = collection.createDoc({ id });
+  const tempDoc = collection.createDoc({ id: 'tempDoc' });
   doc.load();
   tempDoc.load(() => {
     const rootId = tempDoc.addBlock('affine:page', {

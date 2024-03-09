@@ -28,7 +28,7 @@ export type BlockProps = BlockSysProps & {
 
 type DocOptions = {
   id: string;
-  workspace: DocCollection;
+  collection: DocCollection;
   doc: BlockSuiteDoc;
   awarenessStore: AwarenessStore;
   idGenerator?: IdGenerator;
@@ -84,7 +84,7 @@ export class Doc extends Space<FlatBlockMap> {
 
   constructor({
     id,
-    workspace,
+    collection: workspace,
     doc,
     awarenessStore,
     idGenerator = uuidv4,

@@ -166,7 +166,7 @@ export class DocCollectionMeta {
   /**
    * @internal Only for doc initialization
    */
-  writeVersion(workspace: DocCollection) {
+  writeVersion(collection: DocCollection) {
     const { blockVersions, pageVersion, workspaceVersion } = this._proxy;
 
     if (!workspaceVersion) {
@@ -183,7 +183,7 @@ export class DocCollectionMeta {
 
     if (!blockVersions) {
       const _versions: Record<string, number> = {};
-      workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
+      collection.schema.flavourSchemaMap.forEach((schema, flavour) => {
         _versions[flavour] = schema.version;
       });
       this._proxy.blockVersions = _versions;
@@ -192,13 +192,13 @@ export class DocCollectionMeta {
     }
   }
 
-  updateVersion(workspace: DocCollection) {
+  updateVersion(collection: DocCollection) {
     this._proxy.workspaceVersion = WORKSPACE_VERSION;
 
     this._proxy.pageVersion = PAGE_VERSION;
 
     const _versions: Record<string, number> = {};
-    workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
+    collection.schema.flavourSchemaMap.forEach((schema, flavour) => {
       _versions[flavour] = schema.version;
     });
     this._proxy.blockVersions = _versions;
@@ -207,7 +207,7 @@ export class DocCollectionMeta {
   /**
    * @deprecated Only used for legacy doc version validation
    */
-  validateVersion(workspace: DocCollection) {
+  validateVersion(collection: DocCollection) {
     const workspaceVersion = this._proxy.workspaceVersion;
     if (!workspaceVersion) {
       throw new Error(
@@ -248,7 +248,7 @@ export class DocCollectionMeta {
     dataFlavours.forEach(dataFlavour => {
       const dataVersion = blockVersions[dataFlavour] as number;
       const editorVersion =
-        workspace.schema.flavourSchemaMap.get(dataFlavour)?.version;
+        collection.schema.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {
         throw new Error(
           `Editor missing ${dataFlavour} flavour. Please make sure this block flavour is registered.`

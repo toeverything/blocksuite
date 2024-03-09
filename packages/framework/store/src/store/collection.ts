@@ -103,7 +103,7 @@ export class DocCollection extends DocCollectionAddonType {
     this.meta.docMetaAdded.on(docId => {
       const doc = new Doc({
         id: docId,
-        workspace: this,
+        collection: this,
         doc: this.doc,
         awarenessStore: this.awarenessStore,
         idGenerator: this._store.idGenerator,

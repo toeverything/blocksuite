@@ -14,12 +14,12 @@ const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 const params = new URLSearchParams(location.search);
 
 export const heavyWhiteboard: InitFn = (
-  workspace: DocCollection,
+  collection: DocCollection,
   id: string
 ) => {
   const count = Number(params.get('count')) || 100;
 
-  const doc = workspace.createDoc({ id });
+  const doc = collection.createDoc({ id });
   doc.load(() => {
     // Add root block and surface block at root level
     const rootId = doc.addBlock('affine:page', {
