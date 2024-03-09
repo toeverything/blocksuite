@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest';
 import { type BlockModel, defineBlockSchema } from '../schema/base.js';
 import { SchemaValidateError } from '../schema/error.js';
 import { Schema } from '../schema/index.js';
-import { Workspace } from '../workspace/index.js';
-import { Generator } from '../workspace/store.js';
+import { Workspace } from '../store/index.js';
+import { Generator } from '../store/store.js';
 import {
   DividerBlockSchema,
   ListBlockSchema,

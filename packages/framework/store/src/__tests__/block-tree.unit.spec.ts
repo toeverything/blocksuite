@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 
 import type { SchemaToModel } from '../schema/index.js';
 import { defineBlockSchema, Schema } from '../schema/index.js';
-import { Generator, Workspace } from '../workspace/index.js';
+import { Generator, Workspace } from '../store/index.js';
 
 const docSchema = defineBlockSchema({
   flavour: 'page',

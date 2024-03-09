@@ -8,7 +8,7 @@ import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
 import type { BlockModel, BlockSchemaType, Doc } from '../index.js';
 import { Generator, Schema, Workspace } from '../index.js';
-import type { DocMeta } from '../workspace/index.js';
+import type { DocMeta } from '../store/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import {
   NoteBlockSchema,

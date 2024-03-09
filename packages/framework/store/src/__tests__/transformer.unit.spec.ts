@@ -9,8 +9,8 @@ import {
   Schema,
   type SchemaToModel,
 } from '../schema/index.js';
+import { Generator, Workspace } from '../store/index.js';
 import { AssetsManager, BaseBlockTransformer } from '../transformer/index.js';
-import { Generator, Workspace } from '../workspace/index.js';
 
 const docSchema = defineBlockSchema({
   flavour: 'page',
