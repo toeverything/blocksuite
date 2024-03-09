@@ -1,4 +1,4 @@
-import type { Workspace } from '../store/store.js';
+import type { Workspace } from '../store/index.js';
 
 declare global {
   interface WindowEventMap {
