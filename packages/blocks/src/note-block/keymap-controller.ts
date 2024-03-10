@@ -1,4 +1,8 @@
-import type { BlockSelection, UIEventHandler } from '@blocksuite/block-std';
+import type {
+  BlockSelection,
+  UIEventHandler,
+  UIEventStateContext,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { type BlockElement } from '@blocksuite/lit';
@@ -273,7 +277,8 @@ export class KeymapController implements ReactiveController {
     return result;
   };
 
-  private _onEnter = () => {
+  private _onEnter = (ctx: UIEventStateContext) => {
+    const event = ctx.get('defaultState').event;
     const [result] = this._std.command
       .chain()
       .getBlockSelections()
@@ -309,7 +314,8 @@ export class KeymapController implements ReactiveController {
           to: null,
         });
 
-        requestAnimationFrame(() => selection.setGroup('note', [sel]));
+        event.preventDefault();
+        selection.setGroup('note', [sel]);
 
         return next();
       })
