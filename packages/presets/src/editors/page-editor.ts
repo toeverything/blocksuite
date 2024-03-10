@@ -1,4 +1,7 @@
-import { PageEditorBlockSpecs } from '@blocksuite/blocks';
+import {
+  PageEditorBlockSpecs,
+  PageEditorBlockSpecsSimple,
+} from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
@@ -45,7 +48,8 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
   doc!: Doc;
 
   @property({ attribute: false })
-  specs = PageEditorBlockSpecs;
+  specs = PageEditorBlockSpecsSimple;
+  //specs = PageEditorBlockSpecs;
 
   @property({ type: Boolean })
   hasViewport = true;
@@ -53,10 +57,14 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
   private _host: Ref<EditorHost> = createRef<EditorHost>();
 
   get host() {
+    console.log('this is host');
     return this._host.value as EditorHost;
   }
 
   override render() {
+    console.log('3333', this.hasViewport);
+    //console.log("1111",this.specs)
+    //this.specs=[]
     return html`
       <div
         class=${this.hasViewport

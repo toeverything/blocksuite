@@ -146,12 +146,12 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
       component: literal`affine-data-view`,
     },
   },
-  {
+  /* {
     schema: DividerBlockSchema,
     view: {
       component: literal`affine-divider`,
     },
-  },
+  },*/
   {
     schema: CodeBlockSchema,
     view: {
@@ -189,13 +189,13 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     },
     service: AttachmentService,
   },
-  EmbedFigmaBlockSpec,
-  EmbedYoutubeBlockSpec,
-  EmbedGithubBlockSpec,
-  EmbedHtmlBlockSpec,
-  EmbedLinkedDocBlockSpec,
-  EmbedSyncedDocBlockSpec,
-  EmbedLoomBlockSpec,
+  //EmbedFigmaBlockSpec,
+  //EmbedYoutubeBlockSpec,
+  //EmbedGithubBlockSpec,
+  //EmbedHtmlBlockSpec,
+  //EmbedLinkedDocBlockSpec,
+  //EmbedSyncedDocBlockSpec,
+  //EmbedLoomBlockSpec,
 ];
 
 export const PageEditorBlockSpecs: BlockSpec[] = [
@@ -219,6 +219,30 @@ export const PageEditorBlockSpecs: BlockSpec[] = [
     },
   },
 ];
+
+export const PageEditorBlockSpecsSimple: BlockSpec[] = [
+  DocPageSpec,
+  ...CommonFirstPartyBlockSpecs,
+  {
+    schema: SurfaceBlockSchema,
+    view: {
+      component: literal`affine-surface`,
+    },
+    service: SurfacePageService,
+  },
+  {
+    schema: SurfaceRefBlockSchema,
+    service: SurfaceRefBlockService,
+    view: {
+      component: literal`affine-surface-ref`,
+      widgets: {
+        surfaceToolbar: literal`affine-surface-ref-toolbar`,
+      },
+    },
+  },
+];
+
+console.log('222222', PageEditorBlockSpecsSimple);
 
 export const EdgelessEditorBlockSpecs: BlockSpec[] = [
   EdgelessPageSpec,

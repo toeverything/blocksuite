@@ -15,7 +15,14 @@
   "dependencies": {
     "pinia": "^2.1.7",
     "vue": "^3.4.15",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "@blocksuite/sync": "workspace:*",
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/inline": "workspace:*",
+    "@blocksuite/lit": "workspace:*",
+    "@blocksuite/presets": "workspace:*",
+    "@blocksuite/store": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.3.3",
