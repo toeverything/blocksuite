@@ -1,10 +1,10 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { createContext, useContext } from 'react';
 
 export const EditorContext = createContext<{
   editor: AffineEditorContainer;
-  workspace: Workspace;
+  collection: DocCollection;
 } | null>(null);
 
 export function useEditor() {

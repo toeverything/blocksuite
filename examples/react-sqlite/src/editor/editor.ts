@@ -1,15 +1,15 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { Provider } from './provider/provider';
 import { Doc } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { createContext, useContext } from 'react';
 import '@blocksuite/presets/themes/affine.css';
 
 export interface EditorContextType {
   editor: AffineEditorContainer | null;
-  workspace: Workspace | null;
+  collection: DocCollection | null;
   provider: Provider | null;
-  updateWorkspace: (newWorkspace: Workspace) => void;
+  updateCollection: (newCollection: DocCollection) => void;
 }
 
 export const EditorContext = createContext<EditorContextType | null>(null);
@@ -22,10 +22,10 @@ export async function initEditor() {
   const provider = await Provider.init();
   await provider.connect();
 
-  const { workspace } = provider;
+  const { collection: collection } = provider;
   let doc: Doc | null = null;
 
-  workspace.docs.forEach(d => {
+  collection.docs.forEach(d => {
     doc = doc ?? d;
   });
   if (!doc) {
@@ -35,8 +35,8 @@ export async function initEditor() {
   const editor = new AffineEditorContainer();
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ docId }) => {
-    const target = <Doc>workspace.getDoc(docId);
+    const target = <Doc>collection.getDoc(docId);
     editor.doc = target;
   });
-  return { editor, provider, workspace };
+  return { editor, provider, collection };
 }

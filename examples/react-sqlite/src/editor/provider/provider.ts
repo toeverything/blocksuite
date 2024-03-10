@@ -1,4 +1,4 @@
-import { Workspace, Y, Schema, BlobStorage } from '@blocksuite/store';
+import { DocCollection, Y, Schema, BlobStorage } from '@blocksuite/store';
 import { Database } from 'sql.js';
 import {
   getRootDocId,
@@ -15,15 +15,15 @@ import {
 } from './db';
 import { AffineSchemas } from '@blocksuite/blocks';
 
-function createWorkspace(db: Database, id = 'blocksuite-example') {
+function createCollection(db: Database, id = 'blocksuite-example') {
   const schema = new Schema().register(AffineSchemas);
 
-  const workspace = new Workspace({
+  const collection = new DocCollection({
     schema,
     id,
     blobStorages: [() => createBlobStorage(db)],
   });
-  return workspace;
+  return collection;
 }
 
 function createBlobStorage(db: Database): BlobStorage {
@@ -49,8 +49,8 @@ function createBlobStorage(db: Database): BlobStorage {
   };
 }
 
-async function createDoc(workspace: Workspace) {
-  const doc = workspace.createDoc({ id: 'page1' });
+async function createDoc(collection: DocCollection) {
+  const doc = collection.createDoc({ id: 'page1' });
 
   doc.load(() => {
     const pageBlockId = doc.addBlock('affine:page', {});
@@ -62,7 +62,7 @@ async function createDoc(workspace: Workspace) {
 }
 
 export class Provider {
-  workspace!: Workspace;
+  collection!: DocCollection;
 
   private constructor(private db: Database) {}
 
@@ -74,24 +74,24 @@ export class Provider {
   async connect() {
     const { db } = this;
     if (isTableEmpty('docs', db)) {
-      this.workspace = createWorkspace(db);
-      this._connectWorkspace();
+      this.collection = createCollection(db);
+      this._connectCollection();
 
-      insertDocToDb(db, this.workspace.id, null);
-      await createDoc(this.workspace);
+      insertDocToDb(db, this.collection.id, null);
+      await createDoc(this.collection);
     } else {
       const id = getRootDocId(db);
-      if (!id) throw new Error('No workspace found in database');
+      if (!id) throw new Error('No collection found in database');
 
-      this.workspace = createWorkspace(db, id);
-      this._applyToDoc(this.workspace.doc);
-      this.workspace.docs.forEach(doc => {
+      this.collection = createCollection(db, id);
+      this._applyToDoc(this.collection.doc);
+      this.collection.docs.forEach(doc => {
         this._applyToDoc(doc.spaceDoc);
         doc.load();
         this._connectSubDoc(doc.spaceDoc);
       });
 
-      this._connectWorkspace();
+      this._connectCollection();
     }
   }
 
@@ -105,15 +105,15 @@ export class Provider {
     return new Blob([this.db.export()]);
   }
 
-  private _connectWorkspace() {
-    const { workspace, db } = this;
-    workspace.doc.on('update', update => {
-      insertUpdateToDb(db, workspace.id, update);
+  private _connectCollection() {
+    const { collection, db } = this;
+    collection.doc.on('update', update => {
+      insertUpdateToDb(db, collection.id, update);
     });
 
-    workspace.doc.on('subdocs', subdocs => {
+    collection.doc.on('subdocs', subdocs => {
       subdocs.added.forEach((doc: Y.Doc) => {
-        insertDocToDb(db, doc.guid, workspace.id);
+        insertDocToDb(db, doc.guid, collection.id);
         this._connectSubDoc(doc);
       });
     });
@@ -129,7 +129,7 @@ export class Provider {
   private _applyToDoc(doc: Y.Doc) {
     const updates = getUpdatesFromDoc(this.db, doc.guid);
     updates.forEach(update => {
-      Workspace.Y.applyUpdate(doc, update);
+      DocCollection.Y.applyUpdate(doc, update);
     });
   }
 }

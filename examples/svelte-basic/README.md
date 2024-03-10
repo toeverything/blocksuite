@@ -1,6 +1,6 @@
 # Svelte Basic Example
 
-This example encapsulates the BlockSuite editor and workspace in Svelte, demonstrating basic document and workspace management.
+This example encapsulates the BlockSuite editor and doc collection in Svelte, demonstrating basic document management.
 
 ## Development
 

@@ -28,8 +28,8 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
-    const workspace = this.editorProvider.getWorkspace();
-    this.docs = [...workspace.docs.values()];
+    const collection = this.editorProvider.getCollection();
+    this.docs = [...collection.docs.values()];
     this.cdr.detectChanges();
   }
 
