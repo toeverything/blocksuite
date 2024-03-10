@@ -9,3 +9,4 @@ packages:
   - 'packages/docs'
   - 'packages/playground'
   - 'packages/presets'
+  - 'packages/simple'
