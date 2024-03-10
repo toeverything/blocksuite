@@ -3,23 +3,23 @@ import { Doc } from '@blocksuite/store';
 import { useEditor } from '../editor/context';
 
 const Sidebar = () => {
-  const { workspace, editor } = useEditor()!;
+  const { collection, editor } = useEditor()!;
   const [docs, setDocs] = useState<Doc[]>([]);
 
   useEffect(() => {
-    if (!workspace || !editor) return;
+    if (!collection || !editor) return;
     const updateDocs = () => {
-      setDocs([...workspace.docs.values()]);
+      setDocs([...collection.docs.values()]);
     };
     updateDocs();
 
     const disposable = [
-      workspace.slots.docUpdated.on(updateDocs),
+      collection.slots.docUpdated.on(updateDocs),
       editor.slots.docLinkClicked.on(updateDocs),
     ];
 
     return () => disposable.forEach(d => d.dispose());
-  }, [workspace, editor]);
+  }, [collection, editor]);
 
   return (
     <div className="sidebar">
@@ -31,7 +31,7 @@ const Sidebar = () => {
             key={doc.id}
             onClick={() => {
               if (editor) editor.doc = doc;
-              setDocs([...workspace!.docs.values()]);
+              setDocs([...collection!.docs.values()]);
             }}
           >
             {doc.meta?.title || 'Untitled'}
