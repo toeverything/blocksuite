@@ -6,7 +6,6 @@ import type { BlockSuiteDoc } from '../yjs/index.js';
 
 export interface StackItem {
   meta: Map<'cursor-location' | 'selection-state', unknown>;
-  type: 'undo' | 'redo';
 }
 
 export class Space<

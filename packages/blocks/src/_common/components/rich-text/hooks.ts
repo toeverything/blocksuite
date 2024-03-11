@@ -7,7 +7,7 @@ import type {
 import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
 import { isStrictUrl } from '../../utils/url.js';
 
-const EDGE_IGNORED_ATTRIBUTES = ['code'] as const;
+const EDGE_IGNORED_ATTRIBUTES = ['code', 'link'] as const;
 const GLOBAL_IGNORED_ATTRIBUTES = [] as const;
 
 const autoIdentifyLink = (ctx: HookContext<AffineTextAttributes>) => {

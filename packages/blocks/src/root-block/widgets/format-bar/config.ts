@@ -68,12 +68,19 @@ export type ParagraphActionConfigItem = {
   icon: TemplateResult | (() => HTMLElement);
   flavour: string;
 };
+
+export type CustomConfigItem = {
+  type: 'custom';
+  render: (formatBar: AffineFormatBarWidget) => TemplateResult | null;
+};
+
 export type FormatBarConfigItem =
   | DividerConfigItem
   | HighlighterDropdownConfigItem
   | ParagraphDropdownConfigItem
   | ParagraphActionConfigItem
-  | InlineActionConfigItem;
+  | InlineActionConfigItem
+  | CustomConfigItem;
 
 export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
   toolbar

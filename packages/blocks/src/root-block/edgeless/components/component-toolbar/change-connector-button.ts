@@ -71,7 +71,7 @@ function getMostCommonLineWidth(elements: ConnectorElementModel[]): LineWidth {
     return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
-  return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
+  return max ? (Number(max[0]) as LineWidth) : LineWidth.Four;
 }
 
 export function getMostCommonLineStyle(
@@ -284,7 +284,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     const selectedColor = getMostCommonColor(this.elements);
     const selectedMode = getMostCommonMode(this.elements);
     const selectedLineSize =
-      getMostCommonLineWidth(this.elements) ?? LineWidth.LINE_WIDTH_FOUR;
+      getMostCommonLineWidth(this.elements) ?? LineWidth.Four;
     const selectedRough = getMostCommonRough(this.elements);
     const selectedLineStyle = getMostCommonLineStyle(this.elements);
     const selectedStartPointStyle =

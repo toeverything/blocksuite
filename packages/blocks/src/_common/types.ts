@@ -163,16 +163,14 @@ export type ShapeTool = {
 };
 
 export enum LineWidth {
-  LINE_WIDTH_TWO = 2,
-  LINE_WIDTH_FOUR = 4,
-  LINE_WIDTH_SIX = 6,
-  LINE_WIDTH_EIGHT = 8,
-  LINE_WIDTH_TEN = 10,
-  LINE_WIDTH_TWELVE = 12,
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  Thin = 4,
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  Thick = 10,
+  Two = 2,
+  // Thin
+  Four = 4,
+  Six = 6,
+  Eight = 8,
+  // Thick
+  Ten = 10,
+  Twelve = 12,
 }
 
 export type TextTool = {
