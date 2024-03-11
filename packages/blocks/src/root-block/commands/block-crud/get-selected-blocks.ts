@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { type BlockElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import type { RoleType } from '@blocksuite/store';
 
 import type { ImageSelection } from '../../../image-block/image-selection.js';
@@ -48,7 +48,21 @@ export const getSelectedBlocksCommand: Command<
     const viewStore = ctx.std.view;
     const selectedBlockElements = blockSelections.flatMap(selection => {
       const el = viewStore.viewFromPath('block', selection.path);
-      return el ?? [];
+      if (!el) {
+        return [];
+      }
+      const blockElements: BlockElement[] = [el];
+      viewStore.walkThrough(node => {
+        const view = node.view;
+        if (!(view instanceof BlockElement)) {
+          return true;
+        }
+        if (view.model.role !== 'root') {
+          blockElements.push(view);
+        }
+        return;
+      }, selection.path);
+      return blockElements;
     });
     dirtyResult.push(...selectedBlockElements);
   }
