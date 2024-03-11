@@ -79,6 +79,8 @@ export const headingKeys = new Set(
   Object.keys(paragraphPlaceholderMap).filter(key => key.startsWith('h'))
 );
 
+export const outlineSettingsKey = 'outlinePanelSettings';
+
 export type OutlineSettingsDataType = {
   showIcons: boolean;
   enableSorting: boolean;

@@ -9,7 +9,7 @@ import { OutlineNotice } from './body/outline-notice.js';
 import { OutlinePanelBody } from './body/outline-panel-body.js';
 import { OutlineNoteCard } from './card/outline-card.js';
 import { OutlineBlockPreview } from './card/outline-preview.js';
-import type { OutlineSettingsDataType } from './config.js';
+import { type OutlineSettingsDataType, outlineSettingsKey } from './config.js';
 import { OutlinePanelHeader } from './header/outline-panel-header.js';
 import { OutlineNotePreviewSettingMenu } from './header/outline-setting-menu.js';
 
@@ -96,7 +96,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   }
 
   private _loadSettingsFromLocalStorage() {
-    const settings = localStorage.getItem('outlinePanelSettings');
+    const settings = localStorage.getItem(outlineSettingsKey);
     if (settings) {
       this._settings = JSON.parse(settings);
       this._showPreviewIcon = this._settings.showIcons;
@@ -105,10 +105,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   }
 
   private _saveSettingsToLocalStorage() {
-    localStorage.setItem(
-      'outlinePanelSettings',
-      JSON.stringify(this._settings)
-    );
+    localStorage.setItem(outlineSettingsKey, JSON.stringify(this._settings));
   }
 
   private _updateAndSaveSettings(
