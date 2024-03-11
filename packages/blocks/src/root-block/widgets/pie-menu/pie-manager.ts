@@ -3,10 +3,19 @@ import { Slot } from '@blocksuite/store';
 
 import type { RootBlockComponent } from '../../types.js';
 import type { IPieMenuSchema } from './base.js';
+import type { AffinePieMenuWidget } from './index.js';
+import { PieMenu } from './menu.js';
 
 /**
  *  A static class for managing pie menus
  */
+
+export type PieMenuCreateOptions = {
+  x: number;
+  y: number;
+  widgetElement: AffinePieMenuWidget;
+};
+
 export class PieManager {
   private static schemas: Set<IPieMenuSchema> = new Set();
 
@@ -37,8 +46,30 @@ export class PieManager {
     this.registeredSchemas = {};
   }
 
-  private static open(id: string) {
+  public static open(id: string) {
     this.slots.openPie.emit(this._getSchema(id));
+  }
+
+  public static close() {
+    this.abortController.abort();
+  }
+
+  public static createMenu(
+    schema: IPieMenuSchema,
+    { x, y, widgetElement }: PieMenuCreateOptions
+  ) {
+    const menu = new PieMenu();
+    menu.id = schema.id;
+    menu.schema = schema;
+    menu.position = [x, y];
+    menu.rootElement = widgetElement.rootElement;
+    menu.widgetElement = widgetElement;
+    menu.abortController.signal.addEventListener('abort', () => {
+      this.slots.closePie.emit();
+    });
+
+    this.abortController = menu.abortController;
+    return menu;
   }
 
   private static _setupTriggers(rootElement: RootBlockComponent) {

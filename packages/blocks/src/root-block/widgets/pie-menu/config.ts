@@ -31,7 +31,7 @@ pie.action({
   label: 'eraser',
 
   action: () => {
-    console.log('Pen');
+    console.log('Eraser');
   },
 });
 
@@ -39,7 +39,7 @@ pie.action({
   label: 'frame',
 
   action: () => {
-    console.log('pen');
+    console.log('Frame');
   },
 });
 
@@ -47,7 +47,7 @@ pie.action({
   label: 'connector',
 
   action: () => {
-    console.log('pen');
+    console.log('Connector');
   },
 });
 
@@ -72,7 +72,7 @@ pie.action({
   label: 'Triangle',
 
   action: () => {
-    console.log('rectangle');
+    console.log('Triangle');
   },
 });
 pie.endSubmenu();
