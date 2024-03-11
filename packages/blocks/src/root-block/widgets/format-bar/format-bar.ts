@@ -508,8 +508,12 @@ export class AffineFormatBarWidget extends WidgetElement {
     });
   }
 
-  addRawConfigItems(configItems: FormatBarConfigItem[]) {
-    this.configItems.push(...configItems);
+  addRawConfigItems(configItems: FormatBarConfigItem[], index?: number) {
+    if (index === undefined) {
+      this.configItems.push(...configItems);
+    } else {
+      this.configItems.splice(index, 0, ...configItems);
+    }
     return this;
   }
 
