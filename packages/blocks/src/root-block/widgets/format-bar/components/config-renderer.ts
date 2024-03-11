@@ -50,6 +50,10 @@ export function ConfigRenderer(formatBar: AffineFormatBarWidget) {
           </icon-button>`;
           break;
         }
+        case 'custom': {
+          template = item.render(formatBar);
+          break;
+        }
         default:
           template = null;
       }
