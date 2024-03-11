@@ -106,7 +106,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  selectedSize: LineWidth = LineWidth.LINE_WIDTH_TWO;
+  selectedSize: LineWidth = LineWidth.Two;
 
   @property({ attribute: false })
   hasTooltip = true;
@@ -136,22 +136,22 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     let width = 0;
     let dragHandleOffsetX = 0;
     switch (selectedSize) {
-      case LineWidth.LINE_WIDTH_TWO:
+      case LineWidth.Two:
         width = 0;
         break;
-      case LineWidth.LINE_WIDTH_FOUR:
+      case LineWidth.Four:
         width = 16;
         dragHandleOffsetX = 1;
         break;
-      case LineWidth.LINE_WIDTH_SIX:
+      case LineWidth.Six:
         width = 32;
         dragHandleOffsetX = 2;
         break;
-      case LineWidth.LINE_WIDTH_EIGHT:
+      case LineWidth.Eight:
         width = 48;
         dragHandleOffsetX = 3;
         break;
-      case LineWidth.LINE_WIDTH_TEN:
+      case LineWidth.Ten:
         width = 64;
         dragHandleOffsetX = 4;
         break;
@@ -224,17 +224,17 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     // Need to select the nearest size.
     let selectedSize = this.selectedSize;
     if (dragHandlerPosition <= 12) {
-      selectedSize = LineWidth.LINE_WIDTH_TWO;
+      selectedSize = LineWidth.Two;
     } else if (dragHandlerPosition > 12 && dragHandlerPosition <= 26) {
-      selectedSize = LineWidth.LINE_WIDTH_FOUR;
+      selectedSize = LineWidth.Four;
     } else if (dragHandlerPosition > 26 && dragHandlerPosition <= 40) {
-      selectedSize = LineWidth.LINE_WIDTH_SIX;
+      selectedSize = LineWidth.Six;
     } else if (dragHandlerPosition > 40 && dragHandlerPosition <= 54) {
-      selectedSize = LineWidth.LINE_WIDTH_EIGHT;
+      selectedSize = LineWidth.Eight;
     } else if (dragHandlerPosition > 54 && dragHandlerPosition <= 68) {
-      selectedSize = LineWidth.LINE_WIDTH_TEN;
+      selectedSize = LineWidth.Ten;
     } else {
-      selectedSize = LineWidth.LINE_WIDTH_TWELVE;
+      selectedSize = LineWidth.Twelve;
     }
     this._updateLineWidthPanel(selectedSize);
     this._onSelect(selectedSize);
