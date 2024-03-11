@@ -1,6 +1,6 @@
 # Preact Basic Example
 
-This example encapsulates the BlockSuite editor and workspace in Preact, demonstrating basic document and workspace management.
+This example encapsulates the BlockSuite editor and doc collection in Preact, demonstrating basic document management.
 
 ## Development
 

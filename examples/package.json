@@ -4,7 +4,10 @@
   "description": "",
   "private": true,
   "scripts": {
-    "dev": "./dev.sh"
+    "dev": "./dev.sh",
+    "bump": "pnpm -r up @blocksuite/presets@canary @blocksuite/blocks@canary @blocksuite/store@canary",
+    "build": "pnpm -r run build",
+    "clean": "pnpm -r exec -- rm -rf ./dist"
   },
   "keywords": [],
   "author": "toeverything",

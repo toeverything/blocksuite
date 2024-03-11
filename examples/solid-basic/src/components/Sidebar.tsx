@@ -1,23 +1,23 @@
 import { For, createEffect, createSignal, onCleanup } from 'solid-js';
 import { useEditor } from './EditorProvider';
-import { Doc, Workspace } from '@blocksuite/store';
+import { Doc, DocCollection } from '@blocksuite/store';
 
-function getDocs(workspace: Workspace) {
-  return [...workspace.docs.values()].map(d => ({
+function getDocs(collection: DocCollection) {
+  return [...collection.docs.values()].map(d => ({
     title: d.meta?.title || 'Untitled',
     id: d.id,
   }));
 }
 
 export function Sidebar() {
-  const { editor, workspace } = useEditor()!;
+  const { editor, collection } = useEditor()!;
 
-  const [docs, setDocs] = createSignal(getDocs(workspace));
-  const updateDocs = () => setDocs(getDocs(workspace));
+  const [docs, setDocs] = createSignal(getDocs(collection));
+  const updateDocs = () => setDocs(getDocs(collection));
 
   createEffect(() => {
     const disposables = [
-      workspace.slots.docUpdated.on(updateDocs),
+      collection.slots.docUpdated.on(updateDocs),
       editor.slots.docLinkClicked.on(updateDocs),
     ];
     onCleanup(() => disposables.forEach(d => d.dispose()));
@@ -35,7 +35,7 @@ export function Sidebar() {
                 active: editor?.doc.id === doc.id,
               }}
               onClick={() => {
-                editor.doc = workspace.getDoc(doc.id) as Doc;
+                editor.doc = collection.getDoc(doc.id) as Doc;
                 updateDocs();
               }}
             >

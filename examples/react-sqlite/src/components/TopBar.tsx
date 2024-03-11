@@ -2,7 +2,7 @@ import { download, upload } from '../editor/utils';
 import { useEditor } from '../editor/context';
 
 const TopBar = () => {
-  const { provider, updateWorkspace } = useEditor()!;
+  const { provider, updateCollection } = useEditor()!;
 
   return (
     <div className="top-bar">
@@ -19,7 +19,7 @@ const TopBar = () => {
           if (!provider) return;
           const blob = await upload();
           await provider.reset(blob);
-          updateWorkspace(provider.workspace);
+          updateCollection(provider.collection);
         }}
       >
         Import
