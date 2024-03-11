@@ -483,12 +483,12 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
 
 export async function selectBrushSize(page: Page, size: string) {
   const sizeIndexMap: { [key: string]: number } = {
-    two: 6,
-    four: 5,
-    six: 4,
-    eight: 3,
-    ten: 2,
-    twelve: 1,
+    two: 1,
+    four: 2,
+    six: 3,
+    eight: 4,
+    ten: 5,
+    twelve: 6,
   };
   const sizeButton = page.locator(
     `edgeless-brush-menu .line-width-panel .line-width-button:nth-child(${sizeIndexMap[size]})`
