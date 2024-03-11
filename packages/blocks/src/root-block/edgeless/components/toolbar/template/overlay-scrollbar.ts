@@ -2,7 +2,11 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { requestConnectedFrame } from '../../../../../_common/utils/event.js';
+import {
+  on,
+  once,
+  requestConnectedFrame,
+} from '../../../../../_common/utils/event.js';
 
 /**
  * A scrollbar that is only visible when the user is interacting with it.
@@ -52,8 +56,12 @@ export class OverlayScrollbar extends LitElement {
 
   private _disposable = new DisposableGroup();
 
+  private _scrollable: HTMLElement | null = null;
+
+  private _handleVisible = false;
+
   override firstUpdated(): void {
-    this._initScrollbar();
+    this._initWheelHandler();
   }
 
   override connectedCallback(): void {
@@ -61,41 +69,57 @@ export class OverlayScrollbar extends LitElement {
     this._disposable.dispose();
   }
 
-  private _setHandleHeight(clientHeight: number, scrollHeight: number) {
-    this._handle.style.height = `${(clientHeight / scrollHeight) * 100}%`;
+  private _toggleScrollbarVisible(visible: boolean) {
+    const vis = visible || this._handleVisible ? '1' : '0';
+
+    if (this.style.opacity !== vis) {
+      this.style.opacity = vis;
+    }
   }
 
-  private _showScrollbar(top: number, scrollHeight: number) {
-    this.style.opacity = '1';
-    this._handle.style.top = `${(top / scrollHeight) * 100}%`;
+  private _updateScrollbarRect(rect: {
+    scrollTop?: number;
+    clientHeight?: number;
+    scrollHeight?: number;
+  }) {
+    if (rect.scrollHeight !== undefined && rect.clientHeight !== undefined) {
+      this._handle.style.height = `${(rect.clientHeight / rect.scrollHeight) * 100}%`;
+    }
+
+    if (rect.scrollTop !== undefined && rect.scrollHeight !== undefined) {
+      this._handle.style.top = `${(rect.scrollTop / rect.scrollHeight) * 100}%`;
+    }
   }
 
-  private _initScrollbar() {
+  private _scroll(scrollDistance: number) {
+    const scrollable = this._scrollable!;
+
+    if (!scrollable) return;
+
+    scrollable.scrollBy({
+      left: 0,
+      top: scrollDistance,
+      behavior: 'instant',
+    });
+
+    requestConnectedFrame(() => {
+      this._updateScrollbarRect(scrollable);
+      this._toggleScrollbarVisible(true);
+    }, this);
+  }
+
+  private _initWheelHandler() {
     const container = this.parentElement as HTMLElement;
 
     container.style.contain = 'layout';
     container.style.overflow = 'hidden';
 
-    let firstEvent = true;
-    let timeoutId: null | ReturnType<typeof setTimeout> = null;
-    const resetFirstEvent = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        firstEvent = true;
-        timeoutId = null;
-      }, 50);
-    };
-
-    let hideScrollbarTimeout: null | ReturnType<typeof setTimeout> = null;
-    const showScrollbar = (top: number, height: number) => {
-      requestConnectedFrame(() => {
-        this._showScrollbar(top, height);
-      });
-
-      if (hideScrollbarTimeout) clearTimeout(hideScrollbarTimeout);
-      hideScrollbarTimeout = setTimeout(() => {
-        this.style.opacity = '0';
-        hideScrollbarTimeout = null;
+    let hideScrollbarTimeId: null | ReturnType<typeof setTimeout> = null;
+    const delayHideScrollbar = () => {
+      if (hideScrollbarTimeId) clearTimeout(hideScrollbarTimeId);
+      hideScrollbarTimeId = setTimeout(() => {
+        this._toggleScrollbarVisible(false);
+        hideScrollbarTimeId = null;
       }, 800);
     };
 
@@ -105,6 +129,8 @@ export class OverlayScrollbar extends LitElement {
         ? scrollable
         : (container.querySelector('[data-scrollable]') as HTMLElement);
 
+      this._scrollable = scrollable;
+
       if (!scrollable) return;
 
       // firefox may report a wheel event with deltaMode of value other than 0
@@ -112,25 +138,40 @@ export class OverlayScrollbar extends LitElement {
       const scrollDistance =
         event.deltaMode === 0 ? event.deltaY : event.deltaY * 16;
 
-      if (!firstEvent) {
-        scrollable.scrollBy({
-          left: 0,
-          top: scrollDistance,
-          behavior: 'instant',
-        });
-        showScrollbar(scrollable.scrollTop, scrollable.scrollHeight);
-      }
+      this._scroll(scrollDistance ?? 0);
 
-      if (firstEvent) {
-        this._setHandleHeight(scrollable.clientHeight, scrollable.scrollHeight);
-        firstEvent = false;
-        resetFirstEvent();
-      }
+      delayHideScrollbar();
+    });
+  }
+
+  private _dragHandle(event: PointerEvent) {
+    let startY = event.clientY;
+
+    this._handleVisible = true;
+
+    const dispose = on(document, 'pointermove', evt => {
+      this._scroll(evt.clientY - startY);
+      startY = evt.clientY;
+    });
+
+    once(document, 'pointerup', e => {
+      this._handleVisible = false;
+
+      e.stopPropagation();
+
+      setTimeout(() => {
+        this._toggleScrollbarVisible(false);
+      }, 800);
+
+      dispose();
     });
   }
 
   override render() {
-    return html`<div class="overlay-handle"></div>`;
+    return html`<div
+      class="overlay-handle"
+      @pointerdown=${this._dragHandle}
+    ></div>`;
   }
 }
 
