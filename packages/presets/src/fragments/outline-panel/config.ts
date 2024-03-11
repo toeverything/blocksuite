@@ -78,3 +78,8 @@ export const placeholderMap = {
 export const headingKeys = new Set(
   Object.keys(paragraphPlaceholderMap).filter(key => key.startsWith('h'))
 );
+
+export type OutlineSettingsDataType = {
+  showIcons: boolean;
+  enableSorting: boolean;
+};
