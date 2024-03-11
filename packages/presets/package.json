@@ -19,11 +19,11 @@
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@fal-ai/serverless-client": "^0.8.2",
-    "@floating-ui/dom": "^1.5.4",
-    "@toeverything/theme": "^0.7.27",
-    "lit": "^3.1.1",
-    "openai": "^4.25.0"
+    "@fal-ai/serverless-client": "^0.9.0",
+    "@floating-ui/dom": "^1.6.3",
+    "@toeverything/theme": "^0.7.29",
+    "lit": "^3.1.2",
+    "openai": "^4.28.4"
   },
   "exports": {
     ".": "./src/index.ts",
