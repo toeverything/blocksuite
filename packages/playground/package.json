@@ -12,33 +12,33 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/sync": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@shoelace-style/shoelace": "2.12.0",
+    "@blocksuite/sync": "workspace:*",
+    "@shoelace-style/shoelace": "2.14.0",
     "@toeverything/y-indexeddb": "0.10.0-canary.9",
     "@types/katex": "^0.16.7",
     "browser-fs-access": "^0.35.0",
     "intl-segmenter-polyfill-rs": "^0.1.7",
     "jszip": "^3.10.1",
     "katex": "^0.16.9",
-    "lit": "^3.1.1",
+    "lit": "^3.1.2",
     "lz-string": "^1.5.0",
     "merge": "^2.1.1",
     "tweakpane": "^4.0.3",
     "y-protocols": "^1.0.6",
-    "yjs": "^13.6.11",
+    "yjs": "^13.6.14",
     "zod": "^3.22.4"
   },
   "license": "MPL-2.0",
   "devDependencies": {
     "@tweakpane/core": "^2.0.3",
     "@types/micromatch": "^4.0.6",
-    "magic-string": "^0.30.5",
+    "magic-string": "^0.30.8",
     "vite-plugin-wasm": "^3.3.0"
   }
 }

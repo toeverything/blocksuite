@@ -24,7 +24,6 @@ import { onVBeforeinput, onVCompositionEnd } from './hooks.js';
 
 interface RichTextStackItem {
   meta: Map<'richtext-v-range', InlineRange | null>;
-  type: 'undo' | 'redo';
 }
 
 @customElement('rich-text')

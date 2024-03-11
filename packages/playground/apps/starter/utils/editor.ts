@@ -1,7 +1,14 @@
+import type { PageRootService } from '@blocksuite/blocks';
+import {
+  AffineFormatBarWidget,
+  PageEditorBlockSpecs,
+  toolbarDefaultConfig,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import {
   AffineEditorContainer,
+  affineFormatBarItemConfig,
   CommentPanel,
   CopilotPanel,
 } from '@blocksuite/presets';
@@ -17,6 +24,15 @@ import { SidePanel } from '../../_common/components/side-panel.js';
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 
+function configureFormatBar(formatBar: AffineFormatBarWidget) {
+  toolbarDefaultConfig(formatBar);
+
+  formatBar.addRawConfigItems(
+    [affineFormatBarItemConfig, { type: 'divider' }],
+    0
+  );
+}
+
 export async function mountDefaultDocEditor(collection: DocCollection) {
   const doc = collection.docs.values().next().value;
   assertExists(doc, 'Need to create a doc first');
@@ -28,6 +44,34 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   if (!app) return;
 
   const editor = new AffineEditorContainer();
+  editor.pageSpecs = [...PageEditorBlockSpecs].map(spec => {
+    if (spec.schema.model.flavour === 'affine:page') {
+      const setup = spec.setup;
+      spec = {
+        ...spec,
+        setup: (slots, disposable) => {
+          setup?.(slots, disposable);
+
+          const onFormatBarConnected = slots.widgetConnected.on(view => {
+            if (view.component instanceof AffineFormatBarWidget) {
+              configureFormatBar(view.component);
+            }
+          });
+
+          disposable.add(onFormatBarConnected);
+
+          slots.mounted.once(({ service }) => {
+            disposable.add(
+              (<PageRootService>service).slots.editorModeSwitch.on(mode => {
+                editor.mode = mode;
+              })
+            );
+          });
+        },
+      };
+    }
+    return spec;
+  });
   editor.mode = defaultMode;
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ docId }) => {
