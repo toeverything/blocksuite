@@ -1,13 +1,13 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { createContext, useContext } from 'react';
 import { Provider } from './provider/provider';
 
 export interface EditorContextType {
   editor: AffineEditorContainer | null;
-  workspace: Workspace | null;
+  collection: DocCollection | null;
   provider: Provider | null;
-  updateWorkspace: (newWorkspace: Workspace) => void;
+  updateCollection: (newCollection: DocCollection) => void;
 }
 
 export const EditorContext = createContext<EditorContextType | null>(null);
