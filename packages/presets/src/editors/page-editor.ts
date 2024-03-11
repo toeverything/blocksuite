@@ -57,7 +57,7 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
   private _host: Ref<EditorHost> = createRef<EditorHost>();
 
   get host() {
-    console.log('this is host');
+    console.log('this is host', this._host.value);
     return this._host.value as EditorHost;
   }
 
