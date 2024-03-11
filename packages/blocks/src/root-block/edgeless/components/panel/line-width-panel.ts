@@ -38,7 +38,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
     .line-width-panel {
       display: flex;
-      flex-direction: row-reverse;
+      flex-direction: row;
       align-items: center;
       justify-content: space-between;
       position: relative;
@@ -174,20 +174,21 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     }
     const dragHandleRect = this._dragHandle.getBoundingClientRect();
     const dragHandleCenterX = dragHandleRect.left + dragHandleRect.width / 2;
-    const icons = Array.from(this._lineWidthIcons);
-
     // All the icons located at the left of the drag handle should be filled with the icon color.
-    const leftIcons = icons.filter(icon => {
-      const iconRect = icon.getBoundingClientRect();
-      const iconCenterX = iconRect.left + iconRect.width / 2;
-      return iconCenterX < dragHandleCenterX;
-    });
+    const leftIcons = [];
     // All the icons located at the right of the drag handle should be filled with the border color.
-    const rightIcons = icons.filter(icon => {
-      const iconRect = icon.getBoundingClientRect();
-      const iconCenterX = iconRect.left + iconRect.width / 2;
-      return iconCenterX > dragHandleCenterX;
-    });
+    const rightIcons = [];
+
+    for (const icon of this._lineWidthIcons) {
+      const { left, width } = icon.getBoundingClientRect();
+      const centerX = left + width / 2;
+      if (centerX < dragHandleCenterX) {
+        leftIcons.push(icon);
+      } else {
+        rightIcons.push(icon);
+      }
+    }
+
     leftIcons.forEach(
       icon => (icon.style.backgroundColor = 'var(--affine-icon-color)')
     );
@@ -316,7 +317,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html` <style>
+    return html`<style>
         .line-width-panel {
           opacity: ${this.disable ? '0.5' : '1'};
         }
