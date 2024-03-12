@@ -28,8 +28,8 @@ export class AffinePieMenuWidget extends WidgetElement {
     return rootElement;
   }
 
-  // if key is released before 100ms then the menu is kept open else
-  // on release it will select the currently hovered menu node
+  // if key is released before 100ms then the menu is kept open, else
+  // on trigger key release it will select the currently hovered menu node
   // No action if the currently hovered node is a submenu
   private _selectOnTrigRelease: { allow: boolean; timeout?: NodeJS.Timeout } = {
     allow: false,
@@ -79,7 +79,7 @@ export class AffinePieMenuWidget extends WidgetElement {
 
     this._selectOnTrigRelease.timeout = setTimeout(() => {
       this._selectOnTrigRelease.allow = true;
-    }, 200);
+    }, PieManager.settings.SELECT_ON_RELEASE_TIMEOUT);
   }
 
   private _handleKeyUp = (ctx: UIEventStateContext) => {
@@ -103,5 +103,11 @@ export class AffinePieMenuWidget extends WidgetElement {
 
   override render() {
     return this.currentMenu ?? nothing;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    [AFFINE_PIE_MENU_WIDGET]: AffinePieMenuWidget;
   }
 }

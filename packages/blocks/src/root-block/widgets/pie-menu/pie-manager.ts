@@ -18,11 +18,23 @@ export type PieMenuCreateOptions = {
 
 export class PieManager {
   private static schemas: Set<IPieMenuSchema> = new Set();
-
-  public static abortController = new AbortController();
-
   // If somebody wants to invoke a menu with a button without using the trigger key we can use this with open function
   private static registeredSchemas: Record<string, IPieMenuSchema> = {};
+
+  public static abortController = new AbortController();
+  public static settings = {
+    /**
+     * Specifies the distance between the root-node and the child-nodes
+     */
+    PIE_RADIUS: 150,
+    /**
+     * After the specified time if trigger is released the menu will select the currently hovered node\
+     * If released before the time the pie menu will stay open and you can select with mouse or the trigger key\
+     * Time is in `milliseconds`
+     * @default 150
+     */
+    SELECT_ON_RELEASE_TIMEOUT: 150,
+  };
 
   public static slots = {
     openPie: new Slot<IPieMenuSchema>(),

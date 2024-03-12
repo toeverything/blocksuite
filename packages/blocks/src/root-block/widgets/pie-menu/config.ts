@@ -51,6 +51,14 @@ pie.action({
   },
 });
 
+pie.action({
+  label: 'Selector',
+
+  action: () => {
+    console.log('Selector');
+  },
+});
+
 pie.beginSubmenu({ label: 'Shapes' });
 pie.action({
   label: 'Rectangle',
