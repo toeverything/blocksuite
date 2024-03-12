@@ -410,6 +410,39 @@ export async function initEmptyParagraphState(page: Page, rootId?: string) {
   return ids;
 }
 
+export async function initMultipleNoteWithParagraphState(
+  page: Page,
+  rootId?: string,
+  count = 2
+) {
+  const ids = await page.evaluate(
+    ({ rootId, count }) => {
+      const { doc } = window;
+      doc.captureSync();
+      if (!rootId) {
+        rootId = doc.addBlock('affine:page', {
+          title: new doc.Text(),
+        });
+      }
+
+      const ids = Array.from({ length: count })
+        .fill(0)
+        .map(() => {
+          const noteId = doc.addBlock('affine:note', {}, rootId);
+          const paragraphId = doc.addBlock('affine:paragraph', {}, noteId);
+          return { noteId, paragraphId };
+        });
+
+      // doc.addBlock('affine:surface', {}, rootId);
+      doc.captureSync();
+
+      return { rootId, ids };
+    },
+    { rootId, count }
+  );
+  return ids;
+}
+
 export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(() => {
     const { doc } = window;
