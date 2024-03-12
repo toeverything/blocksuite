@@ -137,8 +137,6 @@ export const getSelectedBlocksCommand: Command<
       return 0;
     });
 
-  console.log(result);
-
   if (result.length === 0) return;
 
   next({
