@@ -1,6 +1,7 @@
 import type { PageRootService } from '@blocksuite/blocks';
 import {
   AffineFormatBarWidget,
+  EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
@@ -61,6 +62,30 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
           disposable.add(onFormatBarConnected);
 
           slots.mounted.once(({ service }) => {
+            disposable.add(
+              (<PageRootService>service).slots.editorModeSwitch.on(mode => {
+                editor.mode = mode;
+              })
+            );
+          });
+        },
+      };
+    }
+    return spec;
+  });
+  editor.edgelessSpecs = [...EdgelessEditorBlockSpecs].map(spec => {
+    if (spec.schema.model.flavour === 'affine:page') {
+      spec = {
+        ...spec,
+        setup: (slots, disposable) => {
+          slots.mounted.once(({ service }) => {
+            const onFormatBarConnected = slots.widgetConnected.on(view => {
+              if (view.component instanceof AffineFormatBarWidget) {
+                configureFormatBar(view.component);
+              }
+            });
+
+            disposable.add(onFormatBarConnected);
             disposable.add(
               (<PageRootService>service).slots.editorModeSwitch.on(mode => {
                 editor.mode = mode;
