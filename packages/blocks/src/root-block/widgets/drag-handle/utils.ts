@@ -410,7 +410,7 @@ export function convertDragPreviewDocToEdgeless({
   const blockModel = blockComponent.model;
   const blockProps = getBlockProps(blockModel);
 
-  edgelessRoot.service.addBlock(
+  const blockId = edgelessRoot.service.addBlock(
     blockComponent.flavour as EdgelessBlockType,
     {
       ...blockProps,
@@ -426,6 +426,11 @@ export function convertDragPreviewDocToEdgeless({
     doc.deleteBlock(blockModel);
     host.selection.setGroup('note', []);
   }
+
+  edgelessRoot.service.selection.set({
+    elements: [blockId],
+    editing: false,
+  });
 
   return true;
 }
