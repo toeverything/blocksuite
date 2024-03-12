@@ -29,7 +29,7 @@ interface MoveBlockConfig {
 export const moveBlockConfigs: MoveBlockConfig[] = [
   {
     name: 'Move Up',
-    hotkey: ['Mod-Alt-ArrowUp', 'Mod-Shift-ArrowUp', 'Ctrl-Alt-ArrowUp'],
+    hotkey: ['Mod-Alt-ArrowUp', 'Mod-Shift-ArrowUp'],
     action: blockElement => {
       const doc = blockElement.doc;
       const textSelection = getTextSelection(blockElement);
@@ -88,7 +88,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
   },
   {
     name: 'Move Down',
-    hotkey: ['Mod-Alt-ArrowDown', 'Mod-Shift-ArrowDown', 'Ctrl-Alt-ArrowDown'],
+    hotkey: ['Mod-Alt-ArrowDown', 'Mod-Shift-ArrowDown'],
     action: blockElement => {
       const doc = blockElement.doc;
       const textSelection = getTextSelection(blockElement);
