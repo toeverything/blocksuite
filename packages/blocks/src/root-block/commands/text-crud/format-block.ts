@@ -7,7 +7,7 @@ import type { AffineTextAttributes } from '../../../_common/inline/presets/affin
 
 // for block selection
 export const formatBlockCommand: Command<
-  'currentBlockSelections' | 'host',
+  'currentBlockSelections',
   never,
   {
     blockSelections?: BlockSelection[];
@@ -21,20 +21,13 @@ export const formatBlockCommand: Command<
     '`blockSelections` is required, you need to pass it in args or use `getBlockSelections` command before adding this command to the pipeline.'
   );
 
-  const host = ctx.host;
-  assertExists(
-    host,
-    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
-  );
-
   if (blockSelections.length === 0) return;
 
   const styles = ctx.styles;
   const mode = ctx.mode ?? 'merge';
 
-  const success = host.std.command
-    .pipe()
-    .withHost()
+  const success = ctx.std.command
+    .chain()
     .getSelectedBlocks({
       blockSelections,
       filter: el =>

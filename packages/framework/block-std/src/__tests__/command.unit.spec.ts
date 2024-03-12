@@ -48,8 +48,8 @@ describe('CommandManager', () => {
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
 
-    const [success1] = commandManager.pipe().command1().run();
-    const [success2] = commandManager.pipe().command2().run();
+    const [success1] = commandManager.chain().command1().run();
+    const [success2] = commandManager.chain().command2().run();
 
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
@@ -67,7 +67,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success] = commandManager
-      .pipe()
+      .chain()
       .command1()
       .command2()
       .command3()
@@ -89,7 +89,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success] = commandManager
-      .pipe()
+      .chain()
       .command1()
       .command2()
       .command3()
@@ -115,7 +115,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success] = commandManager
-      .pipe()
+      .chain()
       .command1()
       .command2()
       .command3()
@@ -134,7 +134,7 @@ describe('CommandManager', () => {
     commandManager.add('command1', command1);
 
     const [success] = commandManager
-      .pipe()
+      .chain()
       .command1({ command1Option: 'test' })
       .run();
 
@@ -151,7 +151,7 @@ describe('CommandManager', () => {
     commandManager.add('command1', command1);
 
     const [success, ctx] = commandManager
-      .pipe()
+      .chain()
       .with({ commandData1: 'test' })
       .command1()
       .run();
@@ -176,7 +176,7 @@ describe('CommandManager', () => {
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
 
-    const [success, ctx] = commandManager.pipe().command1().command2().run();
+    const [success, ctx] = commandManager.chain().command1().command2().run();
 
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
@@ -187,7 +187,7 @@ describe('CommandManager', () => {
   test('can execute an inline command', () => {
     const inlineCommand: Command = vi.fn((_ctx, next) => next());
 
-    const success = commandManager.pipe().inline(inlineCommand).run();
+    const success = commandManager.chain().inline(inlineCommand).run();
 
     expect(inlineCommand).toHaveBeenCalled();
     expect(success).toBeTruthy();
@@ -203,7 +203,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success] = commandManager
-      .pipe()
+      .chain()
       .try(cmd => [cmd.command1(), cmd.command2()])
       .command3()
       .run();
@@ -226,7 +226,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success, ctx] = commandManager
-      .pipe()
+      .chain()
       .command1()
       .try(cmd => [cmd.command2(), cmd.command3()])
       .run();
@@ -252,7 +252,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success, ctx] = commandManager
-      .pipe()
+      .chain()
       .try(cmd => [cmd.command1(), cmd.command2()])
       .command3()
       .run();
@@ -278,7 +278,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
 
     const [success, ctx] = commandManager
-      .pipe()
+      .chain()
       .try(cmd => [cmd.command1(), cmd.command2()])
       .run();
 
@@ -314,7 +314,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success] = commandManager
-      .pipe()
+      .chain()
       .command1()
       .try(cmd => [cmd.command2()])
       .command3()
@@ -336,7 +336,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success] = commandManager
-      .pipe()
+      .chain()
       .tryAll(cmd => [cmd.command1(), cmd.command2()])
       .command3()
       .run();
@@ -363,7 +363,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success, ctx] = commandManager
-      .pipe()
+      .chain()
       .tryAll(cmd => [cmd.command1(), cmd.command2(), cmd.command3()])
       .run();
 
@@ -388,7 +388,7 @@ describe('CommandManager', () => {
     commandManager.add('command3', command3);
 
     const [success, ctx] = commandManager
-      .pipe()
+      .chain()
       .tryAll(cmd => [cmd.command1(), cmd.command2()])
       .command3()
       .run();
@@ -434,7 +434,7 @@ describe('CommandManager', () => {
     commandManager.add('command4', command4);
 
     const [success, ctx] = commandManager
-      .pipe()
+      .chain()
       .command1()
       .tryAll(cmd => [cmd.command2(), cmd.command3()])
       .command4()
@@ -462,7 +462,7 @@ describe('CommandManager', () => {
     commandManager.add('command4', command4);
 
     const [success] = commandManager
-      .pipe()
+      .chain()
       .command1()
       .tryAll(cmd => [cmd.command2(), cmd.command3()])
       .command4()

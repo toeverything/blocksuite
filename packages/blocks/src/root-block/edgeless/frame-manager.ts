@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 
 import type {
   EdgelessModel,
@@ -135,7 +135,7 @@ export class EdgelessFrameManager {
     const id = this._rootService.addBlock(
       'affine:frame',
       {
-        title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
+        title: new DocCollection.Y.Text(`Frame ${frames.length + 1}`),
         xywh: bound.serialize(),
       },
       surfaceModel

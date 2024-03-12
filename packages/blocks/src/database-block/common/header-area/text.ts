@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -108,17 +108,17 @@ abstract class BaseTextCell extends BaseCellRenderer<unknown> {
   getYText(text?: string | Y.Text) {
     if (
       this._isRichText &&
-      (text instanceof Workspace.Y.Text || text == null)
+      (text instanceof DocCollection.Y.Text || text == null)
     ) {
       let yText = text;
       if (!yText) {
-        yText = new Workspace.Y.Text();
+        yText = new DocCollection.Y.Text();
         this.titleColumn?.setValue(this.rowId, yText);
       }
       return yText;
     }
-    const yText = new Workspace.Y.Doc().getText('title');
-    if (text instanceof Workspace.Y.Text) {
+    const yText = new DocCollection.Y.Doc().getText('title');
+    if (text instanceof DocCollection.Y.Text) {
       return text;
     }
     yText.insert(0, text ?? '');

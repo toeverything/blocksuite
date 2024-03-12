@@ -1,17 +1,17 @@
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 
 export function createDefaultDoc(
-  workspace: Workspace,
+  collection: DocCollection,
   options: { id?: string; title?: string } = {}
 ) {
-  const doc = workspace.createDoc({ id: options.id });
+  const doc = collection.createDoc({ id: options.id });
 
   doc.load();
   const title = options.title ?? '';
   const rootId = doc.addBlock('affine:page', {
     title: new doc.Text(title),
   });
-  workspace.setDocMeta(doc.id, {
+  collection.setDocMeta(doc.id, {
     title,
   });
   doc.addBlock('affine:surface', {}, rootId);

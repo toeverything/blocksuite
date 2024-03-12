@@ -39,7 +39,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     config: DatabaseBlockDatasourceConfig
   ) {
     super();
-    this._model = host.doc.workspace
+    this._model = host.doc.collection
       .getDoc(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
@@ -50,7 +50,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   public get properties(): string[] {
-    return [...this._model.columns.map(column => column.id)];
+    return this._model.columns.map(column => column.id);
   }
 
   public slots = {
@@ -92,7 +92,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       }
       return;
     }
-    if (this._model.columns.find(v => v.id === propertyId)) {
+    if (this._model.columns.some(v => v.id === propertyId)) {
       this._model.updateCell(rowId, {
         columnId: propertyId,
         value,
@@ -146,7 +146,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
 
   private newColumnName() {
     let i = 1;
-    while (this._model.columns.find(column => column.name === `Column ${i}`)) {
+    while (this._model.columns.some(column => column.name === `Column ${i}`)) {
       i++;
     }
     return `Column ${i}`;

@@ -364,7 +364,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
             'overflow-y': this._isShowCollapsedContent ? 'initial' : 'clip',
           })}
         >
-          ${surface.renderModel(model)}
+          ${surface.host.renderModel(model)}
         </div>
 
         ${isCollapsable

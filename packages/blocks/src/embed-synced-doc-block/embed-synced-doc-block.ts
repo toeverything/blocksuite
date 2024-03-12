@@ -5,7 +5,7 @@ import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -76,7 +76,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   syncedDocEditorHost?: EditorHost;
 
   get syncedDoc() {
-    const doc = this.std.workspace.getDoc(this.model.pageId);
+    const doc = this.std.collection.getDoc(this.model.pageId);
     return doc;
   }
 
@@ -310,7 +310,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
-    const yText = new Workspace.Y.Text();
+    const yText = new DocCollection.Y.Text();
     yText.insert(0, REFERENCE_NODE);
     yText.format(0, REFERENCE_NODE.length, {
       reference: { type: 'LinkedPage', pageId },
@@ -447,7 +447,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   }
 
   override render() {
-    this.removeAttribute('data-nested-editor');
+    delete this.dataset.nestedEditor;
 
     const { style, xywh } = this.model;
 
@@ -523,7 +523,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     const EditorBlockSpec =
       editorMode === 'page' ? PageEditorBlockSpecs : EdgelessEditorBlockSpecs;
 
-    this.setAttribute('data-nested-editor', 'true');
+    this.dataset.nestedEditor = 'true';
     const scale = isInSurface ? this.model.scale ?? 1 : undefined;
 
     return this.renderEmbed(

@@ -188,7 +188,7 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
       if (delta.attributes?.reference) {
         // If linked doc, render linked doc icon and the doc title.
         const refAttribute = delta.attributes.reference;
-        const refMeta = block.doc.workspace.meta.docMetas.find(
+        const refMeta = block.doc.collection.meta.docMetas.find(
           doc => doc.id === refAttribute.pageId
         );
         const unavailable = !refMeta;

@@ -1,13 +1,9 @@
-import { updateBlockElementType } from '../../root-block/utils/operations/element/block-level.js';
 import {
   mergeToCodeModel,
   transformModel,
 } from '../../root-block/utils/operations/model.js';
 
 class DocTestUtils {
-  // block element operations (ui layer)
-  updateBlockElementType = updateBlockElementType;
-
   // block model operations (data layer)
   mergeToCodeModel = mergeToCodeModel;
   transformModel = transformModel;

@@ -131,8 +131,6 @@ const SessionPropsSchema = z.object({
   templateCache: z.string(),
   remoteColor: z.string(),
   showBidirectional: z.boolean(),
-  outlineShowIcon: z.boolean(),
-  outlineEnableSorting: z.boolean(),
 });
 
 type SessionProps = z.infer<typeof SessionPropsSchema>;
@@ -148,12 +146,12 @@ export class EditSessionStorage {
       rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
       stroke: GET_DEFAULT_LINE_COLOR(),
       strokeStyle: StrokeStyle.Solid,
-      strokeWidth: LineWidth.LINE_WIDTH_TWO,
+      strokeWidth: LineWidth.Two,
       rough: false,
     },
     brush: {
       color: GET_DEFAULT_LINE_COLOR(),
-      lineWidth: LineWidth.Thin,
+      lineWidth: LineWidth.Four,
     },
     shape: {
       color: DEFAULT_SHAPE_TEXT_COLOR,
@@ -161,7 +159,7 @@ export class EditSessionStorage {
       fillColor: DEFAULT_SHAPE_FILL_COLOR,
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
       strokeStyle: StrokeStyle.Solid,
-      strokeWidth: LineWidth.LINE_WIDTH_TWO,
+      strokeWidth: LineWidth.Two,
       shapeStyle: ShapeStyle.General,
       filled: true,
       radius: 0,
@@ -253,10 +251,6 @@ export class EditSessionStorage {
         return 'blocksuite:remote-color';
       case 'showBidirectional':
         return 'blocksuite:' + id + ':showBidirectional';
-      case 'outlineShowIcon':
-        return 'blocksuite:' + id + ':outlineShowIcon';
-      case 'outlineEnableSorting':
-        return 'blocksuite:' + id + ':outlineEnableSorting';
       default:
         return key;
     }

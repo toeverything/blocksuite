@@ -1,4 +1,4 @@
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
@@ -97,7 +97,7 @@ const drawAllNode = (
         : service.addElement(CanvasElementType.SHAPE, {
             ...DEFAULT_SHAPE_PROPS,
             xywh: `[${0},${0},${0},${0}]`,
-            text: new Workspace.Y.Text(text),
+            text: new DocCollection.Y.Text(text),
           });
     shapeIds.push(id);
     const ele = service.getElementById(id) as ShapeElementModel;
@@ -229,7 +229,7 @@ export const createNode = (
   const id = service.addElement(CanvasElementType.SHAPE, {
     ...DEFAULT_SHAPE_PROPS,
     xywh: `[${0},${0},${0},${0}]`,
-    text: new Workspace.Y.Text(text),
+    text: new DocCollection.Y.Text(text),
   });
   const ele = service.getElementById(id) as ShapeElementModel;
   const maxWidth =
@@ -268,7 +268,7 @@ export const changeText = (
   service: EdgelessRootService
 ) => {
   service.updateElement(id, {
-    text: new Workspace.Y.Text(text),
+    text: new DocCollection.Y.Text(text),
   });
   const ele = service.getElementById(id) as ShapeElementModel;
   const maxWidth =

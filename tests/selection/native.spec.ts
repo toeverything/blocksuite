@@ -1494,9 +1494,9 @@ test('should keep native range selection when scrolling backward with the scroll
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(9).fill('');
-  data.unshift(...['123', '456', '789']);
-  data.push(...['987', '654', '321']);
+  const data = Array.from({ length: 9 }, () => '');
+  data.unshift('123', '456', '789');
+  data.push('987', '654', '321');
   await assertRichTexts(page, data);
 
   const blockHeight = await page.evaluate(() => {
@@ -1566,9 +1566,9 @@ test('should keep native range selection when scrolling forward with the scroll 
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(9).fill('');
-  data.unshift(...['123', '456', '789']);
-  data.push(...['987', '654', '321']);
+  const data = Array.from({ length: 9 }, () => '');
+  data.unshift('123', '456', '789');
+  data.push('987', '654', '321');
   await assertRichTexts(page, data);
 
   const blockHeight = await page.evaluate(() => {

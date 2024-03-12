@@ -591,7 +591,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
       if (!this._highlightMask) {
         this._highlightMask = document.createElement('div');
-        rootElement.appendChild(this._highlightMask);
+        rootElement.append(this._highlightMask);
       }
 
       Object.assign(this._highlightMask.style, {

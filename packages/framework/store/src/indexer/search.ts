@@ -4,8 +4,8 @@ import FlexSearch from 'flexsearch';
 import type { Doc } from 'yjs';
 import { Text as YText } from 'yjs';
 
-import type { YBlock } from '../workspace/block/block.js';
-import type { YBlocks } from '../workspace/doc.js';
+import type { YBlock } from '../store/block/block.js';
+import type { YBlocks } from '../store/doc.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 
 const DocumentIndexer = FlexSearch.Document;

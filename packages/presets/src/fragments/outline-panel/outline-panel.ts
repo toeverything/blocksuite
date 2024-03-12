@@ -9,6 +9,7 @@ import { OutlineNotice } from './body/outline-notice.js';
 import { OutlinePanelBody } from './body/outline-panel-body.js';
 import { OutlineNoteCard } from './card/outline-card.js';
 import { OutlineBlockPreview } from './card/outline-preview.js';
+import { type OutlineSettingsDataType, outlineSettingsKey } from './config.js';
 import { OutlinePanelHeader } from './header/outline-panel-header.js';
 import { OutlineNotePreviewSettingMenu } from './header/outline-setting-menu.js';
 
@@ -73,6 +74,11 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   @state()
   _noticeVisible = false;
 
+  private _settings: OutlineSettingsDataType = {
+    showIcons: false,
+    enableSorting: false,
+  };
+
   get doc() {
     return this.editor.doc;
   }
@@ -85,37 +91,38 @@ export class OutlinePanel extends WithDisposable(LitElement) {
     return this.editor.querySelector('affine-edgeless-root');
   }
 
-  private get _rootService() {
-    return this.host.spec.getService('affine:page');
-  }
-
   get mode() {
     return this.editor.mode;
   }
 
-  private _tryToRestoreSettings() {
-    if (!this.host || !this._rootService) return;
+  private _loadSettingsFromLocalStorage() {
+    const settings = localStorage.getItem(outlineSettingsKey);
+    if (settings) {
+      this._settings = JSON.parse(settings);
+      this._showPreviewIcon = this._settings.showIcons;
+      this._enableNotesSorting = this._settings.enableSorting;
+    }
+  }
 
-    const { editSession } = this._rootService;
-    this._showPreviewIcon = editSession.getItem('outlineShowIcon') ?? false;
-    this._enableNotesSorting =
-      editSession.getItem('outlineEnableSorting') ?? false;
+  private _saveSettingsToLocalStorage() {
+    localStorage.setItem(outlineSettingsKey, JSON.stringify(this._settings));
+  }
+
+  private _updateAndSaveSettings(
+    newSettings: Partial<OutlineSettingsDataType>
+  ) {
+    this._settings = { ...this._settings, ...newSettings };
+    this._saveSettingsToLocalStorage();
   }
 
   private _toggleShowPreviewIcon = (on: boolean) => {
     this._showPreviewIcon = on;
-    this._rootService.editSession.setItem(
-      'outlineShowIcon',
-      this._showPreviewIcon
-    );
+    this._updateAndSaveSettings({ showIcons: on });
   };
 
   private _toggleNotesSorting = () => {
     this._enableNotesSorting = !this._enableNotesSorting;
-    this._rootService.editSession.setItem(
-      'outlineEnableSorting',
-      this._showPreviewIcon
-    );
+    this._updateAndSaveSettings({ enableSorting: this._enableNotesSorting });
   };
 
   private _setNoticeVisibility = (visibility: boolean) => {
@@ -160,7 +167,7 @@ export class OutlinePanel extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._tryToRestoreSettings();
+    this._loadSettingsFromLocalStorage();
   }
 
   override disconnectedCallback() {

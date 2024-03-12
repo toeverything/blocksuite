@@ -7,7 +7,7 @@ import { defaultImageProxyMiddleware } from './middlewares.js';
 import { createAssetsArchive, download } from './utils.js';
 
 async function exportDoc(doc: Doc) {
-  const job = new Job({ workspace: doc.workspace });
+  const job = new Job({ collection: doc.collection });
   const snapshot = await job.docToSnapshot(doc);
 
   const adapter = new MarkdownAdapter();
@@ -47,7 +47,7 @@ async function importMarkdown({
   noteId,
 }: ImportMarkdownOptions) {
   const job = new Job({
-    workspace: doc.workspace,
+    collection: doc.collection,
     middlewares: [defaultImageProxyMiddleware],
   });
   const adapter = new MarkdownAdapter();
@@ -55,9 +55,9 @@ async function importMarkdown({
   const snapshot = await adapter.toSliceSnapshot({
     file: markdown,
     assets: job.assetsManager,
-    pageVersion: doc.workspace.meta.pageVersion!,
-    workspaceVersion: doc.workspace.meta.workspaceVersion!,
-    workspaceId: doc.workspace.id,
+    pageVersion: doc.collection.meta.pageVersion!,
+    workspaceVersion: doc.collection.meta.workspaceVersion!,
+    workspaceId: doc.collection.id,
     pageId: doc.id,
   });
 

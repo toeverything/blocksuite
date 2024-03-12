@@ -89,7 +89,7 @@ function getMostCommonLineSize(elements: ShapeElementModel[]): LineWidth {
     return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
-  return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
+  return max ? (Number(max[0]) as LineWidth) : LineWidth.Four;
 }
 
 function getMostCommonLineStyle(
@@ -436,7 +436,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const selectedStrokeColor =
       getMostCommonStrokeColor(this.elements) ?? STROKE_COLORS[0];
     const selectedLineSize =
-      getMostCommonLineSize(this.elements) ?? LineWidth.LINE_WIDTH_FOUR;
+      getMostCommonLineSize(this.elements) ?? LineWidth.Four;
     const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
     const selectedShapeStyle =
       getMostCommonShapeStyle(this.elements) ?? ShapeStyle.Scribbled;

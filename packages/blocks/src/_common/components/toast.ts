@@ -44,7 +44,7 @@ const createToastContainer = (editorHost: EditorHost) => {
   const rootElement = getRootByEditorHost(editorHost);
   assertExists(rootElement);
   const viewportElement = rootElement.viewportElement;
-  viewportElement.appendChild(element);
+  viewportElement.append(element);
   return element;
 };
 
@@ -82,7 +82,7 @@ export const toast = (
   const element = htmlToElement<HTMLDivElement>(template);
   // message is not trusted
   element.textContent = message;
-  ToastContainer.appendChild(element);
+  ToastContainer.append(element);
 
   const fadeIn = [
     {

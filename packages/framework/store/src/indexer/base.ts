@@ -2,7 +2,7 @@ import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { YArrayEvent, YMapEvent, YTextEvent } from 'yjs';
 
-import type { YBlock } from '../workspace/block/block.js';
+import type { YBlock } from '../store/block/block.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 
 type DocId = string;
@@ -23,7 +23,7 @@ export type IndexBlockEvent =
 
 export class BlockIndexer {
   private readonly _doc: BlockSuiteDoc;
-  private readonly _workspaceSlots: {
+  private readonly _collectionSlots: {
     docAdded: Slot<string>;
     docRemoved: Slot<string>;
   };
@@ -52,7 +52,7 @@ export class BlockIndexer {
     }
   ) {
     this._doc = doc;
-    this._workspaceSlots = slots;
+    this._collectionSlots = slots;
 
     if (immediately) {
       this._initIndex();
@@ -68,7 +68,9 @@ export class BlockIndexer {
     const doc = this._doc;
     const share = doc.share;
     if (!share.has('meta')) {
-      throw new Error('Failed to initialize indexer: workspace meta not found');
+      throw new Error(
+        'Failed to initialize indexer: collection meta not found'
+      );
     }
 
     let disposeMap: Record<string, (() => void) | null> = {};
@@ -92,7 +94,7 @@ export class BlockIndexer {
         disposeMap[docId] = dispose;
       });
 
-    this._workspaceSlots.docAdded.on(docId => {
+    this._collectionSlots.docAdded.on(docId => {
       const doc = this._getDoc(docId);
       assertExists(doc, `Failed to find doc '${docId}'`);
       if (disposeMap[docId]) {
@@ -102,7 +104,7 @@ export class BlockIndexer {
       const dispose = this._indexDoc(docId, doc);
       disposeMap[docId] = dispose;
     });
-    this._workspaceSlots.docRemoved.on(docId => {
+    this._collectionSlots.docRemoved.on(docId => {
       disposeMap[docId]?.();
       disposeMap[docId] = null;
       this.slots.docRemoved.emit(docId);

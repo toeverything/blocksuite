@@ -292,6 +292,11 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       children,
       displayMode,
     } = this.anchorNote;
+    const {
+      collapse: _,
+      collapsedHeight: __,
+      ...restOfEdgeless
+    } = this.anchorNote.edgeless;
     const anchorBlockId = this._noteBlockIds[this._activeSlicerIndex];
     if (!anchorBlockId) return;
     const sliceIndex = children.findIndex(block => block.id === anchorBlockId);
@@ -310,6 +315,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         displayMode,
         xywh: serializeXYWH(x, newY + NEW_NOTE_GAP, width, DEFAULT_NOTE_HEIGHT),
         index: originIndex + 1,
+        edgeless: restOfEdgeless,
       },
       doc.root?.id
     );

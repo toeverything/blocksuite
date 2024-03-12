@@ -33,7 +33,7 @@ export function startDragging(options: {
   let idx: undefined | number;
   let indicatorTranslateY: undefined | number;
 
-  container.renderRoot.appendChild(maskElement);
+  container.renderRoot.append(maskElement);
 
   const insideListContainer = (e: MouseEvent) => {
     return (
@@ -82,7 +82,7 @@ export function startDragging(options: {
     if (ended) return;
 
     ended = true;
-    container.renderRoot.removeChild(maskElement);
+    maskElement.remove();
 
     disposeMove();
     onDragEnd?.(idx);

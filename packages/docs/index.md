@@ -12,10 +12,10 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /guide/overview
+      link: /guide/quick-start
     - theme: alt
-      text: Try Playground
-      link: https://try-blocksuite.vercel.app/starter?init
+      text: Learn More
+      link: /guide/overview
 
 features:
   - title: 🧩 Headless Editor Framework

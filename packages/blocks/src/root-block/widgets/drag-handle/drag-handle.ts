@@ -136,6 +136,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   get selectedBlocks() {
+    // eslint-disable-next-line unicorn/prefer-array-some
     return this.host.selection.find('text')
       ? this.host.selection.filter('text')
       : this.host.selection.filter('block');
@@ -356,7 +357,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     let dragPreview: DragPreview;
     if (dragPreviewEl) {
       dragPreview = new DragPreview(dragPreviewOffset);
-      dragPreview.appendChild(dragPreviewEl);
+      dragPreview.append(dragPreviewEl);
     } else {
       const fragment = document.createDocumentFragment();
       let width = 0;
@@ -364,7 +365,7 @@ export class AffineDragHandleWidget extends WidgetElement<
         width = Math.max(width, element.getBoundingClientRect().width);
         const container = document.createElement('div');
         render(this.host.renderModel(element.model), container);
-        fragment.appendChild(container);
+        fragment.append(container);
       });
 
       const offset = this._calculatePreviewOffset(blockElements, state);
@@ -379,9 +380,9 @@ export class AffineDragHandleWidget extends WidgetElement<
       })`;
 
       dragPreview.style.opacity = altKey ? '1' : '0.5';
-      dragPreview.appendChild(fragment);
+      dragPreview.append(fragment);
     }
-    this.rootElement.appendChild(dragPreview);
+    this.rootElement.append(dragPreview);
     return dragPreview;
   };
 

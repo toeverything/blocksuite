@@ -125,7 +125,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
         mockSelection.style.height = `${domRect.height}px`;
 
         assertExists(this.mockSelectionContainer);
-        this.mockSelectionContainer.appendChild(mockSelection);
+        this.mockSelectionContainer.append(mockSelection);
       });
     }
 

@@ -190,8 +190,7 @@ export class RootService extends BlockService<RootBlockModel> {
     // Here we are using something new...
     // Introducing commands!
     this.std.command
-      .pipe()
-      .withHost()
+      .chain()
       .tryAll(chain => [
         chain.getTextSelection(),
         chain.getImageSelections(),
@@ -222,47 +221,12 @@ In BlockSuite, you can always control the editor solely through direct operation
 The code at the end of the previous section demonstrates the basic usage of commands:
 
 - The `pipe` method is used to start a new command chain.
-- The `withHost` method allows adding `host` to the _context object_ of the command. Every subsequent command method in this chain is executed with this shared context object.
 - The `tryAll` method sequentially executes multiple sub-commands on the current chain's context.
 - Commands like `getSelectedBlock` and `getTextSelection` are used for actual block tree operations.
 - The `inline` method transfers the state on the command context object to the outside or executes other side effects.
 - The `run` method is used to finally execute the command chain. The context will be destroyed after the command chain execution.
 
-In the above methods, task-specific commands like `getSelectedBlock` are not implemented by the command manager but are registered by individual blocks. In fact, since BlockSuite separates the framework-specific `host` from the framework-agnostic `block-std`, even the `withHost` command is defined in the block spec:
-
-```ts
-import type { Command } from '@blocksuite/block-std';
-import { type EditorHost } from '@blocksuite/lit';
-
-// This command requires no input field on context (`never`),
-// and will add `host` to context as output
-export const withHostCommand: Command<never, 'host'> = (ctx, next) => {
-  const host = ctx.std.host as EditorHost;
-  next({ host });
-};
-
-// ...
-class RootService {
-  // ...
-  mounted() {
-    // ...
-    this.std.command.add('withHost', withHostCommand);
-  }
-}
-
-// This allows the command to be strongly typed
-declare global {
-  namespace BlockSuite {
-    interface CommandContext {
-      host?: EditorHost;
-    }
-
-    interface Commands {
-      withHost: typeof withHostCommand;
-    }
-  }
-}
-```
+In the above methods, task-specific commands like `getSelectedBlock` are not implemented by the command manager but are registered by individual blocks. In fact, since BlockSuite separates the framework-specific `host` from the framework-agnostic `block-std`.
 
 You can refer to the [`Command`](./command) documentation for more advanced uses of commands.
 

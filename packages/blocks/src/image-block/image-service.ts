@@ -114,7 +114,10 @@ export class ImageService extends BlockService<ImageBlockModel> {
         dragPreviewEl.style.borderRadius = '4px';
         dragPreviewEl.style.overflow = 'hidden';
         dragPreviewEl.style.width = `${width / scale}px`;
-        render(blockComponent.renderModel(blockComponent.model), dragPreviewEl);
+        render(
+          blockComponent.host.renderModel(blockComponent.model),
+          dragPreviewEl
+        );
 
         startDragging([blockComponent], state, dragPreviewEl);
         return true;

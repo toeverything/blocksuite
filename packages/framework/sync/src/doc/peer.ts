@@ -310,7 +310,7 @@ export class SyncPeer {
     doc.on('update', this.handleYDocUpdates);
 
     // mark rootDoc as loaded
-    doc.emit('sync', [true]);
+    doc.emit('sync', [true, doc]);
 
     this.updateSyncStatus();
   }

@@ -145,7 +145,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       meta: {
         id: nanoid(),
         title: hastGetTextContent(titleAst, 'Untitled'),
-        createDate: +new Date(),
+        createDate: Date.now(),
         tags: [],
       },
       blocks: {

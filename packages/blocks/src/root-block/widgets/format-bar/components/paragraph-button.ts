@@ -1,72 +1,53 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
-import type { Doc } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { whenHover } from '../../../../_common/components/hover/index.js';
 import { textConversionConfigs } from '../../../../_common/configs/text-conversion.js';
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
 import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
 import { isRootElement } from '../../../../root-block/utils/guard.js';
-import { updateBlockElementType } from '../../../../root-block/utils/operations/element/block-level.js';
+import type { ParagraphActionConfigItem } from '../config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
-  doc: Doc;
-  selectedBlockElements: BlockElement[];
+  host: EditorHost;
+  formatBar: AffineFormatBarWidget;
   ref?: RefOrCallback;
 }
 
-const updateParagraphType = (
-  selectedBlockElements: BlockElement[],
-  flavour: BlockSuite.Flavour,
-  type?: string
-) => {
-  if (selectedBlockElements.length === 0) {
-    throw new Error('No models to update!');
-  }
-  const { flavour: defaultFlavour, type: defaultType } =
-    textConversionConfigs[0];
-  const targetFlavour = selectedBlockElements.every(
-    el =>
-      el.flavour === flavour && (el.model as ParagraphBlockModel).type === type
-  )
-    ? defaultFlavour
-    : flavour;
-  const targetType = selectedBlockElements.every(
-    el =>
-      el.flavour === flavour && (el.model as ParagraphBlockModel).type === type
-  )
-    ? defaultType
-    : type;
-  updateBlockElementType(selectedBlockElements, targetFlavour, targetType);
-};
-
 const ParagraphPanel = ({
-  doc,
-  selectedBlockElements,
+  formatBar,
+  host,
   ref: containerRef,
 }: ParagraphPanelProps) => {
+  const config = formatBar.configItems
+    .filter(
+      (item): item is ParagraphActionConfigItem =>
+        item.type === 'paragraph-action'
+    )
+    .filter(({ flavour }) => host.doc.schema.flavourSchemaMap.has(flavour));
+
+  const renderedConfig = repeat(
+    config,
+    item =>
+      html`<icon-button
+        width="100%"
+        height="32px"
+        style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
+        text="${item.name}"
+        data-testid="${item.id}"
+        @click="${() => item.action(formatBar.std.command.chain(), formatBar)}"
+      >
+        ${typeof item.icon === 'function' ? item.icon() : item.icon}
+      </icon-button>`
+  );
+
   return html`<div ${ref(containerRef)} class="paragraph-panel">
-    ${textConversionConfigs
-      .filter(({ flavour }) => flavour !== 'affine:divider')
-      .filter(({ flavour }) => doc.schema.flavourSchemaMap.has(flavour))
-      .map(
-        ({ flavour, type, name, icon }) =>
-          html`<icon-button
-            width="100%"
-            height="32px"
-            style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
-            text="${name}"
-            data-testid="${flavour}/${type}"
-            @click="${() =>
-              updateParagraphType(selectedBlockElements, flavour, type)}"
-          >
-            ${icon}
-          </icon-button>`
-      )}
+    ${renderedConfig}
   </div>`;
 };
 
@@ -131,8 +112,8 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
   });
 
   const paragraphPanel = ParagraphPanel({
-    selectedBlockElements,
-    doc: formatBar.host.doc,
+    formatBar,
+    host: formatBar.host,
     ref: setFloating,
   });
 

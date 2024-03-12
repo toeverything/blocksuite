@@ -3,23 +3,16 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 export const getSelectedModelsCommand: Command<
-  'host',
+  never,
   'selectedModels',
   {
     types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
   }
 > = (ctx, next) => {
-  const { host } = ctx;
-  assertExists(
-    host,
-    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
-  );
-
   const types = ctx.types ?? ['block', 'text', 'image'];
   const selectedModels: BlockModel[] = [];
-  host.std.command
-    .pipe()
-    .withHost()
+  ctx.std.command
+    .chain()
     .tryAll(chain => [
       chain.getTextSelection(),
       chain.getBlockSelections(),

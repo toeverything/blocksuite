@@ -55,7 +55,7 @@ export class CodeClipboardController {
 
     this._std.doc.captureSync();
     this._std.command
-      .pipe()
+      .chain()
       .try(cmd => [
         cmd.getTextSelection().inline<'currentSelectionPath'>((ctx, next) => {
           const textSelection = ctx.currentTextSelection;

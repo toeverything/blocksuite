@@ -16,6 +16,7 @@ export type {
 export { sha } from './persistence/blob/utils.js';
 export * from './reactive/index.js';
 export * from './schema/index.js';
+export * from './store/index.js';
 export * from './transformer/index.js';
 export {
   createAutoIncrementIdGenerator,
@@ -25,7 +26,6 @@ export {
   uuidv4,
 } from './utils/id-generator.js';
 export * as Utils from './utils/utils.js';
-export * from './workspace/index.js';
 export * from './yjs/index.js';
 export { Slot } from '@blocksuite/global/utils';
 

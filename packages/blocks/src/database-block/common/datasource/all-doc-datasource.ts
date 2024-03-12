@@ -1,6 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { Doc, Workspace } from '@blocksuite/store';
+import type { Doc, DocCollection } from '@blocksuite/store';
 
 import type { InsertToPosition } from '../../types.js';
 import type { ColumnConfig } from '../columns/manager.js';
@@ -11,10 +11,10 @@ import type { AllDocDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
 export class AllDocDatasource extends BaseDataSource {
-  private workspace: Workspace;
+  private collection: DocCollection;
 
   public get rows(): string[] {
-    return Array.from(this.workspace.docs.keys());
+    return Array.from(this.collection.docs.keys());
   }
 
   private propertiesMap: Record<
@@ -43,11 +43,11 @@ export class AllDocDatasource extends BaseDataSource {
         doc.meta.tags = value as string[];
       },
       getData: () => ({
-        options: this.workspace.meta.properties.tags?.options ?? [],
+        options: this.collection.meta.properties.tags?.options ?? [],
       }),
       changeData: data => {
-        this.workspace.meta.setProperties({
-          ...this.workspace.meta.properties,
+        this.collection.meta.setProperties({
+          ...this.collection.meta.properties,
           tags: data as never,
         });
       },
@@ -64,8 +64,8 @@ export class AllDocDatasource extends BaseDataSource {
 
   constructor(host: EditorHost, _config: AllDocDatasourceConfig) {
     super();
-    this.workspace = host.doc.workspace;
-    host.doc.workspace.meta.docMetaUpdated.pipe(this.slots.update);
+    this.collection = host.doc.collection;
+    host.doc.collection.meta.docMetaUpdated.pipe(this.slots.update);
   }
 
   public cellChangeValue(
@@ -73,7 +73,7 @@ export class AllDocDatasource extends BaseDataSource {
     propertyId: string,
     value: unknown
   ): void {
-    const doc = this.workspace.getDoc(rowId);
+    const doc = this.collection.getDoc(rowId);
     assertExists(doc);
     this.propertiesMap[propertyId]?.setValue?.(doc, value);
   }
@@ -86,7 +86,7 @@ export class AllDocDatasource extends BaseDataSource {
   }
 
   public cellGetValue(rowId: string, propertyId: string): unknown {
-    const doc = this.workspace.getDoc(rowId);
+    const doc = this.collection.getDoc(rowId);
     assertExists(doc);
     return this.propertiesMap[propertyId]?.getValue(doc);
   }
@@ -131,11 +131,11 @@ export class AllDocDatasource extends BaseDataSource {
   }
 
   public rowAdd(_insertPosition: InsertToPosition | number): string {
-    return this.workspace.createDoc().id;
+    return this.collection.createDoc().id;
   }
 
   public rowDelete(ids: string[]): void {
-    ids.forEach(id => this.workspace.removeDoc(id));
+    ids.forEach(id => this.collection.removeDoc(id));
   }
 
   public slots = {

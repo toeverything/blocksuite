@@ -25,8 +25,8 @@ export function download(blob: Blob, name: string) {
   const fileURL = URL.createObjectURL(blob);
   element.setAttribute('href', fileURL);
   element.style.display = 'none';
-  document.body.appendChild(element);
+  document.body.append(element);
   element.click();
-  document.body.removeChild(element);
+  element.remove();
   URL.revokeObjectURL(fileURL);
 }

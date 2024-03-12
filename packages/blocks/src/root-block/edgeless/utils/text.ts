@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
@@ -45,7 +45,7 @@ export function mountTextElementEditor(
   textEditor.element = textElement;
   const rootElementContainer = edgeless.rootElementContainer;
 
-  rootElementContainer.appendChild(textEditor);
+  rootElementContainer.append(textEditor);
   textEditor.updateComplete
     .then(() => {
       textEditor.inlineEditor?.focusIndex(cursorIndex);
@@ -63,7 +63,7 @@ export function mountShapeTextEditor(
   edgeless: EdgelessRootBlockComponent
 ) {
   if (!shapeElement.text) {
-    const text = new Workspace.Y.Text();
+    const text = new DocCollection.Y.Text();
     const { fillColor } = shapeElement;
     const color = isTransparent(fillColor)
       ? GET_DEFAULT_LINE_COLOR()
@@ -87,7 +87,7 @@ export function mountShapeTextEditor(
   shapeEditor.edgeless = edgeless;
   const rootElementContainer = edgeless.rootElementContainer;
 
-  rootElementContainer.appendChild(shapeEditor);
+  rootElementContainer.append(shapeEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [shapeElement.id],
     editing: true,
@@ -102,7 +102,7 @@ export function mountFrameTitleEditor(
   frameEditor.frameModel = frame;
   frameEditor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.appendChild(frameEditor);
+  edgeless.rootElementContainer.append(frameEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [frame.id],
     editing: true,
@@ -117,7 +117,7 @@ export function mountGroupTitleEditor(
   groupEditor.group = group;
   groupEditor.edgeless = edgeless;
 
-  edgeless.rootElementContainer.appendChild(groupEditor);
+  edgeless.rootElementContainer.append(groupEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [group.id],
     editing: true,
@@ -138,7 +138,7 @@ export function addText(
     );
     const id = edgeless.service.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
-      text: new Workspace.Y.Text(),
+      text: new DocCollection.Y.Text(),
     });
     edgeless.doc.captureSync();
     const textElement = edgeless.service.getElementById(id);

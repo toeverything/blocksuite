@@ -1,7 +1,7 @@
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { mkdir, writeFile } from 'fs/promises';
 import { rollup } from 'rollup';
 import { minify } from 'terser';
 

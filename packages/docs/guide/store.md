@@ -8,40 +8,40 @@ In BlockSuite, a [`Doc`](/api/@blocksuite/store/classes/Doc.html) is the contain
 
 Besides the block tree, the [selection](./selection) state is also stored in the [`doc.awarenessStore`](/api/@blocksuite/store/classes/Doc.html#awarenessstore) inside the doc. This store is also built on top of the Yjs [awareness](https://docs.yjs.dev/api/about-awareness).
 
-## `Workspace`
+## `DocCollection`
 
-In BlockSuite, a [`Workspace`](/api/@blocksuite/store/classes/Workspace.html) is defined as an opt-in collection of multiple docs, providing comprehensive features for managing cross-doc updates and data synchronization. You can access the workspace via the `doc.workspace` getter, or you can also create a workspace manually:
+In BlockSuite, a [`DocCollection`](/api/@blocksuite/store/classes/DocCollection.html) is defined as an opt-in collection of multiple docs, providing comprehensive features for managing cross-doc updates and data synchronization. You can access the collection via the `doc.collection` getter, or you can also create a collection manually:
 
 ```ts
-import { Workspace, Schema } from '@blocksuite/store';
+import { DocCollection, Schema } from '@blocksuite/store';
 
 const schema = new Schema();
 
-// You can register a batch of block schemas to the workspace
+// You can register a batch of block schemas to the collection
 schema.register(AffineSchemas);
 
-const workspace = new Workspace({ schema });
+const collection = new DocCollection({ schema });
 ```
 
-Then multiple `doc`s can be created under the workspace:
+Then multiple `doc`s can be created under the collection:
 
 ```ts
-const workspace = new Workspace({ schema });
+const collection = new DocCollection({ schema });
 
 // This is an empty doc at this moment
-const doc = workspace.createDoc();
+const doc = collection.createDoc();
 ```
 
 As an example, the `createEmptyDoc` is a simple helper implemented exactly in this way ([source](https://github.com/toeverything/blocksuite/blob/master/packages/presets/src/helpers/index.ts)):
 
 ```ts
 import { AffineSchemas } from '@blocksuite/blocks/models';
-import { Schema, Workspace } from '@blocksuite/store';
+import { Schema, DocCollection } from '@blocksuite/store';
 
 export function createEmptyDoc() {
   const schema = new Schema().register(AffineSchemas);
-  const workspace = new Workspace({ schema });
-  const doc = workspace.createDoc();
+  const collection = new DocCollection({ schema });
+  const doc = collection.createDoc();
 
   return {
     doc,

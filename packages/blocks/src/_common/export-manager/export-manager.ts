@@ -379,8 +379,8 @@ export class ExportManager {
         rich.clientWidth,
         rich.clientHeight + 1
       );
-      rich.parentElement?.appendChild(svgEle);
-      rich.parentElement?.removeChild(rich);
+      rich.parentElement?.append(svgEle);
+      rich.remove();
     });
   };
 
@@ -403,8 +403,8 @@ export class ExportManager {
     foreignObject.setAttribute('y', '0');
     foreignObject.setAttribute('externalResourcesRequired', 'true');
 
-    svg.appendChild(foreignObject);
-    foreignObject.appendChild(node);
+    svg.append(foreignObject);
+    foreignObject.append(node);
     return svg;
   }
 
@@ -459,58 +459,40 @@ export class ExportManager {
     const imgList = Array.from(element.querySelectorAll('img'));
     // Create an array of promises
     const promises = imgList.map(img => {
-      // Return a new promise
-      return new Promise<void>((resolve, reject) => {
-        // Fetch the SVG content
-        fetch(img.src)
-          .then(response => response.blob())
-          .then(blob => {
-            // If the file type is SVG, set svg width and height
-            if (blob.type === 'image/svg+xml') {
-              const reader = new FileReader();
-              reader.readAsText(blob);
-              reader.onloadend = () => {
-                // Parse the SVG
-                const parser = new DOMParser();
-                const svgDoc = parser.parseFromString(
-                  reader.result as string,
-                  'image/svg+xml'
-                );
-                const svgElement =
-                  svgDoc.documentElement as unknown as SVGSVGElement;
+      return fetch(img.src)
+        .then(response => response.blob())
+        .then(async blob => {
+          // If the file type is SVG, set svg width and height
+          if (blob.type === 'image/svg+xml') {
+            // Parse the SVG
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(
+              await blob.text(),
+              'image/svg+xml'
+            );
+            const svgElement =
+              svgDoc.documentElement as unknown as SVGSVGElement;
 
-                // Check if the SVG has width and height attributes
-                if (
-                  !svgElement.hasAttribute('width') &&
-                  !svgElement.hasAttribute('height')
-                ) {
-                  // Get the viewBox
-                  const viewBox = svgElement.viewBox.baseVal;
-                  // Set the SVG width and height
-                  svgElement.setAttribute('width', `${viewBox.width}px`);
-                  svgElement.setAttribute('height', `${viewBox.height}px`);
-                }
-
-                // Replace the img src with the modified SVG
-                const serializer = new XMLSerializer();
-                const newSvgStr = serializer.serializeToString(svgElement);
-                img.src =
-                  'data:image/svg+xml;charset=utf-8,' +
-                  encodeURIComponent(newSvgStr);
-
-                // Resolve the promise
-                resolve();
-              };
-            } else {
-              // If the file type is not SVG, resolve the promise
-              resolve();
+            // Check if the SVG has width and height attributes
+            if (
+              !svgElement.hasAttribute('width') &&
+              !svgElement.hasAttribute('height')
+            ) {
+              // Get the viewBox
+              const viewBox = svgElement.viewBox.baseVal;
+              // Set the SVG width and height
+              svgElement.setAttribute('width', `${viewBox.width}px`);
+              svgElement.setAttribute('height', `${viewBox.height}px`);
             }
-          })
-          .catch(error => {
-            // If there is an error, reject the promise
-            reject(error);
-          });
-      });
+
+            // Replace the img src with the modified SVG
+            const serializer = new XMLSerializer();
+            const newSvgStr = serializer.serializeToString(svgElement);
+            img.src =
+              'data:image/svg+xml;charset=utf-8,' +
+              encodeURIComponent(newSvgStr);
+          }
+        });
     });
 
     // Wait for all promises to resolve

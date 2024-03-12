@@ -72,10 +72,10 @@ async function initEmptyEditor({
 }) {
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
-      const { workspace } = window;
+      const { collection: collection } = window;
 
       async function waitForMountPageEditor(
-        doc: ReturnType<typeof workspace.createDoc>
+        doc: ReturnType<typeof collection.createDoc>
       ) {
         if (!doc.ready) doc.load();
 
@@ -96,7 +96,7 @@ async function initEmptyEditor({
           editor.doc = doc;
           editor.autofocus = true;
           editor.slots.docLinkClicked.on(({ docId }) => {
-            const newDoc = workspace.getDoc(docId);
+            const newDoc = collection.getDoc(docId);
             if (!newDoc) {
               throw new Error(`Failed to jump to page ${docId}`);
             }
@@ -121,17 +121,17 @@ async function initEmptyEditor({
             docsPanel.editor = editor;
             framePanel.editor = editor;
             outlinePanel.editor = editor;
-            debugMenu.workspace = workspace;
+            debugMenu.collection = collection;
             debugMenu.editor = editor;
             debugMenu.docsPanel = docsPanel;
             debugMenu.framePanel = framePanel;
             debugMenu.outlinePanel = outlinePanel;
             const leftSidePanel = document.createElement('left-side-panel');
             debugMenu.leftSidePanel = leftSidePanel;
-            document.body.appendChild(debugMenu);
-            document.body.appendChild(leftSidePanel);
-            document.body.appendChild(framePanel);
-            document.body.appendChild(outlinePanel);
+            document.body.append(debugMenu);
+            document.body.append(leftSidePanel);
+            document.body.append(framePanel);
+            document.body.append(outlinePanel);
 
             window.debugMenu = debugMenu;
             window.editor = editor;
@@ -154,15 +154,15 @@ async function initEmptyEditor({
       }
 
       if (noInit) {
-        const firstDoc = workspace.docs.values().next().value as
-          | ReturnType<typeof workspace.createDoc>
+        const firstDoc = collection.docs.values().next().value as
+          | ReturnType<typeof collection.createDoc>
           | undefined;
         if (firstDoc) {
           window.doc = firstDoc;
           waitForMountPageEditor(firstDoc).catch;
         } else {
-          workspace.slots.docAdded.on(docId => {
-            const doc = workspace.getDoc(docId);
+          collection.slots.docAdded.on(docId => {
+            const doc = collection.getDoc(docId);
             if (!doc) {
               throw new Error(`Failed to get doc ${docId}`);
             }
@@ -171,7 +171,7 @@ async function initEmptyEditor({
           });
         }
       } else {
-        const doc = workspace.createDoc({ id: 'doc:home' });
+        const doc = collection.createDoc({ id: 'doc:home' });
         window.doc = doc;
         waitForMountPageEditor(doc).catch(console.error);
       }
@@ -880,8 +880,8 @@ export async function pasteBlocks(page: Page, json: unknown) {
 export async function getClipboardHTML(page: Page) {
   const dataInClipboard = await page.evaluate(async () => {
     function format(node: HTMLElement, level: number) {
-      const indentBefore = new Array(level++ + 1).join('  ');
-      const indentAfter = new Array(level - 1).join('  ');
+      const indentBefore = '  '.repeat(level++);
+      const indentAfter = '  '.repeat(level >= 2 ? level - 2 : 0);
       let textNode;
 
       for (let i = 0; i < node.children.length; i++) {
@@ -892,7 +892,7 @@ export async function getClipboardHTML(page: Page) {
 
         if (node.lastElementChild == node.children[i]) {
           textNode = document.createTextNode('\n' + indentAfter);
-          node.appendChild(textNode);
+          node.append(textNode);
         }
       }
 
@@ -1027,7 +1027,7 @@ export async function readClipboardText(
     ({ type, id }) => {
       const input = document.createElement(type);
       input.setAttribute('id', id);
-      document.body.appendChild(input);
+      document.body.append(input);
     },
     { type, id }
   );
@@ -1270,6 +1270,7 @@ export async function getCurrentEditorDocId(page: Page) {
 
 export async function getCurrentHTMLTheme(page: Page) {
   const root = page.locator('html');
+  // eslint-disable-next-line unicorn/prefer-dom-node-dataset
   return root.getAttribute('data-theme');
 }
 

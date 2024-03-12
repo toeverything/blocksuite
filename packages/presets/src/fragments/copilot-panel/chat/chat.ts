@@ -140,7 +140,7 @@ export class CopilotChatPanel
     super.connectedCallback();
     this.logic.chat.reactiveData = this;
     this.disposables.add(
-      this.host.doc.workspace.slots.docUpdated.on(() => {
+      this.host.doc.collection.slots.docUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -153,10 +153,10 @@ export class CopilotChatPanel
   }
 
   checkSelection() {
-    this.surfaceSelection =
-      this.host.selection.value.find(v => v.type === 'surface') != null;
-    this.docSelection =
-      this.host.selection.value.find(v => v.type === 'block') != null;
+    this.surfaceSelection = this.host.selection.value.some(
+      v => v.type === 'surface'
+    );
+    this.docSelection = this.host.selection.value.some(v => v.type === 'block');
   }
 
   addSelectionBackground = async () => {
@@ -206,7 +206,7 @@ export class CopilotChatPanel
                   style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
                 >
                   ${repeat(message.sources, ref => {
-                    const doc = this.host.doc.workspace.getDoc(ref.id);
+                    const doc = this.host.doc.collection.getDoc(ref.id);
                     if (!doc) {
                       return;
                     }

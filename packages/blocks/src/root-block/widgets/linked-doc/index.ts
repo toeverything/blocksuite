@@ -44,7 +44,7 @@ export function showLinkedDocPopover({
   linkedDoc.options = options;
   linkedDoc.triggerKey = triggerKey;
   // Mount
-  container.appendChild(linkedDoc);
+  container.append(linkedDoc);
   disposables.add(() => linkedDoc.remove());
 
   // Handle position

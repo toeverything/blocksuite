@@ -13,10 +13,10 @@ Traditionally, you might expect a JSON-based API that works somewhat like `edito
 ```ts
 import { Job } from '@blocksuite/store';
 
-const { workspace } = doc;
+const { collection } = doc;
 
 // A job is required for performing the tasks
-const job = new Job({ workspace });
+const job = new Job({ collection });
 
 // Export current doc content to snapshot JSON
 const json = await job.docToSnapshot(doc);

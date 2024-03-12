@@ -34,7 +34,6 @@ import {
   getSelectedBlocksCommand,
   getSelectedModelsCommand,
   getTextSelectionCommand,
-  withHostCommand,
 } from './commands/index.js';
 import { FontLoader } from './font-loader/font-loader.js';
 import type { RootBlockModel } from './root-model.js';
@@ -135,8 +134,7 @@ export class RootService extends BlockService<RootBlockModel> {
       .add('deleteText', deleteTextCommand)
       .add('formatBlock', formatBlockCommand)
       .add('formatNative', formatNativeCommand)
-      .add('formatText', formatTextCommand)
-      .add('withHost', withHostCommand);
+      .add('formatText', formatTextCommand);
 
     this.loadFonts();
 
@@ -166,8 +164,7 @@ export class RootService extends BlockService<RootBlockModel> {
   get selectedBlocks() {
     let result: BlockElement[] = [];
     this.std.command
-      .pipe()
-      .withHost()
+      .chain()
       .tryAll(chain => [
         chain.getTextSelection(),
         chain.getImageSelections(),

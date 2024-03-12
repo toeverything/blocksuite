@@ -8,7 +8,7 @@ import {
   type TreeNode,
 } from '@blocksuite/blocks';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BlockModel, Workspace } from '@blocksuite/store';
+import type { BlockModel, DocCollection } from '@blocksuite/store';
 
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import {
@@ -56,8 +56,8 @@ export class AIEdgelessLogic {
     }).dispose;
   };
 
-  get workspace(): Workspace {
-    return this.host.doc.workspace;
+  get collection(): DocCollection {
+    return this.host.doc.collection;
   }
 
   constructor(private getHost: () => EditorHost) {}
@@ -215,7 +215,7 @@ export class AIEdgelessLogic {
             const surface = getSurfaceElementFromEditor(this.host);
             let image = getFirstImageInFrame(model, this.host);
             const imgFile = jpegBase64ToFile(b64, 'img');
-            const sourceId = await this.host.doc.workspace.blob.set(imgFile);
+            const sourceId = await this.host.doc.collection.blob.set(imgFile);
             if (!image) {
               image = surface.edgeless.service.addBlock(
                 'affine:image',

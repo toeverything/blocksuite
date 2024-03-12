@@ -145,7 +145,7 @@ export const playCheckAnimation = async (
     border-radius: 50%;
   `;
   sparkingEl.style.left = `${left}px`;
-  refElement.appendChild(sparkingEl);
+  refElement.append(sparkingEl);
 
   await sparkingEl.animate(
     [

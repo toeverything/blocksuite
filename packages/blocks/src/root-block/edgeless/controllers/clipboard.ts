@@ -7,9 +7,9 @@ import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import {
   type BlockSnapshot,
+  DocCollection,
   fromJSON,
   Job,
-  Workspace,
 } from '@blocksuite/store';
 
 import {
@@ -331,7 +331,7 @@ export class EdgelessClipboardController extends PageClipboard {
     idMap: Map<string, string>
   ) {
     if (clipboardData.type === GROUP) {
-      const yMap = new Workspace.Y.Map();
+      const yMap = new DocCollection.Y.Map();
       const children = clipboardData.children ?? {};
       for (const [key, value] of Object.entries(children)) {
         const newKey = idMap.get(key);
@@ -1047,8 +1047,8 @@ export class EdgelessClipboardController extends PageClipboard {
           rich.clientWidth,
           rich.clientHeight + 1
         );
-        rich.parentElement?.appendChild(svgEle);
-        rich.parentElement?.removeChild(rich);
+        rich.parentElement?.append(svgEle);
+        rich.remove();
       })
     );
   }
@@ -1072,8 +1072,8 @@ export class EdgelessClipboardController extends PageClipboard {
     foreignObject.setAttribute('y', '0');
     foreignObject.setAttribute('externalResourcesRequired', 'true');
 
-    svg.appendChild(foreignObject);
-    foreignObject.appendChild(node);
+    svg.append(foreignObject);
+    foreignObject.append(node);
     return svg;
   }
 
@@ -1281,10 +1281,10 @@ function prepareConnectorClipboardData(
   const sourceId = connector.source?.id;
   const targetId = connector.target?.id;
   const serialized = connector.serialize();
-  if (sourceId && !selected.find(s => s.id === sourceId)) {
+  if (sourceId && selected.every(s => s.id !== sourceId)) {
     serialized.source = { position: connector.absolutePath[0] };
   }
-  if (targetId && !selected.find(s => s.id === targetId)) {
+  if (targetId && selected.every(s => s.id !== targetId)) {
     serialized.target = {
       position: connector.absolutePath[connector.absolutePath.length - 1],
     };
@@ -1299,7 +1299,7 @@ export async function prepareClipboardData(
   const selected = await Promise.all(
     selectedAll.map(async selected => {
       const job = new Job({
-        workspace: std.workspace,
+        collection: std.collection,
       });
 
       if (isNoteBlock(selected)) {

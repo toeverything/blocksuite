@@ -7,7 +7,7 @@ import { Text } from '@blocksuite/store';
 const doc = createEmptyDoc().init();
 const editor = new PageEditor();
 editor.doc = doc;
-document.body.appendChild(editor);
+document.body.append(editor);
 
 const paragraphs = doc.getBlockByFlavour('affine:paragraph');
 const paragraph = paragraphs[0];

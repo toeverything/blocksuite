@@ -20,7 +20,7 @@ function createZoomMenuPopper(
   const zoomBar = new EdgelessZoomToolbar(edgeless);
   assertExists(reference.shadowRoot);
   zoomBar.layout = 'vertical';
-  reference.shadowRoot.appendChild(zoomBar);
+  reference.shadowRoot.append(zoomBar);
 
   computePosition(reference, zoomBar, {
     placement: 'top',

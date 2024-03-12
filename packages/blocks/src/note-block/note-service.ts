@@ -16,6 +16,7 @@ import {
   registerTextStyleCommands,
   selectBlock,
   selectBlocksBetween,
+  updateBlockType,
 } from './commands/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
@@ -59,13 +60,13 @@ export class NoteService extends BlockService<NoteBlockModel> {
       assertExists(noteBackground);
 
       const noteBackgroundClone = noteBackground.cloneNode();
-      dragPreviewEl.appendChild(noteBackgroundClone);
+      dragPreviewEl.append(noteBackgroundClone);
 
       const container = document.createElement('div');
       container.style.width = '100%';
       container.style.height = '100%';
       container.style.overflow = 'hidden';
-      dragPreviewEl.appendChild(container);
+      dragPreviewEl.append(container);
 
       render(noteComponent.host.renderModel(noteComponent.model), container);
 
@@ -129,7 +130,8 @@ export class NoteService extends BlockService<NoteBlockModel> {
 
     this.std.command
       .add('selectBlocksBetween', selectBlocksBetween)
-      .add('selectBlock', selectBlock);
+      .add('selectBlock', selectBlock)
+      .add('updateBlockType', updateBlockType);
 
     registerTextStyleCommands(this.std);
 

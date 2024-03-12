@@ -480,8 +480,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         ele.target.id
       ) {
         if (
-          !!this._toBeMoved.find(e => e.id === ele.source.id) &&
-          !!this._toBeMoved.find(e => e.id === ele.target.id)
+          this._toBeMoved.some(e => e.id === ele.source.id) &&
+          this._toBeMoved.some(e => e.id === ele.target.id)
         ) {
           return false;
         }

@@ -185,7 +185,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._indicator = <DragIndicator>(
         document.createElement('affine-drag-indicator')
       );
-      document.body.appendChild(this._indicator);
+      document.body.append(this._indicator);
     }
   }
 

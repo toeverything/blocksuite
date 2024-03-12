@@ -104,7 +104,7 @@ export const createUniComponentFromWebComponent = <
   return (ele, props) => {
     const ins = new component();
     Object.assign(ins, props);
-    ele.appendChild(ins);
+    ele.append(ins);
     return {
       update: props => {
         Object.assign(ins, props);
@@ -141,7 +141,7 @@ export const defineUniComponent = <T, Expose extends NonNullable<unknown>>(
     ins.props = props;
     ins.expose = {} as Expose;
     ins.renderTemplate = renderTemplate;
-    ele.appendChild(ins);
+    ele.append(ins);
     return {
       update: props => {
         ins.props = props;

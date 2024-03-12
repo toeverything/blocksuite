@@ -11,20 +11,20 @@ type UpdateMessage = {
   update: Uint8Array;
 };
 
-type WorkspacePersist = {
+type DocCollectionPersist = {
   id: string;
   updates: UpdateMessage[];
 };
 
 interface BlockSuiteBinaryDB extends DBSchema {
-  workspace: {
+  collection: {
     key: string;
-    value: WorkspacePersist;
+    value: DocCollectionPersist;
   };
 }
 
 export function upgradeDB(db: IDBPDatabase<BlockSuiteBinaryDB>) {
-  db.createObjectStore('workspace', { keyPath: 'id' });
+  db.createObjectStore('collection', { keyPath: 'id' });
 }
 
 type ChannelMessage = {
@@ -56,8 +56,8 @@ export class IndexedDBDocSource implements DocSource {
   ): Promise<{ data: Uint8Array; state?: Uint8Array | undefined } | null> {
     const db = await this.getDb();
     const store = db
-      .transaction('workspace', 'readonly')
-      .objectStore('workspace');
+      .transaction('collection', 'readonly')
+      .objectStore('collection');
     const data = await store.get(docId);
 
     if (!data) {
@@ -75,8 +75,8 @@ export class IndexedDBDocSource implements DocSource {
   async push(docId: string, data: Uint8Array): Promise<void> {
     const db = await this.getDb();
     const store = db
-      .transaction('workspace', 'readwrite')
-      .objectStore('workspace');
+      .transaction('collection', 'readwrite')
+      .objectStore('collection');
 
     const { updates } = (await store.get(docId)) ?? { updates: [] };
     let rows: UpdateMessage[] = [

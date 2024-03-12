@@ -257,7 +257,7 @@ export class ParagraphBlockComponent extends BlockElement<
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.renderModelChildren(this.model)}
+      ${this.renderChildren(this.model)}
     </div>`;
 
     return html`

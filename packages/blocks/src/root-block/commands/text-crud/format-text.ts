@@ -1,6 +1,7 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
+import type { EditorHost } from '@blocksuite/lit';
 
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
@@ -8,7 +9,7 @@ import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-ed
 
 // for text selection
 export const formatTextCommand: Command<
-  'currentTextSelection' | 'host',
+  'currentTextSelection',
   never,
   {
     textSelection?: TextSelection;
@@ -16,11 +17,7 @@ export const formatTextCommand: Command<
     mode?: 'replace' | 'merge';
   }
 > = (ctx, next) => {
-  const { host, styles, mode = 'merge' } = ctx;
-  assertExists(
-    host,
-    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
-  );
+  const { styles, mode = 'merge' } = ctx;
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   assertExists(
@@ -28,9 +25,8 @@ export const formatTextCommand: Command<
     '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
   );
 
-  const success = host.std.command
-    .pipe()
-    .withHost()
+  const success = ctx.std.command
+    .chain()
     .getSelectedBlocks({
       textSelection,
       filter: el =>
@@ -90,7 +86,9 @@ export const formatTextCommand: Command<
 
       Promise.all(selectedBlocks.map(el => el.updateComplete))
         .then(() => {
-          host.rangeManager?.syncTextSelectionToRange(textSelection);
+          (ctx.std.host as EditorHost).rangeManager?.syncTextSelectionToRange(
+            textSelection
+          );
         })
         .catch(console.error);
 

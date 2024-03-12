@@ -142,7 +142,7 @@ export function toggleEmbedCardEditModal(
   const embedCardEditModal = new EmbedCardEditModal();
   embedCardEditModal.model = embedCardModel;
   embedCardEditModal.host = host;
-  document.body.appendChild(embedCardEditModal);
+  document.body.append(embedCardEditModal);
 }
 
 declare global {

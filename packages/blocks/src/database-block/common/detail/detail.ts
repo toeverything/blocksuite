@@ -80,7 +80,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
       this.selection.selection = undefined;
     });
     //FIXME: simulate as a widget
-    this.setAttribute('data-widget-id', 'affine-detail-widget');
+    this.dataset.widgetId = 'affine-detail-widget';
   }
 
   @query('.add-property')

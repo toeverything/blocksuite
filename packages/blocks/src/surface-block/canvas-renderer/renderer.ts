@@ -133,10 +133,7 @@ export class Renderer extends Viewport {
           onCreated?.(canvas);
         }
 
-        canvas.setAttribute(
-          'data-layer-id',
-          `[${layer.indexes[0]}--${layer.indexes[1]}]`
-        );
+        canvas.dataset.layerId = `[${layer.indexes[0]}--${layer.indexes[1]}]`;
         canvas.style.setProperty('z-index', layer.zIndexes.toString());
         canvases.push(canvas);
       }
@@ -169,7 +166,7 @@ export class Renderer extends Viewport {
    */
   attach(container: HTMLElement) {
     this.setContainer(container);
-    container.appendChild(this.canvas);
+    container.append(this.canvas);
 
     this._resetSize();
     this._loop();

@@ -1,4 +1,4 @@
-import { Workspace, type Y } from '@blocksuite/store';
+import { DocCollection, type Y } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { ElementModel } from './base.js';
@@ -152,7 +152,7 @@ export function createModelFromProps(
     throw new Error('Cannot find id in props');
   }
 
-  const yMap = new Workspace.Y.Map();
+  const yMap = new DocCollection.Y.Map();
   const elementModel = createElementModel(
     type as string,
     id as string,

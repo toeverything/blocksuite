@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
 // normal import
-import { Schema, Workspace, type Y } from '@blocksuite/store';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-import { fileURLToPath } from 'url';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { DocCollection, Schema, type Y } from '@blocksuite/store';
 import { assert, describe, expect, test } from 'vitest';
 
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
@@ -20,8 +21,8 @@ async function loadBinary(name: string) {
   const path = join(originPath, `../ydocs/${name}.ydoc`);
   const buffer = await readFile(path);
   const update = new Uint8Array(buffer);
-  const doc = new Workspace.Y.Doc();
-  Workspace.Y.applyUpdate(doc, update);
+  const doc = new DocCollection.Y.Doc();
+  DocCollection.Y.applyUpdate(doc, update);
   return doc;
 }
 
@@ -36,8 +37,8 @@ schema.register([
   FrameBlockSchema,
 ]);
 
-describe('workspace migration', () => {
-  test('add pageVersion in workspace meta', async () => {
+describe('collection migration', () => {
+  test('add pageVersion in collection meta', async () => {
     const doc = await loadBinary('workspace-v1-v2');
 
     const meta = doc.getMap('meta');
@@ -45,7 +46,7 @@ describe('workspace migration', () => {
     assert.equal(before['workspaceVersion'], 1);
     assert.isUndefined(before['pageVersion']);
 
-    schema.upgradeWorkspace(doc);
+    schema.upgradeCollection(doc);
 
     const after = meta.toJSON();
     assert.equal(after['workspaceVersion'], 2);

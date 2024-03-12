@@ -1,11 +1,16 @@
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlobStorage, type Doc, Text, Workspace } from '@blocksuite/store';
+import {
+  type BlobStorage,
+  type Doc,
+  DocCollection,
+  Text,
+} from '@blocksuite/store';
 import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
 
 import { AffineEditorContainer } from '../../index.js';
 
-function createWorkspaceOptions() {
+function createCollectionOptions() {
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   const schema = new Schema();
   const room = Math.random().toString(16).slice(2, 8);
@@ -23,7 +28,6 @@ function createWorkspaceOptions() {
     blobStorages,
     defaultFlags: {
       enable_synced_doc_block: true,
-      enable_transformer_clipboard: true,
       enable_bultin_ledits: true,
       readonly: {
         'doc:home': false,
@@ -32,8 +36,8 @@ function createWorkspaceOptions() {
   };
 }
 
-function initWorkspace(workspace: Workspace) {
-  const doc = workspace.createDoc({ id: 'doc:home' });
+function initCollection(collection: DocCollection) {
+  const doc = collection.createDoc({ id: 'doc:home' });
 
   doc.load(() => {
     const rootId = doc.addBlock('affine:page', {
@@ -45,11 +49,11 @@ function initWorkspace(workspace: Workspace) {
 }
 
 async function createEditor(
-  workspace: Workspace,
+  collection: DocCollection,
   mode: 'edgeless' | 'page' = 'page'
 ) {
   const app = document.createElement('div');
-  const doc = workspace.docs.values().next().value as Doc | undefined;
+  const doc = collection.docs.values().next().value as Doc | undefined;
   assertExists(doc, 'Need to create a doc first');
   const editor = new AffineEditorContainer();
   editor.doc = doc;
@@ -68,12 +72,12 @@ async function createEditor(
 }
 
 export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
-  const workspace = new Workspace(createWorkspaceOptions());
+  const collection = new DocCollection(createCollectionOptions());
 
-  window.workspace = workspace;
+  window.collection = collection;
 
-  initWorkspace(workspace);
-  const appElement = await createEditor(workspace, mode);
+  initCollection(collection);
+  const appElement = await createEditor(collection, mode);
 
   return () => {
     appElement.remove();
@@ -85,7 +89,7 @@ export function cleanup() {
   window.editor.remove();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (window as any).workspace;
+  delete (window as any).collection;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (window as any).editor;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

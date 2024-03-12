@@ -34,11 +34,11 @@ export const FileExporter = {
     element.setAttribute('download', safeFilename);
 
     element.style.display = 'none';
-    document.body.appendChild(element);
+    document.body.append(element);
 
     element.click();
 
-    document.body.removeChild(element);
+    element.remove();
   },
   exportPng(docTitle: string | undefined, dataURL: string) {
     const title = docTitle?.trim() || UNTITLED_PAGE_NAME;

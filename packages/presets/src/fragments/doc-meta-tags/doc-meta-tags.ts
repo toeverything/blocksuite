@@ -286,7 +286,7 @@ export class DocMetaTags extends WithDisposable(LitElement) {
   }
 
   get meta() {
-    return this.doc.workspace.meta;
+    return this.doc.collection.meta;
   }
 
   get options() {
@@ -295,7 +295,7 @@ export class DocMetaTags extends WithDisposable(LitElement) {
 
   set options(tags: SelectTag[]) {
     this.tags = this.tags.filter(v => tags.find(x => x.id === v));
-    this.doc.workspace.meta.setProperties({
+    this.doc.collection.meta.setProperties({
       ...this.meta.properties,
       tags: {
         ...this.meta.properties.tags,
@@ -315,7 +315,7 @@ export class DocMetaTags extends WithDisposable(LitElement) {
 
   private _listenBacklinkList = () => {
     const metaMap = Object.fromEntries(
-      this.doc.workspace.meta.docMetas.map(v => [v.id, v])
+      this.doc.collection.meta.docMetas.map(v => [v.id, v])
     );
 
     const toData = (backlink: BackLink): BacklinkData => {
@@ -338,7 +338,7 @@ export class DocMetaTags extends WithDisposable(LitElement) {
       };
     };
 
-    const backlinkIndexer = this.doc.workspace.indexer.backlink;
+    const backlinkIndexer = this.doc.collection.indexer.backlink;
 
     const getList = () => {
       return backlinkIndexer

@@ -2,10 +2,7 @@ import './chat/chat.js';
 import './edgeless/edgeless.js';
 import './copilot-service';
 
-import {
-  AffineFormatBarWidget,
-  EdgelessComponentToolbar,
-} from '@blocksuite/blocks';
+import { EdgelessComponentToolbar } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -149,7 +146,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
         panel.remove();
       };
-      document.body.appendChild(panel);
+      document.body.append(panel);
     };
     return html`
       <div style="display:flex;flex-direction: column;gap: 32px;">
@@ -267,11 +264,13 @@ declare global {
     'copilot-panel': CopilotPanel;
   }
 }
-AffineFormatBarWidget.registerCustomRenderer({
-  render(): TemplateResult | undefined {
+
+export const affineFormatBarItemConfig = {
+  type: 'custom' as const,
+  render(): TemplateResult | null {
     const copilot = document.querySelector('copilot-panel');
     if (!copilot) {
-      return;
+      return null;
     }
     const renderItem = (item: AllAction): TemplateResult => {
       if (item.type === 'group') {
@@ -324,7 +323,7 @@ AffineFormatBarWidget.registerCustomRenderer({
       </div>
     `;
   },
-});
+};
 
 EdgelessComponentToolbar.registerCustomRenderer({
   render(): TemplateResult | undefined {

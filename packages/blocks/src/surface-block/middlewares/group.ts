@@ -6,6 +6,7 @@ export function groupMiddleware(surface: SurfaceBlockModel) {
     surface.elementRemoved.on(({ id }) => {
       const group = surface.getGroup(id)!;
 
+      // eslint-disable-next-line unicorn/prefer-dom-node-remove
       group?.removeChild(id);
     }),
     surface.elementUpdated.on(({ id, props }) => {

@@ -10,9 +10,9 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@blocksuite/blocks": "canary",
-    "@blocksuite/presets": "canary",
-    "@blocksuite/store": "canary"
+    "@blocksuite/blocks": "0.13.0-canary-202403090437-b9b4c13",
+    "@blocksuite/presets": "0.13.0-canary-202403090437-b9b4c13",
+    "@blocksuite/store": "0.13.0-canary-202403090437-b9b4c13"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.0.2",
@@ -22,5 +22,9 @@
     "tslib": "^2.6.2",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
+  },
+  "stackblitz": {
+    "installDependencies": false,
+    "startCommand": "pnpm i && pnpm dev"
   }
 }

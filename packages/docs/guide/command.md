@@ -7,10 +7,10 @@ Commands are the reusable actions for triggering state updates. Inside a command
 Commands are executed in a chain, and each command can decide whether to continue the chain or not.
 
 ```ts
-std.command.pipe().command1().command2().command3().run();
+std.command.chain().command1().command2().command3().run();
 ```
 
-You will need to call `pipe()` to start a new chain. Then, you can call any command defined in the `Commands` interface. And finally, call `run()` to execute the chain.
+You will need to call `chain()` to start a new chain. Then, you can call any command defined in the `Commands` interface. And finally, call `run()` to execute the chain.
 
 ### Try
 
@@ -18,7 +18,7 @@ If a command fails, the chain will be interrupted. However, you can use `try()` 
 
 ```ts
 std.command
-  .pipe()
+  .chain()
   .try(cmd => [cmd.command1(), cmd.command2()])
   .command3()
   .run();
@@ -34,7 +34,7 @@ This means that even if one of the commands succeeds, `tryAll` will still contin
 
 ```ts
 std.command
-  .pipe()
+  .chain()
   .tryAll(cmd => [cmd.command1(), cmd.command2(), cmd.command3()])
   .command4()
   .run();
@@ -70,7 +70,7 @@ declare global {
 std.command.add('my', myCommand);
 
 // You can call it with
-std.command.pipe().my().run();
+std.command.chain().my().run();
 ```
 
 Only when the command calls `next()`, the next command in the chain will be executed.
@@ -137,7 +137,7 @@ export const myCommand: Command<never, never, MyCommandOptions> = (
 };
 
 // You can call it with
-std.command.pipe().my({ configA: 0, configB: 'hello' }).run();
+std.command.chain().my({ configA: 0, configB: 'hello' }).run();
 ```
 
 Please notice that commands take only one argument,
@@ -149,7 +149,7 @@ You can also use inline command for some temporary commands.
 
 ```ts
 std.command
-  .pipe()
+  .chain()
   .inline((ctx, next) => {
     // ...
     return next();
@@ -162,7 +162,7 @@ std.command
 After `.run`, the command chain will return two values: `success` and `ctx`.
 
 ```ts
-const [success, ctx] = std.command.pipe().commandA().commandB().run();
+const [success, ctx] = std.command.chain().commandA().commandB().run();
 ```
 
 If all commands passed, the `success` will be `true`, otherwise it will be `false`.
@@ -180,7 +180,7 @@ const command2 = (ctx, next) => {
   return next({ data: 1 });
 };
 
-const [sucess, ctx] = std.command.pipe().command1().command2().run();
+const [sucess, ctx] = std.command.chain().command1().command2().run();
 
 // This will pass
 expect(ctx.data).toBe(1);

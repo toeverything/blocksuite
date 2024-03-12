@@ -1,7 +1,7 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { Workspace, type Y } from '@blocksuite/store';
+import { DocCollection, type Y } from '@blocksuite/store';
 
 export interface CommentMeta {
   id: string;
@@ -37,8 +37,7 @@ export class CommentManager {
     range: CommentRange;
   } | null {
     const [_, ctx] = this._command
-      .pipe()
-      .withHost()
+      .chain()
       .getSelectedBlocks({
         currentTextSelection: selection,
         types: ['text'],
@@ -59,11 +58,11 @@ export class CommentManager {
     assertExists(toBlockText);
     assertExists(toBlockPath);
 
-    const startIndex = Workspace.Y.createRelativePositionFromTypeIndex(
+    const startIndex = DocCollection.Y.createRelativePositionFromTypeIndex(
       fromBlockText.yText,
       from.index
     );
-    const endIndex = Workspace.Y.createRelativePositionFromTypeIndex(
+    const endIndex = DocCollection.Y.createRelativePositionFromTypeIndex(
       toBlockText.yText,
       to ? to.index + to.length : from.index + from.length
     );
@@ -109,7 +108,7 @@ export class CommentManager {
     }
 
     const { quote, range } = parseResult;
-    const id = this.host.doc.workspace.idGenerator();
+    const id = this.host.doc.collection.idGenerator();
     const comment: Comment = {
       id,
       date: Date.now(),
@@ -120,7 +119,7 @@ export class CommentManager {
     };
     this.commentsMap.set(
       id,
-      new Workspace.Y.Map<unknown>(Object.entries(comment))
+      new DocCollection.Y.Map<unknown>(Object.entries(comment))
     );
     return comment;
   }
@@ -131,15 +130,17 @@ export class CommentManager {
       const start = comment.get('start') as Comment['start'];
       const end = comment.get('end') as Comment['end'];
 
-      const startIndex = Workspace.Y.createAbsolutePositionFromRelativePosition(
-        start.index,
-        this.host.doc.spaceDoc
-      );
+      const startIndex =
+        DocCollection.Y.createAbsolutePositionFromRelativePosition(
+          start.index,
+          this.host.doc.spaceDoc
+        );
       const startBlock = this.host.view.viewFromPath('block', start.path);
-      const endIndex = Workspace.Y.createAbsolutePositionFromRelativePosition(
-        end.index,
-        this.host.doc.spaceDoc
-      );
+      const endIndex =
+        DocCollection.Y.createAbsolutePositionFromRelativePosition(
+          end.index,
+          this.host.doc.spaceDoc
+        );
       const endBlock = this.host.view.viewFromPath('block', end.path);
 
       if (!startIndex || !startBlock || !endIndex || !endBlock) {

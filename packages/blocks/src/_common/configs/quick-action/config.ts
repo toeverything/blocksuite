@@ -12,7 +12,6 @@ import {
   DatabaseTableViewIcon20,
   FontLinkedDocIcon,
 } from '../../icons/index.js';
-import { getChainWithHost } from '../../utils/command.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
@@ -37,8 +36,7 @@ export const quickActionConfig: QuickActionConfig[] = [
     enabledWhen: () => true,
     action: host => {
       host.std.command
-        .pipe()
-        .withHost()
+        .chain()
         .getSelectedModels()
         .with({
           onCopy: () => {
@@ -56,7 +54,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
     showWhen: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block', 'text'],
         })
@@ -73,7 +72,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       return true;
     },
     enabledWhen: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block', 'text'],
         })
@@ -99,7 +99,8 @@ export const quickActionConfig: QuickActionConfig[] = [
     icon: FontLinkedDocIcon,
     hotkey: `Mod-Shift-l`,
     showWhen: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block'],
         })
@@ -108,7 +109,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       return !!selectedModels && selectedModels.length > 0;
     },
     enabledWhen: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block'],
         })
@@ -117,7 +119,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       return !!selectedModels && selectedModels.length > 0;
     },
     action: host => {
-      const [_, ctx] = getChainWithHost(host.std)
+      const [_, ctx] = host.std.command
+        .chain()
         .getSelectedModels({
           types: ['block'],
         })
@@ -128,7 +131,7 @@ export const quickActionConfig: QuickActionConfig[] = [
       host.selection.clear();
 
       const doc = host.doc;
-      const linkedDoc = doc.workspace.createDoc({});
+      const linkedDoc = doc.collection.createDoc({});
       linkedDoc.load(() => {
         const rootId = linkedDoc.addBlock('affine:page', {
           title: new doc.Text(''),
@@ -155,7 +158,7 @@ export const quickActionConfig: QuickActionConfig[] = [
           firstBlock.type.match(/^h[1-6]$/)
         ) {
           const title = firstBlock.text.toString();
-          linkedDoc.workspace.setDocMeta(linkedDoc.id, {
+          linkedDoc.collection.setDocMeta(linkedDoc.id, {
             title,
           });
 

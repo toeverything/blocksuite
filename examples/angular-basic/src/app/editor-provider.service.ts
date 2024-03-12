@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AffineSchemas } from '@blocksuite/blocks';
-import { Schema, Doc, Workspace } from '@blocksuite/store';
+import { Schema, Doc, DocCollection } from '@blocksuite/store';
 import { AffineEditorContainer } from '@blocksuite/presets';
 
 @Injectable({
@@ -9,14 +9,14 @@ import { AffineEditorContainer } from '@blocksuite/presets';
 })
 export class EditorProviderService {
   private editor: AffineEditorContainer;
-  private workspace: Workspace;
+  private collection: DocCollection;
   private docUpdatedSubject = new BehaviorSubject<Doc[]>([]);
   docUpdated$ = this.docUpdatedSubject.asObservable();
 
   constructor() {
     const schema = new Schema().register(AffineSchemas);
-    this.workspace = new Workspace({ schema });
-    const doc = this.workspace.createDoc({ id: 'page1' });
+    this.collection = new DocCollection({ schema });
+    const doc = this.collection.createDoc({ id: 'page1' });
 
     doc.load(() => {
       const pageBlockId = doc.addBlock('affine:page', {});
@@ -28,16 +28,16 @@ export class EditorProviderService {
     this.editor = new AffineEditorContainer();
     this.editor.doc = doc;
     this.editor.slots.docLinkClicked.on(({ docId }) => {
-      const target = <Doc>this.workspace.getDoc(docId);
+      const target = <Doc>this.collection.getDoc(docId);
       this.editor.doc = target;
     });
 
-    this.workspace.slots.docUpdated.on(() => this.updateDocs());
+    this.collection.slots.docUpdated.on(() => this.updateDocs());
     this.editor.slots.docLinkClicked.on(() => this.updateDocs());
   }
 
   private updateDocs() {
-    const docs = [...this.workspace.docs.values()];
+    const docs = [...this.collection.docs.values()];
     this.docUpdatedSubject.next(docs);
   }
 
@@ -45,7 +45,7 @@ export class EditorProviderService {
     return this.editor;
   }
 
-  getWorkspace() {
-    return this.workspace;
+  getCollection() {
+    return this.collection;
   }
 }

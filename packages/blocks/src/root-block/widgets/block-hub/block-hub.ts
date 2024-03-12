@@ -16,7 +16,7 @@ export class BlockHubWidget extends WidgetElement {
     // FIXME(Flrande): It is not a best practice,
     // but merely a temporary measure for reusing previous components.
     const blockHub = new BlockHub(this.host);
-    document.body.appendChild(blockHub);
+    document.body.append(blockHub);
 
     this.disposables.add(() => blockHub.remove());
   }
