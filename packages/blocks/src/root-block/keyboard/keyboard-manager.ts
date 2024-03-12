@@ -1,12 +1,12 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockElement } from '@blocksuite/lit';
 
 import { matchFlavours } from '../../_common/utils/model.js';
-import type { PageRootBlockComponent } from '../page/page-root-block.js';
 
 export class PageKeyboardManager {
-  constructor(public rootElement: PageRootBlockComponent) {
+  constructor(public rootElement: BlockElement) {
     this.rootElement.bindHotKey(
       {
         'Mod-z': ctx => {
