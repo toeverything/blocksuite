@@ -2,7 +2,7 @@
 
 For a swift start with BlockSuite, you can either kick off with ready-made examples for popular frameworks, or simply install the core packages to integrate it into your project.
 
-:::info
+::: info
 If this is your first time using BlockSuite, referring to the [overview](./overview) section may be helpful.
 :::
 
