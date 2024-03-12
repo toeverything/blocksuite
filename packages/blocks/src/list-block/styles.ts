@@ -63,14 +63,16 @@ export const toggleStyles = css`
 `;
 
 export const styles = css`
+  affine-list {
+    display: block;
+    margin: 10px 0;
+    font-size: var(--affine-font-base);
+  }
+
   .affine-list-block-container {
     box-sizing: border-box;
     border-radius: 4px;
-    padding: 4px 0;
     position: relative;
-  }
-  .affine-list-block-container--first {
-    margin-top: 14px;
   }
   .affine-list-block-container .affine-list-block-container {
     margin-top: 0;
