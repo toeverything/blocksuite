@@ -1,0 +1,27 @@
+{
+  "name": "react-basic-next",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@blocksuite/blocks": "0.13.0-canary-202403120738-e15d583",
+    "@blocksuite/presets": "0.13.0-canary-202403120738-e15d583",
+    "@blocksuite/store": "0.13.0-canary-202403120738-e15d583",
+    "next": "14.1.3",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.3",
+    "typescript": "^5"
+  }
+}

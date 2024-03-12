@@ -2,6 +2,10 @@
 
 For a swift start with BlockSuite, you can either kick off with ready-made examples for popular frameworks, or simply install the core packages to integrate it into your project.
 
+:::info
+If this is your first time using BlockSuite, referring to the [overview](./overview) section may be helpful.
+:::
+
 ## Bootstrap Project
 
 BlockSuite works with all common frameworks, you can start from these examples that basically builds a TodoMVC-like note app based on BlockSuite.
@@ -15,6 +19,11 @@ BlockSuite works with all common frameworks, you can start from these examples t
   <tr>
     <td><Icon name="TypeScript" />Vanilla</td>
     <td><a href="https://github.com/toeverything/blocksuite/tree/master/packages/playground/apps" target="_blank">playground-apps</a></td>
+    <td>✅</td>
+  </tr>
+  <tr>
+    <td><Icon name="Next" />Next</td>
+    <td><a href="https://github.com/toeverything/blocksuite/tree/master/examples/react-basic-next" target="_blank">react-basic-next</a></td>
     <td>✅</td>
   </tr>
   <tr>
