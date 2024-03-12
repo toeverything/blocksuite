@@ -40,6 +40,9 @@ export class PageKeyboardManager {
         'Ctrl-Shift-l': () => {
           this._createEmbedBlock();
         },
+        'Mod-Shift-l': () => {
+          this._createEmbedBlock();
+        },
       },
       {
         global: true,
