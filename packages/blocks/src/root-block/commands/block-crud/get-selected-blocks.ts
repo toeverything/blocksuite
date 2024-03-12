@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { type BlockElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import type { RoleType } from '@blocksuite/store';
 
 import type { ImageSelection } from '../../../image-block/image-selection.js';
@@ -20,9 +20,14 @@ export const getSelectedBlocksCommand: Command<
     filter?: (el: BlockElement) => boolean;
     types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
     roles?: RoleType[];
+    mode?: 'all' | 'flat' | 'highest';
   }
 > = (ctx, next) => {
-  const { types = ['block', 'text', 'image'], roles = ['content'] } = ctx;
+  const {
+    types = ['block', 'text', 'image'],
+    roles = ['content'],
+    mode = 'flat',
+  } = ctx;
 
   let dirtyResult: BlockElement[] = [];
 
@@ -37,7 +42,7 @@ export const getSelectedBlocksCommand: Command<
       range,
       {
         match: (el: BlockElement) => roles.includes(el.model.role),
-        mode: 'flat',
+        mode,
       }
     );
     dirtyResult.push(...selectedBlockElements);
@@ -48,7 +53,45 @@ export const getSelectedBlocksCommand: Command<
     const viewStore = ctx.std.view;
     const selectedBlockElements = blockSelections.flatMap(selection => {
       const el = viewStore.viewFromPath('block', selection.path);
-      return el ?? [];
+      if (!el) {
+        return [];
+      }
+      const blockElements: BlockElement[] = [el];
+      let selectionPath = selection.path;
+      if (mode === 'all') {
+        let parent = null;
+        do {
+          parent = viewStore.getParent(selectionPath);
+          if (!parent) {
+            break;
+          }
+          const view = parent.view;
+          if (
+            view instanceof BlockElement &&
+            !roles.includes(view.model.role)
+          ) {
+            break;
+          }
+          selectionPath = parent.path;
+        } while (parent);
+        parent = viewStore.viewFromPath('block', selectionPath);
+        if (parent) {
+          blockElements.push(parent);
+        }
+      }
+      if (['flat', 'all'].includes(mode)) {
+        viewStore.walkThrough(node => {
+          const view = node.view;
+          if (!(view instanceof BlockElement)) {
+            return true;
+          }
+          if (roles.includes(view.model.role)) {
+            blockElements.push(view);
+          }
+          return;
+        }, selectionPath);
+      }
+      return blockElements;
     });
     dirtyResult.push(...selectedBlockElements);
   }
