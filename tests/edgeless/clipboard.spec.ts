@@ -1,8 +1,14 @@
+import { expect } from '@playwright/test';
+
 import {
   createConnectorElement,
+  createNote,
   createShapeElement,
+  getAllSortedIds,
+  getTypeById,
   Shape,
   toViewCoord,
+  triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
   copyByKeyboard,
@@ -104,6 +110,34 @@ test.describe('connector clipboard', () => {
         [200, -50],
       ],
       1
+    );
+  });
+
+  test('original relative index should keep same when copy and paste group with note and shape', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+    await createNote(page, [100, 50]);
+    await page.mouse.click(10, 50);
+    await selectAllByKeyboard(page);
+    await triggerComponentToolbarAction(page, 'addGroup');
+    await copyByKeyboard(page);
+    const move = await toViewCoord(page, [250, 250]);
+    await page.mouse.move(move[0], move[1]);
+    await page.mouse.click(move[0], move[1]);
+    await pasteByKeyboard(page, true);
+    await waitNextFrame(page, 500);
+    const sortedIds = await getAllSortedIds(page);
+    expect(sortedIds.length).toBe(6);
+    expect(await getTypeById(page, sortedIds[0])).toBe(
+      await getTypeById(page, sortedIds[3])
+    );
+    expect(await getTypeById(page, sortedIds[1])).toBe(
+      await getTypeById(page, sortedIds[4])
+    );
+    expect(await getTypeById(page, sortedIds[2])).toBe(
+      await getTypeById(page, sortedIds[5])
     );
   });
 });
