@@ -1,4 +1,5 @@
 import { BlockService } from '@blocksuite/block-std';
+import { assertEquals } from '@blocksuite/global/utils';
 import { bundledLanguagesInfo } from 'shiki';
 
 import type { CodeBlockModel } from './code-model.js';
@@ -22,6 +23,10 @@ export class CodeService extends BlockService<CodeBlockModel> {
     this._languageDetector = null;
   }
 
+  isLanguageDetectorReady(): boolean {
+    return !!this._languageDetector;
+  }
+
   async loadLanguageDetector() {
     if (this._languageDetector || this._loading) {
       // Already loaded or loading
@@ -32,13 +37,16 @@ export class CodeService extends BlockService<CodeBlockModel> {
       const { createLanguageDetector } = await import(
         './language-detection.js'
       );
-      this._languageDetector = createLanguageDetector({
+      const languageDetector = createLanguageDetector({
         supportedLangs: bundledLanguagesInfo as StrictLanguageInfo[],
         modelOperationsOptions: {
+          // Set maxContentSize to 3000 to avoid the cost of processing large files
           maxContentSize: 3000,
         },
       });
-      await this._languageDetector?.loadModel();
+      await languageDetector.loadModel();
+      assertEquals(languageDetector.isReady(), true);
+      this._languageDetector = languageDetector;
     } catch (error) {
       // Reset the language detector to null so that it can be reloaded later
       this._languageDetector = null;
@@ -50,7 +58,7 @@ export class CodeService extends BlockService<CodeBlockModel> {
 
   async detectLanguage(model: CodeBlockModel) {
     const text = model.text.yText.toString();
-    if (!text || !this._languageDetector || !this._languageDetector.isReady()) {
+    if (!text || !this._languageDetector) {
       return null;
     }
     return this._languageDetector.detectLanguages(text);
@@ -58,7 +66,7 @@ export class CodeService extends BlockService<CodeBlockModel> {
 
   async queryLangConfidence(model: CodeBlockModel) {
     const text = model.text.yText.toString();
-    if (!text || !this._languageDetector || !this._languageDetector.isReady()) {
+    if (!text || !this._languageDetector) {
       return {} as Record<StrictLanguageInfo['id'], number>;
     }
 

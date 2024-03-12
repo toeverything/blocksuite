@@ -173,7 +173,7 @@ export const createLanguageDetector = <Lang extends BundledLanguageInfo>({
     modelOperations,
     loadModel,
     isReady: () => {
-      // @ts-expect-error
+      // @ts-expect-error The `_model` is private but we need to check if it is ready
       return !!modelOperations._model;
     },
     queryLangConfidence,

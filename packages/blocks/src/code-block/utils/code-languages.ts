@@ -92,6 +92,14 @@ export function getPopularLangPriority(lang: string) {
   return POPULAR_LANGUAGES_MAP[lang] ?? 0;
 }
 
+/**
+ * Check if a language is plaintext.
+ *
+ * PLEASE USE `isPlaintext` INSTEAD OF `isPlainLang`.
+ *
+ * The `isPlainLang` no check for `Plain Text`, which used in the code block.
+ * It's was a design mistake to use `Plain Text` as a language id.
+ */
 export function isPlaintext(lang: string) {
   return isPlainLang(lang) || PLAIN_TEXT_LANG_INFO.id === lang;
 }
