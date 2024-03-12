@@ -1,10 +1,12 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+
+import { matchFlavours } from '../../_common/utils/model.js';
+import type { PageRootBlockComponent } from '../page/page-root-block.js';
 
 export class PageKeyboardManager {
-  constructor(public rootElement: BlockElement) {
+  constructor(public rootElement: PageRootBlockComponent) {
     this.rootElement.bindHotKey(
       {
         'Mod-z': ctx => {
@@ -34,6 +36,9 @@ export class PageKeyboardManager {
         'Control-d': () => {
           if (!IS_MAC) return;
           this._handleDelete();
+        },
+        'Ctrl-Shift-l': () => {
+          this._createEmbedBlock();
         },
       },
       {
@@ -130,5 +135,80 @@ export class PageKeyboardManager {
       blockId,
       path: parentPath.concat(blockId),
     };
+  }
+
+  private _createEmbedBlock() {
+    const rootElement = this.rootElement;
+    const [_, ctx] = this.rootElement.std.command
+      .chain()
+      .getSelectedModels({
+        types: ['block'],
+      })
+      .run();
+    const selectedModels = ctx.selectedModels?.filter(
+      block => !block.flavour.startsWith('affine:embed-')
+    );
+
+    if (!selectedModels?.length) {
+      return;
+    }
+
+    const doc = rootElement.host.doc;
+    const linkedDoc = doc.collection.createDoc({});
+    linkedDoc.load(() => {
+      const rootId = linkedDoc.addBlock('affine:page', {
+        title: new doc.Text(''),
+      });
+      linkedDoc.addBlock('affine:surface', {}, rootId);
+      const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
+
+      const firstBlock = selectedModels[0];
+      assertExists(firstBlock);
+
+      doc.addSiblingBlocks(
+        firstBlock,
+        [
+          {
+            flavour: 'affine:embed-linked-doc',
+            pageId: linkedDoc.id,
+          },
+        ],
+        'before'
+      );
+
+      if (
+        matchFlavours(firstBlock, ['affine:paragraph']) &&
+        firstBlock.type.match(/^h[1-6]$/)
+      ) {
+        const title = firstBlock.text.toString();
+        linkedDoc.collection.setDocMeta(linkedDoc.id, {
+          title,
+        });
+
+        const linkedDocRootModel = linkedDoc.getBlockById(rootId);
+        assertExists(linkedDocRootModel);
+        linkedDoc.updateBlock(linkedDocRootModel, {
+          title: new doc.Text(title),
+        });
+
+        doc.deleteBlock(firstBlock);
+        selectedModels.shift();
+      }
+
+      selectedModels.forEach(model => {
+        const keys = model.keys as (keyof typeof model)[];
+        const values = keys.map(key => model[key]);
+        const blockProps = Object.fromEntries(
+          keys.map((key, i) => [key, values[i]])
+        );
+        linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
+        doc.deleteBlock(model);
+      });
+    });
+
+    const linkedDocService = rootElement.host.spec.getService(
+      'affine:embed-linked-doc'
+    );
+    linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
   }
 }
