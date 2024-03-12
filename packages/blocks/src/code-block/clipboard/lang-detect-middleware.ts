@@ -27,7 +27,7 @@ export const languageDetectMiddleware = (
         textSelection.from.index === 0 &&
         textSelection.from.length === beforePastedText.length;
 
-      if (beforePastedText && !selectAll) {
+      if (beforePastedText.trim() && !selectAll) {
         // Only detect language when pasting text into an empty block
         return;
       }
