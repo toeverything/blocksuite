@@ -1,13 +1,14 @@
 import { Clipboard, type UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
 
 import { HtmlAdapter, PlainTextAdapter } from '../../_common/adapters/index.js';
 import { pasteMiddleware } from '../../root-block/clipboard/middlewares/index.js';
+import type { CodeBlockComponent } from '../code-block.js';
+import { languageDetectMiddleware } from './lang-detect-middleware.js';
 
 export class CodeClipboardController {
   protected _disposables = new DisposableGroup();
-  host: BlockElement;
+  host: CodeBlockComponent;
 
   private get _std() {
     return this.host.std;
@@ -17,7 +18,7 @@ export class CodeClipboardController {
   private _plaintextAdapter = new PlainTextAdapter();
   private _htmlAdapter = new HtmlAdapter();
 
-  constructor(host: BlockElement) {
+  constructor(host: CodeBlockComponent) {
     this.host = host;
   }
 
@@ -38,13 +39,16 @@ export class CodeClipboardController {
     this._clipboard.registerAdapter('text/plain', this._plaintextAdapter, 90);
     this._clipboard.registerAdapter('text/html', this._htmlAdapter, 80);
     const paste = pasteMiddleware(this._std);
+    const langDetectMiddleware = languageDetectMiddleware(this.host);
     this._clipboard.use(paste);
+    this._clipboard.use(langDetectMiddleware);
 
     this._disposables.add({
       dispose: () => {
         this._clipboard.unregisterAdapter('text/plain');
         this._clipboard.unregisterAdapter('text/html');
         this._clipboard.unuse(paste);
+        this._clipboard.unuse(langDetectMiddleware);
       },
     });
   };
