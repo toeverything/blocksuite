@@ -76,14 +76,17 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         k: () => {
-          rootElement.service.selection.elements.forEach(ele => {
-            if (
-              ele instanceof EdgelessBlockModel &&
-              matchFlavours(ele, ['affine:note'])
-            ) {
-              rootElement.slots.toggleNoteSlicer.emit();
-            }
-          });
+          const { selection } = rootElement.service;
+
+          if (
+            selection.elements.length === 1 &&
+            selection.firstElement instanceof EdgelessBlockModel &&
+            matchFlavours(selection.firstElement as EdgelessBlockModel, [
+              'affine:note',
+            ])
+          ) {
+            rootElement.slots.toggleNoteSlicer.emit();
+          }
         },
         f: () => {
           if (
