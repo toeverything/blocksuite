@@ -209,7 +209,11 @@ export function calcDropTarget(
   model: BlockModel,
   element: Element,
   draggingElements: BlockComponent[],
-  scale: number
+  scale: number,
+  /**
+   * Allow the dragging block to be dropped as sublist
+   */
+  allowSublist: boolean = true
 ): DropResult | null {
   let type: DropType | 'none' = 'none';
   const height = 3 * scale;
@@ -254,6 +258,7 @@ export function calcDropTarget(
     // to achieve the same effect.
     const hasChild = (element as BlockComponent).childBlockElements.length;
     if (
+      allowSublist &&
       matchFlavours(model, ['affine:list']) &&
       !hasChild &&
       point.x > domRect.x + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
