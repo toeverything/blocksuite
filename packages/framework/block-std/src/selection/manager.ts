@@ -70,7 +70,7 @@ export class SelectionManager {
   }
 
   get value() {
-    return this._store.getLocalSelection().map(json => {
+    return this._store.getLocalSelection(this.std.doc).map(json => {
       return this._jsonToSelection(json);
     });
   }
@@ -83,7 +83,10 @@ export class SelectionManager {
   }
 
   set(selections: BaseSelection[]) {
-    this._store.setLocalSelection(selections.map(s => s.toJSON()));
+    this._store.setLocalSelection(
+      this.std.doc,
+      selections.map(s => s.toJSON())
+    );
     this.slots.changed.emit(selections);
   }
 
@@ -128,7 +131,10 @@ export class SelectionManager {
     const map = new Map<number, BaseSelection[]>();
     this._store.getStates().forEach((state, id) => {
       if (id === this._store.awareness.clientID) return;
-      const selections = state.selection
+      const selection = Object.entries(state.selection)
+        .filter(([key]) => key === this.std.doc.id)
+        .flatMap(([_, selection]) => selection);
+      const selections = selection
         .map(json => {
           try {
             return this._jsonToSelection(json);

@@ -9,6 +9,8 @@ export interface UserInfo {
   name: string;
 }
 
+type UserSelection = Array<Record<string, unknown>>;
+
 // Raw JSON state in awareness CRDT
 export type RawAwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
@@ -16,7 +18,7 @@ export type RawAwarenessState<
   user?: UserInfo;
   color?: string;
   flags: Flags;
-  selection: Array<Record<string, unknown>>;
+  selection: Record<string, UserSelection>;
 };
 
 export interface AwarenessEvent<
@@ -45,7 +47,7 @@ export class AwarenessStore<
     this.store = store;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
-    this.awareness.setLocalStateField('selection', []);
+    this.awareness.setLocalStateField('selection', {});
     this._initFlags(defaultFlags);
   }
 
@@ -84,12 +86,16 @@ export class AwarenessStore<
     }
   }
 
-  setLocalSelection(selection: Array<Record<string, unknown>>) {
-    this.awareness.setLocalStateField('selection', selection);
+  setLocalSelection(space: Space, selection: UserSelection) {
+    const oldSelection = this.awareness.getLocalState()?.selection ?? {};
+    this.awareness.setLocalStateField('selection', {
+      ...oldSelection,
+      [space.id]: selection,
+    });
   }
 
-  getLocalSelection(): ReadonlyArray<Record<string, unknown>> {
-    return this.awareness.getLocalState()?.selection || [];
+  getLocalSelection(space: Space): ReadonlyArray<Record<string, unknown>> {
+    return (this.awareness.getLocalState()?.selection ?? {})[space.id] ?? [];
   }
 
   getStates(): Map<number, RawAwarenessState<Flags>> {
