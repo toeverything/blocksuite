@@ -20,9 +20,14 @@ export const getSelectedBlocksCommand: Command<
     filter?: (el: BlockElement) => boolean;
     types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
     roles?: RoleType[];
+    mode?: 'all' | 'flat' | 'highest';
   }
 > = (ctx, next) => {
-  const { types = ['block', 'text', 'image'], roles = ['content'] } = ctx;
+  const {
+    types = ['block', 'text', 'image'],
+    roles = ['content'],
+    mode = 'flat',
+  } = ctx;
 
   let dirtyResult: BlockElement[] = [];
 
@@ -37,7 +42,7 @@ export const getSelectedBlocksCommand: Command<
       range,
       {
         match: (el: BlockElement) => roles.includes(el.model.role),
-        mode: 'flat',
+        mode: mode,
       }
     );
     dirtyResult.push(...selectedBlockElements);
@@ -52,16 +57,40 @@ export const getSelectedBlocksCommand: Command<
         return [];
       }
       const blockElements: BlockElement[] = [el];
-      viewStore.walkThrough(node => {
-        const view = node.view;
-        if (!(view instanceof BlockElement)) {
-          return true;
+      let selectionPath = selection.path;
+      if (mode === 'all') {
+        let parent = null;
+        do {
+          parent = viewStore.getParent(selectionPath);
+          if (!parent) {
+            break;
+          }
+          const view = parent.view;
+          if (
+            view instanceof BlockElement &&
+            !roles.includes(view.model.role)
+          ) {
+            break;
+          }
+          selectionPath = parent.path;
+        } while (parent);
+        parent = viewStore.viewFromPath('block', selectionPath);
+        if (parent) {
+          blockElements.push(parent);
         }
-        if (view.model.role !== 'root') {
-          blockElements.push(view);
-        }
-        return;
-      }, selection.path);
+      }
+      if (['flat', 'all'].includes(mode)) {
+        viewStore.walkThrough(node => {
+          const view = node.view;
+          if (!(view instanceof BlockElement)) {
+            return true;
+          }
+          if (roles.includes(view.model.role)) {
+            blockElements.push(view);
+          }
+          return;
+        }, selectionPath);
+      }
       return blockElements;
     });
     dirtyResult.push(...selectedBlockElements);
@@ -107,6 +136,8 @@ export const getSelectedBlocksCommand: Command<
 
       return 0;
     });
+
+  console.log(result);
 
   if (result.length === 0) return;
 
