@@ -25,6 +25,7 @@ import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import type { EdgelessBlockType } from '../../../surface-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   DRAG_HANDLE_CONTAINER_HEIGHT,
@@ -396,21 +397,26 @@ export function convertDragPreviewDocToEdgeless({
   assertExists(previewEl);
   const rect = previewEl.getBoundingClientRect();
   const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
-  const point = edgelessRoot.service.viewport.toModelCoord(
+  const newViewBound = new Bound(
     (rect.x - viewportLeft) / state.cumulativeParentScale,
-    (rect.y - viewportTop) / state.cumulativeParentScale
+    (rect.y - viewportTop) / state.cumulativeParentScale,
+    rect.width / noteScale,
+    rect.height / noteScale
   );
+  const newModelBound =
+    edgelessRoot.service.viewport.toModelBound(newViewBound);
+
   const bound = new Bound(
-    point[0],
-    point[1],
-    (width ?? previewEl.clientWidth) * noteScale,
-    (height ?? previewEl.clientHeight) * noteScale
+    newModelBound.x,
+    newModelBound.y,
+    (newModelBound.w ?? width) * noteScale,
+    (newModelBound.h ?? height) * noteScale
   );
 
   const blockModel = blockComponent.model;
   const blockProps = getBlockProps(blockModel);
 
-  edgelessRoot.service.addBlock(
+  const blockId = edgelessRoot.service.addBlock(
     blockComponent.flavour as EdgelessBlockType,
     {
       ...blockProps,
@@ -418,6 +424,13 @@ export function convertDragPreviewDocToEdgeless({
     },
     edgelessRoot.surfaceBlockModel
   );
+
+  const newBlock = edgelessRoot.service.getElementById(blockId);
+  if (isEmbedSyncedDocBlock(newBlock)) {
+    edgelessRoot.service.updateElement(newBlock.id, {
+      scale: noteScale,
+    });
+  }
 
   const doc = blockComponent.doc;
   const host = blockComponent.host;
