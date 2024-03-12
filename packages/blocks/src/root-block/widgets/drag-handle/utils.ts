@@ -397,20 +397,20 @@ export function convertDragPreviewDocToEdgeless({
   assertExists(previewEl);
   const rect = previewEl.getBoundingClientRect();
   const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
-  const newViewBound = new Bound(
+  const currentViewBound = new Bound(
     (rect.x - viewportLeft) / state.cumulativeParentScale,
     (rect.y - viewportTop) / state.cumulativeParentScale,
     rect.width / noteScale,
     rect.height / noteScale
   );
-  const newModelBound =
-    edgelessRoot.service.viewport.toModelBound(newViewBound);
+  const currentModelBound =
+    edgelessRoot.service.viewport.toModelBound(currentViewBound);
 
-  const bound = new Bound(
-    newModelBound.x,
-    newModelBound.y,
-    (newModelBound.w ?? width) * noteScale,
-    (newModelBound.h ?? height) * noteScale
+  const newBound = new Bound(
+    currentModelBound.x,
+    currentModelBound.y,
+    (currentModelBound.w ?? width) * noteScale,
+    (currentModelBound.h ?? height) * noteScale
   );
 
   const blockModel = blockComponent.model;
@@ -420,7 +420,7 @@ export function convertDragPreviewDocToEdgeless({
     blockComponent.flavour as EdgelessBlockType,
     {
       ...blockProps,
-      xywh: bound.serialize(),
+      xywh: newBound.serialize(),
     },
     edgelessRoot.surfaceBlockModel
   );
