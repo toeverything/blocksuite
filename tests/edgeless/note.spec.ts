@@ -363,14 +363,14 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await setEdgelessTool(page, 'note');
 
-  await page.mouse.click(300, 200);
+  await page.mouse.click(200, 200);
   await focusRichText(page, 3);
   await waitNextFrame(page);
 
   // block id 7
   await type(page, '000');
 
-  await page.mouse.dblclick(CENTER_X, CENTER_Y);
+  await page.mouse.dblclick(CENTER_X, CENTER_Y - 20);
   await dragHandleFromBlockToBlockBottomById(page, '3', '7');
   await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
   await waitNextFrame(page);
