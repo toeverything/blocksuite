@@ -425,6 +425,7 @@ export function convertDragPreviewDocToEdgeless({
     edgelessRoot.surfaceBlockModel
   );
 
+  // Embed synced doc block should extend the note scale
   const newBlock = edgelessRoot.service.getElementById(blockId);
   if (isEmbedSyncedDocBlock(newBlock)) {
     edgelessRoot.service.updateElement(newBlock.id, {
