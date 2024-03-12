@@ -146,7 +146,9 @@ export class PageKeyboardManager {
       })
       .run();
     const selectedModels = ctx.selectedModels?.filter(
-      block => !block.flavour.startsWith('affine:embed-')
+      block =>
+        !block.flavour.startsWith('affine:embed-') &&
+        matchFlavours(doc.getParent(block), ['affine:note'])
     );
 
     if (!selectedModels?.length) {
