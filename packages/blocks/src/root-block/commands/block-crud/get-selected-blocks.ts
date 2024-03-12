@@ -42,7 +42,7 @@ export const getSelectedBlocksCommand: Command<
       range,
       {
         match: (el: BlockElement) => roles.includes(el.model.role),
-        mode: mode,
+        mode,
       }
     );
     dirtyResult.push(...selectedBlockElements);
