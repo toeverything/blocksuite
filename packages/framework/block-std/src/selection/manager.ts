@@ -131,7 +131,7 @@ export class SelectionManager {
     const map = new Map<number, BaseSelection[]>();
     this._store.getStates().forEach((state, id) => {
       if (id === this._store.awareness.clientID) return;
-      const selection = Object.entries(state.selection)
+      const selection = Object.entries(state.selectionV2)
         .filter(([key]) => key === this.std.doc.id)
         .flatMap(([_, selection]) => selection);
       const selections = selection
