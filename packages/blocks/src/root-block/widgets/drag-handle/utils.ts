@@ -440,6 +440,11 @@ export function convertDragPreviewDocToEdgeless({
     host.selection.setGroup('note', []);
   }
 
+  edgelessRoot.service.selection.set({
+    elements: [blockId],
+    editing: false,
+  });
+
   return true;
 }
 

@@ -1172,6 +1172,11 @@ export class AffineDragHandleWidget extends WidgetElement<
         this.doc.moveBlocks(selectedBlocks, newNoteBlock);
       }
 
+      edgelessRoot.service.selection.set({
+        elements: [newNoteBlock.id],
+        editing: true,
+      });
+
       return true;
     }
 

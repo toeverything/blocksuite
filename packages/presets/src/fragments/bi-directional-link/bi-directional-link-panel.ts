@@ -275,8 +275,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
             model.text.yText.toDelta();
 
           deltas.forEach(delta => {
-            if (!delta.attributes || !delta.attributes.reference) return;
-            ids.add(delta.attributes.reference.pageId);
+            if (delta.attributes?.reference?.pageId)
+              ids.add(delta.attributes.reference.pageId);
           });
         } else if (
           matchFlavours(model, [
