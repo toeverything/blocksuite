@@ -35,7 +35,7 @@ function getMostCommonSize(elements: BrushElementModel[]): LineWidth {
     (ele: BrushElementModel) => ele.lineWidth
   );
   const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
-  return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
+  return max ? (Number(max[0]) as LineWidth) : LineWidth.Four;
 }
 
 @customElement('edgeless-change-brush-button')
@@ -108,7 +108,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _selectedColor: string | null = null;
 
   @state()
-  private _selectedSize: LineWidth | null = LineWidth.LINE_WIDTH_FOUR;
+  private _selectedSize: LineWidth | null = LineWidth.Four;
 
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;

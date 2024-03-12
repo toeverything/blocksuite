@@ -1,4 +1,5 @@
 import './template-loading.js';
+import './overlay-scrollbar.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
@@ -100,6 +101,17 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       background-color: var(--affine-background-tertiary-color);
     }
 
+    .template-viewport {
+      position: relative;
+      flex-grow: 1;
+    }
+
+    .template-scrollcontent {
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+    }
+
     .template-list {
       padding: 10px;
       display: flex;
@@ -107,9 +119,6 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       align-content: flex-start;
       gap: 10px 20px;
       flex-wrap: wrap;
-
-      flex-grow: 1;
-      overflow-y: scroll;
     }
 
     .template-item {
@@ -419,47 +428,55 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
             }
           )}
         </div>
-        <div class="template-list">
-          ${this._loading
-            ? html`<affine-template-loading
-                style=${styleMap({
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                })}
-              ></affine-template-loading>`
-            : repeat(
-                _templates,
-                template => template.name,
-                template => {
-                  return html`
-                    <div
-                      class=${`template-item ${
-                        template === this._loadingTemplate ? 'loading' : ''
-                      }`}
-                      data-hover-text="Add"
-                      @click=${() => this._insertTemplate(template)}
-                    >
-                      ${template.preview
-                        ? template.preview.startsWith('<svg')
-                          ? html`${unsafeSVG(template.preview)}`
-                          : html`<img
-                              src="${template.preview}"
-                              class="template-preview"
-                            />`
-                        : defaultPreview}
-                      ${template === this._loadingTemplate
-                        ? html`<affine-template-loading></affine-template-loading>`
-                        : nothing}
-                      ${template.name
-                        ? html`<affine-tooltip .offset=${12} tip-position="top">
-                            ${template.name}
-                          </affine-tooltip>`
-                        : nothing}
-                    </div>
-                  `;
-                }
-              )}
+        <div class="template-viewport">
+          <div class="template-scrollcontent" data-scrollable>
+            <div class="template-list">
+              ${this._loading
+                ? html`<affine-template-loading
+                    style=${styleMap({
+                      position: 'absolute',
+                      left: '50%',
+                      top: '50%',
+                    })}
+                  ></affine-template-loading>`
+                : repeat(
+                    _templates,
+                    template => template.name,
+                    template => {
+                      return html`
+                        <div
+                          class=${`template-item ${
+                            template === this._loadingTemplate ? 'loading' : ''
+                          }`}
+                          data-hover-text="Add"
+                          @click=${() => this._insertTemplate(template)}
+                        >
+                          ${template.preview
+                            ? template.preview.startsWith('<svg')
+                              ? html`${unsafeSVG(template.preview)}`
+                              : html`<img
+                                  src="${template.preview}"
+                                  class="template-preview"
+                                />`
+                            : defaultPreview}
+                          ${template === this._loadingTemplate
+                            ? html`<affine-template-loading></affine-template-loading>`
+                            : nothing}
+                          ${template.name
+                            ? html`<affine-tooltip
+                                .offset=${12}
+                                tip-position="top"
+                              >
+                                ${template.name}
+                              </affine-tooltip>`
+                            : nothing}
+                        </div>
+                      `;
+                    }
+                  )}
+            </div>
+          </div>
+          <overlay-scrollbar></overlay-scrollbar>
         </div>
         <div class="arrow">${ArrowIcon}</div>
       </div>
