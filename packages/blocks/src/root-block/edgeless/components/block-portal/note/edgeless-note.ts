@@ -11,11 +11,7 @@ import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { almostEqual, clamp } from '../../../../../_common/utils/math.js';
-import { matchFlavours } from '../../../../../_common/utils/model.js';
-import {
-  buildPath,
-  findClosestTextBlock,
-} from '../../../../../_common/utils/query.js';
+import { handleNativeRangeAtPoint } from '../../../../../_common/utils/selection.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
@@ -162,6 +158,10 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   @query('affine-note')
   private _affineNote!: HTMLDivElement;
 
+  get _zoom() {
+    return this.edgeless.service.viewport.zoom;
+  }
+
   private get _isShowCollapsedContent() {
     return this.model.edgeless.collapse && (this._isResizing || this._isHover);
   }
@@ -182,45 +182,12 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     e.stopPropagation();
     if (!this._affineNote || !this._editing) return;
 
-    const rect = this._affineNote
-      .querySelector('.affine-block-children-container')
-      ?.getBoundingClientRect();
-    if (!rect) return;
-
-    const offset = 5;
-    const x = clamp(e.x, rect.left + offset, rect.right - offset);
-    const y = clamp(e.y, rect.top + offset, rect.bottom - offset);
-    const textBlocks = this.model.children.filter(model =>
-      matchFlavours(model, ['affine:paragraph', 'affine:code', 'affine:list'])
-    );
-
-    const closestTextBlockElement = findClosestTextBlock(
-      textBlocks,
-      this.edgeless.host.view,
-      x,
-      y
-    );
-    if (closestTextBlockElement) {
-      const textPath = buildPath(closestTextBlockElement.model);
-      this.edgeless.host.selection.clear(['text']);
-      let index = closestTextBlockElement.model.text?.length ?? 0;
-      const rect = closestTextBlockElement.getBoundingClientRect();
-      const originX = e.x;
-      const originY = e.y;
-      if (originX < rect.left || originY < rect.top) {
-        index = 0;
-      }
-      this.edgeless.host.selection.setGroup('note', [
-        this.edgeless.host.selection.create('text', {
-          from: {
-            path: textPath,
-            index: index,
-            length: 0,
-          },
-          to: null,
-        }),
-      ]);
-    }
+    const rect = this._affineNote.getBoundingClientRect();
+    const offsetY = 16 * this._zoom;
+    const offsetX = 2 * this._zoom;
+    const x = clamp(e.x, rect.left + offsetX, rect.right - offsetX);
+    const y = clamp(e.y, rect.top + offsetY, rect.bottom - offsetY);
+    handleNativeRangeAtPoint(x, y);
   }
 
   private _setCollapse(event: MouseEvent) {

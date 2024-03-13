@@ -18,6 +18,7 @@ import {
   setEdgelessTool,
   switchEditorMode,
   triggerComponentToolbarAction,
+  zoomOutByKeyboard,
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
@@ -1044,4 +1045,60 @@ test('Click at empty note should add a paragraph block', async ({ page }) => {
   await page.mouse.click(100, 100);
   await waitNextFrame(page, 400);
   await assertBlockCount(page, 'paragraph', 2);
+});
+
+test('Should focus at closest text block when note collapse', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  // Make sure there is no rich text content
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  await assertRichTexts(page, ['']);
+
+  // Select the note
+  await zoomOutByKeyboard(page);
+  const notePortalBox = await page
+    .locator('.edgeless-block-portal-note')
+    .boundingBox();
+  assertExists(notePortalBox);
+  await page.mouse.click(notePortalBox.x + 10, notePortalBox.y + 10);
+  await waitNextFrame(page, 200);
+  const selectedRect = page
+    .locator('edgeless-selected-rect')
+    .locator('.affine-edgeless-selected-rect');
+  await expect(selectedRect).toBeVisible();
+
+  // Collapse the note
+  const selectedBox = await selectedRect.boundingBox();
+  assertExists(selectedBox);
+  await page.mouse.move(
+    selectedBox.x + selectedBox.width / 2,
+    selectedBox.y + selectedBox.height
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    selectedBox.x + selectedBox.width / 2,
+    selectedBox.y + selectedBox.height + 200,
+    { steps: 10 }
+  );
+  await page.mouse.up();
+  await expect(selectedRect).toBeVisible();
+
+  // Click at the bottom of note to focus at the closest text block
+  await page.mouse.click(
+    selectedBox.x + selectedBox.width / 2,
+    selectedBox.y + selectedBox.height - 20
+  );
+  await waitNextFrame(page, 200);
+
+  // Should be enter edit mode and there are no selected rect
+  await expect(selectedRect).toBeHidden();
+
+  // Focus at the closest text block and make sure can type
+  await type(page, 'hello');
+  await waitNextFrame(page, 200);
+  await assertRichTexts(page, ['hello']);
 });
