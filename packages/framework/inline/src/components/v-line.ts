@@ -37,7 +37,7 @@ export class VLine extends LitElement {
   }
 
   protected override firstUpdated(): void {
-    this.style.display = 'inline-block';
+    this.style.display = 'block';
   }
 
   override render() {
