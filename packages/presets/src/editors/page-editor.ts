@@ -56,6 +56,12 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
     return this._host.value as EditorHost;
   }
 
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.host.updateComplete;
+    return result;
+  }
+
   override render() {
     return html`
       <div
