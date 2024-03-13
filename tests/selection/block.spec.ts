@@ -16,6 +16,7 @@ import {
   getRichTextBoundingBox,
   initEmptyParagraphState,
   initImageState,
+  initMultipleNoteWithParagraphState,
   initParagraphsByCount,
   initThreeLists,
   initThreeParagraphs,
@@ -127,6 +128,24 @@ test('select all and delete by forwardDelete', async ({ page }) => {
   await focusRichText(page, 0);
   await type(page, 'abc');
   await assertRichTexts(page, ['abc']);
+});
+
+test('select all should work for multiple notes in doc mode', async ({
+  page,
+}) => {
+  const n = 4;
+  await enterPlaygroundRoom(page);
+  await initMultipleNoteWithParagraphState(page, undefined, n);
+
+  await focusRichText(page, 0);
+  await type(page, '123');
+  await focusRichText(page, 1);
+  await type(page, '456');
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  const rects = page.locator('affine-block-selection').locator('visible=true');
+  await expect(rects).toHaveCount(n);
 });
 
 async function clickListIcon(page: Page, i = 0) {

@@ -19,6 +19,7 @@ pnpm dev example-name
 ## Example List
 
 - [react-basic](./react-basic/)
+- [react-basic-next](./react-basic-next/)
 - [react-sqlite](./react-sqlite/)
 - [vue-basic](./vue-basic/)
 - [angular-basic](./angular-basic/)

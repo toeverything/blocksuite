@@ -150,6 +150,13 @@ export class Viewport {
     return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
   }
 
+  toModelBound(bound: Bound) {
+    const { w, h } = bound;
+    const [x, y] = this.toModelCoord(bound.x, bound.y);
+
+    return new Bound(x, y, w / this.zoom, h / this.zoom);
+  }
+
   toViewBound(bound: Bound) {
     const { w, h } = bound;
     const [x, y] = this.toViewCoord(bound.x, bound.y);

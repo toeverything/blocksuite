@@ -339,6 +339,57 @@ test('drag handle should be shown when a note is activated in default mode or hi
   await expect(page.locator('.affine-drag-handle-container')).toBeVisible();
 });
 
+test('drag handle can drag note into another note', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+
+  await switchEditorMode(page);
+  const noteRect = await page
+    .locator(`[data-block-id="${noteId}"]`)
+    .boundingBox();
+  assertRectExist(noteRect);
+
+  const secondNoteId = await addNote(page, 'hello world', 100, 100);
+  await waitNextFrame(page);
+  const secondNoteRect = await page
+    .locator(`[data-block-id="${secondNoteId}"]`)
+    .boundingBox();
+  assertRectExist(secondNoteRect);
+
+  {
+    const [x, y] = [
+      noteRect.x + noteRect.width / 2,
+      noteRect.y + noteRect.height / 2,
+    ];
+    await page.mouse.click(noteRect.x, noteRect.y + noteRect.height + 100);
+    await page.mouse.move(x, y);
+    await page.mouse.click(x, y);
+
+    const handlerRect = await page
+      .locator('.affine-drag-handle-container')
+      .boundingBox();
+    assertRectExist(handlerRect);
+
+    await page.mouse.move(
+      handlerRect.x + handlerRect.width / 2,
+      handlerRect.y + handlerRect.height / 2
+    );
+    await page.mouse.down();
+
+    const [targetX, targetY] = [
+      secondNoteRect.x + 10,
+      secondNoteRect.y + secondNoteRect.height / 2,
+    ];
+    await page.mouse.move(targetX, targetY);
+    await page.mouse.up();
+
+    await waitNextFrame(page);
+  }
+});
+
 test('drag handle should work inside one note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
@@ -363,14 +414,14 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await setEdgelessTool(page, 'note');
 
-  await page.mouse.click(300, 200);
+  await page.mouse.click(200, 200);
   await focusRichText(page, 3);
   await waitNextFrame(page);
 
   // block id 7
   await type(page, '000');
 
-  await page.mouse.dblclick(CENTER_X, CENTER_Y);
+  await page.mouse.dblclick(CENTER_X, CENTER_Y - 20);
   await dragHandleFromBlockToBlockBottomById(page, '3', '7');
   await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
   await waitNextFrame(page);
@@ -938,4 +989,59 @@ test('Note can be changed to display on doc and edgeless mode', async ({
   await switchEditorMode(page);
   // change successfully, there should be 2 notes in doc page
   await assertBlockCount(page, 'note', 2);
+});
+
+test('Click at empty note should add a paragraph block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, '123');
+  await assertRichTexts(page, ['123']);
+
+  await switchEditorMode(page);
+
+  // Drag paragraph out of note block
+  const paragraphBlock = await page
+    .locator(`[data-block-id="3"]`)
+    .boundingBox();
+  assertExists(paragraphBlock);
+  await page.mouse.dblclick(paragraphBlock.x, paragraphBlock.y);
+  await waitNextFrame(page);
+  await page.mouse.move(
+    paragraphBlock.x + paragraphBlock.width / 2,
+    paragraphBlock.y + paragraphBlock.height / 2
+  );
+  await waitNextFrame(page);
+  const handle = await page
+    .locator('.affine-drag-handle-container')
+    .boundingBox();
+  assertExists(handle);
+  await page.mouse.move(
+    handle.x + handle.width / 2,
+    handle.y + handle.height / 2,
+    { steps: 10 }
+  );
+  await page.mouse.down();
+  await page.mouse.move(100, 200, { steps: 30 });
+  await page.mouse.up();
+
+  // There should be two note blocks and one paragraph block
+  await assertRichTexts(page, ['123']);
+  await assertBlockCount(page, 'note', 2);
+  await assertBlockCount(page, 'paragraph', 1);
+
+  // Click at empty note block to add a paragraph block
+  const emptyNote = await page.locator(`[data-block-id="2"]`).boundingBox();
+  assertExists(emptyNote);
+  await page.mouse.click(
+    emptyNote.x + emptyNote.width / 2,
+    emptyNote.y + emptyNote.height / 2
+  );
+  await waitNextFrame(page, 300);
+  await type(page, '456');
+  await waitNextFrame(page, 400);
+
+  await page.mouse.click(100, 100);
+  await waitNextFrame(page, 400);
+  await assertBlockCount(page, 'paragraph', 2);
 });
