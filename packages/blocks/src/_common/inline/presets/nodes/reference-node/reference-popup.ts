@@ -239,7 +239,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
 
               <icon-button
                 size="24px"
-                class="affine-reference-popover-view-selector-button embed"
+                class="affine-reference-popover-view-selector-button embed card-view"
                 .hover=${false}
                 @click=${() => this._convertToCardView()}
               >
@@ -251,7 +251,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 ? html`
                     <icon-button
                       size="24px"
-                      class="affine-reference-popover-view-selector-button embed"
+                      class="affine-reference-popover-view-selector-button embed embed-view"
                       .hover=${false}
                       @click=${() => this._convertToEmbedView()}
                       ?disabled=${this._isInsideEmbedSyncedDocBlock}

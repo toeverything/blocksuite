@@ -25,6 +25,7 @@ import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import type { EdgelessBlockType } from '../../../surface-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   DRAG_HANDLE_CONTAINER_HEIGHT,
@@ -401,15 +402,20 @@ export function convertDragPreviewDocToEdgeless({
   assertExists(previewEl);
   const rect = previewEl.getBoundingClientRect();
   const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
-  const point = edgelessRoot.service.viewport.toModelCoord(
+  const currentViewBound = new Bound(
     (rect.x - viewportLeft) / state.cumulativeParentScale,
-    (rect.y - viewportTop) / state.cumulativeParentScale
+    (rect.y - viewportTop) / state.cumulativeParentScale,
+    rect.width / noteScale,
+    rect.height / noteScale
   );
-  const bound = new Bound(
-    point[0],
-    point[1],
-    (width ?? previewEl.clientWidth) * noteScale,
-    (height ?? previewEl.clientHeight) * noteScale
+  const currentModelBound =
+    edgelessRoot.service.viewport.toModelBound(currentViewBound);
+
+  const newBound = new Bound(
+    currentModelBound.x,
+    currentModelBound.y,
+    (currentModelBound.w ?? width) * noteScale,
+    (currentModelBound.h ?? height) * noteScale
   );
 
   const blockModel = blockComponent.model;
@@ -419,10 +425,18 @@ export function convertDragPreviewDocToEdgeless({
     blockComponent.flavour as EdgelessBlockType,
     {
       ...blockProps,
-      xywh: bound.serialize(),
+      xywh: newBound.serialize(),
     },
     edgelessRoot.surfaceBlockModel
   );
+
+  // Embed synced doc block should extend the note scale
+  const newBlock = edgelessRoot.service.getElementById(blockId);
+  if (isEmbedSyncedDocBlock(newBlock)) {
+    edgelessRoot.service.updateElement(newBlock.id, {
+      scale: noteScale,
+    });
+  }
 
   const doc = blockComponent.doc;
   const host = blockComponent.host;
