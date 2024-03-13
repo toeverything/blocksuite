@@ -217,7 +217,7 @@ export const CanvasTextFonts: FontConfig[] = [
   // BebasNeue, https://fonts.cdnfonts.com/css/bebas-neue?styles=169713,17622,17620
   {
     font: CanvasTextFontFamily.BebasNeue,
-    url: 'https://cdn.affine.pro/fonts/BebasNeue%20Light.woff',
+    url: 'https://cdn.affine.pro/fonts/BebasNeue-Light.woff',
     weight: CanvasTextFontWeight.Light,
     style: CanvasTextFontStyle.Normal,
   },
