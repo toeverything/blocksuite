@@ -101,7 +101,6 @@ export class PageClipboard {
   private _copySelected = (onCopy?: () => void) => {
     return this._std.command
       .chain()
-      .withHost()
       .with({ onCopy })
       .getSelectedModels()
       .copySelectedModels();
@@ -121,7 +120,6 @@ export class PageClipboard {
     this._copySelected(() => {
       this._std.command
         .chain()
-        .withHost()
         .try(cmd => [
           cmd.getTextSelection().deleteText(),
           cmd.getSelectedModels().deleteSelectedModels(),

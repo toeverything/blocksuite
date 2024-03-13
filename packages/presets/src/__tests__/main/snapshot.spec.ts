@@ -25,7 +25,7 @@ test('snapshot 1 importing', async () => {
       throw e;
     });
   const [newDoc] = await transformer.importDocs(
-    window.editor.doc.workspace,
+    window.editor.doc.collection,
     snapshotFile
   );
 
@@ -69,7 +69,7 @@ test('snapshot 2 importing', async () => {
       throw e;
     });
   const [newDoc] = await transformer.importDocs(
-    window.editor.doc.workspace,
+    window.editor.doc.collection,
     snapshotFile
   );
 

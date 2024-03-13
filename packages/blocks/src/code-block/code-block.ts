@@ -591,7 +591,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           </rich-text>
         </div>
 
-        ${this.renderModelChildren(this.model)}
+        ${this.renderChildren(this.model)}
 
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>

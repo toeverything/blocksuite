@@ -2,7 +2,6 @@ export * from './block-crud/index.js';
 export * from './model-crud/index.js';
 export * from './selection/index.js';
 export * from './text-crud/index.js';
-export * from './with-root.js';
 
 declare global {
   namespace BlockSuite {

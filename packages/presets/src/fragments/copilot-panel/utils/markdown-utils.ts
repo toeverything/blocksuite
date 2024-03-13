@@ -5,7 +5,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
-  const job = new Job({ workspace: host.std.doc.workspace });
+  const job = new Job({ collection: host.std.doc.collection });
   const snapshot = await job.sliceToSnapshot(slice);
   const markdownAdapter = new MarkdownAdapter();
   const markdown = await markdownAdapter.fromSliceSnapshot({
@@ -19,10 +19,10 @@ export const markdownToSnapshot = async (
   markdown: string,
   host: EditorHost
 ) => {
-  const job = new Job({ workspace: host.std.doc.workspace });
+  const job = new Job({ collection: host.std.doc.collection });
   const markdownAdapter = new MarkdownAdapter();
   const { blockVersions, workspaceVersion, pageVersion } =
-    host.std.doc.workspace.meta;
+    host.std.doc.collection.meta;
   if (!blockVersions || !workspaceVersion || !pageVersion)
     throw new Error(
       'Need blockVersions, workspaceVersion, pageVersion meta information to get slice'
@@ -34,7 +34,7 @@ export const markdownToSnapshot = async (
     blockVersions,
     pageVersion,
     workspaceVersion,
-    workspaceId: host.std.doc.workspace.id,
+    workspaceId: host.std.doc.collection.id,
     pageId: host.std.doc.id,
   };
 

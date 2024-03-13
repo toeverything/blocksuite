@@ -1,4 +1,4 @@
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 
 import {
   ImportDoc,
@@ -9,13 +9,13 @@ import {
 export { importHtml, importMarkDown, importNotion } from './import-doc.js';
 
 export function showImportModal({
-  workspace,
+  collection,
   onSuccess,
   onFail,
   container = document.body,
   abortController = new AbortController(),
 }: {
-  workspace: Workspace;
+  collection: DocCollection;
   onSuccess?: OnSuccessHandler;
   onFail?: OnFailHandler;
   multiple?: boolean;
@@ -23,7 +23,7 @@ export function showImportModal({
   abortController?: AbortController;
 }) {
   const importDoc = new ImportDoc(
-    workspace,
+    collection,
     onSuccess,
     onFail,
     abortController

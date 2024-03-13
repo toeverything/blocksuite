@@ -7,9 +7,9 @@ import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import {
   type BlockSnapshot,
+  DocCollection,
   fromJSON,
   Job,
-  Workspace,
 } from '@blocksuite/store';
 
 import {
@@ -331,7 +331,7 @@ export class EdgelessClipboardController extends PageClipboard {
     idMap: Map<string, string>
   ) {
     if (clipboardData.type === GROUP) {
-      const yMap = new Workspace.Y.Map();
+      const yMap = new DocCollection.Y.Map();
       const children = clipboardData.children ?? {};
       for (const [key, value] of Object.entries(children)) {
         const newKey = idMap.get(key);
@@ -719,6 +719,16 @@ export class EdgelessClipboardController extends PageClipboard {
     elementsRawData: Record<string, unknown>[],
     pasteCenter?: IVec
   ) {
+    const originalIndexes = new Map<string, string>();
+    elementsRawData.forEach(data => {
+      originalIndexes.set(
+        data.id as string,
+        (data.type === 'block'
+          ? (data.props as Record<string, unknown>).index
+          : data.index) as string
+      );
+    });
+
     const groupedByType = groupBy(elementsRawData, data =>
       isNoteBlock(data as unknown as Selectable)
         ? 'notes'
@@ -861,9 +871,7 @@ export class EdgelessClipboardController extends PageClipboard {
     );
 
     const [modelX, modelY] = pasteCenter;
-
-    const oldCommonBound = edgelessElementsBound([
-      ...elements,
+    const blocks = [
       ...notes,
       ...frames,
       ...images,
@@ -876,7 +884,10 @@ export class EdgelessClipboardController extends PageClipboard {
       ...syncedDocEmbeds,
       ...htmlEmbeds,
       ...loomEmbeds,
-    ]);
+    ];
+    const allElements = [...elements, ...blocks];
+
+    const oldCommonBound = edgelessElementsBound(allElements);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
@@ -897,20 +908,6 @@ export class EdgelessClipboardController extends PageClipboard {
       }
     });
 
-    const blocks = [
-      ...notes,
-      ...frames,
-      ...images,
-      ...attachments,
-      ...bookmarks,
-      ...githubEmbeds,
-      ...youtubeEmbeds,
-      ...figmaEmbeds,
-      ...linkedDocEmbeds,
-      ...syncedDocEmbeds,
-      ...htmlEmbeds,
-      ...loomEmbeds,
-    ];
     blocks.forEach(block => {
       const bound = Bound.deserialize(block.xywh);
 
@@ -921,7 +918,59 @@ export class EdgelessClipboardController extends PageClipboard {
       });
     });
 
+    originalIndexes.forEach((index, id) => {
+      const newId = oldIdToNewIdMap.get(id);
+      if (newId) {
+        originalIndexes.set(newId, index);
+      }
+    });
+
+    this._updatePastedElementsIndex(allElements, originalIndexes);
+
     return [elements, blocks] as const;
+  }
+
+  private _updatePastedElementsIndex(
+    elements: EdgelessModel[],
+    originalIndexes: Map<string, string>
+  ) {
+    function compare(a: EdgelessModel, b: EdgelessModel) {
+      if (a instanceof GroupElementModel && a.hasDescendant(b)) {
+        return -1;
+      } else if (b instanceof GroupElementModel && b.hasDescendant(a)) {
+        return 1;
+      } else {
+        const aGroups = a.groups;
+        const bGroups = b.groups;
+        const minGroups = Math.min(aGroups.length, bGroups.length);
+
+        for (let i = 0; i < minGroups; ++i) {
+          if (aGroups[i] !== bGroups[i]) {
+            const aGroup = aGroups[i] ?? a;
+            const bGroup = bGroups[i] ?? b;
+
+            return aGroup.index === bGroup.index
+              ? 0
+              : aGroup.index < bGroup.index
+                ? -1
+                : 1;
+          }
+        }
+
+        if (originalIndexes.get(a.id)! < originalIndexes.get(b.id)!) return -1;
+        else if (originalIndexes.get(a.id)! > originalIndexes.get(b.id)!)
+          return 1;
+        return 0;
+      }
+    }
+
+    const idxGenerator = this.edgeless.service.layer.createIndexGenerator(true);
+    const sortedElements = elements.sort(compare);
+    sortedElements.forEach(ele => {
+      this.edgeless.service.updateElement(ele.id, {
+        index: idxGenerator(isTopLevelBlock(ele) ? ele.flavour : ele.type),
+      });
+    });
   }
 
   private _pasteShapesAndBlocks(elementsRawData: Record<string, unknown>[]) {
@@ -1250,7 +1299,7 @@ export async function prepareClipboardData(
   const selected = await Promise.all(
     selectedAll.map(async selected => {
       const job = new Job({
-        workspace: std.workspace,
+        collection: std.collection,
       });
 
       if (isNoteBlock(selected)) {

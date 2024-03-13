@@ -1,12 +1,14 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool } from '../../_common/types.js';
+import { matchFlavours } from '../../_common/utils/model.js';
 import {
   Bound,
   ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
 } from '../../surface-block/index.js';
+import { EdgelessBlockModel } from '../edgeless/type.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import {
@@ -41,24 +43,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             mode: ConnectorMode.Straight,
           });
         },
-        x: () => {
-          rootElement.service.editSession.record('connector', {
-            mode: ConnectorMode.Orthogonal,
-          });
-          this._setEdgelessTool(rootElement, {
-            type: 'connector',
-            mode: ConnectorMode.Orthogonal,
-          });
-        },
-        c: () => {
-          rootElement.service.editSession.record('connector', {
-            mode: ConnectorMode.Curve,
-          });
-          this._setEdgelessTool(rootElement, {
-            type: 'connector',
-            mode: ConnectorMode.Curve,
-          });
-        },
         h: () => {
           this._setEdgelessTool(rootElement, {
             type: 'pan',
@@ -90,6 +74,19 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'shape',
             shapeType: attributes.shapeType,
           });
+        },
+        k: () => {
+          const { selection } = rootElement.service;
+
+          if (
+            selection.elements.length === 1 &&
+            selection.firstElement instanceof EdgelessBlockModel &&
+            matchFlavours(selection.firstElement as EdgelessBlockModel, [
+              'affine:note',
+            ])
+          ) {
+            rootElement.slots.toggleNoteSlicer.emit();
+          }
         },
         f: () => {
           if (

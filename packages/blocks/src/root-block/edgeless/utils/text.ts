@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
@@ -63,7 +63,7 @@ export function mountShapeTextEditor(
   edgeless: EdgelessRootBlockComponent
 ) {
   if (!shapeElement.text) {
-    const text = new Workspace.Y.Text();
+    const text = new DocCollection.Y.Text();
     const { fillColor } = shapeElement;
     const color = isTransparent(fillColor)
       ? GET_DEFAULT_LINE_COLOR()
@@ -138,7 +138,7 @@ export function addText(
     );
     const id = edgeless.service.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
-      text: new Workspace.Y.Text(),
+      text: new DocCollection.Y.Text(),
     });
     edgeless.doc.captureSync();
     const textElement = edgeless.service.getElementById(id);

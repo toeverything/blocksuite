@@ -55,7 +55,7 @@ export enum Shape {
 export async function getNoteRect(page: Page, noteId: string) {
   const xywh: string | null = await page.evaluate(
     ([noteId]) => {
-      const doc = window.workspace.getDoc('doc:home');
+      const doc = window.collection.getDoc('doc:home');
       const block = doc?.getBlockById(noteId);
       if (block?.flavour === 'affine:note') {
         return (block as NoteBlockModel).xywh;
@@ -73,7 +73,7 @@ export async function getNoteRect(page: Page, noteId: string) {
 export async function getNoteProps(page: Page, noteId: string) {
   const props = await page.evaluate(
     ([id]) => {
-      const doc = window.workspace.getDoc('doc:home');
+      const doc = window.collection.getDoc('doc:home');
       const block = doc?.getBlockById(id);
       if (block?.flavour === 'affine:note') {
         return (block as NoteBlockModel).keys.reduce(
@@ -483,12 +483,12 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
 
 export async function selectBrushSize(page: Page, size: string) {
   const sizeIndexMap: { [key: string]: number } = {
-    two: 6,
-    four: 5,
-    six: 4,
-    eight: 3,
-    ten: 2,
-    twelve: 1,
+    two: 1,
+    four: 2,
+    six: 3,
+    eight: 4,
+    ten: 5,
+    twelve: 6,
   };
   const sizeButton = page.locator(
     `edgeless-brush-menu .line-width-panel .line-width-button:nth-child(${sizeIndexMap[size]})`
@@ -1255,6 +1255,26 @@ export async function getSortedIds(page: Page) {
   });
 }
 
+export async function getAllSortedIds(page: Page) {
+  return page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-root');
+    if (!container) throw new Error('container not found');
+    return container.service.edgelessElements.map(e => e.id);
+  });
+}
+
+export async function getTypeById(page: Page, id: string) {
+  return page.evaluate(
+    ([id]) => {
+      const container = document.querySelector('affine-edgeless-root');
+      if (!container) throw new Error('container not found');
+      const element = container.service.getElementById(id);
+      return 'flavour' in element ? element.flavour : element.type;
+    },
+    [id]
+  );
+}
+
 export async function getIds(page: Page, filterGroup = false) {
   return page.evaluate(
     ([filterGroup]) => {
@@ -1337,6 +1357,11 @@ export async function createConnectorElement(
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
+}
+
+export async function createNote(page: Page, coord1: number[]) {
+  const start = await toViewCoord(page, coord1);
+  return addNote(page, 'note', start[0], start[1]);
 }
 
 export async function hoverOnNote(page: Page, id: string, offset = [0, 0]) {

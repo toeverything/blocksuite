@@ -11,7 +11,6 @@ import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
 } from '../../icons/text.js';
-import { getChainWithHost } from '../../utils/command.js';
 
 interface DatabaseView {
   type: DataViewTypes;
@@ -163,7 +162,8 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
   }
 
   private _convertToDatabase(viewType: DataViewTypes) {
-    const [_, ctx] = getChainWithHost(this.host.std)
+    const [_, ctx] = this.host.std.command
+      .chain()
       .getSelectedModels({
         types: ['block', 'text'],
       })

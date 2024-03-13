@@ -41,7 +41,6 @@ const updateHighlight = (
   };
   host.std.command
     .chain()
-    .withHost()
     .try(chain => [
       chain.getTextSelection().formatText(payload),
       chain.getBlockSelections().formatBlock(payload),

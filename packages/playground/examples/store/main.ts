@@ -1,4 +1,4 @@
-import { type Doc, Schema, Workspace } from '@blocksuite/store';
+import { type Doc, DocCollection, Schema } from '@blocksuite/store';
 
 import {
   type TodoContainerBlockModel,
@@ -9,7 +9,7 @@ import {
 function initDoc() {
   const schema = new Schema();
   schema.register(TodoSchema);
-  const workspace = new Workspace({ schema });
+  const workspace = new DocCollection({ schema });
   const doc = workspace.createDoc({ id: 'doc:home' });
   doc.addBlock('todo:container');
   return doc;

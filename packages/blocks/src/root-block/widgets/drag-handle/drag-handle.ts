@@ -219,7 +219,8 @@ export class AffineDragHandleWidget extends WidgetElement<
       model,
       closestBlockElement,
       this.draggingElements,
-      this.scale * this.cumulativeParentScale
+      this.scale * this.cumulativeParentScale,
+      isDraggedElementNote === false
     );
 
     if (result) {
@@ -1171,6 +1172,11 @@ export class AffineDragHandleWidget extends WidgetElement<
       } else {
         this.doc.moveBlocks(selectedBlocks, newNoteBlock);
       }
+
+      edgelessRoot.service.selection.set({
+        elements: [newNoteBlock.id],
+        editing: true,
+      });
 
       return true;
     }

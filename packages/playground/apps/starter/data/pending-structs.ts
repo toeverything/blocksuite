@@ -1,20 +1,23 @@
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';
 
-export const pendingStructs: InitFn = (workspace: Workspace, id: string) => {
-  const doc = workspace.createDoc({ id });
-  const tempDoc = workspace.createDoc({ id: 'tempDoc' });
+export const pendingStructs: InitFn = (
+  collection: DocCollection,
+  id: string
+) => {
+  const doc = collection.createDoc({ id });
+  const tempDoc = collection.createDoc({ id: 'tempDoc' });
   doc.load();
   tempDoc.load(() => {
     const rootId = tempDoc.addBlock('affine:page', {
       title: new Text('Pending Structs'),
     });
-    const vec = Workspace.Y.encodeStateVector(tempDoc.spaceDoc);
+    const vec = DocCollection.Y.encodeStateVector(tempDoc.spaceDoc);
 
     // To avoid pending structs, uncomment the following line
-    // const update = Workspace.Y.encodeStateAsUpdate(tempDoc.spaceDoc);
+    // const update = DocCollection.Y.encodeStateAsUpdate(tempDoc.spaceDoc);
 
     tempDoc.addBlock('affine:surface', {}, rootId);
     // Add note block inside root block
@@ -26,11 +29,11 @@ export const pendingStructs: InitFn = (workspace: Workspace, id: string) => {
       },
       noteId
     );
-    const diff = Workspace.Y.encodeStateAsUpdate(tempDoc.spaceDoc, vec);
+    const diff = DocCollection.Y.encodeStateAsUpdate(tempDoc.spaceDoc, vec);
     // To avoid pending structs, uncomment the following line
-    // Workspace.Y.applyUpdate(doc.spaceDoc, update);
+    // DocCollection.Y.applyUpdate(doc.spaceDoc, update);
 
-    Workspace.Y.applyUpdate(doc.spaceDoc, diff);
+    DocCollection.Y.applyUpdate(doc.spaceDoc, diff);
   });
 };
 

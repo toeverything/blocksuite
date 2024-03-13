@@ -6,7 +6,7 @@ import type { ListBlockModel } from '../../list-block/index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
-export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
+export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
   const idMap = new Map<string, string>();
   slots.afterImport.on(payload => {
     if (
@@ -63,7 +63,7 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
   });
   slots.beforeImport.on(payload => {
     if (payload.type === 'page') {
-      const newId = workspace.idGenerator();
+      const newId = collection.idGenerator();
       idMap.set(payload.snapshot.meta.id, newId);
       payload.snapshot.meta.id = newId;
       return;
@@ -86,7 +86,7 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
       if (idMap.has(original)) {
         newId = idMap.get(original)!;
       } else {
-        newId = workspace.idGenerator();
+        newId = collection.idGenerator();
         idMap.set(original, newId);
       }
       snapshot.id = newId;
@@ -98,7 +98,7 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
           if (idMap.has(original)) {
             newId = idMap.get(original)!;
           } else {
-            newId = workspace.idGenerator();
+            newId = collection.idGenerator();
             idMap.set(original, newId);
           }
         });

@@ -1,4 +1,4 @@
-import { Workspace, type Y } from '@blocksuite/store';
+import { DocCollection, type Y } from '@blocksuite/store';
 
 import type { SerializedXYWH } from '../index.js';
 import { Bound } from '../utils/bound.js';
@@ -31,8 +31,8 @@ export type TextElementProps = BaseProps & {
 
 export class TextElementModel extends ElementModel<TextElementProps> {
   static override propsToY(props: Record<string, unknown>) {
-    if (props.text && !(props.text instanceof Workspace.Y.Text)) {
-      props.text = new Workspace.Y.Text(props.text as string);
+    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
+      props.text = new DocCollection.Y.Text(props.text as string);
     }
 
     return props;
@@ -45,7 +45,7 @@ export class TextElementModel extends ElementModel<TextElementProps> {
   rotate: number = 0;
 
   @yfield()
-  text: Y.Text = new Workspace.Y.Text();
+  text: Y.Text = new DocCollection.Y.Text();
 
   @yfield()
   color: string = '#000000';

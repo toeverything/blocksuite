@@ -1,11 +1,14 @@
 import type { Y } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 
 import type { InitFn } from './utils.js';
 
-export const versionMismatch: InitFn = (workspace: Workspace, id: string) => {
-  const doc = workspace.createDoc({ id });
-  const tempDoc = workspace.createDoc({ id: 'tempDoc' });
+export const versionMismatch: InitFn = (
+  collection: DocCollection,
+  id: string
+) => {
+  const doc = collection.createDoc({ id });
+  const tempDoc = collection.createDoc({ id: 'tempDoc' });
   doc.load();
 
   tempDoc.load(() => {
@@ -21,13 +24,13 @@ export const versionMismatch: InitFn = (workspace: Workspace, id: string) => {
     const paragraph = blocks.get(paragraphId) as Y.Map<unknown>;
     paragraph.set('sys:version', (paragraph.get('sys:version') as number) + 1);
 
-    const update = Workspace.Y.encodeStateAsUpdate(tempDoc.spaceDoc);
+    const update = DocCollection.Y.encodeStateAsUpdate(tempDoc.spaceDoc);
 
-    Workspace.Y.applyUpdate(doc.spaceDoc, update);
+    DocCollection.Y.applyUpdate(doc.spaceDoc, update);
     doc.addBlock('affine:paragraph', {}, noteId);
   });
 
-  workspace.removeDoc('tempDoc');
+  collection.removeDoc('tempDoc');
   doc.resetHistory();
 };
 

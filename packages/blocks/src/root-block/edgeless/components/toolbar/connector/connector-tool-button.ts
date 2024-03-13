@@ -46,7 +46,7 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
   stroke = GET_DEFAULT_LINE_COLOR();
 
   @state()
-  strokeWidth = LineWidth.LINE_WIDTH_TWO;
+  strokeWidth = LineWidth.Two;
 
   protected override _type = 'connector' as const;
   protected override readonly _states = [

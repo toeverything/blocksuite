@@ -17,13 +17,13 @@
   };
 
   onMount(() => {
-    appState.subscribe(({ workspace, editor }) => {
-      docs = [...workspace.docs.values()];
-      workspace.slots.docUpdated.on(() => {
-        docs = [...workspace.docs.values()];
+    appState.subscribe(({ collection, editor }) => {
+      docs = [...collection.docs.values()];
+      collection.slots.docUpdated.on(() => {
+        docs = [...collection.docs.values()];
       });
       editor.slots.docLinkClicked.on(() => {
-        docs = [...workspace.docs.values()];
+        docs = [...collection.docs.values()];
       });
     });
   });

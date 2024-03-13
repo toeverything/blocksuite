@@ -1,3 +1,4 @@
+import type { UIEventStateContext } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
@@ -88,7 +89,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
   private _bindKeyMap() {
     const selection = this._host.selection;
 
-    const addParagraph = () => {
+    const addParagraph = (ctx: UIEventStateContext) => {
       const parent = this._doc.getParent(this._model);
       if (!parent) return;
 
@@ -100,22 +101,23 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         index + 1
       );
 
-      requestAnimationFrame(() => {
-        selection.update(selList =>
-          selList
-            .filter(sel => !sel.is('image'))
-            .concat(
-              selection.create('text', {
-                from: {
-                  path: this.block.parentPath.concat(blockId),
-                  index: 0,
-                  length: 0,
-                },
-                to: null,
-              })
-            )
-        );
-      });
+      const event = ctx.get('defaultState').event;
+      event.preventDefault();
+
+      selection.update(selList =>
+        selList
+          .filter(sel => !sel.is('image'))
+          .concat(
+            selection.create('text', {
+              from: {
+                path: this.block.parentPath.concat(blockId),
+                index: 0,
+                length: 0,
+              },
+              to: null,
+            })
+          )
+      );
     };
 
     this.block.bindHotKey({
@@ -132,24 +134,24 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         });
         return true;
       },
-      Delete: () => {
+      Delete: ctx => {
         if (!this._isSelected) return;
 
-        addParagraph();
+        addParagraph(ctx);
         this._doc.deleteBlock(this._model);
         return true;
       },
-      Backspace: () => {
+      Backspace: ctx => {
         if (!this._isSelected) return;
 
-        addParagraph();
+        addParagraph(ctx);
         this._doc.deleteBlock(this._model);
         return true;
       },
-      Enter: () => {
+      Enter: ctx => {
         if (!this._isSelected) return;
 
-        addParagraph();
+        addParagraph(ctx);
         return true;
       },
     });

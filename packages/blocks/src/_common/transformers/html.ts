@@ -5,7 +5,7 @@ import { HtmlAdapter } from '../adapters/index.js';
 import { createAssetsArchive, download } from './utils.js';
 
 async function exportDoc(doc: Doc) {
-  const job = new Job({ workspace: doc.workspace });
+  const job = new Job({ collection: doc.collection });
   const snapshot = await job.docToSnapshot(doc);
   const adapter = new HtmlAdapter();
   const htmlResult = await adapter.fromDocSnapshot({

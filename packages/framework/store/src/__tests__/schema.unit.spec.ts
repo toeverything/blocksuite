@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest';
 import { type BlockModel, defineBlockSchema } from '../schema/base.js';
 import { SchemaValidateError } from '../schema/error.js';
 import { Schema } from '../schema/index.js';
-import { Workspace } from '../workspace/index.js';
-import { Generator } from '../workspace/store.js';
+import { DocCollection } from '../store/index.js';
+import { Generator } from '../store/store.js';
 import {
   DividerBlockSchema,
   ListBlockSchema,
@@ -21,7 +21,7 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, schema };
+  return { id: 'test-collection', idGenerator, schema };
 }
 
 const TestCustomNoteBlockSchema = defineBlockSchema({
@@ -63,8 +63,8 @@ const BlockSchemas = [
 const defaultDocId = 'doc0';
 function createTestDoc(docId = defaultDocId) {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
-  const doc = workspace.createDoc({ id: docId });
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: docId });
   doc.load();
   return doc;
 }

@@ -1,6 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { Workspace } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 
 import {
@@ -16,7 +16,7 @@ import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
 export class TagsDatasource extends BaseDataSource {
-  private meta: Workspace['meta'];
+  private meta: DocCollection['meta'];
 
   public rowMove(rowId: string, position: InsertToPosition): void {
     // not support
@@ -84,8 +84,8 @@ export class TagsDatasource extends BaseDataSource {
 
   constructor(host: EditorHost, _config: TagsDatasourceConfig) {
     super();
-    this.meta = host.doc.workspace.meta;
-    host.doc.workspace.meta.docMetaUpdated.pipe(this.slots.update);
+    this.meta = host.doc.collection.meta;
+    host.doc.collection.meta.docMetaUpdated.pipe(this.slots.update);
   }
 
   public cellChangeValue(

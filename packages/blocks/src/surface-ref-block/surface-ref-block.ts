@@ -551,7 +551,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
             .doc=${this.doc}
             .host=${this.host}
             .refModel=${referencedModel}
-            .renderModel=${this.renderModel}
+            .renderModel=${this.host.renderModel}
           ></surface-ref-portal>`
         : nothing;
 

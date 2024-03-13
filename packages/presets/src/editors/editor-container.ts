@@ -82,9 +82,11 @@ export class AffineEditorContainer
   @property({ attribute: false })
   pageSpecs = [...PageEditorBlockSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
+      const setup = spec.setup;
       spec = {
         ...spec,
         setup: (slots, disposable) => {
+          setup?.(slots, disposable);
           slots.mounted.once(({ service }) => {
             disposable.add(
               (<PageRootService>service).slots.editorModeSwitch.on(mode => {

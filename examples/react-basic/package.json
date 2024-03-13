@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/blocks": "canary",
-    "@blocksuite/presets": "canary",
-    "@blocksuite/store": "canary",
+    "@blocksuite/blocks": "0.13.0-canary-202403090437-b9b4c13",
+    "@blocksuite/presets": "0.13.0-canary-202403090437-b9b4c13",
+    "@blocksuite/store": "0.13.0-canary-202403090437-b9b4c13",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

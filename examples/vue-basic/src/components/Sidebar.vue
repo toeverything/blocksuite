@@ -19,12 +19,12 @@ import { inject, ref } from 'vue';
 import { AppState } from './EditorProvider.vue';
 import { Doc } from '@blocksuite/store';
 
-const { editor, workspace } = inject<AppState>('appState')!;
-const docs = ref<Doc[]>([...workspace.docs.values()]);
+const { editor, collection } = inject<AppState>('appState')!;
+const docs = ref<Doc[]>([...collection.docs.values()]);
 
-const updateDocs = () => (docs.value = [...workspace.docs.values()]);
+const updateDocs = () => (docs.value = [...collection.docs.values()]);
 
-workspace.slots.docUpdated.on(updateDocs);
+collection.slots.docUpdated.on(updateDocs);
 editor.slots.docLinkClicked.on(updateDocs);
 
 const selectDoc = (doc: Doc) => {

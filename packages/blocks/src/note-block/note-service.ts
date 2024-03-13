@@ -16,6 +16,7 @@ import {
   registerTextStyleCommands,
   selectBlock,
   selectBlocksBetween,
+  updateBlockType,
 } from './commands/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
@@ -129,7 +130,8 @@ export class NoteService extends BlockService<NoteBlockModel> {
 
     this.std.command
       .add('selectBlocksBetween', selectBlocksBetween)
-      .add('selectBlock', selectBlock);
+      .add('selectBlock', selectBlock)
+      .add('updateBlockType', updateBlockType);
 
     registerTextStyleCommands(this.std);
 

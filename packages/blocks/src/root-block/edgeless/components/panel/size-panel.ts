@@ -27,14 +27,14 @@ export class EdgelessSizePanel extends LitElement {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 64px;
+      width: 70px;
     }
 
     .size-button {
       display: flex;
       align-items: center;
       justify-content: start;
-      width: 64px;
+      width: 100%;
       height: 32px;
       padding: 0 8px;
     }
@@ -47,7 +47,7 @@ export class EdgelessSizePanel extends LitElement {
       text-align: justify;
       font-size: 15px;
       font-style: normal;
-      width: 48px;
+      width: 56px;
       height: 24px;
       font-weight: 400;
       line-height: 24px;
@@ -68,7 +68,7 @@ export class EdgelessSizePanel extends LitElement {
     }
 
     .size-input {
-      width: 48px;
+      width: 56px;
       height: 18px;
       border: 1px solid var(--affine-border-color);
       border-radius: 8px;

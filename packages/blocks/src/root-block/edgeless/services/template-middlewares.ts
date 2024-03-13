@@ -22,7 +22,7 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
     const { blockJson } = data;
     const newId = regeneratedIdMap.has(blockJson.id)
       ? regeneratedIdMap.get(blockJson.id)!
-      : job.model.doc.workspace.idGenerator();
+      : job.model.doc.collection.idGenerator();
 
     if (!regeneratedIdMap.has(blockJson.id)) {
       regeneratedIdMap.set(blockJson.id, newId);
@@ -64,7 +64,7 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
       });
 
       blockJson.children.forEach(block => {
-        regeneratedIdMap.set(block.id, job.model.doc.workspace.idGenerator());
+        regeneratedIdMap.set(block.id, job.model.doc.collection.idGenerator());
       });
 
       defered.forEach(id => {

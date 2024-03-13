@@ -9,8 +9,8 @@ import {
   Schema,
   type SchemaToModel,
 } from '../schema/index.js';
+import { DocCollection, Generator } from '../store/index.js';
 import { AssetsManager, BaseBlockTransformer } from '../transformer/index.js';
-import { Generator, Workspace } from '../workspace/index.js';
 
 const docSchema = defineBlockSchema({
   flavour: 'page',
@@ -47,7 +47,7 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register([docSchema]);
-  return { id: 'test-workspace', idGenerator, schema };
+  return { id: 'test-collection', idGenerator, schema };
 }
 
 const transformer = new BaseBlockTransformer();
@@ -56,8 +56,8 @@ const assets = new AssetsManager({ blob: blobManager });
 
 test('model to snapshot', () => {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
-  const doc = workspace.createDoc({ id: 'home' });
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: 'home' });
   doc.load();
   doc.addBlock('page');
   const rootModel = doc.root as RootBlockModel;
@@ -72,8 +72,8 @@ test('model to snapshot', () => {
 
 test('snapshot to model', async () => {
   const options = createTestOptions();
-  const workspace = new Workspace(options);
-  const doc = workspace.createDoc({ id: 'home' });
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: 'home' });
   doc.load();
   doc.addBlock('page');
   const rootModel = doc.root as RootBlockModel;

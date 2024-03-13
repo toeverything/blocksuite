@@ -1,6 +1,11 @@
-import type { BlockSelection, UIEventHandler } from '@blocksuite/block-std';
+import type {
+  BlockSelection,
+  UIEventHandler,
+  UIEventStateContext,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, EditorHost } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
+import { type BlockElement } from '@blocksuite/lit';
 import type { ReactiveController } from 'lit';
 import type { ReactiveControllerHost } from 'lit';
 
@@ -9,7 +14,6 @@ import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { buildPath } from '../_common/utils/index.js';
 import { onModelElementUpdated } from '../root-block/utils/callback.js';
-import { updateBlockElementType } from '../root-block/utils/operations/element/block-level.js';
 import { ensureBlockInContainer } from './utils.js';
 
 export class KeymapController implements ReactiveController {
@@ -273,7 +277,8 @@ export class KeymapController implements ReactiveController {
     return result;
   };
 
-  private _onEnter = () => {
+  private _onEnter = (ctx: UIEventStateContext) => {
+    const event = ctx.get('defaultState').event;
     const [result] = this._std.command
       .chain()
       .getBlockSelections()
@@ -309,6 +314,7 @@ export class KeymapController implements ReactiveController {
           to: null,
         });
 
+        event.preventDefault();
         selection.setGroup('note', [sel]);
 
         return next();
@@ -378,50 +384,40 @@ export class KeymapController implements ReactiveController {
 
             const [result] = this._std.command
               .chain()
-              .withHost()
-              .tryAll(chain => [
-                chain.getTextSelection(),
-                chain.getBlockSelections(),
-              ])
-              .getSelectedBlocks({
-                types: ['text', 'block'],
+              .updateBlockType({
+                flavour: item.flavour,
+                props: {
+                  type: item.type,
+                },
               })
               .inline((ctx, next) => {
-                const { selectedBlocks } = ctx;
-                assertExists(selectedBlocks);
-
-                const newModels = updateBlockElementType(
-                  selectedBlocks,
-                  item.flavour,
-                  item.type
-                );
+                const newModels = ctx.updatedBlocks;
+                const host = ctx.std.host as EditorHost;
+                assertExists(newModels);
+                assertExists(host);
 
                 if (item.flavour !== 'affine:code') {
                   return;
                 }
 
                 const [codeModel] = newModels;
-                onModelElementUpdated(
-                  this._std.host as EditorHost,
-                  codeModel,
-                  () => {
-                    const codeElement = this._std.view.viewFromPath(
-                      'block',
-                      buildPath(codeModel)
-                    );
-                    assertExists(codeElement);
-                    this._std.selection.setGroup('note', [
-                      this._std.selection.create('text', {
-                        from: {
-                          path: codeElement.path,
-                          index: 0,
-                          length: codeModel.text?.length ?? 0,
-                        },
-                        to: null,
-                      }),
-                    ]);
-                  }
-                ).catch(console.error);
+                onModelElementUpdated(host, codeModel, () => {
+                  const codeElement = this._std.view.viewFromPath(
+                    'block',
+                    buildPath(codeModel)
+                  );
+                  assertExists(codeElement);
+                  this._std.selection.setGroup('note', [
+                    this._std.selection.create('text', {
+                      from: {
+                        path: codeElement.path,
+                        index: 0,
+                        length: codeModel.text?.length ?? 0,
+                      },
+                      to: null,
+                    }),
+                  ]);
+                }).catch(console.error);
 
                 next();
               })

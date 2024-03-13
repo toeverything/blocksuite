@@ -17,7 +17,6 @@ import type { ListBlockModel } from './list-model.js';
 import type { ListService } from './list-service.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
-import { getListInfo } from './utils/get-list-info.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
@@ -162,16 +161,12 @@ export class ListBlockComponent extends BlockElement<
   }
 
   override renderBlock(): TemplateResult<1> {
-    const { deep, index } = getListInfo(this.model);
     const { model, _onClickIcon } = this;
     const collapsed = this.doc.readonly
       ? this._isCollapsedWhenReadOnly
       : !!model.collapsed;
     const listIcon = ListIcon(model, !collapsed, _onClickIcon);
 
-    // For the first list item, we need to add a margin-top to make it align with the text
-    const shouldAddMarginTop = index === 0 && deep === 0;
-    const top = shouldAddMarginTop ? 'affine-list-block-container--first' : '';
     const checked =
       this.model.type === 'todo' && this.model.checked
         ? 'affine-list--checked'
@@ -181,11 +176,11 @@ export class ListBlockComponent extends BlockElement<
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.renderModelChildren(this.model)}
+      ${this.renderChildren(this.model)}
     </div>`;
 
     return html`
-      <div class=${`affine-list-block-container ${top}`}>
+      <div class=${'affine-list-block-container'}>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text

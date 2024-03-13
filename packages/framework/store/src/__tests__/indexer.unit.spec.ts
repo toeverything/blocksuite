@@ -3,7 +3,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
-import { Generator, Schema, Workspace } from '../index.js';
+import { DocCollection, Generator, Schema } from '../index.js';
 // Use manual per-module import/export to support vitest environment on Node.js
 import {
   NoteBlockSchema,
@@ -21,13 +21,13 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, schema };
+  return { id: 'test-collection', idGenerator, schema };
 }
 
-function createTestDoc(pageId = 'doc:home', workspace?: Workspace) {
+function createTestDoc(pageId = 'doc:home', collection?: DocCollection) {
   const options = createTestOptions();
-  const _workspace = workspace || new Workspace(options);
-  const doc = _workspace.createDoc({ id: pageId });
+  const _collection = collection || new DocCollection(options);
+  const doc = _collection.createDoc({ id: pageId });
   doc.load();
   return doc;
 }
@@ -54,10 +54,10 @@ beforeEach(() => {
   }
 });
 
-describe('workspace.search works', () => {
-  it('workspace search matching', () => {
+describe('collection.search works', () => {
+  it('collection search matching', () => {
     const doc = createTestDoc();
-    const workspace = doc.workspace;
+    const collection = doc.collection;
 
     const rootId = doc.addBlock('affine:page', {
       title: new doc.Text(''),
@@ -102,18 +102,18 @@ describe('workspace.search works', () => {
 
     requestIdleCallback(() => {
       queueMicrotask(() => {
-        expect(workspace.search('处理器')).toStrictEqual(expected1);
-        expect(workspace.search('索尼')).toStrictEqual(expected2);
+        expect(collection.search('处理器')).toStrictEqual(expected1);
+        expect(collection.search('索尼')).toStrictEqual(expected2);
       });
     });
 
     const update = encodeStateAsUpdate(doc.spaceDoc);
     const schema = new Schema();
-    const workspace2 = new Workspace({
+    const collection2 = new DocCollection({
       schema,
       id: 'test',
     });
-    const doc2 = workspace2.createDoc({
+    const doc2 = collection2.createDoc({
       id: 'doc:home',
     });
     applyUpdate(doc2.spaceDoc, update);
@@ -121,8 +121,8 @@ describe('workspace.search works', () => {
 
     requestIdleCallback(() => {
       queueMicrotask(() => {
-        expect(workspace2.search('处理器')).toStrictEqual(expected1);
-        expect(workspace2.search('索尼')).toStrictEqual(expected2);
+        expect(collection2.search('处理器')).toStrictEqual(expected1);
+        expect(collection2.search('索尼')).toStrictEqual(expected2);
       });
     });
   });
@@ -131,9 +131,9 @@ describe('workspace.search works', () => {
 describe('backlink works', () => {
   it('backlink indexer works with subpage', async () => {
     const doc = createTestDoc();
-    const workspace = doc.workspace;
-    const subpage = createTestDoc('doc1', workspace);
-    const backlinkIndexer = workspace.indexer.backlink;
+    const collection = doc.collection;
+    const subpage = createTestDoc('doc1', collection);
+    const backlinkIndexer = collection.indexer.backlink;
 
     const rootId = doc.addBlock('affine:page', {
       title: new doc.Text(''),
@@ -175,9 +175,9 @@ describe('backlink works', () => {
 
   it('backlink indexer works with linked doc', async () => {
     const doc0 = createTestDoc();
-    const workspace = doc0.workspace;
-    const doc1 = createTestDoc('space:doc1', workspace);
-    const backlinkIndexer = workspace.indexer.backlink;
+    const collection = doc0.collection;
+    const doc1 = createTestDoc('space:doc1', collection);
+    const backlinkIndexer = collection.indexer.backlink;
 
     const doc0Id = doc0.addBlock('affine:page');
     const note0Id = doc0.addBlock('affine:note', {}, doc0Id);

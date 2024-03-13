@@ -1,6 +1,6 @@
 # Solid Basic Example
 
-This example encapsulates the BlockSuite editor and workspace in Solid, demonstrating basic document and workspace management.
+This example encapsulates the BlockSuite editor and doc collection in Solid, demonstrating basic document management.
 
 ## Development
 

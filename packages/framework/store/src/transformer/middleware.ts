@@ -1,14 +1,14 @@
 import type { Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel } from '../schema/index.js';
-import type { Doc, Workspace } from '../workspace/index.js';
+import type { Doc, DocCollection } from '../store/index.js';
 import type { AssetsManager } from './assets.js';
 import type { Slice } from './slice.js';
 import type {
   BlockSnapshot,
+  CollectionInfoSnapshot,
   DocSnapshot,
   SliceSnapshot,
-  WorkspaceInfoSnapshot,
 } from './type.js';
 
 export type BeforeImportPayload =
@@ -27,7 +27,7 @@ export type BeforeImportPayload =
       type: 'page';
     }
   | {
-      snapshot: WorkspaceInfoSnapshot;
+      snapshot: CollectionInfoSnapshot;
       type: 'info';
     };
 
@@ -67,7 +67,7 @@ export type FinalPayload =
       slice: Slice;
     }
   | {
-      snapshot: WorkspaceInfoSnapshot;
+      snapshot: CollectionInfoSnapshot;
       type: 'info';
     };
 
@@ -79,7 +79,7 @@ export type JobSlots = {
 };
 
 type JobMiddlewareOptions = {
-  workspace: Workspace;
+  collection: DocCollection;
   assetsManager: AssetsManager;
   slots: JobSlots;
   adapterConfigs: Map<string, string>;

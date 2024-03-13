@@ -4,7 +4,7 @@ import { multiPlayersColor } from './color-picker.js';
 
 export class RemoteColorManager {
   private get awareness() {
-    return this.host.doc.workspace.awarenessStore;
+    return this.host.doc.collection.awarenessStore;
   }
 
   private get rootService() {

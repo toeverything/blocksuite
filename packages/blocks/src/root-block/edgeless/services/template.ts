@@ -89,7 +89,7 @@ export class TemplateJob {
   };
 
   constructor({ model, type, middlewares }: TemplateJobConfig) {
-    this.job = new Job({ workspace: model.doc.workspace, middlewares: [] });
+    this.job = new Job({ collection: model.doc.collection, middlewares: [] });
     this.model = model;
     this.type = TEMPLATE_TYPES.includes(type as TemplateType)
       ? (type as TemplateType)
@@ -120,7 +120,7 @@ export class TemplateJob {
     to: Y.Map<Y.Map<unknown>>
   ) {
     const schema =
-      this.model.doc.workspace.schema.flavourSchemaMap.get('affine:surface');
+      this.model.doc.collection.schema.flavourSchemaMap.get('affine:surface');
     const surfaceTransformer =
       schema?.transformer?.() as SurfaceBlockTransformer;
 

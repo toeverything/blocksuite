@@ -1,5 +1,5 @@
 import type { Y } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 
 import { keys } from '../../_common/utils/iterable.js';
 import type {
@@ -22,12 +22,12 @@ type GroupElementProps = BaseProps & {
 
 export class GroupElementModel extends ElementModel<GroupElementProps> {
   static override propsToY(props: GroupElementProps) {
-    if (props.title && !(props.title instanceof Workspace.Y.Text)) {
-      props.title = new Workspace.Y.Text(props.title);
+    if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
+      props.title = new DocCollection.Y.Text(props.title);
     }
 
-    if (props.children && !(props.children instanceof Workspace.Y.Map)) {
-      const children = new Workspace.Y.Map() as Y.Map<boolean>;
+    if (props.children && !(props.children instanceof DocCollection.Y.Map)) {
+      const children = new DocCollection.Y.Map() as Y.Map<boolean>;
 
       keys(props.children).forEach(key => {
         children.set(key as string, true);
@@ -43,10 +43,10 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     instance.childIds = Array.from(instance.children.keys());
   })
   @yfield()
-  children: Y.Map<boolean> = new Workspace.Y.Map<boolean>();
+  children: Y.Map<boolean> = new DocCollection.Y.Map<boolean>();
 
   @yfield()
-  title: Y.Text = new Workspace.Y.Text();
+  title: Y.Text = new DocCollection.Y.Text();
 
   @local()
   showTitle: boolean = true;

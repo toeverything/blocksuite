@@ -3,7 +3,7 @@ import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { DocCollection } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import {
@@ -80,7 +80,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   get linkedDoc() {
-    const doc = this.std.workspace.getDoc(this.model.pageId);
+    const doc = this.std.collection.getDoc(this.model.pageId);
     return doc;
   }
 
@@ -180,7 +180,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
-    const yText = new Workspace.Y.Text();
+    const yText = new DocCollection.Y.Text();
     yText.insert(0, REFERENCE_NODE);
     yText.format(0, REFERENCE_NODE.length, {
       reference: { type: 'LinkedPage', pageId },
@@ -294,7 +294,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const linkedDoc = this.linkedDoc;
     if (linkedDoc) {
       this.disposables.add(
-        linkedDoc.workspace.meta.docMetaUpdated.on(() => {
+        linkedDoc.collection.meta.docMetaUpdated.on(() => {
           this._load().catch(e => {
             console.error(e);
             this.isError = true;

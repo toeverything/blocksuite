@@ -32,7 +32,7 @@ export const SHAPE_OVERLAY_OPTIONS = {
   strokeStyle: StrokeStyle.Solid,
   strokeLineDash: [] as number[],
   stroke: 'black',
-  strokeWidth: LineWidth.LINE_WIDTH_TWO,
+  strokeWidth: LineWidth.Two,
   fill: 'transparent',
 };
 

@@ -20,6 +20,7 @@ import {
 } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
+import { compare } from '../../surface-block/managers/layer-utils.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { RootService } from '../root-service.js';
 import { EdgelessFrameManager } from './frame-manager.js';
@@ -151,6 +152,17 @@ export class EdgelessRootService extends RootService {
    */
   get elements() {
     return this._layer.canvasElements;
+  }
+
+  /**
+   * sorted edgeless elements
+   */
+  get edgelessElements() {
+    return [
+      ...this._layer.canvasElements,
+      ...this._layer.blocks,
+      ...this._layer.frames,
+    ].sort(compare);
   }
 
   get frames() {

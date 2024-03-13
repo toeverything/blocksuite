@@ -38,6 +38,12 @@ export class ParagraphBlockComponent extends BlockElement<
   ParagraphService
 > {
   static override styles = css`
+    affine-paragraph {
+      display: block;
+      margin: 10px 0;
+      font-size: var(--affine-font-base);
+    }
+
     .affine-paragraph-block-container {
       position: relative;
       border-radius: 4px;
@@ -130,11 +136,6 @@ export class ParagraphBlockComponent extends BlockElement<
       top: 0;
       background: var(--affine-quote-color);
       border-radius: 18px;
-    }
-    .text {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-size: var(--affine-font-base);
     }
 
     .affine-paragraph-placeholder {
@@ -257,7 +258,7 @@ export class ParagraphBlockComponent extends BlockElement<
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.renderModelChildren(this.model)}
+      ${this.renderChildren(this.model)}
     </div>`;
 
     return html`

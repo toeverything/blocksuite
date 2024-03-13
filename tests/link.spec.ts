@@ -176,6 +176,37 @@ test('type character in link should not jump out link node', async ({
   );
 });
 
+test('type character after link should not extend the link attributes', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const id = await createLinkBlock(page, 'link text', 'http://example.com');
+  await focusRichText(page, 0);
+  await type(page, 'AFTER_LINK');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        insert="Hello"
+      />
+      <text
+        insert="link text"
+        link="http://example.com"
+      />
+      <text
+        insert="AFTER_LINK"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    id
+  );
+});
+
 test('readonly mode should not trigger link popup', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const linkText = 'linkText';
