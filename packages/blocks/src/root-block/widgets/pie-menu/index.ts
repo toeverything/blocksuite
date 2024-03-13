@@ -5,6 +5,7 @@ import { WidgetElement } from '@blocksuite/lit';
 import { nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
+import type { IVec } from '../../../surface-block/index.js';
 import { isRootElement } from '../../utils/guard.js';
 import type { IPieMenuSchema } from './base.js';
 import type { PieMenu } from './menu.js';
@@ -18,7 +19,7 @@ export class AffinePieMenuWidget extends WidgetElement {
   @state()
   currentMenu: PieMenu | null = null;
 
-  mouse: { x: number; y: number } = { x: innerWidth / 2, y: innerHeight / 2 };
+  mouse: IVec = [innerWidth / 2, innerHeight / 2];
 
   get rootElement() {
     const rootElement = this.blockElement;
@@ -69,7 +70,7 @@ export class AffinePieMenuWidget extends WidgetElement {
   private _attachMenu(schema: IPieMenuSchema) {
     if (this.currentMenu && this.currentMenu.id === schema.id)
       return PieManager.close();
-    const { x, y } = this.mouse;
+    const [x, y] = this.mouse;
     const menu = PieManager.createMenu(schema, {
       x,
       y,
@@ -98,7 +99,8 @@ export class AffinePieMenuWidget extends WidgetElement {
 
   private _handleCursorPos = (ctx: UIEventStateContext) => {
     const ev = ctx.get('pointerState');
-    this.mouse = ev.point;
+    const { x, y } = ev.point;
+    this.mouse = [x, y];
   };
 
   override render() {

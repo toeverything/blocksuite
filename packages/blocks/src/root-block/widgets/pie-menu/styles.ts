@@ -39,12 +39,25 @@ export const styles = {
       width: 6rem;
       height: 6rem;
       padding: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .pie-node.root[data-active='false'] {
+      width: 3rem;
+      height: 3rem;
     }
 
     .pie-node.child {
       width: 3rem;
       height: 3rem;
       padding: 0.6rem;
+      transition: all 0.2s ease;
+      opacity: unset;
+    }
+
+    .pie-node.child[data-hovering='true'] {
+      border-color: var(--affine-primary-color);
+      scale: 1.06;
     }
   `,
 };

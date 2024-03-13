@@ -51,13 +51,22 @@ pie.action({
   },
 });
 
+pie.beginSubmenu({ label: 'Selector' });
 pie.action({
-  label: 'Selector',
+  label: 'Select',
 
   action: () => {
-    console.log('Selector');
+    console.log('Select');
   },
 });
+
+pie.action({
+  label: 'Hand',
+  action: () => {
+    console.log('Hand Tool');
+  },
+});
+pie.endSubmenu();
 
 pie.beginSubmenu({ label: 'Shapes' });
 pie.action({

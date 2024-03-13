@@ -34,6 +34,16 @@ export class PieManager {
      * @default 150
      */
     SELECT_ON_RELEASE_TIMEOUT: 150,
+
+    /**
+     * Distance from the center of the active node to start selecting a child node
+     */
+    ACTIVATE_THRESHOLD: 60,
+
+    /**
+     * Time delay to open submenu after hovering a submenu node
+     */
+    SUBMENU_OPEN_TIMEOUT: 60,
   };
 
   public static slots = {
