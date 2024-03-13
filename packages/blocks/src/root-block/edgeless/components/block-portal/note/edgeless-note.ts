@@ -1,6 +1,11 @@
 import '../../note-slicer/index.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import {
+  type BlockElement,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
+import type { BlockModel } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -10,7 +15,9 @@ import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../../../../../_common/types.js';
-import { almostEqual } from '../../../../../_common/utils/math.js';
+import { almostEqual, clamp } from '../../../../../_common/utils/math.js';
+import { matchFlavours } from '../../../../../_common/utils/model.js';
+import { buildPath } from '../../../../../_common/utils/query.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
@@ -170,6 +177,84 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   private _leaved() {
     if (this._isHover) {
       this._isHover = false;
+    }
+  }
+
+  private _findClosestTextBlock(
+    blocks: BlockModel[],
+    x: number,
+    y: number
+  ): BlockElement | null {
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      const blockElement = this.edgeless.host.view.viewFromPath(
+        'block',
+        buildPath(block)
+      );
+      if (!blockElement) continue;
+      const blockRect = blockElement.getBoundingClientRect();
+      if (y >= blockRect.top && y <= blockRect.bottom) {
+        const childrenTextBlocks = block.children.filter(model =>
+          matchFlavours(model, [
+            'affine:paragraph',
+            'affine:code',
+            'affine:list',
+          ])
+        );
+        // If no children, return the block
+        // If has children, find the closest one, if not found, return the block
+        if (!childrenTextBlocks.length) {
+          return blockElement;
+        } else {
+          const childBlock = this._findClosestTextBlock(
+            childrenTextBlocks,
+            x,
+            y
+          );
+          return childBlock ? childBlock : blockElement;
+        }
+      }
+    }
+    return null;
+  }
+
+  private _handleClickAtBackground(e: MouseEvent) {
+    e.stopPropagation();
+    if (!this._affineNote || !this._editing) return;
+
+    const rect = this._affineNote
+      .querySelector('.affine-block-children-container')
+      ?.getBoundingClientRect();
+    if (!rect) return;
+
+    const offset = 5;
+    const x = clamp(e.x, rect.left + offset, rect.right - offset);
+    const y = clamp(e.y, rect.top + offset, rect.bottom - offset);
+    const textBlocks = this.model.children.filter(model =>
+      matchFlavours(model, ['affine:paragraph', 'affine:code', 'affine:list'])
+    );
+
+    const closestBlockElement = this._findClosestBlock(textBlocks, x, y);
+    if (closestBlockElement) {
+      const textPath = buildPath(closestBlockElement.model);
+      this.edgeless.host.selection.clear(['text']);
+      let index = closestBlockElement.model.text?.length ?? 0;
+      const rect = closestBlockElement.getBoundingClientRect();
+      const originX = e.x;
+      const originY = e.y;
+      if (originX < rect.left || originY < rect.top) {
+        index = 0;
+      }
+      this.edgeless.host.selection.setGroup('note', [
+        this.edgeless.host.selection.create('text', {
+          from: {
+            path: textPath,
+            index: index,
+            length: 0,
+          },
+          to: null,
+        }),
+      ]);
     }
   }
 
@@ -355,7 +440,12 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         @mousemove=${this._hovered}
         data-scale="${scale}"
       >
-        <div class="note-background" style=${styleMap(backgroundStyle)}></div>
+        <div
+          class="note-background"
+          style=${styleMap(backgroundStyle)}
+          @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
+          @click=${this._handleClickAtBackground}
+        ></div>
 
         <div
           style=${styleMap({
