@@ -300,19 +300,21 @@ export class ExportManager {
       this._checkCanContinueToCanvas(pathname, editorMode);
     }
 
-    const surfaceElements = surfaces.flatMap(element =>
-      element.type === 'group'
-        ? ((element as GroupElementModel).childElements.filter(
-            el => el instanceof ElementModel
-          ) as ElementModel[])
-        : element
-    );
-    const surfaceCanvas = surfaceRenderer.getCanvasByBound(
-      bound,
-      surfaceElements
-    );
+    if (surfaces?.length) {
+      const surfaceElements = surfaces.flatMap(element =>
+        element.type === 'group'
+          ? ((element as GroupElementModel).childElements.filter(
+              el => el instanceof ElementModel
+            ) as ElementModel[])
+          : element
+      );
+      const surfaceCanvas = surfaceRenderer.getCanvasByBound(
+        bound,
+        surfaceElements
+      );
 
-    ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+      ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+    }
 
     return canvas;
   }
