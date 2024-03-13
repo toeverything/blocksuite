@@ -1,10 +1,19 @@
 import { type IVec } from '../../../surface-block/index.js';
-import type { IPieNode, IPieNonRootNode, IPieRootNode } from './base.js';
+import type {
+  IPieActionNode,
+  IPieNode,
+  IPieNonRootNode,
+  IPieRootNode,
+} from './base.js';
 
 export function getPosition(angleRad: number, v: IVec): IVec {
   const x = Math.cos(angleRad) * v[0];
   const y = Math.sin(angleRad) * v[1];
   return [x, y];
+}
+
+export function isActionNode(node: IPieNode): node is IPieActionNode {
+  return node.type === 'action';
 }
 
 export function isNodeWithChildren(

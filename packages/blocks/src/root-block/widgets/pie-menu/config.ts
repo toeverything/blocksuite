@@ -1,5 +1,19 @@
+import {
+  ConnectorIcon,
+  EdgelessEraserIcon,
+  EdgelessPenIcon,
+  EllipseIcon,
+  FrameIcon,
+  HandIcon,
+  SelectIcon,
+  SquareIcon,
+  ToolsIcon,
+  TriangleIcon,
+} from '../../../_common/icons/edgeless.js';
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
-import type { EdgelessRootBlockComponent } from '../../index.js';
+import { ConnectorMode } from '../../../surface-block/element-model/connector.js';
+import { ShapeType } from '../../../surface-block/index.js';
+import { EdgelessRootBlockComponent } from '../../index.js';
 import { PieMenuBuilder } from './pie-builder.js';
 import { PieManager } from './pie-manager.js';
 
@@ -9,6 +23,7 @@ import { PieManager } from './pie-manager.js';
 const pie = new PieMenuBuilder({
   id: 'affine:pie:edgeless:tools',
   label: 'Tools',
+  icon: ToolsIcon,
   scope: { edgeless: true },
   trigger: ({ keyEvent: ev, rootElement }) => {
     if (isControlledKeyboardEvent(ev)) return false;
@@ -20,79 +35,115 @@ const pie = new PieMenuBuilder({
 });
 
 pie.action({
-  label: 'pen',
-
-  action: () => {
-    console.log('Pen');
+  label: 'Pen',
+  icon: EdgelessPenIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({ type: 'brush' });
+    }
   },
 });
 
 pie.action({
-  label: 'eraser',
-
-  action: () => {
-    console.log('Eraser');
+  label: 'Eraser',
+  icon: EdgelessEraserIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({ type: 'eraser' });
+    }
   },
 });
 
 pie.action({
-  label: 'frame',
-
-  action: () => {
-    console.log('Frame');
+  label: 'Frame',
+  icon: FrameIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({ type: 'frame' });
+    }
   },
 });
 
 pie.action({
-  label: 'connector',
-
-  action: () => {
-    console.log('Connector');
+  label: 'Connector',
+  icon: ConnectorIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({
+        type: 'connector',
+        mode: ConnectorMode.Orthogonal,
+      });
+    }
   },
 });
 
-pie.beginSubmenu({ label: 'Selector' });
+// Shapes Submenu
+pie.beginSubmenu({ label: 'Shapes', icon: SquareIcon });
 pie.action({
-  label: 'Select',
-
-  action: () => {
-    console.log('Select');
-  },
-});
-
-pie.action({
-  label: 'Hand',
-  action: () => {
-    console.log('Hand Tool');
-  },
-});
-pie.endSubmenu();
-
-pie.beginSubmenu({ label: 'Shapes' });
-pie.action({
-  label: 'Rectangle',
-
-  action: () => {
-    console.log('rectangle');
+  label: 'Rect',
+  icon: SquareIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({
+        type: 'shape',
+        shapeType: ShapeType.Rect,
+      });
+    }
   },
 });
 
 pie.action({
   label: 'Ellipse',
-
-  action: () => {
-    console.log('ellipse');
+  icon: EllipseIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({
+        type: 'shape',
+        shapeType: ShapeType.Ellipse,
+      });
+    }
   },
 });
 
 pie.action({
   label: 'Triangle',
-
-  action: () => {
-    console.log('Triangle');
+  icon: TriangleIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({
+        type: 'shape',
+        shapeType: ShapeType.Triangle,
+      });
+    }
   },
 });
 
+pie.endSubmenu();
+
+// Hand and Select tool submenu
+pie.beginSubmenu({ label: 'Default', icon: SelectIcon });
+pie.action({
+  label: 'Select',
+  icon: SelectIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({ type: 'default' });
+    }
+  },
+});
+
+pie.action({
+  label: 'Hand',
+  icon: HandIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({
+        type: 'pan',
+        panning: false,
+      });
+    }
+  },
+});
 pie.endSubmenu();
 
 PieManager.add(pie.build());

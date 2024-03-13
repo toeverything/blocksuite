@@ -16,7 +16,12 @@ import type { AffinePieMenuWidget } from './index.js';
 import { PieNode } from './node.js';
 import { PieManager } from './pie-manager.js';
 import { styles } from './styles.js';
-import { getPosition, isNodeWithChildren, isRootNode } from './utils.js';
+import {
+  getPosition,
+  isActionNode,
+  isNodeWithChildren,
+  isRootNode,
+} from './utils.js';
 
 @customElement('affine-pie-menu')
 export class PieMenu extends WithDisposable(LitElement) {
@@ -92,7 +97,19 @@ export class PieMenu extends WithDisposable(LitElement) {
   }
 
   selectHovered() {
-    // TODO UNIMPLEMENTED
+    const { hoveredNode } = this;
+
+    requestAnimationFrame(() => {
+      if (hoveredNode && isActionNode(hoveredNode.schema)) {
+        hoveredNode.schema.action({
+          rootElement: this.rootElement,
+          menu: this,
+          widgetElement: this.widgetElement,
+        });
+
+        PieManager.close();
+      }
+    });
   }
 
   setHovered(node: PieNode | null) {
@@ -104,7 +121,6 @@ export class PieMenu extends WithDisposable(LitElement) {
     assertEquals(submenu.schema.type, 'submenu', 'Need node of type submenu');
 
     this._openSubmenuTimeout = setTimeout(() => {
-      console.log('open', submenu.schema.label);
       this.selectionChain = [...this.selectionChain, submenu];
       this.slots.requestNodeUpdate.emit();
     }, PieManager.settings.SUBMENU_OPEN_TIMEOUT);
@@ -114,7 +130,6 @@ export class PieMenu extends WithDisposable(LitElement) {
     super.connectedCallback();
     this._setupEvents();
     const root = this._createNodeTree(this.schema.root);
-    console.log({ ...root });
     this.selectionChain.push(root);
   }
 

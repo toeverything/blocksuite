@@ -1,6 +1,8 @@
 import type { TemplateResult } from 'lit';
 
 import type { RootBlockComponent } from '../../types.js';
+import type { AffinePieMenuWidget } from './index.js';
+import type { PieMenu } from './menu.js';
 
 export interface IPieMenuSchema {
   id: string; // TODO use typed (eg: PieMenuId = typeof MenuName...)
@@ -52,7 +54,11 @@ export interface IPieRootNode extends IPieBaseNode {
 // Nodes which can perform a given action
 export interface IPieActionNode extends IPieBaseNode {
   type: 'action';
-  action: () => void;
+  action: (ctx: {
+    rootElement: RootBlockComponent;
+    menu: PieMenu;
+    widgetElement: AffinePieMenuWidget;
+  }) => void;
 }
 
 // Open a submenu

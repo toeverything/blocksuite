@@ -11,7 +11,7 @@ import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';
 type PieBuilderConstructorProps = Omit<
   IPieMenuSchema,
   'root' | 'angle' | 'startAngle' | 'endAngle'
->;
+> & { icon: IPieNode['icon'] };
 
 export class PieMenuBuilder {
   private _schema: IPieMenuSchema | null = null;
@@ -20,7 +20,7 @@ export class PieMenuBuilder {
   constructor(base: PieBuilderConstructorProps) {
     this._schema = {
       ...base,
-      root: { type: 'root', children: [], label: base.label },
+      root: { type: 'root', children: [], label: base.label, icon: base.icon },
     };
     this._stack.push(this._schema.root);
   }

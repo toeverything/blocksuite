@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement, nothing } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -70,11 +70,13 @@ export class PieNode extends WithDisposable(LitElement) {
       transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
     };
 
+    const centerContent = this.schema.icon ?? this.schema.label;
+
     const centerText = isActiveNode
       ? hoveredNode
         ? hoveredNode.schema.label
-        : this.schema.label
-      : this.schema.label;
+        : centerContent
+      : centerContent;
 
     return html`<div
       style="${styleMap(styles)}"
@@ -85,7 +87,7 @@ export class PieNode extends WithDisposable(LitElement) {
         active="${isActiveNode.toString()}"
         class="pie-node root"
       >
-        ${centerText}
+        <div class="node-content">${centerText}</div>
       </div>
 
       <slot name="children-container"></slot>
@@ -93,30 +95,28 @@ export class PieNode extends WithDisposable(LitElement) {
   }
 
   private _renderChildNode() {
-    // Don't render the children's of submenus when it is not the active node
-    // TODO change this method of rendering
-    if (
-      this.schema.type === 'submenu' &&
-      this.menu.selectionChain.includes(this)
-    )
+    const isSubmenu = this.schema.type === 'submenu';
+
+    if (isSubmenu && this.menu.selectionChain.includes(this))
       return this._renderRootNode();
 
-    if (!this.menu.isChildOfActiveNode(this)) return nothing;
-
     const [x, y] = this.position;
+    const visible = this.menu.isChildOfActiveNode(this);
     const styles = {
       top: '50%',
       left: '50%',
       transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
+      opacity: visible ? '1' : '0',
     };
 
-    return html`<div
+    return html`<li
       style="${styleMap(styles)}"
       hovering="${this._isHovering.toString()}"
+      sub-node="${isSubmenu.toString()}"
       class="pie-node child"
     >
-      ${this.schema.label.slice(0, 5)}
-    </div>`;
+      <div class="node-content">${this.schema.icon ?? this.schema.label}</div>
+    </li>`;
   }
 
   private _updateActNodeCurAngle = (angle: number | null) => {
