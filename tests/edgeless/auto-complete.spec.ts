@@ -62,6 +62,7 @@ test.describe('auto-complete', () => {
     test('click on note auto-complete button', async ({ page }) => {
       await edgelessCommonSetup(page);
       await addNote(page, 'note', 100, 100);
+      await page.mouse.click(600, 50);
       await page.mouse.click(300, 50);
       await page.mouse.click(150, 120);
       const rect = await getEdgelessSelectedRectModel(page);
