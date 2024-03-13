@@ -20,6 +20,7 @@ import type { IBound } from '../../surface-block/consts.js';
 import type { ElementModel } from '../../surface-block/element-model/index.js';
 import type { Renderer } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
+import { fetchImage } from '../adapters/utils.js';
 import { FileExporter } from './file-exporter.js';
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
@@ -164,7 +165,13 @@ export class ExportManager {
       proxy: this._exportOptions.imageProxyEndpoint,
     };
 
-    return html2canvas(htmlElement, Object.assign(html2canvasOption, options));
+    this._enableMediaPrint();
+    const data = await html2canvas(
+      htmlElement,
+      Object.assign(html2canvasOption, options)
+    );
+    this._disableMediaPrint();
+    return data;
   }
 
   private _createCanvas(bound: IBound, fillStyle: string) {
@@ -326,9 +333,6 @@ export class ExportManager {
     const pageLeft = rect?.left ?? 0;
     const viewportHeight = viewportElement?.scrollHeight;
 
-    const replaceRichTextWithSvgElement =
-      this._replaceRichTextWithSvgElement.bind(this);
-    const replaceImgSrcWithSvg = this.replaceImgSrcWithSvg;
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -350,10 +354,10 @@ export class ExportManager {
           return false;
         }
       },
-      onclone: async function (_documentClone: Document, element: HTMLElement) {
+      onclone: async (_documentClone: Document, element: HTMLElement) => {
         element.style.height = `${viewportHeight}px`;
-        replaceRichTextWithSvgElement(element);
-        await replaceImgSrcWithSvg(element);
+        this._replaceRichTextWithSvgElement(element);
+        await this.replaceImgSrcWithSvg(element);
       },
       backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
       x: pageLeft - viewport.left,
@@ -363,10 +367,12 @@ export class ExportManager {
       proxy: this._exportOptions.imageProxyEndpoint,
     };
 
+    this._enableMediaPrint();
     const data = await html2canvas(
       viewportElement as HTMLElement,
       html2canvasOption
     );
+    this._disableMediaPrint();
     this._checkCanContinueToCanvas(pathname, editorMode);
     return data;
   }
@@ -383,6 +389,18 @@ export class ExportManager {
       rich.remove();
     });
   };
+
+  private _enableMediaPrint() {
+    document.querySelectorAll('.media-print').forEach(mediaPrint => {
+      mediaPrint.classList.remove('hide');
+    });
+  }
+
+  private _disableMediaPrint() {
+    document.querySelectorAll('.media-print').forEach(mediaPrint => {
+      mediaPrint.classList.add('hide');
+    });
+  }
 
   private _elementToSvgElement(
     node: HTMLElement,
@@ -459,7 +477,11 @@ export class ExportManager {
     const imgList = Array.from(element.querySelectorAll('img'));
     // Create an array of promises
     const promises = imgList.map(img => {
-      return fetch(img.src)
+      return fetchImage(
+        img.src,
+        undefined,
+        this._exportOptions.imageProxyEndpoint
+      )
         .then(response => response.blob())
         .then(async blob => {
           // If the file type is SVG, set svg width and height

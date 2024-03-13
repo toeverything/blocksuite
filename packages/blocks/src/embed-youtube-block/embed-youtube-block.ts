@@ -42,6 +42,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   @state()
   private _showOverlay = true;
 
+  @state()
+  private _showImage = false;
+
   @query('.affine-embed-youtube-block')
   private _youtubeBlockEl!: HTMLDivElement;
 
@@ -130,6 +133,10 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       this._isDragging = ctx.get('pointerState').dragging;
       this._showOverlay =
         this._isResizing || this._isDragging || !this._isSelected;
+    });
+
+    matchMedia('print').addEventListener('change', () => {
+      this._showImage = matchMedia('print').matches;
     });
 
     if (this.isInSurface) {
@@ -259,6 +266,15 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
                         hide: !this._showOverlay,
                       })}
                     ></div>
+                    <img
+                      class=${classMap({
+                        'affine-embed-youtube-video-iframe-overlay': true,
+                        'media-print': true,
+                        hide: !this._showImage,
+                      })}
+                      src=${`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                      alt="YouTube Video"
+                    />
                   </div>
                 `
               : bannerImage}
