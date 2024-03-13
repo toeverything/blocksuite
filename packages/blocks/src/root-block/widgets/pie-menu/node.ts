@@ -95,7 +95,10 @@ export class PieNode extends WithDisposable(LitElement) {
   private _renderChildNode() {
     // Don't render the children's of submenus when it is not the active node
     // TODO change this method of rendering
-    if (this.schema.type === 'submenu' && this.menu.activeNode === this)
+    if (
+      this.schema.type === 'submenu' &&
+      this.menu.selectionChain.includes(this)
+    )
       return this._renderRootNode();
 
     if (!this.menu.isChildOfActiveNode(this)) return nothing;

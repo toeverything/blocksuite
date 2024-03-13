@@ -114,6 +114,7 @@ export class PieMenu extends WithDisposable(LitElement) {
     super.connectedCallback();
     this._setupEvents();
     const root = this._createNodeTree(this.schema.root);
+    console.log({ ...root });
     this.selectionChain.push(root);
   }
 

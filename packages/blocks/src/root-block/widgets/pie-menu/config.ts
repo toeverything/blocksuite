@@ -92,6 +92,7 @@ pie.action({
     console.log('Triangle');
   },
 });
+
 pie.endSubmenu();
 
 PieManager.add(pie.build());
