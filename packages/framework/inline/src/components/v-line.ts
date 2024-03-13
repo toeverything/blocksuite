@@ -91,6 +91,7 @@ export class VLine extends LitElement {
       // this padding is used to make cursor can be placed at the
       // start and end of the line when the first and last element is embed element
       padding: '0 0.5px',
+      display: 'inline-block',
     })}>${renderElements}</div>`;
   }
 
