@@ -3,7 +3,7 @@ import { css, html } from 'lit';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
 export const SYNCED_MIN_WIDTH = 370;
-export const SYNCED_MIN_HEIGHT = 80;
+export const SYNCED_MIN_HEIGHT = 64;
 
 export const blockStyles = css`
   edgeless-block-portal-embed:has(.affine-embed-synced-doc-block.editing) {
@@ -23,7 +23,6 @@ export const blockStyles = css`
   .edgeless-block-portal-embed
     .affine-embed-synced-doc-editor
     .affine-page-root-block-container {
-    padding: 12px 24px;
     width: 100%;
   }
 
