@@ -78,10 +78,16 @@ export class PieNode extends WithDisposable(LitElement) {
 
     return html`<div
       style="${styleMap(styles)}"
-      data-active="${isActiveNode.toString()}"
-      class="pie-node root"
+      class="pie-root-node-container"
     >
-      ${centerText}
+      <div
+        style="${styleMap({ transform: 'translate(-50%, -50%)' })}"
+        active="${isActiveNode.toString()}"
+        class="pie-node root"
+      >
+        ${centerText}
+      </div>
+
       <slot name="children-container"></slot>
     </div>`;
   }
@@ -103,7 +109,7 @@ export class PieNode extends WithDisposable(LitElement) {
 
     return html`<div
       style="${styleMap(styles)}"
-      data-hovering="${this._isHovering.toString()}"
+      hovering="${this._isHovering.toString()}"
       class="pie-node child"
     >
       ${this.schema.label.slice(0, 5)}

@@ -24,11 +24,15 @@ export const styles = {
   `,
 
   pieNode: css`
+    .pie-root-node-container {
+      position: absolute;
+    }
+
     .pie-node {
       position: absolute;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      border: 1px solid var(--affine-border-color);
+      border: 2px solid var(--affine-border-color);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -42,9 +46,10 @@ export const styles = {
       transition: all 0.2s ease;
     }
 
-    .pie-node.root[data-active='false'] {
+    .pie-node.root[active='false'] {
       width: 3rem;
       height: 3rem;
+      opacity: 0.6;
     }
 
     .pie-node.child {
@@ -55,7 +60,7 @@ export const styles = {
       opacity: unset;
     }
 
-    .pie-node.child[data-hovering='true'] {
+    .pie-node.child[hovering='true'] {
       border-color: var(--affine-primary-color);
       scale: 1.06;
     }
