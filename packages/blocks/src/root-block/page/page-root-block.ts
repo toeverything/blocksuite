@@ -225,6 +225,28 @@ export class PageRootBlockComponent extends BlockElement<
     this.keyboardManager = new PageKeyboardManager(this);
 
     this.bindHotKey({
+      'Mod-a': () => {
+        const blocks = this.model.children
+          .filter(model => {
+            if (matchFlavours(model, ['affine:note'])) {
+              const note = model as NoteBlockModel;
+              if (note.displayMode === NoteDisplayMode.EdgelessOnly)
+                return false;
+
+              return true;
+            }
+            return false;
+          })
+          .flatMap(model => {
+            return model.children.map(child => {
+              return this.std.selection.create('block', {
+                path: [this.model.id, model.id, child.id],
+              });
+            });
+          });
+        this.std.selection.setGroup('note', blocks);
+        return true;
+      },
       ArrowUp: () => {
         const view = this.host.view;
         const selection = this.host.selection;
