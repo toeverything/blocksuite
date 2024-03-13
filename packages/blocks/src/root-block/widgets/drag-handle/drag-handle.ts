@@ -219,7 +219,8 @@ export class AffineDragHandleWidget extends WidgetElement<
       model,
       closestBlockElement,
       this.draggingElements,
-      this.scale * this.cumulativeParentScale
+      this.scale * this.cumulativeParentScale,
+      isDraggedElementNote === false
     );
 
     if (result) {
