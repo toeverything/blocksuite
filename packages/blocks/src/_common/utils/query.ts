@@ -919,3 +919,39 @@ export function getEdgelessCanvasTextEditor(element: Element | Document) {
 export function hasClassNameInList(element: Element, classList: string[]) {
   return classList.some(className => element.classList.contains(className));
 }
+
+/**
+ * Finds the closest text block element which contains the given coordinates.
+ *
+ * @param blocks - An array of BlockModel objects representing the blocks to search within.
+ * @param x - The x-coordinate of the point to search for.
+ * @param y - The y-coordinate of the point to search for.
+ * @returns The closest BlockElement that contains the given coordinates, or null if no block is found.
+ */
+export function findClosestTextBlock(
+  blocks: BlockModel[],
+  view: ViewStore,
+  x: number,
+  y: number
+): BlockElement | null {
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    const blockElement = view.viewFromPath('block', buildPath(block));
+    if (!blockElement) continue;
+    const blockRect = blockElement.getBoundingClientRect();
+    if (y >= blockRect.top && y <= blockRect.bottom) {
+      const childrenTextBlocks = block.children.filter(model =>
+        matchFlavours(model, ['affine:paragraph', 'affine:code', 'affine:list'])
+      );
+      // If no children, return the block
+      // If has children, find the closest one, if not found, return the block
+      if (!childrenTextBlocks.length) {
+        return blockElement;
+      } else {
+        const childBlock = findClosestTextBlock(childrenTextBlocks, view, x, y);
+        return childBlock ? childBlock : blockElement;
+      }
+    }
+  }
+  return null;
+}
