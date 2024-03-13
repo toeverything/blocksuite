@@ -30,6 +30,7 @@ export const blockStyles = css`
     display: block;
     padding: 0;
     width: 100%;
+    height: calc(${EMBED_CARD_HEIGHT.syncedDoc}px + 36px);
   }
 
   affine-embed-synced-doc-block[data-nested-editor] {
@@ -51,6 +52,7 @@ export const blockStyles = css`
     display: block;
     padding: 18px 24px;
     width: 100%;
+    height: calc(${EMBED_CARD_HEIGHT.syncedDoc}px + 36px);
   }
   .affine-embed-synced-doc-container:hover.light,
   .affine-embed-synced-doc-container.selected.light,
