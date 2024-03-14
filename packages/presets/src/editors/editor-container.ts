@@ -18,7 +18,7 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import type { EdgelessEditor } from './edgeless-editor.js';
@@ -80,44 +80,56 @@ export class AffineEditorContainer
   mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  pageSpecs = [...PageEditorBlockSpecs].map(spec => {
-    if (spec.schema.model.flavour === 'affine:page') {
-      const setup = spec.setup;
-      spec = {
-        ...spec,
-        setup: (slots, disposable) => {
-          setup?.(slots, disposable);
-          slots.mounted.once(({ service }) => {
-            disposable.add(
-              (<PageRootService>service).slots.editorModeSwitch.on(mode => {
-                this.mode = mode;
-              })
-            );
-          });
-        },
-      };
-    }
-    return spec;
-  });
+  pageSpecs = PageEditorBlockSpecs;
+
+  @state()
+  private get _pageSpecs() {
+    return [...this.pageSpecs].map(spec => {
+      if (spec.schema.model.flavour === 'affine:page') {
+        const setup = spec.setup;
+        spec = {
+          ...spec,
+          setup: (slots, disposable) => {
+            setup?.(slots, disposable);
+            slots.mounted.once(({ service }) => {
+              disposable.add(
+                (<PageRootService>service).slots.editorModeSwitch.on(
+                  this.switchEditor.bind(this)
+                )
+              );
+            });
+          },
+        };
+      }
+      return spec;
+    });
+  }
 
   @property({ attribute: false })
-  edgelessSpecs = [...EdgelessEditorBlockSpecs].map(spec => {
-    if (spec.schema.model.flavour === 'affine:page') {
-      spec = {
-        ...spec,
-        setup: (slots, disposable) => {
-          slots.mounted.once(({ service }) => {
-            disposable.add(
-              (<PageRootService>service).slots.editorModeSwitch.on(mode => {
-                this.mode = mode;
-              })
-            );
-          });
-        },
-      };
-    }
-    return spec;
-  });
+  edgelessSpecs = EdgelessEditorBlockSpecs;
+
+  @state()
+  private get _edgelessSpecs() {
+    return [...this.edgelessSpecs].map(spec => {
+      if (spec.schema.model.flavour === 'affine:page') {
+        const setup = spec.setup;
+        spec = {
+          ...spec,
+          setup: (slots, disposable) => {
+            setup?.(slots, disposable);
+            slots.mounted.once(({ service }) => {
+              disposable.add(
+                (<PageRootService>service).slots.editorModeSwitch.on(
+                  this.switchEditor.bind(this)
+                )
+              );
+            });
+          },
+        };
+      }
+      return spec;
+    });
+  }
 
   @property({ attribute: false })
   override autofocus = false;
@@ -142,6 +154,10 @@ export class AffineEditorContainer
     assertExists(this.doc, 'Missing doc for EditorContainer.');
     assertExists(this.doc.root, 'Missing root model for Doc.');
     return this.doc.root;
+  }
+
+  switchEditor(mode: typeof this.mode) {
+    this.mode = mode;
   }
 
   override async getUpdateComplete(): Promise<boolean> {
@@ -235,7 +251,7 @@ export class AffineEditorContainer
 
               <page-editor
                 .doc=${this.doc}
-                .specs=${this.pageSpecs}
+                .specs=${this._pageSpecs}
                 .hasViewport=${false}
               ></page-editor>
             </div>
@@ -243,7 +259,7 @@ export class AffineEditorContainer
         : html`
             <edgeless-editor
               .doc=${this.doc}
-              .specs=${this.edgelessSpecs}
+              .specs=${this._edgelessSpecs}
             ></edgeless-editor>
           `
     )}`;
