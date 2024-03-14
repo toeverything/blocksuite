@@ -1,10 +1,10 @@
 import {
   ConnectorIcon,
+  DiamondIcon,
   EdgelessEraserIcon,
   EdgelessPenIcon,
   EllipseIcon,
   FrameIcon,
-  HandIcon,
   SelectIcon,
   SquareIcon,
   ToolsIcon,
@@ -118,10 +118,22 @@ pie.action({
   },
 });
 
+pie.action({
+  label: 'Diamond',
+  icon: DiamondIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool({
+        type: 'shape',
+        shapeType: ShapeType.Diamond,
+      });
+    }
+  },
+});
+
 pie.endSubmenu();
 
 // Hand and Select tool submenu
-pie.beginSubmenu({ label: 'Default', icon: SelectIcon });
 pie.action({
   label: 'Select',
   icon: SelectIcon,
@@ -131,19 +143,5 @@ pie.action({
     }
   },
 });
-
-pie.action({
-  label: 'Hand',
-  icon: HandIcon,
-  action: ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      rootElement.service.tool.setEdgelessTool({
-        type: 'pan',
-        panning: false,
-      });
-    }
-  },
-});
-pie.endSubmenu();
 
 PieManager.add(pie.build());

@@ -6,8 +6,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { IVec } from '../../../surface-block/index.js';
 import type { IPieNode } from './base.js';
 import type { PieMenu } from './menu.js';
+import { PieManager } from './pie-manager.js';
 import { styles } from './styles.js';
-import { isAngleBetween, isRootNode } from './utils.js';
+import {
+  isActionNode,
+  isAngleBetween,
+  isRootNode,
+  isSubmenuNode,
+} from './utils.js';
 
 @customElement('affine-pie-node')
 export class PieNode extends WithDisposable(LitElement) {
@@ -39,6 +45,24 @@ export class PieNode extends WithDisposable(LitElement) {
   @state()
   private _isHovering = false;
 
+  select() {
+    const schema = this.schema;
+    if (isRootNode(schema)) return;
+
+    requestAnimationFrame(() => {
+      if (isActionNode(schema)) {
+        schema.action({
+          rootElement: this.menu.rootElement,
+          menu: this.menu,
+          widgetElement: this.menu.widgetElement,
+        });
+        PieManager.close();
+      } else if (isSubmenuNode(schema)) {
+        this.menu.openSubmenu(this); // for Opening with numpad
+      }
+    });
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
     this._setupEvents();
@@ -56,7 +80,7 @@ export class PieNode extends WithDisposable(LitElement) {
 
   private _setupEvents() {
     this._disposables.add(
-      this.menu.slots.updateHoveredNode.on(this._updateActNodeCurAngle)
+      this.menu.slots.updateHoveredNode.on(this._onUpdateHoveredNode)
     );
 
     this._disposables.add(
@@ -125,13 +149,15 @@ export class PieNode extends WithDisposable(LitElement) {
       style="${styleMap(styles)}"
       hovering="${this._isHovering.toString()}"
       sub-node="${isSubmenu.toString()}"
+      @click="${() => this.select()}"
+      index="${this.index}"
       class="pie-node child"
     >
       <div class="node-content">${this.schema.icon ?? this.schema.label}</div>
     </li>`;
   }
 
-  private _updateActNodeCurAngle = (angle: number | null) => {
+  private _onUpdateHoveredNode = (angle: number | null) => {
     if (isRootNode(this.schema) || !this.menu.isChildOfActiveNode(this)) return;
 
     if (angle === null) {

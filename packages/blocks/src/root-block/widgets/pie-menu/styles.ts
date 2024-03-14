@@ -71,6 +71,15 @@ export const styles = {
       animation: my-anim 250ms cubic-bezier(0.775, 1.325, 0.535, 1);
     }
 
+    .pie-node.child::after {
+      content: attr(index);
+      color: var(--affine-text-secondary-color);
+      position: absolute;
+      font-size: 8px;
+      bottom: 10%;
+      right: 30%;
+    }
+
     .pie-node.child .node-content > svg {
       width: 24px;
       height: 24px;
@@ -85,14 +94,13 @@ export const styles = {
     .pie-node.child[sub-node='true']::before {
       content: '';
       position: absolute;
-      top: 75%;
-      left: 65%;
+      top: 50%;
+      right: 10%;
+      transform: translateY(-50%);
       width: 5px;
       height: 5px;
-      border: 2px solid var(--affine-primary-color);
-      border-radius: 10px;
-      background-color: transparent;
-      transition: background-color 30ms ease;
+      background-color: var(--affine-primary-color);
+      border-radius: 50%;
     }
 
     @keyframes my-anim {

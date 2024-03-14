@@ -16,12 +16,7 @@ import type { AffinePieMenuWidget } from './index.js';
 import { PieNode } from './node.js';
 import { PieManager } from './pie-manager.js';
 import { styles } from './styles.js';
-import {
-  getPosition,
-  isActionNode,
-  isNodeWithChildren,
-  isRootNode,
-} from './utils.js';
+import { getPosition, isNodeWithChildren, isRootNode } from './utils.js';
 
 @customElement('affine-pie-menu')
 export class PieMenu extends WithDisposable(LitElement) {
@@ -115,17 +110,9 @@ export class PieMenu extends WithDisposable(LitElement) {
   selectHovered() {
     const { hoveredNode } = this;
 
-    requestAnimationFrame(() => {
-      if (hoveredNode && isActionNode(hoveredNode.schema)) {
-        hoveredNode.schema.action({
-          rootElement: this.rootElement,
-          menu: this,
-          widgetElement: this.widgetElement,
-        });
-
-        PieManager.close();
-      }
-    });
+    if (hoveredNode) {
+      hoveredNode.select();
+    }
   }
 
   setHovered(node: PieNode | null) {
@@ -157,7 +144,7 @@ export class PieMenu extends WithDisposable(LitElement) {
     };
 
     return html` <div class="pie-menu-container blocksuite-overlay">
-      <div class="overlay"></div>
+      <div class="overlay" @click="${() => this.abortController.abort()}"></div>
 
       <div style="${styleMap(menuStyles)}" class="pie-menu">
         ${this.rootNode ?? nothing}
@@ -177,7 +164,32 @@ export class PieMenu extends WithDisposable(LitElement) {
         clearTimeout(this._openSubmenuTimeout);
       })
     );
+
+    this._disposables.addFromEvent(document, 'keydown', this._handleKeyDown);
   }
+
+  private selectChildWithIndex = (index: number) => {
+    const activeNode = this.activeNode;
+    if (!activeNode || isNaN(index)) return;
+
+    const childNode = activeNode.querySelector(
+      `affine-pie-node[index='${index}']`
+    );
+
+    if (childNode instanceof PieNode) {
+      childNode.select();
+    }
+  };
+
+  private _handleKeyDown = (ev: KeyboardEvent) => {
+    const { key } = ev;
+    if (key === 'Escape') {
+      return this.abortController.abort();
+    }
+    if (key.match(/\d+/)) {
+      this.selectChildWithIndex(parseInt(key));
+    }
+  };
 
   private _handlePointerMove = (ev: PointerEvent) => {
     const { clientX, clientY } = ev;
@@ -222,12 +234,15 @@ export class PieMenu extends WithDisposable(LitElement) {
     }
 
     if (isNodeWithChildren(nodeSchema)) {
-      for (const childSchema of nodeSchema.children) {
+      nodeSchema.children.forEach((childSchema, i) => {
         const childNode = this._createNodeTree(childSchema);
         childNode.containerNode = node;
+        childNode.index = i + 1;
+        childNode.setAttribute('index', childNode.index.toString());
         node.append(childNode);
-      }
+      });
     }
+
     return node;
   }
 }

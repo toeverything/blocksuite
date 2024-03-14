@@ -4,16 +4,13 @@ import type {
   IPieNode,
   IPieNonRootNode,
   IPieRootNode,
+  IPieSubmenuNode,
 } from './base.js';
 
 export function getPosition(angleRad: number, v: IVec): IVec {
   const x = Math.cos(angleRad) * v[0];
   const y = Math.sin(angleRad) * v[1];
   return [x, y];
-}
-
-export function isActionNode(node: IPieNode): node is IPieActionNode {
-  return node.type === 'action';
 }
 
 export function isNodeWithChildren(
@@ -24,6 +21,13 @@ export function isNodeWithChildren(
 
 export function isRootNode(node: IPieNode): node is IPieRootNode {
   return node.type === 'root';
+}
+
+export function isSubmenuNode(node: IPieNode): node is IPieSubmenuNode {
+  return node.type === 'submenu';
+}
+export function isActionNode(node: IPieNode): node is IPieActionNode {
+  return node.type === 'action';
 }
 
 //------------------------------------------------------------------------------------
