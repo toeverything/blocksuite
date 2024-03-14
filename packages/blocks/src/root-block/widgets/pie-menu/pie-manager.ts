@@ -6,10 +6,15 @@ import type { IPieMenuSchema } from './base.js';
 import type { AffinePieMenuWidget } from './index.js';
 import { PieMenu } from './menu.js';
 
+/* Future Ideas
+   - Allow to set individual opening time for each submenu
+   - Submenu should have optional action functions  for example if a user tap selects a submenu currently it does noting. it should have a optional action if released without opening the menu, like select the first option. 
+   - Touch device support
+*/
+
 /**
  *  A static class for managing pie menus
  */
-
 export type PieMenuCreateOptions = {
   x: number;
   y: number;
@@ -36,7 +41,7 @@ export class PieManager {
     SELECT_ON_RELEASE_TIMEOUT: 150,
 
     /**
-     * Distance from the center of the active node to start selecting a child node
+     * Distance from the center of the active node to start focusing a child node
      */
     ACTIVATE_THRESHOLD: 60,
 

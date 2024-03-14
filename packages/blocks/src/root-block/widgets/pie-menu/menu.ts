@@ -96,6 +96,22 @@ export class PieMenu extends WithDisposable(LitElement) {
     return this.activeNode === node;
   }
 
+  popSelectionChainTo(node: PieNode) {
+    requestAnimationFrame(() => {
+      assertEquals(
+        isNodeWithChildren(node.schema),
+        true,
+        'Required a root node or a submenu node'
+      );
+
+      while (this.selectionChain.length > 1 && this.activeNode !== node) {
+        this.selectionChain.pop();
+      }
+      this.requestUpdate();
+      this.slots.requestNodeUpdate.emit();
+    });
+  }
+
   selectHovered() {
     const { hoveredNode } = this;
 
@@ -122,6 +138,7 @@ export class PieMenu extends WithDisposable(LitElement) {
 
     this._openSubmenuTimeout = setTimeout(() => {
       this.selectionChain = [...this.selectionChain, submenu];
+      this.setHovered(null);
       this.slots.requestNodeUpdate.emit();
     }, PieManager.settings.SUBMENU_OPEN_TIMEOUT);
   }

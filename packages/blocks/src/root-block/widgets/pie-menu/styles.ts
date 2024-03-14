@@ -3,7 +3,7 @@ export const styles = {
   pieMenu: css`
     .menu-container {
       user-select: none;
-      z-index: calc(var(--affine-z-index-popover) + 1000);
+      z-index: var(--affine-z-index-popover);
       isolation: isolate;
     }
 
@@ -13,7 +13,6 @@ export const styles = {
       height: 100vh;
       width: 100vw;
       position: fixed;
-      background-color: rgba(0 0 0 / 0.2);
       z-index: var(--affine-z-index-popover);
     }
 
@@ -22,6 +21,9 @@ export const styles = {
       top: 0;
       left: 0;
       box-sizing: border-box;
+      z-index: calc(
+        var(--affine-z-index-popover) + 10
+      ); /* This is important or else will hover will not work  */
     }
   `,
 

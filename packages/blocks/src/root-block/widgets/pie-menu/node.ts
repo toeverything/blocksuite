@@ -19,6 +19,9 @@ export class PieNode extends WithDisposable(LitElement) {
   angle!: number;
 
   @property({ attribute: false })
+  index!: number; // for selecting with keyboard
+
+  @property({ attribute: false })
   startAngle!: number;
 
   @property({ attribute: false })
@@ -85,6 +88,7 @@ export class PieNode extends WithDisposable(LitElement) {
       <div
         style="${styleMap({ transform: 'translate(-50%, -50%)' })}"
         active="${isActiveNode.toString()}"
+        @mouseenter="${this._handleGoBack}"
         class="pie-node root"
       >
         <div class="node-content">${centerText}</div>
@@ -93,6 +97,14 @@ export class PieNode extends WithDisposable(LitElement) {
       <slot name="children-container"></slot>
     </div>`;
   }
+
+  private _handleGoBack = () => {
+    // If the node is not active and if it is hovered then we can go back to that node
+    if (this.menu.selectionChain.length <= 1) return;
+    if (this.menu.activeNode !== this) {
+      this.menu.popSelectionChainTo(this);
+    }
+  };
 
   private _renderChildNode() {
     const isSubmenu = this.schema.type === 'submenu';
