@@ -119,6 +119,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return this._edgeless.service.viewport.zoom;
   }
 
+  get _readonly() {
+    return this._edgeless.doc.readonly;
+  }
+
   private _pick(x: number, y: number, options?: HitTestOptions) {
     const service = this._service;
     const modelPos = service.viewport.toModelCoord(x, y);
@@ -184,6 +188,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _handleClickOnSelected(element: EdgelessModel, e: PointerEventState) {
+    if (this._readonly) return;
+
     const { selectedIds, selections } = this.selection;
     const editing = selections[0]?.editing ?? false;
 

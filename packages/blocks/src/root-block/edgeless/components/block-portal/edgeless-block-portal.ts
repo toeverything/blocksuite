@@ -472,13 +472,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         }}
         .autoCompleteOff=${this._enableNoteSlicer}
       ></edgeless-selected-rect>
-      <edgeless-index-label
-        .pageVisibleElementsMap=${pageVisibleBlocks}
-        .edgelessOnlyNotesSet=${edgelessOnlyNotesSet}
-        .surface=${surface}
-        .edgeless=${edgeless}
-        .show=${this._showIndexLabel}
-      ></edgeless-index-label>
+      ${!readonly
+        ? html`<edgeless-index-label
+            .pageVisibleElementsMap=${pageVisibleBlocks}
+            .edgelessOnlyNotesSet=${edgelessOnlyNotesSet}
+            .surface=${surface}
+            .edgeless=${edgeless}
+            .show=${this._showIndexLabel}
+          ></edgeless-index-label>`
+        : nothing}
       ${this._toolbarVisible && !doc.readonly && !this._dragging
         ? html`<edgeless-component-toolbar
             .edgeless=${edgeless}

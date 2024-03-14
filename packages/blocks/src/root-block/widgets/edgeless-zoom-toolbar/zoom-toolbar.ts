@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
@@ -116,9 +116,18 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
         this.requestUpdate()
       )
     );
+    disposables.add(
+      this.edgeless.slots.readonlyUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   override render() {
+    if (this.edgeless.doc.readonly) {
+      return nothing;
+    }
+
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
     const classes = `edgeless-zoom-toolbar-container ${this.layout}`;
 
