@@ -9,7 +9,7 @@ import type { IVec } from '../../../surface-block/index.js';
 import { isRootElement } from '../../utils/guard.js';
 import type { IPieMenuSchema } from './base.js';
 import type { PieMenu } from './menu.js';
-import { PieManager } from './pie-manager.js';
+import { PieManager, type PieManagerSignal } from './pie-manager.js';
 
 const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 export default AFFINE_PIE_MENU_WIDGET;
@@ -54,19 +54,17 @@ export class AffinePieMenuWidget extends WidgetElement {
     PieManager.setup({ rootElement: this.rootElement });
 
     this._disposables.add(
-      PieManager.slots.openPie.on(schema => {
-        this._attachMenu(schema);
-      })
-    );
-
-    this._disposables.add(
-      PieManager.slots.closePie.on(() => {
-        this.currentMenu = null;
-        this._selectOnTrigRelease.allow = false;
-      })
+      PieManager.slots.signal.on(this._handlePieManagerSignal)
     );
   }
-
+  private _handlePieManagerSignal = (signal: PieManagerSignal) => {
+    if (signal.type === 'open') {
+      this._attachMenu(signal.schema);
+    } else if (signal.type === 'close') {
+      this.currentMenu = null;
+      this._selectOnTrigRelease.allow = false;
+    }
+  };
   private _attachMenu(schema: IPieMenuSchema) {
     if (this.currentMenu && this.currentMenu.id === schema.id)
       return PieManager.close();

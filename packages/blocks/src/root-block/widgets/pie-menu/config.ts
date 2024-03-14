@@ -20,8 +20,11 @@ import { PieManager } from './pie-manager.js';
 //----------------------------------------------------------
 // EDGELESS TOOLS PIE MENU SCHEMA
 //----------------------------------------------------------
+
+export const AFFINE_PIE_MENU_ID_EDGELESS_TOOLS = 'affine:pie:edgeless:tools';
+
 const pie = new PieMenuBuilder({
-  id: 'affine:pie:edgeless:tools',
+  id: AFFINE_PIE_MENU_ID_EDGELESS_TOOLS,
   label: 'Tools',
   icon: ToolsIcon,
   scope: { edgeless: true },

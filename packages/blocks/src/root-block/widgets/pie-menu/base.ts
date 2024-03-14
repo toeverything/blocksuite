@@ -1,11 +1,11 @@
 import type { TemplateResult } from 'lit';
 
-import type { RootBlockComponent } from '../../types.js';
+import type { PieMenuId, RootBlockComponent } from '../../types.js';
 import type { AffinePieMenuWidget } from './index.js';
 import type { PieMenu } from './menu.js';
 
 export interface IPieMenuSchema {
-  id: string; // TODO use typed (eg: PieMenuId = typeof MenuName...)
+  id: PieMenuId; // If you want to open menu without the trigger(say a button) by PieManager.open(..id)
 
   /**
    *  Label Describing your menu

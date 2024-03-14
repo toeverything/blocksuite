@@ -1,25 +1,23 @@
 import { assertExists, assertNotExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
-import type { RootBlockComponent } from '../../types.js';
+import type { PieMenuId, RootBlockComponent } from '../../types.js';
 import type { IPieMenuSchema } from './base.js';
 import type { AffinePieMenuWidget } from './index.js';
 import { PieMenu } from './menu.js';
 
-/* Future Ideas
-   - Allow to set individual opening time for each submenu
-   - Submenu should have optional action functions  for example if a user tap selects a submenu currently it does noting. it should have a optional action if released without opening the menu, like select the first option. 
-   - Touch device support
-*/
-
 /**
- *  A static class for managing pie menus
+ *   Static class for managing pie menus
  */
 export type PieMenuCreateOptions = {
   x: number;
   y: number;
   widgetElement: AffinePieMenuWidget;
 };
+
+export type PieManagerSignal =
+  | { type: 'open'; schema: IPieMenuSchema }
+  | { type: 'close' };
 
 export class PieManager {
   private static schemas: Set<IPieMenuSchema> = new Set();
@@ -52,8 +50,7 @@ export class PieManager {
   };
 
   public static slots = {
-    openPie: new Slot<IPieMenuSchema>(),
-    closePie: new Slot(),
+    signal: new Slot<PieManagerSignal>(),
   };
 
   public static add(schema: IPieMenuSchema) {
@@ -73,8 +70,8 @@ export class PieManager {
     this.registeredSchemas = {};
   }
 
-  public static open(id: string) {
-    this.slots.openPie.emit(this._getSchema(id));
+  public static open(id: PieMenuId) {
+    this.slots.signal.emit({ type: 'open', schema: this._getSchema(id) });
   }
 
   public static close() {
@@ -92,7 +89,7 @@ export class PieManager {
     menu.rootElement = widgetElement.rootElement;
     menu.widgetElement = widgetElement;
     menu.abortController.signal.addEventListener('abort', () => {
-      this.slots.closePie.emit();
+      this.slots.signal.emit({ type: 'close' });
     });
 
     this.abortController = menu.abortController;
