@@ -18,13 +18,13 @@ export function handleError(error: Error) {
 
   if (error.isFatal) {
     throw new Error(
-      'A fatal error for BlockSuite occur, please concat the team if you find this.',
+      'A fatal error for BlockSuite occurs, please contact the team if you find this.',
       { cause: error }
     );
   }
 
   console.error(
-    'A runtime error for BlockSuite occur, you can ignore this error if it won\t break the user experience.'
+    "A runtime error for BlockSuite occurs, you can ignore this error if it won't break the user experience."
   );
   console.error(error.stack);
 }
