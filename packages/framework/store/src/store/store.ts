@@ -67,7 +67,6 @@ const FLAGS_PRESET = {
   enable_synced_doc_block: false,
   enable_legacy_validation: true,
   enable_expand_database_block: false,
-  enable_bultin_ledits: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

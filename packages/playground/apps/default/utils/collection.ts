@@ -54,7 +54,6 @@ export async function createDefaultDocCollection() {
     awarenessSources,
     defaultFlags: {
       enable_synced_doc_block: true,
-      enable_bultin_ledits: true,
     },
   };
   const collection = new DocCollection(options);

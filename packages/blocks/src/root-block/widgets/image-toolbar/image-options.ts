@@ -10,7 +10,6 @@ import {
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
-  HighLightDuotoneIcon,
 } from '../../../_common/icons/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
@@ -131,21 +130,6 @@ export function ImageOptionsTemplate({
           ${DeleteIcon}
 
           <affine-tooltip tip-position="right">Delete</affine-tooltip>
-        </icon-button>
-
-        <icon-button
-          size="32px"
-          ?hidden=${readonly ||
-          !blockElement.blob ||
-          !doc.awarenessStore.getFlag('enable_bultin_ledits')}
-          @click="${() => {
-            abortController.abort();
-            blockElement.openEditor();
-          }}"
-        >
-          ${HighLightDuotoneIcon}
-
-          <affine-tooltip tip-position="right">Edit with LEDITS</affine-tooltip>
         </icon-button>
       </div>
     </div>
