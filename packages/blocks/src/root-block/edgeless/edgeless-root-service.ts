@@ -62,7 +62,6 @@ export class EdgelessRootService extends RootService {
       blocks: TopLevelBlockModel[];
       shapes: CanvasElement[];
     }>(),
-    docLinkClicked: new Slot<{ docId: string; blockId?: string }>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
     navigatorSettingUpdated: new Slot<{
@@ -76,6 +75,12 @@ export class EdgelessRootService extends RootService {
     elementResizeStart: new Slot(),
     elementResizeEnd: new Slot(),
     toggleNoteSlicer: new Slot(),
+
+    docLinkClicked: new Slot<{
+      docId: string;
+      blockId?: string;
+    }>(),
+    tagClicked: new Slot<{ tagId: string }>(),
     editorModeSwitch: new Slot<'edgeless' | 'page'>(),
   };
 
