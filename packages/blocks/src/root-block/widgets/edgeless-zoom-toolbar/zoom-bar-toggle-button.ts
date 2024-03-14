@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/lit';
 import { computePosition } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { MoreIcon } from '../../../_common/icons/edgeless.js';
@@ -42,7 +43,7 @@ function createZoomMenuPopper(
 }
 
 @customElement('zoom-bar-toggle-button')
-export class ZoomBarToggleButton extends LitElement {
+export class ZoomBarToggleButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -98,7 +99,20 @@ export class ZoomBarToggleButton extends LitElement {
     super.disconnectedCallback();
   }
 
+  override firstUpdated() {
+    const { disposables } = this;
+    disposables.add(
+      this.edgeless.slots.readonlyUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
   override render() {
+    if (this.edgeless.doc.readonly) {
+      return nothing;
+    }
+
     return html`
       <div class="toggle-button" @pointerdown=${stopPropagation}>
         <edgeless-tool-icon-button
