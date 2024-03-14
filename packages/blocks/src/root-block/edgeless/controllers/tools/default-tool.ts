@@ -3,6 +3,7 @@ import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
 import {
   asyncFocusRichText,
+  buildPath,
   type EdgelessTool,
 } from '../../../../_common/utils/index.js';
 import {
@@ -11,6 +12,7 @@ import {
   resetNativeSelection,
   type Selectable,
 } from '../../../../_common/utils/index.js';
+import { clamp } from '../../../../_common/utils/math.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import {
@@ -113,6 +115,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return this.selection.selections;
   }
 
+  get _zoom() {
+    return this._edgeless.service.viewport.zoom;
+  }
+
   private _pick(x: number, y: number, options?: HitTestOptions) {
     const service = this._service;
     const modelPos = service.viewport.toModelCoord(x, y);
@@ -150,6 +156,29 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     if (note.children.length === 0) {
       this._addEmptyParagraphBlock(note);
     } else {
+      // handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
+      const noteBlockElement = this._edgeless.host.view.viewFromPath(
+        'block',
+        buildPath(note)
+      );
+      if (noteBlockElement) {
+        const rect = noteBlockElement.getBoundingClientRect();
+        const offsetY = 16 * this._zoom;
+        const offsetX = 2 * this._zoom;
+        const x = clamp(
+          e.raw.clientX,
+          rect.left + offsetX,
+          rect.right - offsetX
+        );
+        const y = clamp(
+          e.raw.clientY,
+          rect.top + offsetY,
+          rect.bottom - offsetY
+        );
+        handleNativeRangeAtPoint(x, y);
+        return;
+      }
+
       handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
     }
   }
