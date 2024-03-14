@@ -12,7 +12,7 @@ import {
   type ReferenceElement,
   shift,
 } from '@floating-ui/dom';
-import { html, nothing, type TemplateResult } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import {
@@ -33,67 +33,11 @@ import {
 } from './config.js';
 import { formatBarStyle } from './styles.js';
 
-type FormatBarCustomAction = {
-  disable?: (formatBar: AffineFormatBarWidget) => boolean;
-  icon(formatBar: AffineFormatBarWidget): string | undefined;
-  onClick(formatBar: AffineFormatBarWidget): void;
-};
-type FormatBarCustomElement = {
-  showWhen?(formatBar: AffineFormatBarWidget): boolean;
-  init(formatBar: AffineFormatBarWidget): HTMLElement;
-};
-type FormatBarCustomRenderer = {
-  render(formatBar: AffineFormatBarWidget): TemplateResult | undefined;
-};
 export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
-
-  private static readonly _customElements: Set<FormatBarCustomRenderer> =
-    new Set<FormatBarCustomRenderer>();
-
-  static registerCustomRenderer(render: FormatBarCustomRenderer) {
-    this._customElements.add(render);
-  }
-  static registerCustomElement(element: FormatBarCustomElement) {
-    let elementInstance: HTMLElement | undefined;
-    this._customElements.add({
-      ...element,
-      render: formatBar => {
-        if (!elementInstance) {
-          elementInstance = element.init(formatBar);
-        }
-        const show = element.showWhen?.(formatBar) ?? true;
-        return show ? html`${elementInstance}` : undefined;
-      },
-    });
-  }
-
-  static registerCustomAction(action: FormatBarCustomAction) {
-    this._customElements.add({
-      render: formatBar => {
-        const url = action.icon(formatBar);
-        if (url == null) {
-          return;
-        }
-        const disable = action.disable ? action.disable(formatBar) : false;
-        const click = () => {
-          if (!disable) {
-            action.onClick(formatBar);
-          }
-        };
-        return html`<icon-button
-          size="32px"
-          ?disabled=${disable}
-          @click=${click}
-        >
-          <img src="${url}" alt="" />
-        </icon-button>`;
-      },
-    });
-  }
 
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
   formatBarElement?: HTMLElement;
