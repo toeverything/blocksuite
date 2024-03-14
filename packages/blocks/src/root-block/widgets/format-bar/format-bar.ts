@@ -15,7 +15,10 @@ import {
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { HoverController } from '../../../_common/components/index.js';
+import {
+  HoverController,
+  type RichText,
+} from '../../../_common/components/index.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
@@ -137,6 +140,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     const layout = document.querySelector('side-layout-modal');
     if (layout) return false;
 
+    const readonly = this.doc.awarenessStore.isReadonly(this.doc);
+    if (readonly) return false;
+
     if (
       this.displayType === 'block' &&
       this._selectedBlockElements?.[0]?.flavour === 'affine:surface-ref'
@@ -156,8 +162,42 @@ export class AffineFormatBarWidget extends WidgetElement {
       }
     }
 
-    const readonly = this.doc.awarenessStore.isReadonly(this.doc);
-    return !readonly && this.displayType !== 'none' && !this._dragging;
+    if (this.displayType === 'none' || this._dragging) {
+      return false;
+    }
+
+    // if the selection is on an embed (ex. linked page), we should not display the format bar
+    if (
+      this.displayType === 'text' &&
+      this._selectedBlockElements.length === 1
+    ) {
+      const isEmbed = () => {
+        const [element] = this._selectedBlockElements;
+        const richText = element.querySelector<RichText>('rich-text');
+        const inline = richText?.inlineEditor;
+        if (!richText || !inline) {
+          return false;
+        }
+        const range = inline.getInlineRange();
+        if (!range || range.length > 1) {
+          return false;
+        }
+        const deltas = inline.getDeltasByInlineRange(range);
+        if (deltas.length > 2) {
+          return false;
+        }
+        const delta = deltas?.[1]?.[0];
+        if (!delta) {
+          return false;
+        }
+
+        return inline.isEmbed(delta);
+      };
+
+      return !isEmbed();
+    }
+
+    return true;
   }
 
   private _calculatePlacement() {
