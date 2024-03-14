@@ -1,11 +1,22 @@
+import type { EdgelessTool } from '../../../_common/types.js';
 import { type IVec } from '../../../surface-block/index.js';
+import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type {
+  ActionFunction,
   IPieActionNode,
   IPieNode,
   IPieNonRootNode,
   IPieRootNode,
   IPieSubmenuNode,
 } from './base.js';
+
+export function setEdgelessToolAction(tool: EdgelessTool): ActionFunction {
+  return ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.tool.setEdgelessTool(tool);
+    }
+  };
+}
 
 export function getPosition(angleRad: number, v: IVec): IVec {
   const x = Math.cos(angleRad) * v[0];

@@ -1,5 +1,3 @@
-import './config.js';
-
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/lit';
 import { nothing } from 'lit';
@@ -8,6 +6,7 @@ import { customElement, state } from 'lit/decorators.js';
 import type { IVec } from '../../../surface-block/index.js';
 import { isRootElement } from '../../utils/guard.js';
 import type { IPieMenuSchema } from './base.js';
+import { edgelessToolsPieSchema } from './config.js';
 import type { PieMenu } from './menu.js';
 import { PieManager, type PieManagerSignal } from './pie-manager.js';
 
@@ -111,3 +110,5 @@ declare global {
     [AFFINE_PIE_MENU_WIDGET]: AffinePieMenuWidget;
   }
 }
+
+PieManager.add(edgelessToolsPieSchema);

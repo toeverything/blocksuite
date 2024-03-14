@@ -1,7 +1,7 @@
 import { assertEquals, assertExists, Slot } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -39,7 +39,7 @@ export class PieMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   position!: IVec;
 
-  @state()
+  // @state()
   selectionChain: PieNode[] = [];
 
   // @state()
@@ -124,7 +124,7 @@ export class PieMenu extends WithDisposable(LitElement) {
     assertEquals(submenu.schema.type, 'submenu', 'Need node of type submenu');
 
     this._openSubmenuTimeout = setTimeout(() => {
-      this.selectionChain = [...this.selectionChain, submenu];
+      this.selectionChain.push(submenu);
       this.setHovered(null);
       this.slots.requestNodeUpdate.emit();
     }, PieManager.settings.SUBMENU_OPEN_TIMEOUT);

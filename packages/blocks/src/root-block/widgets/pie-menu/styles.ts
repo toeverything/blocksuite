@@ -43,6 +43,7 @@ export const styles = {
       font-size: 0.8rem;
       align-items: center;
       justify-content: center;
+      text-align: center;
       transition: all 250ms cubic-bezier(0.775, 1.325, 0.535, 1);
     }
 

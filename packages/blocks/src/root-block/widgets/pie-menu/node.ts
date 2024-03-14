@@ -55,6 +55,7 @@ export class PieNode extends WithDisposable(LitElement) {
           rootElement: this.menu.rootElement,
           menu: this.menu,
           widgetElement: this.menu.widgetElement,
+          node: this,
         });
         PieManager.close();
       } else if (isSubmenuNode(schema)) {
@@ -87,7 +88,14 @@ export class PieNode extends WithDisposable(LitElement) {
       this.menu.slots.requestNodeUpdate.on(() => this.requestUpdate())
     );
   }
-
+  private _getIcon(icon: IPieNode['icon']) {
+    if (typeof icon === 'function') {
+      const { menu } = this;
+      const { rootElement, widgetElement } = menu;
+      return icon({ rootElement, menu, widgetElement, node: this });
+    }
+    return icon;
+  }
   private _renderRootNode() {
     const hoveredNode = this.menu.hoveredNode;
     const isActiveNode = this === this.menu.activeNode;
@@ -96,8 +104,8 @@ export class PieNode extends WithDisposable(LitElement) {
     const styles = {
       transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
     };
-
-    const centerContent = this.schema.icon ?? this.schema.label;
+    const { icon, label } = this.schema;
+    const centerContent = icon ? this._getIcon(icon) : label;
 
     const centerText = isActiveNode
       ? hoveredNode
@@ -145,6 +153,7 @@ export class PieNode extends WithDisposable(LitElement) {
       opacity: visible ? '1' : '0',
     };
 
+    const { icon, label } = this.schema;
     return html`<li
       style="${styleMap(styles)}"
       hovering="${this._isHovering.toString()}"
@@ -153,7 +162,7 @@ export class PieNode extends WithDisposable(LitElement) {
       index="${this.index}"
       class="pie-node child"
     >
-      <div class="node-content">${this.schema.icon ?? this.schema.label}</div>
+      <div class="node-content">${icon ? this._getIcon(icon) : label}</div>
     </li>`;
   }
 
