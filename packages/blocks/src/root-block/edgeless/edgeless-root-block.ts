@@ -223,9 +223,11 @@ export class EdgelessRootBlockComponent extends BlockElement<
   private _initSlotEffects() {
     const { disposables, slots } = this;
 
-    disposables.add(listenToThemeChange(this, () => this.surface.refresh())!);
+    const disposable = listenToThemeChange(this, () => this.surface.refresh());
+    if (disposable) {
+      disposables.add(disposable);
+    }
 
-    disposables.add(this.tools);
     disposables.add(this.service.selection);
     disposables.add(
       slots.edgelessToolUpdated.on(tool => (this.edgelessTool = tool))
