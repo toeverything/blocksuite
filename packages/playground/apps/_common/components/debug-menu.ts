@@ -52,7 +52,6 @@ import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
 import { getEdgelessService } from '../../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
-import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { DocsPanel } from './docs-panel.js';
@@ -535,10 +534,6 @@ export class DebugMenu extends ShadowlessElement {
     this._setThemeMode(!!e.matches);
   };
 
-  private _extendFormatBar() {
-    extendFormatBar();
-  }
-
   override firstUpdated() {
     this.doc.slots.historyUpdated.on(() => {
       this._canUndo = this.doc.canUndo;
@@ -688,9 +683,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click="${this._toggleFramePanel}">
                 Toggle Frame Panel
-              </sl-menu-item>
-              <sl-menu-item @click="${this._extendFormatBar}">
-                Extend Format Bar
               </sl-menu-item>
               <sl-menu-item @click="${this._createMindMap}">
                 Create Mind Map

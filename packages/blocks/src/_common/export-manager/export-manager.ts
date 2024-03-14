@@ -165,12 +165,16 @@ export class ExportManager {
       proxy: this._exportOptions.imageProxyEndpoint,
     };
 
-    this._enableMediaPrint();
-    const data = await html2canvas(
-      htmlElement,
-      Object.assign(html2canvasOption, options)
-    );
-    this._disableMediaPrint();
+    let data: HTMLCanvasElement;
+    try {
+      this._enableMediaPrint();
+      data = await html2canvas(
+        htmlElement,
+        Object.assign(html2canvasOption, options)
+      );
+    } finally {
+      this._disableMediaPrint();
+    }
     return data;
   }
 
@@ -380,12 +384,16 @@ export class ExportManager {
       proxy: this._exportOptions.imageProxyEndpoint,
     };
 
-    this._enableMediaPrint();
-    const data = await html2canvas(
-      viewportElement as HTMLElement,
-      html2canvasOption
-    );
-    this._disableMediaPrint();
+    let data: HTMLCanvasElement;
+    try {
+      this._enableMediaPrint();
+      data = await html2canvas(
+        viewportElement as HTMLElement,
+        html2canvasOption
+      );
+    } finally {
+      this._disableMediaPrint();
+    }
     this._checkCanContinueToCanvas(pathname, editorMode);
     return data;
   }

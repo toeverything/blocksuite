@@ -16,7 +16,6 @@ import type { AffineImageCard } from './components/image-card.js';
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import { type ImageBlockModel } from './image-model.js';
 import type { ImageService } from './image-service.js';
-import { openLeditsEditor } from './ledits/main.js';
 import {
   copyImageBlob,
   downloadImageBlob,
@@ -102,10 +101,6 @@ export class ImageBlockComponent extends BlockElement<
       this._selectBlock();
     }
   }
-
-  openEditor = () => {
-    openLeditsEditor(this);
-  };
 
   copy = () => {
     copyImageBlob(this).catch(console.error);

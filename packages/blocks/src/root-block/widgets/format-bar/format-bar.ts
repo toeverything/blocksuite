@@ -12,10 +12,13 @@ import {
   type ReferenceElement,
   shift,
 } from '@floating-ui/dom';
-import { html, nothing, type TemplateResult } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { HoverController } from '../../../_common/components/index.js';
+import {
+  HoverController,
+  type RichText,
+} from '../../../_common/components/index.js';
 import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
@@ -30,67 +33,11 @@ import {
 } from './config.js';
 import { formatBarStyle } from './styles.js';
 
-type FormatBarCustomAction = {
-  disable?: (formatBar: AffineFormatBarWidget) => boolean;
-  icon(formatBar: AffineFormatBarWidget): string | undefined;
-  onClick(formatBar: AffineFormatBarWidget): void;
-};
-type FormatBarCustomElement = {
-  showWhen?(formatBar: AffineFormatBarWidget): boolean;
-  init(formatBar: AffineFormatBarWidget): HTMLElement;
-};
-type FormatBarCustomRenderer = {
-  render(formatBar: AffineFormatBarWidget): TemplateResult | undefined;
-};
 export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
-
-  private static readonly _customElements: Set<FormatBarCustomRenderer> =
-    new Set<FormatBarCustomRenderer>();
-
-  static registerCustomRenderer(render: FormatBarCustomRenderer) {
-    this._customElements.add(render);
-  }
-  static registerCustomElement(element: FormatBarCustomElement) {
-    let elementInstance: HTMLElement | undefined;
-    this._customElements.add({
-      ...element,
-      render: formatBar => {
-        if (!elementInstance) {
-          elementInstance = element.init(formatBar);
-        }
-        const show = element.showWhen?.(formatBar) ?? true;
-        return show ? html`${elementInstance}` : undefined;
-      },
-    });
-  }
-
-  static registerCustomAction(action: FormatBarCustomAction) {
-    this._customElements.add({
-      render: formatBar => {
-        const url = action.icon(formatBar);
-        if (url == null) {
-          return;
-        }
-        const disable = action.disable ? action.disable(formatBar) : false;
-        const click = () => {
-          if (!disable) {
-            action.onClick(formatBar);
-          }
-        };
-        return html`<icon-button
-          size="32px"
-          ?disabled=${disable}
-          @click=${click}
-        >
-          <img src="${url}" alt="" />
-        </icon-button>`;
-      },
-    });
-  }
 
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
   formatBarElement?: HTMLElement;
@@ -137,6 +84,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     const layout = document.querySelector('side-layout-modal');
     if (layout) return false;
 
+    const readonly = this.doc.awarenessStore.isReadonly(this.doc);
+    if (readonly) return false;
+
     if (
       this.displayType === 'block' &&
       this._selectedBlockElements?.[0]?.flavour === 'affine:surface-ref'
@@ -156,8 +106,42 @@ export class AffineFormatBarWidget extends WidgetElement {
       }
     }
 
-    const readonly = this.doc.awarenessStore.isReadonly(this.doc);
-    return !readonly && this.displayType !== 'none' && !this._dragging;
+    if (this.displayType === 'none' || this._dragging) {
+      return false;
+    }
+
+    // if the selection is on an embed (ex. linked page), we should not display the format bar
+    if (
+      this.displayType === 'text' &&
+      this._selectedBlockElements.length === 1
+    ) {
+      const isEmbed = () => {
+        const [element] = this._selectedBlockElements;
+        const richText = element.querySelector<RichText>('rich-text');
+        const inline = richText?.inlineEditor;
+        if (!richText || !inline) {
+          return false;
+        }
+        const range = inline.getInlineRange();
+        if (!range || range.length > 1) {
+          return false;
+        }
+        const deltas = inline.getDeltasByInlineRange(range);
+        if (deltas.length > 2) {
+          return false;
+        }
+        const delta = deltas?.[1]?.[0];
+        if (!delta) {
+          return false;
+        }
+
+        return inline.isEmbed(delta);
+      };
+
+      return !isEmbed();
+    }
+
+    return true;
   }
 
   private _calculatePlacement() {

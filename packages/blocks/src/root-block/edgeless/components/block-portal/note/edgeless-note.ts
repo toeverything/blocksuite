@@ -10,7 +10,8 @@ import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../../../../../_common/types.js';
-import { almostEqual } from '../../../../../_common/utils/math.js';
+import { almostEqual, clamp } from '../../../../../_common/utils/math.js';
+import { handleNativeRangeAtPoint } from '../../../../../_common/utils/selection.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
@@ -157,6 +158,10 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   @query('affine-note')
   private _affineNote!: HTMLDivElement;
 
+  get _zoom() {
+    return this.edgeless.service.viewport.zoom;
+  }
+
   private get _isShowCollapsedContent() {
     return this.model.edgeless.collapse && (this._isResizing || this._isHover);
   }
@@ -171,6 +176,18 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     if (this._isHover) {
       this._isHover = false;
     }
+  }
+
+  private _handleClickAtBackground(e: MouseEvent) {
+    e.stopPropagation();
+    if (!this._affineNote || !this._editing) return;
+
+    const rect = this._affineNote.getBoundingClientRect();
+    const offsetY = 16 * this._zoom;
+    const offsetX = 2 * this._zoom;
+    const x = clamp(e.x, rect.left + offsetX, rect.right - offsetX);
+    const y = clamp(e.y, rect.top + offsetY, rect.bottom - offsetY);
+    handleNativeRangeAtPoint(x, y);
   }
 
   private _setCollapse(event: MouseEvent) {
@@ -355,7 +372,12 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         @mousemove=${this._hovered}
         data-scale="${scale}"
       >
-        <div class="note-background" style=${styleMap(backgroundStyle)}></div>
+        <div
+          class="note-background"
+          style=${styleMap(backgroundStyle)}
+          @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
+          @click=${this._handleClickAtBackground}
+        ></div>
 
         <div
           style=${styleMap({

@@ -247,7 +247,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
-    const { slots, doc } = edgeless;
+    const { slots } = edgeless;
 
     this._hideToolbar =
       !!this.edgeless.service.editSession.getItem('presentHideToolbar');
@@ -292,7 +292,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
-    _disposables.add(doc.slots.blockUpdated);
+
     _disposables.add(
       edgeless.service.viewport.viewportUpdated.on(() => this.requestUpdate())
     );

@@ -178,7 +178,8 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<PageRootBlockCom
     this._lastPointerState = state;
 
     if (shouldAutoScroll) {
-      const result = autoScroll(this._viewportElement, state.raw.y);
+      const rect = this._viewportElement.getBoundingClientRect();
+      const result = autoScroll(this._viewportElement, state.raw.y - rect.top);
       if (!result) {
         this._clearRaf();
         return;

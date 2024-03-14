@@ -23,7 +23,6 @@ import type { InitFn } from '../data/utils.js';
 const params = new URLSearchParams(location.search);
 const room = params.get('room');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
-const featureArgs = (params.get('features') ?? '').split(',');
 const isE2E = room?.startsWith('playwright');
 
 export function createStarterDocCollection() {
@@ -56,7 +55,6 @@ export function createStarterDocCollection() {
     blobStorages,
     defaultFlags: {
       enable_synced_doc_block: true,
-      enable_bultin_ledits: featureArgs.includes('ledits'),
     },
     awarenessSources: [new BroadcastChannelAwarenessSource()],
     docSources,
