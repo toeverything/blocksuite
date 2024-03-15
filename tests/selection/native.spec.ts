@@ -56,6 +56,7 @@ import {
   assertClipItems,
   assertDivider,
   assertExists,
+  assertNativeSelectionRangeCount,
   assertRichTextInlineRange,
   assertRichTexts,
   assertStoreMatchJSX,
@@ -2047,4 +2048,61 @@ test('auto-scroll when creating a new paragraph-block by pressing enter', async 
     return viewport.scrollTop;
   });
   expect(scrollTop).toBeGreaterThan(1000);
+});
+
+test('Use arrow up and down to select two types of block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '--- --- ');
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '--- 123');
+  // 123
+  // ---
+  // ---
+  // 123
+  // ---
+  // 123
+
+  await assertDivider(page, 3);
+  await assertRichTexts(page, ['123', '123', '123']);
+
+  // from bottom to top
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 2, 3);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '7']]);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 1, 3);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '5']]);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '4']]);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 0, 3);
+
+  // from top to bottom
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '4']]);
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '5']]);
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 1, 0);
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '7']]);
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 2, 0);
 });
