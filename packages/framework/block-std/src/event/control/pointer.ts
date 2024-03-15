@@ -97,6 +97,7 @@ export class PointerControl {
   };
 
   private _down = (event: PointerEvent) => {
+    this._moveOutside = false;
     this._activateManager.activate();
     if (
       this._lastPointerDownEvent &&
@@ -197,6 +198,8 @@ export class PointerControl {
   };
 
   private _moveOn = (event: PointerEvent) => {
+    this._moveOutside = false;
+    this._activateManager.activate();
     const state = new PointerEventState({
       event,
       rect: this._rect,
