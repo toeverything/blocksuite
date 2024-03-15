@@ -648,6 +648,7 @@ function handleParagraphDeleteActions(
       'affine:bookmark',
       'affine:code',
       'affine:image',
+      'affine:divider',
       ...EMBED_BLOCK_FLAVOUR_LIST,
     ])
   ) {

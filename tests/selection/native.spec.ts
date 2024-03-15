@@ -52,6 +52,7 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertBlockCount,
+  assertBlockSelections,
   assertClipItems,
   assertDivider,
   assertExists,
@@ -939,11 +940,18 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await waitNextFrame(page);
   await pressEnter(page);
   await type(page, '--- ');
-  await pressArrowUp(page, 2);
-  await pressBackspace(page);
-  await waitNextFrame(page);
   await assertDivider(page, 2);
   await assertRichTexts(page, ['', '']);
+
+  await pressArrowUp(page);
+  await assertBlockSelections(page, [['0', '1', '5']]);
+  await pressArrowUp(page);
+  await assertBlockSelections(page, []);
+  await assertRichTextInlineRange(page, 0, 0);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['']);
+  await assertBlockSelections(page, [['0', '1', '3']]);
+  await assertDivider(page, 2);
 });
 
 test('Delete the second divider between two dividers by forwardDelete', async ({
