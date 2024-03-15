@@ -15,7 +15,6 @@ export class PointerControl {
   private _dragging = false;
   private _startX = -Infinity;
   private _startY = -Infinity;
-  private _moveOutside = false;
   private _cumulativeParentScale = 1;
 
   constructor(
@@ -65,9 +64,6 @@ export class PointerControl {
     this._startY = -Infinity;
     this._lastDragState = null;
     this._dragging = false;
-    if (this._moveOutside) {
-      this._activateManager.deactivate();
-    }
   };
 
   private _createContext(event: Event, pointerState: PointerEventState) {
@@ -82,7 +78,6 @@ export class PointerControl {
   }
 
   private _enter = (event: PointerEvent) => {
-    this._moveOutside = false;
     this._activateManager.activate();
     const state = new PointerEventState({
       event,
@@ -97,7 +92,6 @@ export class PointerControl {
   };
 
   private _down = (event: PointerEvent) => {
-    this._moveOutside = false;
     this._activateManager.activate();
     if (
       this._lastPointerDownEvent &&
@@ -198,8 +192,6 @@ export class PointerControl {
   };
 
   private _moveOn = (event: PointerEvent) => {
-    this._moveOutside = false;
-    this._activateManager.activate();
     const state = new PointerEventState({
       event,
       rect: this._rect,
@@ -229,7 +221,6 @@ export class PointerControl {
       !this._dispatcher.host.contains(document.activeElement)
     ) {
       if (this._dragging) {
-        this._moveOutside = true;
         return;
       }
       this._activateManager.deactivate();
