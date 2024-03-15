@@ -433,12 +433,21 @@ importers:
       '@types/react':
         specifier: '>=17.0.0'
         version: 18.2.64
+      '@types/react-dom':
+        specifier: '>= 17.0.0'
+        version: 18.2.22
       lit:
         specifier: ^3.1.2
         version: 3.1.2
+      nanoid:
+        specifier: ^5.0.0
+        version: 5.0.6
       react:
         specifier: '>=17.0.0'
         version: 18.2.0
+      react-dom:
+        specifier: '>= 17.0.0'
+        version: 18.2.0(react@18.2.0)
 
   packages/framework/store:
     dependencies:
@@ -2257,7 +2266,6 @@ packages:
     resolution: {integrity: sha512-fHkBXPeNtfvri6gdsMYyW+dW7RXFo6Ad09nLFK0VQWR7yGLai/Cyvyj696gbwYvBnhGtevUG9cET0pmUbMtoPQ==}
     dependencies:
       '@types/react': 18.2.64
-    dev: true
 
   /@types/react@18.2.64:
     resolution: {integrity: sha512-MlmPvHgjj2p3vZaxbQgFUQFvD8QiZwACfGqEdDSWou5yISWxDQ4/74nCAwsUiX7UFLKZz3BbVSPj+YxeoGGCfg==}

@@ -17,18 +17,27 @@
     "@blocksuite/store": "workspace:*",
     "lit": "^3.1.2",
     "@types/react": ">=17.0.0",
-    "react": ">=17.0.0"
+    "@types/react-dom": ">= 17.0.0",
+    "react": ">=17.0.0",
+    "react-dom": ">= 17.0.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {
       "optional": true
     },
+    "@types/react-dom": {
+      "optional": true
+    },
     "react": {
+      "optional": true
+    },
+    "react-dom": {
       "optional": true
     }
   },
   "dependencies": {
-    "@blocksuite/presets": "workspace:*"
+    "@blocksuite/presets": "workspace:*",
+    "nanoid": "^5.0.0"
   },
   "exports": {
     ".": "./src/index.ts"
