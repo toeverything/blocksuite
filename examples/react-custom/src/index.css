@@ -1,35 +1,14 @@
 .app {
   display: flex;
+  height: 100vh;
   font-family: sans-serif;
 }
 
-.sidebar {
-  padding: 10px;
-  width: 250px;
+[data-lit-react-wrapper] {
+  display: contents;
 }
 
-.sidebar .header {
-  margin-bottom: 10px;
-}
-
-.doc-item {
-  padding: 5px;
-}
-
-.doc-item.active,
-.doc-item:hover {
-  background-color: #f0f0f0;
-}
-
-.top-bar {
-  display: flex;
-  flex-direction: row-reverse;
-}
-
-.top-bar button {
-  margin: auto 2px;
-}
-
-.main-content {
-  flex: 1;
+.editor-container {
+  min-height: 100%;
+  overflow: auto;
 }
