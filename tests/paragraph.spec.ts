@@ -37,6 +37,7 @@ import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
   assertBlockCount,
+  assertBlockSelections,
   assertBlockType,
   assertClassName,
   assertDivider,
@@ -1864,7 +1865,7 @@ test('arrow up/down navigation within and across paragraphs containing different
   await assertRichTextInlineRange(page, 1, 125, 0);
 });
 
-test('delete divider using keyboard from prev/next paragraph', async ({
+test('select divider using delete keyboard from prev/next paragraph', async ({
   page,
 }) => {
   test.info().annotations.push({
@@ -1881,12 +1882,14 @@ test('delete divider using keyboard from prev/next paragraph', async ({
 
   await focusRichText(page, 0);
   await pressForwardDelete(page);
-  await assertDivider(page, 2);
+  await assertBlockSelections(page, [['0', '1', '4']]);
+  await assertDivider(page, 3);
 
   await focusRichText(page, 1);
   await pressArrowLeft(page, 3);
   await pressBackspace(page);
-  await assertDivider(page, 1);
+  await assertBlockSelections(page, [['0', '1', '6']]);
+  await assertDivider(page, 3);
 
   await assertRichTexts(page, ['123', '123']);
 });

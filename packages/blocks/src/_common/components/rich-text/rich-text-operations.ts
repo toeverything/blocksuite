@@ -836,7 +836,16 @@ function handleParagraphBlockForwardDelete(
     }
     function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
       if (matchFlavours(nextSibling, ['affine:divider'])) {
-        doc.deleteBlock(nextSibling);
+        const nextSiblingComponent = getBlockComponentByModel(
+          editorHost,
+          nextSibling
+        );
+        assertExists(nextSiblingComponent);
+        editorHost.selection.setGroup('note', [
+          editorHost.selection.create('block', {
+            path: nextSiblingComponent.path,
+          }),
+        ]);
         return true;
       }
 
