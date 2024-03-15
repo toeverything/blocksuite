@@ -652,9 +652,6 @@ function handleParagraphDeleteActions(
       ...EMBED_BLOCK_FLAVOUR_LIST,
     ])
   ) {
-    doc.deleteBlock(model, {
-      bringChildrenTo: parent,
-    });
     const previousSiblingElement = getBlockComponentByModel(
       editorHost,
       previousSibling
@@ -664,6 +661,12 @@ function handleParagraphDeleteActions(
       path: previousSiblingElement.path,
     });
     editorHost.selection.setGroup('note', [selection]);
+
+    if (model.text?.length === 0) {
+      doc.deleteBlock(model, {
+        bringChildrenTo: parent,
+      });
+    }
 
     return true;
   }
