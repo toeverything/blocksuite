@@ -12,6 +12,8 @@ import {
   captureEventTarget,
   getDuplicateBlocks,
 } from '../root-block/widgets/drag-handle/utils.js';
+import { focusBlockEnd } from './commands/focus-block-end.js';
+import { focusBlockStart } from './commands/focus-block-start.js';
 import {
   registerTextStyleCommands,
   selectBlock,
@@ -131,6 +133,8 @@ export class NoteService extends BlockService<NoteBlockModel> {
     this.std.command
       .add('selectBlocksBetween', selectBlocksBetween)
       .add('selectBlock', selectBlock)
+      .add('focusBlockStart', focusBlockStart)
+      .add('focusBlockEnd', focusBlockEnd)
       .add('updateBlockType', updateBlockType);
 
     registerTextStyleCommands(this.std);
