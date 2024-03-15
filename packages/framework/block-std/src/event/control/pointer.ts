@@ -78,7 +78,6 @@ export class PointerControl {
   }
 
   private _enter = (event: PointerEvent) => {
-    this._activateManager.activate();
     const state = new PointerEventState({
       event,
       rect: this._rect,
