@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import type { ActivateManager } from '../activate-manager.js';
 import { UIEventState, UIEventStateContext } from '../base.js';
 import type { UIEventDispatcher } from '../dispatcher.js';
 import { PointerEventState } from '../state/index.js';
@@ -14,11 +15,20 @@ export class PointerControl {
   private _dragging = false;
   private _startX = -Infinity;
   private _startY = -Infinity;
+  private _moveOutside = false;
   private _cumulativeParentScale = 1;
 
-  constructor(private _dispatcher: UIEventDispatcher) {}
+  constructor(
+    private _dispatcher: UIEventDispatcher,
+    private _activateManager: ActivateManager
+  ) {}
 
   listen() {
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'pointerenter',
+      this._enter
+    );
     this._dispatcher.disposables.addFromEvent(
       this._dispatcher.host,
       'pointerdown',
@@ -38,6 +48,10 @@ export class PointerControl {
     this._initPanObserver();
   }
 
+  /**
+   * @deprecated
+   * This method is deprecated and will be removed in the future.
+   */
   get cumulativeParentScale() {
     return this._cumulativeParentScale;
   }
@@ -51,6 +65,9 @@ export class PointerControl {
     this._startY = -Infinity;
     this._lastDragState = null;
     this._dragging = false;
+    if (this._moveOutside) {
+      this._activateManager.deactivate();
+    }
   };
 
   private _createContext(event: Event, pointerState: PointerEventState) {
@@ -64,7 +81,23 @@ export class PointerControl {
     );
   }
 
+  private _enter = (event: PointerEvent) => {
+    this._moveOutside = false;
+    this._activateManager.activate();
+    const state = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: -Infinity,
+      startY: -Infinity,
+      last: null,
+      cumulativeParentScale: this._cumulativeParentScale,
+    });
+
+    this._dispatcher.run('pointerEnter', this._createContext(event, state));
+  };
+
   private _down = (event: PointerEvent) => {
+    this._activateManager.activate();
     if (
       this._lastPointerDownEvent &&
       event.timeStamp - this._lastPointerDownEvent.timeStamp < 500 &&
@@ -187,9 +220,23 @@ export class PointerControl {
     });
 
     this._dispatcher.run('pointerOut', this._createContext(event, state));
+
+    if (
+      !document.activeElement ||
+      !this._dispatcher.host.contains(document.activeElement)
+    ) {
+      if (this._dragging) {
+        this._moveOutside = true;
+        return;
+      }
+      this._activateManager.deactivate();
+    }
   };
 
   /**
+   * @deprecated
+   * This method is deprecated and will be removed in the future.
+   *
    * Required for nested editors
    * Observe the scale of the parent elements and update the cumulative scale
    * This is required to calculate the correct pointer position when the parent elements are scaled
@@ -230,6 +277,9 @@ export class PointerControl {
   }
 
   /**
+   * @deprecated
+   * This method is deprecated and will be removed in the future.
+   *
    * Required for nested editors
    * Observe the position of the parent elements and update the viewport position
    * This is required when parent elements are translated and the viewport should be updated accordingly

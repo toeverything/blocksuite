@@ -1,6 +1,7 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
+import { ActivateManager } from './activate-manager.js';
 import {
   type UIEventHandler,
   UIEventState,
@@ -28,6 +29,7 @@ const eventNames = [
   'doubleClick',
   'tripleClick',
 
+  'pointerEnter',
   'pointerDown',
   'pointerMove',
   'pointerUp',
@@ -72,6 +74,11 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
+  /**
+   * @deprecated
+   *
+   * This property is deprecated and will be removed in the future.
+   */
   slots = {
     parentScaleChanged: new Slot<number>(),
     editorHostPanned: new Slot(),
@@ -85,19 +92,27 @@ export class UIEventDispatcher {
   private _keyboardControl: KeyboardControl;
   private _rangeControl: RangeControl;
   private _clipboardControl: ClipboardControl;
+  private _activateManager: ActivateManager;
 
-  private _active = false;
   get active() {
-    return this._active;
+    return this._activateManager.active;
   }
 
   constructor(public std: BlockSuite.Std) {
-    this._pointerControl = new PointerControl(this);
+    const activateManager = new ActivateManager();
+    this._activateManager = activateManager;
+
+    this._pointerControl = new PointerControl(this, activateManager);
+
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
   }
 
+  /**
+   * @deprecated
+   * This method is deprecated and will be removed in the future.
+   */
   get cumulativeParentScale() {
     return this._pointerControl.cumulativeParentScale;
   }
@@ -288,29 +303,12 @@ export class UIEventDispatcher {
     this._rangeControl.listen();
     this._clipboardControl.listen();
 
-    this.disposables.addFromEvent(this.host, 'pointerdown', () => {
-      this._active = true;
-    });
-    this.disposables.addFromEvent(this.host, 'click', () => {
-      this._active = true;
-    });
     this.disposables.addFromEvent(this.host, 'focusin', () => {
-      this._active = true;
+      this._activateManager.activate();
     });
     this.disposables.addFromEvent(this.host, 'focusout', e => {
       if (e.relatedTarget && !this.host.contains(e.relatedTarget as Node)) {
-        this._active = false;
-      }
-    });
-    this.disposables.addFromEvent(this.host, 'mouseenter', () => {
-      this._active = true;
-    });
-    this.disposables.addFromEvent(this.host, 'mouseleave', () => {
-      if (
-        !document.activeElement ||
-        !this.host.contains(document.activeElement)
-      ) {
-        this._active = false;
+        this._activateManager.deactivate();
       }
     });
   }
