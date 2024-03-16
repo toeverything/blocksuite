@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { ActivateManager } from '../activate-manager.js';
 import { UIEventState, UIEventStateContext } from '../base.js';
 import type { UIEventDispatcher } from '../dispatcher.js';
 import { PointerEventState } from '../state/index.js';
@@ -17,17 +16,9 @@ export class PointerControl {
   private _startY = -Infinity;
   private _cumulativeParentScale = 1;
 
-  constructor(
-    private _dispatcher: UIEventDispatcher,
-    private _activateManager: ActivateManager
-  ) {}
+  constructor(private _dispatcher: UIEventDispatcher) {}
 
   listen() {
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'pointerenter',
-      this._enter
-    );
     this._dispatcher.disposables.addFromEvent(
       this._dispatcher.host,
       'pointerdown',
@@ -77,21 +68,7 @@ export class PointerControl {
     );
   }
 
-  private _enter = (event: PointerEvent) => {
-    const state = new PointerEventState({
-      event,
-      rect: this._rect,
-      startX: -Infinity,
-      startY: -Infinity,
-      last: null,
-      cumulativeParentScale: this._cumulativeParentScale,
-    });
-
-    this._dispatcher.run('pointerEnter', this._createContext(event, state));
-  };
-
   private _down = (event: PointerEvent) => {
-    this._activateManager.activate();
     if (
       this._lastPointerDownEvent &&
       event.timeStamp - this._lastPointerDownEvent.timeStamp < 500 &&
@@ -214,16 +191,6 @@ export class PointerControl {
     });
 
     this._dispatcher.run('pointerOut', this._createContext(event, state));
-
-    if (
-      !document.activeElement ||
-      !this._dispatcher.host.contains(document.activeElement)
-    ) {
-      if (this._dragging) {
-        return;
-      }
-      this._activateManager.deactivate();
-    }
   };
 
   /**

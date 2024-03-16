@@ -1,7 +1,6 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
-import { ActivateManager } from './activate-manager.js';
 import {
   type UIEventHandler,
   UIEventState,
@@ -29,7 +28,6 @@ const eventNames = [
   'doubleClick',
   'tripleClick',
 
-  'pointerEnter',
   'pointerDown',
   'pointerMove',
   'pointerUp',
@@ -92,18 +90,14 @@ export class UIEventDispatcher {
   private _keyboardControl: KeyboardControl;
   private _rangeControl: RangeControl;
   private _clipboardControl: ClipboardControl;
-  private _activateManager: ActivateManager;
 
+  private _active = false;
   get active() {
-    return this._activateManager.active;
+    return this._active;
   }
 
   constructor(public std: BlockSuite.Std) {
-    const activateManager = new ActivateManager();
-    this._activateManager = activateManager;
-
-    this._pointerControl = new PointerControl(this, activateManager);
-
+    this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
@@ -303,12 +297,35 @@ export class UIEventDispatcher {
     this._rangeControl.listen();
     this._clipboardControl.listen();
 
+    let _dragging = false;
+    this.disposables.addFromEvent(this.host, 'pointerdown', () => {
+      _dragging = true;
+      this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'pointerup', () => {
+      _dragging = false;
+    });
+    this.disposables.addFromEvent(this.host, 'click', () => {
+      this._active = true;
+    });
     this.disposables.addFromEvent(this.host, 'focusin', () => {
-      this._activateManager.activate();
+      this._active = true;
     });
     this.disposables.addFromEvent(this.host, 'focusout', e => {
       if (e.relatedTarget && !this.host.contains(e.relatedTarget as Node)) {
-        this._activateManager.deactivate();
+        this._active = false;
+      }
+    });
+    this.disposables.addFromEvent(this.host, 'pointerenter', () => {
+      this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'pointerleave', () => {
+      if (
+        (!document.activeElement ||
+          !this.host.contains(document.activeElement)) &&
+        !_dragging
+      ) {
+        this._active = false;
       }
     });
   }
