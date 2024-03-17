@@ -70,6 +70,10 @@ export class PieMenu extends WithDisposable(LitElement) {
     return node;
   }
 
+  close() {
+    this.abortController.abort();
+  }
+
   /**
    * Position of the active node relative to the view
    */

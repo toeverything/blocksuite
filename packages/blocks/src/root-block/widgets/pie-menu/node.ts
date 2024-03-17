@@ -6,7 +6,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { type IVec, toRadian } from '../../../surface-block/index.js';
 import type { IPieNode } from './base.js';
 import type { PieMenu } from './menu.js';
-import { PieManager } from './pie-manager.js';
 import { styles } from './styles.js';
 import {
   getPosition,
@@ -61,7 +60,7 @@ export class PieNode extends WithDisposable(LitElement) {
           widgetElement: this.menu.widgetElement,
           node: this,
         });
-        PieManager.close();
+        this.menu.close();
       } else if (isSubmenuNode(schema)) {
         this.menu.openSubmenu(this); // for Opening with numpad
       }

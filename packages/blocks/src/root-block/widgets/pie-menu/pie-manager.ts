@@ -3,28 +3,16 @@ import { Slot } from '@blocksuite/store';
 
 import type { PieMenuId, RootBlockComponent } from '../../types.js';
 import type { IPieMenuSchema } from './base.js';
-import type { AffinePieMenuWidget } from './index.js';
-import { PieMenu } from './menu.js';
 
 /**
  *   Static class for managing pie menus
  */
-export type PieMenuCreateOptions = {
-  x: number;
-  y: number;
-  widgetElement: AffinePieMenuWidget;
-};
-
-export type PieManagerSignal =
-  | { type: 'open'; schema: IPieMenuSchema }
-  | { type: 'close' };
 
 export class PieManager {
   private static schemas: Set<IPieMenuSchema> = new Set();
   // If somebody wants to invoke a menu with a button without using the trigger key we can use this with open function
   private static registeredSchemas: Record<string, IPieMenuSchema> = {};
 
-  public static abortController = new AbortController();
   public static settings = {
     /**
      * Specifies the distance between the root-node and the child-nodes
@@ -50,7 +38,7 @@ export class PieManager {
   };
 
   public static slots = {
-    signal: new Slot<PieManagerSignal>(),
+    open: new Slot<IPieMenuSchema>(),
   };
 
   public static add(schema: IPieMenuSchema) {
@@ -71,29 +59,7 @@ export class PieManager {
   }
 
   public static open(id: PieMenuId) {
-    this.slots.signal.emit({ type: 'open', schema: this._getSchema(id) });
-  }
-
-  public static close() {
-    this.abortController.abort();
-  }
-
-  public static createMenu(
-    schema: IPieMenuSchema,
-    { x, y, widgetElement }: PieMenuCreateOptions
-  ) {
-    const menu = new PieMenu();
-    menu.id = schema.id;
-    menu.schema = schema;
-    menu.position = [x, y];
-    menu.rootElement = widgetElement.rootElement;
-    menu.widgetElement = widgetElement;
-    menu.abortController.signal.addEventListener('abort', () => {
-      this.slots.signal.emit({ type: 'close' });
-    });
-
-    this.abortController = menu.abortController;
-    return menu;
+    this.slots.open.emit(this._getSchema(id));
   }
 
   private static _setupTriggers(rootElement: RootBlockComponent) {

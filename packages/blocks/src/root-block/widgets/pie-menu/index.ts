@@ -3,12 +3,12 @@ import { WidgetElement } from '@blocksuite/lit';
 import { nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
+import { isRootElement } from '../../../root-block/utils/guard.js';
 import type { IVec } from '../../../surface-block/index.js';
-import { isRootElement } from '../../utils/guard.js';
 import type { IPieMenuSchema } from './base.js';
 import { edgelessToolsPieSchema } from './config.js';
-import type { PieMenu } from './menu.js';
-import { PieManager, type PieManagerSignal } from './pie-manager.js';
+import { PieMenu } from './menu.js';
+import { PieManager } from './pie-manager.js';
 
 const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 export default AFFINE_PIE_MENU_WIDGET;
@@ -53,22 +53,16 @@ export class AffinePieMenuWidget extends WidgetElement {
     PieManager.setup({ rootElement: this.rootElement });
 
     this._disposables.add(
-      PieManager.slots.signal.on(this._handlePieManagerSignal)
+      PieManager.slots.open.on(this._attachMenu.bind(this))
     );
   }
-  private _handlePieManagerSignal = (signal: PieManagerSignal) => {
-    if (signal.type === 'open') {
-      this._attachMenu(signal.schema);
-    } else if (signal.type === 'close') {
-      this.currentMenu = null;
-      this._selectOnTrigRelease.allow = false;
-    }
-  };
+
   private _attachMenu(schema: IPieMenuSchema) {
     if (this.currentMenu && this.currentMenu.id === schema.id)
-      return PieManager.close();
+      return this.currentMenu.close();
+
     const [x, y] = this.mouse;
-    const menu = PieManager.createMenu(schema, {
+    const menu = this._createMenu(schema, {
       x,
       y,
       widgetElement: this,
@@ -80,6 +74,37 @@ export class AffinePieMenuWidget extends WidgetElement {
     }, PieManager.settings.SELECT_ON_RELEASE_TIMEOUT);
   }
 
+  private _onMenuClose() {
+    this.currentMenu = null;
+    this._selectOnTrigRelease.allow = false;
+  }
+
+  public _createMenu(
+    schema: IPieMenuSchema,
+    {
+      x,
+      y,
+      widgetElement,
+    }: {
+      x: number;
+      y: number;
+      widgetElement: AffinePieMenuWidget;
+    }
+  ) {
+    const menu = new PieMenu();
+    menu.id = schema.id;
+    menu.schema = schema;
+    menu.position = [x, y];
+    menu.rootElement = widgetElement.rootElement;
+    menu.widgetElement = widgetElement;
+    menu.abortController.signal.addEventListener(
+      'abort',
+      this._onMenuClose.bind(this)
+    );
+
+    return menu;
+  }
+
   private _handleKeyUp = (ctx: UIEventStateContext) => {
     if (!this.currentMenu) return;
     const ev = ctx.get('keyboardState');
@@ -89,7 +114,7 @@ export class AffinePieMenuWidget extends WidgetElement {
       clearTimeout(this._selectOnTrigRelease.timeout);
       if (this._selectOnTrigRelease.allow) {
         this.currentMenu.selectHovered();
-        PieManager.close();
+        this.currentMenu.close();
       }
     }
   };

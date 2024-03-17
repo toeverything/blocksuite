@@ -29,12 +29,12 @@ import {
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
 import { ConnectorMode } from '../../../surface-block/element-model/connector.js';
 import { ShapeStyle, ShapeType } from '../../../surface-block/index.js';
+import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from '../../edgeless/utils/consts.js';
-import { EdgelessRootBlockComponent } from '../../index.js';
 import { PieMenuBuilder } from './pie-builder.js';
 import { setEdgelessToolAction } from './utils.js';
 
