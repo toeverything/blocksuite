@@ -82,6 +82,77 @@ pie.action({
   }),
 });
 
+pie.action({
+  label: 'Select',
+  icon: SelectIcon,
+  action: setEdgelessToolAction({
+    type: 'default',
+  }),
+});
+
+pie.action({
+  label: 'Note',
+  icon: NoteIcon,
+  action: setEdgelessToolAction({
+    type: 'affine:note',
+    childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
+    childType: DEFAULT_NOTE_CHILD_TYPE,
+    tip: DEFAULT_NOTE_TIP,
+  }),
+});
+
+pie.action({
+  label: 'Reset Zoom',
+  icon: ViewBarIcon,
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.zoomToFit();
+    }
+  },
+});
+
+pie.action({
+  label: 'Present',
+  icon: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      const { type } = rootElement.edgelessTool;
+      if (type === 'frameNavigator') {
+        return html`
+          <span
+            style="${styleMap({
+              color: '#eb4335',
+              fontWeight: 'bold',
+            })}"
+            >Stop</span
+          >
+        `;
+      }
+
+      return FrameNavigatorIcon;
+    }
+
+    return FrameNavigatorIcon;
+  },
+  action: ({ rootElement }) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      const { type } = rootElement.edgelessTool;
+      if (type === 'frameNavigator') {
+        rootElement.tools.setEdgelessTool({ type: 'default' });
+
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(console.error);
+        }
+
+        return;
+      }
+
+      rootElement.tools.setEdgelessTool({
+        type: 'frameNavigator',
+        mode: 'fit',
+      });
+    }
+  },
+});
 // Connector submenu
 pie.beginSubmenu({
   label: 'Connector',
@@ -105,6 +176,7 @@ pie.beginSubmenu({
     return ConnectorIcon;
   },
 });
+
 pie.action({
   label: 'Straight',
   icon: StraightLineIcon,
@@ -204,78 +276,5 @@ pie.action({
   },
 });
 pie.endSubmenu();
-
-// Hand and Select tool submenu
-pie.action({
-  label: 'Pan & Select',
-  icon: SelectIcon,
-  action: setEdgelessToolAction({
-    type: 'default',
-  }),
-});
-
-pie.action({
-  label: 'Note',
-  icon: NoteIcon,
-  action: setEdgelessToolAction({
-    type: 'affine:note',
-    childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
-    childType: DEFAULT_NOTE_CHILD_TYPE,
-    tip: DEFAULT_NOTE_TIP,
-  }),
-});
-
-pie.action({
-  label: 'Reset Zoom',
-  icon: ViewBarIcon,
-  action: ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      rootElement.service.zoomToFit();
-    }
-  },
-});
-
-pie.action({
-  label: 'Present',
-  icon: ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      const { type } = rootElement.edgelessTool;
-      if (type === 'frameNavigator') {
-        return html`
-          <span
-            style="${styleMap({
-              color: '#eb4335',
-              fontWeight: 'bold',
-            })}"
-            >Stop</span
-          >
-        `;
-      }
-
-      return FrameNavigatorIcon;
-    }
-
-    return FrameNavigatorIcon;
-  },
-  action: ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      const { type } = rootElement.edgelessTool;
-      if (type === 'frameNavigator') {
-        rootElement.tools.setEdgelessTool({ type: 'default' });
-
-        if (document.fullscreenElement) {
-          document.exitFullscreen().catch(console.error);
-        }
-
-        return;
-      }
-
-      rootElement.tools.setEdgelessTool({
-        type: 'frameNavigator',
-        mode: 'fit',
-      });
-    }
-  },
-});
 
 export const edgelessToolsPieSchema = pie.build();

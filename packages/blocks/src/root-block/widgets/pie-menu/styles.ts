@@ -59,6 +59,18 @@ export const styles = {
       font-size: 0.7rem;
     }
 
+    .rotator {
+      position: absolute;
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
+      border: 2px solid var(--affine-primary-color);
+      border-radius: 50%;
+      width: 7px;
+      height: 7px;
+      top: 50%;
+      left: 50%;
+    }
+
     .pie-node.root[active='false'] {
       width: 3rem;
       height: 3rem;
@@ -92,7 +104,7 @@ export const styles = {
       scale: 1.06;
     }
 
-    .pie-node.child[sub-node='true']::before {
+    .pie-node.child[submenu='true']::before {
       content: '';
       position: absolute;
       top: 50%;

@@ -1,14 +1,15 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { IVec } from '../../../surface-block/index.js';
+import { type IVec, toRadian } from '../../../surface-block/index.js';
 import type { IPieNode } from './base.js';
 import type { PieMenu } from './menu.js';
 import { PieManager } from './pie-manager.js';
 import { styles } from './styles.js';
 import {
+  getPosition,
   isActionNode,
   isAngleBetween,
   isRootNode,
@@ -44,6 +45,9 @@ export class PieNode extends WithDisposable(LitElement) {
 
   @state()
   private _isHovering = false;
+
+  @state()
+  private _rotatorAngle: number | null = null;
 
   select() {
     const schema = this.schema;
@@ -96,6 +100,19 @@ export class PieNode extends WithDisposable(LitElement) {
     }
     return icon;
   }
+
+  private _renderRotator() {
+    if (this._rotatorAngle === null) return nothing;
+
+    const [x, y] = getPosition(toRadian(this._rotatorAngle), [45, 45]);
+
+    const styles = {
+      transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
+    };
+
+    return html`<span style="${styleMap(styles)}" class="rotator"></span>`;
+  }
+
   private _renderRootNode() {
     const hoveredNode = this.menu.hoveredNode;
     const isActiveNode = this === this.menu.activeNode;
@@ -124,6 +141,7 @@ export class PieNode extends WithDisposable(LitElement) {
         class="pie-node root"
       >
         <div class="node-content">${centerText}</div>
+        ${isActiveNode ? this._renderRotator() : nothing}
       </div>
 
       <slot name="children-container"></slot>
@@ -157,7 +175,7 @@ export class PieNode extends WithDisposable(LitElement) {
     return html`<li
       style="${styleMap(styles)}"
       hovering="${this._isHovering.toString()}"
-      sub-node="${isSubmenu.toString()}"
+      submenu="${isSubmenu.toString()}"
       @click="${() => this.select()}"
       index="${this.index}"
       class="pie-node child"
@@ -167,8 +185,9 @@ export class PieNode extends WithDisposable(LitElement) {
   }
 
   private _onUpdateHoveredNode = (angle: number | null) => {
-    if (isRootNode(this.schema) || !this.menu.isChildOfActiveNode(this)) return;
+    this._rotatorAngle = angle;
 
+    if (isRootNode(this.schema) || !this.menu.isChildOfActiveNode(this)) return;
     if (angle === null) {
       this._isHovering = false;
       this.menu.setHovered(null);

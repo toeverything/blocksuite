@@ -1,13 +1,17 @@
 # Pie Menu
 
-This widget allows users with a visually intuitive and efficient way to access various functions in a single radial menu in a single key press. This widget is inspired from blender and works similar and has more functionality.
+The Pie Menu widget offers users a visually intuitive and efficient way to access various functions through a single radial menu activated by a single key press. Inspired by Blender's interface, this widget offers enhanced functionality for streamlined workflow.
 
-## Usage
+# Usage
 
-Each menu has a trigger key to open the menu. For best use keep the trigger key down and move the cursor to the desired action _( you can just hover towards the button )_ adn release to select that action.
+- Trigger Key: Each menu is associated with a trigger key to open it. To activate a menu, press and hold the trigger key.
 
-The submenu can be opened by hovering at the submenu node
+- Navigation: While holding the trigger key, move the cursor towards the desired action within the pie menu. Hovering over a segment of the pie menu highlights that action. Release the trigger key to select the highlighted action.
 
-If you released the key before 'SELECT_ON_RELEASE_TIMEOUT' then you can keep the pie menu opened
+- Submenu: Submenus can be accessed by hovering over the submenu node (with a blue dot) within the pie menu. This allows for nested menu structures for organizing functions. To close a submenu just hover over the desired center node
 
-you can use the 0-9 keys to select the an action corresponding to the number in the pie
+- Keeping Menu Open: If the trigger key is released before the "SELECT_ON_RELEASE_TIMEOUT" threshold, the pie menu remains open, allowing for multiple selections without reopening the menu.
+
+- Shortcut Selection: The numeric keys (0-9) correspond to actions within the pie menu. Pressing a numeric key selects the action associated with that number directly.
+
+Enhance your workflow by utilizing the Pie Menu widget for swift and intuitive access to various functions with minimal keystrokes.
