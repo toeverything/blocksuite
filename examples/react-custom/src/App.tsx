@@ -1,17 +1,16 @@
-import { PageEditorBlockSpecs } from '@blocksuite/blocks';
-import { adapted } from '@blocksuite/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   appStateContext,
   createDocCollection,
   initEmptyPage,
   useActiveDoc,
+  useSetAppState,
 } from './data';
 import './index.css';
-import { DocTitle } from '@blocksuite/presets';
-import { PageEditor } from '@blocksuite/presets';
 
-const specs = PageEditorBlockSpecs;
+import '@blocksuite/presets/themes/affine.css';
+import { EditorContainer } from './editor-container';
+import { Sidebar } from './sidebar';
 
 const AppStateProvider = ({ children }: { children: React.ReactNode }) => {
   const docCollection = useMemo(() => {
@@ -32,47 +31,34 @@ const AppStateProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const EditorContainer = () => {
-  const activeDoc = useActiveDoc();
+function EditorWrapper() {
+  const doc = useActiveDoc();
+  const updateState = useSetAppState();
 
-  const docRef = useRef<PageEditor | null>(null);
-  const titleRef = useRef<DocTitle>(null);
-  const [docPage, setDocPage] =
-    useState<HTMLElementTagNameMap['affine-page-root']>();
-
-  useEffect(() => {
-    // auto focus the title
-    setTimeout(() => {
-      const docPage = docRef.current?.querySelector('affine-page-root');
-      if (docPage) {
-        setDocPage(docPage);
-      }
-      if (titleRef.current) {
-        const richText = titleRef.current.querySelector('rich-text');
-        richText?.inlineEditor?.focusEnd();
-      } else {
-        docPage?.focusFirstParagraph();
-      }
-    });
-  }, []);
-
-  if (!activeDoc) return null;
-  return (
-    <div className="editor-container">
-      <adapted.DocTitle doc={activeDoc} ref={titleRef} />
-      <adapted.DocEditor doc={activeDoc} specs={specs} />
-      {docPage ? (
-        <adapted.BiDirectionalLinkPanel doc={activeDoc} pageRoot={docPage} />
-      ) : null}
-    </div>
+  const onDocChange = useCallback(
+    (docId: string) => {
+      updateState(state => {
+        return {
+          ...state,
+          activeDocId: docId,
+        };
+      });
+    },
+    [updateState]
   );
-};
+
+  if (!doc) {
+    return null;
+  }
+  return <EditorContainer doc={doc} onDocChange={onDocChange} />;
+}
 
 function App() {
   return (
     <AppStateProvider>
       <div className="root">
-        <EditorContainer />
+        <Sidebar />
+        <EditorWrapper />
       </div>
     </AppStateProvider>
   );

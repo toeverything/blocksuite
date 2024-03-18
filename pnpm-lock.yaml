@@ -159,6 +159,9 @@ importers:
 
   examples/react-custom:
     dependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../../packages/framework/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../../packages/blocks
@@ -205,6 +208,9 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.5
         version: 0.4.6(eslint@8.57.0)
+      lit:
+        specifier: ^3.1.2
+        version: 3.1.2
       typescript:
         specifier: ^5.2.2
         version: 5.4.2
@@ -2231,7 +2237,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 18.19.22
+      '@types/node': 20.11.25
       form-data: 4.0.0
     dev: false
 

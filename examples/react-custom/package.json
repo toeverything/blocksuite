@@ -14,10 +14,12 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/presets": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "lit": "^3.1.2",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "@types/sql.js": "^1.4.9",

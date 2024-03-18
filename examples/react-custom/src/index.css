@@ -1,4 +1,4 @@
-.app {
+.root {
   display: flex;
   height: 100vh;
   font-family: sans-serif;
@@ -11,4 +11,23 @@
 .editor-container {
   min-height: 100%;
   overflow: auto;
+  flex: 1;
+}
+
+.sidebar {
+  padding: 10px;
+  width: 250px;
+}
+
+.sidebar .header {
+  margin-bottom: 10px;
+}
+
+.doc-item {
+  padding: 5px;
+}
+
+.doc-item.active,
+.doc-item:hover {
+  background-color: #f0f0f0;
 }
