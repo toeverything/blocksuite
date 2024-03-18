@@ -62,6 +62,7 @@ import type { EdgelessBlockPortalContainer } from './components/block-portal/edg
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
+import { AIToolController } from './controllers/tools/ai-tool.js';
 import { BrushToolController } from './controllers/tools/brush-tool.js';
 import { ConnectorToolController } from './controllers/tools/connector-tool.js';
 import { DefaultToolController } from './controllers/tools/default-tool.js';
@@ -713,6 +714,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       FrameToolController,
       PanToolController,
       PresentToolController,
+      AIToolController,
     ] as EdgelessToolConstructor[];
 
     tools.forEach(tool => {

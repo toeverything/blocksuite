@@ -2,6 +2,7 @@ import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
+import { once } from '../../index.js';
 import {
   Bound,
   ConnectorElementModel,
@@ -195,6 +196,26 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         global: true,
       }
     );
+
+    this._bindMetaKey();
+    this._bindShiftKey();
+    this._bindToggleHand();
+  }
+
+  private _bindMetaKey() {
+    this.rootElement.handleEvent(
+      'keyDown',
+      ctx => {
+        const event = ctx.get('defaultState').event;
+        if (event instanceof KeyboardEvent) {
+          this._meta(event);
+        }
+      },
+      { global: true }
+    );
+  }
+
+  private _bindShiftKey() {
     this.rootElement.handleEvent(
       'keyDown',
       ctx => {
@@ -217,7 +238,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         global: true,
       }
     );
-    this._bindToggleHand();
   }
 
   private _bindToggleHand() {
@@ -288,13 +308,48 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _shift(event: KeyboardEvent) {
     const edgeless = this.rootElement;
-    if (!event.repeat) {
-      if (event.key.toLowerCase() === 'shift' && event.shiftKey) {
-        edgeless.slots.pressShiftKeyUpdated.emit(true);
-      } else {
-        edgeless.slots.pressShiftKeyUpdated.emit(false);
-      }
+
+    if (event.repeat) return;
+
+    const shiftKeyPressed =
+      event.key.toLowerCase() === 'shift' && event.shiftKey;
+
+    if (shiftKeyPressed) {
+      edgeless.slots.pressShiftKeyUpdated.emit(true);
+    } else {
+      edgeless.slots.pressShiftKeyUpdated.emit(false);
     }
+  }
+
+  private _meta(event: KeyboardEvent) {
+    const edgeless = this.rootElement;
+    const selection = edgeless.service.selection;
+    const currentTool = edgeless.edgelessTool;
+
+    if (
+      selection.editing ||
+      (IS_MAC && !event.metaKey) ||
+      (!IS_MAC && !event.ctrlKey)
+    ) {
+      return;
+    }
+
+    edgeless.tools.metaKey = true;
+    this._setEdgelessTool(edgeless, {
+      type: 'ai',
+    });
+
+    once(document, 'keyup', () => {
+      edgeless.tools.metaKey = false;
+      edgeless.tools.setEdgelessTool(
+        currentTool,
+        {
+          elements: [],
+          editing: false,
+        },
+        false
+      );
+    });
   }
 
   private _delete() {

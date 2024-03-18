@@ -23,6 +23,10 @@ export function isMiddleButtonPressed(e: MouseEvent) {
   return (MOUSE_BUTTONS.AUXILIARY & e.buttons) === MOUSE_BUTTONS.AUXILIARY;
 }
 
+export function isRightButtonPressed(e: MouseEvent) {
+  return (MOUSE_BUTTONS.SECONDARY & e.buttons) === MOUSE_BUTTONS.SECONDARY;
+}
+
 export function stopPropagation(event: Event) {
   event.stopPropagation();
 }
