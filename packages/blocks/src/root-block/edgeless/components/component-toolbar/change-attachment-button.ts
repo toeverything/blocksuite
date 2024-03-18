@@ -12,11 +12,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../../_common/consts.js';
-import {
-  CaptionIcon,
-  PaletteIcon,
-  RefreshIcon,
-} from '../../../../_common/icons/text.js';
+import { CaptionIcon, PaletteIcon } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
 import type {
@@ -123,10 +119,6 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     this._blockElement?.captionElement.show();
   }
 
-  private _refreshData() {
-    this._blockElement?.refreshData();
-  }
-
   private _setCardStyle(style: EmbedCardStyle) {
     const bounds = Bound.deserialize(this.model.xywh);
     bounds.w = EMBED_CARD_WIDTH[style];
@@ -181,19 +173,6 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
           @click=${() => this._showCaption()}
         >
           ${CaptionIcon}
-        </edgeless-tool-icon-button>
-
-        <component-toolbar-menu-divider
-          .vertical=${true}
-        ></component-toolbar-menu-divider>
-
-        <edgeless-tool-icon-button
-          .tooltip=${'Reload'}
-          class="change-attachment-button reload"
-          ?disabled=${this._doc.readonly}
-          @click=${() => this._refreshData()}
-        >
-          ${RefreshIcon}
         </edgeless-tool-icon-button>
       </div>
     `;

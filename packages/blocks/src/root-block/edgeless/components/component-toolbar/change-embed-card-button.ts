@@ -38,7 +38,6 @@ import {
   ExpandFullIcon,
   OpenIcon,
   PaletteIcon,
-  RefreshIcon,
 } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
@@ -772,19 +771,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               ></edgeless-scale-panel>
             `
           : nothing}
-
-        <component-toolbar-menu-divider
-          .vertical=${true}
-        ></component-toolbar-menu-divider>
-
-        <edgeless-tool-icon-button
-          .tooltip=${'Reload'}
-          class="change-embed-card-button reload"
-          ?disabled=${this._doc.readonly}
-          @click=${this._refreshData}
-        >
-          ${RefreshIcon}
-        </edgeless-tool-icon-button>
       </div>
     `;
   }
