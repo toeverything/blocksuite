@@ -47,6 +47,15 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     this.bookmark.open();
   }
 
+  private _getHostName(url: string) {
+    try {
+      return new URL(url).hostname;
+    } catch (e) {
+      console.error(e);
+      return url;
+    }
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -140,7 +149,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
             ${descriptionText}
           </div>
           <div class="affine-bookmark-content-url" @click=${this.bookmark.open}>
-            <span>${url}</span>
+            <span>${this._getHostName(url)}</span>
             <div class="affine-bookmark-content-url-icon">${OpenIcon}</div>
           </div>
         </div>
