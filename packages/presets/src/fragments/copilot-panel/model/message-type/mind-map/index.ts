@@ -1,12 +1,11 @@
 import { html } from 'lit';
 
-import {
-  type CopilotActionFromSchema,
-  createMessageSchema,
-} from '../../chat-history.js';
-import { chatService, userText } from '../base.js';
+import { createMessageSchema } from '../../message-schema.js';
+import { chatService, userText } from '../utils.js';
 
-export const MindMapMessageSchema = createMessageSchema<string>({
+type Markdown = string;
+export const MindMapMessageSchema = createMessageSchema<Markdown>({
+  type: 'mind-map',
   render: ({ value }) => {
     if (value.status === 'loading') {
       return html`loading...`;
@@ -16,7 +15,7 @@ export const MindMapMessageSchema = createMessageSchema<string>({
     }
     return html` <div>${value.data}</div>`;
   },
-  toContext: (value: string) => {
+  toContext: (value: Markdown) => {
     return [
       {
         role: 'assistant',
@@ -27,10 +26,9 @@ export const MindMapMessageSchema = createMessageSchema<string>({
   },
 });
 
-export const createMindMap =
-  (text: string): CopilotActionFromSchema<typeof MindMapMessageSchema> =>
-  context => {
-    return chatService.chat([
+export const createMindMap = MindMapMessageSchema.createActionBuilder(
+  (text: string, context) => {
+    return chatService().chat([
       ...context.history,
       userText(
         `Use the nested unordered list syntax in Markdown to create a structure similar to a mind map. 
@@ -38,4 +36,5 @@ export const createMindMap =
       ${text}`
       ),
     ]);
-  };
+  }
+);

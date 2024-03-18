@@ -1,70 +1,24 @@
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
-type MessageContent =
-  | {
-      type: 'text';
-      text: string;
-    }
-  | {
-      type: 'image_url';
-      image_url: {
-        url: string;
-      };
-    };
-type BackgroundSource = {
-  id: string;
-  slice: string[];
+import type {
+  ApiData,
+  ChatMessage,
+  MessageContent,
+  MessageContext,
+  MessageSchema,
+  UserChatMessage,
+} from './message-schema.js';
+import { MessageSchemas } from './message-type/index.js';
+
+export type CopilotAction<Result> = {
+  type: string;
+  run: (context: MessageContext) => AsyncIterable<Result>;
 };
 
-export type UserChatMessage = {
-  role: 'user';
-  content: MessageContent[];
-};
-export type ChatMessage =
-  | UserChatMessage
-  | {
-      role: 'system';
-      content: string;
-    }
-  | {
-      role: 'assistant';
-      content: string;
-      sources: BackgroundSource[];
-    };
-
-export type ApiData<T> =
-  | {
-      status: 'loading';
-    }
-  | {
-      status: 'error';
-      message: string;
-    }
-  | {
-      status: 'success';
-      data: T;
-    };
-export type MessageSchema<Result, Data = unknown> = {
-  render: (props: {
-    value: ApiData<Result>;
-    data?: Data;
-    changeData: (value: Data) => void;
-    retry: () => void;
-  }) => TemplateResult;
-  toContext: (value: Result, data?: Data) => Array<ChatMessage>;
-};
-export const createMessageSchema = <Result, Data = unknown>(
-  config: MessageSchema<Result, Data>
-): MessageSchema<Result, Data> => config;
-type MessageContext = {
-  history: ChatMessage[];
-};
-export type CopilotActionFromSchema<T extends MessageSchema<never>> =
-  T extends MessageSchema<infer R, infer _> ? CopilotAction<R> : never;
-export type CopilotAction<Result> = (
-  context: MessageContext
-) => AsyncIterable<Result>;
-interface HistoryItem {
+export interface HistoryItem {
   render(): TemplateResult;
 
   toContext(): ChatMessage[];
@@ -74,7 +28,12 @@ class UserHistoryItem implements HistoryItem {
   constructor(private message: UserChatMessage) {}
 
   public render(): TemplateResult {
-    return html``;
+    return html`${repeat(this.message.content, content => {
+      if (content.type === 'text') {
+        return html`<div>${content.text}</div>`;
+      }
+      return html`<div>unsupported content type</div>`;
+    })}`;
   }
 
   public toContext(): ChatMessage[] {
@@ -82,19 +41,24 @@ class UserHistoryItem implements HistoryItem {
   }
 }
 
-class AssistantHistoryItem<Result = unknown, Data = unknown>
+export class AssistantHistoryItem<Result = unknown, Data = unknown>
   implements HistoryItem
 {
   public value: ApiData<Result> = { status: 'loading' };
   public data?: Data;
   private set: Set<() => void> = new Set();
   private abortController: AbortController | null = null;
+  private schema: MessageSchema<Result, Data>;
 
   constructor(
-    private schema: MessageSchema<Result, Data>,
     private action: CopilotAction<Result>,
     private history: HistoryItem[]
   ) {
+    const schema = MessageSchemas.find(v => v.type === action.type);
+    if (!schema) {
+      throw new Error('schema not found');
+    }
+    this.schema = schema as MessageSchema<Result, Data>;
     this.start();
   }
 
@@ -109,7 +73,7 @@ class AssistantHistoryItem<Result = unknown, Data = unknown>
     this.stop();
     const abortController = new AbortController();
     this.abortController = abortController;
-    const result = this.action({
+    const result = this.action.run({
       history: this.history.flatMap(v => v.toContext()),
     });
     const process = async () => {
@@ -134,9 +98,12 @@ class AssistantHistoryItem<Result = unknown, Data = unknown>
     this.start();
   };
 
-  onChange(cb: () => void) {
+  onChange = (cb: () => void) => {
     this.set.add(cb);
-  }
+    return () => {
+      this.set.delete(cb);
+    };
+  };
 
   changeData = (data: Data) => {
     this.data = data;
@@ -155,29 +122,70 @@ class AssistantHistoryItem<Result = unknown, Data = unknown>
   }
 
   render(): TemplateResult {
-    return this.schema.render({
-      value: this.value,
-      data: this.data,
-      changeData: this.changeData,
-      retry: this.retry,
-    });
+    const renderTemplate = () =>
+      this.schema.render({
+        value: this.value,
+        data: this.data,
+        changeData: this.changeData,
+        retry: this.retry,
+      });
+    return html` <copilot-assistant-history-renderer
+      .onChange="${this.onChange}"
+      .renderTemplate="${renderTemplate}"
+    ></copilot-assistant-history-renderer>`;
+  }
+}
+
+@customElement('copilot-assistant-history-renderer')
+export class copilotAssistantHistoryRenderer extends WithDisposable(
+  ShadowlessElement
+) {
+  @property({ attribute: false })
+  onChange!: (cb: () => void) => () => void;
+  @property({ attribute: false })
+  renderTemplate!: () => TemplateResult;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.onChange(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
+  override render() {
+    return this.renderTemplate();
   }
 }
 
 export class ChatHistory {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   history: HistoryItem[] = [];
+  private subSet: Set<() => void> = new Set();
+  onChange(cb: () => void) {
+    this.subSet.add(cb);
+    return () => {
+      this.subSet.delete(cb);
+    };
+  }
+  private fire() {
+    this.subSet.forEach(v => v());
+  }
 
   addUserMessage(contents: MessageContent[]) {
     this.history.push(new UserHistoryItem({ role: 'user', content: contents }));
+    this.fire();
   }
 
-  addAssistantMessage<Result>(
-    schema: MessageSchema<Result>,
-    action: CopilotAction<Result>
-  ) {
-    this.history.push(
-      new AssistantHistoryItem(schema, action, this.history.slice())
-    );
+  requestAssistantMessage<Result>(
+    action: CopilotAction<Result>,
+    userMessage: MessageContent[]
+  ): AssistantHistoryItem<Result> {
+    const history = this.history.slice();
+    this.addUserMessage(userMessage);
+    const assistantHistoryItem = new AssistantHistoryItem(action, history);
+    this.history.push(assistantHistoryItem);
+    this.fire();
+    return assistantHistoryItem;
   }
 }

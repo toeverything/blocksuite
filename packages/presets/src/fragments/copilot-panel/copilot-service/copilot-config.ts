@@ -170,7 +170,8 @@ export class CopilotConfig {
         impl: impl as never,
       };
     } else {
-      return this.getVendorsByService(serviceKind)[0];
+      const vendorsByService = this.getVendorsByService(serviceKind);
+      return vendorsByService[0];
     }
   }
 

@@ -1,18 +1,13 @@
-import {
-  ChatHistory,
-  type CopilotAction,
-  type MessageSchema,
-} from './chat-history.js';
+import '../copilot-service/index.js';
+
+import { ChatHistory, type CopilotAction } from './chat-history.js';
 
 export class Copilot {
   history: ChatHistory = new ChatHistory();
 
-  askAI<Result>(
-    schema: MessageSchema<Result>,
-    action: CopilotAction<Result>,
-    prompt: string
-  ) {
-    this.history.addUserMessage([{ type: 'text', text: prompt }]);
-    this.history.addAssistantMessage(schema, action);
+  askAI<Result>(action: CopilotAction<Result>, prompt: string) {
+    return this.history.requestAssistantMessage(action, [
+      { type: 'text', text: prompt },
+    ]);
   }
 }

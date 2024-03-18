@@ -90,8 +90,10 @@ const askGPTStream = async function* (
     temperature: 0,
     max_tokens: 4096,
   });
+  let text = '';
   for await (const message of result) {
-    yield message.choices[0].delta.content ?? '';
+    text += message.choices[0].delta.content ?? '';
+    yield text;
   }
 };
 

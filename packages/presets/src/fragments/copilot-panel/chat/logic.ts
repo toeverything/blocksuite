@@ -13,7 +13,6 @@ import { LANGUAGE, TONE } from '../config.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import { EmbeddingServiceKind } from '../copilot-service/service-base.js';
 import {
-  runAnalysisAction,
   runChangeToneAction,
   runFixSpellingAction,
   runGenerateAction,
@@ -29,6 +28,8 @@ import {
 } from '../doc/actions.js';
 import { getChatService } from '../doc/api.js';
 import type { AILogic } from '../logic.js';
+import type { Copilot } from '../model/index.js';
+import { createMindMap } from '../model/message-type/mind-map/index.js';
 import { findLeaf, findTree, getConnectorPath } from '../utils/connector.js';
 import {
   insertFromMarkdown,
@@ -54,7 +55,8 @@ export type ChatReactiveData = {
 export class AIChatLogic {
   constructor(
     private logic: AILogic,
-    private getHost: () => EditorHost
+    private getHost: () => EditorHost,
+    private copilot: Copilot
   ) {
     this.logic;
   }
@@ -420,24 +422,28 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Create mind-map',
-      action: this.createAction('Create mind-map', input => {
-        const service = getEdgelessService(this.host);
-        const [x, y] = [service.viewport.centerX, service.viewport.centerY];
-        const reactiveData = this.reactiveData;
-        const build = mindMapBuilder(this.host, x, y);
-        return (async function* () {
-          const strings = runAnalysisAction({ input });
-          let text = '';
-          for await (const item of strings) {
-            yield item;
-            text += item;
-            if (text) {
-              await build(text);
-            }
-            reactiveData.tempMessage = text;
-          }
-        })();
-      }),
+      action: async () => {
+        const text = await this.getSelectedText();
+        this.copilot.askAI(createMindMap(text), text);
+      },
+      // action: this.createAction('Create mind-map', input => {
+      //   const service = getEdgelessService(this.host);
+      //   const [x, y] = [service.viewport.centerX, service.viewport.centerY];
+      //   const reactiveData = this.reactiveData;
+      //   const build = mindMapBuilder(this.host, x, y);
+      //   return (async function* () {
+      //     const strings = runAnalysisAction({ input });
+      //     let text = '';
+      //     for await (const item of strings) {
+      //       yield item;
+      //       text += item;
+      //       if (text) {
+      //         await build(text);
+      //       }
+      //       reactiveData.tempMessage = text;
+      //     }
+      //   })();
+      // }),
     },
     {
       type: 'action',
