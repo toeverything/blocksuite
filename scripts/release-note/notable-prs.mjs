@@ -56,7 +56,12 @@ async function getPRsWithLabel(prNumbers, githubToken) {
     );
     const pr = await response.json();
 
-    if (pr.labels && pr.labels.some(label => label.name === 'notable')) {
+    if (
+      pr.labels &&
+      pr.labels.some(
+        label => label.name === 'notable' || label.name === 'breaking'
+      )
+    ) {
       notablePRs.push(pr);
     }
   }
