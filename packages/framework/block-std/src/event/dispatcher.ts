@@ -72,6 +72,11 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
+  /**
+   * @deprecated
+   *
+   * This property is deprecated and will be removed in the future.
+   */
   slots = {
     parentScaleChanged: new Slot<number>(),
     editorHostPanned: new Slot(),
@@ -98,6 +103,10 @@ export class UIEventDispatcher {
     this._clipboardControl = new ClipboardControl(this);
   }
 
+  /**
+   * @deprecated
+   * This method is deprecated and will be removed in the future.
+   */
   get cumulativeParentScale() {
     return this._pointerControl.cumulativeParentScale;
   }
@@ -288,8 +297,13 @@ export class UIEventDispatcher {
     this._rangeControl.listen();
     this._clipboardControl.listen();
 
+    let _dragging = false;
     this.disposables.addFromEvent(this.host, 'pointerdown', () => {
+      _dragging = true;
       this._active = true;
+    });
+    this.disposables.addFromEvent(this.host, 'pointerup', () => {
+      _dragging = false;
     });
     this.disposables.addFromEvent(this.host, 'click', () => {
       this._active = true;
@@ -302,13 +316,14 @@ export class UIEventDispatcher {
         this._active = false;
       }
     });
-    this.disposables.addFromEvent(this.host, 'mouseenter', () => {
+    this.disposables.addFromEvent(this.host, 'pointerenter', () => {
       this._active = true;
     });
-    this.disposables.addFromEvent(this.host, 'mouseleave', () => {
+    this.disposables.addFromEvent(this.host, 'pointerleave', () => {
       if (
-        !document.activeElement ||
-        !this.host.contains(document.activeElement)
+        (!document.activeElement ||
+          !this.host.contains(document.activeElement)) &&
+        !_dragging
       ) {
         this._active = false;
       }

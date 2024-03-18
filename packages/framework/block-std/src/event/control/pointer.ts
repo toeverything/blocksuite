@@ -38,6 +38,10 @@ export class PointerControl {
     this._initPanObserver();
   }
 
+  /**
+   * @deprecated
+   * This method is deprecated and will be removed in the future.
+   */
   get cumulativeParentScale() {
     return this._cumulativeParentScale;
   }
@@ -190,6 +194,9 @@ export class PointerControl {
   };
 
   /**
+   * @deprecated
+   * This method is deprecated and will be removed in the future.
+   *
    * Required for nested editors
    * Observe the scale of the parent elements and update the cumulative scale
    * This is required to calculate the correct pointer position when the parent elements are scaled
@@ -230,6 +237,9 @@ export class PointerControl {
   }
 
   /**
+   * @deprecated
+   * This method is deprecated and will be removed in the future.
+   *
    * Required for nested editors
    * Observe the position of the parent elements and update the viewport position
    * This is required when parent elements are translated and the viewport should be updated accordingly
