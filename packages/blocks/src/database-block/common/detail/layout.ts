@@ -96,7 +96,6 @@ export const popSideDetail = (ops: {
 }) => {
   const rootElement = ops.rootElement;
   assertExists(rootElement);
-  console.log(rootElement);
   const block = findFirstBlockParent(rootElement) ?? rootElement;
   const modal = createModal(rootElement);
   // fit to the size of the page element
