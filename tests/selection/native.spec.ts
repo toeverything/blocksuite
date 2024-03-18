@@ -52,9 +52,11 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertBlockCount,
+  assertBlockSelections,
   assertClipItems,
   assertDivider,
   assertExists,
+  assertNativeSelectionRangeCount,
   assertRichTextInlineRange,
   assertRichTexts,
   assertStoreMatchJSX,
@@ -939,11 +941,18 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await waitNextFrame(page);
   await pressEnter(page);
   await type(page, '--- ');
-  await pressArrowUp(page, 2);
-  await pressBackspace(page);
-  await waitNextFrame(page);
   await assertDivider(page, 2);
   await assertRichTexts(page, ['', '']);
+
+  await pressArrowUp(page);
+  await assertBlockSelections(page, [['0', '1', '5']]);
+  await pressArrowUp(page);
+  await assertBlockSelections(page, []);
+  await assertRichTextInlineRange(page, 0, 0);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['']);
+  await assertBlockSelections(page, [['0', '1', '3']]);
+  await assertDivider(page, 2);
 });
 
 test('Delete the second divider between two dividers by forwardDelete', async ({
@@ -977,9 +986,9 @@ test('should delete line with content after divider not lose content', async ({
   // Jump to line start
   await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
   await waitNextFrame(page);
-  await pressBackspace(page);
+  await pressBackspace(page, 2);
   await assertDivider(page, 0);
-  await assertRichTexts(page, ['123']);
+  await assertRichTexts(page, ['', '123']);
 });
 
 test('should forwardDelete divider works properly', async ({ page }) => {
@@ -2039,4 +2048,61 @@ test('auto-scroll when creating a new paragraph-block by pressing enter', async 
     return viewport.scrollTop;
   });
   expect(scrollTop).toBeGreaterThan(1000);
+});
+
+test('Use arrow up and down to select two types of block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '--- --- ');
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '--- 123');
+  // 123
+  // ---
+  // ---
+  // 123
+  // ---
+  // 123
+
+  await assertDivider(page, 3);
+  await assertRichTexts(page, ['123', '123', '123']);
+
+  // from bottom to top
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 2, 3);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '7']]);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 1, 3);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '5']]);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '4']]);
+  await pressArrowUp(page);
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 0, 3);
+
+  // from top to bottom
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '4']]);
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '5']]);
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 1, 0);
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 0);
+  await assertBlockSelections(page, [['0', '1', '7']]);
+  await pressArrowDown(page);
+  await assertNativeSelectionRangeCount(page, 1);
+  await assertRichTextInlineRange(page, 2, 0);
 });

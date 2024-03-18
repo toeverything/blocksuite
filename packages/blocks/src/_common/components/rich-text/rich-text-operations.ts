@@ -648,12 +648,10 @@ function handleParagraphDeleteActions(
       'affine:bookmark',
       'affine:code',
       'affine:image',
+      'affine:divider',
       ...EMBED_BLOCK_FLAVOUR_LIST,
     ])
   ) {
-    doc.deleteBlock(model, {
-      bringChildrenTo: parent,
-    });
     const previousSiblingElement = getBlockComponentByModel(
       editorHost,
       previousSibling
@@ -663,6 +661,12 @@ function handleParagraphDeleteActions(
       path: previousSiblingElement.path,
     });
     editorHost.selection.setGroup('note', [selection]);
+
+    if (model.text?.length === 0) {
+      doc.deleteBlock(model, {
+        bringChildrenTo: parent,
+      });
+    }
 
     return true;
   }
@@ -835,7 +839,16 @@ function handleParagraphBlockForwardDelete(
     }
     function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
       if (matchFlavours(nextSibling, ['affine:divider'])) {
-        doc.deleteBlock(nextSibling);
+        const nextSiblingComponent = getBlockComponentByModel(
+          editorHost,
+          nextSibling
+        );
+        assertExists(nextSiblingComponent);
+        editorHost.selection.setGroup('note', [
+          editorHost.selection.create('block', {
+            path: nextSiblingComponent.path,
+          }),
+        ]);
         return true;
       }
 
