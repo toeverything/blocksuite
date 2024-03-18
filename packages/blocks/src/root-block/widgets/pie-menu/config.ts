@@ -54,6 +54,7 @@ const pie = new PieMenuBuilder({
     const isEditing = (rootElement as EdgelessRootBlockComponent).service
       .selection.editing;
 
+    // Todo: make this trigger user configurable .
     return ev.key === 'q' && !isEditing;
   },
 });

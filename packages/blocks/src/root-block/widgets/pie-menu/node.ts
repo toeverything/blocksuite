@@ -11,8 +11,8 @@ import {
   getPosition,
   isActionNode,
   isAngleBetween,
+  isNodeWithChildren,
   isRootNode,
-  isSubmenuNode,
 } from './utils.js';
 
 @customElement('affine-pie-node')
@@ -61,7 +61,7 @@ export class PieNode extends WithDisposable(LitElement) {
           node: this,
         });
         this.menu.close();
-      } else if (isSubmenuNode(schema)) {
+      } else if (isNodeWithChildren(schema)) {
         this.menu.openSubmenu(this); // for Opening with numpad
       }
     });
@@ -75,7 +75,7 @@ export class PieNode extends WithDisposable(LitElement) {
   protected override render(): unknown {
     switch (this.schema.type) {
       case 'root': {
-        return this._renderRootNode();
+        return this._renderCenterNode();
       }
       default:
         return this._renderChildNode();
@@ -112,9 +112,9 @@ export class PieNode extends WithDisposable(LitElement) {
     return html`<span style="${styleMap(styles)}" class="rotator"></span>`;
   }
 
-  private _renderRootNode() {
+  private _renderCenterNode() {
     const hoveredNode = this.menu.hoveredNode;
-    const isActiveNode = this === this.menu.activeNode;
+    const isActiveNode = this.menu.isActiveNode(this);
     const [x, y] = this.position;
 
     const styles = {
@@ -131,13 +131,13 @@ export class PieNode extends WithDisposable(LitElement) {
 
     return html`<div
       style="${styleMap(styles)}"
-      class="pie-root-node-container"
+      class="pie-parent-node-container"
     >
       <div
         style="${styleMap({ transform: 'translate(-50%, -50%)' })}"
         active="${isActiveNode.toString()}"
         @mouseenter="${this._handleGoBack}"
-        class="pie-node root"
+        class="pie-node center"
       >
         <div class="node-content">${centerText}</div>
         ${isActiveNode ? this._renderRotator() : nothing}
@@ -156,10 +156,10 @@ export class PieNode extends WithDisposable(LitElement) {
   };
 
   private _renderChildNode() {
-    const isSubmenu = this.schema.type === 'submenu';
-
-    if (isSubmenu && this.menu.selectionChain.includes(this))
-      return this._renderRootNode();
+    const nodeWithChildren = isNodeWithChildren(this.schema);
+    // if the node is a submenu and if the selection chain has that node then render it as a center node
+    if (nodeWithChildren && this.menu.selectionChain.includes(this))
+      return this._renderCenterNode();
 
     const [x, y] = this.position;
     const visible = this.menu.isChildOfActiveNode(this);
@@ -174,7 +174,7 @@ export class PieNode extends WithDisposable(LitElement) {
     return html`<li
       style="${styleMap(styles)}"
       hovering="${this._isHovering.toString()}"
-      submenu="${isSubmenu.toString()}"
+      submenu="${nodeWithChildren.toString()}"
       @click="${() => this.select()}"
       index="${this.index}"
       class="pie-node child"
@@ -190,14 +190,12 @@ export class PieNode extends WithDisposable(LitElement) {
     if (angle === null) {
       this._isHovering = false;
       this.menu.setHovered(null);
-      this.menu.activeNode.requestUpdate(); // update center text
       return;
     }
 
     if (isAngleBetween(angle, this.startAngle, this.endAngle)) {
       this._isHovering = true;
       this.menu.setHovered(this);
-      this.menu.activeNode.requestUpdate();
     } else {
       this._isHovering = false;
     }

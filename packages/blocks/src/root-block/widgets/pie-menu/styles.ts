@@ -28,7 +28,7 @@ export const styles = {
   `,
 
   pieNode: css`
-    .pie-root-node-container {
+    .pie-parent-node-container {
       position: absolute;
       list-style-type: none;
     }
@@ -47,16 +47,22 @@ export const styles = {
       transition: all 250ms cubic-bezier(0.775, 1.325, 0.535, 1);
     }
 
-    .pie-node.root {
+    .pie-node.center {
       width: 6rem;
       height: 6rem;
       padding: 0.4rem;
     }
 
-    .pie-node.root[active='true'] .node-content > svg {
+    .pie-node.center[active='true'] .node-content > svg {
       width: 2rem;
       height: 2rem;
       font-size: 0.7rem;
+    }
+
+    .pie-node.center[active='false'] {
+      width: 3rem;
+      height: 3rem;
+      opacity: 0.6;
     }
 
     .rotator {
@@ -69,12 +75,6 @@ export const styles = {
       height: 7px;
       top: 50%;
       left: 50%;
-    }
-
-    .pie-node.root[active='false'] {
-      width: 3rem;
-      height: 3rem;
-      opacity: 0.6;
     }
 
     .pie-node.child {
@@ -93,14 +93,14 @@ export const styles = {
       right: 30%;
     }
 
-    .pie-node.child .node-content > svg {
+    .node-content > svg {
       width: 24px;
       height: 24px;
     }
 
     .pie-node.child[hovering='true'] {
       border-color: var(--affine-primary-color);
-      background-color: rgb(55 55 55);
+      background-color: var(--affine-hover-color-filled);
       scale: 1.06;
     }
 

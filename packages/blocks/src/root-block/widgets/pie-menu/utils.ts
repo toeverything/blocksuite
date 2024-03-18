@@ -27,7 +27,7 @@ export function getPosition(angleRad: number, v: IVec): IVec {
 export function isNodeWithChildren(
   node: IPieNode
 ): node is IPieNode & { children: IPieNonRootNode[] } {
-  return node.type === 'root' || node.type === 'submenu';
+  return 'children' in node;
 }
 
 export function isRootNode(node: IPieNode): node is IPieRootNode {

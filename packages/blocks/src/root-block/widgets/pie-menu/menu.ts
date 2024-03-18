@@ -39,18 +39,11 @@ export class PieMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   position!: IVec;
 
-  // @state()
   selectionChain: PieNode[] = [];
 
-  // @state()
+  abortController = new AbortController();
 
   private _hoveredNode: PieNode | null = null;
-
-  /**
-   * Angle between pointer loc vec and node pos vector
-   */
-
-  abortController = new AbortController();
 
   private _openSubmenuTimeout?: NodeJS.Timeout;
 
@@ -211,7 +204,7 @@ export class PieMenu extends WithDisposable(LitElement) {
       const angle = toDegree((Math.atan2(dy, dx) + TAU) % TAU); // convert from [-PI, PI] to [0  TAU]
       this.slots.updateHoveredNode.emit(angle);
     } else {
-      this.slots.updateHoveredNode.emit(null); // acts like a emit signal
+      this.slots.updateHoveredNode.emit(null); // acts like an abort signal
     }
   };
 
@@ -241,7 +234,7 @@ export class PieMenu extends WithDisposable(LitElement) {
       nodeSchema.children.forEach((childSchema, i) => {
         const childNode = this._createNodeTree(childSchema);
         childNode.containerNode = node;
-        childNode.index = i + 1;
+        childNode.index = i + 1; // TODO: angles may not be in the order of nodes, resulting in non-continuous indexing.. Maybe sort the children while when building according to the angle
         childNode.setAttribute('index', childNode.index.toString());
         node.append(childNode);
       });

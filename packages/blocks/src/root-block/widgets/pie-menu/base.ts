@@ -6,7 +6,7 @@ import type { PieMenu } from './menu.js';
 import type { PieNode } from './node.js';
 
 export interface IPieMenuSchema {
-  id: PieMenuId; // If you want to open menu without the trigger(say a button) by PieManager.open(..id)
+  id: PieMenuId;
 
   /**
    *  Label Describing your menu
@@ -75,6 +75,8 @@ export interface IPieSubmenuNode extends IPieBaseNode {
   type: 'submenu';
   children: Array<IPieNonRootNode>;
 }
+
+// TODO: a color menu node
 
 export type IPieNonRootNode = IPieActionNode | IPieSubmenuNode;
 

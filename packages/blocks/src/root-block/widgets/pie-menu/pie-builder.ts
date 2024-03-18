@@ -13,6 +13,7 @@ type PieBuilderConstructorProps = Omit<
   'root' | 'angle' | 'startAngle' | 'endAngle' | 'disabled'
 > & { icon: IPieNode['icon'] };
 
+// TODO: add types for root element (XXXXRootBlockComponent) based on scope; Need Help!
 export class PieMenuBuilder {
   private _schema: IPieMenuSchema | null = null;
   private _stack: IPieNode[] = [];
