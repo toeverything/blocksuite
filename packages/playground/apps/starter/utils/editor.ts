@@ -1,4 +1,3 @@
-import type { PageRootService } from '@blocksuite/blocks';
 import {
   AffineFormatBarWidget,
   EdgelessEditorBlockSpecs,
@@ -60,14 +59,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
           });
 
           disposable.add(onFormatBarConnected);
-
-          slots.mounted.once(({ service }) => {
-            disposable.add(
-              (<PageRootService>service).slots.editorModeSwitch.on(mode => {
-                editor.mode = mode;
-              })
-            );
-          });
         },
       };
     }
@@ -78,7 +69,7 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
       spec = {
         ...spec,
         setup: (slots, disposable) => {
-          slots.mounted.once(({ service }) => {
+          slots.mounted.once(() => {
             const onFormatBarConnected = slots.widgetConnected.on(view => {
               if (view.component instanceof AffineFormatBarWidget) {
                 configureFormatBar(view.component);
@@ -86,11 +77,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
             });
 
             disposable.add(onFormatBarConnected);
-            disposable.add(
-              (<PageRootService>service).slots.editorModeSwitch.on(mode => {
-                editor.mode = mode;
-              })
-            );
           });
         },
       };
