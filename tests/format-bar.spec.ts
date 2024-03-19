@@ -18,8 +18,10 @@ import {
   pressArrowDown,
   pressArrowUp,
   pressEnter,
+  pressTab,
   scrollToBottom,
   scrollToTop,
+  selectAllBlocksByKeyboard,
   selectAllByKeyboard,
   setInlineRangeInInlineEditor,
   setSelection,
@@ -32,6 +34,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertAlmostEqual,
+  assertBlockChildrenIds,
   assertExists,
   assertLocatorVisible,
   assertRichImage,
@@ -1569,4 +1572,45 @@ test('selecting image should not show format bar', async ({ page }) => {
   await waitNextFrame(page);
   const { formatBar } = getFormatBar(page);
   await expect(formatBar).not.toBeVisible();
+});
+
+test('create linked doc from block selection with format bar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await focusRichText(page, 1);
+  await pressTab(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+  await assertBlockChildrenIds(page, '2', ['3']);
+
+  await selectAllBlocksByKeyboard(page);
+  await waitNextFrame(page, 200);
+
+  const blockSelections = page
+    .locator('affine-block-selection')
+    .locator('visible=true');
+  await expect(blockSelections).toHaveCount(2);
+
+  const { createLinkedDocBtn } = getFormatBar(page);
+  expect(await createLinkedDocBtn.isVisible()).toBe(true);
+  await createLinkedDocBtn.click();
+
+  const linkedDocBlock = page.locator('affine-embed-linked-doc-block');
+  await expect(linkedDocBlock).toHaveCount(1);
+
+  const linkedDocBox = await linkedDocBlock.boundingBox();
+  assertExists(linkedDocBox);
+  await page.mouse.dblclick(
+    linkedDocBox.x + linkedDocBox.width / 2,
+    linkedDocBox.y + linkedDocBox.height / 2
+  );
+  await waitNextFrame(page, 200);
+
+  await assertRichTexts(page, ['123', '456', '789']);
+  await assertBlockChildrenIds(page, '8', ['10', '12']);
+  await assertBlockChildrenIds(page, '10', ['11']);
 });

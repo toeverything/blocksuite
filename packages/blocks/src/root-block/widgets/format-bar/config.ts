@@ -27,7 +27,7 @@ import {
   TextIcon,
   UnderlineIcon,
 } from '../../../_common/icons/index.js';
-import { matchFlavours } from '../../../_common/utils/index.js';
+import { createLinkedDocFromSelectedBlocks } from '../../../_common/utils/render-linked-doc.js';
 import type { AffineFormatBarWidget } from './format-bar.js';
 
 export type DividerConfigItem = {
@@ -173,67 +173,21 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         const [_, ctx] = chain
           .getSelectedModels({
             types: ['block'],
+            mode: 'highest',
           })
           .run();
         const { selectedModels } = ctx;
         assertExists(selectedModels);
+        if (!selectedModels.length) return;
 
         const host = formatBar.host;
         host.selection.clear();
 
         const doc = host.doc;
-        const linkedDoc = doc.collection.createDoc({});
-        linkedDoc.load(() => {
-          const rootId = linkedDoc.addBlock('affine:page', {
-            title: new doc.Text(''),
-          });
-          linkedDoc.addBlock('affine:surface', {}, rootId);
-          const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
-
-          const firstBlock = selectedModels[0];
-          assertExists(firstBlock);
-
-          doc.addSiblingBlocks(
-            firstBlock,
-            [
-              {
-                flavour: 'affine:embed-linked-doc',
-                pageId: linkedDoc.id,
-              },
-            ],
-            'before'
-          );
-
-          if (
-            matchFlavours(firstBlock, ['affine:paragraph']) &&
-            firstBlock.type.match(/^h[1-6]$/)
-          ) {
-            const title = firstBlock.text.toString();
-            linkedDoc.collection.setDocMeta(linkedDoc.id, {
-              title,
-            });
-
-            const linkedDocRootModel = linkedDoc.getBlockById(rootId);
-            assertExists(linkedDocRootModel);
-            linkedDoc.updateBlock(linkedDocRootModel, {
-              title: new doc.Text(title),
-            });
-
-            doc.deleteBlock(firstBlock);
-            selectedModels.shift();
-          }
-
-          selectedModels.forEach(model => {
-            const keys = model.keys as (keyof typeof model)[];
-            const values = keys.map(key => model[key]);
-            const blockProps = Object.fromEntries(
-              keys.map((key, i) => [key, values[i]])
-            );
-            linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
-            doc.deleteBlock(model);
-          });
-        });
-
+        const linkedDoc = createLinkedDocFromSelectedBlocks(
+          doc,
+          selectedModels
+        );
         const linkedDocService = host.spec.getService(
           'affine:embed-linked-doc'
         );
