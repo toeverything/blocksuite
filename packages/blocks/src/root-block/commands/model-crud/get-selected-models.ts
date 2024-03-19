@@ -2,6 +2,18 @@ import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+/**
+ * Retrieves the selected models based on the provided selection types and mode.
+ *
+ * @param ctx - The command context.
+ * @param ctx.types - The selection types to be retrieved. Can be an array of 'block', 'text', or 'image'.
+ * @param ctx.mode - The mode of the selection. Can be 'all', 'flat', or 'highest'.
+ * ‘all’: Returns all selected models.
+ * ‘flat’: Returns all selected models in a flat array.
+ * ‘highest’: Returns the highest selected models.
+ * @param next - The next function to be called.
+ * @returns The selected models.
+ */
 export const getSelectedModelsCommand: Command<
   never,
   'selectedModels',
