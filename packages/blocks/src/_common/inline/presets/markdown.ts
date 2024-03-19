@@ -3,7 +3,7 @@
 import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
-} from '@blocksuite/inline';
+} from '@blocksuite/block-std';
 
 import type { InlineMarkdownMatch } from '../inline-manager.js';
 import type { AffineTextAttributes } from './affine-inline-specs.js';

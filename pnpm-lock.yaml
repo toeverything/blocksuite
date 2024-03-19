@@ -165,12 +165,6 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
@@ -192,9 +186,6 @@ importers:
       '@types/webfontloader':
         specifier: ^1.6.38
         version: 1.6.38
-      buffer:
-        specifier: ^6.0.3
-        version: 6.0.3
       date-fns:
         specifier: ^3.3.1
         version: 3.3.1
@@ -322,6 +313,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      lit:
+        specifier: ^3.1.2
+        version: 3.1.2
       lz-string:
         specifier: ^1.5.0
         version: 1.5.0
@@ -342,49 +336,11 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
 
-  packages/framework/inline:
-    dependencies:
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
-    devDependencies:
-      lit:
-        specifier: ^3.1.2
-        version: 3.1.2
-      yjs:
-        specifier: ^13.6.14
-        version: 13.6.14
-
-  packages/framework/lit:
-    dependencies:
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../inline
-      lit:
-        specifier: ^3.1.2
-        version: 3.1.2
-    devDependencies:
-      '@blocksuite/block-std':
-        specifier: workspace:*
-        version: link:../block-std
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:../store
-
   packages/framework/store:
     dependencies:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../inline
       '@blocksuite/sync':
         specifier: workspace:*
         version: link:../sync
@@ -440,18 +396,15 @@ importers:
 
   packages/playground:
     dependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../framework/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/presets':
         specifier: workspace:*
         version: link:../presets
@@ -528,12 +481,6 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../framework/global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
@@ -2103,7 +2050,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 18.19.22
+      '@types/node': 20.11.25
       form-data: 4.0.0
     dev: false
 
@@ -3320,7 +3267,7 @@ packages:
     dev: false
 
   /concat-map@0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
     dev: true
 
   /content-disposition@0.5.4:
@@ -3772,7 +3719,7 @@ packages:
     dev: false
 
   /ee-first@1.1.1:
-    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
   /electron-to-chromium@1.4.699:
@@ -5680,7 +5627,7 @@ packages:
     dev: false
 
   /media-typer@0.3.0:
-    resolution: {integrity: sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==}
+    resolution: {integrity: sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=}
     engines: {node: '>= 0.6'}
     dev: true
 

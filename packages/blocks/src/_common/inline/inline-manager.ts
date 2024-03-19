@@ -1,15 +1,17 @@
-import type { InlineEditor, KeyboardBindingContext } from '@blocksuite/inline';
+import type {
+  InlineEditor,
+  KeyboardBindingContext,
+} from '@blocksuite/block-std';
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
   baseTextAttributes,
-  type DeltaInsert,
   getDefaultAttributeRenderer,
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
   type KeyboardBindingHandler,
-} from '@blocksuite/inline';
-import type { Y } from '@blocksuite/store';
+} from '@blocksuite/block-std';
+import type { DeltaInsert, Y } from '@blocksuite/store';
 import { z, type ZodObject, type ZodTypeAny } from 'zod';
 
 export type InlineSpecs<

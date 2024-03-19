@@ -1,6 +1,6 @@
 import './link-popup.js';
 
-import type { InlineRange } from '@blocksuite/inline';
+import type { InlineRange } from '@blocksuite/block-std';
 
 import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
 import { LinkPopup } from './link-popup.js';

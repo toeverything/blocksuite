@@ -1,9 +1,9 @@
+import { ZERO_WIDTH_SPACE } from '@block-std/inline/index.js';
 import type {
   RichTextCell,
   RichTextCellEditing,
 } from '@blocks/database-block/common/columns/rich-text/cell-renderer.js';
 import type { ColumnType } from '@blocks/index.js';
-import { ZERO_WIDTH_SPACE } from '@inline/consts.js';
 import { expect, type Locator, type Page } from '@playwright/test';
 
 import {

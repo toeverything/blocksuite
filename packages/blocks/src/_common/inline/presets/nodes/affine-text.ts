@@ -1,5 +1,5 @@
-import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, ZERO_WIDTH_SPACE } from '@blocksuite/block-std';
+import type { DeltaInsert } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';

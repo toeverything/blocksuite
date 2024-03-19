@@ -1,10 +1,10 @@
-import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
-} from '@blocksuite/inline';
-import type { EditorHost } from '@blocksuite/lit';
+} from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';

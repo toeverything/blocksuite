@@ -1,15 +1,15 @@
-import type { Slot } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import type { BlockElement } from '@blocksuite/block-std';
 import {
-  type DeltaInsert,
   INLINE_ROOT_ATTR,
   type InlineRootElement,
+  ShadowlessElement,
+  WithDisposable,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
-} from '@blocksuite/inline';
-import type { BlockElement } from '@blocksuite/lit';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Doc, DocMeta } from '@blocksuite/store';
+} from '@blocksuite/block-std';
+import type { Slot } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
+import type { DeltaInsert, Doc, DocMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';

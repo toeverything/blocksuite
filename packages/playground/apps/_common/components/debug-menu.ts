@@ -17,6 +17,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 import './side-panel.js';
 
+import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import type {
   AffineTextAttributes,
   SerializedXYWH,
@@ -35,14 +36,12 @@ import {
   ZipTransformer,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { DeltaInsert } from '@blocksuite/inline/types';
-import { type EditorHost, ShadowlessElement } from '@blocksuite/lit';
 import type {
   AffineEditorContainer,
   CommentPanel,
   CopilotPanel,
 } from '@blocksuite/presets';
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel, DeltaInsert } from '@blocksuite/store';
 import { type DocCollection, Text, Utils } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';

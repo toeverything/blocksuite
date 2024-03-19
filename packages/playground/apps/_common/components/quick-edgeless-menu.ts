@@ -17,12 +17,12 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 
+import { ShadowlessElement } from '@blocksuite/block-std';
 import type { AffineTextAttributes, SerializedXYWH } from '@blocksuite/blocks';
 import { ColorVariables, extractCssVariables } from '@blocksuite/blocks';
-import type { DeltaInsert } from '@blocksuite/inline';
-import { ShadowlessElement } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import { type DocCollection, Text, Utils } from '@blocksuite/store';
+import type { DeltaInsert, DocCollection } from '@blocksuite/store';
+import { Text, Utils } from '@blocksuite/store';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';

@@ -1,4 +1,4 @@
-import type { AttributeRenderer } from '@blocksuite/inline';
+import type { AttributeRenderer } from '@blocksuite/block-std';
 import { html } from 'lit';
 
 import type { HighlightOptionsGetter } from '../code-model.js';

@@ -1,4 +1,4 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

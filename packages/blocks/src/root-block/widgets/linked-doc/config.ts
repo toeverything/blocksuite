@@ -1,5 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 import { type BlockModel, type DocMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';

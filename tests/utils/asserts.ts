@@ -3,6 +3,11 @@
 
 import './declare-test-window.js';
 
+import type { InlineRootElement } from '@block-std/inline/inline-editor.js';
+import type {
+  BlockElement,
+  EditorHost,
+} from '@block-std/view/element/index.js';
 import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
@@ -12,8 +17,6 @@ import type {
   RootBlockModel,
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils/index.js';
-import type { InlineRootElement } from '@inline/inline-editor.js';
-import type { BlockElement, EditorHost } from '@lit/element/index.js';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import { COLLECTION_VERSION, PAGE_VERSION } from '@store/consts.js';

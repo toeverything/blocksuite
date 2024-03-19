@@ -1,6 +1,6 @@
 import { assertEquals } from '@blocksuite/global/utils';
-import type { DeltaInsert } from '@blocksuite/inline';
 import type {
+  DeltaInsert,
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
   FromDocSnapshotPayload,

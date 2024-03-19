@@ -1,6 +1,7 @@
+import { ShadowlessElement } from '@blocksuite/block-std';
+import { ZERO_WIDTH_SPACE } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
-import { ShadowlessElement } from '@blocksuite/lit';
+import type { DeltaInsert } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { ThemedToken } from 'shiki';

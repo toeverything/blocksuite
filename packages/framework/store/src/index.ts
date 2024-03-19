@@ -2,7 +2,6 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../shim.d.ts" />
 
-export type { Y };
 export * from './adapter/index.js';
 export * from './migration/index.js';
 export { createIndexeddbStorage } from './persistence/blob/indexeddb-storage.js';
@@ -31,7 +30,8 @@ export { Slot } from '@blocksuite/global/utils';
 
 import './utils/formatter.js';
 
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
+export { Y };
 
 const env =
   typeof globalThis !== 'undefined'

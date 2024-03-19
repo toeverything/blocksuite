@@ -199,7 +199,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run inline editor playwright test
-        run: pnpm --filter=@blocksuite/inline test:e2e
+        run: pnpm --filter=@blocksuite/block-std test:e2e
 
       - name: Upload test results
         if: ${{ failure() }}

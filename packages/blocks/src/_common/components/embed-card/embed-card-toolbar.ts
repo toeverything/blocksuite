@@ -1,8 +1,8 @@
 import '../tooltip/tooltip.js';
 
+import type { EditorHost } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
 import { flip } from '@floating-ui/dom';

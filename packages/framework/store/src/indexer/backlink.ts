@@ -1,7 +1,7 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
 import { Text } from 'yjs';
 
+import type { BaseTextAttributes, DeltaInsert } from '../reactive/index.js';
 import type { BlockIndexer, IndexBlockEvent } from './base.js';
 
 type DocId = string;

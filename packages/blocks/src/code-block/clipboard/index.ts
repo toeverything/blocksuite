@@ -1,6 +1,6 @@
+import type { BlockElement } from '@blocksuite/block-std';
 import { Clipboard, type UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
 
 import { HtmlAdapter, PlainTextAdapter } from '../../_common/adapters/index.js';
 import { pasteMiddleware } from '../../root-block/clipboard/middlewares/index.js';

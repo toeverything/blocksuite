@@ -1,5 +1,5 @@
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { DocCollection } from '@blocksuite/store';
 import { css, html } from 'lit';

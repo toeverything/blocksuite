@@ -3,9 +3,9 @@ import '../panel/card-style-panel.js';
 import './component-toolbar-menu-divider.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import {
   css,

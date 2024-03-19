@@ -1,3 +1,4 @@
+import { WithDisposable } from '@blocksuite/block-std';
 import type {
   AffineTextAttributes,
   AttachmentBlockModel,
@@ -10,8 +11,7 @@ import type {
 } from '@blocksuite/blocks';
 import { BlocksUtils } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
-import type { DeltaInsert } from '@blocksuite/inline';
-import { WithDisposable } from '@blocksuite/lit';
+import type { DeltaInsert } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 

@@ -1,7 +1,7 @@
 import type { BlockSelection } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
 
 import { matchFlavours } from '../../_common/utils/model.js';
 

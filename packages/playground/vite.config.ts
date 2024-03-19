@@ -84,11 +84,8 @@ export default ({ mode }) => {
         '@blocksuite/store': path.resolve(
           fileURLToPath(new URL('../framework/store/src', import.meta.url))
         ),
-        '@blocksuite/inline': path.resolve(
-          fileURLToPath(new URL('../framework/inline/src', import.meta.url))
-        ),
-        '@blocksuite/inline/*': path.resolve(
-          fileURLToPath(new URL('../framework/inline/src/*', import.meta.url))
+        '@blocksuite/block-std': path.resolve(
+          fileURLToPath(new URL('../framework/block-std/src', import.meta.url))
         ),
       },
     },

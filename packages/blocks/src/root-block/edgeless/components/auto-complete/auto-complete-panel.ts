@@ -1,7 +1,7 @@
 import '../buttons/tool-icon-button.js';
 
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import { DocCollection } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';

@@ -1,3 +1,4 @@
+import { WithDisposable } from '@blocksuite/block-std';
 import type {
   AffineReference,
   PageRootBlockComponent,
@@ -9,9 +10,7 @@ import {
 } from '@blocksuite/blocks';
 import { BlocksUtils, InlineManager, RichText } from '@blocksuite/blocks';
 import { assertExists, noop } from '@blocksuite/global/utils';
-import type { DeltaInsert } from '@blocksuite/inline';
-import { WithDisposable } from '@blocksuite/lit';
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type { BlockModel, DeltaInsert, Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

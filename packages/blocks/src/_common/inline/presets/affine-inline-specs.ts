@@ -1,6 +1,6 @@
 import './nodes/index.js';
 
-import type { InlineEditor, InlineRootElement } from '@blocksuite/inline';
+import type { InlineEditor, InlineRootElement } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { z } from 'zod';
 

@@ -2,7 +2,7 @@ import type {
   BeforeinputHookCtx,
   CompositionEndHookCtx,
   HookContext,
-} from '@blocksuite/inline';
+} from '@blocksuite/block-std';
 
 import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
 import { isStrictUrl } from '../../utils/url.js';

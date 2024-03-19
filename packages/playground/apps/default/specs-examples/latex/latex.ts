@@ -1,6 +1,10 @@
 import './latex-node.js';
 
 import {
+  KEYBOARD_ALLOW_DEFAULT,
+  KEYBOARD_PREVENT_DEFAULT,
+} from '@blocksuite/block-std';
+import {
   EdgelessEditorBlockSpecs,
   type InlineMarkdownMatch,
   type InlineSpecs,
@@ -8,10 +12,6 @@ import {
   PageEditorBlockSpecs,
   ParagraphService,
 } from '@blocksuite/blocks';
-import {
-  KEYBOARD_ALLOW_DEFAULT,
-  KEYBOARD_PREVENT_DEFAULT,
-} from '@blocksuite/inline';
 import { html } from 'lit';
 import { z } from 'zod';
 

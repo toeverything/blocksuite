@@ -3,8 +3,8 @@ import '../panel/card-style-panel.js';
 import './component-toolbar-menu-divider.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 

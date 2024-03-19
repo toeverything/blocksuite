@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import type { ConnectorElementModel } from '@blocksuite/blocks';
 import {
   BlocksUtils,
@@ -7,7 +8,6 @@ import {
   type ImageBlockProps,
   type TreeNode,
 } from '@blocksuite/blocks';
-import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel, DocCollection } from '@blocksuite/store';
 
 import { copilotConfig } from '../copilot-service/copilot-config.js';

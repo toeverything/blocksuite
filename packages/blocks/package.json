@@ -17,8 +17,6 @@
   "dependencies": {
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/inline": "workspace:*",
-    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.3",
     "@toeverything/theme": "^0.7.29",
@@ -26,7 +24,6 @@
     "@types/mdast": "^4.0.3",
     "@types/sortablejs": "^1.15.8",
     "@types/webfontloader": "^1.6.38",
-    "buffer": "^6.0.3",
     "date-fns": "^3.3.1",
     "file-type": "^16.5.4",
     "fractional-indexing": "^3.2.0",

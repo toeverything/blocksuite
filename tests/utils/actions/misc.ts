@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import {
+  type InlineRange,
+  type InlineRootElement,
+} from '@block-std/inline/index.js';
+import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type { RichText } from '@blocks/index.js';
 import {
@@ -9,8 +14,6 @@ import {
   type ThemeObserver,
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
-import { type InlineRange, type InlineRootElement } from '@inline/index.js';
-import type { EditorHost } from '@lit/element/lit-host.js';
 import type { CustomFramePanel } from '@playground/apps/_common/components/custom-frame-panel.js';
 import type { CustomOutlinePanel } from '@playground/apps/_common/components/custom-outline-panel.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';

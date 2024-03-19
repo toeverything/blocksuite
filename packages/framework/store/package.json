@@ -16,7 +16,6 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/inline": "workspace:*",
     "@blocksuite/sync": "workspace:*",
     "@types/flexsearch": "^0.7.6",
     "flexsearch": "0.7.43",

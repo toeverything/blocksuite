@@ -6,12 +6,12 @@ import {
   type BaseTextAttributes,
   baseTextAttributes,
   createInlineKeyDownHandler,
-  type DeltaInsert,
   InlineEditor,
   KEYBOARD_ALLOW_DEFAULT,
+  ShadowlessElement,
   ZERO_WIDTH_NON_JOINER,
-} from '@blocksuite/inline';
-import { ShadowlessElement } from '@blocksuite/lit';
+} from '@blocksuite/block-std';
+import type { DeltaInsert } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

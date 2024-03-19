@@ -1,6 +1,23 @@
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
 import * as Y from 'yjs';
+import { z } from 'zod';
 
+export const baseTextAttributes = z.object({
+  bold: z.literal(true).optional().nullable().catch(undefined),
+  italic: z.literal(true).optional().nullable().catch(undefined),
+  underline: z.literal(true).optional().nullable().catch(undefined),
+  strike: z.literal(true).optional().nullable().catch(undefined),
+  code: z.literal(true).optional().nullable().catch(undefined),
+  link: z.string().optional().nullable().catch(undefined),
+});
+
+export type BaseTextAttributes = z.infer<typeof baseTextAttributes>;
+
+export type DeltaInsert<
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes,
+> = {
+  insert: string;
+  attributes?: TextAttributes;
+};
 export interface OptionalAttributes {
   attributes?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

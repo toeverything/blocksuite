@@ -1,5 +1,5 @@
 import { isEqual } from '@blocksuite/global/utils';
-import type { DeltaInsert } from '@blocksuite/inline';
+import type { DeltaInsert } from '@blocksuite/store';
 
 export const fetchImage = async (
   url: string,

@@ -1,5 +1,5 @@
-import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
+  DeltaInsert,
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
   FromDocSnapshotPayload,

@@ -21,37 +21,34 @@
     "noImplicitOverride": true,
     "skipLibCheck": true,
     "incremental": true,
-    "composite": true,
+    "composite": true
   },
   "files": [],
   "references": [
     {
-      "path": "./packages/framework/block-std",
+      "path": "./packages/framework/block-std"
     },
     {
-      "path": "./packages/blocks",
+      "path": "./packages/framework/store"
     },
     {
-      "path": "./packages/presets",
+      "path": "./packages/framework/global"
     },
     {
-      "path": "./packages/playground",
+      "path": "./packages/blocks"
     },
     {
-      "path": "./packages/framework/store",
+      "path": "./packages/presets"
     },
     {
-      "path": "./packages/framework/global",
+      "path": "./packages/playground"
     },
     {
-      "path": "./packages/framework/inline",
+      "path": "./tests"
     },
     {
-      "path": "./tests",
-    },
-    {
-      "path": "./scripts",
-    },
+      "path": "./scripts"
+    }
   ],
   "ts-node": {
     "esm": true,
@@ -59,7 +56,7 @@
     "compilerOptions": {
       "noUnusedLocals": false,
       "noUnusedParameters": false,
-      "noImplicitReturns": false,
-    },
-  },
+      "noImplicitReturns": false
+    }
+  }
 }

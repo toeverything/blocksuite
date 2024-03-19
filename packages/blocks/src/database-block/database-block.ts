@@ -7,8 +7,8 @@ import './common/filter/filter-bar.js';
 import './data-view.js';
 
 import { PathFinder } from '@blocksuite/block-std';
+import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
-import { BlockElement, RangeManager } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';

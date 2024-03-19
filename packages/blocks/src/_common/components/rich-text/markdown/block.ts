@@ -1,9 +1,9 @@
-import { assertExists, isEqual } from '@blocksuite/global/utils';
+import type { BlockElement } from '@blocksuite/block-std';
 import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
-} from '@blocksuite/inline';
-import type { BlockElement } from '@blocksuite/lit';
+} from '@blocksuite/block-std';
+import { assertExists, isEqual } from '@blocksuite/global/utils';
 
 import {
   asyncSetInlineRange,

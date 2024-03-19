@@ -1,15 +1,14 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   type AttributeRenderer,
   createInlineKeyDownHandler,
-  type DeltaInsert,
   InlineEditor,
   type InlineRange,
   type InlineRangeProvider,
   type KeyboardBindingContext,
-} from '@blocksuite/inline';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Y } from '@blocksuite/store';
+} from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
+import type { DeltaInsert, Y } from '@blocksuite/store';
 import { DocCollection, Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
