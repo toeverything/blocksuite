@@ -12,7 +12,7 @@ import type { ReactiveControllerHost } from 'lit';
 import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
-import { buildPath } from '../_common/utils/index.js';
+import { buildPath, matchFlavours } from '../_common/utils/index.js';
 import { onModelElementUpdated } from '../root-block/utils/callback.js';
 import { ensureBlockInContainer } from './utils.js';
 
@@ -67,7 +67,9 @@ export class KeymapController implements ReactiveController {
     this._bindMoveBlockHotKey();
   };
 
-  private _onArrowDown = () => {
+  private _onArrowDown = (ctx: UIEventStateContext) => {
+    const event = ctx.get('defaultState').event;
+
     const [result] = this._std.command
       .chain()
       .inline((_, next) => {
@@ -75,43 +77,87 @@ export class KeymapController implements ReactiveController {
         return next();
       })
       .try(cmd => [
+        // text selection - select the next block
+        // 1. is paragraph, list, code block - follow the default behavior
+        // 2. is not - select the next block (use block selection instead of text selection)
+        cmd
+          .getTextSelection()
+          .inline<'currentSelectionPath'>((ctx, next) => {
+            const currentTextSelection = ctx.currentTextSelection;
+            assertExists(currentTextSelection);
+            return next({ currentSelectionPath: currentTextSelection.path });
+          })
+          .getNextBlock({
+            filter: block => ensureBlockInContainer(block, this.host),
+          })
+          .inline<'focusBlock'>((ctx, next) => {
+            const { nextBlock } = ctx;
+            assertExists(nextBlock);
+
+            if (
+              matchFlavours(nextBlock.model, [
+                'affine:paragraph',
+                'affine:list',
+                'affine:code',
+              ])
+            )
+              return;
+
+            return next({
+              focusBlock: nextBlock,
+            });
+          })
+          .selectBlock(),
         // block selection - select the next block
-        this._onBlockDown(cmd),
+        // 1. is paragraph, list, code block - focus it
+        // 2. is not - select it using block selection
+        cmd
+          .getBlockSelections()
+          .inline<'currentSelectionPath'>((ctx, next) => {
+            const currentBlockSelections = ctx.currentBlockSelections;
+            assertExists(currentBlockSelections);
+            const blockSelection = currentBlockSelections.at(-1);
+            if (!blockSelection) {
+              return;
+            }
+            return next({ currentSelectionPath: blockSelection.path });
+          })
+          .getNextBlock({
+            filter: block => ensureBlockInContainer(block, this.host),
+          })
+          .inline<'focusBlock'>((ctx, next) => {
+            const { nextBlock } = ctx;
+            assertExists(nextBlock);
+
+            if (
+              matchFlavours(nextBlock.model, [
+                'affine:paragraph',
+                'affine:list',
+                'affine:code',
+              ])
+            ) {
+              this._std.command
+                .chain()
+                .focusBlockStart({ focusBlock: nextBlock })
+                .run();
+              event.preventDefault();
+              return;
+            }
+
+            return next({
+              focusBlock: nextBlock,
+            });
+          })
+          .selectBlock(),
       ])
       .run();
 
     return result;
   };
 
-  private _onBlockDown = (cmd: BlockSuite.CommandChain) => {
-    return cmd
-      .getBlockSelections()
-      .inline<'currentSelectionPath'>((ctx, next) => {
-        const currentBlockSelections = ctx.currentBlockSelections;
-        assertExists(currentBlockSelections);
-        const blockSelection = currentBlockSelections.at(-1);
-        if (!blockSelection) {
-          return;
-        }
-        return next({ currentSelectionPath: blockSelection.path });
-      })
-      .getNextBlock()
-      .inline<'focusBlock'>((ctx, next) => {
-        const { nextBlock } = ctx;
-        assertExists(nextBlock);
+  private _onArrowUp = (ctx: UIEventStateContext) => {
+    const event = ctx.get('defaultState').event;
 
-        if (!ensureBlockInContainer(nextBlock, this.host)) {
-          return;
-        }
-
-        return next({
-          focusBlock: nextBlock,
-        });
-      })
-      .selectBlock();
-  };
-
-  private _onArrowUp = () => {
     const [result] = this._std.command
       .chain()
       .inline((_, next) => {
@@ -119,40 +165,82 @@ export class KeymapController implements ReactiveController {
         return next();
       })
       .try(cmd => [
+        // text selection - select the previous block
+        // 1. is paragraph, list, code block - follow the default behavior
+        // 2. is not - select the previous block (use block selection instead of text selection)
+        cmd
+          .getTextSelection()
+          .inline<'currentSelectionPath'>((ctx, next) => {
+            const currentTextSelection = ctx.currentTextSelection;
+            assertExists(currentTextSelection);
+            return next({ currentSelectionPath: currentTextSelection.path });
+          })
+          .getPrevBlock({
+            filter: block => ensureBlockInContainer(block, this.host),
+          })
+          .inline<'focusBlock'>((ctx, next) => {
+            const { prevBlock } = ctx;
+            assertExists(prevBlock);
+
+            if (
+              matchFlavours(prevBlock.model, [
+                'affine:paragraph',
+                'affine:list',
+                'affine:code',
+              ])
+            )
+              return;
+
+            return next({
+              focusBlock: prevBlock,
+            });
+          })
+          .selectBlock(),
         // block selection - select the previous block
-        this._onBlockUp(cmd),
+        // 1. is paragraph, list, code block - focus it
+        // 2. is not - select it using block selection
+        cmd
+          .getBlockSelections()
+          .inline<'currentSelectionPath'>((ctx, next) => {
+            const currentBlockSelections = ctx.currentBlockSelections;
+            assertExists(currentBlockSelections);
+            const blockSelection = currentBlockSelections.at(-1);
+            if (!blockSelection) {
+              return;
+            }
+            return next({ currentSelectionPath: blockSelection.path });
+          })
+          .getPrevBlock({
+            filter: block => ensureBlockInContainer(block, this.host),
+          })
+          .inline<'focusBlock'>((ctx, next) => {
+            const { prevBlock } = ctx;
+            assertExists(prevBlock);
+
+            if (
+              matchFlavours(prevBlock.model, [
+                'affine:paragraph',
+                'affine:list',
+                'affine:code',
+              ])
+            ) {
+              this._std.command
+                .chain()
+                .focusBlockEnd({ focusBlock: prevBlock })
+                .run();
+              event.preventDefault();
+              return;
+            }
+
+            return next({
+              focusBlock: prevBlock,
+            });
+          })
+          .selectBlock(),
       ])
       .run();
 
     return result;
-  };
-
-  private _onBlockUp = (cmd: BlockSuite.CommandChain) => {
-    return cmd
-      .getBlockSelections()
-      .inline<'currentSelectionPath'>((ctx, next) => {
-        const currentBlockSelections = ctx.currentBlockSelections;
-        assertExists(currentBlockSelections);
-        const blockSelection = currentBlockSelections.at(0);
-        if (!blockSelection) {
-          return;
-        }
-        return next({ currentSelectionPath: blockSelection.path });
-      })
-      .getPrevBlock()
-      .inline((ctx, next) => {
-        const { prevBlock } = ctx;
-        assertExists(prevBlock);
-
-        if (!ensureBlockInContainer(prevBlock, this.host)) {
-          return;
-        }
-
-        return next({
-          focusBlock: prevBlock,
-        });
-      })
-      .selectBlock();
   };
 
   private _onShiftArrowDown = () => {

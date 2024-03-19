@@ -11,5 +11,10 @@
   },
   "keywords": [],
   "author": "toeverything",
-  "license": "MPL-2.0"
+  "license": "MPL-2.0",
+  "pnpm": {
+    "overrides": {
+      "follow-redirects@<=1.15.5": ">=1.15.6"
+    }
+  }
 }

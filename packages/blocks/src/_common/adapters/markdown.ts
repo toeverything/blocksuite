@@ -651,7 +651,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 : undefined)
           ) {
             context.closeNode();
-            const nextONode = o.parent!.children[o.index! + 1];
+            const nextONode = o.parent?.children[o.index! + 1];
             if (
               !nextONode ||
               (nextONode && nextONode.flavour !== 'affine:list')
