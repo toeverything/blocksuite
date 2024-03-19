@@ -1,8 +1,8 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool } from '../../_common/types.js';
+import { once } from '../../_common/utils/event.js';
 import { matchFlavours } from '../../_common/utils/model.js';
-import { once } from '../../index.js';
 import {
   Bound,
   ConnectorElementModel,
