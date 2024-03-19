@@ -86,6 +86,16 @@ export function isEmbeddedBlock(
   );
 }
 
+export function isEmbeddedLinkBlock(
+  element: BlockModel | EdgelessModel | null
+) {
+  return (
+    isEmbeddedBlock(element) &&
+    !isEmbedSyncedDocBlock(element) &&
+    !isEmbedLinkedDocBlock(element)
+  );
+}
+
 export function isEmbedGithubBlock(
   element: BlockModel | EdgelessModel | null
 ): element is EmbedGithubModel {

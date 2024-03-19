@@ -43,7 +43,6 @@ import {
   LinkIcon,
   OpenIcon,
   PaletteIcon,
-  RefreshIcon,
 } from '../../icons/text.js';
 import { createLitPortal } from '../portal.js';
 import { toast } from '../toast.js';
@@ -420,11 +419,6 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _refreshData() {
-    this.block.refreshData();
-    this.abortController.abort();
-  }
-
   private _toggleCardStyleMenu() {
     if (this._moreMenuAbortController) {
       this._moreMenuAbortController.abort();
@@ -616,18 +610,6 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
         >
           ${CaptionIcon}
           <affine-tooltip .offset=${12}>${'Add Caption'}</affine-tooltip>
-        </icon-button>
-
-        <div class="divider"></div>
-
-        <icon-button
-          size="32px"
-          class="embed-card-toolbar-button reload"
-          ?disabled=${model.doc.readonly}
-          @click=${() => this._refreshData()}
-        >
-          ${RefreshIcon}
-          <affine-tooltip .offset=${12}>${'Reload'}</affine-tooltip>
         </icon-button>
 
         <div class="divider"></div>
