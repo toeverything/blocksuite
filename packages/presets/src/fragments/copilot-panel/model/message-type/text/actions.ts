@@ -1,12 +1,12 @@
 import { chatService, userText } from '../utils.js';
 import { TextMessageSchema } from './index.js';
 
-export const runCommonAction = TextMessageSchema.createActionBuilder(
+export const createCommonTextAction = TextMessageSchema.createActionBuilder(
   (text: string, context) => {
     return chatService().chat([...context.history, userText(text)]);
   }
 );
-export const runChangeToneAction = TextMessageSchema.createActionBuilder(
+export const createChangeToneAction = TextMessageSchema.createActionBuilder(
   ({ input, tone }: { input: string; tone: string }) => {
     return chatService().chat([
       {
@@ -21,7 +21,7 @@ export const runChangeToneAction = TextMessageSchema.createActionBuilder(
   }
 );
 
-export const runFixSpellingAction = TextMessageSchema.createActionBuilder(
+export const createFixSpellingAction = TextMessageSchema.createActionBuilder(
   (payload: { input: string }) => {
     const { input } = payload;
     return chatService().chat([
@@ -37,7 +37,7 @@ export const runFixSpellingAction = TextMessageSchema.createActionBuilder(
   }
 );
 
-export const runGenerateAction = TextMessageSchema.createActionBuilder(
+export const createGenerateAction = TextMessageSchema.createActionBuilder(
   (payload: { input: string }) => {
     const { input } = payload;
     return chatService().chat([
@@ -52,7 +52,7 @@ export const runGenerateAction = TextMessageSchema.createActionBuilder(
   }
 );
 
-export const runImproveWritingAction = TextMessageSchema.createActionBuilder(
+export const createImproveWritingAction = TextMessageSchema.createActionBuilder(
   (payload: { input: string }) => {
     const { input } = payload;
     return chatService().chat([
@@ -68,7 +68,7 @@ export const runImproveWritingAction = TextMessageSchema.createActionBuilder(
   }
 );
 
-export const runMakeLongerAction = TextMessageSchema.createActionBuilder(
+export const createMakeLongerAction = TextMessageSchema.createActionBuilder(
   (payload: { input: string }) => {
     const { input } = payload;
     return chatService().chat([
@@ -84,7 +84,7 @@ export const runMakeLongerAction = TextMessageSchema.createActionBuilder(
   }
 );
 
-export const runMakeShorterAction = TextMessageSchema.createActionBuilder(
+export const createMakeShorterAction = TextMessageSchema.createActionBuilder(
   (payload: { input: string }) => {
     const { input } = payload;
     return chatService().chat([
@@ -100,7 +100,7 @@ export const runMakeShorterAction = TextMessageSchema.createActionBuilder(
   }
 );
 
-export const runRefineAction = TextMessageSchema.createActionBuilder(
+export const createRefineAction = TextMessageSchema.createActionBuilder(
   (payload: { input: string }) => {
     const { input } = payload;
     return chatService().chat([
@@ -115,8 +115,8 @@ export const runRefineAction = TextMessageSchema.createActionBuilder(
   }
 );
 
-export const runSimplifyWritingAction = TextMessageSchema.createActionBuilder(
-  (payload: { input: string }) => {
+export const createSimplifyWritingAction =
+  TextMessageSchema.createActionBuilder((payload: { input: string }) => {
     const { input } = payload;
     return chatService().chat([
       {
@@ -128,10 +128,9 @@ export const runSimplifyWritingAction = TextMessageSchema.createActionBuilder(
         'Simplify the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. To make sure do your best'
       ),
     ]);
-  }
-);
+  });
 
-export const runSummaryAction = TextMessageSchema.createActionBuilder(
+export const createSummaryAction = TextMessageSchema.createActionBuilder(
   (payload: { input: string }) => {
     const { input } = payload;
     return chatService().chat([
@@ -145,7 +144,7 @@ export const runSummaryAction = TextMessageSchema.createActionBuilder(
   }
 );
 
-export const runTranslateAction = TextMessageSchema.createActionBuilder(
+export const createTranslateAction = TextMessageSchema.createActionBuilder(
   (payload: { input: string; language: string }) => {
     const { input, language } = payload;
     return chatService().chat([

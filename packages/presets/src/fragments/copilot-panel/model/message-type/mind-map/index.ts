@@ -13,7 +13,7 @@ export const MindMapMessageSchema = createMessageSchema<Markdown>({
     if (value.status === 'error') {
       return html` <div>${value.message}</div>`;
     }
-    return html` <div>${value.data}</div>`;
+    return html` <div style="white-space: pre-wrap">${value.data}</div>`;
   },
   toContext: (value: Markdown) => {
     return [
@@ -26,7 +26,7 @@ export const MindMapMessageSchema = createMessageSchema<Markdown>({
   },
 });
 
-export const createMindMap = MindMapMessageSchema.createActionBuilder(
+export const createMindMapAction = MindMapMessageSchema.createActionBuilder(
   (text: string, context) => {
     return chatService().chat([
       ...context.history,

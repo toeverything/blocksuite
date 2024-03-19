@@ -11,7 +11,7 @@ import {
 import { ChatFeatureKey } from '../doc/api.js';
 import type { AILogic } from '../logic.js';
 import type { Copilot } from '../model/index.js';
-import { runCommonAction } from '../model/message-type/text/actions.js';
+import { createCommonTextAction } from '../model/message-type/text/actions.js';
 import type { ChatMessage, ChatReactiveData, EmbeddedDoc } from './logic.js';
 
 @customElement('copilot-chat-panel')
@@ -212,7 +212,7 @@ export class CopilotChatPanel
       this.input.focus();
       const text = this.input.value;
       this.input.value = '';
-      this.copilot.askAI(runCommonAction(text), text);
+      this.copilot.askAI(createCommonTextAction(text), text);
     };
     const keydown = (e: KeyboardEvent) => {
       e.stopPropagation();

@@ -77,11 +77,17 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
       history: this.history.flatMap(v => v.toContext()),
     });
     const process = async () => {
+      let lastValue: Result | undefined;
       for await (const value of result) {
         if (abortController.signal.aborted) {
           return;
         }
-        this.value = { status: 'success', data: value };
+        lastValue = value;
+        this.value = { status: 'success', data: value, done: false };
+        this.fire();
+      }
+      if (lastValue) {
+        this.value = { status: 'success', data: lastValue, done: true };
         this.fire();
       }
     };

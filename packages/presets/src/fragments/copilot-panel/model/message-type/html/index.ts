@@ -1,16 +1,59 @@
-import { copilotConfig } from '../copilot-service/copilot-config.js';
-import { Image2TextServiceKind } from '../copilot-service/service-base.js';
+import { html } from 'lit';
 
-export const genHtml = async (
-  img: string,
-  latestHtmlBlock?: {
-    design: string;
-    html: string;
-  }
-) => {
-  const result = copilotConfig
-    .getService('make it real', Image2TextServiceKind)
-    .generateText([
+import { createMessageSchema } from '../../message-schema.js';
+import { chatService, image2TextService, userText } from '../utils.js';
+
+type HTML = string;
+export const HTMLMessageSchema = createMessageSchema<HTML>({
+  type: 'html',
+  render: ({ value }) => {
+    if (value.status === 'loading') {
+      return html`loading...`;
+    }
+    if (value.status === 'error') {
+      return html` <div>${value.message}</div>`;
+    }
+    let s = value.data;
+    const start = s.indexOf('<!DOCTYPE html>');
+    if (start >= 0) {
+      s = s.slice(start);
+    }
+    const end = s.indexOf('</html>');
+    if (end >= 0) {
+      s = s.slice(0, end + '</html>'.length);
+    }
+    if (!value.done) {
+      return html`<div style="white-space: pre-wrap;font-size: 12px">
+        ${s}
+      </div>`;
+    }
+    return html` <div>
+      <iframe style="width: 100%;border: 0;" srcdoc="${s}"></iframe>
+    </div>`;
+  },
+  toContext: (value: HTML) => {
+    return [
+      {
+        role: 'assistant',
+        content: value,
+        sources: [],
+      },
+    ];
+  },
+});
+
+export const createHTMLFromImageAction = HTMLMessageSchema.createActionBuilder(
+  ({
+    img,
+    latestHtmlBlock,
+  }: {
+    img: string;
+    latestHtmlBlock?: {
+      design: string;
+      html: string;
+    };
+  }) => {
+    return image2TextService().generateText([
       {
         role: 'system',
         content: `You are an expert web developer who specializes in building working website prototypes from low-fidelity wireframes.
@@ -76,9 +119,35 @@ When sent new wireframes, respond ONLY with the contents of the html file.`,
         ],
       },
     ]);
-  let value = '';
-  for await (const v of result) {
-    value = v;
   }
-  return value;
-};
+);
+
+export const createHTMLFromTextAction = HTMLMessageSchema.createActionBuilder(
+  (text: string, context) => {
+    return chatService().chat([
+      ...context.history,
+      userText(
+        `You are a professional web developer who specializes in building working website prototypes from product requirement descriptions.
+Your job is to take a product requirement description, then create a working prototype using HTML, CSS, and JavaScript, and finally send the result back.
+The result should be a single HTML file.
+Use tailwind to create site styles.
+Add CSS styles in the style tag and JavaScript in the script tag.
+Import any required dependencies using unpkg or skypack.
+Import the required open source fonts using Google Fonts.
+If there are any images, load them from Unsplash or use solid color rectangles.
+
+Wireframes may include flowcharts, diagrams, labels, arrows, sticky notes and other features that should inform your work.
+
+Use your knowledge of the application and user experience to fill in any implied business logic in the wireframe diagram. Fill it in and make it real!
+
+Below are the product requirements:
+\`\`\`
+${text}
+\`\`\`
+
+Don't output anything that isn't HTML
+`
+      ),
+    ]);
+  }
+);

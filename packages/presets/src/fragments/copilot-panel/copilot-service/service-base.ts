@@ -75,7 +75,7 @@ export const EmbeddingServiceKind = createServiceKind<{
 export const Image2TextServiceKind = createServiceKind<{
   generateText(
     messages: Array<OpenAI.ChatCompletionMessageParam>
-  ): Promise<string>;
+  ): AsyncIterable<string>;
 }>({
   type: 'image-to-text-service',
   title: 'Image to text service',

@@ -12,7 +12,7 @@ export const TextMessageSchema = createMessageSchema<string>({
     if (value.status === 'error') {
       return html` <div>${value.message}</div>`;
     }
-    return html` <div>${value.data}</div>`;
+    return html` <div style="white-space: pre-wrap">${value.data}</div>`;
   },
   toContext: (value: Text) => {
     return [

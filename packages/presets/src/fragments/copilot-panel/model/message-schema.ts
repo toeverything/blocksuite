@@ -46,6 +46,7 @@ export type ApiData<T> =
   | {
       status: 'success';
       data: T;
+      done: boolean;
     };
 export type MessageSchema<Result, Data = unknown> = {
   type: string;

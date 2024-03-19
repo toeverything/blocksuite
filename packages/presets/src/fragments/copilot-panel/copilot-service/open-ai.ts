@@ -191,7 +191,7 @@ EmbeddingServiceKind.implService({
 Image2TextServiceKind.implService({
   name: 'GPT4 Vision',
   method: data => ({
-    generateText: async messages => {
+    async *generateText(messages) {
       const apiKey = data.apiKey;
       const openai = new OpenAI({
         apiKey: apiKey,
@@ -202,8 +202,13 @@ Image2TextServiceKind.implService({
         model: 'gpt-4-vision-preview',
         temperature: 0,
         max_tokens: 4096,
+        stream: true,
       });
-      return result.choices[0].message.content ?? '';
+      let text = '';
+      for await (const message of result) {
+        text += message.choices[0].delta.content ?? '';
+        yield text;
+      }
     },
   }),
   vendor: openaiVendor,
