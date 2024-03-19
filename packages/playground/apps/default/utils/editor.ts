@@ -1,3 +1,4 @@
+import type { PageRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer } from '@blocksuite/presets';
@@ -24,8 +25,44 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const specs = getExampleSpecs();
 
   const editor = new AffineEditorContainer();
-  editor.pageSpecs = specs.pageModeSpecs;
-  editor.edgelessSpecs = specs.edgelessModeSpecs;
+  editor.pageSpecs = [...specs.pageModeSpecs].map(spec => {
+    if (spec.schema.model.flavour === 'affine:page') {
+      const setup = spec.setup;
+      spec = {
+        ...spec,
+        setup: (slots, disposable) => {
+          setup?.(slots, disposable);
+          slots.mounted.once(({ service }) => {
+            disposable.add(
+              (<PageRootService>service).slots.editorModeSwitch.on(
+                switchQuickEdgelessMenu
+              )
+            );
+          });
+        },
+      };
+    }
+    return spec;
+  });
+  editor.edgelessSpecs = [...specs.edgelessModeSpecs].map(spec => {
+    if (spec.schema.model.flavour === 'affine:page') {
+      const setup = spec.setup;
+      spec = {
+        ...spec,
+        setup: (slots, disposable) => {
+          setup?.(slots, disposable);
+          slots.mounted.once(({ service }) => {
+            disposable.add(
+              (<PageRootService>service).slots.editorModeSwitch.on(
+                switchQuickEdgelessMenu
+              )
+            );
+          });
+        },
+      };
+    }
+    return spec;
+  });
   editor.doc = doc;
   editor.slots.docLinkClicked.on(({ docId }) => {
     const target = collection.getDoc(docId);
@@ -50,6 +87,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.docsPanel = docsPanel;
+
+  function switchQuickEdgelessMenu(mode: typeof defaultMode) {
+    quickEdgelessMenu.mode = mode;
+  }
 
   document.body.append(leftSidePanel);
   document.body.append(quickEdgelessMenu);
