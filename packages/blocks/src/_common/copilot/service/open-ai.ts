@@ -1,8 +1,7 @@
 import { html } from 'lit';
 import { OpenAI } from 'openai';
 
-import type { ChatMessage } from '../chat/logic.js';
-import { pngBase64ToFile } from '../edgeless/edit-image.js';
+import type { ChatMessage } from '../model/message-schema.js';
 import {
   ChatServiceKind,
   createVendor,
@@ -11,6 +10,16 @@ import {
   Text2ImageServiceKind,
   TextServiceKind,
 } from './service-base.js';
+
+export const pngBase64ToFile = (base64: string, filename: string) => {
+  const bstr = atob(base64);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: 'image/png' });
+};
 
 export const openaiVendor = createVendor<{
   apiKey: string;
@@ -90,8 +99,10 @@ const askGPTStream = async function* (
     temperature: 0,
     max_tokens: 4096,
   });
+  let text = '';
   for await (const message of result) {
-    yield message.choices[0].delta.content ?? '';
+    text += message.choices[0].delta.content ?? '';
+    yield text;
   }
 };
 
@@ -189,7 +200,7 @@ EmbeddingServiceKind.implService({
 Image2TextServiceKind.implService({
   name: 'GPT4 Vision',
   method: data => ({
-    generateText: async messages => {
+    async *generateText(messages) {
       const apiKey = data.apiKey;
       const openai = new OpenAI({
         apiKey: apiKey,
@@ -200,8 +211,13 @@ Image2TextServiceKind.implService({
         model: 'gpt-4-vision-preview',
         temperature: 0,
         max_tokens: 4096,
+        stream: true,
       });
-      return result.choices[0].message.content ?? '';
+      let text = '';
+      for await (const message of result) {
+        text += message.choices[0].delta.content ?? '';
+        yield text;
+      }
     },
   }),
   vendor: openaiVendor,

@@ -17,7 +17,6 @@ import { allKindService } from './copilot-service/service-base.js';
 import type { AIEdgelessLogic } from './edgeless/logic.js';
 import { AddCursorIcon, StarIcon } from './icons.js';
 import { AILogic } from './logic.js';
-import { Copilot } from './model/index.js';
 import { getSurfaceElementFromEditor } from './utils/selection-utils.js';
 
 @customElement('copilot-panel')
@@ -98,7 +97,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       border-radius: 4px;
       color: white;
     }
-
     .copilot-box {
       margin-bottom: 64px;
     }
@@ -108,7 +106,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       align-items: center;
       justify-content: space-between;
     }
-
     .service-type {
       font-size: 14px;
       color: var(--affine-text-secondary-color);
@@ -119,7 +116,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   editor!: AffineEditorContainer;
   editorWithAI?: AIEdgelessLogic;
   aiLogic?: AILogic;
-  copilot = new Copilot();
 
   get host() {
     return this.editor.host;
@@ -127,7 +123,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
 
   get logic() {
     if (!this.aiLogic) {
-      this.aiLogic = new AILogic(() => this.host, this.copilot);
+      this.aiLogic = new AILogic(() => this.host);
     }
     return this.aiLogic;
   }
@@ -200,7 +196,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       render: () => {
         return html` <copilot-chat-panel
           .logic="${this.logic}"
-          .copilot="${this.copilot}"
         ></copilot-chat-panel>`;
       },
     },
@@ -290,8 +285,8 @@ export const affineFormatBarItemConfig = {
       }
       return html`
         <sl-menu-item @click="${() => item.action()}"
-          >${item.name}
-        </sl-menu-item>
+          >${item.name}</sl-menu-item
+        >
       `;
     };
     return html`
@@ -305,7 +300,6 @@ export const affineFormatBarItemConfig = {
           justify-content: center;
           color: var(--affine-icon-color);
         }
-
         .copilot-format-bar-item:hover {
           background-color: var(--affine-hover-color);
         }
@@ -353,8 +347,8 @@ EdgelessComponentToolbar.registerCustomRenderer({
       }
       return html`
         <sl-menu-item @click="${() => item.action()}"
-          >${item.name}
-        </sl-menu-item>
+          >${item.name}</sl-menu-item
+        >
       `;
     };
     return html`
@@ -368,7 +362,6 @@ EdgelessComponentToolbar.registerCustomRenderer({
           justify-content: center;
           color: var(--affine-icon-color);
         }
-
         .copilot-format-bar-item:hover {
           background-color: var(--affine-hover-color);
         }

@@ -1,7 +1,7 @@
 import type { TemplateResult } from 'lit';
 import type { OpenAI } from 'openai';
 
-import type { ChatMessage } from '../chat/logic.js';
+import type { ChatMessage } from '../model/message-schema.js';
 
 export type Vendor<Data> = {
   key: string;
@@ -75,7 +75,7 @@ export const EmbeddingServiceKind = createServiceKind<{
 export const Image2TextServiceKind = createServiceKind<{
   generateText(
     messages: Array<OpenAI.ChatCompletionMessageParam>
-  ): Promise<string>;
+  ): AsyncIterable<string>;
 }>({
   type: 'image-to-text-service',
   title: 'Image to text service',

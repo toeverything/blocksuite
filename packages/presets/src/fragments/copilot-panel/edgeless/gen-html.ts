@@ -8,7 +8,7 @@ export const genHtml = async (
     html: string;
   }
 ) => {
-  const result = copilotConfig
+  const result = await copilotConfig
     .getService('make it real', Image2TextServiceKind)
     .generateText([
       {
@@ -76,9 +76,10 @@ When sent new wireframes, respond ONLY with the contents of the html file.`,
         ],
       },
     ]);
-  let value = '';
-  for await (const v of result) {
-    value = v;
+  if (!result) {
+    return;
   }
-  return value;
+  const start = result.indexOf('<!DOCTYPE html>');
+  const end = result.indexOf('</html>');
+  return result.slice(start, end + '</html>'.length);
 };

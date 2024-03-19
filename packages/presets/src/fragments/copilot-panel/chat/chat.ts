@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html, type PropertyValues } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -10,8 +10,6 @@ import {
 } from '../copilot-service/service-base.js';
 import { ChatFeatureKey } from '../doc/api.js';
 import type { AILogic } from '../logic.js';
-import type { Copilot } from '../model/index.js';
-import { createCommonTextAction } from '../model/message-type/text/actions.js';
 import type { ChatMessage, ChatReactiveData, EmbeddedDoc } from './logic.js';
 
 @customElement('copilot-chat-panel')
@@ -99,8 +97,6 @@ export class CopilotChatPanel
 
   @property({ attribute: false })
   logic!: AILogic;
-  @property({ attribute: false })
-  copilot!: Copilot;
   get chat() {
     return this.logic.chat;
   }
@@ -154,11 +150,6 @@ export class CopilotChatPanel
         this.checkSelection();
       })
     );
-    this.disposables.add(
-      this.copilot.history.onChange(() => {
-        this.requestUpdate();
-      })
-    );
   }
 
   checkSelection() {
@@ -178,6 +169,94 @@ export class CopilotChatPanel
     this.requestUpdate();
   };
 
+  renderMessage = (message: ChatMessage) => {
+    if (message.role === 'system') {
+      return null;
+    }
+    if (message.role === 'user') {
+      const style = styleMap({
+        alignSelf: 'flex-end',
+      });
+      return html` <div class="history-item" style="${style}">
+        ${repeat(message.content, item => {
+          if (item.type === 'text') {
+            return html`<div style="width: fit-content">${item.text}</div>`;
+          }
+          if (item.type === 'image_url') {
+            return html`<div style="width: fit-content">
+              <img .src="${item.image_url.url}" style="max-width: 100px" />
+            </div>`;
+          }
+          return null;
+        })}
+      </div>`;
+    }
+    if (message.role === 'assistant') {
+      const style = styleMap({
+        alignItems: 'flex-start',
+        backgroundColor: 'var(--affine-blue-100)',
+      });
+      return html`
+        <div class="history-item" style="${style}">
+          <div style="width: fit-content">${message.content}</div>
+          ${message.sources?.length
+            ? html` <div class="history-refs">
+                <div style="margin-top: 8px;">sources:</div>
+                <div
+                  style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
+                >
+                  ${repeat(message.sources, ref => {
+                    const doc = this.host.doc.collection.getDoc(ref.id);
+                    if (!doc) {
+                      return;
+                    }
+                    const title = doc.meta?.title || 'Untitled';
+                    const jumpTo = () => {
+                      this.host.doc = doc;
+                    };
+                    return html` <a @click="${jumpTo}" style="cursor: pointer"
+                      >${title}</a
+                    >`;
+                  })}
+                </div>
+              </div>`
+            : null}
+
+          <div
+            style="
+                  position:absolute;
+                  bottom:-35px;
+                  left: 0;
+                  display:flex;
+                  align-items:center;
+                  gap: 8px;
+                  user-select: none;
+                  height: 28px;
+                  white-space: nowrap;
+                  width: 100%;
+                  justify-content: flex-end;
+"
+          >
+            <div
+              @click="${() =>
+                this.chat.replaceSelectedContent(message.content)}"
+              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+            >
+              replace
+            </div>
+            <div
+              @click="${() =>
+                this.chat.insertBelowSelectedContent(message.content)}"
+              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+            >
+              insert below
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    return null;
+  };
   toolbar() {
     // const lastMessage = this.history[this.history.length - 1];
     // return html`<div
@@ -208,17 +287,17 @@ export class CopilotChatPanel
   @query('.copilot-chat-panel-chat-input')
   input!: HTMLInputElement;
   protected override render(): unknown {
-    const getAnswer = () => {
+    const getAnswer = async () => {
       this.input.focus();
       const text = this.input.value;
       this.input.value = '';
-      this.copilot.askAI(createCommonTextAction(text), text);
+      await this.chat.genAnswer(text);
     };
-    const keydown = (e: KeyboardEvent) => {
+    const keydown = async (e: KeyboardEvent) => {
       e.stopPropagation();
       if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.isComposing) {
         e.preventDefault();
-        getAnswer();
+        await getAnswer();
       }
     };
     const sendButtonStyle = styleMap({
@@ -252,7 +331,14 @@ export class CopilotChatPanel
           <div
             style="flex:1;gap:42px;flex-direction: column;display:flex;padding: 0 7px 42px"
           >
-            ${repeat(this.copilot.history.history, item => item.render())}
+            ${repeat(this.history, this.renderMessage)}
+            ${this.tempMessage
+              ? this.renderMessage({
+                  role: 'assistant',
+                  content: this.tempMessage,
+                  sources: [],
+                })
+              : nothing}
           </div>
         </div>
         <div>

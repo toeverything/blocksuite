@@ -1,9 +1,9 @@
-import type { ChatMessage } from '../../chat/logic.js';
-import { copilotConfig } from '../../copilot-service/copilot-config.js';
+import { copilotConfig } from '../../service/copilot-config.js';
 import {
   ChatServiceKind,
   Image2TextServiceKind,
-} from '../../copilot-service/service-base.js';
+} from '../../service/service-base.js';
+import type { ChatMessage } from '../message-schema.js';
 
 const ChatFeatureKey = 'chat';
 export const chatService = () =>

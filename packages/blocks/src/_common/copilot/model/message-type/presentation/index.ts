@@ -1,8 +1,7 @@
 import { html } from 'lit';
 
-import { userText } from '../../../doc/api.js';
 import { createMessageSchema } from '../../message-schema.js';
-import { chatService } from '../utils.js';
+import { chatService, userText } from '../utils.js';
 
 type Markdown = string;
 export const PresentationMessageSchema = createMessageSchema<Markdown>({
