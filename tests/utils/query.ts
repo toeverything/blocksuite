@@ -16,6 +16,7 @@ export function getFormatBar(page: Page) {
   const redForegroundBtn = formatBar.getByTestId(
     'var(--affine-text-highlight-foreground-red)'
   );
+  const createLinkedDocBtn = formatBar.getByTestId('convert-to-linked-doc');
   const defaultColorBtn = formatBar.getByTestId('unset');
   const highlight = {
     highlightBtn,
@@ -53,6 +54,7 @@ export function getFormatBar(page: Page) {
     linkBtn,
     copyBtn,
     highlight,
+    createLinkedDocBtn,
 
     openParagraphMenu,
     textBtn,

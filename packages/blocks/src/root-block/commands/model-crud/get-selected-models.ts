@@ -12,6 +12,7 @@ export const getSelectedModelsCommand: Command<
 > = (ctx, next) => {
   const types = ctx.types ?? ['block', 'text', 'image'];
   const mode = ctx.mode ?? 'flat';
+  const selectedModels: BlockModel[] = [];
   ctx.std.command
     .chain()
     .tryAll(chain => [
