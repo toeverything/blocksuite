@@ -440,10 +440,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._blockElement?.captionElement?.show();
   }
 
-  private _refreshData() {
-    this._blockElement?.refreshData();
-  }
-
   private _copyUrl() {
     if (!('url' in this.model)) {
       return;
