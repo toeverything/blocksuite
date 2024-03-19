@@ -1,5 +1,6 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockModel, Doc } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
 
 import { toast } from '../../../_common/components/index.js';
@@ -173,6 +174,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         const [_, ctx] = chain
           .getSelectedModels({
             types: ['block'],
+            mode: 'highest',
           })
           .run();
         const { selectedModels } = ctx;
@@ -223,14 +225,35 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
             selectedModels.shift();
           }
 
-          selectedModels.forEach(model => {
+          const addBlockRecursively = (
+            linkedDoc: Doc,
+            model: BlockModel,
+            parentId: string
+          ) => {
+            // Add current block to linked doc
             const keys = model.keys as (keyof typeof model)[];
             const values = keys.map(key => model[key]);
             const blockProps = Object.fromEntries(
               keys.map((key, i) => [key, values[i]])
             );
-            linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
+            const newModelId = linkedDoc.addBlock(
+              model.flavour as never,
+              blockProps,
+              parentId
+            );
+            // Add children to linked doc, parent is the new model
+            const children = model.children;
+            if (children.length > 0) {
+              children.forEach(child => {
+                addBlockRecursively(linkedDoc, child, newModelId);
+              });
+            }
+            // Delete current block from original doc
             doc.deleteBlock(model);
+          };
+          // Add selected blocks to linked doc recursively
+          selectedModels.forEach(model => {
+            addBlockRecursively(linkedDoc, model, noteId);
           });
         });
 

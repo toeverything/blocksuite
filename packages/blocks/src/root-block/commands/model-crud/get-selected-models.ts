@@ -7,10 +7,11 @@ export const getSelectedModelsCommand: Command<
   'selectedModels',
   {
     types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
+    mode?: 'all' | 'flat' | 'highest';
   }
 > = (ctx, next) => {
   const types = ctx.types ?? ['block', 'text', 'image'];
-  const selectedModels: BlockModel[] = [];
+  const mode = ctx.mode ?? 'flat';
   ctx.std.command
     .chain()
     .tryAll(chain => [
@@ -20,6 +21,7 @@ export const getSelectedModelsCommand: Command<
     ])
     .getSelectedBlocks({
       types,
+      mode,
     })
     .inline(ctx => {
       const { selectedBlocks } = ctx;

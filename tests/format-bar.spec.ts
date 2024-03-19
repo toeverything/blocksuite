@@ -18,6 +18,7 @@ import {
   pressArrowDown,
   pressArrowUp,
   pressEnter,
+  pressTab,
   scrollToBottom,
   scrollToTop,
   selectAllByKeyboard,
@@ -32,6 +33,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertAlmostEqual,
+  assertBlockChildrenIds,
   assertExists,
   assertLocatorVisible,
   assertRichImage,
@@ -1569,4 +1571,26 @@ test('selecting image should not show format bar', async ({ page }) => {
   await waitNextFrame(page);
   const { formatBar } = getFormatBar(page);
   await expect(formatBar).not.toBeVisible();
+});
+
+test('create linked doc from block selection with format bar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await focusRichText(page, 0);
+  await type(page, 'hello', 20);
+
+  await focusRichText(page, 1);
+  await type(page, 'world', 20);
+  await pressTab(page);
+
+  await focusRichText(page, 2);
+  await type(page, 'hello world', 20);
+  await assertRichTexts(page, ['hello', 'world', 'hello world']);
+
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+  await assertBlockChildrenIds(page, '2', ['3']);
 });
