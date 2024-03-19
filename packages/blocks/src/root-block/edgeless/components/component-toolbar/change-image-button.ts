@@ -7,7 +7,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { CaptionIcon, RefreshIcon } from '../../../../_common/icons/text.js';
+import { CaptionIcon } from '../../../../_common/icons/text.js';
 import type { ImageBlockComponent } from '../../../../image-block/image-block.js';
 import type { ImageBlockModel } from '../../../../image-block/image-model.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
@@ -70,10 +70,6 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
     this._blockElement?.captionElement.show();
   }
 
-  private _refreshData() {
-    this._blockElement?.refreshData();
-  }
-
   override render() {
     return html`
       <div class="change-image-container">
@@ -84,19 +80,6 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
           @click=${() => this._showCaption()}
         >
           ${CaptionIcon}
-        </edgeless-tool-icon-button>
-
-        <component-toolbar-menu-divider
-          .vertical=${true}
-        ></component-toolbar-menu-divider>
-
-        <edgeless-tool-icon-button
-          .tooltip=${'Reload'}
-          class="change-image-button reload"
-          ?disabled=${this._doc.readonly}
-          @click=${() => this._refreshData()}
-        >
-          ${RefreshIcon}
         </edgeless-tool-icon-button>
       </div>
     `;
