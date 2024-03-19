@@ -59,7 +59,7 @@ const pie = new PieMenuBuilder({
   },
 });
 
-pie.action({
+pie.command({
   label: 'Pen',
   icon: EdgelessPenIcon,
   action: setEdgelessToolAction({
@@ -67,7 +67,7 @@ pie.action({
   }),
 });
 
-pie.action({
+pie.command({
   label: 'Eraser',
   icon: EdgelessEraserIcon,
   action: setEdgelessToolAction({
@@ -75,7 +75,7 @@ pie.action({
   }),
 });
 
-pie.action({
+pie.command({
   label: 'Frame',
   icon: FrameIcon,
   action: setEdgelessToolAction({
@@ -83,7 +83,7 @@ pie.action({
   }),
 });
 
-pie.action({
+pie.command({
   label: 'Select',
   icon: SelectIcon,
   action: setEdgelessToolAction({
@@ -91,7 +91,7 @@ pie.action({
   }),
 });
 
-pie.action({
+pie.command({
   label: 'Note',
   icon: NoteIcon,
   action: setEdgelessToolAction({
@@ -102,7 +102,7 @@ pie.action({
   }),
 });
 
-pie.action({
+pie.command({
   label: 'Reset Zoom',
   icon: ViewBarIcon,
   action: ({ rootElement }) => {
@@ -112,7 +112,7 @@ pie.action({
   },
 });
 
-pie.action({
+pie.command({
   label: 'Present',
   icon: ({ rootElement }) => {
     if (rootElement instanceof EdgelessRootBlockComponent) {
@@ -178,7 +178,7 @@ pie.beginSubmenu({
   },
 });
 
-pie.action({
+pie.command({
   label: 'Straight',
   icon: StraightLineIcon,
   action: setEdgelessToolAction({
@@ -187,7 +187,7 @@ pie.action({
   }),
 });
 
-pie.action({
+pie.command({
   label: 'Curved',
   icon: CurveLineIcon,
   action: setEdgelessToolAction({
@@ -196,7 +196,7 @@ pie.action({
   }),
 });
 
-pie.action({
+pie.command({
   label: 'Elbowed',
   icon: ElbowedLineIcon,
   action: setEdgelessToolAction({
@@ -240,7 +240,7 @@ const shapes = [
 ];
 
 shapes.forEach(shape => {
-  pie.action({
+  pie.command({
     label: shape.label,
     icon: ({ rootElement }) => {
       const attributes = rootElement.service.editSession.getLastProps('shape');
@@ -254,7 +254,7 @@ shapes.forEach(shape => {
   });
 });
 
-pie.action({
+pie.command({
   label: 'Toggle Style',
   icon: ({ rootElement }) => {
     const { shapeStyle } =
@@ -263,6 +263,7 @@ pie.action({
       ? ScribbledStyleIcon
       : GeneralStyleIcon;
   },
+
   action: ({ rootElement }) => {
     const { shapeStyle } =
       rootElement.service.editSession.getLastProps('shape');

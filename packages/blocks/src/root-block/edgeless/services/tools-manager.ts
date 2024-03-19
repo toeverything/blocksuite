@@ -16,6 +16,7 @@ import {
 } from '../../../_common/utils/index.js';
 import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
 import type { Bound } from '../../../surface-block/utils/bound.js';
+import type { AffinePieMenuWidget } from '../../widgets/index.js';
 import type { EdgelessToolController } from '../controllers/tools/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
@@ -235,6 +236,15 @@ export class EdgelessToolsManager {
       this._onContainerContextMenu(event);
     });
     this._add('wheel', ctx => {
+      if (
+        (
+          this.container.widgetElements[
+            'affine-pie-menu-widget'
+          ] as AffinePieMenuWidget
+        ).isOpen
+      )
+        return;
+
       const state = ctx.get('defaultState');
       const e = state.event;
       if (!(e instanceof WheelEvent)) return;

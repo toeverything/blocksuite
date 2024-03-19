@@ -23,7 +23,7 @@ export class PieMenu extends WithDisposable(LitElement) {
   static override styles = styles.pieMenu;
 
   slots = {
-    updateHoveredNode: new Slot<number | null>(),
+    pointerAngleUpdated: new Slot<number | null>(),
     requestNodeUpdate: new Slot(),
   };
 
@@ -80,6 +80,29 @@ export class PieMenu extends WithDisposable(LitElement) {
     return position;
   }
 
+  getNodeRelPos(node: PieNode): IVec {
+    const position = [...this.position];
+    let cur: PieNode | null = node;
+
+    while (cur !== null) {
+      position[0] += cur.position[0];
+      position[1] += cur.position[1];
+      cur = cur.containerNode;
+    }
+
+    return position;
+  }
+
+  getActiveNodeToMouseLenSq(mouse: IVec) {
+    const [x, y] = mouse;
+    const [nodeX, nodeY] = this.getActiveNodeRelPos();
+
+    const dx = x - nodeX;
+    const dy = y - nodeY;
+
+    return Vec.len2([dx, dy]);
+  }
+
   isChildOfActiveNode(node: PieNode) {
     return node.containerNode === this.activeNode;
   }
@@ -113,18 +136,31 @@ export class PieMenu extends WithDisposable(LitElement) {
   }
 
   setHovered(node: PieNode | null) {
+    clearTimeout(this._openSubmenuTimeout);
+
     this._hoveredNode = node;
-    if (node && node.schema.type === 'submenu') this.openSubmenu(node);
+
+    if (!node) return;
+    const { type } = node.schema;
+
+    if (type === 'submenu') {
+      this._openSubmenuTimeout = setTimeout(() => {
+        this.openSubmenu(node);
+      }, PieManager.settings.SUBMENU_OPEN_TIMEOUT);
+    }
   }
 
   openSubmenu(submenu: PieNode) {
     assertEquals(submenu.schema.type, 'submenu', 'Need node of type submenu');
 
-    this._openSubmenuTimeout = setTimeout(() => {
-      this.selectionChain.push(submenu);
-      this.setHovered(null);
-      this.slots.requestNodeUpdate.emit();
-    }, PieManager.settings.SUBMENU_OPEN_TIMEOUT);
+    this.selectionChain.push(submenu);
+    this.setHovered(null);
+    this.slots.requestNodeUpdate.emit();
+  }
+
+  // toggles a ToggleNode if the hovered node is a toggle node
+  toggleHoveredNode(_dir: 'up' | 'down') {
+    // TODO: Un Implemented
   }
 
   override connectedCallback(): void {
@@ -156,12 +192,6 @@ export class PieMenu extends WithDisposable(LitElement) {
       this._handlePointerMove
     );
 
-    this._disposables.add(
-      this.slots.updateHoveredNode.on(() => {
-        clearTimeout(this._openSubmenuTimeout);
-      })
-    );
-
     this._disposables.addFromEvent(document, 'keydown', this._handleKeyDown);
   }
 
@@ -183,6 +213,13 @@ export class PieMenu extends WithDisposable(LitElement) {
     if (key === 'Escape') {
       return this.abortController.abort();
     }
+
+    if (ev.code === 'Backspace') {
+      if (this.selectionChain.length <= 1) return;
+      const { containerNode } = this.activeNode;
+      if (containerNode) this.popSelectionChainTo(containerNode);
+    }
+
     if (key.match(/\d+/)) {
       this.selectChildWithIndex(parseInt(key));
     }
@@ -191,20 +228,20 @@ export class PieMenu extends WithDisposable(LitElement) {
   private _handlePointerMove = (ev: PointerEvent) => {
     const { clientX, clientY } = ev;
 
-    const [nodeX, nodeY] = this.getActiveNodeRelPos();
+    const { ACTIVATE_THRESHOLD_MIN } = PieManager.settings;
 
-    const dx = clientX - nodeX;
-    const dy = clientY - nodeY;
+    const lenSq = this.getActiveNodeToMouseLenSq([clientX, clientY]);
 
-    const lenSq = Vec.len2([dx, dy]);
-    const { ACTIVATE_THRESHOLD } = PieManager.settings;
+    if (lenSq > ACTIVATE_THRESHOLD_MIN ** 2) {
+      const [nodeX, nodeY] = this.getActiveNodeRelPos();
+      const dx = clientX - nodeX;
+      const dy = clientY - nodeY;
 
-    if (lenSq > ACTIVATE_THRESHOLD ** 2) {
       const TAU = Math.PI * 2;
       const angle = toDegree((Math.atan2(dy, dx) + TAU) % TAU); // convert from [-PI, PI] to [0  TAU]
-      this.slots.updateHoveredNode.emit(angle);
+      this.slots.pointerAngleUpdated.emit(angle);
     } else {
-      this.slots.updateHoveredNode.emit(null); // acts like an abort signal
+      this.slots.pointerAngleUpdated.emit(null); // acts like a abort signal
     }
   };
 
@@ -234,7 +271,7 @@ export class PieMenu extends WithDisposable(LitElement) {
       nodeSchema.children.forEach((childSchema, i) => {
         const childNode = this._createNodeTree(childSchema);
         childNode.containerNode = node;
-        childNode.index = i + 1; // TODO: angles may not be in the order of nodes, resulting in non-continuous indexing.. Maybe sort the children while when building according to the angle
+        childNode.index = i + 1;
         childNode.setAttribute('index', childNode.index.toString());
         node.append(childNode);
       });

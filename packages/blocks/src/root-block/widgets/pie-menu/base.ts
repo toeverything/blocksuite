@@ -8,24 +8,12 @@ import type { PieNode } from './node.js';
 export interface IPieMenuSchema {
   id: PieMenuId;
 
-  /**
-   *  Label Describing your menu
-   */
   label: string;
 
-  /**
-   * The root node.
-   */
   root: IPieRootNode;
 
-  /**
-   * Whether to render the menu in page, edgeless or both
-   */
   scope: { page?: boolean; edgeless?: boolean };
 
-  /**
-   * Tests the key to open the menu
-   */
   trigger: (props: {
     keyEvent: KeyboardEvent;
     rootElement: RootBlockComponent;
@@ -35,7 +23,7 @@ export interface IPieMenuSchema {
 export type IconGetter = (ctx: PieMenuContext) => TemplateResult;
 export type DisabledGetter = (ctx: PieMenuContext) => boolean;
 export interface IPieBaseNode {
-  type: 'root' | 'action' | 'submenu';
+  type: 'root' | 'command' | 'submenu' | 'toggle' | 'color';
 
   label: string;
 
@@ -65,19 +53,38 @@ export type PieMenuContext = {
 export type ActionFunction = (ctx: PieMenuContext) => void;
 
 // Nodes which can perform a given action
-export interface IPieActionNode extends IPieBaseNode {
-  type: 'action';
+export interface IPieCommandNode extends IPieBaseNode {
+  type: 'command';
   action: ActionFunction;
 }
 
+// Allows to toggle functionality by mouse enter or click but does not close the menu
+export interface IPieToggleNode extends IPieBaseNode {
+  type: 'toggle';
+  action: ActionFunction;
+  // TODO add array of actions which which can be toggled with wheel or arrow
+}
+
+export type IPieNodeWithAction = IPieCommandNode | IPieToggleNode;
+
+export type IPieNonRootNode =
+  | IPieCommandNode
+  | IPieColorNode
+  | IPieSubmenuNode
+  | IPieToggleNode;
+
+export type IPieNode = IPieRootNode | IPieNonRootNode;
+
+// ----------------------------------------------------------
+// TODO: DEV
 // Open a submenu
 export interface IPieSubmenuNode extends IPieBaseNode {
   type: 'submenu';
   children: Array<IPieNonRootNode>;
 }
 
-// TODO: a color menu node
-
-export type IPieNonRootNode = IPieActionNode | IPieSubmenuNode;
-
-export type IPieNode = IPieRootNode | IPieNonRootNode;
+// For a color picker sub menu
+export interface IPieColorNode extends IPieBaseNode {
+  type: 'color';
+  onColorChange: (color: string) => void;
+}

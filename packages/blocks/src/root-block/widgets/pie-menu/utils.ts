@@ -3,11 +3,13 @@ import { type IVec } from '../../../surface-block/index.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type {
   ActionFunction,
-  IPieActionNode,
+  IPieCommandNode,
   IPieNode,
+  IPieNodeWithAction,
   IPieNonRootNode,
   IPieRootNode,
   IPieSubmenuNode,
+  IPieToggleNode,
 } from './base.js';
 
 export function setEdgelessToolAction(tool: EdgelessTool): ActionFunction {
@@ -37,8 +39,17 @@ export function isRootNode(node: IPieNode): node is IPieRootNode {
 export function isSubmenuNode(node: IPieNode): node is IPieSubmenuNode {
   return node.type === 'submenu';
 }
-export function isActionNode(node: IPieNode): node is IPieActionNode {
-  return node.type === 'action';
+
+export function isCommandNode(node: IPieNode): node is IPieCommandNode {
+  return node.type === 'command';
+}
+
+export function isToggleNode(node: IPieNode): node is IPieToggleNode {
+  return node.type === 'toggle';
+}
+
+export function isNodeWithAction(node: IPieNode): node is IPieNodeWithAction {
+  return 'action' in node && typeof node.action === 'function';
 }
 
 //------------------------------------------------------------------------------------

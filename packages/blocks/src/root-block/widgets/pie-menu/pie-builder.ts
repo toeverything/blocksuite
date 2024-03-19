@@ -1,10 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import {
-  type IPieActionNode,
+  type IPieCommandNode,
   type IPieMenuSchema,
   type IPieNode,
   type IPieSubmenuNode,
+  type IPieToggleNode,
 } from './base.js';
 import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';
 
@@ -32,9 +33,20 @@ export class PieMenuBuilder {
     this._stack.push(this._schema.root);
   }
 
-  action(node: Omit<IPieActionNode, 'type'>) {
+  command(node: Omit<IPieCommandNode, 'type'>) {
     const curNode = this._currentNode();
-    const actionNode: IPieActionNode = { ...node, type: 'action' };
+    const actionNode: IPieCommandNode = { ...node, type: 'command' };
+
+    if (isNodeWithChildren(curNode)) {
+      curNode.children.push(actionNode);
+    }
+
+    return this;
+  }
+
+  toggle(node: Omit<IPieToggleNode, 'type'>) {
+    const curNode = this._currentNode();
+    const actionNode: IPieToggleNode = { ...node, type: 'toggle' };
 
     if (isNodeWithChildren(curNode)) {
       curNode.children.push(actionNode);

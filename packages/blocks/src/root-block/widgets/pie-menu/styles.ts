@@ -36,6 +36,7 @@ export const styles = {
     .pie-node {
       position: absolute;
       background: var(--affine-background-overlay-panel-color);
+      user-select: none;
       box-shadow: var(--affine-shadow-2);
       border: 2px solid var(--affine-border-color);
       border-radius: 50%;

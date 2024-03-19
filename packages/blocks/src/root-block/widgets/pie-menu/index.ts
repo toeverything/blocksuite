@@ -20,6 +20,10 @@ export class AffinePieMenuWidget extends WidgetElement {
 
   mouse: IVec = [innerWidth / 2, innerHeight / 2];
 
+  get isOpen() {
+    return !!this.currentMenu;
+  }
+
   get rootElement() {
     const rootElement = this.blockElement;
     if (!isRootElement(rootElement)) {
@@ -31,7 +35,7 @@ export class AffinePieMenuWidget extends WidgetElement {
   // if key is released before 100ms then the menu is kept open, else
   // on trigger key release it will select the currently hovered menu node
   // No action if the currently hovered node is a submenu
-  private _selectOnTrigRelease: { allow: boolean; timeout?: NodeJS.Timeout } = {
+  selectOnTrigRelease: { allow: boolean; timeout?: NodeJS.Timeout } = {
     allow: false,
   };
 
@@ -40,7 +44,10 @@ export class AffinePieMenuWidget extends WidgetElement {
 
     this.handleEvent('keyUp', this._handleKeyUp, { global: true });
     this.handleEvent('pointerMove', this._handleCursorPos, { global: true });
-
+    this.handleEvent('wheel', this._handleWheel),
+      {
+        global: true,
+      };
     this._initPie();
   }
 
@@ -69,14 +76,14 @@ export class AffinePieMenuWidget extends WidgetElement {
     });
     this.currentMenu = menu;
 
-    this._selectOnTrigRelease.timeout = setTimeout(() => {
-      this._selectOnTrigRelease.allow = true;
+    this.selectOnTrigRelease.timeout = setTimeout(() => {
+      this.selectOnTrigRelease.allow = true;
     }, PieManager.settings.SELECT_ON_RELEASE_TIMEOUT);
   }
 
   private _onMenuClose() {
     this.currentMenu = null;
-    this._selectOnTrigRelease.allow = false;
+    this.selectOnTrigRelease.allow = false;
   }
 
   public _createMenu(
@@ -111,12 +118,24 @@ export class AffinePieMenuWidget extends WidgetElement {
     const { trigger } = this.currentMenu.schema;
 
     if (trigger({ keyEvent: ev.raw, rootElement: this.rootElement })) {
-      clearTimeout(this._selectOnTrigRelease.timeout);
-      if (this._selectOnTrigRelease.allow) {
+      clearTimeout(this.selectOnTrigRelease.timeout);
+      if (this.selectOnTrigRelease.allow) {
         this.currentMenu.selectHovered();
         this.currentMenu.close();
       }
     }
+  };
+
+  private _handleWheel = (_ctx: UIEventStateContext) => {
+    // TODO
+    // if (!this.currentMenu) return;
+    // const { event } = ctx.get('defaultState');
+    // if (event instanceof WheelEvent) {
+    //   event.preventDefault();
+    //   event.stopPropagation();
+    //   const dir = Math.sign(event.deltaY) > 0 ? 'up' : 'down';
+    //   this.currentMenu.toggleHoveredNode(dir);
+    // }
   };
 
   private _handleCursorPos = (ctx: UIEventStateContext) => {

@@ -9,8 +9,8 @@ import type { PieMenu } from './menu.js';
 import { styles } from './styles.js';
 import {
   getPosition,
-  isActionNode,
   isAngleBetween,
+  isNodeWithAction,
   isNodeWithChildren,
   isRootNode,
 } from './utils.js';
@@ -48,22 +48,24 @@ export class PieNode extends WithDisposable(LitElement) {
   @state()
   private _rotatorAngle: number | null = null;
 
-  select() {
+  select(closeOnSelect = true) {
     const schema = this.schema;
     if (isRootNode(schema)) return;
 
     requestAnimationFrame(() => {
-      if (isActionNode(schema)) {
+      if (isNodeWithAction(schema)) {
         schema.action({
           rootElement: this.menu.rootElement,
           menu: this.menu,
           widgetElement: this.menu.widgetElement,
           node: this,
         });
-        this.menu.close();
+        if (closeOnSelect) this.menu.close();
       } else if (isNodeWithChildren(schema)) {
         this.menu.openSubmenu(this); // for Opening with numpad
       }
+
+      this.requestUpdate();
     });
   }
 
@@ -84,7 +86,7 @@ export class PieNode extends WithDisposable(LitElement) {
 
   private _setupEvents() {
     this._disposables.add(
-      this.menu.slots.updateHoveredNode.on(this._onUpdateHoveredNode)
+      this.menu.slots.pointerAngleUpdated.on(this._onPointerAngleUpdated)
     );
 
     this._disposables.add(
@@ -183,7 +185,7 @@ export class PieNode extends WithDisposable(LitElement) {
     </li>`;
   }
 
-  private _onUpdateHoveredNode = (angle: number | null) => {
+  private _onPointerAngleUpdated = (angle: number | null) => {
     this._rotatorAngle = angle;
 
     if (isRootNode(this.schema) || !this.menu.isChildOfActiveNode(this)) return;
@@ -194,8 +196,10 @@ export class PieNode extends WithDisposable(LitElement) {
     }
 
     if (isAngleBetween(angle, this.startAngle, this.endAngle)) {
-      this._isHovering = true;
-      this.menu.setHovered(this);
+      if (this.menu.hoveredNode !== this) {
+        this._isHovering = true;
+        this.menu.setHovered(this);
+      }
     } else {
       this._isHovering = false;
     }

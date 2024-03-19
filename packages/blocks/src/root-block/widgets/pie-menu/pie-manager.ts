@@ -29,12 +29,12 @@ export class PieManager {
     /**
      * Distance from the center of the active node to start focusing a child node
      */
-    ACTIVATE_THRESHOLD: 60,
+    ACTIVATE_THRESHOLD_MIN: 60,
 
     /**
      * Time delay to open submenu after hovering a submenu node
      */
-    SUBMENU_OPEN_TIMEOUT: 60,
+    SUBMENU_OPEN_TIMEOUT: 200,
   };
 
   public static slots = {
