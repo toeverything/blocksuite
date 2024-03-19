@@ -269,7 +269,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     ];
   }
 
-  private _delete() {
+  private _delete = () => {
     this.doc.captureSync();
     deleteElements(this.surface, this.selection.elements);
 
@@ -277,7 +277,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       elements: [],
       editing: false,
     });
-  }
+  };
 
   private _refreshable(ele: BlockModel) {
     return (
@@ -288,14 +288,14 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     );
   }
 
-  private _reload(selections: SurfaceSelection[]) {
+  private _reload = (selections: SurfaceSelection[]) => {
     selections.forEach(sel => {
       const blockElement = this.view.viewFromPath('block', sel.path);
       if (!!blockElement && this._refreshable(blockElement.model)) {
         (blockElement as RefreshableBlockComponent).refreshData();
       }
     });
-  }
+  };
 
   private _runAction = async ({ type }: Action) => {
     const selection = this.edgeless.service.selection;

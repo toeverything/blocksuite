@@ -610,6 +610,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
               <edgeless-tool-icon-button
                 .tooltip=${'Click to copy link'}
+                .iconContainerPadding=${2}
                 class="change-embed-card-button copy"
                 ?disabled=${this._doc.readonly}
                 @click=${this._copyUrl}
@@ -619,6 +620,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
               <edgeless-tool-icon-button
                 .tooltip=${'Edit'}
+                .iconContainerPadding=${2}
                 class="change-embed-card-button edit"
                 ?disabled=${this._doc.readonly}
                 @click=${() =>
@@ -643,6 +645,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               </div>
               <edgeless-tool-icon-button
                 .tooltip=${'Open'}
+                .iconContainerPadding=${2}
                 class="change-embed-card-button open"
                 @click=${this._open}
               >
@@ -658,6 +661,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           ? html`
               <edgeless-tool-icon-button
                 .tooltip=${'Full screen'}
+                .iconContainerPadding=${2}
                 class="change-embed-card-button expand"
                 @click=${this._open}
               >
@@ -711,6 +715,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               <div class="change-embed-card-button card-style">
                 <edgeless-tool-icon-button
                   .tooltip=${this._showPopper ? '' : 'Card style'}
+                  .iconContainerPadding=${2}
                   ?disabled=${this._doc.readonly}
                   @click=${() => this._cardStylePopper?.toggle()}
                 >
@@ -734,6 +739,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Add Caption'}
+          .iconContainerPadding=${2}
           class="change-embed-card-button caption"
           ?disabled=${this._doc.readonly}
           @click=${this._showCaption}

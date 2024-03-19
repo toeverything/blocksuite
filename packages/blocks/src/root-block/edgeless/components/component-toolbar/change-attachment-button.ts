@@ -148,6 +148,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         <div class="change-attachment-button card-style">
           <edgeless-tool-icon-button
             .tooltip=${this._showPopper ? '' : 'Card style'}
+            .iconContainerPadding=${2}
             ?disabled=${this._doc.readonly}
             @click=${() => this._cardStylePopper?.toggle()}
           >
@@ -168,6 +169,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Add Caption'}
+          .iconContainerPadding=${2}
           class="change-attachment-button caption"
           ?disabled=${this._doc.readonly}
           @click=${() => this._showCaption()}
