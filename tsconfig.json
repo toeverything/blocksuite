@@ -9,6 +9,7 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "sourceMap": true,
+    "inlineSources": true,
     "declaration": true,
     "declarationMap": true,
     "resolveJsonModule": true,
@@ -21,37 +22,37 @@
     "noImplicitOverride": true,
     "skipLibCheck": true,
     "incremental": true,
-    "composite": true,
+    "composite": true
   },
   "files": [],
   "references": [
     {
-      "path": "./packages/framework/block-std",
+      "path": "./packages/framework/block-std"
     },
     {
-      "path": "./packages/blocks",
+      "path": "./packages/blocks"
     },
     {
-      "path": "./packages/presets",
+      "path": "./packages/presets"
     },
     {
-      "path": "./packages/playground",
+      "path": "./packages/playground"
     },
     {
-      "path": "./packages/framework/store",
+      "path": "./packages/framework/store"
     },
     {
-      "path": "./packages/framework/global",
+      "path": "./packages/framework/global"
     },
     {
-      "path": "./packages/framework/inline",
+      "path": "./packages/framework/inline"
     },
     {
-      "path": "./tests",
+      "path": "./tests"
     },
     {
-      "path": "./scripts",
-    },
+      "path": "./scripts"
+    }
   ],
   "ts-node": {
     "esm": true,
@@ -59,7 +60,7 @@
     "compilerOptions": {
       "noUnusedLocals": false,
       "noUnusedParameters": false,
-      "noImplicitReturns": false,
-    },
-  },
+      "noImplicitReturns": false
+    }
+  }
 }

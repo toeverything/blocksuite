@@ -3,6 +3,7 @@ import '../../surface-block/surface-block.js';
 import './components/block-portal/frame/edgeless-frame.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
+import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { type BlockModel } from '@blocksuite/store';
@@ -19,6 +20,7 @@ import {
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
   type EdgelessTool,
+  isPinchEvent,
   NoteDisplayMode,
   Point,
   requestConnectedFrame,
@@ -42,11 +44,12 @@ import type {
   ImageBlockModel,
   ImageBlockProps,
 } from '../../image-block/image-model.js';
-import type { AttachmentBlockProps } from '../../index.js';
+import type { AffinePieMenuWidget, AttachmentBlockProps } from '../../index.js';
 import {
   Bound,
   type IBound,
   type IVec,
+  normalizeWheelDeltaY,
   serializeXYWH,
   Vec,
 } from '../../surface-block/index.js';
@@ -663,6 +666,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     this._initSurface();
 
     this._initViewport();
+    this._initWheelEvent();
 
     if (this.doc.readonly) {
       this.tools.setEdgelessTool({ type: 'pan', panning: true });
@@ -719,6 +723,50 @@ export class EdgelessRootBlockComponent extends BlockElement<
       this.service.registerTool(tool);
     });
     this.service.tool.mount(this);
+  }
+
+  private _initWheelEvent() {
+    this._disposables.add(
+      this.dispatcher.add('wheel', ctx => {
+        if (this._isPieMenuOpen()) return;
+        const state = ctx.get('defaultState');
+        const e = state.event as WheelEvent;
+
+        e.preventDefault();
+
+        const { viewport } = this.service;
+        // zoom
+        if (isPinchEvent(e)) {
+          const rect = this.getBoundingClientRect();
+          // Perform zooming relative to the mouse position
+          const [baseX, baseY] = this.service.viewport.toModelCoord(
+            e.clientX - rect.x,
+            e.clientY - rect.y
+          );
+
+          const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
+          viewport.setZoom(zoom, new Point(baseX, baseY));
+          e.stopPropagation();
+        }
+        // pan
+        else {
+          const simulateHorizontalScroll = IS_WINDOWS && e.shiftKey;
+          const dx = simulateHorizontalScroll
+            ? e.deltaY / viewport.zoom
+            : e.deltaX / viewport.zoom;
+          const dy = simulateHorizontalScroll ? 0 : e.deltaY / viewport.zoom;
+
+          viewport.applyDeltaCenter(dx, dy);
+          e.stopPropagation();
+        }
+      })
+    );
+  }
+
+  private _isPieMenuOpen() {
+    return (
+      this.widgetElements['affine-pie-menu-widget'] as AffinePieMenuWidget
+    ).isOpen;
   }
 
   override connectedCallback() {

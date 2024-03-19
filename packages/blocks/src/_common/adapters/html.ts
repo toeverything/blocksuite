@@ -1021,10 +1021,11 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         }
         case 'p': {
           if (
-            o.parent!.type === 'element' &&
-            o.parent!.children.length > o.index! + 1
+            o.parent &&
+            o.parent.type === 'element' &&
+            o.parent.children.length > o.index! + 1
           ) {
-            const next = o.parent!.children[o.index! + 1];
+            const next = o.parent.children[o.index! + 1];
             if (
               next.type === 'element' &&
               next.tagName === 'div' &&
