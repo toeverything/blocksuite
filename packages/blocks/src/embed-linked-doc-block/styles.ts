@@ -75,11 +75,13 @@ export const styles = css`
     display: none;
     overflow: hidden;
     pointer-events: none;
+    flex: 1;
   }
 
   ${embedNoteContentStyles}
 
   .affine-embed-linked-doc-content-note.default {
+    flex: 1;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -97,7 +99,7 @@ export const styles = css`
 
   .affine-embed-linked-doc-content-date {
     display: flex;
-    flex-grow: 1;
+    height: 20px;
     align-items: flex-end;
     justify-content: flex-start;
     gap: 8px;
@@ -257,7 +259,7 @@ export const styles = css`
 
     .affine-embed-linked-doc-content-note {
       -webkit-line-clamp: 6;
-      max-height: 120px;
+      max-height: 130px;
     }
 
     .affine-embed-linked-doc-banner {
