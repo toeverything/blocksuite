@@ -156,7 +156,7 @@ export class PieNode extends WithDisposable(LitElement) {
     if (
       isActiveNode &&
       isSubmenuNode(this.schema) &&
-      this.schema.for === 'color-picker'
+      this.schema.role === 'color-picker'
     ) {
       if (!hoveredNode) return this._getIcon(this.schema.icon);
 

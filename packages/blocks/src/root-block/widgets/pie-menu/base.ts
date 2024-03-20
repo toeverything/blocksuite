@@ -62,7 +62,7 @@ export interface IPieCommandNode extends IPieBaseNode {
 // Open a submenu
 export interface IPieSubmenuNode extends IPieBaseNode {
   type: 'submenu';
-  for: 'default' | 'color-picker';
+  role: 'default' | 'color-picker';
   children: Array<IPieNonRootNode>;
   // TODO
   openOnHover?: boolean;

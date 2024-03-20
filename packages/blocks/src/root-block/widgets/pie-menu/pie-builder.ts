@@ -67,7 +67,7 @@ export class PieMenuBuilder {
     const colorPickerNode: IPieSubmenuNode = {
       icon,
       label: props.label,
-      for: 'color-picker',
+      role: 'color-picker',
       type: 'submenu',
       // add color icon;
       children: props.colors.map(({ color }) => ({
@@ -86,12 +86,12 @@ export class PieMenuBuilder {
     }
   }
 
-  beginSubmenu(node: Omit<IPieSubmenuNode, 'type' | 'children' | 'for'>) {
+  beginSubmenu(node: Omit<IPieSubmenuNode, 'type' | 'children' | 'role'>) {
     const curNode = this._currentNode();
     const submenuNode: IPieSubmenuNode = {
       ...node,
       type: 'submenu',
-      for: 'default',
+      role: 'default',
       children: [],
     };
     if (isNodeWithChildren(curNode)) {
