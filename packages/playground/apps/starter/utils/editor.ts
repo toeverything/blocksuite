@@ -14,6 +14,7 @@ import {
 } from '@blocksuite/presets';
 import type { DocCollection } from '@blocksuite/store';
 
+import { CustomChatPanel } from '../../_common/components/custom-chat-panel.js';
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
 import { CustomOutlinePanel } from '../../_common/components/custom-outline-panel.js';
 import { DebugMenu } from '../../_common/components/debug-menu.js';
@@ -116,6 +117,9 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const commentPanel = new CommentPanel();
   commentPanel.host = editor.host;
 
+  const chatPanel = new CustomChatPanel();
+  chatPanel.editor = editor;
+
   const debugMenu = new DebugMenu();
   debugMenu.collection = collection;
   debugMenu.editor = editor;
@@ -126,12 +130,14 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   debugMenu.leftSidePanel = leftSidePanel;
   debugMenu.docsPanel = docsPanel;
   debugMenu.commentPanel = commentPanel;
+  debugMenu.chatPanel = chatPanel;
 
   document.body.append(outlinePanel);
   document.body.append(framePanel);
   document.body.append(sidePanel);
   document.body.append(leftSidePanel);
   document.body.append(debugMenu);
+  document.body.append(chatPanel);
 
   // debug info
   window.editor = editor;
