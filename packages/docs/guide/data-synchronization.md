@@ -53,31 +53,49 @@ In BlockSuite, the data-driven synchronization strategy is implemented through p
 - Similarly, when loading an existing document, the method is to create a new empty `doc` object and connect it to the corresponding provider. At this time, the block tree data will also flow in from the provider data source:
 
 ```ts
-// IndexedDB provider from Yjs community
+import { AffineSchemas } from '@blocksuite/blocks';
+import { AffineEditorContainer } from '@blocksuite/presets';
+import { Schema } from '@blocksuite/store';
+import { DocCollection, Text } from '@blocksuite/store';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
-// Let's start from an empty doc
-const doc = createEmptyDoc();
+const schema = new Schema().register(AffineSchemas);
+const collection = new DocCollection({ schema });
 
-// `doc.spaceDoc` is the underlying CRDT data structure.
-// Here we connect the doc to the IndexedDB table named 'my-doc'
-const provider = new IndexeddbPersistence('my-doc', doc.spaceDoc);
+// Let's start with an empty doc
+const doc = collection.createDoc();
+const editor = new AffineEditorContainer();
+editor.doc = doc;
+document.body.append(editor);
 
 // Case 1.
 // If you are creating a new doc,
-// init here and the block will be automatically written to IndexedDB
-doc.load(() => {
-  doc.addBlock('affine:page');
-  // ...
-});
+// init in this way and the blocks will be automatically written to IndexedDB
+function createDoc() {
+  new IndexeddbPersistence('provider-demo', doc.spaceDoc);
+
+  doc.load(() => {
+    const pageBlockId = doc.addBlock('affine:page', {
+      title: new Text('Test'),
+    });
+    doc.addBlock('affine:surface', {}, pageBlockId);
+    const noteId = doc.addBlock('affine:note', {}, pageBlockId);
+    doc.addBlock(
+      'affine:paragraph',
+      { text: new Text('Hello World!') },
+      noteId
+    );
+  });
+}
 
 // Case 2.
 // If you are loading an existing doc,
-// simply wait here and your content will be ready
-await doc.load();
+// simply load content using the provider callback
+function loadDoc() {
+  const provider = new IndexeddbPersistence('provider-demo', doc.spaceDoc);
+  provider.on('synced', () => doc.load());
+}
 ```
-
-In both cases, whether the document is **loaded** or **created**, the [`doc.slots.ready`](/api/@blocksuite/store/classes/Doc.html#ready-1) slot will be triggered, indicating that the document has been initialized.
 
 Furthermore, by connecting multiple providers, documents can automatically be synchronized to a variety of different backends:
 

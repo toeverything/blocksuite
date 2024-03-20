@@ -24,10 +24,9 @@ import {
 } from '../consts.js';
 import type { EdgelessElementType } from '../edgeless-types.js';
 import {
-  ConnectorEndpointStyle,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
-} from '../elements/connector/types.js';
+} from '../element-model/connector.js';
 import { TextAlign, TextVerticalAlign } from '../elements/consts.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
@@ -39,7 +38,13 @@ import {
   StrokeColorsSchema,
 } from '../elements/shape/consts.js';
 
-const ConnectorEndpointSchema = z.nativeEnum(ConnectorEndpointStyle);
+const ConnectorEndpointSchema = z.enum([
+  'None',
+  'Arrow',
+  'Triangle',
+  'Circle',
+  'Diamond',
+]);
 const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
 const LineWidthSchema = z.nativeEnum(LineWidth);
 const ShapeStyleSchema = z.nativeEnum(ShapeStyle);
