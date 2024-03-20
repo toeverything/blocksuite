@@ -20,17 +20,17 @@ export class AffinePageAIActionPanelWidget extends WidgetElement {
   private _answer = '';
 
   override firstUpdated() {
+    let intervalId: NodeJS.Timeout | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
     this.disposables.add(
       this.actionPanelSlots.stateChange.on(({ type, input }) => {
-        let id: NodeJS.Timeout | null = null;
         if (type === 'generating') {
           this._answer = '';
-          id = setInterval(() => {
+          intervalId = setInterval(() => {
             this._answer += input;
             this.requestUpdate();
           }, 1000);
-          setTimeout(() => {
-            if (id) clearInterval(id);
+          timeoutId = setTimeout(() => {
             // this.actionPanel.state = {
             //   type: 'finished',
             //   input,
@@ -40,8 +40,9 @@ export class AffinePageAIActionPanelWidget extends WidgetElement {
               input,
             };
           }, 6000);
-        } else if (type === 'finished') {
-          if (id) clearInterval(id);
+        } else if (type === 'finished' || type === 'error') {
+          if (intervalId) clearInterval(intervalId);
+          if (timeoutId) clearTimeout(timeoutId);
         }
       })
     );
