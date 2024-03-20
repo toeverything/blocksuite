@@ -1,3 +1,4 @@
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type AttributeRenderer,
@@ -8,7 +9,6 @@ import {
   type InlineRangeProvider,
   type KeyboardBindingContext,
 } from '@blocksuite/inline';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Y } from '@blocksuite/store';
 import { DocCollection, Text } from '@blocksuite/store';
 import { css, html } from 'lit';

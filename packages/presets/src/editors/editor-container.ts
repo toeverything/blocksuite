@@ -3,6 +3,7 @@ import './edgeless-editor.js';
 import '../fragments/doc-title/doc-title.js';
 import '../fragments/doc-meta-tags/doc-meta-tags.js';
 
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type {
   AbstractEditor,
   EdgelessRootBlockComponent,
@@ -15,7 +16,6 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

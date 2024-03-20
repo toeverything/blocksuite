@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/block-std';
 
 import { multiPlayersColor } from './color-picker.js';
 

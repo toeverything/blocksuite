@@ -511,6 +511,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   };
 
   async onContainerDragStart(e: PointerEventState) {
+    if (this.selection.editing) return;
     // Determine the drag type based on the current state and event
     let dragType = this._determineDragType(e);
 

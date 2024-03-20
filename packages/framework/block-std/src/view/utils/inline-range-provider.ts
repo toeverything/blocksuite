@@ -1,4 +1,3 @@
-import { PathFinder, type TextSelection } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -7,6 +6,8 @@ import {
   type InlineRangeUpdatedProp,
 } from '@blocksuite/inline';
 
+import type { TextSelection } from '../../selection/index.js';
+import { PathFinder } from '../../utils/index.js';
 import type { BlockElement } from '../element/block-element.js';
 
 export const getInlineRangeProvider: (

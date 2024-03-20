@@ -2,9 +2,9 @@
 import '../_common/components/rich-text/rich-text.js';
 import '../_common/components/block-selection.js';
 
+import { BlockElement, getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
-import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 

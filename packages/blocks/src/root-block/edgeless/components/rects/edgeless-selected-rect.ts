@@ -1,8 +1,8 @@
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertType, type Disposable } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
