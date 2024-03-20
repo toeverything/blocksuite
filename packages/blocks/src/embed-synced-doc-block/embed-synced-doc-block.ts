@@ -411,7 +411,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this.contentEditable = 'false';
 
     this.model.propsUpdated.on(({ key }) => {
-      if (key === 'pageId') {
+      if (key === 'pageId' || key === 'style') {
         this._load().catch(e => {
           console.error(e);
           this._error = true;

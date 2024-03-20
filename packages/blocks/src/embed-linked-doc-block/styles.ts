@@ -1,6 +1,7 @@
 import { css, html } from 'lit';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { embedNoteContentStyles } from './../_common/utils/render-linked-doc.js';
 
 export const styles = css`
   .affine-embed-linked-doc-block {
@@ -70,16 +71,23 @@ export const styles = css`
     line-height: 22px;
   }
 
-  .affine-embed-linked-doc-content-description {
+  .affine-embed-linked-doc-content-note.render {
+    display: none;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  ${embedNoteContentStyles}
+
+  .affine-embed-linked-doc-content-note.default {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    flex-grow: 1;
     white-space: normal;
     word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--affine-text-primary-color);
+    color: var(--affine-placeholder-color);
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-xs);
     font-style: normal;
@@ -89,11 +97,13 @@ export const styles = css`
 
   .affine-embed-linked-doc-content-date {
     display: flex;
-    align-items: center;
+    flex-grow: 1;
+    align-items: flex-end;
     justify-content: flex-start;
     gap: 8px;
     width: max-content;
     max-width: 100%;
+    line-height: 20px;
   }
 
   .affine-embed-linked-doc-content-date > span {
@@ -120,6 +130,9 @@ export const styles = css`
     opacity: var(--add, 1);
     pointer-events: none;
   }
+  .affine-embed-linked-doc-banner.render {
+    display: none;
+  }
   .affine-embed-linked-doc-banner img,
   .affine-embed-linked-doc-banner object,
   .affine-embed-linked-doc-banner svg {
@@ -135,19 +148,25 @@ export const styles = css`
       display: none;
     }
   }
-  .affine-embed-linked-doc-block:not(.loading).empty {
-    .affine-embed-linked-doc-content-description {
-      color: var(--affine-placeholder-color);
-    }
-
-    .affine-embed-linked-doc-banner.render {
-      display: none;
-    }
-
-    .affine-embed-linked-doc-banner.default {
+  .affine-embed-linked-doc-block:not(.loading):not(.note-empty) {
+    .affine-embed-linked-doc-content-note.render {
       display: block;
     }
+
+    .affine-embed-linked-doc-content-note.default {
+      display: none;
+    }
   }
+
+  .affine-embed-linked-doc-block:not(.loading):not(.banner-empty) {
+    .affine-embed-linked-doc-banner.render {
+      display: block;
+    }
+    .affine-embed-linked-doc-banner.default {
+      display: none;
+    }
+  }
+
   .affine-embed-linked-doc-block:not(.loading):not(.empty).banner-empty {
     .affine-embed-linked-doc-content {
       width: 100%;
@@ -165,8 +184,11 @@ export const styles = css`
   .affine-embed-linked-doc-block:not(.loading).deleted {
     background: var(--affine-background-secondary-color);
 
-    .affine-embed-linked-doc-content-description {
-      color: var(--affine-placeholder-color);
+    .affine-embed-linked-doc-content-note.render {
+      display: none;
+    }
+    .affine-embed-linked-doc-content-note.default {
+      display: block;
     }
 
     .affine-embed-linked-doc-content-date {
@@ -183,7 +205,6 @@ export const styles = css`
   }
   .affine-embed-linked-doc-block.horizontalThin {
     height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
-    background: var(--affine-background-secondary-color);
 
     .affine-embed-linked-doc-banner {
       height: 66px;
@@ -212,7 +233,7 @@ export const styles = css`
       width: calc(100% - 204px);
     }
 
-    .affine-embed-linked-doc-content-description {
+    .affine-embed-linked-doc-content-note {
       display: none !important;
     }
 
@@ -234,14 +255,9 @@ export const styles = css`
       width: 100%;
     }
 
-    .affine-embed-linked-doc-content-description {
+    .affine-embed-linked-doc-content-note {
       -webkit-line-clamp: 6;
       max-height: 120px;
-    }
-
-    .affine-embed-linked-doc-content-date {
-      flex-grow: 1;
-      align-items: flex-end;
     }
 
     .affine-embed-linked-doc-banner {
@@ -272,7 +288,7 @@ export const styles = css`
       display: none;
     }
 
-    .affine-embed-linked-doc-content-description {
+    .affine-embed-linked-doc-content-note {
       -webkit-line-clamp: 16;
       max-height: 320px;
     }
@@ -303,7 +319,7 @@ export const styles = css`
       -webkit-line-clamp: 2;
     }
 
-    .affine-embed-linked-doc-content-description {
+    .affine-embed-linked-doc-content-note {
       display: none !important;
     }
 

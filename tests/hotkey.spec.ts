@@ -1359,10 +1359,8 @@ test('should support ctrl/cmd+shift+g convert to linked doc', async ({
   const title = page.locator('.affine-embed-linked-doc-content-title-text');
   expect(await title.innerText()).toBe('Untitled');
 
-  const description = page.locator(
-    '.affine-embed-linked-doc-content-description'
-  );
-  expect(await description.innerText()).toBe('123');
+  const noteContent = page.locator('.affine-embed-linked-doc-content-note');
+  expect(await noteContent.innerText()).toBe('123\n456\n789');
 });
 
 test('should forwardDelete works when delete single character', async ({
