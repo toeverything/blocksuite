@@ -246,10 +246,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _getEndpointIcon(
-    end: ConnectorEndpoint,
-    style: ConnectorEndpointStyle
-  ) {
+  private _getEndpointIcon(end: ConnectorEndpoint, style: PointStyle) {
     switch (style) {
       case 'None': {
         return ConnectorEndpointNoneIcon;
