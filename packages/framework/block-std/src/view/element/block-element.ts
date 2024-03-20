@@ -1,7 +1,3 @@
-import type { BlockService } from '@blocksuite/block-std';
-import type { EventName, UIEventHandler } from '@blocksuite/block-std';
-import type { BaseSelection } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import type { Doc } from '@blocksuite/store';
@@ -10,7 +6,11 @@ import { property, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
-import { WithDisposable } from '../with-disposable.js';
+import type { EventName, UIEventHandler } from '../../event/index.js';
+import type { BaseSelection } from '../../selection/index.js';
+import type { BlockService } from '../../service/index.js';
+import { PathFinder } from '../../utils/index.js';
+import { WithDisposable } from '../utils/with-disposable.js';
 import type { EditorHost } from './lit-host.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';

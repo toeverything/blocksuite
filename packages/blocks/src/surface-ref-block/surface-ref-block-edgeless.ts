@@ -1,4 +1,4 @@
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/block-std';
 import { nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 

@@ -1,6 +1,6 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { render } from 'lit';
 
 import {

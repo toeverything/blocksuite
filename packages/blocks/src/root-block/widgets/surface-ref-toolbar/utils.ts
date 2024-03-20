@@ -1,5 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 
 import { type EdgelessModel } from '../../../_common/types.js';
 import { isTopLevelBlock } from '../../../root-block/edgeless/utils/query.js';

@@ -1,5 +1,5 @@
 import type { Command } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 
 import {

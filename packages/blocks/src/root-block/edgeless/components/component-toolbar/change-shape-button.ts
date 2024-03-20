@@ -5,7 +5,7 @@ import '../panel/shape-panel.js';
 import './change-text-menu.js';
 import './component-toolbar-menu-divider.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

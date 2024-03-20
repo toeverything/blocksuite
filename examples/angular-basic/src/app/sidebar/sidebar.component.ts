@@ -37,6 +37,7 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription.add(
       this.editorProvider.docUpdated$.subscribe(docs => {
         this.docs = docs;
+        this.cdr.detectChanges();
       })
     );
   }

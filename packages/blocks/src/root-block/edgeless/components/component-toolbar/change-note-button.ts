@@ -7,8 +7,8 @@ import '../panel/note-display-mode-panel.js';
 import '../panel/scale-panel.js';
 import '../panel/size-panel.js';
 
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 

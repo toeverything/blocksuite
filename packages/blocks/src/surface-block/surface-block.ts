@@ -1,6 +1,6 @@
 import '../root-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
-import { BlockElement, RangeManager } from '@blocksuite/lit';
+import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 

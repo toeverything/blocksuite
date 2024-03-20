@@ -2,7 +2,7 @@ import './open-ai.js';
 import './fal.js';
 import './llama2.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { nanoid } from '@blocksuite/store';
 import { computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';

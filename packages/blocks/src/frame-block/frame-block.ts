@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

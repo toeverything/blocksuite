@@ -18,7 +18,6 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
-    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.3",
     "@toeverything/theme": "^0.7.29",
