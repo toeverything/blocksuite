@@ -32,7 +32,7 @@ export const createMindMapAction = MindMapMessageSchema.createActionBuilder(
       ...context.history,
       userText(
         `Use the nested unordered list syntax in Markdown to create a structure similar to a mind map. 
-      Analysis the following questions:
+      Analyze the following questions:
       ${text}`
       ),
     ]);

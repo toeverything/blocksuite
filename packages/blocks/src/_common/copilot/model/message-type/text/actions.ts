@@ -27,11 +27,11 @@ export const createFixSpellingAction = TextMessageSchema.createActionBuilder(
     return chatService().chat([
       {
         role: 'system',
-        content: 'You are a professional writing assisting',
+        content: 'You are a professional writing assistant',
       },
       userText(input),
       userText(
-        'Fix the spelling and grammar of the text, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
+        'Fix the spelling and grammar of the text, preserving the markdown formatting, like bold, italic, link, highlight. Make sure to do your best'
       ),
     ]);
   }
@@ -58,11 +58,11 @@ export const createImproveWritingAction = TextMessageSchema.createActionBuilder(
     return chatService().chat([
       {
         role: 'system',
-        content: 'You are a professional writing assisting',
+        content: 'You are a professional writing assistant',
       },
       userText(input),
       userText(
-        'Improve the writing of the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. To make sure do your best'
+        'Improve the writing of the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. Make sure to do your best'
       ),
     ]);
   }
@@ -74,11 +74,11 @@ export const createMakeLongerAction = TextMessageSchema.createActionBuilder(
     return chatService().chat([
       {
         role: 'system',
-        content: 'You are a professional writing assisting',
+        content: 'You are a professional writing assistant',
       },
       userText(input),
       userText(
-        'Make the input text longer, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
+        'Make the input text longer, preserving the markdown formatting, like bold, italic, link, highlight. Make sure to do your best'
       ),
     ]);
   }
@@ -90,11 +90,11 @@ export const createMakeShorterAction = TextMessageSchema.createActionBuilder(
     return chatService().chat([
       {
         role: 'system',
-        content: 'You are a professional writing assisting',
+        content: 'You are a professional writing assistant',
       },
       userText(input),
       userText(
-        'Make the input text shorter, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
+        'Make the input text shorter, preserving the markdown formatting, like bold, italic, link, highlight. Make sure to do your best'
       ),
     ]);
   }
@@ -121,11 +121,11 @@ export const createSimplifyWritingAction =
     return chatService().chat([
       {
         role: 'system',
-        content: 'You are a professional writing assisting',
+        content: 'You are a professional writing assistant',
       },
       userText(input),
       userText(
-        'Simplify the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. To make sure do your best'
+        'Simplify the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. Make sure to do your best'
       ),
     ]);
   });
@@ -139,7 +139,7 @@ export const createSummaryAction = TextMessageSchema.createActionBuilder(
         content: 'You are a professional writing assisting.',
       },
       userText(input),
-      userText('Summarize this text. To make sure do your best.'),
+      userText('Summarize this text. Make sure to do your best.'),
     ]);
   }
 );
@@ -157,7 +157,7 @@ export const createTranslateAction = TextMessageSchema.createActionBuilder(
       
       ${input}
       
-      to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of translate.`
+      to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of the translate.`
       ),
     ]);
   }
