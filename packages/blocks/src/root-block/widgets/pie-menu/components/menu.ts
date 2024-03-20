@@ -9,14 +9,19 @@ import {
   toDegree,
   toRadian,
   Vec,
-} from '../../../surface-block/index.js';
-import type { RootBlockComponent } from '../../types.js';
-import type { IPieMenuSchema, IPieNode } from './base.js';
-import type { AffinePieMenuWidget } from './index.js';
+} from '../../../../surface-block/index.js';
+import type { RootBlockComponent } from '../../../types.js';
+import type { IPieMenuSchema, IPieNode } from '../base.js';
+import type { AffinePieMenuWidget } from '../index.js';
+import { PieManager } from '../pie-manager.js';
+import { styles } from '../styles.js';
+import {
+  getPosition,
+  isColorNode,
+  isNodeWithChildren,
+  isRootNode,
+} from '../utils.js';
 import { PieNode } from './node.js';
-import { PieManager } from './pie-manager.js';
-import { styles } from './styles.js';
-import { getPosition, isNodeWithChildren, isRootNode } from './utils.js';
 
 @customElement('affine-pie-menu')
 export class PieMenu extends WithDisposable(LitElement) {
@@ -112,19 +117,17 @@ export class PieMenu extends WithDisposable(LitElement) {
   }
 
   popSelectionChainTo(node: PieNode) {
-    requestAnimationFrame(() => {
-      assertEquals(
-        isNodeWithChildren(node.schema),
-        true,
-        'Required a root node or a submenu node'
-      );
+    assertEquals(
+      isNodeWithChildren(node.schema),
+      true,
+      'Required a root node or a submenu node'
+    );
 
-      while (this.selectionChain.length > 1 && this.activeNode !== node) {
-        this.selectionChain.pop();
-      }
-      this.requestUpdate();
-      this.slots.requestNodeUpdate.emit();
-    });
+    while (this.selectionChain.length > 1 && this.activeNode !== node) {
+      this.selectionChain.pop();
+    }
+    this.requestUpdate();
+    this.slots.requestNodeUpdate.emit();
   }
 
   selectHovered() {
@@ -203,7 +206,8 @@ export class PieMenu extends WithDisposable(LitElement) {
       `affine-pie-node[index='${index}']`
     );
 
-    if (childNode instanceof PieNode) {
+    if (childNode instanceof PieNode && !isColorNode(childNode.schema)) {
+      // colors are more than 9 may be another method ?
       childNode.select();
     }
   };
@@ -259,10 +263,10 @@ export class PieMenu extends WithDisposable(LitElement) {
     if (!isRootNode(nodeSchema)) {
       node.slot = 'children-container';
       const { PIE_RADIUS } = PieManager.settings;
-      node.position = getPosition(toRadian(node.angle), [
-        PIE_RADIUS,
-        PIE_RADIUS,
-      ]);
+      const isColorNode = nodeSchema.type === 'color';
+      const radius = isColorNode ? PIE_RADIUS * 0.6 : PIE_RADIUS;
+
+      node.position = getPosition(toRadian(node.angle), [radius, radius]);
     } else {
       node.position = [0, 0];
     }

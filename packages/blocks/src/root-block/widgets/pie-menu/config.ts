@@ -26,17 +26,29 @@ import {
   TriangleIcon,
   ViewBarIcon,
 } from '../../../_common/icons/edgeless.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
 import { ConnectorMode } from '../../../surface-block/element-model/connector.js';
+import {
+  FILL_COLORS,
+  STROKE_COLORS,
+} from '../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle, ShapeType } from '../../../surface-block/index.js';
+import type { LastProps } from '../../../surface-block/managers/edit-session.js';
+import { LINE_COLORS } from '../../edgeless/components/panel/color-panel.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from '../../edgeless/utils/consts.js';
+import type { PieMenuContext } from './base.js';
 import { PieMenuBuilder } from './pie-builder.js';
-import { setEdgelessToolAction } from './utils.js';
+import {
+  getActiveConnectorStrokeColor,
+  getActiveShapeColor,
+  setEdgelessToolAction,
+} from './utils.js';
 
 //----------------------------------------------------------
 // EDGELESS TOOLS PIE MENU SCHEMA
@@ -204,6 +216,20 @@ pie.command({
     mode: ConnectorMode.Orthogonal,
   }),
 });
+
+pie.colorPicker({
+  label: 'Line Color',
+  active: getActiveConnectorStrokeColor,
+  onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.editSession.record('connector', {
+        stroke: color as LastProps['connector']['stroke'],
+      });
+    }
+  },
+  colors: LINE_COLORS.map(color => ({ color })),
+});
+
 pie.endSubmenu();
 
 // Shapes Submenu
@@ -277,6 +303,34 @@ pie.command({
     });
   },
 });
+
+pie.colorPicker({
+  label: 'Fill',
+  active: getActiveShapeColor('fill'),
+  onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.editSession.record('shape', {
+        fillColor: color as LastProps['shape']['fillColor'],
+      });
+    }
+  },
+  colors: FILL_COLORS.map(color => ({ color })),
+});
+
+pie.colorPicker({
+  label: 'Stroke',
+  hollow: true,
+  active: getActiveShapeColor('stroke'),
+  onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      rootElement.service.editSession.record('shape', {
+        strokeColor: color as LastProps['shape']['strokeColor'],
+      });
+    }
+  },
+  colors: STROKE_COLORS.map(color => ({ color, name: 'Color' })),
+});
+
 pie.endSubmenu();
 
 export const edgelessToolsPieSchema = pie.build();

@@ -12,8 +12,6 @@ The Pie Menu widget offers users a visually intuitive and efficient way to acces
 
 - Keeping Menu Open: If the trigger key is released before the "SELECT_ON_RELEASE_TIMEOUT" threshold, the pie menu remains open, allowing for multiple selections without reopening the menu.
 
-- Shortcut Selection: The numeric keys (0-9) correspond to actions within the pie menu. Pressing a numeric key selects the action associated with that number directly.
-
-- Toggle Node: Toggle node allows you to select items in the menu without releasing the trigger. If the pie menu is kept open you can click the node to toggle the action. If it is in **selectOnRelease** then you can hover over the node to toggle it.
+- Shortcut Selection: The numeric keys (0-9) correspond to actions within the pie menu. Pressing a numeric key selects the action associated with that number directly active (this does not work for color nodes).
 
 Enhance your workflow by utilizing the Pie Menu widget for swift and intuitive access to various functions with minimal keystrokes.

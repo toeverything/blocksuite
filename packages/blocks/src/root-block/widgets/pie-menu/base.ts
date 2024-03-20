@@ -1,9 +1,10 @@
 import type { TemplateResult } from 'lit';
 
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { PieMenuId, RootBlockComponent } from '../../types.js';
+import type { PieMenu } from './components/menu.js';
+import type { PieNode } from './components/node.js';
 import type { AffinePieMenuWidget } from './index.js';
-import type { PieMenu } from './menu.js';
-import type { PieNode } from './node.js';
 
 export interface IPieMenuSchema {
   id: PieMenuId;
@@ -58,33 +59,34 @@ export interface IPieCommandNode extends IPieBaseNode {
   action: ActionFunction;
 }
 
-// Allows to toggle functionality by mouse enter or click but does not close the menu
-export interface IPieToggleNode extends IPieBaseNode {
-  type: 'toggle';
-  action: ActionFunction;
-  // TODO add array of actions which which can be toggled with wheel or arrow
-}
-
-export type IPieNodeWithAction = IPieCommandNode | IPieToggleNode;
-
-export type IPieNonRootNode =
-  | IPieCommandNode
-  | IPieColorNode
-  | IPieSubmenuNode
-  | IPieToggleNode;
-
-export type IPieNode = IPieRootNode | IPieNonRootNode;
-
-// ----------------------------------------------------------
-// TODO: DEV
 // Open a submenu
 export interface IPieSubmenuNode extends IPieBaseNode {
   type: 'submenu';
+  for: 'default' | 'color-picker';
   children: Array<IPieNonRootNode>;
+  // TODO
+  openOnHover?: boolean;
+  timeoutOverride?: number;
 }
+
+export type IPieNodeWithAction = IPieCommandNode; // | IPieToggleNode;
+
+export type IPieNonRootNode = IPieCommandNode | IPieColorNode | IPieSubmenuNode;
+// | IPieToggleNode;
+
+export type IPieNode = IPieRootNode | IPieNonRootNode;
 
 // For a color picker sub menu
 export interface IPieColorNode extends IPieBaseNode {
   type: 'color';
-  onColorChange: (color: string) => void;
+  color: CssVariableName;
+  hollowCircle: boolean;
+  text?: string;
+  onChange: (color: CssVariableName, ctx: PieMenuContext) => void;
 }
+
+// ----------------------------------------------------------
+// export interface IPieToggleNode extends IPieBaseNode {
+//   type: 'toggle';
+//   action: ActionFunction;
+// }

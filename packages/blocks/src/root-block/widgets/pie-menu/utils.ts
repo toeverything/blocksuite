@@ -3,14 +3,34 @@ import { type IVec } from '../../../surface-block/index.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type {
   ActionFunction,
+  IPieColorNode,
   IPieCommandNode,
   IPieNode,
   IPieNodeWithAction,
   IPieNonRootNode,
   IPieRootNode,
   IPieSubmenuNode,
-  IPieToggleNode,
+  PieMenuContext,
 } from './base.js';
+
+export function getActiveShapeColor(type: 'fill' | 'stroke') {
+  return ({ rootElement }: PieMenuContext) => {
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      const props = rootElement.service.editSession.getLastProps('shape');
+      if (type == 'fill') return props.fillColor;
+      else return props.strokeColor;
+    }
+    return '';
+  };
+}
+
+export function getActiveConnectorStrokeColor({ rootElement }: PieMenuContext) {
+  if (rootElement instanceof EdgelessRootBlockComponent) {
+    const props = rootElement.service.editSession.getLastProps('connector');
+    return props.stroke;
+  }
+  return '';
+}
 
 export function setEdgelessToolAction(tool: EdgelessTool): ActionFunction {
   return ({ rootElement }) => {
@@ -44,8 +64,12 @@ export function isCommandNode(node: IPieNode): node is IPieCommandNode {
   return node.type === 'command';
 }
 
-export function isToggleNode(node: IPieNode): node is IPieToggleNode {
-  return node.type === 'toggle';
+// export function isToggleNode(node: IPieNode): node is IPieToggleNode {
+//   return node.type === 'toggle';
+// }
+
+export function isColorNode(node: IPieNode): node is IPieColorNode {
+  return node.type === 'color';
 }
 
 export function isNodeWithAction(node: IPieNode): node is IPieNodeWithAction {

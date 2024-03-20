@@ -48,24 +48,6 @@ export const styles = {
       transition: all 250ms cubic-bezier(0.775, 1.325, 0.535, 1);
     }
 
-    .pie-node.center {
-      width: 6rem;
-      height: 6rem;
-      padding: 0.4rem;
-    }
-
-    .pie-node.center[active='true'] .node-content > svg {
-      width: 2rem;
-      height: 2rem;
-      font-size: 0.7rem;
-    }
-
-    .pie-node.center[active='false'] {
-      width: 3rem;
-      height: 3rem;
-      opacity: 0.6;
-    }
-
     .rotator {
       position: absolute;
       background: var(--affine-background-overlay-panel-color);
@@ -77,6 +59,24 @@ export const styles = {
       top: 50%;
       left: 50%;
     }
+    .pie-node.center {
+      width: 6rem;
+      height: 6rem;
+      padding: 0.4rem;
+    }
+
+    .pie-node.center[active='true'] .node-content > svg,
+    .pie-node.center[active='true'] .node-content > .color-unit,
+    .pie-node.center[active='true'] .node-content > .color-unit > svg {
+      width: 2rem !important;
+      height: 2rem !important;
+    }
+
+    .pie-node.center[active='false'] {
+      width: 3rem;
+      height: 3rem;
+      opacity: 0.6;
+    }
 
     .pie-node.child {
       width: 3rem;
@@ -85,7 +85,12 @@ export const styles = {
       animation: my-anim 250ms cubic-bezier(0.775, 1.325, 0.535, 1);
     }
 
-    .pie-node.child::after {
+    .pie-node.child.node-color {
+      width: 0.7rem;
+      height: 0.7rem;
+    }
+
+    .pie-node.child:not(.node-color)::after {
       content: attr(index);
       color: var(--affine-text-secondary-color);
       position: absolute;

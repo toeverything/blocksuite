@@ -1,13 +1,24 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import { ColorUnit } from '../../edgeless/components/panel/color-panel.js';
 import {
+  type IPieColorNode,
   type IPieCommandNode,
   type IPieMenuSchema,
   type IPieNode,
   type IPieSubmenuNode,
-  type IPieToggleNode,
+  type PieMenuContext,
 } from './base.js';
 import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';
+
+export interface IPieColorPickerNodeProps {
+  label: string;
+  active: (ctx: PieMenuContext) => CssVariableName;
+  onChange: IPieColorNode['onChange'];
+  hollow?: boolean;
+  colors: { color: CssVariableName }[];
+}
 
 type PieBuilderConstructorProps = Omit<
   IPieMenuSchema,
@@ -44,22 +55,43 @@ export class PieMenuBuilder {
     return this;
   }
 
-  toggle(node: Omit<IPieToggleNode, 'type'>) {
+  colorPicker(props: IPieColorPickerNodeProps) {
+    const hollow = props.hollow ?? false;
+
+    const icon = (ctx: PieMenuContext) => {
+      const color = props.active(ctx);
+
+      return ColorUnit(color, { hollowCircle: hollow });
+    };
+
+    const colorPickerNode: IPieSubmenuNode = {
+      icon,
+      label: props.label,
+      for: 'color-picker',
+      type: 'submenu',
+      // add color icon;
+      children: props.colors.map(({ color }) => ({
+        icon: () => ColorUnit(color, { hollowCircle: hollow }),
+        type: 'color',
+        hollowCircle: hollow,
+        label: color,
+        color: color,
+        onChange: props.onChange,
+      })),
+    };
+
     const curNode = this._currentNode();
-    const actionNode: IPieToggleNode = { ...node, type: 'toggle' };
-
     if (isNodeWithChildren(curNode)) {
-      curNode.children.push(actionNode);
+      curNode.children.push(colorPickerNode);
     }
-
-    return this;
   }
 
-  beginSubmenu(node: Omit<IPieSubmenuNode, 'type' | 'children'>) {
+  beginSubmenu(node: Omit<IPieSubmenuNode, 'type' | 'children' | 'for'>) {
     const curNode = this._currentNode();
     const submenuNode: IPieSubmenuNode = {
       ...node,
       type: 'submenu',
+      for: 'default',
       children: [],
     };
     if (isNodeWithChildren(curNode)) {

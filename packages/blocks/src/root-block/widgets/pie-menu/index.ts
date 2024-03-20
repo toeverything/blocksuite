@@ -6,8 +6,8 @@ import { customElement, state } from 'lit/decorators.js';
 import { isRootElement } from '../../../root-block/utils/guard.js';
 import type { IVec } from '../../../surface-block/index.js';
 import type { IPieMenuSchema } from './base.js';
+import { PieMenu } from './components/menu.js';
 import { edgelessToolsPieSchema } from './config.js';
-import { PieMenu } from './menu.js';
 import { PieManager } from './pie-manager.js';
 
 const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';

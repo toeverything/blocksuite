@@ -1,19 +1,23 @@
+import { assertEquals } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type IVec, toRadian } from '../../../surface-block/index.js';
-import type { IPieNode } from './base.js';
-import type { PieMenu } from './menu.js';
-import { styles } from './styles.js';
+import { type IVec, toRadian } from '../../../../surface-block/index.js';
+import { ColorUnit } from '../../../edgeless/components/panel/color-panel.js';
+import type { IPieNode } from '../base.js';
+import { styles } from '../styles.js';
 import {
   getPosition,
   isAngleBetween,
+  isColorNode,
   isNodeWithAction,
   isNodeWithChildren,
   isRootNode,
-} from './utils.js';
+  isSubmenuNode,
+} from '../utils.js';
+import type { PieMenu } from './menu.js';
 
 @customElement('affine-pie-node')
 export class PieNode extends WithDisposable(LitElement) {
@@ -50,23 +54,26 @@ export class PieNode extends WithDisposable(LitElement) {
 
   select(closeOnSelect = true) {
     const schema = this.schema;
+
     if (isRootNode(schema)) return;
 
-    requestAnimationFrame(() => {
-      if (isNodeWithAction(schema)) {
-        schema.action({
-          rootElement: this.menu.rootElement,
-          menu: this.menu,
-          widgetElement: this.menu.widgetElement,
-          node: this,
-        });
-        if (closeOnSelect) this.menu.close();
-      } else if (isNodeWithChildren(schema)) {
-        this.menu.openSubmenu(this); // for Opening with numpad
-      }
+    const ctx = {
+      rootElement: this.menu.rootElement,
+      menu: this.menu,
+      widgetElement: this.menu.widgetElement,
+      node: this,
+    };
 
-      this.requestUpdate();
-    });
+    if (isNodeWithAction(schema)) {
+      schema.action(ctx);
+      if (closeOnSelect) this.menu.close();
+    } else if (isNodeWithChildren(schema)) {
+      this.menu.openSubmenu(this); // for Opening with numpad
+    } else if (isColorNode(schema)) {
+      schema.onChange(schema.color, ctx);
+    }
+
+    this.requestUpdate();
   }
 
   override connectedCallback(): void {
@@ -103,7 +110,8 @@ export class PieNode extends WithDisposable(LitElement) {
   }
 
   private _renderRotator() {
-    if (this._rotatorAngle === null) return nothing;
+    if (!this.menu.isActiveNode(this) || this._rotatorAngle === null)
+      return nothing;
 
     const [x, y] = getPosition(toRadian(this._rotatorAngle), [45, 45]);
 
@@ -115,21 +123,13 @@ export class PieNode extends WithDisposable(LitElement) {
   }
 
   private _renderCenterNode() {
-    const hoveredNode = this.menu.hoveredNode;
     const isActiveNode = this.menu.isActiveNode(this);
+
     const [x, y] = this.position;
 
     const styles = {
       transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
     };
-    const { icon, label } = this.schema;
-    const centerContent = icon ? this._getIcon(icon) : label;
-
-    const centerText = isActiveNode
-      ? hoveredNode
-        ? hoveredNode.schema.label
-        : centerContent
-      : centerContent;
 
     return html`<div
       style="${styleMap(styles)}"
@@ -141,12 +141,42 @@ export class PieNode extends WithDisposable(LitElement) {
         @mouseenter="${this._handleGoBack}"
         class="pie-node center"
       >
-        <div class="node-content">${centerText}</div>
-        ${isActiveNode ? this._renderRotator() : nothing}
+        <div class="node-content">${this._getCenterNodeContent()}</div>
+        ${this._renderRotator()}
       </div>
 
       <slot name="children-container"></slot>
     </div>`;
+  }
+
+  private _getCenterNodeContent() {
+    const { hoveredNode } = this.menu;
+    const isActiveNode = this.menu.isActiveNode(this);
+
+    if (
+      isActiveNode &&
+      isSubmenuNode(this.schema) &&
+      this.schema.for === 'color-picker'
+    ) {
+      if (!hoveredNode) return this._getIcon(this.schema.icon);
+
+      assertEquals(
+        hoveredNode.schema.type,
+        'color',
+        'IPieSubMenuNode.for with color-picker should have children of type color'
+      );
+      const { color, hollowCircle } = hoveredNode.schema;
+      return ColorUnit(color, { hollowCircle });
+    }
+
+    const { icon, label } = this.schema;
+    const centerIcon = icon ? this._getIcon(icon) : label;
+
+    return isActiveNode
+      ? hoveredNode
+        ? hoveredNode.schema.label
+        : centerIcon
+      : centerIcon;
   }
 
   private _handleGoBack = () => {
@@ -158,7 +188,8 @@ export class PieNode extends WithDisposable(LitElement) {
   };
 
   private _renderChildNode() {
-    const nodeWithChildren = isNodeWithChildren(this.schema);
+    const { schema } = this;
+    const nodeWithChildren = isNodeWithChildren(schema);
     // if the node is a submenu and if the selection chain has that node then render it as a center node
     if (nodeWithChildren && this.menu.selectionChain.includes(this))
       return this._renderCenterNode();
@@ -169,19 +200,19 @@ export class PieNode extends WithDisposable(LitElement) {
       top: '50%',
       left: '50%',
       transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
-      opacity: visible ? '1' : '0',
+      visibility: visible ? 'visible' : 'hidden',
     };
 
-    const { icon, label } = this.schema;
+    const { icon } = this.schema;
     return html`<li
       style="${styleMap(styles)}"
       hovering="${this._isHovering.toString()}"
       submenu="${nodeWithChildren.toString()}"
       @click="${() => this.select()}"
       index="${this.index}"
-      class="pie-node child"
+      class=${`pie-node child node-${this.schema.type}`}
     >
-      <div class="node-content">${icon ? this._getIcon(icon) : label}</div>
+      <div class="node-content">${this._getIcon(icon)}</div>
     </li>`;
   }
 
