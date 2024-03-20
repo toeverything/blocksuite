@@ -1,6 +1,6 @@
 import './chat/chat.js';
 import './edgeless/edgeless.js';
-import './copilot-service.js';
+import './copilot-service/index.js';
 
 import { EdgelessComponentToolbar } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
