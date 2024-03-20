@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import '../_common/components/block-selection.js';
 
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 

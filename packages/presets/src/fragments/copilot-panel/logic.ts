@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/block-std';
 
 import { AIChatLogic } from './chat/logic.js';
 import { AIDocLogic } from './doc/logic.js';

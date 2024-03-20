@@ -3,7 +3,7 @@ import '../toolbar/shape/shape-menu.js';
 import '../../../../_common/components/menu-divider.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';

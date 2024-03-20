@@ -1,6 +1,6 @@
 import '../../_common/components/block-selection.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { customElement, property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

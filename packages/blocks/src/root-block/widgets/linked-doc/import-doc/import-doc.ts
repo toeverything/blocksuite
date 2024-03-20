@@ -1,6 +1,6 @@
 import '../../../../_common/components/loader.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import { type DocCollection } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';

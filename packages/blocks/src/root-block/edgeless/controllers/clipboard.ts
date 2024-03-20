@@ -3,8 +3,8 @@ import type {
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import {
   type BlockSnapshot,
   DocCollection,

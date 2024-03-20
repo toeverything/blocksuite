@@ -1,4 +1,4 @@
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement } from '@blocksuite/block-std';
 
 export * from './block-type.js';
 export * from './select-block.js';

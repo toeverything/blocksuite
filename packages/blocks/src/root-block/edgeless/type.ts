@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/block-std';
 import { BlockModel } from '@blocksuite/store';
 
 import type { EdgelessSelectableProps } from '../../_common/edgeless/mixin/edgeless-selectable.js';

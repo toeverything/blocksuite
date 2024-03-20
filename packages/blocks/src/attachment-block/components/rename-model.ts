@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 

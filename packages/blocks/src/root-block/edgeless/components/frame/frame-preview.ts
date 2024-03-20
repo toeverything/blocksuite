@@ -1,11 +1,11 @@
 import '../../../../surface-ref-block/surface-ref-portal.js';
 
-import { debounce, DisposableGroup } from '@blocksuite/global/utils';
 import {
   type EditorHost,
   ShadowlessElement,
   WithDisposable,
-} from '@blocksuite/lit';
+} from '@blocksuite/block-std';
+import { debounce, DisposableGroup } from '@blocksuite/global/utils';
 import { type Doc, nanoid } from '@blocksuite/store';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

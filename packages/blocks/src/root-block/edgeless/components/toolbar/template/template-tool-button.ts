@@ -1,6 +1,6 @@
 import './template-panel.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import {
   arrow,
   autoUpdate,
