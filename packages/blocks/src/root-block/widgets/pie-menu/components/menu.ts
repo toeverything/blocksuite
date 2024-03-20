@@ -10,7 +10,7 @@ import {
   toRadian,
   Vec,
 } from '../../../../surface-block/index.js';
-import type { RootBlockComponent } from '../../../types.js';
+import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root-block.js';
 import type { IPieMenuSchema, IPieNode } from '../base.js';
 import type { AffinePieMenuWidget } from '../index.js';
 import { PieManager } from '../pie-manager.js';
@@ -34,7 +34,7 @@ export class PieMenu extends WithDisposable(LitElement) {
   };
 
   @property({ attribute: false })
-  rootElement!: RootBlockComponent;
+  rootElement!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
   widgetElement!: AffinePieMenuWidget;

@@ -4,7 +4,6 @@ const allPackages = [
   'framework/block-std',
   'framework/global',
   'frameworlk/inline',
-  'framework/lit',
   'framework/store',
   'framework/sync',
   'blocks',

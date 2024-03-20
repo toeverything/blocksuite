@@ -67,6 +67,10 @@ export default ({ mode }) => {
           ),
           'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
           'examples/store': resolve(__dirname, 'examples/store/index.html'),
+          'examples/provider': resolve(
+            __dirname,
+            'examples/provider/index.html'
+          ),
         },
       },
     },
