@@ -80,8 +80,7 @@ export function renderLinkedDocInCard(
   renderSurfaceRef(card);
 }
 
-function getNotesFromPage(linkedDoc: Doc) {
-  // TODO: consider multiple note blocks and note displayMode
+function getNotesFromDoc(linkedDoc: Doc) {
   const note = linkedDoc.root?.children.filter(
     child =>
       matchFlavours(child, ['affine:note']) &&
@@ -107,7 +106,7 @@ async function renderNoteContent(
     `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
   );
 
-  const notes = getNotesFromPage(doc);
+  const notes = getNotesFromDoc(doc);
   if (!notes) {
     return;
   }
@@ -259,7 +258,7 @@ async function renderPageAbstract(
     `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
   );
 
-  const notes = getNotesFromPage(linkedDoc);
+  const notes = getNotesFromDoc(linkedDoc);
   if (!notes) {
     card.isBannerEmpty = true;
     return;

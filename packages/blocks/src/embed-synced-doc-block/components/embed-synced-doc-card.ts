@@ -23,9 +23,6 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
   isError = false;
 
   @property({ attribute: false })
-  abstractText = '';
-
-  @property({ attribute: false })
   isNoteContentEmpty = false;
 
   @property({ attribute: false })

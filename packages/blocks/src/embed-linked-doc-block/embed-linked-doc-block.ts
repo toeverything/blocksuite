@@ -444,13 +444,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
         : isEmpty
           ? 'Preview of the doc will be displayed here.'
           : '';
-    // const descriptionText = isLoading
-    //   ? ''
-    //   : isDeleted
-    //     ? 'This linked page is deleted.'
-    //     : isEmpty
-    //       ? 'Preview of the page will be displayed here.'
-    //       : this.abstractText;
 
     const dateText = this._docUpdatedAt.toLocaleTimeString();
 
