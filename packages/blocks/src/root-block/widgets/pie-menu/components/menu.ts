@@ -203,7 +203,9 @@ export class PieMenu extends WithDisposable(LitElement) {
     const activeNode = this.activeNode;
     if (!activeNode || isNaN(index)) return;
 
-    const node = activeNode.querySelector(`affine-pie-node[index='${index}']`);
+    const node = activeNode.querySelector(
+      `& > affine-pie-node[index='${index}']`
+    );
 
     if (node instanceof PieNode && !isColorNode(node.schema)) {
       // colors are more than 9 may be another method ?
@@ -225,7 +227,7 @@ export class PieMenu extends WithDisposable(LitElement) {
     }
 
     if (key.match(/\d+/)) {
-      this.selectChildWithIndex(parseInt(key) + 1);
+      this.selectChildWithIndex(parseInt(key));
     }
   };
 
@@ -277,6 +279,7 @@ export class PieMenu extends WithDisposable(LitElement) {
         childNode.containerNode = node;
         childNode.index = i + 1;
         childNode.setAttribute('index', childNode.index.toString());
+
         node.append(childNode);
       });
     }
