@@ -1,7 +1,8 @@
 import type { TemplateResult } from 'lit';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
-import type { PieMenuId, RootBlockComponent } from '../../types.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { PieMenuId } from '../../types.js';
 import type { PieMenu } from './components/menu.js';
 import type { PieNode } from './components/node.js';
 import type { AffinePieMenuWidget } from './index.js';
@@ -13,11 +14,9 @@ export interface IPieMenuSchema {
 
   root: IPieRootNode;
 
-  scope: { page?: boolean; edgeless?: boolean };
-
   trigger: (props: {
     keyEvent: KeyboardEvent;
-    rootElement: RootBlockComponent;
+    rootElement: EdgelessRootBlockComponent;
   }) => boolean;
 }
 
@@ -46,7 +45,7 @@ export interface IPieRootNode extends IPieBaseNode {
 }
 
 export type PieMenuContext = {
-  rootElement: RootBlockComponent;
+  rootElement: EdgelessRootBlockComponent;
   menu: PieMenu;
   widgetElement: AffinePieMenuWidget;
   node: PieNode;

@@ -3,15 +3,14 @@ import { WidgetElement } from '@blocksuite/block-std';
 import { nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { isRootElement } from '../../../root-block/utils/guard.js';
 import type { IVec } from '../../../surface-block/index.js';
+import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { IPieMenuSchema } from './base.js';
 import { PieMenu } from './components/menu.js';
 import { edgelessToolsPieSchema } from './config.js';
 import { PieManager } from './pie-manager.js';
 
-const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
-export default AFFINE_PIE_MENU_WIDGET;
+export const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 
 @customElement(AFFINE_PIE_MENU_WIDGET)
 export class AffinePieMenuWidget extends WidgetElement {
@@ -24,12 +23,12 @@ export class AffinePieMenuWidget extends WidgetElement {
     return !!this.currentMenu;
   }
 
-  get rootElement() {
+  get rootElement(): EdgelessRootBlockComponent {
     const rootElement = this.blockElement;
-    if (!isRootElement(rootElement)) {
-      throw new Error('AffinePieMenuWidget should be used in RootBlock');
+    if (rootElement instanceof EdgelessRootBlockComponent) {
+      return rootElement;
     }
-    return rootElement;
+    throw new Error('AffinePieMenuWidget is only supported in edgeless');
   }
 
   // if key is released before 100ms then the menu is kept open, else

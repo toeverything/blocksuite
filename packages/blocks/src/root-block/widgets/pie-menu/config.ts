@@ -36,7 +36,6 @@ import {
 import { ShapeStyle, ShapeType } from '../../../surface-block/index.js';
 import type { LastProps } from '../../../surface-block/managers/edit-session.js';
 import { LINE_COLORS } from '../../edgeless/components/panel/color-panel.js';
-import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
@@ -60,11 +59,9 @@ const pie = new PieMenuBuilder({
   id: AFFINE_PIE_MENU_ID_EDGELESS_TOOLS,
   label: 'Tools',
   icon: ToolsIcon,
-  scope: { edgeless: true },
   trigger: ({ keyEvent: ev, rootElement }) => {
     if (isControlledKeyboardEvent(ev)) return false;
-    const isEditing = (rootElement as EdgelessRootBlockComponent).service
-      .selection.editing;
+    const isEditing = rootElement.service.selection.editing;
 
     // Todo: make this trigger user configurable .
     return ev.key === 'q' && !isEditing;
@@ -118,74 +115,64 @@ pie.command({
   label: 'Reset Zoom',
   icon: ViewBarIcon,
   action: ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      rootElement.service.zoomToFit();
-    }
+    rootElement.service.zoomToFit();
   },
 });
 
 pie.command({
   label: 'Present',
   icon: ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      const { type } = rootElement.edgelessTool;
-      if (type === 'frameNavigator') {
-        return html`
-          <span
-            style="${styleMap({
-              color: '#eb4335',
-              fontWeight: 'bold',
-            })}"
-            >Stop</span
-          >
-        `;
-      }
-
-      return FrameNavigatorIcon;
+    const { type } = rootElement.edgelessTool;
+    if (type === 'frameNavigator') {
+      return html`
+        <span
+          style="${styleMap({
+            color: '#eb4335',
+            fontWeight: 'bold',
+          })}"
+          >Stop</span
+        >
+      `;
     }
+
+    return FrameNavigatorIcon;
 
     return FrameNavigatorIcon;
   },
   action: ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      const { type } = rootElement.edgelessTool;
-      if (type === 'frameNavigator') {
-        rootElement.tools.setEdgelessTool({ type: 'default' });
+    const { type } = rootElement.edgelessTool;
+    if (type === 'frameNavigator') {
+      rootElement.tools.setEdgelessTool({ type: 'default' });
 
-        if (document.fullscreenElement) {
-          document.exitFullscreen().catch(console.error);
-        }
-
-        return;
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(console.error);
       }
 
-      rootElement.tools.setEdgelessTool({
-        type: 'frameNavigator',
-        mode: 'fit',
-      });
+      return;
     }
+
+    rootElement.tools.setEdgelessTool({
+      type: 'frameNavigator',
+      mode: 'fit',
+    });
   },
 });
 // Connector submenu
 pie.beginSubmenu({
   label: 'Connector',
   icon: ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      const tool = rootElement.edgelessTool;
+    const tool = rootElement.edgelessTool;
 
-      if (tool.type === 'connector') {
-        switch (tool.mode) {
-          case ConnectorMode.Orthogonal:
-            return ElbowedLineIcon;
-          case ConnectorMode.Curve:
-            return CurveLineIcon;
-          case ConnectorMode.Straight:
-            return StraightLineIcon;
-        }
+    if (tool.type === 'connector') {
+      switch (tool.mode) {
+        case ConnectorMode.Orthogonal:
+          return ElbowedLineIcon;
+        case ConnectorMode.Curve:
+          return CurveLineIcon;
+        case ConnectorMode.Straight:
+          return StraightLineIcon;
       }
-      return ConnectorIcon;
     }
-
     return ConnectorIcon;
   },
 });
@@ -221,11 +208,9 @@ pie.colorPicker({
   label: 'Line Color',
   active: getActiveConnectorStrokeColor,
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      rootElement.service.editSession.record('connector', {
-        stroke: color as LastProps['connector']['stroke'],
-      });
-    }
+    rootElement.service.editSession.record('connector', {
+      stroke: color as LastProps['connector']['stroke'],
+    });
   },
   colors: LINE_COLORS.map(color => ({ color })),
 });
@@ -308,11 +293,9 @@ pie.colorPicker({
   label: 'Fill',
   active: getActiveShapeColor('fill'),
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      rootElement.service.editSession.record('shape', {
-        fillColor: color as LastProps['shape']['fillColor'],
-      });
-    }
+    rootElement.service.editSession.record('shape', {
+      fillColor: color as LastProps['shape']['fillColor'],
+    });
   },
   colors: FILL_COLORS.map(color => ({ color })),
 });
@@ -322,11 +305,9 @@ pie.colorPicker({
   hollow: true,
   active: getActiveShapeColor('stroke'),
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      rootElement.service.editSession.record('shape', {
-        strokeColor: color as LastProps['shape']['strokeColor'],
-      });
-    }
+    rootElement.service.editSession.record('shape', {
+      strokeColor: color as LastProps['shape']['strokeColor'],
+    });
   },
   colors: STROKE_COLORS.map(color => ({ color, name: 'Color' })),
 });

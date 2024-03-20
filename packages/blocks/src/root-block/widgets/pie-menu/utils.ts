@@ -34,9 +34,7 @@ export function getActiveConnectorStrokeColor({ rootElement }: PieMenuContext) {
 
 export function setEdgelessToolAction(tool: EdgelessTool): ActionFunction {
   return ({ rootElement }) => {
-    if (rootElement instanceof EdgelessRootBlockComponent) {
-      rootElement.service.tool.setEdgelessTool(tool);
-    }
+    rootElement.service.tool.setEdgelessTool(tool);
   };
 }
 

@@ -1,7 +1,8 @@
 import { assertExists, assertNotExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 
-import type { PieMenuId, RootBlockComponent } from '../../types.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { PieMenuId } from '../../types.js';
 import type { IPieMenuSchema } from './base.js';
 
 /**
@@ -49,8 +50,12 @@ export class PieManager {
     return this.schemas.delete(schema);
   }
 
-  public static setup({ rootElement }: { rootElement: RootBlockComponent }) {
-    this.schemas.forEach(s => this._register(s, rootElement));
+  public static setup({
+    rootElement,
+  }: {
+    rootElement: EdgelessRootBlockComponent;
+  }) {
+    this.schemas.forEach(schema => this._register(schema));
     this._setupTriggers(rootElement);
   }
 
@@ -62,7 +67,7 @@ export class PieManager {
     this.slots.open.emit(this._getSchema(id));
   }
 
-  private static _setupTriggers(rootElement: RootBlockComponent) {
+  private static _setupTriggers(rootElement: EdgelessRootBlockComponent) {
     Object.values(this.registeredSchemas).forEach(schema => {
       const { trigger } = schema;
 
@@ -80,12 +85,7 @@ export class PieManager {
     });
   }
 
-  private static _register(
-    schema: IPieMenuSchema,
-    rootElement: RootBlockComponent
-  ) {
-    if (!this._checkScope(schema, rootElement)) return;
-
+  private static _register(schema: IPieMenuSchema) {
     const { id } = schema;
 
     assertNotExists(
@@ -94,18 +94,6 @@ export class PieManager {
     );
 
     this.registeredSchemas[id] = schema;
-  }
-
-  private static _checkScope(
-    schema: IPieMenuSchema,
-    rootElement: RootBlockComponent
-  ) {
-    const edgeless = !!schema.scope.edgeless;
-    const page = !!schema.scope.page;
-    return (
-      (edgeless && rootElement.tagName === 'AFFINE-EDGELESS-ROOT') ||
-      (page && rootElement.tagName === 'AFFINE-PAGE-ROOT')
-    );
   }
 
   private static _getSchema(id: string) {
