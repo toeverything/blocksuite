@@ -28,17 +28,6 @@ const disposable = slot.on(myHandler);
 disposable.dispose();
 ```
 
-Under the `doc` instance, you can subscribe to common events using `doc.slots`:
-
-```ts
-doc.slots.ready.on(() => {
-  // The `doc.root` should be ready to use at this moment
-  console.log('doc ready!');
-});
-
-doc.addBlock('affine:page');
-```
-
 Moreover, for any node in the block tree, events can be triggered when the node is updated:
 
 ```ts

@@ -478,6 +478,9 @@ importers:
       tweakpane:
         specifier: ^4.0.3
         version: 4.0.3
+      y-indexeddb:
+        specifier: ^9.0.12
+        version: 9.0.12(yjs@13.6.14)
       y-protocols:
         specifier: ^1.0.6
         version: 1.0.6(yjs@13.6.14)
@@ -8158,6 +8161,16 @@ packages:
       utf-8-validate:
         optional: true
     dev: true
+
+  /y-indexeddb@9.0.12(yjs@13.6.14):
+    resolution: {integrity: sha512-9oCFRSPPzBK7/w5vOkJBaVCQZKHXB/v6SIT+WYhnJxlEC61juqG0hBrAf+y3gmSMLFLwICNH9nQ53uscuse6Hg==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      yjs: ^13.0.0
+    dependencies:
+      lib0: 0.2.91
+      yjs: 13.6.14
+    dev: false
 
   /y-protocols@1.0.6(yjs@13.6.14):
     resolution: {integrity: sha512-vHRF2L6iT3rwj1jub/K5tYcTT/mEYDUppgNPXwp8fmLpui9f7Yeq3OEtTLVF012j39QnV+KEQpNqoN7CWU7Y9Q==}
