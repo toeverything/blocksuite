@@ -12,6 +12,7 @@ import {
   getPosition,
   isAngleBetween,
   isColorNode,
+  isCommandNode,
   isNodeWithAction,
   isNodeWithChildren,
   isRootNode,
@@ -52,7 +53,7 @@ export class PieNode extends WithDisposable(LitElement) {
   @state()
   private _rotatorAngle: number | null = null;
 
-  select(closeOnSelect = true) {
+  select() {
     const schema = this.schema;
 
     if (isRootNode(schema)) return;
@@ -66,7 +67,6 @@ export class PieNode extends WithDisposable(LitElement) {
 
     if (isNodeWithAction(schema)) {
       schema.action(ctx);
-      if (closeOnSelect) this.menu.close();
     } else if (isNodeWithChildren(schema)) {
       this.menu.openSubmenu(this); // for Opening with numpad
     } else if (isColorNode(schema)) {
@@ -208,13 +208,18 @@ export class PieNode extends WithDisposable(LitElement) {
       style="${styleMap(styles)}"
       hovering="${this._isHovering.toString()}"
       submenu="${nodeWithChildren.toString()}"
-      @click="${() => this.select()}"
+      @click="${this._handleChildNodeClick}"
       index="${this.index}"
       class=${`pie-node child node-${this.schema.type}`}
     >
       <div class="node-content">${this._getIcon(icon)}</div>
     </li>`;
   }
+
+  private _handleChildNodeClick = () => {
+    this.select();
+    if (isCommandNode(this.schema)) this.menu.close();
+  };
 
   private _onPointerAngleUpdated = (angle: number | null) => {
     this._rotatorAngle = angle;

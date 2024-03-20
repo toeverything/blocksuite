@@ -18,6 +18,7 @@ import { styles } from '../styles.js';
 import {
   getPosition,
   isColorNode,
+  isCommandNode,
   isNodeWithChildren,
   isRootNode,
 } from '../utils.js';
@@ -202,13 +203,12 @@ export class PieMenu extends WithDisposable(LitElement) {
     const activeNode = this.activeNode;
     if (!activeNode || isNaN(index)) return;
 
-    const childNode = activeNode.querySelector(
-      `affine-pie-node[index='${index}']`
-    );
+    const node = activeNode.querySelector(`affine-pie-node[index='${index}']`);
 
-    if (childNode instanceof PieNode && !isColorNode(childNode.schema)) {
+    if (node instanceof PieNode && !isColorNode(node.schema)) {
       // colors are more than 9 may be another method ?
-      childNode.select();
+      node.select();
+      if (isCommandNode(node.schema)) this.close();
     }
   };
 
@@ -225,7 +225,7 @@ export class PieMenu extends WithDisposable(LitElement) {
     }
 
     if (key.match(/\d+/)) {
-      this.selectChildWithIndex(parseInt(key));
+      this.selectChildWithIndex(parseInt(key) + 1);
     }
   };
 
