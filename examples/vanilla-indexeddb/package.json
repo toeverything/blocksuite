@@ -1,28 +1,21 @@
 {
-  "name": "vue-basic",
+  "name": "vanilla-indexeddb",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
-    "sql.js": "^1.10.2",
-    "vue": "^3.4.19"
+    "y-indexeddb": "^9.0.12"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
     "typescript": "^5.2.2",
-    "vite": "^5.1.4",
-    "vue-tsc": "^1.8.27"
-  },
-  "stackblitz": {
-    "installDependencies": false,
-    "startCommand": "pnpm i && pnpm dev"
+    "vite": "^5.2.0"
   }
 }
