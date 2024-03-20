@@ -14,8 +14,18 @@ import { type BaseProps, ElementModel } from './base.js';
 import type { StrokeStyle } from './common.js';
 import { derive, local, yfield } from './decorators.js';
 
+export enum ConnectorEndpoint {
+  Front = 'Front',
+  Rear = 'Rear',
+}
+
 export type PointStyle = 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond';
 
+export const DEFAULT_FRONT_END_POINT_STYLE = 'None' as const;
+export const DEFAULT_REAR_END_POINT_STYLE = 'Arrow' as const;
+
+// at least one of id and position is not null
+// both exists means the position is relative to the element
 export type Connection = {
   id?: string;
   position?: [number, number];
