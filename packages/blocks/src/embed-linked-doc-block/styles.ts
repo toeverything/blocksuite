@@ -14,8 +14,10 @@ export const styles = css`
     border: 1px solid var(--affine-background-tertiary-color);
     opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-shadow-1);
     user-select: none;
+  }
+  .affine-embed-linked-doc-block.surface {
+    box-shadow: var(--affine-shadow-1);
   }
 
   .affine-embed-linked-doc-content {

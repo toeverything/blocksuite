@@ -148,8 +148,10 @@ export const cardStyles = css`
     border: 1px solid var(--affine-background-tertiary-color);
     opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-shadow-1);
     user-select: none;
+  }
+  .affine-embed-synced-doc-card.surface {
+    box-shadow: var(--affine-shadow-1);
   }
 
   .affine-embed-synced-doc-card-content {
@@ -444,7 +446,7 @@ export const cardStyles = css`
 
     .affine-embed-synced-doc-card-content-note {
       -webkit-line-clamp: 6;
-      max-height: 120px;
+      max-height: 130px;
     }
 
     .affine-embed-synced-doc-card-content-date {
