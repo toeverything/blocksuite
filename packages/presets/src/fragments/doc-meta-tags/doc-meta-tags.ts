@@ -1,3 +1,4 @@
+import { WithDisposable } from '@blocksuite/block-std';
 import {
   DocIcon,
   LinkedDocIcon,
@@ -11,7 +12,6 @@ import {
   TagsIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';

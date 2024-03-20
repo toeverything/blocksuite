@@ -12,7 +12,7 @@ import './eraser/eraser-tool-button.js';
 import './frame/navigator-setting-button.js';
 import './template/template-tool-button.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import {
   css,

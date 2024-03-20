@@ -1,15 +1,15 @@
+import type { BlockElement } from '@blocksuite/block-std';
 import {
   PathFinder,
   type PointerEventState,
   type UIEventHandler,
 } from '@blocksuite/block-std';
+import { WidgetElement } from '@blocksuite/block-std';
 import {
   assertExists,
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
-import { WidgetElement } from '@blocksuite/lit';
 import { type BlockModel } from '@blocksuite/store';
 import { html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';

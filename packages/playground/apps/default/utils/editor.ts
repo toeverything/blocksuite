@@ -1,6 +1,6 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import type { PageRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { Doc, DocCollection } from '@blocksuite/store';
 

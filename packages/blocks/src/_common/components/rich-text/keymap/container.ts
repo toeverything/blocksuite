@@ -1,4 +1,5 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
@@ -7,7 +8,6 @@ import {
   type InlineEditor,
   type InlineRootElement,
 } from '@blocksuite/inline';
-import type { BlockElement } from '@blocksuite/lit';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { RootBlockComponent } from '../../../../root-block/types.js';

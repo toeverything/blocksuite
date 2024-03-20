@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   BlocksUtils,
   type EdgelessBlock,
@@ -7,7 +8,6 @@ import {
   type SurfaceBlockComponent,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
 
 import { getMarkdownFromSlice } from './markdown-utils.js';

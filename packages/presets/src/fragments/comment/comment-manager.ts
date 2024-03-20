@@ -1,6 +1,6 @@
 import type { TextSelection } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { DocCollection, type Y } from '@blocksuite/store';
 
 export interface CommentMeta {

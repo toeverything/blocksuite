@@ -1,6 +1,10 @@
+import {
+  EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { PageEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

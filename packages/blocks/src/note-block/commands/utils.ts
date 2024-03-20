@@ -4,6 +4,7 @@ import type {
   CommandKeyToData,
   InitCommandCtx,
 } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -11,7 +12,6 @@ import {
   type InlineRange,
   type InlineRootElement,
 } from '@blocksuite/inline';
-import type { BlockElement } from '@blocksuite/lit';
 
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,

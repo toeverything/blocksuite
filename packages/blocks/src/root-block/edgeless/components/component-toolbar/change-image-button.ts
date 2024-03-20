@@ -2,8 +2,8 @@ import '../buttons/tool-icon-button.js';
 import './component-toolbar-menu-divider.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

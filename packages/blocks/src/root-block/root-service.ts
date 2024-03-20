@@ -1,6 +1,6 @@
+import type { BlockElement, EditorHost } from '@blocksuite/block-std';
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
 import {
   FileDropManager,
