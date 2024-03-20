@@ -1,7 +1,11 @@
+import {
+  EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import type { SurfaceBlockComponent } from '@blocksuite/blocks';
 import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

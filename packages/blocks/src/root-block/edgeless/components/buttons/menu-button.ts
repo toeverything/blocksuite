@@ -1,6 +1,6 @@
 import './tool-icon-button.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
 import { type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';

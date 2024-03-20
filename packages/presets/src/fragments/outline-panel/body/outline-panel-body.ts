@@ -1,13 +1,13 @@
 import './outline-notice.js';
 
+import type { EditorHost } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
 import type {
   EdgelessRootBlockComponent,
   NoteBlockModel,
 } from '@blocksuite/blocks';
 import { BlocksUtils, Bound, NoteDisplayMode } from '@blocksuite/blocks';
 import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
 import { type BlockModel, type Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

@@ -3,8 +3,8 @@ import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/embed-card/embed-card-toolbar.js';
 
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { DocCollection } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing, type PropertyValues } from 'lit';

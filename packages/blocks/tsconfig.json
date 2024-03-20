@@ -3,24 +3,21 @@
   "compilerOptions": {
     "rootDir": "./src/",
     "outDir": "./dist/",
-    "noEmit": false,
+    "noEmit": false
   },
   "include": ["./src"],
   "references": [
     {
-      "path": "../framework/global",
+      "path": "../framework/global"
     },
     {
-      "path": "../framework/store",
+      "path": "../framework/store"
     },
     {
-      "path": "../framework/block-std",
+      "path": "../framework/block-std"
     },
     {
-      "path": "../framework/lit",
-    },
-    {
-      "path": "../framework/inline",
-    },
-  ],
+      "path": "../framework/inline"
+    }
+  ]
 }

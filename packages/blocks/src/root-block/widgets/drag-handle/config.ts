@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { BlockElement, EditorHost } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
-import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
 import type { Point, Rect } from '../../../_common/utils/index.js';
 import type { DragPreview } from './components/drag-preview.js';

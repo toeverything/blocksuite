@@ -1,6 +1,6 @@
 import type { Command } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
-import type { BlockElement } from '@blocksuite/lit';
 
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';

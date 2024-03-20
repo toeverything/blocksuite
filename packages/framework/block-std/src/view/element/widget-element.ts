@@ -1,11 +1,11 @@
-import type { BlockService } from '@blocksuite/block-std';
-import { type EventName, type UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import { WithDisposable } from '../with-disposable.js';
+import type { EventName, UIEventHandler } from '../../event/index.js';
+import type { BlockService } from '../../service/index.js';
+import { WithDisposable } from '../utils/with-disposable.js';
 import type { BlockElement } from './block-element.js';
 import type { EditorHost } from './lit-host.js';
 

@@ -1,6 +1,6 @@
 import '../../../../../_common/components/button.js';
 
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/block-std';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 

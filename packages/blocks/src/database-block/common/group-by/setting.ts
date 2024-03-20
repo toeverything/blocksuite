@@ -1,4 +1,4 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { ReferenceElement } from '@floating-ui/dom';
 import type { PropertyValues } from 'lit';
 import { css, html, unsafeCSS } from 'lit';

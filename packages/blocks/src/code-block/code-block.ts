@@ -2,13 +2,13 @@ import '../_common/components/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
+import { BlockElement, getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
   type InlineRangeProvider,
   type InlineRootElement,
 } from '@blocksuite/inline';
-import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import { limitShift, offset, shift } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';

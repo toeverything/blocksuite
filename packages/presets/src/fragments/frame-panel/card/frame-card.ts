@@ -1,5 +1,7 @@
 import './frame-card-title.js';
 
+import type { EditorHost } from '@blocksuite/block-std';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   type EdgelessRootBlockComponent,
   type FrameBlockModel,
@@ -7,8 +9,6 @@ import {
   once,
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';

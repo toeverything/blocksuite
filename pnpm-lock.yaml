@@ -168,9 +168,6 @@ importers:
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
@@ -322,6 +319,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      lit:
+        specifier: ^3.1.2
+        version: 3.1.2
       lz-string:
         specifier: ^1.5.0
         version: 1.5.0
@@ -332,6 +332,9 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../inline
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
@@ -357,25 +360,6 @@ importers:
       yjs:
         specifier: ^13.6.14
         version: 13.6.14
-
-  packages/framework/lit:
-    dependencies:
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../inline
-      lit:
-        specifier: ^3.1.2
-        version: 3.1.2
-    devDependencies:
-      '@blocksuite/block-std':
-        specifier: workspace:*
-        version: link:../block-std
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:../store
 
   packages/framework/store:
     dependencies:
@@ -440,6 +424,9 @@ importers:
 
   packages/playground:
     dependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../framework/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
@@ -449,9 +436,6 @@ importers:
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/presets':
         specifier: workspace:*
         version: link:../presets
@@ -531,9 +515,6 @@ importers:
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
