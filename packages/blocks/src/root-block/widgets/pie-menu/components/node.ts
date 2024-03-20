@@ -1,5 +1,5 @@
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertEquals } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

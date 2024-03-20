@@ -1,5 +1,5 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/lit';
+import { WidgetElement } from '@blocksuite/block-std';
 import { nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
