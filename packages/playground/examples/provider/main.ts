@@ -19,7 +19,7 @@ function createDoc() {
 
   doc.load(() => {
     const pageBlockId = doc.addBlock('affine:page', {
-      title: new Text('test '),
+      title: new Text('Test'),
     });
     doc.addBlock('affine:surface', {}, pageBlockId);
     const noteId = doc.addBlock('affine:note', {}, pageBlockId);
