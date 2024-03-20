@@ -48,9 +48,9 @@ import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
-import type { Connection } from '../../../surface-block/elements/connector/types.js';
 import {
   type CanvasElement,
+  type Connection,
   GroupElementModel,
 } from '../../../surface-block/index.js';
 import {
