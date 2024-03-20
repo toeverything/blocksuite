@@ -34,6 +34,7 @@ import {
 } from '../root-block/index.js';
 import { PageRootService } from '../root-block/page/page-root-service.js';
 import { RootBlockSchema } from '../root-block/root-model.js';
+import { AFFINE_PAGE_AI_ACTION_PANEL_WIDGET } from '../root-block/widgets/ai-action-panel/page-ai-action-panel.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/edgeless-remote-selection/index.js';
@@ -78,6 +79,9 @@ const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
       )}`,
       [AFFINE_PAGE_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(
         AFFINE_PAGE_DRAGGING_AREA_WIDGET
+      )}`,
+      [AFFINE_PAGE_AI_ACTION_PANEL_WIDGET]: literal`${unsafeStatic(
+        AFFINE_PAGE_AI_ACTION_PANEL_WIDGET
       )}`,
     },
   },
