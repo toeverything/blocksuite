@@ -1,5 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
 
 import type {
