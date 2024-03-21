@@ -1,4 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { html, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -19,7 +23,7 @@ export type CopilotAction<Result> = {
 };
 
 export interface HistoryItem {
-  render(): TemplateResult;
+  render(host: EditorHost): TemplateResult;
 
   toContext(): ChatMessage[];
 }
@@ -27,7 +31,7 @@ export interface HistoryItem {
 class UserHistoryItem implements HistoryItem {
   constructor(private message: UserChatMessage) {}
 
-  public render(): TemplateResult {
+  public render(_: EditorHost): TemplateResult {
     return html`${repeat(this.message.content, content => {
       if (content.type === 'text') {
         return html`<div>${content.text}</div>`;
@@ -127,13 +131,14 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
     return this.schema.toContext(this.value.data, this.data);
   }
 
-  render(): TemplateResult {
+  render(host: EditorHost): TemplateResult {
     const renderTemplate = () =>
       this.schema.render({
         value: this.value,
         data: this.data,
         changeData: this.changeData,
         retry: this.retry,
+        host,
       });
     return html` <copilot-assistant-history-renderer
       .onChange="${this.onChange}"
