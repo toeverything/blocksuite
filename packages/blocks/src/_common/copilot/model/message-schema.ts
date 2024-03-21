@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import type { CopilotAction } from './chat-history.js';
@@ -54,6 +55,7 @@ export type MessageSchema<Result, Data = unknown> = {
     value: ApiData<Result>;
     data?: Data;
     changeData: (value: Data) => void;
+    host: EditorHost;
     retry: () => void;
   }) => TemplateResult;
   toContext: (value: Result, data?: Data) => Array<ChatMessage>;
