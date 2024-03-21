@@ -1,6 +1,7 @@
 import { css, html } from 'lit';
 
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import { embedNoteContentStyles } from '../_common/utils/render-linked-doc.js';
 
 export const SYNCED_MIN_WIDTH = 370;
 export const SYNCED_MIN_HEIGHT = 64;
@@ -56,7 +57,7 @@ export const blockStyles = css`
   }
   .affine-embed-synced-doc-container:hover.light,
   .affine-embed-synced-doc-container.selected.light,
-  aaffine-embed-synced-doc-block.with-drag-handle
+  affine-embed-synced-doc-block.with-drag-handle
     > .affine-embed-synced-doc-container.light {
     box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.08);
   }
@@ -201,16 +202,23 @@ export const cardStyles = css`
     line-height: 22px;
   }
 
-  .affine-embed-synced-doc-card-content-description {
+  .affine-embed-synced-doc-content-note.render {
+    display: none;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  ${embedNoteContentStyles}
+
+  .affine-embed-synced-doc-content-note.default {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    flex-grow: 1;
     white-space: normal;
     word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--affine-text-primary-color);
+    color: var(--affine-placeholder-color);
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-xs);
     font-style: normal;
@@ -227,6 +235,7 @@ export const cardStyles = css`
     gap: 8px;
     width: max-content;
     max-width: 100%;
+    line-height: 20px;
   }
 
   .affine-embed-synced-doc-card-content-date > span {
@@ -294,67 +303,61 @@ export const cardStyles = css`
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
-  .affine-embed-synced-doc-card.loading {
-    .affine-embed-synced-doc-card-content-date {
-      display: none;
-    }
-  }
+  .affine-embed-synced-doc-card.loading,
+  .affine-embed-synced-doc-card.deleted,
   .affine-embed-synced-doc-card.error {
-    background: var(--affine-background-secondary-color);
-
-    .affine-embed-synced-doc-card-content-description {
-      color: var(--affine-text-secondary-color);
-    }
-
-    .affine-embed-synced-doc-card-content-date {
+    .affine-embed-linked-doc-content-note.render {
       display: none;
     }
-
+    .affine-embed-linked-doc-content-note.default {
+      display: block;
+    }
     .affine-embed-synced-doc-card-banner.render {
       display: none;
     }
-
     .affine-embed-synced-doc-card-banner.default {
       display: block;
+    }
+    .affine-embed-synced-doc-card-content-date {
+      display: none;
     }
   }
-  .affine-embed-synced-doc-card:not(.loading):not(.error).deleted {
-    height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
+
+  .affine-embed-synced-doc-card:not(.loading).deleted,
+  .affine-embed-synced-doc-card:not(.loading).error {
     background: var(--affine-background-secondary-color);
-
-    .affine-embed-synced-doc-card-content-description {
-      color: var(--affine-text-secondary-color);
-    }
-
-    .affine-embed-synced-doc-card-content-date {
-      display: none;
-    }
-
-    .affine-embed-synced-doc-card-banner.render {
-      display: none;
-    }
-
-    .affine-embed-synced-doc-card-banner.default {
-      display: block;
-    }
-
+  }
+  .affine-embed-synced-doc-card:not(.loading):not(.error):not(
+      .surface
+    ).deleted {
+    height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
     .affine-embed-synced-doc-card-banner {
       height: 66px;
     }
-
     .affine-embed-synced-doc-card-banner img,
     .affine-embed-synced-doc-card-banner object,
     .affine-embed-synced-doc-card-banner svg {
       height: 66px;
     }
-
     .affine-embed-synced-doc-card-content {
       gap: 12px;
     }
   }
-  .affine-embed-synced-doc-card:not(.loading):not(.error):not(
-      .deleted
-    ).cycle:not(.banner-empty) {
+
+  .affine-embed-synced-doc-card:not(.loading):not(.error):not(.deleted):not(
+      .note-empty
+    ).cycle {
+    .affine-embed-synced-doc-content-note.render {
+      display: block;
+    }
+    .affine-embed-synced-doc-content-note.default {
+      display: none;
+    }
+  }
+
+  .affine-embed-synced-doc-card:not(.loading):not(.error):not(.deleted):not(
+      .banner-empty
+    ).cycle {
     .affine-embed-synced-doc-card-banner.render {
       display: block;
     }
@@ -413,7 +416,7 @@ export const cardStyles = css`
       margin: 0 auto;
     }
 
-    .affine-embed-synced-doc-card-content-description {
+    .affine-embed-synced-doc-card-content-note {
       margin: 0 auto;
       flex-grow: 0;
     }
@@ -438,9 +441,9 @@ export const cardStyles = css`
       width: 100%;
     }
 
-    .affine-embed-synced-doc-card-content-description {
+    .affine-embed-synced-doc-card-content-note {
       -webkit-line-clamp: 6;
-      max-height: 120px;
+      max-height: 130px;
     }
 
     .affine-embed-synced-doc-card-content-date {
@@ -477,7 +480,7 @@ export const cardStyles = css`
       display: none;
     }
 
-    .affine-embed-synced-doc-card-content-description {
+    .affine-embed-synced-doc-card-content-note {
       -webkit-line-clamp: 16;
       max-height: 320px;
     }

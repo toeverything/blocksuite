@@ -1,16 +1,75 @@
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
-import { render, type TemplateResult } from 'lit';
+import { css, render, type TemplateResult } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
 import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';
+import { EMBED_CARD_HEIGHT } from '../consts.js';
+import { NoteDisplayMode } from '../types.js';
 import { matchFlavours } from './model.js';
+
+export const embedNoteContentStyles = css`
+  .affine-embed-doc-content-note-blocks affine-divider,
+  .affine-embed-doc-content-note-blocks affine-divider > * {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .affine-embed-doc-content-note-blocks affine-paragraph,
+  .affine-embed-doc-content-note-blocks affine-list {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding: 0 2px;
+  }
+  .affine-embed-doc-content-note-blocks affine-paragraph *,
+  .affine-embed-doc-content-note-blocks affine-list * {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 20px;
+    font-size: var(--affine-font-xs);
+    font-weight: 400;
+  }
+  .affine-embed-doc-content-note-blocks affine-list .affine-list-block__prefix {
+    height: 20px;
+  }
+  .affine-embed-doc-content-note-blocks affine-paragraph .quote {
+    padding-left: 15px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h1),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h2),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h3),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h4),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h5),
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h6) {
+    margin-top: 6px;
+    margin-bottom: 4px;
+    padding: 0 2px;
+  }
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h1) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h2) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h3) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h4) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h5) *,
+  .affine-embed-doc-content-note-blocks affine-paragraph:has(.h6) * {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 20px;
+    font-size: var(--affine-font-xs);
+    font-weight: 600;
+  }
+`;
 
 export function renderLinkedDocInCard(
   card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
@@ -21,28 +80,102 @@ export function renderLinkedDocInCard(
     `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
   );
 
-  card.abstractText = getAbstractText(linkedDoc);
-  prepareSurfaceRefRenderer(card);
+  renderNoteContent(card).catch(e => {
+    console.error(e);
+    card.isError = true;
+  });
+
+  renderSurfaceRef(card);
 }
 
-function getNoteFromPage(linkedDoc: Doc) {
-  const note = linkedDoc.root?.children.find(child =>
-    matchFlavours(child, ['affine:note'])
-  ) as NoteBlockModel | undefined;
-
-  assertExists(
-    note,
-    `Trying to get note block in page ${linkedDoc.id}, but note not found.`
+function getNotesFromDoc(linkedDoc: Doc) {
+  const note = linkedDoc.root?.children.filter(
+    child =>
+      matchFlavours(child, ['affine:note']) &&
+      child.displayMode !== NoteDisplayMode.EdgelessOnly
   );
+
+  if (!note || !note.length) {
+    console.log('No note block found in linked doc.');
+    return null;
+  }
 
   return note;
 }
 
-function getAbstractText(linkedDoc: Doc) {
-  const note = getNoteFromPage(linkedDoc);
-  const blockHasText = note.children.find(child => child.text != null);
-  if (!blockHasText) return '';
-  return blockHasText.text!.toString();
+async function renderNoteContent(
+  card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
+) {
+  card.isNoteContentEmpty = true;
+
+  const doc = card.linkedDoc;
+  assertExists(
+    doc,
+    `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
+  );
+
+  const notes = getNotesFromDoc(doc);
+  if (!notes) {
+    return;
+  }
+
+  const noteChildren = notes.flatMap(note =>
+    note.children.filter(child => {
+      if (matchFlavours(child, ['affine:divider'])) {
+        return true;
+      }
+      if (!matchFlavours(child, ['affine:paragraph', 'affine:list'])) {
+        return false;
+      }
+      return !!child.text?.toString().length;
+    })
+  );
+
+  card.isNoteContentEmpty = noteChildren.length === 0;
+  if (!noteChildren.length) {
+    return;
+  }
+
+  const cardStyle = card.model.style;
+
+  const noteContainer = await card.noteContainer;
+  while (noteContainer.firstChild) {
+    noteContainer.firstChild.remove();
+  }
+
+  const noteBlocksContainer = document.createElement('div');
+  noteBlocksContainer.classList.add('affine-embed-doc-content-note-blocks');
+  noteBlocksContainer.contentEditable = 'false';
+  noteContainer.append(noteBlocksContainer);
+
+  const cardHeight = EMBED_CARD_HEIGHT[cardStyle];
+
+  const firstBlock = noteChildren[0];
+  if (
+    cardStyle === 'horizontal' &&
+    matchFlavours(firstBlock, ['affine:paragraph']) &&
+    firstBlock.type.match(/^h[1-6]$/)
+  ) {
+    noteChildren.splice(1);
+  }
+
+  for (const block of noteChildren) {
+    const fragment = document.createDocumentFragment();
+    render(card.host.renderModel(block), fragment);
+    noteBlocksContainer.append(fragment);
+
+    await card.updateComplete;
+    const renderHeight = noteBlocksContainer.getBoundingClientRect().height;
+    if (renderHeight >= cardHeight) {
+      break;
+    }
+  }
+  const contentEditableElements = noteBlocksContainer.querySelectorAll(
+    '[contenteditable="true"]'
+  );
+  contentEditableElements.forEach(element => {
+    (element as HTMLElement).contentEditable = 'false';
+  });
 }
 
 async function addCover(
@@ -62,9 +195,11 @@ async function addCover(
   }
 }
 
-function prepareSurfaceRefRenderer(
+function renderSurfaceRef(
   card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
 ) {
+  card.isBannerEmpty = true;
+
   const surfaceRedService = card.std.spec.getService('affine:surface-ref');
   assertExists(surfaceRedService, `Surface ref service not found.`);
   card.surfaceRefService = surfaceRedService;
@@ -131,10 +266,17 @@ async function renderPageAbstract(
     `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
   );
 
-  const note = getNoteFromPage(linkedDoc);
-  const target = note.children.find(child =>
-    matchFlavours(child, ['affine:image', 'affine:surface-ref'])
-  );
+  const notes = getNotesFromDoc(linkedDoc);
+  if (!notes) {
+    card.isBannerEmpty = true;
+    return;
+  }
+
+  const target = notes.flatMap(note =>
+    note.children.filter(child =>
+      matchFlavours(child, ['affine:image', 'affine:surface-ref'])
+    )
+  )[0];
 
   switch (target?.flavour) {
     case 'affine:image':

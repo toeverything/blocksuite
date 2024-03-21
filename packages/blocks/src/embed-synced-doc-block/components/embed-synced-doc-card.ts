@@ -23,7 +23,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
   isError = false;
 
   @property({ attribute: false })
-  abstractText = '';
+  isNoteContentEmpty = false;
 
   @property({ attribute: false })
   isBannerEmpty = false;
@@ -36,6 +36,9 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
 
   @queryAsync('.affine-embed-synced-doc-card-banner.render')
   bannerContainer!: Promise<HTMLDivElement>;
+
+  @queryAsync('.affine-embed-synced-doc-content-note.render')
+  noteContainer!: Promise<HTMLDivElement>;
 
   get std() {
     return this.block.std;
@@ -71,7 +74,10 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       return false;
     }
     return (
-      !!syncedDoc && !syncedDoc.meta?.title.length && !this.abstractText.length
+      !!syncedDoc &&
+      !syncedDoc.meta?.title.length &&
+      this.isNoteContentEmpty &&
+      this.isBannerEmpty
     );
   }
 
@@ -148,6 +154,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       surface: this.block.isInSurface,
       empty: isEmpty,
       'banner-empty': this.isBannerEmpty,
+      'note-empty': this.isNoteContentEmpty,
     });
 
     const {
@@ -161,29 +168,32 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
       SyncedDocDeletedBanner,
     } = getSyncedDocIcons(this.editorMode);
 
-    const titleIcon = isLoading
-      ? LoadingIcon
-      : error
-        ? SyncedDocErrorIcon
+    const titleIcon = error
+      ? SyncedDocErrorIcon
+      : isLoading
+        ? LoadingIcon
         : isDeleted
           ? SyncedDocDeletedIcon
           : SyncedDocIcon;
 
-    const titleText = isLoading
-      ? 'Loading...'
-      : isDeleted
-        ? `Deleted doc`
-        : this.block.docTitle;
-
-    const descriptionText = isLoading
-      ? ''
-      : error
-        ? 'This linked doc failed to load.'
+    const titleText = error
+      ? this.block.docTitle
+      : isLoading
+        ? 'Loading...'
         : isDeleted
-          ? 'This linked doc is deleted.'
+          ? `Deleted doc`
+          : this.block.docTitle;
+
+    const showDefaultNoteContent = isLoading || error || isDeleted || isEmpty;
+    const defaultNoteContent = error
+      ? 'This linked doc failed to load.'
+      : isLoading
+        ? ''
+        : isDeleted
+          ? 'This linked page is deleted.'
           : isEmpty
-            ? 'Preview of the linked doc will be displayed here.'
-            : this.abstractText;
+            ? 'Preview of the page will be displayed here.'
+            : '';
 
     const dateText = this.block.docUpdatedAt.toLocaleTimeString();
 
@@ -213,9 +223,12 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
             </div>
           </div>
 
-          <div class="affine-embed-synced-doc-card-content-description">
-            ${descriptionText}
-          </div>
+          ${showDefaultNoteContent
+            ? html`<div class="affine-embed-synced-doc-content-note default">
+                ${defaultNoteContent}
+              </div>`
+            : nothing}
+          <div class="affine-embed-synced-doc-content-note render"></div>
 
           ${error
             ? html`
