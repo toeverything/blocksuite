@@ -45,12 +45,7 @@ export class Doc extends Space<FlatBlockMap> {
   private _shouldTransact = true;
 
   readonly slots = {
-    /**
-     * This fires when the block tree is initialized via API call or underlying existing ydoc binary.
-     * (Equivalent to when you execute `Doc.load`)
-     * Note that this is different with the `doc.loaded` field,
-     * since `loaded` only indicates that the ydoc is loaded, not the block tree.
-     */
+    /** This is always triggered after `doc.load` is called. */
     ready: new Slot(),
     historyUpdated: new Slot(),
     /**

@@ -1,5 +1,5 @@
+import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { WidgetElement } from '@blocksuite/lit';
 import type { UserInfo } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';

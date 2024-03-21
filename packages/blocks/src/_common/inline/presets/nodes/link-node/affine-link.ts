@@ -1,3 +1,5 @@
+import type { BlockElement } from '@blocksuite/block-std';
+import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
@@ -5,8 +7,6 @@ import {
   type InlineRootElement,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
-import type { BlockElement } from '@blocksuite/lit';
-import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';

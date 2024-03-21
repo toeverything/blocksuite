@@ -1,7 +1,7 @@
 import { assertExists, assertType } from '@blocksuite/global/utils';
 import { type BlockSnapshot, type SnapshotReturn } from '@blocksuite/store';
 
-import type { IConnector } from '../../../surface-block/index.js';
+import type { ConnectorElementModel } from '../../../surface-block/index.js';
 import { Bound } from '../../../surface-block/utils/bound.js';
 import { generateElementId } from '../../../surface-block/utils/index.js';
 import { sortIndex } from '../../../surface-block/utils/sort.js';
@@ -182,7 +182,7 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
           if (type === 'connector') {
             (['target', 'source'] as const).forEach(prop => {
               const propVal = val[prop];
-              assertType<IConnector['target']>(propVal);
+              assertType<ConnectorElementModel['target']>(propVal);
 
               if (propVal['id'] || !propVal['position']) return;
               const pos = propVal['position'];

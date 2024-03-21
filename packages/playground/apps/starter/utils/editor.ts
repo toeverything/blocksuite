@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   AffineFormatBarWidget,
   EdgelessEditorBlockSpecs,
@@ -5,7 +6,6 @@ import {
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import {
   AffineEditorContainer,
   affineFormatBarItemConfig,

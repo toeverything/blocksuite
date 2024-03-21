@@ -1,6 +1,6 @@
 import type { BlockSelection } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
 
 const getSelection = (blockComponent: BlockElement) =>
   blockComponent.host.selection;

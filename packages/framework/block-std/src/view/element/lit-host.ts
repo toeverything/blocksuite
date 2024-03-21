@@ -1,14 +1,5 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import type {
-  BlockSpec,
-  CommandManager,
-  SelectionManager,
-  SpecStore,
-  UIEventDispatcher,
-  ViewStore,
-} from '@blocksuite/block-std';
-import { BlockStdScope } from '@blocksuite/block-std';
 import { handleError } from '@blocksuite/global/exceptions';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
@@ -23,8 +14,14 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
+import type { CommandManager } from '../../command/index.js';
+import type { UIEventDispatcher } from '../../event/index.js';
+import { BlockStdScope } from '../../scope/index.js';
+import type { SelectionManager } from '../../selection/index.js';
+import type { BlockSpec, SpecStore } from '../../spec/index.js';
 import { RangeManager } from '../utils/range-manager.js';
-import { WithDisposable } from '../with-disposable.js';
+import { WithDisposable } from '../utils/with-disposable.js';
+import type { ViewStore } from '../view-store.js';
 import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';

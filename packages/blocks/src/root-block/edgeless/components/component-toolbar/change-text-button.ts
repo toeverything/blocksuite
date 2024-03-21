@@ -1,7 +1,7 @@
 import '../panel/align-panel.js';
 import '../panel/font-family-panel.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

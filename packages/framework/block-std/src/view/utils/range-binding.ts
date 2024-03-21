@@ -1,7 +1,7 @@
-import type { BaseSelection, TextSelection } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, throttle } from '@blocksuite/global/utils';
 
+import type { BaseSelection, TextSelection } from '../../selection/index.js';
+import { PathFinder } from '../../utils/index.js';
 import { BlockElement } from '../element/block-element.js';
 import { RangeManager } from './range-manager.js';
 

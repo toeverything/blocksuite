@@ -15,7 +15,7 @@ import './release-from-group-button.js';
 import './more-button.js';
 import './align-button.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import {
   css,

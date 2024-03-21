@@ -3,15 +3,18 @@
   "compilerOptions": {
     "rootDir": "./src/",
     "outDir": "./dist/",
-    "noEmit": false,
+    "noEmit": false
   },
   "include": ["./src"],
   "references": [
     {
-      "path": "../global",
+      "path": "../global"
     },
     {
-      "path": "../store",
+      "path": "../store"
     },
-  ],
+    {
+      "path": "../inline"
+    }
+  ]
 }
