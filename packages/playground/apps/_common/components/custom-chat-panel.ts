@@ -1,8 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import {
-  type AffineEditorContainer,
-  registerChatPanelComponents,
-} from '@blocksuite/presets';
+import { type AffineEditorContainer } from '@blocksuite/presets';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -35,12 +32,6 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     const { editor } = this;
-
-    registerChatPanelComponents(components => {
-      Object.entries(components).forEach(([name, component]) => {
-        customElements.define(name, component);
-      });
-    });
 
     this.disposables.add(
       editor.host.spec
