@@ -7,11 +7,11 @@ import { html, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { CopilotServiceResult } from '../service/service-base.js';
 import type {
   ApiData,
   ChatMessage,
   MessageContent,
-  MessageContext,
   MessageSchema,
   UserChatMessage,
 } from './message-schema.js';
@@ -19,7 +19,7 @@ import { MessageSchemas } from './message-type/index.js';
 
 export type CopilotAction<Result> = {
   type: string;
-  run: (context: MessageContext) => AsyncIterable<Result>;
+  run: CopilotServiceResult<Result>;
 };
 
 export interface HistoryItem {
@@ -77,9 +77,12 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
     this.stop();
     const abortController = new AbortController();
     this.abortController = abortController;
-    const result = this.action.run({
-      history: this.history.flatMap(v => v.toContext()),
-    });
+    const result = this.action.run(
+      {
+        history: this.history.flatMap(v => v.toContext()),
+      },
+      abortController.signal
+    );
     const process = async () => {
       let lastValue: Result | undefined;
       for await (const value of result) {

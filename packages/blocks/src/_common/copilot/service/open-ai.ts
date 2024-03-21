@@ -58,27 +58,6 @@ const toGPTMessages = (
   });
 };
 
-const askGPT = async (
-  apiKey: string,
-  model:
-    | 'gpt-4'
-    | 'gpt-3.5-turbo-1106'
-    | 'gpt-4-vision-preview'
-    | 'gpt-4-turbo',
-  messages: Array<ChatMessage>
-) => {
-  const openai = new OpenAI({
-    apiKey: apiKey,
-    dangerouslyAllowBrowser: true,
-  });
-  const result = await openai.chat.completions.create({
-    messages: toGPTMessages(messages),
-    model: model,
-    temperature: 0,
-    max_tokens: 4096,
-  });
-  return result.choices[0].message;
-};
 const askGPTStream = async function* (
   apiKey: string,
   model:
@@ -86,19 +65,23 @@ const askGPTStream = async function* (
     | 'gpt-3.5-turbo-1106'
     | 'gpt-4-vision-preview'
     | 'gpt-4-turbo',
-  messages: Array<ChatMessage>
+  messages: Array<ChatMessage>,
+  signal: AbortSignal
 ): AsyncIterable<string> {
   const openai = new OpenAI({
     apiKey: apiKey,
     dangerouslyAllowBrowser: true,
   });
-  const result = await openai.chat.completions.create({
-    stream: true,
-    messages: toGPTMessages(messages),
-    model: model,
-    temperature: 0,
-    max_tokens: 4096,
-  });
+  const result = await openai.chat.completions.create(
+    {
+      stream: true,
+      messages: toGPTMessages(messages),
+      model: model,
+      temperature: 0,
+      max_tokens: 4096,
+    },
+    { signal }
+  );
   let text = '';
   for await (const message of result) {
     text += message.choices[0].delta.content ?? '';
@@ -109,9 +92,13 @@ const askGPTStream = async function* (
 TextServiceKind.implService({
   name: 'GPT3.5 Turbo',
   method: data => ({
-    generateText: async messages => {
-      const result = await askGPT(data.apiKey, 'gpt-3.5-turbo-1106', messages);
-      return result.content ?? '';
+    generateText: messages => (context, signal) => {
+      return askGPTStream(
+        data.apiKey,
+        'gpt-3.5-turbo-1106',
+        [...context.history, ...messages],
+        signal
+      );
     },
   }),
   vendor: openaiVendor,
@@ -119,9 +106,13 @@ TextServiceKind.implService({
 TextServiceKind.implService({
   name: 'GPT4',
   method: data => ({
-    generateText: async messages => {
-      const result = await askGPT(data.apiKey, 'gpt-4', messages);
-      return result.content ?? '';
+    generateText: messages => (context, signal) => {
+      return askGPTStream(
+        data.apiKey,
+        'gpt-4',
+        [...context.history, ...messages],
+        signal
+      );
     },
   }),
   vendor: openaiVendor,
@@ -130,8 +121,13 @@ TextServiceKind.implService({
 ChatServiceKind.implService({
   name: 'GPT3.5 Turbo',
   method: data => ({
-    chat: messages => {
-      return askGPTStream(data.apiKey, 'gpt-3.5-turbo-1106', messages);
+    chat: messages => (context, signal) => {
+      return askGPTStream(
+        data.apiKey,
+        'gpt-3.5-turbo-1106',
+        [...context.history, ...messages],
+        signal
+      );
     },
   }),
   vendor: openaiVendor,
@@ -140,15 +136,26 @@ ChatServiceKind.implService({
 ChatServiceKind.implService({
   name: 'GPT4',
   method: data => ({
-    chat: messages => askGPTStream(data.apiKey, 'gpt-4', messages),
+    chat: messages => (context, signal) =>
+      askGPTStream(
+        data.apiKey,
+        'gpt-4',
+        [...context.history, ...messages],
+        signal
+      ),
   }),
   vendor: openaiVendor,
 });
 ChatServiceKind.implService({
   name: 'GPT4-Vision',
   method: data => ({
-    chat: messages =>
-      askGPTStream(data.apiKey, 'gpt-4-vision-preview', messages),
+    chat: messages => (context, signal) =>
+      askGPTStream(
+        data.apiKey,
+        'gpt-4-vision-preview',
+        [...context.history, ...messages],
+        signal
+      ),
   }),
   vendor: openaiVendor,
 });
@@ -200,25 +207,29 @@ EmbeddingServiceKind.implService({
 Image2TextServiceKind.implService({
   name: 'GPT4 Vision',
   method: data => ({
-    async *generateText(messages) {
-      const apiKey = data.apiKey;
-      const openai = new OpenAI({
-        apiKey: apiKey,
-        dangerouslyAllowBrowser: true,
-      });
-      const result = await openai.chat.completions.create({
-        messages,
-        model: 'gpt-4-vision-preview',
-        temperature: 0,
-        max_tokens: 4096,
-        stream: true,
-      });
-      let text = '';
-      for await (const message of result) {
-        text += message.choices[0].delta.content ?? '';
-        yield text;
-      }
-    },
+    generateText: messages =>
+      async function* (context, signal) {
+        const apiKey = data.apiKey;
+        const openai = new OpenAI({
+          apiKey: apiKey,
+          dangerouslyAllowBrowser: true,
+        });
+        const result = await openai.chat.completions.create(
+          {
+            messages: [...toGPTMessages(context.history), ...messages],
+            model: 'gpt-4-vision-preview',
+            temperature: 0,
+            max_tokens: 4096,
+            stream: true,
+          },
+          { signal }
+        );
+        let text = '';
+        for await (const message of result) {
+          text += message.choices[0].delta.content ?? '';
+          yield text;
+        }
+      },
   }),
   vendor: openaiVendor,
 });
