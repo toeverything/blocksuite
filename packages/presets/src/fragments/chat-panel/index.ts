@@ -2,6 +2,7 @@ import './chat-panel-messages.js';
 import './chat-panel-input.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
+import type { RootService } from '@blocksuite/blocks';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -68,7 +69,7 @@ export class ChatPanel extends WithDisposable(LitElement) {
     return this.editor.host.std.spec.getService('affine:page');
   }
 
-  get copilot() {
+  get copilot(): RootService['copilot'] {
     return this.rootService.copilot;
   }
 
