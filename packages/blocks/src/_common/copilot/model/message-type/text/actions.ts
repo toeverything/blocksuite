@@ -2,8 +2,8 @@ import { chatService, userText } from '../utils.js';
 import { TextMessageSchema } from './index.js';
 
 export const createCommonTextAction = TextMessageSchema.createActionBuilder(
-  (text: string, context) => {
-    return chatService().chat([...context.history, userText(text)]);
+  (text: string) => {
+    return chatService().chat([userText(text)]);
   }
 );
 export const createChangeToneAction = TextMessageSchema.createActionBuilder(

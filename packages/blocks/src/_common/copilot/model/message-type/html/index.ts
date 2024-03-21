@@ -123,9 +123,8 @@ When sent new wireframes, respond ONLY with the contents of the html file.`,
 );
 
 export const createHTMLFromTextAction = HTMLMessageSchema.createActionBuilder(
-  (text: string, context) => {
+  (text: string) => {
     return chatService().chat([
-      ...context.history,
       userText(
         `You are a professional web developer who specializes in building working website prototypes from product requirement descriptions.
 Your job is to take a product requirement description, then create a working prototype using HTML, CSS, and JavaScript, and finally send the result back.

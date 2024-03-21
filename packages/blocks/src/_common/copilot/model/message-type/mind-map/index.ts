@@ -27,9 +27,8 @@ export const MindMapMessageSchema = createMessageSchema<Markdown>({
 });
 
 export const createMindMapAction = MindMapMessageSchema.createActionBuilder(
-  (text: string, context) => {
+  (text: string) => {
     return chatService().chat([
-      ...context.history,
       userText(
         `Use the nested unordered list syntax in Markdown to create a structure similar to a mind map. 
       Analyze the following questions:
