@@ -1,6 +1,7 @@
-import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { WithDisposable } from '@blocksuite/block-std';
+import { css, html, LitElement } from 'lit';
+import { property, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import type { AffineEditorContainer } from '../../editors/index.js';
 import {
@@ -144,9 +145,34 @@ export class ChatPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   editor!: AffineEditorContainer;
 
-  override render() {
-    const { messages } = this;
+  public override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.copilot.history.onChange(() => this.requestUpdate())
+    );
+  }
 
+  get rootService() {
+    return this.editor.host.std.spec.getService('affine:page');
+  }
+
+  get copilot() {
+    return this.rootService.copilot;
+  }
+
+  @query('textarea')
+  textarea!: HTMLTextAreaElement;
+
+  send = () => {
+    const text = this.textarea.value;
+    if (!text) {
+      return;
+    }
+    this.copilot.askAI(this.copilot.actions.createCommonTextAction(text), text);
+  };
+
+  override render() {
+    const messages = this.copilot.history.history;
     return html`<div class="chat-panel-container">
       <div class="chat-panel-title">AFFINE AI</div>
       <div class="chat-panel-messages">
@@ -155,7 +181,7 @@ export class ChatPanel extends WithDisposable(LitElement) {
               ${AffineIcon}
               <div>What can I help you with?</div>
             </div>`
-          : nothing}
+          : repeat(messages, message => message.render(this.editor.host))}
       </div>
       ${messages.length === 0 &&
       html`<div class="chat-panel-hints">
@@ -166,7 +192,9 @@ export class ChatPanel extends WithDisposable(LitElement) {
         <textarea placeholder="What are your thoughts? "> </textarea>
         <div class="chat-panel-input-actions">
           <div class="image-upload">${ImageIcon}</div>
-          <div class="chat-panel-send">${ChatSendIcon}</div>
+          <div @click="${this.send}" class="chat-panel-send">
+            ${ChatSendIcon}
+          </div>
         </div>
       </div>
       <div class="chat-panel-footer">

@@ -38,3 +38,6 @@ export const createMindMapAction = MindMapMessageSchema.createActionBuilder(
     ]);
   }
 );
+export const mindMapActions = {
+  createMindMapAction,
+};

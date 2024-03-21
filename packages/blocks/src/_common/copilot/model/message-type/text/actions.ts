@@ -162,3 +162,16 @@ export const createTranslateAction = TextMessageSchema.createActionBuilder(
     ]);
   }
 );
+export const textActions = {
+  createChangeToneAction,
+  createCommonTextAction,
+  createFixSpellingAction,
+  createGenerateAction,
+  createImproveWritingAction,
+  createMakeLongerAction,
+  createMakeShorterAction,
+  createRefineAction,
+  createSimplifyWritingAction,
+  createSummaryAction,
+  createTranslateAction,
+};
