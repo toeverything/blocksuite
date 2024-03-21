@@ -218,7 +218,11 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       <div class="overlay-root blocksuite-overlay">
         <div class="affine-reference-popover-container">
           <div class="affine-reference-popover view">
-            <icon-button size="32px" @click=${this._openDoc}>
+            <icon-button
+              size="24px"
+              class="affine-reference-popover-open-button"
+              @click=${this._openDoc}
+            >
               ${OpenIcon}
               <affine-tooltip .offset=${12}
                 >${'Click to open doc'}</affine-tooltip

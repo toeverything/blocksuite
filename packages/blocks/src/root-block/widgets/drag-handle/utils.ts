@@ -411,12 +411,21 @@ export function convertDragPreviewDocToEdgeless({
   const currentModelBound =
     edgelessRoot.service.viewport.toModelBound(currentViewBound);
 
-  const newBound = new Bound(
-    currentModelBound.x,
-    currentModelBound.y,
-    (currentModelBound.w ?? width) * noteScale,
-    (currentModelBound.h ?? height) * noteScale
-  );
+  // Except for embed synced doc block
+  // The width and height of other card style should be fixed
+  const newBound = isEmbedSyncedDocBlock(blockComponent.model)
+    ? new Bound(
+        currentModelBound.x,
+        currentModelBound.y,
+        (currentModelBound.w ?? width) * noteScale,
+        (currentModelBound.h ?? height) * noteScale
+      )
+    : new Bound(
+        currentModelBound.x,
+        currentModelBound.y,
+        (width ?? currentModelBound.w) * noteScale,
+        (height ?? currentModelBound.h) * noteScale
+      );
 
   const blockModel = blockComponent.model;
   const blockProps = getBlockProps(blockModel);

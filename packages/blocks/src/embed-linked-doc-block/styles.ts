@@ -16,6 +16,10 @@ export const styles = css`
     background: var(--affine-background-primary-color);
     user-select: none;
   }
+  .affine-embed-linked-doc-block:hover {
+    background: var(--affine-hover-color);
+    cursor: pointer;
+  }
 
   .affine-embed-linked-doc-content {
     width: calc(100% - 204px);

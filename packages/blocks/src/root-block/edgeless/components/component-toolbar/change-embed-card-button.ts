@@ -632,13 +632,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           : nothing}
         ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
           ? html`
-              <div
-                class="change-embed-card-button doc-info"
-                @click=${this._open}
-              >
-                ${this._pageIcon}
-                <span>${this._docTitle}</span>
-              </div>
+              ${isEmbedSyncedDocBlock(model)
+                ? html`<div
+                    class="change-embed-card-button doc-info"
+                    @click=${this._open}
+                  >
+                    ${this._pageIcon}
+                    <span>${this._docTitle}</span>
+                  </div>`
+                : nothing}
               <edgeless-tool-icon-button
                 .tooltip=${'Open'}
                 .iconContainerPadding=${2}

@@ -153,8 +153,7 @@ async function renderNoteContent(
   const firstBlock = noteChildren[0];
   if (
     cardStyle === 'horizontal' &&
-    matchFlavours(firstBlock, ['affine:paragraph']) &&
-    firstBlock.type.match(/^h[1-6]$/)
+    matchFlavours(firstBlock, ['affine:paragraph'])
   ) {
     noteChildren.splice(1);
   }

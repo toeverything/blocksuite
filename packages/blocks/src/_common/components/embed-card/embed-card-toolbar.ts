@@ -498,7 +498,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               </div>
 
               <icon-button
-                size="32px"
+                size="24px"
                 class="embed-card-toolbar-button copy"
                 ?disabled=${model.doc.readonly}
                 @click=${() => this._copyUrl()}
@@ -510,7 +510,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               </icon-button>
 
               <icon-button
-                size="32px"
+                size="24px"
                 class="embed-card-toolbar-button edit"
                 ?disabled=${model.doc.readonly}
                 @click=${() =>
@@ -526,11 +526,14 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
         ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
           ? html`
               <icon-button
-                size="32px"
+                size="24px"
                 class="embed-card-toolbar-button doc-info"
                 @click=${() => this.block.open()}
               >
-                ${this._pageIcon} <span>${this._docTitle}</span> ${OpenIcon}
+                ${isEmbedLinkedDocBlock(model)
+                  ? nothing
+                  : html`${this._pageIcon} <span>${this._docTitle}</span>`}
+                ${OpenIcon}
                 <affine-tooltip .offset=${12}>${'Open'}</affine-tooltip>
               </icon-button>
 
@@ -589,7 +592,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
         ${this._canShowCardStylePanel(model)
           ? html`
               <icon-button
-                size="32px"
+                size="24px"
                 class="embed-card-toolbar-button card-style"
                 ?disabled=${model.doc.readonly}
                 @click=${() => this._toggleCardStyleMenu()}
@@ -603,7 +606,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
         <div class="divider"></div>
 
         <icon-button
-          size="32px"
+          size="24px"
           class="embed-card-toolbar-button caption"
           ?disabled=${model.doc.readonly}
           @click=${() => this._showCaption()}
