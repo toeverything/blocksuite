@@ -1,4 +1,4 @@
-import '../copilot-service/index.js';
+import '../service/index.js';
 
 import { ChatHistory, type CopilotAction } from './chat-history.js';
 
