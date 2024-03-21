@@ -23,12 +23,15 @@ export type CopilotAction<Result> = {
 };
 
 export interface HistoryItem {
+  isUser: boolean;
+
   render(host: EditorHost): TemplateResult;
 
   toContext(): ChatMessage[];
 }
 
 class UserHistoryItem implements HistoryItem {
+  isUser = true;
   constructor(private message: UserChatMessage) {}
 
   public render(_: EditorHost): TemplateResult {
@@ -48,6 +51,7 @@ class UserHistoryItem implements HistoryItem {
 export class AssistantHistoryItem<Result = unknown, Data = unknown>
   implements HistoryItem
 {
+  isUser = false;
   public value: ApiData<Result> = { status: 'loading' };
   public data?: Data;
   private set: Set<() => void> = new Set();

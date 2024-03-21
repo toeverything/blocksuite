@@ -172,7 +172,13 @@ export class ChatPanel extends WithDisposable(LitElement) {
     }
     this.textarea.value = '';
     this.currentMessage = '';
-    this.copilot.askAI(this.copilot.actions.createCommonTextAction(text), text);
+    this.copilot.askAI(
+      this.copilot.actions.createCommonTextAction([
+        { type: 'text', text },
+        // {type:'image_url',image_url:{url:'xxx'}}
+      ]),
+      text
+    );
   };
 
   override render() {
