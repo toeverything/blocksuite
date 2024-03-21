@@ -7,6 +7,7 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
+import { Copilot } from '../_common/copilot/model/index.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
 import {
   HtmlTransformer,
@@ -49,6 +50,7 @@ export type EmbedOptions = {
 export class RootService extends BlockService<RootBlockModel> {
   readonly fontLoader = new FontLoader();
   readonly editSession: EditSessionStorage = new EditSessionStorage(this);
+  public readonly copilot = new Copilot();
 
   fileDropManager!: FileDropManager;
   exportManager!: ExportManager;
