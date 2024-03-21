@@ -61,7 +61,7 @@ export {
 } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
 export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
-export { on, once } from './_common/utils/event.js';
+export { on, once, openFileOrFiles } from './_common/utils/index.js';
 export { createDefaultDoc } from './_common/utils/init.js';
 export { getThemeMode } from './_common/utils/query.js';
 export * from './_specs/_specs.js';
