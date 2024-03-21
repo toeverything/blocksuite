@@ -40,6 +40,11 @@ export const embedNoteContentStyles = css`
   .affine-embed-doc-content-note-blocks affine-list .affine-list-block__prefix {
     height: 20px;
   }
+  .affine-embed-doc-content-note-blocks affine-paragraph .quote {
+    padding-left: 15px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h1),
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h2),
   .affine-embed-doc-content-note-blocks affine-paragraph:has(.h3),
