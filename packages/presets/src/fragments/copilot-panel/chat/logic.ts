@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   BlocksUtils,
   MarkdownAdapter,
@@ -6,7 +7,6 @@ import {
   type TreeNodeWithId,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { type BlockSnapshot, type Doc, Job } from '@blocksuite/store';
 
 import { LANGUAGE, TONE } from '../config.js';

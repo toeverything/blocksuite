@@ -4,7 +4,6 @@ const allPackages = [
   'framework/block-std',
   'framework/global',
   'frameworlk/inline',
-  'framework/lit',
   'framework/store',
   'framework/sync',
   'blocks',
@@ -49,7 +48,7 @@ const createPattern = packageName => [
 module.exports = {
   env: {
     browser: true,
-    es2021: true,
+    es2022: true,
   },
   extends: [
     'eslint:recommended',

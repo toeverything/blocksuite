@@ -1,8 +1,8 @@
 import '../../../_common/components/button.js';
 
+import type { BlockElement } from '@blocksuite/block-std';
+import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
-import { WidgetElement } from '@blocksuite/lit';
 import {
   autoUpdate,
   computePosition,

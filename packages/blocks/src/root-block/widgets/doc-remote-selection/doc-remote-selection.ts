@@ -3,8 +3,8 @@ import {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
+import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists, throttle } from '@blocksuite/global/utils';
-import { WidgetElement } from '@blocksuite/lit';
 import { type UserInfo } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';

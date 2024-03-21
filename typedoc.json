@@ -1,7 +1,6 @@
 {
   "entryPoints": [
     "packages/framework/block-std",
-    "packages/framework/lit",
     "packages/framework/store",
     "packages/framework/inline",
     "packages/blocks",

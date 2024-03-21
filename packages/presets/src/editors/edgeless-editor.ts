@@ -1,9 +1,13 @@
+import {
+  EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import type { SurfaceBlockComponent } from '@blocksuite/blocks';
 import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
@@ -49,6 +53,13 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
     return this._host.value as EditorHost;
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.doc.slots.rootAdded.on(() => this.requestUpdate())
+    );
+  }
+
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
     await this.host.updateComplete;
@@ -56,6 +67,8 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
+    if (!this.doc.root) return nothing;
+
     return html`
       <div class="affine-edgeless-viewport">
         <editor-host

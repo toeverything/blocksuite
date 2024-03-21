@@ -2,14 +2,15 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import type { ShapeElementModel } from '../../surface-block/index.js';
+import type {
+  ConnectorElementModel,
+  ShapeElementModel,
+} from '../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
-  ConnectorEndpointStyle,
   ConnectorMode,
   getLineWidth,
-  type IConnector,
   type IShape,
   normalizeShapeBound,
   SHAPE_TEXT_PADDING,
@@ -34,14 +35,13 @@ export const DEFAULT_SHAPE_PROPS: Partial<IShape> = {
   shapeStyle: ShapeStyle.General,
 };
 
-export const DEFAULT_CONNECTOR_PROPS: Partial<IConnector> = {
+export const DEFAULT_CONNECTOR_PROPS: Partial<ConnectorElementModel> = {
   stroke: '--affine-palette-line-black',
   mode: ConnectorMode.Orthogonal,
-  controllers: [],
   strokeWidth: 2,
   strokeStyle: StrokeStyle.Solid,
-  frontEndpointStyle: ConnectorEndpointStyle.None,
-  rearEndpointStyle: ConnectorEndpointStyle.None,
+  frontEndpointStyle: 'None',
+  rearEndpointStyle: 'None',
 };
 export type TreeNode = {
   // element id in edgeless if it already exists

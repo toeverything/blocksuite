@@ -1,10 +1,10 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
+import { WidgetElement } from '@blocksuite/block-std';
 import {
   assertExists,
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
-import { WidgetElement } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
