@@ -10,6 +10,7 @@ import {
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
+import { assertTitle } from 'utils/asserts.js';
 
 import { test } from './utils/playwright.js';
 
@@ -108,5 +109,37 @@ test.describe('Embed synced doc', () => {
     const EmbedSyncedDocPortalBox = await EmbedSyncedDocPortal.boundingBox();
     assertExists(EmbedSyncedDocPortalBox);
     expect(EmbedSyncedDocPortalBox.height).toBe(height);
+  });
+
+  test('can jump to other docs when click linked doc inside embed synced doc block', async ({
+    page,
+  }) => {
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await createAndConvertToEmbedSyncedDoc(page);
+
+    // Focus on the embed synced doc
+    const embedSyncedBlock = page.locator('affine-embed-synced-doc-block');
+    const embedSyncedBox = await embedSyncedBlock.boundingBox();
+    assertExists(embedSyncedBox);
+    await page.mouse.click(
+      embedSyncedBox.x + embedSyncedBox.width / 2,
+      embedSyncedBox.y + embedSyncedBox.height / 2
+    );
+
+    // Create a linked doc inside the embed synced doc
+    await type(page, '@');
+    await type(page, 'Linked Doc');
+    await pressEnter(page);
+    const refNode = page.locator(`affine-reference`, {
+      has: page.locator(`.affine-reference-title[data-title="Linked Doc"]`),
+    });
+    await expect(refNode).toBeVisible();
+    // Click the linked doc inside the embed synced doc to jump to the linked doc
+    await refNode.click();
+    await waitNextFrame(page, 200);
+
+    await assertTitle(page, 'Linked Doc');
   });
 });
