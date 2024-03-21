@@ -47,7 +47,7 @@ const heightMap: { [key: string]: number } = {
   h5: 28,
   h6: 26,
   quote: 46,
-  list: 32,
+  list: 24,
   database: 28,
   image: 28,
   divider: 36,
