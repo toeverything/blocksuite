@@ -9,6 +9,7 @@ import {
   WarningIcon,
 } from '../../../../icons/misc.js';
 import type { MessageRenderer } from '../../message-schema.js';
+import { renderActions } from '../common/actions.js';
 
 export const textRenderer: MessageRenderer<string> = ({ value, item }) => {
   const retry = () => item.retry();
@@ -20,15 +21,16 @@ export const textRenderer: MessageRenderer<string> = ({ value, item }) => {
       <div @click="${stop}" class="right">${AIStopIcon}</div>
     </div>`;
   }
+  const retryAndDiscard = renderActions([
+    {
+      actions: [
+        { name: 'Regenerate', icon: ResetIcon, onSelect: retry },
+        { name: 'Discard', icon: DeleteIcon, onSelect: () => {} },
+      ],
+    },
+  ]);
   if (value.status === 'stop') {
-    return html`<div @click=${retry} class="action-item">
-        ${ResetIcon}
-        <div class="content"><div>Regenerate</div></div>
-      </div>
-      <div class="action-item">
-        ${DeleteIcon}
-        <div class="content"><div>Discard</div></div>
-      </div>`;
+    return retryAndDiscard;
   }
   if (value.status === 'error') {
     return html`
@@ -42,15 +44,7 @@ export const textRenderer: MessageRenderer<string> = ({ value, item }) => {
         </div>
         <div class="upgrade"><div class="content">Upgrade</div></div>
       </div>
-      <div class="divider"><div></div></div>
-      <div @click=${retry} class="action-item">
-        ${ResetIcon}
-        <div class="content"><div>Regenerate</div></div>
-      </div>
-      <div class="action-item">
-        ${DeleteIcon}
-        <div class="content"><div>Discard</div></div>
-      </div>
+      ${retryAndDiscard}
     `;
   }
   if (!value.done) {
@@ -61,17 +55,9 @@ export const textRenderer: MessageRenderer<string> = ({ value, item }) => {
         <div @click="${stop}" class="right">${AIStopIcon}</div>
       </div>`;
   }
-  return html`${renderAnswer(value.data)}
-    <div class="divider"><div></div></div>
-    <div @click=${retry} class="action-item">
-      ${ResetIcon}
-      <div class="content"><div>Regenerate</div></div>
-    </div>
-    <div class="action-item">
-      ${DeleteIcon}
-      <div class="content"><div>Discard</div></div>
-    </div>
-    ${renderCommonAction()} `;
+  return html`
+    ${renderAnswer(value.data)} ${retryAndDiscard} ${renderCommonAction()}
+  `;
 };
 const renderAnswer = (text: string) => {
   return html`
@@ -219,60 +205,13 @@ const renderAnswer = (text: string) => {
   `;
 };
 const renderCommonAction = () => {
-  return html`
-    <style>
-      .divider {
-        display: flex;
-        padding: 0px 0px 4px 0px;
-        flex-direction: column;
-        align-items: flex-start;
-        align-self: stretch;
-
-        & > div {
-          height: 0.5px;
-          width: 100%;
-          background: #e3e2e4;
-        }
-      }
-
-      .head {
-        display: flex;
-        padding: 6px 12px;
-        align-items: center;
-        gap: 4px;
-        align-self: stretch;
-
-        .content {
-          display: flex;
-          padding: 0px 4px;
-          align-items: center;
-          flex: 1 0 0;
-
-          color: var(
-            --light-textColor-textSecondaryColor,
-            var(--textColor-textSecondaryColor, #8e8d91)
-          );
-          text-align: justify;
-
-          /* light/xsMedium */
-          font-family: Inter;
-          font-size: 12px;
-          font-style: normal;
-          font-weight: 500;
-          line-height: 20px; /* 166.667% */
-        }
-      }
-    </style>
-    <div class="head">
-      <div class="content">RESULT ACTIONS</div>
-    </div>
-    <div class="action-item">
-      ${ReplaceIcon}
-      <div class="content"><div>Replace Selection</div></div>
-    </div>
-    <div class="action-item">
-      ${InsertBelowIcon}
-      <div class="content"><div>Insert Below</div></div>
-    </div>
-  `;
+  return renderActions([
+    {
+      name: 'RESULT ACTIONS',
+      actions: [
+        { name: 'Replace Selection', icon: ReplaceIcon, onSelect: () => {} },
+        { name: 'Insert Below', icon: InsertBelowIcon, onSelect: () => {} },
+      ],
+    },
+  ]);
 };
