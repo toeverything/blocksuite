@@ -2,7 +2,7 @@ import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 import '../panel/line-width-panel.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import type { Doc } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

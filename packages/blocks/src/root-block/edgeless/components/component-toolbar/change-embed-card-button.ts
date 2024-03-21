@@ -3,9 +3,9 @@ import '../panel/card-style-panel.js';
 import './component-toolbar-menu-divider.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import {
   css,
@@ -38,7 +38,6 @@ import {
   ExpandFullIcon,
   OpenIcon,
   PaletteIcon,
-  RefreshIcon,
 } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
@@ -441,10 +440,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._blockElement?.captionElement?.show();
   }
 
-  private _refreshData() {
-    this._blockElement?.refreshData();
-  }
-
   private _copyUrl() {
     if (!('url' in this.model)) {
       return;
@@ -611,6 +606,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
               <edgeless-tool-icon-button
                 .tooltip=${'Click to copy link'}
+                .iconContainerPadding=${2}
                 class="change-embed-card-button copy"
                 ?disabled=${this._doc.readonly}
                 @click=${this._copyUrl}
@@ -620,6 +616,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
               <edgeless-tool-icon-button
                 .tooltip=${'Edit'}
+                .iconContainerPadding=${2}
                 class="change-embed-card-button edit"
                 ?disabled=${this._doc.readonly}
                 @click=${() =>
@@ -644,6 +641,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               </div>
               <edgeless-tool-icon-button
                 .tooltip=${'Open'}
+                .iconContainerPadding=${2}
                 class="change-embed-card-button open"
                 @click=${this._open}
               >
@@ -659,6 +657,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           ? html`
               <edgeless-tool-icon-button
                 .tooltip=${'Full screen'}
+                .iconContainerPadding=${2}
                 class="change-embed-card-button expand"
                 @click=${this._open}
               >
@@ -712,6 +711,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               <div class="change-embed-card-button card-style">
                 <edgeless-tool-icon-button
                   .tooltip=${this._showPopper ? '' : 'Card style'}
+                  .iconContainerPadding=${2}
                   ?disabled=${this._doc.readonly}
                   @click=${() => this._cardStylePopper?.toggle()}
                 >
@@ -735,6 +735,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Add Caption'}
+          .iconContainerPadding=${2}
           class="change-embed-card-button caption"
           ?disabled=${this._doc.readonly}
           @click=${this._showCaption}
@@ -772,19 +773,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               ></edgeless-scale-panel>
             `
           : nothing}
-
-        <component-toolbar-menu-divider
-          .vertical=${true}
-        ></component-toolbar-menu-divider>
-
-        <edgeless-tool-icon-button
-          .tooltip=${'Reload'}
-          class="change-embed-card-button reload"
-          ?disabled=${this._doc.readonly}
-          @click=${this._refreshData}
-        >
-          ${RefreshIcon}
-        </edgeless-tool-icon-button>
       </div>
     `;
   }

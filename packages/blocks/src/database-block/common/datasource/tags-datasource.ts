@@ -1,5 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import type { DocCollection } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 

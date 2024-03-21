@@ -2,7 +2,6 @@ packages:
   - 'packages/framework/block-std'
   - 'packages/framework/global'
   - 'packages/framework/inline'
-  - 'packages/framework/lit'
   - 'packages/framework/store'
   - 'packages/framework/sync'
   - 'packages/blocks'

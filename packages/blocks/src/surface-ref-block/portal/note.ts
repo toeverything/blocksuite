@@ -2,7 +2,7 @@ import {
   RangeManager,
   ShadowlessElement,
   WithDisposable,
-} from '@blocksuite/lit';
+} from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import { css, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

@@ -6,7 +6,6 @@
     "packages/framework/block-std",
     "packages/framework/global",
     "packages/framework/inline",
-    "packages/framework/lit",
     "packages/framework/store",
     "packages/framework/sync",
     "packages/blocks",
@@ -50,7 +49,7 @@
     "clean": "./scripts/clean.sh",
     "release-note:draft": "node --loader ts-node/esm ./scripts/release-note/convert.ts",
     "release-note:notable": "node ./scripts/release-note/notable-prs.mjs",
-    "postinstall": "husky install"
+    "postinstall": "husky"
   },
   "lint-staged": {
     "*": "prettier --write --cache --ignore-unknown",

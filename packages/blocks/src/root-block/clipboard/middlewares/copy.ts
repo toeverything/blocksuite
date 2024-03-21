@@ -1,6 +1,6 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/lit';
 import type {
   BlockModel,
   BlockSnapshot,

@@ -43,6 +43,7 @@ import { AFFINE_FORMAT_BAR_WIDGET } from '../root-block/widgets/format-bar/forma
 import { AFFINE_LINKED_DOC_WIDGET } from '../root-block/widgets/linked-doc/index.js';
 import { AFFINE_MODAL_WIDGET } from '../root-block/widgets/modal/modal.js';
 import { AFFINE_PAGE_DRAGGING_AREA_WIDGET } from '../root-block/widgets/page-dragging-area/page-dragging-area.js';
+import { AFFINE_PIE_MENU_WIDGET } from '../root-block/widgets/pie-menu/index.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../root-block/widgets/slash-menu/index.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfacePageService } from '../surface-block/surface-page-service.js';
@@ -94,6 +95,7 @@ const EdgelessPageSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
       //   AFFINE_BLOCK_HUB_WIDGET
       // )}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
+      [AFFINE_PIE_MENU_WIDGET]: literal`${unsafeStatic(AFFINE_PIE_MENU_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET
       )}`,

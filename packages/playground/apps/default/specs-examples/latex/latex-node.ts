@@ -1,3 +1,4 @@
+import { ShadowlessElement } from '@blocksuite/block-std';
 import type { AffineTextAttributes } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -5,7 +6,6 @@ import {
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
-import { ShadowlessElement } from '@blocksuite/lit';
 import katex from 'katex';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

@@ -1,6 +1,6 @@
 import './database-header-column.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { autoUpdate, computePosition, shift } from '@floating-ui/dom';
 import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

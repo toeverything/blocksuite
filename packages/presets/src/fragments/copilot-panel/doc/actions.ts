@@ -24,11 +24,11 @@ export function runFixSpellingAction(payload: { input: string }) {
   return getChatService().chat([
     {
       role: 'system',
-      content: 'You are a professional writing assisting',
+      content: 'You are a professional writing assistant',
     },
     userText(input),
     userText(
-      'Fix the spelling and grammar of the text, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
+      'Fix the spelling and grammar of the text, preserving the markdown formatting, like bold, italic, link, highlight. Make sure to do your best'
     ),
   ]);
 }
@@ -51,11 +51,11 @@ export function runImproveWritingAction(payload: { input: string }) {
   return getChatService().chat([
     {
       role: 'system',
-      content: 'You are a professional writing assisting',
+      content: 'You are a professional writing assistant',
     },
     userText(input),
     userText(
-      'Improve the writing of the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. To make sure do your best'
+      'Improve the writing of the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. Make sure to do your best'
     ),
   ]);
 }
@@ -65,11 +65,11 @@ export function runMakeLongerAction(payload: { input: string }) {
   return getChatService().chat([
     {
       role: 'system',
-      content: 'You are a professional writing assisting',
+      content: 'You are a professional writing assistant',
     },
     userText(input),
     userText(
-      'Make the input text longer, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
+      'Make the input text longer, preserving the markdown formatting, like bold, italic, link, highlight. Make sure to do your best'
     ),
   ]);
 }
@@ -79,11 +79,11 @@ export function runMakeShorterAction(payload: { input: string }) {
   return getChatService().chat([
     {
       role: 'system',
-      content: 'You are a professional writing assisting',
+      content: 'You are a professional writing assistant',
     },
     userText(input),
     userText(
-      'Make the input text shorter, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
+      'Make the input text shorter, preserving the markdown formatting, like bold, italic, link, highlight. Make sure to do your best'
     ),
   ]);
 }
@@ -106,11 +106,11 @@ export function runSimplifyWritingAction(payload: { input: string }) {
   return getChatService().chat([
     {
       role: 'system',
-      content: 'You are a professional writing assisting',
+      content: 'You are a professional writing assistant',
     },
     userText(input),
     userText(
-      'Simplify the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. To make sure do your best'
+      'Simplify the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. Make sure to do your best'
     ),
   ]);
 }
@@ -123,7 +123,7 @@ export function runSummaryAction(payload: { input: string }) {
       content: 'You are a professional writing assisting.',
     },
     userText(input),
-    userText('Summarize this text. To make sure do your best.'),
+    userText('Summarize this text. Make sure to do your best.'),
   ]);
 }
 
@@ -142,7 +142,7 @@ export function runTranslateAction(payload: {
       
       ${input}
       
-      to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of translate.`
+      to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of the translate.`
     ),
   ]);
 }
@@ -152,7 +152,7 @@ export function runAnalysisAction(payload: { input: string }) {
   return getChatService().chat([
     userText(
       `Use the nested unordered list syntax in Markdown to create a structure similar to a mind map. 
-      Analysis the following questions:
+      Analyze the following questions:
       ${input}`
     ),
   ]);
@@ -224,7 +224,7 @@ this is a template:
     - content
 
 
-please help me to write this ppt, do not output any content that does not belong to the ppt content itself outside of the content, Directly output the title content keywords without prefix like Title:xxx, Content: xxx, Keywords: xxx
+please help me to write this ppt, do not output any content that does not belong to the slides content itself outside of the content, Directly output the title content keywords without prefix like Title:xxx, Content: xxx, Keywords: xxx
 The PPT is based on the following topics:
 ${input}`
     ),

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import type { EditorHost } from '@block-std/view/element/index.js';
 import type { TestUtils } from '@blocks/index.js';
-import type { EditorHost } from '@lit/element/index.js';
 import type { DebugMenu } from '@playground/apps/_common/components/debug-menu.js';
 import type { AffineEditorContainer } from '@presets/editors/index.js';
 import type { BlockModel, Doc, DocCollection } from '@store/index.js';

@@ -16,20 +16,19 @@ export { CanvasTextFonts, GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export { type EdgelessBlockType } from './edgeless-types.js';
 export { ElementModel } from './element-model/base.js';
 export { BrushElementModel } from './element-model/brush.js';
-export { ConnectorElementModel } from './element-model/connector.js';
+export {
+  type Connection,
+  ConnectorElementModel,
+  ConnectorEndpoint,
+  ConnectorMode,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
+  type PointStyle,
+} from './element-model/connector.js';
 export { GroupElementModel } from './element-model/group.js';
 export { CanvasElementType } from './element-model/index.js';
 export { ShapeElementModel } from './element-model/shape.js';
 export { TextElementModel } from './element-model/text.js';
-export {
-  type Connection,
-  ConnectorEndpoint,
-  ConnectorEndpointStyle,
-  ConnectorMode,
-  type Controller,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
-} from './elements/connector/types.js';
 export * from './elements/index.js';
 export { ShapeType } from './elements/shape/consts.js';
 export { getStroke } from './perfect-freehand/getStroke.js';

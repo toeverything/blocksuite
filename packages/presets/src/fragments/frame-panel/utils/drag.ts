@@ -1,10 +1,10 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   type EdgelessRootBlockComponent,
   type FrameBlockModel,
   on,
   once,
 } from '@blocksuite/blocks';
-import type { EditorHost } from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 
 import type { FramePanelBody } from '../body/frame-panel-body.js';

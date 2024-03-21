@@ -3,8 +3,8 @@
 import './portal/note.js';
 import './portal/generic-block.js';
 
-import type { EditorHost } from '@blocksuite/lit';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/block-std';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel, Doc } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
 import { html } from 'lit';

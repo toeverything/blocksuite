@@ -1,5 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
 
 import type {

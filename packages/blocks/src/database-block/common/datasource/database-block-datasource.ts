@@ -1,6 +1,6 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
 

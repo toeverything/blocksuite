@@ -6,7 +6,6 @@
 packages=(
   "framework/block-std"
   "framework/global"
-  "framework/lit"
   "framework/store"
   "framework/inline"
   "framework/sync"

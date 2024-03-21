@@ -1,9 +1,9 @@
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { DocCollection } from '@blocksuite/store';
-import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { css, html, nothing } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -54,6 +54,16 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   editor!: AffineEditorContainer;
 
+  @state()
+  private get collection() {
+    return this.editor.doc.collection;
+  }
+
+  @state()
+  private get docs() {
+    return [...this.collection.docs.values()];
+  }
+
   public override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
@@ -68,8 +78,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
   };
 
   protected override render(): unknown {
-    const collection = this.editor.doc.collection;
-    const docs = [...collection.docs.values()];
+    const { docs, collection } = this;
     return html`
       <div @click="${this.createDoc}" class="new-doc-button">New Doc</div>
       ${repeat(
@@ -93,18 +102,23 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             this.editor.doc.resetHistory();
             this.requestUpdate();
           };
-          const deleteDoc = () => {
+          const deleteDoc = (e: MouseEvent) => {
+            e.stopPropagation();
+            const isDeleteCurrent = doc.id === this.editor.doc.id;
+
             collection.removeDoc(doc.id);
-            // When delete a doc, we need to set the editor doc to the first remaining doc
-            const docs = Array.from(collection.docs.values());
-            this.editor.doc = docs[0];
-            this.requestUpdate();
+            // When delete the current doc, we need to set the editor doc to the first remaining doc
+            if (isDeleteCurrent) {
+              this.editor.doc = this.docs[0];
+            }
           };
           return html`<div class="doc-item" @click="${click}" style="${style}">
             ${doc.meta?.title || 'Untitled'}
-            <div @click="${deleteDoc}" class="delete-doc-icon">
-              ${CloseIcon}
-            </div>
+            ${docs.length > 1
+              ? html`<div @click="${deleteDoc}" class="delete-doc-icon">
+                  ${CloseIcon}
+                </div>`
+              : nothing}
           </div>`;
         }
       )}

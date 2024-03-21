@@ -1,6 +1,6 @@
 import type { BlockService } from '@blocksuite/block-std';
+import { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html, render } from 'lit';

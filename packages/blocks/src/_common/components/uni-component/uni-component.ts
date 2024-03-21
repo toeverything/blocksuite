@@ -1,4 +1,4 @@
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement } from '@blocksuite/block-std';
 import type { LitElement, PropertyValues, TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

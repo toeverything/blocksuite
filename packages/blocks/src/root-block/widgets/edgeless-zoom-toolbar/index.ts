@@ -1,7 +1,7 @@
 import './zoom-toolbar.js';
 import './zoom-bar-toggle-button.js';
 
-import { WidgetElement } from '@blocksuite/lit';
+import { WidgetElement } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 

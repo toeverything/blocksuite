@@ -1,5 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { html, type TemplateResult } from 'lit';
 

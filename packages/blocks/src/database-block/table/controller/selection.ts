@@ -1,5 +1,5 @@
+import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
 import type { ReactiveController } from 'lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';

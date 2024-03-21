@@ -1,3 +1,4 @@
+import { WithDisposable } from '@blocksuite/block-std';
 import {
   createButtonPopper,
   getThemeMode,
@@ -7,7 +8,6 @@ import {
   once,
 } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import type { BlockModel, Doc } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import {

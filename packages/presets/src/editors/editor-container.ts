@@ -3,6 +3,7 @@ import './edgeless-editor.js';
 import '../fragments/doc-title/doc-title.js';
 import '../fragments/doc-meta-tags/doc-meta-tags.js';
 
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type {
   AbstractEditor,
   EdgelessRootBlockComponent,
@@ -15,9 +16,8 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Doc } from '@blocksuite/store';
-import { css, html } from 'lit';
+import type { BlockModel, Doc } from '@blocksuite/store';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
@@ -151,9 +151,7 @@ export class AffineEditorContainer
   }
 
   get rootModel() {
-    assertExists(this.doc, 'Missing doc for EditorContainer.');
-    assertExists(this.doc.root, 'Missing root model for Doc.');
-    return this.doc.root;
+    return this.doc.root as BlockModel;
   }
 
   switchEditor(mode: typeof this.mode) {
@@ -210,11 +208,11 @@ export class AffineEditorContainer
   override connectedCallback() {
     super.connectedCallback();
 
-    assertExists(this.doc, 'Missing doc for EditorContainer.');
-    assertExists(this.doc.root, 'Missing root model for Doc.');
-
     this.themeObserver.observe(document.documentElement);
     this._disposables.add(this.themeObserver);
+    this._disposables.add(
+      this.doc.slots.rootAdded.on(() => this.requestUpdate())
+    );
   }
 
   /**
@@ -240,6 +238,8 @@ export class AffineEditorContainer
   }
 
   override render() {
+    if (!this.rootModel) return nothing;
+
     return html`${keyed(
       this.rootModel.id,
       this.mode === 'page'

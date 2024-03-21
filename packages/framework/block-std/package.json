@@ -15,15 +15,18 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "peerDependencies": {
+    "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
+    "lit": "^3.1.2",
     "lz-string": "^1.5.0",
     "w3c-keyname": "^2.2.8",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*"
   },
   "exports": {

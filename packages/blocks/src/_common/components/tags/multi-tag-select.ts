@@ -1,4 +1,4 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { nanoid } from '@blocksuite/store';
 import type { Middleware } from '@floating-ui/dom';
 import { autoPlacement, detectOverflow } from '@floating-ui/dom';

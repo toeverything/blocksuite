@@ -168,12 +168,12 @@ importers:
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
+      '@fal-ai/serverless-client':
+        specifier: ^0.9.0
+        version: 0.9.0
       '@floating-ui/dom':
         specifier: ^1.6.3
         version: 1.6.3
@@ -192,6 +192,9 @@ importers:
       '@types/webfontloader':
         specifier: ^1.6.38
         version: 1.6.38
+      bson:
+        specifier: ^6.5.0
+        version: 6.5.0
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -249,6 +252,9 @@ importers:
       nanoid:
         specifier: ^5.0.6
         version: 5.0.6
+      openai:
+        specifier: ^4.28.4
+        version: 4.28.4
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
@@ -322,6 +328,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      lit:
+        specifier: ^3.1.2
+        version: 3.1.2
       lz-string:
         specifier: ^1.5.0
         version: 1.5.0
@@ -332,6 +341,9 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../inline
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
@@ -357,25 +369,6 @@ importers:
       yjs:
         specifier: ^13.6.14
         version: 13.6.14
-
-  packages/framework/lit:
-    dependencies:
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../inline
-      lit:
-        specifier: ^3.1.2
-        version: 3.1.2
-    devDependencies:
-      '@blocksuite/block-std':
-        specifier: workspace:*
-        version: link:../block-std
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:../store
 
   packages/framework/store:
     dependencies:
@@ -440,6 +433,9 @@ importers:
 
   packages/playground:
     dependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../framework/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
@@ -449,9 +445,6 @@ importers:
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/presets':
         specifier: workspace:*
         version: link:../presets
@@ -494,6 +487,9 @@ importers:
       tweakpane:
         specifier: ^4.0.3
         version: 4.0.3
+      y-indexeddb:
+        specifier: ^9.0.12
+        version: 9.0.12(yjs@13.6.14)
       y-protocols:
         specifier: ^1.0.6
         version: 1.0.6(yjs@13.6.14)
@@ -531,9 +527,6 @@ importers:
       '@blocksuite/inline':
         specifier: workspace:*
         version: link:../framework/inline
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../framework/lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
@@ -3009,6 +3002,11 @@ packages:
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
     dev: true
+
+  /bson@6.5.0:
+    resolution: {integrity: sha512-DXf1BTAS8vKyR90BO4x5v3rKVarmkdkzwOrnYDFdjAY694ILNDkmA3uRh1xXJEl+C1DAh8XCvAQ+Gh3kzubtpg==}
+    engines: {node: '>=16.20.1'}
+    dev: false
 
   /buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
@@ -8177,6 +8175,16 @@ packages:
       utf-8-validate:
         optional: true
     dev: true
+
+  /y-indexeddb@9.0.12(yjs@13.6.14):
+    resolution: {integrity: sha512-9oCFRSPPzBK7/w5vOkJBaVCQZKHXB/v6SIT+WYhnJxlEC61juqG0hBrAf+y3gmSMLFLwICNH9nQ53uscuse6Hg==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      yjs: ^13.0.0
+    dependencies:
+      lib0: 0.2.91
+      yjs: 13.6.14
+    dev: false
 
   /y-protocols@1.0.6(yjs@13.6.14):
     resolution: {integrity: sha512-vHRF2L6iT3rwj1jub/K5tYcTT/mEYDUppgNPXwp8fmLpui9f7Yeq3OEtTLVF012j39QnV+KEQpNqoN7CWU7Y9Q==}

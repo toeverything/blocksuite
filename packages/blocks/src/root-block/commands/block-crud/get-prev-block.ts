@@ -1,7 +1,7 @@
 import type { Command } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
 
 type Filter = (view: BlockElement) => boolean;
 

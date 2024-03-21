@@ -17,7 +17,6 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
-    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@fal-ai/serverless-client": "^0.9.0",
     "@floating-ui/dom": "^1.6.3",

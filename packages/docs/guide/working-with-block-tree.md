@@ -75,14 +75,11 @@ const { spec, selection, command } = host.std;
 
 Firstly, let's explain the newly introduced `host` and `std`, which are determined by the framework-agnostic architecture of BlockSuite:
 
-- As [mentioned before](./component-types#composing-editors-by-blocks), the `editor.host` - also known as the [`EditorHost`](/api/@blocksuite/lit/) component, is a container for mounting block UI components. It handles the heavy lifting involved in mapping the **block tree** to the **component tree**.
+- As [mentioned before](./component-types#composing-editors-by-blocks), the `editor.host` - also known as the [`EditorHost`](/api/@blocksuite/block-std/) component, is a container for mounting block UI components. It handles the heavy lifting involved in mapping the **block tree** to the **component tree**.
 - Regardless of the framework used to implement `EditorHost`, they can access the same headless standard library designed for editable blocks through `host.std`. For example, `std.spec` contains all the registered [`BlockSpec`](./block-spec)s.
 
 ::: tip
-
-- To access `host` after attaching doc to an editor, wait for a [slot](./slot) named [`doc.slots.ready`](/api/@blocksuite/store/classes/Doc.html#ready-1).
-- We usually access `host.spec` instead of `host.std.spec` to simplify the code.
-
+We usually access `host.spec` instead of `host.std.spec` to simplify the code.
 :::
 
 As the runtime for the block tree, this is the mental model inside the `editor`:

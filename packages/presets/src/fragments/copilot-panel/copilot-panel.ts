@@ -1,9 +1,9 @@
 import './chat/chat.js';
 import './edgeless/edgeless.js';
-import './copilot-service';
+import './copilot-service/index.js';
 
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { EdgelessComponentToolbar } from '@blocksuite/blocks';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

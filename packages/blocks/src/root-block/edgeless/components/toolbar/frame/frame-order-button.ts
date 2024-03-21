@@ -1,7 +1,7 @@
 import './frame-order-menu.js';
 import '../../buttons/tool-icon-button.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 

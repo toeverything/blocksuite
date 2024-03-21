@@ -2,7 +2,9 @@ import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 import '../../../../_common/components/menu-divider.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import type { SurfaceSelection } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -19,17 +21,45 @@ import {
   MoreDuplicateIcon,
   MoreHorizontalIcon,
   MoreVerticalIcon,
+  RefreshIcon,
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../../_common/icons/index.js';
 import { type ReorderingType } from '../../../../_common/utils/index.js';
+import type {
+  AttachmentBlockComponent,
+  BookmarkBlockComponent,
+  EmbedFigmaBlockComponent,
+  EmbedGithubBlockComponent,
+  EmbedLoomBlockComponent,
+  EmbedYoutubeBlockComponent,
+  ImageBlockComponent,
+} from '../../../../index.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { removeContainedFrames } from '../../frame-manager.js';
 import { duplicate, splitElements } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
-import { isFrameBlock } from '../../utils/query.js';
+import {
+  isAttachmentBlock,
+  isBookmarkBlock,
+  isEmbeddedLinkBlock,
+  isFrameBlock,
+  isImageBlock,
+} from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
+
+type EmbedLinkBlockComponent =
+  | EmbedGithubBlockComponent
+  | EmbedFigmaBlockComponent
+  | EmbedLoomBlockComponent
+  | EmbedYoutubeBlockComponent;
+
+type RefreshableBlockComponent =
+  | EmbedLinkBlockComponent
+  | ImageBlockComponent
+  | AttachmentBlockComponent
+  | BookmarkBlockComponent;
 
 type Action =
   | {
@@ -42,6 +72,7 @@ type Action =
         | 'create-group'
         | 'copy'
         | 'duplicate'
+        | 'reload'
         | ReorderingType;
       disabled?: boolean;
     }
@@ -49,31 +80,44 @@ type Action =
       type: 'divider';
     };
 
-const ACTIONS: Action[] = [
-  { icon: FrameIcon, name: 'Frame Section', type: 'create-frame' },
-  { icon: GroupIcon, name: 'Group Section', type: 'create-group' },
-  { type: 'divider' },
+const REORDER_ACTIONS: Action[] = [
   { icon: BringToFrontIcon, name: 'Bring to Front', type: 'front' },
   { icon: BringForwardIcon, name: 'Bring Forward', type: 'forward' },
   { icon: SendBackwardIcon, name: 'Send Backward', type: 'backward' },
   { icon: SendToBackIcon, name: 'Send to Back', type: 'back' },
-  { type: 'divider' },
-  { icon: MoreCopyIcon, name: 'Copy', type: 'copy' },
-  { icon: CopyAsPngIcon, name: 'Copy as PNG', type: 'copy-as-png' },
-  { icon: MoreDuplicateIcon, name: 'Duplicate', type: 'duplicate' },
-  { type: 'divider' },
-  { icon: MoreDeleteIcon, name: 'Delete', type: 'delete' },
 ];
 
-const FRAME_ACTIONS: Action[] = [
-  { icon: FrameIcon, name: 'Frame Section', type: 'create-frame' },
-  { type: 'divider' },
+const COPY_ACTIONS: Action[] = [
   { icon: MoreCopyIcon, name: 'Copy', type: 'copy' },
   { icon: CopyAsPngIcon, name: 'Copy as PNG', type: 'copy-as-png' },
   { icon: MoreDuplicateIcon, name: 'Duplicate', type: 'duplicate' },
-  { type: 'divider' },
-  { icon: MoreDeleteIcon, name: 'Delete', type: 'delete' },
 ];
+
+const DELETE_ACTION: Action = {
+  icon: MoreDeleteIcon,
+  name: 'Delete',
+  type: 'delete',
+};
+
+const FRAME_ACTION: Action = {
+  icon: FrameIcon,
+  name: 'Frame Section',
+  type: 'create-frame',
+};
+
+const GROUP_ACTION: Action = {
+  icon: GroupIcon,
+  name: 'Group Section',
+  type: 'create-group',
+};
+
+const RELOAD_ACTION: Action = {
+  icon: RefreshIcon,
+  name: 'Reload',
+  type: 'reload',
+};
+
+const ACTION_DIVIDER: Action = { type: 'divider' };
 
 function Actions(
   actions: Action[],
@@ -191,7 +235,41 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   get surface() {
     return this.edgeless.surface;
   }
-  private _delete() {
+
+  get view() {
+    return this.edgeless.host.view;
+  }
+
+  get _Actions(): Action[] {
+    const actions: Action[] = [
+      FRAME_ACTION,
+      GROUP_ACTION,
+      ACTION_DIVIDER,
+      ...REORDER_ACTIONS,
+      ACTION_DIVIDER,
+      ...COPY_ACTIONS,
+    ];
+    const refreshable = this.selection.elements.every(ele =>
+      this._refreshable(ele as BlockModel)
+    );
+    if (refreshable) {
+      actions.push(RELOAD_ACTION);
+    }
+    actions.push(ACTION_DIVIDER, DELETE_ACTION);
+    return actions;
+  }
+
+  get _FrameActions(): Action[] {
+    return [
+      FRAME_ACTION,
+      ACTION_DIVIDER,
+      ...COPY_ACTIONS,
+      ACTION_DIVIDER,
+      DELETE_ACTION,
+    ];
+  }
+
+  private _delete = () => {
     this.doc.captureSync();
     deleteElements(this.surface, this.selection.elements);
 
@@ -199,7 +277,25 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       elements: [],
       editing: false,
     });
+  };
+
+  private _refreshable(ele: BlockModel) {
+    return (
+      isImageBlock(ele) ||
+      isBookmarkBlock(ele) ||
+      isAttachmentBlock(ele) ||
+      isEmbeddedLinkBlock(ele)
+    );
   }
+
+  private _reload = (selections: SurfaceSelection[]) => {
+    selections.forEach(sel => {
+      const blockElement = this.view.viewFromPath('block', sel.path);
+      if (!!blockElement && this._refreshable(blockElement.model)) {
+        (blockElement as RefreshableBlockComponent).refreshData();
+      }
+    });
+  };
 
   private _runAction = async ({ type }: Action) => {
     const selection = this.edgeless.service.selection;
@@ -245,6 +341,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         });
         break;
       }
+      case 'reload':
+        this._reload(this.selection.selections);
+        break;
     }
     this._actionsMenuPopper?.hide();
   };
@@ -268,8 +367,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
     const actions = Actions(
       selection.elements.some(ele => isFrameBlock(ele))
-        ? FRAME_ACTIONS
-        : ACTIONS,
+        ? this._FrameActions
+        : this._Actions,
       this._runAction
     );
     return html`

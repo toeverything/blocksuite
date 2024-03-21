@@ -1,4 +1,4 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 

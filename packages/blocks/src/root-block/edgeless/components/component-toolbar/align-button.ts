@@ -1,7 +1,7 @@
 import '../buttons/menu-button.js';
 import '../../../../_common/components/menu-divider.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

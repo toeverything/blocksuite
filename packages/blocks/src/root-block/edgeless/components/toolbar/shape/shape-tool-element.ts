@@ -1,5 +1,5 @@
+import { WithDisposable } from '@blocksuite/block-std';
 import { sleep } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import {
   css,
   html,

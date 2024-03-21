@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { BlockElement } from '@blocksuite/block-std';
+import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
-import { WidgetElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

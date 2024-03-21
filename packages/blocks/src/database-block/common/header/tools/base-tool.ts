@@ -1,4 +1,4 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewExpose, DataViewToolsProps } from '../../data-view.js';

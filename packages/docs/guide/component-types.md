@@ -24,7 +24,7 @@ Within each block spec, there can be [`Widget`](./block-widgets)s specific to th
 
 ## Composing Editors by Blocks
 
-In BlockSuite, the `editor` is typically designed to be remarkably lightweight. The actual editable blocks are registered to the [`EditorHost`](/api/@blocksuite/lit/) component, which is a container for mounting block UI components.
+In BlockSuite, the `editor` is typically designed to be remarkably lightweight. The actual editable blocks are registered to the [`EditorHost`](/api/@blocksuite/block-std/) component, which is a container for mounting block UI components.
 
 BlockSuite by default offers a host based on the [lit](https://lit.dev) framework. For example, this is a conceptually usable BlockSuite editor composed of [`BlockSpec`](./block-spec)s:
 

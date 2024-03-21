@@ -3,8 +3,8 @@ import '../panel/card-style-panel.js';
 import './component-toolbar-menu-divider.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -12,11 +12,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../../_common/consts.js';
-import {
-  CaptionIcon,
-  PaletteIcon,
-  RefreshIcon,
-} from '../../../../_common/icons/text.js';
+import { CaptionIcon, PaletteIcon } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
 import type {
@@ -123,10 +119,6 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     this._blockElement?.captionElement.show();
   }
 
-  private _refreshData() {
-    this._blockElement?.refreshData();
-  }
-
   private _setCardStyle(style: EmbedCardStyle) {
     const bounds = Bound.deserialize(this.model.xywh);
     bounds.w = EMBED_CARD_WIDTH[style];
@@ -156,6 +148,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         <div class="change-attachment-button card-style">
           <edgeless-tool-icon-button
             .tooltip=${this._showPopper ? '' : 'Card style'}
+            .iconContainerPadding=${2}
             ?disabled=${this._doc.readonly}
             @click=${() => this._cardStylePopper?.toggle()}
           >
@@ -176,24 +169,12 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Add Caption'}
+          .iconContainerPadding=${2}
           class="change-attachment-button caption"
           ?disabled=${this._doc.readonly}
           @click=${() => this._showCaption()}
         >
           ${CaptionIcon}
-        </edgeless-tool-icon-button>
-
-        <component-toolbar-menu-divider
-          .vertical=${true}
-        ></component-toolbar-menu-divider>
-
-        <edgeless-tool-icon-button
-          .tooltip=${'Reload'}
-          class="change-attachment-button reload"
-          ?disabled=${this._doc.readonly}
-          @click=${() => this._refreshData()}
-        >
-          ${RefreshIcon}
         </edgeless-tool-icon-button>
       </div>
     `;

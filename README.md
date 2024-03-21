@@ -92,10 +92,6 @@ To that end, the BlockSuite project is structured around key packages that are c
     <td><code>@blocksuite/block-std</code></td>
     <td>Framework-agnostic library for modeling editable blocks. Its capabilities cover the structure of block fields, events, selection, clipboard support, etc.</td>
   </tr>
-  <tr>
-    <td><code>@blocksuite/lit</code></td>
-    <td>Intermediate layer for adapting the block tree to the <a href="https://lit.dev/">lit</a> framework component tree UI. BlockSuite uses lit as the default framework because lit components are native web components, avoiding synchronization issues between the component tree and DOM tree during complex editing.</td>
-  </tr>
 </table>
 
 <table>
@@ -111,10 +107,6 @@ To that end, the BlockSuite project is structured around key packages that are c
     <td>Plug-and-play editable components including <i>editors</i> (<code>PageEditor</code> / <code>EdgelessEditor</code>) and auxiliary UI components named <i>fragments</i> (<code>CopilotPanel</code>, <code>DocTitle</code>...).</td>
   </tr>
 </table>
-
-This can be illustrated as the diagram below:
-
-![package-overview.png](./packages/docs/images/package-overview.png)
 
 ## Resources
 

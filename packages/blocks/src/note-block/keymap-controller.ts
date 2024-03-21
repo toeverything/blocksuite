@@ -3,9 +3,9 @@ import type {
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
+import { type BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
-import { type BlockElement } from '@blocksuite/lit';
 import type { ReactiveController } from 'lit';
 import type { ReactiveControllerHost } from 'lit';
 

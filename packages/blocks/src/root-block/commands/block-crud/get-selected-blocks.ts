@@ -3,9 +3,9 @@ import type {
   Command,
   TextSelection,
 } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
+import { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
-import { BlockElement } from '@blocksuite/lit';
 import type { RoleType } from '@blocksuite/store';
 
 import type { ImageSelection } from '../../../image-block/image-selection.js';

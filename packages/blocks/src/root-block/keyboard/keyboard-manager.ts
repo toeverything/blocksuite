@@ -1,9 +1,10 @@
 import type { BlockSelection } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
 
 import { matchFlavours } from '../../_common/utils/model.js';
+import { createLinkedDocFromSelectedBlocks } from '../../_common/utils/render-linked-doc.js';
 
 export class PageKeyboardManager {
   constructor(public rootElement: BlockElement) {
@@ -143,6 +144,7 @@ export class PageKeyboardManager {
       .chain()
       .getSelectedModels({
         types: ['block'],
+        mode: 'highest',
       })
       .run();
     const selectedModels = ctx.selectedModels?.filter(
@@ -156,58 +158,7 @@ export class PageKeyboardManager {
     }
 
     const doc = rootElement.host.doc;
-    const linkedDoc = doc.collection.createDoc({});
-    linkedDoc.load(() => {
-      const rootId = linkedDoc.addBlock('affine:page', {
-        title: new doc.Text(''),
-      });
-      linkedDoc.addBlock('affine:surface', {}, rootId);
-      const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
-
-      const firstBlock = selectedModels[0];
-      assertExists(firstBlock);
-
-      doc.addSiblingBlocks(
-        firstBlock,
-        [
-          {
-            flavour: 'affine:embed-linked-doc',
-            pageId: linkedDoc.id,
-          },
-        ],
-        'before'
-      );
-
-      if (
-        matchFlavours(firstBlock, ['affine:paragraph']) &&
-        firstBlock.type.match(/^h[1-6]$/)
-      ) {
-        const title = firstBlock.text.toString();
-        linkedDoc.collection.setDocMeta(linkedDoc.id, {
-          title,
-        });
-
-        const linkedDocRootModel = linkedDoc.getBlockById(rootId);
-        assertExists(linkedDocRootModel);
-        linkedDoc.updateBlock(linkedDocRootModel, {
-          title: new doc.Text(title),
-        });
-
-        doc.deleteBlock(firstBlock);
-        selectedModels.shift();
-      }
-
-      selectedModels.forEach(model => {
-        const keys = model.keys as (keyof typeof model)[];
-        const values = keys.map(key => model[key]);
-        const blockProps = Object.fromEntries(
-          keys.map((key, i) => [key, values[i]])
-        );
-        linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
-        doc.deleteBlock(model);
-      });
-    });
-
+    const linkedDoc = createLinkedDocFromSelectedBlocks(doc, selectedModels);
     const linkedDocService = rootElement.host.spec.getService(
       'affine:embed-linked-doc'
     );

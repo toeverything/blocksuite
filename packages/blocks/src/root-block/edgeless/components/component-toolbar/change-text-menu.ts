@@ -2,7 +2,7 @@ import '../panel/font-family-panel.js';
 import '../panel/size-panel.js';
 import '../panel/font-weight-and-style-panel.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';

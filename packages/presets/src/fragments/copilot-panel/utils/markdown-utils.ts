@@ -1,6 +1,6 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { MarkdownAdapter } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
 

@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/block-std';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { AllDocDatasource } from './all-doc-datasource.js';

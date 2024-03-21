@@ -1,7 +1,7 @@
 import './database-convert-view.js';
 
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
@@ -12,6 +12,7 @@ import {
   DatabaseTableViewIcon20,
   FontLinkedDocIcon,
 } from '../../icons/index.js';
+import { createLinkedDocFromSelectedBlocks } from '../../utils/render-linked-doc.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
@@ -123,66 +124,17 @@ export const quickActionConfig: QuickActionConfig[] = [
         .chain()
         .getSelectedModels({
           types: ['block'],
+          mode: 'highest',
         })
         .run();
       const { selectedModels } = ctx;
       assertExists(selectedModels);
+      if (!selectedModels.length) return;
 
       host.selection.clear();
 
       const doc = host.doc;
-      const linkedDoc = doc.collection.createDoc({});
-      linkedDoc.load(() => {
-        const rootId = linkedDoc.addBlock('affine:page', {
-          title: new doc.Text(''),
-        });
-        linkedDoc.addBlock('affine:surface', {}, rootId);
-        const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
-
-        const firstBlock = selectedModels[0];
-        assertExists(firstBlock);
-
-        doc.addSiblingBlocks(
-          firstBlock,
-          [
-            {
-              flavour: 'affine:embed-linked-doc',
-              pageId: linkedDoc.id,
-            },
-          ],
-          'before'
-        );
-
-        if (
-          matchFlavours(firstBlock, ['affine:paragraph']) &&
-          firstBlock.type.match(/^h[1-6]$/)
-        ) {
-          const title = firstBlock.text.toString();
-          linkedDoc.collection.setDocMeta(linkedDoc.id, {
-            title,
-          });
-
-          const linkedDocRootModel = linkedDoc.getBlockById(rootId);
-          assertExists(linkedDocRootModel);
-          linkedDoc.updateBlock(linkedDocRootModel, {
-            title: new doc.Text(title),
-          });
-
-          doc.deleteBlock(firstBlock);
-          selectedModels.shift();
-        }
-
-        selectedModels.forEach(model => {
-          const keys = model.keys as (keyof typeof model)[];
-          const values = keys.map(key => model[key]);
-          const blockProps = Object.fromEntries(
-            keys.map((key, i) => [key, values[i]])
-          );
-          linkedDoc.addBlock(model.flavour as never, blockProps, noteId);
-          doc.deleteBlock(model);
-        });
-      });
-
+      const linkedDoc = createLinkedDocFromSelectedBlocks(doc, selectedModels);
       const linkedDocService = host.spec.getService('affine:embed-linked-doc');
       linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
     },

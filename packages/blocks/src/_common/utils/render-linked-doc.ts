@@ -193,3 +193,82 @@ async function renderSurfaceRefAbstract(
 
   card.isBannerEmpty = false;
 }
+
+function moveBlocksToLinkedDoc(
+  doc: Doc,
+  linkedDoc: Doc,
+  model: BlockModel,
+  parentId: string
+) {
+  // Add current block to linked doc
+  const keys = model.keys as (keyof typeof model)[];
+  const values = keys.map(key => model[key]);
+  const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
+  const newModelId = linkedDoc.addBlock(
+    model.flavour as never,
+    blockProps,
+    parentId
+  );
+  // Add children to linked doc, parent is the new model
+  const children = model.children;
+  if (children.length > 0) {
+    children.forEach(child => {
+      moveBlocksToLinkedDoc(doc, linkedDoc, child, newModelId);
+    });
+  }
+  // Delete current block from original doc
+  doc.deleteBlock(model);
+}
+
+export function createLinkedDocFromSelectedBlocks(
+  doc: Doc,
+  selectedModels: BlockModel[]
+) {
+  const linkedDoc = doc.collection.createDoc({});
+  linkedDoc.load(() => {
+    const rootId = linkedDoc.addBlock('affine:page', {
+      title: new doc.Text(''),
+    });
+    linkedDoc.addBlock('affine:surface', {}, rootId);
+    const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
+
+    const firstBlock = selectedModels[0];
+    assertExists(firstBlock);
+
+    doc.addSiblingBlocks(
+      firstBlock,
+      [
+        {
+          flavour: 'affine:embed-linked-doc',
+          pageId: linkedDoc.id,
+        },
+      ],
+      'before'
+    );
+
+    if (
+      matchFlavours(firstBlock, ['affine:paragraph']) &&
+      firstBlock.type.match(/^h[1-6]$/)
+    ) {
+      const title = firstBlock.text.toString();
+      linkedDoc.collection.setDocMeta(linkedDoc.id, {
+        title,
+      });
+
+      const linkedDocRootModel = linkedDoc.getBlockById(rootId);
+      assertExists(linkedDocRootModel);
+      linkedDoc.updateBlock(linkedDocRootModel, {
+        title: new doc.Text(title),
+      });
+
+      doc.deleteBlock(firstBlock);
+      selectedModels.shift();
+    }
+    // Add selected blocks to linked doc recursively
+    selectedModels.forEach(model => {
+      moveBlocksToLinkedDoc(doc, linkedDoc, model, noteId);
+    });
+  });
+
+  return linkedDoc;
+}

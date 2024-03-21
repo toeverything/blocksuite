@@ -1,10 +1,10 @@
 import '../../../../components/tooltip/tooltip.js';
 import '../../../../components/button.js';
 
+import type { BlockElement } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline';
-import type { BlockElement } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
 import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';

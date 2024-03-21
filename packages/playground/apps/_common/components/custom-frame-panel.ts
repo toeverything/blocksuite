@@ -1,4 +1,4 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import { registerFramePanelComponents } from '@blocksuite/presets';
 import { css, html, nothing } from 'lit';

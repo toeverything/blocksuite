@@ -1,6 +1,6 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, sleep } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
-import type { EditorHost } from '@blocksuite/lit';
 import { BlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 

@@ -1,5 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { Slot, throttle } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import { almostEqual } from '../../../_common/utils/math.js';

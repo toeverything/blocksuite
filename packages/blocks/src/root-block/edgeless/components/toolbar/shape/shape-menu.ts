@@ -1,7 +1,7 @@
 import '../../buttons/tool-icon-button.js';
 import '../../panel/one-row-color-panel.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

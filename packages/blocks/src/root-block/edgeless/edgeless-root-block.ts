@@ -3,9 +3,9 @@ import '../../surface-block/surface-block.js';
 import './components/block-portal/frame/edgeless-frame.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
+import { BlockElement } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists, throttle } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
 import { type BlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -730,6 +730,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
   private _initWheelEvent() {
     this._disposables.add(
       this.dispatcher.add('wheel', ctx => {
+        if (this._isPieMenuOpen()) return;
         const state = ctx.get('defaultState');
         const e = state.event as WheelEvent;
 
@@ -762,6 +763,12 @@ export class EdgelessRootBlockComponent extends BlockElement<
         }
       })
     );
+  }
+  private _isPieMenuOpen() {
+    return false; // TODO add it back later
+    // return (
+    //   this.widgetElements['affine-pie-menu-widget'] as AffinePieMenuWidget
+    // ).isOpen;
   }
 
   override connectedCallback() {

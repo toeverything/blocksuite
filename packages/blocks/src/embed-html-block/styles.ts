@@ -20,7 +20,6 @@ export const styles = css`
 
     opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-shadow-1);
     user-select: none;
   }
 

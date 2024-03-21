@@ -1,17 +1,17 @@
 import '../card/frame-card.js';
 
 import {
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
+import {
   Bound,
   type EdgelessRootBlockComponent,
   type FrameBlockModel,
   generateKeyBetween,
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import {
-  type EditorHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/lit';
 import type { Doc } from '@blocksuite/store';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

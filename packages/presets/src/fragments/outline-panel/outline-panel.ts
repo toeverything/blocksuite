@@ -1,5 +1,5 @@
+import { WithDisposable } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';

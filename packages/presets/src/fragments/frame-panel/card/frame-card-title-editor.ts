@@ -1,10 +1,10 @@
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type {
   AffineInlineEditor,
   FrameBlockModel,
   RichText,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

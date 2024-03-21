@@ -19,9 +19,9 @@
     "@angular/platform-browser": "^17.2.0",
     "@angular/platform-browser-dynamic": "^17.2.0",
     "@angular/router": "^17.2.0",
-    "@blocksuite/blocks": "0.13.0-canary-202403090437-b9b4c13",
-    "@blocksuite/presets": "0.13.0-canary-202403090437-b9b4c13",
-    "@blocksuite/store": "0.13.0-canary-202403090437-b9b4c13",
+    "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
+    "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
+    "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"

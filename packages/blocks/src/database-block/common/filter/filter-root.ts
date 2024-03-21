@@ -1,6 +1,6 @@
 import './condition.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';

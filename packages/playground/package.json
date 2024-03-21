@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
-    "@blocksuite/lit": "workspace:*",
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/sync": "workspace:*",
@@ -30,6 +30,7 @@
     "lz-string": "^1.5.0",
     "merge": "^2.1.1",
     "tweakpane": "^4.0.3",
+    "y-indexeddb": "^9.0.12",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.14",
     "zod": "^3.22.4"

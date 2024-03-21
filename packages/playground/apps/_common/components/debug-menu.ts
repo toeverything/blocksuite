@@ -17,6 +17,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 import './side-panel.js';
 
+import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
 import type {
   AffineTextAttributes,
   SerializedXYWH,
@@ -36,7 +37,6 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
-import { type EditorHost, ShadowlessElement } from '@blocksuite/lit';
 import type {
   AffineEditorContainer,
   CommentPanel,

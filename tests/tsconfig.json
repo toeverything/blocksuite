@@ -9,12 +9,11 @@
       "@block-std/*": ["../packages/framework/block-std/src/*"],
       "@global/*": ["../packages/framework/global/src/*"],
       "@inline/*": ["../packages/framework/inline/src/*"],
-      "@lit/*": ["../packages/framework/lit/src/*"],
       "@store/provider/*": ["../packages/framework/store/provider/*"],
       "@store/*": ["../packages/framework/store/src/*"],
       "@presets/*": ["../packages/presets/src/*"],
-      "@playground/*": ["../packages/playground/*"],
-    },
+      "@playground/*": ["../packages/playground/*"]
+    }
   },
-  "include": ["**.spec.ts", "**.test.ts", "**/**.ts"],
+  "include": ["**.spec.ts", "**.test.ts", "**/**.ts"]
 }

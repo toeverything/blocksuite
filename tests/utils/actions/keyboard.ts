@@ -109,6 +109,12 @@ export async function selectAllByKeyboard(page: Page) {
   });
 }
 
+export async function selectAllBlocksByKeyboard(page: Page) {
+  for (let i = 0; i < 3; i++) {
+    await selectAllByKeyboard(page);
+  }
+}
+
 export async function pressTab(page: Page, count = 1) {
   for (let i = 0; i < count; i++) {
     await page.keyboard.press('Tab', { delay: 20 });

@@ -1,7 +1,7 @@
+import type { BlockElement, EditorHost } from '@blocksuite/block-std';
 import { PathFinder, type ViewStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
-import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 
 import type { Loader } from '../../_common/components/loader.js';
