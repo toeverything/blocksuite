@@ -54,6 +54,7 @@ export async function createDefaultDocCollection() {
     awarenessSources,
     defaultFlags: {
       enable_synced_doc_block: true,
+      enable_pie_menu: true,
     },
   };
   const collection = new DocCollection(options);

@@ -23,6 +23,10 @@ export class AffinePieMenuWidget extends WidgetElement {
     return !!this.currentMenu;
   }
 
+  get isEnabled() {
+    return this.doc.awarenessStore.getFlag('enable_pie_menu');
+  }
+
   get rootElement(): EdgelessRootBlockComponent {
     const rootElement = this.blockElement;
     if (rootElement instanceof EdgelessRootBlockComponent) {
@@ -40,6 +44,8 @@ export class AffinePieMenuWidget extends WidgetElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
+
+    if (!this.isEnabled) return;
 
     this.handleEvent('keyUp', this._handleKeyUp, { global: true });
     this.handleEvent('pointerMove', this._handleCursorPos, { global: true });

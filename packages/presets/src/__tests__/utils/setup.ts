@@ -28,6 +28,7 @@ function createCollectionOptions() {
     blobStorages,
     defaultFlags: {
       enable_synced_doc_block: true,
+      enable_pie_menu: true,
       readonly: {
         'doc:home': false,
       },
