@@ -9,10 +9,10 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type {
   ApiData,
+  AssistantMessageSchema,
   ChatMessage,
   MessageContent,
   MessageContext,
-  MessageSchema,
   UserChatMessage,
 } from './message-schema.js';
 import { MessageSchemas } from './message-type/index.js';
@@ -45,14 +45,15 @@ class UserHistoryItem implements HistoryItem {
   }
 }
 
-export class AssistantHistoryItem<Result = unknown, Data = unknown>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class AssistantHistoryItem<Result = any, Data = unknown>
   implements HistoryItem
 {
   public value: ApiData<Result> = { status: 'loading' };
   public data?: Data;
   private set: Set<() => void> = new Set();
   private abortController: AbortController | null = null;
-  private schema: MessageSchema<Result, Data>;
+  private schema: AssistantMessageSchema<Result, Data>;
 
   constructor(
     private action: CopilotAction<Result>,
@@ -62,7 +63,7 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
     if (!schema) {
       throw new Error('schema not found');
     }
-    this.schema = schema as MessageSchema<Result, Data>;
+    this.schema = schema as AssistantMessageSchema<Result, Data>;
     this.start();
   }
 
@@ -70,6 +71,12 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
+      if (this.value.status === 'success') {
+        this.value = { status: 'success', data: this.value.data, done: true };
+      } else {
+        this.value = { status: 'stop' };
+      }
+      this.fire();
     }
   }
 
@@ -77,6 +84,8 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
     this.stop();
     const abortController = new AbortController();
     this.abortController = abortController;
+    this.value = { status: 'loading' };
+    this.fire();
     const result = this.action.run({
       history: this.history.flatMap(v => v.toContext()),
     });
@@ -137,10 +146,11 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
         value: this.value,
         data: this.data,
         changeData: this.changeData,
-        retry: this.retry,
+        item: this,
         host,
       });
     return html` <copilot-assistant-history-renderer
+      style="display:contents"
       .onChange="${this.onChange}"
       .renderTemplate="${renderTemplate}"
     ></copilot-assistant-history-renderer>`;

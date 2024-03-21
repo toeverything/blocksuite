@@ -1,7 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
-import type { CopilotAction } from './chat-history.js';
+import type { AssistantHistoryItem } from './chat-history.js';
+import { type CopilotAction } from './chat-history.js';
 
 export type MessageContent =
   | {
@@ -45,24 +46,28 @@ export type ApiData<T> =
       message: string;
     }
   | {
+      status: 'stop';
+    }
+  | {
       status: 'success';
       data: T;
       done: boolean;
     };
-export type MessageSchema<Result, Data = unknown> = {
+export type MessageRenderer<Result, Data = unknown> = (props: {
+  value: ApiData<Result>;
+  data?: Data;
+  changeData: (value: Data) => void;
+  host: EditorHost;
+  item: AssistantHistoryItem<Result, Data>;
+}) => TemplateResult;
+export type AssistantMessageSchema<Result, Data = unknown> = {
   type: string;
-  render: (props: {
-    value: ApiData<Result>;
-    data?: Data;
-    changeData: (value: Data) => void;
-    host: EditorHost;
-    retry: () => void;
-  }) => TemplateResult;
+  render: MessageRenderer<Result, Data>;
   toContext: (value: Result, data?: Data) => Array<ChatMessage>;
 };
 export const createMessageSchema = <Result, Data = unknown>(
-  config: MessageSchema<Result, Data>
-): MessageSchema<Result, Data> & {
+  config: AssistantMessageSchema<Result, Data>
+): AssistantMessageSchema<Result, Data> & {
   createActionBuilder: <Arg>(
     fn: (arg: Arg, context: MessageContext) => AsyncIterable<Result>
   ) => (arg: Arg) => CopilotAction<Result>;
