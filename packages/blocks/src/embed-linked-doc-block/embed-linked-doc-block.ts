@@ -409,7 +409,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       error: isError,
       deleted: isDeleted,
       empty: isEmpty,
-      surface: this.isInSurface,
       'banner-empty': this.isBannerEmpty,
       'note-empty': this.isNoteContentEmpty,
       [this._cardStyle]: true,
