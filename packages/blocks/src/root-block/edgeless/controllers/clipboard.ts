@@ -51,6 +51,7 @@ import { CanvasElementType } from '../../../surface-block/element-model/index.js
 import {
   type CanvasElement,
   type Connection,
+  getBoundsWithRotation,
   GroupElementModel,
 } from '../../../surface-block/index.js';
 import {
@@ -991,7 +992,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bounds.push(Bound.deserialize(block.xywh));
     });
     shapes.forEach(shape => {
-      bounds.push(Bound.deserialize(shape.xywh));
+      bounds.push(getBoundsWithRotation(shape.elementBound));
     });
     const bound = getCommonBound(bounds);
     assertExists(bound, 'bound not exist');
@@ -1081,7 +1082,9 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless: EdgelessRootBlockComponent,
     bound: IBound,
     nodes?: TopLevelBlockModel[],
-    canvasElements: CanvasElement[] = []
+    canvasElements: CanvasElement[] = [],
+
+    withBackground = false
   ): Promise<HTMLCanvasElement | undefined> {
     const host = edgeless.host;
     const rootModel = this.doc.root;
@@ -1110,8 +1113,10 @@ export class EdgelessClipboardController extends PageClipboard {
     if (!ctx) return;
     ctx.scale(dpr, dpr);
 
-    ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (withBackground) {
+      ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     const replaceImgSrcWithSvg = this._exportManager.replaceImgSrcWithSvg;
     const replaceRichTextWithSvgElementFunc =
