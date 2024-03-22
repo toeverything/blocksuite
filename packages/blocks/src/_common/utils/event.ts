@@ -19,8 +19,20 @@ export enum MOUSE_BUTTONS {
   FIFTH = 16,
 }
 
+export enum MOUSE_BUTTON {
+  MAIN = 0,
+  AUXILIARY = 1,
+  SECONDARY = 2,
+  FORTH = 3,
+  FIFTH = 4,
+}
+
 export function isMiddleButtonPressed(e: MouseEvent) {
   return (MOUSE_BUTTONS.AUXILIARY & e.buttons) === MOUSE_BUTTONS.AUXILIARY;
+}
+
+export function isRightButtonPressed(e: MouseEvent) {
+  return (MOUSE_BUTTONS.SECONDARY & e.buttons) === MOUSE_BUTTONS.SECONDARY;
 }
 
 export function stopPropagation(event: Event) {
