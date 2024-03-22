@@ -1,7 +1,7 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool } from '../../_common/types.js';
-import { once } from '../../_common/utils/event.js';
+import { on } from '../../_common/utils/event.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import {
   Bound,
@@ -339,16 +339,19 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       type: 'ai',
     });
 
-    once(document, 'keyup', () => {
-      edgeless.tools.metaKey = false;
-      edgeless.tools.setEdgelessTool(
-        currentTool,
-        {
-          elements: [],
-          editing: false,
-        },
-        false
-      );
+    const off = on(document, 'keyup', evt => {
+      if (!evt.metaKey && evt.key === 'Meta') {
+        off();
+        edgeless.tools.metaKey = false;
+        edgeless.tools.setEdgelessTool(
+          currentTool,
+          {
+            elements: [],
+            editing: false,
+          },
+          false
+        );
+      }
     });
   }
 

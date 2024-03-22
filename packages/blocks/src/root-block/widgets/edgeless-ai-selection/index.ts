@@ -1,4 +1,4 @@
-import { WidgetElement } from '@blocksuite/lit';
+import { WidgetElement } from '@blocksuite/block-std';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
