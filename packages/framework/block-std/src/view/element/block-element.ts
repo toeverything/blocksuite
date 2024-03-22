@@ -251,6 +251,10 @@ export class BlockElement<
   override disconnectedCallback() {
     super.disconnectedCallback();
 
+    if (this.std.doc.getBlockById(this.model.id)) {
+      return;
+    }
+
     this.std.view._blockMap.delete(this.model.id);
 
     this.service.specSlots.viewDisconnected.emit({
