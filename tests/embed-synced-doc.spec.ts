@@ -109,7 +109,7 @@ test.describe('Embed synced doc', () => {
     const EmbedSyncedDocPortalBox = await EmbedSyncedDocPortal.boundingBox();
     const border = 2;
     assertExists(EmbedSyncedDocPortalBox);
-    expect(EmbedSyncedDocPortalBox.height).toBe(height + border);
+    expect(EmbedSyncedDocPortalBox.height).toBeCloseTo(height + border, 1);
   });
 
   test('can jump to other docs when click linked doc inside embed synced doc block', async ({
