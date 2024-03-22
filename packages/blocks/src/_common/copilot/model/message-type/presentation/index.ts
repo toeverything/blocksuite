@@ -86,3 +86,6 @@ ${input}`
       ]);
     }
   );
+export const presentationActions = {
+  createPresentationAction,
+};
