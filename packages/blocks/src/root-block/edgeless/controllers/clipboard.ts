@@ -1082,9 +1082,7 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless: EdgelessRootBlockComponent,
     bound: IBound,
     nodes?: TopLevelBlockModel[],
-    canvasElements: CanvasElement[] = [],
-
-    withBackground = false
+    canvasElements: CanvasElement[] = []
   ): Promise<HTMLCanvasElement | undefined> {
     const host = edgeless.host;
     const rootModel = this.doc.root;
@@ -1098,7 +1096,6 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const rootElement = getRootByEditorHost(host);
     assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
 
     const container = rootElement.querySelector(
       '.affine-block-children-container'
@@ -1111,11 +1108,7 @@ export class EdgelessClipboardController extends PageClipboard {
     canvas.height = (bound.h + IMAGE_PADDING) * dpr;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    if (withBackground) {
-      ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+    ctx.scale(dpr, dpr);
 
     const replaceImgSrcWithSvg = this._exportManager.replaceImgSrcWithSvg;
     const replaceRichTextWithSvgElementFunc =
@@ -1143,6 +1136,7 @@ export class EdgelessClipboardController extends PageClipboard {
           return false;
         }
       },
+
       onclone: async function (documentClone: Document, element: HTMLElement) {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
@@ -1162,7 +1156,7 @@ export class EdgelessClipboardController extends PageClipboard {
         await replaceImgSrcWithSvg(element);
         await replaceRichTextWithSvgElementFunc(element);
       },
-      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
+      backgroundColor: 'transparent',
       useCORS: _imageProxyEndpoint ? false : true,
       proxy: _imageProxyEndpoint,
     };
