@@ -401,12 +401,13 @@ export function convertDragPreviewDocToEdgeless({
   const previewEl = dragPreview.querySelector(cssSelector);
   assertExists(previewEl);
   const rect = previewEl.getBoundingClientRect();
+  const border = 2;
   const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
   const currentViewBound = new Bound(
     (rect.x - viewportLeft) / state.cumulativeParentScale,
     (rect.y - viewportTop) / state.cumulativeParentScale,
-    rect.width / noteScale,
-    rect.height / noteScale
+    rect.width + border / noteScale,
+    rect.height + border / noteScale
   );
   const currentModelBound =
     edgelessRoot.service.viewport.toModelBound(currentViewBound);
