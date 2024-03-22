@@ -562,8 +562,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   private _setEmbedScale(scale: number) {
     if (isEmbedHtmlBlock(this.model)) return;
 
+    const bound = Bound.deserialize(this.model.xywh);
     if (isEmbedSyncedDocBlock(this.model)) {
-      const bound = Bound.deserialize(this.model.xywh);
       const oldScale = this.model.scale ?? 1;
       const ratio = scale / oldScale;
       bound.w *= ratio;
@@ -571,7 +571,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       const xywh = bound.serialize();
       this.model.doc.updateBlock(this.model, { scale, xywh });
     } else {
-      const bound = Bound.deserialize(this.model.xywh);
       bound.h = EMBED_CARD_HEIGHT[this.model.style] * scale;
       bound.w = EMBED_CARD_WIDTH[this.model.style] * scale;
       const xywh = bound.serialize();
