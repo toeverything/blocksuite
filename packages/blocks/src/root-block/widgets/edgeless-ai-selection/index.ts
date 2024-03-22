@@ -14,7 +14,7 @@ import type { EdgelessRootBlockComponent } from '../../index.js';
 export const AFFINE_EDGELESS_AI_WIDGET = 'affine-edgeless-ai-widget';
 
 @customElement('affine-edgeless-ai-widget')
-export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> {
+export class EdgelessAIWidget extends WidgetElement<EdgelessRootBlockComponent> {
   static override styles = css`
     .ai-selection-rect {
       position: absolute;
@@ -124,6 +124,6 @@ export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_EDGELESS_AI_WIDGET]: EdgeelssAIWidget;
+    [AFFINE_EDGELESS_AI_WIDGET]: EdgelessAIWidget;
   }
 }

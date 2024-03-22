@@ -313,18 +313,17 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
-    const rawEvt = e.raw;
-    const isMetaKeyPressed = (evt: PointerEvent) =>
-      IS_MAC ? evt.metaKey : evt.ctrlKey;
+    const pointEvt = e.raw;
+    const metaKeyPressed = IS_MAC ? pointEvt.metaKey : pointEvt.ctrlKey;
 
     if (
-      isMiddleButtonPressed(rawEvt) ||
-      isRightButtonPressed(rawEvt) ||
-      isMetaKeyPressed(rawEvt)
+      isMiddleButtonPressed(pointEvt) ||
+      isRightButtonPressed(pointEvt) ||
+      metaKeyPressed
     ) {
-      const isRightButton = isRightButtonPressed(rawEvt);
+      const isRightButton = isRightButtonPressed(pointEvt);
       const targetTool = (
-        isRightButton || isMetaKeyPressed(rawEvt)
+        isRightButton || metaKeyPressed
           ? {
               type: 'ai',
             }
@@ -334,11 +333,15 @@ export class EdgelessToolsManager {
       const targetButtonRelease = (_e: MouseEvent) =>
         (isMiddleButtonPressed(e.raw) && !isMiddleButtonPressed(_e)) ||
         (isRightButton && !isRightButtonPressed(_e)) ||
-        isMetaKeyPressed(rawEvt);
+        metaKeyPressed;
 
       const switchToPreMode = (_e: MouseEvent) => {
         if (targetButtonRelease(_e)) {
-          this.setEdgelessTool(prevEdgelessTool, undefined, !isRightButton);
+          this.setEdgelessTool(
+            prevEdgelessTool,
+            undefined,
+            !isRightButton && !metaKeyPressed
+          );
           document.removeEventListener('pointerup', switchToPreMode, false);
           document.removeEventListener('pointerover', switchToPreMode, false);
         }
