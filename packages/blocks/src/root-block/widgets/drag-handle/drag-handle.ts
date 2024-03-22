@@ -11,7 +11,7 @@ import {
   throttle,
 } from '@blocksuite/global/utils';
 import { type BlockModel } from '@blocksuite/store';
-import { html, render } from 'lit';
+import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -370,7 +370,8 @@ export class AffineDragHandleWidget extends WidgetElement<
       blockElements.forEach(element => {
         width = Math.max(width, element.getBoundingClientRect().width);
         const container = document.createElement('div');
-        render(this.host.renderModel(element.model), container);
+        // FIXME(mirone/view-store): use `renderSpecPortal` to render preview.
+        // render(this.host.renderModel(element.model), container);
         fragment.append(container);
       });
 
@@ -567,7 +568,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   // Multiple blocks: drag handle should show on the vertical middle of all blocks
   private _showDragHandleOnHoverBlock = (blockPath: string[]) => {
     const blockElement = this._getBlockElementFromViewStore(blockPath);
-    assertExists(blockElement);
+    if (!blockElement) return;
 
     const container = this._dragHandleContainer;
     const grabber = this._dragHandleGrabber;
@@ -1255,7 +1256,8 @@ export class AffineDragHandleWidget extends WidgetElement<
       if (parentElement) {
         const newSelectedBlocks = selectedBlocks
           .map(block => parentElement.path.concat(block.id))
-          .map(path => this._getBlockElementFromViewStore(path));
+          .map(path => this._getBlockElementFromViewStore(path))
+          .filter(x => !!x);
 
         if (!newSelectedBlocks) return;
 
