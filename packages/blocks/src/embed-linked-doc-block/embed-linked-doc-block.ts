@@ -46,7 +46,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
   @property({ attribute: false })
-  abstractText = '';
+  isNoteContentEmpty = false;
 
   @property({ attribute: false })
   isBannerEmpty = false;
@@ -75,6 +75,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   @queryAsync('.affine-embed-linked-doc-banner.render')
   bannerContainer!: Promise<HTMLDivElement>;
 
+  @queryAsync('.affine-embed-linked-doc-content-note.render')
+  noteContainer!: Promise<HTMLDivElement>;
+
   get editorMode() {
     return this._editorMode;
   }
@@ -97,7 +100,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   private async _load() {
     this._loading = true;
     this.isError = false;
-    this.abstractText = '';
+    this.isNoteContentEmpty = true;
     this.isBannerEmpty = true;
 
     const linkedDoc = this.linkedDoc;
@@ -129,7 +132,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this._loading = false;
 
     if (!this.isError) {
-      renderLinkedDocInCard(this);
+      // renderLinkedDocInCard(this);
+      const cardStyle = this.model.style;
+      if (cardStyle === 'horizontal' || cardStyle === 'vertical') {
+        renderLinkedDocInCard(this);
+      }
     }
   }
 
@@ -139,7 +146,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       return false;
     }
     return (
-      !!linkedDoc && !linkedDoc.meta?.title.length && !this.abstractText.length
+      !!linkedDoc &&
+      !linkedDoc.meta?.title.length &&
+      this.isNoteContentEmpty &&
+      this.isBannerEmpty
     );
   }
 
@@ -318,7 +328,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     }
 
     this.model.propsUpdated.on(({ key }) => {
-      if (key === 'pageId') {
+      if (key === 'pageId' || key === 'style') {
         this._load().catch(e => {
           console.error(e);
           this.isError = true;
@@ -339,8 +349,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   override disconnectedCallback() {
-    super.disconnectedCallback();
     this.cleanUpSurfaceRefRenderer();
+    super.disconnectedCallback();
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
@@ -383,22 +393,24 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   });
 
   override renderBlock() {
-    const linkedDoc = this.linkedDoc;
-    const isDeleted = !linkedDoc;
-    const isLoading = this._loading;
-    const editorMode = this.editorMode;
-
     this._cardStyle = this.model.style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
     this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
+    const linkedDoc = this.linkedDoc;
+    const isDeleted = !linkedDoc;
+    const isLoading = this._loading;
+    const isError = this.isError;
+    const editorMode = this.editorMode;
     const isEmpty = this._isDocEmpty() && this.isBannerEmpty;
 
     const cardClassMap = classMap({
       loading: isLoading,
+      error: isError,
       deleted: isDeleted,
       empty: isEmpty,
       'banner-empty': this.isBannerEmpty,
+      'note-empty': this.isNoteContentEmpty,
       [this._cardStyle]: true,
     });
 
@@ -419,26 +431,29 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const titleText = isLoading
       ? 'Loading...'
       : isDeleted
-        ? `Deleted ${editorMode}`
+        ? `Deleted ${this.editorMode}`
         : linkedDoc?.meta?.title.length
           ? linkedDoc.meta.title
           : 'Untitled';
 
-    const descriptionText = isLoading
+    const showDefaultNoteContent = isLoading || isDeleted || isEmpty;
+    const defaultNoteContent = isLoading
       ? ''
       : isDeleted
-        ? 'This linked page is deleted.'
+        ? 'This linked doc is deleted.'
         : isEmpty
-          ? 'Preview of the page will be displayed here.'
-          : this.abstractText;
+          ? 'Preview of the doc will be displayed here.'
+          : '';
 
     const dateText = this._docUpdatedAt.toLocaleTimeString();
 
     const showDefaultBanner = isDeleted || isEmpty;
 
-    const defaultBanner = isDeleted
-      ? LinkedDocDeletedBanner
-      : LinkedDocEmptyBanner;
+    const defaultBanner = isLoading
+      ? LinkedDocEmptyBanner
+      : isDeleted
+        ? LinkedDocDeletedBanner
+        : LinkedDocEmptyBanner;
 
     return this.renderEmbed(
       () => html`
@@ -459,9 +474,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
               </div>
             </div>
 
-            <div class="affine-embed-linked-doc-content-description">
-              ${descriptionText}
-            </div>
+            <div class="affine-embed-linked-doc-content-note render"></div>
+            ${showDefaultNoteContent
+              ? html`<div class="affine-embed-linked-doc-content-note default">
+                  ${defaultNoteContent}
+                </div>`
+              : nothing}
 
             <div class="affine-embed-linked-doc-content-date">
               <span>Updated</span>

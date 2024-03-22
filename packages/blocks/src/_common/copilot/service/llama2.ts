@@ -35,51 +35,8 @@ export const llama2Vendor = createVendor<{
 TextServiceKind.implService({
   name: 'llama2',
   method: data => ({
-    generateText: async messages => {
-      const result: {
-        message: {
-          role: string;
-          content: string;
-        };
-      } = await fetch(`${data.host}/api/chat`, {
-        method: 'POST',
-        body: JSON.stringify({
-          model: 'llama2',
-          messages: messages,
-          stream: false,
-        }),
-      }).then(res => res.json());
-      return result.message.content;
-    },
-  }),
-  vendor: llama2Vendor,
-});
-
-ChatServiceKind.implService({
-  name: 'llama2',
-  method: data => ({
-    chat: messages => {
-      const llama2Messages = messages.map(message => {
-        if (message.role === 'user') {
-          let text = '';
-          const imgs: string[] = [];
-          message.content.forEach(v => {
-            if (v.type === 'text') {
-              text += `${v.text}\n`;
-            }
-            if (v.type === 'image_url') {
-              imgs.push(v.image_url.url.split(',')[1]);
-            }
-          });
-          return {
-            role: message.role,
-            content: text,
-            images: imgs,
-          };
-        }
-        return message;
-      });
-      return (async function* () {
+    generateText: messages =>
+      async function* (context, signal) {
         const result: {
           message: {
             role: string;
@@ -87,6 +44,54 @@ ChatServiceKind.implService({
           };
         } = await fetch(`${data.host}/api/chat`, {
           method: 'POST',
+          signal,
+          body: JSON.stringify({
+            model: 'llama2',
+            messages: [...context.history, ...messages],
+            stream: false,
+          }),
+        }).then(res => res.json());
+        yield result.message.content;
+      },
+  }),
+  vendor: llama2Vendor,
+});
+
+ChatServiceKind.implService({
+  name: 'llama2',
+  method: data => ({
+    chat: messages =>
+      async function* (context, signal) {
+        const llama2Messages = [...context.history, ...messages].map(
+          message => {
+            if (message.role === 'user') {
+              let text = '';
+              const imgs: string[] = [];
+              message.content.forEach(v => {
+                if (v.type === 'text') {
+                  text += `${v.text}\n`;
+                }
+                if (v.type === 'image_url') {
+                  imgs.push(v.image_url.url.split(',')[1]);
+                }
+              });
+              return {
+                role: message.role,
+                content: text,
+                images: imgs,
+              };
+            }
+            return message;
+          }
+        );
+        const result: {
+          message: {
+            role: string;
+            content: string;
+          };
+        } = await fetch(`${data.host}/api/chat`, {
+          method: 'POST',
+          signal,
           body: JSON.stringify({
             model: 'llama2',
             messages: llama2Messages,
@@ -94,8 +99,7 @@ ChatServiceKind.implService({
           }),
         }).then(res => res.json());
         yield result.message.content;
-      })();
-    },
+      },
   }),
   vendor: llama2Vendor,
 });

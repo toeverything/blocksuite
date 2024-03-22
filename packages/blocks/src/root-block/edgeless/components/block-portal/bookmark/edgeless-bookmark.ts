@@ -19,6 +19,8 @@ export class EdgelessBlockPortalBookmark extends EdgelessPortalBase<BookmarkBloc
       left: `${bound.x}px`,
       top: `${bound.y}px`,
       transformOrigin: '0 0',
+      boxShadow: 'var(--affine-shadow-1)',
+      borderRadius: '8px',
     };
 
     return html`

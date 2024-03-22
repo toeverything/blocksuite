@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
+import type { CopilotServiceResult } from '../service/service-base.js';
 import type { AssistantHistoryItem } from './chat-history.js';
 import { type CopilotAction } from './chat-history.js';
 
@@ -29,12 +30,13 @@ export type AssistantChatMessage = {
   content: string;
   sources: BackgroundSource[];
 };
+export type SystemChatMessage = {
+  role: 'system';
+  content: string;
+};
 export type ChatMessage =
   | UserChatMessage
-  | {
-      role: 'system';
-      content: string;
-    }
+  | SystemChatMessage
   | AssistantChatMessage;
 
 export type ApiData<T> =
@@ -69,7 +71,7 @@ export const createMessageSchema = <Result, Data = unknown>(
   config: AssistantMessageSchema<Result, Data>
 ): AssistantMessageSchema<Result, Data> & {
   createActionBuilder: <Arg>(
-    fn: (arg: Arg, context: MessageContext) => AsyncIterable<Result>
+    fn: (arg: Arg) => CopilotServiceResult<Result>
   ) => (arg: Arg) => CopilotAction<Result>;
 } => {
   return {
@@ -77,7 +79,7 @@ export const createMessageSchema = <Result, Data = unknown>(
     createActionBuilder: fn => arg => {
       return {
         type: config.type,
-        run: context => fn(arg, context),
+        run: fn(arg),
       };
     },
   };

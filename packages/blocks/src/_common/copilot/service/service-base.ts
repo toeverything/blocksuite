@@ -1,7 +1,7 @@
 import type { TemplateResult } from 'lit';
 import type { OpenAI } from 'openai';
 
-import type { ChatMessage } from '../model/message-schema.js';
+import type { ChatMessage, MessageContext } from '../model/message-schema.js';
 
 export type Vendor<Data> = {
   key: string;
@@ -21,6 +21,10 @@ export type ServiceKind<M> = {
   implList: ServiceImpl<M, unknown>[];
   implService: <Data>(impl: ServiceImpl<M, Data>) => void;
 };
+export type CopilotServiceResult<Result> = (
+  context: MessageContext,
+  signal: AbortSignal
+) => AsyncIterable<Result>;
 export const createVendor = <Data extends object>(
   config: Vendor<Data>
 ): Vendor<Data> => {
@@ -45,13 +49,13 @@ const createServiceKind = <M>(config: {
 };
 
 export const TextServiceKind = createServiceKind<{
-  generateText(messages: ChatMessage[]): Promise<string>;
+  generateText(messages: ChatMessage[]): CopilotServiceResult<string>;
 }>({
   type: 'text-service',
   title: 'Text service',
 });
 export const ChatServiceKind = createServiceKind<{
-  chat(messages: Array<ChatMessage>): AsyncIterable<string>;
+  chat(messages: Array<ChatMessage>): CopilotServiceResult<string>;
 }>({
   type: 'chat-service',
   title: 'Chat service',
@@ -75,7 +79,7 @@ export const EmbeddingServiceKind = createServiceKind<{
 export const Image2TextServiceKind = createServiceKind<{
   generateText(
     messages: Array<OpenAI.ChatCompletionMessageParam>
-  ): AsyncIterable<string>;
+  ): CopilotServiceResult<string>;
 }>({
   type: 'image-to-text-service',
   title: 'Image to text service',

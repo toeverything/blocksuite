@@ -411,7 +411,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this.contentEditable = 'false';
 
     this.model.propsUpdated.on(({ key }) => {
-      if (key === 'pageId') {
+      if (key === 'pageId' || key === 'style') {
         this._load().catch(e => {
           console.error(e);
           this._error = true;
@@ -439,6 +439,17 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
         this._selectBlock();
       }
     });
+
+    // Forward docLinkClicked event from the synced doc
+    const syncedDocRootService =
+      this.syncedDocEditorHost?.std.spec.getService('affine:page');
+    if (syncedDocRootService) {
+      this.disposables.add(
+        syncedDocRootService.slots.docLinkClicked.on(({ docId }) => {
+          this._rootService.slots.docLinkClicked.emit({ docId });
+        })
+      );
+    }
   }
 
   override updated(changedProperties: PropertyValues) {
