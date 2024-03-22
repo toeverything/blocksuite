@@ -295,6 +295,14 @@ export class EdgelessClipboardController extends PageClipboard {
       return;
     }
 
+    const svg = tryGetSvgFromClipboard(data);
+    if (svg) {
+      const { lastMousePos } = this.toolManager;
+      const point = new Point(lastMousePos.x, lastMousePos.y);
+      await this.host.addImages([svg], point);
+      return;
+    }
+
     const json = this.std.clipboard.readFromClipboard(data);
     const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
     this._pasteShapesAndBlocks(elementsRawData);
@@ -1361,4 +1369,29 @@ function isPureFileInClipboard(clipboardData: DataTransfer) {
       (types.includes('text/plain') || types.includes('text/html')) &&
       types.includes('Files'))
   );
+}
+
+function tryGetSvgFromClipboard(clipboardData: DataTransfer) {
+  const types = clipboardData.types;
+
+  if (types.length === 1 && types[0] !== 'text/plain') {
+    return null;
+  }
+
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(
+    clipboardData.getData('text/plain'),
+    'image/svg+xml'
+  );
+
+  console.log(svgDoc.documentElement);
+  if (svgDoc.documentElement.tagName !== 'svg') {
+    return null;
+  }
+  const svgContent = new XMLSerializer().serializeToString(
+    svgDoc.documentElement
+  );
+  const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+  const file = new File([blob], 'pasted-image.svg', { type: 'image/svg+xml' });
+  return file;
 }
