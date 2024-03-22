@@ -561,7 +561,7 @@ test('selection drag-area start should be same when space is pressed again', asy
   );
 });
 
-test('ai selection rect should appears when drag with meta key pressed', async ({
+test('copilot selection rect should appears when drag with meta key pressed', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
