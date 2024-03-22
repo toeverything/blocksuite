@@ -322,19 +322,26 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
-    if (isMiddleButtonPressed(e.raw) || isRightButtonPressed(e.raw)) {
+    if (
+      isMiddleButtonPressed(e.raw) ||
+      isRightButtonPressed(e.raw) ||
+      this._metaKey
+    ) {
       const isRightButton = isRightButtonPressed(e.raw);
       const targetTool = (
-        isRightButton
+        isRightButton || this._metaKey
           ? {
               type: 'ai',
             }
           : { type: 'pan', panning: true }
       ) as EdgelessTool;
       const prevEdgelessTool = this._edgelessTool;
+      const metaKey = this._metaKey;
       const targetButtonRelease = (_e: MouseEvent) =>
         (isMiddleButtonPressed(e.raw) && !isMiddleButtonPressed(_e)) ||
-        (isRightButton && !isRightButtonPressed(_e));
+        (isRightButton && !isRightButtonPressed(_e)) ||
+        (metaKey && !_e.metaKey);
+
       const switchToPreMode = (_e: MouseEvent) => {
         if (targetButtonRelease(_e)) {
           this.setEdgelessTool(prevEdgelessTool, undefined, !isRightButton);

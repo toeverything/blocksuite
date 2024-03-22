@@ -3,7 +3,11 @@ import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { MOUSE_BUTTON, on } from '../../../_common/utils/event.js';
+import {
+  MOUSE_BUTTON,
+  on,
+  requestConnectedFrame,
+} from '../../../_common/utils/event.js';
 import type { AIToolController } from '../../edgeless/controllers/tools/ai-tool.js';
 import type { EdgelessRootBlockComponent } from '../../index.js';
 
@@ -34,7 +38,7 @@ export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
   private _visible = false;
 
   private _clickOutsideOff: (() => void) | null = null;
-  private _listenClickOutsideId: ReturnType<typeof setTimeout> | null = null;
+  private _listenClickOutsideId: number | null = null;
 
   get edgeless() {
     return this.blockElement;
@@ -57,13 +61,14 @@ export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
     const { width, height } = this._selectionRect || {};
 
     if (width && height) {
-      this._listenClickOutsideId && clearTimeout(this._listenClickOutsideId);
-      this._listenClickOutsideId = setTimeout(() => {
+      this._listenClickOutsideId &&
+        cancelAnimationFrame(this._listenClickOutsideId);
+      this._listenClickOutsideId = requestConnectedFrame(() => {
         if (!this.isConnected) {
           return;
         }
 
-        const off = on(this.ownerDocument, 'click', e => {
+        const off = on(this.ownerDocument, 'mousedown', e => {
           if (
             e.button === MOUSE_BUTTON.MAIN &&
             !this.contains(e.target as HTMLElement)
@@ -74,7 +79,7 @@ export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
         });
         this._listenClickOutsideId = null;
         this._clickOutsideOff = off;
-      }, 750);
+      }, this);
     }
   }
 
