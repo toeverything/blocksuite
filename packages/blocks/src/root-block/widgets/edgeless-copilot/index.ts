@@ -11,9 +11,9 @@ import {
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../index.js';
 
-export const AFFINE_EDGELESS_AI_WIDGET = 'affine-edgeless-ai-widget';
+export const AFFINE_EDGELESS_COPILOT_WIDGET = 'affine-edgeless-copilot-widget';
 
-@customElement('affine-edgeless-ai-widget')
+@customElement(AFFINE_EDGELESS_COPILOT_WIDGET)
 export class EdgelessCopilotWidget extends WidgetElement<EdgelessRootBlockComponent> {
   static override styles = css`
     .copilot-selection-rect {
@@ -126,6 +126,6 @@ export class EdgelessCopilotWidget extends WidgetElement<EdgelessRootBlockCompon
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_EDGELESS_AI_WIDGET]: EdgelessCopilotWidget;
+    [AFFINE_EDGELESS_COPILOT_WIDGET]: EdgelessCopilotWidget;
   }
 }
