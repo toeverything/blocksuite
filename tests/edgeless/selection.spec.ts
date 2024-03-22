@@ -559,3 +559,30 @@ test('selection drag-area start should be same when space is pressed again', asy
     }
   );
 });
+
+test('ai selection rect should appears when drag with meta key pressed', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await actions.zoomResetByKeyboard(page);
+
+  await page.keyboard.down('Meta');
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await page.keyboard.up('Meta');
+
+  const aiSelectionRect = await page
+    .locator('.ai-selection-rect')
+    .boundingBox();
+
+  expect(aiSelectionRect).not.toBeNull();
+  expect(aiSelectionRect!.width).toBe(100);
+  expect(aiSelectionRect!.height).toBe(100);
+  expect(aiSelectionRect!.x).toBe(100);
+  expect(aiSelectionRect!.y).toBe(100);
+
+  await page.mouse.click(205, 150);
+  await expect(page.locator('.ai-selection-rect')).toBeHidden();
+});

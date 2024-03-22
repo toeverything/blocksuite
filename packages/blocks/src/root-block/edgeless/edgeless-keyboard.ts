@@ -1,4 +1,4 @@
-import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
+import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
@@ -196,32 +196,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       }
     );
 
-    this._bindMetaKey();
     this._bindShiftKey();
     this._bindToggleHand();
-  }
-
-  private _bindMetaKey() {
-    this.rootElement.handleEvent(
-      'keyDown',
-      ctx => {
-        const event = ctx.get('defaultState').event;
-        if (event instanceof KeyboardEvent) {
-          this._meta(event);
-        }
-      },
-      { global: true }
-    );
-    this.rootElement.handleEvent(
-      'keyUp',
-      ctx => {
-        const event = ctx.get('defaultState').event;
-        if (event instanceof KeyboardEvent) {
-          this._meta(event);
-        }
-      },
-      { global: true }
-    );
   }
 
   private _bindShiftKey() {
@@ -327,22 +303,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       edgeless.slots.pressShiftKeyUpdated.emit(true);
     } else {
       edgeless.slots.pressShiftKeyUpdated.emit(false);
-    }
-  }
-
-  private _meta(evt: KeyboardEvent) {
-    const edgeless = this.rootElement;
-
-    if (evt.repeat) return;
-
-    const key = evt.key.toLowerCase();
-    const currentMetaKey = IS_WINDOWS ? key === 'control' : key === 'meta';
-    const metaKeyPressed = IS_WINDOWS ? evt.ctrlKey : evt.metaKey;
-
-    if (metaKeyPressed && currentMetaKey) {
-      edgeless.service.tool.metaKey = true;
-    } else if (!metaKeyPressed) {
-      edgeless.service.tool.metaKey = false;
     }
   }
 

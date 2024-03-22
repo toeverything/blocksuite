@@ -16,11 +16,9 @@ export const AFFINE_EDGELESS_AI_WIDGET = 'affine-edgeless-ai-widget';
 @customElement('affine-edgeless-ai-widget')
 export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> {
   static override styles = css`
-    .affine-edgeless-ai {
-    }
-
     .ai-selection-rect {
       position: absolute;
+      box-sizing: border-box;
       border-radius: 4px;
       border: 2px dashed var(--affine-brand-color, #1e96eb);
     }

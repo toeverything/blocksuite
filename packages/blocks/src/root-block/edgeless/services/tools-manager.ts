@@ -5,6 +5,7 @@ import type {
   UIEventHandler,
   UIEventState,
 } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
@@ -72,8 +73,6 @@ export class EdgelessToolsManager {
   // pressed shift key
   private _shiftKey = false;
 
-  private _metaKey = false;
-
   private _spaceBar = false;
 
   private _dragging = false;
@@ -135,14 +134,6 @@ export class EdgelessToolsManager {
 
   get shiftKey() {
     return this._shiftKey;
-  }
-
-  set metaKey(pressed: boolean) {
-    this._metaKey = pressed;
-  }
-
-  get metaKey() {
-    return this._metaKey;
   }
 
   get doc() {
@@ -322,25 +313,28 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
+    const rawEvt = e.raw;
+    const isMetaKeyPressed = (evt: PointerEvent) =>
+      IS_MAC ? evt.metaKey : evt.ctrlKey;
+
     if (
-      isMiddleButtonPressed(e.raw) ||
-      isRightButtonPressed(e.raw) ||
-      this._metaKey
+      isMiddleButtonPressed(rawEvt) ||
+      isRightButtonPressed(rawEvt) ||
+      isMetaKeyPressed(rawEvt)
     ) {
-      const isRightButton = isRightButtonPressed(e.raw);
+      const isRightButton = isRightButtonPressed(rawEvt);
       const targetTool = (
-        isRightButton || this._metaKey
+        isRightButton || isMetaKeyPressed(rawEvt)
           ? {
               type: 'ai',
             }
           : { type: 'pan', panning: true }
       ) as EdgelessTool;
       const prevEdgelessTool = this._edgelessTool;
-      const metaKey = this._metaKey;
       const targetButtonRelease = (_e: MouseEvent) =>
         (isMiddleButtonPressed(e.raw) && !isMiddleButtonPressed(_e)) ||
         (isRightButton && !isRightButtonPressed(_e)) ||
-        (metaKey && !_e.metaKey);
+        isMetaKeyPressed(rawEvt);
 
       const switchToPreMode = (_e: MouseEvent) => {
         if (targetButtonRelease(_e)) {
