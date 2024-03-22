@@ -150,3 +150,7 @@ Don't output anything that isn't HTML
     ]);
   }
 );
+export const htmlActions = {
+  createHTMLFromImageAction,
+  createHTMLFromTextAction,
+};
