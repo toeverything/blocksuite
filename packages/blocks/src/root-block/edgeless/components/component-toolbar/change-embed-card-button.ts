@@ -559,7 +559,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return bound.h / EMBED_CARD_HEIGHT[this.model.style];
   };
 
-  private _setEmbedSyncedDocScale(scale: number) {
+  private _setEmbedScale(scale: number) {
     if (isEmbedHtmlBlock(this.model)) return;
 
     if (isEmbedSyncedDocBlock(this.model)) {
@@ -792,7 +792,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 .scales=${[50, 100, 200]}
                 .minSize=${0}
                 .onSelect=${(scale: number) => {
-                  this._setEmbedSyncedDocScale(scale);
+                  this._setEmbedScale(scale);
                 }}
                 .onPopperCose=${() => this._embedScalePopper?.hide()}
               ></edgeless-scale-panel>`
