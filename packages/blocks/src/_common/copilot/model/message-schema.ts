@@ -49,6 +49,7 @@ export type ApiData<T> =
     }
   | {
       status: 'stop';
+      data?: T;
     }
   | {
       status: 'success';

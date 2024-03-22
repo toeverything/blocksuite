@@ -1,9 +1,5 @@
-import {
-  type EditorHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/block-std';
-import { html, type TemplateResult } from 'lit';
+import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
+import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -67,20 +63,19 @@ export class AssistantHistoryItem<Result = any, Data = unknown>
     this.start();
   }
 
-  stop() {
+  stop = () => {
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
-      if (this.value.status === 'success') {
-        this.value = { status: 'success', data: this.value.data, done: true };
-      } else {
-        this.value = { status: 'stop' };
-      }
+      this.value = {
+        status: 'stop',
+        data: this.value.status === 'success' ? this.value.data : undefined,
+      };
       this.fire();
     }
-  }
+  };
 
-  start() {
+  start = () => {
     this.stop();
     const abortController = new AbortController();
     this.abortController = abortController;
@@ -108,13 +103,13 @@ export class AssistantHistoryItem<Result = any, Data = unknown>
       }
     };
     process().catch(e => {
-      if (e.name === 'AbortError') {
+      if (this.value.status === 'stop') {
         return;
       }
       this.value = { status: 'error', message: e.message };
       this.fire();
     });
-  }
+  };
 
   retry = () => {
     this.start();
@@ -152,8 +147,7 @@ export class AssistantHistoryItem<Result = any, Data = unknown>
         item: this,
         host,
       });
-    return html` <copilot-assistant-history-renderer
-      style="display:contents"
+    return html`<copilot-assistant-history-renderer
       .onChange="${this.onChange}"
       .renderTemplate="${renderTemplate}"
     ></copilot-assistant-history-renderer>`;
@@ -162,8 +156,16 @@ export class AssistantHistoryItem<Result = any, Data = unknown>
 
 @customElement('copilot-assistant-history-renderer')
 export class copilotAssistantHistoryRenderer extends WithDisposable(
-  ShadowlessElement
+  LitElement
 ) {
+  static override styles = css`
+    :host {
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+    }
+  `;
+
   @property({ attribute: false })
   onChange!: (cb: () => void) => () => void;
   @property({ attribute: false })

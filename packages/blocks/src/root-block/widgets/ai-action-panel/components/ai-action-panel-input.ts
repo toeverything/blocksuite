@@ -11,7 +11,7 @@ export class AIActionBarInput extends WithDisposable(LitElement) {
     .root {
       display: flex;
       padding: 8px 12px;
-      align-items: flex-start;
+      align-items: center;
       gap: 8px;
 
       border-radius: var(--8, 8px);
