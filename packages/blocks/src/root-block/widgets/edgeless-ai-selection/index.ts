@@ -3,6 +3,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { MOUSE_BUTTON, on } from '../../../_common/utils/event.js';
 import type { AIToolController } from '../../edgeless/controllers/tools/ai-tool.js';
 import type { EdgelessRootBlockComponent } from '../../index.js';
 
@@ -29,6 +30,12 @@ export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
     height: number;
   } | null = null;
 
+  @state()
+  private _visible = false;
+
+  private _clickOutsideOff: (() => void) | null = null;
+  private _listenClickOutsideId: ReturnType<typeof setTimeout> | null = null;
+
   get edgeless() {
     return this.blockElement;
   }
@@ -44,6 +51,33 @@ export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
     this._selectionRect = { x, y, width, height };
   }
 
+  private _watchClickOutside() {
+    this._clickOutsideOff?.();
+
+    const { width, height } = this._selectionRect || {};
+
+    if (width && height) {
+      this._listenClickOutsideId && clearTimeout(this._listenClickOutsideId);
+      this._listenClickOutsideId = setTimeout(() => {
+        if (!this.isConnected) {
+          return;
+        }
+
+        const off = on(this.ownerDocument, 'click', e => {
+          if (
+            e.button === MOUSE_BUTTON.MAIN &&
+            !this.contains(e.target as HTMLElement)
+          ) {
+            off();
+            this._visible = false;
+          }
+        });
+        this._listenClickOutsideId = null;
+        this._clickOutsideOff = off;
+      }, 750);
+    }
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -51,7 +85,9 @@ export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
 
     this._disposables.add(
       AITool.draggingAreaUpdated.on(() => {
+        this._visible = true;
         this._updateSelection(AITool.area);
+        this._watchClickOutside();
       })
     );
 
@@ -63,6 +99,8 @@ export class EdgeelssAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
   }
 
   override render() {
+    if (!this._visible) return nothing;
+
     const rect = this._selectionRect;
 
     return html`<div class="affine-edgeless-ai">
