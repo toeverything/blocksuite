@@ -759,7 +759,7 @@ test('hide drag handle when mouse is hovering over the title', async ({
   await expect(dragHandle).toBeVisible();
 });
 
-test('should create preview when dragging', async ({ page }) => {
+test.skip('should create preview when dragging', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);

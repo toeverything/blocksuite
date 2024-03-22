@@ -1254,12 +1254,16 @@ export class AffineDragHandleWidget extends WidgetElement<
         buildPath(parent)
       );
       if (parentElement) {
-        const newSelectedBlocks = selectedBlocks
-          .map(block => parentElement.path.concat(block.id))
-          .map(path => this._getBlockElementFromViewStore(path))
-          .filter(x => !!x);
-
+        console.log(this.std.view._blockMap);
+        const newSelectedBlocks = selectedBlocks.map(block => {
+          console.log(block.id);
+          const el = this.std.view._blockMap.get(block.id);
+          console.log('----el---');
+          return el;
+        });
         if (!newSelectedBlocks) return;
+
+        console.log(newSelectedBlocks);
 
         const noteId = getNoteId(parentElement);
         this._setSelectedBlocks(newSelectedBlocks as BlockElement[], noteId);
