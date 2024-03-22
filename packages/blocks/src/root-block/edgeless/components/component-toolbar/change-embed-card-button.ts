@@ -211,7 +211,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       height: 24px;
     }
 
-    .embed-synced-doc-scale-button {
+    .embed-scale-button {
       display: flex;
       border-radius: 4px;
       align-items: center;
@@ -223,7 +223,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       height: 26px;
     }
 
-    .embed-synced-doc-scale-label {
+    .embed-scale-label {
       display: flex;
       padding: 2px 0px 2px 4px;
       align-items: center;
@@ -259,19 +259,21 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   @state()
   private _showPopper = false;
 
+  @state()
+  private _embedScale = 1;
+
   @query('.change-embed-card-button.card-style')
   private _cardStyleButton!: HTMLDivElement;
 
   @query('card-style-panel')
   private _cardStylePanel!: HTMLDivElement;
 
-  @query('.embed-synced-doc-scale-button')
-  private _embedSyncedDocScaleButton!: HTMLDivElement;
+  @query('.embed-scale-button')
+  private _embedScaleButton!: HTMLDivElement;
   @query('edgeless-scale-panel')
-  private _embedSyncedDocScalePanel!: HTMLDivElement;
-  private _embedSyncedDocScalePopper: ReturnType<
-    typeof createButtonPopper
-  > | null = null;
+  private _embedScalePanel!: HTMLDivElement;
+  private _embedScalePopper: ReturnType<typeof createButtonPopper> | null =
+    null;
 
   private get _doc() {
     return this.model.doc;
@@ -546,19 +548,41 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._doc.deleteBlock(this.model);
   }
 
-  private _getScale(model: EmbedSyncedDocModel) {
-    return model.scale ?? 1;
-  }
+  private _getScale = () => {
+    if (isEmbedSyncedDocBlock(this.model)) {
+      return this.model.scale ?? 1;
+    } else if (isEmbedHtmlBlock(this.model)) {
+      return 1;
+    }
+
+    const bound = Bound.deserialize(this.model.xywh);
+    return bound.h / EMBED_CARD_HEIGHT[this.model.style];
+  };
 
   private _setEmbedSyncedDocScale(scale: number) {
-    if (!isEmbedSyncedDocBlock(this.model)) return;
-    const bound = Bound.deserialize(this.model.xywh);
-    const oldScale = this.model.scale ?? 1;
-    const ratio = scale / oldScale;
-    bound.w *= ratio;
-    bound.h *= ratio;
-    const xywh = bound.serialize();
-    this.model.doc.updateBlock(this.model, { scale, xywh });
+    if (isEmbedHtmlBlock(this.model)) return;
+
+    if (isEmbedSyncedDocBlock(this.model)) {
+      const bound = Bound.deserialize(this.model.xywh);
+      const oldScale = this.model.scale ?? 1;
+      const ratio = scale / oldScale;
+      bound.w *= ratio;
+      bound.h *= ratio;
+      const xywh = bound.serialize();
+      this.model.doc.updateBlock(this.model, { scale, xywh });
+    } else {
+      const bound = Bound.deserialize(this.model.xywh);
+      bound.h = EMBED_CARD_HEIGHT[this.model.style] * scale;
+      bound.w = EMBED_CARD_WIDTH[this.model.style] * scale;
+      const xywh = bound.serialize();
+      this.model.doc.updateBlock(this.model, { xywh });
+    }
+    this._embedScale = scale;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._embedScale = this._getScale();
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -574,15 +598,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       this._disposables.add(this._cardStylePopper);
     }
 
-    if (isEmbedSyncedDocBlock(this.model)) {
-      this._embedSyncedDocScalePopper = createButtonPopper(
-        this._embedSyncedDocScaleButton,
-        this._embedSyncedDocScalePanel,
+    if (!isEmbedHtmlBlock(this.model)) {
+      this._embedScalePopper = createButtonPopper(
+        this._embedScaleButton,
+        this._embedScalePanel,
         ({ display }) => {
           this._showPopper = display === 'show';
         }
       );
-      this._disposables.add(this._embedSyncedDocScalePopper);
+      this._disposables.add(this._embedScalePopper);
     }
 
     super.updated(changedProperties);
@@ -745,35 +769,33 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           ${CaptionIcon}
         </edgeless-tool-icon-button>
 
-        ${isEmbedSyncedDocBlock(model)
-          ? html`
-              <component-toolbar-menu-divider
+        ${!isEmbedHtmlBlock(model)
+          ? html`<component-toolbar-menu-divider
                 .vertical=${true}
               ></component-toolbar-menu-divider>
 
               <edgeless-tool-icon-button
                 .tooltip=${this._showPopper ? '' : 'Scale'}
                 .iconContainerPadding=${0}
-                @click=${() => this._embedSyncedDocScalePopper?.toggle()}
+                @click=${() => this._embedScalePopper?.toggle()}
               >
-                <div class="embed-synced-doc-scale-button">
-                  <span class="embed-synced-doc-scale-label"
-                    >${Math.round(this._getScale(model) * 100) + '%'}</span
+                <div class="embed-scale-button">
+                  <span class="embed-scale-label"
+                    >${Math.round(this._embedScale * 100) + '%'}</span
                   >
                   ${SmallArrowDownIcon}
                 </div>
               </edgeless-tool-icon-button>
               <edgeless-scale-panel
-                class="embed-synced-doc-scale-popper"
-                .scale=${Math.round(this._getScale(model) * 100)}
+                class="embed-scale-popper"
+                .scale=${Math.round(this._embedScale * 100)}
                 .scales=${[50, 100, 200]}
                 .minSize=${0}
                 .onSelect=${(scale: number) => {
                   this._setEmbedSyncedDocScale(scale);
                 }}
-                .onPopperCose=${() => this._embedSyncedDocScalePopper?.hide()}
-              ></edgeless-scale-panel>
-            `
+                .onPopperCose=${() => this._embedScalePopper?.hide()}
+              ></edgeless-scale-panel>`
           : nothing}
       </div>
     `;
