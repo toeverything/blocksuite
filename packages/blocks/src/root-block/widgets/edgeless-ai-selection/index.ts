@@ -8,7 +8,7 @@ import {
   on,
   requestConnectedFrame,
 } from '../../../_common/utils/event.js';
-import type { AIToolController } from '../../edgeless/controllers/tools/ai-tool.js';
+import type { CopilotSelectionController } from '../../edgeless/controllers/tools/ai-tool.js';
 import type { EdgelessRootBlockComponent } from '../../index.js';
 
 export const AFFINE_EDGELESS_AI_WIDGET = 'affine-edgeless-ai-widget';
@@ -84,19 +84,21 @@ export class EdgelessAIWidget extends WidgetElement<EdgelessRootBlockComponent> 
   override connectedCallback(): void {
     super.connectedCallback();
 
-    const AITool = this.edgeless.tools.controllers['ai'] as AIToolController;
+    const CopilotSelectionTool = this.edgeless.tools.controllers[
+      'copilot'
+    ] as CopilotSelectionController;
 
     this._disposables.add(
-      AITool.draggingAreaUpdated.on(() => {
+      CopilotSelectionTool.draggingAreaUpdated.on(() => {
         this._visible = true;
-        this._updateSelection(AITool.area);
+        this._updateSelection(CopilotSelectionTool.area);
         this._watchClickOutside();
       })
     );
 
     this._disposables.add(
       this.edgeless.service.viewport.viewportUpdated.on(() => {
-        this._updateSelection(AITool.area);
+        this._updateSelection(CopilotSelectionTool.area);
       })
     );
   }

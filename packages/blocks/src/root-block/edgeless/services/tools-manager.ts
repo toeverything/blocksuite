@@ -252,7 +252,7 @@ export class EdgelessToolsManager {
     if (
       e.button === 2 &&
       this.edgelessTool.type !== 'pan' &&
-      this.edgelessTool.type !== 'ai'
+      this.edgelessTool.type !== 'copilot'
     )
       return;
 
@@ -266,7 +266,7 @@ export class EdgelessToolsManager {
     if (
       e.button === 2 &&
       this.edgelessTool.type !== 'pan' &&
-      this.edgelessTool.type !== 'ai'
+      this.edgelessTool.type !== 'copilot'
     )
       return;
 
@@ -280,7 +280,7 @@ export class EdgelessToolsManager {
     if (
       e.button === 2 &&
       this.edgelessTool.type !== 'pan' &&
-      this.edgelessTool.type !== 'ai'
+      this.edgelessTool.type !== 'copilot'
     )
       return;
 
@@ -325,7 +325,7 @@ export class EdgelessToolsManager {
       const targetTool = (
         isRightButton || metaKeyPressed
           ? {
-              type: 'ai',
+              type: 'copilot',
             }
           : { type: 'pan', panning: true }
       ) as EdgelessTool;

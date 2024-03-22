@@ -199,8 +199,8 @@ export type PanTool = {
   panning: boolean;
 };
 
-export type AITool = {
-  type: 'ai';
+export type CopilotSelectionTool = {
+  type: 'copilot';
 };
 
 export type NoteChildrenFlavour =
@@ -244,7 +244,7 @@ export type EdgelessTool =
   | EraserTool
   | FrameTool
   | FrameNavigatorTool
-  | AITool;
+  | CopilotSelectionTool;
 
 export type EmbedBlockDoubleClickData = {
   blockId: string;

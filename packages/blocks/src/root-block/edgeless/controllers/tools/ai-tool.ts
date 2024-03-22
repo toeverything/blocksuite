@@ -1,12 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/store';
 
-import type { AITool } from '../../../../_common/utils/index.js';
+import type { CopilotSelectionTool } from '../../../../_common/utils/index.js';
 import { EdgelessToolController } from './index.js';
 
-export class AIToolController extends EdgelessToolController<AITool> {
-  readonly tool = <AITool>{
-    type: 'ai',
+export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
+  readonly tool = <CopilotSelectionTool>{
+    type: 'copilot',
   };
 
   private _dragStartPoint: [number, number] = [0, 0];
