@@ -16,6 +16,7 @@ import {
   initEmptyEdgelessState,
   initThreeParagraphs,
   pressEnter,
+  SHORT_KEY,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -569,9 +570,9 @@ test('ai selection rect should appears when drag with meta key pressed', async (
 
   await actions.zoomResetByKeyboard(page);
 
-  await page.keyboard.down('Meta');
+  await page.keyboard.down(SHORT_KEY);
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await page.keyboard.up('Meta');
+  await page.keyboard.up(SHORT_KEY);
 
   const aiSelectionRect = await page
     .locator('.ai-selection-rect')
