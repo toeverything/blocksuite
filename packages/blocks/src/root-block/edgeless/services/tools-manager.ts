@@ -5,11 +5,13 @@ import type {
   UIEventHandler,
   UIEventState,
 } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
   isMiddleButtonPressed,
+  isRightButtonPressed,
   NoteDisplayMode,
 } from '../../../_common/utils/index.js';
 import type { Bound } from '../../../surface-block/utils/bound.js';
@@ -101,6 +103,10 @@ export class EdgelessToolsManager {
     return this._controllers[this.edgelessTool.type];
   }
 
+  get controllers() {
+    return this._controllers;
+  }
+
   get draggingArea() {
     if (!this.currentController.draggingArea) return null;
 
@@ -111,11 +117,14 @@ export class EdgelessToolsManager {
     const maxY = Math.max(start.y, end.y);
     return new DOMRect(minX, minY, maxX - minX, maxY - minY);
   }
+
+  set spaceBar(pressed: boolean) {
+    this._spaceBar = pressed;
+    this.currentController.onPressSpaceBar(pressed);
+  }
+
   get spaceBar() {
     return this._spaceBar;
-  }
-  get shiftKey() {
-    return this._shiftKey;
   }
 
   set shiftKey(pressed: boolean) {
@@ -123,9 +132,8 @@ export class EdgelessToolsManager {
     this.currentController.onPressShiftKey(pressed);
   }
 
-  set spaceBar(pressed: boolean) {
-    this._spaceBar = pressed;
-    this.currentController.onPressSpaceBar(pressed);
+  get shiftKey() {
+    return this._shiftKey;
   }
 
   get doc() {
@@ -241,7 +249,12 @@ export class EdgelessToolsManager {
     // only allow pan tool in readonly mode
     if (this.doc.readonly && this.edgelessTool.type !== 'pan') return;
     // do nothing when holding right-key and not in pan mode
-    if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
+    if (
+      e.button === 2 &&
+      this.edgelessTool.type !== 'pan' &&
+      this.edgelessTool.type !== 'copilot'
+    )
+      return;
 
     return this.currentController.onContainerDragStart(e);
   };
@@ -250,7 +263,12 @@ export class EdgelessToolsManager {
     // only allow pan tool in readonly mode
     if (this.doc.readonly && this.edgelessTool.type !== 'pan') return;
     // do nothing when holding right-key and not in pan mode
-    if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
+    if (
+      e.button === 2 &&
+      this.edgelessTool.type !== 'pan' &&
+      this.edgelessTool.type !== 'copilot'
+    )
+      return;
 
     return this.currentController.onContainerDragMove(e);
   };
@@ -259,7 +277,12 @@ export class EdgelessToolsManager {
     // only allow pan tool in readonly mode
     if (this.doc.readonly && this.edgelessTool.type !== 'pan') return;
     // do nothing when holding right-key and not in pan mode
-    if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
+    if (
+      e.button === 2 &&
+      this.edgelessTool.type !== 'pan' &&
+      this.edgelessTool.type !== 'copilot'
+    )
+      return;
 
     return this.currentController.onContainerDragEnd(e);
   };
@@ -290,33 +313,53 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
-    if (!isMiddleButtonPressed(e.raw)) {
-      if (this.doc.readonly) return;
+    const pointEvt = e.raw;
+    const metaKeyPressed = IS_MAC ? pointEvt.metaKey : pointEvt.ctrlKey;
 
-      return this.currentController.onContainerPointerDown(e);
+    if (
+      isMiddleButtonPressed(pointEvt) ||
+      isRightButtonPressed(pointEvt) ||
+      metaKeyPressed
+    ) {
+      const isRightButton = isRightButtonPressed(pointEvt);
+      const targetTool = (
+        isRightButton || metaKeyPressed
+          ? {
+              type: 'copilot',
+            }
+          : { type: 'pan', panning: true }
+      ) as EdgelessTool;
+      const prevEdgelessTool = this._edgelessTool;
+      const targetButtonRelease = (_e: MouseEvent) =>
+        (isMiddleButtonPressed(e.raw) && !isMiddleButtonPressed(_e)) ||
+        (isRightButton && !isRightButtonPressed(_e)) ||
+        metaKeyPressed;
+
+      const switchToPreMode = (_e: MouseEvent) => {
+        if (targetButtonRelease(_e)) {
+          this.setEdgelessTool(
+            prevEdgelessTool,
+            undefined,
+            !isRightButton && !metaKeyPressed
+          );
+          document.removeEventListener('pointerup', switchToPreMode, false);
+          document.removeEventListener('pointerover', switchToPreMode, false);
+        }
+      };
+
+      this.dispatcher.disposables.addFromEvent(
+        document,
+        'pointerup',
+        switchToPreMode
+      );
+
+      this.setEdgelessTool(targetTool);
+      return;
     }
 
-    const prevEdgelessTool = this._edgelessTool;
-    const switchToPreMode = (_e: MouseEvent) => {
-      if (!isMiddleButtonPressed(_e)) {
-        this.setEdgelessTool(prevEdgelessTool);
-        document.removeEventListener('pointerup', switchToPreMode, false);
-        document.removeEventListener('pointerover', switchToPreMode, false);
-      }
-    };
+    if (this.doc.readonly) return;
 
-    this.dispatcher.disposables.addFromEvent(
-      document,
-      'pointerover',
-      switchToPreMode
-    );
-    this.dispatcher.disposables.addFromEvent(
-      document,
-      'pointerup',
-      switchToPreMode
-    );
-
-    this.setEdgelessTool({ type: 'pan', panning: true });
+    return this.currentController.onContainerPointerDown(e);
   };
 
   private _onContainerPointerUp = (_ev: PointerEventState) => {};
@@ -353,7 +396,8 @@ export class EdgelessToolsManager {
     state: EdgelessSelectionState | SurfaceSelection[] = {
       elements: [],
       editing: false,
-    }
+    },
+    restoreToLastSelection = true
   ) => {
     const { type } = edgelessTool;
     if (this.doc.readonly && type !== 'pan' && type !== 'frameNavigator') {
@@ -380,7 +424,8 @@ export class EdgelessToolsManager {
       isDefaultType &&
       isEmptyState &&
       hasLastState &&
-      isNotSingleDocOnlyNote
+      isNotSingleDocOnlyNote &&
+      restoreToLastSelection
     ) {
       state = this.selection.lastState;
     }

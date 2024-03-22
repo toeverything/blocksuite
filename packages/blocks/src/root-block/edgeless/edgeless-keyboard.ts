@@ -195,6 +195,12 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         global: true,
       }
     );
+
+    this._bindShiftKey();
+    this._bindToggleHand();
+  }
+
+  private _bindShiftKey() {
     this.rootElement.handleEvent(
       'keyDown',
       ctx => {
@@ -217,7 +223,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         global: true,
       }
     );
-    this._bindToggleHand();
   }
 
   private _bindToggleHand() {
@@ -288,12 +293,16 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _shift(event: KeyboardEvent) {
     const edgeless = this.rootElement;
-    if (!event.repeat) {
-      if (event.key.toLowerCase() === 'shift' && event.shiftKey) {
-        edgeless.slots.pressShiftKeyUpdated.emit(true);
-      } else {
-        edgeless.slots.pressShiftKeyUpdated.emit(false);
-      }
+
+    if (event.repeat) return;
+
+    const shiftKeyPressed =
+      event.key.toLowerCase() === 'shift' && event.shiftKey;
+
+    if (shiftKeyPressed) {
+      edgeless.slots.pressShiftKeyUpdated.emit(true);
+    } else {
+      edgeless.slots.pressShiftKeyUpdated.emit(false);
     }
   }
 

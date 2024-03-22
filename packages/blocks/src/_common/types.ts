@@ -199,6 +199,10 @@ export type PanTool = {
   panning: boolean;
 };
 
+export type CopilotSelectionTool = {
+  type: 'copilot';
+};
+
 export type NoteChildrenFlavour =
   | 'affine:paragraph'
   | 'affine:list'
@@ -239,7 +243,8 @@ export type EdgelessTool =
   | ConnectorTool
   | EraserTool
   | FrameTool
-  | FrameNavigatorTool;
+  | FrameNavigatorTool
+  | CopilotSelectionTool;
 
 export type EmbedBlockDoubleClickData = {
   blockId: string;
