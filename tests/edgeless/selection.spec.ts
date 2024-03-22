@@ -575,7 +575,7 @@ test('ai selection rect should appears when drag with meta key pressed', async (
   await page.keyboard.up(SHORT_KEY);
 
   const aiSelectionRect = await page
-    .locator('.ai-selection-rect')
+    .locator('.copilot-selection-rect')
     .boundingBox();
 
   expect(aiSelectionRect).not.toBeNull();
@@ -585,5 +585,5 @@ test('ai selection rect should appears when drag with meta key pressed', async (
   expect(aiSelectionRect!.y).toBe(100);
 
   await page.mouse.click(205, 150);
-  await expect(page.locator('.ai-selection-rect')).toBeHidden();
+  await expect(page.locator('.copilot-selection-rect')).toBeHidden();
 });
