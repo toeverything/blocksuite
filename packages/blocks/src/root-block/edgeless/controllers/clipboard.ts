@@ -85,7 +85,7 @@ import {
 
 const BLOCKSUITE_SURFACE = 'blocksuite/surface';
 const IMAGE_PNG = 'image/png';
-
+const IMAGE_PADDING = 10; // for rotated shapes some padding is needed
 const { GROUP } = CanvasElementType;
 
 export class EdgelessClipboardController extends PageClipboard {
@@ -1107,11 +1107,10 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
-    canvas.width = (bound.w + 100) * dpr;
-    canvas.height = (bound.h + 100) * dpr;
+    canvas.width = (bound.w + IMAGE_PADDING) * dpr;
+    canvas.height = (bound.h + IMAGE_PADDING) * dpr;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.scale(dpr, dpr);
 
     if (withBackground) {
       ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
@@ -1192,8 +1191,8 @@ export class EdgelessClipboardController extends PageClipboard {
       );
       ctx.drawImage(
         canvasData,
-        blockBound.x - bound.x + 50,
-        blockBound.y - bound.y + 50,
+        blockBound.x - bound.x + IMAGE_PADDING / 2,
+        blockBound.y - bound.y + IMAGE_PADDING / 2,
         blockBound.w,
         isInFrame
           ? (blockBound.w / canvasData.width) * canvasData.height
@@ -1235,7 +1234,13 @@ export class EdgelessClipboardController extends PageClipboard {
       bound,
       canvasElements
     );
-    ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+    ctx.drawImage(
+      surfaceCanvas,
+      IMAGE_PADDING / 2,
+      IMAGE_PADDING / 2,
+      bound.w,
+      bound.h
+    );
 
     return canvas;
   }
