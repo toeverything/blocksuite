@@ -87,9 +87,7 @@ export class KeymapController implements ReactiveController {
             assertExists(currentTextSelection);
             return next({ currentSelectionPath: currentTextSelection.path });
           })
-          .getNextBlock({
-            filter: block => ensureBlockInContainer(block, this.host),
-          })
+          .getNextBlock()
           .inline<'focusBlock'>((ctx, next) => {
             const { nextBlock } = ctx;
             assertExists(nextBlock);
@@ -122,9 +120,7 @@ export class KeymapController implements ReactiveController {
             }
             return next({ currentSelectionPath: blockSelection.path });
           })
-          .getNextBlock({
-            filter: block => ensureBlockInContainer(block, this.host),
-          })
+          .getNextBlock()
           .inline<'focusBlock'>((ctx, next) => {
             const { nextBlock } = ctx;
             assertExists(nextBlock);
@@ -175,9 +171,7 @@ export class KeymapController implements ReactiveController {
             assertExists(currentTextSelection);
             return next({ currentSelectionPath: currentTextSelection.path });
           })
-          .getPrevBlock({
-            filter: block => ensureBlockInContainer(block, this.host),
-          })
+          .getPrevBlock()
           .inline<'focusBlock'>((ctx, next) => {
             const { prevBlock } = ctx;
             assertExists(prevBlock);
@@ -210,9 +204,7 @@ export class KeymapController implements ReactiveController {
             }
             return next({ currentSelectionPath: blockSelection.path });
           })
-          .getPrevBlock({
-            filter: block => ensureBlockInContainer(block, this.host),
-          })
+          .getPrevBlock()
           .inline<'focusBlock'>((ctx, next) => {
             const { prevBlock } = ctx;
             assertExists(prevBlock);
@@ -423,7 +415,6 @@ export class KeymapController implements ReactiveController {
     const blocks: BlockSelection[] = [];
     view.walkThrough(nodeView => {
       if (
-        nodeView.type === 'block' &&
         // Remove children blocks, only select the most top level blocks.
         !blocks
           .map(b => b.path)

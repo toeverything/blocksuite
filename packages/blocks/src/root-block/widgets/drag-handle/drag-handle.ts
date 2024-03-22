@@ -27,7 +27,11 @@ import {
   Point,
   Rect,
 } from '../../../_common/utils/index.js';
-import type { NoteBlockComponent, NoteBlockModel } from '../../../index.js';
+import type { RootBlockModel } from '../../../index.js';
+import {
+  type NoteBlockComponent,
+  type NoteBlockModel,
+} from '../../../index.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
 import {
   getSelectedRect,
@@ -76,6 +80,7 @@ export const AFFINE_DRAG_HANDLE_WIDGET = 'affine-drag-handle-widget';
 
 @customElement(AFFINE_DRAG_HANDLE_WIDGET)
 export class AffineDragHandleWidget extends WidgetElement<
+  RootBlockModel,
   EdgelessRootBlockComponent | PageRootBlockComponent
 > {
   static override styles = styles;

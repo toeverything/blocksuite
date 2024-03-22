@@ -16,12 +16,16 @@ import {
   isTopLevelBlock,
 } from '../../../root-block/edgeless/utils/query.js';
 import { RemoteColorManager } from '../../../root-block/remote-color-manager/remote-color-manager.js';
+import type { RootBlockModel } from '../../root-model.js';
 
 export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';
 
 @customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET)
-export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessRootBlockComponent> {
+export class EdgelessRemoteSelectionWidget extends WidgetElement<
+  RootBlockModel,
+  EdgelessRootBlockComponent
+> {
   static override styles = css`
     :host {
       pointer-events: none;

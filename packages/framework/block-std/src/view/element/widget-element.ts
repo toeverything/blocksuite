@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -10,6 +10,7 @@ import type { BlockElement } from './block-element.js';
 import type { EditorHost } from './lit-host.js';
 
 export class WidgetElement<
+  Model extends BlockModel = BlockModel,
   B extends BlockElement = BlockElement,
 > extends WithDisposable(LitElement) {
   @property({ attribute: false })
@@ -18,19 +19,14 @@ export class WidgetElement<
   @property({ attribute: false })
   doc!: Doc;
 
+  @property({ attribute: false })
+  model!: Model;
+
   path!: string[];
 
   service!: BlockService;
 
   blockElement!: B;
-
-  get widgetName(): string {
-    return this.path[this.path.length - 1];
-  }
-
-  get hostPath() {
-    return this.path.slice(0, -1);
-  }
 
   get flavour(): string {
     assertExists(this.blockElement);
@@ -72,7 +68,9 @@ export class WidgetElement<
     assertExists(nodeView);
     this.blockElement = nodeView.view as B;
     this.service = this.blockElement.service;
-    this.path = this.host.view.calculatePath(this);
+    this.path = this.host.view
+      .calculatePath(this)
+      .concat(this.dataset.widgetId as string);
     this.service.specSlots.widgetConnected.emit({
       service: this.blockElement.service,
       component: this,

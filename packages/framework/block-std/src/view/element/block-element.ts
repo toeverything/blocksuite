@@ -77,10 +77,12 @@ export class BlockElement<
   }
 
   get childBlockElements() {
-    const children = this.host.view.getChildren(this.path);
-    return children
-      .filter(child => child.type === 'block')
-      .map(child => child.view as BlockElement);
+    const childModels = this.model.children;
+    return childModels
+      .map(child => {
+        return this.std.view._blockMap.get(child.id);
+      })
+      .filter((x): x is BlockElement => !!x);
   }
 
   get rootElement() {
@@ -208,6 +210,8 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.std.view._blockMap.set(this.model.id, this);
+
     this.service = this.host.std.spec.getService(this.model.flavour);
     this.path = this.host.view.calculatePath(this);
 
@@ -246,6 +250,9 @@ export class BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+
+    this.std.view._blockMap.delete(this.model.id);
+
     this.service.specSlots.viewDisconnected.emit({
       service: this.service,
       component: this,

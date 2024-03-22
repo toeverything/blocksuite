@@ -2,32 +2,14 @@ import type { Command } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-type Filter = (view: BlockElement) => boolean;
-
-function getNextSibling(
-  std: BlockSuite.Std,
-  blockElement: BlockElement,
-  filter?: Filter
-) {
+function getNextSibling(std: BlockSuite.Std, blockElement: BlockElement) {
   const view = std.view;
-  const nextView = view.findNext(blockElement.path, node => {
-    if (node.type !== 'block' || node.view.contains(blockElement)) {
-      return;
-    }
-    if (filter && !filter(node.view as BlockElement)) {
-      return;
-    }
-    return true;
-  });
-  if (!nextView) return null;
-  return view.viewFromPath('block', nextView.path);
+  const next = std.doc.getNextSibling(blockElement.model);
+  if (!next) return null;
+  return view._blockMap.get(next.id) ?? null;
 }
 
-function getNextBlock(
-  std: BlockSuite.Std,
-  path: string[],
-  filter?: (block: BlockElement) => boolean
-) {
+function getNextBlock(std: BlockSuite.Std, path: string[]) {
   const view = std.view;
   const focusBlock = view.viewFromPath('block', path);
   if (!focusBlock) return null;
@@ -38,7 +20,7 @@ function getNextBlock(
   }
 
   if (!next) {
-    next = getNextSibling(std, focusBlock, filter);
+    next = getNextSibling(std, focusBlock);
   }
 
   if (next && !next.contains(focusBlock)) {
@@ -53,7 +35,6 @@ export const getNextBlockCommand: Command<
   'nextBlock',
   {
     path?: string[];
-    filter?: Filter;
   }
 > = (ctx, next) => {
   const path = ctx.path ?? ctx.currentSelectionPath;
@@ -62,7 +43,7 @@ export const getNextBlockCommand: Command<
     '`path` is required, you need to pass it in args or ctx before adding this command to the pipeline.'
   );
 
-  const nextBlock = getNextBlock(ctx.std, path, ctx.filter);
+  const nextBlock = getNextBlock(ctx.std, path);
 
   if (nextBlock) {
     next({ nextBlock });

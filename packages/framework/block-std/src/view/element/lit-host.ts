@@ -151,9 +151,11 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     const tag = view.component;
     const widgets: Record<string, TemplateResult> = view.widgets
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
-          const template = html`<${tag} ${unsafeStatic(
-            this.widgetIdAttr
-          )}=${key} .host=${this} .doc=${this.doc}></${tag}>`;
+          const template = html`<${tag}
+            ${unsafeStatic(this.widgetIdAttr)}=${key}
+            .host=${this}
+            .model=${model}
+            .doc=${this.doc}></${tag}>`;
 
           return {
             ...mapping,

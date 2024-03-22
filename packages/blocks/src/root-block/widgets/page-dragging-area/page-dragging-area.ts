@@ -8,7 +8,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { PageRootBlockComponent } from '../../index.js';
+import type { RootBlockModel } from '../../index.js';
+import { type PageRootBlockComponent } from '../../index.js';
 import { autoScroll } from '../../text-selection/utils.js';
 
 type Rect = {
@@ -27,7 +28,10 @@ export const AFFINE_PAGE_DRAGGING_AREA_WIDGET =
   'affine-page-dragging-area-widget';
 
 @customElement(AFFINE_PAGE_DRAGGING_AREA_WIDGET)
-export class AffinePageDraggingAreaWidget extends WidgetElement<PageRootBlockComponent> {
+export class AffinePageDraggingAreaWidget extends WidgetElement<
+  RootBlockModel,
+  PageRootBlockComponent
+> {
   @state()
   rect: Rect | null = null;
 
@@ -73,7 +77,7 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<PageRootBlockCom
     const getAllNodeFromTree = (): BlockElement[] => {
       const blockElement: BlockElement[] = [];
       this.host.view.walkThrough(node => {
-        const view = node.view;
+        const view = node;
         if (!(view instanceof BlockElement)) {
           return true;
         }

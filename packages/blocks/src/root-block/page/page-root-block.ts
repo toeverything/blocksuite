@@ -1,4 +1,4 @@
-import { PathFinder, type PointerEventState } from '@blocksuite/block-std';
+import { type PointerEventState } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
@@ -248,34 +248,18 @@ export class PageRootBlockComponent extends BlockElement<
         return true;
       },
       ArrowUp: () => {
-        const view = this.host.view;
         const selection = this.host.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
         if (!sel) return;
-        const focusNote = view.findPrev(
-          sel.path,
-          (nodeView, _index, parent) => {
-            if (nodeView.type === 'block' && parent.view === this) {
-              return true;
-            }
-            return;
-          }
-        );
-        if (!focusNote) return;
-        const notes = this.childBlockElements.filter(
-          el => el.model.flavour === 'affine:note'
-        );
-        const index = notes.indexOf(focusNote.view as BlockElement);
+        const model = this.doc.getBlockById(sel.path[sel.path.length - 1]);
+        if (!model) return;
+        const prevNote = this.doc.getPreviousSibling(model);
+        if (!prevNote) return;
+        const notes = this.doc.getBlockByFlavour('affine:note');
+        const index = notes.indexOf(prevNote);
         if (index !== 0) return;
-
-        const firstNoteChild = focusNote.children[0];
-        if (
-          !firstNoteChild ||
-          !PathFinder.equals(firstNoteChild.path, sel.path)
-        )
-          return;
 
         const range = this.host.rangeManager?.value;
         requestAnimationFrame(() => {
