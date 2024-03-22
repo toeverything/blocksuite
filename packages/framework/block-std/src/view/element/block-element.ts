@@ -251,6 +251,8 @@ export class BlockElement<
   override disconnectedCallback() {
     super.disconnectedCallback();
 
+    this.std.view._blockMap.delete(this.model.id);
+
     this.service.specSlots.viewDisconnected.emit({
       service: this.service,
       component: this,
