@@ -1384,7 +1384,6 @@ function tryGetSvgFromClipboard(clipboardData: DataTransfer) {
     'image/svg+xml'
   );
 
-  console.log(svgDoc.documentElement);
   if (svgDoc.documentElement.tagName !== 'svg') {
     return null;
   }
