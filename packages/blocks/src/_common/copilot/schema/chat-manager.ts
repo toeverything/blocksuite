@@ -22,7 +22,7 @@ export type CopilotAction<Result> = {
   run: CopilotServiceResult<Result>;
 };
 
-export interface HistoryItem {
+export interface ChatItem {
   isUser: boolean;
 
   render(host: EditorHost): TemplateResult;
@@ -30,7 +30,7 @@ export interface HistoryItem {
   toContext(): CopilotMessage[];
 }
 
-class UserHistoryItem implements HistoryItem {
+class UserChatItem implements ChatItem {
   isUser = true;
   constructor(private message: UserMessage) {}
 
@@ -48,8 +48,8 @@ class UserHistoryItem implements HistoryItem {
   }
 }
 
-export class AssistantHistoryItem<Result = unknown, Data = unknown>
-  implements HistoryItem
+export class AssistantChatItem<Result = unknown, Data = unknown>
+  implements ChatItem
 {
   isUser = false;
   public value: ApiData<Result> = { status: 'loading' };
@@ -60,7 +60,7 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
 
   constructor(
     private action: CopilotAction<Result>,
-    private history: HistoryItem[]
+    private history: ChatItem[]
   ) {
     const schema = ContentSchemas.find(v => v.type === action.type);
     if (!schema) {
@@ -177,8 +177,8 @@ export class CopilotAssistantHistoryRenderer extends WithDisposable(
   }
 }
 
-export class ChatHistory {
-  history: HistoryItem[] = [];
+export class ChatManager {
+  items: ChatItem[] = [];
   private subSet: Set<() => void> = new Set();
   onChange(cb: () => void) {
     this.subSet.add(cb);
@@ -191,19 +191,19 @@ export class ChatHistory {
   }
 
   addUserMessage(contents: ContentPayload[]) {
-    this.history.push(new UserHistoryItem({ role: 'user', content: contents }));
+    this.items.push(new UserChatItem({ role: 'user', content: contents }));
     this.fire();
   }
 
   requestAssistantMessage<Result>(
     action: CopilotAction<Result>,
     userMessage: ContentPayload[]
-  ): AssistantHistoryItem<Result> {
-    const history = this.history.slice();
+  ): AssistantChatItem<Result> {
+    const history = this.items.slice();
     this.addUserMessage(userMessage);
-    const assistantHistoryItem = new AssistantHistoryItem(action, history);
-    this.history.push(assistantHistoryItem);
+    const assistantChatItem = new AssistantChatItem(action, history);
+    this.items.push(assistantChatItem);
     this.fire();
-    return assistantHistoryItem;
+    return assistantChatItem;
   }
 }

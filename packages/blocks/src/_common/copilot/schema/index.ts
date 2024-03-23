@@ -1,14 +1,14 @@
 import '../service/index.js';
 
-import { ChatHistory, type CopilotAction } from './chat-history.js';
+import { ChatManager, type CopilotAction } from './chat-manager.js';
 import { actions } from './content-types/index.js';
 
 export class Copilot {
   actions = actions;
-  history: ChatHistory = new ChatHistory();
+  chat: ChatManager = new ChatManager();
 
   askAI<Result>(action: CopilotAction<Result>, prompt: string) {
-    return this.history.requestAssistantMessage(action, [
+    return this.chat.requestAssistantMessage(action, [
       { type: 'text', text: prompt },
     ]);
   }

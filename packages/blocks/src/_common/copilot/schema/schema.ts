@@ -2,7 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import type { CopilotServiceResult } from '../service/service-base.js';
-import type { CopilotAction } from './chat-history.js';
+import type { CopilotAction } from './chat-manager.js';
 
 export type ContentPayload =
   | {
