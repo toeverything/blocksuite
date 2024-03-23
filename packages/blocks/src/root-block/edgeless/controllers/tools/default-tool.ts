@@ -229,10 +229,16 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
+  private _getSnapAxis(dx: number, dy: number): 'x' | 'y' {
+    const angle = Math.abs(Math.atan2(dy, dx));
+    return angle < Math.PI / 4 || angle > 3 * (Math.PI / 4) ? 'x' : 'y';
+  }
+
   private _handleSurfaceDragMove(
     selected: CanvasElement,
     initialBound: Bound,
-    delta: IVec
+    delta: IVec,
+    e: PointerEventState
   ) {
     if (!this._lock) {
       this._lock = true;
@@ -240,8 +246,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     const bound = initialBound.clone();
-    bound.x += delta[0];
-    bound.y += delta[1];
+
+    if (e.keys.shift || this._edgeless.tools.shiftKey) {
+      const snapAxis = this._getSnapAxis(delta[0], delta[1]);
+      snapAxis === 'x' ? (bound.x += delta[0]) : (bound.y += delta[1]);
+    } else {
+      bound.x += delta[0];
+      bound.y += delta[1];
+    }
 
     if (selected instanceof ConnectorElementModel) {
       selected.moveTo(bound);
@@ -255,11 +267,17 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _handleBlockDragMove(
     block: EdgelessBlockModel,
     initialBound: Bound,
-    delta: IVec
+    delta: IVec,
+    e: PointerEventState
   ) {
     const bound = initialBound.clone();
-    bound.x += delta[0];
-    bound.y += delta[1];
+    if (e.keys.shift || this._edgeless.tools.shiftKey) {
+      const snapAxis = this._getSnapAxis(delta[0], delta[1]);
+      snapAxis === 'x' ? (bound.x += delta[0]) : (bound.y += delta[1]);
+    } else {
+      bound.x += delta[0];
+      bound.y += delta[1];
+    }
 
     this._service.updateElement(block.id, {
       xywh: bound.serialize(),
@@ -652,13 +670,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             this._handleSurfaceDragMove(
               element,
               this._selectedBounds[index],
-              delta
+              delta,
+              e
             );
           } else {
             this._handleBlockDragMove(
               element as EdgelessBlockModel,
               this._selectedBounds[index],
-              delta
+              delta,
+              e
             );
           }
         });
