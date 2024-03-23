@@ -406,13 +406,9 @@ hhh
       ],
     };
     const markdown = `* aaa
-
   * bbb
-
     * ccc
-
   * ddd
-
 * eee
 `;
 
@@ -558,13 +554,9 @@ hhh
       ],
     };
     const markdown = `* [ ] aaa
-
   * [x] bbb
-
     * [ ] ccc
-
   - [x] ddd
-
 - [ ] eee
 `;
 
@@ -706,11 +698,8 @@ hhh
     };
 
     const markdown = `1. aaa
-
    1. bbb
-
    2. ccc
-
 2. ddd
 `;
 
