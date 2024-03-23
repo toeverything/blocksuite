@@ -6,7 +6,7 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { Viewport } from '../../_common/utils/index.js';
+import { focusTitle, type Viewport } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   getDocTitleInlineEditor,
@@ -256,7 +256,10 @@ export class PageRootBlockComponent extends BlockElement<
         const model = this.doc.getBlockById(sel.path[sel.path.length - 1]);
         if (!model) return;
         const prevNote = this.doc.getPreviousSibling(model);
-        if (!prevNote) return;
+        if (!prevNote) {
+          focusTitle(this.host);
+          return;
+        }
         const notes = this.doc.getBlockByFlavour('affine:note');
         const index = notes.indexOf(prevNote);
         if (index !== 0) return;

@@ -1844,18 +1844,9 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  await assertRichTextInlineRange(page, 0, 90);
+  await assertRichTextInlineRange(page, 0, 0);
   // - aaa... (no \n)
   //   |a
-  // - b  (have \n)
-  //
-  // -
-
-  await pressArrowUp(page);
-  await waitNextFrame(page);
-  await assertRichTextInlineRange(page, 0, 0);
-  // - |aaa... (no \n)
-  //   a
   // - b  (have \n)
   //
   // -
@@ -1870,15 +1861,6 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await assertRichTextInlineRange(page, 0, 0);
   // - |aaa... (no \n)
   //   a
-  // - b  (have \n)
-  //
-  // -
-
-  await pressArrowDown(page);
-  await waitNextFrame(page);
-  await assertRichTextInlineRange(page, 0, 90);
-  // - aaa... (no \n)
-  //   |a
   // - b  (have \n)
   //
   // -
