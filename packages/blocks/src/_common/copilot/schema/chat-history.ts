@@ -8,14 +8,14 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { CopilotServiceResult } from '../service/service-base.js';
+import { MessageSchemas } from './content-types/index.js';
 import type {
   ApiData,
   ContentPayload,
   ContentSchema,
   CopilotMessage,
   UserMessage,
-} from './message-schema.js';
-import { MessageSchemas } from './message-type/index.js';
+} from './schema.js';
 
 export type CopilotAction<Result> = {
   type: string;

@@ -1,7 +1,7 @@
 import '../service/index.js';
 
 import { ChatHistory, type CopilotAction } from './chat-history.js';
-import { actions } from './message-type/index.js';
+import { actions } from './content-types/index.js';
 
 export class Copilot {
   actions = actions;

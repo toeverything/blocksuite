@@ -3,7 +3,7 @@ import {
   ChatServiceKind,
   Image2TextServiceKind,
 } from '../../service/service-base.js';
-import type { CopilotMessage } from '../message-schema.js';
+import type { CopilotMessage } from '../schema.js';
 
 const ChatFeatureKey = 'chat';
 export const chatService = () =>

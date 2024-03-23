@@ -1,10 +1,7 @@
 import type { TemplateResult } from 'lit';
 import type { OpenAI } from 'openai';
 
-import type {
-  CopilotMessage,
-  MessageContext,
-} from '../model/message-schema.js';
+import type { CopilotMessage, MessageContext } from '../schema/schema.js';
 
 export type Vendor<Data> = {
   key: string;

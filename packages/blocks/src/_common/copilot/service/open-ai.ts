@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { OpenAI } from 'openai';
 
-import type { CopilotMessage } from '../model/message-schema.js';
+import type { CopilotMessage } from '../schema/schema.js';
 import {
   ChatServiceKind,
   createVendor,
