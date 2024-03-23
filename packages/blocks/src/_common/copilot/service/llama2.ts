@@ -47,7 +47,7 @@ TextServiceKind.implService({
           signal,
           body: JSON.stringify({
             model: 'llama2',
-            messages: [...context.history, ...messages],
+            messages: [...context.messages, ...messages],
             stream: false,
           }),
         }).then(res => res.json());
@@ -62,7 +62,7 @@ ChatServiceKind.implService({
   method: data => ({
     chat: messages =>
       async function* (context, signal) {
-        const llama2Messages = [...context.history, ...messages].map(
+        const llama2Messages = [...context.messages, ...messages].map(
           message => {
             if (message.role === 'user') {
               let text = '';

@@ -3,7 +3,7 @@ import {
   ChatServiceKind,
   Image2TextServiceKind,
 } from '../../service/service-base.js';
-import type { ChatMessage } from '../message-schema.js';
+import type { ChatMessage } from '../schema.js';
 
 const ChatFeatureKey = 'chat';
 export const chatService = () =>

@@ -8,21 +8,21 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { CopilotServiceResult } from '../service/service-base.js';
+import { ContentSchemas } from './content-types/index.js';
 import type {
   ApiData,
   ChatMessage,
-  MessageContent,
-  MessageSchema,
-  UserChatMessage,
-} from './message-schema.js';
-import { MessageSchemas } from './message-type/index.js';
+  ContentSchema,
+  UserMessage,
+  UserMessageContent,
+} from './schema.js';
 
 export type CopilotAction<Result> = {
   type: string;
   run: CopilotServiceResult<Result>;
 };
 
-export interface HistoryItem {
+export interface ChatItem {
   isUser: boolean;
 
   render(host: EditorHost): TemplateResult;
@@ -30,9 +30,9 @@ export interface HistoryItem {
   toContext(): ChatMessage[];
 }
 
-class UserHistoryItem implements HistoryItem {
+class UserChatItem implements ChatItem {
   isUser = true;
-  constructor(private message: UserChatMessage) {}
+  constructor(private message: UserMessage) {}
 
   public render(_: EditorHost): TemplateResult {
     return html`${repeat(this.message.content, content => {
@@ -48,25 +48,25 @@ class UserHistoryItem implements HistoryItem {
   }
 }
 
-export class AssistantHistoryItem<Result = unknown, Data = unknown>
-  implements HistoryItem
+export class AssistantChatItem<Result = unknown, Data = unknown>
+  implements ChatItem
 {
   isUser = false;
   public value: ApiData<Result> = { status: 'loading' };
   public data?: Data;
   private set: Set<() => void> = new Set();
   private abortController: AbortController | null = null;
-  private schema: MessageSchema<Result, Data>;
+  private schema: ContentSchema<Result, Data>;
 
   constructor(
     private action: CopilotAction<Result>,
-    private history: HistoryItem[]
+    private items: ChatItem[]
   ) {
-    const schema = MessageSchemas.find(v => v.type === action.type);
+    const schema = ContentSchemas.find(v => v.type === action.type);
     if (!schema) {
       throw new Error('schema not found');
     }
-    this.schema = schema as MessageSchema<Result, Data>;
+    this.schema = schema as ContentSchema<Result, Data>;
     this.start();
   }
 
@@ -83,7 +83,7 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
     this.abortController = abortController;
     const result = this.action.run(
       {
-        history: this.history.flatMap(v => v.toContext()),
+        messages: this.items.flatMap(v => v.toContext()),
       },
       abortController.signal
     );
@@ -147,15 +147,15 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
         retry: this.retry,
         host,
       });
-    return html` <copilot-assistant-history-renderer
+    return html` <assistant-chat-item-renderer
       .onChange="${this.onChange}"
       .renderTemplate="${renderTemplate}"
-    ></copilot-assistant-history-renderer>`;
+    ></assistant-chat-item-renderer>`;
   }
 }
 
-@customElement('copilot-assistant-history-renderer')
-export class copilotAssistantHistoryRenderer extends WithDisposable(
+@customElement('assistant-chat-item-renderer')
+export class AssistantChatItemRenderer extends WithDisposable(
   ShadowlessElement
 ) {
   @property({ attribute: false })
@@ -177,8 +177,8 @@ export class copilotAssistantHistoryRenderer extends WithDisposable(
   }
 }
 
-export class ChatHistory {
-  history: HistoryItem[] = [];
+export class ChatManager {
+  items: ChatItem[] = [];
   private subSet: Set<() => void> = new Set();
   onChange(cb: () => void) {
     this.subSet.add(cb);
@@ -190,20 +190,20 @@ export class ChatHistory {
     this.subSet.forEach(v => v());
   }
 
-  addUserMessage(contents: MessageContent[]) {
-    this.history.push(new UserHistoryItem({ role: 'user', content: contents }));
+  addUserMessage(contents: UserMessageContent[]) {
+    this.items.push(new UserChatItem({ role: 'user', content: contents }));
     this.fire();
   }
 
   requestAssistantMessage<Result>(
     action: CopilotAction<Result>,
-    userMessage: MessageContent[]
-  ): AssistantHistoryItem<Result> {
-    const history = this.history.slice();
+    userMessage: UserMessageContent[]
+  ): AssistantChatItem<Result> {
+    const items = this.items.slice();
     this.addUserMessage(userMessage);
-    const assistantHistoryItem = new AssistantHistoryItem(action, history);
-    this.history.push(assistantHistoryItem);
+    const assistantChatItem = new AssistantChatItem(action, items);
+    this.items.push(assistantChatItem);
     this.fire();
-    return assistantHistoryItem;
+    return assistantChatItem;
   }
 }

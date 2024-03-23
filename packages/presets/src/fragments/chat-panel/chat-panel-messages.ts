@@ -92,12 +92,12 @@ export class ChatPanelMessages extends WithDisposable(LitElement) {
   public override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
-      this.copilot.history.onChange(() => this.requestUpdate())
+      this.copilot.chat.onChange(() => this.requestUpdate())
     );
   }
 
   protected override render() {
-    const messages = this.copilot.history.history;
+    const { items } = this.copilot.chat;
 
     return html`
       <div
@@ -109,18 +109,18 @@ export class ChatPanelMessages extends WithDisposable(LitElement) {
             200;
         }}
       >
-        ${messages.length === 0
+        ${items.length === 0
           ? html`<div class="chat-panel-messages-placeholder">
               ${AffineIcon}
               <div>What can I help you with?</div>
             </div>`
-          : repeat(messages, message => {
+          : repeat(items, item => {
               return html`<div class="message">
                 <div class="user-info">
                   <div class="avator"></div>
-                  ${message.isUser ? 'You' : 'AFFINE AI'}
+                  ${item.isUser ? 'You' : 'AFFINE AI'}
                 </div>
-                ${message.render(this.host)}
+                ${item.render(this.host)}
               </div>`;
             })}
       </div>
