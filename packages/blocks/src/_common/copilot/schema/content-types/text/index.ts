@@ -1,6 +1,6 @@
 import { html } from 'lit';
 
-import { type ContentSchema } from '../../message-schema.js';
+import { type ContentSchema } from '../../schema.js';
 
 type Text = string;
 export const TextContentSchema: ContentSchema<Text, unknown> = {

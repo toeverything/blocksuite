@@ -1,7 +1,4 @@
-import {
-  type ContentPayload,
-  createActionBuilder,
-} from '../../message-schema.js';
+import { type ContentPayload, createActionBuilder } from '../../schema.js';
 import { chatService, userText } from '../utils.js';
 
 export const createCommonTextAction = createActionBuilder('text')((

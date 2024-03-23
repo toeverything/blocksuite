@@ -1,9 +1,6 @@
 import { html } from 'lit';
 
-import {
-  type ContentSchema,
-  createActionBuilder,
-} from '../../message-schema.js';
+import { type ContentSchema, createActionBuilder } from '../../schema.js';
 import { chatService, userText } from '../utils.js';
 
 type Markdown = string;
