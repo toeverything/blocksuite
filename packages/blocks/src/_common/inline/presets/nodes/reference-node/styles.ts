@@ -41,10 +41,15 @@ export const styles = css`
     border-radius: 8px;
   }
 
-  .affine-reference-popover-dividing-line {
-    margin: 0 6px;
-    width: 1px;
+  .affine-reference-popover-open-button > svg {
+    width: 20px;
     height: 20px;
+    flex-shrink: 0;
+  }
+
+  .affine-reference-popover-dividing-line {
+    width: 1px;
+    height: 24px;
     background-color: var(--affine-border-color);
   }
 

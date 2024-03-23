@@ -497,6 +497,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
                 </div>
               `
             : nothing}
+          <div class="affine-embed-linked-doc-block-overlay"></div>
         </div>
 
         <embed-card-caption .block=${this}></embed-card-caption>
