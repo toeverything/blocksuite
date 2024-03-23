@@ -1,9 +1,9 @@
 import { html } from 'lit';
 
-import { createMessageSchema } from '../../message-schema.js';
+import { type ContentSchema } from '../../message-schema.js';
 
 type Text = string;
-export const TextMessageSchema = createMessageSchema<string>({
+export const TextContentSchema: ContentSchema<Text, unknown> = {
   type: 'text',
   render: ({ value }) => {
     if (value.status === 'loading') {
@@ -23,4 +23,4 @@ export const TextMessageSchema = createMessageSchema<string>({
       },
     ];
   },
-});
+};

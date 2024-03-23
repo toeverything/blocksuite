@@ -3,14 +3,14 @@ import {
   ChatServiceKind,
   Image2TextServiceKind,
 } from '../../service/service-base.js';
-import type { ChatMessage } from '../message-schema.js';
+import type { CopilotMessage } from '../message-schema.js';
 
 const ChatFeatureKey = 'chat';
 export const chatService = () =>
   copilotConfig.getService(ChatFeatureKey, ChatServiceKind);
 export const image2TextService = () =>
   copilotConfig.getService(ChatFeatureKey, Image2TextServiceKind);
-export const userText = (text: string): ChatMessage => {
+export const userText = (text: string): CopilotMessage => {
   return {
     role: 'user',
     content: [

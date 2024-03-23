@@ -10,10 +10,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { CopilotServiceResult } from '../service/service-base.js';
 import type {
   ApiData,
-  ChatMessage,
-  MessageContent,
-  MessageSchema,
-  UserChatMessage,
+  ContentPayload,
+  ContentSchema,
+  CopilotMessage,
+  UserMessage,
 } from './message-schema.js';
 import { MessageSchemas } from './message-type/index.js';
 
@@ -27,12 +27,12 @@ export interface HistoryItem {
 
   render(host: EditorHost): TemplateResult;
 
-  toContext(): ChatMessage[];
+  toContext(): CopilotMessage[];
 }
 
 class UserHistoryItem implements HistoryItem {
   isUser = true;
-  constructor(private message: UserChatMessage) {}
+  constructor(private message: UserMessage) {}
 
   public render(_: EditorHost): TemplateResult {
     return html`${repeat(this.message.content, content => {
@@ -43,7 +43,7 @@ class UserHistoryItem implements HistoryItem {
     })}`;
   }
 
-  public toContext(): ChatMessage[] {
+  public toContext(): CopilotMessage[] {
     return [this.message];
   }
 }
@@ -56,7 +56,7 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
   public data?: Data;
   private set: Set<() => void> = new Set();
   private abortController: AbortController | null = null;
-  private schema: MessageSchema<Result, Data>;
+  private schema: ContentSchema<Result, Data>;
 
   constructor(
     private action: CopilotAction<Result>,
@@ -66,7 +66,7 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
     if (!schema) {
       throw new Error('schema not found');
     }
-    this.schema = schema as MessageSchema<Result, Data>;
+    this.schema = schema as ContentSchema<Result, Data>;
     this.start();
   }
 
@@ -155,7 +155,7 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
 }
 
 @customElement('copilot-assistant-history-renderer')
-export class copilotAssistantHistoryRenderer extends WithDisposable(
+export class CopilotAssistantHistoryRenderer extends WithDisposable(
   ShadowlessElement
 ) {
   @property({ attribute: false })
@@ -190,14 +190,14 @@ export class ChatHistory {
     this.subSet.forEach(v => v());
   }
 
-  addUserMessage(contents: MessageContent[]) {
+  addUserMessage(contents: ContentPayload[]) {
     this.history.push(new UserHistoryItem({ role: 'user', content: contents }));
     this.fire();
   }
 
   requestAssistantMessage<Result>(
     action: CopilotAction<Result>,
-    userMessage: MessageContent[]
+    userMessage: ContentPayload[]
   ): AssistantHistoryItem<Result> {
     const history = this.history.slice();
     this.addUserMessage(userMessage);

@@ -1,10 +1,13 @@
 import { html } from 'lit';
 
-import { createMessageSchema } from '../../message-schema.js';
+import {
+  type ContentSchema,
+  createActionBuilder,
+} from '../../message-schema.js';
 import { chatService, image2TextService, userText } from '../utils.js';
 
 type HTML = string;
-export const HTMLMessageSchema = createMessageSchema<HTML>({
+export const HTMLContentSchema: ContentSchema<HTML, unknown> = {
   type: 'html',
   render: ({ value }) => {
     if (value.status === 'loading') {
@@ -40,23 +43,22 @@ export const HTMLMessageSchema = createMessageSchema<HTML>({
       },
     ];
   },
-});
+};
 
-export const createHTMLFromImageAction = HTMLMessageSchema.createActionBuilder(
-  ({
-    img,
-    latestHtmlBlock,
-  }: {
-    img: string;
-    latestHtmlBlock?: {
-      design: string;
-      html: string;
-    };
-  }) => {
-    return image2TextService().generateText([
-      {
-        role: 'system',
-        content: `You are an expert web developer who specializes in building working website prototypes from low-fidelity wireframes.
+export const createHTMLFromImageAction = createActionBuilder('html')(({
+  img,
+  latestHtmlBlock,
+}: {
+  img: string;
+  latestHtmlBlock?: {
+    design: string;
+    html: string;
+  };
+}) => {
+  return image2TextService().generateText([
+    {
+      role: 'system',
+      content: `You are an expert web developer who specializes in building working website prototypes from low-fidelity wireframes.
 Your job is to accept low-fidelity wireframes, then create a working prototype using HTML, CSS, and JavaScript, and finally send back the results.
 The results should be a single HTML file.
 Use tailwind to style the website.
@@ -82,51 +84,51 @@ Use the provided list of text from the wireframes as a reference if any text is 
 You love your designers and want them to be happy. Incorporating their feedback and notes and producing working websites makes them happy.
 
 When sent new wireframes, respond ONLY with the contents of the html file.`,
-      },
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'image_url',
-            image_url: {
-              detail: 'high',
-              url: img,
-            },
+    },
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'image_url',
+          image_url: {
+            detail: 'high',
+            url: img,
           },
-          {
-            type: 'text',
-            text: 'Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?',
-          },
-          ...(latestHtmlBlock
-            ? ([
-                {
-                  type: 'text',
-                  text: "The designs also included one of your previous result. Here's the image that you used as its source:",
+        },
+        {
+          type: 'text',
+          text: 'Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?',
+        },
+        ...(latestHtmlBlock
+          ? ([
+              {
+                type: 'text',
+                text: "The designs also included one of your previous result. Here's the image that you used as its source:",
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: latestHtmlBlock.design,
+                  detail: 'high',
                 },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: latestHtmlBlock.design,
-                    detail: 'high',
-                  },
-                },
-                {
-                  type: 'text',
-                  text: `And here's the HTML you came up with for it: ${latestHtmlBlock.html}`,
-                },
-              ] as const)
-            : []),
-        ],
-      },
-    ]);
-  }
-);
+              },
+              {
+                type: 'text',
+                text: `And here's the HTML you came up with for it: ${latestHtmlBlock.html}`,
+              },
+            ] as const)
+          : []),
+      ],
+    },
+  ]);
+});
 
-export const createHTMLFromTextAction = HTMLMessageSchema.createActionBuilder(
-  (text: string) => {
-    return chatService().chat([
-      userText(
-        `You are a professional web developer who specializes in building working website prototypes from product requirement descriptions.
+export const createHTMLFromTextAction = createActionBuilder('html')((
+  text: string
+) => {
+  return chatService().chat([
+    userText(
+      `You are a professional web developer who specializes in building working website prototypes from product requirement descriptions.
 Your job is to take a product requirement description, then create a working prototype using HTML, CSS, and JavaScript, and finally send the result back.
 The result should be a single HTML file.
 Use tailwind to create site styles.
@@ -146,10 +148,10 @@ ${text}
 
 Don't output anything that isn't HTML
 `
-      ),
-    ]);
-  }
-);
+    ),
+  ]);
+});
+
 export const htmlActions = {
   createHTMLFromImageAction,
   createHTMLFromTextAction,
