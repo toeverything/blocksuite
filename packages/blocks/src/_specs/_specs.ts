@@ -37,6 +37,7 @@ import { RootBlockSchema } from '../root-block/root-model.js';
 import { AFFINE_PAGE_AI_ACTION_PANEL_WIDGET } from '../root-block/widgets/ai-action-panel/page-ai-action-panel.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_EDGELESS_COPILOT_WIDGET } from '../root-block/widgets/edgeless-copilot/index.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/edgeless-remote-selection/index.js';
 import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../root-block/widgets/edgeless-zoom-toolbar/index.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../root-block/widgets/format-bar/format-bar.js';
@@ -120,6 +121,7 @@ const EdgelessPageSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
       [AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET]: literal`${unsafeStatic(
         AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
       )}`,
+      [AFFINE_EDGELESS_COPILOT_WIDGET]: literal`${unsafeStatic(AFFINE_EDGELESS_COPILOT_WIDGET)}`,
     },
   },
 };

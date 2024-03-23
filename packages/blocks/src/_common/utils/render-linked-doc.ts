@@ -150,12 +150,7 @@ async function renderNoteContent(
 
   const cardHeight = EMBED_CARD_HEIGHT[cardStyle];
 
-  const firstBlock = noteChildren[0];
-  if (
-    cardStyle === 'horizontal' &&
-    matchFlavours(firstBlock, ['affine:paragraph']) &&
-    firstBlock.type.match(/^h[1-6]$/)
-  ) {
+  if (cardStyle === 'horizontal') {
     noteChildren.splice(1);
   }
 

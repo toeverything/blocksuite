@@ -1,9 +1,10 @@
+import type { MessageContent } from '../../message-schema.js';
 import { chatService, userText } from '../utils.js';
 import { TextMessageSchema } from './index.js';
 
 export const createCommonTextAction = TextMessageSchema.createActionBuilder(
-  (text: string) => {
-    return chatService().chat([userText(text)]);
+  (messages: MessageContent[]) => {
+    return chatService().chat([{ role: 'user', content: messages }]);
   }
 );
 export const createChangeToneAction = TextMessageSchema.createActionBuilder(
@@ -162,3 +163,16 @@ export const createTranslateAction = TextMessageSchema.createActionBuilder(
     ]);
   }
 );
+export const textActions = {
+  createChangeToneAction,
+  createCommonTextAction,
+  createFixSpellingAction,
+  createGenerateAction,
+  createImproveWritingAction,
+  createMakeLongerAction,
+  createMakeShorterAction,
+  createRefineAction,
+  createSimplifyWritingAction,
+  createSummaryAction,
+  createTranslateAction,
+};
