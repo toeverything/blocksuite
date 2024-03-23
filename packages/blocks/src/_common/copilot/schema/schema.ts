@@ -74,5 +74,5 @@ export const createActionBuilder = <Result>(type: string) => {
 };
 
 export type MessageContext = {
-  history: CopilotMessage[];
+  messages: CopilotMessage[];
 };

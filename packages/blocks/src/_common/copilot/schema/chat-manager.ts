@@ -60,7 +60,7 @@ export class AssistantChatItem<Result = unknown, Data = unknown>
 
   constructor(
     private action: CopilotAction<Result>,
-    private history: ChatItem[]
+    private items: ChatItem[]
   ) {
     const schema = ContentSchemas.find(v => v.type === action.type);
     if (!schema) {
@@ -83,7 +83,7 @@ export class AssistantChatItem<Result = unknown, Data = unknown>
     this.abortController = abortController;
     const result = this.action.run(
       {
-        history: this.history.flatMap(v => v.toContext()),
+        messages: this.items.flatMap(v => v.toContext()),
       },
       abortController.signal
     );
@@ -147,15 +147,15 @@ export class AssistantChatItem<Result = unknown, Data = unknown>
         retry: this.retry,
         host,
       });
-    return html` <copilot-assistant-history-renderer
+    return html` <assistant-chat-item-renderer
       .onChange="${this.onChange}"
       .renderTemplate="${renderTemplate}"
-    ></copilot-assistant-history-renderer>`;
+    ></assistant-chat-item-renderer>`;
   }
 }
 
-@customElement('copilot-assistant-history-renderer')
-export class CopilotAssistantHistoryRenderer extends WithDisposable(
+@customElement('assistant-chat-item-renderer')
+export class AssistantChatItemRenderer extends WithDisposable(
   ShadowlessElement
 ) {
   @property({ attribute: false })
@@ -199,9 +199,9 @@ export class ChatManager {
     action: CopilotAction<Result>,
     userMessage: ContentPayload[]
   ): AssistantChatItem<Result> {
-    const history = this.items.slice();
+    const items = this.items.slice();
     this.addUserMessage(userMessage);
-    const assistantChatItem = new AssistantChatItem(action, history);
+    const assistantChatItem = new AssistantChatItem(action, items);
     this.items.push(assistantChatItem);
     this.fire();
     return assistantChatItem;
