@@ -30,6 +30,7 @@ import type { Column } from '../../database-block/types.js';
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
+import { join } from './stringify.js';
 import { fetchImage } from './utils.js';
 
 export type Markdown = string;
@@ -1013,6 +1014,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       .use(remarkGfm)
       .use(remarkStringify, {
         resourceLink: true,
+        join,
       })
       .stringify(ast)
       .replace(/&#x20;\n/g, ' \n');
