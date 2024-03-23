@@ -3,12 +3,12 @@
   "compilerOptions": {
     "rootDir": "./src/",
     "outDir": "./dist/",
-    "noEmit": false,
+    "noEmit": false
   },
   "include": ["./src", "index.d.ts"],
   "references": [
     {
-      "path": "../global",
-    },
-  ],
+      "path": "../global"
+    }
+  ]
 }
