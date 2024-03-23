@@ -11,7 +11,10 @@ export const HTMLMessageSchema = createMessageSchema<HTML>({
       return html`loading...`;
     }
     if (value.status === 'error') {
-      return html` <div>${value.message}</div>`;
+      return html`<div>${value.message}</div>`;
+    }
+    if (value.status === 'stop') {
+      return html`<div>stopped</div>`;
     }
     let s = value.data;
     const start = s.indexOf('<!DOCTYPE html>');
