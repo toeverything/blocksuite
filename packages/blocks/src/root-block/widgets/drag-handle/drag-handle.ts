@@ -1259,8 +1259,6 @@ export class AffineDragHandleWidget extends WidgetElement<
         });
         if (!newSelectedBlocks) return;
 
-        console.log(newSelectedBlocks);
-
         const noteId = getNoteId(parentElement);
         this._setSelectedBlocks(newSelectedBlocks as BlockElement[], noteId);
       }

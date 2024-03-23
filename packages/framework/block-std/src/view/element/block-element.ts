@@ -211,6 +211,12 @@ export class BlockElement<
     super.connectedCallback();
 
     this.std.view._blockMap.set(this.model.id, this);
+    const disposable = this.std.doc.slots.blockUpdated.on(({ type, id }) => {
+      if (id === this.model.id && type === 'delete') {
+        this.std.view._blockMap.delete(this.model.id);
+        disposable.dispose();
+      }
+    });
 
     this.service = this.host.std.spec.getService(this.model.flavour);
     this.path = this.host.view.calculatePath(this);
@@ -250,12 +256,6 @@ export class BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-
-    if (this.std.doc.getBlockById(this.model.id)) {
-      return;
-    }
-
-    this.std.view._blockMap.delete(this.model.id);
 
     this.service.specSlots.viewDisconnected.emit({
       service: this.service,
