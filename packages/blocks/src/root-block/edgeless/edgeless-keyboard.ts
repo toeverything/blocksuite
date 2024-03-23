@@ -178,6 +178,38 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             rootElement.selection.clear();
           }
         },
+
+        ArrowUp: () => {
+          this._move('ArrowUp');
+        },
+
+        ArrowDown: () => {
+          this._move('ArrowDown');
+        },
+
+        ArrowLeft: () => {
+          this._move('ArrowLeft');
+        },
+
+        ArrowRight: () => {
+          this._move('ArrowRight');
+        },
+
+        'Shift-ArrowUp': () => {
+          this._move('ArrowUp', true);
+        },
+
+        'Shift-ArrowDown': () => {
+          this._move('ArrowDown', true);
+        },
+
+        'Shift-ArrowLeft': () => {
+          this._move('ArrowLeft', true);
+        },
+
+        'Shift-ArrowRight': () => {
+          this._move('ArrowRight', true);
+        },
       },
       {
         global: true,
@@ -186,7 +218,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
     this._bindShiftKey();
     this._bindToggleHand();
-    this._bindArrowKeys();
   }
 
   private _bindShiftKey() {
@@ -235,33 +266,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       },
       { global: true }
     );
-  }
-  private _bindArrowKeys() {
-    const arrowKeys = ['ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp'];
-    this.rootElement.handleEvent(
-      'keyDown',
-      ctx => {
-        const event = ctx.get('keyboardState').raw;
-        if (arrowKeys.includes(event.key)) {
-          this._arrow(event);
-        }
-      },
-      { global: true }
-    );
-    this.rootElement.handleEvent(
-      'keyUp',
-      ctx => {
-        const event = ctx.get('keyboardState').raw;
-        if (arrowKeys.includes(event.key)) {
-          this._arrow(event);
-        }
-      },
-      { global: true }
-    );
-  }
-
-  private _arrow(event: KeyboardEvent) {
-    this._move(event.key, event.shiftKey);
   }
 
   private _space(event: KeyboardEvent) {
@@ -351,7 +355,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     const edgeless = this.rootElement;
     if (edgeless.service.selection.editing) return;
     const { elements } = edgeless.service.selection;
-    const inc = shift ? 5 : 1;
+    const inc = shift ? 10 : 1;
 
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
