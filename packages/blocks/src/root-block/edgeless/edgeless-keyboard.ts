@@ -43,6 +43,24 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             mode: ConnectorMode.Straight,
           });
         },
+        x: () => {
+          rootElement.service.editSession.record('connector', {
+            mode: ConnectorMode.Orthogonal,
+          });
+          this._setEdgelessTool(rootElement, {
+            type: 'connector',
+            mode: ConnectorMode.Orthogonal,
+          });
+        },
+        c: () => {
+          rootElement.service.editSession.record('connector', {
+            mode: ConnectorMode.Curve,
+          });
+          this._setEdgelessTool(rootElement, {
+            type: 'connector',
+            mode: ConnectorMode.Curve,
+          });
+        },
         h: () => {
           this._setEdgelessTool(rootElement, {
             type: 'pan',
