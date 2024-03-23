@@ -39,7 +39,15 @@ export class AffinePageAIActionPanelWidget extends WidgetElement {
   item?: AssistantHistoryItem;
 
   private _inputFinish = (input: string) => {
-    this.item = this.copilot.askAI(createCommonTextAction(input), input);
+    this.item = this.copilot.askAI(
+      createCommonTextAction([
+        {
+          type: 'text',
+          text: input,
+        },
+      ]),
+      input
+    );
   };
 
   override render() {
