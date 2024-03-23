@@ -75,6 +75,52 @@ test('should update rect of selection when resizing viewport', async ({
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
+test.describe('translation should constrain to cur axis when dragged with shift key', () => {
+  test('constrain-x', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+
+    await switchEditorMode(page);
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 100, y: 100 },
+      { x: 200, y: 200 }
+    );
+
+    await page.mouse.move(110, 110);
+    await page.mouse.down();
+
+    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+    await page.keyboard.down('Shift');
+    await page.mouse.move(110, 200); // constrain to y
+    await page.mouse.move(300, 200); // constrain to x
+    await assertEdgelessSelectedRect(page, [290, 100, 100, 100]); // y should remain same as constrained to x
+  });
+
+  test('constrain-y', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+
+    await switchEditorMode(page);
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 100, y: 100 },
+      { x: 200, y: 200 }
+    );
+
+    await page.mouse.move(110, 110);
+    await page.mouse.down();
+
+    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+    await page.keyboard.down('Shift');
+    await page.mouse.move(200, 110); // constrain to x
+    await page.mouse.move(200, 300); // constrain to y
+    await assertEdgelessSelectedRect(page, [100, 290, 100, 100]); // x should remain same as constrained to y
+  });
+});
+
 test('select multiple shapes and translate', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
