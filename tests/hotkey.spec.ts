@@ -1335,7 +1335,7 @@ test('enter in title should move cursor in new paragraph block', async ({
   await assertRichTexts(page, ['world', '']);
 });
 
-test('should support ctrl/cmd+shift+g convert to linked doc', async ({
+test('should support ctrl/cmd+shift+l convert to linked doc', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -1360,7 +1360,7 @@ test('should support ctrl/cmd+shift+g convert to linked doc', async ({
   expect(await title.innerText()).toBe('Untitled');
 
   const noteContent = page.locator('.affine-embed-linked-doc-content-note');
-  expect(await noteContent.innerText()).toBe('123\n456\n789');
+  expect(await noteContent.innerText()).toBe('123');
 });
 
 test('should forwardDelete works when delete single character', async ({
