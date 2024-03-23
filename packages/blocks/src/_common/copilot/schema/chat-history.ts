@@ -8,7 +8,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { CopilotServiceResult } from '../service/service-base.js';
-import { MessageSchemas } from './content-types/index.js';
+import { ContentSchemas } from './content-types/index.js';
 import type {
   ApiData,
   ContentPayload,
@@ -62,7 +62,7 @@ export class AssistantHistoryItem<Result = unknown, Data = unknown>
     private action: CopilotAction<Result>,
     private history: HistoryItem[]
   ) {
-    const schema = MessageSchemas.find(v => v.type === action.type);
+    const schema = ContentSchemas.find(v => v.type === action.type);
     if (!schema) {
       throw new Error('schema not found');
     }

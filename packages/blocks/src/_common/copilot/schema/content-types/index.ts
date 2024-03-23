@@ -7,7 +7,7 @@ import {
 import { textActions } from './text/actions.js';
 import { TextContentSchema } from './text/index.js';
 
-export const MessageSchemas = [
+export const ContentSchemas = [
   MindMapContentSchema,
   PresentationContentSchema,
   TextContentSchema,
