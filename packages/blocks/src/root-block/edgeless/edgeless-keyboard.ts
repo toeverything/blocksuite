@@ -173,18 +173,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           if (!IS_MAC) return;
           this._delete();
         },
-        ArrowUp: () => {
-          this._move('ArrowUp');
-        },
-        ArrowDown: () => {
-          this._move('ArrowDown');
-        },
-        ArrowLeft: () => {
-          this._move('ArrowLeft');
-        },
-        ArrowRight: () => {
-          this._move('ArrowRight');
-        },
         Escape: () => {
           if (!this.rootElement.service.selection.empty) {
             rootElement.selection.clear();
@@ -198,6 +186,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
     this._bindShiftKey();
     this._bindToggleHand();
+    this._bindArrowKeys();
   }
 
   private _bindShiftKey() {
@@ -246,6 +235,33 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       },
       { global: true }
     );
+  }
+  private _bindArrowKeys() {
+    const arrowKeys = ['ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp'];
+    this.rootElement.handleEvent(
+      'keyDown',
+      ctx => {
+        const event = ctx.get('keyboardState').raw;
+        if (arrowKeys.includes(event.key)) {
+          this._arrow(event);
+        }
+      },
+      { global: true }
+    );
+    this.rootElement.handleEvent(
+      'keyUp',
+      ctx => {
+        const event = ctx.get('keyboardState').raw;
+        if (arrowKeys.includes(event.key)) {
+          this._arrow(event);
+        }
+      },
+      { global: true }
+    );
+  }
+
+  private _arrow(event: KeyboardEvent) {
+    this._move(event.key, event.shiftKey);
   }
 
   private _space(event: KeyboardEvent) {
@@ -331,25 +347,27 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     edgeless.tools.setEdgelessTool(edgelessTool);
   }
 
-  private _move(key: string) {
+  private _move(key: string, shift = false) {
     const edgeless = this.rootElement;
     if (edgeless.service.selection.editing) return;
     const { elements } = edgeless.service.selection;
+    const inc = shift ? 5 : 1;
+
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
 
       switch (key) {
         case 'ArrowUp':
-          bound.y--;
+          bound.y -= inc;
           break;
         case 'ArrowLeft':
-          bound.x--;
+          bound.x -= inc;
           break;
         case 'ArrowRight':
-          bound.x++;
+          bound.x += inc;
           break;
         case 'ArrowDown':
-          bound.y++;
+          bound.y += inc;
           break;
       }
 

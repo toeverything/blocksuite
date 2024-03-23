@@ -204,3 +204,41 @@ test.describe('delete', () => {
     await assertBlockCount(page, 'note', 1);
   });
 });
+
+test.describe('Arrow Keys should move selection', () => {
+  test('with shift increment by 5px', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 100, y: 100 },
+      { x: 200, y: 200 }
+    );
+
+    await page.keyboard.down('Shift');
+
+    for (let i = 0; i < 10; i++) await page.keyboard.press('ArrowLeft');
+    for (let i = 0; i < 10; i++) await page.keyboard.press('ArrowDown');
+    await page.keyboard.up('Shift');
+    await assertEdgelessSelectedRect(page, [0, 200, 100, 100]);
+  });
+
+  test('without shift increment by 1px', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 100, y: 100 },
+      { x: 200, y: 200 }
+    );
+
+    for (let i = 0; i < 10; i++) await page.keyboard.press('ArrowRight');
+    for (let i = 0; i < 10; i++) await page.keyboard.press('ArrowUp');
+
+    await assertEdgelessSelectedRect(page, [120, 80, 100, 100]);
+  });
+});
