@@ -11,10 +11,10 @@ import type { CopilotServiceResult } from '../service/service-base.js';
 import { ContentSchemas } from './content-types/index.js';
 import type {
   ApiData,
-  ContentPayload,
+  ChatMessage,
   ContentSchema,
-  CopilotMessage,
   UserMessage,
+  UserMessageContent,
 } from './schema.js';
 
 export type CopilotAction<Result> = {
@@ -27,7 +27,7 @@ export interface ChatItem {
 
   render(host: EditorHost): TemplateResult;
 
-  toContext(): CopilotMessage[];
+  toContext(): ChatMessage[];
 }
 
 class UserChatItem implements ChatItem {
@@ -43,7 +43,7 @@ class UserChatItem implements ChatItem {
     })}`;
   }
 
-  public toContext(): CopilotMessage[] {
+  public toContext(): ChatMessage[] {
     return [this.message];
   }
 }
@@ -190,14 +190,14 @@ export class ChatManager {
     this.subSet.forEach(v => v());
   }
 
-  addUserMessage(contents: ContentPayload[]) {
+  addUserMessage(contents: UserMessageContent[]) {
     this.items.push(new UserChatItem({ role: 'user', content: contents }));
     this.fire();
   }
 
   requestAssistantMessage<Result>(
     action: CopilotAction<Result>,
-    userMessage: ContentPayload[]
+    userMessage: UserMessageContent[]
   ): AssistantChatItem<Result> {
     const items = this.items.slice();
     this.addUserMessage(userMessage);

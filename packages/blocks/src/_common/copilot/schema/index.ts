@@ -5,7 +5,7 @@ import { actions } from './content-types/index.js';
 
 export class Copilot {
   actions = actions;
-  chat: ChatManager = new ChatManager();
+  chat = new ChatManager();
 
   askAI<Result>(action: CopilotAction<Result>, prompt: string) {
     return this.chat.requestAssistantMessage(action, [

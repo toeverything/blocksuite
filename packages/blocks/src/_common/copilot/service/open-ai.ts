@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { OpenAI } from 'openai';
 
-import type { CopilotMessage } from '../schema/schema.js';
+import type { ChatMessage } from '../schema/schema.js';
 import {
   ChatServiceKind,
   createVendor,
@@ -48,7 +48,7 @@ export const openaiVendor = createVendor<{
   },
 });
 const toGPTMessages = (
-  messages: CopilotMessage[]
+  messages: ChatMessage[]
 ): Array<OpenAI.ChatCompletionMessageParam> => {
   return messages.map(v => {
     if (v.role === 'assistant') {
@@ -65,7 +65,7 @@ const askGPTStream = async function* (
     | 'gpt-3.5-turbo-1106'
     | 'gpt-4-vision-preview'
     | 'gpt-4-turbo',
-  messages: Array<CopilotMessage>,
+  messages: Array<ChatMessage>,
   signal: AbortSignal
 ): AsyncIterable<string> {
   const openai = new OpenAI({

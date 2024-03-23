@@ -4,7 +4,7 @@ import type { TemplateResult } from 'lit';
 import type { CopilotServiceResult } from '../service/service-base.js';
 import type { CopilotAction } from './chat-manager.js';
 
-export type ContentPayload =
+export type UserMessageContent =
   | {
       type: 'text';
       text: string;
@@ -22,7 +22,7 @@ type BackgroundSource = {
 
 export type UserMessage = {
   role: 'user';
-  content: ContentPayload[];
+  content: UserMessageContent[];
 };
 export type AssistantMessage = {
   role: 'assistant';
@@ -33,7 +33,7 @@ export type SystemMessage = {
   role: 'system';
   content: string;
 };
-export type CopilotMessage = UserMessage | SystemMessage | AssistantMessage;
+export type ChatMessage = UserMessage | SystemMessage | AssistantMessage;
 
 export type ApiData<T> =
   | {
@@ -57,7 +57,7 @@ export type ContentSchema<Result, Data = unknown> = {
     host: EditorHost;
     retry: () => void;
   }) => TemplateResult;
-  toContext: (value: Result, data?: Data) => Array<CopilotMessage>;
+  toContext: (value: Result, data?: Data) => Array<ChatMessage>;
 };
 
 export const createActionBuilder = <Result>(type: string) => {
@@ -74,5 +74,5 @@ export const createActionBuilder = <Result>(type: string) => {
 };
 
 export type MessageContext = {
-  messages: CopilotMessage[];
+  messages: ChatMessage[];
 };

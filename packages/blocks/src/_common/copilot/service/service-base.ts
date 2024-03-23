@@ -1,7 +1,7 @@
 import type { TemplateResult } from 'lit';
 import type { OpenAI } from 'openai';
 
-import type { CopilotMessage, MessageContext } from '../schema/schema.js';
+import type { ChatMessage, MessageContext } from '../schema/schema.js';
 
 export type Vendor<Data> = {
   key: string;
@@ -49,13 +49,13 @@ const createServiceKind = <M>(config: {
 };
 
 export const TextServiceKind = createServiceKind<{
-  generateText(messages: CopilotMessage[]): CopilotServiceResult<string>;
+  generateText(messages: ChatMessage[]): CopilotServiceResult<string>;
 }>({
   type: 'text-service',
   title: 'Text service',
 });
 export const ChatServiceKind = createServiceKind<{
-  chat(messages: Array<CopilotMessage>): CopilotServiceResult<string>;
+  chat(messages: Array<ChatMessage>): CopilotServiceResult<string>;
 }>({
   type: 'chat-service',
   title: 'Chat service',
