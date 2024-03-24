@@ -14,6 +14,7 @@ import { evalFilter } from '../logical/eval-filter.js';
 import type { TType } from '../logical/typesystem.js';
 import type { InsertToPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
+import { ColumnStats } from './column-stats.js';
 import { headerRenderer } from './components/header-cell.js';
 
 type TableViewData = RealDataViewDataTypeMap['table'];
@@ -350,11 +351,13 @@ export class DataViewTableManager extends BaseDataViewManager {
 }
 
 export class DataViewTableColumnManager extends BaseDataViewColumnManager {
+  stats: ColumnStats;
   constructor(
     propertyId: string,
     override dataViewManager: DataViewTableManager
   ) {
     super(propertyId, dataViewManager);
+    this.stats = new ColumnStats(this);
   }
 
   get width(): number {

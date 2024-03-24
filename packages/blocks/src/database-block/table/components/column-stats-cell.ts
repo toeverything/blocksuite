@@ -11,7 +11,7 @@ import type { DataViewTableColumnManager } from '../table-view-manager.js';
 import { popFormulaMenu } from './menu.js';
 
 const styles = css`
-  .formula-cell {
+  .stats-cell {
     cursor: pointer;
     padding: 8px 3px;
     transition: opacity 230ms ease;
@@ -21,15 +21,15 @@ const styles = css`
     opacity: 0;
     justify-content: flex-end;
   }
-  .formula-cell:hover {
+  .stats-cell:hover {
     background-color: var(--affine-hover-color);
     cursor: pointer;
     opacity: 1;
   }
-  .formula-cell[calculated='true'] {
+  .stats-cell[calculated='true'] {
     opacity: 1;
   }
-  .formula-cell .content {
+  .stats-cell .content {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43,8 +43,8 @@ const styles = css`
   }
 `;
 
-@customElement('affine-database-formula-cell')
-export class DatabaseFormulaCell extends WithDisposable(LitElement) {
+@customElement('affine-database-column-stats-cell')
+export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -68,7 +68,7 @@ export class DatabaseFormulaCell extends WithDisposable(LitElement) {
     return html`<div
       calculated="${!!this.formula}"
       style="${styleMap(style)}"
-      class="formula-cell"
+      class="stats-cell"
     >
       <div class="content">
         ${!this.formula
@@ -114,6 +114,6 @@ export class DatabaseFormulaCell extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-formula-cell': DatabaseFormulaCell;
+    'affine-database-column-stats-cell': DatabaseColumnStatsCell;
   }
 }

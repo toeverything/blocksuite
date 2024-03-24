@@ -6,12 +6,12 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 
 const styles = css`
-  .affine-database-formula-container {
+  .affine-database-column-stats {
     display: flex;
   }
 `;
-@customElement('affine-database-formula-container')
-export class DataBaseFormulaContainer extends WithDisposable(LitElement) {
+@customElement('affine-database-column-stats')
+export class DataBaseColumnStats extends WithDisposable(LitElement) {
   static override styles = styles;
   @property({ attribute: false })
   view!: DataViewTableManager;
@@ -21,7 +21,7 @@ export class DataBaseFormulaContainer extends WithDisposable(LitElement) {
     this.disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
-        this.querySelectorAll('affine-database-formula-cell').forEach(e =>
+        this.querySelectorAll('affine-database-column-stats').forEach(e =>
           e.requestUpdate()
         );
       })
@@ -31,14 +31,14 @@ export class DataBaseFormulaContainer extends WithDisposable(LitElement) {
     const cols = this.view.columnManagerList;
 
     return html`
-      <div class="affine-database-formula-container">
+      <div class="affine-database-column-stats">
         ${repeat(
           cols,
           col => col.id,
           col => {
-            return html`<affine-database-formula-cell
+            return html`<affine-database-column-stats-cell
               .column="${col}"
-            ></affine-database-formula-cell>`;
+            ></affine-database-column-stats-cell>`;
           }
         )}
       </div>
@@ -48,6 +48,6 @@ export class DataBaseFormulaContainer extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-formula-container': DataBaseFormulaContainer;
+    'affine-database-column-stats': DataBaseColumnStats;
   }
 }

@@ -9,14 +9,14 @@ import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js'
 import { PlusIcon } from '../../_common/icons/index.js';
 import { GroupTitle } from '../common/group-by/group-title.js';
 import type { GroupData } from '../common/group-by/helper.js';
-import { DatabaseFormulaCell } from './components/formula-cell.js';
-import { DataBaseFormulaContainer } from './components/formula-container.js';
+import { DataBaseColumnStats } from './components/column-stats.js';
+import { DatabaseColumnStatsCell } from './components/column-stats-cell.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
-noop(DataBaseFormulaContainer);
-noop(DatabaseFormulaCell);
+noop(DataBaseColumnStats);
+noop(DatabaseColumnStatsCell);
 
 const styles = css`
   affine-data-view-table-group .group-header-op {
@@ -164,8 +164,8 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
               ${PlusIcon}<span>New Record</span>
             </div>
           </div>`}
-      <affine-database-formula-container .view="${this.view}">
-      </affine-database-formula-container>
+      <affine-database-column-stats .view="${this.view}">
+      </affine-database-column-stats>
     `;
   }
 
