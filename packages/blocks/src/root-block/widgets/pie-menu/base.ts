@@ -3,9 +3,9 @@ import type { TemplateResult } from 'lit';
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { PieMenuId } from '../../types.js';
-import type { PieMenu } from './components/menu.js';
-import type { PieNode } from './components/node.js';
 import type { AffinePieMenuWidget } from './index.js';
+import type { PieMenu } from './menu.js';
+import type { PieNode } from './node.js';
 
 export interface IPieMenuSchema {
   id: PieMenuId;
@@ -61,21 +61,13 @@ export interface IPieCommandNode extends IPieBaseNode {
 // Open a submenu
 export interface IPieSubmenuNode extends IPieBaseNode {
   type: 'submenu';
-  role: 'default' | 'color-picker';
+  role: 'default' | 'color-picker' | 'command';
+  action?: ActionFunction;
   children: Array<IPieNonRootNode>;
-  // TODO
   openOnHover?: boolean;
   timeoutOverride?: number;
 }
 
-export type IPieNodeWithAction = IPieCommandNode; // | IPieToggleNode;
-
-export type IPieNonRootNode = IPieCommandNode | IPieColorNode | IPieSubmenuNode;
-// | IPieToggleNode;
-
-export type IPieNode = IPieRootNode | IPieNonRootNode;
-
-// For a color picker sub menu
 export interface IPieColorNode extends IPieBaseNode {
   type: 'color';
   color: CssVariableName;
@@ -84,8 +76,10 @@ export interface IPieColorNode extends IPieBaseNode {
   onChange: (color: CssVariableName, ctx: PieMenuContext) => void;
 }
 
-// ----------------------------------------------------------
-// export interface IPieToggleNode extends IPieBaseNode {
-//   type: 'toggle';
-//   action: ActionFunction;
-// }
+export type IPieNodeWithAction =
+  | IPieCommandNode
+  | (IPieSubmenuNode & { role: 'command'; action: ActionFunction });
+
+export type IPieNonRootNode = IPieCommandNode | IPieColorNode | IPieSubmenuNode;
+
+export type IPieNode = IPieRootNode | IPieNonRootNode;

@@ -16,6 +16,7 @@ export interface IPieColorPickerNodeProps {
   label: string;
   active: (ctx: PieMenuContext) => CssVariableName;
   onChange: IPieColorNode['onChange'];
+  openOnHover?: IPieSubmenuNode['openOnHover'];
   hollow?: boolean;
   colors: { color: CssVariableName }[];
 }
@@ -65,11 +66,11 @@ export class PieMenuBuilder {
     };
 
     const colorPickerNode: IPieSubmenuNode = {
+      type: 'submenu',
       icon,
       label: props.label,
       role: 'color-picker',
-      type: 'submenu',
-      // add color icon;
+      openOnHover: props.openOnHover ?? true,
       children: props.colors.map(({ color }) => ({
         icon: () => ColorUnit(color, { hollowCircle: hollow }),
         type: 'color',
@@ -89,6 +90,7 @@ export class PieMenuBuilder {
   beginSubmenu(node: Omit<IPieSubmenuNode, 'type' | 'children' | 'role'>) {
     const curNode = this._currentNode();
     const submenuNode: IPieSubmenuNode = {
+      openOnHover: true,
       ...node,
       type: 'submenu',
       role: 'default',

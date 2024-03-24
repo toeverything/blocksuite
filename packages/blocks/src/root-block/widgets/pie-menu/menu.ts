@@ -9,24 +9,25 @@ import {
   toDegree,
   toRadian,
   Vec,
-} from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root-block.js';
-import type { IPieMenuSchema, IPieNode } from '../base.js';
-import type { AffinePieMenuWidget } from '../index.js';
-import { PieManager } from '../pie-manager.js';
-import { styles } from '../styles.js';
+} from '../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { IPieMenuSchema, IPieNode } from './base.js';
+import type { AffinePieMenuWidget } from './index.js';
+import { PieNode } from './node.js';
+import { PieManager } from './pie-manager.js';
+import { pieMenuStyles } from './styles.js';
 import {
   getPosition,
   isColorNode,
   isCommandNode,
   isNodeWithChildren,
   isRootNode,
-} from '../utils.js';
-import { PieNode } from './node.js';
+  isSubmenuNode,
+} from './utils.js';
 
 @customElement('affine-pie-menu')
 export class PieMenu extends WithDisposable(LitElement) {
-  static override styles = styles.pieMenu;
+  static override styles = pieMenuStyles;
 
   slots = {
     pointerAngleUpdated: new Slot<number | null>(),
@@ -145,12 +146,16 @@ export class PieMenu extends WithDisposable(LitElement) {
     this._hoveredNode = node;
 
     if (!node) return;
-    const { type } = node.schema;
 
-    if (type === 'submenu') {
+    if (isSubmenuNode(node.schema)) {
+      const { openOnHover, timeoutOverride } = node.schema;
+      const { SUBMENU_OPEN_TIMEOUT } = PieManager.settings;
+
+      if (openOnHover !== undefined && !openOnHover) return;
+
       this._openSubmenuTimeout = setTimeout(() => {
         this.openSubmenu(node);
-      }, PieManager.settings.SUBMENU_OPEN_TIMEOUT);
+      }, timeoutOverride ?? SUBMENU_OPEN_TIMEOUT);
     }
   }
 
@@ -160,11 +165,6 @@ export class PieMenu extends WithDisposable(LitElement) {
     this.selectionChain.push(submenu);
     this.setHovered(null);
     this.slots.requestNodeUpdate.emit();
-  }
-
-  // toggles a ToggleNode if the hovered node is a toggle node
-  toggleHoveredNode(_dir: 'up' | 'down') {
-    // TODO: Un Implemented
   }
 
   override connectedCallback(): void {
@@ -263,7 +263,7 @@ export class PieMenu extends WithDisposable(LitElement) {
     node.menu = this;
 
     if (!isRootNode(nodeSchema)) {
-      node.slot = 'children-container';
+      node.slot = 'children-slot';
       const { PIE_RADIUS } = PieManager.settings;
       const isColorNode = nodeSchema.type === 'color';
       const radius = isColorNode ? PIE_RADIUS * 0.6 : PIE_RADIUS;

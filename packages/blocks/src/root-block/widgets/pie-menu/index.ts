@@ -1,14 +1,24 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
+import { noop } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import type { IVec } from '../../../surface-block/index.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { IPieMenuSchema } from './base.js';
-import { PieMenu } from './components/menu.js';
+import { PieNodeCenter } from './components/pie-node-center.js';
+import { PieNodeChild } from './components/pie-node-child.js';
+import { PieNodeContent } from './components/pie-node-content.js';
+import { PieCenterRotator } from './components/rotator.js';
 import { edgelessToolsPieSchema } from './config.js';
+import { PieMenu } from './menu.js';
 import { PieManager } from './pie-manager.js';
+
+noop(PieNodeContent);
+noop(PieNodeCenter);
+noop(PieCenterRotator);
+noop(PieNodeChild);
 
 export const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 
@@ -49,10 +59,7 @@ export class AffinePieMenuWidget extends WidgetElement {
 
     this.handleEvent('keyUp', this._handleKeyUp, { global: true });
     this.handleEvent('pointerMove', this._handleCursorPos, { global: true });
-    this.handleEvent('wheel', this._handleWheel),
-      {
-        global: true,
-      };
+
     this._initPie();
   }
 
@@ -129,18 +136,6 @@ export class AffinePieMenuWidget extends WidgetElement {
         this.currentMenu.close();
       }
     }
-  };
-
-  private _handleWheel = (_ctx: UIEventStateContext) => {
-    // TODO
-    // if (!this.currentMenu) return;
-    // const { event } = ctx.get('defaultState');
-    // if (event instanceof WheelEvent) {
-    //   event.preventDefault();
-    //   event.stopPropagation();
-    //   const dir = Math.sign(event.deltaY) > 0 ? 'up' : 'down';
-    //   this.currentMenu.toggleHoveredNode(dir);
-    // }
   };
 
   private _handleCursorPos = (ctx: UIEventStateContext) => {

@@ -11,7 +11,6 @@ import type { IPieMenuSchema } from './base.js';
 
 export class PieManager {
   private static schemas: Set<IPieMenuSchema> = new Set();
-  // If somebody wants to invoke a menu with a button without using the trigger key we can use this with open function
   private static registeredSchemas: Record<string, IPieMenuSchema> = {};
 
   public static settings = {
