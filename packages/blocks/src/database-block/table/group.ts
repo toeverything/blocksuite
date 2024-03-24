@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { noop } from '@blocksuite/global/utils';
 import type { PropertyValues } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -8,9 +9,14 @@ import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js'
 import { PlusIcon } from '../../_common/icons/index.js';
 import { GroupTitle } from '../common/group-by/group-title.js';
 import type { GroupData } from '../common/group-by/helper.js';
+import { DatabaseFormulaCell } from './components/formula-cell.js';
+import { DataBaseFormulaContainer } from './components/formula-container.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
+
+noop(DataBaseFormulaContainer);
+noop(DatabaseFormulaCell);
 
 const styles = css`
   affine-data-view-table-group .group-header-op {
@@ -123,6 +129,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       },
     ]);
   };
+
   private renderRows(ids: string[]) {
     return html`
       <affine-database-column-header
@@ -157,6 +164,8 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
               ${PlusIcon}<span>New Record</span>
             </div>
           </div>`}
+      <affine-database-formula-container .view="${this.view}">
+      </affine-database-formula-container>
     `;
   }
 
