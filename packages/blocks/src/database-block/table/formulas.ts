@@ -1,7 +1,7 @@
-import type { DataViewColumnManager } from '../common/data-view-manager.js';
+import type { DataViewTableColumnManager } from './table-view-manager.js';
 
 // Common formula types
-export type FormulaBaseTypes =
+export type StatCalcBaseTypes =
   | 'none'
   | 'count-all'
   | 'count-values'
@@ -12,8 +12,8 @@ export type FormulaBaseTypes =
   | 'percent-not-empty';
 
 // Mathematical formula types
-export type FormulaMathTypes =
-  | FormulaBaseTypes
+export type StatCalcMathTypes =
+  | StatCalcBaseTypes
   | 'sum'
   | 'avg'
   | 'median'
@@ -23,99 +23,142 @@ export type FormulaMathTypes =
   | 'range';
 
 // Union of all formula types
-export type FormulaType = FormulaBaseTypes | FormulaMathTypes;
+export type StatCalcType = StatCalcBaseTypes | StatCalcMathTypes;
 
-export interface IFormula<F extends FormulaType = FormulaType> {
-  type: F;
+export interface StatCalc {
+  type: StatCalcType;
   label: string;
   display: string;
-  calculate: (colData: string[], column: DataViewColumnManager) => void;
+  calculate: (column: DataViewTableColumnManager) => StatResult;
 }
 
 export type CalculationType = 'math' | 'common';
 
-export type CalcResult = {
+export type StatResult = {
   value: number;
-  unit: 'percent' | 'non';
+  type: '%' | 'x10';
 };
 
-export const baseFormulas: IFormula<FormulaBaseTypes>[] = [
-  { type: 'none', label: 'None', display: 'Calculate', calculate: () => {} },
+export const baseCalc: StatCalc[] = [
+  {
+    type: 'none',
+    label: 'None',
+    display: 'Calculate',
+    calculate: () => {
+      return {
+        value: 0,
+        type: 'x10',
+      };
+    },
+  },
 
   {
     type: 'count-all',
     label: 'Count All',
     display: 'Count',
-    calculate: () => {},
+    calculate: c => {
+      return {
+        value: c.stats.countAll(),
+        type: 'x10',
+      };
+    },
   },
 
   {
     type: 'count-values',
     label: 'Count Values',
     display: 'Values',
-    calculate: () => {},
+    calculate: c => {
+      return {
+        value: c.stats.countValues(),
+        type: 'x10',
+      };
+    },
   },
 
   {
     type: 'count-uni-values',
     label: 'Count Unique Values',
     display: 'Unique',
-    calculate: () => {},
+    calculate: c => {
+      return {
+        value: c.stats.countUniqueValues(),
+        type: 'x10',
+      };
+    },
   },
 
   {
     type: 'count-empty',
     label: 'Count Empty',
     display: 'Empty',
-    calculate: () => {},
+    calculate: c => {
+      return {
+        value: c.stats.countEmpty(),
+        type: 'x10',
+      };
+    },
   },
 
   {
     type: 'count-not-empty',
     label: 'Count Not Empty',
     display: 'Not Empty',
-    calculate: () => {},
+    calculate: c => {
+      return {
+        value: c.stats.countNonEmpty(),
+        type: 'x10',
+      };
+    },
   },
 
   {
     type: 'percent-empty',
     label: 'Percent Empty',
-    display: '% Empty',
-    calculate: () => {},
+    display: 'Empty',
+    calculate: c => {
+      return {
+        value: c.stats.percentEmpty(),
+        type: '%',
+      };
+    },
   },
 
   {
     type: 'percent-not-empty',
     label: 'Percent Not Empty',
-    display: '% Not Empty',
-    calculate: () => {},
+    display: 'Not Empty',
+    calculate: c => {
+      return {
+        value: c.stats.percentNonEmpty(),
+        type: '%',
+      };
+    },
   },
 ];
-export const mathFormulas: IFormula<FormulaMathTypes>[] = [
-  ...baseFormulas,
+
+export const mathCalc: StatCalc[] = [
+  ...baseCalc,
   {
     type: 'sum',
     label: 'Sum',
     display: 'Sum',
-    calculate: colData => {
-      return colData
-        .filter(d => d.trim() !== '')
-        .map(n => parseInt(n))
-        .reduce((a, c) => a + c, 0);
+    calculate: c => {
+      return {
+        value: c.stats.sum(),
+        type: 'x10',
+      };
     },
   },
-
   {
     type: 'avg',
     label: 'Average',
     display: 'Avg',
-    calculate: colData => {
-      return (
-        colData
-          .filter(d => d.trim() !== '')
-          .map(n => parseInt(n))
-          .reduce((a, c) => a + c, 0) / colData.length
-      );
+    calculate: c => {
+      return {
+        value: c.stats.avg(),
+        type: 'x10',
+      };
     },
   },
 
@@ -123,33 +166,46 @@ export const mathFormulas: IFormula<FormulaMathTypes>[] = [
     type: 'median',
     label: 'Median',
     display: 'Median',
-    calculate: () => {},
+    calculate: c => {
+      return {
+        value: c.stats.median(),
+        type: 'x10',
+      };
+    },
   },
 
   {
     type: 'mode',
     label: 'Mode',
     display: 'Mode',
-    calculate: () => {},
+    calculate: c => {
+      return {
+        value: c.stats.mode(),
+        type: 'x10',
+      };
+    },
   },
+
   {
     type: 'min',
     label: 'Min',
     display: '',
-    calculate: colData => {
-      return Math.min(
-        ...colData.filter(d => d.trim() !== '').map(n => parseInt(n))
-      );
+    calculate: c => {
+      return {
+        value: c.stats.min(),
+        type: 'x10',
+      };
     },
   },
   {
     type: 'max',
     label: 'Max',
     display: 'Max',
-    calculate: colData => {
-      return Math.max(
-        ...colData.filter(d => d.trim() !== '').map(n => parseInt(n))
-      );
+    calculate: c => {
+      return {
+        value: c.stats.max(),
+        type: 'x10',
+      };
     },
   },
 
@@ -157,6 +213,11 @@ export const mathFormulas: IFormula<FormulaMathTypes>[] = [
     type: 'range',
     label: 'Range',
     display: 'Range',
-    calculate: () => {},
+    calculate: c => {
+      return {
+        value: c.stats.range(),
+        type: 'x10',
+      };
+    },
   },
 ];

@@ -6,7 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { positionToVRect } from '../../../_common/components/menu/menu.js';
 import { ArrowDownIcon } from '../../../_common/icons/text.js';
 import { getRootByElement } from '../../../_common/utils/query.js';
-import type { CalculationType, IFormula } from '../formulas.js';
+import type { CalculationType, StatCalc, StatResult } from '../formulas.js';
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
 import { popFormulaMenu } from './menu.js';
 
@@ -51,14 +51,20 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   column!: DataViewTableColumnManager;
 
   @state()
-  private formula: IFormula | null = null;
+  private formula: StatCalc | null = null;
 
   @state()
-  private calculated: number | null = null;
+  private result: StatResult | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', this.openMenu);
+    this.disposables.add(
+      this.column.dataViewManager.slots.update.on(() => {
+        if (this.formula) this.onSelect(this.formula);
+        // change this
+      })
+    );
   }
 
   protected override render() {
@@ -75,10 +81,21 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
           ? html`Calculate ${ArrowDownIcon}`
           : html`
               <span class="label">${this.formula.display}</span>
-              <span class="value">${this.calculated ?? 0} </span>
+              <span class="value">${this.getResultString()} </span>
             `}
       </div>
     </div>`;
+  }
+
+  private getResultString() {
+    if (!this.result) return '';
+    const { type, value } = this.result;
+    switch (type) {
+      case '%':
+        return `${(value * 100).toFixed(3)}%`;
+      case 'x10':
+        return `${value}`;
+    }
   }
 
   openMenu = (ev: MouseEvent) => {
@@ -91,21 +108,16 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
       this.onSelect
     );
   };
-  onSelect = (formula: IFormula) => {
-    if (formula.type === 'none') return (this.formula = null);
+  onSelect = (formula: StatCalc) => {
+    if (formula.type === 'none') {
+      this.formula = null;
+      this.result = null;
+      return;
+    }
+
     this.formula = formula;
-    const data = this.column.dataViewManager.rows.map(rId => {
-      return this.column.getStringValue(rId);
-    });
-
-    console.log(this.calculate(this.formula, data));
-
-    return;
+    this.result = formula.calculate(this.column);
   };
-
-  calculate(formula: IFormula, data: string[]) {
-    return formula.calculate(data, this.column);
-  }
 
   getCalculationType(): CalculationType {
     return this.column.type === 'number' ? 'math' : 'common';

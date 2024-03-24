@@ -16,10 +16,10 @@ import type { DataViewColumnManager } from '../../common/data-view-manager.js';
 import { popSideDetail } from '../../common/detail/layout.js';
 import type { TableSelectionController } from '../controller/selection.js';
 import {
-  baseFormulas,
+  baseCalc,
   type CalculationType,
-  type IFormula,
-  mathFormulas,
+  mathCalc,
+  type StatCalc,
 } from '../formulas.js';
 
 export const openDetail = (
@@ -137,9 +137,9 @@ export const popFormulaMenu = (
   elem: ReferenceElement,
   _column: DataViewColumnManager,
   calcType: CalculationType,
-  onSelect: (formula: IFormula) => void
+  onSelect: (formula: StatCalc) => void
 ) => {
-  const formulas = calcType === 'math' ? mathFormulas : baseFormulas;
+  const formulas = calcType === 'math' ? mathCalc : baseCalc;
   const menus: Menu[] = formulas.map(f => ({
     type: 'action',
     name: f.label,
