@@ -1,7 +1,10 @@
 import type { ReferenceElement } from '@floating-ui/dom';
 import { html } from 'lit';
 
-import { popFilterableSimpleMenu } from '../../../_common/components/menu/index.js';
+import {
+  type Menu,
+  popFilterableSimpleMenu,
+} from '../../../_common/components/menu/index.js';
 import {
   DeleteIcon,
   ExpandFullIcon,
@@ -9,8 +12,15 @@ import {
   MoveRightIcon,
 } from '../../../_common/icons/index.js';
 import type { RootBlockComponent } from '../../../root-block/types.js';
+import type { DataViewColumnManager } from '../../common/data-view-manager.js';
 import { popSideDetail } from '../../common/detail/layout.js';
 import type { TableSelectionController } from '../controller/selection.js';
+import {
+  baseFormulas,
+  type CalculationType,
+  type IFormula,
+  mathFormulas,
+} from '../formulas.js';
 
 export const openDetail = (
   rootElement: RootBlockComponent | null,
@@ -120,4 +130,23 @@ export const popRowMenu = (
       ],
     },
   ]);
+};
+
+export const popFormulaMenu = (
+  _rootElement: RootBlockComponent | null,
+  elem: ReferenceElement,
+  _column: DataViewColumnManager,
+  calcType: CalculationType,
+  onSelect: (formula: IFormula) => void
+) => {
+  const formulas = calcType === 'math' ? mathFormulas : baseFormulas;
+  const menus: Menu[] = formulas.map(f => ({
+    type: 'action',
+    name: f.label,
+    select: () => {
+      onSelect(f);
+    },
+  }));
+
+  return popFilterableSimpleMenu(elem, menus);
 };
