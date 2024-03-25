@@ -148,7 +148,6 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   override render() {
     if (!this.service) return nothing;
-
     return html`<rich-text
       .yText=${this.value}
       .inlineEventSource=${this.topContenteditableElement}
@@ -222,8 +221,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    assertExists(databaseBlock);
-    return databaseBlock.topContenteditableElement;
+    return databaseBlock?.topContenteditableElement;
   }
 
   override connectedCallback() {
@@ -337,7 +335,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   override render() {
     if (!this.service) return nothing;
-
     return html`<rich-text
       .yText=${this.value}
       .inlineEventSource=${this.topContenteditableElement}
