@@ -13,12 +13,9 @@ export interface BlockSuiteViewSpec<T = any> {
   getChildren: (node: Element) => Element[];
 }
 
-type BlockIndex = string;
-type WidgetIndex = [blockIndex: BlockIndex, widgetId: string];
-
 export class ViewStore {
-  readonly _blockMap = new Map<BlockIndex, BlockElement>();
-  readonly _widgetMap = new Map<WidgetIndex, WidgetElement>();
+  readonly _blockMap = new Map<string, BlockElement>();
+  readonly _widgetMap = new Map<string, WidgetElement>();
   readonly viewSpec = new Set<BlockSuiteViewSpec>();
 
   constructor(public std: BlockSuite.Std) {}
@@ -66,7 +63,8 @@ export class ViewStore {
     if (type === 'block') {
       return this.fromPath(path);
     }
-    const widgetId = path.slice(-2) as WidgetIndex;
+    const temp = path.slice(-2) as [string, string];
+    const widgetId = temp.join('|');
     return this._widgetMap.get(widgetId) ?? null;
   }
 

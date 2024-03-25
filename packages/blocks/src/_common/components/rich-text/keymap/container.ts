@@ -394,13 +394,16 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   }
 
   function tryConvertToLinkedDoc() {
+    const root = model.doc.root;
+    assertExists(root);
     const docBlock = blockElement.host.view.viewFromPath(
       'block',
       buildPath(model.doc.root)
     );
     assertExists(docBlock);
-    const linkedDocWidgetEle =
-      docBlock.widgetElements['affine-linked-doc-widget'];
+    const linkedDocWidgetEle = blockElement.host.view._widgetMap.get(
+      `${root.id}|affine-linked-doc-widget`
+    );
     if (!linkedDocWidgetEle) return false;
 
     const inlineEditor = _getInlineEditor();

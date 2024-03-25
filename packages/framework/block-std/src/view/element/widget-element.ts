@@ -62,15 +62,16 @@ export class WidgetElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    const id = this.dataset.widgetId as string;
+    const widgetIndex = `${this.model.id}|${id}`;
+    this.std.view._widgetMap.set(widgetIndex, this);
     const parentElement = this.parentElement;
     assertExists(parentElement);
     const nodeView = this.host.view.getNodeView(parentElement);
     assertExists(nodeView);
     this.blockElement = nodeView.view as B;
     this.service = this.blockElement.service;
-    this.path = this.host.view
-      .calculatePath(this)
-      .concat(this.dataset.widgetId as string);
+    this.path = this.host.view.calculatePath(this).concat(id);
     this.service.specSlots.widgetConnected.emit({
       service: this.blockElement.service,
       component: this,
@@ -79,6 +80,9 @@ export class WidgetElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    const id = this.dataset.widgetId as string;
+    const widgetIndex = `${this.model.id}|${id}`;
+    this.std.view._widgetMap.delete(widgetIndex);
     this.service.specSlots.widgetDisconnected.emit({
       service: this.blockElement.service,
       component: this,
