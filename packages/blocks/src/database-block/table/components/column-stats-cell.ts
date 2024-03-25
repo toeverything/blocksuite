@@ -6,10 +6,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { positionToVRect } from '../../../_common/components/menu/menu.js';
 import { ArrowDownIcon } from '../../../_common/icons/text.js';
 import { getRootByElement } from '../../../_common/utils/query.js';
-import type { CalculationType, StatCalcOp, StatOpResult } from '../stat-ops.js';
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './../consts.js';
 import { popFormulaMenu } from './menu.js';
+import type { ColumnDataType, StatCalcOp, StatOpResult } from './stat-ops.js';
 
 const styles = css`
   .stats-cell {
@@ -92,7 +92,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
 
   private getResultString() {
     if (!this.result) return '';
-    const { type, value } = this.result;
+    const { displayFormat: type, value } = this.result;
     switch (type) {
       case '%':
         return `${(value * 100).toFixed(3)}%`;
@@ -107,7 +107,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
       rootElement,
       positionToVRect(ev.x, ev.y),
       this.column,
-      this.getCalculationType(),
+      this.getColumnType(),
       this.onSelect
     );
   };
@@ -128,8 +128,10 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
     this.result = this.operation.calculate(this.column);
   }
 
-  getCalculationType(): CalculationType {
-    return this.column.type === 'number' ? 'math' : 'common';
+  getColumnType(): ColumnDataType {
+    const type = this.column.type;
+    if (type === 'number' || type === 'checkbox') return type;
+    return 'other';
   }
 }
 

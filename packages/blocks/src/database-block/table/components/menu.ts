@@ -16,11 +16,12 @@ import type { DataViewColumnManager } from '../../common/data-view-manager.js';
 import { popSideDetail } from '../../common/detail/layout.js';
 import type { TableSelectionController } from '../controller/selection.js';
 import {
-  baseCalcOps,
-  type CalculationType,
-  mathCalcOps,
+  checkboxCalcOps,
+  type ColumnDataType,
+  commonCalcOps,
+  numberColCalcOps,
   type StatCalcOp,
-} from '../stat-ops.js';
+} from './stat-ops.js';
 
 export const openDetail = (
   rootElement: RootBlockComponent | null,
@@ -136,11 +137,22 @@ export const popFormulaMenu = (
   _rootElement: RootBlockComponent | null,
   elem: ReferenceElement,
   _column: DataViewColumnManager,
-  calcType: CalculationType,
+  calcType: ColumnDataType,
   onSelect: (formula: StatCalcOp) => void
 ) => {
-  const formulas = calcType === 'math' ? mathCalcOps : baseCalcOps;
-  const menus: Menu[] = formulas.map(f => ({
+  let operations: StatCalcOp[] = [];
+  switch (calcType) {
+    case 'number':
+      operations = numberColCalcOps;
+      break;
+    case 'checkbox':
+      operations = checkboxCalcOps;
+      break;
+    default:
+      operations = commonCalcOps;
+  }
+
+  const menus: Menu[] = operations.map(f => ({
     type: 'action',
     name: f.label,
     select: () => {

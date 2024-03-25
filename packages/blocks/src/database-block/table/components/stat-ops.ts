@@ -1,4 +1,4 @@
-import type { DataViewTableColumnManager } from './table-view-manager.js';
+import type { DataViewTableColumnManager } from '../table-view-manager.js';
 
 // Common formula types
 export type StatCalcOpBaseTypes =
@@ -22,8 +22,18 @@ export type StatCalcOpMathTypes =
   | 'max'
   | 'range';
 
+export type StatCalcOpCheckboxTypes =
+  | StatCalcOpBaseTypes
+  | 'checked'
+  | 'not-checked'
+  | 'percent-checked'
+  | 'percent-not-checked';
+
 // Union of all formula types
-export type StatCalcOpType = StatCalcOpBaseTypes | StatCalcOpMathTypes;
+export type StatCalcOpType =
+  | StatCalcOpBaseTypes
+  | StatCalcOpMathTypes
+  | StatCalcOpCheckboxTypes;
 
 export interface StatCalcOp {
   type: StatCalcOpType;
@@ -32,14 +42,14 @@ export interface StatCalcOp {
   calculate: (column: DataViewTableColumnManager) => StatOpResult;
 }
 
-export type CalculationType = 'math' | 'common';
+export type ColumnDataType = 'number' | 'checkbox' | 'other';
 
 export type StatOpResult = {
   value: number;
-  type: '%' | 'x10';
+  displayFormat: '%' | 'x10';
 };
 
-export const baseCalcOps: StatCalcOp[] = [
+export const commonCalcOps: StatCalcOp[] = [
   {
     type: 'none',
     label: 'None',
@@ -47,7 +57,7 @@ export const baseCalcOps: StatCalcOp[] = [
     calculate: () => {
       return {
         value: 0,
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -59,7 +69,7 @@ export const baseCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.countAll(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -71,7 +81,7 @@ export const baseCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.countValues(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -83,7 +93,7 @@ export const baseCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.countUniqueValues(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -95,7 +105,7 @@ export const baseCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.countEmpty(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -107,7 +117,7 @@ export const baseCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.countNonEmpty(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -119,7 +129,7 @@ export const baseCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.percentEmpty(),
-        type: '%',
+        displayFormat: '%',
       };
     },
   },
@@ -131,14 +141,14 @@ export const baseCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.percentNonEmpty(),
-        type: '%',
+        displayFormat: '%',
       };
     },
   },
 ];
 
-export const mathCalcOps: StatCalcOp[] = [
-  ...baseCalcOps,
+export const numberColCalcOps: StatCalcOp[] = [
+  ...commonCalcOps,
   {
     type: 'sum',
     label: 'Sum',
@@ -146,7 +156,7 @@ export const mathCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.sum(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -157,7 +167,7 @@ export const mathCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.avg(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -169,7 +179,7 @@ export const mathCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.median(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -181,7 +191,7 @@ export const mathCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.mode(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -193,7 +203,7 @@ export const mathCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.min(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -204,7 +214,7 @@ export const mathCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.max(),
-        type: 'x10',
+        displayFormat: 'x10',
       };
     },
   },
@@ -216,7 +226,55 @@ export const mathCalcOps: StatCalcOp[] = [
     calculate: c => {
       return {
         value: c.stats.range(),
-        type: 'x10',
+        displayFormat: 'x10',
+      };
+    },
+  },
+];
+
+export const checkboxCalcOps: StatCalcOp[] = [
+  ...commonCalcOps.slice(0, 2),
+  {
+    type: 'checked',
+    label: 'Checked',
+    display: 'Checked',
+    calculate: c => {
+      return {
+        value: c.stats.checked(),
+        displayFormat: 'x10',
+      };
+    },
+  },
+  {
+    type: 'not-checked',
+    label: 'Not Checked',
+    display: 'Not Checked',
+    calculate: c => {
+      return {
+        value: c.stats.notChecked(),
+        displayFormat: 'x10',
+      };
+    },
+  },
+  {
+    type: 'percent-checked',
+    label: 'Percent Checked',
+    display: 'Checked',
+    calculate: c => {
+      return {
+        value: c.stats.percentChecked(),
+        displayFormat: '%',
+      };
+    },
+  },
+  {
+    type: 'percent-not-checked',
+    label: 'Percent Not Checked',
+    display: 'Not Checked',
+    calculate: c => {
+      return {
+        value: c.stats.percentNotChecked(),
+        displayFormat: '%',
       };
     },
   },
