@@ -73,11 +73,14 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
     this.view.rowAdd('end', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
+      const index = this.view.columnManagerList.findIndex(
+        v => v.type === 'title'
+      );
       selectionController.selection = {
         groupKey: this.group?.key,
         focus: {
           rowIndex: this.rows.length - 1,
-          columnIndex: 0,
+          columnIndex: index,
         },
         isEditing: true,
       };
