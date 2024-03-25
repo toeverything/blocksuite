@@ -3,15 +3,15 @@ import { Slot } from '@blocksuite/store';
 
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { PieMenuId } from '../../types.js';
-import type { IPieMenuSchema } from './base.js';
+import type { PieMenuSchema } from './base.js';
 
 /**
  *   Static class for managing pie menus
  */
 
 export class PieManager {
-  private static schemas: Set<IPieMenuSchema> = new Set();
-  private static registeredSchemas: Record<string, IPieMenuSchema> = {};
+  private static schemas: Set<PieMenuSchema> = new Set();
+  private static registeredSchemas: Record<string, PieMenuSchema> = {};
 
   public static settings = {
     /**
@@ -38,14 +38,14 @@ export class PieManager {
   };
 
   public static slots = {
-    open: new Slot<IPieMenuSchema>(),
+    open: new Slot<PieMenuSchema>(),
   };
 
-  public static add(schema: IPieMenuSchema) {
+  public static add(schema: PieMenuSchema) {
     return this.schemas.add(schema);
   }
 
-  public static remove(schema: IPieMenuSchema) {
+  public static remove(schema: PieMenuSchema) {
     return this.schemas.delete(schema);
   }
 
@@ -84,7 +84,7 @@ export class PieManager {
     });
   }
 
-  private static _register(schema: IPieMenuSchema) {
+  private static _register(schema: PieMenuSchema) {
     const { id } = schema;
 
     assertNotExists(

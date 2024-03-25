@@ -59,36 +59,36 @@ export class PieNodeContent extends LitElement {
     });
   }
   private _renderCenterNodeContent() {
-    if (isSubmenuNode(this.node.schema) && !this.isActive) {
+    if (isSubmenuNode(this.node.model) && !this.isActive) {
       return this._renderChildNodeContent();
     }
 
-    const { menu, schema } = this.node;
+    const { menu, model } = this.node;
     const isActiveNode = menu.isActiveNode(this.node);
     const hoveredNode = this.hoveredNode;
 
     if (
       this.isActive &&
-      isSubmenuNode(schema) &&
-      schema.role === 'color-picker'
+      isSubmenuNode(model) &&
+      model.role === 'color-picker'
     ) {
       if (!hoveredNode) return this.node.icon;
 
       assertEquals(
-        hoveredNode.schema.type,
+        hoveredNode.model.type,
         'color',
         'IPieSubMenuNode.role with color-picker should have children of type color'
       );
-      const { color, hollowCircle } = hoveredNode.schema;
+      const { color, hollowCircle } = hoveredNode.model;
       return ColorUnit(color, { hollowCircle });
     }
 
-    const { label } = schema;
+    const { label } = model;
     const centerLabelOrIcon = this.node.icon ?? label;
 
     return isActiveNode
       ? hoveredNode
-        ? hoveredNode.schema.label
+        ? hoveredNode.model.label
         : centerLabelOrIcon
       : centerLabelOrIcon;
   }

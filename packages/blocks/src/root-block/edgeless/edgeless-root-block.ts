@@ -44,7 +44,7 @@ import type {
   ImageBlockModel,
   ImageBlockProps,
 } from '../../image-block/image-model.js';
-import type { AffinePieMenuWidget, AttachmentBlockProps } from '../../index.js';
+import type { AttachmentBlockProps } from '../../index.js';
 import {
   Bound,
   type IBound,
@@ -728,10 +728,8 @@ export class EdgelessRootBlockComponent extends BlockElement<
   }
 
   private _initWheelEvent() {
-    if (this._isPieMenuOpen()) return;
     this._disposables.add(
       this.dispatcher.add('wheel', ctx => {
-        if (this._isPieMenuOpen()) return;
         const state = ctx.get('defaultState');
         const e = state.event as WheelEvent;
 
@@ -764,11 +762,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
         }
       })
     );
-  }
-  private _isPieMenuOpen() {
-    return (
-      this.widgetElements['affine-pie-menu-widget'] as AffinePieMenuWidget
-    ).isOpen;
   }
 
   override connectedCallback() {

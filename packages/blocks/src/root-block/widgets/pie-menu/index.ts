@@ -6,7 +6,7 @@ import { customElement, state } from 'lit/decorators.js';
 
 import type { IVec } from '../../../surface-block/index.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { IPieMenuSchema } from './base.js';
+import type { PieMenuSchema } from './base.js';
 import { PieNodeCenter } from './components/pie-node-center.js';
 import { PieNodeChild } from './components/pie-node-child.js';
 import { PieNodeContent } from './components/pie-node-content.js';
@@ -59,6 +59,14 @@ export class AffinePieMenuWidget extends WidgetElement {
 
     this.handleEvent('keyUp', this._handleKeyUp, { global: true });
     this.handleEvent('pointerMove', this._handleCursorPos, { global: true });
+    this.handleEvent(
+      'wheel',
+      ctx => {
+        const state = ctx.get('defaultState');
+        if (state.event instanceof WheelEvent) state.event.stopPropagation();
+      },
+      { global: true }
+    );
 
     this._initPie();
   }
@@ -76,7 +84,7 @@ export class AffinePieMenuWidget extends WidgetElement {
     );
   }
 
-  private _attachMenu(schema: IPieMenuSchema) {
+  private _attachMenu(schema: PieMenuSchema) {
     if (this.currentMenu && this.currentMenu.id === schema.id)
       return this.currentMenu.close();
 
@@ -99,7 +107,7 @@ export class AffinePieMenuWidget extends WidgetElement {
   }
 
   public _createMenu(
-    schema: IPieMenuSchema,
+    schema: PieMenuSchema,
     {
       x,
       y,

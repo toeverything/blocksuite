@@ -62,7 +62,7 @@ export class PieNodeChild extends LitElement {
   onClick!: (ev: MouseEvent) => void;
 
   protected override render() {
-    const { schema, position } = this.node;
+    const { model, position } = this.node;
 
     const [x, y] = position;
 
@@ -78,7 +78,7 @@ export class PieNodeChild extends LitElement {
       hovering="${this.hovering.toString()}"
       @click="${this.onClick}"
       index="${this.node.index}"
-      class=${`pie-node child node-${schema.type}`}
+      class=${`pie-node child node-${model.type}`}
     >
       <pie-node-content
         .node=${this.node}

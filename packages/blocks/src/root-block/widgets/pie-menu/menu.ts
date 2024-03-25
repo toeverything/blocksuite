@@ -11,7 +11,7 @@ import {
   Vec,
 } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { IPieMenuSchema, IPieNode } from './base.js';
+import type { PieMenuSchema, PieNodeModel } from './base.js';
 import type { AffinePieMenuWidget } from './index.js';
 import { PieNode } from './node.js';
 import { PieManager } from './pie-manager.js';
@@ -41,7 +41,7 @@ export class PieMenu extends WithDisposable(LitElement) {
   widgetElement!: AffinePieMenuWidget;
 
   @property({ attribute: false })
-  schema!: IPieMenuSchema;
+  schema!: PieMenuSchema;
 
   @property({ attribute: false })
   position!: IVec;
@@ -120,7 +120,7 @@ export class PieMenu extends WithDisposable(LitElement) {
 
   popSelectionChainTo(node: PieNode) {
     assertEquals(
-      isNodeWithChildren(node.schema),
+      isNodeWithChildren(node.model),
       true,
       'Required a root node or a submenu node'
     );
@@ -147,8 +147,8 @@ export class PieMenu extends WithDisposable(LitElement) {
 
     if (!node) return;
 
-    if (isSubmenuNode(node.schema)) {
-      const { openOnHover, timeoutOverride } = node.schema;
+    if (isSubmenuNode(node.model)) {
+      const { openOnHover, timeoutOverride } = node.model;
       const { SUBMENU_OPEN_TIMEOUT } = PieManager.settings;
 
       if (openOnHover !== undefined && !openOnHover) return;
@@ -160,7 +160,7 @@ export class PieMenu extends WithDisposable(LitElement) {
   }
 
   openSubmenu(submenu: PieNode) {
-    assertEquals(submenu.schema.type, 'submenu', 'Need node of type submenu');
+    assertEquals(submenu.model.type, 'submenu', 'Need node of type submenu');
 
     this.selectionChain.push(submenu);
     this.setHovered(null);
@@ -207,10 +207,10 @@ export class PieMenu extends WithDisposable(LitElement) {
       `& > affine-pie-node[index='${index}']`
     );
 
-    if (node instanceof PieNode && !isColorNode(node.schema)) {
+    if (node instanceof PieNode && !isColorNode(node.model)) {
       // colors are more than 9 may be another method ?
       node.select();
-      if (isCommandNode(node.schema)) this.close();
+      if (isCommandNode(node.model)) this.close();
     }
   };
 
@@ -251,12 +251,12 @@ export class PieMenu extends WithDisposable(LitElement) {
     }
   };
 
-  private _createNodeTree(nodeSchema: IPieNode): PieNode {
+  private _createNodeTree(nodeSchema: PieNodeModel): PieNode {
     const node = new PieNode();
     const { angle, startAngle, endAngle, label } = nodeSchema;
 
     node.id = label;
-    node.schema = nodeSchema;
+    node.model = nodeSchema;
     node.angle = angle ?? 0;
     node.startAngle = startAngle ?? 0;
     node.endAngle = endAngle ?? 0;

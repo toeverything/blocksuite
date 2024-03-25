@@ -3,7 +3,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { type IVec } from '../../../surface-block/index.js';
-import type { IPieNode } from './base.js';
+import type { PieNodeModel } from './base.js';
 import type { PieMenu } from './menu.js';
 import { pieNodeStyles } from './styles.js';
 import {
@@ -19,7 +19,7 @@ import {
 export class PieNode extends WithDisposable(LitElement) {
   static override styles = pieNodeStyles;
   @property({ attribute: false })
-  schema!: IPieNode;
+  model!: PieNodeModel;
 
   @property({ attribute: false })
   angle!: number;
@@ -48,7 +48,7 @@ export class PieNode extends WithDisposable(LitElement) {
   private _rotatorAngle: number | null = null;
 
   select() {
-    const schema = this.schema;
+    const schema = this.model;
 
     if (isRootNode(schema)) return;
 
@@ -71,7 +71,7 @@ export class PieNode extends WithDisposable(LitElement) {
   }
 
   get icon() {
-    const icon = this.schema.icon;
+    const icon = this.model.icon;
     if (typeof icon === 'function') {
       const { menu } = this;
       const { rootElement, widgetElement } = menu;
@@ -82,7 +82,7 @@ export class PieNode extends WithDisposable(LitElement) {
 
   isCenterNode() {
     return (
-      isNodeWithChildren(this.schema) && this.menu.selectionChain.includes(this)
+      isNodeWithChildren(this.model) && this.menu.selectionChain.includes(this)
     );
   }
 
@@ -147,14 +147,14 @@ export class PieNode extends WithDisposable(LitElement) {
 
   private _handleChildNodeClick = () => {
     this.select();
-    if (isCommandNode(this.schema)) this.menu.close();
+    if (isCommandNode(this.model)) this.menu.close();
   };
 
   private _onPointerAngleUpdated = (angle: number | null) => {
     this._rotatorAngle = angle;
     this.menu.activeNode.requestUpdate();
 
-    if (isRootNode(this.schema) || !this.menu.isChildOfActiveNode(this)) return;
+    if (isRootNode(this.model) || !this.menu.isChildOfActiveNode(this)) return;
     if (angle === null) {
       this._isHovering = false;
       this.menu.setHovered(null);

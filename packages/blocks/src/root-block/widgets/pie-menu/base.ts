@@ -7,12 +7,12 @@ import type { AffinePieMenuWidget } from './index.js';
 import type { PieMenu } from './menu.js';
 import type { PieNode } from './node.js';
 
-export interface IPieMenuSchema {
+export interface PieMenuSchema {
   id: PieMenuId;
 
   label: string;
 
-  root: IPieRootNode;
+  root: PieRootNodeModel;
 
   trigger: (props: {
     keyEvent: KeyboardEvent;
@@ -22,7 +22,7 @@ export interface IPieMenuSchema {
 
 export type IconGetter = (ctx: PieMenuContext) => TemplateResult;
 export type DisabledGetter = (ctx: PieMenuContext) => boolean;
-export interface IPieBaseNode {
+export interface PieBaseNodeModel {
   type: 'root' | 'command' | 'submenu' | 'toggle' | 'color';
 
   label: string;
@@ -39,9 +39,9 @@ export interface IPieBaseNode {
 }
 
 // A menu can only have one root node
-export interface IPieRootNode extends IPieBaseNode {
+export interface PieRootNodeModel extends PieBaseNodeModel {
   type: 'root';
-  children: Array<IPieNonRootNode>;
+  children: Array<PieNonRootNode>;
 }
 
 export type PieMenuContext = {
@@ -53,22 +53,22 @@ export type PieMenuContext = {
 export type ActionFunction = (ctx: PieMenuContext) => void;
 
 // Nodes which can perform a given action
-export interface IPieCommandNode extends IPieBaseNode {
+export interface PieCommandNodeModel extends PieBaseNodeModel {
   type: 'command';
   action: ActionFunction;
 }
 
 // Open a submenu
-export interface IPieSubmenuNode extends IPieBaseNode {
+export interface PieSubmenuNodeModel extends PieBaseNodeModel {
   type: 'submenu';
   role: 'default' | 'color-picker' | 'command';
   action?: ActionFunction;
-  children: Array<IPieNonRootNode>;
+  children: Array<PieNonRootNode>;
   openOnHover?: boolean;
   timeoutOverride?: number;
 }
 
-export interface IPieColorNode extends IPieBaseNode {
+export interface PieColorNodeModel extends PieBaseNodeModel {
   type: 'color';
   color: CssVariableName;
   hollowCircle: boolean;
@@ -77,9 +77,12 @@ export interface IPieColorNode extends IPieBaseNode {
 }
 
 export type IPieNodeWithAction =
-  | IPieCommandNode
-  | (IPieSubmenuNode & { role: 'command'; action: ActionFunction });
+  | PieCommandNodeModel
+  | (PieSubmenuNodeModel & { role: 'command'; action: ActionFunction });
 
-export type IPieNonRootNode = IPieCommandNode | IPieColorNode | IPieSubmenuNode;
+export type PieNonRootNode =
+  | PieCommandNodeModel
+  | PieColorNodeModel
+  | PieSubmenuNodeModel;
 
-export type IPieNode = IPieRootNode | IPieNonRootNode;
+export type PieNodeModel = PieRootNodeModel | PieNonRootNode;
