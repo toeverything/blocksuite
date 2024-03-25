@@ -153,6 +153,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
+      .embedChecker=${this.inlineManager.embedChecker}
       .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
       .readonly=${true}
       class="affine-database-rich-text inline-editor"
@@ -340,6 +341,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
+      .embedChecker=${this.inlineManager.embedChecker}
       .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
       class="affine-database-rich-text inline-editor"
     ></rich-text>`;
