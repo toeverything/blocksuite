@@ -1844,7 +1844,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  await assertRichTextInlineRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
