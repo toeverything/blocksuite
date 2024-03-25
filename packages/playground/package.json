@@ -12,8 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/blocks": "workspace:*",
     "@blocksuite/block-std": "workspace:*",
+    "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/presets": "workspace:*",
@@ -25,7 +25,7 @@
     "browser-fs-access": "^0.35.0",
     "intl-segmenter-polyfill-rs": "^0.1.7",
     "jszip": "^3.10.1",
-    "katex": "^0.16.9",
+    "katex": "^0.16.10",
     "lit": "^3.1.2",
     "lz-string": "^1.5.0",
     "merge": "^2.1.1",
