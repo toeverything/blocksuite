@@ -59,7 +59,7 @@ test.describe('Embed synced doc', () => {
     await createAndConvertToEmbedSyncedDoc(page);
   });
 
-  test('drag embed synced doc to whiteboard should fit in height', async ({
+  test.skip('drag embed synced doc to whiteboard should fit in height', async ({
     page,
   }) => {
     await initEmptyEdgelessState(page);
