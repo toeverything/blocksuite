@@ -80,10 +80,6 @@ export const guide: DefaultTheme.NavItem[] = [
         text: '<code>inline</code>',
         link: 'guide/inline',
       },
-      {
-        text: '<code>lit</code>',
-        link: 'guide/lit',
-      },
     ],
   },
   {
