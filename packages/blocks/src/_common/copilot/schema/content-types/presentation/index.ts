@@ -32,7 +32,7 @@ export const createPresentationAction = createActionBuilder('presentation')(
     return chatService().chat([
       userText(
         `
-I want to write a slides, that has many pages, each page has 1 to 4 sections,
+I want to create a slide, that has many pages, each page has 1 to 4 sections,
 each section has a title of no more than 30 words and no more than 500 words of content,
 but also need some keywords that match the content of the paragraph used to generate images,
 Try to have a different number of section per page
@@ -78,8 +78,8 @@ this is a template:
     - content
 
 
-please help me to write this ppt, do not output any content that does not belong to the slides content itself outside of the content, Directly output the title content keywords without prefix like Title:xxx, Content: xxx, Keywords: xxx
-The PPT is based on the following topics:
+please help me to write this slide, do not output any content that does not belong to the slides content itself outside of the content, Directly output the title content keywords without prefix like Title:xxx, Content: xxx, Keywords: xxx
+The slide is based on the following topics:
 ${input}`
       ),
     ]);

@@ -12,12 +12,12 @@
     "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
-    "preact": "^10.19.5"
+    "preact": "^10.20.1"
   },
   "devDependencies": {
-    "@preact/preset-vite": "^2.8.1",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.4"
+    "@preact/preset-vite": "^2.8.2",
+    "typescript": "^5.4.3",
+    "vite": "^5.2.6"
   },
   "stackblitz": {
     "installDependencies": false,
