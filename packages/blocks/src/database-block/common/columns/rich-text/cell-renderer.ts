@@ -107,14 +107,13 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   }
 
   get inlineManager() {
-    assertExists(this.service);
-    return this.service.inlineManager;
+    return this.service?.inlineManager;
   }
   get attributesSchema() {
-    return this.inlineManager.getSchema();
+    return this.inlineManager?.getSchema();
   }
   get attributeRenderer() {
-    return this.inlineManager.getRenderer();
+    return this.inlineManager?.getRenderer();
   }
 
   @query('rich-text')
@@ -153,7 +152,8 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
-      .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
+      .embedChecker=${this.inlineManager?.embedChecker}
+      .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
       .readonly=${true}
       class="affine-database-rich-text inline-editor"
     ></rich-text>`;
@@ -198,14 +198,13 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   get inlineManager() {
-    assertExists(this.service);
-    return this.service.inlineManager;
+    return this.service?.inlineManager;
   }
   get attributesSchema() {
-    return this.inlineManager.getSchema();
+    return this.inlineManager?.getSchema();
   }
   get attributeRenderer() {
-    return this.inlineManager.getRenderer();
+    return this.inlineManager?.getRenderer();
   }
 
   @query('rich-text')
@@ -340,7 +339,8 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
-      .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
+      .embedChecker=${this.inlineManager?.embedChecker}
+      .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
       class="affine-database-rich-text inline-editor"
     ></rich-text>`;
   }
