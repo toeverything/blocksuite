@@ -77,14 +77,13 @@ abstract class BaseTextCell extends BaseCellRenderer<unknown> {
   }
 
   get inlineManager() {
-    assertExists(this.service);
-    return this.service.inlineManager;
+    return this.service?.inlineManager;
   }
   get attributesSchema() {
-    return this.inlineManager.getSchema();
+    return this.inlineManager?.getSchema();
   }
   get attributeRenderer() {
-    return this.inlineManager.getRenderer();
+    return this.inlineManager?.getRenderer();
   }
   get topContenteditableElement() {
     const databaseBlock =
@@ -170,8 +169,8 @@ export class HeaderAreaTextCell extends BaseTextCell {
         .inlineEventSource=${this.topContenteditableElement}
         .attributesSchema=${this.attributesSchema}
         .attributeRenderer=${this.attributeRenderer}
-        .embedChecker=${this.inlineManager.embedChecker}
-        .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
+        .embedChecker=${this.inlineManager?.embedChecker}
+        .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
         .readonly=${true}
         class="data-view-header-area-rich-text"
       ></rich-text>`;
@@ -214,8 +213,8 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         .inlineEventSource=${this.topContenteditableElement}
         .attributesSchema=${this.attributesSchema}
         .attributeRenderer=${this.attributeRenderer}
-        .embedChecker=${this.inlineManager.embedChecker}
-        .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
+        .embedChecker=${this.inlineManager?.embedChecker}
+        .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
         .readonly=${this.readonly}
         class="data-view-header-area-rich-text"
       ></rich-text>`;
