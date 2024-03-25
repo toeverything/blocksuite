@@ -15,7 +15,6 @@ import type { TType } from '../logical/typesystem.js';
 import type { InsertToPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { headerRenderer } from './components/header-cell.js';
-import { ColumnDataStats } from './data-stats.js';
 
 type TableViewData = RealDataViewDataTypeMap['table'];
 
@@ -351,13 +350,11 @@ export class DataViewTableManager extends BaseDataViewManager {
 }
 
 export class DataViewTableColumnManager extends BaseDataViewColumnManager {
-  stats: ColumnDataStats;
   constructor(
     propertyId: string,
     override dataViewManager: DataViewTableManager
   ) {
     super(propertyId, dataViewManager);
-    this.stats = new ColumnDataStats(this);
   }
 
   get width(): number {

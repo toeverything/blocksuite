@@ -12,6 +12,7 @@ import type {
 } from './columns/manager.js';
 import { columnManager } from './columns/manager.js';
 import { columnRenderer } from './columns/renderer.js';
+import { ColumnDataStats } from './data-stats.js';
 import type { DataSource, DetailSlots } from './datasource/base.js';
 
 export interface DataViewManager {
@@ -479,6 +480,8 @@ export abstract class BaseDataViewManager implements DataViewManager {
 export abstract class BaseDataViewColumnManager
   implements DataViewColumnManager
 {
+  public readonly stats = new ColumnDataStats(this);
+
   protected constructor(
     protected propertyId: string,
     public dataViewManager: DataViewManager

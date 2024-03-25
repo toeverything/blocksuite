@@ -7,6 +7,8 @@ import type { DataViewTableManager } from '../table-view-manager.js';
 
 const styles = css`
   .affine-database-column-stats {
+    width: 100%;
+    margin-left: 8px;
     display: flex;
   }
 `;

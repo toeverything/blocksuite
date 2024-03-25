@@ -6,19 +6,21 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { positionToVRect } from '../../../_common/components/menu/menu.js';
 import { ArrowDownIcon } from '../../../_common/icons/text.js';
 import { getRootByElement } from '../../../_common/utils/query.js';
-import type { CalculationType, StatCalc, StatResult } from '../formulas.js';
+import type { CalculationType, StatCalcOp, StatOpResult } from '../stat-ops.js';
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './../consts.js';
 import { popFormulaMenu } from './menu.js';
 
 const styles = css`
   .stats-cell {
     cursor: pointer;
-    padding: 8px 3px;
     transition: opacity 230ms ease;
+    padding: 8px 0px;
     font-size: 12px;
     color: var(--affine-text-secondary-color);
     display: flex;
     opacity: 0;
+    min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
     justify-content: flex-end;
   }
   .stats-cell:hover {
@@ -34,6 +36,7 @@ const styles = css`
     align-items: center;
     justify-content: center;
     gap: 0.2rem;
+    margin-inline: 5px;
   }
   .label {
     text-transform: uppercase;
@@ -51,17 +54,17 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   column!: DataViewTableColumnManager;
 
   @state()
-  private formula: StatCalc | null = null;
+  private operation: StatCalcOp | null = null;
 
   @state()
-  private result: StatResult | null = null;
+  private result: StatOpResult | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', this.openMenu);
     this.disposables.add(
       this.column.dataViewManager.slots.update.on(() => {
-        if (this.formula) this.onSelect(this.formula);
+        this.calculate();
         // change this
       })
     );
@@ -72,15 +75,15 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
       width: `${this.column.width}px`,
     };
     return html`<div
-      calculated="${!!this.formula}"
+      calculated="${!!this.operation}"
       style="${styleMap(style)}"
       class="stats-cell"
     >
       <div class="content">
-        ${!this.formula
+        ${!this.operation
           ? html`Calculate ${ArrowDownIcon}`
           : html`
-              <span class="label">${this.formula.display}</span>
+              <span class="label">${this.operation.display}</span>
               <span class="value">${this.getResultString()} </span>
             `}
       </div>
@@ -108,16 +111,22 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
       this.onSelect
     );
   };
-  onSelect = (formula: StatCalc) => {
+  onSelect = (formula: StatCalcOp) => {
     if (formula.type === 'none') {
-      this.formula = null;
+      this.operation = null;
       this.result = null;
       return;
     }
 
-    this.formula = formula;
-    this.result = formula.calculate(this.column);
+    this.operation = formula;
+
+    this.calculate();
   };
+
+  calculate() {
+    if (!this.operation) return;
+    this.result = this.operation.calculate(this.column);
+  }
 
   getCalculationType(): CalculationType {
     return this.column.type === 'number' ? 'math' : 'common';

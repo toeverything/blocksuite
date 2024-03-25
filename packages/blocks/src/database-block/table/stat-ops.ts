@@ -1,7 +1,7 @@
 import type { DataViewTableColumnManager } from './table-view-manager.js';
 
 // Common formula types
-export type StatCalcBaseTypes =
+export type StatCalcOpBaseTypes =
   | 'none'
   | 'count-all'
   | 'count-values'
@@ -12,8 +12,8 @@ export type StatCalcBaseTypes =
   | 'percent-not-empty';
 
 // Mathematical formula types
-export type StatCalcMathTypes =
-  | StatCalcBaseTypes
+export type StatCalcOpMathTypes =
+  | StatCalcOpBaseTypes
   | 'sum'
   | 'avg'
   | 'median'
@@ -23,23 +23,23 @@ export type StatCalcMathTypes =
   | 'range';
 
 // Union of all formula types
-export type StatCalcType = StatCalcBaseTypes | StatCalcMathTypes;
+export type StatCalcOpType = StatCalcOpBaseTypes | StatCalcOpMathTypes;
 
-export interface StatCalc {
-  type: StatCalcType;
+export interface StatCalcOp {
+  type: StatCalcOpType;
   label: string;
   display: string;
-  calculate: (column: DataViewTableColumnManager) => StatResult;
+  calculate: (column: DataViewTableColumnManager) => StatOpResult;
 }
 
 export type CalculationType = 'math' | 'common';
 
-export type StatResult = {
+export type StatOpResult = {
   value: number;
   type: '%' | 'x10';
 };
 
-export const baseCalc: StatCalc[] = [
+export const baseCalcOps: StatCalcOp[] = [
   {
     type: 'none',
     label: 'None',
@@ -137,8 +137,8 @@ export const baseCalc: StatCalc[] = [
   },
 ];
 
-export const mathCalc: StatCalc[] = [
-  ...baseCalc,
+export const mathCalcOps: StatCalcOp[] = [
+  ...baseCalcOps,
   {
     type: 'sum',
     label: 'Sum',

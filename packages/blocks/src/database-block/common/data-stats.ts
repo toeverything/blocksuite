@@ -1,14 +1,13 @@
 import { assertEquals } from '@blocksuite/global/utils';
 
-import type {
-  DataViewTableColumnManager,
-  DataViewTableManager,
-} from './table-view-manager.js';
+import type { DataViewColumnManager } from './data-view-manager.js';
 
-export class ColumnDataStats {
+export class ColumnDataStats<
+  Column extends DataViewColumnManager = DataViewColumnManager,
+> {
   // private _cache: Record<string, unknown>;
-  private dataViewManager: DataViewTableManager;
-  constructor(private column: DataViewTableColumnManager) {
+  private dataViewManager: Column['dataViewManager'];
+  constructor(private column: Column) {
     this.dataViewManager = column.dataViewManager;
   }
 
