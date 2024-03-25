@@ -143,7 +143,7 @@ export const createSummaryAction = createActionBuilder('text')((payload: {
   return chatService().chat([
     {
       role: 'system',
-      content: 'You are a professional writing assisting.',
+      content: 'You are a professional writing assistant.',
     },
     userText(input),
     userText('Summarize this text. Make sure to do your best.'),
@@ -165,7 +165,7 @@ export const createTranslateAction = createActionBuilder('text')((payload: {
       
       ${input}
       
-      to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of the translate.`
+      to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of the translation.`
     ),
   ]);
 });

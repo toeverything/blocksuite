@@ -110,10 +110,6 @@ export const reference: DefaultTheme.NavItem[] = [
         text: '@blocksuite/block-std',
         link: 'api/@blocksuite/block-std/index',
       },
-      {
-        text: '@blocksuite/block-std',
-        link: 'api/@blocksuite/block-std/index',
-      },
       { text: '@blocksuite/inline', link: 'api/@blocksuite/inline/index' },
       {
         text: '@blocksuite/presets',
