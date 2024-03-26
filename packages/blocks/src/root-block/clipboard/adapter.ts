@@ -16,12 +16,13 @@ import type {
   SliceSnapshot,
 } from '@blocksuite/store';
 import { BaseAdapter } from '@blocksuite/store';
-import { EJSON } from 'bson';
+
+import { decode, encode } from './utils.js';
 
 type FileSnapshot = {
   name: string;
   type: string;
-  content: ArrayBuffer;
+  content: string;
 };
 
 export class ClipboardAdapter extends BaseAdapter<string> {
@@ -60,16 +61,17 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     const blobs: Record<string, FileSnapshot> = {};
     await Promise.all(
       Array.from(map.entries()).map(async ([id, blob]) => {
+        const content = encode(await blob.arrayBuffer());
         const file: FileSnapshot = {
           name: (blob as File).name,
           type: blob.type,
-          content: await blob.arrayBuffer(),
+          content,
         };
         blobs[id] = file;
       })
     );
     return {
-      file: EJSON.stringify({
+      file: JSON.stringify({
         snapshot,
         blobs,
       }),
@@ -80,10 +82,12 @@ export class ClipboardAdapter extends BaseAdapter<string> {
   override toSliceSnapshot(
     payload: ToSliceSnapshotPayload<string>
   ): Promise<SliceSnapshot> {
-    const { snapshot, blobs } = EJSON.parse(payload.file);
+    const json = JSON.parse(payload.file);
+    const { blobs, snapshot } = json;
     const map = payload.assets?.getAssets();
     Object.entries<FileSnapshot>(blobs).forEach(([sourceId, file]) => {
-      const f = new File([file.content], file.name, {
+      const blob = new Blob([decode(file.content)]);
+      const f = new File([blob], file.name, {
         type: file.type,
       });
       assertExists(map);
