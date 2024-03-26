@@ -27,17 +27,17 @@ import {
   Point,
   Rect,
 } from '../../../_common/utils/index.js';
-import type { RootBlockModel } from '../../../index.js';
-import {
-  type NoteBlockComponent,
-  type NoteBlockModel,
-} from '../../../index.js';
+import type {
+  NoteBlockComponent,
+  NoteBlockModel,
+} from '../../../note-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
 import {
   getSelectedRect,
   isTopLevelBlock,
 } from '../../../root-block/edgeless/utils/query.js';
 import { PageRootBlockComponent } from '../../../root-block/page/page-root-block.js';
+import type { RootBlockModel } from '../../../root-block/root-model.js';
 import { autoScroll } from '../../../root-block/text-selection/utils.js';
 import { Bound, type IVec } from '../../../surface-block/index.js';
 import type { EdgelessBlockModel } from '../../edgeless/type.js';
