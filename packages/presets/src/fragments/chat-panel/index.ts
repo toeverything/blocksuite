@@ -74,7 +74,7 @@ export class ChatPanel extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const messages = this.copilot.history.history;
+    const { items } = this.copilot.chat;
 
     return html` <div class="chat-panel-container">
       <div class="chat-panel-title">AFFINE AI</div>
@@ -82,7 +82,7 @@ export class ChatPanel extends WithDisposable(LitElement) {
         .host=${this.editor.host}
         .copilot=${this.copilot}
       ></chat-panel-messages>
-      ${messages.length === 0
+      ${items.length === 0
         ? html`<div class="chat-panel-hints">
             <div>Start with current selection</div>
             <div>you've chosen within the doc</div>

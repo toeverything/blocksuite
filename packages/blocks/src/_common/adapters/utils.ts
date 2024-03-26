@@ -48,3 +48,6 @@ export const mergeDeltas = (
   }
   return [...acc, cur];
 };
+
+export const isNullish = (value: unknown) =>
+  value === null || value === undefined;

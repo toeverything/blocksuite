@@ -15,6 +15,21 @@ export const styles = css`
     opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
+    position: relative;
+  }
+
+  .affine-embed-linked-doc-block-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .affine-embed-linked-doc-block-overlay:hover {
+    background: var(--affine-hover-color);
   }
 
   .affine-embed-linked-doc-content {

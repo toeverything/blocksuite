@@ -1,6 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -56,8 +55,7 @@ export class BlockRenderer
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    assertExists(databaseBlock);
-    return databaseBlock.topContenteditableElement;
+    return databaseBlock?.topContenteditableElement;
   }
 
   public override connectedCallback() {

@@ -33,6 +33,9 @@ export const blockStyles = css`
     width: 100%;
     height: calc(${EMBED_CARD_HEIGHT.syncedDoc}px + 36px);
   }
+  .edgeless-block-portal-embed .affine-embed-synced-doc-container.surface {
+    border: 1px solid var(--affine-border-color);
+  }
 
   affine-embed-synced-doc-block[data-nested-editor] {
     position: relative;

@@ -68,19 +68,19 @@ export class BlockElement<
     return this.path.slice(0, -1);
   }
 
-  get parentBlockElement() {
-    const parentElement = this.parentElement;
-    assertExists(parentElement);
-    const nodeView = this.host.view.getNodeView(parentElement);
-    assertExists(nodeView);
-    return nodeView.view as BlockElement;
+  get parentBlockElement(): BlockElement {
+    const el = this.parentElement;
+    // TODO(mirone/#6534): find a better way to get block element from a node
+    return el?.closest('[data-block-id]') as BlockElement;
   }
 
   get childBlockElements() {
-    const children = this.host.view.getChildren(this.path);
-    return children
-      .filter(child => child.type === 'block')
-      .map(child => child.view as BlockElement);
+    const childModels = this.model.children;
+    return childModels
+      .map(child => {
+        return this.std.view.getBlock(child.id);
+      })
+      .filter((x): x is BlockElement => !!x);
   }
 
   get rootElement() {
@@ -208,6 +208,14 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.std.view.setBlock(this);
+    const disposable = this.std.doc.slots.blockUpdated.on(({ type, id }) => {
+      if (id === this.model.id && type === 'delete') {
+        this.std.view.deleteBlock(this);
+        disposable.dispose();
+      }
+    });
+
     this.service = this.host.std.spec.getService(this.model.flavour);
     this.path = this.host.view.calculatePath(this);
 
@@ -246,6 +254,7 @@ export class BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+
     this.service.specSlots.viewDisconnected.emit({
       service: this.service,
       component: this,

@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { OpenAI } from 'openai';
 
-import type { ChatMessage } from '../model/message-schema.js';
+import type { ChatMessage } from '../schema/schema.js';
 import {
   ChatServiceKind,
   createVendor,
@@ -96,7 +96,7 @@ TextServiceKind.implService({
       return askGPTStream(
         data.apiKey,
         'gpt-3.5-turbo-1106',
-        [...context.history, ...messages],
+        [...context.messages, ...messages],
         signal
       );
     },
@@ -110,7 +110,7 @@ TextServiceKind.implService({
       return askGPTStream(
         data.apiKey,
         'gpt-4',
-        [...context.history, ...messages],
+        [...context.messages, ...messages],
         signal
       );
     },
@@ -125,7 +125,7 @@ ChatServiceKind.implService({
       return askGPTStream(
         data.apiKey,
         'gpt-3.5-turbo-1106',
-        [...context.history, ...messages],
+        [...context.messages, ...messages],
         signal
       );
     },
@@ -140,7 +140,7 @@ ChatServiceKind.implService({
       askGPTStream(
         data.apiKey,
         'gpt-4',
-        [...context.history, ...messages],
+        [...context.messages, ...messages],
         signal
       ),
   }),
@@ -153,7 +153,7 @@ ChatServiceKind.implService({
       askGPTStream(
         data.apiKey,
         'gpt-4-vision-preview',
-        [...context.history, ...messages],
+        [...context.messages, ...messages],
         signal
       ),
   }),
@@ -216,7 +216,7 @@ Image2TextServiceKind.implService({
         });
         const result = await openai.chat.completions.create(
           {
-            messages: [...toGPTMessages(context.history), ...messages],
+            messages: [...toGPTMessages(context.messages), ...messages],
             model: 'gpt-4-vision-preview',
             temperature: 0,
             max_tokens: 4096,

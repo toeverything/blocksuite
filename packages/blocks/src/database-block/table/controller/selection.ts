@@ -583,22 +583,23 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
-  public insertRowBefore(rowId: string) {
-    const id = this.view.rowAdd({ before: true, id: rowId });
-    this.selection = {
-      focus: {
-        rowIndex: this.view.rows.findIndex(v => v === id),
-        columnIndex: this.selection?.focus.columnIndex ?? 0,
-      },
-      isEditing: false,
-    };
+  public insertRowBefore(groupKey: string | undefined, rowId: string) {
+    this.insertTo(groupKey, rowId, true);
   }
 
   public insertRowAfter(groupKey: string | undefined, rowId: string) {
-    const id = this.view.rowAdd({ before: false, id: rowId });
+    this.insertTo(groupKey, rowId, false);
+  }
+
+  private insertTo(
+    groupKey: string | undefined,
+    rowId: string,
+    before: boolean
+  ) {
+    const id = this.view.rowAdd({ before, id: rowId });
     if (groupKey != null) {
       this.view.groupHelper?.moveCardTo(id, undefined, groupKey, {
-        before: false,
+        before,
         id: rowId,
       });
     }
@@ -607,11 +608,14 @@ export class TableSelectionController implements ReactiveController {
         ? this.view.groupHelper?.groupMap[groupKey].rows
         : this.view.rows;
     requestAnimationFrame(() => {
+      const index = this.host.view.columnManagerList.findIndex(
+        v => v.type === 'title'
+      );
       this.selection = {
         groupKey: groupKey,
         focus: {
           rowIndex: rows?.findIndex(v => v === id) ?? 0,
-          columnIndex: this.selection?.focus.columnIndex ?? 0,
+          columnIndex: index,
         },
         isEditing: true,
       };

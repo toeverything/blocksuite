@@ -59,7 +59,6 @@ declare global {
     interface NodeViewType {}
 
     type Component = Values<ComponentType>;
-    type NodeView = Values<NodeViewType>;
 
     type Std = BlockStdScope;
   }
