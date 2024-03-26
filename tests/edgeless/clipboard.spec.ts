@@ -13,6 +13,7 @@ import {
 import {
   copyByKeyboard,
   edgelessCommonSetup as commonSetup,
+  expectConsoleMessage,
   pasteByKeyboard,
   pasteContent,
   selectAllByKeyboard,
@@ -23,6 +24,7 @@ import { test } from '../utils/playwright.js';
 
 test.describe('mime', () => {
   test('should paste svg in text/plain mime', async ({ page }) => {
+    expectConsoleMessage(page, 'Error: Image sourceId is missing!', 'warning');
     await commonSetup(page);
     const content = {
       'text/plain': `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
@@ -37,6 +39,9 @@ test.describe('mime', () => {
   });
 
   test('should not paste bad svg', async ({ page }) => {
+    expectConsoleMessage(page, 'BlockSuiteError: val does not exist', 'error');
+    expectConsoleMessage(page, 'Error: Image sourceId is missing!', 'warning');
+
     await commonSetup(page);
     const contents = [
       {
