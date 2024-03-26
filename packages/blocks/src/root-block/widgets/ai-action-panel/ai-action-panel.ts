@@ -163,7 +163,6 @@ export class AffineAIActionPanelWidget extends WidgetElement {
 
     this.tabIndex = -1;
     this.disposables.addFromEvent(this, 'blur', e => {
-      console.log(e);
       if (!e.relatedTarget || this.contains(e.relatedTarget as Node)) return;
 
       cleanUp?.();
