@@ -8,8 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import type { RootBlockModel } from '../../index.js';
-import { type PageRootBlockComponent } from '../../index.js';
+import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
 import { autoScroll } from '../../text-selection/utils.js';
 
 type Rect = {
