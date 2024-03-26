@@ -69,11 +69,11 @@ export class BlockElement<
   }
 
   get parentBlockElement(): BlockElement {
-    const parentBlock = this.doc.getParent(this.model);
-    assertExists(parentBlock);
-    const parentEl = this.host.view._blockMap.get(parentBlock.id);
-    assertExists(parentEl);
-    return parentEl;
+    console.log(this);
+    console.log(this.parentElement);
+    const el = this.parentElement;
+    // TODO(mirone/#6534): find a better way to get block element from a node
+    return el?.closest('[data-block-id]') as BlockElement;
   }
 
   get childBlockElements() {
