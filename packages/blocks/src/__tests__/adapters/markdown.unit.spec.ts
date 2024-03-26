@@ -406,13 +406,9 @@ hhh
       ],
     };
     const markdown = `* aaa
-
   * bbb
-
     * ccc
-
   * ddd
-
 * eee
 `;
 
@@ -423,6 +419,7 @@ hhh
     expect(target.file).toBe(markdown);
   });
 
+  // TODO(@fourdim): fix this test
   test('todo list', async () => {
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
@@ -558,11 +555,8 @@ hhh
       ],
     };
     const markdown = `* [ ] aaa
-
   * [x] bbb
-
     * [ ] ccc
-
   - [x] ddd
 
 - [ ] eee
@@ -706,11 +700,8 @@ hhh
     };
 
     const markdown = `1. aaa
-
    1. bbb
-
    2. ccc
-
 2. ddd
 `;
 

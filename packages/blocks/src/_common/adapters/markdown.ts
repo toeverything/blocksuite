@@ -30,7 +30,7 @@ import type { Column } from '../../database-block/types.js';
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
-import { fetchImage } from './utils.js';
+import { fetchImage, isNullish } from './utils.js';
 
 export type Markdown = string;
 
@@ -343,10 +343,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             context.getNodeContext('affine:list:parent') === o.parent &&
             currentTNode.type === 'list' &&
             currentTNode.ordered === (o.node.props.type === 'numbered') &&
-            currentTNode.children[0].checked ===
-              (o.node.props.type === 'todo'
-                ? (o.node.props.checked as boolean)
-                : undefined)
+            isNullish(currentTNode.children[0].checked) ===
+              isNullish(
+                o.node.props.type === 'todo'
+                  ? (o.node.props.checked as boolean)
+                  : undefined
+              )
           ) {
             context
               .openNode(
@@ -356,6 +358,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                     o.node.props.type === 'todo'
                       ? (o.node.props.checked as boolean)
                       : undefined,
+                  spread: false,
                   children: [],
                 },
                 'children'
@@ -374,6 +377,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 {
                   type: 'list',
                   ordered: o.node.props.type === 'numbered',
+                  spread: false,
                   children: [],
                 },
                 'children'
@@ -386,6 +390,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                     o.node.props.type === 'todo'
                       ? (o.node.props.checked as boolean)
                       : undefined,
+                  spread: false,
                   children: [],
                 },
                 'children'
@@ -645,10 +650,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             currentTNode.type === 'listItem' &&
             previousTNode?.type === 'list' &&
             previousTNode.ordered === (o.node.props.type === 'numbered') &&
-            previousTNode.children[0]?.checked ===
-              (o.node.props.type === 'todo'
-                ? (o.node.props.checked as boolean)
-                : undefined)
+            isNullish(previousTNode.children[0]?.checked) ===
+              isNullish(
+                o.node.props.type === 'todo'
+                  ? (o.node.props.checked as boolean)
+                  : undefined
+              )
           ) {
             context.closeNode();
             const nextONode = o.parent?.children[o.index! + 1];
