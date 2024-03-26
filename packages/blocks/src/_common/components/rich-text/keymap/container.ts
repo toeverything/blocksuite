@@ -380,6 +380,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       _preventDefault(ctx);
       return true;
     }
+    return;
   }
 
   function handleDelete(ctx: UIEventStateContext) {
