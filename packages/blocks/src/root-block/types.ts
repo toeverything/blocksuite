@@ -2,6 +2,7 @@
 
 import type { EdgelessRootBlockComponent } from './edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from './page/page-root-block.js';
+import type { AFFINE_AI_ACTION_PANEL_WIDGET } from './widgets/ai-action-panel/ai-action-panel.js';
 import type { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from './widgets/doc-remote-selection/doc-remote-selection.js';
 import type { AFFINE_DRAG_HANDLE_WIDGET } from './widgets/drag-handle/drag-handle.js';
 import type { AFFINE_EDGELESS_COPILOT_WIDGET } from './widgets/edgeless-copilot/index.js';
@@ -23,7 +24,8 @@ export type PageRootBlockWidgetName =
   | typeof AFFINE_PAGE_DRAGGING_AREA_WIDGET
   | typeof AFFINE_DRAG_HANDLE_WIDGET
   | typeof AFFINE_FORMAT_BAR_WIDGET
-  | typeof AFFINE_DOC_REMOTE_SELECTION_WIDGET;
+  | typeof AFFINE_DOC_REMOTE_SELECTION_WIDGET
+  | typeof AFFINE_AI_ACTION_PANEL_WIDGET;
 
 export type EdgelessRootBlockWidgetName =
   // | typeof AFFINE_BLOCK_HUB_WIDGET

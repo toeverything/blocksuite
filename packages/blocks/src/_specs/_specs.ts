@@ -1,4 +1,5 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+import { html } from 'lit';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 // import { AFFINE_BLOCK_HUB_WIDGET } from '../root-block/widgets/block-hub/block-hub.js';
@@ -34,6 +35,10 @@ import {
 } from '../root-block/index.js';
 import { PageRootService } from '../root-block/page/page-root-service.js';
 import { RootBlockSchema } from '../root-block/root-model.js';
+import {
+  AFFINE_AI_ACTION_PANEL_WIDGET,
+  AffineAIActionPanelWidget,
+} from '../root-block/widgets/ai-action-panel/ai-action-panel.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
 import { AFFINE_EDGELESS_COPILOT_WIDGET } from '../root-block/widgets/edgeless-copilot/index.js';
@@ -81,7 +86,45 @@ const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
       [AFFINE_PAGE_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(
         AFFINE_PAGE_DRAGGING_AREA_WIDGET
       )}`,
+      [AFFINE_AI_ACTION_PANEL_WIDGET]: literal`${unsafeStatic(
+        AFFINE_AI_ACTION_PANEL_WIDGET
+      )}`,
     },
+  },
+  setup: (slots, disposableGroup) => {
+    let answer = '';
+    disposableGroup.add(
+      slots.widgetConnected.on(view => {
+        if (view.component instanceof AffineAIActionPanelWidget) {
+          view.component.config = {
+            answerRenderer: answer => html`<div>${answer}</div>`,
+            generateAnswer: ({ input, update, finish, signal }) => {
+              const interval = setInterval(() => {
+                answer += input;
+                update(answer);
+              }, 1000);
+              const timeout = setTimeout(() => {
+                clearInterval(interval);
+                // finish('error');
+                finish('success');
+              }, 5000);
+              signal.addEventListener('abort', () => {
+                clearInterval(interval);
+                clearTimeout(timeout);
+              });
+            },
+
+            finishStateConfig: {
+              responses: [],
+            },
+            errorStateConfig: {
+              upgrade: () => {},
+              responses: [],
+            },
+          };
+        }
+      })
+    );
   },
 };
 
