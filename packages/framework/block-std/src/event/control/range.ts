@@ -1,3 +1,4 @@
+import type { BlockElement } from '../../view/index.js';
 import { UIEventState, UIEventStateContext } from '../base.js';
 import type {
   EventName,
@@ -120,7 +121,11 @@ export class RangeControl {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
-    const getBlockView = this._dispatcher.std.view.getNodeView;
+    const getBlockView = (node: Node) => {
+      const el = node instanceof Element ? node : node.parentElement;
+      // TODO(mirone/#6534): find a better way to get block element from a node
+      return el?.closest<BlockElement>('[data-block-id]');
+    };
     if (ancestor.nodeType === Node.TEXT_NODE) {
       const leaf = getBlockView(ancestor);
       if (leaf) {

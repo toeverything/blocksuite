@@ -3,26 +3,12 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { PathFinder } from '../utils/index.js';
 import type { BlockElement, WidgetElement } from './element/index.js';
-import type { NodeView } from './type.js';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface BlockSuiteViewSpec<T = any> {
-  type: BlockSuite.ViewType;
-  fromDOM: (node: Node) => null | NodeView<T>;
-  toDOM: (nodeView: NodeView<T>) => Element;
-  getChildren: (node: Element) => Element[];
-}
 
 export class ViewStore {
   readonly _blockMap = new Map<string, BlockElement>();
   readonly _widgetMap = new Map<string, WidgetElement>();
-  readonly viewSpec = new Set<BlockSuiteViewSpec>();
 
   constructor(public std: BlockSuite.Std) {}
-
-  register<T extends BlockSuite.ViewType>(spec: BlockSuite.View[T]) {
-    this.viewSpec.add(spec);
-  }
 
   calculatePath = (node: BlockElement | WidgetElement): string[] => {
     const path: string[] = [];
@@ -32,18 +18,6 @@ export class ViewStore {
       current = this.std.doc.getParent(current);
     }
     return path.reverse();
-  };
-
-  getNodeView = (node: Node): NodeView | null => {
-    for (const [_, spec] of this.viewSpec.entries()) {
-      const view = spec.fromDOM(node);
-      if (view) {
-        return {
-          ...view,
-        } as NodeView;
-      }
-    }
-    return null;
   };
 
   fromPath = (path: string[]): BlockElement | null => {
@@ -112,18 +86,7 @@ export class ViewStore {
   mount() {}
 
   unmount() {
-    this.viewSpec.clear();
     this._blockMap.clear();
     this._widgetMap.clear();
-  }
-}
-
-declare global {
-  namespace BlockSuite {
-    type View = {
-      [P in keyof NodeViewType]: BlockSuiteViewSpec<NodeViewType[P]>;
-    };
-
-    type ViewType = keyof View;
   }
 }

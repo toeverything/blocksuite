@@ -67,9 +67,8 @@ export class WidgetElement<
     this.std.view._widgetMap.set(widgetIndex, this);
     const parentElement = this.parentElement;
     assertExists(parentElement);
-    const nodeView = this.host.view.getNodeView(parentElement);
-    assertExists(nodeView);
-    this.blockElement = nodeView.view as B;
+    // TODO(mirone/#6534): find a better way to get block element from a node
+    this.blockElement = parentElement.closest('[data-block-id]') as B;
     this.service = this.blockElement.service;
     this.path = this.host.view.calculatePath(this).concat(id);
     this.service.specSlots.widgetConnected.emit({

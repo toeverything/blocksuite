@@ -68,12 +68,16 @@ export class BlockElement<
     return this.path.slice(0, -1);
   }
 
-  get parentBlockElement() {
-    const parentElement = this.parentElement;
-    assertExists(parentElement);
-    const nodeView = this.host.view.getNodeView(parentElement);
-    assertExists(nodeView);
-    return nodeView.view as BlockElement;
+  get parentBlockElement(): BlockElement | null {
+    const parentBlock = this.doc.getParent(this.model);
+    if (!parentBlock) {
+      return null;
+    }
+    const parentEl = this.host.view._blockMap.get(parentBlock.id);
+    if (!parentEl) {
+      return null;
+    }
+    return parentEl;
   }
 
   get childBlockElements() {
