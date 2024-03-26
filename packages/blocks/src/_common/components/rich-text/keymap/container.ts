@@ -378,6 +378,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
     if (!tryConvertBlock(blockElement, inlineEditor, prefixText, inlineRange)) {
       _preventDefault(ctx);
+      return true;
     }
   }
 
