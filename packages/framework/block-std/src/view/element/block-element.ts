@@ -69,8 +69,6 @@ export class BlockElement<
   }
 
   get parentBlockElement(): BlockElement {
-    console.log(this);
-    console.log(this.parentElement);
     const el = this.parentElement;
     // TODO(mirone/#6534): find a better way to get block element from a node
     return el?.closest('[data-block-id]') as BlockElement;
