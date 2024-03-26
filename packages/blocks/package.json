@@ -29,6 +29,7 @@
     "bson": "^6.5.0",
     "buffer": "^6.0.3",
     "date-fns": "^3.3.1",
+    "dompurify": "^3.0.11",
     "file-type": "^16.5.4",
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
@@ -87,5 +88,8 @@
     "!dist/__tests__",
     "schemas.d.ts",
     "schemas.js"
-  ]
+  ],
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5"
+  }
 }

@@ -201,6 +201,9 @@ importers:
       date-fns:
         specifier: ^3.3.1
         version: 3.3.1
+      dompurify:
+        specifier: ^3.0.11
+        version: 3.0.11
       file-type:
         specifier: ^16.5.4
         version: 16.5.4
@@ -285,6 +288,10 @@ importers:
       zod:
         specifier: ^3.22.4
         version: 3.22.4
+    devDependencies:
+      '@types/dompurify':
+        specifier: ^3.0.5
+        version: 3.0.5
 
   packages/docs:
     dependencies:
@@ -1982,6 +1989,12 @@ packages:
     dependencies:
       '@types/ms': 0.7.34
     dev: false
+
+  /@types/dompurify@3.0.5:
+    resolution: {integrity: sha512-1Wg0g3BtQF7sSb27fJQAKck1HECM6zV1EB66j8JH9i3LCjYabJa0FSdiSgsD5K/RbrsR0SiraKacLB+T8ZVYAg==}
+    dependencies:
+      '@types/trusted-types': 2.0.7
+    dev: true
 
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
@@ -3756,6 +3769,10 @@ packages:
     dependencies:
       esutils: 2.0.3
     dev: true
+
+  /dompurify@3.0.11:
+    resolution: {integrity: sha512-Fan4uMuyB26gFV3ovPoEoQbxRRPfTu3CvImyZnhGq5fsIEO+gEFLp45ISFt+kQBWsK5ulDdT0oV28jS1UrwQLg==}
+    dev: false
 
   /dot-prop@5.3.0:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
