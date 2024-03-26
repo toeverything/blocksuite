@@ -1,3 +1,4 @@
+import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import { DocCollection, Text } from '@blocksuite/store';
@@ -229,6 +230,18 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     if (!this.value || typeof this.value === 'string') {
       this._initYText(this.value);
     }
+
+    const selectAll = (e: KeyboardEvent) => {
+      if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.inlineEditor.selectAll();
+      }
+    };
+    this.addEventListener('keydown', selectAll);
+    this.disposables.add(() => {
+      this.removeEventListener('keydown', selectAll);
+    });
   }
 
   override firstUpdated() {

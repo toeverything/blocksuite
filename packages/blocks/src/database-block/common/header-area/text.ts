@@ -1,3 +1,4 @@
+import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
@@ -201,6 +202,21 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         );
       })
       .catch(console.error);
+  }
+
+  public override connectedCallback() {
+    super.connectedCallback();
+    const selectAll = (e: KeyboardEvent) => {
+      if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.inlineEditor.selectAll();
+      }
+    };
+    this.addEventListener('keydown', selectAll);
+    this.disposables.add(() => {
+      this.removeEventListener('keydown', selectAll);
+    });
   }
 
   override render() {
