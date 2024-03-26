@@ -4,6 +4,11 @@ import {
   AffineAIActionPanelWidget,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
+  toolbarDefaultConfig,
+} from '@blocksuite/blocks';
+import {
+  affineFormatBarAskAIButton,
+  AffineFormatBarWidget,
 } from '@blocksuite/blocks';
 import { html } from 'lit';
 import { literal, unsafeStatic } from 'lit/static-html.js';
@@ -53,6 +58,15 @@ export function getAIActionPanelSpecs() {
                     responses: [],
                   },
                 };
+              }
+
+              if (view.component instanceof AffineFormatBarWidget) {
+                const formatBar = view.component;
+                toolbarDefaultConfig(formatBar);
+                formatBar.addRawConfigItems(
+                  [affineFormatBarAskAIButton, { type: 'divider' }],
+                  0
+                );
               }
             })
           );

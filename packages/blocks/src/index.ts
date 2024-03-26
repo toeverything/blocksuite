@@ -20,6 +20,7 @@ import { deserializeXYWH } from './surface-block/index.js';
 export * from './_common/adapters/index.js';
 export type { SelectTag } from './_common/components/index.js';
 export {
+  affineFormatBarAskAIButton,
   popTagSelect,
   RichText,
   scrollbarStyle,
