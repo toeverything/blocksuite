@@ -399,7 +399,9 @@ export function convertDragPreviewDocToEdgeless({
   }
 
   const previewEl = dragPreview.querySelector(cssSelector);
-  assertExists(previewEl);
+  if (!previewEl) {
+    return false;
+  }
   const rect = previewEl.getBoundingClientRect();
   const border = 2;
   const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;

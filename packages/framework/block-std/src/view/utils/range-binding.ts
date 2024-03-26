@@ -222,7 +222,7 @@ export class RangeBinding {
 
       const parents: BlockElement[] = [];
       for (const highestBlock of highestBlocks) {
-        const parent = this.host.view.getParent(highestBlock.path)?.view;
+        const parent = this.host.view.getParent(highestBlock.path);
         if (!(parent instanceof BlockElement) || parents.includes(parent))
           continue;
 

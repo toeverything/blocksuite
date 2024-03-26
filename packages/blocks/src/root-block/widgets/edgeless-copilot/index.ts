@@ -9,12 +9,16 @@ import {
   requestConnectedFrame,
 } from '../../../_common/utils/event.js';
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
-import type { EdgelessRootBlockComponent } from '../../index.js';
+import type { RootBlockModel } from '../../index.js';
+import { type EdgelessRootBlockComponent } from '../../index.js';
 
 export const AFFINE_EDGELESS_COPILOT_WIDGET = 'affine-edgeless-copilot-widget';
 
 @customElement(AFFINE_EDGELESS_COPILOT_WIDGET)
-export class EdgelessCopilotWidget extends WidgetElement<EdgelessRootBlockComponent> {
+export class EdgelessCopilotWidget extends WidgetElement<
+  RootBlockModel,
+  EdgelessRootBlockComponent
+> {
   static override styles = css`
     .copilot-selection-rect {
       position: absolute;

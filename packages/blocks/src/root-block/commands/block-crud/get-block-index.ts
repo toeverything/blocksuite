@@ -20,13 +20,13 @@ export const getBlockIndexCommand: Command<
   if (!parent) {
     return;
   }
-  const index = parent.children.findIndex(x => {
+  const index = parent.childBlockElements.findIndex(x => {
     return PathFinder.equals(x.path, path);
   });
 
   next({
     blockIndex: index,
-    parentBlock: parent.view as BlockElement,
+    parentBlock: parent as BlockElement,
   });
 };
 

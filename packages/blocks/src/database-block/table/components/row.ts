@@ -122,9 +122,10 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     }
     e.preventDefault();
     const ele = e.target as HTMLElement;
-    const columnIndex =
-      ele.closest('affine-database-cell-container')?.columnIndex ?? 0;
+    const cell = ele.closest('affine-database-cell-container');
+    const columnIndex = cell?.columnIndex ?? 0;
     selection.selection = {
+      groupKey: this.groupKey,
       rowsSelection: {
         start: this.rowIndex,
         end: this.rowIndex,
@@ -199,6 +200,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               return;
             }
             this.setSelection({
+              groupKey: this.groupKey,
               rowsSelection: {
                 start: this.rowIndex,
                 end: this.rowIndex,
@@ -218,6 +220,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
             }
             const ele = e.currentTarget as HTMLElement;
             this.setSelection({
+              groupKey: this.groupKey,
               rowsSelection: {
                 start: this.rowIndex,
                 end: this.rowIndex,

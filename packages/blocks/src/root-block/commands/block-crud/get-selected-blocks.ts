@@ -65,7 +65,7 @@ export const getSelectedBlocksCommand: Command<
           if (!parent) {
             break;
           }
-          const view = parent.view;
+          const view = parent;
           if (
             view instanceof BlockElement &&
             !roles.includes(view.model.role)
@@ -81,7 +81,7 @@ export const getSelectedBlocksCommand: Command<
       }
       if (['flat', 'all'].includes(mode)) {
         viewStore.walkThrough(node => {
-          const view = node.view;
+          const view = node;
           if (!(view instanceof BlockElement)) {
             return true;
           }
