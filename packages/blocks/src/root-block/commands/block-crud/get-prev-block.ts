@@ -9,7 +9,7 @@ function getPrevSibling(std: BlockSuite.Std, path: string[]) {
   if (!blockElement) return null;
   const prev = std.doc.getPreviousSibling(blockElement.model);
   if (!prev) return null;
-  return view._blockMap.get(prev.id) ?? null;
+  return view.getBlock(prev.id);
 }
 
 function getPrevBlock(std: BlockSuite.Std, path: string[]) {

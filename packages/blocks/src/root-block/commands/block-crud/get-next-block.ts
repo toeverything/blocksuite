@@ -6,7 +6,7 @@ function getNextSibling(std: BlockSuite.Std, blockElement: BlockElement) {
   const view = std.view;
   const next = std.doc.getNextSibling(blockElement.model);
   if (!next) return null;
-  return view._blockMap.get(next.id) ?? null;
+  return view.getBlock(next.id);
 }
 
 function getNextBlock(std: BlockSuite.Std, path: string[]) {

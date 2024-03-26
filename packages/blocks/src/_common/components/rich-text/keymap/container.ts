@@ -401,8 +401,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       buildPath(model.doc.root)
     );
     assertExists(docBlock);
-    const linkedDocWidgetEle = blockElement.host.view._widgetMap.get(
-      `${root.id}|affine-linked-doc-widget`
+    const linkedDocWidgetEle = blockElement.host.view.getWidget(
+      'affine-linked-doc-widget',
+      root.id
     );
     if (!linkedDocWidgetEle) return false;
 

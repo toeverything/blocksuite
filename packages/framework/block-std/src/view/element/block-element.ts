@@ -78,7 +78,7 @@ export class BlockElement<
     const childModels = this.model.children;
     return childModels
       .map(child => {
-        return this.std.view._blockMap.get(child.id);
+        return this.std.view.getBlock(child.id);
       })
       .filter((x): x is BlockElement => !!x);
   }
@@ -208,10 +208,10 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.std.view._blockMap.set(this.model.id, this);
+    this.std.view.setBlock(this);
     const disposable = this.std.doc.slots.blockUpdated.on(({ type, id }) => {
       if (id === this.model.id && type === 'delete') {
-        this.std.view._blockMap.delete(this.model.id);
+        this.std.view.deleteBlock(this);
         disposable.dispose();
       }
     });

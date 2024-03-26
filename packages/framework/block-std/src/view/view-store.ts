@@ -5,8 +5,40 @@ import { PathFinder } from '../utils/index.js';
 import type { BlockElement, WidgetElement } from './element/index.js';
 
 export class ViewStore {
-  readonly _blockMap = new Map<string, BlockElement>();
-  readonly _widgetMap = new Map<string, WidgetElement>();
+  private readonly _blockMap = new Map<string, BlockElement>();
+  private readonly _widgetMap = new Map<string, WidgetElement>();
+
+  setBlock = (node: BlockElement) => {
+    this._blockMap.set(node.model.id, node);
+  };
+
+  setWidget = (node: WidgetElement) => {
+    const id = node.dataset.widgetId as string;
+    const widgetIndex = `${node.model.id}|${id}`;
+    this._widgetMap.set(widgetIndex, node);
+  };
+
+  getBlock = (id: string): BlockElement | null => {
+    return this._blockMap.get(id) ?? null;
+  };
+
+  getWidget = (
+    widgetName: string,
+    hostBlockId: string
+  ): WidgetElement | null => {
+    const widgetIndex = `${hostBlockId}|${widgetName}`;
+    return this._widgetMap.get(widgetIndex) ?? null;
+  };
+
+  deleteBlock = (node: BlockElement) => {
+    this._blockMap.delete(node.id);
+  };
+
+  deleteWidget = (node: WidgetElement) => {
+    const id = node.dataset.widgetId as string;
+    const widgetIndex = `${node.model.id}|${id}`;
+    this._widgetMap.delete(widgetIndex);
+  };
 
   constructor(public std: BlockSuite.Std) {}
 

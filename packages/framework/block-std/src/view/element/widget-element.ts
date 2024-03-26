@@ -63,8 +63,7 @@ export class WidgetElement<
   override connectedCallback() {
     super.connectedCallback();
     const id = this.dataset.widgetId as string;
-    const widgetIndex = `${this.model.id}|${id}`;
-    this.std.view._widgetMap.set(widgetIndex, this);
+    this.std.view.setWidget(this);
     const parentElement = this.parentElement;
     assertExists(parentElement);
     // TODO(mirone/#6534): find a better way to get block element from a node
@@ -79,9 +78,7 @@ export class WidgetElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    const id = this.dataset.widgetId as string;
-    const widgetIndex = `${this.model.id}|${id}`;
-    this.std.view._widgetMap.delete(widgetIndex);
+    this.std.view.deleteWidget(this);
     this.service.specSlots.widgetDisconnected.emit({
       service: this.blockElement.service,
       component: this,
