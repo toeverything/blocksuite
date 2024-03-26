@@ -59,6 +59,7 @@ test.describe('Embed synced doc', () => {
     await createAndConvertToEmbedSyncedDoc(page);
   });
 
+  // FIXME(mirone/#6534)
   test.skip('drag embed synced doc to whiteboard should fit in height', async ({
     page,
   }) => {

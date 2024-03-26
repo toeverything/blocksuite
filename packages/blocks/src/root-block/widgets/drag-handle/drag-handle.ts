@@ -370,7 +370,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       blockElements.forEach(element => {
         width = Math.max(width, element.getBoundingClientRect().width);
         const container = document.createElement('div');
-        // FIXME(mirone/view-store): use `renderSpecPortal` to render preview.
+        // FIXME(mirone/#6534): use `renderSpecPortal` to render preview.
         // render(this.host.renderModel(element.model), container);
         fragment.append(container);
       });
