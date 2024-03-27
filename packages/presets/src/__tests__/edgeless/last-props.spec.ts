@@ -38,7 +38,7 @@ describe('apply last props', () => {
   test('connector', () => {
     const id = service.addElement('connector', { mode: 0 });
     const connector = service.getElementById(id) as ConnectorElementModel;
-    expect(connector.stroke).toBe('--affine-palette-line-black');
+    expect(connector.stroke).toBe('--affine-palette-line-grey');
     expect(connector.strokeWidth).toBe(2);
     expect(connector.strokeStyle).toBe('solid');
     expect(connector.frontEndpointStyle).toBe('None');

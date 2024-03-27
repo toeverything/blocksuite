@@ -11,6 +11,7 @@ import {
 } from '../../_common/edgeless/note/consts.js';
 import { LineWidth, NoteDisplayMode } from '../../_common/types.js';
 import {
+  DEFAULT_CONNECTOR_COLOR,
   GET_DEFAULT_LINE_COLOR,
   GET_DEFAULT_TEXT_COLOR,
   LineColorsSchema,
@@ -149,7 +150,7 @@ export class EditSessionStorage {
     connector: {
       frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
       rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
-      stroke: GET_DEFAULT_LINE_COLOR(),
+      stroke: DEFAULT_CONNECTOR_COLOR,
       strokeStyle: StrokeStyle.Solid,
       strokeWidth: LineWidth.Two,
       rough: false,
