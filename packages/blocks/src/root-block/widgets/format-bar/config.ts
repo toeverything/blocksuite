@@ -2,7 +2,7 @@ import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { html, type TemplateResult } from 'lit';
 
-import { AskAIButton, toast } from '../../../_common/components/index.js';
+import { toast } from '../../../_common/components/index.js';
 import { createSimplePortal } from '../../../_common/components/portal.js';
 import { DATABASE_CONVERT_WHITE_LIST } from '../../../_common/configs/quick-action/database-convert-view.js';
 import {
@@ -275,12 +275,3 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
       icon: QuoteIcon,
     });
 }
-
-export const affineFormatBarAskAIButton = {
-  type: 'custom' as const,
-  render(formatBar: AffineFormatBarWidget): TemplateResult | null {
-    const askAIButton = new AskAIButton();
-    askAIButton.host = formatBar.host;
-    return html`${askAIButton}`;
-  },
-};

@@ -3,7 +3,7 @@ import {
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 
-import { getAIActionPanelSpecs } from './ai-action-panel/ai-action-panel.js';
+import { getAISpecs } from './ai/ai-action-panel.js';
 import { getCustomAttachmentSpecs } from './custom-attachment/custom-attachment.js';
 import { getLatexSpecs } from './latex/latex.js';
 
@@ -25,8 +25,8 @@ export function getExampleSpecs() {
     pageModeSpecs = specs.pageModeSpecs;
     edgelessModeSpecs = specs.edgelessModeSpecs;
   }
-  if (type === 'ai-action-panel') {
-    const specs = getAIActionPanelSpecs();
+  if (type === 'ai') {
+    const specs = getAISpecs();
     pageModeSpecs = specs.pageModeSpecs;
     edgelessModeSpecs = specs.edgelessModeSpecs;
   }

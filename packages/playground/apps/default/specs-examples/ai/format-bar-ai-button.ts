@@ -1,15 +1,15 @@
-import './ai-item-list.js';
-
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
+import {
+  AIItemGroups,
+  AIStarIcon,
+  createButtonPopper,
+  isInsidePageEditor,
+} from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { AIStarIcon } from '../../icons/ai.js';
-import { createButtonPopper } from '../../utils/button-popper.js';
-import { isInsidePageEditor } from '../../utils/query.js';
-import { AIConfigGroups } from './config.js';
-@customElement('ask-ai-button')
-export class AskAIButton extends WithDisposable(LitElement) {
+@customElement('format-bar-ai-button')
+export class FormatBarAIButton extends WithDisposable(LitElement) {
   static override styles = css`
     .ask-ai-icon-button {
       color: var(--affine-brand-color);
@@ -84,7 +84,7 @@ export class AskAIButton extends WithDisposable(LitElement) {
   }
 
   get _actionGroups() {
-    const filteredConfig = AIConfigGroups.map(group => ({
+    const filteredConfig = AIItemGroups.map(group => ({
       ...group,
       items: group.items.filter(item =>
         item.showWhen(this.host.command.chain(), this._editorMode)
@@ -115,6 +115,6 @@ export class AskAIButton extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ask-ai-button': AskAIButton;
+    'format-bar-ai-button': FormatBarAIButton;
   }
 }

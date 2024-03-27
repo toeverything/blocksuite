@@ -1,4 +1,4 @@
-import './ai-sub-menu.js';
+import './ai-sub-item-list.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -9,17 +9,17 @@ import { ref } from 'lit/directives/ref.js';
 
 import { ArrowRightIcon, EnterIcon } from '../../icons/ai.js';
 import { HoverController } from '../hover/controller.js';
-import { menuItemStyles } from './ai-sub-menu.js';
-import { type AIMenuConfigItem } from './config.js';
+import { menuItemStyles } from './styles.js';
+import type { AIItemConfig } from './types.js';
 
-@customElement('ai-menu-item')
-export class AIMenuItem extends WithDisposable(LitElement) {
+@customElement('ai-item')
+export class AIItem extends WithDisposable(LitElement) {
   static override styles = css`
     ${menuItemStyles}
   `;
 
   @property({ attribute: false })
-  item!: AIMenuConfigItem;
+  item!: AIItemConfig;
 
   @property({ attribute: false })
   host!: EditorHost;
@@ -30,11 +30,11 @@ export class AIMenuItem extends WithDisposable(LitElement) {
     super();
     this._whenHover = new HoverController(this, ({ abortController }) => {
       return {
-        template: html`<ai-sub-menu
+        template: html`<ai-sub-item-list
           .item=${this.item}
           .host=${this.host}
           .abortController=${abortController}
-        ></ai-sub-menu>`,
+        ></ai-sub-item-list>`,
         computePosition: {
           referenceElement: this,
           placement: 'right-start',
@@ -53,7 +53,7 @@ export class AIMenuItem extends WithDisposable(LitElement) {
 
   override render() {
     const { item } = this;
-    const hasSubConfig = !!item.subConfig && item.subConfig.length > 0;
+    const hasSubConfig = !!item.subItem && item.subItem.length > 0;
     return html`<div
       class="menu-item"
       @click=${() => typeof item.handler === 'function' && item.handler()}
@@ -61,7 +61,7 @@ export class AIMenuItem extends WithDisposable(LitElement) {
     >
       <span class="item-icon">${item.icon}</span>
       <div class="item-name">${item.name}</div>
-      ${item.subConfig
+      ${item.subItem
         ? html`<span class="arrow-right-icon">${ArrowRightIcon}</span>`
         : html`<span class="enter-icon">${EnterIcon}</span>`}
     </div>`;
@@ -70,6 +70,6 @@ export class AIMenuItem extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-menu-item': AIMenuItem;
+    'ai-item': AIItem;
   }
 }

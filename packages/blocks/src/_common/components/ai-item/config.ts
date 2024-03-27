@@ -1,5 +1,4 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
-import type { TemplateResult } from 'lit';
 
 import {
   AIDoneIcon,
@@ -14,42 +13,10 @@ import {
   TagIcon,
   ToneIcon,
 } from '../../icons/ai.js';
-import type { EditorMode } from '../../types.js';
 import { matchFlavours } from '../../utils/model.js';
+import type { AIItemGroupConfig, AISubItemConfig } from './types.js';
 
-export type AIGroup =
-  | 'doc'
-  | 'edit'
-  | 'draft'
-  | 'mindMap'
-  | 'create'
-  | 'code'
-  | 'presentation'
-  | 'draw'
-  | 'others';
-
-export interface AISubMenuConfigItem {
-  type: string;
-  handler?: () => void;
-}
-
-export interface AIMenuConfigItem {
-  name: string;
-  icon: TemplateResult | (() => HTMLElement);
-  showWhen: (chain: Chain<InitCommandCtx>, editorMode: EditorMode) => boolean;
-  subConfig?: AISubMenuConfigItem[];
-  /**
-   * TODO：add parameter to the handler function and implement the logic under each handler item
-   */
-  handler?: () => void;
-}
-
-export interface AIConfigGroup {
-  name: AIGroup;
-  items: AIMenuConfigItem[];
-}
-
-export const TranslateSubConfig: AISubMenuConfigItem[] = [
+export const translateSubItem: AISubItemConfig[] = [
   {
     type: 'English',
     handler: () => {
@@ -67,7 +34,7 @@ export const TranslateSubConfig: AISubMenuConfigItem[] = [
   { type: 'Korean' },
 ];
 
-export const ToneSubConfig: AISubMenuConfigItem[] = [
+export const toneSubItem: AISubItemConfig[] = [
   { type: 'professional' },
   { type: 'informal' },
   { type: 'friendly' },
@@ -102,7 +69,7 @@ const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   return matchFlavours(model, ['affine:code']);
 };
 
-export const DocAIGroup: AIConfigGroup = {
+const DocAIGroup: AIItemGroupConfig = {
   name: 'doc',
   items: [
     {
@@ -116,20 +83,20 @@ export const DocAIGroup: AIConfigGroup = {
   ],
 };
 
-export const EditAIGroup: AIConfigGroup = {
+const EditAIGroup: AIItemGroupConfig = {
   name: 'edit',
   items: [
     {
       name: 'Translate to',
       icon: LanguageIcon,
       showWhen: textBlockShowWhen,
-      subConfig: TranslateSubConfig,
+      subItem: translateSubItem,
     },
     {
       name: 'Change tone to',
       icon: ToneIcon,
       showWhen: textBlockShowWhen,
-      subConfig: ToneSubConfig,
+      subItem: toneSubItem,
     },
     {
       name: 'Improve writing for it',
@@ -178,7 +145,7 @@ export const EditAIGroup: AIConfigGroup = {
   ],
 };
 
-export const DraftAIGroup: AIConfigGroup = {
+const DraftAIGroup: AIItemGroupConfig = {
   name: 'draft',
   items: [
     {
@@ -214,7 +181,7 @@ export const DraftAIGroup: AIConfigGroup = {
   ],
 };
 
-export const MindMapAIGroup: AIConfigGroup = {
+const MindMapAIGroup: AIItemGroupConfig = {
   name: 'mindMap',
   items: [
     {
@@ -260,7 +227,7 @@ export const MindMapAIGroup: AIConfigGroup = {
   ],
 };
 
-export const CreateAIGroup: AIConfigGroup = {
+const CreateAIGroup: AIItemGroupConfig = {
   name: 'create',
   items: [
     {
@@ -287,7 +254,7 @@ export const CreateAIGroup: AIConfigGroup = {
   ],
 };
 
-export const CodeAIGroup: AIConfigGroup = {
+const CodeAIGroup: AIItemGroupConfig = {
   name: 'code',
   items: [
     {
@@ -298,7 +265,7 @@ export const CodeAIGroup: AIConfigGroup = {
   ],
 };
 
-export const PresentationAIGroup: AIConfigGroup = {
+const PresentationAIGroup: AIItemGroupConfig = {
   name: 'presentation',
   items: [
     {
@@ -325,7 +292,7 @@ export const PresentationAIGroup: AIConfigGroup = {
   ],
 };
 
-export const DrawAIGroup: AIConfigGroup = {
+const DrawAIGroup: AIItemGroupConfig = {
   name: 'draw',
   items: [
     {
@@ -352,7 +319,7 @@ export const DrawAIGroup: AIConfigGroup = {
   ],
 };
 
-export const OthersAIGroup: AIConfigGroup = {
+const OthersAIGroup: AIItemGroupConfig = {
   name: 'others',
   items: [
     {
@@ -416,7 +383,7 @@ export const OthersAIGroup: AIConfigGroup = {
   ],
 };
 
-export const AIConfigGroups: AIConfigGroup[] = [
+export const AIItemGroups: AIItemGroupConfig[] = [
   DocAIGroup,
   EditAIGroup,
   DraftAIGroup,

@@ -1,4 +1,4 @@
-import './ai-menu-item.js';
+import './ai-item.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -7,7 +7,7 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { type AIConfigGroup } from './config.js';
+import type { AIItemGroupConfig } from './types.js';
 
 @customElement('ai-item-list')
 export class AIItemList extends WithDisposable(LitElement) {
@@ -39,7 +39,7 @@ export class AIItemList extends WithDisposable(LitElement) {
   host!: EditorHost;
 
   @property({ attribute: false })
-  groups!: AIConfigGroup[];
+  groups!: AIItemGroupConfig[];
 
   private _getGroupName(name: string) {
     const groupName = name === 'others' ? name : name + ' with ai';
@@ -56,8 +56,7 @@ export class AIItemList extends WithDisposable(LitElement) {
           : nothing}
         ${repeat(
           group.items,
-          item =>
-            html`<ai-menu-item .item=${item} .host=${this.host}></ai-menu-item>`
+          item => html`<ai-item .item=${item} .host=${this.host}></ai-item>`
         )}
       `;
     })}`;

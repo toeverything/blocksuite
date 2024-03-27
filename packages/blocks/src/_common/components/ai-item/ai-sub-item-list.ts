@@ -5,58 +5,11 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { EnterIcon } from '../../icons/ai.js';
-import { type AIMenuConfigItem, type AISubMenuConfigItem } from './config.js';
+import { menuItemStyles } from './styles.js';
+import type { AIItemConfig, AISubItemConfig } from './types.js';
 
-export const menuItemStyles = css`
-  .menu-item {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 4px 12px;
-    gap: 4px;
-    align-self: stretch;
-    border-radius: 4px;
-    box-sizing: border-box;
-    &:hover {
-      background: var(--affine-hover-color);
-      cursor: pointer;
-    }
-  }
-  .item-icon {
-    display: flex;
-    color: var(--affine-brand-color);
-  }
-  .item-name {
-    display: flex;
-    padding: 0px 4px;
-    align-items: center;
-    flex: 1 0 0;
-    color: var(--affine-text-primary-color);
-    text-align: justify;
-    font-feature-settings:
-      'clig' off,
-      'liga' off;
-    font-size: var(--affine-font-sm);
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px;
-  }
-  .enter-icon,
-  .arrow-right-icon {
-    color: var(--affine-icon-color);
-  }
-  .enter-icon {
-    display: none;
-  }
-  .arrow-right-icon,
-  .menu-item:hover .enter-icon {
-    display: flex;
-  }
-`;
-
-@customElement('ai-sub-menu')
-export class AISubMenu extends WithDisposable(LitElement) {
+@customElement('ai-sub-item-list')
+export class AISubItemList extends WithDisposable(LitElement) {
   static override styles = css`
     .ai-sub-menu {
       display: flex;
@@ -90,12 +43,12 @@ export class AISubMenu extends WithDisposable(LitElement) {
   host!: EditorHost;
 
   @property({ attribute: false })
-  item!: AIMenuConfigItem;
+  item!: AIItemConfig;
 
   @property({ attribute: false })
   abortController!: AbortController;
 
-  private _handleClick = (subItem: AISubMenuConfigItem) => {
+  private _handleClick = (subItem: AISubItemConfig) => {
     if (subItem.handler) {
       // TODO: add parameters to ai handler
       subItem.handler();
@@ -105,9 +58,9 @@ export class AISubMenu extends WithDisposable(LitElement) {
   };
 
   override render() {
-    if (!this.item.subConfig || this.item.subConfig.length <= 0) return nothing;
+    if (!this.item.subItem || this.item.subItem.length <= 0) return nothing;
     return html`<div class="ai-sub-menu">
-      ${this.item.subConfig?.map(
+      ${this.item.subItem?.map(
         subItem =>
           html`<div
             class="menu-item"
@@ -123,6 +76,6 @@ export class AISubMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-sub-menu': AISubMenu;
+    'ai-sub-item-list': AISubItemList;
   }
 }
