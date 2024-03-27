@@ -10,10 +10,8 @@ import {
   MoreHorizontalIcon,
   NewEditIcon,
 } from '../../../_common/icons/index.js';
-import {
-  getRootByElement,
-  type TableViewSelection,
-} from '../../../_common/utils/index.js';
+import { type TableViewSelection } from '../../../_common/utils/index.js';
+import type { DataViewNative } from '../../data-view.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import { openDetail, popRowMenu } from './menu.js';
@@ -100,6 +98,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     return this.closest('affine-database-table')?.selectionController;
   }
   @property({ attribute: false })
+  dataViewEle!: DataViewNative;
+  @property({ attribute: false })
   view!: DataViewTableManager;
   @property({ attribute: false })
   rowIndex!: number;
@@ -136,8 +136,12 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       },
       isEditing: false,
     };
-    const rootElement = getRootByElement(this);
-    popRowMenu(rootElement, positionToVRect(e.x, e.y), this.rowId, selection);
+    popRowMenu(
+      this.dataViewEle,
+      positionToVRect(e.x, e.y),
+      this.rowId,
+      selection
+    );
   };
 
   public override connectedCallback() {
@@ -211,8 +215,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               },
               isEditing: false,
             });
-            const rootElement = getRootByElement(this);
-            openDetail(rootElement, this.rowId, this.selectionController);
+            openDetail(this.dataViewEle, this.rowId, this.selectionController);
           };
           const openMenu = (e: MouseEvent) => {
             if (!this.selectionController) {
@@ -231,8 +234,12 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               },
               isEditing: false,
             });
-            const rootElement = getRootByElement(this);
-            popRowMenu(rootElement, ele, this.rowId, this.selectionController);
+            popRowMenu(
+              this.dataViewEle,
+              ele,
+              this.rowId,
+              this.selectionController
+            );
           };
           return html`
             <div>

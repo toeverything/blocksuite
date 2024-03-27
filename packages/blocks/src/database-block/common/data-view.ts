@@ -8,6 +8,7 @@ import type { Doc } from '@blocksuite/store';
 
 import type { UniComponent } from '../../_common/components/uni-component/uni-component.js';
 import type { DataViewSelection } from '../../_common/utils/index.js';
+import type { DataViewNative } from '../data-view.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { InsertToPosition } from '../types.js';
 import type { DataViewManager } from './data-view-manager.js';
@@ -20,6 +21,8 @@ export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
   Selection extends DataViewSelection = DataViewSelection,
 > {
+  dataViewEle: DataViewNative;
+
   header?: DataViewHeaderComponentProp<T>;
 
   view: T;

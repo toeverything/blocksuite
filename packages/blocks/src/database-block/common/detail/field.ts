@@ -43,6 +43,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       width: 116px;
       border-radius: 4px;
       cursor: pointer;
+      user-select: none;
     }
 
     .field-left:hover {

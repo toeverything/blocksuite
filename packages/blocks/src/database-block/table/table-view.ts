@@ -224,6 +224,7 @@ export class DataViewTable extends BaseDataView<
           ${groupHelper.groups.map(group => {
             return html`<affine-data-view-table-group
               data-group-key="${group.key}"
+              .dataViewEle="${this.dataViewEle}"
               .view="${this.view}"
               .viewEle="${this}"
               .group="${group}"
