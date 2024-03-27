@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type {
   AIActionPanelListGroup,
   AIActionPanelListGroupItem,
-} from '../item.js';
+} from '../list.js';
 
 export interface AIActionPanelErrorConfig {
   upgrade: () => void;
