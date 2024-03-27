@@ -210,6 +210,7 @@ export class DataViewKanban extends BaseDataView<
           group => {
             return html` <affine-data-view-kanban-group
               data-key="${group.key}"
+              .dataViewEle="${this.dataViewEle}"
               .view="${this.view}"
               .group="${group}"
             ></affine-data-view-kanban-group>`;

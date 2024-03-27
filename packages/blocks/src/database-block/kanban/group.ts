@@ -10,6 +10,7 @@ import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js'
 import { AddCursorIcon } from '../../_common/icons/index.js';
 import { GroupTitle } from '../common/group-by/group-title.js';
 import type { GroupData } from '../common/group-by/helper.js';
+import type { DataViewNative } from '../data-view.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
 const styles = css`
@@ -97,6 +98,8 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  dataViewEle!: DataViewNative;
+  @property({ attribute: false })
   view!: DataViewKanbanManager;
   @property({ attribute: false })
   group!: GroupData;
@@ -171,6 +174,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
               <affine-data-view-kanban-card
                 data-card-id="${id}"
                 .groupKey="${this.group.key}"
+                .dataViewEle="${this.dataViewEle}"
                 .view="${this.view}"
                 .cardId="${id}"
               ></affine-data-view-kanban-card>

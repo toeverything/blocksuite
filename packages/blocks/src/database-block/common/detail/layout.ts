@@ -1,12 +1,16 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { autoUpdate, computePosition, size } from '@floating-ui/dom';
+import {
+  autoUpdate,
+  computePosition,
+  type ReferenceElement,
+  size,
+} from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { createModal } from '../../../_common/components/menu/index.js';
 import { CrossIcon } from '../../../_common/icons/index.js';
-import type { RootBlockComponent } from '../../../index.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import { RecordDetail } from './detail.js';
 
@@ -89,18 +93,18 @@ class SideLayoutModal extends ShadowlessElement {
 }
 
 export const popSideDetail = (ops: {
-  rootElement: RootBlockComponent | null;
+  attachTo: HTMLElement;
+  target: ReferenceElement;
   view: DataViewManager;
   rowId: string;
   onClose?: () => void;
 }) => {
-  const rootElement = ops.rootElement;
+  const rootElement = ops.attachTo;
   assertExists(rootElement);
-  const block = findFirstBlockParent(rootElement) ?? rootElement;
   const modal = createModal(rootElement);
-  // fit to the size of the page element
-  const cancel = autoUpdate(block, modal, () => {
-    computePosition(block, modal, {
+  // fit to the size of the body element
+  const cancel = autoUpdate(ops.target, modal, () => {
+    computePosition(ops.target, modal, {
       middleware: [
         size({
           apply: ({ rects }) => {
@@ -131,10 +135,4 @@ export const popSideDetail = (ops: {
   };
   modal.onclick = close;
   modal.append(sideContainer);
-};
-const findFirstBlockParent = (ele: HTMLElement | null) => {
-  while (ele && ele.computedStyleMap().get('display')?.toString() !== 'block') {
-    ele = ele.parentElement;
-  }
-  return ele;
 };

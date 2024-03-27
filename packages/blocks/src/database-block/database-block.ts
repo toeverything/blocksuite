@@ -6,8 +6,7 @@ import './common/header/tools/tools.js';
 import './common/filter/filter-bar.js';
 import './data-view.js';
 
-import { PathFinder } from '@blocksuite/block-std';
-import { BlockElement, RangeManager } from '@blocksuite/block-std';
+import { BlockElement, PathFinder, RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -32,6 +31,8 @@ import {
   captureEventTarget,
   getDropResult,
 } from '../root-block/widgets/drag-handle/utils.js';
+import type { AffineInnerModalWidget } from '../root-block/widgets/inner-modal/inner-modal.js';
+import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
@@ -67,6 +68,7 @@ export class DatabaseBlockComponent extends BlockElement<
       background-color: var(--affine-hover-color);
       border-radius: 4px;
     }
+
     .database-ops {
       margin-top: 4px;
       padding: 2px;
@@ -74,11 +76,13 @@ export class DatabaseBlockComponent extends BlockElement<
       display: flex;
       cursor: pointer;
     }
+
     .database-ops svg {
       width: 16px;
       height: 16px;
       color: var(--affine-icon-color);
     }
+
     .database-ops:hover {
       background-color: var(--affine-hover-color);
     }
@@ -169,11 +173,12 @@ export class DatabaseBlockComponent extends BlockElement<
       },
     });
   };
+
   private renderDatabaseOps() {
     if (this.doc.readonly) {
       return nothing;
     }
-    return html`<div class="database-ops" @click="${this._clickDatabaseOps}">
+    return html` <div class="database-ops" @click="${this._clickDatabaseOps}">
       ${MoreHorizontalIcon}
     </div>`;
   }
@@ -292,7 +297,7 @@ export class DatabaseBlockComponent extends BlockElement<
     ></affine-database-title>`;
   };
   private renderReference = () => {
-    return html`<div></div>`;
+    return html` <div></div>`;
   };
 
   headerComponent = defineUniComponent(
@@ -359,6 +364,12 @@ export class DatabaseBlockComponent extends BlockElement<
     };
   };
 
+  get innerModalWidget() {
+    return this.rootElement.widgetElements[
+      AFFINE_INNER_MODAL_WIDGET
+    ] as AffineInnerModalWidget;
+  }
+
   override renderBlock() {
     const config: DataViewNativeConfig = {
       bindHotkey: this._bindHotkey,
@@ -371,6 +382,9 @@ export class DatabaseBlockComponent extends BlockElement<
       headerComponent: this.headerComponent,
       onDrag: this.onDrag,
       std: this.std,
+      detailPanelConfig: {
+        target: () => this.innerModalWidget.target,
+      },
     };
     return html`
       <div contenteditable="false" style="position: relative">
@@ -380,7 +394,7 @@ export class DatabaseBlockComponent extends BlockElement<
         ></affine-data-view-native>
 
         <affine-block-selection
-          .block=${this}
+          .block="${this}"
           style="z-index: 1"
         ></affine-block-selection>
       </div>

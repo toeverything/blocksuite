@@ -9,19 +9,17 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../_common/icons/index.js';
-import type { RootBlockComponent } from '../../index.js';
-import { popSideDetail } from '../common/detail/layout.js';
+import type { DataViewNative } from '../data-view.js';
 import type { KanbanSelectionController } from './controller/selection.js';
 
 export const openDetail = (
-  rootElement: RootBlockComponent | null,
+  dataViewEle: DataViewNative,
   rowId: string,
   selection: KanbanSelectionController
 ) => {
   const old = selection.selection;
   selection.selection = undefined;
-  popSideDetail({
-    rootElement,
+  dataViewEle.openDetailPanel({
     view: selection.view,
     rowId: rowId,
     onClose: () => {
@@ -31,7 +29,7 @@ export const openDetail = (
 };
 
 export const popCardMenu = (
-  rootElement: RootBlockComponent | null,
+  dataViewEle: DataViewNative,
   ele: ReferenceElement,
   rowId: string,
   selection: KanbanSelectionController
@@ -42,7 +40,7 @@ export const popCardMenu = (
       name: 'Expand Card',
       icon: ExpandFullIcon,
       select: () => {
-        openDetail(rootElement, rowId, selection);
+        openDetail(dataViewEle, rowId, selection);
       },
     },
     {
