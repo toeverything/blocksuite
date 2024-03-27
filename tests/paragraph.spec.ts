@@ -1309,8 +1309,7 @@ test('press arrow up in the second line should move caret to the first line', as
   // Focus the empty paragraph
   await focusRichText(page, 1);
   await assertRichTexts(page, ['ib'.repeat(75), '']);
-  await pressArrowUp(page, 4);
-  await pressArrowDown(page);
+  await pressArrowUp(page, 2);
   await type(page, '0');
   await assertTitle(page, '');
   await assertRichTexts(page, ['0' + 'ib'.repeat(75), '']);
