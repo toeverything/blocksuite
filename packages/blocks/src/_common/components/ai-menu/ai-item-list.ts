@@ -1,4 +1,4 @@
-import './ai-action-item.js';
+import './ai-menu-item.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -7,10 +7,10 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { type AIActionConfigGroup } from './config.js';
+import { type AIConfigGroup } from './config.js';
 
-@customElement('ai-action-list')
-export class AIActionList extends WithDisposable(LitElement) {
+@customElement('ai-item-list')
+export class AIItemList extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -39,7 +39,7 @@ export class AIActionList extends WithDisposable(LitElement) {
   host!: EditorHost;
 
   @property({ attribute: false })
-  groups!: AIActionConfigGroup[];
+  groups!: AIConfigGroup[];
 
   private _getGroupName(name: string) {
     const groupName = name === 'others' ? name : name + ' with ai';
@@ -57,10 +57,7 @@ export class AIActionList extends WithDisposable(LitElement) {
         ${repeat(
           group.items,
           item =>
-            html`<ai-action-item
-              .item=${item}
-              .host=${this.host}
-            ></ai-action-item>`
+            html`<ai-menu-item .item=${item} .host=${this.host}></ai-menu-item>`
         )}
       `;
     })}`;
@@ -69,6 +66,6 @@ export class AIActionList extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-action-list': AIActionList;
+    'ai-item-list': AIItemList;
   }
 }

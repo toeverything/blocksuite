@@ -5,13 +5,10 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { EnterIcon } from '../../icons/ai.js';
-import {
-  type AIActionConfigItem,
-  type AIActionSubConfigItem,
-} from './config.js';
+import { type AIMenuConfigItem, type AISubMenuConfigItem } from './config.js';
 
-export const actionItemStyles = css`
-  .action-item {
+export const menuItemStyles = css`
+  .menu-item {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -26,11 +23,11 @@ export const actionItemStyles = css`
       cursor: pointer;
     }
   }
-  .action-icon {
+  .item-icon {
     display: flex;
     color: var(--affine-brand-color);
   }
-  .action-name {
+  .item-name {
     display: flex;
     padding: 0px 4px;
     align-items: center;
@@ -53,15 +50,15 @@ export const actionItemStyles = css`
     display: none;
   }
   .arrow-right-icon,
-  .action-item:hover .enter-icon {
+  .menu-item:hover .enter-icon {
     display: flex;
   }
 `;
 
-@customElement('ai-action-sub-menu')
-export class AIActionSubMenu extends WithDisposable(LitElement) {
+@customElement('ai-sub-menu')
+export class AISubMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    .action-sub-menu {
+    .ai-sub-menu {
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
@@ -86,22 +83,22 @@ export class AIActionSubMenu extends WithDisposable(LitElement) {
       line-height: 22px;
       user-select: none;
     }
-    ${actionItemStyles}
+    ${menuItemStyles}
   `;
 
   @property({ attribute: false })
   host!: EditorHost;
 
   @property({ attribute: false })
-  item!: AIActionConfigItem;
+  item!: AIMenuConfigItem;
 
   @property({ attribute: false })
   abortController!: AbortController;
 
-  private _handleClick = (subItem: AIActionSubConfigItem) => {
-    if (subItem.action) {
-      // TODO: add parameters to action
-      subItem.action();
+  private _handleClick = (subItem: AISubMenuConfigItem) => {
+    if (subItem.handler) {
+      // TODO: add parameters to ai handler
+      subItem.handler();
     }
 
     this.abortController.abort();
@@ -109,14 +106,14 @@ export class AIActionSubMenu extends WithDisposable(LitElement) {
 
   override render() {
     if (!this.item.subConfig || this.item.subConfig.length <= 0) return nothing;
-    return html`<div class="action-sub-menu">
+    return html`<div class="ai-sub-menu">
       ${this.item.subConfig?.map(
         subItem =>
           html`<div
-            class="action-item"
+            class="menu-item"
             @click=${() => this._handleClick(subItem)}
           >
-            <div class="action-name">${subItem.type}</div>
+            <div class="item-name">${subItem.type}</div>
             <span class="enter-icon">${EnterIcon}</span>
           </div>`
       )}
@@ -126,6 +123,6 @@ export class AIActionSubMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-action-sub-menu': AIActionSubMenu;
+    'ai-sub-menu': AISubMenu;
   }
 }

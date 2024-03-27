@@ -1,5 +1,4 @@
-import { assertExists, type Disposable } from '@blocksuite/global/utils';
-import { computePosition, flip, offset, shift } from '@floating-ui/dom';
+import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 
 import {
@@ -25,109 +24,6 @@ export function getCommonRectStyle(
     height: `${rect.height}px`,
     transform: `translate(${rect.x}px, ${rect.y}px) rotate(${rotate}deg)`,
     backgroundColor: !active && selected ? 'var(--affine-hover-color)' : '',
-  };
-}
-
-export function listenClickAway(
-  element: HTMLElement,
-  onClickAway: () => void
-): Disposable {
-  const callback = (event: MouseEvent) => {
-    const inside = event.composedPath().includes(element);
-    if (!inside) {
-      onClickAway();
-    }
-  };
-
-  document.addEventListener('click', callback);
-
-  return {
-    dispose: () => {
-      document.removeEventListener('click', callback);
-    },
-  };
-}
-
-const ATTR_SHOW = 'data-show';
-/**
- * Using attribute 'data-show' to control popper visibility.
- *
- * ```css
- * selector {
- *   display: none;
- * }
- * selector[data-show] {
- *   display: block;
- * }
- * ```
- */
-export function createButtonPopper(
-  reference: HTMLElement,
-  popperElement: HTMLElement,
-  stateUpdated: (state: { display: 'show' | 'hidden' }) => void = () => {
-    /** DEFAULT EMPTY FUNCTION */
-  },
-  mainAxis?: number,
-  crossAxis?: number
-) {
-  function compute() {
-    computePosition(reference, popperElement, {
-      placement: 'top',
-      middleware: [
-        offset({
-          mainAxis: mainAxis ?? 14,
-          crossAxis: crossAxis ?? 0,
-        }),
-        flip({
-          fallbackPlacements: ['bottom'],
-        }),
-        shift({
-          padding: 10,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        Object.assign(popperElement.style, {
-          position: 'absolute',
-          zIndex: 1,
-          left: `${x}px`,
-          top: `${y}px`,
-        });
-      })
-      .catch(console.error);
-  }
-
-  const show = () => {
-    popperElement.setAttribute(ATTR_SHOW, '');
-    compute();
-    stateUpdated({ display: 'show' });
-  };
-
-  const hide = () => {
-    if (!popperElement) return;
-    popperElement.removeAttribute(ATTR_SHOW);
-
-    compute();
-    stateUpdated({ display: 'hidden' });
-  };
-
-  const toggle = () => {
-    if (popperElement.hasAttribute(ATTR_SHOW)) {
-      hide();
-    } else {
-      show();
-    }
-  };
-
-  const clickAway = listenClickAway(reference, () => hide());
-
-  return {
-    show,
-    hide,
-    toggle,
-    dispose: () => {
-      clickAway.dispose();
-    },
   };
 }
 

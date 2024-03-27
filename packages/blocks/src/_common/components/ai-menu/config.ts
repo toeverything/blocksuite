@@ -17,7 +17,7 @@ import {
 import type { EditorMode } from '../../types.js';
 import { matchFlavours } from '../../utils/model.js';
 
-export type AIActionGroup =
+export type AIGroup =
   | 'doc'
   | 'edit'
   | 'draft'
@@ -28,31 +28,31 @@ export type AIActionGroup =
   | 'draw'
   | 'others';
 
-export interface AIActionSubConfigItem {
+export interface AISubMenuConfigItem {
   type: string;
-  action?: () => void;
+  handler?: () => void;
 }
 
-export interface AIActionConfigItem {
+export interface AIMenuConfigItem {
   name: string;
   icon: TemplateResult | (() => HTMLElement);
   showWhen: (chain: Chain<InitCommandCtx>, editorMode: EditorMode) => boolean;
-  subConfig?: AIActionSubConfigItem[];
+  subConfig?: AISubMenuConfigItem[];
   /**
-   * TODO：add parameter to the action function and implement the logic under each action item
+   * TODO：add parameter to the handler function and implement the logic under each handler item
    */
-  action?: () => void;
+  handler?: () => void;
 }
 
-export interface AIActionConfigGroup {
-  name: AIActionGroup;
-  items: AIActionConfigItem[];
+export interface AIConfigGroup {
+  name: AIGroup;
+  items: AIMenuConfigItem[];
 }
 
-export const TranslateSubConfig: AIActionSubConfigItem[] = [
+export const TranslateSubConfig: AISubMenuConfigItem[] = [
   {
     type: 'English',
-    action: () => {
+    handler: () => {
       // TODO: implement the logic to translate to English
     },
   },
@@ -67,7 +67,7 @@ export const TranslateSubConfig: AIActionSubConfigItem[] = [
   { type: 'Korean' },
 ];
 
-export const ToneSubConfig: AIActionSubConfigItem[] = [
+export const ToneSubConfig: AISubMenuConfigItem[] = [
   { type: 'professional' },
   { type: 'informal' },
   { type: 'friendly' },
@@ -102,21 +102,21 @@ const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   return matchFlavours(model, ['affine:code']);
 };
 
-export const DocActionGroup: AIActionConfigGroup = {
+export const DocAIGroup: AIConfigGroup = {
   name: 'doc',
   items: [
     {
       name: 'Summary',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      action: () => {
+      handler: () => {
         // TODO: Implement the logic to summarize the text
       },
     },
   ],
 };
 
-export const EditActionGroup: AIActionConfigGroup = {
+export const EditAIGroup: AIConfigGroup = {
   name: 'edit',
   items: [
     {
@@ -178,7 +178,7 @@ export const EditActionGroup: AIActionConfigGroup = {
   ],
 };
 
-export const DraftActionGroup: AIActionConfigGroup = {
+export const DraftAIGroup: AIConfigGroup = {
   name: 'draft',
   items: [
     {
@@ -214,7 +214,7 @@ export const DraftActionGroup: AIActionConfigGroup = {
   ],
 };
 
-export const MindMapActionGroup: AIActionConfigGroup = {
+export const MindMapAIGroup: AIConfigGroup = {
   name: 'mindMap',
   items: [
     {
@@ -260,7 +260,7 @@ export const MindMapActionGroup: AIActionConfigGroup = {
   ],
 };
 
-export const CreateActionGroup: AIActionConfigGroup = {
+export const CreateAIGroup: AIConfigGroup = {
   name: 'create',
   items: [
     {
@@ -287,7 +287,7 @@ export const CreateActionGroup: AIActionConfigGroup = {
   ],
 };
 
-export const CodeActionGroup: AIActionConfigGroup = {
+export const CodeAIGroup: AIConfigGroup = {
   name: 'code',
   items: [
     {
@@ -298,7 +298,7 @@ export const CodeActionGroup: AIActionConfigGroup = {
   ],
 };
 
-export const PresentationActionGroup: AIActionConfigGroup = {
+export const PresentationAIGroup: AIConfigGroup = {
   name: 'presentation',
   items: [
     {
@@ -325,7 +325,7 @@ export const PresentationActionGroup: AIActionConfigGroup = {
   ],
 };
 
-export const DrawActionGroup: AIActionConfigGroup = {
+export const DrawAIGroup: AIConfigGroup = {
   name: 'draw',
   items: [
     {
@@ -352,7 +352,7 @@ export const DrawActionGroup: AIActionConfigGroup = {
   ],
 };
 
-export const OthersActionGroup: AIActionConfigGroup = {
+export const OthersAIGroup: AIConfigGroup = {
   name: 'others',
   items: [
     {
@@ -396,7 +396,7 @@ export const OthersActionGroup: AIActionConfigGroup = {
       showWhen: codeBlockShowWhen,
     },
     {
-      name: 'Find action items from it',
+      name: 'Find handler items from it',
       icon: AISearchIcon,
       showWhen: textBlockShowWhen,
     },
@@ -416,14 +416,14 @@ export const OthersActionGroup: AIActionConfigGroup = {
   ],
 };
 
-export const AIActionConfig: AIActionConfigGroup[] = [
-  DocActionGroup,
-  EditActionGroup,
-  DraftActionGroup,
-  MindMapActionGroup,
-  CreateActionGroup,
-  CodeActionGroup,
-  PresentationActionGroup,
-  DrawActionGroup,
-  OthersActionGroup,
+export const AIConfigGroups: AIConfigGroup[] = [
+  DocAIGroup,
+  EditAIGroup,
+  DraftAIGroup,
+  MindMapAIGroup,
+  CreateAIGroup,
+  CodeAIGroup,
+  PresentationAIGroup,
+  DrawAIGroup,
+  OthersAIGroup,
 ];

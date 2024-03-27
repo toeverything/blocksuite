@@ -1,14 +1,13 @@
-import './ai-action-list.js';
+import './ai-item-list.js';
 
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { createButtonPopper } from '../../../root-block/edgeless/components/utils.js';
-import type { AffineFormatBarWidget } from '../../../root-block/widgets/format-bar/format-bar.js';
 import { AIStarIcon } from '../../icons/ai.js';
+import { createButtonPopper } from '../../utils/button-popper.js';
 import { isInsidePageEditor } from '../../utils/query.js';
-import { AIActionConfig } from './config.js';
+import { AIConfigGroups } from './config.js';
 @customElement('ask-ai-button')
 export class AskAIButton extends WithDisposable(LitElement) {
   static override styles = css`
@@ -16,6 +15,7 @@ export class AskAIButton extends WithDisposable(LitElement) {
       color: var(--affine-brand-color);
       font-weight: 500;
       font-size: var(--affine-font-sm);
+      position: relative;
     }
 
     .ask-ai-icon-button span {
@@ -84,7 +84,7 @@ export class AskAIButton extends WithDisposable(LitElement) {
   }
 
   get _actionGroups() {
-    const filteredConfig = AIActionConfig.map(group => ({
+    const filteredConfig = AIConfigGroups.map(group => ({
       ...group,
       items: group.items.filter(item =>
         item.showWhen(this.host.command.chain(), this._editorMode)
@@ -104,10 +104,10 @@ export class AskAIButton extends WithDisposable(LitElement) {
         ${AIStarIcon} <span>Ask AI</span></icon-button
       >
       <div class="ask-ai-panel">
-        <ai-action-list
+        <ai-item-list
           .host=${this.host}
           .groups=${this._actionGroups}
-        ></ai-action-list>
+        ></ai-item-list>
       </div>
     </div>`;
   }
@@ -118,10 +118,3 @@ declare global {
     'ask-ai-button': AskAIButton;
   }
 }
-
-export const affineFormatBarAskAIButton = {
-  type: 'custom' as const,
-  render(formatBar: AffineFormatBarWidget): TemplateResult | null {
-    return html`<ask-ai-button .host=${formatBar.host}></ask-ai-button>`;
-  },
-};
