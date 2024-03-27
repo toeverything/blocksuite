@@ -1,7 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
-import { type BlockModel, type DocMeta } from '@blocksuite/store';
+import { type DocMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { toast } from '../../../_common/components/toast.js';
@@ -10,9 +9,9 @@ import {
   ImportIcon,
   NewDocIcon,
 } from '../../../_common/icons/index.js';
+import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import { createDefaultDoc } from '../../../_common/utils/init.js';
-import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';
 import { showImportModal } from './import-doc/index.js';
 
@@ -23,9 +22,8 @@ export type LinkedDocOptions = {
   getMenus: (ctx: {
     editorHost: EditorHost;
     query: string;
-    doc: Doc;
+    inlineEditor: AffineInlineEditor;
     docMetas: DocMeta[];
-    model: BlockModel;
   }) => LinkedDocGroup[];
 };
 
@@ -48,15 +46,12 @@ const DEFAULT_DOC_NAME = 'Untitled';
 const DISPLAY_NAME_LENGTH = 8;
 
 export function insertLinkedNode({
-  editorHost,
-  model,
+  inlineEditor,
   docId,
 }: {
-  editorHost: EditorHost;
-  model: BlockModel;
+  inlineEditor: AffineInlineEditor;
   docId: string;
 }) {
-  const inlineEditor = getInlineEditorByModel(editorHost, model);
   assertExists(inlineEditor, 'Editor not found');
   const inlineRange = inlineEditor.getInlineRange();
   assertExists(inlineRange);
@@ -72,10 +67,10 @@ export function insertLinkedNode({
 export const getMenus: (ctx: {
   editorHost: EditorHost;
   query: string;
-  doc: Doc;
+  inlineEditor: AffineInlineEditor;
   docMetas: DocMeta[];
-  model: BlockModel;
-}) => LinkedDocGroup[] = ({ editorHost, query, doc, model, docMetas }) => {
+}) => LinkedDocGroup[] = ({ editorHost, query, inlineEditor, docMetas }) => {
+  const doc = editorHost.doc;
   const docName = query || DEFAULT_DOC_NAME;
   const displayDocName =
     docName.slice(0, DISPLAY_NAME_LENGTH) +
@@ -95,8 +90,7 @@ export const getMenus: (ctx: {
         icon: DocIcon,
         action: () =>
           insertLinkedNode({
-            editorHost,
-            model,
+            inlineEditor,
             docId: doc.id,
           }),
       })),
@@ -114,8 +108,7 @@ export const getMenus: (ctx: {
               title: docName,
             });
             insertLinkedNode({
-              editorHost,
-              model,
+              inlineEditor,
               docId: newDoc.id,
             });
           },
@@ -137,8 +130,7 @@ export const getMenus: (ctx: {
               );
               for (const docId of docIds) {
                 insertLinkedNode({
-                  editorHost,
-                  model,
+                  inlineEditor,
                   docId,
                 });
               }
