@@ -2,19 +2,12 @@ import './ai-action-item.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
-// import { flip, offset } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-// import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-// import { HoverController } from '../../../../../_common/components/hover/controller.js';
-import {
-  AIActionConfig,
-  type AIActionConfigGroup,
-  // type AIActionSubConfigItem,
-} from './config.js';
+import { AIActionConfig, type AIActionConfigGroup } from './config.js';
 
 @customElement('ai-action-list')
 export class AIActionList extends WithDisposable(LitElement) {

@@ -1,119 +1,108 @@
 import './ai-action-list.js';
 
-import { assertExists } from '@blocksuite/global/utils';
-import { computePosition, flip, offset, shift } from '@floating-ui/dom';
-import { html, type TemplateResult } from 'lit';
-import { ref, type RefOrCallback } from 'lit/directives/ref.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { WithDisposable } from '@blocksuite/block-std';
+import { css, html, LitElement, type TemplateResult } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
+import { createButtonPopper } from '../../../root-block/edgeless/components/utils.js';
 import type { AffineFormatBarWidget } from '../../../root-block/widgets/format-bar/format-bar.js';
 import { AIStarIcon } from '../../icons/ai.js';
-import { whenHover } from '../hover/when-hover.js';
-
-const AskAIPanel = (
-  formatBar: AffineFormatBarWidget,
-  containerRef?: RefOrCallback
-) => {
-  return html` <style>
-      .ask-ai-panel {
-        display: none;
-        box-sizing: border-box;
-        position: absolute;
-        padding: 8px;
-        min-width: 294px;
-        max-height: 374px;
-        overflow-y: auto;
-        background: var(--affine-background-overlay-panel-color);
-        box-shadow: var(--affine-shadow-2);
-        border-radius: 8px;
-        z-index: var(--affine-z-index-popover);
-      }
-      .ask-ai-icon-button svg {
-        color: var(--affine-brand-color);
-      }
-      .ask-ai-panel::-webkit-scrollbar {
-        width: 5px;
-        max-height: 100px;
-      }
-      .ask-ai-panel::-webkit-scrollbar-thumb {
-        border-radius: 20px;
-      }
-      .ask-ai-panel:hover::-webkit-scrollbar-thumb {
-        background-color: var(--affine-black-30);
-      }
-      .ask-ai-panel::-webkit-scrollbar-corner {
-        display: none;
-      }
-    </style>
-    <div ${ref(containerRef)} class="ask-ai-panel">
-      <ai-action-list .host=${formatBar.host}></ai-action-list>
-    </div>`;
-};
-
-export const AskAIButton = (formatBar: AffineFormatBarWidget) => {
-  // const editorHost = formatBar.host;
-
-  const { setFloating, setReference } = whenHover(isHover => {
-    if (!isHover) {
-      const panel =
-        formatBar.shadowRoot?.querySelector<HTMLElement>('.ask-ai-panel');
-      if (!panel) return;
-      panel.style.display = 'none';
-      return;
+@customElement('ask-ai-button')
+export class AskAIButton extends WithDisposable(LitElement) {
+  static override styles = css`
+    .ask-ai-icon-button {
+      color: var(--affine-brand-color);
+      font-weight: 500;
+      font-size: var(--affine-font-sm);
     }
-    const button =
-      formatBar.shadowRoot?.querySelector<HTMLElement>('.ask-ai-button');
-    const panel =
-      formatBar.shadowRoot?.querySelector<HTMLElement>('.ask-ai-panel');
-    assertExists(button);
-    assertExists(panel);
-    panel.style.display = 'flex';
-    computePosition(button, panel, {
-      placement: 'bottom-start',
-      middleware: [
-        flip(),
-        offset(10),
-        shift({
-          padding: 16,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        panel.style.left = `${x}px`;
-        panel.style.top = `${y}px`;
-      })
-      .catch(console.error);
-  });
 
-  const askAIPanel = AskAIPanel(formatBar, setFloating);
+    .ask-ai-icon-button span {
+      line-height: 22px;
+      padding-left: 4px;
+    }
 
-  const buttonStyle = styleMap({
-    color: 'var(--affine-brand-color)',
-    fontWeight: '500',
-    fontSize: 'var(--affine-font-sm)',
-  });
+    .ask-ai-panel {
+      display: none;
+      box-sizing: border-box;
+      position: absolute;
+      padding: 8px;
+      min-width: 294px;
+      max-height: 374px;
+      overflow-y: auto;
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
+      border-radius: 8px;
+      z-index: var(--affine-z-index-popover);
+    }
 
-  const labelStyle = styleMap({
-    lineHeight: '22px',
-    paddingLeft: '4px',
-  });
+    .ask-ai-panel[data-show] {
+      display: flex;
+    }
 
-  return html`<div ${ref(setReference)} class="ask-ai-button">
-    <icon-button
-      class="ask-ai-icon-button"
-      width="75px"
-      height="32px"
-      style=${buttonStyle}
-    >
-      ${AIStarIcon} <span style=${labelStyle}>Ask AI</span></icon-button
-    >
-    ${askAIPanel}
-  </div>`;
-};
+    .ask-ai-icon-button svg {
+      color: var(--affine-brand-color);
+    }
+    .ask-ai-panel::-webkit-scrollbar {
+      width: 5px;
+      max-height: 100px;
+    }
+    .ask-ai-panel::-webkit-scrollbar-thumb {
+      border-radius: 20px;
+    }
+    .ask-ai-panel:hover::-webkit-scrollbar-thumb {
+      background-color: var(--affine-black-30);
+    }
+    .ask-ai-panel::-webkit-scrollbar-corner {
+      display: none;
+    }
+  `;
+
+  @property({ attribute: false })
+  formatBar!: AffineFormatBarWidget;
+
+  @query('.ask-ai-button')
+  private _askAIButton!: HTMLDivElement;
+  @query('.ask-ai-panel')
+  private _askAIPanel!: HTMLDivElement;
+  private _askAIPopper: ReturnType<typeof createButtonPopper> | null = null;
+
+  override firstUpdated() {
+    this._askAIPopper = createButtonPopper(
+      this._askAIButton,
+      this._askAIPanel,
+      () => {},
+      10,
+      102
+    );
+    this.disposables.add(this._askAIPopper);
+  }
+
+  override render() {
+    return html`<div class="ask-ai-button">
+      <icon-button
+        class="ask-ai-icon-button"
+        width="75px"
+        height="32px"
+        @click=${() => this._askAIPopper?.toggle()}
+      >
+        ${AIStarIcon} <span>Ask AI</span></icon-button
+      >
+      <div class="ask-ai-panel">
+        <ai-action-list .host=${this.formatBar.host}></ai-action-list>
+      </div>
+    </div>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'ask-ai-button': AskAIButton;
+  }
+}
 
 export const affineFormatBarAskAIButton = {
   type: 'custom' as const,
   render(formatBar: AffineFormatBarWidget): TemplateResult | null {
-    return AskAIButton(formatBar);
+    return html`<ask-ai-button .formatBar=${formatBar}></ask-ai-button>`;
   },
 };
