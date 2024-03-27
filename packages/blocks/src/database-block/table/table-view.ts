@@ -235,6 +235,7 @@ export class DataViewTable extends BaseDataView<
       `;
     }
     return html`<affine-data-view-table-group
+      .dataViewEle="${this.dataViewEle}"
       .view="${this.view}"
       .viewEle="${this}"
     ></affine-data-view-table-group>`;
