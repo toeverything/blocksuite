@@ -623,9 +623,12 @@ test.describe('indent correctly when deleting list item', () => {
     await pressArrowUp(page);
     await pressArrowUp(page);
     await pressArrowUp(page);
+    await waitNextFrame(page);
     await pressBackspace(page);
+    await waitNextFrame(page);
     await pressBackspace(page);
 
+    await waitNextFrame(page, 200);
     await assertRichTexts(page, ['a', 'b', '', 'd', 'e', 'f']);
     await assertBlockChildrenIds(page, '1', ['3', '9']);
     await assertBlockChildrenIds(page, '3', ['4']);

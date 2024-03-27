@@ -35,6 +35,7 @@ test.describe('mime', () => {
     };
 
     await pasteContent(page, content);
+    await waitNextFrame(page, 200);
     await assertRichImage(page, 1);
   });
 
