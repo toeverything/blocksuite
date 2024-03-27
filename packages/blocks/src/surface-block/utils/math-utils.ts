@@ -179,6 +179,26 @@ export function getBoundsFromPoints(points: IVec[], rotation = 0): TLBounds {
   };
 }
 
+export function getPolygonPathFromStroke(
+  points: IVec[],
+  closed = true
+): string {
+  const len = points.length;
+  if (len < 2) return ``;
+
+  const a = points[0];
+  const b = points[1];
+
+  let res = `M${a[0].toFixed(2)},${a[1].toFixed()}L${b[0].toFixed(2)},${b[1].toFixed()}`;
+
+  for (let i = 2; i < len; i++) {
+    const a = points[i];
+    res += `L${a[0].toFixed(2)},${a[1].toFixed()}`;
+  }
+
+  if (closed) res += 'Z';
+  return res;
+}
 export function getSvgPathFromStroke(points: IVec[], closed = true): string {
   const len = points.length;
 

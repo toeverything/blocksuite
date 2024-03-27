@@ -1,6 +1,6 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
-import { type EdgelessTool } from '../../_common/types.js';
+import { type EdgelessTool, LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import {
   Bound,
@@ -41,6 +41,18 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._setEdgelessTool(rootElement, {
             type: 'connector',
             mode: ConnectorMode.Straight,
+          });
+        },
+        'Shift-v': () => {
+          const cur = rootElement.edgelessTool;
+          this._setEdgelessTool(rootElement, {
+            type: 'lasso',
+            mode:
+              cur.type === 'lasso'
+                ? cur.mode === LassoMode.FreeHand
+                  ? LassoMode.Polygonal
+                  : LassoMode.FreeHand
+                : LassoMode.FreeHand,
           });
         },
         h: () => {
