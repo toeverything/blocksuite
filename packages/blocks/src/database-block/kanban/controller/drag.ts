@@ -59,17 +59,14 @@ export class KanbanDragController implements ReactiveController {
     }
     this.host.disposables.add(
       this.host.handleEvent('dragStart', context => {
-        const selection = this.host.selectionController.selection;
-        if (
-          selection &&
-          selection.selectionType === 'cell' &&
-          selection.isEditing
-        )
-          return;
-
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
+          const cell = target.closest('affine-data-view-kanban-cell');
+          if (cell?.editing) {
+            return;
+          }
+          cell?.selectCurrentCell(false);
           const card = target.closest('affine-data-view-kanban-card');
           if (card) {
             this.dragStart(card, event);
