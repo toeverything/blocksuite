@@ -90,13 +90,7 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
     const arrowColor = active ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._menu
-          ? ''
-          : html`<div>
-              ${getTooltipWithShortcut('Straight ', 'L')}
-              ${getTooltipWithShortcut('Elbowed', 'X', '(Default)')}
-              ${getTooltipWithShortcut('Curve    ', 'C')}
-            </div> `}
+        .tooltip=${this._menu ? '' : getTooltipWithShortcut('Straight ', 'L')}
         .tooltipOffset=${17}
         .active=${active}
         .iconContainerPadding=${8}

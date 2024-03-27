@@ -43,24 +43,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             mode: ConnectorMode.Straight,
           });
         },
-        x: () => {
-          rootElement.service.editSession.record('connector', {
-            mode: ConnectorMode.Orthogonal,
-          });
-          this._setEdgelessTool(rootElement, {
-            type: 'connector',
-            mode: ConnectorMode.Orthogonal,
-          });
-        },
-        c: () => {
-          rootElement.service.editSession.record('connector', {
-            mode: ConnectorMode.Curve,
-          });
-          this._setEdgelessTool(rootElement, {
-            type: 'connector',
-            mode: ConnectorMode.Curve,
-          });
-        },
         h: () => {
           this._setEdgelessTool(rootElement, {
             type: 'pan',
@@ -287,7 +269,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   }
 
   private _space(event: KeyboardEvent) {
-    /* 
+    /*
       Call this function with a check for !event.repeat to consider only the first keydown (not repeat). This way, you can use onPressSpaceBar in a tool to determine if the space bar is pressed or not.
     */
 
