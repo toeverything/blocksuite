@@ -14,7 +14,6 @@ import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
-import { getTooltipWithShortcut } from '../../utils.js';
 
 const CONNECTOR_SUBMENU_WIDTH = 474;
 
@@ -22,9 +21,6 @@ function ConnectorModeButtonGroup(
   mode: ConnectorMode,
   setConnectorMode: (props: Record<string, unknown>) => void
 ) {
-  const straightLineTooltip = getTooltipWithShortcut('Straight', 'L');
-  const orthogonalTooltip = getTooltipWithShortcut('Elbowed', 'X');
-  const curveTooltip = getTooltipWithShortcut('Curve', 'C');
   /**
    * There is little hacky on rendering tooltip.
    * We don't want either tooltip overlap the top button or tooltip on left.
@@ -36,7 +32,7 @@ function ConnectorModeButtonGroup(
         .active=${mode === ConnectorMode.Straight}
         .activeMode=${'background'}
         .iconContainerPadding=${2}
-        .tooltip=${straightLineTooltip}
+        .tooltip=${'Straight'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Straight })}
       >
         ${ConnectorLWithArrowIcon}
@@ -45,7 +41,7 @@ function ConnectorModeButtonGroup(
         .active=${mode === ConnectorMode.Curve}
         .activeMode=${'background'}
         .iconContainerPadding=${2}
-        .tooltip=${curveTooltip}
+        .tooltip=${'Curve'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Curve })}
       >
         ${ConnectorCWithArrowIcon}
@@ -54,7 +50,7 @@ function ConnectorModeButtonGroup(
         .active=${mode === ConnectorMode.Orthogonal}
         .activeMode=${'background'}
         .iconContainerPadding=${2}
-        .tooltip=${orthogonalTooltip}
+        .tooltip=${'Elbowed'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Orthogonal })}
       >
         ${ConnectorXWithArrowIcon}

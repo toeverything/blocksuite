@@ -39,6 +39,7 @@ export {
   PlusIcon,
   TagsIcon,
 } from './_common/icons/index.js';
+export * from './_common/icons/index.js';
 export * from './_common/inline/inline-manager.js';
 export {
   type AffineInlineEditor,
