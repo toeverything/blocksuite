@@ -7,8 +7,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { NavigatorSettingsIcon } from '../../../../../_common/icons/edgeless.js';
+import { createButtonPopper } from '../../../../../_common/utils/button-popper.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import { createButtonPopper } from '../../utils.js';
 
 @customElement('edgeless-navigator-setting-button')
 export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {

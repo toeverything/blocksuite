@@ -4,12 +4,16 @@ import {
   AffineAIActionPanelWidget,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
+  toolbarDefaultConfig,
 } from '@blocksuite/blocks';
+import { AffineFormatBarWidget } from '@blocksuite/blocks';
 import { InsertBelowIcon } from '@blocksuite/blocks';
-import { html } from 'lit';
+import { html, type TemplateResult } from 'lit';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-export function getAIActionPanelSpecs() {
+import { FormatBarAIButton } from './format-bar-ai-button';
+
+export function getAISpecs() {
   const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
       const newPageSpec: BlockSpec = {
@@ -72,6 +76,27 @@ export function getAIActionPanelSpecs() {
                     responses: [],
                   },
                 };
+              }
+
+              if (view.component instanceof AffineFormatBarWidget) {
+                const formatBar = view.component;
+                toolbarDefaultConfig(formatBar);
+                formatBar.addRawConfigItems(
+                  [
+                    {
+                      type: 'custom' as const,
+                      render(
+                        formatBar: AffineFormatBarWidget
+                      ): TemplateResult | null {
+                        const askAIButton = new FormatBarAIButton();
+                        askAIButton.host = formatBar.host;
+                        return html`${askAIButton}`;
+                      },
+                    },
+                    { type: 'divider' },
+                  ],
+                  0
+                );
               }
             })
           );

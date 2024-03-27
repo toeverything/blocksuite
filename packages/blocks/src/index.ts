@@ -18,6 +18,7 @@ import { isCanvasElement } from './root-block/edgeless/utils/query.js';
 import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
+export * from './_common/components/ai-item/index.js';
 export type { SelectTag } from './_common/components/index.js';
 export {
   popTagSelect,
@@ -62,9 +63,14 @@ export {
 } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
 export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
-export { on, once, openFileOrFiles } from './_common/utils/index.js';
+export {
+  createButtonPopper,
+  on,
+  once,
+  openFileOrFiles,
+} from './_common/utils/index.js';
 export { createDefaultDoc } from './_common/utils/init.js';
-export { getThemeMode } from './_common/utils/query.js';
+export { getThemeMode, isInsidePageEditor } from './_common/utils/query.js';
 export * from './_specs/_specs.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';

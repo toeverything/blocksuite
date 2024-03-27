@@ -40,6 +40,7 @@ import {
   PaletteIcon,
 } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
+import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
 import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
 import { BookmarkStyles } from '../../../../bookmark-block/bookmark-model.js';
 import type {
@@ -84,7 +85,6 @@ import {
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
 } from '../../utils/query.js';
-import { createButtonPopper } from '../utils.js';
 
 @customElement('edgeless-change-embed-card-button')
 export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {

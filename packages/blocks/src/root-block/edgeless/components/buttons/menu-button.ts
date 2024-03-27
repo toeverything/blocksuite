@@ -6,7 +6,7 @@ import { type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { createButtonPopper } from '../utils.js';
+import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
 
 @customElement('edgeless-menu-button')
 export class EdgelessMenuButton extends WithDisposable(LitElement) {

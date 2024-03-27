@@ -10,6 +10,7 @@ import { toast } from '../../../../_common/components/toast.js';
 import { NoteIcon, RenameIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { NoteDisplayMode } from '../../../../_common/types.js';
+import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
 import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import {
@@ -22,7 +23,6 @@ import { mountFrameTitleEditor } from '../../utils/text.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import type { ColorEvent } from '../panel/color-panel.js';
 import { ColorUnit } from '../panel/color-panel.js';
-import { createButtonPopper } from '../utils.js';
 
 const FRAME_BACKGROUND: CssVariableName[] = [
   '--affine-tag-gray',
