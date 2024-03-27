@@ -35,8 +35,9 @@ export interface AIActionSubConfigItem {
 export interface AIActionConfigItem {
   name: string;
   icon: TemplateResult | (() => HTMLElement);
-  action?: () => void;
+  showWhen: () => boolean;
   subConfig?: AIActionSubConfigItem[];
+  action?: () => void;
 }
 
 export interface AIActionConfigGroup {
@@ -70,6 +71,7 @@ export const DocActionGroup: AIActionConfigGroup = {
     {
       name: 'Summary',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
   ],
 };
@@ -80,36 +82,44 @@ export const EditActionGroup: AIActionConfigGroup = {
     {
       name: 'Translate to',
       icon: LanguageIcon,
+      showWhen: () => true,
       subConfig: TranslateSubConfig,
     },
     {
       name: 'Change tone to',
       icon: ToneIcon,
+      showWhen: () => true,
       subConfig: ToneSubConfig,
     },
     {
       name: 'Improve writing for it',
       icon: ImproveWritingIcon,
+      showWhen: () => true,
     },
     {
       name: 'Improve grammar for it',
       icon: AIDoneIcon,
+      showWhen: () => true,
     },
     {
       name: 'Fix spelling for it',
       icon: AIDoneIcon,
+      showWhen: () => true,
     },
     {
       name: 'Create headings',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Make longer',
       icon: LongerIcon,
+      showWhen: () => true,
     },
     {
       name: 'Make shorter',
       icon: ShorterIcon,
+      showWhen: () => true,
     },
   ],
 };
@@ -120,26 +130,32 @@ export const DraftActionGroup: AIActionConfigGroup = {
     {
       name: 'Write an article about this',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Write a Twitter about this',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Write a poem about this',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Write a blog post about this',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Brainstorm ideas about this',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Write a outline from this',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
   ],
 };
@@ -150,10 +166,12 @@ export const MindMapActionGroup: AIActionConfigGroup = {
     {
       name: 'Explain from this mind-map node',
       icon: ExplainIcon,
+      showWhen: () => true,
     },
     {
       name: 'Brainstorm ideas with mind-map',
       icon: ExplainIcon,
+      showWhen: () => true,
     },
   ],
 };
@@ -164,6 +182,7 @@ export const CreateActionGroup: AIActionConfigGroup = {
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
+      showWhen: () => true,
     },
   ],
 };
@@ -174,6 +193,7 @@ export const CodeActionGroup: AIActionConfigGroup = {
     {
       name: 'Check code error',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
   ],
 };
@@ -184,6 +204,7 @@ export const PresentationActionGroup: AIActionConfigGroup = {
     {
       name: 'Create a presentation',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
   ],
 };
@@ -194,6 +215,7 @@ export const DrawActionGroup: AIActionConfigGroup = {
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
+      showWhen: () => true,
     },
   ],
 };
@@ -204,26 +226,32 @@ export const OthersActionGroup: AIActionConfigGroup = {
     {
       name: 'Summary the webpage',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Explain this image',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Explain this code',
       icon: AIPenIcon,
+      showWhen: () => true,
     },
     {
       name: 'Find action items from it',
       icon: AISearchIcon,
+      showWhen: () => true,
     },
     {
       name: 'Explain this',
       icon: ExplainIcon,
+      showWhen: () => true,
     },
     {
       name: 'Add tag for this doc',
       icon: TagIcon,
+      showWhen: () => true,
     },
   ],
 };
