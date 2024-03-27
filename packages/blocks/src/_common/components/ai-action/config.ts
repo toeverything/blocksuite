@@ -53,7 +53,7 @@ export const TranslateSubConfig: AIActionSubConfigItem[] = [
   {
     type: 'English',
     action: () => {
-      // implement the logic to translate to English
+      // TODO: implement the logic to translate to English
     },
   },
   { type: 'Spanish' },
@@ -110,7 +110,7 @@ export const DocActionGroup: AIActionConfigGroup = {
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
       action: () => {
-        // Implement the logic to summarize the text
+        // TODO: Implement the logic to summarize the text
       },
     },
   ],
