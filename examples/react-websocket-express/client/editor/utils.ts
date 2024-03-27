@@ -1,5 +1,6 @@
 import { AffineSchemas } from '@blocksuite/blocks/dist/schemas.js';
 import { Schema, DocCollection } from '@blocksuite/store';
+import * as api from './api';
 
 export function getCurrentRoom() {
   const id = window.location.pathname.replace(/^\//, '');
@@ -12,13 +13,22 @@ export function setRoom(id: string) {
   window.history.pushState({ path: newPath }, '', newPath);
 }
 
-export function createCollection(id = 'blocksuite-example') {
+export async function initCollection(id = 'blocksuite-example') {
   const schema = new Schema().register(AffineSchemas);
-  return new DocCollection({ schema, id });
+  const collection = new DocCollection({ schema, id });
+
+  const docMetaInfos = await api.getDocMetas();
+
+  docMetaInfos.map(docMeta => {
+    collection.createDoc({ id: docMeta.id });
+    collection.setDocMeta(docMeta.id, { ...docMeta });
+  });
+
+  return collection;
 }
 
-export function createDoc(collection: DocCollection, id: string) {
-  const doc = collection.createDoc({ id });
+export function createDoc(collection: DocCollection) {
+  const doc = collection.createDoc();
 
   doc.load(() => {
     const pageBlockId = doc.addBlock('affine:page', {});

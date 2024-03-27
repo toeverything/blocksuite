@@ -3,7 +3,7 @@ import ViteExpress from 'vite-express';
 
 import { importJWK, SignJWT } from 'jose';
 import { JSONFilePreset } from 'lowdb/node';
-import { DocMeta, nanoid } from '@blocksuite/store';
+import { DocMeta } from '@blocksuite/store';
 
 // Constants
 const appName = 'blocksuite-example';
@@ -76,19 +76,14 @@ app.get('/api/docs', async (_, res) => {
 });
 
 // create a new doc
-app.post('/api/docs', async (_, res) => {
-  const newDoc: DocMeta = {
-    id: nanoid(),
-    title: '',
-    tags: [],
-    createDate: Date.now(),
-  };
+app.post('/api/docs', async (req, res) => {
+  const newDoc: DocMeta = req.body;
 
   await db.read();
   db.data.docs.push(newDoc);
   await db.write();
 
-  res.status(201).send(newDoc);
+  res.status(201);
 });
 
 app.patch('/api/docs/:id/title', async (req, res) => {

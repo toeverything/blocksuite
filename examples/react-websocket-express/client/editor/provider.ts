@@ -1,64 +1,47 @@
 import { Doc, DocCollection, Slot } from '@blocksuite/store';
 import { WebsocketProvider } from 'y-websocket';
 import * as api from './api';
-import { createCollection } from './utils';
-import { createDoc } from './utils';
-
-type ProviderOptions = {
-  wsBaseUrl: string;
-};
+import { initCollection } from './utils';
 
 export class Provider {
-  wsBaseUrl: string;
-
   ws: WebsocketProvider | null = null;
-
-  token!: string;
 
   slots = {
     connectStatusChanged: new Slot<'connected' | 'disconnected' | 'error'>(),
     docSync: new Slot<Doc>(),
   };
 
-  collection: DocCollection;
-
   currentRoom: string | null = null;
 
-  private _initialized: boolean = false;
   private _previousTitles = new Map<string, string>();
 
-  constructor({ wsBaseUrl }: ProviderOptions) {
-    this.wsBaseUrl = wsBaseUrl;
-    this.collection = createCollection();
-  }
-
-  async init() {
-    if (this._initialized) return this;
-
-    this.token = await api.getAuth();
-
-    const docMetaInfos = await api.getDocMetas();
-
-    docMetaInfos.map(docMeta => {
-      this.collection.createDoc({ id: docMeta.id });
-      this.collection.setDocMeta(docMeta.id, { ...docMeta });
-      this._previousTitles.set(docMeta.id, docMeta.title);
+  private constructor(
+    private readonly wsBaseUrl: string,
+    private token: string,
+    public collection: DocCollection
+  ) {
+    this.collection.meta.docMetas.forEach(({ id, title }) => {
+      this._previousTitles.set(id, title);
     });
 
-    this.collection.meta.docMetaUpdated.on(() =>
-      this._handleTitleUpdateEvent()
-    );
+    this.collection.slots.docAdded.on(docId => {
+      api.createDoc(this.collection.meta.getDocMeta(docId)!);
+    });
 
-    this._initialized = true;
+    this.collection.slots.docRemoved.on(docId => {
+      api.deleteDoc(docId);
+    });
 
-    return this;
+    collection.slots.docUpdated.on(() => this._handleTitleUpdateEvent());
+  }
+
+  static async init(wsBaseUrl: string) {
+    const token = await api.getAuth();
+    const collection = await initCollection();
+    return new Provider(wsBaseUrl, token, collection);
   }
 
   connect(room: string) {
-    if (!this._initialized) {
-      throw new Error('Not initialized');
-    }
-
     if (this.currentRoom === room) return;
 
     this.ws?.destroy();
@@ -83,32 +66,6 @@ export class Provider {
     });
 
     this.ws.connect();
-  }
-
-  async createDoc() {
-    if (!this._initialized) {
-      throw new Error('Not initialized');
-    }
-
-    const docMetaInfo = await api.createDoc();
-
-    const doc = createDoc(this.collection, docMetaInfo.id);
-    this.collection.setDocMeta(docMetaInfo.id, { ...docMetaInfo });
-
-    return doc;
-  }
-
-  async deleteDoc(docId: string) {
-    if (!this._initialized) {
-      throw new Error('Not initialized');
-    }
-
-    if (this.collection.getDoc(docId) === null) {
-      throw new Error(`Unkown doc: ${docId}`);
-    }
-
-    api.deleteDoc(docId);
-    this.collection.removeDoc(docId);
   }
 
   private _handleTitleUpdateEvent() {

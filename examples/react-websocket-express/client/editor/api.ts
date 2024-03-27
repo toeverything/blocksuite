@@ -9,8 +9,14 @@ export async function getDocMetas(): Promise<DocMeta[]> {
   return docs;
 }
 
-export async function createDoc(): Promise<DocMeta> {
-  return (await fetch(`/api/docs`, { method: 'POST' })).json();
+export async function createDoc(docMeta: DocMeta) {
+  await fetch(`/api/docs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(docMeta),
+  });
 }
 
 export async function deleteDoc(docId: string) {

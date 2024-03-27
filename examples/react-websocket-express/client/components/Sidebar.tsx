@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DocMeta } from '@blocksuite/store';
 import { useEditor } from '../editor/context';
+import { createDoc } from '../editor/utils';
 
 const Sidebar = () => {
   const { editor, collection, provider } = useEditor()!;
@@ -26,8 +27,8 @@ const Sidebar = () => {
   }, [collection, editor]);
 
   const addDoc = async () => {
-    if (!provider) return;
-    await provider.createDoc();
+    if (!collection) return;
+    createDoc(collection);
   };
 
   return (

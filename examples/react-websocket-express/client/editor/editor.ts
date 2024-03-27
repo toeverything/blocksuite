@@ -1,15 +1,13 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { Doc } from '@blocksuite/store';
-import { getCurrentRoom, setRoom } from './utils';
+import { createDoc, getCurrentRoom, setRoom } from './utils';
 import { Provider } from './provider';
 import '@blocksuite/presets/themes/affine.css';
 
 export async function initEditor() {
   const editor = new AffineEditorContainer();
 
-  const provider = await new Provider({
-    wsBaseUrl: 'ws://localhost:3002',
-  }).init();
+  const provider = await Provider.init('ws://localhost:3002');
 
   const { collection } = provider;
 
@@ -37,11 +35,7 @@ export async function initEditor() {
   }
 
   if (doc === null) {
-    doc = await provider.createDoc();
-  }
-
-  if (doc === null) {
-    throw new Error('Failed to get intial Doc');
+    doc = createDoc(collection);
   }
 
   provider.connect(doc.id);
