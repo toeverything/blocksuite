@@ -80,32 +80,11 @@ export class KeymapController implements ReactiveController {
         // text selection - select the next block
         // 1. is paragraph, list, code block - follow the default behavior
         // 2. is not - select the next block (use block selection instead of text selection)
-        cmd
-          .getTextSelection()
-          .inline<'currentSelectionPath'>((ctx, next) => {
-            const currentTextSelection = ctx.currentTextSelection;
-            assertExists(currentTextSelection);
-            return next({ currentSelectionPath: currentTextSelection.path });
-          })
-          .getNextBlock()
-          .inline<'focusBlock'>((ctx, next) => {
-            const { nextBlock } = ctx;
-            assertExists(nextBlock);
-
-            if (
-              matchFlavours(nextBlock.model, [
-                'affine:paragraph',
-                'affine:list',
-                'affine:code',
-              ])
-            )
-              return;
-
-            return next({
-              focusBlock: nextBlock,
-            });
-          })
-          .selectBlock(),
+        cmd.getTextSelection().inline<'currentSelectionPath'>((ctx, next) => {
+          const currentTextSelection = ctx.currentTextSelection;
+          assertExists(currentTextSelection);
+          return next({ currentSelectionPath: currentTextSelection.path });
+        }),
         // block selection - select the next block
         // 1. is paragraph, list, code block - focus it
         // 2. is not - select it using block selection
@@ -153,7 +132,6 @@ export class KeymapController implements ReactiveController {
 
   private _onArrowUp = (ctx: UIEventStateContext) => {
     const event = ctx.get('defaultState').event;
-    let takeover = false;
 
     const [result] = this._std.command
       .chain()
@@ -175,24 +153,13 @@ export class KeymapController implements ReactiveController {
           .getPrevBlock()
           .inline<'focusBlock'>((ctx, next) => {
             const { prevBlock } = ctx;
-            assertExists(prevBlock);
 
-            if (
-              matchFlavours(prevBlock.model, [
-                'affine:paragraph',
-                'affine:list',
-                'affine:code',
-              ])
-            ) {
-              takeover = true;
+            if (!prevBlock) {
               return;
             }
 
-            return next({
-              focusBlock: prevBlock,
-            });
-          })
-          .selectBlock(),
+            return next({});
+          }),
         // block selection - select the previous block
         // 1. is paragraph, list, code block - focus it
         // 2. is not - select it using block selection
@@ -219,7 +186,6 @@ export class KeymapController implements ReactiveController {
                 'affine:code',
               ])
             ) {
-              takeover = true;
               this._std.command
                 .chain()
                 .focusBlockEnd({ focusBlock: prevBlock })
@@ -236,7 +202,7 @@ export class KeymapController implements ReactiveController {
       ])
       .run();
 
-    return takeover || result;
+    return result;
   };
 
   private _onShiftArrowDown = () => {

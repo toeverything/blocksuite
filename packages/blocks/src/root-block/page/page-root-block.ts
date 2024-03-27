@@ -257,7 +257,11 @@ export class PageRootBlockComponent extends BlockElement<
         if (!model) return;
         const prevNote = this.doc.getPreviousSibling(model);
         if (!prevNote) {
-          focusTitle(this.host);
+          const isFirstText = sel.is('text') && sel.start.index === 0;
+          const isBlock = sel.is('block');
+          if (isBlock || isFirstText) {
+            focusTitle(this.host);
+          }
           return;
         }
         const notes = this.doc.getBlockByFlavour('affine:note');
