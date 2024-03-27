@@ -275,6 +275,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     this.doc.updateBlock(this._model, {
       children: this._model.children.filter(v => !ids.includes(v.id)),
     });
+    this._model.deleteRows(ids);
   }
 
   public override captureSync(): void {
