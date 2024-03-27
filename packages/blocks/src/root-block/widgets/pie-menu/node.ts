@@ -61,8 +61,6 @@ export class PieNode extends WithDisposable(LitElement) {
 
     if (isNodeWithAction(schema)) {
       schema.action(ctx);
-    } else if (isNodeWithChildren(schema)) {
-      this.menu.openSubmenu(this); // for Opening with numpad
     } else if (isColorNode(schema)) {
       schema.onChange(schema.color, ctx);
     }
