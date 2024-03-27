@@ -594,7 +594,7 @@ test.describe('indent correctly when deleting list item', () => {
     await assertRichTextInlineRange(page, 1, 1);
   });
 
-  test.only('merge two lists', async ({ page }) => {
+  test('merge two lists', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await focusRichText(page, 0);
