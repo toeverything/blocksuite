@@ -38,6 +38,9 @@ export interface AIActionConfigItem {
   icon: TemplateResult | (() => HTMLElement);
   showWhen: (chain: Chain<InitCommandCtx>, editorMode: EditorMode) => boolean;
   subConfig?: AIActionSubConfigItem[];
+  /**
+   * TODO：add parameter to the action function and implement the logic under each action item
+   */
   action?: () => void;
 }
 
@@ -47,7 +50,12 @@ export interface AIActionConfigGroup {
 }
 
 export const TranslateSubConfig: AIActionSubConfigItem[] = [
-  { type: 'English' },
+  {
+    type: 'English',
+    action: () => {
+      // implement the logic to translate to English
+    },
+  },
   { type: 'Spanish' },
   { type: 'German' },
   { type: 'French' },
@@ -76,7 +84,7 @@ const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   const { selectedModels } = ctx;
   if (!selectedModels || selectedModels.length === 0) return false;
 
-  return selectedModels.every(model =>
+  return selectedModels.some(model =>
     matchFlavours(model, ['affine:paragraph', 'affine:list'])
   );
 };
@@ -101,6 +109,9 @@ export const DocActionGroup: AIActionConfigGroup = {
       name: 'Summary',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
+      action: () => {
+        // Implement the logic to summarize the text
+      },
     },
   ],
 };

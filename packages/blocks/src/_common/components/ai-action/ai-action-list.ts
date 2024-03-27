@@ -18,6 +18,7 @@ export class AIActionList extends WithDisposable(LitElement) {
       gap: 2px;
       width: 100%;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      user-select: none;
     }
     .group-name {
       display: flex;

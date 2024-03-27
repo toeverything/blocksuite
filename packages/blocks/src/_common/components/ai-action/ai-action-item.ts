@@ -28,17 +28,24 @@ export class AIActionItem extends WithDisposable(LitElement) {
 
   constructor() {
     super();
-    this._whenHover = new HoverController(this, () => {
+    this._whenHover = new HoverController(this, ({ abortController }) => {
       return {
         template: html`<ai-action-sub-panel
           .item=${this.item}
           .host=${this.host}
+          .abortController=${abortController}
         ></ai-action-sub-panel>`,
         computePosition: {
           referenceElement: this,
           placement: 'right-start',
           middleware: [flip(), offset({ mainAxis: 16, crossAxis: -60 })],
-          autoUpdate: true,
+          autoUpdate: {
+            ancestorScroll: false,
+            ancestorResize: false,
+            elementResize: false,
+            layoutShift: false,
+            animationFrame: false,
+          },
         },
       };
     });
@@ -49,7 +56,7 @@ export class AIActionItem extends WithDisposable(LitElement) {
     const hasSubConfig = !!item.subConfig && item.subConfig.length > 0;
     return html`<div
       class="action-item"
-      @click="${item.action}"
+      @click=${() => typeof item.action === 'function' && item.action()}
       ${hasSubConfig ? ref(this._whenHover.setReference) : ''}
     >
       <span class="action-icon">${item.icon}</span>

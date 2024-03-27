@@ -5,7 +5,10 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { EnterIcon } from '../../icons/ai.js';
-import { type AIActionConfigItem } from './config.js';
+import {
+  type AIActionConfigItem,
+  type AIActionSubConfigItem,
+} from './config.js';
 
 export const actionItemStyles = css`
   .action-item {
@@ -81,6 +84,7 @@ export class AIActionSubPanel extends WithDisposable(LitElement) {
       font-style: normal;
       font-weight: 400;
       line-height: 22px;
+      user-select: none;
     }
     ${actionItemStyles}
   `;
@@ -91,12 +95,27 @@ export class AIActionSubPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   item!: AIActionConfigItem;
 
+  @property({ attribute: false })
+  abortController!: AbortController;
+
+  private _handleClick = (subItem: AIActionSubConfigItem) => {
+    if (subItem.action) {
+      // TODO: add parameters to action
+      subItem.action();
+    }
+
+    this.abortController.abort();
+  };
+
   override render() {
     if (!this.item.subConfig || this.item.subConfig.length <= 0) return nothing;
     return html`<div class="action-sub-menu">
       ${this.item.subConfig?.map(
         subItem =>
-          html`<div class="action-item" @click="${subItem.action}">
+          html`<div
+            class="action-item"
+            @click=${() => this._handleClick(subItem)}
+          >
             <div class="action-name">${subItem.type}</div>
             <span class="enter-icon">${EnterIcon}</span>
           </div>`
