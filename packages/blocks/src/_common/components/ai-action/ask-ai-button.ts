@@ -1,12 +1,13 @@
 import './ai-action-list.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
+import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { createButtonPopper } from '../../../root-block/edgeless/components/utils.js';
 import type { AffineFormatBarWidget } from '../../../root-block/widgets/format-bar/format-bar.js';
 import { AIStarIcon } from '../../icons/ai.js';
+import { isInsidePageEditor } from '../../utils/query.js';
 import { AIActionConfig } from './config.js';
 @customElement('ask-ai-button')
 export class AskAIButton extends WithDisposable(LitElement) {
@@ -59,7 +60,7 @@ export class AskAIButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  formatBar!: AffineFormatBarWidget;
+  host!: EditorHost;
 
   @query('.ask-ai-button')
   private _askAIButton!: HTMLDivElement;
@@ -78,10 +79,16 @@ export class AskAIButton extends WithDisposable(LitElement) {
     this.disposables.add(this._askAIPopper);
   }
 
+  get _editorMode() {
+    return isInsidePageEditor(this.host) ? 'page' : 'edgeless';
+  }
+
   get _actionGroups() {
     const filteredConfig = AIActionConfig.map(group => ({
       ...group,
-      items: group.items.filter(item => item.showWhen()),
+      items: group.items.filter(item =>
+        item.showWhen(this.host.command.chain(), this._editorMode)
+      ),
     })).filter(group => group.items.length > 0);
     return filteredConfig;
   }
@@ -98,7 +105,7 @@ export class AskAIButton extends WithDisposable(LitElement) {
       >
       <div class="ask-ai-panel">
         <ai-action-list
-          .host=${this.formatBar.host}
+          .host=${this.host}
           .groups=${this._actionGroups}
         ></ai-action-list>
       </div>
@@ -115,6 +122,6 @@ declare global {
 export const affineFormatBarAskAIButton = {
   type: 'custom' as const,
   render(formatBar: AffineFormatBarWidget): TemplateResult | null {
-    return html`<ask-ai-button .formatBar=${formatBar}></ask-ai-button>`;
+    return html`<ask-ai-button .host=${formatBar.host}></ask-ai-button>`;
   },
 };

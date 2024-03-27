@@ -1,3 +1,4 @@
+import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import {
@@ -13,8 +14,8 @@ import {
   TagIcon,
   ToneIcon,
 } from '../../icons/ai.js';
-
-// import type { AffineFormatBarWidget } from '../../format-bar.js';
+import type { EditorMode } from '../../types.js';
+import { matchFlavours } from '../../utils/model.js';
 
 export type AIActionGroup =
   | 'doc'
@@ -35,7 +36,7 @@ export interface AIActionSubConfigItem {
 export interface AIActionConfigItem {
   name: string;
   icon: TemplateResult | (() => HTMLElement);
-  showWhen: () => boolean;
+  showWhen: (chain: Chain<InitCommandCtx>, editorMode: EditorMode) => boolean;
   subConfig?: AIActionSubConfigItem[];
   action?: () => void;
 }
@@ -65,13 +66,40 @@ export const ToneSubConfig: AIActionSubConfigItem[] = [
   { type: 'critical' },
 ];
 
+const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
+  const [_, ctx] = chain
+    .getSelectedModels({
+      types: ['block', 'text'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  if (!selectedModels || selectedModels.length === 0) return false;
+
+  return selectedModels.every(model =>
+    matchFlavours(model, ['affine:paragraph', 'affine:list'])
+  );
+};
+
+const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
+  const [_, ctx] = chain
+    .getSelectedModels({
+      types: ['text'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  if (!selectedModels || selectedModels.length > 1) return false;
+
+  const model = selectedModels[0];
+  return matchFlavours(model, ['affine:code']);
+};
+
 export const DocActionGroup: AIActionConfigGroup = {
   name: 'doc',
   items: [
     {
       name: 'Summary',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
   ],
 };
@@ -82,44 +110,58 @@ export const EditActionGroup: AIActionConfigGroup = {
     {
       name: 'Translate to',
       icon: LanguageIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
       subConfig: TranslateSubConfig,
     },
     {
       name: 'Change tone to',
       icon: ToneIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
       subConfig: ToneSubConfig,
     },
     {
       name: 'Improve writing for it',
       icon: ImproveWritingIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Improve grammar for it',
       icon: AIDoneIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Fix spelling for it',
       icon: AIDoneIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Create headings',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: chain => {
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['block', 'text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || selectedModels.length === 0) return false;
+
+        return selectedModels.every(
+          model =>
+            matchFlavours(model, ['affine:paragraph', 'affine:list']) &&
+            !model.type.startsWith('h')
+        );
+      },
     },
     {
       name: 'Make longer',
       icon: LongerIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Make shorter',
       icon: ShorterIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
   ],
 };
@@ -130,32 +172,32 @@ export const DraftActionGroup: AIActionConfigGroup = {
     {
       name: 'Write an article about this',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Write a Twitter about this',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Write a poem about this',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Write a blog post about this',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Brainstorm ideas about this',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Write a outline from this',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
   ],
 };
@@ -166,12 +208,26 @@ export const MindMapActionGroup: AIActionConfigGroup = {
     {
       name: 'Explain from this mind-map node',
       icon: ExplainIcon,
-      showWhen: () => true,
+      showWhen: (chain, editorMode) => {
+        if (editorMode === 'page') {
+          return false;
+        }
+
+        // TODO: complete this logic
+        return true;
+      },
     },
     {
       name: 'Brainstorm ideas with mind-map',
       icon: ExplainIcon,
-      showWhen: () => true,
+      showWhen: (chain, editorMode) => {
+        if (editorMode === 'page') {
+          return false;
+        }
+
+        // TODO: complete this logic
+        return true;
+      },
     },
   ],
 };
@@ -182,7 +238,14 @@ export const CreateActionGroup: AIActionConfigGroup = {
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
-      showWhen: () => true,
+      showWhen: (chain, editorMode) => {
+        if (editorMode === 'page') {
+          return false;
+        }
+
+        // TODO: complete this logic
+        return true;
+      },
     },
   ],
 };
@@ -193,7 +256,7 @@ export const CodeActionGroup: AIActionConfigGroup = {
     {
       name: 'Check code error',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: codeBlockShowWhen,
     },
   ],
 };
@@ -204,7 +267,14 @@ export const PresentationActionGroup: AIActionConfigGroup = {
     {
       name: 'Create a presentation',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: (chain, editorMode) => {
+        if (editorMode === 'page') {
+          return false;
+        }
+
+        // TODO: complete this logic
+        return true;
+      },
     },
   ],
 };
@@ -213,9 +283,16 @@ export const DrawActionGroup: AIActionConfigGroup = {
   name: 'draw',
   items: [
     {
-      name: 'Make it real',
+      name: 'Generate a image about this',
       icon: MakeItRealIcon,
-      showWhen: () => true,
+      showWhen: (chain, editorMode) => {
+        if (editorMode === 'page') {
+          return false;
+        }
+
+        // TODO: complete this logic
+        return true;
+      },
     },
   ],
 };
@@ -226,32 +303,60 @@ export const OthersActionGroup: AIActionConfigGroup = {
     {
       name: 'Summary the webpage',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: chain => {
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['block', 'text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || selectedModels.length > 1) return false;
+
+        const model = selectedModels[0];
+        return matchFlavours(model, [
+          'affine:bookmark',
+          'affine:embed-linked-doc',
+        ]);
+      },
     },
     {
       name: 'Explain this image',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: chain => {
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['block', 'text', 'image'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || selectedModels.length > 1) return false;
+
+        const model = selectedModels[0];
+        return matchFlavours(model, ['affine:image', 'affine:surface-ref']);
+      },
     },
     {
       name: 'Explain this code',
       icon: AIPenIcon,
-      showWhen: () => true,
+      showWhen: codeBlockShowWhen,
     },
     {
       name: 'Find action items from it',
       icon: AISearchIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Explain this',
       icon: ExplainIcon,
-      showWhen: () => true,
+      showWhen: textBlockShowWhen,
     },
     {
       name: 'Add tag for this doc',
       icon: TagIcon,
-      showWhen: () => true,
+      showWhen: () => {
+        // TODO: nice to have, currently not supported
+        return false;
+      },
     },
   ],
 };
