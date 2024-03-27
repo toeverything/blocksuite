@@ -7,7 +7,6 @@ export class AIActionPanelDivider extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
-      padding: 12px 0px 4px 0px;
       flex-direction: column;
       align-items: flex-start;
       align-self: stretch;
