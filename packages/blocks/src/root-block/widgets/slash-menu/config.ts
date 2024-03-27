@@ -6,6 +6,7 @@ import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
 import {
+  AIStarIcon,
   ArrowDownBigIcon,
   ArrowUpBigIcon,
   AttachmentIcon,
@@ -57,6 +58,32 @@ import {
 } from './utils.js';
 
 export const menuGroups: SlashMenuOptions['menus'] = [
+  {
+    name: 'AI',
+    items: [
+      {
+        name: 'Ask AI',
+        icon: AIStarIcon,
+        showWhen: (_, rootElement) => {
+          const view = rootElement.host.view;
+          const affineAIPanelWidget = view.getWidget(
+            'affine-ai-action-panel-widget',
+            rootElement.model.id
+          );
+          return !!affineAIPanelWidget;
+        },
+        action: ({ rootElement, model }) => {
+          const view = rootElement.host.view;
+          const affineAIPanelWidget = view.getWidget(
+            'affine-ai-action-panel-widget',
+            rootElement.model.id
+          );
+          assertExists(affineAIPanelWidget);
+          rootElement.slots.askAIButtonClicked.emit({ model });
+        },
+      },
+    ],
+  },
   {
     name: 'Text',
     items: textConversionConfigs
