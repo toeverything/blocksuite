@@ -39,10 +39,6 @@ export enum Direction {
 export const PANEL_WIDTH = 136;
 export const PANEL_HEIGHT = 108;
 
-export const PANEL_OFFSET = {
-  x: -PANEL_WIDTH / 2,
-  y: -PANEL_HEIGHT * (3 / 4),
-};
 export const MAIN_GAP = 100;
 export const SECOND_GAP = 20;
 export const DEFAULT_NOTE_OVERLAY_HEIGHT = 110;
