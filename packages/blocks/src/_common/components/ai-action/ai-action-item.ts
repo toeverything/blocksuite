@@ -1,4 +1,4 @@
-import './ai-action-sub-panel.js';
+import './ai-action-sub-menu.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -9,7 +9,7 @@ import { ref } from 'lit/directives/ref.js';
 
 import { ArrowRightIcon, EnterIcon } from '../../icons/ai.js';
 import { HoverController } from '../hover/controller.js';
-import { actionItemStyles } from './ai-action-sub-panel.js';
+import { actionItemStyles } from './ai-action-sub-menu.js';
 import { type AIActionConfigItem } from './config.js';
 
 @customElement('ai-action-item')
@@ -30,11 +30,11 @@ export class AIActionItem extends WithDisposable(LitElement) {
     super();
     this._whenHover = new HoverController(this, ({ abortController }) => {
       return {
-        template: html`<ai-action-sub-panel
+        template: html`<ai-action-sub-menu
           .item=${this.item}
           .host=${this.host}
           .abortController=${abortController}
-        ></ai-action-sub-panel>`,
+        ></ai-action-sub-menu>`,
         computePosition: {
           referenceElement: this,
           placement: 'right-start',

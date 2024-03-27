@@ -58,8 +58,8 @@ export const actionItemStyles = css`
   }
 `;
 
-@customElement('ai-action-sub-panel')
-export class AIActionSubPanel extends WithDisposable(LitElement) {
+@customElement('ai-action-sub-menu')
+export class AIActionSubMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .action-sub-menu {
       display: flex;
@@ -126,6 +126,6 @@ export class AIActionSubPanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-action-sub-panel': AIActionSubPanel;
+    'ai-action-sub-menu': AIActionSubMenu;
   }
 }
