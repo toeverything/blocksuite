@@ -80,11 +80,40 @@ export class KeymapController implements ReactiveController {
         // text selection - select the next block
         // 1. is paragraph, list, code block - follow the default behavior
         // 2. is not - select the next block (use block selection instead of text selection)
-        cmd.getTextSelection().inline<'currentSelectionPath'>((ctx, next) => {
-          const currentTextSelection = ctx.currentTextSelection;
-          assertExists(currentTextSelection);
-          return next({ currentSelectionPath: currentTextSelection.path });
-        }),
+        cmd
+          .getTextSelection()
+          .inline<'currentSelectionPath'>((ctx, next) => {
+            const currentTextSelection = ctx.currentTextSelection;
+            assertExists(currentTextSelection);
+            return next({ currentSelectionPath: currentTextSelection.path });
+          })
+          .getNextBlock()
+          .inline((ctx, next) => {
+            const { nextBlock } = ctx;
+
+            if (!nextBlock) {
+              return;
+            }
+
+            if (
+              !matchFlavours(nextBlock.model, [
+                'affine:paragraph',
+                'affine:list',
+                'affine:code',
+              ])
+            ) {
+              this._std.command
+                .chain()
+                .with({
+                  focusBlock: nextBlock,
+                })
+                .selectBlock()
+                .run();
+            }
+
+            return next({});
+          }),
+
         // block selection - select the next block
         // 1. is paragraph, list, code block - focus it
         // 2. is not - select it using block selection
@@ -104,6 +133,7 @@ export class KeymapController implements ReactiveController {
             const { nextBlock } = ctx;
             assertExists(nextBlock);
 
+            event.preventDefault();
             if (
               matchFlavours(nextBlock.model, [
                 'affine:paragraph',
@@ -115,15 +145,16 @@ export class KeymapController implements ReactiveController {
                 .chain()
                 .focusBlockStart({ focusBlock: nextBlock })
                 .run();
-              event.preventDefault();
-              return;
+              return next();
             }
 
-            return next({
-              focusBlock: nextBlock,
-            });
-          })
-          .selectBlock(),
+            this._std.command
+              .chain()
+              .with({ focusBlock: nextBlock })
+              .selectBlock()
+              .run();
+            return next();
+          }),
       ])
       .run();
 
@@ -151,7 +182,7 @@ export class KeymapController implements ReactiveController {
             return next({ currentSelectionPath: currentTextSelection.path });
           })
           .getPrevBlock()
-          .inline<'focusBlock'>((ctx, next) => {
+          .inline((ctx, next) => {
             const { prevBlock } = ctx;
 
             if (!prevBlock) {
