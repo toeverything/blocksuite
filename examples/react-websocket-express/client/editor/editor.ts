@@ -7,10 +7,9 @@ import '@blocksuite/presets/themes/affine.css';
 export async function initEditor() {
   const editor = new AffineEditorContainer();
 
-  const provider = await new Provider(
-    'http://localhost:5173',
-    'ws://localhost:3002'
-  ).init();
+  const provider = await new Provider({
+    wsBaseUrl: 'ws://localhost:3002',
+  }).init();
 
   const { collection } = provider;
 

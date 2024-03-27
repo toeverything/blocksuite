@@ -1,11 +1,15 @@
 import { Doc, DocCollection, Slot } from '@blocksuite/store';
 import { WebsocketProvider } from 'y-websocket';
-import { ApiClient } from './api';
+import * as api from './api';
 import { createCollection } from './utils';
 import { createDoc } from './utils';
 
+type ProviderOptions = {
+  wsBaseUrl: string;
+};
+
 export class Provider {
-  apiClient: ApiClient;
+  wsBaseUrl: string;
 
   ws: WebsocketProvider | null = null;
 
@@ -23,20 +27,17 @@ export class Provider {
   private _initialized: boolean = false;
   private _previousTitles = new Map<string, string>();
 
-  constructor(
-    backendBaseUrl: string,
-    private readonly wsBaseUrl: string
-  ) {
-    this.apiClient = new ApiClient(backendBaseUrl);
+  constructor({ wsBaseUrl }: ProviderOptions) {
+    this.wsBaseUrl = wsBaseUrl;
     this.collection = createCollection();
   }
 
   async init() {
     if (this._initialized) return this;
 
-    this.token = await this.apiClient.getAuth();
+    this.token = await api.getAuth();
 
-    const docMetaInfos = await this.apiClient.getDocMetas();
+    const docMetaInfos = await api.getDocMetas();
 
     docMetaInfos.map(docMeta => {
       this.collection.createDoc({ id: docMeta.id });
@@ -89,7 +90,7 @@ export class Provider {
       throw new Error('Not initialized');
     }
 
-    const docMetaInfo = await this.apiClient.createDoc();
+    const docMetaInfo = await api.createDoc();
 
     const doc = createDoc(this.collection, docMetaInfo.id);
     this.collection.setDocMeta(docMetaInfo.id, { ...docMetaInfo });
@@ -106,7 +107,7 @@ export class Provider {
       throw new Error(`Unkown doc: ${docId}`);
     }
 
-    this.apiClient.deleteDoc(docId);
+    api.deleteDoc(docId);
     this.collection.removeDoc(docId);
   }
 
@@ -117,7 +118,7 @@ export class Provider {
         this._previousTitles.has(id) &&
         this._previousTitles.get(id) !== title
       ) {
-        this.apiClient.updateTitle(id, title);
+        api.updateTitle(id, title);
       }
     });
 
