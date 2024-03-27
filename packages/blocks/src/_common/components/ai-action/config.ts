@@ -209,25 +209,41 @@ export const MindMapActionGroup: AIActionConfigGroup = {
     {
       name: 'Explain from this mind-map node',
       icon: ExplainIcon,
-      showWhen: editorMode => {
+      showWhen: (chain, editorMode) => {
         if (editorMode === 'page') {
           return false;
         }
 
         // TODO: complete this logic
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || selectedModels.length > 1) return false;
         return true;
       },
     },
     {
       name: 'Brainstorm ideas with mind-map',
       icon: ExplainIcon,
-      showWhen: editorMode => {
+      showWhen: (chain, editorMode) => {
         if (editorMode === 'page') {
           return false;
         }
 
         // TODO: complete this logic
-        return true;
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || !selectedModels.length) return false;
+        return selectedModels.every(model =>
+          matchFlavours(model, ['affine:paragraph', 'affine:list'])
+        );
       },
     },
   ],
@@ -239,13 +255,22 @@ export const CreateActionGroup: AIActionConfigGroup = {
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
-      showWhen: editorMode => {
+      showWhen: (chain, editorMode) => {
         if (editorMode === 'page') {
           return false;
         }
 
         // TODO: complete this logic
-        return true;
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || selectedModels.length > 1) return false;
+
+        const model = selectedModels[0];
+        return matchFlavours(model, ['affine:frame']);
       },
     },
   ],
@@ -268,13 +293,22 @@ export const PresentationActionGroup: AIActionConfigGroup = {
     {
       name: 'Create a presentation',
       icon: AIPenIcon,
-      showWhen: editorMode => {
+      showWhen: (chain, editorMode) => {
         if (editorMode === 'page') {
           return false;
         }
 
         // TODO: complete this logic
-        return true;
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || !selectedModels.length) return false;
+        return selectedModels.every(model =>
+          matchFlavours(model, ['affine:paragraph', 'affine:list'])
+        );
       },
     },
   ],
@@ -286,13 +320,22 @@ export const DrawActionGroup: AIActionConfigGroup = {
     {
       name: 'Generate a image about this',
       icon: MakeItRealIcon,
-      showWhen: editorMode => {
+      showWhen: (chain, editorMode) => {
         if (editorMode === 'page') {
           return false;
         }
 
         // TODO: complete this logic
-        return true;
+        const [_, ctx] = chain
+          .getSelectedModels({
+            types: ['text'],
+          })
+          .run();
+        const { selectedModels } = ctx;
+        if (!selectedModels || selectedModels.length > 1) return false;
+
+        const model = selectedModels[0];
+        return matchFlavours(model, ['affine:frame']);
       },
     },
   ],
