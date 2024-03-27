@@ -1,5 +1,4 @@
-import type { UIEventStateContext } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockElement, UIEventStateContext } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
@@ -430,8 +429,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       title: docName,
     });
     insertLinkedNode({
-      editorHost: blockElement.host,
-      model: blockElement.model,
+      inlineEditor,
       docId: doc.id,
     });
     return true;
