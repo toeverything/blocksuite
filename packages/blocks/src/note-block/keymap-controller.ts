@@ -158,6 +158,22 @@ export class KeymapController implements ReactiveController {
               return;
             }
 
+            if (
+              !matchFlavours(prevBlock.model, [
+                'affine:paragraph',
+                'affine:list',
+                'affine:code',
+              ])
+            ) {
+              this._std.command
+                .chain()
+                .with({
+                  focusBlock: prevBlock,
+                })
+                .selectBlock()
+                .run();
+            }
+
             return next({});
           }),
         // block selection - select the previous block
@@ -186,19 +202,21 @@ export class KeymapController implements ReactiveController {
                 'affine:code',
               ])
             ) {
+              event.preventDefault();
               this._std.command
                 .chain()
                 .focusBlockEnd({ focusBlock: prevBlock })
                 .run();
-              event.preventDefault();
-              return;
+              return next();
             }
 
-            return next({
-              focusBlock: prevBlock,
-            });
-          })
-          .selectBlock(),
+            this._std.command
+              .chain()
+              .with({ focusBlock: prevBlock })
+              .selectBlock()
+              .run();
+            return next();
+          }),
       ])
       .run();
 
