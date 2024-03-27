@@ -7,12 +7,11 @@ import { CopyIcon } from '../../../../../_common/icons/text.js';
 import type {
   AIActionPanelListGroup,
   AIActionPanelListGroupItem,
-} from '../item.js';
+} from '../list.js';
 
 export type AIActionPanelAnswerConfig = {
   responses: AIActionPanelListGroupItem[];
-  //TODO: ai actions
-  // actions: AIActionPanelListGroup[];
+  actions: AIActionPanelListGroup[];
 };
 
 @customElement('ai-action-panel-answer')
@@ -124,8 +123,9 @@ export class AIActionPanelAnswer extends WithDisposable(LitElement) {
   finish = true;
 
   override render() {
-    const groups: AIActionPanelListGroup[] = [
+    const responseGroups: AIActionPanelListGroup[] = [
       {
+        head: 'Responses',
         items: this.config.responses,
       },
     ];
@@ -150,7 +150,16 @@ export class AIActionPanelAnswer extends WithDisposable(LitElement) {
               ? html`
                   <ai-action-panel-divider></ai-action-panel-divider>
                   <ai-action-panel-list
-                    .groups=${groups}
+                    .groups=${responseGroups}
+                  ></ai-action-panel-list>
+                `
+              : nothing}
+            ${this.config.responses.length > 0 &&
+            html`<ai-action-panel-divider></ai-action-panel-divider>`}
+            ${this.config.actions.length > 0
+              ? html`
+                  <ai-action-panel-list
+                    .groups=${this.config.actions}
                   ></ai-action-panel-list>
                 `
               : nothing}
