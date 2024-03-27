@@ -62,7 +62,7 @@
     "@commitlint/cli": "^19.2.1",
     "@commitlint/config-conventional": "^19.1.0",
     "@open-wc/dev-server-hmr": "^0.2.0",
-    "@playwright/test": "1.41.1",
+    "@playwright/test": "1.42.1",
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
