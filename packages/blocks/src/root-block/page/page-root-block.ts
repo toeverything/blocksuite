@@ -1,7 +1,8 @@
 import { type PointerEventState } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Text } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
+import { type Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -253,10 +254,18 @@ export class PageRootBlockComponent extends BlockElement<
           sel => sel.is('text') || sel.is('block')
         );
         if (!sel) return;
-        const model = this.doc.getBlockById(sel.path[sel.path.length - 1]);
+        let model: BlockModel | null = null;
+        let path: string[] = sel.path;
+        while (path.length > 0 && !model) {
+          const m = this.doc.getBlockById(path[path.length - 1]);
+          if (m && m.flavour === 'affine:note') {
+            model = m;
+          }
+          path = path.slice(0, -1);
+        }
         if (!model) return;
         const prevNote = this.doc.getPreviousSibling(model);
-        if (!prevNote) {
+        if (!prevNote || prevNote.flavour !== 'affine:note') {
           const isFirstText = sel.is('text') && sel.start.index === 0;
           const isBlock = sel.is('block');
           if (isBlock || isFirstText) {
