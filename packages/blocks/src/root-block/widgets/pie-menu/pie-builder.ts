@@ -3,6 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { ColorUnit } from '../../edgeless/components/panel/color-panel.js';
 import {
+  type ActionFunction,
   type PieColorNodeModel,
   type PieCommandNodeModel,
   type PieMenuContext,
@@ -10,6 +11,7 @@ import {
   type PieNodeModel,
   type PieSubmenuNodeModel,
 } from './base.js';
+import { PieManager } from './pie-manager.js';
 import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';
 
 export interface IPieColorPickerNodeProps {
@@ -55,6 +57,18 @@ export class PieMenuBuilder {
     return this;
   }
 
+  expandableCommand(
+    node: Omit<PieSubmenuNodeModel, 'type' | 'children' | 'role'> & {
+      action: ActionFunction;
+      submenus: (pie: PieMenuBuilder) => void;
+    }
+  ) {
+    const { icon, label } = node;
+    this.beginSubmenu({ icon, label }, node.action);
+    node.submenus(this);
+    this.endSubmenu();
+  }
+
   colorPicker(props: IPieColorPickerNodeProps) {
     const hollow = props.hollow ?? false;
 
@@ -86,15 +100,23 @@ export class PieMenuBuilder {
     }
   }
 
-  beginSubmenu(node: Omit<PieSubmenuNodeModel, 'type' | 'children' | 'role'>) {
+  beginSubmenu(
+    node: Omit<PieSubmenuNodeModel, 'type' | 'children' | 'role'>,
+    action?: PieSubmenuNodeModel['action']
+  ) {
     const curNode = this._currentNode();
     const submenuNode: PieSubmenuNodeModel = {
       openOnHover: true,
       ...node,
       type: 'submenu',
-      role: 'default',
+      role: action ? 'default' : 'command',
+      action,
       children: [],
     };
+    if (submenuNode.action !== undefined)
+      submenuNode.timeoutOverride =
+        PieManager.settings.EXPANDABLE_ACTION_NODE_TIMEOUT;
+
     if (isNodeWithChildren(curNode)) {
       curNode.children.push(submenuNode);
     }

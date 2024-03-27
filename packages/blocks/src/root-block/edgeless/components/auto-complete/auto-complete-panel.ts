@@ -53,7 +53,6 @@ import {
   Direction,
   NOTE_BACKGROUND_COLOR_MAP,
   PANEL_HEIGHT,
-  PANEL_OFFSET,
   PANEL_WIDTH,
   type TARGET_SHAPE_TYPE,
 } from './utils.js';
@@ -77,17 +76,20 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     }
 
     .row-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 120px;
-      height: 20px;
+      height: 28px;
       padding: 4px 0;
       text-align: center;
-      border-radius: 4px;
+      border-radius: 8px;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      font-size: 13px;
+      font-size: 12px;
       font-style: normal;
-      font-weight: 400;
-      line-height: 20px;
+      font-weight: 500;
       border: 1px solid var(--affine-border-color, #e3e2e4);
+      box-sizing: border-box;
     }
   `;
 
@@ -435,16 +437,15 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   private _getPanelPosition() {
     const { viewport } = this.edgeless.service;
     const viewportRect = viewport.boundingClientRect;
-    let [x, y] = viewport.toViewCoord(...this.position);
+    const result = this._getTargetXYWH(PANEL_WIDTH, PANEL_HEIGHT);
+    const pos = result ? result.xywh.slice(0, 2) : this.position;
+    const coord = viewport.toViewCoord(pos[0], pos[1]);
     const { width, height } = viewportRect;
-    // if connector target position is out of viewport, don't show the panel
-    if (x <= 0 || x >= width || y <= 0 || y >= height) return null;
 
-    x += PANEL_OFFSET.x;
-    y += PANEL_OFFSET.y;
-    x = clamp(x, 20, width - 20 - PANEL_WIDTH);
-    y = clamp(y, 20, height - 20 - PANEL_HEIGHT);
-    return [x, y] as [number, number];
+    coord[0] = clamp(coord[0], 20, width - 20 - PANEL_WIDTH);
+    coord[1] = clamp(coord[1], 20, height - 20 - PANEL_HEIGHT);
+
+    return coord;
   }
 
   constructor(

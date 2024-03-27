@@ -20,6 +20,7 @@ import {
   getPosition,
   isColorNode,
   isCommandNode,
+  isNodeWithAction,
   isNodeWithChildren,
   isRootNode,
   isSubmenuNode,
@@ -162,6 +163,8 @@ export class PieMenu extends WithDisposable(LitElement) {
   openSubmenu(submenu: PieNode) {
     assertEquals(submenu.model.type, 'submenu', 'Need node of type submenu');
 
+    if (isNodeWithAction(submenu.model)) submenu.select();
+
     this.selectionChain.push(submenu);
     this.setHovered(null);
     this.slots.requestNodeUpdate.emit();
@@ -209,7 +212,9 @@ export class PieMenu extends WithDisposable(LitElement) {
 
     if (node instanceof PieNode && !isColorNode(node.model)) {
       // colors are more than 9 may be another method ?
-      node.select();
+      if (isSubmenuNode(node.model)) this.openSubmenu(node);
+      else node.select();
+
       if (isCommandNode(node.model)) this.close();
     }
   };

@@ -1,14 +1,14 @@
-import type { UIEventStateContext } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { EditorHost, UIEventStateContext } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import {
   assertExists,
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
+import { InlineEditor } from '@blocksuite/inline';
 import { customElement } from 'lit/decorators.js';
 
+import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/index.js';
 import {
@@ -22,7 +22,7 @@ import { LinkedDocPopover } from './linked-doc-popover.js';
 
 export function showLinkedDocPopover({
   editorHost,
-  model,
+  inlineEditor,
   range,
   container = document.body,
   abortController = new AbortController(),
@@ -30,7 +30,7 @@ export function showLinkedDocPopover({
   triggerKey,
 }: {
   editorHost: EditorHost;
-  model: BlockModel;
+  inlineEditor: AffineInlineEditor;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
@@ -40,7 +40,11 @@ export function showLinkedDocPopover({
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
-  const linkedDoc = new LinkedDocPopover(editorHost, model, abortController);
+  const linkedDoc = new LinkedDocPopover(
+    editorHost,
+    inlineEditor,
+    abortController
+  );
   linkedDoc.options = options;
   linkedDoc.triggerKey = triggerKey;
   // Mount
@@ -101,21 +105,31 @@ export class AffineLinkedDocWidget extends WidgetElement {
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedDoc = (model: BlockModel, triggerKey: string) => {
+  public showLinkedDoc = (
+    inlineEditor: AffineInlineEditor,
+    triggerKey: string
+  ) => {
     const curRange = getCurrentNativeRange();
     showLinkedDocPopover({
       editorHost: this.host,
-      model,
+      inlineEditor,
       range: curRange,
       options: this.options,
       triggerKey,
     });
   };
 
-  private _onKeyDown = (ctx: UIEventStateContext) => {
-    const eventState = ctx.get('keyboardState');
-    const event = eventState.raw;
-    if (isControlledKeyboardEvent(event) || event.key.length !== 1) return;
+  private getInlineEditor = (evt: KeyboardEvent) => {
+    if (evt.target instanceof HTMLElement) {
+      const editor = (
+        evt.target.closest('.inline-editor') as {
+          inlineEditor?: AffineInlineEditor;
+        }
+      )?.inlineEditor;
+      if (editor instanceof InlineEditor) {
+        return editor;
+      }
+    }
     const text = this.host.selection.value.find(selection =>
       selection.is('text')
     );
@@ -127,7 +141,14 @@ export class AffineLinkedDocWidget extends WidgetElement {
       return;
     }
     if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
-    const inlineEditor = getInlineEditorByModel(this.host, model);
+    return getInlineEditorByModel(this.host, model);
+  };
+
+  private _onKeyDown = (ctx: UIEventStateContext) => {
+    const eventState = ctx.get('keyboardState');
+    const event = eventState.raw;
+    if (isControlledKeyboardEvent(event) || event.key.length !== 1) return;
+    const inlineEditor = this.getInlineEditor(event);
     if (!inlineEditor) return;
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
@@ -170,11 +191,11 @@ export class AffineLinkedDocWidget extends WidgetElement {
           length: 0,
         });
         inlineEditor.slots.inlineRangeApply.once(() => {
-          this.showLinkedDoc(model, primaryTriggerKey);
+          this.showLinkedDoc(inlineEditor, primaryTriggerKey);
         });
         return;
       }
-      this.showLinkedDoc(model, matchedKey);
+      this.showLinkedDoc(inlineEditor, matchedKey);
     });
   };
 }

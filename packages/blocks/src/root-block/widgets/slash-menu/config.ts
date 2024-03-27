@@ -210,7 +210,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
           // Wait for range to be updated
           setTimeout(() => {
-            linkedDocWidget.showLinkedDoc(model, triggerKey);
+            const inlineEditor = getInlineEditorByModel(
+              rootElement.host,
+              model
+            );
+            assertExists(inlineEditor);
+            linkedDocWidget.showLinkedDoc(inlineEditor, triggerKey);
           });
         },
       },
@@ -238,6 +243,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
 
           const imageFiles = await getImageFilesFromLocal();
+          if (!imageFiles.length) return;
 
           const imageService = rootElement.host.spec.getService('affine:image');
           const maxFileSize = imageService.maxFileSize;

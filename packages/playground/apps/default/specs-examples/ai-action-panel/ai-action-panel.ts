@@ -5,6 +5,7 @@ import {
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
+import { InsertBelowIcon } from '@blocksuite/blocks';
 import { html } from 'lit';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
@@ -46,7 +47,25 @@ export function getAIActionPanelSpecs() {
                   },
 
                   finishStateConfig: {
-                    responses: [],
+                    responses: [
+                      {
+                        icon: InsertBelowIcon,
+                        text: 'Example Response',
+                        handler: () => {},
+                      },
+                    ],
+                    actions: [
+                      {
+                        head: 'Example Action',
+                        items: [
+                          {
+                            icon: InsertBelowIcon,
+                            text: 'Example Action',
+                            handler: () => {},
+                          },
+                        ],
+                      },
+                    ],
                   },
                   errorStateConfig: {
                     upgrade: () => {},
