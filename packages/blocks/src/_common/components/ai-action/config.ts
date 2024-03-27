@@ -66,6 +66,7 @@ export const ToneSubConfig: AIActionSubConfigItem[] = [
   { type: 'critical' },
 ];
 
+// TODO: improve the logic, to make it more accurate
 const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   const [_, ctx] = chain
     .getSelectedModels({
@@ -208,7 +209,7 @@ export const MindMapActionGroup: AIActionConfigGroup = {
     {
       name: 'Explain from this mind-map node',
       icon: ExplainIcon,
-      showWhen: (chain, editorMode) => {
+      showWhen: editorMode => {
         if (editorMode === 'page') {
           return false;
         }
@@ -220,7 +221,7 @@ export const MindMapActionGroup: AIActionConfigGroup = {
     {
       name: 'Brainstorm ideas with mind-map',
       icon: ExplainIcon,
-      showWhen: (chain, editorMode) => {
+      showWhen: editorMode => {
         if (editorMode === 'page') {
           return false;
         }
@@ -238,7 +239,7 @@ export const CreateActionGroup: AIActionConfigGroup = {
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
-      showWhen: (chain, editorMode) => {
+      showWhen: editorMode => {
         if (editorMode === 'page') {
           return false;
         }
@@ -267,7 +268,7 @@ export const PresentationActionGroup: AIActionConfigGroup = {
     {
       name: 'Create a presentation',
       icon: AIPenIcon,
-      showWhen: (chain, editorMode) => {
+      showWhen: editorMode => {
         if (editorMode === 'page') {
           return false;
         }
@@ -285,7 +286,7 @@ export const DrawActionGroup: AIActionConfigGroup = {
     {
       name: 'Generate a image about this',
       icon: MakeItRealIcon,
-      showWhen: (chain, editorMode) => {
+      showWhen: editorMode => {
         if (editorMode === 'page') {
           return false;
         }
