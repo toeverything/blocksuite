@@ -3,7 +3,6 @@ import '../../../_common/components/button.js';
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -12,7 +11,7 @@ import {
   cleanSpecifiedTail,
   createKeydownObserver,
 } from '../../../_common/components/utils.js';
-import { getRichTextByModel } from '../../../_common/utils/query.js';
+import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import type { LinkedDocOptions } from './config.js';
 import { type LinkedDocGroup } from './config.js';
 import { styles } from './styles.js';
@@ -54,8 +53,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     this._actionGroup = this.options.getMenus({
       editorHost: this.editorHost,
       query: this._query,
-      doc: this._doc,
-      model: this.model,
+      inlineEditor: this.inlineEditor,
       docMetas: this._doc.collection.meta.docMetas,
     });
   }
@@ -64,12 +62,12 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   linkedDocElement?: Element;
 
   private get _doc() {
-    return this.model.doc;
+    return this.editorHost.doc;
   }
 
   constructor(
     private editorHost: EditorHost,
-    private model: BlockModel,
+    private inlineEditor: AffineInlineEditor,
     private abortController = new AbortController()
   ) {
     super();
@@ -77,15 +75,13 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    const richText = getRichTextByModel(this.editorHost, this.model);
-    assertExists(richText, 'RichText not found');
-    const inlineEditor = richText.inlineEditor;
+    const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor, 'RichText InlineEditor not found');
 
     // init
     this._updateActionList();
     this._disposables.add(
-      this.model.doc.collection.slots.docUpdated.on(() => {
+      this._doc.collection.slots.docUpdated.on(() => {
         this._updateActionList();
       })
     );
@@ -130,7 +126,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
         this.abortController.abort();
         cleanSpecifiedTail(
           this.editorHost,
-          this.model,
+          this.inlineEditor,
           this.triggerKey + this._query
         );
         this._flattenActionList[this._activatedItemIndex]
@@ -184,7 +180,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
                     this.abortController.abort();
                     cleanSpecifiedTail(
                       this.editorHost,
-                      this.model,
+                      this.inlineEditor,
                       this.triggerKey + this._query
                     );
                     action()?.catch(console.error);

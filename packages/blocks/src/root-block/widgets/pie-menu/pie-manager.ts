@@ -35,6 +35,8 @@ export class PieManager {
      * Time delay to open submenu after hovering a submenu node
      */
     SUBMENU_OPEN_TIMEOUT: 200,
+
+    EXPANDABLE_ACTION_NODE_TIMEOUT: 300,
   };
 
   public static slots = {
