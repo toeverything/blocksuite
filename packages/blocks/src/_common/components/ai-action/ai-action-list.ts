@@ -4,10 +4,10 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { AIActionConfig, type AIActionConfigGroup } from './config.js';
+import { type AIActionConfigGroup } from './config.js';
 
 @customElement('ai-action-list')
 export class AIActionList extends WithDisposable(LitElement) {
@@ -37,21 +37,12 @@ export class AIActionList extends WithDisposable(LitElement) {
   @property({ attribute: false })
   host!: EditorHost;
 
-  @state()
-  groups: AIActionConfigGroup[] = [];
+  @property({ attribute: false })
+  groups!: AIActionConfigGroup[];
 
   private _getGroupName(name: string) {
     const groupName = name === 'others' ? name : name + ' with ai';
     return groupName.toLocaleUpperCase();
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    const filteredConfig = AIActionConfig.map(group => ({
-      ...group,
-      items: group.items.filter(item => item.showWhen()),
-    })).filter(group => group.items.length > 0);
-    this.groups = filteredConfig;
   }
 
   override render() {

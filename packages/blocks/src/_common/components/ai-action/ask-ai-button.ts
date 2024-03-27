@@ -7,6 +7,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { createButtonPopper } from '../../../root-block/edgeless/components/utils.js';
 import type { AffineFormatBarWidget } from '../../../root-block/widgets/format-bar/format-bar.js';
 import { AIStarIcon } from '../../icons/ai.js';
+import { AIActionConfig } from './config.js';
 @customElement('ask-ai-button')
 export class AskAIButton extends WithDisposable(LitElement) {
   static override styles = css`
@@ -77,6 +78,14 @@ export class AskAIButton extends WithDisposable(LitElement) {
     this.disposables.add(this._askAIPopper);
   }
 
+  get _actionGroups() {
+    const filteredConfig = AIActionConfig.map(group => ({
+      ...group,
+      items: group.items.filter(item => item.showWhen()),
+    })).filter(group => group.items.length > 0);
+    return filteredConfig;
+  }
+
   override render() {
     return html`<div class="ask-ai-button">
       <icon-button
@@ -88,7 +97,10 @@ export class AskAIButton extends WithDisposable(LitElement) {
         ${AIStarIcon} <span>Ask AI</span></icon-button
       >
       <div class="ask-ai-panel">
-        <ai-action-list .host=${this.formatBar.host}></ai-action-list>
+        <ai-action-list
+          .host=${this.formatBar.host}
+          .groups=${this._actionGroups}
+        ></ai-action-list>
       </div>
     </div>`;
   }
