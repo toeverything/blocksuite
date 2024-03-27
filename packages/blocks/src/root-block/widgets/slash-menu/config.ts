@@ -238,6 +238,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
 
           const imageFiles = await getImageFilesFromLocal();
+          if (!imageFiles.length) return;
 
           const imageService = rootElement.host.spec.getService('affine:image');
           const maxFileSize = imageService.maxFileSize;
