@@ -59,6 +59,7 @@ export const GET_DEFAULT_LINE_COLOR = () =>
 export const GET_DEFAULT_TEXT_COLOR = () => LINE_COLORS[7];
 
 export const DEFAULT_BRUSH_COLOR = '--affine-palette-line-blue';
+export const DEFAULT_CONNECTOR_COLOR = LINE_COLORS[10];
 
 export function isTransparent(color: CssVariableName) {
   return color.toLowerCase() === '--affine-palette-transparent';
