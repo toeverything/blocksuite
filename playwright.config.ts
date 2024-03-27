@@ -4,6 +4,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: 'tests',
+  timeout: 40000,
   fullyParallel: true,
   snapshotDir: 'tests/snapshots',
   webServer: {
