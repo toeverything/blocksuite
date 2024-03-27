@@ -86,7 +86,7 @@ import {
 
 const BLOCKSUITE_SURFACE = 'blocksuite/surface';
 const IMAGE_PNG = 'image/png';
-
+const IMAGE_PADDING = 10; // for rotated shapes some padding is needed
 const { GROUP } = CanvasElementType;
 
 export class EdgelessClipboardController extends PageClipboard {
@@ -1091,9 +1091,7 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless: EdgelessRootBlockComponent,
     bound: IBound,
     nodes?: TopLevelBlockModel[],
-    canvasElements: CanvasElement[] = [],
-
-    withBackground = false
+    canvasElements: CanvasElement[] = []
   ): Promise<HTMLCanvasElement | undefined> {
     const host = edgeless.host;
     const rootModel = this.doc.root;
@@ -1107,7 +1105,6 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const rootElement = getRootByEditorHost(host);
     assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
 
     const container = rootElement.querySelector(
       '.affine-block-children-container'
@@ -1116,16 +1113,11 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
-    canvas.width = (bound.w + 100) * dpr;
-    canvas.height = (bound.h + 100) * dpr;
+    canvas.width = (bound.w + IMAGE_PADDING) * dpr;
+    canvas.height = (bound.h + IMAGE_PADDING) * dpr;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.scale(dpr, dpr);
-
-    if (withBackground) {
-      ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
 
     const replaceImgSrcWithSvg = this._exportManager.replaceImgSrcWithSvg;
     const replaceRichTextWithSvgElementFunc =
@@ -1153,6 +1145,7 @@ export class EdgelessClipboardController extends PageClipboard {
           return false;
         }
       },
+
       onclone: async function (documentClone: Document, element: HTMLElement) {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
@@ -1172,7 +1165,7 @@ export class EdgelessClipboardController extends PageClipboard {
         await replaceImgSrcWithSvg(element);
         await replaceRichTextWithSvgElementFunc(element);
       },
-      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
+      backgroundColor: 'transparent',
       useCORS: _imageProxyEndpoint ? false : true,
       proxy: _imageProxyEndpoint,
     };
@@ -1201,8 +1194,8 @@ export class EdgelessClipboardController extends PageClipboard {
       );
       ctx.drawImage(
         canvasData,
-        blockBound.x - bound.x + 50,
-        blockBound.y - bound.y + 50,
+        blockBound.x - bound.x + IMAGE_PADDING / 2,
+        blockBound.y - bound.y + IMAGE_PADDING / 2,
         blockBound.w,
         isInFrame
           ? (blockBound.w / canvasData.width) * canvasData.height
@@ -1244,7 +1237,13 @@ export class EdgelessClipboardController extends PageClipboard {
       bound,
       canvasElements
     );
-    ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+    ctx.drawImage(
+      surfaceCanvas,
+      IMAGE_PADDING / 2,
+      IMAGE_PADDING / 2,
+      bound.w,
+      bound.h
+    );
 
     return canvas;
   }
