@@ -1,7 +1,10 @@
 import type { ReferenceElement } from '@floating-ui/dom';
 import { html } from 'lit';
 
-import { popFilterableSimpleMenu } from '../../../_common/components/menu/index.js';
+import {
+  type Menu,
+  popFilterableSimpleMenu,
+} from '../../../_common/components/menu/index.js';
 import {
   DeleteIcon,
   ExpandFullIcon,
@@ -9,8 +12,16 @@ import {
   MoveRightIcon,
 } from '../../../_common/icons/index.js';
 import type { RootBlockComponent } from '../../../root-block/types.js';
+import type { DataViewColumnManager } from '../../common/data-view-manager.js';
 import { popSideDetail } from '../../common/detail/layout.js';
 import type { TableSelectionController } from '../controller/selection.js';
+import {
+  checkboxCalcOps,
+  type ColumnDataType,
+  commonCalcOps,
+  numberColCalcOps,
+  type StatCalcOp,
+} from './stat-ops.js';
 
 export const openDetail = (
   rootElement: RootBlockComponent | null,
@@ -120,4 +131,34 @@ export const popRowMenu = (
       ],
     },
   ]);
+};
+
+export const popFormulaMenu = (
+  _rootElement: RootBlockComponent | null,
+  elem: ReferenceElement,
+  _column: DataViewColumnManager,
+  calcType: ColumnDataType,
+  onSelect: (formula: StatCalcOp) => void
+) => {
+  let operations: StatCalcOp[] = [];
+  switch (calcType) {
+    case 'number':
+      operations = numberColCalcOps;
+      break;
+    case 'checkbox':
+      operations = checkboxCalcOps;
+      break;
+    default:
+      operations = commonCalcOps;
+  }
+
+  const menus: Menu[] = operations.map(f => ({
+    type: 'action',
+    name: f.label,
+    select: () => {
+      onSelect(f);
+    },
+  }));
+
+  return popFilterableSimpleMenu(elem, menus);
 };
