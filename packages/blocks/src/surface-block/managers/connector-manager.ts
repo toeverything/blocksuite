@@ -23,6 +23,7 @@ import {
   isOverlap,
   isVecZero,
   lineIntersects,
+  PI2,
   sign,
   toRadian,
 } from '../utils/math-utils.js';
@@ -736,25 +737,26 @@ export class ConnectionOverlay extends Overlay {
 
   override render(ctx: CanvasRenderingContext2D): void {
     const zoom = this._service.viewport.zoom;
+    const radius = 5 / zoom;
+    const color = getComputedStyle(this._service.host).getPropertyValue(
+      '--affine-text-emphasis-color'
+    );
+
     this.points.forEach(p => {
       ctx.beginPath();
-      ctx.arc(p[0], p[1], 3 / zoom, 0, Math.PI * 2);
+      ctx.arc(p[0], p[1], radius, 0, PI2);
       ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'blue';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
       ctx.fill();
       ctx.stroke();
     });
     if (this.highlightPoint) {
       ctx.beginPath();
-      ctx.arc(
-        this.highlightPoint[0],
-        this.highlightPoint[1],
-        3 / zoom,
-        0,
-        Math.PI * 2
-      );
-      ctx.fillStyle = 'blue';
-      ctx.strokeStyle = 'blue';
+      ctx.arc(this.highlightPoint[0], this.highlightPoint[1], radius, 0, PI2);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
       ctx.fill();
       ctx.stroke();
     }
