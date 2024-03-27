@@ -153,6 +153,7 @@ export class KeymapController implements ReactiveController {
 
   private _onArrowUp = (ctx: UIEventStateContext) => {
     const event = ctx.get('defaultState').event;
+    let takeover = false;
 
     const [result] = this._std.command
       .chain()
@@ -182,8 +183,10 @@ export class KeymapController implements ReactiveController {
                 'affine:list',
                 'affine:code',
               ])
-            )
+            ) {
+              takeover = true;
               return;
+            }
 
             return next({
               focusBlock: prevBlock,
@@ -216,6 +219,7 @@ export class KeymapController implements ReactiveController {
                 'affine:code',
               ])
             ) {
+              takeover = true;
               this._std.command
                 .chain()
                 .focusBlockEnd({ focusBlock: prevBlock })
@@ -232,7 +236,7 @@ export class KeymapController implements ReactiveController {
       ])
       .run();
 
-    return result;
+    return takeover || result;
   };
 
   private _onShiftArrowDown = () => {

@@ -607,11 +607,10 @@ test.describe('indent correctly when deleting list item', () => {
     await pressTab(page);
     await type(page, 'c');
     await pressEnter(page);
-    await pressBackspace(page);
-    await pressBackspace(page);
-    await pressBackspace(page);
+    await pressBackspace(page, 3);
     await assertRichTexts(page, ['a', 'b', 'c', '']);
 
+    await waitNextFrame(page);
     await pressEnter(page);
     await type(page, '- d');
     await pressEnter(page);
@@ -620,13 +619,8 @@ test.describe('indent correctly when deleting list item', () => {
     await pressEnter(page);
     await pressTab(page);
     await type(page, 'f');
-    await pressArrowUp(page);
-    await pressArrowUp(page);
-    await pressArrowUp(page);
-    await waitNextFrame(page);
-    await pressBackspace(page);
-    await waitNextFrame(page);
-    await pressBackspace(page);
+    await pressArrowUp(page, 3);
+    await pressBackspace(page, 2);
 
     await waitNextFrame(page, 200);
     await assertRichTexts(page, ['a', 'b', '', 'd', 'e', 'f']);
