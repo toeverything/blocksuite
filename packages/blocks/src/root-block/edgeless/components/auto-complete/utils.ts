@@ -322,13 +322,13 @@ export function createEdgelessElement(
 
 export function createShapeElement(
   edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel,
+  current: ShapeElementModel | NoteBlockModel,
   targetType: TARGET_SHAPE_TYPE
 ) {
   const service = edgeless.service!;
 
-  const id = service.addElement(current.type, {
-    ...current.serialize(),
+  const id = service.addElement('shape', {
+    ...(isShape(current) ? current.serialize() : {}),
     shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
     radius: targetType === 'roundedRect' ? 0.1 : 0,
     text: new DocCollection.Y.Text(),
@@ -342,7 +342,7 @@ export function createShapeElement(
 
 export function createTextElement(
   edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel
+  current: ShapeElementModel | NoteBlockModel
 ) {
   const id = edgeless.service.addElement(CanvasElementType.TEXT, {
     text: new DocCollection.Y.Text(),

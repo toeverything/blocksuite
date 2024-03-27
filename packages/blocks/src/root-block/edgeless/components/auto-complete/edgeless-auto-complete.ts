@@ -34,7 +34,9 @@ import {
 import { ConnectorPathGenerator } from '../../../../surface-block/managers/connector-manager.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
+import { isNoteBlock } from '../../utils/query.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
+import { DEFAULT_CONNECTOR_COLOR } from '../panel/color-panel.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
 import {
@@ -146,6 +148,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return this.edgeless.surface;
   }
 
+  get canAddAutoCompletePanel() {
+    const { current } = this;
+    return isShape(current) || isNoteBlock(current);
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
     this._pathGenerator = new ConnectorPathGenerator({
@@ -182,7 +189,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     e: PointerEvent,
     connector: ConnectorElementModel
   ) {
-    if (!isShape(this.current)) return;
+    if (!this.canAddAutoCompletePanel) return;
 
     const position = this.edgeless.service.viewport.toModelCoord(
       e.clientX,
@@ -217,7 +224,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         e.clientY - viewportRect.top
       );
       if (Vec.dist(start, point) > 8 && !this._isMoving) {
-        if (!isShape(this.current)) return;
+        if (!this.canAddAutoCompletePanel) return;
         this._isMoving = true;
         const { startPosition } = getPosition(type);
         connector = this._addConnector(
@@ -258,10 +265,23 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private _addConnector(source: Connection, target: Connection) {
     const { service } = this.edgeless;
+
+    let color = '';
+    if (isShape(this.current)) {
+      color = this.current.strokeColor;
+    } else {
+      let tag = this.current.background.split('-').pop();
+      if (!tag || tag === 'gray') tag = 'grey';
+      color = `--affine-palette-line-${tag}`;
+    }
+    const stroke = getComputedStyle(this.edgeless).getPropertyValue(color)
+      ? color
+      : DEFAULT_CONNECTOR_COLOR;
+
     const id = service.addElement(CanvasElementType.CONNECTOR, {
       mode: ConnectorMode.Orthogonal,
       strokeWidth: 2,
-      stroke: (<ShapeElementModel>this.current).strokeColor,
+      stroke,
       source,
       target,
     });
