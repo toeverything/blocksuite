@@ -227,17 +227,19 @@ export class InlineEditor<
     this.slots.inlineRangeUpdate.on(this.rangeService.onInlineRangeUpdated);
   }
 
-  mount(rootElement: HTMLElement, eventSource: HTMLElement = rootElement) {
+  mount(
+    rootElement: HTMLElement,
+    eventSource: HTMLElement = rootElement,
+    isReadonly = false
+  ) {
     const inlineRoot = rootElement as InlineRootElement<TextAttributes>;
     inlineRoot.inlineEditor = this;
     this._rootElement = inlineRoot;
     this._eventSource = eventSource;
-    render(nothing, this._rootElement);
-    this._rootElement.contentEditable = 'true';
-    this._rootElement.style.outline = 'none';
-    this._eventSource.contentEditable = 'true';
     this._eventSource.style.outline = 'none';
     this._rootElement.dataset.vRoot = 'true';
+    this.setReadonly(isReadonly);
+    render(nothing, this._rootElement);
 
     this._bindYTextObserver();
 
@@ -269,8 +271,9 @@ export class InlineEditor<
   }
 
   setReadonly(isReadonly: boolean): void {
-    this.rootElement.contentEditable = isReadonly ? 'false' : 'true';
-    this.eventSource.contentEditable = isReadonly ? 'false' : 'true';
+    const value = isReadonly ? 'false' : 'true';
+    this.rootElement.contentEditable = value;
+    this.eventSource.contentEditable = value;
     this._isReadonly = isReadonly;
   }
 

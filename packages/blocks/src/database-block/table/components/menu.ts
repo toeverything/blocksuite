@@ -79,7 +79,7 @@ export const popRowMenu = (
             ${MoveLeftIcon}
           </div>`,
           select: () => {
-            selection.insertRowBefore(rowId);
+            selection.insertRowBefore(selection.selection?.groupKey, rowId);
           },
         },
         {

@@ -1,7 +1,7 @@
 import type { TemplateResult } from 'lit';
 import type { OpenAI } from 'openai';
 
-import type { ChatMessage, MessageContext } from '../model/message-schema.js';
+import type { ChatMessage, MessageContext } from '../schema/schema.js';
 
 export type Vendor<Data> = {
   key: string;

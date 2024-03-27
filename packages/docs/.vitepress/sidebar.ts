@@ -80,10 +80,6 @@ export const guide: DefaultTheme.NavItem[] = [
         text: '<code>inline</code>',
         link: 'guide/inline',
       },
-      {
-        text: '<code>lit</code>',
-        link: 'guide/lit',
-      },
     ],
   },
   {
@@ -106,10 +102,6 @@ export const reference: DefaultTheme.NavItem[] = [
     text: 'API Reference',
     items: [
       { text: '@blocksuite/store', link: 'api/@blocksuite/store/index' },
-      {
-        text: '@blocksuite/block-std',
-        link: 'api/@blocksuite/block-std/index',
-      },
       {
         text: '@blocksuite/block-std',
         link: 'api/@blocksuite/block-std/index',

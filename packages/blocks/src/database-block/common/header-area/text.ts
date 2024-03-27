@@ -1,3 +1,4 @@
+import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
@@ -71,7 +72,20 @@ abstract class BaseTextCell extends BaseCellRenderer<unknown> {
   static override styles = styles;
   @property({ attribute: false })
   showIcon = false;
+  get service() {
+    const database = this.closest<DatabaseBlockComponent>('affine-database');
+    return database?.service;
+  }
 
+  get inlineManager() {
+    return this.service?.inlineManager;
+  }
+  get attributesSchema() {
+    return this.inlineManager?.getSchema();
+  }
+  get attributeRenderer() {
+    return this.inlineManager?.getRenderer();
+  }
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
@@ -150,11 +164,14 @@ export class HeaderAreaTextCell extends BaseTextCell {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
     );
-
     return html`${this.renderIcon()}
       <rich-text
         .yText=${yText}
         .inlineEventSource=${this.topContenteditableElement}
+        .attributesSchema=${this.attributesSchema}
+        .attributeRenderer=${this.attributeRenderer}
+        .embedChecker=${this.inlineManager?.embedChecker}
+        .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
         .readonly=${true}
         class="data-view-header-area-rich-text"
       ></rich-text>`;
@@ -187,15 +204,33 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       .catch(console.error);
   }
 
+  public override connectedCallback() {
+    super.connectedCallback();
+    const selectAll = (e: KeyboardEvent) => {
+      if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.inlineEditor.selectAll();
+      }
+    };
+    this.addEventListener('keydown', selectAll);
+    this.disposables.add(() => {
+      this.removeEventListener('keydown', selectAll);
+    });
+  }
+
   override render() {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
     );
-
     return html`${this.renderIcon()}
       <rich-text
         .yText=${yText}
         .inlineEventSource=${this.topContenteditableElement}
+        .attributesSchema=${this.attributesSchema}
+        .attributeRenderer=${this.attributeRenderer}
+        .embedChecker=${this.inlineManager?.embedChecker}
+        .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
         .readonly=${this.readonly}
         class="data-view-header-area-rich-text"
       ></rich-text>`;

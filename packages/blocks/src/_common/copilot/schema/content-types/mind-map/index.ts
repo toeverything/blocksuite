@@ -1,10 +1,10 @@
 import { html } from 'lit';
 
-import { createMessageSchema } from '../../message-schema.js';
+import { type ContentSchema, createActionBuilder } from '../../schema.js';
 import { chatService, userText } from '../utils.js';
 
 type Markdown = string;
-export const MindMapMessageSchema = createMessageSchema<Markdown>({
+export const MindMapContentSchema: ContentSchema<Markdown, unknown> = {
   type: 'mind-map',
   render: ({ value }) => {
     if (value.status === 'loading') {
@@ -24,19 +24,19 @@ export const MindMapMessageSchema = createMessageSchema<Markdown>({
       },
     ];
   },
-});
+};
 
-export const createMindMapAction = MindMapMessageSchema.createActionBuilder(
-  (text: string) => {
-    return chatService().chat([
-      userText(
-        `Use the nested unordered list syntax in Markdown to create a structure similar to a mind map. 
+export const createMindMapAction = createActionBuilder('mind-map')((
+  text: string
+) => {
+  return chatService().chat([
+    userText(
+      `Use the nested unordered list syntax in Markdown to create a structure similar to a mind map. 
       Analyze the following questions:
       ${text}`
-      ),
-    ]);
-  }
-);
+    ),
+  ]);
+});
 export const mindMapActions = {
   createMindMapAction,
 };

@@ -214,8 +214,11 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    inlineEditor.mount(this.inlineEditorContainer, this.inlineEventSource);
-    inlineEditor.setReadonly(this.readonly);
+    inlineEditor.mount(
+      this.inlineEditorContainer,
+      this.inlineEventSource,
+      this.readonly
+    );
   }
 
   private _onStackItemAdded = (event: { stackItem: RichTextStackItem }) => {

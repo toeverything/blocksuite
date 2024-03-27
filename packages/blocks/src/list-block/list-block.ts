@@ -105,12 +105,12 @@ export class ListBlockComponent extends BlockElement<
   private _updateFollowingListSiblings() {
     this.updateComplete
       .then(() => {
-        let current: BlockElement | undefined = this as BlockElement;
-        while (current && current.tagName == 'AFFINE-LIST') {
+        let current: BlockElement | null = this as BlockElement;
+        while (current?.tagName == 'AFFINE-LIST') {
           current.requestUpdate();
-          current = this.std.view.findNext(current.path, () => {
-            return true;
-          })?.view as BlockElement;
+          const next = this.std.doc.getNextSibling(current.model);
+          const id = next?.id;
+          current = id ? this.std.view.getBlock(id) : null;
         }
       })
       .catch(console.error);

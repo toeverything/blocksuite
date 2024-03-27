@@ -43,6 +43,24 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             mode: ConnectorMode.Straight,
           });
         },
+        x: () => {
+          rootElement.service.editSession.record('connector', {
+            mode: ConnectorMode.Orthogonal,
+          });
+          this._setEdgelessTool(rootElement, {
+            type: 'connector',
+            mode: ConnectorMode.Orthogonal,
+          });
+        },
+        c: () => {
+          rootElement.service.editSession.record('connector', {
+            mode: ConnectorMode.Curve,
+          });
+          this._setEdgelessTool(rootElement, {
+            type: 'connector',
+            mode: ConnectorMode.Curve,
+          });
+        },
         h: () => {
           this._setEdgelessTool(rootElement, {
             type: 'pan',
@@ -173,22 +191,42 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           if (!IS_MAC) return;
           this._delete();
         },
-        ArrowUp: () => {
-          this._move('ArrowUp');
-        },
-        ArrowDown: () => {
-          this._move('ArrowDown');
-        },
-        ArrowLeft: () => {
-          this._move('ArrowLeft');
-        },
-        ArrowRight: () => {
-          this._move('ArrowRight');
-        },
         Escape: () => {
           if (!this.rootElement.service.selection.empty) {
             rootElement.selection.clear();
           }
+        },
+
+        ArrowUp: () => {
+          this._move('ArrowUp');
+        },
+
+        ArrowDown: () => {
+          this._move('ArrowDown');
+        },
+
+        ArrowLeft: () => {
+          this._move('ArrowLeft');
+        },
+
+        ArrowRight: () => {
+          this._move('ArrowRight');
+        },
+
+        'Shift-ArrowUp': () => {
+          this._move('ArrowUp', true);
+        },
+
+        'Shift-ArrowDown': () => {
+          this._move('ArrowDown', true);
+        },
+
+        'Shift-ArrowLeft': () => {
+          this._move('ArrowLeft', true);
+        },
+
+        'Shift-ArrowRight': () => {
+          this._move('ArrowRight', true);
         },
       },
       {
@@ -331,25 +369,27 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     edgeless.tools.setEdgelessTool(edgelessTool);
   }
 
-  private _move(key: string) {
+  private _move(key: string, shift = false) {
     const edgeless = this.rootElement;
     if (edgeless.service.selection.editing) return;
     const { elements } = edgeless.service.selection;
+    const inc = shift ? 10 : 1;
+
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
 
       switch (key) {
         case 'ArrowUp':
-          bound.y--;
+          bound.y -= inc;
           break;
         case 'ArrowLeft':
-          bound.x--;
+          bound.x -= inc;
           break;
         case 'ArrowRight':
-          bound.x++;
+          bound.x += inc;
           break;
         case 'ArrowDown':
-          bound.y++;
+          bound.y += inc;
           break;
       }
 
