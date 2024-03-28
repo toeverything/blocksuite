@@ -87,17 +87,14 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     });
   }
 
-  private _selectElements(e: PointerEventState) {
+  private _updateSelection(e: PointerEventState) {
     const lassoBounds = getBoundFromPoints(this._lassoPoints);
 
     const elements = this._service
       .pickElementsByBound(lassoBounds)
-      .filter(e =>
-        this.isBoundingBoxIntersectsWithLasso(e.elementBound, this._lassoPoints)
-      );
+      .filter(e => this.isInsideLassoSelection(e.elementBound));
 
     const selection = this.selection;
-
     const { tools } = this._edgeless;
     const set = new Set(
       tools.shiftKey || e.keys.shift
@@ -134,8 +131,8 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
       const lastPoint = this._lastPoint;
       const dx = lastPoint[0] - firstPoint[0];
       const dy = lastPoint[1] - firstPoint[1];
-      if (Vec.len2([dx, dy]) < 10 ** 2) {
-        this._selectElements(e);
+      if (Vec.len2([dx, dy]) < 20 ** 2) {
+        this._updateSelection(e);
         return this._reset();
       }
 
@@ -167,7 +164,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const [x, y] = this.toModelCoord(point);
     this._lassoPoints.push([x, y]);
 
-    this._selectElements(e);
+    this._updateSelection(e);
   }
 
   override onContainerDragEnd(): void {
@@ -186,18 +183,14 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     noop();
   }
 
-  private isBoundingBoxIntersectsWithLasso(
-    bound: Bound,
-    lassoPoints: IVec[]
-  ): boolean {
+  private isInsideLassoSelection(bound: Bound): boolean {
     // Check if any corner of the bounding box is inside the lasso polygon
-    const point = bound.points;
-    return (
-      pointInPolygon(point[0], lassoPoints) ||
-      pointInPolygon(point[1], lassoPoints) ||
-      pointInPolygon(point[2], lassoPoints) ||
-      pointInPolygon(point[3], lassoPoints)
-    );
+    const lassoPoints = this._lassoPoints.concat([this._lassoPoints[0]]);
+    const elPoly = bound.points;
+    for (const point of elPoly) {
+      if (pointInPolygon(point, lassoPoints)) return true;
+    }
+    return false;
   }
 
   override onContainerMouseMove(e: PointerEventState): void {
@@ -209,7 +202,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
       lastPoint[0] = x;
       lastPoint[1] = y;
     }
-    this._selectElements(e);
+    this._updateSelection(e);
   }
 
   override onContainerMouseOut(): void {
