@@ -1,6 +1,6 @@
-# React Basic Example
+# React Y-Redis Express Example
 
-This example encapsulates the BlockSuite editor and doc collection in React, demonstrating basic document synchronization with y-websocket.
+This example encapsulates the BlockSuite editor and doc collection in React, demonstrating document synchronization and storage with y-redis.
 
 ## Development
 
@@ -9,7 +9,7 @@ git clone https://github.com/toeverything/blocksuite.git
 cd blocksuite/examples
 
 pnpm install
-pnpm dev react-websocket
+pnpm dev react-y-redis-express
 ```
 
 This project is created using the `pnpm create vite` cli.

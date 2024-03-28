@@ -1,2 +1,2 @@
-const TopBar = () => <div className="top-bar">React WebSocket</div>;
+const TopBar = () => <div className="top-bar">React Y-Redis Express</div>;
 export default TopBar;
