@@ -671,6 +671,6 @@ export class EmbedCardToolbar extends WidgetElement<
 
 declare global {
   interface HTMLElementTagNameMap {
-    [EMBED_CARD_TOOLBAR]: EmbedCardToolbar;
+    embedCardToolbar: EmbedCardToolbar;
   }
 }

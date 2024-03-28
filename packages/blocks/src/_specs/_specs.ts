@@ -200,13 +200,61 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     },
     service: AttachmentService,
   },
-  EmbedFigmaBlockSpec,
-  EmbedYoutubeBlockSpec,
-  EmbedGithubBlockSpec,
+  {
+    ...EmbedFigmaBlockSpec,
+    view: {
+      ...EmbedFigmaBlockSpec.view,
+      widgets: {
+        [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
+      },
+    },
+  },
+  {
+    ...EmbedYoutubeBlockSpec,
+    view: {
+      ...EmbedYoutubeBlockSpec.view,
+      widgets: {
+        [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
+      },
+    },
+  },
+  {
+    ...EmbedGithubBlockSpec,
+    view: {
+      ...EmbedGithubBlockSpec.view,
+      widgets: {
+        [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
+      },
+    },
+  },
+  {
+    ...EmbedLinkedDocBlockSpec,
+    view: {
+      ...EmbedLinkedDocBlockSpec.view,
+      widgets: {
+        [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
+      },
+    },
+  },
+  {
+    ...EmbedSyncedDocBlockSpec,
+    view: {
+      ...EmbedSyncedDocBlockSpec.view,
+      widgets: {
+        [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
+      },
+    },
+  },
+  {
+    ...EmbedLoomBlockSpec,
+    view: {
+      ...EmbedLoomBlockSpec.view,
+      widgets: {
+        [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
+      },
+    },
+  },
   EmbedHtmlBlockSpec,
-  EmbedLinkedDocBlockSpec,
-  EmbedSyncedDocBlockSpec,
-  EmbedLoomBlockSpec,
 ];
 
 export const PageEditorBlockSpecs: BlockSpec[] = [
