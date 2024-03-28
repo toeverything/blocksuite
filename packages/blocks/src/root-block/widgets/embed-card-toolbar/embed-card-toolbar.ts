@@ -272,7 +272,6 @@ export class EmbedCardToolbar extends WidgetElement<
 
     navigator.clipboard.writeText(this.model.url).catch(console.error);
     toast(this.host as EditorHost, 'Copied link to clipboard');
-    this.remove();
   }
 
   private get _pageIcon() {
@@ -671,6 +670,6 @@ export class EmbedCardToolbar extends WidgetElement<
 
 declare global {
   interface HTMLElementTagNameMap {
-    embedCardToolbar: EmbedCardToolbar;
+    [EMBED_CARD_TOOLBAR]: EmbedCardToolbar;
   }
 }
