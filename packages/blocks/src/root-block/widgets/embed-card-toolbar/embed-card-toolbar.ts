@@ -1,3 +1,46 @@
+import type { EditorHost } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
+import { type BlockModel, DocCollection } from '@blocksuite/store';
+import { flip } from '@floating-ui/dom';
+import { css, html, LitElement, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
+
+import { EmbedCardMoreMenu } from '../../../_common/components/embed-card/embed-card-more-menu-popper.js';
+import { EmbedCardStyleMenu } from '../../../_common/components/embed-card/embed-card-style-popper.js';
+import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
+import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
+import type { EmbedToolbarBlock } from '../../../_common/components/embed-card/type.js';
+import { createLitPortal } from '../../../_common/components/portal.js';
+import { toast } from '../../../_common/components/toast.js';
+import {
+  type BookmarkBlockModel,
+  BookmarkIcon,
+  BookmarkStyles,
+  CaptionIcon,
+  CopyIcon,
+  EditIcon,
+  EmbedEdgelessIcon,
+  type EmbedGithubModel,
+  type EmbedLinkedDocBlockComponent,
+  type EmbedLinkedDocModel,
+  EmbedPageIcon,
+  type EmbedSyncedDocBlockComponent,
+  EmbedWebIcon,
+  LinkIcon,
+  MoreVerticalIcon,
+  OpenIcon,
+  PaletteIcon,
+} from '../../../index.js';
+import {
+  isBookmarkBlock,
+  isEmbedGithubBlock,
+  isEmbedLinkedDocBlock,
+  isEmbedSyncedDocBlock,
+} from '../../edgeless/utils/query.js';
+import type { EmbedOptions } from '../../root-service.js';
+
 export const AFFINE_EMBED_CARD_TOOLBAR = 'affine_embed-card-toolbar';
 
 @customElement(AFFINE_EMBED_CARD_TOOLBAR)
