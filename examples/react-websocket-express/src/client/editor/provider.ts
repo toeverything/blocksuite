@@ -1,7 +1,7 @@
 import { Doc, DocCollection, Slot } from '@blocksuite/store';
 import { WebsocketProvider } from 'y-websocket';
 import * as api from './api';
-import { initCollection } from './utils';
+import { debounce, initCollection } from './utils';
 
 export class Provider {
   ws: WebsocketProvider | null = null;
@@ -32,7 +32,9 @@ export class Provider {
       api.deleteDoc(docId);
     });
 
-    collection.slots.docUpdated.on(() => this._handleTitleUpdateEvent());
+    collection.slots.docUpdated.on(
+      debounce(() => this._handleTitleUpdateEvent(), 500)
+    );
   }
 
   static async init(wsBaseUrl: string) {

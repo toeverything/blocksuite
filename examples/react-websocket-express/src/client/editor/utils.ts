@@ -39,3 +39,16 @@ export function createDoc(collection: DocCollection) {
   doc.resetHistory();
   return doc;
 }
+
+export function debounce<T extends (...args: unknown[]) => void>(
+  func: T,
+  limit: number
+) {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: unknown[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, limit);
+  };
+}
