@@ -1,6 +1,6 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
-import { type EdgelessTool } from '../../_common/types.js';
+import { type EdgelessTool, LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import type { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import type { ShapeElementModel } from '../../surface-block/index.js';
@@ -45,6 +45,20 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'connector',
             mode: ConnectorMode.Straight,
           });
+        },
+        'Shift-v': () => {
+          const edgeless = rootElement;
+          const cur = edgeless.edgelessTool;
+          const tool: EdgelessTool = {
+            type: 'lasso',
+            mode:
+              cur.type === 'lasso'
+                ? cur.mode === LassoMode.FreeHand
+                  ? LassoMode.Polygonal
+                  : LassoMode.FreeHand
+                : LassoMode.FreeHand,
+          };
+          this._setEdgelessTool(edgeless, tool);
         },
         h: () => {
           this._setEdgelessTool(rootElement, {

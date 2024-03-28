@@ -492,7 +492,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   };
 
-  private _clearLastSelecton = () => {
+  private _clearLastSelection = () => {
     if (this.selection.empty) {
       this.selection.clearLast();
     }
@@ -763,7 +763,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   beforeModeSwitch(edgelessTool?: EdgelessTool) {
     if (edgelessTool?.type === 'pan') {
-      this._clearLastSelecton();
+      this._clearLastSelection();
     }
     this._stopAutoPanning();
     this._clearDraggingAreaDisposable();

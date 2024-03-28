@@ -173,6 +173,11 @@ export enum LineWidth {
   Twelve = 12,
 }
 
+export enum LassoMode {
+  FreeHand,
+  Polygonal,
+}
+
 export type TextTool = {
   type: 'text';
 };
@@ -201,6 +206,11 @@ export type PanTool = {
 
 export type CopilotSelectionTool = {
   type: 'copilot';
+};
+
+export type LassoTool = {
+  type: 'lasso';
+  mode: LassoMode;
 };
 
 export type NoteChildrenFlavour =
@@ -244,7 +254,8 @@ export type EdgelessTool =
   | EraserTool
   | FrameTool
   | FrameNavigatorTool
-  | CopilotSelectionTool;
+  | CopilotSelectionTool
+  | LassoTool;
 
 export type EmbedBlockDoubleClickData = {
   blockId: string;
