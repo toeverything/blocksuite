@@ -28,6 +28,7 @@ import {
 } from '../../../_common/icons/index.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import {
+  buildPath,
   createDefaultDoc,
   getImageFilesFromLocal,
   getInlineEditorByModel,
@@ -47,6 +48,10 @@ import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import type { SurfaceBlockModel } from '../../../surface-block/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
+import {
+  AFFINE_AI_PANEL_WIDGET,
+  type AffineAIPanelWidget,
+} from '../ai-panel/ai-panel.js';
 import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import {
   formatDate,
@@ -66,18 +71,23 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         icon: AIStarIcon,
         showWhen: (_, rootElement) => {
           const affineAIPanelWidget = rootElement.host.view.getWidget(
-            'affine-ai-action-panel-widget',
+            AFFINE_AI_PANEL_WIDGET,
             rootElement.model.id
           );
           return !!affineAIPanelWidget;
         },
-        action: ({ rootElement }) => {
-          const affineAIPanelWidget = rootElement.host.view.getWidget(
-            'affine-ai-action-panel-widget',
+        action: ({ rootElement, model }) => {
+          const view = rootElement.host.view;
+          const affineAIPanelWidget = view.getWidget(
+            AFFINE_AI_PANEL_WIDGET,
             rootElement.model.id
           );
           assertExists(affineAIPanelWidget);
-          // TODO: Call the AI panel widget to show the AI panel
+          requestAnimationFrame(() => {
+            const block = view.viewFromPath('block', buildPath(model));
+            assertExists(block);
+            (affineAIPanelWidget as AffineAIPanelWidget).toggle(block);
+          });
         },
       },
     ],
