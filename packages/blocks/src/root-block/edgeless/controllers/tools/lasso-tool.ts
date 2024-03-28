@@ -46,11 +46,11 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   };
 
   private _overlay = new LassoOverlay();
-  // private _lastTime = 0;
   private _raf = 0;
   private _lassoPoints: IVec[] = [];
   private _lastPoint: IVec = [];
   private _isSelecting = false;
+  // todo: need a better way does not work when subtracting
   private _currentSelectionState = new Set<string>(); // to finalize the selection
 
   get selection() {
@@ -62,6 +62,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   private _loop = () => {
+    // Reduce the number of points
     const path =
       this.tool.mode === LassoMode.FreeHand
         ? getSvgPathFromStroke(this._lassoPoints)
@@ -155,9 +156,6 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   override onContainerPointerDown(e: PointerEventState): void {
-    e.event.preventDefault();
-    e.event.stopPropagation();
-
     const { mode } = this.tool;
     if (mode !== LassoMode.Polygonal) return;
 
@@ -283,8 +281,12 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     noop();
   }
 
-  override afterModeSwitch(): void {
-    noop();
+  override afterModeSwitch(newTool?: EdgelessTool): void {
+    // When lasso is selected start with the current selection
+    if (newTool?.type === 'lasso')
+      this._currentSelectionState = new Set(
+        this.selection.elements.map(el => el.id)
+      );
   }
 
   override onPressShiftKey(): void {
