@@ -264,28 +264,28 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   };
 
   private _addConnector(source: Connection, target: Connection) {
-    const { service } = this.edgeless;
+    const { current, edgeless } = this;
 
     let color = '';
-    if (isShape(this.current)) {
-      color = this.current.strokeColor;
+    if (isShape(current)) {
+      color = current.strokeColor;
     } else {
-      let tag = this.current.background.split('-').pop();
+      let tag = current.background.split('-').pop();
       if (!tag || tag === 'gray') tag = 'grey';
       color = `--affine-palette-line-${tag}`;
     }
-    const stroke = getComputedStyle(this.edgeless).getPropertyValue(color)
+    const stroke = getComputedStyle(edgeless).getPropertyValue(color)
       ? color
       : DEFAULT_CONNECTOR_COLOR;
 
-    const id = service.addElement(CanvasElementType.CONNECTOR, {
+    const id = edgeless.service.addElement(CanvasElementType.CONNECTOR, {
       mode: ConnectorMode.Orthogonal,
       strokeWidth: 2,
       stroke,
       source,
       target,
     });
-    return service.getElementById(id) as ConnectorElementModel;
+    return edgeless.service.getElementById(id) as ConnectorElementModel;
   }
 
   private _generateElementOnClick(type: Direction) {
