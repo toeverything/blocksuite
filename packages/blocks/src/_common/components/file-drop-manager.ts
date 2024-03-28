@@ -91,8 +91,8 @@ export class FileDropManager {
         lastNote = newNote;
       }
 
-      const lastItem = lastNote.lastItem();
-      if (lastItem && !matchFlavours(lastItem, ['affine:note'])) {
+      const lastItem = lastNote.children[lastNote.children.length - 1];
+      if (lastItem) {
         targetModel = lastItem;
       } else {
         const newParagraphId = this.doc.addBlock(
