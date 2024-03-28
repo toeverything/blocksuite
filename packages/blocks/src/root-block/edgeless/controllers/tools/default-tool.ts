@@ -15,8 +15,10 @@ import {
 import { clamp } from '../../../../_common/utils/math.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import { GroupLikeModel } from '../../../../surface-block/element-model/base.js';
 import {
   GroupElementModel,
+  MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
@@ -579,7 +581,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._edgeless.service.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
-      } else if (element instanceof GroupElementModel) {
+      } else if (element instanceof GroupLikeModel) {
         element.decendants().forEach(ele => toBeMoved.add(ele));
       }
     });
@@ -700,6 +702,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._doc.transact(() => {
       this._toBeMoved.forEach(el => {
         el.pop('xywh');
+
+        if (el.group instanceof MindmapElementModel) {
+          el.group.requestLayout();
+        }
       });
     });
 

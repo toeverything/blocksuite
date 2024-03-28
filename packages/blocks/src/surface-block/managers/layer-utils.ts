@@ -4,7 +4,7 @@ import type {
   EdgelessBlockModel,
   EdgelessModel,
 } from '../../root-block/edgeless/type.js';
-import { GroupElementModel } from '../index.js';
+import { GroupLikeModel } from '../element-model/base.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
 
@@ -96,9 +96,9 @@ export function renderableInEdgeless(
 }
 
 export function compare(a: EdgelessModel, b: EdgelessModel) {
-  if (a instanceof GroupElementModel && a.hasDescendant(b)) {
+  if (a instanceof GroupLikeModel && a.hasDescendant(b)) {
     return -1;
-  } else if (b instanceof GroupElementModel && b.hasDescendant(a)) {
+  } else if (b instanceof GroupLikeModel && b.hasDescendant(a)) {
     return 1;
   } else {
     const aGroups = a.groups;

@@ -9,8 +9,10 @@ export class Slot<T = void> implements Disposable {
 
   filter(testFun: (v: T) => boolean): Slot<T> {
     const result = new Slot<T>();
-    // if result is disposed, dispose this too
-    result._disposables.push({ dispose: () => this.dispose() });
+    // if the original slot is disposed, dispose the filtered one
+    this._disposables.push({
+      dispose: () => result.dispose(),
+    });
 
     this.on((v: T) => {
       if (testFun(v)) {

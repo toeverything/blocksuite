@@ -12,8 +12,8 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   static override styles = css`
     .line-controller {
       position: absolute;
-      width: 9px;
-      height: 9px;
+      width: 12px;
+      height: 12px;
       box-sizing: border-box;
       border-radius: 50%;
       border: 2px solid var(--affine-text-emphasis-color);

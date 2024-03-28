@@ -8,7 +8,7 @@ import { isPointIn } from '../utils/math-utils.js';
 import type { PointLocation } from '../utils/point-location.js';
 import { type IVec2 } from '../utils/vec.js';
 import { type BaseProps, ElementModel } from './base.js';
-import { FontFamily, FontWeight } from './common.js';
+import { FontFamily, FontWeight, TextResizing } from './common.js';
 import {
   type FontStyle,
   type StrokeStyle,
@@ -61,6 +61,8 @@ export type ShapeProps = BaseProps & {
   textAlign?: TextAlign;
   textHorizontalAlign?: TextAlign;
   textVerticalAlign?: VerticalAlign;
+  textResizing?: TextResizing;
+  maxWidth?: false | number;
 };
 
 export class ShapeElementModel extends ElementModel<ShapeProps> {
@@ -138,6 +140,12 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
 
   @yfield('center')
   textVerticalAlign!: VerticalAlign;
+
+  @yfield(TextResizing.AUTO_HEIGHT)
+  textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
+
+  @yfield(false)
+  maxWidth: false | number = false;
 
   override hitTest(x: number, y: number, options: HitTestOptions) {
     // If pierce is false, only check if the point is in the bounding box

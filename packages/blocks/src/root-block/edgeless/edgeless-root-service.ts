@@ -8,16 +8,17 @@ import { clamp } from '../../_common/utils/math.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
-import type {
-  CanvasElement,
-  CanvasElementType,
-  ConnectorElementModel,
-} from '../../surface-block/element-model/index.js';
-import type { SurfaceBlockModel } from '../../surface-block/index.js';
+import { GroupLikeModel } from '../../surface-block/element-model/base.js';
 import {
-  getCommonBound,
+  type CanvasElement,
+  type CanvasElementType,
+  type ConnectorElementModel,
+} from '../../surface-block/element-model/index.js';
+import type {
   GroupElementModel,
+  SurfaceBlockModel,
 } from '../../surface-block/index.js';
+import { getCommonBound } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
@@ -417,8 +418,7 @@ export class EdgelessRootService extends RootService {
       let index = results.length - 1;
       while (
         picked === activeGroup ||
-        (picked instanceof GroupElementModel &&
-          picked.hasDescendant(activeGroup))
+        (picked instanceof GroupLikeModel && picked.hasDescendant(activeGroup))
       ) {
         picked = results[--index];
       }
@@ -481,12 +481,11 @@ export class EdgelessRootService extends RootService {
       return;
     }
 
-    const parent = selection.firstElement.group;
+    const parent = selection.firstElement.group as GroupElementModel;
 
     if (parent !== null) {
       selection.elements.forEach(element => {
-        // eslint-disable-next-line unicorn/prefer-dom-node-remove
-        parent.removeChild(element.id);
+        parent.removeDescendant(element.id);
       });
     }
 
@@ -507,12 +506,15 @@ export class EdgelessRootService extends RootService {
   ungroup(group: GroupElementModel) {
     const { selection } = this;
     const elements = group.childElements;
-    const parent = group.group;
+    const parent = group.group as GroupElementModel;
 
     if (parent !== null) {
-      // eslint-disable-next-line unicorn/prefer-dom-node-remove
-      parent.removeChild(group.id);
+      parent.removeDescendant(group.id);
     }
+
+    elements.forEach(element => {
+      group.removeDescendant(element.id);
+    });
 
     elements.forEach(element => {
       // @ts-ignore
@@ -520,8 +522,6 @@ export class EdgelessRootService extends RootService {
 
       element.index = this.generateIndex(elementType);
     });
-
-    this.removeElement(group.id);
 
     if (parent !== null) {
       elements.forEach(element => {
