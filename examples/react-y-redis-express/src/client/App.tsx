@@ -1,7 +1,7 @@
-import { EditorProvider } from './components/EditorProvider';
-import Sidebar from './components/Sidebar';
-import TopBar from './components/TopBar';
-import EditorContainer from './components/EditorContainer';
+import { EditorProvider } from './components/EditorProvider.js';
+import Sidebar from './components/Sidebar.js';
+import TopBar from './components/TopBar.js';
+import EditorContainer from './components/EditorContainer.js';
 import './index.css';
 
 function App() {

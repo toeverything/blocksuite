@@ -1,7 +1,7 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { Doc } from '@blocksuite/store';
-import { createDoc, getCurrentRoom, setRoom } from './utils';
-import { Provider } from './provider';
+import { createDoc, getCurrentRoom, setRoom } from './utils.js';
+import { Provider } from './provider.js';
 import '@blocksuite/presets/themes/affine.css';
 
 export async function initEditor() {

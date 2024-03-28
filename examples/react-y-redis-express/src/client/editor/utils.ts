@@ -1,6 +1,6 @@
 import { AffineSchemas } from '@blocksuite/blocks/dist/schemas.js';
 import { Schema, DocCollection } from '@blocksuite/store';
-import * as api from './api';
+import * as api from './api.js';
 
 export function getCurrentRoom() {
   const id = window.location.pathname.replace(/^\//, '');

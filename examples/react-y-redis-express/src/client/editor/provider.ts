@@ -1,7 +1,7 @@
 import { Doc, DocCollection, Slot } from '@blocksuite/store';
 import { WebsocketProvider } from 'y-websocket';
-import * as api from './api';
-import { debounce, initCollection } from './utils';
+import * as api from './api.js';
+import { debounce, initCollection } from './utils.js';
 
 export class Provider {
   ws: WebsocketProvider | null = null;
