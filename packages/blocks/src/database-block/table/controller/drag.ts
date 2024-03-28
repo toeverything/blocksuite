@@ -2,7 +2,7 @@
 
 import type { ReactiveController } from 'lit';
 
-import type { InsertToPosition } from '../../types.js';
+import { type InsertToPosition } from '../../types.js';
 import { startDrag } from '../../utils/drag.js';
 import { TableRow } from '../components/row.js';
 import type { DataViewTable } from '../table-view.js';
@@ -96,6 +96,7 @@ export class TableDragController implements ReactiveController {
       evt.y - offsetTop
     );
     const fromGroup = row.groupKey;
+
     startDrag<
       | undefined
       | {
