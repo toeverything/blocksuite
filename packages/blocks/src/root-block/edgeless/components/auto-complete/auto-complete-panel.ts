@@ -53,7 +53,6 @@ import {
   DEFAULT_TEXT_WIDTH,
   Direction,
   isShape,
-  NOTE_BACKGROUND_COLOR_MAP,
   PANEL_HEIGHT,
   PANEL_WIDTH,
   type TARGET_SHAPE_TYPE,
@@ -206,12 +205,20 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     )?.xywh;
     if (!xywh) return;
 
-    const fillColor = this.currentSource.fillColor;
+    let color = '';
+    if (isShape(this.currentSource)) {
+      let tag = this.currentSource.fillColor.split('-').pop();
+      if (!tag || tag === 'gray') tag = 'grey';
+      color = `--affine-tag-${tag}`;
+    } else {
+      color = this.currentSource.background;
+    }
     const computedStyle = getComputedStyle(this.edgeless);
-    const backgroundColor = computedStyle.getPropertyValue(
-      NOTE_BACKGROUND_COLOR_MAP.get(fillColor) ?? DEFAULT_NOTE_BACKGROUND_COLOR
-    );
-    this._overlay = new AutoCompleteNoteOverlay(xywh, backgroundColor);
+    const background =
+      computedStyle.getPropertyValue(color) ||
+      computedStyle.getPropertyValue(DEFAULT_NOTE_BACKGROUND_COLOR);
+
+    this._overlay = new AutoCompleteNoteOverlay(xywh, background);
     this.edgeless.surface.renderer.addOverlay(this._overlay);
   }
 
@@ -459,7 +466,10 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     return coord;
   }
 
-  private _getCurrentSourceInfo() {
+  private _getCurrentSourceInfo(): {
+    style: string;
+    name: AUTO_COMPLETE_TARGET_TYPE;
+  } {
     const { currentSource } = this;
     const shape = isShape(currentSource);
     return {
