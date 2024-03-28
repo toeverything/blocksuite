@@ -1,4 +1,4 @@
-# React Y-Redis Express Example
+# React Websocket Example
 
 This example encapsulates the BlockSuite editor and doc collection in React, demonstrating document synchronization and storage with y-redis.
 
