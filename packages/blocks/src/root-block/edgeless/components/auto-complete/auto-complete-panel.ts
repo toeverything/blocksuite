@@ -243,8 +243,11 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     const { x, y, w, h } = bound;
     const xywh = [x, y, w, h] as XYWH;
-    const { shapeStyle, roughness, strokeColor, fillColor, strokeWidth } =
-      this.currentSource;
+    const { shapeStyle, strokeColor, fillColor, strokeWidth, roughness } =
+      isShape(this.currentSource)
+        ? this.currentSource
+        : this.edgeless.service.editSession.getLastProps('shape');
+
     const computedStyle = getComputedStyle(this.edgeless);
     const stroke = computedStyle.getPropertyValue(strokeColor);
     const fill = computedStyle.getPropertyValue(fillColor);
