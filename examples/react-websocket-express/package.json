@@ -4,27 +4,30 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev:server": "nodemon --watch server.ts --exec 'tsc -p tsconfig.server.json && node -r dotenv/config --enable-source-maps dist/server.js'",
-    "dev:client": "vite",
-    "build:client": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "dev": "nodemon -w src/server -x tsx src/server/main.ts",
+    "start": "NODE_ENV=production tsx src/server/main.ts",
+    "build": "vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jose": "^5.2.3",
     "lowdb": "^7.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "tsx": "^4.3.0",
+    "typescript": "^5.3.2",
     "vite-express": "^0.16.0",
     "y-websocket": "^2.0.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/node": "^20.9.3",
     "@types/react": "^18.2.69",
     "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
