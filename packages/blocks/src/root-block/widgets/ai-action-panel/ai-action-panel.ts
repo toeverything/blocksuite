@@ -7,7 +7,6 @@ import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { buildPath } from '../../../_common/utils/query.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../page/page-root-block.js';
 import type { RootBlockModel } from '../../root-model.js';
@@ -171,30 +170,6 @@ export class AffineAIActionPanelWidget extends WidgetElement<
         }
       }
     });
-
-    this.disposables.add(
-      this.rootBlockElement.slots.askAIButtonClicked.on(({ model }) => {
-        const block = this.host.view.viewFromPath('block', buildPath(model));
-        if (!block) return;
-        console.log('block', block);
-        this.state = 'input';
-        this.updateComplete
-          .then(() => {
-            console.log('updateComplete: ', this);
-            cleanUp = autoUpdate(block, this, () => {
-              computePosition(block, this, {
-                placement: 'bottom-start',
-              })
-                .then(({ x, y }) => {
-                  this.style.left = `${x}px`;
-                  this.style.top = `${y}px`;
-                })
-                .catch(console.error);
-            });
-          })
-          .catch(console.error);
-      })
-    );
 
     this.tabIndex = -1;
     this.disposables.addFromEvent(this, 'blur', e => {

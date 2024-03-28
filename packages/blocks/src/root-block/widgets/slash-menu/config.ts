@@ -72,14 +72,14 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           );
           return !!affineAIPanelWidget;
         },
-        action: ({ rootElement, model }) => {
+        action: ({ rootElement }) => {
           const view = rootElement.host.view;
           const affineAIPanelWidget = view.getWidget(
             'affine-ai-action-panel-widget',
             rootElement.model.id
           );
           assertExists(affineAIPanelWidget);
-          rootElement.slots.askAIButtonClicked.emit({ model });
+          // TODO: Call the AI panel widget to show the AI panel
         },
       },
     ],
