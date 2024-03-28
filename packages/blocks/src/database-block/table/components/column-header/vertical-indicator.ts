@@ -114,7 +114,7 @@ export const startDragWidthAdjustmentBar = (
   width: number,
   column: DataViewTableColumnManager
 ) => {
-  const scale = column.width / width;
+  const scale = width / column.width;
   const tableRect = tableContainer.getBoundingClientRect();
   const left =
     tableContainer
