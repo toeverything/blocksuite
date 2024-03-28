@@ -65,16 +65,14 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'Ask AI',
         icon: AIStarIcon,
         showWhen: (_, rootElement) => {
-          const view = rootElement.host.view;
-          const affineAIPanelWidget = view.getWidget(
+          const affineAIPanelWidget = rootElement.host.view.getWidget(
             'affine-ai-action-panel-widget',
             rootElement.model.id
           );
           return !!affineAIPanelWidget;
         },
         action: ({ rootElement }) => {
-          const view = rootElement.host.view;
-          const affineAIPanelWidget = view.getWidget(
+          const affineAIPanelWidget = rootElement.host.view.getWidget(
             'affine-ai-action-panel-widget',
             rootElement.model.id
           );
