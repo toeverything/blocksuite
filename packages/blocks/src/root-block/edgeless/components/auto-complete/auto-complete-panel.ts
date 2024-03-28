@@ -436,8 +436,8 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
   private _getPanelPosition() {
     const { viewport } = this.edgeless.service;
-    const viewportRect = viewport.boundingClientRect;
-    const result = this._getTargetXYWH(PANEL_WIDTH, PANEL_HEIGHT);
+    const { boundingClientRect: viewportRect, zoom } = viewport;
+    const result = this._getTargetXYWH(PANEL_WIDTH / zoom, PANEL_HEIGHT / zoom);
     const pos = result ? result.xywh.slice(0, 2) : this.position;
     const coord = viewport.toViewCoord(pos[0], pos[1]);
     const { width, height } = viewportRect;

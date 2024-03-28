@@ -10,6 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../../_common/types.js';
+import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import type { BrushElementModel } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
@@ -19,7 +20,6 @@ import {
   GET_DEFAULT_LINE_COLOR,
 } from '../panel/color-panel.js';
 import type { LineWidthEvent } from '../panel/line-width-panel.js';
-import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(
   elements: BrushElementModel[]

@@ -11,6 +11,7 @@ export { AffineEdgelessZoomToolbarWidget } from './edgeless-zoom-toolbar/index.j
 export { toolbarDefaultConfig } from './format-bar/config.js';
 export { AffineFormatBarWidget } from './format-bar/format-bar.js';
 export { AffineImageToolbarWidget } from './image-toolbar/image-toolbar.js';
+export { AffineInnerModalWidget } from './inner-modal/inner-modal.js';
 export {
   // It's used in the AFFiNE!
   showImportModal,

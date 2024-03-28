@@ -9,6 +9,7 @@ import './change-group-button.js';
 import './change-embed-card-button.js';
 import './change-attachment-button.js';
 import './change-image-button.js';
+import './change-mindmap-button.js';
 import './add-frame-button.js';
 import './add-group-button.js';
 import './release-from-group-button.js';
@@ -47,8 +48,9 @@ import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-yo
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import type {
-  ElementModel,
+import type { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
+import {
+  type ElementModel,
   GroupElementModel,
 } from '../../../../surface-block/index.js';
 import {
@@ -79,6 +81,7 @@ type CategorizedElements = {
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
   attachment?: AttachmentBlockModel[];
+  mindmap?: MindmapElementModel[];
   embedCard?: BookmarkBlockModel[] &
     EmbedGithubModel[] &
     EmbedYoutubeModel[] &
@@ -213,15 +216,29 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return result as CategorizedElements;
   }
 
-  private _ShapeButton(shapeElements?: ShapeElementModel[]) {
-    const shapeButton = shapeElements?.length
-      ? html`<edgeless-change-shape-button
-          .elements=${shapeElements}
-          .doc=${this.doc}
-          .surface=${this.surface}
+  private _MindmapButton(mindmapElements?: MindmapElementModel[]) {
+    return mindmapElements?.length
+      ? html`<edgeless-change-mindmap-button
+          .elements=${mindmapElements}
+          .edgeless=${this.edgeless}
         >
-        </edgeless-change-shape-button>`
+        </edgeless-change-mindmap-button>`
       : nothing;
+  }
+
+  private _ShapeButton(shapeElements?: ShapeElementModel[]) {
+    const shapeButton =
+      shapeElements?.length &&
+      shapeElements.every(
+        el => !this.edgeless.service.surface.isInMindmap(el.id)
+      )
+        ? html`<edgeless-change-shape-button
+            .elements=${shapeElements}
+            .doc=${this.doc}
+            .surface=${this.surface}
+          >
+          </edgeless-change-shape-button>`
+        : nothing;
     return shapeButton;
   }
 
@@ -458,6 +475,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       embedCard,
       attachment,
       image,
+      mindmap,
     } = groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -469,6 +487,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     const buttons = selectedAtLeastTwoTypes
       ? []
       : [
+          this._MindmapButton(mindmap),
           this._ShapeButton(shape),
           this._BrushButton(brush),
           this._ConnectorButton(connector),
@@ -491,7 +510,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
 
     if (elements.length === 1) {
-      if (selection.firstElement.group !== null) {
+      if (selection.firstElement.group instanceof GroupElementModel) {
         buttons.unshift(this._Divider());
         buttons.unshift(this._ReleaseFromGroupButton());
       }

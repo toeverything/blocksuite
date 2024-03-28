@@ -8,19 +8,17 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../_common/icons/index.js';
-import type { RootBlockComponent } from '../../../root-block/types.js';
-import { popSideDetail } from '../../common/detail/layout.js';
+import type { DataViewNative } from '../../data-view.js';
 import type { TableSelectionController } from '../controller/selection.js';
 
 export const openDetail = (
-  rootElement: RootBlockComponent | null,
+  dataViewEle: DataViewNative,
   rowId: string,
   selection: TableSelectionController
 ) => {
   const old = selection.selection;
   selection.selection = undefined;
-  popSideDetail({
-    rootElement,
+  dataViewEle.openDetailPanel({
     view: selection.host.view,
     rowId: rowId,
     onClose: () => {
@@ -30,7 +28,7 @@ export const openDetail = (
 };
 
 export const popRowMenu = (
-  rootElement: RootBlockComponent | null,
+  dataViewEle: DataViewNative,
   ele: ReferenceElement,
   rowId: string,
   selection: TableSelectionController
@@ -41,7 +39,7 @@ export const popRowMenu = (
       name: 'Expand Row',
       icon: ExpandFullIcon,
       select: () => {
-        openDetail(rootElement, rowId, selection);
+        openDetail(dataViewEle, rowId, selection);
       },
     },
     // {

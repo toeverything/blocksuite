@@ -5,6 +5,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { ReleaseFromGroupButtonIcon } from '../../../../_common/icons/index.js';
+import { GroupElementModel } from '../../../../surface-block/element-model/group.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-release-from-group-button')
@@ -16,19 +17,18 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
     const service = this.surface.edgeless.service;
     const element = service.selection.firstElement;
 
-    if (element.group === null) return;
+    if (!(element.group instanceof GroupElementModel)) return;
 
     const group = element.group;
 
-    // eslint-disable-next-line unicorn/prefer-dom-node-remove
-    group.removeChild(element.id);
+    group.removeDescendant(element.id);
 
     element.index = service.layer.generateIndex(
       'flavour' in element ? element.flavour : element.type
     );
 
     const parent = group.group;
-    if (parent != null) {
+    if (parent instanceof GroupElementModel) {
       parent.addChild(element.id);
     }
   }

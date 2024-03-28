@@ -6,6 +6,7 @@ import type { Bound } from './bound.js';
 import { PointLocation } from './point-location.js';
 import { type IVec, Vec } from './vec.js';
 
+export const PI2 = Math.PI * 2;
 export const EPSILON = 1e-12;
 export const MACHINE_EPSILON = 1.12e-16;
 export const CURVETIME_EPSILON = 1e-8;

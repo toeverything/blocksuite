@@ -3,6 +3,7 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import { assertType, DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
+import { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
 import {
   GroupElementModel,
   type SurfaceBlockModel,
@@ -48,7 +49,7 @@ export class EdgelessSelectionManager {
   remoteCursor: Map<number, CursorSelection> = new Map();
   remoteSelection: Map<number, SurfaceSelection> = new Map();
 
-  private _activeGroup: GroupElementModel | null = null;
+  private _activeGroup: GroupElementModel | MindmapElementModel | null = null;
   private _selected: Set<string> = new Set();
   private _selectedIds: string[] = [];
   private _remoteSelected: Set<string> = new Set();
@@ -283,7 +284,8 @@ export class EdgelessSelectionManager {
 
     if (
       selection.elements.length === 1 &&
-      this.firstElement instanceof GroupElementModel
+      (this.firstElement instanceof GroupElementModel ||
+        this.firstElement instanceof MindmapElementModel)
     ) {
       this._activeGroup = this.firstElement;
     } else {

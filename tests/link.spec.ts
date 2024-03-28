@@ -409,7 +409,7 @@ test('convert link to card', async ({ page }) => {
   await type(page, link);
   await pressEnter(page);
   await expect(linkPopoverLocator).not.toBeVisible();
-  await focusRichText(page);
+  await focusRichText(page, 1);
 
   await assertStoreMatchJSX(
     page,

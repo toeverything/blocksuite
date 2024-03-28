@@ -10,6 +10,12 @@ export enum FontFamily {
   OrelegaOne = 'blocksuite:surface:OrelegaOne',
 }
 
+export enum TextResizing {
+  AUTO_WIDTH,
+  AUTO_HEIGHT,
+  FIXED_SIZE,
+}
+
 export const enum FontWeight {
   Light = '300',
   Regular = '400',

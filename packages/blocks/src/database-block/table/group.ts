@@ -8,6 +8,7 @@ import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js'
 import { PlusIcon } from '../../_common/icons/index.js';
 import { GroupTitle } from '../common/group-by/group-title.js';
 import type { GroupData } from '../common/group-by/helper.js';
+import type { DataViewNative } from '../data-view.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
@@ -52,6 +53,8 @@ const styles = css`
 export class TableGroup extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
+  @property({ attribute: false })
+  dataViewEle!: DataViewNative;
   @property({ attribute: false })
   view!: DataViewTableManager;
   @property({ attribute: false })
@@ -142,6 +145,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
             return html`<data-view-table-row
               data-row-index="${idx}"
               data-row-id="${id}"
+              .dataViewEle="${this.dataViewEle}"
               .view="${this.view}"
               .rowId="${id}"
               .rowIndex="${idx}"

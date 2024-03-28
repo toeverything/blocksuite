@@ -109,7 +109,7 @@ export type DataViewSelectionState = DataViewSelection | undefined;
 
 export type CommonSlots = RefNodeSlots;
 
-type EditorMode = 'page' | 'edgeless';
+export type EditorMode = 'page' | 'edgeless';
 type EditorSlots = {
   editorModeSwitched: Slot<EditorMode>;
   docUpdated: Slot<{ newDocId: string }>;

@@ -66,7 +66,7 @@ export const formatBarStyle = css`
     display: none;
     align-items: center;
     padding: 4px 8px;
-    gap: 4px;
+    gap: 8px;
     height: 40px;
     width: max-content;
 

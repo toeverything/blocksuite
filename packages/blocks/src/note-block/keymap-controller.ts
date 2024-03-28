@@ -88,24 +88,32 @@ export class KeymapController implements ReactiveController {
             return next({ currentSelectionPath: currentTextSelection.path });
           })
           .getNextBlock()
-          .inline<'focusBlock'>((ctx, next) => {
+          .inline((ctx, next) => {
             const { nextBlock } = ctx;
-            assertExists(nextBlock);
+
+            if (!nextBlock) {
+              return;
+            }
 
             if (
-              matchFlavours(nextBlock.model, [
+              !matchFlavours(nextBlock.model, [
                 'affine:paragraph',
                 'affine:list',
                 'affine:code',
               ])
-            )
-              return;
+            ) {
+              this._std.command
+                .chain()
+                .with({
+                  focusBlock: nextBlock,
+                })
+                .selectBlock()
+                .run();
+            }
 
-            return next({
-              focusBlock: nextBlock,
-            });
-          })
-          .selectBlock(),
+            return next({});
+          }),
+
         // block selection - select the next block
         // 1. is paragraph, list, code block - focus it
         // 2. is not - select it using block selection
@@ -125,6 +133,7 @@ export class KeymapController implements ReactiveController {
             const { nextBlock } = ctx;
             assertExists(nextBlock);
 
+            event.preventDefault();
             if (
               matchFlavours(nextBlock.model, [
                 'affine:paragraph',
@@ -136,15 +145,16 @@ export class KeymapController implements ReactiveController {
                 .chain()
                 .focusBlockStart({ focusBlock: nextBlock })
                 .run();
-              event.preventDefault();
-              return;
+              return next();
             }
 
-            return next({
-              focusBlock: nextBlock,
-            });
-          })
-          .selectBlock(),
+            this._std.command
+              .chain()
+              .with({ focusBlock: nextBlock })
+              .selectBlock()
+              .run();
+            return next();
+          }),
       ])
       .run();
 
@@ -153,7 +163,6 @@ export class KeymapController implements ReactiveController {
 
   private _onArrowUp = (ctx: UIEventStateContext) => {
     const event = ctx.get('defaultState').event;
-    let takeover = false;
 
     const [result] = this._std.command
       .chain()
@@ -173,26 +182,31 @@ export class KeymapController implements ReactiveController {
             return next({ currentSelectionPath: currentTextSelection.path });
           })
           .getPrevBlock()
-          .inline<'focusBlock'>((ctx, next) => {
+          .inline((ctx, next) => {
             const { prevBlock } = ctx;
-            assertExists(prevBlock);
+
+            if (!prevBlock) {
+              return;
+            }
 
             if (
-              matchFlavours(prevBlock.model, [
+              !matchFlavours(prevBlock.model, [
                 'affine:paragraph',
                 'affine:list',
                 'affine:code',
               ])
             ) {
-              takeover = true;
-              return;
+              this._std.command
+                .chain()
+                .with({
+                  focusBlock: prevBlock,
+                })
+                .selectBlock()
+                .run();
             }
 
-            return next({
-              focusBlock: prevBlock,
-            });
-          })
-          .selectBlock(),
+            return next({});
+          }),
         // block selection - select the previous block
         // 1. is paragraph, list, code block - focus it
         // 2. is not - select it using block selection
@@ -219,24 +233,25 @@ export class KeymapController implements ReactiveController {
                 'affine:code',
               ])
             ) {
-              takeover = true;
+              event.preventDefault();
               this._std.command
                 .chain()
                 .focusBlockEnd({ focusBlock: prevBlock })
                 .run();
-              event.preventDefault();
-              return;
+              return next();
             }
 
-            return next({
-              focusBlock: prevBlock,
-            });
-          })
-          .selectBlock(),
+            this._std.command
+              .chain()
+              .with({ focusBlock: prevBlock })
+              .selectBlock()
+              .run();
+            return next();
+          }),
       ])
       .run();
 
-    return takeover || result;
+    return result;
   };
 
   private _onShiftArrowDown = () => {

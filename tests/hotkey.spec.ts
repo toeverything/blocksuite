@@ -1067,7 +1067,7 @@ test('should cut work single line', async ({ page }) => {
   );
 });
 
-test.skip('should cut work multiple line', async ({ page }) => {
+test('should cut work multiple line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1097,7 +1097,11 @@ test.skip('should cut work multiple line', async ({ page }) => {
   prop:index="a0"
 >
   <affine:paragraph
-    prop:text="19"
+    prop:text="1"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="9"
     prop:type="text"
   />
 </affine:note>`,
@@ -1105,7 +1109,7 @@ test.skip('should cut work multiple line', async ({ page }) => {
   );
   await undoByKeyboard(page);
   const text = await readClipboardText(page);
-  expect(text).toBe(`23\n456\n78`);
+  expect(text).toBe(`23 456 78`);
   await assertStoreMatchJSX(
     page,
     `
