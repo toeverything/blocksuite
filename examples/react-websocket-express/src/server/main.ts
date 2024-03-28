@@ -4,8 +4,8 @@ import ViteExpress from 'vite-express';
 
 import * as jwt from 'lib0/crypto/jwt';
 import * as ecdsa from 'lib0/crypto/ecdsa';
-import { JSONFilePreset } from 'lowdb/node';
 import { DocMeta } from '@blocksuite/store';
+import { JSONDatabase } from './db.js';
 
 // Constants
 const appName = 'blocksuite-example';
@@ -17,9 +17,7 @@ const authPrivateKey = await ecdsa.importKeyJwk(
 //   JSON.parse(process.env.AUTH_PUBLIC_KEY ?? '')
 // );
 
-const db = await JSONFilePreset<{ docs: DocMeta[] }>('db.json', { docs: [] });
-await db.read();
-await db.write();
+const db = await JSONDatabase.init('db.json');
 
 // Create http server
 const app = express();
@@ -53,8 +51,7 @@ app.get('/auth/perm/:room/:userid', async (req, res) => {
 
   let yaccess = 'rw';
 
-  await db.read();
-  if (db.data.docs.findIndex(doc => doc.id === yroom) === -1) {
+  if ((await db.getDocMeta(yroom)) === null) {
     yaccess = 'no-access';
   }
 
@@ -69,19 +66,19 @@ app.get('/auth/perm/:room/:userid', async (req, res) => {
 });
 
 app.get('/api/docs', async (_, res) => {
-  await db.read();
-  res.json(db.data);
+  res.json(await db.getDocMetas());
 });
 
 // create a new doc
 app.post('/api/docs', async (req, res) => {
   const newDoc: DocMeta = req.body;
 
-  await db.read();
-  db.data.docs.push(newDoc);
-  await db.write();
-
-  res.status(201);
+  const result = await db.addDocMeta(newDoc);
+  if (result) {
+    res.status(201).json(result);
+  } else {
+    res.status(500).send('Failed to create document');
+  }
 });
 
 app.patch('/api/docs/:id/title', async (req, res) => {
@@ -90,14 +87,12 @@ app.patch('/api/docs/:id/title', async (req, res) => {
 
   if (typeof title !== 'string') return res.status(400).send('Missing title');
 
-  await db.read();
-  const doc = db.data.docs.find(doc => doc.id === id);
-  if (doc) {
-    doc.title = title;
-    await db.write();
-    res.status(200).json(doc);
+  const result = await db.updateDocMeta(id, { title });
+
+  if (result) {
+    res.json(result);
   } else {
-    res.status(404).send('Document not found');
+    res.status(500).send('Failed to update document');
   }
 });
 
@@ -105,10 +100,10 @@ app.patch('/api/docs/:id/title', async (req, res) => {
 app.delete('/api/docs/:id', async (req, res) => {
   const docId = req.params.id;
 
-  await db.read();
-  db.data.docs = db.data.docs.filter(({ id }) => id !== docId);
-  await db.write();
-
+  const success = await db.deleteDocMeta(docId);
+  if (!success) {
+    res.status(404).send(`Document ${docId} not found`);
+  }
   res.send(`Document ${docId} removed`);
 });
 

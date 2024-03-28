@@ -5,8 +5,8 @@ export async function getAuth() {
 }
 
 export async function getDocMetas(): Promise<DocMeta[]> {
-  const { docs } = await (await fetch(`/api/docs`)).json();
-  return docs;
+  const { docMetas } = await (await fetch(`/api/docs`)).json();
+  return docMetas;
 }
 
 export async function createDoc(docMeta: DocMeta) {
