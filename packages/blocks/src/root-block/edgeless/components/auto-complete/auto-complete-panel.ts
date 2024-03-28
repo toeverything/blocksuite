@@ -476,7 +476,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const { currentSource } = this;
     const shape = isShape(currentSource);
     return {
-      style: shape ? currentSource.shapeType : 'General',
+      style: shape ? currentSource.shapeStyle : 'General',
       name: shape
         ? currentSource.shapeType !== 'rect'
           ? currentSource.shapeType
