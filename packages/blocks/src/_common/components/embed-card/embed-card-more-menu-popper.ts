@@ -17,7 +17,7 @@ import {
   RefreshIcon,
 } from '../../icons/text.js';
 import { toast } from '../toast.js';
-import type { EmbedToolbarBlock } from './embed-card-toolbar.js';
+import type { EmbedToolbarBlock } from './type.js';
 
 @customElement('embed-card-more-menu')
 export class EmbedCardMoreMenu extends WithDisposable(LitElement) {

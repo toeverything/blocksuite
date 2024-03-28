@@ -1,52 +1,7 @@
-import '../tooltip/tooltip.js';
+export const AFFINE_EMBED_CARD_TOOLBAR = 'affine_embed-card-toolbar';
 
-import type { EditorHost } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
-import { DocCollection } from '@blocksuite/store';
-import { flip } from '@floating-ui/dom';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
-
-import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
-import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
-import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
-import type {
-  EmbedLinkedDocBlockComponent,
-  EmbedLinkedDocModel,
-} from '../../../embed-linked-doc-block/index.js';
-import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
-import {
-  isBookmarkBlock,
-  isEmbedGithubBlock,
-  isEmbedLinkedDocBlock,
-  isEmbedSyncedDocBlock,
-} from '../../../root-block/edgeless/utils/query.js';
-import type { EmbedOptions } from '../../../root-block/root-service.js';
-import { BookmarkIcon, MoreVerticalIcon } from '../../icons/edgeless.js';
-import {
-  CaptionIcon,
-  CopyIcon,
-  EditIcon,
-  EmbedEdgelessIcon,
-  EmbedPageIcon,
-  EmbedWebIcon,
-  LinkIcon,
-  OpenIcon,
-  PaletteIcon,
-} from '../../icons/text.js';
-import { createLitPortal } from '../portal.js';
-import { toast } from '../toast.js';
-import { EmbedCardMoreMenu } from './embed-card-more-menu-popper.js';
-import { EmbedCardStyleMenu } from './embed-card-style-popper.js';
-import { toggleEmbedCardCaptionEditModal } from './modal/embed-card-caption-edit-modal.js';
-import { toggleEmbedCardEditModal } from './modal/embed-card-edit-modal.js';
-import type { EmbedToolbarBlock } from './type.js';
-
-@customElement('embed-card-toolbar')
-export class EmbedCardToolbar extends WithDisposable(LitElement) {
+@customElement(AFFINE_EMBED_CARD_TOOLBAR)
+export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     .embed-card-toolbar {
       box-sizing: border-box;
@@ -617,6 +572,6 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'embed-card-toolbar': EmbedCardToolbar;
+    [AFFINE_EMBED_CARD_TOOLBAR]: AffineEmbedCardToolbar;
   }
 }

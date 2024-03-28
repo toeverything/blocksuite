@@ -10,7 +10,7 @@ import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
 import { stopPropagation } from '../../utils/event.js';
 import { asyncFocusRichText } from '../../utils/selection.js';
-import type { EmbedToolbarBlock } from './embed-card-toolbar.js';
+import type { EmbedToolbarBlock } from './type.js';
 
 @customElement('embed-card-caption')
 export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
