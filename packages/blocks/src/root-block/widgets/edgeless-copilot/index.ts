@@ -88,6 +88,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
             off();
             this._copilotPanel?.remove();
             this._visible = false;
+            this._clickOutsideOff = null;
           }
         });
         this._listenClickOutsideId = null;
