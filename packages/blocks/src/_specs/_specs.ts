@@ -39,6 +39,7 @@ import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/dra
 import { AFFINE_EDGELESS_COPILOT_WIDGET } from '../root-block/widgets/edgeless-copilot/index.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/edgeless-remote-selection/index.js';
 import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../root-block/widgets/edgeless-zoom-toolbar/index.js';
+import { EMBED_CARD_TOOLBAR } from '../root-block/widgets/embed-card-toolbar/embed-card-toolbar.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../root-block/widgets/format-bar/format-bar.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { AFFINE_LINKED_DOC_WIDGET } from '../root-block/widgets/linked-doc/index.js';
@@ -186,6 +187,9 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     schema: BookmarkBlockSchema,
     view: {
       component: literal`affine-bookmark`,
+      widgets: {
+        [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
+      },
     },
     service: BookmarkService,
   },

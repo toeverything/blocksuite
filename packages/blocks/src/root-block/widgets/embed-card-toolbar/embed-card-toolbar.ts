@@ -1,17 +1,20 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
+import { PathFinder, WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection } from '@blocksuite/store';
-import { flip } from '@floating-ui/dom';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
+import { css, html, nothing } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { EmbedCardMoreMenu } from '../../../_common/components/embed-card/embed-card-more-menu-popper.js';
 import { EmbedCardStyleMenu } from '../../../_common/components/embed-card/embed-card-style-popper.js';
 import { toggleEmbedCardCaptionEditModal } from '../../../_common/components/embed-card/modal/embed-card-caption-edit-modal.js';
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
-import type { EmbedToolbarBlock } from '../../../_common/components/embed-card/type.js';
+import type {
+  EmbedToolbarBlockElement,
+  EmbedToolbarModel,
+} from '../../../_common/components/embed-card/type.js';
 import { createLitPortal } from '../../../_common/components/portal.js';
 import { toast } from '../../../_common/components/toast.js';
 import {
@@ -41,12 +44,16 @@ import {
 } from '../../edgeless/utils/query.js';
 import type { EmbedOptions } from '../../root-service.js';
 
-export const AFFINE_EMBED_CARD_TOOLBAR = 'affine_embed-card-toolbar';
+export const EMBED_CARD_TOOLBAR = 'embed-card-toolbar';
 
-@customElement(AFFINE_EMBED_CARD_TOOLBAR)
-export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
+@customElement(EMBED_CARD_TOOLBAR)
+export class EmbedCardToolbar extends WidgetElement<
+  EmbedToolbarModel,
+  EmbedToolbarBlockElement
+> {
   static override styles = css`
     .embed-card-toolbar {
+      position: absolute;
       box-sizing: border-box;
       display: flex;
       align-items: center;
@@ -57,7 +64,8 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       border-radius: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      user-select: none;
+      width: max-content;
+      z-index: var(--affine-z-index-popover);
     }
 
     .embed-card-toolbar .divider {
@@ -74,7 +82,6 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       gap: 10px;
       border-radius: var(--1, 0px);
       opacity: var(--add, 1);
-      user-select: none;
       cursor: pointer;
     }
 
@@ -152,17 +159,43 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  block!: EmbedToolbarBlock;
-
-  @property({ attribute: false })
-  abortController!: AbortController;
-
   @query('.embed-card-toolbar')
   embedCardToolbarElement!: HTMLElement;
 
   @query('.embed-card-toolbar-button.card-style')
   cardStyleButton?: HTMLElement;
+
+  @state()
+  hide: boolean = true;
+
+  private _abortController = new AbortController();
+  private _resetAbortController = () => {
+    this._abortController.abort();
+    this._abortController = new AbortController();
+  };
+
+  private _show() {
+    this.hide = false;
+    this._abortController.signal.addEventListener(
+      'abort',
+      autoUpdate(this.blockElement, this, () => {
+        computePosition(this.blockElement, this, {
+          placement: 'top-end',
+          middleware: [flip(), offset(4)],
+        })
+          .then(({ x, y }) => {
+            this.style.left = `${x}px`;
+            this.style.top = `${y}px`;
+          })
+          .catch(console.error);
+      })
+    );
+  }
+
+  private _hide() {
+    this._resetAbortController();
+    this.hide = true;
+  }
 
   private _cardStyleMenuAbortController: AbortController | null = null;
 
@@ -170,46 +203,38 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
 
   private _embedOptions: EmbedOptions | null = null;
 
-  private get _model() {
-    return this.block.model;
-  }
-
-  private get _host() {
-    return this.block.host;
-  }
-
-  private get _std() {
-    return this.block.std;
+  private get _selection() {
+    return this.host.selection;
   }
 
   private get _rootService() {
-    return this._std.spec.getService('affine:page');
+    return this.std.spec.getService('affine:page');
   }
 
   private get _canShowUrlOptions() {
-    return 'url' in this._model && this._isCardView;
+    return 'url' in this.model && this._isCardView;
   }
 
   private get _isCardView() {
     return (
-      isBookmarkBlock(this._model) ||
-      isEmbedLinkedDocBlock(this._model) ||
+      isBookmarkBlock(this.model) ||
+      isEmbedLinkedDocBlock(this.model) ||
       this._embedOptions?.viewType === 'card'
     );
   }
 
   private get _isEmbedView() {
     return (
-      !isBookmarkBlock(this._model) &&
-      (isEmbedSyncedDocBlock(this._model) ||
+      !isBookmarkBlock(this.model) &&
+      (isEmbedSyncedDocBlock(this.model) ||
         this._embedOptions?.viewType === 'embed')
     );
   }
 
   private get _canConvertToEmbedView() {
     // synced doc entry controlled by awareness flag
-    if (isEmbedLinkedDocBlock(this._model)) {
-      const isSyncedDocEnabled = this._model.doc.awarenessStore.getFlag(
+    if (isEmbedLinkedDocBlock(this.model)) {
+      const isSyncedDocEnabled = this.model.doc.awarenessStore.getFlag(
         'enable_synced_doc_block'
       );
       if (!isSyncedDocEnabled) {
@@ -218,14 +243,15 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
     }
 
     return (
-      'convertToEmbed' in this.block || this._embedOptions?.viewType === 'embed'
+      'convertToEmbed' in this.blockElement ||
+      this._embedOptions?.viewType === 'embed'
     );
   }
 
   private get _embedViewButtonDisabled() {
     return (
-      isEmbedLinkedDocBlock(this._model) &&
-      !!this.block.closest('affine-embed-synced-doc-block')
+      isEmbedLinkedDocBlock(this.model) &&
+      !!this.blockElement.closest('affine-embed-synced-doc-block')
     );
   }
 
@@ -240,23 +266,23 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
   }
 
   private _copyUrl() {
-    if (!('url' in this._model)) {
+    if (!('url' in this.model)) {
       return;
     }
 
-    navigator.clipboard.writeText(this._model.url).catch(console.error);
-    toast(this._host as EditorHost, 'Copied link to clipboard');
+    navigator.clipboard.writeText(this.model.url).catch(console.error);
+    toast(this.host as EditorHost, 'Copied link to clipboard');
     this.remove();
   }
 
   private get _pageIcon() {
     if (
-      !isEmbedLinkedDocBlock(this._model) &&
-      !isEmbedSyncedDocBlock(this._model)
+      !isEmbedLinkedDocBlock(this.model) &&
+      !isEmbedSyncedDocBlock(this.model)
     ) {
       return nothing;
     }
-    const block = this.block as
+    const block = this.blockElement as
       | EmbedLinkedDocBlockComponent
       | EmbedSyncedDocBlockComponent;
 
@@ -265,35 +291,35 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
 
   private get _docTitle() {
     if (
-      !isEmbedLinkedDocBlock(this._model) &&
-      !isEmbedSyncedDocBlock(this._model)
+      !isEmbedLinkedDocBlock(this.model) &&
+      !isEmbedSyncedDocBlock(this.model)
     ) {
       return '';
     }
-    const block = this.block as
+    const block = this.blockElement as
       | EmbedLinkedDocBlockComponent
       | EmbedSyncedDocBlockComponent;
     return block.docTitle;
   }
 
   private _turnIntoInlineView() {
-    if ('covertToInline' in this.block) {
-      this.block.covertToInline();
+    if ('covertToInline' in this.blockElement) {
+      this.blockElement.covertToInline();
       return;
     }
 
-    if (!('url' in this._model)) {
+    if (!('url' in this.model)) {
       return;
     }
 
-    const { doc } = this._model;
-    const parent = doc.getParent(this._model);
-    const index = parent?.children.indexOf(this._model);
+    const { doc } = this.model;
+    const parent = doc.getParent(this.model);
+    const index = parent?.children.indexOf(this.model);
 
     const yText = new DocCollection.Y.Text();
-    const insert = this._model.title || this._model.caption || this._model.url;
+    const insert = this.model.title || this.model.caption || this.model.url;
     yText.insert(0, insert);
-    yText.format(0, insert.length, { link: this._model.url });
+    yText.format(0, insert.length, { link: this.model.url });
     const text = new doc.Text(yText);
     doc.addBlock(
       'affine:paragraph',
@@ -304,7 +330,7 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       index
     );
 
-    doc.deleteBlock(this._model);
+    doc.deleteBlock(this.model);
   }
 
   private _convertToCardView() {
@@ -312,16 +338,16 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       return;
     }
 
-    if ('convertToCard' in this.block) {
-      this.block.convertToCard();
+    if ('convertToCard' in this.blockElement) {
+      this.blockElement.convertToCard();
       return;
     }
 
-    if (!('url' in this._model)) {
+    if (!('url' in this.model)) {
       return;
     }
 
-    const { doc, url, style, caption } = this._model;
+    const { doc, url, style, caption } = this.model;
 
     let targetFlavour = 'affine:bookmark',
       targetStyle = style;
@@ -338,9 +364,9 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
           )[0];
     }
 
-    const parent = doc.getParent(this._model);
+    const parent = doc.getParent(this.model);
     assertExists(parent);
-    const index = parent.children.indexOf(this._model);
+    const index = parent.children.indexOf(this.model);
 
     doc.addBlock(
       targetFlavour as never,
@@ -348,8 +374,8 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       parent,
       index
     );
-    this._std.selection.setGroup('note', []);
-    doc.deleteBlock(this._model);
+    this.std.selection.setGroup('note', []);
+    doc.deleteBlock(this.model);
   }
 
   private _convertToEmbedView() {
@@ -357,16 +383,16 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       return;
     }
 
-    if ('convertToEmbed' in this.block) {
-      this.block.convertToEmbed();
+    if ('convertToEmbed' in this.blockElement) {
+      this.blockElement.convertToEmbed();
       return;
     }
 
-    if (!('url' in this._model)) {
+    if (!('url' in this.model)) {
       return;
     }
 
-    const { doc, url, style, caption } = this._model;
+    const { doc, url, style, caption } = this.model;
 
     if (!this._embedOptions || this._embedOptions.viewType !== 'embed') {
       return;
@@ -377,9 +403,9 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       ? style
       : styles.filter(style => style !== 'vertical' && style !== 'cube')[0];
 
-    const parent = doc.getParent(this._model);
+    const parent = doc.getParent(this.model);
     assertExists(parent);
-    const index = parent.children.indexOf(this._model);
+    const index = parent.children.indexOf(this.model);
 
     doc.addBlock(
       flavour as never,
@@ -388,18 +414,18 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       index
     );
 
-    this._std.selection.setGroup('note', []);
-    doc.deleteBlock(this._model);
+    this.std.selection.setGroup('note', []);
+    doc.deleteBlock(this.model);
   }
 
   private _showCaption() {
-    const captionElement = this.block.captionElement;
+    const captionElement = this.blockElement.captionElement;
     if (captionElement) {
       captionElement.show();
     } else {
-      toggleEmbedCardCaptionEditModal(this.block);
+      toggleEmbedCardCaptionEditModal(this.blockElement);
     }
-    this.abortController.abort();
+    this._resetAbortController();
   }
 
   private _toggleCardStyleMenu() {
@@ -412,13 +438,13 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
       this._cardStyleMenuAbortController = null;
       return;
     }
-    if (!this._canShowCardStylePanel(this._model)) {
+    if (!this._canShowCardStylePanel(this.model)) {
       return;
     }
     this._cardStyleMenuAbortController = new AbortController();
     const embedCardStyleMenu = new EmbedCardStyleMenu();
-    embedCardStyleMenu.model = this._model;
-    embedCardStyleMenu.abortController = this.abortController;
+    embedCardStyleMenu.model = this.model;
+    embedCardStyleMenu.abortController = this._abortController;
 
     const referenceElement = this.cardStyleButton;
     assertExists(referenceElement);
@@ -448,8 +474,8 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
     }
     this._moreMenuAbortController = new AbortController();
     const embedCardMoreMenu = new EmbedCardMoreMenu();
-    embedCardMoreMenu.block = this.block;
-    embedCardMoreMenu.abortController = this.abortController;
+    embedCardMoreMenu.block = this.blockElement;
+    embedCardMoreMenu.abortController = this._abortController;
 
     createLitPortal({
       template: embedCardMoreMenu,
@@ -464,13 +490,44 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
     });
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this._selection.slots.changed.on(() => {
+        console.log('selection changed');
+        const hasTextSelection = this._selection.find('text');
+        if (hasTextSelection) {
+          this._hide();
+          return;
+        }
+
+        const blockSelections = this._selection.filter('block');
+        if (
+          !blockSelections ||
+          blockSelections.length !== 1 ||
+          !PathFinder.equals(blockSelections[0].path, this.blockElement.path)
+        ) {
+          this._hide();
+          return;
+        }
+
+        this._show();
+      })
+    );
+  }
+
   override render() {
-    const model = this._model;
+    if (this.hide) return nothing;
+
+    const model = this.model;
     this._embedOptions =
       'url' in model ? this._rootService.getEmbedBlockOptions(model.url) : null;
 
     return html`
-      <div class="embed-card-toolbar">
+      <div
+        class="embed-card-toolbar"
+        @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
+      >
         ${this._canShowUrlOptions && 'url' in model
           ? html`
               <div
@@ -496,8 +553,7 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
                 size="24px"
                 class="embed-card-toolbar-button edit"
                 ?disabled=${model.doc.readonly}
-                @click=${() =>
-                  toggleEmbedCardEditModal(this._host as EditorHost, model)}
+                @click=${() => toggleEmbedCardEditModal(this.host, model)}
               >
                 ${EditIcon}
                 <affine-tooltip .offset=${12}>${'Edit'}</affine-tooltip>
@@ -511,7 +567,7 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
               <icon-button
                 size="24px"
                 class="embed-card-toolbar-button doc-info"
-                @click=${() => this.block.open()}
+                @click=${() => this.blockElement.open()}
               >
                 ${isEmbedLinkedDocBlock(model)
                   ? nothing
@@ -615,6 +671,6 @@ export class AffineEmbedCardToolbar extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_EMBED_CARD_TOOLBAR]: AffineEmbedCardToolbar;
+    [EMBED_CARD_TOOLBAR]: EmbedCardToolbar;
   }
 }
