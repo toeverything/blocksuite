@@ -23,7 +23,7 @@ import { EdgelessToolController } from './index.js';
 
 class LassoOverlay extends Overlay {
   d = '';
-  strokeStyle = 'blue';
+  strokeStyle = '#aaa';
   render(ctx: CanvasRenderingContext2D): void {
     const path = new Path2D(this.d);
     ctx.save();
@@ -50,7 +50,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   private _lassoPoints: IVec[] = [];
   private _lastPoint: IVec = [];
   private _isSelecting = false;
-  private _selectionStore = new Set<string>();
+  private _currentSelectionState = new Set<string>(); // to finalize the selection
 
   get selection() {
     return this._edgeless.service.selection;
@@ -87,10 +87,11 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._overlay.d = '';
 
     const elements = this._getElementsInsideLasso();
-    this._selectionStore = new Set([
-      ...Array.from(this._selectionStore),
+
+    this._currentSelectionState = new Set([
+      ...Array.from(this._currentSelectionState),
       ...elements.map(el => el.id),
-    ]); // we need this to avoid selecting items which were inside the lasso area previously for some reason and now it is not in add mode
+    ]);
 
     this._lassoPoints = [];
     this._isSelecting = false;
@@ -120,19 +121,20 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const selection = this.selection;
 
     const selectionMode = this._getSelectionMode(e);
-
     let set!: Set<EdgelessModel>;
     switch (selectionMode) {
       case 'add':
         set = new Set([
           ...elements,
-          ...selection.elements.filter(el => this._selectionStore.has(el.id)),
+          ...selection.elements.filter(el =>
+            this._currentSelectionState.has(el.id)
+          ),
         ]);
         break;
       case 'sub': {
-        // const toRemove = new Set(elements.map(el => el.id));
-        // console.log(toRemove);
-        set = new Set();
+        const toRemove = new Set(elements.map(el => el.id));
+        const filtered = selection.elements.filter(el => !toRemove.has(el.id));
+        set = new Set(filtered);
         break;
       }
       case 'set':
@@ -146,12 +148,15 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   override onContainerPointerDown(e: PointerEventState): void {
+    e.event.preventDefault();
+    e.event.stopPropagation();
+
     const { mode } = this.tool;
     if (mode !== LassoMode.Polygonal) return;
 
     const { alt, shift } = e.keys;
     if (!shift && !alt) {
-      this._selectionStore.clear();
+      this._currentSelectionState.clear();
       this.selection.clear();
     }
 
@@ -182,10 +187,13 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   override onContainerDragStart(e: PointerEventState): void {
+    e.event.preventDefault();
+    e.event.stopPropagation();
     if (this.tool.mode === LassoMode.Polygonal) return;
     const { alt, shift } = e.keys;
+
     if (!shift && !alt) {
-      this._selectionStore.clear();
+      this._currentSelectionState.clear();
       this.selection.clear();
     }
 
@@ -214,8 +222,9 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._reset();
   }
 
-  override onContainerClick(): void {
-    noop();
+  override onContainerClick(e: PointerEventState): void {
+    e.event.preventDefault();
+    e.event.stopPropagation();
   }
 
   override onContainerDblClick(): void {

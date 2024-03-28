@@ -409,6 +409,8 @@ export class EdgelessToolsManager {
     this._controllers[type].beforeModeSwitch(edgelessTool);
 
     const isDefaultType = type === 'default';
+    const isLassoType = type === 'lasso';
+    const isLastLassoType = lastType === 'lasso';
     const isEmptyState = Array.isArray(state)
       ? this.selection.isEmpty(state)
       : state.elements.length === 0;
@@ -422,12 +424,20 @@ export class EdgelessToolsManager {
 
     if (
       isDefaultType &&
+      !isLastLassoType &&
       isEmptyState &&
       hasLastState &&
       isNotSingleDocOnlyNote &&
       restoreToLastSelection
     ) {
       state = this.selection.lastState;
+    }
+
+    if (isLassoType || (isDefaultType && isLastLassoType)) {
+      state = {
+        elements: this.selection.elements.map(el => el.id),
+        editing: false,
+      };
     }
 
     this.selection.set(state);

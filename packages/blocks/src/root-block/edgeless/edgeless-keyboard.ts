@@ -47,8 +47,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         'Shift-v': () => {
-          const cur = rootElement.edgelessTool;
-          this._setEdgelessTool(rootElement, {
+          const edgeless = rootElement;
+          const cur = edgeless.edgelessTool;
+          const tool: EdgelessTool = {
             type: 'lasso',
             mode:
               cur.type === 'lasso'
@@ -56,7 +57,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                   ? LassoMode.Polygonal
                   : LassoMode.FreeHand
                 : LassoMode.FreeHand,
-          });
+          };
+          this._setEdgelessTool(edgeless, tool);
         },
         h: () => {
           this._setEdgelessTool(rootElement, {
