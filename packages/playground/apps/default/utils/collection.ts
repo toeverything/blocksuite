@@ -11,7 +11,11 @@ import {
   type StoreOptions,
   Text,
 } from '@blocksuite/store';
-import { IndexedDBDocSource } from '@blocksuite/sync';
+import {
+  BroadcastChannelAwarenessSource,
+  BroadcastChannelDocSource,
+  IndexedDBDocSource,
+} from '@blocksuite/sync';
 
 import { WebSocketAwarenessSource } from '../../_common/sync/websocket/awareness';
 import { WebSocketDocSource } from '../../_common/sync/websocket/doc';
@@ -34,15 +38,24 @@ export async function createDefaultDocCollection() {
   const room = params.get('room');
   if (room) {
     const ws = new WebSocket(new URL(`/room/${room}`, BASE_WEBSOCKET_URL));
-    await new Promise(resolve => {
+    await new Promise((resolve, reject) => {
       ws.addEventListener('open', resolve);
-      ws.addEventListener('error', resolve);
-    });
-    docSources = {
-      main: new IndexedDBDocSource(),
-      shadow: [new WebSocketDocSource(ws)],
-    };
-    awarenessSources = [new WebSocketAwarenessSource(ws)];
+      ws.addEventListener('error', reject);
+    })
+      .then(() => {
+        docSources = {
+          main: new IndexedDBDocSource(),
+          shadow: [new WebSocketDocSource(ws)],
+        };
+        awarenessSources = [new WebSocketAwarenessSource(ws)];
+      })
+      .catch(() => {
+        docSources = {
+          main: new IndexedDBDocSource(),
+          shadow: [new BroadcastChannelDocSource()],
+        };
+        awarenessSources = [new BroadcastChannelAwarenessSource()];
+      });
   }
 
   const options: DocCollectionOptions = {
