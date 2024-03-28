@@ -14,8 +14,10 @@ export const startDrag = <
   }
 ) => {
   const transform = ops?.transform ?? (e => e as P);
+  const param = transform(evt);
   const result = {
-    data: ops.onDrag(transform(evt)),
+    data: ops.onDrag(param),
+    last: param,
     move: (p: P) => {
       result.data = ops.onMove(p);
     },
@@ -33,7 +35,9 @@ export const startDrag = <
   };
   const move = (evt: PointerEvent) => {
     evt.preventDefault();
-    result.data = ops.onMove(transform(evt));
+    const p = transform(evt);
+    result.last = p;
+    result.data = ops.onMove(p);
   };
   const up = () => {
     try {

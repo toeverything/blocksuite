@@ -12,17 +12,21 @@ import type {
   TableViewSelection,
 } from '../../../_common/types.js';
 import { startDrag } from '../../utils/drag.js';
+import { autoScrollOnBoundary } from '../../utils/frame-loop.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
 
 export class TableSelectionController implements ReactiveController {
   __selectionElement = new SelectionElement();
+
   private get focusSelectionElement() {
     return this.__selectionElement.focusRef.value;
   }
+
   private get areaSelectionElement() {
     return this.__selectionElement.selectionRef.value;
   }
+
   constructor(public host: DataViewTable) {
     host.addController(this);
   }
@@ -58,9 +62,14 @@ export class TableSelectionController implements ReactiveController {
         }
 
         const old = this._tableViewSelection;
-        requestAnimationFrame(() => {
-          this.scrollToFocus();
-        });
+        if (
+          old?.focus.rowIndex !== tableSelection?.focus.rowIndex ||
+          old?.focus.columnIndex !== tableSelection?.focus.columnIndex
+        ) {
+          requestAnimationFrame(() => {
+            this.scrollToFocus();
+          });
+        }
         if (old) {
           const container = this.getCellContainer(
             old.groupKey,
@@ -177,18 +186,19 @@ export class TableSelectionController implements ReactiveController {
     }
   }
 
-  cellPosition(groupKey: string | undefined, left: number, top: number) {
+  cellPosition(groupKey: string | undefined) {
     const rows = this.rows(groupKey);
     const cells = rows
       ?.item(0)
       .querySelectorAll('affine-database-cell-container');
-    const rowOffsets: number[] = Array.from(rows ?? []).map(
-      v => v.getBoundingClientRect().top - top
-    );
-    const columnOffsets: number[] = Array.from(cells ?? []).map(
-      v => v.getBoundingClientRect().left - left
-    );
+
     return (x1: number, x2: number, y1: number, y2: number) => {
+      const rowOffsets: number[] = Array.from(rows ?? []).map(
+        v => v.getBoundingClientRect().top
+      );
+      const columnOffsets: number[] = Array.from(cells ?? []).map(
+        v => v.getBoundingClientRect().left
+      );
       const [startX, endX] = x1 < x2 ? [x1, x2] : [x2, x1];
       const [startY, endY] = y1 < y2 ? [y1, y2] : [y2, y1];
       const row: MultiSelection = {
@@ -227,14 +237,12 @@ export class TableSelectionController implements ReactiveController {
   startDrag(evt: PointerEvent, cell: DatabaseCellContainer) {
     const groupKey = cell.closest('affine-data-view-table-group')?.group?.key;
     const table = this.tableContainer;
+    const scrollContainer = table.parentElement;
+    assertExists(scrollContainer);
     const tableRect = table.getBoundingClientRect();
     const startOffsetX = evt.x - tableRect.left;
     const startOffsetY = evt.y - tableRect.top;
-    const offsetToSelection = this.cellPosition(
-      groupKey,
-      tableRect.left,
-      tableRect.top
-    );
+    const offsetToSelection = this.cellPosition(groupKey);
     const select = (selection: {
       row: MultiSelection;
       column: MultiSelection;
@@ -250,7 +258,12 @@ export class TableSelectionController implements ReactiveController {
         isEditing: false,
       };
     };
-    startDrag<
+    const cancelScroll = autoScrollOnBoundary(scrollContainer, {
+      onScroll() {
+        drag.move({ x: drag.last.x, y: drag.last.y });
+      },
+    });
+    const drag = startDrag<
       | {
           row: MultiSelection;
           column: MultiSelection;
@@ -267,14 +280,10 @@ export class TableSelectionController implements ReactiveController {
       }),
       onDrag: () => undefined,
       onMove: ({ x, y }) => {
-        const currentOffsetX = x - tableRect.left;
-        const currentOffsetY = y - tableRect.top;
-        const selection = offsetToSelection(
-          currentOffsetX,
-          startOffsetX,
-          currentOffsetY,
-          startOffsetY
-        );
+        const tableRect = table.getBoundingClientRect();
+        const startX = tableRect.left + startOffsetX;
+        const startY = tableRect.top + startOffsetY;
+        const selection = offsetToSelection(startX, x, startY, y);
         select(selection);
         return selection;
       },
@@ -285,7 +294,7 @@ export class TableSelectionController implements ReactiveController {
         select(selection);
       },
       onClear: () => {
-        //
+        cancelScroll();
       },
     });
   }
@@ -646,6 +655,7 @@ export class TableSelectionController implements ReactiveController {
     }
     return true;
   }
+
   isRowSelection(groupKey: string | undefined, rowIndex: number) {
     const selection = this.selection;
     if (!selection || selection.groupKey != groupKey) {
@@ -692,6 +702,7 @@ class SelectionElement extends ShadowlessElement {
 
   focusRef: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
   selectionRef: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
+
   override render() {
     return html`
       <div ${ref(this.selectionRef)} class="database-selection"></div>
