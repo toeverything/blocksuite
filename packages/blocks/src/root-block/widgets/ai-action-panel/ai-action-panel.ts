@@ -7,9 +7,6 @@ import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { PageRootBlockComponent } from '../../page/page-root-block.js';
-import type { RootBlockModel } from '../../root-model.js';
 import type {
   AIActionPanelAnswerConfig,
   AIActionPanelErrorConfig,
@@ -39,10 +36,7 @@ export type AffineAIActionPanelState =
 export const AFFINE_AI_ACTION_PANEL_WIDGET = 'affine-ai-action-panel-widget';
 
 @customElement(AFFINE_AI_ACTION_PANEL_WIDGET)
-export class AffineAIActionPanelWidget extends WidgetElement<
-  RootBlockModel,
-  EdgelessRootBlockComponent | PageRootBlockComponent
-> {
+export class AffineAIActionPanelWidget extends WidgetElement {
   static override styles = css`
     :host {
       display: flex;
@@ -79,10 +73,6 @@ export class AffineAIActionPanelWidget extends WidgetElement<
 
   @property()
   state: AffineAIActionPanelState = 'hidden';
-
-  get rootBlockElement() {
-    return this.blockElement;
-  }
 
   private _inputText: string | null = null;
   get inputText() {
@@ -173,7 +163,6 @@ export class AffineAIActionPanelWidget extends WidgetElement<
 
     this.tabIndex = -1;
     this.disposables.addFromEvent(this, 'blur', e => {
-      console.log('blur', e);
       if (!e.relatedTarget || this.contains(e.relatedTarget as Node)) return;
 
       cleanUp?.();

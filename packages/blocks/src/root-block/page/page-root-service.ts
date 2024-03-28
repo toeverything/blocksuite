@@ -1,4 +1,3 @@
-import type { BlockModel } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 
 import type { Viewport } from '../../_common/utils/index.js';
@@ -15,6 +14,5 @@ export class PageRootService extends RootService {
     }>(),
     viewportUpdated: new Slot<Viewport>(),
     editorModeSwitch: new Slot<'edgeless' | 'page'>(),
-    askAIButtonClicked: new Slot<{ model: BlockModel }>(),
   };
 }
