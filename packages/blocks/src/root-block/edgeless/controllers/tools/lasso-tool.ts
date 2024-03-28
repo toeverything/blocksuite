@@ -3,6 +3,7 @@ import { noop } from '@blocksuite/global/utils';
 
 import {
   type EdgelessModel,
+  type EdgelessTool,
   type IPoint,
   LassoMode,
   type LassoTool,
@@ -96,6 +97,12 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._lassoPoints = [];
     this._isSelecting = false;
   }
+
+  private _clearLastSelection = () => {
+    if (this.selection.empty) {
+      this.selection.clearLast();
+    }
+  };
 
   private _setSelectionState(elements: string[], editing: boolean) {
     this.selection.set({
@@ -269,8 +276,11 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     noop();
   }
 
-  override beforeModeSwitch(): void {
-    this._reset();
+  beforeModeSwitch(edgelessTool?: EdgelessTool) {
+    if (edgelessTool?.type === 'pan') {
+      this._clearLastSelection();
+    }
+    noop();
   }
 
   override afterModeSwitch(): void {
