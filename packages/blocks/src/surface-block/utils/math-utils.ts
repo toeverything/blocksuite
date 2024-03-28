@@ -180,7 +180,7 @@ export function getBoundsFromPoints(points: IVec[], rotation = 0): TLBounds {
   };
 }
 
-export function getPolygonPathFromStroke(
+export function getPolygonPathFromPoints(
   points: IVec[],
   closed = true
 ): string {

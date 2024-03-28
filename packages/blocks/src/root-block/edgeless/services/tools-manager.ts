@@ -400,50 +400,41 @@ export class EdgelessToolsManager {
     restoreToLastSelection = true
   ) => {
     const { type } = edgelessTool;
-    if (this.doc.readonly && !['pan', 'frameNavigator'].includes(type)) return;
+    if (this.doc.readonly && type !== 'pan' && type !== 'frameNavigator') {
+      return;
+    }
     if (this.edgelessTool === edgelessTool) return;
-
     const lastType = this.edgelessTool.type;
-
-    if (type === 'default' && lastType === 'default') return;
-
-    const { selections, lastState } = this.selection;
-
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[type].beforeModeSwitch(edgelessTool);
 
     const isDefaultType = type === 'default';
-    const isLassoType = type === 'lasso';
-    const isLastLassoType = lastType === 'lasso';
     const isEmptyState = Array.isArray(state)
       ? this.selection.isEmpty(state)
       : state.elements.length === 0;
-    const hasLastState = !!lastState;
+    const hasLastState = !!this.selection.lastState;
     const isNotSingleDocOnlyNote = !(
-      lastState?.[0]?.elements.length === 1 &&
-      this._isDocOnlyNote(lastState[0].elements[0])
+      this.selection.lastState &&
+      this.selection.lastState[0] &&
+      this.selection.lastState[0].elements.length === 1 &&
+      this._isDocOnlyNote(this.selection.lastState[0].elements[0])
     );
 
     if (
-      (isDefaultType && isLastLassoType) ||
-      (isLassoType && lastType === 'default')
-    ) {
-      state = selections; // Keep the lasso selections
-    } else if (
-      ((isDefaultType && !isLastLassoType) || isLassoType) &&
+      isDefaultType &&
       isEmptyState &&
       hasLastState &&
       isNotSingleDocOnlyNote &&
       restoreToLastSelection
     ) {
-      state = lastState;
+      state = this.selection.lastState;
     }
 
     this.selection.set(state);
     this.edgelessTool = edgelessTool;
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
-    this._controllers[type].afterModeSwitch(edgelessTool);
+    this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
 
   switchToDefaultMode(state: EdgelessSelectionState) {

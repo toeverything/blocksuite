@@ -17,7 +17,7 @@ import {
   Vec,
 } from '../../../../surface-block/index.js';
 import {
-  getPolygonPathFromStroke,
+  getPolygonPathFromPoints,
   pointInPolygon,
 } from '../../../../surface-block/utils/math-utils.js';
 import { EdgelessToolController } from './index.js';
@@ -66,7 +66,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const path =
       this.tool.mode === LassoMode.FreeHand
         ? getSvgPathFromStroke(this._lassoPoints)
-        : getPolygonPathFromStroke(this._lassoPoints);
+        : getPolygonPathFromPoints(this._lassoPoints);
 
     this._overlay.d = path;
     this._overlay.strokeStyle = this._surface.themeObserver.getVariableValue(
