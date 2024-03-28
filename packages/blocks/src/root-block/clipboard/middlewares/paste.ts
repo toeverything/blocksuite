@@ -1,5 +1,9 @@
-import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type {
+  BlockElement,
+  EditorHost,
+  TextRangePoint,
+  TextSelection,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
