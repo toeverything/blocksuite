@@ -15,7 +15,7 @@
     "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "jose": "^5.2.3",
+    "lib0": "^0.2.93",
     "lowdb": "^7.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

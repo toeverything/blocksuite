@@ -2,17 +2,18 @@ import 'dotenv/config';
 import express, { json } from 'express';
 import ViteExpress from 'vite-express';
 
-import { importJWK, SignJWT } from 'jose';
+import * as jwt from 'lib0/crypto/jwt';
+import * as ecdsa from 'lib0/crypto/ecdsa';
 import { JSONFilePreset } from 'lowdb/node';
 import { DocMeta } from '@blocksuite/store';
 
 // Constants
 const appName = 'blocksuite-example';
 const port = 5173;
-const authPrivateKey = await importJWK(
+const authPrivateKey = await ecdsa.importKeyJwk(
   JSON.parse(process.env.AUTH_PRIVATE_KEY ?? '')
 );
-// const authPublicKey = await importJWK(
+// const authPublicKey = await ecdsa.importKeyJwk(
 //   JSON.parse(process.env.AUTH_PUBLIC_KEY ?? '')
 // );
 
@@ -27,16 +28,12 @@ app.use(json());
 // This example server always grants read-write permission to all requests.
 // Modify it to your own needs or implement the same API in your own backend!
 app.get('/auth/token', async (_, res) => {
-  const token = await new SignJWT({
+  const token = await jwt.encodeJwt(authPrivateKey, {
+    iss: appName,
+    exp: Date.now() + 1000 * 60 * 60, // access expires in an hour
     yuserid: 'user1', // associate the client with a unique id that can will be used to check permissions
-  })
-    .setProtectedHeader({
-      alg: 'ES384',
-    })
-    .setIssuer(appName)
-    .setExpirationTime(Date.now() + 1000 * 60 * 60)
-    .sign(authPrivateKey);
-  //
+  });
+
   res.send(token);
 });
 

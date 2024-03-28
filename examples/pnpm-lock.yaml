@@ -280,9 +280,9 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.19.2
-      jose:
-        specifier: ^5.2.3
-        version: 5.2.3
+      lib0:
+        specifier: ^0.2.93
+        version: 0.2.93
       lowdb:
         specifier: ^7.0.1
         version: 7.0.1
@@ -7677,10 +7677,6 @@ packages:
     resolution: {integrity: sha512-gFqAIbuKyyso/3G2qhiO2OM6shY6EPP/R0+mkDbyspxKazh8BXDC5FiFsUjlczgdNz/vfra0da2y+aHrusLG/Q==}
     hasBin: true
     dev: true
-
-  /jose@5.2.3:
-    resolution: {integrity: sha512-KUXdbctm1uHVL8BYhnyHkgp3zDX5KW8ZhAKVFEfUbU2P8Alpzjb+48hHvjOdQIyPshoblhzsuqOwEEAbtHVirA==}
-    dev: false
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
