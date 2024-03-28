@@ -136,7 +136,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!this.value || typeof this.value === 'string') {
+    if (typeof this.value === 'string') {
       this._initYText(this.value);
     }
   }
@@ -148,6 +148,9 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   override render() {
     if (!this.service) return nothing;
+    if (!this.value) {
+      return html`<div class="affine-database-rich-text"></div>`;
+    }
     return html`<rich-text
       .yText=${this.value}
       .inlineEventSource=${this.topContenteditableElement}

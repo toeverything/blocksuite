@@ -48,12 +48,12 @@ import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
+import { GroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import {
   type CanvasElement,
   type Connection,
   getBoundsWithRotation,
-  GroupElementModel,
 } from '../../../surface-block/index.js';
 import {
   ConnectorElementModel,
@@ -86,8 +86,9 @@ import {
 
 const BLOCKSUITE_SURFACE = 'blocksuite/surface';
 const IMAGE_PNG = 'image/png';
+
+const { GROUP, MINDMAP } = CanvasElementType;
 const IMAGE_PADDING = 10; // for rotated shapes some padding is needed
-const { GROUP } = CanvasElementType;
 
 export class EdgelessClipboardController extends PageClipboard {
   constructor(public override host: EdgelessRootBlockComponent) {
@@ -350,6 +351,25 @@ export class EdgelessClipboardController extends PageClipboard {
       }
       clipboardData.children = yMap;
     }
+
+    if (clipboardData.type === MINDMAP) {
+      const yMap = new DocCollection.Y.Map();
+      const children = clipboardData.children ?? {};
+      for (const [key, value] of Object.entries(children)) {
+        const newKey = idMap.get(key);
+        assertExists(newKey);
+
+        if (value.parent) {
+          const newParent = idMap.get(value.parent);
+          assertExists(newParent);
+          value.parent = newParent;
+        }
+
+        yMap.set(newKey, value);
+      }
+      clipboardData.children = yMap;
+    }
+
     const id = this.host.service.addElement(
       clipboardData.type as CanvasElementType,
       clipboardData
@@ -369,6 +389,8 @@ export class EdgelessClipboardController extends PageClipboard {
           return 'connectors';
         case 'group':
           return 'groups';
+        case 'mindmap':
+          return 'mindmaps';
         default:
           return 'others';
       }
@@ -405,6 +427,14 @@ export class EdgelessClipboardController extends PageClipboard {
         const oldId = group.id as string;
         assertExists(oldId);
         const element = this._createCanvasElement(group, idMap);
+        idMap.set(oldId, element.id);
+        return element;
+      }) ?? []),
+
+      ...(result.mindmaps?.map(mindmap => {
+        const oldId = mindmap.id as string;
+        assertExists(oldId);
+        const element = this._createCanvasElement(mindmap, idMap);
         idMap.set(oldId, element.id);
         return element;
       }) ?? []),
@@ -945,9 +975,9 @@ export class EdgelessClipboardController extends PageClipboard {
     originalIndexes: Map<string, string>
   ) {
     function compare(a: EdgelessModel, b: EdgelessModel) {
-      if (a instanceof GroupElementModel && a.hasDescendant(b)) {
+      if (a instanceof GroupLikeModel && a.hasDescendant(b)) {
         return -1;
-      } else if (b instanceof GroupElementModel && b.hasDescendant(a)) {
+      } else if (b instanceof GroupLikeModel && b.hasDescendant(a)) {
         return 1;
       } else {
         const aGroups = a.groups;
@@ -1274,11 +1304,10 @@ export function getCopyElements(
       surface.edgeless.service.frame
         .getElementsInFrame(element)
         .forEach(ele => set.add(ele));
-    } else if (element instanceof GroupElementModel) {
-      getCopyElements(
-        surface,
-        (element as GroupElementModel).childElements
-      ).forEach(ele => set.add(ele));
+    } else if (element instanceof GroupLikeModel) {
+      getCopyElements(surface, element.childElements).forEach(ele =>
+        set.add(ele)
+      );
       set.add(element);
     } else {
       set.add(element);

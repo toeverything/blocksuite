@@ -272,10 +272,11 @@ export class Renderer extends Viewport {
 
         if (!renderFn) {
           console.warn(`Cannot find renderer for ${element.type}`);
+          ctx.restore();
           continue;
         }
 
-        renderFn(element, ctx, matrix.translate(dx, dy), this);
+        renderFn(element, ctx, matrix.translate(dx, dy), this, bound);
       }
 
       ctx.restore();

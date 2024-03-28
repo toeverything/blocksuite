@@ -16,8 +16,6 @@ export enum SHAPE_TEXT_FONT_SIZE {
   XLARGE = 36,
 }
 
-export const SHAPE_TEXT_PADDING = 20;
-
 export interface GeneralShapeOptions {
   x: number;
   y: number;

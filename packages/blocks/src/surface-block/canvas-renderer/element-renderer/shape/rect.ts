@@ -27,7 +27,8 @@ export function rect(
   const renderOffset = Math.max(strokeWidth, 0) / 2;
   const renderWidth = w - renderOffset * 2;
   const renderHeight = h - renderOffset * 2;
-  const r = Math.min(renderWidth * radius, renderHeight * radius);
+  const r =
+    radius < 1 ? Math.min(renderWidth * radius, renderHeight * radius) : radius;
   const cx = renderWidth / 2;
   const cy = renderHeight / 2;
   const realFillColor = renderer.getVariableColor(model.fillColor);
