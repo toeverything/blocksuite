@@ -1,7 +1,7 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 import {
-  AFFINE_AI_ACTION_PANEL_WIDGET,
-  AffineAIActionPanelWidget,
+  AFFINE_AI_PANEL_WIDGET,
+  AffineAIPanelWidget,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
   toolbarDefaultConfig,
@@ -22,8 +22,8 @@ export function getAISpecs() {
           ...spec.view,
           widgets: {
             ...spec.view.widgets,
-            [AFFINE_AI_ACTION_PANEL_WIDGET]: literal`${unsafeStatic(
-              AFFINE_AI_ACTION_PANEL_WIDGET
+            [AFFINE_AI_PANEL_WIDGET]: literal`${unsafeStatic(
+              AFFINE_AI_PANEL_WIDGET
             )}`,
           },
         },
@@ -31,8 +31,31 @@ export function getAISpecs() {
           let answer = '';
           disposableGroup.add(
             slots.widgetConnected.on(view => {
-              if (view.component instanceof AffineAIActionPanelWidget) {
-                view.component.config = {
+              if (view.component instanceof AffineAIPanelWidget) {
+                const panel = view.component;
+                panel.handleEvent('keyDown', ctx => {
+                  const keyboardState = ctx.get('keyboardState');
+                  if (keyboardState.raw.key === ' ') {
+                    const selection = panel.host.selection.find('text');
+                    if (
+                      selection &&
+                      selection.isCollapsed() &&
+                      selection.from.index === 0
+                    ) {
+                      const block = panel.host.view.viewFromPath(
+                        'block',
+                        selection.path
+                      );
+                      if (!block?.model?.text || block.model.text?.length > 0)
+                        return;
+
+                      keyboardState.raw.preventDefault();
+                      panel.toggle(block);
+                    }
+                  }
+                });
+
+                panel.config = {
                   answerRenderer: answer => html`<div>${answer}</div>`,
                   generateAnswer: ({ input, update, finish, signal }) => {
                     const interval = setInterval(() => {
@@ -41,8 +64,8 @@ export function getAISpecs() {
                     }, 1000);
                     const timeout = setTimeout(() => {
                       clearInterval(interval);
-                      // finish('error');
-                      finish('success');
+                      finish('error');
+                      // finish('success');
                     }, 5000);
                     signal.addEventListener('abort', () => {
                       clearInterval(interval);
@@ -54,17 +77,17 @@ export function getAISpecs() {
                     responses: [
                       {
                         icon: InsertBelowIcon,
-                        text: 'Example Response',
+                        name: 'Example Response',
                         handler: () => {},
                       },
                     ],
                     actions: [
                       {
-                        head: 'Example Action',
+                        name: 'Example Action',
                         items: [
                           {
                             icon: InsertBelowIcon,
-                            text: 'Example Action',
+                            name: 'Example Action',
                             handler: () => {},
                           },
                         ],
