@@ -29,7 +29,7 @@ import {
   hastQuerySelector,
   type HtmlAST,
 } from './hast.js';
-import { fetchImage } from './utils.js';
+import { fetchable, fetchImage } from './utils.js';
 
 export type NotionHtml = string;
 
@@ -241,7 +241,6 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           context.skipAllChildren();
           break;
         }
-        // TODO: move to Normal HTML Adapter as this is not notion specific
         case 'img': {
           if (!assets) {
             break;
@@ -253,7 +252,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               : '';
           if (imageURL) {
             let blobId = '';
-            if (!imageURL.startsWith('http')) {
+            if (!fetchable(imageURL)) {
               assets.getAssets().forEach((_value, key) => {
                 const attachmentName = getAssetName(assets.getAssets(), key);
                 if (imageURL.includes(attachmentName)) {
@@ -576,7 +575,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           if (imageURL) {
             let blobId = '';
-            if (!imageURL.startsWith('http')) {
+            if (!fetchable(imageURL)) {
               assets.getAssets().forEach((_value, key) => {
                 const attachmentName = getAssetName(assets.getAssets(), key);
                 if (imageURL.includes(attachmentName)) {
@@ -634,7 +633,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             let name = '';
             let type = '';
             let size = 0;
-            if (!embededURL.startsWith('http')) {
+            if (!fetchable(embededURL)) {
               assets.getAssets().forEach((value, key) => {
                 const embededName = getAssetName(assets.getAssets(), key);
                 if (embededURL.includes(embededName)) {
