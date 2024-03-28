@@ -5,8 +5,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { AIStarIcon } from '../../../../../_common/icons/ai.js';
 import { ArrowUpBigIcon } from '../../../../../_common/icons/text.js';
 
-@customElement('ai-action-panel-input')
-export class AIActionPanelInput extends WithDisposable(LitElement) {
+@customElement('ai-panel-input')
+export class AIPanelInput extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 100%;
@@ -124,6 +124,6 @@ export class AIActionPanelInput extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-action-panel-input': AIActionPanelInput;
+    'ai-panel-input': AIPanelInput;
   }
 }

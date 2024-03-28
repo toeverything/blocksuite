@@ -3,13 +3,15 @@ import type {
   ListType,
   ParagraphType,
 } from '@blocksuite/blocks';
-import { checkboxPureColumnConfig } from '@blocksuite/blocks';
-import { datePureColumnConfig } from '@blocksuite/blocks';
-import { linkPureColumnConfig } from '@blocksuite/blocks';
-import { multiSelectColumnConfig } from '@blocksuite/blocks';
-import { numberPureColumnConfig } from '@blocksuite/blocks';
-import { progressPureColumnConfig } from '@blocksuite/blocks';
-import { richTextPureColumnConfig } from '@blocksuite/blocks';
+import {
+  checkboxPureColumnConfig,
+  datePureColumnConfig,
+  linkPureColumnConfig,
+  multiSelectColumnConfig,
+  numberPureColumnConfig,
+  progressPureColumnConfig,
+  richTextPureColumnConfig,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DocCollection, Text } from '@blocksuite/store';
 
@@ -50,7 +52,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           'end',
           numberPureColumnConfig.create(numberPureColumnConfig.name)
         );
-        database.addColumn(
+        const richTextId = database.addColumn(
           'end',
           richTextPureColumnConfig.create(richTextPureColumnConfig.name)
         );
@@ -94,11 +96,15 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
           'h6',
         ];
         paragraphTypes.forEach(type => {
-          doc.addBlock(
+          const id = doc.addBlock(
             'affine:paragraph',
             { type: type, text: new Text(`Paragraph type ${type}`) },
             databaseId
           );
+          database.updateCell(id, {
+            columnId: richTextId,
+            value: new Text(`Paragraph type ${type}`),
+          });
         });
         const listTypes: ListType[] = [
           'numbered',
@@ -108,11 +114,15 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         ];
 
         listTypes.forEach(type => {
-          doc.addBlock(
+          const id = doc.addBlock(
             'affine:list',
             { type: type, text: new Text(`List type ${type}`) },
             databaseId
           );
+          database.updateCell(id, {
+            columnId: richTextId,
+            value: new Text(`List type ${type}`),
+          });
         });
         // Add a paragraph after database
         doc.addBlock('affine:paragraph', {}, noteId);

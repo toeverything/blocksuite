@@ -1,8 +1,8 @@
 export {
-  AFFINE_AI_ACTION_PANEL_WIDGET,
-  AffineAIActionPanelWidget,
-  type AffineAIActionPanelWidgetConfig,
-} from './ai-action-panel/ai-action-panel.js';
+  AFFINE_AI_PANEL_WIDGET,
+  AffineAIPanelWidget,
+  type AffineAIPanelWidgetConfig,
+} from './ai-panel/ai-panel.js';
 export { BlockHubWidget } from './block-hub/block-hub.js';
 export { AffineDocRemoteSelectionWidget } from './doc-remote-selection/doc-remote-selection.js';
 export { AffineDragHandleWidget } from './drag-handle/drag-handle.js';

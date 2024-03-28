@@ -7,8 +7,8 @@ import {
   AIStopIcon,
 } from '../../../../../_common/icons/ai.js';
 
-@customElement('ai-action-panel-generating')
-export class AIActionPanelGenerating extends WithDisposable(LitElement) {
+@customElement('ai-panel-generating')
+export class AIPanelGenerating extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 100%;
@@ -64,6 +64,6 @@ export class AIActionPanelGenerating extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-action-panel-generating': AIActionPanelGenerating;
+    'ai-panel-generating': AIPanelGenerating;
   }
 }
