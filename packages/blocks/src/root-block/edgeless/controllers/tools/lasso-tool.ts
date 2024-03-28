@@ -2,6 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import {
+  type EdgelessModel,
   type IPoint,
   LassoMode,
   type LassoTool,
@@ -49,6 +50,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   private _lassoPoints: IVec[] = [];
   private _lastPoint: IVec = [];
   private _isSelecting = false;
+  private _selectionStore = new Set<string>();
 
   get selection() {
     return this._edgeless.service.selection;
@@ -72,10 +74,24 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._raf = requestAnimationFrame(this._loop);
   };
 
+  private _getElementsInsideLasso() {
+    const lassoBounds = getBoundFromPoints(this._lassoPoints);
+    return this._service
+      .pickElementsByBound(lassoBounds)
+      .filter(e => this.isInsideLassoSelection(e.elementBound));
+  }
+
   private _reset() {
     cancelAnimationFrame(this._raf);
     this._edgeless.surface.renderer.removeOverlay(this._overlay);
     this._overlay.d = '';
+
+    const elements = this._getElementsInsideLasso();
+    this._selectionStore = new Set([
+      ...Array.from(this._selectionStore),
+      ...elements.map(el => el.id),
+    ]); // we need this to avoid selecting items which were inside the lasso area previously for some reason and now it is not in add mode
+
     this._lassoPoints = [];
     this._isSelecting = false;
   }
@@ -87,20 +103,42 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     });
   }
 
-  private _updateSelection(e: PointerEventState) {
-    const lassoBounds = getBoundFromPoints(this._lassoPoints);
+  private _getSelectionMode(ev: PointerEventState): 'add' | 'sub' | 'set' {
+    const shiftKey = ev.keys.shift ?? this._edgeless.tools.shiftKey;
+    const altKey = ev.keys.alt ?? false;
 
-    const elements = this._service
-      .pickElementsByBound(lassoBounds)
-      .filter(e => this.isInsideLassoSelection(e.elementBound));
+    if (shiftKey) return 'add';
+    else if (altKey) return 'sub';
+    else {
+      return 'set';
+    }
+  }
+
+  private _updateSelection(e: PointerEventState) {
+    const elements = this._getElementsInsideLasso();
 
     const selection = this.selection;
-    const { tools } = this._edgeless;
-    const set = new Set(
-      tools.shiftKey || e.keys.shift
-        ? [...elements, ...selection.elements]
-        : elements
-    );
+
+    const selectionMode = this._getSelectionMode(e);
+
+    let set!: Set<EdgelessModel>;
+    switch (selectionMode) {
+      case 'add':
+        set = new Set([
+          ...elements,
+          ...selection.elements.filter(el => this._selectionStore.has(el.id)),
+        ]);
+        break;
+      case 'sub': {
+        // const toRemove = new Set(elements.map(el => el.id));
+        // console.log(toRemove);
+        set = new Set();
+        break;
+      }
+      case 'set':
+        set = new Set(elements);
+        break;
+    }
     this._setSelectionState(
       Array.from(set).map(element => element.id),
       false
@@ -111,7 +149,9 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const { mode } = this.tool;
     if (mode !== LassoMode.Polygonal) return;
 
-    if (!e.keys.shift || !this._edgeless.tools.shiftKey) {
+    const { alt, shift } = e.keys;
+    if (!shift && !alt) {
+      this._selectionStore.clear();
       this.selection.clear();
     }
 
@@ -143,8 +183,9 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   override onContainerDragStart(e: PointerEventState): void {
     if (this.tool.mode === LassoMode.Polygonal) return;
-
-    if (!e.keys.shift || !this._edgeless.tools.shiftKey) {
+    const { alt, shift } = e.keys;
+    if (!shift && !alt) {
+      this._selectionStore.clear();
       this.selection.clear();
     }
 
@@ -167,8 +208,10 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._updateSelection(e);
   }
 
-  override onContainerDragEnd(): void {
-    if (this.tool.mode !== LassoMode.Polygonal) this._reset();
+  override onContainerDragEnd(e: PointerEventState): void {
+    if (this.tool.mode === LassoMode.Polygonal) return;
+    this._updateSelection(e);
+    this._reset();
   }
 
   override onContainerClick(): void {
@@ -185,7 +228,11 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   private isInsideLassoSelection(bound: Bound): boolean {
     // Check if any corner of the bounding box is inside the lasso polygon
-    const lassoPoints = this._lassoPoints.concat([this._lassoPoints[0]]);
+    const firstPoint = this._lassoPoints[0];
+    const lassoPoints = this._lassoPoints.concat(
+      firstPoint ? [firstPoint] : []
+    );
+
     const elPoly = bound.points;
     for (const point of elPoly) {
       if (pointInPolygon(point, lassoPoints)) return true;
