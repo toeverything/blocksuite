@@ -1,9 +1,22 @@
+import type { Y } from '@blocksuite/store';
+
 import { keys } from '../../_common/utils/iterable.js';
 import type { ElementModel } from './base.js';
 
 const state = {
+  /**
+   * Skip the field initialization during the model creation.
+   */
   skip: false,
+
+  /**
+   * Whether the model is creating.
+   */
   creating: false,
+
+  /**
+   * Whether the model is in the derive process.
+   */
   derive: false,
 };
 
@@ -113,6 +126,7 @@ export function local(): PropertyDecorator {
           oldValues: {
             [prop]: oldValue,
           },
+          local: true,
         });
       },
     });
@@ -222,7 +236,7 @@ const convertSymbol = Symbol('convert');
  * set to the Y map.
  *
  * Note:
- * 1. This decorator function will not execute in model creation.
+ * 1. This decorator function will not execute in model initialization.
  * @param fn
  * @returns
  */
@@ -257,6 +271,22 @@ export function convertProps(
 const observeSymbol = Symbol('observe');
 const observerDisposableSymbol = Symbol('observerDisposable');
 
+type ObserveFn<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  E extends Y.YEvent<any> = Y.YEvent<any>,
+  T extends ElementModel = ElementModel,
+> = (
+  /**
+   * The event object of the Y.Map or Y.Array, the `null` value means the observer is initializing.
+   */
+  event: E | null,
+  instance: T,
+  /**
+   * The transaction object of the Y.Map or Y.Array, the `null` value means the observer is initializing.
+   */
+  transaction: Y.Transaction | null
+) => void;
+
 /**
  * A decorator to observe the y type property.
  * You can think of it is just a decorator version of 'observe' method of Y.Array and Y.Map.
@@ -266,9 +296,10 @@ const observerDisposableSymbol = Symbol('observerDisposable');
  * @param fn
  * @returns
  */
-export function observe<T extends ElementModel>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function observe<E extends Y.YEvent<any>, T extends ElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (event: any, instance: T, type: 'modified' | 'altered') => void
+  fn: ObserveFn<E, T>
 ) {
   return function observeDecorator(prototype: unknown, prop: string | symbol) {
     setObjectMeta(observeSymbol, prototype, prop, fn);
@@ -278,13 +309,7 @@ export function observe<T extends ElementModel>(
 function getObserveMeta(
   target: unknown,
   prop: string | symbol
-):
-  | null
-  | ((
-      event: unknown,
-      instance: unknown,
-      type: 'modified' | 'altered'
-    ) => void) {
+): null | ObserveFn {
   // @ts-ignore
   return target[observeSymbol]?.[prop] ?? null;
 }
@@ -310,25 +335,26 @@ function startObserve(
     return;
   }
 
-  const value = receiver[prop as keyof ElementModel];
+  const value = receiver[prop as keyof ElementModel] as
+    | Y.Map<unknown>
+    | Y.Array<unknown>
+    | null;
 
-  observeFn(null, receiver, 'altered');
+  observeFn(null, receiver, null);
 
-  // @ts-ignore
-  try {
-    const fn = (event: unknown) => {
-      observeFn(event, receiver, 'modified');
-    };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fn = (event: Y.YEvent<any>, transaction: Y.Transaction) => {
+    observeFn(event, receiver, transaction);
+  };
 
-    // @ts-ignore
+  if (value && 'observe' in value) {
     value.observe(fn);
-    // @ts-ignore
+
     observerDisposable[prop] = () => {
-      // @ts-ignore
       value.unobserve(fn);
     };
-  } catch {
-    throw new Error(
+  } else {
+    console.warn(
       `Failed to observe "${prop.toString()}" of ${
         receiver.type
       } element, make sure it's a Y type.`
@@ -356,20 +382,26 @@ export function initializedObservers(
 }
 
 const watchSymbol = Symbol('watch');
+type WatchFn<T extends ElementModel = ElementModel> = (
+  oldValue: unknown,
+  instance: T,
+  local: boolean
+) => void;
 
+/**
+ * The watch decorator is used to watch the property change of the element.
+ * You can thinks of it as a decorator version of `elementUpdated` slot of the surface model.
+ */
 export function watch<T extends ElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (propValue: any, instance: T) => void
+  fn: WatchFn<T>
 ) {
   return function watchDecorator(target: unknown, prop: string | symbol) {
     setObjectMeta(watchSymbol, target, prop, fn);
   };
 }
 
-function getWatchMeta(
-  target: unknown,
-  prop: string | symbol
-): null | ((propValue: unknown, instance: unknown) => void) {
+function getWatchMeta(target: unknown, prop: string | symbol): null | WatchFn {
   // @ts-ignore
   return target[watchSymbol]?.[prop] ?? null;
 }
@@ -383,12 +415,10 @@ function startWatch(
 
   if (!watchFn) return;
 
-  watchFn(undefined, receiver);
-
   receiver['_disposable'].add(
     receiver.surface.elementUpdated.on(payload => {
       if (payload.id === receiver.id && prop in payload.props) {
-        watchFn(payload.oldValues[prop as string], receiver);
+        watchFn(payload.oldValues[prop as string], receiver, payload.local);
       }
     })
   );

@@ -2,6 +2,8 @@ import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
+import type { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
+import type { ShapeElementModel } from '../../surface-block/index.js';
 import {
   Bound,
   ConnectorElementModel,
@@ -18,6 +20,7 @@ import {
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
 import { isCanvasElement, isNoteBlock } from './utils/query.js';
+import { mountShapeTextEditor } from './utils/text.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override rootElement: EdgelessRootBlockComponent) {
@@ -47,6 +50,32 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._setEdgelessTool(rootElement, {
             type: 'pan',
             panning: false,
+          });
+        },
+        m: () => {
+          if (this.rootElement.service.selection.editing) return;
+          const edgelessService = this.rootElement.service;
+          const lastMousePosition = edgelessService.tool.lastMousePos;
+          const [x, y] = edgelessService.viewport.toModelCoord(
+            lastMousePosition.x,
+            lastMousePosition.y
+          );
+          const mindmapId = edgelessService.addElement('mindmap', {}) as string;
+          const mindmap = edgelessService.getElementById(
+            mindmapId
+          ) as MindmapElementModel;
+          const nodeId = mindmap.addNode(null, 'shape', undefined, undefined, {
+            text: 'Mindmap',
+            xywh: `[${x},${y},150,30]`,
+          });
+
+          requestAnimationFrame(() => {
+            mountShapeTextEditor(
+              this.rootElement.service.getElementById(
+                nodeId
+              )! as ShapeElementModel,
+              this.rootElement
+            );
           });
         },
         n: () => {
