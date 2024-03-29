@@ -27,7 +27,7 @@ There are some entires for diffrent usage:
 ```
       DocMeta  ┌────────────┐
     ┌─────────▶│   Express  │ ◀ - - - ┐
-    │          │   server   │         | (cehck auth?)
+    │ (auth?)  │   server   │         | (cehck auth?)
     ▼          └────────────┘         | (Y-Doc update callback?)
 ┌────────────┐                 ┌─────────────┐           ┌────────────┐
 │   Editor   │     (auth?)     │ Y-Websocket │           │  Document  │
