@@ -53,11 +53,6 @@ const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await pressEnter(page);
 };
 
-const hoverBookmarkBlock = async (page: Page) => {
-  const listMenu = page.locator('affine-bookmark');
-  await listMenu.hover();
-};
-
 test(scoped`create bookmark by slash menu`, async ({ page }) => {
   await createBookmarkBlockBySlashMenu(page);
   await assertStoreMatchJSX(
@@ -153,7 +148,9 @@ test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
 
 test(scoped`covert bookmark block to link text`, async ({ page }) => {
   await createBookmarkBlockBySlashMenu(page);
-  await hoverBookmarkBlock(page);
+  const bookmark = page.locator('affine-bookmark');
+  await bookmark.click();
+  await page.waitForTimeout(100);
   await page.click('.embed-card-toolbar-button.link');
   await assertStoreMatchJSX(
     page,
