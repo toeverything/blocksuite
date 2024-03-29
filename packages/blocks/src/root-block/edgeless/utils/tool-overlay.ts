@@ -57,7 +57,7 @@ const drawGeneralShape = (
       shapeMethods.rect.draw(ctx, bound);
       break;
     case 'triangle':
-      shapeMethods.rect.draw(ctx, bound);
+      shapeMethods.triangle.draw(ctx, bound);
       break;
     case 'diamond':
       shapeMethods.diamond.draw(ctx, bound);
