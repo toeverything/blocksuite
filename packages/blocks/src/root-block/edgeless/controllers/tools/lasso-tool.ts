@@ -192,8 +192,6 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   override onContainerDragStart(e: PointerEventState): void {
-    e.event.preventDefault();
-    e.event.stopPropagation();
     if (this.tool.mode === LassoMode.Polygonal) return;
     const { alt, shift } = e.keys;
 
@@ -227,10 +225,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._reset();
   }
 
-  override onContainerClick(e: PointerEventState): void {
-    e.event.preventDefault();
-    e.event.stopPropagation();
-  }
+  override onContainerClick(): void {}
 
   override onContainerDblClick(): void {
     noop();
