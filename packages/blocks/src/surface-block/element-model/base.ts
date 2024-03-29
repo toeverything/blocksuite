@@ -245,10 +245,10 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     // @ts-ignore
     delete this[prop];
 
-    // @ts-ignore
-    if (getYFieldPropsSet(prototype).has(prop)) {
+    if (getYFieldPropsSet(prototype).has(prop as string)) {
       this.surface.doc.transact(() => {
-        this.yMap.set(prop as string, value);
+        // @ts-ignore
+        this[prop] = value;
       });
     } else {
       console.warn('pop a prop that is not yfield or local:', prop);
