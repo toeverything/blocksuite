@@ -29,10 +29,10 @@ There are some entires for diffrent usage:
     ┌─────────▶│   Express  │ ◀ - - - ┐
     │          │   server   │         | (cehck auth?)
     ▼          └────────────┘         | (Y-Doc update callback?)
-┌────────────┐                 ┌───────────-─┐           ┌────────────┐
+┌────────────┐                 ┌─────────────┐           ┌────────────┐
 │   Editor   │     (auth?)     │ Y-Websocket │           │  Document  │
 │   Client   │◀───────────────▶│   backend   │ - - - - -▶│  Storage   │
-└────────────┘      sync       └────────────-┘           └───────────-┘
+└────────────┘      sync       └─────────────┘           └────────────┘
 ```
 
 This example is a simple C/S architecture, where the client is the BlockSuite editor, using Y-Websocket for synchronization. The Express server maintains `DocMeta` information inlcuding `id`, `title`. The actual ability of document storage is provided by Y-Websocket backend.
