@@ -2,8 +2,15 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { PathFinder, WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection } from '@blocksuite/store';
-import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
-import { css, html, nothing } from 'lit';
+import {
+  autoUpdate,
+  computePosition,
+  flip,
+  offset,
+  type Placement,
+  type ReferenceElement,
+} from '@floating-ui/dom';
+import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -18,24 +25,28 @@ import type {
 import { createLitPortal } from '../../../_common/components/portal.js';
 import { toast } from '../../../_common/components/toast.js';
 import {
-  type BookmarkBlockModel,
   BookmarkIcon,
-  BookmarkStyles,
+  MoreVerticalIcon,
+} from '../../../_common/icons/edgeless.js';
+import {
   CaptionIcon,
   CopyIcon,
   EditIcon,
   EmbedEdgelessIcon,
-  type EmbedGithubModel,
-  type EmbedLinkedDocBlockComponent,
-  type EmbedLinkedDocModel,
   EmbedPageIcon,
-  type EmbedSyncedDocBlockComponent,
   EmbedWebIcon,
   LinkIcon,
-  MoreVerticalIcon,
   OpenIcon,
   PaletteIcon,
-} from '../../../index.js';
+} from '../../../_common/icons/text.js';
+import {
+  type BookmarkBlockModel,
+  BookmarkStyles,
+} from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
+import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
@@ -43,6 +54,7 @@ import {
   isEmbedSyncedDocBlock,
 } from '../../edgeless/utils/query.js';
 import type { EmbedOptions } from '../../root-service.js';
+import { embedCardToolbarStyle } from './styles.js';
 
 export const EMBED_CARD_TOOLBAR = 'embed-card-toolbar';
 
@@ -51,119 +63,16 @@ export class EmbedCardToolbar extends WidgetElement<
   EmbedToolbarModel,
   EmbedToolbarBlockElement
 > {
-  static override styles = css`
-    .embed-card-toolbar {
-      position: absolute;
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      padding: 8px;
-      gap: 8px;
-      height: 40px;
-
-      border-radius: 8px;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      width: max-content;
-      z-index: var(--affine-z-index-popover);
-    }
-
-    .embed-card-toolbar .divider {
-      width: 1px;
-      height: 24px;
-      background-color: var(--affine-border-color);
-    }
-
-    .embed-card-toolbar-button.url {
-      display: flex;
-      width: 180px;
-      padding: var(--1, 0px);
-      align-items: flex-start;
-      gap: 10px;
-      border-radius: var(--1, 0px);
-      opacity: var(--add, 1);
-      cursor: pointer;
-    }
-
-    .embed-card-toolbar-button.url > span {
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-
-      color: var(--affine-link-color);
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      font-family: var(--affine-font-family);
-      font-size: 15px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 24px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      opacity: var(--add, 1);
-    }
-
-    .embed-card-toolbar-button.doc-info {
-      display: flex;
-      align-items: center;
-      width: max-content;
-      max-width: 180px;
-
-      gap: 4px;
-      opacity: var(--add, 1);
-      user-select: none;
-      cursor: pointer;
-    }
-
-    .embed-card-toolbar-button.doc-info > svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-
-    .embed-card-toolbar-button.doc-info > span {
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-
-      color: var(--affine-text-primary-color);
-      font-feature-settings:
-        'clig' off,
-        'liga' off;
-      word-break: break-all;
-      font-family: var(--affine-font-family);
-      font-size: 14px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 22px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      opacity: var(--add, 1);
-    }
-
-    .embed-card-toolbar-button.view-selector {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 2px;
-      border-radius: 6px;
-      background: var(--affine-hover-color);
-    }
-    .embed-card-toolbar-button.view-selector > icon-button {
-      padding: 0px;
-    }
-    .embed-card-toolbar-button.view-selector .current-view {
-      background: var(--affine-background-overlay-panel-color);
-      border-radius: 6px;
-    }
-  `;
+  static override styles = embedCardToolbarStyle;
 
   @query('.embed-card-toolbar')
   embedCardToolbarElement!: HTMLElement;
 
   @query('.embed-card-toolbar-button.card-style')
   cardStyleButton?: HTMLElement;
+
+  @query('.embed-card-toolbar-button.more-button')
+  moreButton?: HTMLElement;
 
   @state()
   hide: boolean = true;
@@ -427,73 +336,76 @@ export class EmbedCardToolbar extends WidgetElement<
     this._resetAbortController();
   }
 
-  private _toggleCardStyleMenu() {
-    if (this._moreMenuAbortController) {
-      this._moreMenuAbortController.abort();
-      this._moreMenuAbortController = null;
-    }
-    if (this._cardStyleMenuAbortController) {
-      this._cardStyleMenuAbortController.abort();
-      this._cardStyleMenuAbortController = null;
-      return;
-    }
-    if (!this._canShowCardStylePanel(this.model)) {
-      return;
-    }
-    this._cardStyleMenuAbortController = new AbortController();
-    const embedCardStyleMenu = new EmbedCardStyleMenu();
-    embedCardStyleMenu.model = this.model;
-    embedCardStyleMenu.abortController = this._abortController;
-
-    const referenceElement = this.cardStyleButton;
-    assertExists(referenceElement);
-
+  private _createMenu(
+    referenceElement: ReferenceElement,
+    menu: EmbedCardStyleMenu | EmbedCardMoreMenu,
+    placement: Placement,
+    offsetValue = 0
+  ) {
     createLitPortal({
-      template: embedCardStyleMenu,
+      template: menu,
       container: this.embedCardToolbarElement,
       computePosition: {
         referenceElement,
-        placement: 'top',
-        middleware: [flip()],
+        placement,
+        middleware: [flip(), offset(offsetValue)],
         autoUpdate: true,
       },
-      abortController: this._cardStyleMenuAbortController,
+      abortController: menu.abortController,
     });
   }
 
-  private _toggleMoreMenu() {
-    if (this._cardStyleMenuAbortController) {
+  private _toggleCardStyleMenu() {
+    this._moreMenuAbortController?.abort();
+    if (
+      this._cardStyleMenuAbortController &&
+      !this._cardStyleMenuAbortController.signal.aborted
+    ) {
       this._cardStyleMenuAbortController.abort();
-      this._cardStyleMenuAbortController = null;
+      return;
     }
-    if (this._moreMenuAbortController) {
+    this._cardStyleMenuAbortController = new AbortController();
+
+    if (!this._canShowCardStylePanel(this.model)) {
+      return;
+    }
+
+    const embedCardStyleMenu = new EmbedCardStyleMenu();
+    embedCardStyleMenu.model = this.model;
+    embedCardStyleMenu.abortController = this._cardStyleMenuAbortController;
+
+    assertExists(this.cardStyleButton);
+    this._createMenu(this.cardStyleButton, embedCardStyleMenu, 'top', 4);
+  }
+
+  private _toggleMoreMenu() {
+    this._cardStyleMenuAbortController?.abort();
+    // Abort the previous menu if it's not aborted
+    if (
+      this._moreMenuAbortController &&
+      !this._moreMenuAbortController.signal.aborted
+    ) {
       this._moreMenuAbortController.abort();
-      this._moreMenuAbortController = null;
       return;
     }
     this._moreMenuAbortController = new AbortController();
+
     const embedCardMoreMenu = new EmbedCardMoreMenu();
     embedCardMoreMenu.block = this.blockElement;
-    embedCardMoreMenu.abortController = this._abortController;
+    embedCardMoreMenu.abortController = this._moreMenuAbortController;
 
-    createLitPortal({
-      template: embedCardMoreMenu,
-      container: this.embedCardToolbarElement,
-      computePosition: {
-        referenceElement: this.embedCardToolbarElement,
-        placement: 'top-end',
-        middleware: [flip()],
-        autoUpdate: true,
-      },
-      abortController: this._moreMenuAbortController,
-    });
+    assertExists(this.moreButton);
+    this._createMenu(
+      this.embedCardToolbarElement,
+      embedCardMoreMenu,
+      'top-end'
+    );
   }
 
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
       this._selection.slots.changed.on(() => {
-        console.log('selection changed');
         const hasTextSelection = this._selection.find('text');
         if (hasTextSelection) {
           this._hide();
