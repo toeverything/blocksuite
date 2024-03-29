@@ -1,16 +1,24 @@
 import './chat-panel-messages.js';
 import './chat-panel-input.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
-import type { RootService } from '@blocksuite/blocks';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { css, html } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 
+import { CopilotClient } from '../../copilot-client.js';
 import type { AffineEditorContainer } from '../../editors/index.js';
 import { SmallHintIcon } from '../_common/icons.js';
 
+export type ChatMessage = {
+  content: string;
+  createdAt: string;
+  role: 'user' | 'assistant';
+};
+
+export type ChatStatus = 'loading' | 'success' | 'error' | 'idle';
+
 @customElement('chat-panel')
-export class ChatPanel extends WithDisposable(LitElement) {
+export class ChatPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .chat-panel-container {
       display: flex;
@@ -30,7 +38,7 @@ export class ChatPanel extends WithDisposable(LitElement) {
 
     chat-panel-messages {
       flex: 1;
-      overflow-y: auto;
+      overflow-y: hidden;
     }
 
     .chat-panel-hints {
@@ -65,32 +73,77 @@ export class ChatPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   editor!: AffineEditorContainer;
 
+  @state()
+  sessionId!: string;
+
+  @state()
+  messages: ChatMessage[] = [
+    { role: 'user', content: 'hello', createdAt: '2021-09-01' },
+    { role: 'assistant', content: 'hi', createdAt: '2021-09-01' },
+  ];
+
+  @state()
+  status: ChatStatus = 'idle';
+
+  private _copilotClient = new CopilotClient();
+
+  public override async connectedCallback() {
+    super.connectedCallback();
+
+    const { editor } = this;
+    let sessitonId = localStorage.getItem(
+      `blocksuite:chat:${editor.doc.id}:session`
+    );
+    if (!sessitonId) {
+      sessitonId = await this._copilotClient.createSession({
+        workspaceId: editor.doc.collection.id,
+        docId: editor.doc.id,
+        action: false,
+        model: 'Gpt35Turbo',
+        promptName: '',
+      });
+    }
+    this.sessionId = sessitonId;
+    localStorage.setItem(
+      `blocksuite:chat:${editor.doc.id}:session`,
+      sessitonId
+    );
+    await this.updateMessages();
+  }
+
   get rootService() {
     return this.editor.host.std.spec.getService('affine:page');
   }
 
-  get copilot(): RootService['copilot'] {
-    return this.rootService.copilot;
-  }
+  updateMessages = async () => {
+    const histories = await this._copilotClient.getAnonymousHistories(
+      editor.doc.collection.id,
+      editor.doc.id
+    );
+    this.messages =
+      histories.find(h => h.sessionId === this.sessionId)?.messages ||
+      this.messages;
+  };
+
+  updateStatus = (status: ChatStatus) => {
+    this.status = status;
+  };
 
   override render() {
-    const { items } = this.copilot.chat;
-
     return html` <div class="chat-panel-container">
       <div class="chat-panel-title">AFFINE AI</div>
       <chat-panel-messages
         .host=${this.editor.host}
-        .copilot=${this.copilot}
+        .copilotClient=${this._copilotClient}
+        .messages=${this.messages}
       ></chat-panel-messages>
-      ${items.length === 0
-        ? html`<div class="chat-panel-hints">
-            <div>Start with current selection</div>
-            <div>you've chosen within the doc</div>
-          </div>`
-        : nothing}
       <chat-panel-input
         .host=${this.editor.host}
-        .copilot=${this.copilot}
+        .copilotClient=${this._copilotClient}
+        .sessionId=${this.sessionId}
+        .updateMessages=${this.updateMessages}
+        .status=${this.status}
+        .updateStatus=${this.updateStatus}
       ></chat-panel-input>
       <div class="chat-panel-footer">
         ${SmallHintIcon}

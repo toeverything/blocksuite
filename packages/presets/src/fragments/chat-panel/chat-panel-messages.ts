@@ -1,14 +1,27 @@
-import type { EditorHost } from '@blocksuite/block-std';
-import { WithDisposable } from '@blocksuite/block-std';
-import type { RootService } from '@blocksuite/blocks';
-import { css, html, LitElement, nothing } from 'lit';
+import './text-renderer.js';
+import './slides-renderer.js';
+
+import type { EditorHost, TextSelection } from '@blocksuite/block-std';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { Text } from '@blocksuite/store';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { AffineIcon, DownArrowIcon } from '../_common/icons.js';
+import type { CopilotClient } from '../../copilot-client.js';
+import {
+  AffineIcon,
+  CreateAsPageIcon,
+  DownArrowIcon,
+  InsertBelowIcon,
+  NewBlockIcon,
+  PenIcon,
+  ReplaceIcon,
+} from '../_common/icons.js';
+import type { ChatMessage } from './index.js';
 
 @customElement('chat-panel-messages')
-export class ChatPanelMessages extends WithDisposable(LitElement) {
+export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     :host {
       position: relative;
@@ -20,6 +33,7 @@ export class ChatPanelMessages extends WithDisposable(LitElement) {
       gap: 24px;
       height: 100%;
       position: relative;
+      overflow-y: auto;
     }
 
     .chat-panel-messages-placeholder {
@@ -78,26 +92,199 @@ export class ChatPanelMessages extends WithDisposable(LitElement) {
   `;
 
   @state()
-  showDownIndicator = true;
+  showDownIndicator = false;
 
   @property({ attribute: false })
   host!: EditorHost;
 
   @property({ attribute: false })
-  copilot!: RootService['copilot'];
+  copilotClient!: CopilotClient;
+
+  @property({ attribute: false })
+  messages!: ChatMessage[];
 
   @query('.chat-panel-messages')
   messagesContainer!: HTMLDivElement;
 
+  private _currentTextSelection: TextSelection | null = null;
+
   public override connectedCallback() {
     super.connectedCallback();
-    this.disposables.add(
-      this.copilot.chat.onChange(() => this.requestUpdate())
-    );
+    this.host.selection.slots.changed.on(() => {
+      const res = this.host.command.chain().getTextSelection().run();
+      this._currentTextSelection =
+        res[1].currentTextSelection ?? this._currentTextSelection;
+    });
+  }
+
+  renderItem(message: ChatMessage) {
+    if (message.role === 'user') {
+      return html`<ai-text-renderer
+        .text=${message.content}
+      ></ai-text-renderer>`;
+    }
+    return html`
+      <style>
+        .ppt-title {
+          border-radius: 4px;
+          border: 1px solid var(--affine-border-color);
+          padding: 10px 16px;
+          font-size: 15px;
+          font-weight: 400;
+          margin-top: 4px;
+          margin-bottom: 12px;
+        }
+        .ppt-postfix {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+          margin-bottom: 8px;
+        }
+        .ppt-postfix div {
+          color: var(--affine-text-primary-color);
+          font-size: 14px;
+          font-weight: 400;
+        }
+      </style>
+      <div class="ppt-title">Title</div>
+      <ai-slides-renderer></ai-slides-renderer>
+      <div class="ppt-postfix">
+        ${PenIcon}
+        <div>Create a presentation</div>
+      </div>
+    `;
+  }
+
+  renderEditorActions(content: string) {
+    return html`
+      <style>
+        .actions-container {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 8px;
+        }
+
+        .actions-container > div {
+          display: flex;
+          gap: 8px;
+        }
+
+        .action {
+          width: fit-content;
+          padding: 4px 12px;
+          border-radius: 8px;
+          border: 1px solid var(--affine-border-color);
+          background-color: var(--affine-white-10);
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+          font-size: 15px;
+          font-weight: 500;
+          color: var(--affine-text-primary-color);
+          cursor: pointer;
+        }
+      </style>
+      <div class="actions-container">
+        <div class="action">
+          ${ReplaceIcon}
+          <div
+            @click=${() => {
+              if (!this._currentTextSelection) return;
+              this.host.command
+                .chain()
+                .deleteText({ textSelection: this._currentTextSelection })
+                .inline((_, next) => {
+                  if (!this._currentTextSelection) return;
+                  const block = this.host.doc.getBlockById(
+                    this._currentTextSelection.blockId
+                  );
+                  if (block?.text) {
+                    block.text.insert(
+                      content,
+                      this._currentTextSelection.start.index
+                    );
+                  }
+                  next();
+                })
+                .run();
+            }}
+          >
+            Replace selection
+          </div>
+        </div>
+        <div>
+          <div class="action">
+            ${InsertBelowIcon}
+            <div
+              @click=${() => {
+                if (this._currentTextSelection) {
+                  const { path } = this._currentTextSelection;
+
+                  this.host.command
+                    .chain()
+                    .getBlockIndex({ path })
+                    .inline((ctx, next) => {
+                      if (ctx.parentBlock && ctx.blockIndex !== undefined) {
+                        this.host.doc.addBlock(
+                          'affine:paragraph',
+                          { text: new Text(content) },
+                          ctx.parentBlock.model,
+                          ctx.blockIndex + 1
+                        );
+                      }
+                      next();
+                    })
+                    .run();
+                }
+              }}
+            >
+              Insert below
+            </div>
+          </div>
+          <div class="action">
+            ${NewBlockIcon}
+            <div
+              @click=${() => {
+                this.host.spec
+                  .getService('affine:page')
+                  .appendParagraph(content);
+              }}
+            >
+              New block
+            </div>
+          </div>
+        </div>
+        <div class="action">
+          ${CreateAsPageIcon}
+          <div
+            @click=${() => {
+              const newDoc = this.host.doc.collection.createDoc();
+              newDoc.load();
+              const rootId = newDoc.addBlock('affine:page');
+              newDoc.addBlock('affine:surface', {}, rootId);
+              const noteId = newDoc.addBlock('affine:note', {}, rootId);
+              newDoc.addBlock(
+                'affine:paragraph',
+                { text: new Text(content) },
+                noteId
+              );
+              this.host.spec
+                .getService('affine:page')
+                .slots.docLinkClicked.emit({
+                  docId: newDoc.id,
+                });
+            }}
+          >
+            Create as a page
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   protected override render() {
-    const { items } = this.copilot.chat;
+    const { messages } = this;
 
     return html`
       <div
@@ -109,18 +296,21 @@ export class ChatPanelMessages extends WithDisposable(LitElement) {
             200;
         }}
       >
-        ${items.length === 0
+        ${messages.length === 0
           ? html`<div class="chat-panel-messages-placeholder">
               ${AffineIcon}
               <div>What can I help you with?</div>
             </div>`
-          : repeat(items, item => {
+          : repeat(messages, (message, index) => {
               return html`<div class="message">
                 <div class="user-info">
                   <div class="avator"></div>
-                  ${item.isUser ? 'You' : 'AFFINE AI'}
+                  ${message.role === 'user' ? 'You' : 'AFFINE AI'}
                 </div>
-                ${item.render(this.host)}
+                ${this.renderItem(message)}
+                ${index === messages.length - 1
+                  ? this.renderEditorActions(message.content)
+                  : nothing}
               </div>`;
             })}
       </div>
