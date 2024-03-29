@@ -107,7 +107,6 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private _cardStyleMenuAbortController: AbortController | null = null;
-
   private _moreMenuAbortController: AbortController | null = null;
 
   private _embedOptions: EmbedOptions | null = null;
@@ -352,6 +351,7 @@ export class EmbedCardToolbar extends WidgetElement<
         autoUpdate: true,
       },
       abortController: menu.abortController,
+      closeOnClickAway: true,
     });
   }
 

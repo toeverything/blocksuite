@@ -28,6 +28,14 @@ export const embedCardToolbarStyle = css`
     background-color: var(--affine-border-color);
   }
 
+  .embed-card-toolbar-button {
+    color: var(--affine-icon-color);
+  }
+
+  .embed-card-toolbar-button > svg {
+    flex-shrink: 0;
+  }
+
   .embed-card-toolbar-button.url {
     display: flex;
     width: 180px;
@@ -73,7 +81,6 @@ export const embedCardToolbarStyle = css`
   .embed-card-toolbar-button.doc-info > svg {
     width: 20px;
     height: 20px;
-    flex-shrink: 0;
   }
 
   .embed-card-toolbar-button.doc-info > span {

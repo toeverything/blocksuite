@@ -65,6 +65,7 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
             height="76px"
             class=${classMap({
               selected: this.model.style === 'horizontal',
+              'card-style-button-horizontal': true,
             })}
             @click=${() => this._setEmbedCardStyle('horizontal')}
           >
@@ -79,6 +80,7 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
             height="76px"
             class=${classMap({
               selected: this.model.style === 'list',
+              'card-style-button-list': true,
             })}
             @click=${() => this._setEmbedCardStyle('list')}
           >

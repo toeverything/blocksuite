@@ -2,6 +2,7 @@ import './utils/declare-test-window.js';
 
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { getEmbedCardToolbar } from 'utils/query.js';
 
 import {
   activeNoteInEdgeless,
@@ -10,6 +11,7 @@ import {
   focusRichText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  pasteByKeyboard,
   pressArrowRight,
   pressArrowUp,
   pressBackspace,
@@ -23,8 +25,10 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertAlmostEqual,
   assertBlockCount,
   assertBlockSelections,
+  assertExists,
   assertRichTextInlineRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
@@ -484,4 +488,96 @@ test('press backspace after bookmark block can select bookmark block', async ({
   await pressBackspace(page);
   await assertBlockSelections(page, [['0', '1', '4']]);
   await assertBlockCount(page, 'paragraph', 0);
+});
+
+test.describe('embed card toolbar', () => {
+  async function showEmbedCardToolbar(page: Page) {
+    await createBookmarkBlockBySlashMenu(page);
+    const bookmark = page.locator('affine-bookmark');
+    await bookmark.click();
+    await page.waitForTimeout(100);
+    const { embedCardToolbar } = getEmbedCardToolbar(page);
+    await expect(embedCardToolbar).toBeVisible();
+  }
+
+  test('show toolbar when bookmark selected', async ({ page }) => {
+    await showEmbedCardToolbar(page);
+  });
+
+  test('copy bookmark url by copy button', async ({ page }) => {
+    await showEmbedCardToolbar(page);
+    const { copyButton } = getEmbedCardToolbar(page);
+    await copyButton.click();
+    await page.mouse.click(600, 600);
+    await waitNextFrame(page);
+
+    await pasteByKeyboard(page);
+    await assertStoreMatchJSX(
+      page,
+      /*xml*/ `<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:bookmark
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
+      prop:url="${inputUrl}"
+    />
+    <affine:paragraph
+      prop:text={
+        <>
+          <text
+            insert="${inputUrl}"
+            link="${inputUrl}"
+          />
+        </>
+      }
+      prop:type="text"
+    />
+  </affine:note>
+</affine:page>`
+    );
+  });
+
+  test('change card style', async ({ page }) => {
+    await showEmbedCardToolbar(page);
+    const bookmark = page.locator('affine-bookmark');
+    const { openCardStyleMenu } = getEmbedCardToolbar(page);
+    await openCardStyleMenu();
+    const { cardStyleHorizontalButton, cardStyleListButton } =
+      getEmbedCardToolbar(page);
+    await cardStyleListButton.click();
+    await waitNextFrame(page);
+    const listStyleBookmarkBox = await bookmark.boundingBox();
+    assertExists(listStyleBookmarkBox);
+    assertAlmostEqual(listStyleBookmarkBox.width, 752, 2);
+    assertAlmostEqual(listStyleBookmarkBox.height, 46, 2);
+
+    await openCardStyleMenu();
+    await cardStyleHorizontalButton.click();
+    await waitNextFrame(page);
+    const horizontalStyleBookmarkBox = await bookmark.boundingBox();
+    assertExists(horizontalStyleBookmarkBox);
+    assertAlmostEqual(horizontalStyleBookmarkBox.width, 752, 2);
+    assertAlmostEqual(horizontalStyleBookmarkBox.height, 116, 2);
+  });
 });
