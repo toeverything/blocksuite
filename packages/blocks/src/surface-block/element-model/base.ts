@@ -29,6 +29,7 @@ import {
 import {
   convertProps,
   getDeriveProperties,
+  getYFieldPropsSet,
   local,
   updateDerivedProp,
   watch,
@@ -193,8 +194,13 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
-    const curVal = this[prop as unknown as keyof ElementModel];
     const prototype = Object.getPrototypeOf(this);
+
+    if (!getYFieldPropsSet(prototype).has(prop as string)) {
+      return;
+    }
+
+    const curVal = this[prop as unknown as keyof ElementModel];
 
     this._stashed.set(prop, curVal);
 
@@ -233,20 +239,17 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
+    const prototype = Object.getPrototypeOf(this);
     const value = this._stashed.get(prop);
     this._stashed.delete(prop);
     // @ts-ignore
     delete this[prop];
 
     // @ts-ignore
-    if (this['_yProps']?.has(prop)) {
+    if (getYFieldPropsSet(prototype).has(prop)) {
       this.surface.doc.transact(() => {
         this.yMap.set(prop as string, value);
       });
-    }
-    // @ts-ignore
-    else if (this['_localProps']?.has(prop)) {
-      this._local.set(prop as string, value);
     } else {
       console.warn('pop a prop that is not yfield or local:', prop);
     }
