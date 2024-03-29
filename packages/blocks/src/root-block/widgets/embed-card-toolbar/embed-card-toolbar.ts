@@ -89,8 +89,8 @@ export class EmbedCardToolbar extends WidgetElement<
       'abort',
       autoUpdate(this.blockElement, this, () => {
         computePosition(this.blockElement, this, {
-          placement: 'top-end',
-          middleware: [flip(), offset(4)],
+          placement: 'top-start',
+          middleware: [flip(), offset(8)],
         })
           .then(({ x, y }) => {
             this.style.left = `${x}px`;

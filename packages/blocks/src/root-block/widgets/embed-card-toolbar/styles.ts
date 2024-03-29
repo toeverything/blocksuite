@@ -1,8 +1,14 @@
 import { css } from 'lit';
 
 export const embedCardToolbarStyle = css`
-  .embed-card-toolbar {
+  :host {
     position: absolute;
+    top: 0;
+    left: 0;
+    z-index: var(--affine-z-index-popover);
+  }
+
+  .embed-card-toolbar {
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -14,7 +20,6 @@ export const embedCardToolbarStyle = css`
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
     width: max-content;
-    z-index: var(--affine-z-index-popover);
   }
 
   .embed-card-toolbar .divider {
