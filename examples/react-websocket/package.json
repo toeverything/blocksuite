@@ -4,15 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon -w src/server -x tsx src/server/main.ts",
-    "start": "NODE_ENV=production tsx src/server/main.ts",
+    "dev": "concurrently -r 'pnpm dev:server' 'pnpm basic-websocket' 'pnpm y-redis'",
+    "start": "concurrently -r 'pnpm start:server' 'pnpm basic-websocket' 'pnpm y-redis'",
+    "dev:server": "nodemon -w src/server -x tsx src/server/main.ts",
+    "start:server": "NODE_ENV=production pnpm tsx src/server/main.ts",
+    "basic-websocket": "PORT=3001 pnpm exec y-websocket",
+    "y-redis": "concurrently -r 'pnpm y-redis-server' 'pnpm y-redis-worker' 'pnpm docker' 'pnpm redis' 'pnpm minio'",
+    "y-redis-server": "wait-on tcp:6379 && node --env-file .env node_modules/@y/redis/bin/server.js",
+    "y-redis-worker": "wait-on tcp:6379 && node --env-file .env node_modules/@y/redis/bin/worker.js",
+    "redis": "docker run --rm -p 6379:6379 redis",
+    "minio": "docker run --rm -p 9000:9000 -p 9001:9001 quay.io/minio/minio server /data --console-address \":9001\"",
     "build": "vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "postinstall": "cp node_modules/@y/redis/.env.template .env && sh gen-key.sh"
   },
   "dependencies": {
     "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
+    "@y/redis": "github:y-js/y-redis",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "lib0": "^0.2.93",
@@ -33,12 +43,14 @@
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "nodemon": "^3.1.0",
     "typescript": "^5.4.3",
-    "vite": "^5.2.6"
+    "vite": "^5.2.6",
+    "wait-on": "^7.2.0"
   },
   "stackblitz": {
     "installDependencies": false,

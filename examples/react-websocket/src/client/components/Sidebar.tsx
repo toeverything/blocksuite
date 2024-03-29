@@ -26,9 +26,30 @@ const Sidebar = () => {
     return () => disposable.forEach(d => d?.dispose());
   }, [collection, editor]);
 
-  const addDoc = async () => {
-    if (!collection) return;
-    createDoc(collection);
+  const addDoc = () => {
+    if (!collection || !provider) return;
+    const doc = createDoc(collection);
+    provider.connect(doc.id);
+  };
+
+  const deleteDoc = (docId: string) => {
+    if (!provider || !collection) return;
+
+    if (currentDocId === docId) {
+      const index = docMetaInfos.findIndex(({ id }) => id === docId);
+      if (index === 0) {
+        if (docMetaInfos.length === 1) {
+          const newDoc = createDoc(collection);
+          provider.connect(newDoc.id);
+        } else {
+          provider.connect(docMetaInfos[1].id);
+        }
+      } else {
+        provider.connect(docMetaInfos[index - 1].id);
+      }
+    }
+
+    collection.removeDoc(docId);
   };
 
   return (
@@ -42,9 +63,16 @@ const Sidebar = () => {
           <div
             className={`doc-item ${currentDocId === id ? 'active' : ''}`}
             key={id}
-            onClick={() => provider?.connect(id)}
           >
-            {title || 'Untitled'}
+            <div
+              className="doc-item-title"
+              onClick={() => provider?.connect(id)}
+            >
+              {title || 'Untitled'}
+            </div>
+            <button className="del-doc" onClick={() => deleteDoc(id)}>
+              ✖
+            </button>
           </div>
         ))}
       </div>

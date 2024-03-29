@@ -3,11 +3,13 @@ import { WebsocketProvider } from 'y-websocket';
 import * as api from './api.js';
 import { debounce, initCollection } from './utils.js';
 
+export type ConnectionStatus = 'connected' | 'disconnected' | 'error';
+
 export class Provider {
   ws: WebsocketProvider | null = null;
 
   slots = {
-    connectStatusChanged: new Slot<'connected' | 'disconnected' | 'error'>(),
+    connectStatusChanged: new Slot<ConnectionStatus>(),
     docSync: new Slot<Doc>(),
   };
 
@@ -16,8 +18,8 @@ export class Provider {
   private _previousTitles = new Map<string, string>();
 
   private constructor(
-    private readonly wsBaseUrl: string,
-    private token: string,
+    readonly wsBaseUrl: string,
+    private token: string | null,
     public collection: DocCollection
   ) {
     this.collection.meta.docMetas.forEach(({ id, title }) => {
@@ -37,10 +39,9 @@ export class Provider {
     );
   }
 
-  static async init(wsBaseUrl: string) {
-    const token = await api.getAuth();
+  static async init(configs: { wsBaseUrl: string; token: string | null }) {
     const collection = await initCollection();
-    return new Provider(wsBaseUrl, token, collection);
+    return new Provider(configs.wsBaseUrl, configs.token, collection);
   }
 
   connect(room: string) {
@@ -51,7 +52,7 @@ export class Provider {
     const doc = this.collection.getDoc(room)!;
 
     this.ws = new WebsocketProvider(this.wsBaseUrl, room, doc.spaceDoc, {
-      params: { yauth: this.token },
+      params: this.token ? { yauth: this.token } : {},
       connect: false,
     });
 
@@ -68,6 +69,8 @@ export class Provider {
     });
 
     this.ws.connect();
+
+    this.currentRoom = room;
   }
 
   private _handleTitleUpdateEvent() {

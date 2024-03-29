@@ -5,6 +5,7 @@ import ViteExpress from 'vite-express';
 import * as jwt from 'lib0/crypto/jwt';
 import * as ecdsa from 'lib0/crypto/ecdsa';
 import { DocMeta } from '@blocksuite/store';
+import * as fs from 'fs/promises';
 import { JSONDatabase } from './db.js';
 
 // Constants
@@ -17,6 +18,7 @@ const authPrivateKey = await ecdsa.importKeyJwk(
 //   JSON.parse(process.env.AUTH_PUBLIC_KEY ?? '')
 // );
 
+const dbFile = 'db.json';
 const db = await JSONDatabase.init('db.json');
 
 // Create http server
@@ -110,3 +112,7 @@ app.delete('/api/docs/:id', async (req, res) => {
 ViteExpress.listen(app, port, () =>
   console.log(`Server listening at http://localhost:${port}`)
 );
+
+process.on('exit', async () => {
+  await fs.unlink(dbFile);
+});

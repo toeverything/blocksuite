@@ -1,13 +1,30 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { Doc } from '@blocksuite/store';
-import { createDoc, getCurrentRoom, setRoom } from './utils.js';
+import {
+  createDoc,
+  getCurrentRoom,
+  getCurrentWsServerType,
+  setRoom,
+} from './utils.js';
 import { Provider } from './provider.js';
 import '@blocksuite/presets/themes/affine.css';
+import { getAuth } from './api.js';
+
+const wsServers = {
+  basic: {
+    wsBaseUrl: 'ws://localhost:3001',
+    token: null,
+  },
+  'y-redis': {
+    wsBaseUrl: 'ws://localhost:3002',
+    token: await getAuth(),
+  },
+};
 
 export async function initEditor() {
   const editor = new AffineEditorContainer();
 
-  const provider = await Provider.init('ws://localhost:3002');
+  const provider = await Provider.init(wsServers[getCurrentWsServerType()]);
 
   const { collection } = provider;
 

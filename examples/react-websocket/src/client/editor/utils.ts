@@ -1,6 +1,15 @@
 import { AffineSchemas } from '@blocksuite/blocks/dist/schemas.js';
-import { Schema, DocCollection } from '@blocksuite/store';
+import { Schema, DocCollection, nanoid } from '@blocksuite/store';
 import * as api from './api.js';
+
+export function getCurrentWsServerType() {
+  const currentRoom = getCurrentRoom();
+  const wsServer = currentRoom ? currentRoom.split('_')[0] : 'basic';
+  if (wsServer !== 'basic' && wsServer !== 'y-redis') {
+    return 'basic';
+  }
+  return wsServer;
+}
 
 export function getCurrentRoom() {
   const id = window.location.pathname.replace(/^\//, '');
@@ -17,7 +26,10 @@ export async function initCollection(id = 'blocksuite-example') {
   const schema = new Schema().register(AffineSchemas);
   const collection = new DocCollection({ schema, id });
 
-  const docMetaInfos = await api.getDocMetas();
+  const wsServerType = getCurrentWsServerType();
+  const docMetaInfos = (await api.getDocMetas()).filter(({ id }) => {
+    return id.split('_')[0] === wsServerType;
+  });
 
   docMetaInfos.map(docMeta => {
     collection.createDoc({ id: docMeta.id });
@@ -28,7 +40,9 @@ export async function initCollection(id = 'blocksuite-example') {
 }
 
 export function createDoc(collection: DocCollection) {
-  const doc = collection.createDoc();
+  const doc = collection.createDoc({
+    id: `${getCurrentWsServerType()}_${nanoid()}`,
+  });
 
   doc.load(() => {
     const pageBlockId = doc.addBlock('affine:page', {});
