@@ -120,6 +120,7 @@ const isSelectableItem = (item: Item): item is SelectItem => {
 export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-menu {
+      font-family: var(--affine-font-family);
       display: flex;
       flex-direction: column;
       user-select: none;
