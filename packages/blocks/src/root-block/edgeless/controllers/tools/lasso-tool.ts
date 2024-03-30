@@ -24,13 +24,28 @@ import { EdgelessToolController } from './index.js';
 
 class LassoOverlay extends Overlay {
   d = '';
-  strokeStyle = '#aaa';
+  startPoint: IVec | null = null;
   render(ctx: CanvasRenderingContext2D): void {
     const path = new Path2D(this.d);
+    const { zoom } = this._renderer;
     ctx.save();
-    ctx.strokeStyle = this.strokeStyle;
+    const primaryColor = this._renderer.getVariableColor(
+      '--affine-primary-color'
+    );
+    const strokeColor = this._renderer.getVariableColor(
+      '--affine-secondary-color'
+    );
+    if (this.startPoint) {
+      const [x, y] = this.startPoint;
+      ctx.beginPath();
+      ctx.arc(x, y, 2 / zoom, 0, Math.PI * 2);
+      ctx.fillStyle = primaryColor;
+      ctx.fill();
+    }
+
+    ctx.strokeStyle = strokeColor;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.lineWidth = 2 / this._renderer.zoom;
+    ctx.lineWidth = 2 / zoom;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.setLineDash([2, 5]);
@@ -50,7 +65,6 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   private _lassoPoints: IVec[] = [];
   private _lastPoint: IVec = [];
   private _isSelecting = false;
-  // todo: need a better way does not work when subtracting
   private _currentSelectionState = new Set<string>(); // to finalize the selection
 
   get selection() {
@@ -62,16 +76,12 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   private _loop = () => {
-    // Reduce the number of points
     const path =
       this.tool.mode === LassoMode.FreeHand
         ? getSvgPathFromStroke(this._lassoPoints)
         : getPolygonPathFromPoints(this._lassoPoints);
 
     this._overlay.d = path;
-    this._overlay.strokeStyle = this._surface.themeObserver.getVariableValue(
-      '--affine-border-color'
-    );
     this._surface.refresh();
     this._raf = requestAnimationFrame(this._loop);
   };
@@ -87,6 +97,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     cancelAnimationFrame(this._raf);
     this._edgeless.surface.renderer.removeOverlay(this._overlay);
     this._overlay.d = '';
+    this._overlay.startPoint = null;
 
     const elements = this._getElementsInsideLasso();
 
@@ -141,8 +152,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
         break;
       case 'sub': {
         const toRemove = new Set(elements.map(el => el.id));
-        const filtered = selection.elements.filter(el => !toRemove.has(el.id));
-        set = new Set(filtered);
+        set = new Set(selection.elements.filter(el => !toRemove.has(el.id)));
         break;
       }
       case 'set':
@@ -174,6 +184,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
       const b = [x, y];
       this._lassoPoints = [a, b];
       this._lastPoint = b;
+      this._overlay.startPoint = a;
       this._raf = requestAnimationFrame(this._loop);
       this._surface.renderer.addOverlay(this._overlay);
     } else {
@@ -206,6 +217,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const [x, y] = this.toModelCoord(point);
     this._lassoPoints = [[x, y]];
     this._raf = requestAnimationFrame(this._loop);
+    this._overlay.startPoint = this._lassoPoints[0];
     this._surface.renderer.addOverlay(this._overlay);
   }
 
@@ -282,6 +294,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
       this._currentSelectionState = new Set(
         this.selection.elements.map(el => el.id)
       );
+    this._reset();
   }
 
   override onPressShiftKey(): void {
