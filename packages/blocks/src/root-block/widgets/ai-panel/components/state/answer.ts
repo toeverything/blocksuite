@@ -152,8 +152,9 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
                   <ai-item-list .groups=${responseGroups}></ai-item-list>
                 `
               : nothing}
-            ${this.config.responses.length > 0 &&
-            html`<ai-panel-divider></ai-panel-divider>`}
+            ${this.config.responses.length > 0 && this.config.actions.length > 0
+              ? html`<ai-panel-divider></ai-panel-divider>`
+              : nothing}
             ${this.config.actions.length > 0
               ? html`
                   <ai-item-list .groups=${this.config.actions}></ai-item-list>
