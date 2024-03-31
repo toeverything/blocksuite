@@ -70,6 +70,14 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     return this._edgeless.service.selection;
   }
 
+  get isSelecting() {
+    return this._isSelecting;
+  }
+
+  abort() {
+    this._reset();
+  }
+
   private toModelCoord(p: IPoint): IVec {
     return this._service.viewport.toModelCoord(p.x, p.y);
   }
@@ -296,7 +304,6 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     if (edgelessTool?.type === 'pan') {
       this._clearLastSelection();
     }
-    noop();
   }
 
   override afterModeSwitch(newTool?: EdgelessTool): void {

@@ -257,6 +257,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._delete();
         },
         Escape: () => {
+          const curController = this.rootElement.tools.currentController;
+          if (
+            curController instanceof LassoToolController &&
+            curController.isSelecting
+          ) {
+            curController.abort();
+          }
+
           if (!this.rootElement.service.selection.empty) {
             rootElement.selection.clear();
           }
