@@ -89,6 +89,7 @@ const LastPropsSchema = z.object({
     textAlign: TextAlignSchema.optional(),
     textHorizontalAlign: TextAlignSchema.optional(),
     textVerticalAlign: TextVerticalAlignSchema.optional(),
+    roughness: z.number().optional(),
   }),
   text: z.object({
     color: z.string(),

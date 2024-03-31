@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import path, { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { defineConfig, loadEnv } from 'vite';
@@ -72,15 +72,28 @@ export default ({ mode }) => {
             'examples/provider/index.html'
           ),
         },
-        output: {
-          manualChunks: {
-            blocks: ['@blocksuite/blocks'],
-            'block-std': ['@blocksuite/block-std'],
-            inline: ['@blocksuite/inline'],
-            store: ['@blocksuite/store'],
-            sync: ['@blocksuite/sync'],
-          },
-        },
+      },
+    },
+    resolve: {
+      alias: {
+        '@blocksuite/blocks': path.resolve(
+          fileURLToPath(new URL('../blocks/src', import.meta.url))
+        ),
+        '@blocksuite/blocks/*': path.resolve(
+          fileURLToPath(new URL('../blocks/src/*', import.meta.url))
+        ),
+        '@blocksuite/global/*': path.resolve(
+          fileURLToPath(new URL('../framework/global/src/*', import.meta.url))
+        ),
+        '@blocksuite/store': path.resolve(
+          fileURLToPath(new URL('../framework/store/src', import.meta.url))
+        ),
+        '@blocksuite/inline': path.resolve(
+          fileURLToPath(new URL('../framework/inline/src', import.meta.url))
+        ),
+        '@blocksuite/inline/*': path.resolve(
+          fileURLToPath(new URL('../framework/inline/src/*', import.meta.url))
+        ),
       },
     },
   });
