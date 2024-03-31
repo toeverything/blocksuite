@@ -84,7 +84,7 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         class="edgeless-lasso-button ${mode}"
-        .tooltip=${getTooltipWithShortcut('Toggle Lasso', 'Shift + V')}
+        .tooltip=${getTooltipWithShortcut('Lasso', 'L')}
         .tooltipOffset=${17}
         .active=${type === 'lasso'}
         .iconContainerPadding=${8}
