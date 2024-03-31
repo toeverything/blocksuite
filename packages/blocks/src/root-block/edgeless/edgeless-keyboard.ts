@@ -12,6 +12,7 @@ import {
 } from '../../surface-block/index.js';
 import { EdgelessBlockModel } from '../edgeless/type.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
+import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
@@ -37,7 +38,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'text',
           });
         },
-        l: () => {
+        c: () => {
           rootElement.service.editSession.record('connector', {
             mode: ConnectorMode.Straight,
           });
@@ -46,7 +47,22 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             mode: ConnectorMode.Straight,
           });
         },
-        'Shift-v': () => {
+        l: () => {
+          // select the current lasso mode
+          const edgeless = rootElement;
+          const lassoController = edgeless.tools.controllers['lasso'];
+          const tool: EdgelessTool = {
+            type: 'lasso',
+            mode: LassoMode.Polygonal,
+          };
+
+          if (lassoController instanceof LassoToolController)
+            tool.mode = lassoController.tool.mode;
+
+          this._setEdgelessTool(edgeless, tool);
+        },
+        'Shift-l': () => {
+          // toggle between lasso modes
           const edgeless = rootElement;
           const cur = edgeless.edgelessTool;
           const tool: EdgelessTool = {

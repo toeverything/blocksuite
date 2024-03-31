@@ -2,7 +2,6 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import {
-  type EdgelessModel,
   type EdgelessTool,
   type IPoint,
   LassoMode,
@@ -110,11 +109,11 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._isSelecting = false;
   }
 
-  private _clearLastSelection = () => {
+  private _clearLastSelection() {
     if (this.selection.empty) {
       this.selection.clearLast();
     }
-  };
+  }
 
   private _setSelectionState(elements: string[], editing: boolean) {
     this.selection.set({
@@ -126,7 +125,6 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   private _getSelectionMode(ev: PointerEventState): 'add' | 'sub' | 'set' {
     const shiftKey = ev.keys.shift ?? this._edgeless.tools.shiftKey;
     const altKey = ev.keys.alt ?? false;
-
     if (shiftKey) return 'add';
     else if (altKey) return 'sub';
     else {
@@ -134,35 +132,92 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     }
   }
 
-  private _updateSelection(e: PointerEventState) {
-    const elements = this._getElementsInsideLasso();
+  private isInsideLassoSelection(bound: Bound): boolean {
+    // Check if any corner of the bounding box is inside the lasso polygon
+    const firstPoint = this._lassoPoints[0];
+    const lassoPoints = this._lassoPoints.concat(
+      firstPoint ? [firstPoint] : []
+    );
 
-    const selection = this.selection;
+    const elPoly = bound.points;
+    for (const point of elPoly) {
+      if (pointInPolygon(point, lassoPoints)) return true;
+    }
+    return false;
+  }
+
+  private _updateSelection(e: PointerEventState) {
+    // elements inside the lasso selection
+    const elements = this._getElementsInsideLasso().map(el => el.id);
+
+    // current selections
+    const selection = this.selection.elements.map(el => el.id);
 
     const selectionMode = this._getSelectionMode(e);
-    let set!: Set<EdgelessModel>;
+    let set!: Set<string>;
     switch (selectionMode) {
       case 'add':
         set = new Set([
           ...elements,
-          ...selection.elements.filter(el =>
-            this._currentSelectionState.has(el.id)
-          ),
+          ...selection.filter(elId => this._currentSelectionState.has(elId)),
         ]);
         break;
       case 'sub': {
-        const toRemove = new Set(elements.map(el => el.id));
-        set = new Set(selection.elements.filter(el => !toRemove.has(el.id)));
+        const toRemove = new Set(elements);
+        set = new Set(
+          Array.from(this._currentSelectionState).filter(
+            el => !toRemove.has(el)
+          )
+        );
         break;
       }
       case 'set':
         set = new Set(elements);
         break;
     }
-    this._setSelectionState(
-      Array.from(set).map(element => element.id),
-      false
+    this._setSelectionState(Array.from(set), false);
+  }
+
+  // For Freehand Mode =
+  override onContainerDragStart(e: PointerEventState): void {
+    if (this.tool.mode !== LassoMode.FreeHand) return;
+    const { alt, shift } = e.keys;
+
+    if (!shift && !alt) {
+      this._currentSelectionState.clear();
+      this.selection.clear();
+    }
+
+    this._currentSelectionState = new Set(
+      this.selection.elements.map(el => el.id)
     );
+
+    this._isSelecting = true;
+
+    const { point } = e;
+    const [x, y] = this.toModelCoord(point);
+    this._lassoPoints = [[x, y]];
+    this._raf = requestAnimationFrame(this._loop);
+    this._overlay.startPoint = this._lassoPoints[0];
+    this._surface.renderer.addOverlay(this._overlay);
+  }
+
+  override onContainerDragMove(e: PointerEventState): void {
+    if (this.tool.mode !== LassoMode.FreeHand) return;
+
+    const { point } = e;
+    const [x, y] = this.toModelCoord(point);
+    this._lassoPoints.push([x, y]);
+
+    this._updateSelection(e);
+  }
+
+  override onContainerDragEnd(e: PointerEventState): void {
+    if (this.tool.mode !== LassoMode.FreeHand) return;
+
+    this._updateSelection(e);
+
+    this._reset();
   }
 
   override onContainerPointerDown(e: PointerEventState): void {
@@ -180,6 +235,10 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const { point } = e;
     const [x, y] = this.toModelCoord(point);
     if (this._lassoPoints.length < 2) {
+      this._currentSelectionState = new Set(
+        this.selection.elements.map(el => el.id)
+      );
+
       const a = [x, y];
       const b = [x, y];
       this._lassoPoints = [a, b];
@@ -194,71 +253,13 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
       const dy = lastPoint[1] - firstPoint[1];
       if (Vec.len2([dx, dy]) < 20 ** 2) {
         this._updateSelection(e);
+
         return this._reset();
       }
 
       this._lastPoint = [x, y];
       this._lassoPoints.push(this._lastPoint);
     }
-  }
-
-  override onContainerDragStart(e: PointerEventState): void {
-    if (this.tool.mode === LassoMode.Polygonal) return;
-    const { alt, shift } = e.keys;
-
-    if (!shift && !alt) {
-      this._currentSelectionState.clear();
-      this.selection.clear();
-    }
-
-    this._isSelecting = true;
-
-    const { point } = e;
-    const [x, y] = this.toModelCoord(point);
-    this._lassoPoints = [[x, y]];
-    this._raf = requestAnimationFrame(this._loop);
-    this._overlay.startPoint = this._lassoPoints[0];
-    this._surface.renderer.addOverlay(this._overlay);
-  }
-
-  override onContainerDragMove(e: PointerEventState): void {
-    if (this.tool.mode === LassoMode.Polygonal) return;
-
-    const { point } = e;
-    const [x, y] = this.toModelCoord(point);
-    this._lassoPoints.push([x, y]);
-
-    this._updateSelection(e);
-  }
-
-  override onContainerDragEnd(e: PointerEventState): void {
-    if (this.tool.mode === LassoMode.Polygonal) return;
-    this._updateSelection(e);
-    this._reset();
-  }
-
-  override onContainerClick(): void {}
-
-  override onContainerDblClick(): void {
-    noop();
-  }
-
-  override onContainerTripleClick(): void {
-    noop();
-  }
-
-  private isInsideLassoSelection(bound: Bound): boolean {
-    // Check if any corner of the bounding box is inside the lasso polygon
-    const firstPoint = this._lassoPoints[0];
-    const lassoPoints = this._lassoPoints.concat(
-      firstPoint ? [firstPoint] : []
-    );
-
-    const elPoly = bound.points;
-    for (const point of elPoly) {
-      if (pointInPolygon(point, lassoPoints)) return true;
-    }
-    return false;
   }
 
   override onContainerMouseMove(e: PointerEventState): void {
@@ -273,6 +274,16 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     this._updateSelection(e);
   }
 
+  override onContainerClick(): void {}
+
+  override onContainerDblClick(): void {
+    noop();
+  }
+
+  override onContainerTripleClick(): void {
+    noop();
+  }
+
   override onContainerMouseOut(): void {
     noop();
   }
@@ -281,7 +292,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     noop();
   }
 
-  beforeModeSwitch(edgelessTool?: EdgelessTool) {
+  override beforeModeSwitch(edgelessTool?: EdgelessTool) {
     if (edgelessTool?.type === 'pan') {
       this._clearLastSelection();
     }
@@ -289,7 +300,6 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   }
 
   override afterModeSwitch(newTool?: EdgelessTool): void {
-    // When lasso is selected start with the current selection
     if (newTool?.type === 'lasso')
       this._currentSelectionState = new Set(
         this.selection.elements.map(el => el.id)
