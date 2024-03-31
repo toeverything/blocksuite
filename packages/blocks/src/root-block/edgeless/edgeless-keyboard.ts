@@ -9,9 +9,11 @@ import {
   ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
+  ShapeType,
 } from '../../surface-block/index.js';
 import { EdgelessBlockModel } from '../edgeless/type.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
+import { ShapeToolController } from './controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
@@ -19,6 +21,7 @@ import {
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
+import { getNextShapeType, updateShapeProps } from './utils/hotkey-utils.js';
 import { isCanvasElement, isNoteBlock } from './utils/query.js';
 import { mountShapeTextEditor } from './utils/text.js';
 
@@ -136,6 +139,27 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             isNoteBlock(elements[0])
           ) {
             rootElement.slots.toggleNoteSlicer.emit();
+          }
+        },
+        'Shift-s': () => {
+          const attr = rootElement.service.editSession.getLastProps('shape');
+
+          const nextShapeType = getNextShapeType(
+            attr.radius > 0 && attr.shapeType === ShapeType.Rect
+              ? 'roundedRect'
+              : attr.shapeType
+          );
+          this._setEdgelessTool(rootElement, {
+            type: 'shape',
+            shapeType:
+              nextShapeType === 'roundedRect' ? ShapeType.Rect : nextShapeType,
+          });
+
+          updateShapeProps(nextShapeType, rootElement);
+
+          const controller = rootElement.tools.currentController;
+          if (controller instanceof ShapeToolController) {
+            controller.createOverlay();
           }
         },
         'Mod-g': ctx => {
