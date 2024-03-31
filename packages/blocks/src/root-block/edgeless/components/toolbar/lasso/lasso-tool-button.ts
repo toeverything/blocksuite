@@ -78,10 +78,12 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
 
   override render() {
     const type = this.edgelessTool?.type;
+    const mode = this.curMode === LassoMode.FreeHand ? 'freehand' : 'polygonal';
+
     const arrowColor = type === 'lasso' ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
-        class="edgeless-lasso-button ${type}"
+        class="edgeless-lasso-button ${mode}"
         .tooltip=${getTooltipWithShortcut('Toggle Lasso', 'Shift + V')}
         .tooltipOffset=${17}
         .active=${type === 'lasso'}
