@@ -36,23 +36,23 @@ export function diamond(
   );
 
   if (shapeStyle === 'General') {
-    drawGeneralShape(ctx, model, renderer);
-  } else {
-    rc.polygon(
-      [
-        [renderWidth / 2, 0],
-        [renderWidth, renderHeight / 2],
-        [renderWidth / 2, renderHeight],
-        [0, renderHeight / 2],
-      ],
-      {
-        seed,
-        roughness: shapeStyle === 'Scribbled' ? roughness : 0,
-        strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
-        stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
-        strokeWidth,
-        fill: filled ? realFillColor : undefined,
-      }
-    );
+    return drawGeneralShape(ctx, model, renderer);
   }
+
+  rc.polygon(
+    [
+      [renderWidth / 2, 0],
+      [renderWidth, renderHeight / 2],
+      [renderWidth / 2, renderHeight],
+      [0, renderHeight / 2],
+    ],
+    {
+      seed,
+      roughness,
+      strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
+      stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
+      strokeWidth,
+      fill: filled ? realFillColor : undefined,
+    }
+  );
 }

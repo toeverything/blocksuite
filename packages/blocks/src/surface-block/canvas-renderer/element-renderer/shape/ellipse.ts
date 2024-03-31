@@ -36,16 +36,16 @@ export function ellipse(
   );
 
   if (shapeStyle === 'General') {
-    drawGeneralShape(ctx, model, renderer);
-  } else {
-    rc.ellipse(cx, cy, renderWidth, renderHeight, {
-      seed,
-      roughness: shapeStyle === 'Scribbled' ? roughness : 0,
-      strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
-      stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
-      strokeWidth,
-      fill: filled ? realFillColor : undefined,
-      curveFitting: 1,
-    });
+    return drawGeneralShape(ctx, model, renderer);
   }
+
+  rc.ellipse(cx, cy, renderWidth, renderHeight, {
+    seed,
+    roughness,
+    strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
+    stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
+    strokeWidth,
+    fill: filled ? realFillColor : undefined,
+    curveFitting: 1,
+  });
 }

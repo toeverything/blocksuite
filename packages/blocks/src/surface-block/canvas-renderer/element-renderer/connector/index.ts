@@ -59,7 +59,6 @@ function renderPoints(
   curve: boolean
 ) {
   const { seed, stroke, strokeWidth, roughness, rough } = model;
-  const rc = renderer.rc;
   const realStrokeColor = renderer.getVariableColor(stroke);
 
   if (rough) {
@@ -70,51 +69,54 @@ function renderPoints(
       stroke: realStrokeColor,
       strokeWidth,
     };
+
     if (curve) {
       const b = getBezierParameters(model.absolutePath);
-      rc.path(
-        `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]}  ${b[3][0]},${b[3][1]} `,
+      renderer.rc.path(
+        `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]} ${b[3][0]},${b[3][1]}`,
         options
       );
-    } else {
-      rc.linearPath(points as unknown as [number, number][], options);
+      return;
     }
-  } else {
-    ctx.save();
-    ctx.strokeStyle = realStrokeColor;
-    ctx.lineWidth = model.strokeWidth;
-    ctx.lineJoin = 'round';
-    dash && ctx.setLineDash([12, 12]);
-    ctx.beginPath();
-    if (curve) {
-      points.forEach((point, index) => {
-        if (index === 0) {
-          ctx.moveTo(point[0], point[1]);
-        } else {
-          const last = points[index - 1];
-          ctx.bezierCurveTo(
-            last.absOut[0],
-            last.absOut[1],
-            point.absIn[0],
-            point.absIn[1],
-            point[0],
-            point[1]
-          );
-        }
-      });
-    } else {
-      points.forEach((point, index) => {
-        if (index === 0) {
-          ctx.moveTo(point[0], point[1]);
-        } else {
-          ctx.lineTo(point[0], point[1]);
-        }
-      });
-    }
-    ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
+
+    renderer.rc.linearPath(points as unknown as [number, number][], options);
+    return;
   }
+
+  ctx.save();
+  ctx.strokeStyle = realStrokeColor;
+  ctx.lineWidth = strokeWidth;
+  ctx.lineJoin = 'round';
+  dash && ctx.setLineDash([12, 12]);
+  ctx.beginPath();
+  if (curve) {
+    points.forEach((point, index) => {
+      if (index === 0) {
+        ctx.moveTo(point[0], point[1]);
+      } else {
+        const last = points[index - 1];
+        ctx.bezierCurveTo(
+          last.absOut[0],
+          last.absOut[1],
+          point.absIn[0],
+          point.absIn[1],
+          point[0],
+          point[1]
+        );
+      }
+    });
+  } else {
+    points.forEach((point, index) => {
+      if (index === 0) {
+        ctx.moveTo(point[0], point[1]);
+      } else {
+        ctx.lineTo(point[0], point[1]);
+      }
+    });
+  }
+  ctx.stroke();
+  ctx.closePath();
+  ctx.restore();
 }
 
 function renderEndpoint(

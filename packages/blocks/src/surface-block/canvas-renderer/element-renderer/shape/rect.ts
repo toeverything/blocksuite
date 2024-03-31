@@ -44,10 +44,11 @@ export function rect(
   );
 
   if (shapeStyle === 'General') {
-    drawGeneralShape(ctx, model, renderer);
-  } else {
-    rc.path(
-      `
+    return drawGeneralShape(ctx, model, renderer);
+  }
+
+  rc.path(
+    `
       M ${r} 0
       L ${renderWidth - r} 0
       C ${renderWidth - K_RECT * r} 0 ${renderWidth} ${
@@ -65,14 +66,13 @@ export function rect(
       C 0 ${K_RECT * r} ${K_RECT * r} 0 ${r} 0
       Z
       `,
-      {
-        seed,
-        roughness: shapeStyle === 'Scribbled' ? roughness : 0,
-        strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
-        stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
-        strokeWidth,
-        fill: filled ? realFillColor : undefined,
-      }
-    );
-  }
+    {
+      seed,
+      roughness,
+      strokeLineDash: strokeStyle === 'dash' ? [12, 12] : undefined,
+      stroke: strokeStyle === 'none' ? 'none' : realStrokeColor,
+      strokeWidth,
+      fill: filled ? realFillColor : undefined,
+    }
+  );
 }
