@@ -1083,3 +1083,15 @@ export async function assertBlockSelections(page: Page, paths: string[][]) {
   const actualPaths = selections.map(selection => selection.path);
   expect(actualPaths).toEqual(paths);
 }
+
+export async function assertConnectorStrokeColor(
+  page: Page,
+  color: CssVariableName
+) {
+  const colorButton = page
+    .locator('edgeless-change-connector-button')
+    .locator('edgeless-color-panel')
+    .locator(`.color-unit[aria-label="${color}"]`);
+
+  expect(await colorButton.count()).toBe(1);
+}

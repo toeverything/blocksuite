@@ -283,6 +283,34 @@ export async function setEdgelessTool(
     }
   }
 }
+export type ShapeName =
+  | 'rect'
+  | 'ellipse'
+  | 'diamond'
+  | 'triangle'
+  | 'roundedRect';
+
+export async function assertEdgelessShapeType(page: Page, type: ShapeName) {
+  const curType = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-root');
+    if (!container) {
+      throw new Error('Missing edgeless page');
+    }
+    if (container.edgelessTool.type !== 'shape')
+      throw new Error('Expected shape tool');
+
+    const shapeType = container.edgelessTool.shapeType;
+    if (
+      shapeType === 'rect' &&
+      container.service.editSession.getLastProps('shape').radius > 0
+    )
+      return 'roundedRect';
+
+    return container.edgelessTool.shapeType;
+  });
+
+  expect(type).toEqual(curType);
+}
 
 export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
   const type = await page.evaluate(() => {
