@@ -13,12 +13,62 @@ import {
 import {
   copyByKeyboard,
   edgelessCommonSetup as commonSetup,
+  expectConsoleMessage,
   pasteByKeyboard,
+  pasteContent,
   selectAllByKeyboard,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertConnectorPath } from '../utils/asserts.js';
+import { assertConnectorPath, assertRichImage } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
+
+test.describe('mime', () => {
+  test('should paste svg in text/plain mime', async ({ page }) => {
+    expectConsoleMessage(page, 'Error: Image sourceId is missing!', 'warning');
+    await commonSetup(page);
+    const content = {
+      'text/plain': `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+      <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+      <script>alert("Malicious script executed!");</script>
+    </svg>
+    `,
+    };
+
+    await pasteContent(page, content);
+
+    // wait for paste
+    await page.waitForTimeout(200);
+    await assertRichImage(page, 1);
+  });
+
+  test('should not paste bad svg', async ({ page }) => {
+    expectConsoleMessage(page, 'BlockSuiteError: val does not exist', 'error');
+    expectConsoleMessage(page, 'Error: Image sourceId is missing!', 'warning');
+
+    await commonSetup(page);
+    const contents = [
+      {
+        'text/plain': `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+      <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+      <script>alert("Malicious script executed!");</script>
+    `,
+      },
+
+      {
+        'text/plain': `<svg width="100" height="100">
+      <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+      <script>alert("Malicious script executed!");</script>
+      </svg>
+    `,
+      },
+    ];
+    for (const content of contents) {
+      await pasteContent(page, content);
+    }
+
+    await assertRichImage(page, 0);
+  });
+});
 
 test.describe('connector clipboard', () => {
   test('copy and paste connector whose both sides connect nothing', async ({

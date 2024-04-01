@@ -11,7 +11,7 @@ import {
 } from '../../../../../_common/icons/index.js';
 import { LineWidth } from '../../../../../_common/utils/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
-import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
+import { DEFAULT_CONNECTOR_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
 import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
@@ -43,7 +43,7 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
   mode: ConnectorMode = ConnectorMode.Curve;
 
   @state()
-  stroke = GET_DEFAULT_LINE_COLOR();
+  stroke = DEFAULT_CONNECTOR_COLOR;
 
   @state()
   strokeWidth = LineWidth.Two;
@@ -90,13 +90,7 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
     const arrowColor = active ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._menu
-          ? ''
-          : html`<div>
-              ${getTooltipWithShortcut('Straight ', 'L')}
-              ${getTooltipWithShortcut('Elbowed', 'X', '(Default)')}
-              ${getTooltipWithShortcut('Curve    ', 'C')}
-            </div> `}
+        .tooltip=${this._menu ? '' : getTooltipWithShortcut('Straight ', 'L')}
         .tooltipOffset=${17}
         .active=${active}
         .iconContainerPadding=${8}

@@ -1,5 +1,4 @@
-import type { UIEventStateContext } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockElement, UIEventStateContext } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
@@ -378,9 +377,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
     if (!tryConvertBlock(blockElement, inlineEditor, prefixText, inlineRange)) {
       _preventDefault(ctx);
+      return true;
     }
-
-    return true;
+    return;
   }
 
   function handleDelete(ctx: UIEventStateContext) {
@@ -394,13 +393,17 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   }
 
   function tryConvertToLinkedDoc() {
+    const root = model.doc.root;
+    assertExists(root);
     const docBlock = blockElement.host.view.viewFromPath(
       'block',
       buildPath(model.doc.root)
     );
     assertExists(docBlock);
-    const linkedDocWidgetEle =
-      docBlock.widgetElements['affine-linked-doc-widget'];
+    const linkedDocWidgetEle = blockElement.host.view.getWidget(
+      'affine-linked-doc-widget',
+      root.id
+    );
     if (!linkedDocWidgetEle) return false;
 
     const inlineEditor = _getInlineEditor();
@@ -426,8 +429,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       title: docName,
     });
     insertLinkedNode({
-      editorHost: blockElement.host,
-      model: blockElement.model,
+      inlineEditor,
       docId: doc.id,
     });
     return true;

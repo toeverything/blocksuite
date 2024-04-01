@@ -9,6 +9,7 @@ import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js'
 import { PlusIcon } from '../../_common/icons/index.js';
 import { GroupTitle } from '../common/group-by/group-title.js';
 import type { GroupData } from '../common/group-by/helper.js';
+import type { DataViewNative } from '../data-view.js';
 import { DataBaseColumnStats } from './components/column-stats.js';
 import { DatabaseColumnStatsCell } from './components/column-stats-cell.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
@@ -59,6 +60,8 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  dataViewEle!: DataViewNative;
+  @property({ attribute: false })
   view!: DataViewTableManager;
   @property({ attribute: false })
   viewEle!: DataViewTable;
@@ -79,11 +82,14 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
     this.view.rowAdd('end', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
+      const index = this.view.columnManagerList.findIndex(
+        v => v.type === 'title'
+      );
       selectionController.selection = {
         groupKey: this.group?.key,
         focus: {
           rowIndex: this.rows.length - 1,
-          columnIndex: 0,
+          columnIndex: index,
         },
         isEditing: true,
       };
@@ -93,11 +99,14 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
     this.view.rowAdd('start', this.group?.key);
     requestAnimationFrame(() => {
       const selectionController = this.viewEle.selectionController;
+      const index = this.view.columnManagerList.findIndex(
+        v => v.type === 'title'
+      );
       selectionController.selection = {
         groupKey: this.group?.key,
         focus: {
           rowIndex: 0,
-          columnIndex: 0,
+          columnIndex: index,
         },
         isEditing: true,
       };
@@ -143,6 +152,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
             return html`<data-view-table-row
               data-row-index="${idx}"
               data-row-id="${id}"
+              .dataViewEle="${this.dataViewEle}"
               .view="${this.view}"
               .rowId="${id}"
               .rowIndex="${idx}"

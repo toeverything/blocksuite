@@ -47,6 +47,7 @@ import {
   getActiveConnectorStrokeColor,
   getActiveShapeColor,
   setEdgelessToolAction,
+  updateShapeOverlay,
 } from './utils.js';
 
 //----------------------------------------------------------
@@ -63,17 +64,26 @@ const pie = new PieMenuBuilder({
     if (isControlledKeyboardEvent(ev)) return false;
     const isEditing = rootElement.service.selection.editing;
 
-    // Todo: make this trigger user configurable .
     return ev.key === 'q' && !isEditing;
   },
 });
 
-pie.command({
+pie.expandableCommand({
   label: 'Pen',
   icon: EdgelessPenIcon,
-  action: setEdgelessToolAction({
-    type: 'brush',
-  }),
+  action: setEdgelessToolAction({ type: 'brush' }),
+  submenus: pie => {
+    pie.colorPicker({
+      label: 'Pen Color',
+      active: getActiveConnectorStrokeColor,
+      onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
+        rootElement.service.editSession.record('brush', {
+          color: color as LastProps['brush']['color'],
+        });
+      },
+      colors: LINE_COLORS.map(color => ({ color })),
+    });
+  },
 });
 
 pie.command({
@@ -258,10 +268,16 @@ shapes.forEach(shape => {
       return shape.icon(attributes.shapeStyle);
     },
 
-    action: setEdgelessToolAction({
-      type: 'shape',
-      shapeType: shape.type,
-    }),
+    action: ({ rootElement }) => {
+      rootElement.service.tool.setEdgelessTool({
+        type: 'shape',
+        shapeType: shape.type,
+      });
+      rootElement.service.editSession.record('shape', {
+        shapeType: shape.type,
+      });
+      updateShapeOverlay(rootElement);
+    },
   });
 });
 
@@ -286,6 +302,8 @@ pie.command({
     rootElement.service.editSession.record('shape', {
       shapeStyle: toggleType,
     });
+
+    updateShapeOverlay(rootElement);
   },
 });
 
@@ -296,6 +314,7 @@ pie.colorPicker({
     rootElement.service.editSession.record('shape', {
       fillColor: color as LastProps['shape']['fillColor'],
     });
+    updateShapeOverlay(rootElement);
   },
   colors: FILL_COLORS.map(color => ({ color })),
 });
@@ -308,6 +327,7 @@ pie.colorPicker({
     rootElement.service.editSession.record('shape', {
       strokeColor: color as LastProps['shape']['strokeColor'],
     });
+    updateShapeOverlay(rootElement);
   },
   colors: STROKE_COLORS.map(color => ({ color, name: 'Color' })),
 });

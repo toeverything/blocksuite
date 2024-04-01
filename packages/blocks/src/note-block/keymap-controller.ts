@@ -87,27 +87,33 @@ export class KeymapController implements ReactiveController {
             assertExists(currentTextSelection);
             return next({ currentSelectionPath: currentTextSelection.path });
           })
-          .getNextBlock({
-            filter: block => ensureBlockInContainer(block, this.host),
-          })
-          .inline<'focusBlock'>((ctx, next) => {
+          .getNextBlock()
+          .inline((ctx, next) => {
             const { nextBlock } = ctx;
-            assertExists(nextBlock);
+
+            if (!nextBlock) {
+              return;
+            }
 
             if (
-              matchFlavours(nextBlock.model, [
+              !matchFlavours(nextBlock.model, [
                 'affine:paragraph',
                 'affine:list',
                 'affine:code',
               ])
-            )
-              return;
+            ) {
+              this._std.command
+                .chain()
+                .with({
+                  focusBlock: nextBlock,
+                })
+                .selectBlock()
+                .run();
+            }
 
-            return next({
-              focusBlock: nextBlock,
-            });
-          })
-          .selectBlock(),
+            return next({});
+          }),
+
         // block selection - select the next block
         // 1. is paragraph, list, code block - focus it
         // 2. is not - select it using block selection
@@ -122,13 +128,12 @@ export class KeymapController implements ReactiveController {
             }
             return next({ currentSelectionPath: blockSelection.path });
           })
-          .getNextBlock({
-            filter: block => ensureBlockInContainer(block, this.host),
-          })
+          .getNextBlock()
           .inline<'focusBlock'>((ctx, next) => {
             const { nextBlock } = ctx;
             assertExists(nextBlock);
 
+            event.preventDefault();
             if (
               matchFlavours(nextBlock.model, [
                 'affine:paragraph',
@@ -140,15 +145,16 @@ export class KeymapController implements ReactiveController {
                 .chain()
                 .focusBlockStart({ focusBlock: nextBlock })
                 .run();
-              event.preventDefault();
-              return;
+              return next();
             }
 
-            return next({
-              focusBlock: nextBlock,
-            });
-          })
-          .selectBlock(),
+            this._std.command
+              .chain()
+              .with({ focusBlock: nextBlock })
+              .selectBlock()
+              .run();
+            return next();
+          }),
       ])
       .run();
 
@@ -175,27 +181,32 @@ export class KeymapController implements ReactiveController {
             assertExists(currentTextSelection);
             return next({ currentSelectionPath: currentTextSelection.path });
           })
-          .getPrevBlock({
-            filter: block => ensureBlockInContainer(block, this.host),
-          })
-          .inline<'focusBlock'>((ctx, next) => {
+          .getPrevBlock()
+          .inline((ctx, next) => {
             const { prevBlock } = ctx;
-            assertExists(prevBlock);
+
+            if (!prevBlock) {
+              return;
+            }
 
             if (
-              matchFlavours(prevBlock.model, [
+              !matchFlavours(prevBlock.model, [
                 'affine:paragraph',
                 'affine:list',
                 'affine:code',
               ])
-            )
-              return;
+            ) {
+              this._std.command
+                .chain()
+                .with({
+                  focusBlock: prevBlock,
+                })
+                .selectBlock()
+                .run();
+            }
 
-            return next({
-              focusBlock: prevBlock,
-            });
-          })
-          .selectBlock(),
+            return next({});
+          }),
         // block selection - select the previous block
         // 1. is paragraph, list, code block - focus it
         // 2. is not - select it using block selection
@@ -210,9 +221,7 @@ export class KeymapController implements ReactiveController {
             }
             return next({ currentSelectionPath: blockSelection.path });
           })
-          .getPrevBlock({
-            filter: block => ensureBlockInContainer(block, this.host),
-          })
+          .getPrevBlock()
           .inline<'focusBlock'>((ctx, next) => {
             const { prevBlock } = ctx;
             assertExists(prevBlock);
@@ -224,19 +233,21 @@ export class KeymapController implements ReactiveController {
                 'affine:code',
               ])
             ) {
+              event.preventDefault();
               this._std.command
                 .chain()
                 .focusBlockEnd({ focusBlock: prevBlock })
                 .run();
-              event.preventDefault();
-              return;
+              return next();
             }
 
-            return next({
-              focusBlock: prevBlock,
-            });
-          })
-          .selectBlock(),
+            this._std.command
+              .chain()
+              .with({ focusBlock: prevBlock })
+              .selectBlock()
+              .run();
+            return next();
+          }),
       ])
       .run();
 
@@ -423,7 +434,6 @@ export class KeymapController implements ReactiveController {
     const blocks: BlockSelection[] = [];
     view.walkThrough(nodeView => {
       if (
-        nodeView.type === 'block' &&
         // Remove children blocks, only select the most top level blocks.
         !blocks
           .map(b => b.path)

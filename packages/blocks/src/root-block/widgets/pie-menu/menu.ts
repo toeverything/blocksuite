@@ -9,24 +9,26 @@ import {
   toDegree,
   toRadian,
   Vec,
-} from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless/edgeless-root-block.js';
-import type { IPieMenuSchema, IPieNode } from '../base.js';
-import type { AffinePieMenuWidget } from '../index.js';
-import { PieManager } from '../pie-manager.js';
-import { styles } from '../styles.js';
+} from '../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { PieMenuSchema, PieNodeModel } from './base.js';
+import type { AffinePieMenuWidget } from './index.js';
+import { PieNode } from './node.js';
+import { PieManager } from './pie-manager.js';
+import { pieMenuStyles } from './styles.js';
 import {
   getPosition,
   isColorNode,
   isCommandNode,
+  isNodeWithAction,
   isNodeWithChildren,
   isRootNode,
-} from '../utils.js';
-import { PieNode } from './node.js';
+  isSubmenuNode,
+} from './utils.js';
 
 @customElement('affine-pie-menu')
 export class PieMenu extends WithDisposable(LitElement) {
-  static override styles = styles.pieMenu;
+  static override styles = pieMenuStyles;
 
   slots = {
     pointerAngleUpdated: new Slot<number | null>(),
@@ -40,7 +42,7 @@ export class PieMenu extends WithDisposable(LitElement) {
   widgetElement!: AffinePieMenuWidget;
 
   @property({ attribute: false })
-  schema!: IPieMenuSchema;
+  schema!: PieMenuSchema;
 
   @property({ attribute: false })
   position!: IVec;
@@ -119,7 +121,7 @@ export class PieMenu extends WithDisposable(LitElement) {
 
   popSelectionChainTo(node: PieNode) {
     assertEquals(
-      isNodeWithChildren(node.schema),
+      isNodeWithChildren(node.model),
       true,
       'Required a root node or a submenu node'
     );
@@ -145,26 +147,27 @@ export class PieMenu extends WithDisposable(LitElement) {
     this._hoveredNode = node;
 
     if (!node) return;
-    const { type } = node.schema;
 
-    if (type === 'submenu') {
+    if (isSubmenuNode(node.model)) {
+      const { openOnHover, timeoutOverride } = node.model;
+      const { SUBMENU_OPEN_TIMEOUT } = PieManager.settings;
+
+      if (openOnHover !== undefined && !openOnHover) return;
+
       this._openSubmenuTimeout = setTimeout(() => {
         this.openSubmenu(node);
-      }, PieManager.settings.SUBMENU_OPEN_TIMEOUT);
+      }, timeoutOverride ?? SUBMENU_OPEN_TIMEOUT);
     }
   }
 
   openSubmenu(submenu: PieNode) {
-    assertEquals(submenu.schema.type, 'submenu', 'Need node of type submenu');
+    assertEquals(submenu.model.type, 'submenu', 'Need node of type submenu');
+
+    if (isNodeWithAction(submenu.model)) submenu.select();
 
     this.selectionChain.push(submenu);
     this.setHovered(null);
     this.slots.requestNodeUpdate.emit();
-  }
-
-  // toggles a ToggleNode if the hovered node is a toggle node
-  toggleHoveredNode(_dir: 'up' | 'down') {
-    // TODO: Un Implemented
   }
 
   override connectedCallback(): void {
@@ -207,10 +210,12 @@ export class PieMenu extends WithDisposable(LitElement) {
       `& > affine-pie-node[index='${index}']`
     );
 
-    if (node instanceof PieNode && !isColorNode(node.schema)) {
+    if (node instanceof PieNode && !isColorNode(node.model)) {
       // colors are more than 9 may be another method ?
-      node.select();
-      if (isCommandNode(node.schema)) this.close();
+      if (isSubmenuNode(node.model)) this.openSubmenu(node);
+      else node.select();
+
+      if (isCommandNode(node.model)) this.close();
     }
   };
 
@@ -251,19 +256,19 @@ export class PieMenu extends WithDisposable(LitElement) {
     }
   };
 
-  private _createNodeTree(nodeSchema: IPieNode): PieNode {
+  private _createNodeTree(nodeSchema: PieNodeModel): PieNode {
     const node = new PieNode();
     const { angle, startAngle, endAngle, label } = nodeSchema;
 
     node.id = label;
-    node.schema = nodeSchema;
+    node.model = nodeSchema;
     node.angle = angle ?? 0;
     node.startAngle = startAngle ?? 0;
     node.endAngle = endAngle ?? 0;
     node.menu = this;
 
     if (!isRootNode(nodeSchema)) {
-      node.slot = 'children-container';
+      node.slot = 'children-slot';
       const { PIE_RADIUS } = PieManager.settings;
       const isColorNode = nodeSchema.type === 'color';
       const radius = isColorNode ? PIE_RADIUS * 0.6 : PIE_RADIUS;

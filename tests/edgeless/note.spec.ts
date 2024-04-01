@@ -244,7 +244,6 @@ test('edgeless arrow up/down', async ({ page }) => {
   await pressEnter(page);
   await type(page, 'aaa');
 
-  await activeNoteInEdgeless(page, noteId);
   await waitForInlineEditorStateUpdated(page);
   // 0 for page, 1 for surface, 2 for note, 3 for paragraph
   expect(paragraphId).toBe('3');

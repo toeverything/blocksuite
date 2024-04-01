@@ -47,7 +47,7 @@ import {
   hastQuerySelector,
   type HtmlAST,
 } from './hast.js';
-import { fetchImage, mergeDeltas } from './utils.js';
+import { fetchable, fetchImage, mergeDeltas } from './utils.js';
 
 export type Html = string;
 
@@ -704,7 +704,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               : '';
           if (imageURL) {
             let blobId = '';
-            if (!imageURL.startsWith('http')) {
+            if (!fetchable(imageURL)) {
               assets.getAssets().forEach((_value, key) => {
                 const attachmentName = getAssetName(assets.getAssets(), key);
                 if (imageURL.includes(attachmentName)) {

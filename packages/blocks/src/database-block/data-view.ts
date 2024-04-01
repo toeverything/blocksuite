@@ -6,6 +6,7 @@ import './kanban/renderer.js';
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -28,6 +29,7 @@ import type {
 import { viewRendererManager } from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import type { DataSource } from './common/datasource/base.js';
+import { popSideDetail } from './common/detail/layout.js';
 import type { SingleViewSource, ViewSource } from './common/view-source.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
@@ -60,10 +62,14 @@ export type DataViewNativeConfig = {
   setSelection: (selection: DataViewSelection | undefined) => void;
   dataSource: DataSource;
   viewSource: ViewSource;
+  detailPanelConfig?: {
+    target?: () => ReferenceElement;
+  };
   headerComponent: DataViewProps['header'];
   onDrag?: DataViewProps['onDrag'];
   std: BlockStdScope;
 };
+
 @customElement('affine-data-view-native')
 export class DataViewNative extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -79,6 +85,7 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
   public get expose() {
     return this._view.value;
   }
+
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
@@ -152,11 +159,26 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
     return this.viewMap[id];
   }
 
+  openDetailPanel = (ops: {
+    view: DataViewManager;
+    rowId: string;
+    onClose?: () => void;
+  }) => {
+    popSideDetail({
+      attachTo: this,
+      target: this.config.detailPanelConfig?.target?.() ?? document.body,
+      view: ops.view,
+      rowId: ops.rowId,
+      onClose: ops.onClose,
+    });
+  };
+
   private renderView(viewData?: ViewProps) {
     if (!viewData) {
       return;
     }
     const props: DataViewProps = {
+      dataViewEle: this,
       view: viewData.view,
       header: this.config.headerComponent,
       selectionUpdated: viewData.selectionUpdated,

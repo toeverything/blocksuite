@@ -13,7 +13,7 @@ import {
 } from '../../../_common/icons/index.js';
 import type { RootBlockComponent } from '../../../root-block/types.js';
 import type { DataViewColumnManager } from '../../common/data-view-manager.js';
-import { popSideDetail } from '../../common/detail/layout.js';
+import type { DataViewNative } from '../../data-view.js';
 import type { TableSelectionController } from '../controller/selection.js';
 import {
   checkboxCalcOps,
@@ -24,14 +24,13 @@ import {
 } from './stat-ops.js';
 
 export const openDetail = (
-  rootElement: RootBlockComponent | null,
+  dataViewEle: DataViewNative,
   rowId: string,
   selection: TableSelectionController
 ) => {
   const old = selection.selection;
   selection.selection = undefined;
-  popSideDetail({
-    rootElement,
+  dataViewEle.openDetailPanel({
     view: selection.host.view,
     rowId: rowId,
     onClose: () => {
@@ -41,7 +40,7 @@ export const openDetail = (
 };
 
 export const popRowMenu = (
-  rootElement: RootBlockComponent | null,
+  dataViewEle: DataViewNative,
   ele: ReferenceElement,
   rowId: string,
   selection: TableSelectionController
@@ -52,7 +51,7 @@ export const popRowMenu = (
       name: 'Expand Row',
       icon: ExpandFullIcon,
       select: () => {
-        openDetail(rootElement, rowId, selection);
+        openDetail(dataViewEle, rowId, selection);
       },
     },
     // {
@@ -90,7 +89,7 @@ export const popRowMenu = (
             ${MoveLeftIcon}
           </div>`,
           select: () => {
-            selection.insertRowBefore(rowId);
+            selection.insertRowBefore(selection.selection?.groupKey, rowId);
           },
         },
         {

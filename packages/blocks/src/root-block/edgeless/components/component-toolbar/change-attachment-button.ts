@@ -14,6 +14,7 @@ import {
 } from '../../../../_common/consts.js';
 import { CaptionIcon, PaletteIcon } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
+import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
 import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
 import type {
   AttachmentBlockComponent,
@@ -21,7 +22,6 @@ import type {
 } from '../../../../index.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import { createButtonPopper } from '../utils.js';
 
 @customElement('edgeless-change-attachment-button')
 export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {

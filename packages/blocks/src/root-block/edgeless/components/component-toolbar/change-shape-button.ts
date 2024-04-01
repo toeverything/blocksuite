@@ -19,6 +19,7 @@ import {
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { LineWidth, type ShapeTool } from '../../../../_common/types.js';
+import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
 import {
@@ -50,7 +51,6 @@ import {
 } from '../panel/line-styles-panel.js';
 import type { EdgelessShapePanel } from '../panel/shape-panel.js';
 import type { EdgelessShapeStylePanel } from '../panel/shape-style-panel.js';
-import { createButtonPopper } from '../utils.js';
 
 const ICON_BUTTON_PADDING_TWO = 2;
 

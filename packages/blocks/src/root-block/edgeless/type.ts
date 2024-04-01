@@ -2,8 +2,11 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { BlockModel } from '@blocksuite/store';
 
 import type { EdgelessSelectableProps } from '../../_common/edgeless/mixin/edgeless-selectable.js';
-import type { ElementModel } from '../../surface-block/element-model/base.js';
-import type { GroupElementModel } from '../../surface-block/element-model/group.js';
+import type {
+  BaseProps,
+  ElementModel,
+  GroupLikeModel,
+} from '../../surface-block/element-model/base.js';
 import {
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
@@ -50,8 +53,8 @@ export interface IEdgelessElement {
    * The bound without rotation should be created by `Bound.deserialize(this.xywh)`.
    */
   elementBound: Bound;
-  group: GroupElementModel | null;
-  groups: GroupElementModel[];
+  group: GroupLikeModel<BaseProps> | null;
+  groups: GroupLikeModel<BaseProps>[];
   containedByBounds(bounds: Bound): boolean;
   getNearestPoint(point: IVec): IVec;
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
@@ -167,4 +170,4 @@ export class EdgelessBlockModel<
   }
 }
 
-export type EdgelessModel = EdgelessBlockModel | ElementModel;
+export type EdgelessModel = EdgelessBlockModel | ElementModel | GroupLikeModel;

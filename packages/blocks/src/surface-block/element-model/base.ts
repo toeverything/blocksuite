@@ -3,6 +3,8 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import { type Y } from '@blocksuite/store';
 
 import type {
+  EdgelessBlockModel,
+  EdgelessModel,
   HitTestOptions,
   IEdgelessElement,
 } from '../../root-block/edgeless/type.js';
@@ -27,6 +29,7 @@ import {
 import {
   convertProps,
   getDeriveProperties,
+  getYFieldPropsSet,
   local,
   updateDerivedProp,
   watch,
@@ -68,6 +71,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   protected _onChange: (payload: {
     props: Record<string, unknown>;
     oldValues: Record<string, unknown>;
+    local: boolean;
   }) => void;
   protected _disposable = new DisposableGroup();
 
@@ -117,6 +121,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     onChange: (payload: {
       props: Record<string, unknown>;
       oldValues: Record<string, unknown>;
+      local: boolean;
     }) => void;
   }) {
     const { yMap, model, stashedStore, onChange } = options;
@@ -145,7 +150,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       this._lastXYWH = xywh;
     }
 
-    return this._local.get('deserializedXYWH') as XYWH;
+    return (this._local.get('deserializedXYWH') as XYWH) ?? [0, 0, 0, 0];
   }
 
   get x() {
@@ -164,7 +169,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     return this.deserializedXYWH[3];
   }
 
-  get group() {
+  get group(): GroupLikeModel | null {
     return this.surface.getGroup(this.id);
   }
 
@@ -189,8 +194,13 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
-    const curVal = this[prop as unknown as keyof ElementModel];
     const prototype = Object.getPrototypeOf(this);
+
+    if (!getYFieldPropsSet(prototype).has(prop as string)) {
+      return;
+    }
+
+    const curVal = this[prop as unknown as keyof ElementModel];
 
     this._stashed.set(prop, curVal);
 
@@ -216,6 +226,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
           oldValues: {
             [prop]: oldValue,
           },
+          local: true,
         });
 
         updateDerivedProp(derivedProps, this as unknown as ElementModel);
@@ -228,20 +239,18 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
+    const prototype = Object.getPrototypeOf(this);
     const value = this._stashed.get(prop);
     this._stashed.delete(prop);
     // @ts-ignore
     delete this[prop];
 
-    // @ts-ignore
-    if (this['_yProps']?.has(prop)) {
+    if (getYFieldPropsSet(prototype).has(prop as string)) {
       this.surface.doc.transact(() => {
+        // directly set the value to the ymap to avoid
+        // executing derive and convert decorators again
         this.yMap.set(prop as string, value);
       });
-    }
-    // @ts-ignore
-    else if (this['_localProps']?.has(prop)) {
-      this._local.set(prop as string, value);
     } else {
       console.warn('pop a prop that is not yfield or local:', prop);
     }
@@ -287,5 +296,132 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
 
   serialize() {
     return this.yMap.toJSON();
+  }
+}
+
+export abstract class GroupLikeModel<
+  Props extends BaseProps = BaseProps,
+> extends ElementModel<Props> {
+  /**
+   * The actual field that stores the children of the group.
+   * It could be any type you want and this field should be decorated with `@yfield`.
+   */
+  abstract children: unknown;
+
+  /**
+   * The ids of the children. Its role is to provide a unique way to access the children.
+   * You should update this field through `setChildIds` when the children are added or removed.
+   */
+  get childIds() {
+    return this._childIds;
+  }
+  private _childIds: string[] = [];
+
+  /**
+   * Set the new value of the childIds
+   * @param value the new value of the childIds
+   * @param fromLocal if true, the change is happend in the local
+   */
+  protected setChildIds(value: string[], fromLocal: boolean) {
+    const oldChildIds = this.childIds;
+    this._childIds = value;
+
+    this._onChange({
+      props: {
+        childIds: value,
+      },
+      oldValues: {
+        childIds: oldChildIds,
+      },
+      local: fromLocal,
+    });
+  }
+
+  get childElements() {
+    const elements: EdgelessModel[] = [];
+
+    for (const key of this.childIds) {
+      const element =
+        this.surface.getElementById(key) ||
+        (this.surface.doc.getBlockById(key) as EdgelessBlockModel);
+
+      element && elements.push(element);
+    }
+
+    return elements;
+  }
+
+  @local()
+  xywh: SerializedXYWH = '[0,0,0,0]';
+
+  /**
+   * Check if the element has the descendant
+   */
+  hasDescendant(element: string | EdgelessModel) {
+    const groups =
+      typeof element === 'string'
+        ? this.surface.getGroups(element)
+        : this.surface.getGroups(element.id);
+
+    return groups.some(group => group.id === this.id);
+  }
+
+  /**
+   * Get all decendants of this group
+   * @param withoutGroup if true, will not include group element
+   */
+  decendants(withoutGroup = true) {
+    return this.childElements.reduce((prev, child) => {
+      if (child instanceof GroupLikeModel) {
+        prev = prev.concat(child.decendants());
+
+        !withoutGroup && prev.push(child);
+      } else {
+        prev.push(child);
+      }
+
+      return prev;
+    }, [] as EdgelessModel[]);
+  }
+
+  /**
+   * Remove the descendant from the group
+   */
+  abstract removeDescendant(id: string): void;
+}
+
+export abstract class LocalModel {
+  protected _local: Map<string | symbol, unknown> = new Map();
+
+  abstract rotate: number;
+
+  abstract xywh: SerializedXYWH;
+
+  private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
+
+  get deserializedXYWH() {
+    if (this.xywh !== this._lastXYWH) {
+      const xywh = this.xywh;
+      this._local.set('deserializedXYWH', deserializeXYWH(xywh));
+      this._lastXYWH = xywh;
+    }
+
+    return this._local.get('deserializedXYWH') as XYWH;
+  }
+
+  get x() {
+    return this.deserializedXYWH[0];
+  }
+
+  get y() {
+    return this.deserializedXYWH[1];
+  }
+
+  get w() {
+    return this.deserializedXYWH[2];
+  }
+
+  get h() {
+    return this.deserializedXYWH[3];
   }
 }

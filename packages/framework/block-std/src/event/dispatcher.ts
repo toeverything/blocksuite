@@ -1,6 +1,7 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
+import type { BlockElement } from '../view/index.js';
 import {
   type UIEventHandler,
   UIEventState,
@@ -228,7 +229,11 @@ export class UIEventDispatcher {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
-    const path = this.std.view.getNodeView(target)?.path;
+    // TODO(mirone/#6534): find a better way to get block element from a node
+    const el = target instanceof Element ? target : target.parentElement;
+    const block = el?.closest<BlockElement>('[data-block-id]');
+
+    const path = block?.path;
     if (!path) {
       return this._buildEventScopeBySelection(name);
     }

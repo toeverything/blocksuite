@@ -10,7 +10,7 @@ import {
 import { PointLocation } from '../utils/point-location.js';
 import { type IVec2, Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
-import { type BaseProps, ElementModel } from './base.js';
+import { type BaseProps, ElementModel, LocalModel } from './base.js';
 import type { StrokeStyle } from './common.js';
 import { derive, local, yfield } from './decorators.js';
 
@@ -172,4 +172,59 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     result.xywh = this.xywh;
     return result;
   }
+}
+
+export class LocalConnectorElementModel extends LocalModel {
+  get type() {
+    return 'connector';
+  }
+
+  private _path: PointLocation[] = [];
+
+  seed: number = Math.random();
+
+  id: string = '';
+
+  updatingPath = false;
+
+  get path(): PointLocation[] {
+    return this._path;
+  }
+
+  set path(value: PointLocation[]) {
+    const { x, y } = this;
+
+    this.absolutePath = value.map(p => p.clone().setVec([p[0] + x, p[1] + y]));
+    this._path = this.path;
+  }
+
+  absolutePath: PointLocation[] = [];
+
+  xywh: SerializedXYWH = '[0,0,0,0]';
+
+  rotate: number = 0;
+
+  mode: ConnectorMode = ConnectorMode.Orthogonal;
+
+  strokeWidth: number = 4;
+
+  stroke: string = '#000000';
+
+  strokeStyle: StrokeStyle = 'solid';
+
+  roughness: number = DEFAULT_ROUGHNESS;
+
+  rough?: boolean;
+
+  source: Connection = {
+    position: [0, 0],
+  };
+
+  target: Connection = {
+    position: [0, 0],
+  };
+
+  frontEndpointStyle!: PointStyle;
+
+  rearEndpointStyle!: PointStyle;
 }

@@ -39,10 +39,6 @@ export enum Direction {
 export const PANEL_WIDTH = 136;
 export const PANEL_HEIGHT = 108;
 
-export const PANEL_OFFSET = {
-  x: -PANEL_WIDTH / 2,
-  y: -PANEL_HEIGHT * (3 / 4),
-};
 export const MAIN_GAP = 100;
 export const SECOND_GAP = 20;
 export const DEFAULT_NOTE_OVERLAY_HEIGHT = 110;
@@ -58,15 +54,6 @@ export type AUTO_COMPLETE_TARGET_TYPE =
 
 export const DEFAULT_NOTE_BACKGROUND_COLOR =
   '--affine-background-secondary-color';
-export const NOTE_BACKGROUND_COLOR_MAP = new Map(
-  Object.entries({
-    '--affine-palette-shape-yellow': '--affine-tag-yellow',
-    '--affine-palette-shape-red': '--affine-tag-red',
-    '--affine-palette-shape-green': '--affine-tag-green',
-    '--affine-palette-shape-blue': '--affine-tag-blue',
-    '--affine-palette-shape-purple': '--affine-tag-purple',
-  })
-);
 
 class AutoCompleteTargetOverlay extends Overlay {
   xywh: XYWH;
@@ -84,8 +71,9 @@ export class AutoCompleteTextOverlay extends AutoCompleteTargetOverlay {
   }
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
-    ctx.globalAlpha = 0.4;
     const [x, y, w, h] = this.xywh;
+
+    ctx.globalAlpha = 0.4;
     ctx.strokeStyle = '#1e96eb';
     ctx.lineWidth = 1;
     ctx.strokeRect(x, y, w, h);
@@ -107,8 +95,9 @@ export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
   }
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
-    ctx.globalAlpha = 0.4;
     const [x, y, w, h] = this.xywh;
+
+    ctx.globalAlpha = 0.4;
     ctx.fillStyle = this._background;
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.10)';
     ctx.lineWidth = 2;
@@ -135,12 +124,13 @@ export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
   }
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
-    ctx.globalAlpha = 0.4;
     const [x, y, w, h] = this.xywh;
     // frame title background
     const titleWidth = 72;
     const titleHeight = 30;
     const titleY = y - titleHeight - 10;
+
+    ctx.globalAlpha = 0.4;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.beginPath();
     ctx.roundRect(x, titleY, titleWidth, titleHeight, 4);
@@ -326,13 +316,17 @@ export function createEdgelessElement(
 
 export function createShapeElement(
   edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel,
+  current: ShapeElementModel | NoteBlockModel,
   targetType: TARGET_SHAPE_TYPE
 ) {
   const service = edgeless.service!;
 
-  const id = service.addElement(current.type, {
-    ...current.serialize(),
+  const props = isShape(current)
+    ? current.serialize()
+    : edgeless.service.editSession.getLastProps('shape');
+
+  const id = service.addElement('shape', {
+    ...props,
     shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
     radius: targetType === 'roundedRect' ? 0.1 : 0,
     text: new DocCollection.Y.Text(),
@@ -346,7 +340,7 @@ export function createShapeElement(
 
 export function createTextElement(
   edgeless: EdgelessRootBlockComponent,
-  current: ShapeElementModel
+  current: ShapeElementModel | NoteBlockModel
 ) {
   const id = edgeless.service.addElement(CanvasElementType.TEXT, {
     text: new DocCollection.Y.Text(),

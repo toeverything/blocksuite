@@ -1,17 +1,25 @@
 import type { EdgelessTool } from '../../../_common/types.js';
 import { type IVec } from '../../../surface-block/index.js';
+import { ShapeToolController } from '../../edgeless/controllers/tools/shape-tool.js';
 import { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type {
   ActionFunction,
-  IPieColorNode,
-  IPieCommandNode,
-  IPieNode,
   IPieNodeWithAction,
-  IPieNonRootNode,
-  IPieRootNode,
-  IPieSubmenuNode,
+  PieColorNodeModel,
+  PieCommandNodeModel,
   PieMenuContext,
+  PieNodeModel,
+  PieNonRootNode,
+  PieRootNodeModel,
+  PieSubmenuNodeModel,
 } from './base.js';
+
+export function updateShapeOverlay(rootElement: EdgelessRootBlockComponent) {
+  const controller = rootElement.tools.currentController;
+  if (controller instanceof ShapeToolController) {
+    controller.createOverlay();
+  }
+}
 
 export function getActiveShapeColor(type: 'fill' | 'stroke') {
   return ({ rootElement }: PieMenuContext) => {
@@ -45,32 +53,34 @@ export function getPosition(angleRad: number, v: IVec): IVec {
 }
 
 export function isNodeWithChildren(
-  node: IPieNode
-): node is IPieNode & { children: IPieNonRootNode[] } {
+  node: PieNodeModel
+): node is PieNodeModel & { children: PieNonRootNode[] } {
   return 'children' in node;
 }
 
-export function isRootNode(node: IPieNode): node is IPieRootNode {
-  return node.type === 'root';
+export function isRootNode(model: PieNodeModel): model is PieRootNodeModel {
+  return model.type === 'root';
 }
 
-export function isSubmenuNode(node: IPieNode): node is IPieSubmenuNode {
-  return node.type === 'submenu';
+export function isSubmenuNode(
+  model: PieNodeModel
+): model is PieSubmenuNodeModel {
+  return model.type === 'submenu';
 }
 
-export function isCommandNode(node: IPieNode): node is IPieCommandNode {
-  return node.type === 'command';
+export function isCommandNode(
+  model: PieNodeModel
+): model is PieCommandNodeModel {
+  return model.type === 'command';
 }
 
-// export function isToggleNode(node: IPieNode): node is IPieToggleNode {
-//   return node.type === 'toggle';
-// }
-
-export function isColorNode(node: IPieNode): node is IPieColorNode {
-  return node.type === 'color';
+export function isColorNode(model: PieNodeModel): model is PieColorNodeModel {
+  return model.type === 'color';
 }
 
-export function isNodeWithAction(node: IPieNode): node is IPieNodeWithAction {
+export function isNodeWithAction(
+  node: PieNodeModel
+): node is IPieNodeWithAction {
   return 'action' in node && typeof node.action === 'function';
 }
 

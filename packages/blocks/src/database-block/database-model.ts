@@ -239,6 +239,14 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     });
   }
 
+  deleteRows(rowIds: string[]) {
+    this.doc.transact(() => {
+      for (const rowId of rowIds) {
+        delete this.cells[rowId];
+      }
+    });
+  }
+
   copyCellsByColumn(fromId: Column['id'], toId: Column['id']) {
     this.doc.transact(() => {
       Object.keys(this.cells).forEach(rowId => {

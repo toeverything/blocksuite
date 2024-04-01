@@ -1,7 +1,7 @@
 import type { IShape } from './shape/types.js';
 
-export { SHAPE_TEXT_PADDING } from './shape/consts.js';
 export { getFontString, getLineHeight, getLineWidth } from './text/utils.js';
+
 import type {
   CanvasElement,
   ShapeElementModel,

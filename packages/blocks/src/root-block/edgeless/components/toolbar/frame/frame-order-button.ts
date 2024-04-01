@@ -6,9 +6,9 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { FrameOrderAdjustmentIcon } from '../../../../../_common/icons/index.js';
+import { createButtonPopper } from '../../../../../_common/utils/button-popper.js';
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import { createButtonPopper } from '../../utils.js';
 import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
 
 @customElement('edgeless-frame-order-button')

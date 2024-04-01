@@ -25,7 +25,10 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../../_common/icons/index.js';
-import { type ReorderingType } from '../../../../_common/utils/index.js';
+import {
+  createButtonPopper,
+  type ReorderingType,
+} from '../../../../_common/utils/index.js';
 import type {
   AttachmentBlockComponent,
   BookmarkBlockComponent,
@@ -47,7 +50,6 @@ import {
   isFrameBlock,
   isImageBlock,
 } from '../../utils/query.js';
-import { createButtonPopper } from '../utils.js';
 
 type EmbedLinkBlockComponent =
   | EmbedGithubBlockComponent

@@ -6,6 +6,7 @@ import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
 import {
+  AIStarIcon,
   ArrowDownBigIcon,
   ArrowUpBigIcon,
   AttachmentIcon,
@@ -27,6 +28,7 @@ import {
 } from '../../../_common/icons/index.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import {
+  buildPath,
   createDefaultDoc,
   getImageFilesFromLocal,
   getInlineEditorByModel,
@@ -46,6 +48,10 @@ import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import type { SurfaceBlockModel } from '../../../surface-block/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
+import {
+  AFFINE_AI_PANEL_WIDGET,
+  type AffineAIPanelWidget,
+} from '../ai-panel/ai-panel.js';
 import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import {
   formatDate,
@@ -57,6 +63,35 @@ import {
 } from './utils.js';
 
 export const menuGroups: SlashMenuOptions['menus'] = [
+  {
+    name: 'AI',
+    items: [
+      {
+        name: 'Ask AI',
+        icon: AIStarIcon,
+        showWhen: (_, rootElement) => {
+          const affineAIPanelWidget = rootElement.host.view.getWidget(
+            AFFINE_AI_PANEL_WIDGET,
+            rootElement.model.id
+          );
+          return !!affineAIPanelWidget;
+        },
+        action: ({ rootElement, model }) => {
+          const view = rootElement.host.view;
+          const affineAIPanelWidget = view.getWidget(
+            AFFINE_AI_PANEL_WIDGET,
+            rootElement.model.id
+          );
+          assertExists(affineAIPanelWidget);
+          requestAnimationFrame(() => {
+            const block = view.viewFromPath('block', buildPath(model));
+            assertExists(block);
+            (affineAIPanelWidget as AffineAIPanelWidget).toggle(block);
+          });
+        },
+      },
+    ],
+  },
   {
     name: 'Text',
     items: textConversionConfigs
@@ -210,7 +245,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
           // Wait for range to be updated
           setTimeout(() => {
-            linkedDocWidget.showLinkedDoc(model, triggerKey);
+            const inlineEditor = getInlineEditorByModel(
+              rootElement.host,
+              model
+            );
+            assertExists(inlineEditor);
+            linkedDocWidget.showLinkedDoc(inlineEditor, triggerKey);
           });
         },
       },
@@ -238,6 +278,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
 
           const imageFiles = await getImageFilesFromLocal();
+          if (!imageFiles.length) return;
 
           const imageService = rootElement.host.spec.getService('affine:image');
           const maxFileSize = imageService.maxFileSize;

@@ -75,8 +75,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    assertExists(databaseBlock);
-    return databaseBlock.topContenteditableElement;
+    return databaseBlock?.topContenteditableElement;
   }
 
   override firstUpdated() {

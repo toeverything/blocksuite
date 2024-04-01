@@ -11,6 +11,7 @@ import {
   fromJSON,
   Job,
 } from '@blocksuite/store';
+import DOMPurify from 'dompurify';
 
 import {
   DEFAULT_IMAGE_PROXY_ENDPOINT,
@@ -47,12 +48,12 @@ import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
+import { GroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import {
   type CanvasElement,
   type Connection,
   getBoundsWithRotation,
-  GroupElementModel,
 } from '../../../surface-block/index.js';
 import {
   ConnectorElementModel,
@@ -86,7 +87,8 @@ import {
 const BLOCKSUITE_SURFACE = 'blocksuite/surface';
 const IMAGE_PNG = 'image/png';
 
-const { GROUP } = CanvasElementType;
+const { GROUP, MINDMAP } = CanvasElementType;
+const IMAGE_PADDING = 10; // for rotated shapes some padding is needed
 
 export class EdgelessClipboardController extends PageClipboard {
   constructor(public override host: EdgelessRootBlockComponent) {
@@ -295,6 +297,14 @@ export class EdgelessClipboardController extends PageClipboard {
       return;
     }
 
+    const svg = tryGetSvgFromClipboard(data);
+    if (svg) {
+      const { lastMousePos } = this.toolManager;
+      const point = new Point(lastMousePos.x, lastMousePos.y);
+      await this.host.addImages([svg], point);
+      return;
+    }
+
     const json = this.std.clipboard.readFromClipboard(data);
     const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
     this._pasteShapesAndBlocks(elementsRawData);
@@ -341,6 +351,25 @@ export class EdgelessClipboardController extends PageClipboard {
       }
       clipboardData.children = yMap;
     }
+
+    if (clipboardData.type === MINDMAP) {
+      const yMap = new DocCollection.Y.Map();
+      const children = clipboardData.children ?? {};
+      for (const [key, value] of Object.entries(children)) {
+        const newKey = idMap.get(key);
+        assertExists(newKey);
+
+        if (value.parent) {
+          const newParent = idMap.get(value.parent);
+          assertExists(newParent);
+          value.parent = newParent;
+        }
+
+        yMap.set(newKey, value);
+      }
+      clipboardData.children = yMap;
+    }
+
     const id = this.host.service.addElement(
       clipboardData.type as CanvasElementType,
       clipboardData
@@ -360,6 +389,8 @@ export class EdgelessClipboardController extends PageClipboard {
           return 'connectors';
         case 'group':
           return 'groups';
+        case 'mindmap':
+          return 'mindmaps';
         default:
           return 'others';
       }
@@ -396,6 +427,14 @@ export class EdgelessClipboardController extends PageClipboard {
         const oldId = group.id as string;
         assertExists(oldId);
         const element = this._createCanvasElement(group, idMap);
+        idMap.set(oldId, element.id);
+        return element;
+      }) ?? []),
+
+      ...(result.mindmaps?.map(mindmap => {
+        const oldId = mindmap.id as string;
+        assertExists(oldId);
+        const element = this._createCanvasElement(mindmap, idMap);
         idMap.set(oldId, element.id);
         return element;
       }) ?? []),
@@ -936,9 +975,9 @@ export class EdgelessClipboardController extends PageClipboard {
     originalIndexes: Map<string, string>
   ) {
     function compare(a: EdgelessModel, b: EdgelessModel) {
-      if (a instanceof GroupElementModel && a.hasDescendant(b)) {
+      if (a instanceof GroupLikeModel && a.hasDescendant(b)) {
         return -1;
-      } else if (b instanceof GroupElementModel && b.hasDescendant(a)) {
+      } else if (b instanceof GroupLikeModel && b.hasDescendant(a)) {
         return 1;
       } else {
         const aGroups = a.groups;
@@ -1082,9 +1121,7 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless: EdgelessRootBlockComponent,
     bound: IBound,
     nodes?: TopLevelBlockModel[],
-    canvasElements: CanvasElement[] = [],
-
-    withBackground = false
+    canvasElements: CanvasElement[] = []
   ): Promise<HTMLCanvasElement | undefined> {
     const host = edgeless.host;
     const rootModel = this.doc.root;
@@ -1098,7 +1135,6 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const rootElement = getRootByEditorHost(host);
     assertExists(rootElement);
-    const viewportElement = rootElement.viewportElement;
 
     const container = rootElement.querySelector(
       '.affine-block-children-container'
@@ -1107,16 +1143,11 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
-    canvas.width = (bound.w + 100) * dpr;
-    canvas.height = (bound.h + 100) * dpr;
+    canvas.width = (bound.w + IMAGE_PADDING) * dpr;
+    canvas.height = (bound.h + IMAGE_PADDING) * dpr;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.scale(dpr, dpr);
-
-    if (withBackground) {
-      ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
 
     const replaceImgSrcWithSvg = this._exportManager.replaceImgSrcWithSvg;
     const replaceRichTextWithSvgElementFunc =
@@ -1144,6 +1175,7 @@ export class EdgelessClipboardController extends PageClipboard {
           return false;
         }
       },
+
       onclone: async function (documentClone: Document, element: HTMLElement) {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
@@ -1163,7 +1195,7 @@ export class EdgelessClipboardController extends PageClipboard {
         await replaceImgSrcWithSvg(element);
         await replaceRichTextWithSvgElementFunc(element);
       },
-      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
+      backgroundColor: 'transparent',
       useCORS: _imageProxyEndpoint ? false : true,
       proxy: _imageProxyEndpoint,
     };
@@ -1192,8 +1224,8 @@ export class EdgelessClipboardController extends PageClipboard {
       );
       ctx.drawImage(
         canvasData,
-        blockBound.x - bound.x + 50,
-        blockBound.y - bound.y + 50,
+        blockBound.x - bound.x + IMAGE_PADDING / 2,
+        blockBound.y - bound.y + IMAGE_PADDING / 2,
         blockBound.w,
         isInFrame
           ? (blockBound.w / canvasData.width) * canvasData.height
@@ -1235,7 +1267,13 @@ export class EdgelessClipboardController extends PageClipboard {
       bound,
       canvasElements
     );
-    ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+    ctx.drawImage(
+      surfaceCanvas,
+      IMAGE_PADDING / 2,
+      IMAGE_PADDING / 2,
+      bound.w,
+      bound.h
+    );
 
     return canvas;
   }
@@ -1266,11 +1304,10 @@ export function getCopyElements(
       surface.edgeless.service.frame
         .getElementsInFrame(element)
         .forEach(ele => set.add(ele));
-    } else if (element instanceof GroupElementModel) {
-      getCopyElements(
-        surface,
-        (element as GroupElementModel).childElements
-      ).forEach(ele => set.add(ele));
+    } else if (element instanceof GroupLikeModel) {
+      getCopyElements(surface, element.childElements).forEach(ele =>
+        set.add(ele)
+      );
       set.add(element);
     } else {
       set.add(element);
@@ -1361,4 +1398,29 @@ function isPureFileInClipboard(clipboardData: DataTransfer) {
       (types.includes('text/plain') || types.includes('text/html')) &&
       types.includes('Files'))
   );
+}
+
+function tryGetSvgFromClipboard(clipboardData: DataTransfer) {
+  const types = clipboardData.types;
+
+  if (types.length === 1 && types[0] !== 'text/plain') {
+    return null;
+  }
+
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(
+    clipboardData.getData('text/plain'),
+    'image/svg+xml'
+  );
+  const svg = svgDoc.documentElement;
+
+  if (svg.tagName !== 'svg' || !svg.hasAttribute('xmlns')) {
+    return null;
+  }
+  const svgContent = DOMPurify.sanitize(svgDoc.documentElement, {
+    USE_PROFILES: { svg: true },
+  });
+  const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+  const file = new File([blob], 'pasted-image.svg', { type: 'image/svg+xml' });
+  return file;
 }

@@ -1,5 +1,9 @@
-import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type {
+  BlockElement,
+  EditorHost,
+  TextRangePoint,
+  TextSelection,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockModel,
@@ -237,13 +241,13 @@ class PasteTr {
 
   focusPasted = () => {
     const host = this.std.host as EditorHost;
-    const parentBlockElement = this.fromPointState.block.parentBlockElement;
+
     const lastModel = this.std.doc.getBlockById(this.lastSnapshot.id);
     assertExists(lastModel);
 
     host.updateComplete
       .then(() => {
-        const target = parentBlockElement.querySelector<BlockElement>(
+        const target = this.std.host.querySelector<BlockElement>(
           `[${host.blockIdAttr}="${lastModel.id}"]`
         );
         assertExists(target);
