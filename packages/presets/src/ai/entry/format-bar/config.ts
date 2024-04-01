@@ -18,10 +18,10 @@ import {
   ToneIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { CopilotClient } from '@blocksuite/presets';
 
-import { textRenderer } from '../../message/text';
-import { getGenerateAnswer } from '../../utils';
+import { CopilotClient } from '../../copilot-client.js';
+import { textRenderer } from '../../message/text.js';
+import { getGenerateAnswer } from '../../utils.js';
 
 export const translateSubItem: AISubItemConfig[] = [
   {
