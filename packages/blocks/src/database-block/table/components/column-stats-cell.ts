@@ -62,12 +62,15 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', this.openMenu);
-    this.disposables.add(
-      this.column.dataViewManager.slots.update.on(() => {
-        this.calculate();
-        // change this
-      })
-    );
+    const dataViewManager = this.column.dataViewManager;
+
+    for (const rId of dataViewManager.rows) {
+      this._disposables.add(
+        dataViewManager.onCellUpdate(rId, this.column.id, () => {
+          this.calculate();
+        })
+      );
+    }
   }
 
   protected override render() {
