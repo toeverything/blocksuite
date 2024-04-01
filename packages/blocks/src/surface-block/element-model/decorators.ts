@@ -28,12 +28,22 @@ export function setCreateState(
   state.creating = creating;
 }
 
+const yPropsSetSymbol = Symbol('yProps');
+
+export function getYFieldPropsSet(prototype: unknown): Set<string | symbol> {
+  // @ts-ignore
+  if (!Object.hasOwn(prototype, yPropsSetSymbol)) {
+    // @ts-ignore
+    prototype[yPropsSetSymbol] = new Set();
+  }
+
+  // @ts-ignore
+  return prototype[yPropsSetSymbol] as Set<string | symbol>;
+}
+
 export function yfield(fallback?: unknown): PropertyDecorator {
   return function yDecorator(prototype: unknown, prop: string | symbol) {
-    // @ts-ignore
-    const yProps = prototype['_yProps'] ?? new Set();
-    // @ts-ignore
-    prototype['_yProps'] = yProps;
+    const yProps = getYFieldPropsSet(prototype);
 
     yProps.add(prop);
 

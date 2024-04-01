@@ -1,7 +1,7 @@
 import type {
   ConnectorElementModel,
+  LocalConnectorElementModel,
   PointStyle,
-  StatelessConnectorElementModel,
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
 import type { PointLocation } from '../../../index.js';
@@ -16,7 +16,7 @@ import {
 } from './utils.js';
 
 export function connector(
-  model: ConnectorElementModel | StatelessConnectorElementModel,
+  model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer
@@ -51,7 +51,7 @@ export function connector(
 }
 
 function renderPoints(
-  model: ConnectorElementModel | StatelessConnectorElementModel,
+  model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
   points: PointLocation[],
@@ -118,7 +118,7 @@ function renderPoints(
 }
 
 function renderEndpoint(
-  model: ConnectorElementModel | StatelessConnectorElementModel,
+  model: ConnectorElementModel | LocalConnectorElementModel,
   location: PointLocation[],
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
