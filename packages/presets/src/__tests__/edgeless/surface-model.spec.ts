@@ -392,6 +392,24 @@ describe('stash/pop', () => {
     expect(elementModel.w).toBe(200 + elementModel.lineWidth);
     expect(elementModel.h).toBe(180 + elementModel.lineWidth);
   });
+
+  test('non-yfield property should not allow stash/pop, and should failed silently ', () => {
+    const id = model.addElement({
+      type: 'group',
+    });
+    const elementModel = model.getElementById(id)! as GroupElementModel;
+
+    elementModel.stash('xywh');
+    elementModel.xywh = '[10,10,200,200]';
+
+    expect(elementModel['_stashed'].has('xywh')).toBe(false);
+    expect(elementModel.xywh).toBe('[10,10,200,200]');
+
+    elementModel.pop('xywh');
+
+    expect(elementModel['_stashed'].has('xywh')).toBe(false);
+    expect(elementModel.yMap.has('xywh')).toBe(false);
+  });
 });
 
 describe('derive decorator', () => {
@@ -463,5 +481,19 @@ describe('convert decorator', () => {
       [200 - xOffset, 200 - yOffset],
       [300 - xOffset, 300 - yOffset],
     ]);
+  });
+});
+
+describe('basic property', () => {
+  test('empty group should have all zero xywh', () => {
+    const id = model.addElement({
+      type: 'group',
+    });
+    const group = model.getElementById(id)! as GroupElementModel;
+
+    expect(group.x).toBe(0);
+    expect(group.y).toBe(0);
+    expect(group.w).toBe(0);
+    expect(group.h).toBe(0);
   });
 });

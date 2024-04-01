@@ -3,17 +3,17 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type {
-  AIActionPanelListGroup,
-  AIActionPanelListGroupItem,
-} from '../list.js';
+  AIItemConfig,
+  AIItemGroupConfig,
+} from '../../../../../_common/components/index.js';
 
-export interface AIActionPanelErrorConfig {
+export interface AIPanelErrorConfig {
   upgrade: () => void;
-  responses: AIActionPanelListGroupItem[];
+  responses: AIItemConfig[];
 }
 
-@customElement('ai-action-panel-error')
-export class AIActionPanelError extends WithDisposable(LitElement) {
+@customElement('ai-panel-error')
+export class AIPanelError extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 100%;
@@ -93,10 +93,10 @@ export class AIActionPanelError extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  config!: AIActionPanelErrorConfig;
+  config!: AIPanelErrorConfig;
 
   override render() {
-    const groups: AIActionPanelListGroup[] = [{ items: this.config.responses }];
+    const groups: AIItemGroupConfig[] = [{ items: this.config.responses }];
 
     return html`
       <div class="error">
@@ -112,7 +112,7 @@ export class AIActionPanelError extends WithDisposable(LitElement) {
         </div>
       </div>
       ${this.config.responses.length > 0
-        ? html`<ai-action-panel-list .groups=${groups}></ai-action-panel-list>`
+        ? html`<ai-item-list .groups=${groups}></ai-item-list>`
         : nothing}
     `;
   }
@@ -120,6 +120,6 @@ export class AIActionPanelError extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-action-panel-error': AIActionPanelError;
+    'ai-panel-error': AIPanelError;
   }
 }

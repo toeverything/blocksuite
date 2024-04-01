@@ -1,3 +1,4 @@
+export { CopilotClient } from './copilot-client.js';
 export * from './editors/index.js';
 export * from './fragments/index.js';
 export * from './helpers/index.js';

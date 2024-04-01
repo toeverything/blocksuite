@@ -1,21 +1,29 @@
 import { expect, type Page } from '@playwright/test';
 
 import { clickView, moveView } from '../utils/actions/click.js';
+import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
   addNote,
+  changeEdgelessNoteBackground,
+  changeShapeFillColor,
+  changeShapeStrokeColor,
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
   getEdgelessSelectedRectModel,
   Shape,
   toViewCoord,
+  triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
   waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from '../utils/actions/misc.js';
 import {
+  assertConnectorStrokeColor,
   assertEdgelessCanvasText,
+  assertEdgelessNoteBackground,
+  assertExists,
   assertRichTexts,
   assertSelectedBound,
 } from '../utils/asserts.js';
@@ -114,6 +122,12 @@ test.describe('auto-complete', () => {
       await edgelessCommonSetup(page);
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await assertSelectedBound(page, [0, 0, 100, 100]);
+      await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
+      const lineColor = '--affine-palette-line-red';
+      await changeShapeStrokeColor(page, lineColor);
+      await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+      const color = '--affine-palette-shape-green';
+      await changeShapeFillColor(page, color);
       await dragBetweenViewCoords(page, [120, 50], [200, 0]);
 
       const noteButton = getAutoCompletePanelButton(page, 'note');
@@ -121,12 +135,77 @@ test.describe('auto-complete', () => {
       await noteButton.click();
       await waitNextFrame(page);
 
-      expect(await page.locator('affine-note').count()).toBe(1);
+      const portalNote = page.locator('.edgeless-block-portal-note');
+
+      expect(await portalNote.locator('affine-note').count()).toBe(1);
       const [x, y] = await toViewCoord(page, [240, 0]);
       await page.mouse.click(x, y);
       await page.keyboard.type('hello');
       await waitNextFrame(page);
       await assertRichTexts(page, ['hello']);
+
+      const noteId = await page.evaluate(() => {
+        const note = document.body.querySelector('affine-note');
+        return note?.getAttribute('data-block-id');
+      });
+      assertExists(noteId);
+      await assertEdgelessNoteBackground(page, noteId, '--affine-tag-green');
+
+      const rect = await portalNote.boundingBox();
+      assertExists(rect);
+
+      // blur note block
+      await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height * 3);
+      await waitNextFrame(page);
+
+      // select connector
+      await dragBetweenViewCoords(page, [140, 50], [160, 0]);
+      await waitNextFrame(page);
+      await assertConnectorStrokeColor(page, lineColor);
+
+      // select note block
+      await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
+      await waitNextFrame(page);
+
+      await triggerComponentToolbarAction(page, 'changeNoteColor');
+      const noteColor = '--affine-tag-red';
+      await changeEdgelessNoteBackground(page, noteColor);
+
+      // move to arrow icon
+      await page.mouse.move(
+        rect.x + rect.width + 20,
+        rect.y + rect.height / 2,
+        { steps: 5 }
+      );
+      await waitNextFrame(page);
+
+      // drag arrow
+      await dragBetweenCoords(
+        page,
+        {
+          x: rect.x + rect.width + 20,
+          y: rect.y + rect.height / 2,
+        },
+        {
+          x: rect.x + rect.width + 20 + 50,
+          y: rect.y + rect.height / 2 + 50,
+        }
+      );
+
+      // `Add a same object` button has the same type.
+      const noteButton2 = getAutoCompletePanelButton(page, 'note').nth(0);
+      await expect(noteButton2).toBeVisible();
+      await noteButton2.click();
+      await waitNextFrame(page);
+
+      const noteId2 = await page.evaluate(() => {
+        const note = document.body.querySelectorAll('affine-note')[1];
+        return note?.getAttribute('data-block-id');
+      });
+      assertExists(noteId2);
+      await assertEdgelessNoteBackground(page, noteId, noteColor);
+
+      expect(await portalNote.locator('affine-note').count()).toBe(2);
     });
 
     test('drag on right auto-complete button to add frame', async ({

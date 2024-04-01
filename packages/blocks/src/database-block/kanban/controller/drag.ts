@@ -6,6 +6,7 @@ import type { ReactiveController } from 'lit';
 import { Point, Rect } from '../../../_common/utils/index.js';
 import type { InsertToPosition } from '../../types.js';
 import { startDrag } from '../../utils/drag.js';
+import { autoScrollOnBoundary } from '../../utils/frame-loop.js';
 import { KanbanCard } from '../card.js';
 import { KanbanGroup } from '../group.js';
 import type { DataViewKanban } from '../kanban-view.js';
@@ -13,6 +14,13 @@ import type { DataViewKanban } from '../kanban-view.js';
 export class KanbanDragController implements ReactiveController {
   constructor(private host: DataViewKanban) {
     this.host.addController(this);
+  }
+  get scrollContainer() {
+    const scrollContainer = this.host.querySelector(
+      '.affine-data-view-kanban-groups'
+    ) as HTMLElement;
+    assertExists(scrollContainer);
+    return scrollContainer;
   }
 
   dropPreview = createDropPreview();
@@ -87,6 +95,7 @@ export class KanbanDragController implements ReactiveController {
       evt.y - offsetTop
     );
     const currentGroup = ele.closest('affine-data-view-kanban-group');
+    const cancelScroll = autoScrollOnBoundary(this.scrollContainer);
     startDrag<
       | { type: 'out'; callback: () => void }
       | {
@@ -127,6 +136,7 @@ export class KanbanDragController implements ReactiveController {
       onClear: () => {
         preview.remove();
         this.dropPreview.remove();
+        cancelScroll();
       },
       onDrop: result => {
         if (!result) {
