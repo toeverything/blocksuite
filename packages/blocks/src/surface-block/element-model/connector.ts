@@ -1,3 +1,5 @@
+import type { Y } from '@blocksuite/store';
+
 import type { HitTestOptions } from '../../root-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import { Bound } from '../utils/bound.js';
@@ -11,7 +13,8 @@ import { PointLocation } from '../utils/point-location.js';
 import { type IVec2, Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import { type BaseProps, ElementModel, LocalModel } from './base.js';
-import type { StrokeStyle } from './common.js';
+import type { StrokeStyle, TextAlign } from './common.js';
+import { FontFamily, FontWeight } from './common.js';
 import { derive, local, yfield } from './decorators.js';
 
 export enum ConnectorEndpoint {
@@ -115,6 +118,30 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
 
   @yfield('Arrow')
   rearEndpointStyle!: PointStyle;
+
+  @yfield()
+  displayText?: boolean;
+
+  @yfield()
+  textPosition?: [number, number];
+
+  @yfield()
+  text?: Y.Text;
+
+  @yfield('#000000')
+  color!: string;
+
+  @yfield(FontFamily.Inter)
+  fontFamily!: string;
+
+  @yfield(FontWeight.Regular)
+  fontWeight!: FontWeight;
+
+  @yfield(16)
+  fontSize!: number;
+
+  @yfield('center')
+  textAlign!: TextAlign;
 
   moveTo(bound: Bound) {
     const oldBound = Bound.deserialize(this.xywh);

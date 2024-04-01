@@ -9,6 +9,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
+  ConnectorAddTextIcon,
   ConnectorEndpointNoneIcon,
   CurveLineIcon,
   DashLineIcon,
@@ -273,6 +274,8 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       }
     }
   }
+
+  private _setConnectorLabel() {}
 
   override render() {
     const selectedColor = getMostCommonColor(this.elements);
@@ -581,6 +584,17 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
         >
         </edgeless-menu-button>
       </div>
+
+      <menu-divider .vertical=${true} .dividerMargin=${12}></menu-divider>
+
+      <edgeless-tool-icon-button
+        .tooltip=${'Add Text'}
+        .iconContainerPadding=${2}
+        .activeMode=${'background'}
+        @click=${() => this._setConnectorLabel()}
+      >
+        ${ConnectorAddTextIcon}
+      </edgeless-tool-icon-button>
     `;
   }
 }
