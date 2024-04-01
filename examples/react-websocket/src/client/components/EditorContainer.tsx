@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useEditor } from '../editor/context.js';
+import { useEditor } from '../editor/context';
 
 const EditorContainer = () => {
   const { editor } = useEditor()!;

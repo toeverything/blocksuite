@@ -9,7 +9,7 @@
     "dev:server": "nodemon -w src/server -x tsx src/server/main.ts",
     "start:server": "NODE_ENV=production pnpm tsx src/server/main.ts",
     "basic-websocket": "PORT=3001 pnpm exec y-websocket",
-    "y-redis": "concurrently -r 'pnpm y-redis-server' 'pnpm y-redis-worker' 'pnpm docker' 'pnpm redis' 'pnpm minio'",
+    "y-redis": "concurrently -r 'pnpm y-redis-server' 'pnpm y-redis-worker' 'pnpm redis' 'pnpm minio'",
     "y-redis-server": "wait-on tcp:6379 && node --env-file .env node_modules/@y/redis/bin/server.js",
     "y-redis-worker": "wait-on tcp:6379 && node --env-file .env node_modules/@y/redis/bin/worker.js",
     "redis": "docker run --rm -p 6379:6379 redis",

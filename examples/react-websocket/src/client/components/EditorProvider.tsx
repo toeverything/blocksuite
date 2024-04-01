@@ -1,9 +1,9 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { DocCollection } from '@blocksuite/store';
 import React, { useEffect, useRef, useState } from 'react';
-import { EditorContext } from '../editor/context.js';
-import { initEditor } from '../editor/editor.js';
-import { Provider } from '../editor/provider.js';
+import { EditorContext } from '../editor/context';
+import { initEditor } from '../editor/editor';
+import { Provider } from '../editor/provider';
 
 export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
   const [editor, setEditor] = useState<AffineEditorContainer | null>(null);

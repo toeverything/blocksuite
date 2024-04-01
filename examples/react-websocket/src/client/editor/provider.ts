@@ -1,7 +1,7 @@
 import { Doc, DocCollection, Slot } from '@blocksuite/store';
 import { WebsocketProvider } from 'y-websocket';
-import * as api from './api.js';
-import { debounce, initCollection } from './utils.js';
+import * as api from './api';
+import { debounce, initCollection } from './utils';
 
 export type ConnectionStatus = 'connected' | 'disconnected' | 'error';
 

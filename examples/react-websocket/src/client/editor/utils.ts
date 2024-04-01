@@ -1,6 +1,6 @@
-import { AffineSchemas } from '@blocksuite/blocks/dist/schemas.js';
+import { AffineSchemas } from '@blocksuite/blocks';
 import { Schema, DocCollection, nanoid } from '@blocksuite/store';
-import * as api from './api.js';
+import * as api from './api';
 
 export function getCurrentWsServerType() {
   const currentRoom = getCurrentRoom();

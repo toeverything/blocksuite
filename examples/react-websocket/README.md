@@ -22,6 +22,14 @@ There are some entires for diffrent usage:
 - The [localhost:5173/y-redis](http://localhost:5173/y-redis) entry is the example using a y-redis for synchronization.
 - The [localhost:9001](http://localhost:5173/9001) entiry can be use to check the documents stored by y-redis. the user name and password is `minioadmin`
 
+This example will remove database file and docker containers when process exiting by default. You can remove the following codes in the end of the `./src/server/main.ts` and remove the flag `--rm` of the docker continaer creation command in `package.json`.
+
+```ts
+process.on('exit', async () => {
+  await fs.unlink(dbFile);
+});
+```
+
 ### How it works?
 
 ```

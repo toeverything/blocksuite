@@ -5,10 +5,10 @@ import {
   getCurrentRoom,
   getCurrentWsServerType,
   setRoom,
-} from './utils.js';
-import { Provider } from './provider.js';
+} from './utils';
+import { Provider } from './provider';
+import { getAuth } from './api';
 import '@blocksuite/presets/themes/affine.css';
-import { getAuth } from './api.js';
 
 const wsServers = {
   basic: {

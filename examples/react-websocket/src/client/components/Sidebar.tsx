@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DocMeta } from '@blocksuite/store';
-import { useEditor } from '../editor/context.js';
-import { createDoc } from '../editor/utils.js';
+import { useEditor } from '../editor/context';
+import { createDoc } from '../editor/utils';
 
 const Sidebar = () => {
   const { editor, collection, provider } = useEditor()!;

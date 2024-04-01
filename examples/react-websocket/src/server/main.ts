@@ -6,7 +6,7 @@ import * as jwt from 'lib0/crypto/jwt';
 import * as ecdsa from 'lib0/crypto/ecdsa';
 import { DocMeta } from '@blocksuite/store';
 import * as fs from 'fs/promises';
-import { JSONDatabase } from './db.js';
+import { JSONDatabase } from './db.ts';
 
 // Constants
 const appName = 'blocksuite-example';
@@ -19,7 +19,7 @@ const authPrivateKey = await ecdsa.importKeyJwk(
 // );
 
 const dbFile = 'db.json';
-const db = await JSONDatabase.init('db.json');
+const db = await JSONDatabase.init(dbFile);
 
 // Create http server
 const app = express();
