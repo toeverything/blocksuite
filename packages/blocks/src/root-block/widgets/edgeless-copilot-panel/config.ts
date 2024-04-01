@@ -2,7 +2,11 @@ import type { EditorHost } from '@blocksuite/block-std';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { AIItemConfig } from '../../../_common/components/ai-item/types.js';
-import { AIPenIcon, ChatWithAIIcon } from '../../../_common/icons/ai.js';
+import {
+  AIPenIcon,
+  ChatWithAIIcon,
+  MakeItRealIcon,
+} from '../../../_common/icons/ai.js';
 import type { EditorMode } from '../../../_common/types.js';
 import { ImageBlockModel } from '../../../image-block/image-model.js';
 import { NoteBlockModel } from '../../../note-block/note-model.js';
@@ -214,7 +218,13 @@ const chatWithAI: AIItemConfig = {
   showWhen: () => true,
 };
 
+const makeItReal: AIItemConfig = {
+  name: 'Make it real',
+  icon: MakeItRealIcon,
+  showWhen: () => true,
+};
+
 export const actionWithAI = {
   name: 'action',
-  items: [chatWithAI],
+  items: [chatWithAI, makeItReal],
 };
