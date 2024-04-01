@@ -78,11 +78,16 @@ export class AffineAIPanelWidget extends WidgetElement {
   @property()
   state: AffineAIPanelState = 'hidden';
 
-  toggle = (reference: ReferenceElement) => {
-    // reset state
-    this.hide();
+  toggle = (reference: ReferenceElement, input?: string) => {
+    if (input) {
+      this._inputText = input;
+      this.generate();
+    } else {
+      // reset state
+      this.hide();
+      this.state = 'input';
+    }
 
-    this.state = 'input';
     this._abortController.signal.addEventListener(
       'abort',
       autoUpdate(reference, this, () => {
