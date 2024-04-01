@@ -4,6 +4,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import {
   MOUSE_BUTTON,
   on,
@@ -13,6 +14,7 @@ import {
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { RootBlockModel } from '../../index.js';
 import { type EdgelessRootBlockComponent } from '../../index.js';
+import { actionWithAI, dragWithAI } from '../edgeless-copilot-panel/config.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 
 export const AFFINE_EDGELESS_COPILOT_WIDGET = 'affine-edgeless-copilot-widget';
@@ -45,12 +47,13 @@ export class EdgelessCopilotWidget extends WidgetElement<
   @query('.copilot-selection-rect')
   private _selectionRectEl!: HTMLDivElement;
 
-  private _copilotPanel!: EdgelessCopilotPanel | null;
-
   private _clickOutsideOff: (() => void) | null = null;
   private _listenClickOutsideId: number | null = null;
 
+  private _copilotPanel!: EdgelessCopilotPanel | null;
   private _showCopilotPanelOff: (() => void) | null = null;
+
+  groups: AIItemGroupConfig[] = [actionWithAI, dragWithAI];
 
   get edgeless() {
     return this.blockElement;
@@ -104,13 +107,11 @@ export class EdgelessCopilotWidget extends WidgetElement<
         return;
       }
 
-      const copilotTool = this.edgeless.tools.controllers[
-        'copilot'
-      ] as CopilotSelectionController;
       const panel = new EdgelessCopilotPanel();
       const referenceElement = this._selectionRectEl;
       panel.host = this.host;
-      panel.selectedEls = copilotTool.selectedElements;
+      panel.groups = this.groups;
+      panel.edgeless = this.edgeless;
       this.renderRoot.append(panel);
       this._copilotPanel = panel;
 

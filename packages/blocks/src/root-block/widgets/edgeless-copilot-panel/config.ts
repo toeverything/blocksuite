@@ -1,100 +1,194 @@
+import type { EditorHost } from '@blocksuite/block-std';
+
+import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
+import type { AIItemConfig } from '../../../_common/components/ai-item/types.js';
 import { AIPenIcon, ChatWithAIIcon } from '../../../_common/icons/ai.js';
+import type { EditorMode } from '../../../_common/types.js';
 import { ImageBlockModel } from '../../../image-block/image-model.js';
 import { NoteBlockModel } from '../../../note-block/note-model.js';
+import type { EdgelessRootService } from '../../../root-block/edgeless/edgeless-root-service.js';
 import { TextElementModel } from '../../../surface-block/index.js';
-import type { EdgelessModel } from '../../edgeless/type.js';
+import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 
-const createMediaPost = {
+function showWhen(
+  host: EditorHost,
+  check: (service: EdgelessRootService) => boolean
+) {
+  const edgelessService = host.spec.getService(
+    'affine:page'
+  ) as EdgelessRootService;
+
+  return check(edgelessService);
+}
+
+function getSelectedElements(service: EdgelessRootService) {
+  return (service.tool.controllers['copilot'] as CopilotSelectionController)
+    .selectedElements;
+}
+
+const createMediaPost: AIItemConfig = {
   name: 'Create a social media post',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
-    return selectedEls[0] instanceof ImageBlockModel;
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+    return (
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected[0] instanceof ImageBlockModel ||
+          selected[0] instanceof NoteBlockModel ||
+          selected[0] instanceof TextElementModel
+        );
+      })
+    );
   },
 };
 
-const createImage = {
+const createImage: AIItemConfig = {
   name: 'Create an image',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
     return (
-      selectedEls.length === 0 ||
-      selectedEls[0] instanceof ImageBlockModel ||
-      selectedEls[0] instanceof NoteBlockModel
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected.length === 0 ||
+          selected[0] instanceof ImageBlockModel ||
+          selected[0] instanceof NoteBlockModel ||
+          selected[0] instanceof TextElementModel
+        );
+      })
     );
   },
 };
 
-const createMindmap = {
+const createMindmap: AIItemConfig = {
   name: 'Create a mindmap',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
     return (
-      selectedEls.length === 0 ||
-      selectedEls[0] instanceof ImageBlockModel ||
-      selectedEls[0] instanceof NoteBlockModel
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected.length === 0 ||
+          selected[0] instanceof ImageBlockModel ||
+          selected[0] instanceof NoteBlockModel
+        );
+      })
     );
   },
 };
 
-const createPresentation = {
+const createPresentation: AIItemConfig = {
   name: 'Create a presentation',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
-    return selectedEls.length === 0 || selectedEls[0] instanceof NoteBlockModel;
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+    return (
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected.length === 0 ||
+          selected[0] instanceof NoteBlockModel ||
+          selected[0] instanceof TextElementModel
+        );
+      })
+    );
   },
 };
 
-const createOutline = {
+const createOutline: AIItemConfig = {
   name: 'Create an outline',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
     return (
-      selectedEls[0] instanceof NoteBlockModel ||
-      selectedEls[0] instanceof TextElementModel
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected[0] instanceof NoteBlockModel ||
+          selected[0] instanceof TextElementModel
+        );
+      })
     );
   },
 };
 
-const createStory = {
+const createStory: AIItemConfig = {
   name: 'Create creative story',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
     return (
-      selectedEls[0] instanceof NoteBlockModel ||
-      selectedEls[0] instanceof TextElementModel
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected[0] instanceof NoteBlockModel ||
+          selected[0] instanceof TextElementModel
+        );
+      })
     );
   },
 };
 
-const createEssay = {
+const createEssay: AIItemConfig = {
   name: 'Create an essay',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
     return (
-      selectedEls[0] instanceof NoteBlockModel ||
-      selectedEls[0] instanceof TextElementModel
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected[0] instanceof NoteBlockModel ||
+          selected[0] instanceof TextElementModel
+        );
+      })
     );
   },
 };
 
-const createSummary = {
+const createSummary: AIItemConfig = {
   name: 'Create a summary from this doc',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
     return (
-      selectedEls[0] instanceof NoteBlockModel ||
-      selectedEls[0] instanceof TextElementModel
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected[0] instanceof NoteBlockModel ||
+          selected[0] instanceof TextElementModel
+        );
+      })
     );
   },
 };
 
-const createCode = {
+const createTitle: AIItemConfig = {
   name: 'Create a title for this doc',
   icon: AIPenIcon,
-  showWhen: (selectedEls: EdgelessModel[]) => {
+  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
     return (
-      selectedEls[0] instanceof NoteBlockModel ||
-      selectedEls[0] instanceof TextElementModel
+      editorMode === 'edgeless' &&
+      showWhen(host, service => {
+        const selected = getSelectedElements(service);
+
+        return (
+          selected[0] instanceof NoteBlockModel ||
+          selected[0] instanceof TextElementModel
+        );
+      })
     );
   },
 };
@@ -110,11 +204,11 @@ export const dragWithAI = {
     createStory,
     createEssay,
     createSummary,
-    createCode,
+    createTitle,
   ],
-};
+} as AIItemGroupConfig;
 
-const chatWithAI = {
+const chatWithAI: AIItemConfig = {
   name: 'Chat with ai',
   icon: ChatWithAIIcon,
   showWhen: () => true,
@@ -123,9 +217,4 @@ const chatWithAI = {
 export const actionWithAI = {
   name: 'action',
   items: [chatWithAI],
-};
-
-export const editOrReviewWithAI = {
-  name: 'edit or review selection',
-  items: [],
 };

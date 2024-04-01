@@ -5,13 +5,8 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type {
-  AIItemConfig,
-  AIItemGroupConfig,
-} from '../../../_common/components/ai-item/types.js';
+import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessModel } from '../../edgeless/type.js';
-import { actionWithAI, dragWithAI } from './config.js';
 
 @customElement('edgeless-copilot-panel')
 export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
@@ -38,21 +33,23 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  selectedEls!: EdgelessModel[];
+  groups!: AIItemGroupConfig[];
 
-  get _groups(): AIItemGroupConfig[] {
-    const dragWithAiGroup = {
-      ...dragWithAI,
-      items: dragWithAI.items.filter(item =>
-        item.showWhen(this.selectedEls)
-      ) as unknown[] as AIItemConfig[],
-    } as AIItemGroupConfig;
-
-    return [actionWithAI as AIItemGroupConfig, dragWithAiGroup];
+  private _getChain() {
+    return this.edgeless.service.std.command.chain();
   }
 
   override render() {
-    const groups = this._groups;
+    const chain = this._getChain();
+    const groups = this.groups.reduce((pre, group) => {
+      const filtered = group.items.filter(item =>
+        item.showWhen?.(chain, 'edgeless', this.host)
+      );
+
+      if (filtered.length > 0) pre.push({ ...group, items: filtered });
+
+      return pre;
+    }, [] as AIItemGroupConfig[]);
 
     return html`
       <div class="edgeless-copilot-panel">
