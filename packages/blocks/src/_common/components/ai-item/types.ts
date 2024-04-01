@@ -1,6 +1,7 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
+import type { AffineAIPanelWidget } from '../../../root-block/index.js';
 import type { EditorMode } from '../../utils/index.js';
 
 export interface AIItemGroupConfig {
@@ -16,7 +17,7 @@ export interface AIItemConfig {
   /**
    * TODO：add parameter to the handler function and implement the logic under each handler item
    */
-  handler?: () => void;
+  handler?: (aiPanel: AffineAIPanelWidget) => void;
 }
 
 export interface AISubItemConfig {

@@ -1,20 +1,24 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
-
 import {
   AIDoneIcon,
+  type AIItemGroupConfig,
   AIPenIcon,
   AISearchIcon,
+  type AISubItemConfig,
   ExplainIcon,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
   MakeItRealIcon,
+  matchFlavours,
   ShorterIcon,
   TagIcon,
   ToneIcon,
-} from '../../icons/ai.js';
-import { matchFlavours } from '../../utils/model.js';
-import type { AIItemGroupConfig, AISubItemConfig } from './types.js';
+} from '@blocksuite/blocks';
+import { CopilotClient } from '@blocksuite/presets';
+
+import { textRenderer } from '../../message/text';
+import { getGenerateAnswer } from '../../utils';
 
 export const translateSubItem: AISubItemConfig[] = [
   {
@@ -76,8 +80,51 @@ const DocAIGroup: AIItemGroupConfig = {
       name: 'Summary',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: () => {
-        // TODO: Implement the logic to summarize the text
+      handler: panel => {
+        panel.host.command
+          .chain()
+          .getTextSelection()
+          .getSelectedBlocks()
+          .inline(ctx => {
+            const blocks = ctx.selectedBlocks;
+            if (!blocks || blocks.length === 0) return;
+
+            const text = blocks.reduce((acc, block) => {
+              return acc + block.model.text?.toString();
+            }, '');
+
+            const copilotClient = new CopilotClient('http://localhost:3010');
+
+            panel.config = {
+              answerRenderer: textRenderer,
+              generateAnswer: getGenerateAnswer({
+                copilotClient,
+                panel,
+              }),
+
+              finishStateConfig: {
+                responses: [],
+                actions: [],
+              },
+              errorStateConfig: {
+                upgrade: () => {},
+                responses: [],
+              },
+            };
+            panel.toggle(
+              blocks[0],
+              `
+            Summarize the key points from the following content in a clear and concise manner,
+            suitable for a reader who is seeking a quick understanding of the original content.
+            Ensure to capture the main ideas and any significant details without unnecessary elaboration:
+
+            ${text}
+            `
+            );
+
+            panel.host.selection.clear();
+          })
+          .run();
       },
     },
   ],
