@@ -1,6 +1,7 @@
-import { literal } from 'lit/static-html.js';
+import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { createEmbedBlock } from '../_common/embed-block-helper/helper.js';
+import { EMBED_CARD_TOOLBAR } from '../root-block/widgets/embed-card-toolbar/embed-card-toolbar.js';
 import {
   type EmbedLinkedDocBlockProps,
   EmbedLinkedDocModel,
@@ -23,6 +24,9 @@ export const EmbedLinkedDocBlockSpec = createEmbedBlock({
   },
   view: {
     component: literal`affine-embed-linked-doc-block`,
+    widgets: {
+      [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
+    },
   },
   service: EmbedLinkedDocService,
 });
