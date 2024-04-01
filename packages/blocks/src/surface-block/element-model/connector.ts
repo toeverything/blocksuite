@@ -174,7 +174,7 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   }
 }
 
-export class StatelessConnectorElementModel extends LocalModel {
+export class LocalConnectorElementModel extends LocalModel {
   get type() {
     return 'connector';
   }

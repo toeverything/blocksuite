@@ -1,6 +1,6 @@
 import type {
   ConnectorElementModel,
-  StatelessConnectorElementModel,
+  LocalConnectorElementModel,
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
 import type { PointLocation } from '../../../index.js';
@@ -117,7 +117,7 @@ export type ArrowOptions = ReturnType<typeof getArrowOptions>;
 
 export function getArrowOptions(
   end: ConnectorEnd,
-  model: ConnectorElementModel | StatelessConnectorElementModel,
+  model: ConnectorElementModel | LocalConnectorElementModel,
   renderer: Renderer
 ) {
   const { stroke } = model;
