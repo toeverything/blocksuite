@@ -10,12 +10,12 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { CopilotClient } from '../../copilot-client.js';
 import {
+  AffineAvatorIcon,
   AffineIcon,
   CreateAsPageIcon,
   DownArrowIcon,
   InsertBelowIcon,
   NewBlockIcon,
-  PenIcon,
   ReplaceIcon,
 } from '../_common/icons.js';
 import type { ChatMessage } from './index.js';
@@ -111,9 +111,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   public override connectedCallback() {
     super.connectedCallback();
     this.host.selection.slots.changed.on(() => {
-      const res = this.host.command.chain().getTextSelection().run();
       this._currentTextSelection =
-        res[1].currentTextSelection ?? this._currentTextSelection;
+        this.host.selection.find('text') ?? this._currentTextSelection;
     });
   }
 
@@ -122,37 +121,42 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       return html`<ai-text-renderer
         .text=${message.content}
       ></ai-text-renderer>`;
+    } else {
+      return html`<ai-text-renderer
+        .text=${message.content}
+      ></ai-text-renderer>`;
     }
-    return html`
-      <style>
-        .ppt-title {
-          border-radius: 4px;
-          border: 1px solid var(--affine-border-color);
-          padding: 10px 16px;
-          font-size: 15px;
-          font-weight: 400;
-          margin-top: 4px;
-          margin-bottom: 12px;
-        }
-        .ppt-postfix {
-          display: flex;
-          gap: 8px;
-          margin-top: 12px;
-          margin-bottom: 8px;
-        }
-        .ppt-postfix div {
-          color: var(--affine-text-primary-color);
-          font-size: 14px;
-          font-weight: 400;
-        }
-      </style>
-      <div class="ppt-title">Title</div>
-      <ai-slides-renderer></ai-slides-renderer>
-      <div class="ppt-postfix">
-        ${PenIcon}
-        <div>Create a presentation</div>
-      </div>
-    `;
+
+    // return html`
+    //   <style>
+    //     .ppt-title {
+    //       border-radius: 4px;
+    //       border: 1px solid var(--affine-border-color);
+    //       padding: 10px 16px;
+    //       font-size: 15px;
+    //       font-weight: 400;
+    //       margin-top: 4px;
+    //       margin-bottom: 12px;
+    //     }
+    //     .ppt-postfix {
+    //       display: flex;
+    //       gap: 8px;
+    //       margin-top: 12px;
+    //       margin-bottom: 8px;
+    //     }
+    //     .ppt-postfix div {
+    //       color: var(--affine-text-primary-color);
+    //       font-size: 14px;
+    //       font-weight: 400;
+    //     }
+    //   </style>
+    //   <div class="ppt-title">Title</div>
+    //   <ai-slides-renderer></ai-slides-renderer>
+    //   <div class="ppt-postfix">
+    //     ${PenIcon}
+    //     <div>Create a presentation</div>
+    //   </div>
+    // `;
   }
 
   renderEditorActions(content: string) {
@@ -163,6 +167,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           flex-direction: column;
           align-items: flex-end;
           gap: 8px;
+          margin-top: 8px;
         }
 
         .actions-container > div {
@@ -304,7 +309,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           : repeat(messages, (message, index) => {
               return html`<div class="message">
                 <div class="user-info">
-                  <div class="avator"></div>
+                  ${message.role === 'user'
+                    ? html`<div class="avator"></div>`
+                    : AffineAvatorIcon}
                   ${message.role === 'user' ? 'You' : 'AFFINE AI'}
                 </div>
                 ${this.renderItem(message)}

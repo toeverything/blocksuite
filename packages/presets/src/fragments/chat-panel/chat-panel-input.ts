@@ -7,7 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { CopilotClient } from '../../copilot-client.js';
 import { ChatSendIcon, CloseIcon, ImageIcon } from '../_common/icons.js';
-import type { ChatStatus } from './index.js';
+import type { ChatMessage, ChatStatus } from './index.js';
 
 const MaximumImageCount = 8;
 
@@ -101,7 +101,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   sessionId!: string;
 
   @property({ attribute: false })
-  updateMessages!: () => Promise<void>;
+  updateMessages!: (messages: ChatMessage[]) => void;
 
   @property({ attribute: false })
   status!: ChatStatus;
@@ -132,8 +132,11 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     this.textarea.value = '';
     this.isInputEmpty = true;
     this.images = [];
-    await this.copilotClient.textToText(text, this.sessionId);
-    await this.updateMessages();
+    this.updateMessages([{ role: 'user', content: text }]);
+    const res = await this.copilotClient.textToText(text, this.sessionId);
+    if (res) {
+      this.updateMessages([{ role: 'assistant', content: res }]);
+    }
   };
 
   protected override render() {

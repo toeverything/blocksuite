@@ -11,7 +11,6 @@ import { SmallHintIcon } from '../_common/icons.js';
 
 export type ChatMessage = {
   content: string;
-  createdAt: string;
   role: 'user' | 'assistant';
 };
 
@@ -77,15 +76,12 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   sessionId!: string;
 
   @state()
-  messages: ChatMessage[] = [
-    { role: 'user', content: 'hello', createdAt: '2021-09-01' },
-    { role: 'assistant', content: 'hi', createdAt: '2021-09-01' },
-  ];
+  messages: ChatMessage[] = [];
 
   @state()
   status: ChatStatus = 'idle';
 
-  private _copilotClient = new CopilotClient();
+  private _copilotClient = new CopilotClient('http://localhost:3010');
 
   public override async connectedCallback() {
     super.connectedCallback();
@@ -117,12 +113,16 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
 
   updateMessages = async () => {
     const histories = await this._copilotClient.getAnonymousHistories(
-      editor.doc.collection.id,
-      editor.doc.id
+      this.editor.doc.collection.id,
+      this.editor.doc.id
     );
     this.messages =
       histories.find(h => h.sessionId === this.sessionId)?.messages ||
       this.messages;
+  };
+
+  addToMessages = (messages: ChatMessage[]) => {
+    this.messages = [...this.messages, ...messages];
   };
 
   updateStatus = (status: ChatStatus) => {
@@ -141,7 +141,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         .host=${this.editor.host}
         .copilotClient=${this._copilotClient}
         .sessionId=${this.sessionId}
-        .updateMessages=${this.updateMessages}
+        .updateMessages=${this.addToMessages}
         .status=${this.status}
         .updateStatus=${this.updateStatus}
       ></chat-panel-input>
