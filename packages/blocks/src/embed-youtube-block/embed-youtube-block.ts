@@ -1,16 +1,12 @@
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
-import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { ref } from 'lit/directives/ref.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
-import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
@@ -44,9 +40,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
   @state()
   private _showImage = false;
-
-  @query('.affine-embed-youtube-block')
-  private _youtubeBlockEl!: HTMLDivElement;
 
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
@@ -161,45 +154,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     }
   }
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-    ) {
-      return null;
-    }
-
-    return {
-      template: html`
-        <style>
-          :host {
-            z-index: 1;
-          }
-        </style>
-        <embed-card-toolbar
-          .block=${this}
-          .abortController=${abortController}
-        ></embed-card-toolbar>
-      `,
-      computePosition: {
-        referenceElement: this._youtubeBlockEl,
-        placement: 'top-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    };
-  });
-
   override renderBlock() {
     const {
       image,
@@ -238,83 +192,86 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
     return this.renderEmbed(
       () => html`
-        <div
-          ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
-          class=${classMap({
-            'affine-embed-youtube-block': true,
-            loading,
-            selected: this._isSelected,
-          })}
-          @click=${this._handleClick}
-          @dblclick=${this._handleDoubleClick}
-        >
-          <div class="affine-embed-youtube-video">
-            ${videoId
-              ? html`
-                  <div class="affine-embed-youtube-video-iframe-container">
-                    <iframe
-                      id="ytplayer"
-                      type="text/html"
-                      src=${`https://www.youtube.com/embed/${videoId}`}
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowfullscreen
-                    ></iframe>
-                    <div
-                      class=${classMap({
-                        'affine-embed-youtube-video-iframe-overlay': true,
-                        hide: !this._showOverlay,
-                      })}
-                    ></div>
-                    <img
-                      class=${classMap({
-                        'affine-embed-youtube-video-iframe-overlay': true,
-                        'media-print': true,
-                        hide: !this._showImage,
-                      })}
-                      src=${`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-                      alt="YouTube Video"
-                    />
-                  </div>
-                `
-              : bannerImage}
+        <div>
+          <div
+            class=${classMap({
+              'affine-embed-youtube-block': true,
+              loading,
+              selected: this._isSelected,
+            })}
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            <div class="affine-embed-youtube-video">
+              ${videoId
+                ? html`
+                    <div class="affine-embed-youtube-video-iframe-container">
+                      <iframe
+                        id="ytplayer"
+                        type="text/html"
+                        src=${`https://www.youtube.com/embed/${videoId}`}
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                      ></iframe>
+                      <div
+                        class=${classMap({
+                          'affine-embed-youtube-video-iframe-overlay': true,
+                          hide: !this._showOverlay,
+                        })}
+                      ></div>
+                      <img
+                        class=${classMap({
+                          'affine-embed-youtube-video-iframe-overlay': true,
+                          'media-print': true,
+                          hide: !this._showImage,
+                        })}
+                        src=${`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                        alt="YouTube Video"
+                      />
+                    </div>
+                  `
+                : bannerImage}
+            </div>
+            <div class="affine-embed-youtube-content">
+              <div class="affine-embed-youtube-content-header">
+                <div class="affine-embed-youtube-content-title-icon">
+                  ${titleIcon}
+                </div>
+
+                <div class="affine-embed-youtube-content-title-text">
+                  ${titleText}
+                </div>
+
+                <div class="affine-embed-youtube-content-creator-image">
+                  ${creatorImageEl}
+                </div>
+
+                <div class="affine-embed-youtube-content-creator-text">
+                  ${creator}
+                </div>
+              </div>
+
+              <div class="affine-embed-youtube-content-description">
+                ${descriptionText}
+              </div>
+
+              <div class="affine-embed-youtube-content-url" @click=${this.open}>
+                <span>www.youtube.com</span>
+
+                <div class="affine-embed-youtube-content-url-icon">
+                  ${OpenIcon}
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="affine-embed-youtube-content">
-            <div class="affine-embed-youtube-content-header">
-              <div class="affine-embed-youtube-content-title-icon">
-                ${titleIcon}
-              </div>
 
-              <div class="affine-embed-youtube-content-title-text">
-                ${titleText}
-              </div>
+          <embed-card-caption .block=${this}></embed-card-caption>
 
-              <div class="affine-embed-youtube-content-creator-image">
-                ${creatorImageEl}
-              </div>
-
-              <div class="affine-embed-youtube-content-creator-text">
-                ${creator}
-              </div>
-            </div>
-
-            <div class="affine-embed-youtube-content-description">
-              ${descriptionText}
-            </div>
-
-            <div class="affine-embed-youtube-content-url" @click=${this.open}>
-              <span>www.youtube.com</span>
-
-              <div class="affine-embed-youtube-content-url-icon">
-                ${OpenIcon}
-              </div>
-            </div>
-          </div>
+          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
 
-        <embed-card-caption .block=${this}></embed-card-caption>
-
-        <affine-block-selection .block=${this}></affine-block-selection>
+        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }
