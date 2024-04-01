@@ -12,7 +12,7 @@ import * as jwt from 'lib0/crypto/jwt';
 import * as ecdsa from 'lib0/crypto/ecdsa';
 import * as promise from 'lib0/promise';
 import { DocMeta } from '@blocksuite/store';
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 import { JSONDatabase } from './db.ts';
 
 // Constants
@@ -90,7 +90,7 @@ app.use('/ydoc/:room', async (req, res, next) => {
         // You should probably delete it if it is no longer being used.
         const file = files.ydoc[0];
         // we are just going to log the content and delete the temporary file
-        fs.readFile(file.filepath).then(resolve, reject);
+        fs.promises.readFile(file.filepath).then(resolve, reject);
       }
     });
   });
@@ -178,6 +178,11 @@ ViteExpress.listen(app, port, () =>
 );
 
 // Remove the following code if you want to keep the database in disk
-process.on('exit', async () => {
-  await fs.unlink(dbFile);
+process.on('exit', () => {
+  try {
+    fs.rmSync(dbFile);
+    fs.rmSync('storage', { recursive: true, force: true }); // the storage for basic websocket
+  } catch (err) {
+    console.log(err);
+  }
 });
