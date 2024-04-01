@@ -8,8 +8,8 @@ import {
 import { AffineFormatBarWidget } from '@blocksuite/blocks';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import { setupFormatBarEntry } from './entry/format-bar/setup-format-bar';
-import { setupSpaceEntry } from './entry/space/setup-space';
+import { setupFormatBarEntry } from './entry/format-bar/setup-format-bar.js';
+import { setupSpaceEntry } from './entry/space/setup-space.js';
 
 export function getAISpecs() {
   const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
