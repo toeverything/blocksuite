@@ -244,13 +244,6 @@ export class BlockModel<
     return this.children[this.children.length - 1].lastChild();
   }
 
-  lastItem(): BlockModel | null {
-    if (!this.children.length) {
-      return this;
-    }
-    return this.children[this.children.length - 1];
-  }
-
   dispose() {
     this.created.dispose();
     this.deleted.dispose();

@@ -30,7 +30,7 @@ import type { Column } from '../../database-block/types.js';
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
-import { fetchImage, isNullish } from './utils.js';
+import { fetchable, fetchImage, isNullish } from './utils.js';
 
 export type Markdown = string;
 
@@ -864,7 +864,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           if (!assets) {
             break;
           }
-          if (!o.node.url.startsWith('http')) {
+          if (!fetchable(o.node.url)) {
             const imageURL = o.node.url;
             assets.getAssets().forEach((_value, key) => {
               if (imageURL.includes(getAssetName(assets.getAssets(), key))) {

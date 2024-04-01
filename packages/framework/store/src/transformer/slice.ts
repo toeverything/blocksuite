@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BlockModel } from '../schema/index.js';
 import type { Doc } from '../store/index.js';
+import type { DraftModel } from './draft.js';
 
 type SliceData = {
-  content: BlockModel[];
+  content: DraftModel[];
   workspaceId: string;
   pageId: string;
   pageVersion: number;
@@ -12,7 +12,7 @@ type SliceData = {
 };
 
 export class Slice {
-  static fromModels(doc: Doc, models: BlockModel[]) {
+  static fromModels(doc: Doc, models: DraftModel[]) {
     const meta = doc.collection.meta;
     const { pageVersion, workspaceVersion } = meta;
     assertExists(pageVersion);

@@ -7,6 +7,7 @@ import type { Doc } from '../store/index.js';
 import type { DocsPropertiesMeta } from '../store/meta.js';
 import { AssetsManager } from './assets.js';
 import { BaseBlockTransformer } from './base.js';
+import { type DraftModel } from './draft.js';
 import type {
   BeforeExportPayload,
   BeforeImportPayload,
@@ -127,7 +128,7 @@ export class Job {
     });
   }
 
-  private async _blockToSnapshot(model: BlockModel): Promise<BlockSnapshot> {
+  private async _blockToSnapshot(model: DraftModel): Promise<BlockSnapshot> {
     this._slots.beforeExport.emit({
       type: 'block',
       model,
@@ -157,7 +158,7 @@ export class Job {
     return snapshot;
   }
 
-  blockToSnapshot = async (model: BlockModel): Promise<BlockSnapshot> => {
+  blockToSnapshot = async (model: DraftModel): Promise<BlockSnapshot> => {
     const snapshot = await this._blockToSnapshot(model);
     BlockSnapshotSchema.parse(snapshot);
 

@@ -2,17 +2,21 @@ import './components/index.js';
 
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { autoUpdate, computePosition } from '@floating-ui/dom';
+import {
+  autoUpdate,
+  computePosition,
+  type ReferenceElement,
+} from '@floating-ui/dom';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type {
-  AIActionPanelAnswerConfig,
-  AIActionPanelErrorConfig,
+  AIPanelAnswerConfig,
+  AIPanelErrorConfig,
 } from './components/index.js';
 
-export interface AffineAIActionPanelWidgetConfig {
+export interface AffineAIPanelWidgetConfig {
   answerRenderer: (answer: string) => TemplateResult<1>;
   generateAnswer: (props: {
     input: string;
@@ -22,21 +26,21 @@ export interface AffineAIActionPanelWidgetConfig {
     signal: AbortSignal;
   }) => void;
 
-  finishStateConfig: AIActionPanelAnswerConfig;
-  errorStateConfig: AIActionPanelErrorConfig;
+  finishStateConfig: AIPanelAnswerConfig;
+  errorStateConfig: AIPanelErrorConfig;
 }
 
-export type AffineAIActionPanelState =
+export type AffineAIPanelState =
   | 'hidden'
   | 'input'
   | 'generating'
   | 'finished'
   | 'error';
 
-export const AFFINE_AI_ACTION_PANEL_WIDGET = 'affine-ai-action-panel-widget';
+export const AFFINE_AI_PANEL_WIDGET = 'affine-ai-panel-widget';
 
-@customElement(AFFINE_AI_ACTION_PANEL_WIDGET)
-export class AffineAIActionPanelWidget extends WidgetElement {
+@customElement(AFFINE_AI_PANEL_WIDGET)
+export class AffineAIPanelWidget extends WidgetElement {
   static override styles = css`
     :host {
       display: flex;
@@ -69,34 +73,50 @@ export class AffineAIActionPanelWidget extends WidgetElement {
   `;
 
   @property({ attribute: false })
-  config: AffineAIActionPanelWidgetConfig | null = null;
+  config: AffineAIPanelWidgetConfig | null = null;
 
   @property()
-  state: AffineAIActionPanelState = 'hidden';
+  state: AffineAIPanelState = 'hidden';
 
-  private _inputText: string | null = null;
-  get inputText() {
-    return this._inputText;
-  }
+  toggle = (reference: ReferenceElement) => {
+    // reset state
+    this.hide();
 
-  private _answer: string | null = null;
-  get answer() {
-    return this._answer;
-  }
+    this.state = 'input';
+    this._abortController.signal.addEventListener(
+      'abort',
+      autoUpdate(reference, this, () => {
+        computePosition(reference, this, {
+          placement: 'bottom-start',
+        })
+          .then(({ x, y }) => {
+            this.style.left = `${x}px`;
+            this.style.top = `${y}px`;
+          })
+          .catch(console.error);
+      })
+    );
+  };
 
-  private _abortController: AbortController | null = null;
-  private _inputFinish = (text: string) => {
-    assertExists(this.config);
-
-    this._inputText = text;
-    this.state = 'generating';
-
-    if (this._abortController) {
-      this._abortController.abort();
-    }
-    this._abortController = new AbortController();
-
+  hide = () => {
+    this._resetAbortController();
+    this.state = 'hidden';
+    this._inputText = null;
     this._answer = null;
+  };
+
+  /**
+   * You can evaluate this method multiple times to regenerate the answer.
+   */
+  generate = () => {
+    assertExists(this.config);
+    const text = this._inputText;
+    assertExists(text);
+
+    this._resetAbortController();
+    // reset answer
+    this._answer = null;
+
     const update = (answer: string) => {
       this._answer = answer;
       this.requestUpdate();
@@ -108,10 +128,10 @@ export class AffineAIActionPanelWidget extends WidgetElement {
         this.state = 'finished';
       }
 
-      this._abortController?.abort();
-      this._abortController = null;
+      this._resetAbortController();
     };
 
+    this.state = 'generating';
     this.config.generateAnswer({
       input: text,
       update,
@@ -120,59 +140,39 @@ export class AffineAIActionPanelWidget extends WidgetElement {
     });
   };
 
-  private _stopGenerating = () => {
-    this._abortController?.abort();
+  stopGenerating = () => {
+    this._abortController.abort();
     this.state = 'finished';
+  };
+
+  private _abortController = new AbortController();
+  private _resetAbortController = () => {
+    this._abortController.abort();
+    this._abortController = new AbortController();
+  };
+
+  private _inputText: string | null = null;
+  get inputText() {
+    return this._inputText;
+  }
+
+  private _answer: string | null = null;
+  get answer() {
+    return this._answer;
+  }
+
+  private _inputFinish = (text: string) => {
+    this._inputText = text;
+    this.generate();
   };
 
   override connectedCallback() {
     super.connectedCallback();
 
-    let cleanUp: () => void;
-    this.handleEvent('keyDown', ctx => {
-      const keyboardState = ctx.get('keyboardState');
-      if (keyboardState.raw.key === ' ') {
-        const selection = this.host.selection.find('text');
-        if (
-          selection &&
-          selection.isCollapsed() &&
-          selection.from.index === 0
-        ) {
-          const block = this.host.view.viewFromPath('block', selection.path);
-          if (!block?.model?.text || block.model.text?.length > 0) return;
-
-          keyboardState.raw.preventDefault();
-          this.state = 'input';
-          this.updateComplete
-            .then(() => {
-              cleanUp = autoUpdate(block, this, () => {
-                computePosition(block, this, {
-                  placement: 'bottom-start',
-                })
-                  .then(({ x, y }) => {
-                    this.style.left = `${x}px`;
-                    this.style.top = `${y}px`;
-                  })
-                  .catch(console.error);
-              });
-            })
-            .catch(console.error);
-        }
-      }
-    });
-
     this.tabIndex = -1;
     this.disposables.addFromEvent(this, 'blur', e => {
       if (!e.relatedTarget || this.contains(e.relatedTarget as Node)) return;
-
-      cleanUp?.();
-      if (this._abortController) {
-        this._abortController.abort();
-        this._abortController = null;
-      }
-      this._inputText = null;
-      this._answer = null;
-      this.state = 'hidden';
+      this.hide();
     });
   }
 
@@ -196,42 +196,40 @@ export class AffineAIActionPanelWidget extends WidgetElement {
       [
         'input',
         () =>
-          html`<ai-action-panel-input
+          html`<ai-panel-input
             .onFinish=${this._inputFinish}
-          ></ai-action-panel-input>`,
+          ></ai-panel-input>`,
       ],
       [
         'generating',
         () => html`
           ${this.answer
             ? html`
-                <ai-action-panel-answer
+                <ai-panel-answer
                   .finish=${false}
                   .config=${config.finishStateConfig}
                 >
                   ${this.answer && config.answerRenderer(this.answer)}
-                </ai-action-panel-answer>
+                </ai-panel-answer>
               `
             : nothing}
-          <ai-action-panel-generating
-            .stopGenerating=${this._stopGenerating}
-          ></ai-action-panel-generating>
+          <ai-panel-generating
+            .stopGenerating=${this.stopGenerating}
+          ></ai-panel-generating>
         `,
       ],
       [
         'finished',
         () => html`
-          <ai-action-panel-answer .config=${config.finishStateConfig}>
+          <ai-panel-answer .config=${config.finishStateConfig}>
             ${this.answer && config.answerRenderer(this.answer)}
-          </ai-action-panel-answer>
+          </ai-panel-answer>
         `,
       ],
       [
         'error',
         () => html`
-          <ai-action-panel-error
-            .config=${config.errorStateConfig}
-          ></ai-action-panel-error>
+          <ai-panel-error .config=${config.errorStateConfig}></ai-panel-error>
         `,
       ],
     ])}`;
