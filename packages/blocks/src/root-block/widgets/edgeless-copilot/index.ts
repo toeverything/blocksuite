@@ -13,7 +13,7 @@ import {
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { RootBlockModel } from '../../index.js';
 import { type EdgelessRootBlockComponent } from '../../index.js';
-import { EdgelessCopilotPanel } from '../edgeless-copilet-panel/index.js';
+import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 
 export const AFFINE_EDGELESS_COPILOT_WIDGET = 'affine-edgeless-copilot-widget';
 
