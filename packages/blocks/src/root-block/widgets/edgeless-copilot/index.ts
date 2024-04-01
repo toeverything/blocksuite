@@ -104,9 +104,13 @@ export class EdgelessCopilotWidget extends WidgetElement<
         return;
       }
 
+      const copilotTool = this.edgeless.tools.controllers[
+        'copilot'
+      ] as CopilotSelectionController;
       const panel = new EdgelessCopilotPanel();
       const referenceElement = this._selectionRectEl;
       panel.host = this.host;
+      panel.selectedEls = copilotTool.selectedElements;
       this.renderRoot.append(panel);
       this._copilotPanel = panel;
 

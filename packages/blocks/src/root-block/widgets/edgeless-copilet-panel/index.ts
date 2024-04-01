@@ -5,7 +5,13 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { AIItemGroups } from '../../../_common/components/ai-item/config.js';
+import type {
+  AIItemConfig,
+  AIItemGroupConfig,
+} from '../../../_common/components/ai-item/types.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessModel } from '../../edgeless/type.js';
+import { actionWithAI, dragWithAI } from './config.js';
 
 @customElement('edgeless-copilot-panel')
 export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
@@ -28,10 +34,29 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   host!: EditorHost;
 
+  @property({ attribute: false })
+  edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  selectedEls!: EdgelessModel[];
+
+  get _groups(): AIItemGroupConfig[] {
+    const dragWithAiGroup = {
+      ...dragWithAI,
+      items: dragWithAI.items.filter(item =>
+        item.showWhen(this.selectedEls)
+      ) as unknown[] as AIItemConfig[],
+    } as AIItemGroupConfig;
+
+    return [actionWithAI as AIItemGroupConfig, dragWithAiGroup];
+  }
+
   override render() {
+    const groups = this._groups;
+
     return html`
       <div class="edgeless-copilot-panel">
-        <ai-item-list .host=${this.host} .groups=${AIItemGroups}></ai-item-list>
+        <ai-item-list .host=${this.host} .groups=${groups}></ai-item-list>
       </div>
     `;
   }
