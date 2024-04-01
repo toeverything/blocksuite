@@ -8,7 +8,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { CopilotClient } from '../../copilot-client.js';
+import type { CopilotClient } from '../../ai/index.js';
 import {
   AffineAvatorIcon,
   AffineIcon,
@@ -117,15 +117,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderItem(message: ChatMessage) {
-    if (message.role === 'user') {
-      return html`<ai-text-renderer
-        .text=${message.content}
-      ></ai-text-renderer>`;
-    } else {
-      return html`<ai-text-renderer
-        .text=${message.content}
-      ></ai-text-renderer>`;
-    }
+    return html`<ai-text-renderer .text=${message.content}></ai-text-renderer>`;
 
     // return html`
     //   <style>

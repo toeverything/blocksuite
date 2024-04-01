@@ -5,7 +5,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { CopilotClient } from '../../copilot-client.js';
+import type { CopilotClient } from '../../ai/index.js';
 import { ChatSendIcon, CloseIcon, ImageIcon } from '../_common/icons.js';
 import type { ChatMessage, ChatStatus } from './index.js';
 
