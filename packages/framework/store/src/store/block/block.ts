@@ -5,6 +5,7 @@ import { Boxed, type UnRecord, y2Native } from '../../reactive/index.js';
 import { createYProxy, native2Y } from '../../reactive/index.js';
 import { BlockModel, internalPrimitives } from '../../schema/base.js';
 import type { Schema } from '../../schema/index.js';
+import type { Doc } from '../doc.js';
 
 export type YBlock = Y.Map<unknown>;
 
@@ -21,9 +22,71 @@ export class Block {
   private _byPassProxy: boolean = false;
   private readonly _stashed: Set<string | number> = new Set();
 
+  private _stashProp(prop: string) {
+    (this.model as BlockModel<Record<string, unknown>>)[prop] = y2Native(
+      this.yBlock.get(`prop:${prop}`),
+      {
+        transform: (value, origin) => {
+          if (Boxed.is(origin)) {
+            return value;
+          }
+          if (origin instanceof Y.Map) {
+            return new Proxy(value as UnRecord, {
+              get: (target, p, receiver) => {
+                return Reflect.get(target, p, receiver);
+              },
+              set: (target, p, value, receiver) => {
+                const result = Reflect.set(target, p, value, receiver);
+                this.options.onChange?.(this, prop, value);
+                return result;
+              },
+              deleteProperty: (target, p) => {
+                const result = Reflect.deleteProperty(target, p);
+                this.options.onChange?.(this, prop, undefined);
+                return result;
+              },
+            });
+          }
+          if (origin instanceof Y.Array) {
+            return new Proxy(value as unknown[], {
+              get: (target, p, receiver) => {
+                return Reflect.get(target, p, receiver);
+              },
+              set: (target, p, value, receiver) => {
+                const index = Number(p);
+                if (Number.isNaN(index)) {
+                  return Reflect.set(target, p, value, receiver);
+                }
+                const result = Reflect.set(target, p, value, receiver);
+                this.options.onChange?.(this, prop, value);
+                return result;
+              },
+              deleteProperty: (target, p) => {
+                const result = Reflect.deleteProperty(target, p);
+                this.options.onChange?.(this, p as string, undefined);
+                return result;
+              },
+            });
+          }
+
+          return value;
+        },
+      }
+    );
+  }
+
+  private _popProp(prop: string) {
+    const model = this.model as BlockModel<Record<string, unknown>>;
+
+    const value = model[prop];
+    this._stashed.delete(prop);
+    model[prop] = value;
+  }
+
   constructor(
     readonly schema: Schema,
     readonly yBlock: YBlock,
+    readonly doc: Doc,
     readonly options: BlockOptions = {}
   ) {
     const { id, flavour, version, yChildren, props } = this._parseYBlock();
@@ -76,72 +139,20 @@ export class Block {
 
       this.options.onChange?.(this, '', undefined);
     });
+
+    this.model.doc = doc;
   }
 
   stash = (prop: string) => {
     if (this._stashed.has(prop)) return;
 
     this._stashed.add(prop);
-    // @ts-ignore
-    this.model[prop] = y2Native(this.yBlock.get(`prop:${prop}`), {
-      transform: (value, origin) => {
-        if (Boxed.is(origin)) {
-          return value;
-        }
-        if (origin instanceof Y.Map) {
-          return new Proxy(value as UnRecord, {
-            get: (target, p, receiver) => {
-              return Reflect.get(target, p, receiver);
-            },
-            set: (target, p, value, receiver) => {
-              const result = Reflect.set(target, p, value, receiver);
-              this.options.onChange?.(this, prop, value);
-              return result;
-            },
-            deleteProperty: (target, p) => {
-              const result = Reflect.deleteProperty(target, p);
-              this.options.onChange?.(this, prop, undefined);
-              return result;
-            },
-          });
-        }
-        if (origin instanceof Y.Array) {
-          return new Proxy(value as unknown[], {
-            get: (target, p, receiver) => {
-              return Reflect.get(target, p, receiver);
-            },
-            set: (target, p, value, receiver) => {
-              const index = Number(p);
-              if (Number.isNaN(index)) {
-                return Reflect.set(target, p, value, receiver);
-              }
-              const result = Reflect.set(target, p, value, receiver);
-              this.options.onChange?.(this, prop, value);
-              return result;
-            },
-            deleteProperty: (target, p) => {
-              const result = Reflect.deleteProperty(target, p);
-              this.options.onChange?.(this, p as string, undefined);
-              return result;
-            },
-          });
-        }
-
-        return value;
-      },
-    });
+    this._stashProp(prop);
   };
 
   pop = (prop: string) => {
     if (!this._stashed.has(prop)) return;
-
-    // @ts-ignore
-    const value = this.model[prop];
-
-    this._stashed.delete(prop);
-
-    // @ts-ignore
-    this.model[prop] = value;
+    this._popProp(prop);
   };
 
   private _byPassUpdate = (fn: () => void) => {

@@ -88,8 +88,8 @@ export class Doc extends Space<FlatBlockMap> {
     this._collection = collection;
     this._idGenerator = idGenerator;
     this._blockTree = new BlockTree({
+      doc: this,
       schema: collection.schema,
-      yBlocks: this.yBlocks,
     });
   }
 
@@ -668,9 +668,7 @@ export class Doc extends Space<FlatBlockMap> {
       this._handleYBlockAdd(id);
     });
 
-    if (initFn) {
-      initFn();
-    }
+    initFn?.();
 
     this._ready = true;
     this.slots.ready.emit();
@@ -722,7 +720,7 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    this._blockTree.onBlockAdded(id, this, {
+    this._blockTree.onBlockAdded(id, {
       onChange: (block, key) => {
         if (key) {
           block.model.propsUpdated.emit({ key });
@@ -781,27 +779,26 @@ export class Doc extends Space<FlatBlockMap> {
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
     // event on top-level block store
-    if (event.target === this._yBlocks) {
-      event.keys.forEach((value, id) => {
-        if (value.action === 'add') {
-          this._handleYBlockAdd(id);
-        } else if (value.action === 'delete') {
-          this._handleYBlockDelete(id);
-        } else {
-          // fires when undoing delete-and-add operation on a block
-          // console.warn('update action on top-level block store', event);
-        }
-      });
+    if (event.target !== this._yBlocks) {
+      return;
     }
+    event.keys.forEach((value, id) => {
+      if (value.action === 'add') {
+        this._handleYBlockAdd(id);
+        return;
+      }
+      if (value.action === 'delete') {
+        this._handleYBlockDelete(id);
+        return;
+      }
+    });
   }
 
   // Handle all the events that happen at _any_ level (potentially deep inside the structure).
   // So, we apply a listener at the top level for the flat structure of the current
   // doc/space container.
   private _handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
-    for (const event of events) {
-      this._handleYEvent(event);
-    }
+    events.forEach(event => this._handleYEvent(event));
   };
 
   private _handleVersion() {
