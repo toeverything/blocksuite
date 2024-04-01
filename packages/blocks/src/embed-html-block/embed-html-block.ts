@@ -1,6 +1,5 @@
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
-import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';

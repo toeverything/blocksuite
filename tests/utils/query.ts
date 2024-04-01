@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 
+import { waitNextFrame } from './actions/misc.js';
 import { assertAlmostEqual } from './asserts.js';
 
 export function getFormatBar(page: Page) {
@@ -63,5 +64,56 @@ export function getFormatBar(page: Page) {
     codeBlockBtn,
 
     assertBoundingBox,
+  };
+}
+
+export function getEmbedCardToolbar(page: Page) {
+  const embedCardToolbar = page.locator('.embed-card-toolbar');
+  function createButtonLocator(className: string) {
+    return embedCardToolbar.locator(`.embed-card-toolbar-button.${className}`);
+  }
+  const urlButton = createButtonLocator('url');
+  const copyButton = createButtonLocator('copy');
+  const editButton = createButtonLocator('edit');
+  const docInfo = createButtonLocator('doc-info');
+  const inlineButton = createButtonLocator('link');
+  const cardButton = createButtonLocator('card');
+  const embedButton = createButtonLocator('embed');
+  const cardStyleButton = createButtonLocator('card-style');
+  const captionButton = createButtonLocator('caption');
+  const moreButton = createButtonLocator('more');
+  const cardStyleHorizontalButton = page.locator(
+    '.card-style-button-horizontal'
+  );
+  const cardStyleListButton = page.locator('.card-style-button-list');
+
+  const openCardStyleMenu = async () => {
+    await expect(embedCardToolbar).toBeVisible();
+    await cardStyleButton.click();
+    await waitNextFrame(page);
+  };
+
+  const openMoreMenu = async () => {
+    await expect(embedCardToolbar).toBeVisible();
+    await moreButton.click();
+    await waitNextFrame(page);
+  };
+
+  return {
+    embedCardToolbar,
+    urlButton,
+    copyButton,
+    editButton,
+    docInfo,
+    inlineButton,
+    cardButton,
+    embedButton,
+    cardStyleButton,
+    captionButton,
+    moreButton,
+    openCardStyleMenu,
+    openMoreMenu,
+    cardStyleHorizontalButton,
+    cardStyleListButton,
   };
 }

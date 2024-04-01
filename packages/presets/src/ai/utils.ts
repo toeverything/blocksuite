@@ -2,7 +2,8 @@ import type {
   AffineAIPanelWidget,
   AffineAIPanelWidgetConfig,
 } from '@blocksuite/blocks';
-import type { CopilotClient } from '@blocksuite/presets';
+
+import type { CopilotClient } from './copilot-client.js';
 
 export function getGenerateAnswer({
   copilotClient,

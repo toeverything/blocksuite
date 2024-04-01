@@ -1,10 +1,8 @@
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
-import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
-import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import {
   customElement,
@@ -14,10 +12,8 @@ import {
   state,
 } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { ref } from 'lit/directives/ref.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
-import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
@@ -353,45 +349,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     super.disconnectedCallback();
   }
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-    ) {
-      return null;
-    }
-
-    return {
-      template: html`
-        <style>
-          :host {
-            z-index: 1;
-          }
-        </style>
-        <embed-card-toolbar
-          .block=${this}
-          .abortController=${abortController}
-        ></embed-card-toolbar>
-      `,
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    };
-  });
-
   override renderBlock() {
     this._cardStyle = this.model.style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
@@ -457,52 +414,57 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     return this.renderEmbed(
       () => html`
-        <div
-          ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
-          class="affine-embed-linked-doc-block ${cardClassMap}"
-          @click=${this._handleClick}
-          @dblclick=${this._handleDoubleClick}
-        >
-          <div class="affine-embed-linked-doc-content">
-            <div class="affine-embed-linked-doc-content-title">
-              <div class="affine-embed-linked-doc-content-title-icon">
-                ${titleIcon}
+        <div>
+          <div
+            class="affine-embed-linked-doc-block ${cardClassMap}"
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            <div class="affine-embed-linked-doc-content">
+              <div class="affine-embed-linked-doc-content-title">
+                <div class="affine-embed-linked-doc-content-title-icon">
+                  ${titleIcon}
+                </div>
+
+                <div class="affine-embed-linked-doc-content-title-text">
+                  ${titleText}
+                </div>
               </div>
 
-              <div class="affine-embed-linked-doc-content-title-text">
-                ${titleText}
+              <div class="affine-embed-linked-doc-content-note render"></div>
+              ${showDefaultNoteContent
+                ? html`<div
+                    class="affine-embed-linked-doc-content-note default"
+                  >
+                    ${defaultNoteContent}
+                  </div>`
+                : nothing}
+
+              <div class="affine-embed-linked-doc-content-date">
+                <span>Updated</span>
+
+                <span>${dateText}</span>
               </div>
             </div>
 
-            <div class="affine-embed-linked-doc-content-note render"></div>
-            ${showDefaultNoteContent
-              ? html`<div class="affine-embed-linked-doc-content-note default">
-                  ${defaultNoteContent}
-                </div>`
+            <div class="affine-embed-linked-doc-banner render"></div>
+
+            ${showDefaultBanner
+              ? html`
+                  <div class="affine-embed-linked-doc-banner default">
+                    ${defaultBanner}
+                  </div>
+                `
               : nothing}
-
-            <div class="affine-embed-linked-doc-content-date">
-              <span>Updated</span>
-
-              <span>${dateText}</span>
-            </div>
+            <div class="affine-embed-linked-doc-block-overlay"></div>
           </div>
 
-          <div class="affine-embed-linked-doc-banner render"></div>
+          <embed-card-caption .block=${this}></embed-card-caption>
 
-          ${showDefaultBanner
-            ? html`
-                <div class="affine-embed-linked-doc-banner default">
-                  ${defaultBanner}
-                </div>
-              `
-            : nothing}
-          <div class="affine-embed-linked-doc-block-overlay"></div>
+          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
 
-        <embed-card-caption .block=${this}></embed-card-caption>
-
-        <affine-block-selection .block=${this}></affine-block-selection>
+        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }
