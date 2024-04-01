@@ -537,6 +537,19 @@ export class AIChatLogic {
         })(text);
       },
     },
+
+    {
+      type: 'action',
+      name: 'Make it real',
+      hide: () => {
+        const service = getEdgelessService(this.host);
+        const ele = service.selection.elements[0];
+        return !SurfaceBlockComponent.isShape(ele);
+      },
+      action: async () => {
+        await this.logic.edgeless.makeItReal();
+      },
+    },
   ];
 }
 
