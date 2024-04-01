@@ -707,7 +707,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             if (!fetchable(imageURL)) {
               assets.getAssets().forEach((_value, key) => {
                 const attachmentName = getAssetName(assets.getAssets(), key);
-                if (imageURL.includes(attachmentName)) {
+                if (decodeURIComponent(imageURL).includes(attachmentName)) {
                   blobId = key;
                 }
               });
