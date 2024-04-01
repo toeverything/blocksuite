@@ -8,15 +8,15 @@
     "start": "concurrently -r 'pnpm start:server' 'pnpm basic-websocket' 'pnpm y-redis'",
     "dev:server": "nodemon -w src/server -x tsx src/server/main.ts",
     "start:server": "NODE_ENV=production pnpm tsx src/server/main.ts",
-    "basic-websocket": "PORT=3001 pnpm exec y-websocket",
+    "basic-websocket": "node --env-file .env.basic node_modules/y-websocket/bin/server.cjs",
     "y-redis": "concurrently -r 'pnpm y-redis-server' 'pnpm y-redis-worker' 'pnpm redis' 'pnpm minio'",
-    "y-redis-server": "wait-on tcp:6379 && node --env-file .env node_modules/@y/redis/bin/server.js",
-    "y-redis-worker": "wait-on tcp:6379 && node --env-file .env node_modules/@y/redis/bin/worker.js",
+    "y-redis-server": "wait-on tcp:6379 && node --env-file .env.y-redis node_modules/@y/redis/bin/server.js",
+    "y-redis-worker": "wait-on tcp:6379 && node --env-file .env.y-redis node_modules/@y/redis/bin/worker.js",
     "redis": "docker run --rm -p 6379:6379 redis",
     "minio": "docker run --rm -p 9000:9000 -p 9001:9001 quay.io/minio/minio server /data --console-address \":9001\"",
     "build": "vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "postinstall": "cp node_modules/@y/redis/.env.template .env && sh gen-key.sh"
+    "postinstall": "cp node_modules/@y/redis/.env.template .env.y-redis && sh gen-key.sh"
   },
   "dependencies": {
     "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",

@@ -2,7 +2,7 @@
  * This implementation is based on https://github.com/yjs/y-redis/blob/master/demos/blocksuite/server.js
  */
 
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
 import express, { json } from 'express';
 import ViteExpress from 'vite-express';
 
@@ -16,6 +16,7 @@ import * as fs from 'fs/promises';
 import { JSONDatabase } from './db.ts';
 
 // Constants
+dotenv.config({ path: '.env.y-redis' });
 const appName = 'blocksuite-example';
 const port = 5173;
 const authPrivateKey = await ecdsa.importKeyJwk(
@@ -33,7 +34,29 @@ const app = express();
 app.use(json());
 
 // --------------------------
-// Y-Redis related callback
+// Basic WebSocket callback
+// --------------------------
+type BasicWsCallbackBody = {
+  room: string;
+  data: {
+    blocks: {
+      type: 'Map';
+      content: Record<string, unknown>;
+    };
+  };
+};
+
+// This endpoint is called in regular intervals when the document changes.
+app.post('/basic-ws-callback', async (req, res) => {
+  const { room, data } = req.body as BasicWsCallbackBody;
+  console.log(
+    `BlockSuite doc in room "${room}" updated, block count: ${Object.keys(data.blocks.content).length}`
+  );
+  res.sendStatus(200);
+});
+
+// --------------------------
+// Y-Redis related callbacks
 // --------------------------
 
 // This example server always grants read-write permission to all requests.
@@ -103,7 +126,7 @@ app.get('/auth/perm/:room/:userid', async (req, res) => {
 });
 
 // --------------------------
-// Client realted api
+// Client related api
 // --------------------------
 
 // get all doc meta information

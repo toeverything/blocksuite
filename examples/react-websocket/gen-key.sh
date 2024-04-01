@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ENV_PATH="./.env"
+ENV_PATH="./.env.y-redis"
 
 echo "Generating ECDSA key pair..."
 keys=$(npx 0ecdsa-generate-keypair --name auth)
