@@ -17,3 +17,18 @@ export const userText = (text: string): ChatMessage => {
     ],
   };
 };
+
+export const userImage = (url: string): ChatMessage => {
+  return {
+    role: 'user',
+    content: [
+      {
+        type: 'image_url',
+        image_url: {
+          detail: 'high',
+          url,
+        },
+      },
+    ],
+  };
+};

@@ -27,7 +27,7 @@ import {
   runSummaryAction,
   runTranslateAction,
 } from '../doc/actions.js';
-import { getChatService } from '../doc/api.js';
+import { getChatService, userImage } from '../doc/api.js';
 import type { AILogic } from '../logic.js';
 import { findLeaf, findTree, getConnectorPath } from '../utils/connector.js';
 import {
@@ -543,11 +543,37 @@ export class AIChatLogic {
       name: 'Make it real',
       hide: () => {
         const service = getEdgelessService(this.host);
-        const ele = service.selection.elements[0];
-        return !SurfaceBlockComponent.isShape(ele);
+        const { notes, frames, shapes, images } = BlocksUtils.splitElements(
+          service.selection.elements
+        );
+        return !(
+          notes.length ||
+          frames.length ||
+          shapes.length ||
+          images.length
+        );
       },
       action: async () => {
-        await this.logic.edgeless.makeItReal();
+        const canvas = await selectedToCanvas(this.host);
+        if (!canvas) {
+          alert('Please select some shapes first');
+          return;
+        }
+        const url = canvas.toDataURL();
+        console.log(url);
+        this.reactiveData.history.push(userImage(url));
+
+        // edgelessRoot.doc.addBlock(
+        //   EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
+        //   { html, design: png, xywh: '[0, 400, 400, 200]' },
+        //   edgelessRoot.surface.model.id
+        // );
+
+        // await this.createAction('Make it real', input => {
+        //   return (async function* () {
+        //     yield input;
+        //   })();
+        // })(url);
       },
     },
   ];
@@ -574,6 +600,7 @@ type MessageContent =
       type: 'image_url';
       image_url: {
         url: string;
+        detail?: string;
       };
     };
 
