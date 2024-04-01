@@ -247,8 +247,9 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
 
     if (getYFieldPropsSet(prototype).has(prop as string)) {
       this.surface.doc.transact(() => {
-        // @ts-ignore
-        this[prop] = value;
+        // directly set the value to the ymap to avoid
+        // executing derive and convert decorators again
+        this.yMap.set(prop as string, value);
       });
     } else {
       console.warn('pop a prop that is not yfield or local:', prop);
@@ -389,7 +390,7 @@ export abstract class GroupLikeModel<
   abstract removeDescendant(id: string): void;
 }
 
-export abstract class StatelessModel {
+export abstract class LocalModel {
   protected _local: Map<string | symbol, unknown> = new Map();
 
   abstract rotate: number;

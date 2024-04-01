@@ -10,7 +10,7 @@ import {
 import { PointLocation } from '../utils/point-location.js';
 import { type IVec2, Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
-import { type BaseProps, ElementModel, StatelessModel } from './base.js';
+import { type BaseProps, ElementModel, LocalModel } from './base.js';
 import type { StrokeStyle } from './common.js';
 import { derive, local, yfield } from './decorators.js';
 
@@ -174,7 +174,7 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   }
 }
 
-export class StatelessConnectorElementModel extends StatelessModel {
+export class StatelessConnectorElementModel extends LocalModel {
   get type() {
     return 'connector';
   }
