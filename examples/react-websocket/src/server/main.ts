@@ -33,7 +33,7 @@ const app = express();
 app.use(json());
 
 // --------------------------
-// Y-Redis realted callback
+// Y-Redis related callback
 // --------------------------
 
 // This example server always grants read-write permission to all requests.
@@ -106,7 +106,7 @@ app.get('/auth/perm/:room/:userid', async (req, res) => {
 // Client realted api
 // --------------------------
 
-// get all doc meta informations
+// get all doc meta information
 app.get('/api/docs', async (_, res) => {
   res.json(await db.getDocMetas());
 });
@@ -154,7 +154,7 @@ ViteExpress.listen(app, port, () =>
   console.log(`Server listening at http://localhost:${port}`)
 );
 
-// Remove the follwoing if you want to keep the database in disk
+// Remove the following code if you want to keep the database in disk
 process.on('exit', async () => {
   await fs.unlink(dbFile);
 });
