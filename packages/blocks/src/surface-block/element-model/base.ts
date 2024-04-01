@@ -141,7 +141,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     return true;
   }
 
-  private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
+  private _lastXYWH: SerializedXYWH = '[0,0,0,0]';
 
   get deserializedXYWH() {
     if (this.xywh !== this._lastXYWH) {
@@ -150,7 +150,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       this._lastXYWH = xywh;
     }
 
-    return this._local.get('deserializedXYWH') as XYWH;
+    return (this._local.get('deserializedXYWH') as XYWH) ?? [0, 0, 0, 0];
   }
 
   get x() {

@@ -2,11 +2,13 @@ import { expect } from '@playwright/test';
 
 import {
   addBasicRectShapeElement,
+  assertEdgelessShapeType,
   createShapeElement,
   edgelessCommonSetup,
   getEdgelessSelectedRect,
   getZoomLevel,
   locatorEdgelessToolButton,
+  type ShapeName,
   switchEditorMode,
   zoomFitByKeyboard,
   zoomInByKeyboard,
@@ -37,7 +39,6 @@ test('shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-
   await page.mouse.click(100, 100);
 
   await page.keyboard.press('t');
@@ -63,6 +64,29 @@ test('shortcut', async ({ page }) => {
   await page.mouse.click(100, 100);
   await page.keyboard.press('x');
   await expect(connectorButton).toHaveAttribute('active', '');
+});
+
+test('toggle shapes shortcut', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await page.mouse.click(100, 100);
+
+  const shapesInOrder = [
+    'ellipse',
+    'diamond',
+    'triangle',
+    'roundedRect',
+    'rect',
+    'ellipse',
+    'diamond',
+    'triangle',
+    'roundedRect',
+  ] as ShapeName[];
+  for (const shape of shapesInOrder) {
+    await page.keyboard.press('Shift+s');
+    await assertEdgelessShapeType(page, shape);
+  }
 });
 
 test('pressing the ESC key will return to the default state', async ({

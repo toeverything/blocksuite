@@ -53,6 +53,7 @@ const embedConfig: EmbedConfig[] = [
         frameborder="no"
         allowTransparency
         allowfullscreen
+        type="application/pdf"
       ></iframe>`;
     },
   },
