@@ -6,8 +6,6 @@ import {
   type NormalizedCacheObject,
 } from '@apollo/client/core';
 
-const backendUrl = 'https://affine.fail';
-
 const GET_COPILOT_HISTORIES = gql`
   query getCopilotHistories(
     $workspaceId: String!
@@ -81,7 +79,7 @@ const CREATE_COPILOT_SESSIONS = gql`
 export class CopilotClient {
   private graphQLClient: ApolloClient<NormalizedCacheObject>;
 
-  constructor() {
+  constructor(readonly backendUrl: string = 'https://affine.fail') {
     this.graphQLClient = new ApolloClient({
       link: new HttpLink({
         uri: `${backendUrl}/graphql`,
@@ -190,7 +188,7 @@ export class CopilotClient {
 
   async textToText(text: string, sessionId: string) {
     const res = await fetch(
-      `${backendUrl}/api/copilot/chat/${sessionId}?message=${text}`
+      `${this.backendUrl}/api/copilot/chat/${sessionId}?message=${text}`
     );
     if (!res.ok) return;
     return res.text();
@@ -198,7 +196,7 @@ export class CopilotClient {
 
   textToTextStream(text: string, sessionId: string) {
     return new EventSource(
-      `${backendUrl}/api/copilot/chat/${sessionId}/stream?message=${text}`
+      `${this.backendUrl}/api/copilot/chat/${sessionId}/stream?message=${text}`
     );
   }
 }

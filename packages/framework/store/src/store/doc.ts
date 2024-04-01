@@ -189,6 +189,10 @@ export class Doc extends Space<FlatBlockMap> {
     return this._idGenerator();
   }
 
+  hasBlockById(id: string): boolean {
+    return this._blockTree.hasBlock(id);
+  }
+
   getBlockById<Model extends BlockModel = BlockModel>(
     id: string
   ): Model | null {
