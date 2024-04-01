@@ -56,6 +56,7 @@ export class Doc extends Space<FlatBlockMap> {
      */
     rootAdded: new Slot<BlockModel>(),
     rootDeleted: new Slot<string>(),
+    selectorUpdated: new Slot<BlockSelector>(),
     blockUpdated: new Slot<
       | {
           type: 'add';

@@ -13,7 +13,6 @@ export type BlockSelector = (block: Block) => boolean;
 type BlockTreeOptions = {
   schema: Schema;
   doc: Doc;
-  selector?: BlockSelector;
 };
 
 export class BlockTree {
@@ -38,10 +37,9 @@ export class BlockTree {
     return this._doc.yBlocks;
   }
 
-  constructor({ schema, doc, selector }: BlockTreeOptions) {
+  constructor({ schema, doc }: BlockTreeOptions) {
     this._doc = doc;
     this._schema = schema;
-    this._selector = selector;
   }
 
   updateSelector(selector: BlockSelector) {
@@ -58,6 +56,8 @@ export class BlockTree {
         this.onBlockAdded(id);
       }
     });
+
+    this._doc.slots.selectorUpdated.emit(selector);
   }
 
   onBlockAdded(id: string) {
