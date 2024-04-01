@@ -12,8 +12,8 @@ import {
   requestConnectedFrame,
 } from '../../../_common/utils/event.js';
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { RootBlockModel } from '../../index.js';
-import { type EdgelessRootBlockComponent } from '../../index.js';
 import { actionWithAI, dragWithAI } from '../edgeless-copilot-panel/config.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 
