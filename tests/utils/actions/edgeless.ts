@@ -264,6 +264,7 @@ export async function setEdgelessTool(
     case 'lasso':
     case 'text':
     case 'note':
+    case 'brush':
     case 'eraser':
     case 'frame':
     case 'connector': {
