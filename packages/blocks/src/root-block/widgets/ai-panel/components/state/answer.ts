@@ -2,20 +2,20 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type {
+  AIItemConfig,
+  AIItemGroupConfig,
+} from '../../../../../_common/components/ai-item/index.js';
 import { WarningIcon } from '../../../../../_common/icons/misc.js';
 import { CopyIcon } from '../../../../../_common/icons/text.js';
-import type {
-  AIActionPanelListGroup,
-  AIActionPanelListGroupItem,
-} from '../list.js';
 
-export type AIActionPanelAnswerConfig = {
-  responses: AIActionPanelListGroupItem[];
-  actions: AIActionPanelListGroup[];
+export type AIPanelAnswerConfig = {
+  responses: AIItemConfig[];
+  actions: AIItemGroupConfig[];
 };
 
-@customElement('ai-action-panel-answer')
-export class AIActionPanelAnswer extends WithDisposable(LitElement) {
+@customElement('ai-panel-answer')
+export class AIPanelAnswer extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 100%;
@@ -117,15 +117,15 @@ export class AIActionPanelAnswer extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  config!: AIActionPanelAnswerConfig;
+  config!: AIPanelAnswerConfig;
 
   @property({ attribute: false })
   finish = true;
 
   override render() {
-    const responseGroups: AIActionPanelListGroup[] = [
+    const responseGroups: AIItemGroupConfig[] = [
       {
-        head: 'Responses',
+        name: 'Responses',
         items: this.config.responses,
       },
     ];
@@ -148,19 +148,16 @@ export class AIActionPanelAnswer extends WithDisposable(LitElement) {
             </div>
             ${this.config.responses.length > 0
               ? html`
-                  <ai-action-panel-divider></ai-action-panel-divider>
-                  <ai-action-panel-list
-                    .groups=${responseGroups}
-                  ></ai-action-panel-list>
+                  <ai-panel-divider></ai-panel-divider>
+                  <ai-item-list .groups=${responseGroups}></ai-item-list>
                 `
               : nothing}
-            ${this.config.responses.length > 0 &&
-            html`<ai-action-panel-divider></ai-action-panel-divider>`}
+            ${this.config.responses.length > 0 && this.config.actions.length > 0
+              ? html`<ai-panel-divider></ai-panel-divider>`
+              : nothing}
             ${this.config.actions.length > 0
               ? html`
-                  <ai-action-panel-list
-                    .groups=${this.config.actions}
-                  ></ai-action-panel-list>
+                  <ai-item-list .groups=${this.config.actions}></ai-item-list>
                 `
               : nothing}
           `
@@ -171,6 +168,6 @@ export class AIActionPanelAnswer extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-action-panel-answer': AIActionPanelAnswer;
+    'ai-panel-answer': AIPanelAnswer;
   }
 }

@@ -2,7 +2,6 @@ import type {
   ShapeElementModel,
   ShapeType,
 } from '../../../element-model/shape.js';
-import { serializeXYWH } from '../../../utils/xywh.js';
 import type { Renderer } from '../../renderer.js';
 import {
   deltaInsertsToChunks,
@@ -73,7 +72,9 @@ function renderText(
     fontWeight: model.fontWeight,
     fontStyle: model.fontStyle,
   });
-  const lines = deltaInsertsToChunks(wrapTextDeltas(text, font, w));
+  const lines = deltaInsertsToChunks(
+    wrapTextDeltas(text, font, w - SHAPE_TEXT_PADDING * 2)
+  );
   const horiOffset = horizontalOffset(model.w, model.textAlign);
   const vertOffset = verticalOffset(lines, lineHeight, h, textVerticalAlign);
   let maxLineWidth = 0;
@@ -99,9 +100,8 @@ function renderText(
 
       ctx.fillText(
         str,
-        horiOffset - 2,
-        // 1.5 is a "magic number" used to align the text rendered on the canvas with the text in the DOM.
-        // This approach is employed until a better or proper handling method is discovered.
+        // 1.5 is the magic number to make the text align with the DOM text
+        horiOffset - 1.5,
         (lineIndex + 1) * lineHeight + vertOffset - 1.5
       );
 
@@ -114,18 +114,4 @@ function renderText(
       ctx.restore();
     }
   }
-
-  const textOffsetX =
-    textAlign === 'center'
-      ? horiOffset - maxLineWidth / 2
-      : textAlign === 'right'
-        ? horiOffset - maxLineWidth
-        : SHAPE_TEXT_PADDING;
-
-  model.externalXYWH = serializeXYWH(
-    model.x + textOffsetX - 2,
-    model.y + vertOffset - 1.5,
-    maxLineWidth,
-    lines.length * lineHeight
-  );
 }

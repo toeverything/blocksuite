@@ -2,8 +2,8 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-@customElement('ai-action-panel-divider')
-export class AIActionPanelDivider extends WithDisposable(LitElement) {
+@customElement('ai-panel-divider')
+export class AIPanelDivider extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -26,6 +26,6 @@ export class AIActionPanelDivider extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-action-panel-divider': AIActionPanelDivider;
+    'ai-panel-divider': AIPanelDivider;
   }
 }

@@ -1,11 +1,11 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import type {
-  BlockModel,
-  BlockSnapshot,
-  JobMiddleware,
-  JobSlots,
+import {
+  type BlockSnapshot,
+  type DraftModel,
+  type JobMiddleware,
+  type JobSlots,
 } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
@@ -13,9 +13,10 @@ import { matchFlavours } from '../../../_common/utils/index.js';
 const handlePoint = (
   point: TextRangePoint,
   snapshot: BlockSnapshot,
-  model: BlockModel
+  model: DraftModel
 ) => {
   const { index, length } = point;
+  // @ts-expect-error TODO: add match flavour type for draft model
   if (matchFlavours(model, ['affine:page'])) {
     if (length === 0) return;
     (snapshot.props.title as Record<string, unknown>).delta =

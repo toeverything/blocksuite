@@ -1,6 +1,7 @@
 import type { BlockModel, InternalPrimitives } from '../schema/index.js';
 import { internalPrimitives } from '../schema/index.js';
 import type { AssetsManager } from './assets.js';
+import type { DraftModel } from './draft.js';
 import { fromJSON, toJSON } from './json.js';
 import type { BlockSnapshot } from './type.js';
 
@@ -16,7 +17,7 @@ export type FromSnapshotPayload = {
 };
 
 export type ToSnapshotPayload<Props extends object> = {
-  model: BlockModel<Props>;
+  model: DraftModel<BlockModel<Props>>;
   assets: AssetsManager;
 };
 
@@ -38,7 +39,7 @@ export class BaseBlockTransformer<Props extends object = object> {
     ) as Props;
   }
 
-  protected _propsToSnapshot(model: BlockModel) {
+  protected _propsToSnapshot(model: DraftModel) {
     return Object.fromEntries(
       model.keys.map(key => {
         const value = model[key as keyof typeof model];

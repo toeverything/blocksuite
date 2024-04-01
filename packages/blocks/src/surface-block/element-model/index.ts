@@ -10,6 +10,7 @@ import {
   setCreateState,
 } from './decorators.js';
 import { GroupElementModel } from './group.js';
+import { MindmapElementModel } from './mindmap.js';
 import { ShapeElementModel } from './shape.js';
 import { TextElementModel } from './text.js';
 
@@ -19,6 +20,7 @@ const elementsCtorMap = {
   shape: ShapeElementModel,
   brush: BrushElementModel,
   text: TextElementModel,
+  mindmap: MindmapElementModel,
 };
 
 export function createElementModel(
@@ -31,6 +33,7 @@ export function createElementModel(
       id: string;
       props: Record<string, unknown>;
       oldValues: Record<string, unknown>;
+      local: boolean;
     }) => void;
     skipFieldInit?: boolean;
   }
@@ -53,7 +56,7 @@ export function createElementModel(
     yMap,
     model,
     stashedStore: stashed,
-    onChange: props => mounted && options.onChange({ id, ...props }),
+    onChange: payload => mounted && options.onChange({ id, ...payload }),
   }) as ElementModel;
 
   setCreateState(false, false);
@@ -91,9 +94,13 @@ function onElementChange(
   callback: (payload: {
     props: Record<string, unknown>;
     oldValues: Record<string, unknown>;
+    local: boolean;
   }) => void
 ) {
-  const observer = (event: Y.YMapEvent<unknown>) => {
+  const observer = (
+    event: Y.YMapEvent<unknown>,
+    transaction: Y.Transaction
+  ) => {
     const props: Record<string, unknown> = {};
     const oldValues: Record<string, unknown> = {};
 
@@ -114,6 +121,7 @@ function onElementChange(
     callback({
       props,
       oldValues,
+      local: transaction.local,
     });
   };
 
@@ -143,6 +151,7 @@ export function createModelFromProps(
       id: string;
       props: Record<string, unknown>;
       oldValues: Record<string, unknown>;
+      local: boolean;
     }) => void;
   }
 ) {
@@ -179,6 +188,7 @@ export {
   ConnectorElementModel,
   ElementModel,
   GroupElementModel,
+  MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
 };
@@ -188,7 +198,8 @@ export type CanvasElement =
   | ConnectorElementModel
   | ShapeElementModel
   | TextElementModel
-  | GroupElementModel;
+  | GroupElementModel
+  | MindmapElementModel;
 
 export enum CanvasElementType {
   SHAPE = 'shape',
@@ -196,6 +207,7 @@ export enum CanvasElementType {
   CONNECTOR = 'connector',
   TEXT = 'text',
   GROUP = 'group',
+  MINDMAP = 'mindmap',
 }
 
 export type ElementModelMap = {
@@ -204,6 +216,7 @@ export type ElementModelMap = {
   ['connector']: ConnectorElementModel;
   ['text']: TextElementModel;
   ['group']: GroupElementModel;
+  ['mindmap']: MindmapElementModel;
 };
 
 export function isCanvasElementType(type: string): type is CanvasElementType {

@@ -1,9 +1,9 @@
 import { assertEquals, assertExists } from '@blocksuite/global/utils';
 
-import {
-  type Connectable,
-  type EdgelessModel,
-  type Selectable,
+import type {
+  Connectable,
+  EdgelessModel,
+  Selectable,
 } from '../../_common/types.js';
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import { Overlay } from '../canvas-renderer/renderer.js';
@@ -11,6 +11,7 @@ import type { IBound } from '../consts.js';
 import type {
   Connection,
   ConnectorElementModel,
+  LocalConnectorElementModel,
 } from '../element-model/connector.js';
 import { ConnectorMode } from '../element-model/connector.js';
 import { AStarRunner } from '../utils/a-star.js';
@@ -23,6 +24,7 @@ import {
   isOverlap,
   isVecZero,
   lineIntersects,
+  PI2,
   sign,
   toRadian,
 } from '../utils/math-utils.js';
@@ -43,7 +45,7 @@ function rBound(ele: EdgelessModel, anti = false): IBound {
 }
 
 export function isConnectorAndBindingsAllSelected(
-  connector: ConnectorElementModel,
+  connector: ConnectorElementModel | LocalConnectorElementModel,
   selected: Selectable[]
 ) {
   const connectorSelected = selected.find(s => s.id === connector.id);
@@ -736,25 +738,26 @@ export class ConnectionOverlay extends Overlay {
 
   override render(ctx: CanvasRenderingContext2D): void {
     const zoom = this._service.viewport.zoom;
+    const radius = 5 / zoom;
+    const color = getComputedStyle(this._service.host).getPropertyValue(
+      '--affine-text-emphasis-color'
+    );
+
     this.points.forEach(p => {
       ctx.beginPath();
-      ctx.arc(p[0], p[1], 3 / zoom, 0, Math.PI * 2);
+      ctx.arc(p[0], p[1], radius, 0, PI2);
       ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'blue';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
       ctx.fill();
       ctx.stroke();
     });
     if (this.highlightPoint) {
       ctx.beginPath();
-      ctx.arc(
-        this.highlightPoint[0],
-        this.highlightPoint[1],
-        3 / zoom,
-        0,
-        Math.PI * 2
-      );
-      ctx.fillStyle = 'blue';
-      ctx.strokeStyle = 'blue';
+      ctx.arc(this.highlightPoint[0], this.highlightPoint[1], radius, 0, PI2);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
       ctx.fill();
       ctx.stroke();
     }
@@ -883,7 +886,7 @@ export class ConnectorPathGenerator {
   ) {}
 
   private _getConnectorEndElement(
-    connector: ConnectorElementModel,
+    connector: ConnectorElementModel | LocalConnectorElementModel,
     type: 'source' | 'target'
   ): Connectable | null {
     const id = connector[type].id;
@@ -896,7 +899,7 @@ export class ConnectorPathGenerator {
   }
 
   private _getConnectionPoint(
-    connector: ConnectorElementModel,
+    connector: ConnectorElementModel | LocalConnectorElementModel,
     type: 'source' | 'target'
   ): PointLocation {
     const connection = connector[type];
@@ -918,7 +921,9 @@ export class ConnectorPathGenerator {
     }
   }
 
-  private _generateStraightConnectorPath(connector: ConnectorElementModel) {
+  private _generateStraightConnectorPath(
+    connector: ConnectorElementModel | LocalConnectorElementModel
+  ) {
     const { source, target } = connector;
     if (source.id && !source.position && target.id && !target.position) {
       const start = this._getConnectorEndElement(
@@ -941,7 +946,9 @@ export class ConnectorPathGenerator {
     }
   }
 
-  private _computeStartEndPoint(connector: ConnectorElementModel) {
+  private _computeStartEndPoint(
+    connector: ConnectorElementModel | LocalConnectorElementModel
+  ) {
     const { source, target } = connector;
     const start = this._getConnectorEndElement(connector, 'source');
     const end = this._getConnectorEndElement(connector, 'target');
@@ -974,7 +981,9 @@ export class ConnectorPathGenerator {
     return [startPoint, endPoint];
   }
 
-  private _generateCurveConnectorPath(connector: ConnectorElementModel) {
+  private _generateCurveConnectorPath(
+    connector: ConnectorElementModel | LocalConnectorElementModel
+  ) {
     const { source, target } = connector;
 
     if (source.id || target.id) {
@@ -1087,7 +1096,9 @@ export class ConnectorPathGenerator {
     ];
   }
 
-  private _generateConnectorPath(connector: ConnectorElementModel) {
+  private _generateConnectorPath(
+    connector: ConnectorElementModel | LocalConnectorElementModel
+  ) {
     const { mode } = connector;
     if (mode === ConnectorMode.Straight) {
       return this._generateStraightConnectorPath(connector);
@@ -1116,7 +1127,10 @@ export class ConnectorPathGenerator {
     throw new Error('unknown connector mode');
   }
 
-  updatePath(connector: ConnectorElementModel, path?: PointLocation[]) {
+  updatePath(
+    connector: ConnectorElementModel | LocalConnectorElementModel,
+    path?: PointLocation[]
+  ) {
     const points = path ?? this._generateConnectorPath(connector) ?? [];
 
     const bound = getBoundFromPoints(points);
@@ -1190,7 +1204,9 @@ export class ConnectorPathGenerator {
     return path;
   }
 
-  hasRelatedElement(connecter: ConnectorElementModel) {
+  hasRelatedElement(
+    connecter: ConnectorElementModel | LocalConnectorElementModel
+  ) {
     const { source, target } = connecter;
     if (
       (source.id && !this.options.getElementById(source.id)) ||

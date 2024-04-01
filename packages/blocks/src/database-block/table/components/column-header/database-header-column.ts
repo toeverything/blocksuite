@@ -23,7 +23,7 @@ import {
 } from '../../../../_common/icons/index.js';
 import type { InsertToPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
-import { startFrameLoop } from '../../../utils/frame-loop.js';
+import { autoScrollOnBoundary } from '../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
@@ -45,6 +45,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     affine-database-header-column {
       display: flex;
     }
+
     .affine-database-header-column-grabbing * {
       cursor: grabbing;
     }
@@ -59,6 +60,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
 
   private widthDragBar = createRef();
+
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
@@ -80,7 +82,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             }
             if (this.contains(target)) {
               event.preventDefault();
-              this._drag(event);
+              this.moveColumn(event);
               return true;
             }
           }
@@ -166,7 +168,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     };
   };
-  private _drag = (evt: PointerEvent) => {
+  private moveColumn = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const headerContainer = this.closest('affine-database-column-header');
     const scrollContainer = tableContainer?.parentElement;
@@ -175,7 +177,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     assertExists(scrollContainer);
     const columnHeaderRect = this.getBoundingClientRect();
     const scale = columnHeaderRect.width / this.column.width;
-    const tableContainerRect = scrollContainer.getBoundingClientRect();
     const headerContainerRect = tableContainer.getBoundingClientRect();
 
     const rectOffsetLeft = evt.x - columnHeaderRect.left;
@@ -199,26 +200,23 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     );
     const rectList = getTableGroupRects(tableContainer);
     const dropPreview = getVerticalIndicator();
-
-    const cancelScroll = startFrameLoop(delta => {
-      const offset = delta * 0.4;
-      if (drag.data.x < tableContainerRect.left + rectOffsetLeft) {
-        scrollContainer.scrollLeft -= offset;
-        drag.move({ x: drag.data.x });
-      } else if (drag.data.x > tableContainerRect.right - offsetRight) {
-        scrollContainer.scrollLeft += offset;
-        drag.move({ x: drag.data.x });
-      }
+    const cancelScroll = autoScrollOnBoundary(scrollContainer, {
+      boundary: {
+        left: rectOffsetLeft,
+        right: offsetRight,
+      },
+      onScroll: () => {
+        drag.move({ x: drag.last.x });
+      },
     });
     const html = document.querySelector('html');
     html?.classList.toggle('affine-database-header-column-grabbing', true);
     const drag = startDrag<{
-      x: number;
       insertPosition?: InsertToPosition;
     }>(evt, {
-      onDrag: evt => {
+      onDrag: () => {
         this.grabStatus = 'grabbing';
-        return { x: evt.x };
+        return {};
       },
       onMove: ({ x }: { x: number }) => {
         this.grabStatus = 'grabbing';
@@ -246,7 +244,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         }
         dragPreview.display(currentOffset);
         return {
-          x,
           insertPosition: insertInfo.insertPosition,
         };
       },
@@ -491,6 +488,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     this.drawWidthDragBarTask = 0;
     getVerticalIndicator().remove();
   };
+
   override render() {
     const column = this.column;
     const style = styleMap({
@@ -509,7 +507,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       >
         ${this.readonly
           ? null
-          : html`<button class=${classes}>
+          : html` <button class="${classes}">
               <div class="hover-trigger"></div>
               <div class="control-h"></div>
               <div class="control-l"></div>
@@ -529,8 +527,8 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       </div>
       <div
         ${ref(this.widthDragBar)}
-        @mouseenter=${this._enterWidthDragBar}
-        @mouseleave=${this._leaveWidthDragBar}
+        @mouseenter="${this._enterWidthDragBar}"
+        @mouseleave="${this._leaveWidthDragBar}"
         style="width: 0;position: relative;height: 100%;z-index: 1;cursor: col-resize"
       >
         <div style="width: 8px;height: 100%;margin-left: -4px;"></div>

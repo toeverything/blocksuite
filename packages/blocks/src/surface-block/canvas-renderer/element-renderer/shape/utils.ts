@@ -15,6 +15,7 @@ import {
 } from '../text/utils.js';
 
 export const SHAPE_TEXT_PADDING = 20;
+export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
@@ -66,7 +67,10 @@ function drawRect(
   height: number,
   radius: number
 ) {
-  const r = Math.max(Math.min(width * radius, height * radius), 0);
+  const r =
+    radius < 1
+      ? Math.max(Math.min(width * radius, height * radius), 0)
+      : radius;
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + width - r, y);
@@ -140,8 +144,8 @@ export function verticalOffset(
   return textVerticalAlign === 'center'
     ? (height - lineHeight * lines.length) / 2
     : textVerticalAlign === 'top'
-      ? SHAPE_TEXT_PADDING
-      : height - lineHeight * lines.length - SHAPE_TEXT_PADDING;
+      ? SHAPE_TEXT_VERTICAL_PADDING
+      : height - lineHeight * lines.length - SHAPE_TEXT_VERTICAL_PADDING;
 }
 export function normalizeShapeBound(
   shape: ShapeElementModel,
@@ -175,8 +179,8 @@ export function normalizeShapeBound(
   ) as TextDelta[];
   const lines = deltaInsertsToChunks(deltas);
 
-  if (bound.h < lineHeight * lines.length + SHAPE_TEXT_PADDING * 2) {
-    bound.h = lineHeight * lines.length + SHAPE_TEXT_PADDING * 2;
+  if (bound.h < lineHeight * lines.length + SHAPE_TEXT_VERTICAL_PADDING * 2) {
+    bound.h = lineHeight * lines.length + SHAPE_TEXT_VERTICAL_PADDING * 2;
   }
 
   return bound;

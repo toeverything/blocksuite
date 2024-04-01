@@ -47,4 +47,5 @@ export type EdgelessElementType =
   | 'connector'
   | 'text'
   | 'group'
-  | 'debug';
+  | 'debug'
+  | 'mindmap';
