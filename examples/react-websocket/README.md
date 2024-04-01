@@ -26,14 +26,14 @@ There are multiple entries:
 Here is how it works:
 
 ```
-      DocMeta  ┌────────────┐
+    doc list   ┌────────────┐
     ┌─────────▶│   Express  │ ◀ - - - ┐
-    │ (auth?)  │   server   │         | (check auth?)
-    ▼          └────────────┘         | (Y-Doc update callback?)
+    │          │   Server   │         | save ydocs
+    ▼          └────────────┘         |
 ┌────────────┐                 ┌─────────────┐           ┌────────────┐
-│   Editor   │     (auth?)     │ Y-Websocket │           │  Document  │
-│   Client   │◀───────────────▶│   backend   │ - - - - -▶│  Storage   │
-└────────────┘      sync       └─────────────┘           └────────────┘
+│   Editor   │                 │ Y-Websocket │           │  Document  │
+│   Client   │◀───────────────▶│   Backend   │ - - - - -▶│  Storage   │
+└────────────┘    ydoc room    └─────────────┘           └────────────┘
 ```
 
 This project is created using the `pnpm create vite-express` cli.
