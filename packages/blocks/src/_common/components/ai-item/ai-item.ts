@@ -54,9 +54,11 @@ export class AIItem extends WithDisposable(LitElement) {
   override render() {
     const { item } = this;
     const hasSubConfig = !!item.subItem && item.subItem.length > 0;
+
     return html`<div
       class="menu-item"
-      @click=${() => typeof item.handler === 'function' && item.handler()}
+      @click=${() =>
+        typeof item.handler === 'function' && item.handler(this.host)}
       ${hasSubConfig ? ref(this._whenHover.setReference) : ''}
     >
       <span class="item-icon">${item.icon}</span>
