@@ -72,6 +72,7 @@ import { DefaultToolController } from './controllers/tools/default-tool.js';
 import { EraserToolController } from './controllers/tools/eraser-tool.js';
 import { PresentToolController } from './controllers/tools/frame-navigator-tool.js';
 import { FrameToolController } from './controllers/tools/frame-tool.js';
+import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { NoteToolController } from './controllers/tools/note-tool.js';
 import { PanToolController } from './controllers/tools/pan-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
@@ -719,6 +720,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       PanToolController,
       PresentToolController,
       CopilotSelectionController,
+      LassoToolController,
     ] as EdgelessToolConstructor[];
 
     tools.forEach(tool => {

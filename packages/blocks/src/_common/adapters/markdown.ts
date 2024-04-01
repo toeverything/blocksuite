@@ -867,7 +867,8 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           if (!fetchable(o.node.url)) {
             const imageURL = o.node.url;
             assets.getAssets().forEach((_value, key) => {
-              if (imageURL.includes(getAssetName(assets.getAssets(), key))) {
+              const imageName = getAssetName(assets.getAssets(), key);
+              if (decodeURIComponent(imageURL).includes(imageName)) {
                 blobId = key;
               }
             });
