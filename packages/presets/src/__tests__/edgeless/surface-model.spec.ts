@@ -483,3 +483,17 @@ describe('convert decorator', () => {
     ]);
   });
 });
+
+describe('basic property', () => {
+  test('empty group should have all zero xywh', () => {
+    const id = model.addElement({
+      type: 'group',
+    });
+    const group = model.getElementById(id)! as GroupElementModel;
+
+    expect(group.x).toBe(0);
+    expect(group.y).toBe(0);
+    expect(group.w).toBe(0);
+    expect(group.h).toBe(0);
+  });
+});
