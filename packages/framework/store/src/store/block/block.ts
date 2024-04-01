@@ -86,7 +86,7 @@ export class Block {
   constructor(
     readonly schema: Schema,
     readonly yBlock: YBlock,
-    readonly doc: Doc,
+    readonly doc?: Doc,
     readonly options: BlockOptions = {}
   ) {
     const { id, flavour, version, yChildren, props } = this._parseYBlock();
@@ -140,7 +140,9 @@ export class Block {
       this.options.onChange?.(this, '', undefined);
     });
 
-    this.model.doc = doc;
+    if (doc) {
+      this.model.doc = doc;
+    }
   }
 
   stash = (prop: string) => {
