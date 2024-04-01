@@ -2,8 +2,8 @@ import {
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
+import { getAISpecs } from '@blocksuite/presets';
 
-import { getAISpecs } from './ai/ai.js';
 import { getCustomAttachmentSpecs } from './custom-attachment/custom-attachment.js';
 import { getLatexSpecs } from './latex/latex.js';
 

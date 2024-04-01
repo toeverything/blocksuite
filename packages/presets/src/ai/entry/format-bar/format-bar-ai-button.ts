@@ -7,7 +7,7 @@ import {
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { AIItemGroups } from './config';
+import { AIItemGroups } from './config.js';
 
 @customElement('format-bar-ai-button')
 export class FormatBarAIButton extends WithDisposable(LitElement) {
