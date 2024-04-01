@@ -32,7 +32,6 @@ type DocOptions = {
   doc: BlockSuiteDoc;
   awarenessStore: AwarenessStore;
   idGenerator?: IdGenerator;
-  selector?: BlockSelector;
 };
 
 export class Doc extends Space<FlatBlockMap> {
@@ -56,7 +55,7 @@ export class Doc extends Space<FlatBlockMap> {
      */
     rootAdded: new Slot<BlockModel>(),
     rootDeleted: new Slot<string>(),
-    selectorUpdated: new Slot<BlockSelector>(),
+    selectorUpdated: new Slot<BlockSelector | undefined>(),
     blockUpdated: new Slot<
       | {
           type: 'add';
@@ -84,7 +83,6 @@ export class Doc extends Space<FlatBlockMap> {
     collection,
     doc,
     awarenessStore,
-    selector,
     idGenerator = uuidv4,
   }: DocOptions) {
     super(id, doc, awarenessStore);
@@ -93,7 +91,6 @@ export class Doc extends Space<FlatBlockMap> {
     this._blockTree = new BlockTree({
       doc: this,
       schema: collection.schema,
-      selector,
     });
   }
 
@@ -692,7 +689,7 @@ export class Doc extends Space<FlatBlockMap> {
     }
   }
 
-  setSelector(selector: BlockSelector) {
+  setSelector(selector?: BlockSelector) {
     this._blockTree.updateSelector(selector);
   }
 

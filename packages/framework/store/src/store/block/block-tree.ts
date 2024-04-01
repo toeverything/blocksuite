@@ -42,10 +42,10 @@ export class BlockTree {
     this._schema = schema;
   }
 
-  updateSelector(selector: BlockSelector) {
+  updateSelector(selector?: BlockSelector) {
     this._selector = selector;
     this._blocks.forEach(block => {
-      const shouldAdd = selector(block);
+      const shouldAdd = selector?.(block) ?? true;
       if (!shouldAdd) {
         this.onBlockRemoved(block.id);
       }
