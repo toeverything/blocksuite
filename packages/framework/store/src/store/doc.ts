@@ -8,7 +8,7 @@ import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
-import type { YBlock } from './block/index.js';
+import type { BlockSelector, YBlock } from './block/index.js';
 import { BlockTree } from './block/index.js';
 import type { DocCollection } from './collection.js';
 import { Space } from './space.js';
@@ -32,6 +32,7 @@ type DocOptions = {
   doc: BlockSuiteDoc;
   awarenessStore: AwarenessStore;
   idGenerator?: IdGenerator;
+  selector?: BlockSelector;
 };
 
 export class Doc extends Space<FlatBlockMap> {
@@ -82,6 +83,7 @@ export class Doc extends Space<FlatBlockMap> {
     collection,
     doc,
     awarenessStore,
+    selector,
     idGenerator = uuidv4,
   }: DocOptions) {
     super(id, doc, awarenessStore);
@@ -90,6 +92,7 @@ export class Doc extends Space<FlatBlockMap> {
     this._blockTree = new BlockTree({
       doc: this,
       schema: collection.schema,
+      selector,
     });
   }
 
@@ -688,6 +691,10 @@ export class Doc extends Space<FlatBlockMap> {
     }
   }
 
+  setSelector(selector: BlockSelector) {
+    this._blockTree.updateSelector(selector);
+  }
+
   private _initYBlocks() {
     const { _yBlocks } = this;
     _yBlocks.observeDeep(this._handleYEvents);
@@ -720,20 +727,7 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    this._blockTree.onBlockAdded(id, {
-      onChange: (block, key) => {
-        if (key) {
-          block.model.propsUpdated.emit({ key });
-        }
-
-        this.slots.blockUpdated.emit({
-          type: 'update',
-          id,
-          flavour: block.flavour,
-          props: { key },
-        });
-      },
-    });
+    this._blockTree.onBlockAdded(id);
     const block = this._blockTree.getBlock(id);
     assertExists(block);
     const model = block.model;

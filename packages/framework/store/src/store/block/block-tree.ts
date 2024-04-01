@@ -8,15 +8,19 @@ import type { Doc } from '../doc.js';
 import type { BlockOptions } from './block.js';
 import { Block } from './block.js';
 
+export type BlockSelector = (block: Block) => boolean;
+
 type BlockTreeOptions = {
   schema: Schema;
   doc: Doc;
+  selector?: BlockSelector;
 };
 
 export class BlockTree {
   protected readonly _schema: Schema;
   protected readonly _blocks: Map<string, Block> = new Map();
   protected readonly _doc: Doc;
+  protected _selector?: BlockSelector;
 
   hasBlock(id: string) {
     return this._blocks.has(id);
@@ -34,12 +38,29 @@ export class BlockTree {
     return this._doc.yBlocks;
   }
 
-  constructor({ schema, doc }: BlockTreeOptions) {
+  constructor({ schema, doc, selector }: BlockTreeOptions) {
     this._doc = doc;
     this._schema = schema;
+    this._selector = selector;
   }
 
-  onBlockAdded(id: string, options: BlockOptions = {}) {
+  updateSelector(selector: BlockSelector) {
+    this._selector = selector;
+    this._blocks.forEach(block => {
+      const shouldAdd = selector(block);
+      if (!shouldAdd) {
+        this.onBlockRemoved(block.id);
+      }
+    });
+
+    this._yBlocks.forEach((_, id) => {
+      if (!this._blocks.has(id)) {
+        this.onBlockAdded(id);
+      }
+    });
+  }
+
+  onBlockAdded(id: string) {
     if (this._blocks.has(id)) {
       return;
     }
@@ -49,7 +70,27 @@ export class BlockTree {
       return;
     }
 
+    const options: BlockOptions = {
+      onChange: (block, key) => {
+        if (key) {
+          block.model.propsUpdated.emit({ key });
+        }
+
+        this._doc.slots.blockUpdated.emit({
+          type: 'update',
+          id,
+          flavour: block.flavour,
+          props: { key },
+        });
+      },
+    };
     const block = new Block(this._schema, yBlock, this._doc, options);
+
+    const shouldAdd = this._selector ? this._selector(block) : true;
+
+    if (!shouldAdd) {
+      return;
+    }
 
     this._blocks.set(id, block);
     block.model.created.emit();
