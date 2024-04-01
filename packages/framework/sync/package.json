@@ -34,11 +34,6 @@
         "types": "./dist/index.d.ts",
         "module": "./dist/index.js",
         "import": "./dist/index.js"
-      },
-      "./impl/*": {
-        "types": "./dist/impl/*.d.ts",
-        "module": "./dist/impl/*.js",
-        "import": "./dist/impl/*.js"
       }
     }
   },
