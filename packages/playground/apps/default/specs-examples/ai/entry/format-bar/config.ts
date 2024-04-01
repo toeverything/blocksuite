@@ -1,5 +1,7 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
 import {
+  AFFINE_AI_PANEL_WIDGET,
+  AffineAIPanelWidget,
   AIDoneIcon,
   type AIItemGroupConfig,
   AIPenIcon,
@@ -15,6 +17,7 @@ import {
   TagIcon,
   ToneIcon,
 } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import { CopilotClient } from '@blocksuite/presets';
 
 import { textRenderer } from '../../message/text';
@@ -80,8 +83,16 @@ const DocAIGroup: AIItemGroupConfig = {
       name: 'Summary',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: panel => {
-        panel.host.command
+      handler: host => {
+        const rootBlockId = host.doc.root?.id;
+        assertExists(rootBlockId);
+        const aiPanel = host.view.getWidget(
+          AFFINE_AI_PANEL_WIDGET,
+          rootBlockId
+        );
+        if (!(aiPanel instanceof AffineAIPanelWidget)) return;
+
+        host.command
           .chain()
           .getTextSelection()
           .getSelectedBlocks()
@@ -95,11 +106,11 @@ const DocAIGroup: AIItemGroupConfig = {
 
             const copilotClient = new CopilotClient('http://localhost:3010');
 
-            panel.config = {
+            aiPanel.config = {
               answerRenderer: textRenderer,
               generateAnswer: getGenerateAnswer({
                 copilotClient,
-                panel,
+                panel: aiPanel,
               }),
 
               finishStateConfig: {
@@ -111,7 +122,7 @@ const DocAIGroup: AIItemGroupConfig = {
                 responses: [],
               },
             };
-            panel.toggle(
+            aiPanel.toggle(
               blocks[0],
               `
             Summarize the key points from the following content in a clear and concise manner,
@@ -122,7 +133,7 @@ const DocAIGroup: AIItemGroupConfig = {
             `
             );
 
-            panel.host.selection.clear();
+            host.selection.clear();
           })
           .run();
       },

@@ -2,16 +2,11 @@ import './ai-sub-item-list.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
-import {
-  AFFINE_AI_PANEL_WIDGET,
-  AffineAIPanelWidget,
-} from '../../../root-block/index.js';
 import { ArrowRightIcon, EnterIcon } from '../../icons/ai.js';
 import { HoverController } from '../hover/controller.js';
 import { menuItemStyles } from './styles.js';
@@ -60,18 +55,9 @@ export class AIItem extends WithDisposable(LitElement) {
     const { item } = this;
     const hasSubConfig = !!item.subItem && item.subItem.length > 0;
 
-    const rootBlockId = this.host.doc.root?.id;
-    assertExists(rootBlockId);
-    const aiPanel = this.host.view.getWidget(
-      AFFINE_AI_PANEL_WIDGET,
-      rootBlockId
-    );
-    if (!(aiPanel instanceof AffineAIPanelWidget)) return nothing;
-
     return html`<div
-      class="menu-item"
       @click=${() =>
-        typeof item.handler === 'function' && item.handler(aiPanel)}
+        typeof item.handler === 'function' && item.handler(this.host)}
       ${hasSubConfig ? ref(this._whenHover.setReference) : ''}
     >
       <span class="item-icon">${item.icon}</span>
