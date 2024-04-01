@@ -1,7 +1,7 @@
 import { last } from '../../../../_common/utils/iterable.js';
 import { FontWeight } from '../../common.js';
 import { FontFamily, type StrokeStyle } from '../../common.js';
-import type { StatelessConnectorElementModel } from '../../connector.js';
+import type { LocalConnectorElementModel } from '../../connector.js';
 import { ConnectorMode } from '../../connector.js';
 import type { MindmapNode } from './layout.js';
 
@@ -271,7 +271,7 @@ export const applyNodeStyle = (node: MindmapNode, nodeStyle: NodeStyle) => {
 };
 
 export const applyConnectorStyle = (
-  connector: StatelessConnectorElementModel,
+  connector: LocalConnectorElementModel,
   style: ConnectorStyle
 ) => {
   Object.entries(style).forEach(([key, value]) => {
