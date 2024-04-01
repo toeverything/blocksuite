@@ -25,6 +25,7 @@
     "@y/redis": "github:y-js/y-redis",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "formidable": "^3.5.1",
     "lib0": "^0.2.93",
     "lowdb": "^7.0.1",
     "react": "^18.2.0",
@@ -32,11 +33,13 @@
     "tsx": "^4.3.0",
     "typescript": "^5.3.2",
     "vite-express": "^0.16.0",
-    "y-websocket": "^2.0.2"
+    "y-websocket": "^2.0.2",
+    "yjs": "^13.6.14"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/formidable": "^3.4.5",
     "@types/node": "^20.9.3",
     "@types/react": "^18.2.69",
     "@types/react-dom": "^18.2.22",

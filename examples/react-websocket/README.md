@@ -6,7 +6,7 @@ This example includes two WebSocket backends, one is a basic WebSocket server fr
 
 ### Development
 
-To run this example, please ensure you have installed [Docker](https://www.docker.com/).
+To run this example, please **ensure** you have installed [Docker](https://www.docker.com/).
 
 ```sh
 git clone https://github.com/toeverything/blocksuite.git

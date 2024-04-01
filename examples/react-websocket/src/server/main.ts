@@ -1,9 +1,16 @@
+/**
+ * This implementation is based on https://github.com/yjs/y-redis/blob/master/demos/blocksuite/server.js
+ */
+
 import 'dotenv/config';
 import express, { json } from 'express';
 import ViteExpress from 'vite-express';
 
+import * as Y from 'yjs';
+import formidable from 'formidable';
 import * as jwt from 'lib0/crypto/jwt';
 import * as ecdsa from 'lib0/crypto/ecdsa';
+import * as promise from 'lib0/promise';
 import { DocMeta } from '@blocksuite/store';
 import * as fs from 'fs/promises';
 import { JSONDatabase } from './db.ts';
@@ -25,6 +32,10 @@ const db = await JSONDatabase.init(dbFile);
 const app = express();
 app.use(json());
 
+// --------------------------
+// Y-Redis realted callback
+// --------------------------
+
 // This example server always grants read-write permission to all requests.
 // Modify it to your own needs or implement the same API in your own backend!
 app.get('/auth/token', async (_, res) => {
@@ -39,8 +50,32 @@ app.get('/auth/token', async (_, res) => {
 
 // This endpoint is called in regular intervals when the document changes.
 // The request contains a multi-part formdata field that can be read, for example, with formidable:
-app.use('/ydoc/:room', async (_, res) => {
-  //   const room = req.params.room;
+app.use('/ydoc/:room', async (req, res, next) => {
+  const room = req.params.room;
+
+  const ydocUpdate = await promise.create<Uint8Array>((resolve, reject) => {
+    const form = formidable({});
+    form.parse(req, (err, _fields, files) => {
+      if (err) {
+        next(err);
+        reject(err);
+        return;
+      }
+      if (files.ydoc) {
+        // formidable writes the data to a file by default. This might be a good idea for your
+        // application. Check the documentation to find a non-temporary location for the read file.
+        // You should probably delete it if it is no longer being used.
+        const file = files.ydoc[0];
+        // we are just going to log the content and delete the temporary file
+        fs.readFile(file.filepath).then(resolve, reject);
+      }
+    });
+  });
+  const ydoc = new Y.Doc();
+  Y.applyUpdateV2(ydoc, ydocUpdate);
+  console.log(
+    `BlockSuite doc in room "${room}" updated, block count: ${ydoc.getMap('blocks').size}`
+  );
 
   res.sendStatus(200);
 });
@@ -67,6 +102,11 @@ app.get('/auth/perm/:room/:userid', async (req, res) => {
   );
 });
 
+// --------------------------
+// Client realted api
+// --------------------------
+
+// get all doc meta informations
 app.get('/api/docs', async (_, res) => {
   res.json(await db.getDocMetas());
 });
@@ -83,6 +123,7 @@ app.post('/api/docs', async (req, res) => {
   }
 });
 
+// update title
 app.patch('/api/docs/:id/title', async (req, res) => {
   const { id } = req.params;
   const { title } = req.body;
@@ -98,7 +139,7 @@ app.patch('/api/docs/:id/title', async (req, res) => {
   }
 });
 
-// delete a existed doc
+// delete a doc
 app.delete('/api/docs/:id', async (req, res) => {
   const docId = req.params.id;
 
@@ -113,6 +154,7 @@ ViteExpress.listen(app, port, () =>
   console.log(`Server listening at http://localhost:${port}`)
 );
 
+// Remove the follwoing if you want to keep the database in disk
 process.on('exit', async () => {
   await fs.unlink(dbFile);
 });
