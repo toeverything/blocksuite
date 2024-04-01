@@ -1,17 +1,13 @@
 import './components/bookmark-card.js';
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
-import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { BlockElement } from '@blocksuite/block-std';
-import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
-import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { type BookmarkBlockModel } from './bookmark-model.js';
@@ -81,45 +77,6 @@ export class BookmarkBlockComponent extends BlockElement<
     );
   }
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-    ) {
-      return null;
-    }
-
-    return {
-      template: html`
-        <style>
-          :host {
-            z-index: 1;
-          }
-        </style>
-        <embed-card-toolbar
-          .block=${this}
-          .abortController=${abortController}
-        ></embed-card-toolbar>
-      `,
-      computePosition: {
-        referenceElement: this.bookmarkCard,
-        placement: 'top-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    };
-  });
-
   override renderBlock() {
     const { style } = this.model;
 
@@ -146,11 +103,7 @@ export class BookmarkBlockComponent extends BlockElement<
     }
 
     return html`
-      <div
-        ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
-        class="affine-bookmark-container"
-        style=${containerStyleMap}
-      >
+      <div class="affine-bookmark-container" style=${containerStyleMap}>
         <bookmark-card
           .bookmark=${this}
           .loading=${this.loading}
@@ -161,6 +114,8 @@ export class BookmarkBlockComponent extends BlockElement<
 
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>
+
+      ${this.isInSurface ? nothing : Object.values(this.widgets)}
     `;
   }
 }

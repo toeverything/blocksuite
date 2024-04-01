@@ -1,4 +1,5 @@
-import path, { resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { defineConfig, loadEnv } from 'vite';
@@ -7,7 +8,60 @@ import wasm from 'vite-plugin-wasm';
 
 import { hmrPlugin } from './scripts/hmr-plugin';
 
+const require = createRequire(import.meta.url);
 const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
+
+const cache = new Map();
+
+function isDepInclude(
+  id: string,
+  depPaths: string[],
+  importChain: string[],
+  getModuleInfo
+): boolean | undefined {
+  const key = `${id}-${depPaths.join('|')}`;
+  if (importChain.includes(id)) {
+    cache.set(key, false);
+    return false;
+  }
+  if (cache.has(key)) {
+    return cache.get(key);
+  }
+  if (depPaths.includes(id)) {
+    importChain.forEach(item =>
+      cache.set(`${item}-${depPaths.join('|')}`, true)
+    );
+    return true;
+  }
+  const moduleInfo = getModuleInfo(id);
+  if (!moduleInfo || !moduleInfo.importers) {
+    cache.set(key, false);
+    return false;
+  }
+  const isInclude = moduleInfo.importers.some(importer =>
+    isDepInclude(importer, depPaths, importChain.concat(id), getModuleInfo)
+  );
+  cache.set(key, isInclude);
+  return isInclude;
+}
+
+const chunkGroups = {
+  framework: [
+    require.resolve('@blocksuite/block-std'),
+    require.resolve('@blocksuite/global'),
+    require.resolve('@blocksuite/global/utils'),
+    require.resolve('@blocksuite/global/env'),
+    require.resolve('@blocksuite/global/exceptions'),
+    require.resolve('@blocksuite/inline'),
+    require.resolve('@blocksuite/store'),
+    require.resolve('@blocksuite/sync'),
+  ],
+  blocks: [
+    require.resolve('@blocksuite/blocks'),
+    require.resolve('@blocksuite/blocks/schemas'),
+  ],
+  presets: [require.resolve('@blocksuite/presets')],
+};
 
 // https://vitejs.dev/config/
 export default ({ mode }) => {
@@ -72,28 +126,16 @@ export default ({ mode }) => {
             'examples/provider/index.html'
           ),
         },
-      },
-    },
-    resolve: {
-      alias: {
-        '@blocksuite/blocks': path.resolve(
-          fileURLToPath(new URL('../blocks/src', import.meta.url))
-        ),
-        '@blocksuite/blocks/*': path.resolve(
-          fileURLToPath(new URL('../blocks/src/*', import.meta.url))
-        ),
-        '@blocksuite/global/*': path.resolve(
-          fileURLToPath(new URL('../framework/global/src/*', import.meta.url))
-        ),
-        '@blocksuite/store': path.resolve(
-          fileURLToPath(new URL('../framework/store/src', import.meta.url))
-        ),
-        '@blocksuite/inline': path.resolve(
-          fileURLToPath(new URL('../framework/inline/src', import.meta.url))
-        ),
-        '@blocksuite/inline/*': path.resolve(
-          fileURLToPath(new URL('../framework/inline/src/*', import.meta.url))
-        ),
+        output: {
+          manualChunks(id, { getModuleInfo }) {
+            for (const group of Object.keys(chunkGroups)) {
+              const deps = chunkGroups[group];
+              if (isDepInclude(id, deps, [], getModuleInfo)) {
+                return group;
+              }
+            }
+          },
+        },
       },
     },
   });

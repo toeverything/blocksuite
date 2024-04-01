@@ -1,21 +1,17 @@
 import './components/embed-synced-doc-card.js';
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
-import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
-import { flip, offset } from '@floating-ui/dom';
 import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
-import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
-import { HoverController } from '../_common/components/hover/index.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
@@ -172,14 +168,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     });
   };
 
-  private _handleFocusEventsInHover = (abortController: AbortController) => {
-    const syncedDocEditorHost = this.syncedDocEditorHost;
-    if (!syncedDocEditorHost) return;
-    this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', () => {
-      abortController.abort();
-    });
-  };
-
   private async _load() {
     this._loading = true;
     this._error = false;
@@ -228,57 +216,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       this._handleFocusEventsInLoad();
     }
   }
-
-  private _whenHover = new HoverController(
-    this,
-    ({ abortController }) => {
-      if (this._editing) {
-        return null;
-      }
-
-      const selection = this.host.selection;
-      const textSelection = selection.find('text');
-      if (
-        !!textSelection &&
-        (!!textSelection.to || !!textSelection.from.length)
-      ) {
-        return null;
-      }
-
-      const blockSelections = selection.filter('block');
-      if (
-        blockSelections.length > 1 ||
-        (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-      ) {
-        return null;
-      }
-
-      this._handleFocusEventsInHover(abortController);
-
-      return {
-        template: html`
-          <style>
-            :host {
-              z-index: 1;
-            }
-          </style>
-          <embed-card-toolbar
-            .block=${this}
-            .abortController=${abortController}
-          ></embed-card-toolbar>
-        `,
-        computePosition: {
-          referenceElement: this,
-          placement: 'top-start',
-          middleware: [flip(), offset(4)],
-          autoUpdate: true,
-        },
-      };
-    },
-    {
-      allowMultiple: true,
-    }
-  );
 
   private _handlePointerDown = (event: MouseEvent) => {
     if (this._editing) {
@@ -496,9 +433,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       return this.renderEmbed(
         () => html`
           <affine-embed-synced-doc-card
-            ${isInSurface || !isCycle
-              ? nothing
-              : ref(this._whenHover.setReference)}
             style=${cardStyleMap}
             .block=${this}
           ></affine-embed-synced-doc-card>
@@ -539,10 +473,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
     return this.renderEmbed(
       () => html`
+      </div>
         <div
-          ${isInSurface || isEditing
-            ? nothing
-            : ref(this._whenHover.setReference)}
           class=${classMap({
             'affine-embed-synced-doc-container': true,
             [editorMode]: true,
@@ -563,30 +495,41 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
             })}
           >
             ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
-            ${isEmpty && !isEditing && editorMode === 'page'
-              ? html`
-                  <div class="affine-embed-synced-doc-editor-empty">
-                    <span>This is a linked doc, you can add content here.</span>
-                  </div>
-                `
-              : nothing}
+            ${
+              isEmpty && !isEditing && editorMode === 'page'
+                ? html`
+                    <div class="affine-embed-synced-doc-editor-empty">
+                      <span
+                        >This is a linked doc, you can add content here.</span
+                      >
+                    </div>
+                  `
+                : nothing
+            }
+            </div>
+
+            ${
+              isInSurface && !isEditing
+                ? html`
+                    <div
+                      class="affine-embed-synced-doc-editor-overlay"
+                      @dblclick=${this._handleOverlayDblClick}
+                    ></div>
+                  `
+                : nothing
+            }
           </div>
 
-          ${isInSurface && !isEditing
-            ? html`
-                <div
-                  class="affine-embed-synced-doc-editor-overlay"
-                  @dblclick=${this._handleOverlayDblClick}
-                ></div>
-              `
-            : nothing}
+          ${
+            isInSurface
+              ? html`<embed-card-caption .block=${this}></embed-card-caption>`
+              : nothing
+          }
+
+          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
 
-        ${isInSurface
-          ? html`<embed-card-caption .block=${this}></embed-card-caption>`
-          : nothing}
-
-        <affine-block-selection .block=${this}></affine-block-selection>
+        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }
