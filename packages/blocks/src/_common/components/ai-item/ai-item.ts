@@ -56,6 +56,7 @@ export class AIItem extends WithDisposable(LitElement) {
     const hasSubConfig = !!item.subItem && item.subItem.length > 0;
 
     return html`<div
+      class="menu-item"
       @click=${() =>
         typeof item.handler === 'function' && item.handler(this.host)}
       ${hasSubConfig ? ref(this._whenHover.setReference) : ''}
