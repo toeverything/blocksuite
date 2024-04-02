@@ -21,12 +21,108 @@ export class BlockTree {
   protected readonly _doc: Doc;
   protected _selector?: BlockSelector;
 
+  get _root() {
+    const rootBlock = Array.from(this._blocks.values()).find(block => {
+      return block.model.role === 'root';
+    });
+    if (!rootBlock) {
+      return null;
+    }
+
+    return rootBlock;
+  }
+
   hasBlock(id: string) {
     return this._blocks.has(id);
   }
 
+  /**
+   * @deprecated
+   * Use `hasBlock` instead.
+   */
+  hasBlockById(id: string) {
+    return this.hasBlock(id);
+  }
+
   getBlock(id: string) {
     return this._blocks.get(id);
+  }
+
+  /**
+   * @deprecated
+   * Use `getBlock` instead.
+   */
+  getBlockById(id: string) {
+    return this.getBlock(id)?.model ?? null;
+  }
+
+  /**
+   * @deprecated
+   * Use `getBlocksByFlavour` instead.
+   */
+  getBlockByFlavour(blockFlavour: string | string[]) {
+    return this.getBlocksByFlavour(blockFlavour).map(x => x.model);
+  }
+
+  getBlocksByFlavour(blockFlavour: string | string[]) {
+    const flavours =
+      typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
+
+    return Array.from(this._blocks.values()).filter(({ flavour }) =>
+      flavours.includes(flavour)
+    );
+  }
+
+  getParent(target: BlockModel | string): BlockModel | null {
+    const root = this._root;
+    const targetId = typeof target === 'string' ? target : target.id;
+    if (!root || root.id === targetId) return null;
+
+    const findParent = (parentId: string): BlockModel | null => {
+      const parentBlock = this.getBlock(parentId);
+      if (!parentBlock) return null;
+
+      for (const [childId] of parentBlock.model.childMap) {
+        if (childId === targetId) return parentBlock.model;
+
+        const parent = findParent(childId);
+        if (parent !== null) return parent;
+      }
+
+      return null;
+    };
+
+    return findParent(root.id);
+  }
+
+  getPrev(block: BlockModel | string) {
+    return this._getSiblings(
+      block,
+      (parent, index) => parent.children[index - 1] ?? null
+    );
+  }
+
+  getPrevs(block: BlockModel | string) {
+    return this._getSiblings(block, (parent, index) =>
+      parent.children.slice(0, index)
+    );
+  }
+
+  getNext(block: BlockModel | string) {
+    return this._getSiblings(
+      block,
+      (parent, index) => parent.children[index + 1] ?? null
+    );
+  }
+
+  getNexts(block: BlockModel | string) {
+    return this._getSiblings(block, (parent, index) =>
+      parent.children.slice(index + 1)
+    );
+  }
+
+  getBlocks() {
+    return Array.from(this._blocks.values());
   }
 
   get blocks() {
@@ -35,6 +131,23 @@ export class BlockTree {
 
   private get _yBlocks() {
     return this._doc.yBlocks;
+  }
+
+  private _getSiblings<T>(
+    block: BlockModel | string,
+    fn: (parent: BlockModel, index: number) => T
+  ) {
+    const parent = this.getParent(block);
+    if (!parent) return null;
+
+    const blockModel =
+      typeof block === 'string' ? this.getBlock(block)?.model : block;
+    if (!blockModel) return null;
+
+    const index = parent.children.indexOf(blockModel);
+    if (index === -1) return null;
+
+    return fn(parent, index);
   }
 
   constructor({ schema, doc }: BlockTreeOptions) {
