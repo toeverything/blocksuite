@@ -613,43 +613,51 @@ export class Doc extends Space<FlatBlockMap> {
         yParentChildren.delete(modelIndex, 1);
       }
 
-      if (bringChildrenTo) {
-        // validate children flavour
-        model.children.forEach(child => {
-          this.schema.validate(child.flavour, bringChildrenTo.flavour);
-        });
+      const apply = () => {
+        if (bringChildrenTo) {
+          const bringChildrenToModel = () => {
+            assertExists(bringChildrenTo);
+            // validate children flavour
+            model.children.forEach(child => {
+              this.schema.validate(child.flavour, bringChildrenTo.flavour);
+            });
 
-        if (bringChildrenTo.id === parent.id) {
-          // When bring children to parent, insert children to the original position of model
-          yParentChildren.insert(modelIndex, yModelChildren.toArray());
-        } else {
-          const yBringChildrenTo = this._yBlocks.get(
-            bringChildrenTo.id
-          ) as YBlock;
-          const yBringChildrenToChildren = yBringChildrenTo.get(
-            'sys:children'
-          ) as Y.Array<string>;
-          yBringChildrenToChildren.push(yModelChildren.toArray());
+            if (bringChildrenTo.id === parent.id) {
+              // When bring children to parent, insert children to the original position of model
+              yParentChildren.insert(modelIndex, yModelChildren.toArray());
+              return;
+            }
+
+            const yBringChildrenTo = this._yBlocks.get(
+              bringChildrenTo.id
+            ) as YBlock;
+            const yBringChildrenToChildren = yBringChildrenTo.get(
+              'sys:children'
+            ) as Y.Array<string>;
+            yBringChildrenToChildren.push(yModelChildren.toArray());
+            return;
+          };
+
+          bringChildrenToModel();
+          return;
         }
-      } else {
+
         if (deleteChildren) {
           // delete children recursively
-          const dl = (id: string) => {
+          const deleteById = (id: string) => {
             const yBlock = this._yBlocks.get(id) as YBlock;
 
             const yChildren = yBlock.get('sys:children') as Y.Array<string>;
-            yChildren.forEach(id => {
-              dl(id);
-            });
+            yChildren.forEach(id => deleteById(id));
 
             this._blockTree.removeBlock(id);
           };
 
-          yModelChildren.forEach(id => {
-            dl(id);
-          });
+          yModelChildren.forEach(id => deleteById(id));
         }
-      }
+      };
+
+      apply();
 
       this._blockTree.removeBlock(model.id);
     });
