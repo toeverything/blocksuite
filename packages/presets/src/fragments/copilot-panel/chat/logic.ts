@@ -560,8 +560,10 @@ export class AIChatLogic {
           return;
         }
         const url = canvas.toDataURL();
-        console.log(url);
-        this.reactiveData.history.push(userImage(url));
+        this.reactiveData.history = [
+          ...this.reactiveData.history,
+          userImage(url),
+        ];
 
         // edgelessRoot.doc.addBlock(
         //   EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
