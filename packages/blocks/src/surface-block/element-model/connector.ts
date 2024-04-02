@@ -124,7 +124,7 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   @yfield('Arrow')
   rearEndpointStyle!: PointStyle;
 
-  @yfield()
+  @local()
   displayText?: boolean;
 
   @yfield()

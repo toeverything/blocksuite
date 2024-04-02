@@ -228,13 +228,14 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
         break;
     }
 
-    edgeless.service.updateElement(element.id, {
-      xywh: bound.serialize(),
-    });
+    console.log(bound);
+    // edgeless.service.updateElement(element.id, {
+    //   xywh: bound.serialize(),
+    // });
   };
 
   getVisualPosition(element: ConnectorElementModel) {
-    const { x, y, w, h, rotate } = element;
+    const { x, y, w, h, rotate, _absolutePath } = element;
     return Vec.rotWith([x, y], [x + w / 2, y + h / 2], toRadian(rotate));
   }
 
@@ -287,6 +288,8 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
         this.disposables.add(() => {
           if (element.text?.length === 0) {
             element.text = undefined;
+          } else {
+            element.displayText = true;
           }
 
           edgeless.service.selection.set({

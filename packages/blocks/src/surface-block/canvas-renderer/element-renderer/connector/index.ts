@@ -1,12 +1,28 @@
+import { assertExists } from '@blocksuite/global/utils';
+
 import {
   ConnectorElementModel,
   type LocalConnectorElementModel,
   type PointStyle,
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
-import type { PointLocation } from '../../../index.js';
-import { getBezierParameters } from '../../../utils/curve.js';
+import { type PointLocation, Vec } from '../../../index.js';
+import {
+  // getBezierCurvature,
+  // getBezierNormal,
+  getBezierParameters,
+  // getBezierPoint,
+  // getBezierTangent,
+} from '../../../utils/curve.js';
 import type { Renderer } from '../../renderer.js';
+import {
+  deltaInsertsToChunks,
+  getFontString,
+  getLineHeight,
+  getTextWidth,
+  isRTL,
+  wrapTextDeltas,
+} from '../text/utils.js';
 import {
   getArrowOptions,
   renderArrow,
@@ -48,8 +64,12 @@ export function connector(
   renderEndpoint(model, points, ctx, renderer, 'Front', frontEndpointStyle);
   renderEndpoint(model, points, ctx, renderer, 'Rear', rearEndpointStyle);
 
-  if (model instanceof ConnectorElementModel && model.displayText) {
-    renderLabel(model, ctx, renderer, points);
+  if (
+    model instanceof ConnectorElementModel &&
+    model.displayText &&
+    model.text?.length
+  ) {
+    renderLabel(matrix, model, ctx, renderer, points);
   }
 }
 
@@ -148,10 +168,88 @@ function renderEndpoint(
 }
 
 function renderLabel(
+  matrix: DOMMatrix,
   model: ConnectorElementModel,
-  _ctx: CanvasRenderingContext2D,
-  _renderer: Renderer,
-  _path: PointLocation[]
+  ctx: CanvasRenderingContext2D,
+  renderer: Renderer,
+  path: PointLocation[]
 ) {
-  console.log(123, model.text);
+  const {
+    mode,
+    color,
+    fontSize,
+    fontWeight,
+    fontStyle,
+    fontFamily,
+    textAlign,
+    // rotate,
+  } = model;
+  assertExists(model.text);
+
+  const [, , w, _] = model.deserializedXYWH;
+  const points: [number, number][] = path.map(p => [p[0], p[1]]);
+
+  // const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
+  const font = getFontString({
+    fontStyle,
+    fontWeight,
+    fontSize,
+    fontFamily,
+  });
+  const deltas = wrapTextDeltas(model.text, font, w);
+  const lines = deltaInsertsToChunks(deltas);
+  const lineHeightPx = getLineHeight(fontFamily, fontSize);
+  const horizontalOffset =
+    textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
+
+  if (mode === ConnectorMode.Straight) {
+    const first = points[0];
+    const last = points[path.length - 1];
+    const point = Vec.med(first, last);
+    const y = point[1] - lines.length * lineHeightPx;
+    ctx.setTransform(matrix.translate(0, y));
+  } else if (mode === ConnectorMode.Orthogonal) {
+    console.log(233);
+  } else {
+    // const b = getBezierParameters(path);
+    // const p = getBezierCurvature(b, 0.5);
+    // if (!p) return;
+  }
+
+  ctx.font = font;
+  ctx.fillStyle = renderer.getVariableColor(color);
+  ctx.textAlign = textAlign;
+  ctx.textBaseline = 'ideographic';
+
+  for (const [lineIndex, line] of lines.entries()) {
+    let beforeTextWidth = 0;
+
+    for (const delta of line) {
+      const str = delta.insert;
+      const rtl = isRTL(str);
+      const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
+      if (shouldTemporarilyAttach) {
+        // to correctly render RTL text mixed with LTR, we have to append it
+        // to the DOM
+        document.body.append(ctx.canvas);
+      }
+
+      ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+
+      // 0.5 comes from v-line padding
+      const offset =
+        textAlign === 'center' ? 0 : textAlign === 'right' ? -0.5 : 0.5;
+      ctx.fillText(
+        str,
+        horizontalOffset + beforeTextWidth + offset,
+        (lineIndex + 1) * lineHeightPx
+      );
+
+      beforeTextWidth += getTextWidth(str, font);
+
+      if (shouldTemporarilyAttach) {
+        ctx.canvas.remove();
+      }
+    }
+  }
 }

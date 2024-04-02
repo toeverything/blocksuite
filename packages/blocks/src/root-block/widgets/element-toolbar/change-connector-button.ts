@@ -280,6 +280,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     if (!connector.text) {
       connector.text = new DocCollection.Y.Text();
     }
+    connector.displayText = false;
     mountConnectorTextEditor(connector, this.edgeless);
   }
 
