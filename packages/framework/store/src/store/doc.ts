@@ -409,63 +409,68 @@ export class Doc extends Space<FlatBlockMap> {
     }
 
     if (!newParent) {
-      throw new Error("Can't find new parent block");
+      return;
     }
 
     // A map to store parent block and their respective child blocks
     const childBlocksPerParent = new Map<BlockModel, BlockModel[]>();
     blocksToMove.forEach(block => {
-      const parentBlock = this.getParent(block);
-      if (!parentBlock) {
-        throw new Error("Can't find parent block for the current block");
-      }
+      const parent = this.getParent(block);
+      if (!parent) return;
 
       this.schema.validate(block.flavour, newParent.flavour);
 
-      const childrenBlocksOfCurrentParent =
-        childBlocksPerParent.get(parentBlock);
-      if (childrenBlocksOfCurrentParent) {
-        if (
-          this.getNextSibling(
-            childrenBlocksOfCurrentParent[
-              childrenBlocksOfCurrentParent.length - 1
-            ]
-          ) !== block
-        ) {
-          throw new Error(
-            'The blocks to move are not contiguous under their parent'
-          );
-        }
-        childrenBlocksOfCurrentParent.push(block);
-      } else {
-        childBlocksPerParent.set(parentBlock, [block]);
+      const children = childBlocksPerParent.get(parent);
+      if (!children) {
+        childBlocksPerParent.set(parent, [block]);
+        return;
       }
+
+      const last = children[children.length - 1];
+      if (this.getNextSibling(last) !== block) {
+        throw new Error(
+          'The blocks to move are not contiguous under their parent'
+        );
+      }
+
+      children.push(block);
+      return;
     });
 
     this.transact(() => {
       let insertIndex = 0;
-      let first = true;
-      for (const [parentBlock, blocksToMove] of childBlocksPerParent) {
-        const targetParentBlock = this._yBlocks.get(newParent.id) as YBlock;
-        const targetParentChildren = targetParentBlock.get(
-          'sys:children'
-        ) as Y.Array<string>;
-        const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
-        const sourceParentChildren = sourceParentBlock.get(
-          'sys:children'
-        ) as Y.Array<string>;
+      Array.from(childBlocksPerParent.entries()).forEach(
+        ([parentBlock, blocksToMove], index) => {
+          const targetParentBlock = this._yBlocks.get(newParent.id) as YBlock;
+          const targetParentChildren = targetParentBlock.get(
+            'sys:children'
+          ) as Y.Array<string>;
+          const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
+          const sourceParentChildren = sourceParentBlock.get(
+            'sys:children'
+          ) as Y.Array<string>;
 
-        // Get the IDs of blocks to move
-        const idsOfBlocksToMove = blocksToMove.map(({ id }) => id);
+          // Get the IDs of blocks to move
+          const idsOfBlocksToMove = blocksToMove.map(({ id }) => id);
 
-        // Remove the blocks from their current parent
-        const startIndex = sourceParentChildren
-          .toArray()
-          .findIndex(id => id === idsOfBlocksToMove[0]);
-        sourceParentChildren.delete(startIndex, idsOfBlocksToMove.length);
+          // Remove the blocks from their current parent
+          const startIndex = sourceParentChildren
+            .toArray()
+            .findIndex(id => id === idsOfBlocksToMove[0]);
+          sourceParentChildren.delete(startIndex, idsOfBlocksToMove.length);
 
-        if (first) {
-          if (targetSibling) {
+          const updateInsertIndex = () => {
+            const first = index === 0;
+            if (!first) {
+              insertIndex++;
+              return;
+            }
+
+            if (!targetSibling) {
+              insertIndex = targetParentChildren.length;
+              return;
+            }
+
             const targetIndex = targetParentChildren
               .toArray()
               .findIndex(id => id === targetSibling.id);
@@ -475,16 +480,13 @@ export class Doc extends Space<FlatBlockMap> {
             insertIndex = shouldInsertBeforeSibling
               ? targetIndex
               : targetIndex + 1;
-          } else {
-            insertIndex = targetParentChildren.length;
-          }
-          first = false;
-        } else {
-          insertIndex++;
-        }
+          };
 
-        targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
-      }
+          updateInsertIndex();
+
+          targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
+        }
+      );
     });
   }
 
@@ -514,26 +516,27 @@ export class Doc extends Space<FlatBlockMap> {
     assertExists(yBlock);
 
     this.transact(() => {
-      if (!isCallback) {
-        // TODO diff children changes
-        // All child nodes will be deleted in the current behavior, then added again.
-        // Through diff children changes, the experience can be improved.
-        if (callBackOrProps.children) {
-          const yChildren = new Y.Array<string>();
-          yChildren.insert(
-            0,
-            callBackOrProps.children.map(child => child.id)
-          );
-          yBlock.set('sys:children', yChildren);
-        }
-
-        const schema = this.schema.flavourSchemaMap.get(model.flavour);
-        assertExists(schema);
-        syncBlockProps(schema, model, yBlock, callBackOrProps);
+      if (isCallback) {
+        callBackOrProps();
         return;
       }
 
-      callBackOrProps();
+      // TODO: diff children changes
+      // All child nodes will be deleted in the current behavior, then added again.
+      // Through diff children changes, the experience can be improved.
+      if (callBackOrProps.children) {
+        const yChildren = new Y.Array<string>();
+        yChildren.insert(
+          0,
+          callBackOrProps.children.map(child => child.id)
+        );
+        yBlock.set('sys:children', yChildren);
+      }
+
+      const schema = this.schema.flavourSchemaMap.get(model.flavour);
+      assertExists(schema);
+      syncBlockProps(schema, model, yBlock, callBackOrProps);
+      return;
     });
   }
 
