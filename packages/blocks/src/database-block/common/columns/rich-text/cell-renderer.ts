@@ -264,10 +264,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     this.onChange(yText);
   };
 
-  override onExitEditMode(): void {
-    this.onChange(this.value);
-  }
-
   private _handleKeyDown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape') {
       if (event.key === 'Tab') {

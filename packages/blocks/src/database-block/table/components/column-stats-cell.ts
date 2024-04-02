@@ -62,15 +62,14 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'click', this.openMenu);
-    const dataViewManager = this.column.dataViewManager;
 
-    for (const rId of dataViewManager.rows) {
-      this._disposables.add(
-        dataViewManager.onCellUpdate(rId, this.column.id, () => {
-          this.calculate();
-        })
-      );
-    }
+    // this.column.dataViewManager.rows.forEach(rId => {
+    //   this._disposables.add(
+    //     this.column.onCellUpdate(rId, () => {
+    //       console.log(`Update ${this.column.name}`);
+    //     })
+    //   );
+    // });
   }
 
   protected override render() {
@@ -94,10 +93,10 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   }
 
   private getResultString() {
-    if (!this.result) return '';
-    const { displayFormat: type, value } = this.result;
-    if (!isFinite(value)) return '';
-    switch (type) {
+    if (!this.result || !isFinite(this.result.value)) return '';
+    const { displayFormat: df, value } = this.result;
+
+    switch (df) {
       case '%':
         return `${(value * 100).toFixed(3)}%`;
       case 'x10':
@@ -115,19 +114,20 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
       this.onSelect
     );
   };
-  onSelect = (formula: StatCalcOp) => {
-    if (formula.type === 'none') {
+  onSelect = (operation: StatCalcOp) => {
+    if (operation.type === 'none') {
       this.operation = null;
       this.result = null;
       return;
     }
 
-    this.operation = formula;
+    this.operation = operation;
 
     this.calculate();
   };
 
   calculate() {
+    console.log('calculate');
     if (!this.operation) return;
     this.result = this.operation.calculate(this.column);
   }

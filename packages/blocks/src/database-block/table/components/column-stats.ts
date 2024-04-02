@@ -12,6 +12,7 @@ const styles = css`
     display: flex;
   }
 `;
+
 @customElement('affine-database-column-stats')
 export class DataBaseColumnStats extends WithDisposable(LitElement) {
   static override styles = styles;
@@ -20,15 +21,14 @@ export class DataBaseColumnStats extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+
     this.disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
-        this.querySelectorAll('affine-database-column-stats').forEach(e =>
-          e.requestUpdate()
-        );
       })
     );
   }
+
   protected override render() {
     const cols = this.view.columnManagerList;
 
