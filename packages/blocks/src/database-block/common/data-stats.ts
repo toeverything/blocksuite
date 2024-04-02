@@ -114,14 +114,13 @@ export class ColumnDataStats<
   mode() {
     const values = this._getColValuesAsNumber();
 
-    const frequencyMap = new Map();
+    const frequencyMap = new Map<number, number>();
 
     values.forEach(value => {
-      if (frequencyMap.has(value)) {
-        frequencyMap.set(value, frequencyMap.get(value) + 1);
-      } else {
-        frequencyMap.set(value, 1);
-      }
+      const cur = frequencyMap.get(value);
+      cur === undefined
+        ? frequencyMap.set(value, 1)
+        : frequencyMap.set(value, cur + 1);
     });
 
     let mode = 0;
