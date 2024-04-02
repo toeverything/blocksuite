@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import {
   BlocksUtils,
+  EmbedHtmlBlockSpec,
   MarkdownAdapter,
   type ShapeElementModel,
   SurfaceBlockComponent,
@@ -18,6 +19,7 @@ import {
   runFixSpellingAction,
   runGenerateAction,
   runImproveWritingAction,
+  runMakeItRealAction,
   runMakeLongerAction,
   runMakeShorterAction,
   runPartAnalysisAction,
@@ -27,7 +29,7 @@ import {
   runSummaryAction,
   runTranslateAction,
 } from '../doc/actions.js';
-import { getChatService, userImage } from '../doc/api.js';
+import { getChatService, userImage, userText } from '../doc/api.js';
 import type { AILogic } from '../logic.js';
 import { findLeaf, findTree, getConnectorPath } from '../utils/connector.js';
 import {
@@ -559,23 +561,34 @@ export class AIChatLogic {
           alert('Please select some shapes first');
           return;
         }
+
         const url = canvas.toDataURL();
-        this.reactiveData.history = [
-          ...this.reactiveData.history,
+        const { reactiveData, host } = this;
+        reactiveData.history = [
+          ...reactiveData.history,
           userImage(url),
+          userText('Make it real'),
         ];
 
-        // edgelessRoot.doc.addBlock(
-        //   EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
-        //   { html, design: png, xywh: '[0, 400, 400, 200]' },
-        //   edgelessRoot.surface.model.id
-        // );
+        await this.startRequest(async () => {
+          let html = await runMakeItRealAction({ input: url });
+          if (!html) return;
 
-        // await this.createAction('Make it real', input => {
-        //   return (async function* () {
-        //     yield input;
-        //   })();
-        // })(url);
+          const start = html.indexOf('<!DOCTYPE html>');
+          const end = html.indexOf('</html>');
+
+          html = html.slice(start, end + '</html>'.length);
+
+          const service = getEdgelessService(host);
+          service.doc.addBlock(
+            EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
+            { html, design: url, xywh: '[0, 400, 400, 200]' },
+            service.surface.id
+          );
+
+          // @TODO: insert html or image
+          reactiveData.tempMessage = html;
+        });
       },
     },
   ];
