@@ -109,6 +109,7 @@ export {
   ConnectorMode,
   ElementModel,
   generateKeyBetween,
+  getElementsBound,
   GroupElementModel,
   type PointStyle,
   type SerializedXYWH,

@@ -2,7 +2,9 @@ import type { EditorHost } from '@blocksuite/block-std';
 import {
   BlocksUtils,
   EmbedHtmlBlockSpec,
+  getElementsBound,
   MarkdownAdapter,
+  type SerializedXYWH,
   type ShapeElementModel,
   SurfaceBlockComponent,
   type TreeNodeWithId,
@@ -580,9 +582,19 @@ export class AIChatLogic {
           html = html.slice(start, end + '</html>'.length);
 
           const service = getEdgelessService(host);
+          const bounds = getElementsBound(
+            service.selection.elements.map(ele => ele.elementBound)
+          );
+          const left = bounds.maxX + 20;
+          const top = (bounds.minY + bounds.maxY) / 2 - 200 / 2;
+
           service.doc.addBlock(
             EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
-            { html, design: url, xywh: '[0, 400, 400, 200]' },
+            {
+              html,
+              design: url,
+              xywh: `[${left}, ${top}, 400, 200]` as SerializedXYWH,
+            },
             service.surface.id
           );
 
