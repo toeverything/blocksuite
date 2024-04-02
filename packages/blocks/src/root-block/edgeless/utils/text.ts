@@ -129,13 +129,26 @@ export function mountGroupTitleEditor(
 
 export function mountConnectorTextEditor(
   connector: ConnectorElementModel,
-  edgeless: EdgelessRootBlockComponent
+  edgeless: EdgelessRootBlockComponent,
+  focusCoord?: IModelCoord
 ) {
+  assertExists(connector.text);
+  let cursorIndex = connector.text.length;
+  if (focusCoord) {
+    cursorIndex = Math.min(
+      getCursorByCoord(connector, focusCoord),
+      cursorIndex
+    );
+  }
+
   const editor = new EdgelessConnectorTextEditor();
-  editor.connector = connector;
+  editor.element = connector;
   editor.edgeless = edgeless;
 
   edgeless.rootElementContainer.append(editor);
+  editor.updateComplete
+    .then(() => editor.inlineEditor?.focusIndex(cursorIndex))
+    .catch(console.error);
   edgeless.tools.switchToDefaultMode({
     elements: [connector.id],
     editing: true,

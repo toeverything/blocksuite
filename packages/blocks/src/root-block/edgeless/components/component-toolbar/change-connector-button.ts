@@ -3,7 +3,8 @@ import '../panel/color-panel.js';
 import '../buttons/menu-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import type { Doc } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type Doc, DocCollection } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -277,7 +278,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   }
 
   private _setConnectorText() {
-    mountConnectorTextEditor(this.elements[0], this.edgeless);
+    const connector = this.elements[0];
+    assertExists(connector);
+    if (!connector.text) {
+      connector.text = new DocCollection.Y.Text();
+    }
+    mountConnectorTextEditor(connector, this.edgeless);
   }
 
   override render() {
