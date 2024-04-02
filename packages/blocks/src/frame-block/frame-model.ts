@@ -65,11 +65,10 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
     return bound.isPointInBound([x, y]);
   }
 
-  override boxSelect(seclectedBound: Bound): boolean {
+  override boxSelect(selectedBound: Bound): boolean {
     const bound = Bound.deserialize(this.xywh);
     return (
-      bound.isIntersectWithBound(seclectedBound) ||
-      seclectedBound.contains(bound)
+      bound.isIntersectWithBound(selectedBound) || selectedBound.contains(bound)
     );
   }
 }

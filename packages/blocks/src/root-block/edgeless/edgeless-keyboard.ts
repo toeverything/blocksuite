@@ -1,6 +1,6 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
-import { type EdgelessTool } from '../../_common/types.js';
+import { type EdgelessTool, LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import type { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import type { ShapeElementModel } from '../../surface-block/index.js';
@@ -13,6 +13,7 @@ import {
 } from '../../surface-block/index.js';
 import { EdgelessBlockModel } from '../edgeless/type.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
+import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import {
@@ -40,7 +41,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'text',
           });
         },
-        l: () => {
+        c: () => {
           rootElement.service.editSession.record('connector', {
             mode: ConnectorMode.Straight,
           });
@@ -48,6 +49,35 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'connector',
             mode: ConnectorMode.Straight,
           });
+        },
+        l: () => {
+          // select the current lasso mode
+          const edgeless = rootElement;
+          const lassoController = edgeless.tools.controllers['lasso'];
+          const tool: EdgelessTool = {
+            type: 'lasso',
+            mode: LassoMode.Polygonal,
+          };
+
+          if (lassoController instanceof LassoToolController)
+            tool.mode = lassoController.tool.mode;
+
+          this._setEdgelessTool(edgeless, tool);
+        },
+        'Shift-l': () => {
+          // toggle between lasso modes
+          const edgeless = rootElement;
+          const cur = edgeless.edgelessTool;
+          const tool: EdgelessTool = {
+            type: 'lasso',
+            mode:
+              cur.type === 'lasso'
+                ? cur.mode === LassoMode.FreeHand
+                  ? LassoMode.Polygonal
+                  : LassoMode.FreeHand
+                : LassoMode.FreeHand,
+          };
+          this._setEdgelessTool(edgeless, tool);
         },
         h: () => {
           this._setEdgelessTool(rootElement, {
@@ -227,6 +257,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._delete();
         },
         Escape: () => {
+          const curController = this.rootElement.tools.currentController;
+          if (
+            curController instanceof LassoToolController &&
+            curController.isSelecting
+          ) {
+            curController.abort();
+          }
+
           if (!this.rootElement.service.selection.empty) {
             rootElement.selection.clear();
           }

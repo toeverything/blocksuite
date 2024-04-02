@@ -1143,7 +1143,7 @@ describe('notion html to snapshot', () => {
   test('embeded', async () => {
     const html = `<div class="page-body">
       <figure id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5">
-        <div class="source"><a href="Untitled%ed3d2ae962f5433a90499ddbd1c81ac507/README.pdf">README.pdf</a>
+        <div class="source"><a href="Untitled%203d2ae962f5433a90499ddbd1c81ac507/README.pdf">README.pdf</a>
         </div>
       </figure>
     </div>`;
