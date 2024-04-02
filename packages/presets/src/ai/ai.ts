@@ -1,6 +1,7 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 import {
   AFFINE_AI_PANEL_WIDGET,
+  AFFINE_EDGELESS_COPILOT_WIDGET,
   AffineAIPanelWidget,
   AffineFormatBarWidget,
   AffineSlashMenuWidget,
@@ -50,8 +51,28 @@ export function getAISpecs() {
     return spec;
   });
 
+  const edgelessModeSpecs = EdgelessEditorBlockSpecs.map(spec => {
+    if (spec.schema.model.flavour === 'affine:page') {
+      const newEdgelessSpec: BlockSpec = {
+        ...spec,
+        view: {
+          ...spec.view,
+          widgets: {
+            ...spec.view.widgets,
+            [AFFINE_EDGELESS_COPILOT_WIDGET]: literal`${unsafeStatic(
+              AFFINE_EDGELESS_COPILOT_WIDGET
+            )}`,
+          },
+        },
+      };
+
+      return newEdgelessSpec;
+    }
+    return spec;
+  });
+
   return {
     pageModeSpecs,
-    edgelessModeSpecs: EdgelessEditorBlockSpecs,
+    edgelessModeSpecs,
   };
 }

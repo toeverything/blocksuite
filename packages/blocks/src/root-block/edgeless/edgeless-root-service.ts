@@ -351,6 +351,11 @@ export class EdgelessRootService extends RootService {
     return options.all ? results : last(results) ?? null;
   }
 
+  /**
+   * Pick the elements in the given area
+   * @param bound
+   * @param type By default, it will pick all elements, but you can specify the type to pick only you need.
+   */
   pickElementsByBound(bound: IBound | Bound, type?: 'all'): EdgelessModel[];
   pickElementsByBound(
     bound: IBound | Bound,
