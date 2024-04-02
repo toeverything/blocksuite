@@ -48,6 +48,7 @@ import {
 } from '../../edgeless/components/panel/color-panel.js';
 import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { mountConnectorTextEditor } from '../../edgeless/utils/text.js';
 
 function getMostCommonColor(
   elements: ConnectorElementModel[]
@@ -271,7 +272,9 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     }
   }
 
-  private _setConnectorLabel() {}
+  private _setConnectorText() {
+    mountConnectorTextEditor(this.elements[0], this.edgeless);
+  }
 
   override render() {
     const { elements } = this;
@@ -591,7 +594,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               .tooltip=${'Add Text'}
               .iconContainerPadding=${2}
               .activeMode=${'background'}
-              @click=${() => this._setConnectorLabel()}
+              @click=${() => this._setConnectorText()}
             >
               ${ConnectorAddTextIcon}
             </edgeless-tool-icon-button>`
