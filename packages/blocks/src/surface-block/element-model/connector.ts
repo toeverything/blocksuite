@@ -13,8 +13,13 @@ import { PointLocation } from '../utils/point-location.js';
 import { type IVec2, Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import { type BaseProps, ElementModel, LocalModel } from './base.js';
-import type { StrokeStyle, TextAlign } from './common.js';
-import { FontFamily, type FontStyle, FontWeight } from './common.js';
+import type { StrokeStyle, TextAlign, VerticalAlign } from './common.js';
+import {
+  FontFamily,
+  type FontStyle,
+  FontWeight,
+  TextResizing,
+} from './common.js';
 import { derive, local, yfield } from './decorators.js';
 
 export enum ConnectorEndpoint {
@@ -141,10 +146,16 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   fontSize!: number;
 
   @yfield('normal')
-  fontStype!: FontStyle;
+  fontStyle!: FontStyle;
+
+  @yfield('center')
+  textVerticalAlign!: VerticalAlign;
 
   @yfield('center')
   textAlign!: TextAlign;
+
+  @yfield(TextResizing.AUTO_HEIGHT)
+  textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
 
   moveTo(bound: Bound) {
     const oldBound = Bound.deserialize(this.xywh);
