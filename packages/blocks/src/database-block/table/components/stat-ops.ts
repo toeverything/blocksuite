@@ -166,7 +166,7 @@ export const numberColCalcOps: StatCalcOp[] = [
     display: 'Avg',
     calculate: c => {
       return {
-        value: c.stats.avg(),
+        value: c.stats.mean(),
         displayFormat: 'x10',
       };
     },
@@ -199,7 +199,7 @@ export const numberColCalcOps: StatCalcOp[] = [
   {
     type: 'min',
     label: 'Min',
-    display: '',
+    display: 'Min',
     calculate: c => {
       return {
         value: c.stats.min(),

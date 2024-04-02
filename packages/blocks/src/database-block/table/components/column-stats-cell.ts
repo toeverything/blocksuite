@@ -8,7 +8,7 @@ import { ArrowDownIcon } from '../../../_common/icons/text.js';
 import { getRootByElement } from '../../../_common/utils/query.js';
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './../consts.js';
-import { popFormulaMenu } from './menu.js';
+import { popColStatOperationMenu } from './menu.js';
 import type { ColumnDataType, StatCalcOp, StatOpResult } from './stat-ops.js';
 
 const styles = css`
@@ -96,6 +96,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   private getResultString() {
     if (!this.result) return '';
     const { displayFormat: type, value } = this.result;
+    if (!isFinite(value)) return '';
     switch (type) {
       case '%':
         return `${(value * 100).toFixed(3)}%`;
@@ -106,7 +107,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
 
   openMenu = (ev: MouseEvent) => {
     const rootElement = getRootByElement(this);
-    popFormulaMenu(
+    popColStatOperationMenu(
       rootElement,
       positionToVRect(ev.x, ev.y),
       this.column,

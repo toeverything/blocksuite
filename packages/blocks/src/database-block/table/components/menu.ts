@@ -132,7 +132,7 @@ export const popRowMenu = (
   ]);
 };
 
-export const popFormulaMenu = (
+export const popColStatOperationMenu = (
   _rootElement: RootBlockComponent | null,
   elem: ReferenceElement,
   _column: DataViewColumnManager,

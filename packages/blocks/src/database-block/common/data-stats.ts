@@ -1,66 +1,103 @@
 import { assertEquals } from '@blocksuite/global/utils';
 
+import type { SelectTag } from '../../_common/components/index.js';
 import type { DataViewColumnManager } from './data-view-manager.js';
 
+/**
+ * Class for computing statistics on a DataViewColumnManager column.
+ * Supports various statistical operations such as counting, sum, mean, median, mode, max, min, range,
+ * and specific operations for checkbox columns.
+ */
 export class ColumnDataStats<
   Column extends DataViewColumnManager = DataViewColumnManager,
 > {
-  // private _cache: Record<string, unknown>;
   private dataViewManager: Column['dataViewManager'];
+
+  /**
+   * Constructs a new ColumnDataStats instance.
+   *
+   * @param column The column for which statistics are computed.
+   */
   constructor(private column: Column) {
     this.dataViewManager = column.dataViewManager;
   }
-  // Common
+
+  /**
+   * Returns the number of cells in the column.
+   */
   countAll() {
     return this.dataViewManager.rows.length;
   }
 
+  /**
+   * Returns the number of cells in the column with a value in it.
+   */
   countValues() {
-    return this.getColValuesAsString(true).length;
+    return this._getColumnValueCounts();
   }
 
+  /**
+   * Returns the number of unique values in the column.
+   */
   countUniqueValues() {
-    return [...new Set(this.getColValuesAsString(true))].length;
+    return [...new Set(this._getAllValuesAsString())].length;
   }
 
+  /**
+   * Returns the number of cells in the column which are *empty*.
+   */
   countEmpty() {
-    return this.countAll() - this.getColValuesAsString(true).length;
+    return this._getEmptyCellCount();
   }
 
+  /**
+   * Returns the number of cells in the column which are *not empty*.
+   */
   countNonEmpty() {
-    const nonEmpty = this.getColValuesAsString().filter(
-      v => v.trim() !== ''
-    ).length;
-    return this.countAll() - nonEmpty;
+    return this._getNonEmptyCellCount();
   }
 
+  /**
+   * Returns the percent of cells in the column which are empty.
+   */
   percentEmpty() {
-    return this.countEmpty() / this.countAll();
+    return this._getEmptyCellCount() / this.countAll();
   }
 
+  /**
+   * Returns the percent of cells in the column which are not empty.
+   */
   percentNonEmpty() {
     return 1.0 - this.percentEmpty();
   }
-  // Number Col
+
+  // Math Ops
+
+  /**
+   * Returns the sum of all values in the column.
+   */
   sum() {
-    this.assertColumnType('number');
-    const values = this.getColValuesAsNumber();
+    const values = this._getColValuesAsNumber();
     let sum = 0;
     for (const val of values) sum += val;
     return sum;
   }
 
-  avg() {
-    this.assertColumnType('number');
-    const values = this.getColValuesAsNumber();
+  /**
+   * Returns the average of values in the column.
+   */
+  mean() {
+    const values = this._getColValuesAsNumber();
     let sum = 0;
     for (const val of values) sum += val;
     return sum / values.length;
   }
 
+  /**
+   * Returns the median of the column.
+   */
   median() {
-    this.assertColumnType('number');
-    const values = this.getColValuesAsNumber().sort((a, b) => a - b);
+    const values = this._getColValuesAsNumber().sort((a, b) => a - b);
     const n = values.length;
     const mid = Math.floor(n / 2);
 
@@ -71,9 +108,11 @@ export class ColumnDataStats<
     }
   }
 
+  /**
+   * Returns the mode of the column.
+   */
   mode() {
-    this.assertColumnType('number');
-    const values = this.getColValuesAsNumber().sort((a, b) => a - b);
+    const values = this._getColValuesAsNumber();
 
     const frequencyMap = new Map();
 
@@ -98,84 +137,156 @@ export class ColumnDataStats<
     return mode;
   }
 
+  /**
+   * Returns the maximum value in the column.
+   */
   max() {
-    this.assertColumnType('number');
-    const values = this.getColValuesAsNumber().sort((a, b) => a - b);
+    const values = this._getColValuesAsNumber();
+
     return Math.max(...values);
   }
 
+  /**
+   * Returns the minimum value in the column.
+   */
   min() {
-    this.assertColumnType('number');
-    const values = this.getColValuesAsNumber().sort((a, b) => a - b);
+    const values = this._getColValuesAsNumber();
+
     return Math.min(...values);
   }
 
+  /**
+   * Returns the range of the value in the column (max - min).
+   */
   range() {
-    this.assertColumnType('number');
-
     return this.max() - this.min();
   }
+
   // Checkbox
 
+  /**
+   * Returns the number of checked checkboxes.
+   */
   checked() {
-    this.assertColumnType('checkbox');
     let checked = 0;
-    const values = this.getCheckBoxColValues();
+    const values = this._getCheckBoxColValues();
     for (const value of values) {
       if (value) checked++;
     }
     return checked;
   }
 
+  /**
+   * Returns the number of unchecked checkboxes.
+   */
   notChecked() {
-    this.assertColumnType('checkbox');
     let notChecked = 0;
-    const values = this.getCheckBoxColValues();
+    const values = this._getCheckBoxColValues();
     for (const value of values) {
       if (!value) notChecked++;
     }
     return notChecked;
   }
 
+  /**
+   * Returns the percent of checked checkboxes.
+   */
   percentChecked() {
-    this.assertColumnType('checkbox');
+    this._assertColumnType('checkbox');
     return this.checked() / this.countAll();
   }
 
+  /**
+   * Returns the percent of unchecked checkboxes.
+   */
   percentNotChecked() {
-    this.assertColumnType('checkbox');
+    this._assertColumnType('checkbox');
     return 1.0 - this.percentChecked();
   }
 
-  private assertColumnType(type: string) {
+  private _assertColumnType(type: string) {
     assertEquals(
       this.column.type,
       type,
-      `This function should only be called in column of type ${type}`
+      `This function should only be called in a column of type ${type}`
     );
   }
 
-  private getColValuesAsString(noEmpty = false) {
+  private _getEmptyCellCount() {
+    let empty = 0;
+
+    for (const rId of this.dataViewManager.rows) {
+      const colVal = this.column.getStringValue(rId).trim();
+      if (colVal === '') empty++;
+    }
+    return empty;
+  }
+
+  private _getNonEmptyCellCount() {
+    let notEmpty = 0;
+
+    for (const rId of this.dataViewManager.rows) {
+      const colVal = this.column.getStringValue(rId).trim();
+      if (colVal !== '') notEmpty++;
+    }
+    return notEmpty;
+  }
+
+  // this functions also splits the individual values inside the multiselect
+  private _getAllValuesAsString() {
+    const colType = this.column.type;
+    const colValues: string[] = [];
+
+    for (const rId of this.dataViewManager.rows) {
+      switch (colType) {
+        case 'multi-select': {
+          const options = (this.column.data.options ?? []) as SelectTag[];
+          const values = (this.column.getValue(rId) ?? []) as string[];
+          const map = new Map<string, SelectTag>(options?.map(v => [v.id, v]));
+          for (const id of values) {
+            const opt = map.get(id);
+
+            if (opt) colValues.push(opt.value);
+          }
+          break;
+        }
+        default: {
+          const value = this.column.getStringValue(rId);
+          if (value.trim() !== '') colValues.push(value);
+        }
+      }
+    }
+
+    return colValues;
+  }
+  // gets the count of non-empty values in the column with seperated out multiselct items
+  private _getColumnValueCounts() {
+    return this._getAllValuesAsString().length;
+  }
+
+  // @ts-ignore
+  private _getColValuesAsString(noEmpty = false) {
     const val = this.dataViewManager.rows.map(rId => {
       return this.column.getStringValue(rId);
     });
     return noEmpty ? val.filter(v => v.trim() !== '') : val;
   }
 
-  private getColValuesAsNumber() {
-    return this.dataViewManager.rows
-      .map(rId => {
-        return parseInt(this.column.getStringValue(rId));
-      })
-      .filter(n => !isNaN(n));
+  private _getColValuesAsNumber() {
+    this._assertColumnType('number');
+    const values: number[] = [];
+    for (const rId of this.dataViewManager.rows) {
+      const value = this.column.getValue(rId) as number | undefined;
+      if (value !== undefined) values.push(value);
+    }
+    return values;
   }
 
-  private getCheckBoxColValues() {
+  private _getCheckBoxColValues() {
+    this._assertColumnType('checkbox');
     const val = this.dataViewManager.rows.map(rId => {
       return this.column.getValue(rId);
     });
     return val as (boolean | undefined)[];
   }
-
-  // private _getColValuesAsNumber() {}
 }
