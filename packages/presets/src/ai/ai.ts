@@ -2,13 +2,15 @@ import type { BlockSpec } from '@blocksuite/block-std';
 import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
+  AffineFormatBarWidget,
+  AffineSlashMenuWidget,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
-import { AffineFormatBarWidget } from '@blocksuite/blocks';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { setupFormatBarEntry } from './entry/format-bar/setup-format-bar.js';
+import { setUpSlashMenuEntry } from './entry/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entry/space/setup-space.js';
 
 export function getAISpecs() {
@@ -34,6 +36,10 @@ export function getAISpecs() {
 
               if (view.component instanceof AffineFormatBarWidget) {
                 setupFormatBarEntry(view.component);
+              }
+
+              if (view.component instanceof AffineSlashMenuWidget) {
+                setUpSlashMenuEntry(view.component);
               }
             })
           );
