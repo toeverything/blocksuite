@@ -408,26 +408,40 @@ export class EdgelessToolsManager {
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[type].beforeModeSwitch(edgelessTool);
 
-    const isDefaultType = type === 'default';
-    const isEmptyState = Array.isArray(state)
-      ? this.selection.isEmpty(state)
-      : state.elements.length === 0;
-    const hasLastState = !!this.selection.lastState;
-    const isNotSingleDocOnlyNote = !(
-      this.selection.lastState &&
-      this.selection.lastState[0] &&
-      this.selection.lastState[0].elements.length === 1 &&
-      this._isDocOnlyNote(this.selection.lastState[0].elements[0])
-    );
+    const isEditing = !Array.isArray(state) && state.editing;
 
-    if (
-      isDefaultType &&
-      isEmptyState &&
-      hasLastState &&
-      isNotSingleDocOnlyNote &&
-      restoreToLastSelection
-    ) {
-      state = this.selection.lastState;
+    if (!isEditing) {
+      const isDefaultType = type === 'default';
+      const isLassoType = type === 'lasso';
+      const isLastTypeLasso = lastType === 'lasso';
+      const isLastTypeDefault = lastType === 'default';
+      const isEmptyState = Array.isArray(state)
+        ? this.selection.isEmpty(state)
+        : state.elements.length === 0;
+      const hasLastState = !!this.selection.lastState;
+      const isNotSingleDocOnlyNote = !(
+        this.selection.lastState &&
+        this.selection.lastState[0] &&
+        this.selection.lastState[0].elements.length === 1 &&
+        this._isDocOnlyNote(this.selection.lastState[0].elements[0])
+      );
+
+      if (
+        (isDefaultType && isLastTypeDefault) ||
+        (isLassoType && isLastTypeDefault) ||
+        (isDefaultType && isLastTypeLasso) ||
+        (isLassoType && isLastTypeLasso)
+      )
+        state = this.selection.selections; // selection should remain same when switching between default and lasso tool
+      else if (
+        ((isDefaultType && !isLastTypeLasso) || isLassoType) &&
+        isEmptyState &&
+        hasLastState &&
+        isNotSingleDocOnlyNote &&
+        restoreToLastSelection
+      ) {
+        state = this.selection.lastState; // for getting the selection back after going to another tools
+      }
     }
 
     this.selection.set(state);

@@ -4,11 +4,11 @@ import {
   InsertBelowIcon,
   MarkdownAdapter,
 } from '@blocksuite/blocks';
-import { CopilotClient } from '@blocksuite/presets';
 import { Job } from '@blocksuite/store';
 
-import { textRenderer } from '../../message/text';
-import { getGenerateAnswer } from '../../utils';
+import { CopilotClient } from '../../copilot-client.js';
+import { textRenderer } from '../../message/text.js';
+import { getGenerateAnswer } from '../../utils.js';
 
 export function setupSpaceEntry(panel: AffineAIPanelWidget) {
   const host = panel.host;

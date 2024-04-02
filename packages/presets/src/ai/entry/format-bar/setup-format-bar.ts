@@ -4,7 +4,7 @@ import {
 } from '@blocksuite/blocks';
 import { html, type TemplateResult } from 'lit';
 
-import { FormatBarAIButton } from './format-bar-ai-button';
+import { FormatBarAIButton } from './format-bar-ai-button.js';
 
 export function setupFormatBarEntry(formatBar: AffineFormatBarWidget) {
   toolbarDefaultConfig(formatBar);

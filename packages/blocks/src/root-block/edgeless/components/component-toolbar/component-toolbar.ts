@@ -500,7 +500,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._ImageButton(image),
         ].filter(b => !!b && b !== nothing);
 
-    if (elements.length > 1) {
+    if (elements.length > 1 && elements.length !== connector?.length) {
       buttons.unshift(this._Divider());
       buttons.unshift(this._AlignButton());
       buttons.unshift(this._Divider());
