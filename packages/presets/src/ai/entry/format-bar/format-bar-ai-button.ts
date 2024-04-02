@@ -89,7 +89,11 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
       ...group,
       items: group.items.filter(item =>
         item.showWhen
-          ? item.showWhen(this.host.command.chain(), this._editorMode)
+          ? item.showWhen(
+              this.host.command.chain(),
+              this._editorMode,
+              this.host
+            )
           : true
       ),
     })).filter(group => group.items.length > 0);
