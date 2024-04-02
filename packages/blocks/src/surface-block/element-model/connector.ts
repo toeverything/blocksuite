@@ -14,7 +14,7 @@ import { type IVec2, Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import { type BaseProps, ElementModel, LocalModel } from './base.js';
 import type { StrokeStyle, TextAlign } from './common.js';
-import { FontFamily, FontWeight } from './common.js';
+import { FontFamily, type FontStyle, FontWeight } from './common.js';
 import { derive, local, yfield } from './decorators.js';
 
 export enum ConnectorEndpoint {
@@ -123,7 +123,7 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   displayText?: boolean;
 
   @yfield()
-  textPosition?: [number, number];
+  textXYWH?: SerializedXYWH;
 
   @yfield()
   text?: Y.Text;
@@ -139,6 +139,9 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
 
   @yfield(16)
   fontSize!: number;
+
+  @yfield('normal')
+  fontStype!: FontStyle;
 
   @yfield('center')
   textAlign!: TextAlign;

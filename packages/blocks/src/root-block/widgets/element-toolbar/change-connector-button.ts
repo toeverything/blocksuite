@@ -274,17 +274,17 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   private _setConnectorLabel() {}
 
   override render() {
-    const selectedColor = getMostCommonColor(this.elements);
-    const selectedMode = getMostCommonMode(this.elements);
-    const selectedLineSize =
-      getMostCommonLineWidth(this.elements) ?? LineWidth.Four;
-    const selectedRough = getMostCommonRough(this.elements);
-    const selectedLineStyle = getMostCommonLineStyle(this.elements);
+    const { elements } = this;
+    const selectedColor = getMostCommonColor(elements);
+    const selectedMode = getMostCommonMode(elements);
+    const selectedLineSize = getMostCommonLineWidth(elements) ?? LineWidth.Four;
+    const selectedRough = getMostCommonRough(elements);
+    const selectedLineStyle = getMostCommonLineStyle(elements);
     const selectedStartPointStyle =
-      getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Front) ??
+      getMostCommonEndpointStyle(elements, ConnectorEndpoint.Front) ??
       DEFAULT_FRONT_END_POINT_STYLE;
     const selectedEndPointStyle =
-      getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Rear) ??
+      getMostCommonEndpointStyle(elements, ConnectorEndpoint.Rear) ??
       DEFAULT_REAR_END_POINT_STYLE;
 
     return html`
@@ -581,16 +581,21 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
         </edgeless-menu-button>
       </div>
 
-      <menu-divider .vertical=${true} .dividerMargin=${12}></menu-divider>
+      ${elements.length === 1
+        ? html`<menu-divider
+              .vertical=${true}
+              .dividerMargin=${12}
+            ></menu-divider>
 
-      <edgeless-tool-icon-button
-        .tooltip=${'Add Text'}
-        .iconContainerPadding=${2}
-        .activeMode=${'background'}
-        @click=${() => this._setConnectorLabel()}
-      >
-        ${ConnectorAddTextIcon}
-      </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Add Text'}
+              .iconContainerPadding=${2}
+              .activeMode=${'background'}
+              @click=${() => this._setConnectorLabel()}
+            >
+              ${ConnectorAddTextIcon}
+            </edgeless-tool-icon-button>`
+        : nothing}
     `;
   }
 }
