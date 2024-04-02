@@ -1,7 +1,7 @@
-import type {
+import {
   ConnectorElementModel,
-  LocalConnectorElementModel,
-  PointStyle,
+  type LocalConnectorElementModel,
+  type PointStyle,
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
 import type { PointLocation } from '../../../index.js';
@@ -47,6 +47,10 @@ export function connector(
   );
   renderEndpoint(model, points, ctx, renderer, 'Front', frontEndpointStyle);
   renderEndpoint(model, points, ctx, renderer, 'Rear', rearEndpointStyle);
+
+  if (model instanceof ConnectorElementModel && model.displayText) {
+    renderLabel(model, ctx, renderer, points);
+  }
 }
 
 function renderPoints(
@@ -141,4 +145,13 @@ function renderEndpoint(
       renderDiamond(location, ctx, rc, arrowOptions);
       break;
   }
+}
+
+function renderLabel(
+  model: ConnectorElementModel,
+  _ctx: CanvasRenderingContext2D,
+  _renderer: Renderer,
+  _path: PointLocation[]
+) {
+  console.log(123, model.text);
 }
