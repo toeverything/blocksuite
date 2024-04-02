@@ -51,7 +51,7 @@ export class AISubItemList extends WithDisposable(LitElement) {
   private _handleClick = (subItem: AISubItemConfig) => {
     if (subItem.handler) {
       // TODO: add parameters to ai handler
-      subItem.handler();
+      subItem.handler(this.host);
     }
 
     this.abortController.abort();

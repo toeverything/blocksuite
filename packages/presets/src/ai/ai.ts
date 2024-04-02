@@ -10,11 +10,13 @@ import {
 } from '@blocksuite/blocks';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
+import { buildAIActionGroups, buildAIPanelConfig } from './config/builder.js';
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
+import type { AIConfig } from './types.js';
 
-export function getAISpecs() {
+export function getAISpecs(config: AIConfig) {
   const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
       const newPageSpec: BlockSpec = {
@@ -32,11 +34,15 @@ export function getAISpecs() {
           disposableGroup.add(
             slots.widgetConnected.on(view => {
               if (view.component instanceof AffineAIPanelWidget) {
-                setupSpaceEntry(view.component);
+                view.component.config = buildAIPanelConfig(view.component);
+                if (config.getAskAIStream) {
+                  setupSpaceEntry(view.component, config.getAskAIStream);
+                }
               }
 
               if (view.component instanceof AffineFormatBarWidget) {
-                setupFormatBarEntry(view.component);
+                const actionGroups = buildAIActionGroups(config);
+                setupFormatBarEntry(view.component, actionGroups);
               }
 
               if (view.component instanceof AffineSlashMenuWidget) {
