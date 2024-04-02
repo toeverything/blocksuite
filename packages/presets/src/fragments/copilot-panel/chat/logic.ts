@@ -11,6 +11,8 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockSnapshot, type Doc, Job } from '@blocksuite/store';
+import { html, type TemplateResult } from 'lit';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { LANGUAGE, TONE } from '../config.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
@@ -52,7 +54,7 @@ export type ChatReactiveData = {
   syncedDocs: EmbeddedDoc[];
   value: string;
   currentRequest?: number;
-  tempMessage?: string;
+  tempMessage?: string | TemplateResult;
 };
 
 export class AIChatLogic {
@@ -573,33 +575,64 @@ export class AIChatLogic {
         ];
 
         await this.startRequest(async () => {
-          let html = await runMakeItRealAction({ input: url });
-          if (!html) return;
+          let text = await runMakeItRealAction({ input: url });
+          if (!text) return;
 
-          const start = html.indexOf('<!DOCTYPE html>');
-          const end = html.indexOf('</html>');
+          const start = text.indexOf('<!DOCTYPE html>');
+          const end = text.indexOf('</html>');
 
-          html = html.slice(start, end + '</html>'.length);
+          text = text.slice(start, end + '</html>'.length);
 
           const service = getEdgelessService(host);
           const bounds = getElementsBound(
             service.selection.elements.map(ele => ele.elementBound)
           );
+          const width = 400;
+          const height = 200;
           const left = bounds.maxX + 20;
-          const top = (bounds.minY + bounds.maxY) / 2 - 200 / 2;
+          const top = bounds.minY + bounds.maxY - height;
 
           service.doc.addBlock(
             EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
             {
-              html,
+              html: text,
               design: url,
-              xywh: `[${left}, ${top}, 400, 200]` as SerializedXYWH,
+              xywh: `[${left}, ${top}, ${width}, ${height}]` as SerializedXYWH,
             },
             service.surface.id
           );
 
-          // @TODO: insert html or image
-          reactiveData.tempMessage = html;
+          reactiveData.tempMessage = html`
+            <div
+              class="chat-message-block"
+              style=${styleMap({
+                borderRadius: '4px',
+                padding: '8px 12px',
+                boxSizing: 'border-box',
+                border: '1px solid var(--affine-border-color)',
+                background: 'var(--affine-background-secondary-color)',
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                boxShadow: 'var(--affine-shadow-1)',
+                overflow: 'hidden',
+              })}
+            >
+              <iframe
+                class="chat-message-iframe-block"
+                sandbox="allow-scripts"
+                scrolling="no"
+                allowfullscreen
+                style=${styleMap({
+                  width: '100%',
+                  height: '100% ',
+                  border: 'none',
+                })}
+                .srcdoc=${text}
+              >
+              </iframe>
+            </div>
+          `;
         });
       },
     },
