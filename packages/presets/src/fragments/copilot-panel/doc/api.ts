@@ -1,6 +1,9 @@
 import type { ChatMessage } from '../chat/logic.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
-import { ChatServiceKind } from '../copilot-service/service-base.js';
+import {
+  ChatServiceKind,
+  Image2TextServiceKind,
+} from '../copilot-service/service-base.js';
 
 export const ChatFeatureKey = 'chat';
 export const getChatService = () => {
@@ -18,6 +21,9 @@ export const userText = (text: string): ChatMessage => {
   };
 };
 
+export const getImage2TextService = (key = 'make it real') => {
+  return copilotConfig.getService(key, Image2TextServiceKind);
+};
 export const userImage = (url: string): ChatMessage => {
   return {
     role: 'user',
