@@ -11,12 +11,14 @@ import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
   Bound,
   CanvasElementType,
+  type ConnectorElementModel,
   type IModelCoord,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
   isTransparent,
 } from '../components/panel/color-panel.js';
+import { EdgelessConnectorTextEditor } from '../components/text/edgeless-connector-text-editor.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
@@ -121,6 +123,21 @@ export function mountGroupTitleEditor(
   edgeless.rootElementContainer.append(groupEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [group.id],
+    editing: true,
+  });
+}
+
+export function mountConnectorTextEditor(
+  connector: ConnectorElementModel,
+  edgeless: EdgelessRootBlockComponent
+) {
+  const editor = new EdgelessConnectorTextEditor();
+  editor.connector = connector;
+  editor.edgeless = edgeless;
+
+  edgeless.rootElementContainer.append(editor);
+  edgeless.tools.switchToDefaultMode({
+    elements: [connector.id],
     editing: true,
   });
 }

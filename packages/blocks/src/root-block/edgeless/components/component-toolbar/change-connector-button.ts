@@ -43,6 +43,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import { mountConnectorTextEditor } from '../../utils/text.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import {
   type ColorEvent,
@@ -275,7 +276,9 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     }
   }
 
-  private _setConnectorLabel() {}
+  private _setConnectorText() {
+    mountConnectorTextEditor(this.elements[0], this.edgeless);
+  }
 
   override render() {
     const { elements } = this;
@@ -595,7 +598,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               .tooltip=${'Add Text'}
               .iconContainerPadding=${2}
               .activeMode=${'background'}
-              @click=${() => this._setConnectorLabel()}
+              @click=${() => this._setConnectorText()}
             >
               ${ConnectorAddTextIcon}
             </edgeless-tool-icon-button>`
