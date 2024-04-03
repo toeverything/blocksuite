@@ -1,7 +1,8 @@
 import './text-renderer.js';
 import './slides-renderer.js';
 
-import type { EditorHost, TextSelection } from '@blocksuite/block-std';
+import type { TextSelection } from '@blocksuite/block-std';
+import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
@@ -23,7 +24,7 @@ import type { ChatMessage } from './index.js';
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    :host {
+    chat-panel-messages {
       position: relative;
     }
 
@@ -118,37 +119,10 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
   renderItem(message: ChatMessage) {
     return html`<ai-text-renderer .text=${message.content}></ai-text-renderer>`;
+  }
 
-    // return html`
-    //   <style>
-    //     .ppt-title {
-    //       border-radius: 4px;
-    //       border: 1px solid var(--affine-border-color);
-    //       padding: 10px 16px;
-    //       font-size: 15px;
-    //       font-weight: 400;
-    //       margin-top: 4px;
-    //       margin-bottom: 12px;
-    //     }
-    //     .ppt-postfix {
-    //       display: flex;
-    //       gap: 8px;
-    //       margin-top: 12px;
-    //       margin-bottom: 8px;
-    //     }
-    //     .ppt-postfix div {
-    //       color: var(--affine-text-primary-color);
-    //       font-size: 14px;
-    //       font-weight: 400;
-    //     }
-    //   </style>
-    //   <div class="ppt-title">Title</div>
-    //   <ai-slides-renderer></ai-slides-renderer>
-    //   <div class="ppt-postfix">
-    //     ${PenIcon}
-    //     <div>Create a presentation</div>
-    //   </div>
-    // `;
+  scrollToDown() {
+    this.messagesContainer.scrollTo(0, this.messagesContainer.scrollHeight);
   }
 
   renderEditorActions(content: string) {
@@ -190,7 +164,10 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               if (!this._currentTextSelection) return;
               this.host.command
                 .chain()
-                .deleteText({ textSelection: this._currentTextSelection })
+                .inline((_, next) => {
+                  next({ textSelection: this._currentTextSelection });
+                })
+                .deleteText()
                 .inline((_, next) => {
                   if (!this._currentTextSelection) return;
                   const block = this.host.doc.getBlockById(
@@ -314,14 +291,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
             })}
       </div>
       ${this.showDownIndicator
-        ? html`<div
-            class="down-indicator"
-            @click=${() =>
-              this.messagesContainer.scrollTo(
-                0,
-                this.messagesContainer.scrollHeight
-              )}
-          >
+        ? html`<div class="down-indicator" @click=${() => this.scrollToDown()}>
             ${DownArrowIcon}
           </div>`
         : nothing}

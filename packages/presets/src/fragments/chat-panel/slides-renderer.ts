@@ -44,14 +44,7 @@ export class AISlidesRenderer extends WithDisposable(ShadowlessElement) {
     this._editorContainer.value?.append(editor);
 
     requestAnimationFrame(() => {
-      PPTBuilder(editor.host)
-        .process(this.text)
-        .then(() => {
-          requestAnimationFrame(() => {
-            // editor.doc.collection.awarenessStore.setReadonly(editor.doc, true);
-          });
-        })
-        .catch(console.error);
+      PPTBuilder(editor.host).process(this.text).catch(console.error);
     });
   }
 

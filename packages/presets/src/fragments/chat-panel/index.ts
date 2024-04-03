@@ -4,10 +4,12 @@ import './chat-panel-input.js';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
 import { CopilotClient } from '../../ai/index.js';
 import type { AffineEditorContainer } from '../../editors/index.js';
 import { SmallHintIcon } from '../_common/icons.js';
+import type { ChatPanelMessages } from './chat-panel-messages.js';
 
 export type ChatMessage = {
   content: string;
@@ -82,6 +84,8 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   status: ChatStatus = 'idle';
 
   private _copilotClient = new CopilotClient('http://localhost:3010');
+  private _chatMessages: Ref<ChatPanelMessages> =
+    createRef<ChatPanelMessages>();
 
   public override async connectedCallback() {
     super.connectedCallback();
@@ -119,11 +123,17 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     this.messages =
       histories.find(h => h.sessionId === this.sessionId)?.messages ||
       this.messages;
+    this.scrollToDown();
   };
 
   addToMessages = (messages: ChatMessage[]) => {
     this.messages = [...this.messages, ...messages];
+    this.scrollToDown();
   };
+
+  scrollToDown() {
+    requestAnimationFrame(() => this._chatMessages.value?.scrollToDown());
+  }
 
   updateStatus = (status: ChatStatus) => {
     this.status = status;
@@ -133,6 +143,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     return html` <div class="chat-panel-container">
       <div class="chat-panel-title">AFFINE AI</div>
       <chat-panel-messages
+        ${ref(this._chatMessages)}
         .host=${this.editor.host}
         .copilotClient=${this._copilotClient}
         .messages=${this.messages}
