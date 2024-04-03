@@ -161,7 +161,10 @@ export class AffineFormatBarWidget extends WidgetElement {
         let targetRect: DOMRect | null = null;
         if (this.displayType === 'text' || this.displayType === 'native') {
           const range = this.nativeRange;
-          assertExists(range);
+          if (!range) {
+            this._reset();
+            return;
+          }
           targetRect = range.getBoundingClientRect();
         } else if (this.displayType === 'block') {
           const blockElement = this._selectedBlockElements[0];
@@ -516,6 +519,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     return html` <div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
       @pointerdown="${stopPropagation}"
+      @wheel="${stopPropagation}"
     >
       ${items}
     </div>`;

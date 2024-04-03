@@ -65,6 +65,7 @@ export * from './_common/transformers/index.js';
 export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
 export {
   createButtonPopper,
+  matchFlavours,
   on,
   once,
   openFileOrFiles,

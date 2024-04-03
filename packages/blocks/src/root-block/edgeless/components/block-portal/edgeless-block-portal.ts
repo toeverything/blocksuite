@@ -457,6 +457,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
+
       ${readonly || this._isResizing || !this._enableNoteSlicer
         ? nothing
         : html`<note-slicer

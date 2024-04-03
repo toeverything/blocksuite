@@ -1,12 +1,13 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
-  AIItemGroups,
   AIStarIcon,
   createButtonPopper,
   isInsidePageEditor,
 } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+
+import { AIItemGroups } from './config.js';
 
 @customElement('format-bar-ai-button')
 export class FormatBarAIButton extends WithDisposable(LitElement) {
@@ -88,7 +89,11 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
       ...group,
       items: group.items.filter(item =>
         item.showWhen
-          ? item.showWhen(this.host.command.chain(), this._editorMode)
+          ? item.showWhen(
+              this.host.command.chain(),
+              this._editorMode,
+              this.host
+            )
           : true
       ),
     })).filter(group => group.items.length > 0);

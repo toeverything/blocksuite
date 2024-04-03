@@ -1,20 +1,27 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
-
 import {
+  AFFINE_AI_PANEL_WIDGET,
+  AffineAIPanelWidget,
   AIDoneIcon,
+  type AIItemGroupConfig,
   AIPenIcon,
   AISearchIcon,
+  type AISubItemConfig,
   ExplainIcon,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
   MakeItRealIcon,
+  matchFlavours,
   ShorterIcon,
   TagIcon,
   ToneIcon,
-} from '../../icons/ai.js';
-import { matchFlavours } from '../../utils/model.js';
-import type { AIItemGroupConfig, AISubItemConfig } from './types.js';
+} from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
+
+import { CopilotClient } from '../../copilot-client.js';
+import { textRenderer } from '../../message/text.js';
+import { getGenerateAnswer } from '../../utils.js';
 
 export const translateSubItem: AISubItemConfig[] = [
   {
@@ -76,8 +83,59 @@ const DocAIGroup: AIItemGroupConfig = {
       name: 'Summary',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: () => {
-        // TODO: Implement the logic to summarize the text
+      handler: host => {
+        const rootBlockId = host.doc.root?.id;
+        assertExists(rootBlockId);
+        const aiPanel = host.view.getWidget(
+          AFFINE_AI_PANEL_WIDGET,
+          rootBlockId
+        );
+        if (!(aiPanel instanceof AffineAIPanelWidget)) return;
+
+        host.command
+          .chain()
+          .getTextSelection()
+          .getSelectedBlocks()
+          .inline(ctx => {
+            const blocks = ctx.selectedBlocks;
+            if (!blocks || blocks.length === 0) return;
+
+            const text = blocks.reduce((acc, block) => {
+              return acc + block.model.text?.toString();
+            }, '');
+
+            const copilotClient = new CopilotClient('http://localhost:3010');
+
+            aiPanel.config = {
+              answerRenderer: textRenderer,
+              generateAnswer: getGenerateAnswer({
+                copilotClient,
+                panel: aiPanel,
+              }),
+
+              finishStateConfig: {
+                responses: [],
+                actions: [],
+              },
+              errorStateConfig: {
+                upgrade: () => {},
+                responses: [],
+              },
+            };
+            aiPanel.toggle(
+              blocks[0],
+              `
+            Summarize the key points from the following content in a clear and concise manner,
+            suitable for a reader who is seeking a quick understanding of the original content.
+            Ensure to capture the main ideas and any significant details without unnecessary elaboration:
+
+            ${text}
+            `
+            );
+
+            host.selection.clear();
+          })
+          .run();
       },
     },
   ],
