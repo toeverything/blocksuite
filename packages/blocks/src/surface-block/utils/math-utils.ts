@@ -639,15 +639,16 @@ export function isPointOnlines(
 }
 
 export function getPolylineCenter(points: IVec2[]) {
-  let totalDistance = 0;
+  const len = points.length;
   const distances = [];
-  for (let i = 1; i < points.length; i++) {
+  let totalDistance = 0;
+  for (let i = 1; i < len; i++) {
     const distance = Vec.dist(points[i], points[i - 1]);
     distances.push(distance);
     totalDistance += distance;
   }
   let half = totalDistance / 2;
-  for (let i = 1; i < points.length; i++) {
+  for (let i = 1; i < len; i++) {
     if (half > distances[i - 1]) {
       half -= distances[i - 1];
     } else {
