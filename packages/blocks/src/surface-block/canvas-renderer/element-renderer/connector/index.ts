@@ -178,6 +178,7 @@ function renderLabel(
     fontStyle,
     fontFamily,
     textAlign,
+    // strokeWidth,
     // rotate,
   } = model;
   assertExists(model.text);
@@ -195,12 +196,10 @@ function renderLabel(
   const deltas = wrapTextDeltas(model.text, font, w);
   const lines = deltaInsertsToChunks(deltas);
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
-  // const horizontalOffset =
-  //   textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
-  const verticalOffset = (lines.length * lineHeightPx) / 2;
+  const textHeight = (lines.length - 1) * lineHeightPx * 0.5;
 
   let x = 0;
-  let y = -verticalOffset;
+  let y = -textHeight;
   if (mode === ConnectorMode.Straight) {
     const first = points[0];
     const last = points[path.length - 1];
@@ -219,16 +218,16 @@ function renderLabel(
     x = point[0];
     y += point[1];
   }
-  ctx.setTransform(matrix.translate(x, y));
 
+  ctx.setTransform(matrix.translate(x, y));
   ctx.font = font;
   ctx.fillStyle = renderer.getVariableColor(color);
   ctx.textAlign = textAlign;
-  ctx.textBaseline = 'ideographic';
+  ctx.textBaseline = 'middle';
 
   const maxTextWidth = getMaxTextWidth(lines, font);
 
-  for (const [lineIndex, line] of lines.entries()) {
+  for (const [index, line] of lines.entries()) {
     for (const delta of line) {
       const str = delta.insert;
       const rtl = isRTL(str);
@@ -245,9 +244,9 @@ function renderLabel(
         textAlign === 'center'
           ? 0
           : textAlign === 'right'
-            ? (maxTextWidth / 2) * (rtl ? -1 : 1)
-            : (maxTextWidth / 2) * (rtl ? 1 : -1);
-      ctx.fillText(str, x, (lineIndex + 1) * lineHeightPx, w);
+            ? maxTextWidth * (rtl ? -0.5 : 0.5)
+            : maxTextWidth * (rtl ? 0.5 : -0.5);
+      ctx.fillText(str, x, index * lineHeightPx, w);
 
       if (shouldTemporarilyAttach) {
         ctx.canvas.remove();
