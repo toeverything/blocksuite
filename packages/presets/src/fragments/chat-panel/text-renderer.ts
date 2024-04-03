@@ -11,17 +11,3 @@ export class AITextRenderer extends WithDisposable(LitElement) {
     return html` <div style="white-space: pre-wrap">${this.text}</div>`;
   }
 }
-
-@customElement('ai-loading')
-export class AIloading extends WithDisposable(LitElement) {
-  protected override render() {
-    return html`loading...`;
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'ai-text-renderer': AITextRenderer;
-    'ai-loading': AIloading;
-  }
-}
