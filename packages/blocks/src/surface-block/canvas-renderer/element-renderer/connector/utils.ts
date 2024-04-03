@@ -120,20 +120,20 @@ export function getArrowOptions(
   model: ConnectorElementModel | LocalConnectorElementModel,
   renderer: Renderer
 ) {
-  const { stroke } = model;
+  const { stroke, seed, mode, rough, roughness, strokeWidth, path } = model;
   const realStrokeColor = renderer.getVariableColor(stroke);
 
   return {
     end,
-    seed: model.seed,
-    mode: model.mode,
-    rough: model.rough,
-    roughness: model.roughness,
+    seed,
+    mode,
+    rough,
+    roughness,
+    strokeWidth,
     strokeColor: realStrokeColor,
-    strokeWidth: model.strokeWidth,
     fillColor: realStrokeColor,
     fillStyle: 'solid',
-    bezierParameters: getBezierParameters(model.absolutePath),
+    bezierParameters: getBezierParameters(path),
   };
 }
 

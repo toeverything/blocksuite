@@ -2,6 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/store';
 
 import type { CopilotSelectionTool } from '../../../../_common/utils/index.js';
+import { Bound } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
@@ -14,6 +15,17 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   private _dragging = false;
 
   draggingAreaUpdated = new Slot();
+
+  get selectedElements() {
+    const area = this.area;
+    const bound = new Bound(area.x, area.y, area.width, area.height);
+
+    return area.width === 0 || area.height === 0
+      ? []
+      : this._service.pickElementsByBound(bound).filter(el => {
+          return bound.contains(el.elementBound);
+        });
+  }
 
   get area() {
     const start = new DOMPoint(

@@ -3,11 +3,12 @@ import { Doc } from '@blocksuite/store';
 import { useEditor } from '../editor/context';
 
 const Sidebar = () => {
-  const { collection, editor } = useEditor()!;
+  const { provider, editor } = useEditor()!;
   const [docs, setDocs] = useState<Doc[]>([]);
 
   useEffect(() => {
-    if (!collection || !editor) return;
+    if (!provider || !editor) return;
+    const { collection } = provider;
     const updateDocs = () => {
       setDocs([...collection.docs.values()]);
     };
@@ -19,7 +20,7 @@ const Sidebar = () => {
     ];
 
     return () => disposable.forEach(d => d.dispose());
-  }, [collection, editor]);
+  }, [provider, editor]);
 
   return (
     <div className="sidebar">
@@ -31,7 +32,7 @@ const Sidebar = () => {
             key={doc.id}
             onClick={() => {
               if (editor) editor.doc = doc;
-              setDocs([...collection!.docs.values()]);
+              setDocs([...provider!.collection!.docs.values()]);
             }}
           >
             {doc.meta?.title || 'Untitled'}
