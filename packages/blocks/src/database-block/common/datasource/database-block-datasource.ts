@@ -6,7 +6,7 @@ import { Text, type Y } from '@blocksuite/store';
 
 import { createUniComponentFromWebComponent } from '../../../_common/components/uni-component/uni-component.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
-import type { InsertToPosition } from '../../types.js';
+import type { InsertToPosition, StatCalcOpType } from '../../types.js';
 import { insertPositionToIndex } from '../../utils/insert.js';
 import { checkboxColumnConfig } from '../columns/checkbox/cell-renderer.js';
 import { dateColumnConfig } from '../columns/date/cell-renderer.js';
@@ -21,12 +21,12 @@ import { progressColumnConfig } from '../columns/progress/cell-renderer.js';
 import { richTextColumnConfig } from '../columns/rich-text/cell-renderer.js';
 import { selectColumnConfig } from '../columns/select/cell-renderer.js';
 import { titleColumnConfig } from '../columns/title/cell-renderer.js';
-import type { DatabaseBlockDatasourceConfig, DetailSlots } from './base.js';
+import type { DatabaseBlockDataSourceConfig, DetailSlots } from './base.js';
 import { BaseDataSource } from './base.js';
 import { getIcon } from './block-icons.js';
 import { BlockRenderer } from './block-renderer.js';
 
-export class DatabaseBlockDatasource extends BaseDataSource {
+export class DatabaseBlockDataSource extends BaseDataSource {
   private _model: DatabaseBlockModel;
   private _batch = 0;
 
@@ -36,7 +36,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
 
   constructor(
     private host: EditorHost,
-    config: DatabaseBlockDatasourceConfig
+    config: DatabaseBlockDataSourceConfig
   ) {
     super();
     this._model = host.doc.collection
@@ -181,6 +181,15 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     this._model.applyColumnUpdate();
   }
 
+  public propertyChangeStatCalcOp(
+    propertyId: string,
+    type: StatCalcOpType
+  ): void {
+    this.doc.captureSync();
+    this._model.updateColumn(propertyId, () => ({ statCalcOp: type }));
+    this._model.applyColumnUpdate();
+  }
+
   public propertyChangeType(propertyId: string, toType: string): void {
     const currentType = this.propertyGetType(propertyId);
     const currentData = this.propertyGetData(propertyId);
@@ -241,6 +250,12 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       return 'image';
     }
     return this._model.columns.find(v => v.id === propertyId)?.type ?? '';
+  }
+
+  public propertyGetStatCalcOp(propertyId: string): StatCalcOpType {
+    return (
+      this._model.columns.find(v => v.id === propertyId)?.statCalcOp ?? 'none'
+    );
   }
 
   public propertyDuplicate(columnId: string): string {

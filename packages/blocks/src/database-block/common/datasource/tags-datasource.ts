@@ -8,14 +8,14 @@ import {
   selectOptionColors,
 } from '../../../_common/components/tags/colors.js';
 import type { SelectTag } from '../../../_common/components/tags/multi-tag-select.js';
-import type { InsertToPosition } from '../../types.js';
+import type { InsertToPosition, StatCalcOpType } from '../../types.js';
 import type { ColumnConfig } from '../columns/manager.js';
 import { selectPureColumnConfig } from '../columns/select/define.js';
 import { textPureColumnConfig } from '../columns/text/define.js';
-import type { TagsDatasourceConfig } from './base.js';
+import type { TagsDataSourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
-export class TagsDatasource extends BaseDataSource {
+export class TagsDataSource extends BaseDataSource {
   private meta: DocCollection['meta'];
 
   public rowMove(rowId: string, position: InsertToPosition): void {
@@ -82,7 +82,7 @@ export class TagsDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(host: EditorHost, _config: TagsDatasourceConfig) {
+  constructor(host: EditorHost, _config: TagsDataSourceConfig) {
     super();
     this.meta = host.doc.collection.meta;
     host.doc.collection.meta.docMetaUpdated.pipe(this.slots.update);
@@ -127,6 +127,13 @@ export class TagsDatasource extends BaseDataSource {
     // not support
   }
 
+  public propertyChangeStatCalcOp(
+    _propertyId: string,
+    _type: StatCalcOpType
+  ): void {
+    // no support
+  }
+
   public propertyChangeType(_propertyId: string, _type: string): void {
     // not support
   }
@@ -145,6 +152,10 @@ export class TagsDatasource extends BaseDataSource {
 
   public propertyGetName(propertyId: string): string {
     return propertyId;
+  }
+
+  public override propertyGetStatCalcOp(_propertyId: string): StatCalcOpType {
+    return 'none';
   }
 
   public propertyGetType(propertyId: string): string {

@@ -166,8 +166,9 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
 
   addColumn(
     position: InsertToPosition,
-    column: Omit<Column, 'id'> & {
+    column: Omit<Column, 'id' | 'statCalcOp'> & {
       id?: string;
+      calculate?: Column['statCalcOp'];
     }
   ): string {
     const id = column.id ?? this.doc.generateBlockId();
@@ -175,9 +176,10 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
       return id;
     }
     this.doc.transact(() => {
-      const col = {
+      const col: Column = {
         ...column,
         id,
+        statCalcOp: column.calculate ?? 'none',
       };
       this.columns.splice(
         insertPositionToIndex(position, this.columns),
@@ -288,6 +290,7 @@ const migration = {
       id,
       type: 'title',
       name: title,
+      statCalcOp: 'none',
       data: {},
     });
     data.views.forEach(view => {
@@ -298,6 +301,9 @@ const migration = {
         });
       }
     });
+  },
+  toV4: data => {
+    data.columns.forEach(col => (col.statCalcOp = 'none'));
   },
 } satisfies Record<string, MigrationRunner<typeof DatabaseBlockSchema>>;
 
@@ -317,8 +323,10 @@ export const DatabaseBlockSchema = defineBlockSchema({
   },
   toModel: () => new DatabaseBlockModel(),
   onUpgrade: (data, previousVersion, latestVersion) => {
+    console.log('upgrade');
     if (previousVersion < 3 && latestVersion >= 3) {
       migration.toV3(data);
     }
+    if (previousVersion < 4 && latestVersion >= 4) migration.toV4(data);
   },
 });

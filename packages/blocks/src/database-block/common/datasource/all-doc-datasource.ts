@@ -2,15 +2,15 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { Doc, DocCollection } from '@blocksuite/store';
 
-import type { InsertToPosition } from '../../types.js';
+import type { InsertToPosition, StatCalcOpType } from '../../types.js';
 import type { ColumnConfig } from '../columns/manager.js';
 import { multiSelectPureColumnConfig } from '../columns/multi-select/define.js';
 import { numberPureColumnConfig } from '../columns/number/define.js';
 import { textPureColumnConfig } from '../columns/text/define.js';
-import type { AllDocDatasourceConfig } from './base.js';
+import type { AllDocDataSourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
-export class AllDocDatasource extends BaseDataSource {
+export class AllDocDataSource extends BaseDataSource {
   private collection: DocCollection;
 
   public get rows(): string[] {
@@ -62,7 +62,7 @@ export class AllDocDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(host: EditorHost, _config: AllDocDatasourceConfig) {
+  constructor(host: EditorHost, _config: AllDocDataSourceConfig) {
     super();
     this.collection = host.doc.collection;
     host.doc.collection.meta.docMetaUpdated.pipe(this.slots.update);
@@ -106,6 +106,13 @@ export class AllDocDatasource extends BaseDataSource {
     // not support
   }
 
+  public propertyChangeStatCalcOp(
+    _propertyId: string,
+    _type: StatCalcOpType
+  ): void {
+    // no support
+  }
+
   public propertyChangeType(_propertyId: string, _type: string): void {
     // not support
   }
@@ -128,6 +135,11 @@ export class AllDocDatasource extends BaseDataSource {
 
   public propertyGetType(propertyId: string): string {
     return this.propertiesMap[propertyId].type;
+  }
+
+  public propertyGetStatCalcOp(_propertyId: string): StatCalcOpType {
+    // todo(golok727) change this
+    return 'none';
   }
 
   public rowAdd(_insertPosition: InsertToPosition | number): string {

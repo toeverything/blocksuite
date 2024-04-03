@@ -1,39 +1,7 @@
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
-
-// Common formula types
-export type StatCalcOpBaseTypes =
-  | 'none'
-  | 'count-all'
-  | 'count-values'
-  | 'count-uni-values'
-  | 'count-empty'
-  | 'count-not-empty'
-  | 'percent-empty'
-  | 'percent-not-empty';
-
-// Mathematical formula types
-export type StatCalcOpMathTypes =
-  | StatCalcOpBaseTypes
-  | 'sum'
-  | 'avg'
-  | 'median'
-  | 'mode'
-  | 'min'
-  | 'max'
-  | 'range';
-
-export type StatCalcOpCheckboxTypes =
-  | StatCalcOpBaseTypes
-  | 'checked'
-  | 'not-checked'
-  | 'percent-checked'
-  | 'percent-not-checked';
-
-// Union of all formula types
-export type StatCalcOpType =
-  | StatCalcOpBaseTypes
-  | StatCalcOpMathTypes
-  | StatCalcOpCheckboxTypes;
+import type { StatCalcOpType } from '../types.js';
 
 export interface StatCalcOp {
   type: StatCalcOpType;
@@ -279,3 +247,13 @@ export const checkboxCalcOps: StatCalcOp[] = [
     },
   },
 ];
+
+const allCalcOps = Array.from(
+  new Set([...commonCalcOps, ...numberColCalcOps, ...checkboxCalcOps])
+);
+
+export function getStatCalcOperationFromType(type: StatCalcOpType): StatCalcOp {
+  const operation = allCalcOps.find(op => op.type === type);
+  assertExists(operation, `Invalid operation type ${type}`);
+  return operation;
+}

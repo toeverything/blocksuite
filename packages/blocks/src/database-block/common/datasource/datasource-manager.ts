@@ -1,17 +1,17 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
-import { AllDocDatasource } from './all-doc-datasource.js';
+import { AllDocDataSource } from './all-doc-datasource.js';
 import type {
-  AllDocDatasourceConfig,
-  DatabaseBlockDatasourceConfig,
+  AllDocDataSourceConfig,
+  DatabaseBlockDataSourceConfig,
   DataSource,
   DataSourceConfig,
   GetConfig,
-  TagsDatasourceConfig,
+  TagsDataSourceConfig,
 } from './base.js';
-import { DatabaseBlockDatasource } from './database-block-datasource.js';
-import { TagsDatasource } from './tags-datasource.js';
+import { DatabaseBlockDataSource } from './database-block-datasource.js';
+import { TagsDataSource } from './tags-datasource.js';
 
 const datasourceMap: {
   [K in DataSourceConfig['type']]: {
@@ -20,25 +20,25 @@ const datasourceMap: {
   };
 } = {
   'database-block': {
-    title: (host: EditorHost, config: DatabaseBlockDatasourceConfig) => {
+    title: (host: EditorHost, config: DatabaseBlockDataSourceConfig) => {
       const dbblock = host.doc.collection
         .getDoc(config.pageId)
         ?.getBlockById(config.blockId) as DatabaseBlockModel;
       return dbblock?.title.toString() ?? '';
     },
-    constructor: DatabaseBlockDatasource,
+    constructor: DatabaseBlockDataSource,
   },
   'all-pages': {
-    title: (_host: EditorHost, _config: AllDocDatasourceConfig) => {
+    title: (_host: EditorHost, _config: AllDocDataSourceConfig) => {
       return 'All Pages';
     },
-    constructor: AllDocDatasource,
+    constructor: AllDocDataSource,
   },
   tags: {
-    title: (_host: EditorHost, _config: TagsDatasourceConfig) => {
+    title: (_host: EditorHost, _config: TagsDataSourceConfig) => {
       return 'Tags';
     },
-    constructor: TagsDatasource,
+    constructor: TagsDataSource,
   },
 };
 export const createDatasource = (

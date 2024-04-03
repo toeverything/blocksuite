@@ -9,7 +9,12 @@ import { getRootByElement } from '../../../_common/utils/query.js';
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './../consts.js';
 import { popColStatOperationMenu } from './menu.js';
-import type { ColumnDataType, StatCalcOp, StatOpResult } from './stat-ops.js';
+import {
+  type ColumnDataType,
+  getStatCalcOperationFromType,
+  type StatCalcOp,
+  type StatOpResult,
+} from './stat-ops.js';
 
 const styles = css`
   .stats-cell {
@@ -61,8 +66,9 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    this.operation = getStatCalcOperationFromType(this.column.statCalcOp);
+    this.calculate();
     this.disposables.addFromEvent(this, 'click', this.openMenu);
-
     // this.column.dataViewManager.rows.forEach(rId => {
     //   this._disposables.add(
     //     this.column.onCellUpdate(rId, () => {
@@ -77,12 +83,12 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
       width: `${this.column.width}px`,
     };
     return html`<div
-      calculated="${!!this.operation}"
+      calculated="${!!this.operation && this.operation.type !== 'none'}"
       style="${styleMap(style)}"
       class="stats-cell"
     >
       <div class="content">
-        ${!this.operation
+        ${!this.operation || this.operation.type === 'none'
           ? html`Calculate ${ArrowDownIcon}`
           : html`
               <span class="label">${this.operation.display}</span>
@@ -120,14 +126,13 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
       this.result = null;
       return;
     }
-
+    this.column.updateStatCalcOp(operation.type);
     this.operation = operation;
-
     this.calculate();
   };
 
   calculate() {
-    console.log('calculate');
+    // console.log('calculate');
     if (!this.operation) return;
     this.result = this.operation.calculate(this.column);
   }
