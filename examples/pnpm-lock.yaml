@@ -219,15 +219,15 @@ importers:
       '@blocksuite/store':
         specifier: 0.14.0-canary-202403201020-e0ac77d
         version: 0.14.0-canary-202403201020-e0ac77d(lit@3.1.2)(yjs@13.6.14)
+      idb:
+        specifier: ^8.0.0
+        version: 8.0.0
       react:
         specifier: ^18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
-      sql.js:
-        specifier: ^1.10.2
-        version: 1.10.2
     devDependencies:
       '@types/react':
         specifier: ^18.2.69
@@ -235,9 +235,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.22
         version: 18.2.22
-      '@types/sql.js':
-        specifier: ^1.4.9
-        version: 1.4.9
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.3.1
         version: 7.3.1(@typescript-eslint/parser@7.3.1)(eslint@8.57.0)(typescript@5.4.3)

@@ -5,7 +5,6 @@ import { CollectionProvider } from './provider/provider';
 export interface EditorContextType {
   editor: AffineEditorContainer | null;
   provider: CollectionProvider | null;
-  updateProvider: (newProvider: CollectionProvider) => void;
 }
 
 export const EditorContext = createContext<EditorContextType | null>(null);

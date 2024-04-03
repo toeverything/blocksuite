@@ -7,9 +7,6 @@ import { EditorContext } from '../editor/context';
 export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
   const [editor, setEditor] = useState<AffineEditorContainer | null>(null);
   const [provider, setProvider] = useState<CollectionProvider | null>(null);
-  const updateProvider = (newProvider: CollectionProvider) => {
-    setProvider(newProvider);
-  };
 
   useEffect(() => {
     initEditor().then(({ editor, provider }) => {
@@ -23,7 +20,6 @@ export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         editor,
         provider,
-        updateProvider,
       }}
     >
       {children}

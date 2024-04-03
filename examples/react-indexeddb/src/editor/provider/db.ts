@@ -1,154 +1,100 @@
-import initSqlJs, { Database } from 'sql.js';
-import sqliteUrl from '../../../assets/sql-wasm.wasm?url';
+import { openDB, IDBPDatabase } from 'idb';
 
-async function initEmptyDb() {
-  const SQL = await initSqlJs({
-    locateFile: () => sqliteUrl,
-  });
+const DB_NAME = 'react-indexeddb';
+const DB_VERSION = 1;
+const DOCS_STORE = 'docs';
+const UPDATES_STORE = 'updates';
+const BLOBS_STORE = 'blobs';
 
-  const db = new SQL.Database();
-  const sqlstrs = [
-    `
-    CREATE TABLE IF NOT EXISTS docs (
-      doc_id TEXT PRIMARY KEY,
-      root_doc_id TEXT,
-      FOREIGN KEY (root_doc_id) REFERENCES docs(doc_id)
-    );`,
-    `
-    CREATE TABLE IF NOT EXISTS updates (
-      update_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      doc_id TEXT,
-      update_data BLOB,
-      FOREIGN KEY (doc_id) REFERENCES docs(doc_id)
-    );
+export class IndexedDBClient {
+  private dbPromise: Promise<IDBPDatabase>;
 
-    CREATE TABLE IF NOT EXISTS blobs (
-      blob_id TEXT PRIMARY KEY,
-      blob_data BLOB
-    );
-    `,
-  ];
-  sqlstrs.forEach(sqlstr => db.run(sqlstr));
-  return db;
-}
-
-async function initDbFromBinary(data: Uint8Array) {
-  const SQL = await initSqlJs({
-    locateFile: () => sqliteUrl,
-  });
-  return new SQL.Database(data);
-}
-
-function insertRoot(db: Database, rootDocId: string) {
-  db.run('INSERT INTO docs (doc_id, root_doc_id) VALUES (?, ?)', [
-    rootDocId,
-    null,
-  ]);
-}
-
-function insertDoc(db: Database, docId: string, rootDocId: string) {
-  db.run('INSERT INTO docs (doc_id, root_doc_id) VALUES (?, ?)', [
-    docId,
-    rootDocId,
-  ]);
-}
-
-function insertUpdate(db: Database, docId: string, update: Uint8Array) {
-  db.run('INSERT INTO updates (doc_id, update_data) VALUES (?, ?)', [
-    docId,
-    update,
-  ]);
-}
-
-async function insertBlob(db: Database, blobId: string, blobData: Blob) {
-  return new Promise<void>(resolve => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const arrayBuffer = reader.result as ArrayBuffer;
-      db.run('INSERT INTO blobs (blob_id, blob_data) VALUES (?, ?)', [
-        blobId,
-        new Uint8Array(arrayBuffer),
-      ]);
-      resolve();
-    };
-    reader.readAsArrayBuffer(blobData);
-  });
-}
-
-function getBlob(db: Database, blobId: string) {
-  const results = db.exec('SELECT blob_data FROM blobs WHERE blob_id = ?', [
-    blobId,
-  ]);
-  const blob = results[0].values[0][0] as Uint8Array;
-  if (!blob) return null;
-  return new Blob([blob]);
-}
-
-function deleteBlob(db: Database, blobId: string) {
-  db.run('DELETE FROM blobs WHERE blob_id = ?', [blobId]);
-}
-
-function getAllBlobIds(db: Database) {
-  const sql = `SELECT blob_id FROM blobs`;
-  const stmt = db.prepare(sql);
-  const blobIds: string[] = [];
-  while (stmt.step()) {
-    const row = stmt.getAsObject();
-    blobIds.push(row.blob_id as string);
+  constructor() {
+    this.dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(DOCS_STORE)) {
+          db.createObjectStore(DOCS_STORE, { keyPath: 'doc_id' });
+        }
+        if (!db.objectStoreNames.contains(UPDATES_STORE)) {
+          const store = db.createObjectStore(UPDATES_STORE, {
+            autoIncrement: true,
+          });
+          store.createIndex('doc_id', 'doc_id', { unique: false });
+        }
+        if (!db.objectStoreNames.contains(BLOBS_STORE)) {
+          db.createObjectStore(BLOBS_STORE, { keyPath: 'blob_id' });
+        }
+      },
+    });
   }
-  stmt.free();
-  return blobIds;
-}
 
-function getUpdates(db: Database, docId: string) {
-  const sqlStr = 'SELECT update_data FROM updates WHERE doc_id = ?';
-  const stmt = db.prepare(sqlStr);
-  stmt.bind([docId]);
-
-  const updates = [];
-  while (stmt.step()) {
-    const row = stmt.getAsObject();
-    const updateData = new Uint8Array(row.update_data as ArrayBufferLike);
-    updates.push(updateData);
+  async insertRoot(rootId: string) {
+    const db = await this.dbPromise;
+    const tx = db.transaction(DOCS_STORE, 'readwrite');
+    await tx.store.add({ doc_id: rootId, root_doc_id: null });
+    await tx.done;
   }
-  stmt.free();
 
-  return updates;
+  async insertDoc(docId: string, rootId: string) {
+    const db = await this.dbPromise;
+    const tx = db.transaction(DOCS_STORE, 'readwrite');
+    await tx.store.add({ doc_id: docId, root_doc_id: rootId });
+    await tx.done;
+  }
+
+  async insertUpdate(docId: string, updateData: Uint8Array) {
+    const db = await this.dbPromise;
+    const tx = db.transaction(UPDATES_STORE, 'readwrite');
+    await tx.store.add({ doc_id: docId, data: updateData });
+    await tx.done;
+  }
+
+  async insertBlob(blobId: string, blobData: Blob) {
+    const db = await this.dbPromise;
+    const tx = db.transaction(BLOBS_STORE, 'readwrite');
+    await tx.store.add({ blob_id: blobId, blob_data: blobData });
+    await tx.done;
+  }
+
+  async getBlob(blobId: string): Promise<Blob | null> {
+    const db = await this.dbPromise;
+    const blob = await db.get(BLOBS_STORE, blobId);
+    return blob ? blob.blob_data : null;
+  }
+
+  async deleteBlob(blobId: string): Promise<void> {
+    const db = await this.dbPromise;
+    await db.delete(BLOBS_STORE, blobId);
+  }
+
+  async getAllBlobIds(): Promise<string[]> {
+    const db = await this.dbPromise;
+    const blobs = await db.getAllKeys(BLOBS_STORE);
+    return blobs.map(key => String(key));
+  }
+
+  async getUpdates(docId: string): Promise<Uint8Array[]> {
+    const db = await this.dbPromise;
+    const tx = db.transaction(UPDATES_STORE, 'readonly');
+    const store = tx.store;
+    const index = store.index('doc_id');
+    const updates = await index.getAll(IDBKeyRange.only(docId));
+    await tx.done;
+    return updates.map(update => update.data);
+  }
+
+  async getRootDocId(): Promise<string | null> {
+    const db = await this.dbPromise;
+    const docs = await db.getAll(DOCS_STORE);
+    const rootDoc = docs.find(doc => !doc.root_doc_id);
+    return rootDoc ? rootDoc.doc_id : null;
+  }
+
+  async checkForExistingData(): Promise<boolean> {
+    const db = await this.dbPromise;
+    const count = await db.count(DOCS_STORE);
+    return count > 0;
+  }
 }
 
-function getRootDocId(db: Database) {
-  const results = db.exec('SELECT * FROM docs WHERE root_doc_id IS NULL;');
-  let id = '';
-  results[0].columns.forEach((column: string, index) => {
-    if (column === 'doc_id') {
-      id = results[0].values[0][index] as string;
-    }
-  });
-  return id;
-}
-
-function isTableEmpty(tableName: string, db: Database) {
-  const sqlStr = `SELECT COUNT(*) AS count FROM ${tableName}`;
-  const stmt = db.prepare(sqlStr);
-  stmt.step();
-
-  const result = stmt.getAsObject();
-  stmt.free();
-
-  return result.count === 0;
-}
-
-export const client = {
-  initEmptyDb,
-  initDbFromBinary,
-  insertRoot,
-  insertDoc,
-  insertUpdate,
-  insertBlob,
-  getBlob,
-  deleteBlob,
-  getAllBlobIds,
-  getUpdates,
-  getRootDocId,
-  isTableEmpty,
-};
+export const client = new IndexedDBClient();

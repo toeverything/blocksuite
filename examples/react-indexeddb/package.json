@@ -13,14 +13,13 @@
     "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
     "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
+    "idb": "^8.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "sql.js": "^1.10.2"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.69",
     "@types/react-dom": "^18.2.22",
-    "@types/sql.js": "^1.4.9",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
     "@vitejs/plugin-react": "^4.2.1",
