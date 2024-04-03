@@ -3,14 +3,16 @@ import {
   AFFINE_AI_PANEL_WIDGET,
   AFFINE_EDGELESS_COPILOT_WIDGET,
   AffineAIPanelWidget,
+  AffineFormatBarWidget,
+  AffineSlashMenuWidget,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
-import { AffineFormatBarWidget } from '@blocksuite/blocks';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import { setupFormatBarEntry } from './entry/format-bar/setup-format-bar.js';
-import { setupSpaceEntry } from './entry/space/setup-space.js';
+import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
+import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
+import { setupSpaceEntry } from './entries/space/setup-space.js';
 
 export function getAISpecs() {
   const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
@@ -35,6 +37,10 @@ export function getAISpecs() {
 
               if (view.component instanceof AffineFormatBarWidget) {
                 setupFormatBarEntry(view.component);
+              }
+
+              if (view.component instanceof AffineSlashMenuWidget) {
+                setupSlashMenuEntry(view.component);
               }
             })
           );
