@@ -4,7 +4,7 @@
 import type { IBound } from '../consts.js';
 import type { Bound } from './bound.js';
 import { PointLocation } from './point-location.js';
-import { type IVec, Vec } from './vec.js';
+import { type IVec2, Vec } from './vec.js';
 
 export const PI2 = Math.PI * 2;
 export const EPSILON = 1e-12;
@@ -636,4 +636,24 @@ export function isPointOnlines(
   }
 
   return false;
+}
+
+export function getPolylineCenter(points: IVec2[]) {
+  let totalDistance = 0;
+  const distances = [];
+  for (let i = 1; i < points.length; i++) {
+    const distance = Vec.dist(points[i], points[i - 1]);
+    distances.push(distance);
+    totalDistance += distance;
+  }
+  let half = totalDistance / 2;
+  for (let i = 1; i < points.length; i++) {
+    if (half > distances[i - 1]) {
+      half -= distances[i - 1];
+    } else {
+      const t = half / distances[i - 1];
+      return Vec.lrp(points[i - 1], points[i], t);
+    }
+  }
+  return null;
 }

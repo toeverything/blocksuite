@@ -14,6 +14,7 @@ import {
   // getBezierPoint,
   // getBezierTangent,
 } from '../../../utils/curve.js';
+import { getPolylineCenter } from '../../../utils/math-utils.js';
 import type { Renderer } from '../../renderer.js';
 import {
   deltaInsertsToChunks,
@@ -201,15 +202,19 @@ function renderLabel(
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
   const horizontalOffset =
     textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
+  const verticalOffset = (lines.length * lineHeightPx) / 2;
 
   if (mode === ConnectorMode.Straight) {
     const first = points[0];
     const last = points[path.length - 1];
     const point = Vec.med(first, last);
-    const y = point[1] - lines.length * lineHeightPx;
+    const y = point[1] - verticalOffset;
     ctx.setTransform(matrix.translate(0, y));
   } else if (mode === ConnectorMode.Orthogonal) {
-    console.log(233);
+    const point = getPolylineCenter(points);
+    assertExists(point);
+    const y = point[1] - verticalOffset;
+    ctx.setTransform(matrix.translate(0, y));
   } else {
     // const b = getBezierParameters(path);
     // const p = getBezierCurvature(b, 0.5);
