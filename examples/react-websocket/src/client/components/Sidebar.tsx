@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DocMeta } from '@blocksuite/store';
 import { useEditor } from '../editor/context';
-import { createDoc } from '../editor/utils';
+import { createDoc as createAndInitDoc } from '../editor/utils';
 
 const Sidebar = () => {
   const { editor, collection, provider } = useEditor()!;
@@ -28,7 +28,7 @@ const Sidebar = () => {
 
   const addDoc = () => {
     if (!collection || !provider) return;
-    const doc = createDoc(collection);
+    const doc = createAndInitDoc(collection);
     provider.connect(doc.id);
   };
 
@@ -39,7 +39,7 @@ const Sidebar = () => {
       const index = docMetaInfos.findIndex(({ id }) => id === docId);
       if (index === 0) {
         if (docMetaInfos.length === 1) {
-          const newDoc = createDoc(collection);
+          const newDoc = createAndInitDoc(collection);
           provider.connect(newDoc.id);
         } else {
           provider.connect(docMetaInfos[1].id);
