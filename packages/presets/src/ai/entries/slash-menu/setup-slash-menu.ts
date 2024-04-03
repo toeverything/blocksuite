@@ -1,4 +1,7 @@
-import type { AffineAIPanelWidget } from '@blocksuite/blocks';
+import type {
+  AffineAIPanelWidget,
+  AffineAIPanelWidgetConfig,
+} from '@blocksuite/blocks';
 import {
   AFFINE_AI_PANEL_WIDGET,
   AffineSlashMenuWidget,
@@ -6,7 +9,13 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
+import { bindEventSource } from '../../config/builder.js';
+import type { AIConfig } from '../../types.js';
+
+export function setupSlashMenuEntry(
+  slashMenu: AffineSlashMenuWidget,
+  getAskAIStream: NonNullable<AIConfig['getAskAIStream']>
+) {
   const menus = slashMenu.options.menus.slice();
   menus.unshift({
     name: 'AI',
@@ -32,6 +41,17 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
             const block = view.getBlock(model.id);
             assertExists(block);
             const panel = affineAIPanelWidget as AffineAIPanelWidget;
+            const host = panel.host;
+            const generateAnswer: AffineAIPanelWidgetConfig['generateAnswer'] =
+              ({ finish, input, signal, update }) => {
+                getAskAIStream(host.doc, input)
+                  .then(stream => {
+                    bindEventSource(stream, { update, finish, signal });
+                  })
+                  .catch(console.error);
+              };
+            assertExists(panel.config);
+            panel.config.generateAnswer = generateAnswer;
             panel.toggle(block);
           });
         },

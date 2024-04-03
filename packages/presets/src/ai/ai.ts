@@ -46,7 +46,9 @@ export function getAISpecs(config: AIConfig) {
               }
 
               if (view.component instanceof AffineSlashMenuWidget) {
-                setupSlashMenuEntry(view.component);
+                if (config.getAskAIStream) {
+                  setupSlashMenuEntry(view.component, config.getAskAIStream);
+                }
               }
             })
           );
