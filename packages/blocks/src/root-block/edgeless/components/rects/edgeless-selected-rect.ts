@@ -421,11 +421,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _selectedRect: SelectedRect = {
     width: 0,
     height: 0,
-    borderWidth: 0,
-    borderStyle: 'solid',
     left: 0,
     top: 0,
     rotate: 0,
+    borderWidth: 0,
+    borderStyle: 'solid',
   };
 
   @state()
@@ -502,6 +502,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const elements = this.selection.elements;
 
     let areAllConnectors = true;
+    let areAllIndependentConnectors = elements.length > 1;
     let areAllShapes = true;
     let areAllTexts = true;
 
@@ -522,8 +523,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllTexts = false;
       } else {
         assertType<ElementModel>(element);
-        if (element.type !== CanvasElementType.CONNECTOR)
+        if (element.type === CanvasElementType.CONNECTOR) {
+          const connector = element as ConnectorElementModel;
+          areAllIndependentConnectors &&= !(
+            connector.source.id || connector.target.id
+          );
+        } else {
           areAllConnectors = false;
+        }
         if (
           element.type !== CanvasElementType.SHAPE &&
           element.type !== CanvasElementType.GROUP
@@ -533,7 +540,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
-    if (areAllConnectors) return 'none';
+    if (areAllConnectors) {
+      if (areAllIndependentConnectors) {
+        return 'all';
+      } else {
+        return 'none';
+      }
+    }
+
     if (areAllShapes) return 'all';
     if (areAllTexts) return 'edgeAndCorner';
 
@@ -901,13 +915,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     this._selectedRect = {
-      width: width,
-      height: height,
-      borderWidth: selection.editing ? 2 : 1,
-      borderStyle: 'solid',
+      width,
+      height,
       left,
       top,
       rotate,
+      borderStyle: 'solid',
+      borderWidth: selection.editing ? 2 : 1,
     };
   }, this);
 
@@ -1113,7 +1127,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
     const elementHandle =
-      elements.length > 1
+      elements.length > 1 &&
+      !elements.reduce((p, e) => p && e instanceof ConnectorElementModel, true)
         ? elements.map(element => {
             const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
             const [x, y] = edgeless.service.viewport.toViewCoord(

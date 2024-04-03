@@ -656,7 +656,7 @@ test.describe('slash menu with customize menu', () => {
       class CustomSlashMenu extends SlashMenuWidget {
         override options = {
           ...SlashMenuWidget.DEFAULT_OPTIONS,
-          menus: SlashMenuWidget.DEFAULT_OPTIONS.menus.slice(1, 2),
+          menus: SlashMenuWidget.DEFAULT_OPTIONS.menus.slice(0, 1),
         };
       }
       // Fix `Illegal constructor` error

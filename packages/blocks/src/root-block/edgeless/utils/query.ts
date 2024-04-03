@@ -200,6 +200,7 @@ export function getCursorMode(edgelessTool: EdgelessTool) {
     case 'shape':
     case 'connector':
     case 'frame':
+    case 'lasso':
       return 'crosshair';
     case 'text':
       return 'text';

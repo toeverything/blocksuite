@@ -20,7 +20,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 
 import { CopilotClient } from '../../copilot-client.js';
-import { textRenderer } from '../../message/text.js';
+import { textRenderer } from '../../messages/text.js';
 import { getGenerateAnswer } from '../../utils.js';
 
 export const translateSubItem: AISubItemConfig[] = [

@@ -519,6 +519,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     return html` <div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
       @pointerdown="${stopPropagation}"
+      @wheel="${stopPropagation}"
     >
       ${items}
     </div>`;

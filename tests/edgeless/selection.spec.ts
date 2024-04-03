@@ -4,19 +4,23 @@ import * as actions from '../utils/actions/edgeless.js';
 import {
   getNoteBoundBoxInEdgeless,
   setEdgelessTool,
+  Shape,
   switchEditorMode,
+  toModelCoord,
 } from '../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
+  addBasicConnectorElement,
   addBasicRectShapeElement,
   clickInCenter,
+  createConnectorElement,
+  createShapeElement,
   dragBetweenCoords,
   enterPlaygroundRoom,
   getBoundingRect,
   initEmptyEdgelessState,
   initThreeParagraphs,
   pressEnter,
-  SHORT_KEY,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -607,29 +611,80 @@ test('selection drag-area start should be same when space is pressed again', asy
   );
 });
 
-test('copilot selection rect should appears when drag with meta key pressed', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
+test.describe('select multiple connectors', () => {
+  test('should show single selection rect', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await actions.zoomResetByKeyboard(page);
 
-  await actions.zoomResetByKeyboard(page);
+    await addBasicConnectorElement(
+      page,
+      { x: 100, y: 200 },
+      { x: 300, y: 200 }
+    );
+    await addBasicConnectorElement(
+      page,
+      { x: 100, y: 230 },
+      { x: 300, y: 230 }
+    );
+    await addBasicConnectorElement(
+      page,
+      { x: 100, y: 260 },
+      { x: 300, y: 260 }
+    );
 
-  await page.keyboard.down(SHORT_KEY);
-  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await page.keyboard.up(SHORT_KEY);
+    await dragBetweenCoords(page, { x: 50, y: 50 }, { x: 400, y: 290 });
+    await waitNextFrame(page);
 
-  const aiSelectionRect = await page
-    .locator('.copilot-selection-rect')
-    .boundingBox();
+    expect(
+      await page
+        .locator('.affine-edgeless-selected-rect')
+        .locator('.element-handle')
+        .count()
+    ).toBe(0);
+  });
 
-  expect(aiSelectionRect).not.toBeNull();
-  expect(aiSelectionRect!.width).toBe(100);
-  expect(aiSelectionRect!.height).toBe(100);
-  expect(aiSelectionRect!.x).toBe(100);
-  expect(aiSelectionRect!.y).toBe(100);
+  test('should disable resize when a connector is already connected', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await actions.zoomResetByKeyboard(page);
 
-  await page.mouse.click(205, 150);
-  await expect(page.locator('.copilot-selection-rect')).toBeHidden();
+    const start = await toModelCoord(page, [100, 0]);
+    const end = await toModelCoord(page, [200, 100]);
+    await createShapeElement(page, start, end, Shape.Diamond);
+    const c1 = await toModelCoord(page, [200, 50]);
+    const c2 = await toModelCoord(page, [450, 50]);
+    await createConnectorElement(page, c1, c2);
+
+    await addBasicConnectorElement(
+      page,
+      { x: 250, y: 200 },
+      { x: 450, y: 200 }
+    );
+    await addBasicConnectorElement(
+      page,
+      { x: 250, y: 230 },
+      { x: 450, y: 230 }
+    );
+    await addBasicConnectorElement(
+      page,
+      { x: 250, y: 260 },
+      { x: 450, y: 260 }
+    );
+
+    await dragBetweenCoords(page, { x: 500, y: 20 }, { x: 400, y: 290 });
+    await waitNextFrame(page);
+
+    const selectedRectLocalor = page.locator('.affine-edgeless-selected-rect');
+    expect(await selectedRectLocalor.locator('.element-handle').count()).toBe(
+      0
+    );
+    expect(
+      await selectedRectLocalor.locator('.handle').locator('.resize').count()
+    ).toBe(0);
+  });
 });

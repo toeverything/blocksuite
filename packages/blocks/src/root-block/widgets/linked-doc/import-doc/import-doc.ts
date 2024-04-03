@@ -1,7 +1,7 @@
 import '../../../../_common/components/loader.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { type DocCollection } from '@blocksuite/store';
+import { type DocCollection, sha } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
@@ -70,6 +70,7 @@ export async function importNotion(collection: DocCollection, file: File) {
     const pageMap = new Map<string, string>();
     const files = Object.keys(zipFile.files);
     const promises: Promise<void>[] = [];
+    const pendingAssets = new Map<string, Blob>();
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.startsWith('__MACOSX/')) continue;
@@ -96,19 +97,27 @@ export async function importNotion(collection: DocCollection, file: File) {
           }
         }
         pageMap.set(file, collection.idGenerator());
+        continue;
       }
       if (i === 0 && fileName.endsWith('.csv')) {
         window.open(
           'https://affine.pro/blog/import-your-data-from-notion-into-affine',
           '_blank'
         );
+        continue;
       }
       if (fileName.endsWith('.zip')) {
         const innerZipFile = await zipFile.file(fileName)?.async('blob');
         if (innerZipFile) {
           promises.push(...(await parseZipFile(innerZipFile)));
         }
+        continue;
       }
+      const blob = await zipFile.files[file].async('blob');
+      pendingAssets.set(
+        await sha(await blob.arrayBuffer()),
+        new File([blob], fileName)
+      );
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
       const job = new Job({
@@ -117,6 +126,12 @@ export async function importNotion(collection: DocCollection, file: File) {
       });
       const htmlAdapter = new NotionHtmlAdapter();
       htmlAdapter.applyConfigs(job.adapterConfigs);
+      const assets = job.assetsManager.getAssets();
+      for (const [key, value] of pendingAssets.entries()) {
+        if (!assets.has(key)) {
+          assets.set(key, value);
+        }
+      }
       const snapshot = await htmlAdapter.toDocSnapshot({
         file: await zipFile.files[file].async('text'),
         pageId: pageMap.get(file),
