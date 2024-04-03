@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   type AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
@@ -5,7 +6,8 @@ import {
   InsertBelowIcon,
   MarkdownAdapter,
 } from '@blocksuite/blocks';
-import { Job } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
+import { DocCollection, Job } from '@blocksuite/store';
 
 import type { CopilotClient } from './copilot-client.js';
 import { textRenderer } from './messages/text.js';
@@ -135,4 +137,23 @@ export function createDefaultPanelConfig(
       responses: [],
     },
   };
+}
+
+export async function markDownToDoc(host: EditorHost, answer: string) {
+  const schema = host.std.doc.collection.schema;
+  // Should not create a new doc in the original collection
+  const collection = new DocCollection({ schema });
+  const job = new Job({
+    collection,
+    middlewares: [defaultImageProxyMiddleware],
+  });
+  const mdAdapter = new MarkdownAdapter();
+  mdAdapter.applyConfigs(job.adapterConfigs);
+  const snapshot = await mdAdapter.toDocSnapshot({
+    file: answer,
+    assets: job.assetsManager,
+  });
+  const doc = await job.snapshotToDoc(snapshot);
+  if (!doc) throw new Error('Failed to convert markdown to doc');
+  return doc as Doc;
 }
