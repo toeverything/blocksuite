@@ -6,7 +6,13 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
+import { handleAskAIAction } from '../../config/builder.js';
+import type { AIConfig } from '../../types.js';
+
+export function setupSlashMenuEntry(
+  slashMenu: AffineSlashMenuWidget,
+  { getAskAIStream }: AIConfig
+) {
   const menus = slashMenu.options.menus.slice();
   menus.unshift({
     name: 'AI',
@@ -21,19 +27,15 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
           );
           return !!affineAIPanelWidget;
         },
-        action: ({ rootElement, model }) => {
+        action: ({ rootElement }) => {
           const view = rootElement.host.view;
           const affineAIPanelWidget = view.getWidget(
             AFFINE_AI_PANEL_WIDGET,
             rootElement.model.id
-          );
+          ) as AffineAIPanelWidget;
           assertExists(affineAIPanelWidget);
-          requestAnimationFrame(() => {
-            const block = view.getBlock(model.id);
-            assertExists(block);
-            const panel = affineAIPanelWidget as AffineAIPanelWidget;
-            panel.toggle(block);
-          });
+          assertExists(getAskAIStream);
+          handleAskAIAction(affineAIPanelWidget, getAskAIStream);
         },
       },
     ],

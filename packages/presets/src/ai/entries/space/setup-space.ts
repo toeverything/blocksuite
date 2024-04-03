@@ -1,19 +1,15 @@
-import {
-  type AffineAIPanelWidget,
-  type AffineAIPanelWidgetConfig,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
+import { type AffineAIPanelWidget } from '@blocksuite/blocks';
 
-import { bindEventSource } from '../../config/builder.js';
+import { handleAskAIAction } from '../../config/builder.js';
 import type { AIConfig } from '../../types.js';
 
 export function setupSpaceEntry(
   panel: AffineAIPanelWidget,
-  getAskAIStream: NonNullable<AIConfig['getAskAIStream']>
+  { getAskAIStream }: AIConfig
 ) {
-  const host = panel.host;
-
+  if (!getAskAIStream) return;
   panel.handleEvent('keyDown', ctx => {
+    const host = panel.host;
     const keyboardState = ctx.get('keyboardState');
     if (keyboardState.raw.key === ' ') {
       const selection = host.selection.find('text');
@@ -22,21 +18,7 @@ export function setupSpaceEntry(
         if (!block?.model?.text || block.model.text?.length > 0) return;
 
         keyboardState.raw.preventDefault();
-        const generateAnswer: AffineAIPanelWidgetConfig['generateAnswer'] = ({
-          finish,
-          input,
-          signal,
-          update,
-        }) => {
-          getAskAIStream(host.doc, input)
-            .then(stream => {
-              bindEventSource(stream, { update, finish, signal });
-            })
-            .catch(console.error);
-        };
-        assertExists(panel.config);
-        panel.config.generateAnswer = generateAnswer;
-        panel.toggle(block);
+        handleAskAIAction(panel, getAskAIStream);
       }
     }
   });
