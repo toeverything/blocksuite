@@ -187,3 +187,5 @@ export class PageClipboard {
       .run();
   };
 }
+
+export { copyMiddleware, pasteMiddleware };

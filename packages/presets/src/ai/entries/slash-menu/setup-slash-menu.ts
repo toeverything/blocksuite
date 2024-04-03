@@ -6,9 +6,6 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { CopilotClient } from '../../copilot-client.js';
-import { createDefaultPanelConfig } from '../../utils.js';
-
 export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
   const menus = slashMenu.options.menus.slice();
   menus.unshift({
@@ -35,9 +32,6 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
             const block = view.getBlock(model.id);
             assertExists(block);
             const panel = affineAIPanelWidget as AffineAIPanelWidget;
-            const copilotClient = new CopilotClient('http://localhost:3010');
-
-            panel.config = createDefaultPanelConfig(panel, copilotClient);
             panel.toggle(block);
           });
         },
