@@ -1,7 +1,7 @@
 import { type AffineAIPanelWidget } from '@blocksuite/blocks';
 
 import { CopilotClient } from '../../copilot-client.js';
-import { createDefaultPanelConfig } from '../../utils.js';
+import { createDefaultPanelConfig } from '../entry-utils.js';
 
 export function setupSpaceEntry(panel: AffineAIPanelWidget) {
   const host = panel.host;

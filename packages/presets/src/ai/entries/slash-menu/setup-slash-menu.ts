@@ -7,7 +7,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 
 import { CopilotClient } from '../../copilot-client.js';
-import { createDefaultPanelConfig } from '../../utils.js';
+import { createDefaultPanelConfig } from '../entry-utils.js';
 
 export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
   const menus = slashMenu.options.menus.slice();
