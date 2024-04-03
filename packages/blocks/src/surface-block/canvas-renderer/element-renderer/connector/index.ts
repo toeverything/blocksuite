@@ -245,8 +245,8 @@ function renderLabel(
         textAlign === 'center'
           ? 0
           : textAlign === 'right'
-            ? (maxTextWidth / 2) * (rtl ? 1 : -1)
-            : (maxTextWidth / 2) * (rtl ? -1 : 1);
+            ? (maxTextWidth / 2) * (rtl ? -1 : 1)
+            : (maxTextWidth / 2) * (rtl ? 1 : -1);
       ctx.fillText(str, x, (lineIndex + 1) * lineHeightPx, w);
 
       if (shouldTemporarilyAttach) {
@@ -257,14 +257,12 @@ function renderLabel(
 }
 
 function getMaxTextWidth(lines: TextDelta[][], font: string) {
-  let beforeTextWidth = 0;
-
-  for (const line of lines) {
-    for (const delta of line) {
-      const str = delta.insert;
-      beforeTextWidth += getTextWidth(str, font);
-    }
-  }
-
-  return beforeTextWidth;
+  return lines.reduce(
+    (width, line) =>
+      line.reduce(
+        (width, delta) => Math.max(width, getTextWidth(delta.insert, font)),
+        width
+      ),
+    0
+  );
 }
