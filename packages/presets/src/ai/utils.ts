@@ -72,6 +72,8 @@ export async function markDownToDoc(host: EditorHost, answer: string) {
     assets: job.assetsManager,
   });
   const doc = await job.snapshotToDoc(snapshot);
-  if (!doc) throw new Error('Failed to convert markdown to doc');
+  if (!doc) {
+    console.error('Failed to convert markdown to doc');
+  }
   return doc as Doc;
 }
