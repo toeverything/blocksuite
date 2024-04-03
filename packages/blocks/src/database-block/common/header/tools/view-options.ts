@@ -62,13 +62,17 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
     }
   }
 
-  public clickMoreAction = (e: MouseEvent) => {
-    e.stopPropagation();
+  openMoreAction = (target: ReferenceElement) => {
     this.showToolBar(true);
-    const target = eventToVRect(e);
     popViewOptions(target, this.view, () => {
       this.showToolBar(false);
     });
+  };
+
+  public clickMoreAction = (e: MouseEvent) => {
+    e.stopPropagation();
+    const target = eventToVRect(e);
+    this.openMoreAction(target);
   };
 
   override render() {
