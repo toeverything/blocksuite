@@ -8,7 +8,7 @@ import {
 import { Job } from '@blocksuite/store';
 
 import type { CopilotClient } from './copilot-client.js';
-import { textRenderer } from './message/text.js';
+import { textRenderer } from './messages/text.js';
 
 export function getGenerateAnswer({
   copilotClient,

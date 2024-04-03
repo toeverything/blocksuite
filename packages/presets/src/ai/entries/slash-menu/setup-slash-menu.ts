@@ -9,7 +9,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { CopilotClient } from '../../copilot-client.js';
 import { createDefaultPanelConfig } from '../../utils.js';
 
-export function setUpSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
+export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
   const menus = slashMenu.options.menus.slice();
   menus.unshift({
     name: 'AI',
