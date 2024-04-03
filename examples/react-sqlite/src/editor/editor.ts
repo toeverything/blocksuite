@@ -1,15 +1,7 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { CollectionProvider } from './provider/provider';
 import { Doc } from '@blocksuite/store';
-import { DocCollection } from '@blocksuite/store';
 import '@blocksuite/presets/themes/affine.css';
-
-export interface EditorContextType {
-  editor: AffineEditorContainer | null;
-  collection: DocCollection | null;
-  provider: CollectionProvider | null;
-  updateCollection: (newCollection: DocCollection) => void;
-}
 
 export async function initEditor() {
   const provider = await CollectionProvider.init();
