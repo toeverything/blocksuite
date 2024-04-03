@@ -5,7 +5,7 @@ import { native2Y } from '../../reactive/index.js';
 import type { BlockModel, Schema } from '../../schema/index.js';
 import { internalPrimitives } from '../../schema/index.js';
 import type { Doc } from '../doc.js';
-import type { BlockOptions } from './block.js';
+import type { BlockOptions, YBlock } from './block.js';
 import { Block } from './block.js';
 
 export type BlockSelector = (block: Block) => boolean;
@@ -224,7 +224,7 @@ export class BlockTree {
     const schema = this._schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Could not find schema for flavour ${flavour}`);
 
-    const yBlock = new Y.Map();
+    const yBlock = new Y.Map() as YBlock;
     this._yBlocks.set(id, yBlock);
 
     const version = schema.version;

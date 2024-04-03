@@ -7,7 +7,12 @@ import { BlockModel, internalPrimitives } from '../../schema/base.js';
 import type { Schema } from '../../schema/index.js';
 import type { Doc } from '../doc.js';
 
-export type YBlock = Y.Map<unknown>;
+export type YBlock = Y.Map<unknown> & {
+  get(prop: 'sys:id'): string;
+  get(prop: 'sys:flavour'): string;
+  get(prop: 'sys:children'): Y.Array<string>;
+  get<T = unknown>(prop: string): T;
+};
 
 export type BlockOptions = Partial<{
   onChange: (block: Block, key: string, value: unknown) => void;
