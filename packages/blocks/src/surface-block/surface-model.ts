@@ -510,6 +510,10 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     ) as ElementModelMap[K][];
   }
 
+  hasElementById(id: string): boolean {
+    return this._elementModels.has(id);
+  }
+
   getElementById(id: string): ElementModel | null {
     return this._elementModels.get(id)?.model ?? null;
   }

@@ -18,6 +18,10 @@ export class BlockTree {
   protected readonly _yBlocks: Y.Map<YBlock>;
   protected readonly _blocks: Map<string, Block> = new Map();
 
+  hasBlock(id: string) {
+    return this._blocks.has(id);
+  }
+
   getBlock(id: string) {
     return this._blocks.get(id);
   }

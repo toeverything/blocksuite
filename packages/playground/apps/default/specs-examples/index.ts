@@ -3,7 +3,7 @@ import {
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 
-import { getAISpecs } from './ai/ai.js';
+import { getParsedAISpecs as getResolvedAISpecs } from './ai/spec.js';
 import { getCustomAttachmentSpecs } from './custom-attachment/custom-attachment.js';
 import { getLatexSpecs } from './latex/latex.js';
 
@@ -26,7 +26,7 @@ export function getExampleSpecs() {
     edgelessModeSpecs = specs.edgelessModeSpecs;
   }
   if (type === 'ai') {
-    const specs = getAISpecs();
+    const specs = getResolvedAISpecs();
     pageModeSpecs = specs.pageModeSpecs;
     edgelessModeSpecs = specs.edgelessModeSpecs;
   }

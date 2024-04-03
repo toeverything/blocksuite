@@ -255,7 +255,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             if (!fetchable(imageURL)) {
               assets.getAssets().forEach((_value, key) => {
                 const attachmentName = getAssetName(assets.getAssets(), key);
-                if (imageURL.includes(attachmentName)) {
+                if (decodeURIComponent(imageURL).includes(attachmentName)) {
                   blobId = key;
                 }
               });
@@ -578,7 +578,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             if (!fetchable(imageURL)) {
               assets.getAssets().forEach((_value, key) => {
                 const attachmentName = getAssetName(assets.getAssets(), key);
-                if (imageURL.includes(attachmentName)) {
+                if (decodeURIComponent(imageURL).includes(attachmentName)) {
                   blobId = key;
                 }
               });
@@ -636,7 +636,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             if (!fetchable(embededURL)) {
               assets.getAssets().forEach((value, key) => {
                 const embededName = getAssetName(assets.getAssets(), key);
-                if (embededURL.includes(embededName)) {
+                if (decodeURIComponent(embededURL).includes(embededName)) {
                   blobId = key;
                   name = embededName;
                   size = value.size;

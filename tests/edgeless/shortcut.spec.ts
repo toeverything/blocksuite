@@ -2,11 +2,13 @@ import { expect } from '@playwright/test';
 
 import {
   addBasicRectShapeElement,
+  assertEdgelessShapeType,
   createShapeElement,
   edgelessCommonSetup,
   getEdgelessSelectedRect,
   getZoomLevel,
   locatorEdgelessToolButton,
+  type ShapeName,
   switchEditorMode,
   zoomFitByKeyboard,
   zoomInByKeyboard,
@@ -37,7 +39,6 @@ test('shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-
   await page.mouse.click(100, 100);
 
   await page.keyboard.press('t');
@@ -56,13 +57,59 @@ test('shortcut', async ({ page }) => {
   const panButton = locatorEdgelessToolButton(page, 'pan');
   await expect(panButton).toHaveAttribute('active', '');
 
-  await page.keyboard.press('l');
+  await page.keyboard.press('c');
   const connectorButton = locatorEdgelessToolButton(page, 'connector');
   await expect(connectorButton).toHaveAttribute('active', '');
 
+  await page.keyboard.press('l');
+  const lassoButton = locatorEdgelessToolButton(page, 'lasso');
+  await expect(lassoButton).toHaveAttribute('active', '');
+});
+
+test('toggle lasso tool modes', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
   await page.mouse.click(100, 100);
-  await page.keyboard.press('x');
-  await expect(connectorButton).toHaveAttribute('active', '');
+
+  const lassoButton = locatorEdgelessToolButton(page, 'lasso', false);
+
+  const isLassoMode = async (type: 'freehand' | 'polygonal') => {
+    const classes = (await lassoButton.getAttribute('class'))?.split(' ') ?? [];
+    return classes.includes(type);
+  };
+
+  await page.keyboard.press('Shift+l');
+  expect(await isLassoMode('freehand')).toBe(true);
+
+  await page.keyboard.press('Shift+l');
+  expect(await isLassoMode('polygonal')).toBe(true);
+
+  await page.keyboard.press('Shift+l');
+  expect(await isLassoMode('freehand')).toBe(true);
+});
+
+test('toggle shapes shortcut', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await page.mouse.click(100, 100);
+
+  const shapesInOrder = [
+    'ellipse',
+    'diamond',
+    'triangle',
+    'roundedRect',
+    'rect',
+    'ellipse',
+    'diamond',
+    'triangle',
+    'roundedRect',
+  ] as ShapeName[];
+  for (const shape of shapesInOrder) {
+    await page.keyboard.press('Shift+s');
+    await assertEdgelessShapeType(page, shape);
+  }
 });
 
 test('pressing the ESC key will return to the default state', async ({

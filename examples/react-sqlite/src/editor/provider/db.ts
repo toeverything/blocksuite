@@ -1,7 +1,7 @@
 import initSqlJs, { Database } from 'sql.js';
 import sqliteUrl from '../../../assets/sql-wasm.wasm?url';
 
-export async function initEmptyDb() {
+async function initEmptyDb() {
   const SQL = await initSqlJs({
     locateFile: () => sqliteUrl,
   });
@@ -32,40 +32,35 @@ export async function initEmptyDb() {
   return db;
 }
 
-export async function loadDb(data: Uint8Array) {
+async function initDbFromBinary(data: Uint8Array) {
   const SQL = await initSqlJs({
     locateFile: () => sqliteUrl,
   });
   return new SQL.Database(data);
 }
 
-export function insertDocToDb(
-  db: Database,
-  docId: string,
-  rootDocId: string | null
-) {
+function insertRoot(db: Database, rootDocId: string) {
+  db.run('INSERT INTO docs (doc_id, root_doc_id) VALUES (?, ?)', [
+    rootDocId,
+    null,
+  ]);
+}
+
+function insertDoc(db: Database, docId: string, rootDocId: string) {
   db.run('INSERT INTO docs (doc_id, root_doc_id) VALUES (?, ?)', [
     docId,
     rootDocId,
   ]);
 }
 
-export function insertUpdateToDb(
-  db: Database,
-  docId: string,
-  update: Uint8Array
-) {
+function insertUpdate(db: Database, docId: string, update: Uint8Array) {
   db.run('INSERT INTO updates (doc_id, update_data) VALUES (?, ?)', [
     docId,
     update,
   ]);
 }
 
-export async function insertBlobToDb(
-  db: Database,
-  blobId: string,
-  blobData: Blob
-) {
+async function insertBlob(db: Database, blobId: string, blobData: Blob) {
   return new Promise<void>(resolve => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -80,7 +75,7 @@ export async function insertBlobToDb(
   });
 }
 
-export function getBlobFromDb(db: Database, blobId: string) {
+function getBlob(db: Database, blobId: string) {
   const results = db.exec('SELECT blob_data FROM blobs WHERE blob_id = ?', [
     blobId,
   ]);
@@ -89,11 +84,11 @@ export function getBlobFromDb(db: Database, blobId: string) {
   return new Blob([blob]);
 }
 
-export function deleteBlobFromDb(db: Database, blobId: string) {
+function deleteBlob(db: Database, blobId: string) {
   db.run('DELETE FROM blobs WHERE blob_id = ?', [blobId]);
 }
 
-export function getAllBlobIds(db: Database) {
+function getAllBlobIds(db: Database) {
   const sql = `SELECT blob_id FROM blobs`;
   const stmt = db.prepare(sql);
   const blobIds: string[] = [];
@@ -105,7 +100,7 @@ export function getAllBlobIds(db: Database) {
   return blobIds;
 }
 
-export function getUpdatesFromDoc(db: Database, docId: string) {
+function getUpdates(db: Database, docId: string) {
   const sqlStr = 'SELECT update_data FROM updates WHERE doc_id = ?';
   const stmt = db.prepare(sqlStr);
   stmt.bind([docId]);
@@ -121,7 +116,7 @@ export function getUpdatesFromDoc(db: Database, docId: string) {
   return updates;
 }
 
-export function getRootDocId(db: Database) {
+function getRootDocId(db: Database) {
   const results = db.exec('SELECT * FROM docs WHERE root_doc_id IS NULL;');
   let id = '';
   results[0].columns.forEach((column: string, index) => {
@@ -132,7 +127,7 @@ export function getRootDocId(db: Database) {
   return id;
 }
 
-export function isTableEmpty(tableName: string, db: Database) {
+function isTableEmpty(tableName: string, db: Database) {
   const sqlStr = `SELECT COUNT(*) AS count FROM ${tableName}`;
   const stmt = db.prepare(sqlStr);
   stmt.step();
@@ -142,3 +137,18 @@ export function isTableEmpty(tableName: string, db: Database) {
 
   return result.count === 0;
 }
+
+export const client = {
+  initEmptyDb,
+  initDbFromBinary,
+  insertRoot,
+  insertDoc,
+  insertUpdate,
+  insertBlob,
+  getBlob,
+  deleteBlob,
+  getAllBlobIds,
+  getUpdates,
+  getRootDocId,
+  isTableEmpty,
+};

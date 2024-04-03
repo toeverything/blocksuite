@@ -1,45 +1,13 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
-
 import {
-  AIDoneIcon,
+  type AIItemGroupConfig,
   AIPenIcon,
   AISearchIcon,
   ExplainIcon,
-  ImproveWritingIcon,
-  LanguageIcon,
-  LongerIcon,
   MakeItRealIcon,
-  ShorterIcon,
+  matchFlavours,
   TagIcon,
-  ToneIcon,
-} from '../../icons/ai.js';
-import { matchFlavours } from '../../utils/model.js';
-import type { AIItemGroupConfig, AISubItemConfig } from './types.js';
-
-export const translateSubItem: AISubItemConfig[] = [
-  {
-    type: 'English',
-    handler: () => {
-      // TODO: implement the logic to translate to English
-    },
-  },
-  { type: 'Spanish' },
-  { type: 'German' },
-  { type: 'French' },
-  { type: 'Italian' },
-  { type: 'Simplified Chinese' },
-  { type: 'Traditional Chinese' },
-  { type: 'Japanese' },
-  { type: 'Russian' },
-  { type: 'Korean' },
-];
-
-export const toneSubItem: AISubItemConfig[] = [
-  { type: 'professional' },
-  { type: 'informal' },
-  { type: 'friendly' },
-  { type: 'critical' },
-];
+} from '@blocksuite/blocks';
 
 // TODO: improve the logic, to make it more accurate
 const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
@@ -67,82 +35,6 @@ const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
 
   const model = selectedModels[0];
   return matchFlavours(model, ['affine:code']);
-};
-
-const DocAIGroup: AIItemGroupConfig = {
-  name: 'doc',
-  items: [
-    {
-      name: 'Summary',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
-      handler: () => {
-        // TODO: Implement the logic to summarize the text
-      },
-    },
-  ],
-};
-
-const EditAIGroup: AIItemGroupConfig = {
-  name: 'edit',
-  items: [
-    {
-      name: 'Translate to',
-      icon: LanguageIcon,
-      showWhen: textBlockShowWhen,
-      subItem: translateSubItem,
-    },
-    {
-      name: 'Change tone to',
-      icon: ToneIcon,
-      showWhen: textBlockShowWhen,
-      subItem: toneSubItem,
-    },
-    {
-      name: 'Improve writing for it',
-      icon: ImproveWritingIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Improve grammar for it',
-      icon: AIDoneIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Fix spelling for it',
-      icon: AIDoneIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Create headings',
-      icon: AIPenIcon,
-      showWhen: chain => {
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['block', 'text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length === 0) return false;
-
-        return selectedModels.every(
-          model =>
-            matchFlavours(model, ['affine:paragraph', 'affine:list']) &&
-            !model.type.startsWith('h')
-        );
-      },
-    },
-    {
-      name: 'Make longer',
-      icon: LongerIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Make shorter',
-      icon: ShorterIcon,
-      showWhen: textBlockShowWhen,
-    },
-  ],
 };
 
 const DraftAIGroup: AIItemGroupConfig = {
@@ -384,8 +276,6 @@ const OthersAIGroup: AIItemGroupConfig = {
 };
 
 export const AIItemGroups: AIItemGroupConfig[] = [
-  DocAIGroup,
-  EditAIGroup,
   DraftAIGroup,
   MindMapAIGroup,
   CreateAIGroup,

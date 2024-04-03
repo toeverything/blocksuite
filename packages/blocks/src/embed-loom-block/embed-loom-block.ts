@@ -1,16 +1,12 @@
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
-import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { ref } from 'lit/directives/ref.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
-import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
@@ -38,9 +34,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
 
   @state()
   private _showOverlay = true;
-
-  @query('.affine-embed-loom-block')
-  private _loomBlockEl!: HTMLDivElement;
 
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
@@ -151,45 +144,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
     }
   }
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-    ) {
-      return null;
-    }
-
-    return {
-      template: html`
-        <style>
-          :host {
-            z-index: 1;
-          }
-        </style>
-        <embed-card-toolbar
-          .block=${this}
-          .abortController=${abortController}
-        ></embed-card-toolbar>
-      `,
-      computePosition: {
-        referenceElement: this._loomBlockEl,
-        placement: 'top-start',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    };
-  });
-
   override renderBlock() {
     const { image, title = 'Loom', description, videoId, style } = this.model;
 
@@ -211,62 +165,67 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
 
     return this.renderEmbed(
       () => html`
-        <div
-          ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
-          class=${classMap({
-            'affine-embed-loom-block': true,
-            loading,
-            selected: this._isSelected,
-          })}
-          @click=${this._handleClick}
-          @dblclick=${this._handleDoubleClick}
-        >
-          <div class="affine-embed-loom-video">
-            ${videoId
-              ? html`
-                  <div class="affine-embed-loom-video-iframe-container">
-                    <iframe
-                      src=${`https://www.loom.com/embed/${videoId}?hide_title=true`}
-                      frameborder="0"
-                      allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    ></iframe>
+        <div>
+          <div
+            class=${classMap({
+              'affine-embed-loom-block': true,
+              loading,
+              selected: this._isSelected,
+            })}
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            <div class="affine-embed-loom-video">
+              ${videoId
+                ? html`
+                    <div class="affine-embed-loom-video-iframe-container">
+                      <iframe
+                        src=${`https://www.loom.com/embed/${videoId}?hide_title=true`}
+                        frameborder="0"
+                        allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      ></iframe>
 
-                    <div
-                      class=${classMap({
-                        'affine-embed-loom-video-iframe-overlay': true,
-                        hide: !this._showOverlay,
-                      })}
-                    ></div>
-                  </div>
-                `
-              : bannerImage}
-          </div>
-          <div class="affine-embed-loom-content">
-            <div class="affine-embed-loom-content-header">
-              <div class="affine-embed-loom-content-title-icon">
-                ${titleIcon}
+                      <div
+                        class=${classMap({
+                          'affine-embed-loom-video-iframe-overlay': true,
+                          hide: !this._showOverlay,
+                        })}
+                      ></div>
+                    </div>
+                  `
+                : bannerImage}
+            </div>
+            <div class="affine-embed-loom-content">
+              <div class="affine-embed-loom-content-header">
+                <div class="affine-embed-loom-content-title-icon">
+                  ${titleIcon}
+                </div>
+
+                <div class="affine-embed-loom-content-title-text">
+                  ${titleText}
+                </div>
               </div>
 
-              <div class="affine-embed-loom-content-title-text">
-                ${titleText}
+              <div class="affine-embed-loom-content-description">
+                ${descriptionText}
+              </div>
+
+              <div class="affine-embed-loom-content-url" @click=${this.open}>
+                <span>loom.com</span>
+
+                <div class="affine-embed-loom-content-url-icon">
+                  ${OpenIcon}
+                </div>
               </div>
             </div>
-
-            <div class="affine-embed-loom-content-description">
-              ${descriptionText}
-            </div>
-
-            <div class="affine-embed-loom-content-url" @click=${this.open}>
-              <span>loom.com</span>
-
-              <div class="affine-embed-loom-content-url-icon">${OpenIcon}</div>
-            </div>
           </div>
+
+          <embed-card-caption .block=${this}></embed-card-caption>
+
+          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
 
-        <embed-card-caption .block=${this}></embed-card-caption>
-
-        <affine-block-selection .block=${this}></affine-block-selection>
+        ${this.isInSurface ? nothing : Object.values(this.widgets)}
       `
     );
   }

@@ -256,13 +256,15 @@ export class EdgelessRootService extends RootService {
   }
 
   updateElement(id: string, props: Record<string, unknown>) {
-    if (this._surface.getElementById(id)) {
-      const element = this._surface.getElementById(id)!;
+    const element = this._surface.getElementById(id);
+    if (element) {
       this.editSession.record(element.type as EdgelessElementType, props);
       this._surface.updateElement(id, props);
-    } else if (this.doc.getBlockById(id)) {
-      const block = this.doc.getBlockById(id)!;
+      return;
+    }
 
+    const block = this.doc.getBlockById(id);
+    if (block) {
       this.editSession.record(block.flavour as EdgelessElementType, props);
       this.doc.updateBlock(block, props);
     }
@@ -271,11 +273,13 @@ export class EdgelessRootService extends RootService {
   removeElement(id: string | EdgelessModel) {
     id = typeof id === 'string' ? id : id.id;
 
-    if (this._surface.getElementById(id)) {
+    if (this._surface.hasElementById(id)) {
       this._surface.removeElement(id);
-    } else if (this.doc.getBlockById(id)) {
-      const block = this.doc.getBlockById(id)!;
+      return;
+    }
 
+    if (this.doc.hasBlockById(id)) {
+      const block = this.doc.getBlockById(id)!;
       this.doc.deleteBlock(block);
     }
   }
@@ -347,6 +351,11 @@ export class EdgelessRootService extends RootService {
     return options.all ? results : last(results) ?? null;
   }
 
+  /**
+   * Pick the elements in the given area
+   * @param bound
+   * @param type By default, it will pick all elements, but you can specify the type to pick only you need.
+   */
   pickElementsByBound(bound: IBound | Bound, type?: 'all'): EdgelessModel[];
   pickElementsByBound(
     bound: IBound | Bound,

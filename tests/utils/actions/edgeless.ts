@@ -52,6 +52,11 @@ export enum Shape {
   'Rounded rectangle' = 'Rounded rectangle',
 }
 
+export enum LassoMode {
+  FreeHand = 'freehand',
+  Polygonal = 'polygonal',
+}
+
 export async function getNoteRect(page: Page, noteId: string) {
   const xywh: string | null = await page.evaluate(
     ([noteId]) => {
@@ -125,7 +130,8 @@ type EdgelessTool =
   | 'text'
   | 'connector'
   | 'frame'
-  | 'frameNavigator';
+  | 'frameNavigator'
+  | 'lasso';
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
@@ -145,6 +151,7 @@ export function locatorEdgelessToolButton(
     note: '.edgeless-note-button',
     frame: '.edgeless-frame-button',
     frameNavigator: '.edgeless-frame-navigator-button',
+    lasso: '.edgeless-lasso-button',
   }[type];
 
   let buttonType;
@@ -254,9 +261,10 @@ export async function setEdgelessTool(
       }
       break;
     }
-    case 'brush':
+    case 'lasso':
     case 'text':
     case 'note':
+    case 'brush':
     case 'eraser':
     case 'frame':
     case 'connector': {
@@ -276,6 +284,34 @@ export async function setEdgelessTool(
     }
   }
 }
+export type ShapeName =
+  | 'rect'
+  | 'ellipse'
+  | 'diamond'
+  | 'triangle'
+  | 'roundedRect';
+
+export async function assertEdgelessShapeType(page: Page, type: ShapeName) {
+  const curType = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-root');
+    if (!container) {
+      throw new Error('Missing edgeless page');
+    }
+    if (container.edgelessTool.type !== 'shape')
+      throw new Error('Expected shape tool');
+
+    const shapeType = container.edgelessTool.shapeType;
+    if (
+      shapeType === 'rect' &&
+      container.service.editSession.getLastProps('shape').radius > 0
+    )
+      return 'roundedRect';
+
+    return container.edgelessTool.shapeType;
+  });
+
+  expect(type).toEqual(curType);
+}
 
 export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
   const type = await page.evaluate(() => {
@@ -286,6 +322,20 @@ export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
     return container.edgelessTool.type;
   });
   expect(type).toEqual(mode);
+}
+
+export async function assertEdgelessLassoToolMode(page: Page, mode: LassoMode) {
+  const tool = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-root');
+    if (!container) {
+      throw new Error('Missing edgeless page');
+    }
+    return container.edgelessTool;
+  });
+  if (tool.type !== 'lasso') {
+    throw new Error('Expected lasso tool');
+  }
+  expect(tool.mode).toEqual(mode === LassoMode.FreeHand ? 0 : 1);
 }
 
 export async function getEdgelessBlockChild(page: Page) {

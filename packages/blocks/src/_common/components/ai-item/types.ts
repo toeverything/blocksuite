@@ -1,4 +1,4 @@
-import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
+import type { Chain, EditorHost, InitCommandCtx } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 
 import type { EditorMode } from '../../utils/index.js';
@@ -11,15 +11,16 @@ export interface AIItemGroupConfig {
 export interface AIItemConfig {
   name: string;
   icon: TemplateResult | (() => HTMLElement);
-  showWhen?: (chain: Chain<InitCommandCtx>, editorMode: EditorMode) => boolean;
+  showWhen?: (
+    chain: Chain<InitCommandCtx>,
+    editorMode: EditorMode,
+    host: EditorHost
+  ) => boolean;
   subItem?: AISubItemConfig[];
-  /**
-   * TODO：add parameter to the handler function and implement the logic under each handler item
-   */
-  handler?: () => void;
+  handler?: (host: EditorHost) => void;
 }
 
 export interface AISubItemConfig {
   type: string;
-  handler?: () => void;
+  handler?: (host: EditorHost) => void;
 }

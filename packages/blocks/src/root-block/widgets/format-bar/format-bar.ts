@@ -138,7 +138,21 @@ export class AffineFormatBarWidget extends WidgetElement {
         return inline.isEmbed(delta);
       };
 
-      return !isEmbed();
+      if (isEmbed()) {
+        return false;
+      }
+    }
+
+    // todo: refactor later that ai panel & format bar should not depend on each other
+    // do not display if AI panel is open
+    const rootBlockId = this.host.doc.root?.id;
+    const aiPanel = rootBlockId
+      ? this.host.view.getWidget('affine-ai-panel-widget', rootBlockId)
+      : null;
+
+    // @ts-ignore
+    if (aiPanel && aiPanel?.state !== 'hidden') {
+      return false;
     }
 
     return true;
@@ -161,7 +175,10 @@ export class AffineFormatBarWidget extends WidgetElement {
         let targetRect: DOMRect | null = null;
         if (this.displayType === 'text' || this.displayType === 'native') {
           const range = this.nativeRange;
-          assertExists(range);
+          if (!range) {
+            this._reset();
+            return;
+          }
           targetRect = range.getBoundingClientRect();
         } else if (this.displayType === 'block') {
           const blockElement = this._selectedBlockElements[0];
@@ -516,6 +533,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     return html` <div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
       @pointerdown="${stopPropagation}"
+      @wheel="${stopPropagation}"
     >
       ${items}
     </div>`;

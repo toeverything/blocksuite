@@ -1,6 +1,6 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
-  AIItemGroups,
+  type AIItemGroupConfig,
   AIStarIcon,
   createButtonPopper,
   isInsidePageEditor,
@@ -62,6 +62,9 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   host!: EditorHost;
 
+  @property({ attribute: false })
+  actionGroups!: AIItemGroupConfig[];
+
   @query('.ask-ai-button')
   private _askAIButton!: HTMLDivElement;
   @query('.ask-ai-panel')
@@ -84,14 +87,20 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
   }
 
   get _actionGroups() {
-    const filteredConfig = AIItemGroups.map(group => ({
-      ...group,
-      items: group.items.filter(item =>
-        item.showWhen
-          ? item.showWhen(this.host.command.chain(), this._editorMode)
-          : true
-      ),
-    })).filter(group => group.items.length > 0);
+    const filteredConfig = this.actionGroups
+      .map(group => ({
+        ...group,
+        items: group.items.filter(item =>
+          item.showWhen
+            ? item.showWhen(
+                this.host.command.chain(),
+                this._editorMode,
+                this.host
+              )
+            : true
+        ),
+      }))
+      .filter(group => group.items.length > 0);
     return filteredConfig;
   }
 

@@ -43,11 +43,13 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
     if (!localStorage.defaultTool) {
       localStorage.defaultTool = 'default';
     }
-    this.edgeless.slots.edgelessToolUpdated.on(({ type }) => {
-      if (type === 'default' || type === 'pan') {
-        localStorage.defaultTool = type;
-      }
-    });
+    this.disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(({ type }) => {
+        if (type === 'default' || type === 'pan') {
+          localStorage.defaultTool = type;
+        }
+      })
+    );
   }
 
   private _fadeOut() {
@@ -74,7 +76,6 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
     // wait for animation to finish
     setTimeout(() => {
       if (type === 'default') {
-        this.currentIcon;
         this.setEdgelessTool({ type: 'pan', panning: false });
       } else if (type === 'pan') {
         this.setEdgelessTool({ type: 'default' });

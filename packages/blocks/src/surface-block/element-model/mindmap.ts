@@ -7,7 +7,7 @@ import { last } from '../../_common/utils/iterable.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import { type BaseProps, GroupLikeModel } from './base.js';
 import { TextResizing } from './common.js';
-import { StatelessConnectorElementModel } from './connector.js';
+import { LocalConnectorElementModel } from './connector.js';
 import { convert, observe, watch, yfield } from './decorators.js';
 import type {
   MindmapNode,
@@ -104,7 +104,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   @yfield()
   style: MindmapStyle = MindmapStyle.FOUR;
 
-  connectors: Map<string, StatelessConnectorElementModel> = new Map();
+  connectors: Map<string, LocalConnectorElementModel> = new Map();
 
   private _tree!: MindmapRoot;
 
@@ -405,7 +405,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     const id = `#${from.id}-${to.id}`;
 
     if (!this.connectors.has(id)) {
-      const connector = new StatelessConnectorElementModel();
+      const connector = new LocalConnectorElementModel();
       this.connectors.set(id, connector);
     }
 

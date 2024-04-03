@@ -1,7 +1,7 @@
 import type {
   ConnectorElementModel,
+  LocalConnectorElementModel,
   PointStyle,
-  StatelessConnectorElementModel,
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
 import type { PointLocation } from '../../../index.js';
@@ -16,16 +16,17 @@ import {
 } from './utils.js';
 
 export function connector(
-  model: ConnectorElementModel | StatelessConnectorElementModel,
+  model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer
 ) {
   const {
-    absolutePath: points,
+    path: points,
     mode,
-    frontEndpointStyle: frontEndpointStyle,
-    rearEndpointStyle: rearEndpointStyle,
+    strokeStyle,
+    frontEndpointStyle,
+    rearEndpointStyle,
   } = model;
 
   // points might not be build yet in some senarios
@@ -34,16 +35,14 @@ export function connector(
     return;
   }
 
-  const [x, y] = model.deserializedXYWH;
-
-  ctx.setTransform(matrix.translateSelf(-x, -y));
+  ctx.setTransform(matrix);
 
   renderPoints(
     model,
     ctx,
     renderer,
     points,
-    model.strokeStyle === 'dash',
+    strokeStyle === 'dash',
     mode === ConnectorMode.Curve
   );
   renderEndpoint(model, points, ctx, renderer, 'Front', frontEndpointStyle);
@@ -51,7 +50,7 @@ export function connector(
 }
 
 function renderPoints(
-  model: ConnectorElementModel | StatelessConnectorElementModel,
+  model: ConnectorElementModel | LocalConnectorElementModel,
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
   points: PointLocation[],
@@ -71,7 +70,7 @@ function renderPoints(
       strokeWidth,
     };
     if (curve) {
-      const b = getBezierParameters(model.absolutePath);
+      const b = getBezierParameters(points);
       rc.path(
         `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]}  ${b[3][0]},${b[3][1]} `,
         options
@@ -82,7 +81,7 @@ function renderPoints(
   } else {
     ctx.save();
     ctx.strokeStyle = realStrokeColor;
-    ctx.lineWidth = model.strokeWidth;
+    ctx.lineWidth = strokeWidth;
     ctx.lineJoin = 'round';
     dash && ctx.setLineDash([12, 12]);
     ctx.beginPath();
@@ -118,7 +117,7 @@ function renderPoints(
 }
 
 function renderEndpoint(
-  model: ConnectorElementModel | StatelessConnectorElementModel,
+  model: ConnectorElementModel | LocalConnectorElementModel,
   location: PointLocation[],
   ctx: CanvasRenderingContext2D,
   renderer: Renderer,
