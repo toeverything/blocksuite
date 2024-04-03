@@ -16,6 +16,7 @@ import {
   getLineHeight,
   getTextWidth,
   isRTL,
+  type TextDelta,
   wrapTextDeltas,
 } from '../text/utils.js';
 import {
@@ -194,36 +195,40 @@ function renderLabel(
   const deltas = wrapTextDeltas(model.text, font, w);
   const lines = deltaInsertsToChunks(deltas);
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
-  const horizontalOffset =
-    textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
+  // const horizontalOffset =
+  //   textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
   const verticalOffset = (lines.length * lineHeightPx) / 2;
 
+  let x = 0;
   let y = -verticalOffset;
   if (mode === ConnectorMode.Straight) {
     const first = points[0];
     const last = points[path.length - 1];
     const point = Vec.med(first, last);
+    x = point[0];
     y += point[1];
   } else if (mode === ConnectorMode.Orthogonal) {
     const point = getPolylineCenter(points);
     assertExists(point);
+    x = point[0];
     y += point[1];
   } else {
     const b = getBezierParameters(path);
     const point = getBezierPoint(b, 0.5);
     assertExists(point);
+    x = point[0];
     y += point[1];
   }
-  ctx.setTransform(matrix.translate(0, y));
+  ctx.setTransform(matrix.translate(x, y));
 
   ctx.font = font;
   ctx.fillStyle = renderer.getVariableColor(color);
   ctx.textAlign = textAlign;
   ctx.textBaseline = 'ideographic';
 
-  for (const [lineIndex, line] of lines.entries()) {
-    let beforeTextWidth = 0;
+  const maxTextWidth = getMaxTextWidth(lines, font);
 
+  for (const [lineIndex, line] of lines.entries()) {
     for (const delta of line) {
       const str = delta.insert;
       const rtl = isRTL(str);
@@ -236,20 +241,30 @@ function renderLabel(
 
       ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
 
-      // 0.5 comes from v-line padding
-      const offset =
-        textAlign === 'center' ? 0 : textAlign === 'right' ? -0.5 : 0.5;
-      ctx.fillText(
-        str,
-        horizontalOffset + beforeTextWidth + offset,
-        (lineIndex + 1) * lineHeightPx
-      );
-
-      beforeTextWidth += getTextWidth(str, font);
+      const x =
+        textAlign === 'center'
+          ? 0
+          : textAlign === 'right'
+            ? (maxTextWidth / 2) * (rtl ? 1 : -1)
+            : (maxTextWidth / 2) * (rtl ? -1 : 1);
+      ctx.fillText(str, x, (lineIndex + 1) * lineHeightPx, w);
 
       if (shouldTemporarilyAttach) {
         ctx.canvas.remove();
       }
     }
   }
+}
+
+function getMaxTextWidth(lines: TextDelta[][], font: string) {
+  let beforeTextWidth = 0;
+
+  for (const line of lines) {
+    for (const delta of line) {
+      const str = delta.insert;
+      beforeTextWidth += getTextWidth(str, font);
+    }
+  }
+
+  return beforeTextWidth;
 }
