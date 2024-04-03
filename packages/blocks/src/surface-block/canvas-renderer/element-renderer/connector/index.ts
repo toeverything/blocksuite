@@ -7,13 +7,7 @@ import {
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
 import { type PointLocation, Vec } from '../../../index.js';
-import {
-  // getBezierCurvature,
-  // getBezierNormal,
-  getBezierParameters,
-  // getBezierPoint,
-  // getBezierTangent,
-} from '../../../utils/curve.js';
+import { getBezierParameters, getBezierPoint } from '../../../utils/curve.js';
 import { getPolylineCenter } from '../../../utils/math-utils.js';
 import type { Renderer } from '../../renderer.js';
 import {
@@ -204,22 +198,23 @@ function renderLabel(
     textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
   const verticalOffset = (lines.length * lineHeightPx) / 2;
 
+  let y = -verticalOffset;
   if (mode === ConnectorMode.Straight) {
     const first = points[0];
     const last = points[path.length - 1];
     const point = Vec.med(first, last);
-    const y = point[1] - verticalOffset;
-    ctx.setTransform(matrix.translate(0, y));
+    y += point[1];
   } else if (mode === ConnectorMode.Orthogonal) {
     const point = getPolylineCenter(points);
     assertExists(point);
-    const y = point[1] - verticalOffset;
-    ctx.setTransform(matrix.translate(0, y));
+    y += point[1];
   } else {
-    // const b = getBezierParameters(path);
-    // const p = getBezierCurvature(b, 0.5);
-    // if (!p) return;
+    const b = getBezierParameters(path);
+    const point = getBezierPoint(b, 0.5);
+    assertExists(point);
+    y += point[1];
   }
+  ctx.setTransform(matrix.translate(0, y));
 
   ctx.font = font;
   ctx.fillStyle = renderer.getVariableColor(color);
