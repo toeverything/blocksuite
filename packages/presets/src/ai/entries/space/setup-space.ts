@@ -1,11 +1,17 @@
-import { type AffineAIPanelWidget } from '@blocksuite/blocks';
+import {
+  type AffineAIPanelWidget,
+  type AffineAIPanelWidgetConfig,
+} from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 
-import { CopilotClient } from '../../copilot-client.js';
-import { createDefaultPanelConfig } from '../entry-utils.js';
+import { bindEventSource } from '../../config/builder.js';
+import type { AIConfig } from '../../types.js';
 
-export function setupSpaceEntry(panel: AffineAIPanelWidget) {
+export function setupSpaceEntry(
+  panel: AffineAIPanelWidget,
+  getAskAIStream: NonNullable<AIConfig['getAskAIStream']>
+) {
   const host = panel.host;
-  const copilotClient = new CopilotClient('http://localhost:3010');
 
   panel.handleEvent('keyDown', ctx => {
     const keyboardState = ctx.get('keyboardState');
@@ -16,8 +22,20 @@ export function setupSpaceEntry(panel: AffineAIPanelWidget) {
         if (!block?.model?.text || block.model.text?.length > 0) return;
 
         keyboardState.raw.preventDefault();
-
-        panel.config = createDefaultPanelConfig(panel, copilotClient);
+        const generateAnswer: AffineAIPanelWidgetConfig['generateAnswer'] = ({
+          finish,
+          input,
+          signal,
+          update,
+        }) => {
+          getAskAIStream(host.doc, input)
+            .then(stream => {
+              bindEventSource(stream, { update, finish, signal });
+            })
+            .catch(console.error);
+        };
+        assertExists(panel.config);
+        panel.config.generateAnswer = generateAnswer;
         panel.toggle(block);
       }
     }

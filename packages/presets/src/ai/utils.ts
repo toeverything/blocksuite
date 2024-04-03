@@ -27,9 +27,8 @@ export function getGenerateAnswer({
       .createSession({
         workspaceId: panel.host.doc.collection.id,
         docId: panel.host.doc.id,
-        action: true,
         model: 'Gpt4TurboPreview',
-        promptName: '',
+        promptName: 'placeholder',
       })
       .then(sessionId => {
         const stream = copilotClient.textToTextStream(input, sessionId);
@@ -50,6 +49,7 @@ export function getGenerateAnswer({
         });
         signal.addEventListener('abort', () => {
           stream.close();
+          finish('aborted');
         });
       })
       .catch(console.error);

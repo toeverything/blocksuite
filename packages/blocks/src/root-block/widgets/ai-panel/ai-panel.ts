@@ -1,6 +1,7 @@
 import './components/index.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
+import type { TextSelection } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -8,8 +9,14 @@ import {
   computePosition,
   type ReferenceElement,
 } from '@floating-ui/dom';
-import { css, html, nothing, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import {
+  css,
+  html,
+  nothing,
+  type PropertyValues,
+  type TemplateResult,
+} from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type {
@@ -22,7 +29,7 @@ export interface AffineAIPanelWidgetConfig {
   generateAnswer: (props: {
     input: string;
     update: (answer: string) => void;
-    finish: (type: 'success' | 'error') => void;
+    finish: (type: 'success' | 'error' | 'aborted') => void;
     // Used to allow users to stop actively when generating
     signal: AbortSignal;
   }) => void;
@@ -79,6 +86,9 @@ export class AffineAIPanelWidget extends WidgetElement {
   @property()
   state: AffineAIPanelState = 'hidden';
 
+  @query('.mock-selection-container')
+  mockSelectionContainer!: HTMLDivElement;
+
   toggle = (reference: ReferenceElement, input?: string) => {
     if (input) {
       this._inputText = input;
@@ -118,6 +128,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     assertExists(this.config);
     const text = this._inputText;
     assertExists(text);
+    assertExists(this.config.generateAnswer);
 
     this._resetAbortController();
     // reset answer
@@ -127,7 +138,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       this._answer = answer;
       this.requestUpdate();
     };
-    const finish = (type: 'success' | 'error') => {
+    const finish = (type: 'success' | 'error' | 'aborted') => {
       if (type === 'error') {
         this.state = 'error';
       } else {
@@ -162,6 +173,8 @@ export class AffineAIPanelWidget extends WidgetElement {
     return this._inputText;
   }
 
+  private _selection?: TextSelection;
+
   private _answer: string | null = null;
   get answer() {
     return this._answer;
@@ -176,10 +189,45 @@ export class AffineAIPanelWidget extends WidgetElement {
     super.connectedCallback();
 
     this.tabIndex = -1;
-    this.disposables.addFromEvent(this, 'blur', e => {
-      if (!e.relatedTarget || this.contains(e.relatedTarget as Node)) return;
+    this.disposables.addFromEvent(document, 'mousedown', this._onDocumentClick);
+  }
+
+  private _onDocumentClick = (e: MouseEvent) => {
+    if (this.state !== 'hidden') {
+      e.preventDefault();
+    }
+
+    if (
+      e.target !== this &&
+      !this.contains(e.target as Node) &&
+      this.state !== 'generating'
+    ) {
       this.hide();
-    });
+    }
+  };
+
+  protected override willUpdate(changed: PropertyValues): void {
+    const prevState = changed.get('state');
+    if (prevState) {
+      if (prevState === 'hidden') {
+        this._selection = this.host.selection.find('text');
+      } else {
+        // restore selection
+        if (this._selection) {
+          this.host.selection.set([this._selection]);
+        }
+      }
+
+      // tell format bar to show or hide
+      const rootBlockId = this.host.doc.root?.id;
+      const formatBar = rootBlockId
+        ? this.host.view.getWidget('affine-format-bar-widget', rootBlockId)
+        : null;
+
+      if (formatBar) {
+        formatBar.requestUpdate();
+      }
+    }
   }
 
   override render() {
@@ -198,7 +246,8 @@ export class AffineAIPanelWidget extends WidgetElement {
         this.focus();
       })
       .catch(console.error);
-    return html`${choose(this.state, [
+
+    const mainTemplate = choose(this.state, [
       [
         'input',
         () =>
@@ -239,6 +288,9 @@ export class AffineAIPanelWidget extends WidgetElement {
           <ai-panel-error .config=${config.errorStateConfig}></ai-panel-error>
         `,
       ],
-    ])}`;
+    ]);
+
+    return html`<div class="mock-selection-container"></div>
+      ${mainTemplate}`;
   }
 }
