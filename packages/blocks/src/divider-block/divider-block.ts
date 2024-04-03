@@ -34,10 +34,10 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     </div>`;
 
     return html`
-      <style>
-        ${dividerBlockStyles}
-      </style>
       <div class="affine-divider-block-container">
+        <style>
+          ${dividerBlockStyles}
+        </style>
         <hr />
 
         ${children}

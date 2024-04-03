@@ -178,10 +178,10 @@ export class ListBlockComponent extends BlockElement<
     </div>`;
 
     return html`
-      <style>
-        ${listBlockStyles}
-      </style>
       <div class=${'affine-list-block-container'}>
+        <style>
+          ${listBlockStyles}
+        </style>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text

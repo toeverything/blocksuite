@@ -148,10 +148,10 @@ export class ParagraphBlockComponent extends BlockElement<
     </div>`;
 
     return html`
-      <style>
-        ${paragraphBlockStyles}
-      </style>
       <div class="affine-paragraph-block-container">
+        <style>
+          ${paragraphBlockStyles}
+        </style>
         <div class="affine-paragraph-rich-text-wrapper ${type}">
           <div contenteditable="false" class="affine-paragraph-placeholder">
             ${getPlaceholder(this.model)}
