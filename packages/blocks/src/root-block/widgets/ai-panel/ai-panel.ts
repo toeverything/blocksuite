@@ -26,7 +26,7 @@ import type {
 
 export interface AffineAIPanelWidgetConfig {
   answerRenderer: (host: EditorHost, answer: string) => TemplateResult<1>;
-  generateAnswer: (props: {
+  generateAnswer?: (props: {
     input: string;
     update: (answer: string) => void;
     finish: (type: 'success' | 'error' | 'aborted') => void;
