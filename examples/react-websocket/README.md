@@ -26,4 +26,6 @@ Here is how it works:
 └────────────┘  ydoc room  └─────────────┘           └────────────┘
 ```
 
+This WebSocket backend is provided by [y-websocket](https://github.com/yjs/y-websocket). Additionally, the yjs community also offers [y-redis](https://github.com/yjs/y-redis), an alternative WebSocket backend with authentication. You can check out the [example](https://github.com/yjs/y-redis/tree/master/demos/blocksuite) of BlockSuite in the y-redis repository.
+
 This project is created using the `pnpm create vite-express` cli.
