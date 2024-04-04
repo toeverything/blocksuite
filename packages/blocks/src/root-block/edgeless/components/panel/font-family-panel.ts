@@ -66,6 +66,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
 
           return html`
             <edgeless-tool-icon-button
+              class="${key.toLowerCase()}"
               style="font-family: ${wrapFontFamily(font)}"
               .active=${this.value === font}
               .activeMode=${'background'}
