@@ -37,12 +37,12 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
 
   static override styles = css`
     .edgeless-connector-text-editor {
-      box-sizing: content-box;
+      box-sizing: border-box;
       position: absolute;
       left: 0;
       top: 0;
       z-index: 10;
-      transform-origin: -50% -50%;
+      transform-origin: center;
       border: ${EdgelessConnectorTextEditor.BORDER_WIDTH}px solid
         var(--affine-primary-color, #1e96eb);
       border-radius: 4px;
@@ -332,7 +332,6 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
           this.inlineEditorContainer,
           'blur',
           () => !this._keeping && this.remove()
-          // () => {}
         );
 
         this.disposables.addFromEvent(
@@ -380,13 +379,14 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
 
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;
     const [visualX, visualY] = this.getVisualPosition(this.element);
-    const containerOffset = this.getContainerOffset();
+    // const containerOffset = this.getContainerOffset();
     const transformOperation = [
+      'translate(-50%, -50%)',
       `translate(${translateX}px, ${translateY}px)`,
       `translate(${visualX * zoom}px, ${visualY * zoom}px)`,
       `scale(${zoom})`,
       `rotate(${rotate}deg)`,
-      `translate(${containerOffset})`,
+      // `translate(${containerOffset})`,
     ];
 
     const isEmpty = !text.length && !this._isComposition;
