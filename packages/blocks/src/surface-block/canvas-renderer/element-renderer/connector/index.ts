@@ -92,7 +92,7 @@ function renderPoints(
     if (curve) {
       const b = getBezierParameters(points);
       rc.path(
-        `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]}  ${b[3][0]},${b[3][1]} `,
+        `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]} ${b[3][0]},${b[3][1]}`,
         options
       );
     } else {
@@ -195,11 +195,12 @@ function renderLabel(
   });
   const deltas = wrapTextDeltas(model.text, font, w);
   const lines = deltaInsertsToChunks(deltas);
-  const lineHeightPx = getLineHeight(fontFamily, fontSize);
-  const textHeight = (lines.length - 1) * lineHeightPx * 0.5;
+  const lineHeight = getLineHeight(fontFamily, fontSize);
+  const textHeight = (lines.length - 1) * lineHeight * 0.5;
 
   let x = 0;
   let y = -textHeight;
+  y += 0.5; // text-editor: border-width / 2
   if (mode === ConnectorMode.Straight) {
     const first = points[0];
     const last = points[path.length - 1];
@@ -221,9 +222,9 @@ function renderLabel(
 
   ctx.setTransform(matrix.translate(x, y));
   ctx.font = font;
-  ctx.fillStyle = renderer.getVariableColor(color);
   ctx.textAlign = textAlign;
   ctx.textBaseline = 'middle';
+  ctx.fillStyle = renderer.getVariableColor(color);
 
   const maxTextWidth = getMaxTextWidth(lines, font);
 
@@ -246,7 +247,7 @@ function renderLabel(
           : textAlign === 'right'
             ? maxTextWidth * (rtl ? -0.5 : 0.5)
             : maxTextWidth * (rtl ? 0.5 : -0.5);
-      ctx.fillText(str, x, index * lineHeightPx, w);
+      ctx.fillText(str, x, index * lineHeight, w);
 
       if (shouldTemporarilyAttach) {
         ctx.canvas.remove();

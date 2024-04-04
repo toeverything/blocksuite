@@ -235,7 +235,6 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
         break;
     }
 
-    console.log(bound);
     // edgeless.service.updateElement(element.id, {
     //   xywh: bound.serialize(),
     // });
@@ -243,30 +242,26 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
 
   getVisualPosition(element: ConnectorElementModel) {
     const { x, y, mode, path } = element;
-    let px = 0;
-    let py = 0;
+
     if (mode === ConnectorMode.Straight) {
       const first = path[0];
       const last = path[path.length - 1];
-      const point = Vec.lrp(first, last, 0.5);
-      px = point[0];
-      py += point[1];
-    } else if (mode === ConnectorMode.Orthogonal) {
+      return Vec.add([x, y], Vec.lrp(first, last, 0.5));
+    }
+
+    if (mode === ConnectorMode.Orthogonal) {
       const point = Polyline.pointAt(
         path.map<IVec2>(p => [p[0], p[1]]),
         0.5
       );
       assertExists(point);
-      px = point[0];
-      py += point[1];
-    } else {
-      const b = getBezierParameters(path);
-      const point = getBezierPoint(b, 0.5);
-      assertExists(point);
-      px = point[0];
-      py += point[1];
+      return Vec.add([x, y], point);
     }
-    return [x + px, y + py];
+
+    const b = getBezierParameters(path);
+    const point = getBezierPoint(b, 0.5);
+    assertExists(point);
+    return Vec.add([x, y], point);
   }
 
   getContainerOffset() {
