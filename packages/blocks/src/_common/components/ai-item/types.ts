@@ -11,12 +11,16 @@ export interface AIItemGroupConfig {
 export interface AIItemConfig {
   name: string;
   icon: TemplateResult | (() => HTMLElement);
-  showWhen?: (chain: Chain<InitCommandCtx>, editorMode: EditorMode) => boolean;
+  showWhen?: (
+    chain: Chain<InitCommandCtx>,
+    editorMode: EditorMode,
+    host: EditorHost
+  ) => boolean;
   subItem?: AISubItemConfig[];
   handler?: (host: EditorHost) => void;
 }
 
 export interface AISubItemConfig {
   type: string;
-  handler?: () => void;
+  handler?: (host: EditorHost) => void;
 }
