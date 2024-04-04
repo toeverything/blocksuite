@@ -302,9 +302,6 @@ const migration = {
       }
     });
   },
-  toV4: data => {
-    data.columns.forEach(col => (col.statCalcOp = 'none'));
-  },
 } satisfies Record<string, MigrationRunner<typeof DatabaseBlockSchema>>;
 
 export const DatabaseBlockSchema = defineBlockSchema({
@@ -323,10 +320,8 @@ export const DatabaseBlockSchema = defineBlockSchema({
   },
   toModel: () => new DatabaseBlockModel(),
   onUpgrade: (data, previousVersion, latestVersion) => {
-    console.log('upgrade');
     if (previousVersion < 3 && latestVersion >= 3) {
       migration.toV3(data);
     }
-    if (previousVersion < 4 && latestVersion >= 4) migration.toV4(data);
   },
 });

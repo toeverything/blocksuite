@@ -55,6 +55,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
 
   public slots = {
     update: new Slot(),
+    thisUpdate: new Slot(),
   };
 
   private _runCapture() {

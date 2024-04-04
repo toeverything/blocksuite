@@ -13,7 +13,7 @@ import type {
 import { DatabaseBlockDataSource } from './database-block-datasource.js';
 import { TagsDataSource } from './tags-datasource.js';
 
-const datasourceMap: {
+const dataSourceMap: {
   [K in DataSourceConfig['type']]: {
     title: (host: EditorHost, config: GetConfig<K>) => string;
     constructor: new (host: EditorHost, config: GetConfig<K>) => DataSource;
@@ -21,10 +21,10 @@ const datasourceMap: {
 } = {
   'database-block': {
     title: (host: EditorHost, config: DatabaseBlockDataSourceConfig) => {
-      const dbblock = host.doc.collection
+      const dbBlock = host.doc.collection
         .getDoc(config.pageId)
         ?.getBlockById(config.blockId) as DatabaseBlockModel;
-      return dbblock?.title.toString() ?? '';
+      return dbBlock?.title.toString() ?? '';
     },
     constructor: DatabaseBlockDataSource,
   },
@@ -41,15 +41,15 @@ const datasourceMap: {
     constructor: TagsDataSource,
   },
 };
-export const createDatasource = (
+export const createDataSource = (
   host: EditorHost,
   config: DataSourceConfig
 ): DataSource => {
-  return new datasourceMap[config.type].constructor(host, config as never);
+  return new dataSourceMap[config.type].constructor(host, config as never);
 };
-export const getDatasourceTitle = (
+export const getDataSourceTitle = (
   host: EditorHost,
   config: DataSourceConfig
 ): string => {
-  return datasourceMap[config.type].title(host, config as never);
+  return dataSourceMap[config.type].title(host, config as never);
 };

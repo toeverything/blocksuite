@@ -242,9 +242,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       }
     };
     this.addEventListener('keydown', selectAll);
-    this.disposables.add(() => {
-      this.removeEventListener('keydown', selectAll);
-    });
+    this.disposables.addFromEvent(this, 'keydown', selectAll);
   }
 
   override firstUpdated() {
@@ -263,6 +261,10 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     const yText = new Text(text);
     this.onChange(yText);
   };
+
+  public override onExitEditMode(): void {
+    this.onChange(this.value);
+  }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape') {

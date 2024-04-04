@@ -69,6 +69,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
     this.operation = getStatCalcOperationFromType(this.column.statCalcOp);
     this.calculate();
     this.disposables.addFromEvent(this, 'click', this.openMenu);
+
     // this.column.dataViewManager.rows.forEach(rId => {
     //   this._disposables.add(
     //     this.column.onCellUpdate(rId, () => {
@@ -120,6 +121,7 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
       this.onSelect
     );
   };
+
   onSelect = (operation: StatCalcOp) => {
     if (operation.type === 'none') {
       this.operation = null;
