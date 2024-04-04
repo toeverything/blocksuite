@@ -9,6 +9,7 @@ export const styles = css`
     border-radius: 8px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-2);
+    font-family: var(--affine-font-family);
     min-width: 300px;
     max-width: 720px;
   }
