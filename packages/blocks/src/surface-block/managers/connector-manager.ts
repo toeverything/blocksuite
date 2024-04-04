@@ -16,6 +16,7 @@ import type {
 import { ConnectorMode } from '../element-model/connector.js';
 import { AStarRunner } from '../utils/a-star.js';
 import { Bound, getBoundFromPoints } from '../utils/bound.js';
+import { getBezierParameters } from '../utils/curve.js';
 import {
   almostEqual,
   clamp,
@@ -1132,8 +1133,12 @@ export class ConnectorPathGenerator {
     path?: PointLocation[]
   ) {
     const points = path ?? this._generateConnectorPath(connector) ?? [];
-
-    const bound = getBoundFromPoints(points);
+    // https://stackoverflow.com/questions/29746785/d3js-finding-paths-bounding-box-without-getbbox
+    const bound = getBoundFromPoints(
+      connector.mode === ConnectorMode.Curve
+        ? getBezierParameters(points)
+        : points
+    );
     const relativePoints = points.map(p => {
       return p.setVec(Vec.sub(p, [bound.x, bound.y]));
     });
