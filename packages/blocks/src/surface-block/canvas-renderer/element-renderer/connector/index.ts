@@ -8,7 +8,7 @@ import {
 import { ConnectorMode } from '../../../element-model/connector.js';
 import { type PointLocation, Vec } from '../../../index.js';
 import { getBezierParameters, getBezierPoint } from '../../../utils/curve.js';
-import { getPolylineCenter } from '../../../utils/math-utils.js';
+import { Polyline } from '../../../utils/polyline.js';
 import type { Renderer } from '../../renderer.js';
 import {
   deltaInsertsToChunks,
@@ -203,11 +203,11 @@ function renderLabel(
   if (mode === ConnectorMode.Straight) {
     const first = points[0];
     const last = points[path.length - 1];
-    const point = Vec.med(first, last);
+    const point = Vec.lrp(first, last, 0.5);
     x = point[0];
     y += point[1];
   } else if (mode === ConnectorMode.Orthogonal) {
-    const point = getPolylineCenter(points);
+    const point = Polyline.pointAt(points, 0.5);
     assertExists(point);
     x = point[0];
     y += point[1];
