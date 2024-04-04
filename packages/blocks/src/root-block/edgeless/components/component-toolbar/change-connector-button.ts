@@ -560,15 +560,6 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               ${StraightLineIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Elbowed'}
-              .iconContainerPadding=${2}
-              .active=${selectedMode === ConnectorMode.Orthogonal}
-              .activeMode=${'background'}
-              @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
-            >
-              ${ElbowedLineIcon}
-            </edgeless-tool-icon-button>
-            <edgeless-tool-icon-button
               .tooltip=${'Curve'}
               .iconContainerPadding=${2}
               .active=${selectedMode === ConnectorMode.Curve}
@@ -576,6 +567,15 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               @click=${() => this._setConnectorMode(ConnectorMode.Curve)}
             >
               ${CurveLineIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Elbowed'}
+              .iconContainerPadding=${2}
+              .active=${selectedMode === ConnectorMode.Orthogonal}
+              .activeMode=${'background'}
+              @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
+            >
+              ${ElbowedLineIcon}
             </edgeless-tool-icon-button>
           `}
         >
