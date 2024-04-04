@@ -340,7 +340,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
       this.column.captureSync();
       const text = new Text(this.inlineEditor.yText);
-      text.replace(inlineRange.index, length, '\n');
+      text.replace(inlineRange.index, 0, '\n');
       this.inlineEditor.setInlineRange({
         index: inlineRange.index + 1,
         length: 0,
