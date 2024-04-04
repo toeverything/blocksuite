@@ -1,9 +1,10 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, queryAll } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { DataViewTableManager } from '../table-view-manager.js';
+import type { DatabaseColumnStatsCell } from './column-stats-cell.js';
 
 const styles = css`
   .affine-database-column-stats {
@@ -18,6 +19,9 @@ export class DataBaseColumnStats extends WithDisposable(LitElement) {
   static override styles = styles;
   @property({ attribute: false })
   view!: DataViewTableManager;
+
+  @queryAll('affine-database-column-stats-cell')
+  statCells!: NodeListOf<DatabaseColumnStatsCell>;
 
   override connectedCallback(): void {
     super.connectedCallback();

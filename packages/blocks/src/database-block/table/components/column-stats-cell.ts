@@ -66,17 +66,19 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+
     this.operation = getStatCalcOperationFromType(this.column.statCalcOp);
     this.calculate();
+
     this.disposables.addFromEvent(this, 'click', this.openMenu);
 
-    // this.column.dataViewManager.rows.forEach(rId => {
-    //   this._disposables.add(
-    //     this.column.onCellUpdate(rId, () => {
-    //       console.log(`Update ${this.column.name}`);
-    //     })
-    //   );
-    // });
+    this.column.dataViewManager.rows.forEach(rId => {
+      this._disposables.add(
+        this.column.onCellUpdate(rId, () => {
+          this.calculate();
+        })
+      );
+    });
   }
 
   protected override render() {
@@ -134,7 +136,6 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   };
 
   calculate() {
-    // console.log('calculate');
     if (!this.operation) return;
     this.result = this.operation.calculate(this.column);
   }
