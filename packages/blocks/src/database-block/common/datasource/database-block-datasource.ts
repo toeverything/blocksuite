@@ -55,7 +55,6 @@ export class DatabaseBlockDataSource extends BaseDataSource {
 
   public slots = {
     update: new Slot(),
-    thisUpdate: new Slot(),
   };
 
   private _runCapture() {
@@ -75,7 +74,6 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     value: unknown
   ): void {
     this._runCapture();
-
     const type = this.propertyGetType(propertyId);
     if (type === 'title' && typeof value === 'string') {
       const text = this.getModelById(rowId)?.text;
