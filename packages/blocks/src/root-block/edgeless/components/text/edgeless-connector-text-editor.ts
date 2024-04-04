@@ -12,9 +12,16 @@ import { getLineHeight } from '../../../../surface-block/canvas-renderer/element
 import {
   Bound,
   type ConnectorElementModel,
+  ConnectorMode,
+  type IVec2,
+  Polyline,
   toRadian,
   Vec,
 } from '../../../../surface-block/index.js';
+import {
+  getBezierParameters,
+  getBezierPoint,
+} from '../../../../surface-block/utils/curve.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 // import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
@@ -29,13 +36,13 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
   static BORDER_WIDTH = 1;
 
   static override styles = css`
-    .edgeless-text-editor {
+    .edgeless-connector-text-editor {
       box-sizing: content-box;
       position: absolute;
       left: 0;
       top: 0;
       z-index: 10;
-      transform-origin: left top;
+      transform-origin: -50% -50%;
       border: ${EdgelessConnectorTextEditor.BORDER_WIDTH}px solid
         var(--affine-primary-color, #1e96eb);
       border-radius: 4px;
@@ -45,17 +52,17 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
       overflow: visible;
     }
 
-    .edgeless-text-editor .inline-editor {
+    .edgeless-connector-text-editor .inline-editor {
       white-space: pre-wrap !important;
       outline: none;
     }
 
-    .edgeless-text-editor .inline-editor span {
+    .edgeless-connector-text-editor .inline-editor span {
       word-break: normal !important;
       overflow-wrap: anywhere !important;
     }
 
-    .edgeless-text-editor-placeholder {
+    .edgeless-connector-text-editor-placeholder {
       pointer-events: none;
       color: var(--affine-text-disable-color);
       white-space: nowrap;
@@ -235,8 +242,31 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
   };
 
   getVisualPosition(element: ConnectorElementModel) {
-    const { x, y, w, h, rotate, _absolutePath } = element;
-    return Vec.rotWith([x, y], [x + w / 2, y + h / 2], toRadian(rotate));
+    const { x, y, mode, path } = element;
+    let px = 0;
+    let py = 0;
+    if (mode === ConnectorMode.Straight) {
+      const first = path[0];
+      const last = path[path.length - 1];
+      const point = Vec.lrp(first, last, 0.5);
+      px = point[0];
+      py += point[1];
+    } else if (mode === ConnectorMode.Orthogonal) {
+      const point = Polyline.pointAt(
+        path.map<IVec2>(p => [p[0], p[1]]),
+        0.5
+      );
+      assertExists(point);
+      px = point[0];
+      py += point[1];
+    } else {
+      const b = getBezierParameters(path);
+      const point = getBezierPoint(b, 0.5);
+      assertExists(point);
+      px = point[0];
+      py += point[1];
+    }
+    return [x + px, y + py];
   }
 
   getContainerOffset() {
@@ -302,6 +332,7 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
           this.inlineEditorContainer,
           'blur',
           () => !this._keeping && this.remove()
+          // () => {}
         );
 
         this.disposables.addFromEvent(
@@ -372,7 +403,7 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
         textAlign,
         lineHeight: `${lineHeight}px`,
       })}
-      class="edgeless-text-editor"
+      class="edgeless-connector-text-editor"
     >
       <rich-text
         .yText=${text}
@@ -390,7 +421,9 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
           : nothing}
       ></rich-text>
       ${isEmpty
-        ? html`<span class="edgeless-text-editor-placeholder">Add text</span>`
+        ? html`<span class="edgeless-connector-text-editor-placeholder">
+            Add Text
+          </span>`
         : nothing}
     </div>`;
   }
