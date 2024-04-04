@@ -90,7 +90,9 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   override render() {
     this.updateComplete
       .then(() => {
-        this._textarea.focus();
+        requestAnimationFrame(() => {
+          this._textarea.focus();
+        });
       })
       .catch(console.error);
 

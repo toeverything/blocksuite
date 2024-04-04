@@ -210,6 +210,7 @@ export class RootService extends BlockService<RootBlockModel> {
   appendParagraph = () => {
     const { doc } = this;
     if (!doc.root) return;
+    if (doc.readonly) return;
     let noteId = this._getLastNoteBlock()?.id;
     if (!noteId) {
       noteId = doc.addBlock('affine:note', {}, doc.root.id);

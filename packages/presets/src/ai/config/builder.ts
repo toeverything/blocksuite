@@ -332,3 +332,30 @@ export function buildAIPanelConfig(
     },
   };
 }
+
+export function handleAskAIAction(
+  panel: AffineAIPanelWidget,
+  getAskAIStream: NonNullable<AIConfig['getAskAIStream']>
+) {
+  const host = panel.host;
+  const selection = host.selection.find('text');
+  const lastBlockPath = selection ? selection.to?.path ?? selection.path : null;
+  if (!lastBlockPath) return;
+  const block = host.view.viewFromPath('block', lastBlockPath);
+  if (!block) return;
+  const generateAnswer: AffineAIPanelWidgetConfig['generateAnswer'] = ({
+    finish,
+    input,
+    signal,
+    update,
+  }) => {
+    getAskAIStream(host.doc, input)
+      .then(stream => {
+        bindEventSource(stream, { update, finish, signal });
+      })
+      .catch(console.error);
+  };
+  assertExists(panel.config);
+  panel.config.generateAnswer = generateAnswer;
+  panel.toggle(block);
+}

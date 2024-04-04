@@ -13,6 +13,7 @@ export class VText extends LitElement {
   styles: StyleInfo = {
     'word-break': 'break-word',
     'white-space': 'pre-wrap',
+    cursor: 'text',
   };
 
   override render() {
