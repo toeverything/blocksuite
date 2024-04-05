@@ -1,6 +1,6 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
-import type { CanvasTextFontFamily } from '../../consts.js';
+import type { CanvasTextFontFamilyValueType } from '../../consts.js';
 import { wrapFontFamily } from '../../utils/font.js';
 
 const RS_LTR_CHARS =
@@ -33,7 +33,7 @@ const cachedFontFamily = new Map<
   }
 >();
 export function getLineHeight(
-  fontFamily: CanvasTextFontFamily,
+  fontFamily: CanvasTextFontFamilyValueType,
   fontSize: number
 ) {
   const ctx = getMeasureCtx();
@@ -67,7 +67,7 @@ export function getFontString({
   fontStyle: string;
   fontWeight: string;
   fontSize: number;
-  fontFamily: CanvasTextFontFamily;
+  fontFamily: CanvasTextFontFamilyValueType;
 }): string {
   const lineHeight = getLineHeight(fontFamily, fontSize);
   return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight}px ${wrapFontFamily(
