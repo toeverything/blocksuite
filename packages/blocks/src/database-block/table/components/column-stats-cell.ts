@@ -71,11 +71,20 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
 
     this.disposables.addFromEvent(this, 'click', this.openMenu);
 
+    const view = this.column.dataViewManager;
     this.disposables.add(
-      this.column.dataViewManager.slots.update.on(() => {
+      view.slots.update.on(() => {
         this.calculate();
       })
     );
+
+    view.rows.forEach(rowId => {
+      this._disposables.add(
+        this.column.onCellUpdate(rowId, () => {
+          this.calculate();
+        })
+      );
+    });
   }
 
   protected override render() {
