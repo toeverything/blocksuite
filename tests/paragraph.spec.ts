@@ -26,6 +26,7 @@ import {
   redoByKeyboard,
   resetHistory,
   setSelection,
+  switchReadonly,
   type,
   undoByClick,
   undoByKeyboard,
@@ -1408,6 +1409,24 @@ test('should placeholder works', async ({ page }) => {
 
   await pressEnter(page);
   await expect(placeholder).toHaveCount(1);
+});
+
+test('should placeholder not show at readonly mode', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await pressEnter(page);
+  await updateBlockType(page, 'affine:paragraph', 'h1');
+
+  const placeholder = page.locator('.affine-paragraph-placeholder.visible');
+
+  await switchReadonly(page);
+  await focusRichText(page, 0);
+  await expect(placeholder).toBeHidden();
+
+  await focusRichText(page, 1);
+  await expect(placeholder).toBeHidden();
 });
 
 test.describe('press ArrowDown when cursor is at the last line of a block', () => {

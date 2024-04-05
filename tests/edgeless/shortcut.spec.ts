@@ -8,6 +8,7 @@ import {
   getEdgelessSelectedRect,
   getZoomLevel,
   locatorEdgelessToolButton,
+  setEdgelessTool,
   type ShapeName,
   switchEditorMode,
   zoomFitByKeyboard,
@@ -26,6 +27,7 @@ import {
   selectAllByKeyboard,
   selectNoteInEdgeless,
   type,
+  waitNextFrame,
 } from '../utils/actions/index.js';
 import {
   assertBlockCount,
@@ -94,6 +96,7 @@ test('toggle shapes shortcut', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await page.mouse.click(100, 100);
+  await setEdgelessTool(page, 'shape');
 
   const shapesInOrder = [
     'ellipse',
@@ -110,6 +113,37 @@ test('toggle shapes shortcut', async ({ page }) => {
     await page.keyboard.press('Shift+s');
     await assertEdgelessShapeType(page, shape);
   }
+});
+
+test('should not switch shapes in editing', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setEdgelessTool(page, 'shape');
+  await waitNextFrame(page);
+  await assertEdgelessShapeType(page, 'rect');
+
+  await page.mouse.click(200, 150);
+  await waitNextFrame(page);
+  await page.mouse.dblclick(250, 200);
+  await waitNextFrame(page);
+
+  await type(page, 'hello');
+  await page.keyboard.press('Shift+s');
+  await page.keyboard.press('Escape');
+  await waitNextFrame(page);
+  await setEdgelessTool(page, 'shape');
+  await assertEdgelessShapeType(page, 'rect');
+
+  await setEdgelessTool(page, 'default');
+  await page.mouse.dblclick(250, 200);
+  await waitNextFrame(page);
+  await page.keyboard.press('Shift+S');
+  await page.keyboard.press('Escape');
+  await waitNextFrame(page);
+  await setEdgelessTool(page, 'shape');
+  await assertEdgelessShapeType(page, 'rect');
 });
 
 test('pressing the ESC key will return to the default state', async ({
