@@ -210,6 +210,9 @@ export class AffineAIPanelWidget extends WidgetElement {
     if (prevState) {
       if (prevState === 'hidden') {
         this._selection = this.host.selection.find('text');
+        requestAnimationFrame(() => {
+          this.scrollIntoView();
+        });
       } else {
         // restore selection
         if (this._selection) {
@@ -251,6 +254,7 @@ export class AffineAIPanelWidget extends WidgetElement {
         'input',
         () =>
           html`<ai-panel-input
+            .onBlur=${this.hide}
             .onFinish=${this._inputFinish}
           ></ai-panel-input>`,
       ],
@@ -288,7 +292,6 @@ export class AffineAIPanelWidget extends WidgetElement {
       ],
     ]);
 
-    return html`<div class="mock-selection-container"></div>
-      ${mainTemplate}`;
+    return html`${mainTemplate}`;
   }
 }
