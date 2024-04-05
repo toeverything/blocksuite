@@ -1,21 +1,13 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontFamilyKey,
+  CanvasTextFontFamilyName,
+  type CanvasTextFontFamilyValueType,
+} from '../../../../surface-block/consts.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
-
-export const CanvasTextFontFamiliesNames: Record<
-  keyof typeof CanvasTextFontFamily,
-  string
-> = {
-  Inter: 'Inter',
-  Kalam: 'Kalam',
-  Satoshi: 'Satoshi',
-  Poppins: 'Poppins',
-  Lora: 'Lora',
-  BebasNeue: 'Bebas Neue',
-  OrelegaOne: 'Orelega One',
-};
 
 @customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {
@@ -41,12 +33,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value = CanvasTextFontFamily.Inter;
-
-  @property({ attribute: false })
-  options = Object.keys(
-    CanvasTextFontFamily
-  ) as (keyof typeof CanvasTextFontFamily)[];
+  value: CanvasTextFontFamilyValueType = CanvasTextFontFamily.Inter;
 
   @property({ attribute: false })
   onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
@@ -61,7 +48,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
   override render() {
     return html`
       <div class="font-family-container">
-        ${this.options.map(key => {
+        ${CanvasTextFontFamilyKey.map(key => {
           const font = CanvasTextFontFamily[key];
 
           return html`
@@ -76,7 +63,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
               }}
             >
               <div class="font-family-button">
-                ${CanvasTextFontFamiliesNames[key]}
+                ${CanvasTextFontFamilyName[key]}
               </div>
             </edgeless-tool-icon-button>
           `;
