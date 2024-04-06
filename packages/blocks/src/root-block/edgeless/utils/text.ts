@@ -152,7 +152,7 @@ export function mountConnectorLabelEditor(
     .then(() => editor.inlineEditor?.focusIndex(cursorIndex))
     .catch(console.error);
   edgeless.tools.switchToDefaultMode({
-    elements: [connector.id],
+    elements: [label.id],
     editing: true,
   });
 }

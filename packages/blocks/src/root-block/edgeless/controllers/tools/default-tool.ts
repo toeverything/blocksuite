@@ -17,6 +17,7 @@ import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { GroupLikeModel } from '../../../../surface-block/element-model/base.js';
 import {
+  CanvasElementType,
   GroupElementModel,
   MindmapElementModel,
   ShapeElementModel,
@@ -28,6 +29,8 @@ import {
   ConnectorElementModel,
   ConnectorLabelElementModel,
   type IVec,
+  type IVec2,
+  Vec,
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import type {
@@ -405,16 +408,42 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     } else {
       const [modelX, modelY] = this._service.viewport.toModelCoord(e.x, e.y);
 
+      let connectorLabel;
+      if (selected instanceof ConnectorElementModel) {
+        if (!selected.label) {
+          const offset = [selected.x, selected.y];
+          const [x, y] = selected.getNearestPoint(
+            Vec.sub([modelX, modelY], offset) as IVec2
+          );
+          const t = selected.getTimeByPoint({
+            point: Vec.add([x, y], offset) as IVec2,
+          });
+          selected.label = this._service.addElement(
+            CanvasElementType.CONNECTOR_LABEL,
+            {
+              connector: selected.id,
+              xywh: `[${x - 65 / 2},${y - 19 / 2},65,19]`,
+              t,
+            }
+          );
+        }
+        connectorLabel = this._service.getElementById(
+          selected.label
+        )! as ConnectorLabelElementModel;
+      }
+
       if (selected instanceof ConnectorLabelElementModel) {
+        connectorLabel = selected;
+      }
+
+      if (connectorLabel) {
         const connector = this._service.getElementById(
-          selected.connector
+          connectorLabel.connector
         )! as ConnectorElementModel;
-        mountConnectorLabelEditor(connector, selected, this._edgeless, {
-          x: modelX,
-          y: modelY,
-        });
+        mountConnectorLabelEditor(connector, connectorLabel, this._edgeless);
         return;
       }
+
       if (selected instanceof TextElementModel) {
         mountTextElementEditor(selected, this._edgeless, {
           x: modelX,

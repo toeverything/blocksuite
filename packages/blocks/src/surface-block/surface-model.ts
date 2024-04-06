@@ -585,6 +585,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
             element.connector
           )! as ConnectorElementModel;
           connector.label = undefined;
+          // element.connector = undefined;
         }
       }
 
