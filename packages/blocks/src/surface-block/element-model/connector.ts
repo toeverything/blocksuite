@@ -258,28 +258,27 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     const { mode, path } = this;
     const { x, y } = this;
 
+    const offset = [x, y];
+    const rp = Vec.sub(point, offset) as IVec2;
+
     if (mode === ConnectorMode.Straight) {
       const first = path[0];
       const last = path[path.length - 1];
-      return Vec.add(
-        [x, y],
-        Vec.nearestPointOnLineSegment(first, last, point, true)
-      );
+      const p = Vec.nearestPointOnLineSegment(first, last, rp, true);
+      return Vec.add(offset, p);
     }
 
     if (mode === ConnectorMode.Orthogonal) {
       const points = path.map<IVec2>(p => [p[0], p[1]]);
-      return Polyline.nearestPoint(points, point);
+      return Vec.add(offset, Polyline.nearestPoint(points, rp));
     }
 
     const b = getBezierParameters(path);
-    const t = getBezierNearestTime(b, point);
+    const t = getBezierNearestTime(b, rp);
     const p = getBezierPoint(b, t);
-    if (p) {
-      return p;
-    }
+    if (p) return Vec.add(offset, p);
 
-    return [x, y];
+    return offset;
   }
 }
 
