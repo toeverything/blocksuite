@@ -45,6 +45,7 @@ export type EdgelessElementType =
   | 'shape'
   | 'brush'
   | 'connector'
+  | 'connector-label'
   | 'text'
   | 'group'
   | 'debug'
