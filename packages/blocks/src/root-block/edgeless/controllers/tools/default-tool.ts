@@ -30,7 +30,6 @@ import {
   ConnectorLabelElementModel,
   type IVec,
   type IVec2,
-  Vec,
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import type {
@@ -411,18 +410,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       let connectorLabel;
       if (selected instanceof ConnectorElementModel) {
         if (!selected.label) {
-          const offset = [selected.x, selected.y];
-          const [x, y] = selected.getNearestPoint(
-            Vec.sub([modelX, modelY], offset) as IVec2
-          );
-          const t = selected.getTimeByPoint({
-            point: Vec.add([x, y], offset) as IVec2,
-          });
+          const point = selected.getNearestPoint([modelX, modelY]) as IVec2;
+          const t = selected.getTimeByPoint({ point });
           selected.label = this._service.addElement(
             CanvasElementType.CONNECTOR_LABEL,
             {
               connector: selected.id,
-              xywh: `[${x - 65 / 2},${y - 19 / 2},65,19]`,
+              xywh: `[${point[0] - 65 / 2},${point[1] - 19 / 2},65,19]`,
               t,
             }
           );
