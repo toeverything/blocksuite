@@ -134,6 +134,9 @@ export function mountConnectorLabelEditor(
   edgeless: EdgelessRootBlockComponent,
   focusCoord?: IModelCoord
 ) {
+  label.actived = false;
+  label.display = false;
+
   let cursorIndex = label.text.length;
   if (focusCoord) {
     cursorIndex = Math.min(getCursorByCoord(label, focusCoord), cursorIndex);

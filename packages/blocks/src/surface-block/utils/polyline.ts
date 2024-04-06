@@ -3,10 +3,15 @@ import { type IVec2, Vec } from './vec.js';
 export class Polyline {
   static len(points: IVec2[]) {
     const n = points.length;
+
+    if (n < 2) {
+      return 0;
+    }
+
     let i = 0;
     let len = 0;
-    let prev = points[0];
     let curr: IVec2;
+    let prev = points[0];
 
     while (++i < n) {
       curr = points[i];
@@ -19,6 +24,7 @@ export class Polyline {
 
   static pointAt(points: IVec2[], ratio: number) {
     const n = points.length;
+
     if (n === 0) {
       return null;
     }
@@ -42,6 +48,7 @@ export class Polyline {
 
   static pointAtLen(points: IVec2[], len: number): IVec2 | null {
     const n = points.length;
+
     if (n === 0) {
       return null;
     }
@@ -79,6 +86,7 @@ export class Polyline {
     const n = points.length;
     const r: IVec2 = [0, 0];
     let len = Infinity;
+
     for (let i = 0; i < n - 1; i++) {
       const a = points[i];
       const b = points[i + 1];
@@ -90,12 +98,14 @@ export class Polyline {
         r[1] = p[1];
       }
     }
+
     return r;
   }
 
   static lenAtPoint(points: IVec2[], point: IVec2) {
     const n = points.length;
     let len = n;
+
     for (let i = 0; i < n - 1; i++) {
       const a = points[i];
       const b = points[i + 1];
@@ -109,6 +119,7 @@ export class Polyline {
 
       len += Vec.dist(a, b);
     }
+
     return len;
   }
 }

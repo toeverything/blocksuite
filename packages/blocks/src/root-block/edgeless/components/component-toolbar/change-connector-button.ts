@@ -293,7 +293,6 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     const label = this.service.getElementById(
       connector.label
     )! as ConnectorLabelElementModel;
-    label.display = false;
     mountConnectorLabelEditor(connector, label, this.edgeless);
   }
 
