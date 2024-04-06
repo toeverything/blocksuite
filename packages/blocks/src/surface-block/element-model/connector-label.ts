@@ -22,7 +22,7 @@ export class ConnectorLabelElementModel extends TextElementModel {
   @yfield()
   connector!: string;
 
-  // At the center of the path, 0.5 by default.
+  // Along the path, 0.5 by default.
   // `t`: [0, 1];
   @yfield(0.5)
   t!: number;
