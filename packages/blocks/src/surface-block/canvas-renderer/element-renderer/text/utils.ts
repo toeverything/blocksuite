@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 
 import type {
@@ -6,7 +5,6 @@ import type {
   FontStyle,
   FontWeight,
 } from '../../../element-model/common.js';
-import type { ConnectorLabelElementModel } from '../../../element-model/connector-label.js';
 import type { TextElementModel } from '../../../element-model/text.js';
 import type { Bound } from '../../../utils/bound.js';
 import {
@@ -389,7 +387,7 @@ export const truncateTextByWidth = (
 };
 
 export function getTextCursorPosition(
-  model: ConnectorLabelElementModel | TextElementModel,
+  model: TextElementModel,
   coord: { x: number; y: number }
 ) {
   const leftTop = getPointsFromBoundsWithRotation(model)[0];
@@ -409,10 +407,9 @@ export function getTextCursorPosition(
 }
 
 export function getCursorByCoord(
-  model: ConnectorLabelElementModel | TextElementModel,
+  model: TextElementModel,
   coord: { x: number; y: number }
 ) {
-  assertExists(model.text);
   const [lineIndex, offsetX] = getTextCursorPosition(model, coord);
 
   const font = getFontString(model);
