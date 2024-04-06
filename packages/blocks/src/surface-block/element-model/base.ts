@@ -141,6 +141,10 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     return true;
   }
 
+  get resizeable() {
+    return true;
+  }
+
   private _lastXYWH: SerializedXYWH = '[0,0,0,0]';
 
   get deserializedXYWH() {

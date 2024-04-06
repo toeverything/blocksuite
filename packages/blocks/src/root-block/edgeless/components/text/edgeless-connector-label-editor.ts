@@ -12,27 +12,19 @@ import { getLineHeight } from '../../../../surface-block/canvas-renderer/element
 import {
   Bound,
   type ConnectorElementModel,
-  ConnectorMode,
-  type IVec2,
-  Polyline,
-  toRadian,
-  Vec,
+  type ConnectorLabelElementModel,
 } from '../../../../surface-block/index.js';
-import {
-  getBezierParameters,
-  getBezierPoint,
-} from '../../../../surface-block/utils/curve.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 // import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
 
-@customElement('edgeless-connector-text-editor')
-export class EdgelessConnectorTextEditor extends WithDisposable(
+@customElement('edgeless-connector-label-editor')
+export class EdgelessConnectorLabelEditor extends WithDisposable(
   ShadowlessElement
 ) {
   static PLACEHOLDER_TEXT = 'Add text';
-  static HORIZONTAL_PADDING = 10;
-  static VERTICAL_PADDING = 6;
+  static HORIZONTAL_PADDING = 2;
+  static VERTICAL_PADDING = 2;
   static BORDER_WIDTH = 1;
 
   static override styles = css`
@@ -43,12 +35,12 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
       top: 0;
       z-index: 10;
       transform-origin: center;
-      border: ${EdgelessConnectorTextEditor.BORDER_WIDTH}px solid
+      border: ${EdgelessConnectorLabelEditor.BORDER_WIDTH}px solid
         var(--affine-primary-color, #1e96eb);
       border-radius: 4px;
       box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
-      padding: ${EdgelessConnectorTextEditor.VERTICAL_PADDING}px
-        ${EdgelessConnectorTextEditor.HORIZONTAL_PADDING}px;
+      padding: ${EdgelessConnectorLabelEditor.VERTICAL_PADDING}px
+        ${EdgelessConnectorLabelEditor.HORIZONTAL_PADDING}px;
       overflow: visible;
     }
 
@@ -73,7 +65,10 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
   richText!: RichText;
 
   @property({ attribute: false })
-  element!: ConnectorElementModel;
+  connector!: ConnectorElementModel;
+
+  @property({ attribute: false })
+  label!: ConnectorLabelElementModel;
 
   @property({ attribute: false })
   edgeless!: EdgelessRootBlockComponent;
@@ -167,106 +162,39 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
     return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
   }
 
-  private _updateRect = () => {
-    const edgeless = this.edgeless;
-    const element = this.element;
-
-    if (!edgeless || !element) return;
+  private _updateLabelRect = () => {
+    const { connector, edgeless, label } = this;
+    if (!connector || !edgeless || !label) return;
 
     const newWidth = this.inlineEditorContainer.scrollWidth;
     const newHeight = this.inlineEditorContainer.scrollHeight;
-    const bound = new Bound(element.x, element.y, newWidth, newHeight);
-    const { x, y, w, h, rotate } = element;
-
-    switch (element.textAlign) {
-      case 'left':
-        {
-          const newPos = this.getCoordsOnLeftAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-      case 'center':
-        {
-          const newPos = this.getCoordsOnCenterAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-      case 'right':
-        {
-          const newPos = this.getCoordsOnRightAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-    }
-
-    // edgeless.service.updateElement(element.id, {
-    //   xywh: bound.serialize(),
-    // });
+    const midpoint = EdgelessConnectorLabelEditor.getMiddlePosition(
+      connector,
+      label
+    );
+    const bound = new Bound(
+      midpoint[0] - newWidth / 2,
+      midpoint[1] - newHeight / 2,
+      newWidth,
+      newHeight
+    );
+    edgeless.service.updateElement(label.id, {
+      xywh: bound.serialize(),
+    });
   };
 
-  getVisualPosition(element: ConnectorElementModel) {
-    const { x, y, mode, path } = element;
-
-    if (mode === ConnectorMode.Straight) {
-      const first = path[0];
-      const last = path[path.length - 1];
-      return Vec.add([x, y], Vec.lrp(first, last, 0.5));
-    }
-
-    if (mode === ConnectorMode.Orthogonal) {
-      const point = Polyline.pointAt(
-        path.map<IVec2>(p => [p[0], p[1]]),
-        0.5
-      );
-      assertExists(point);
-      return Vec.add([x, y], point);
-    }
-
-    const b = getBezierParameters(path);
-    const point = getBezierPoint(b, 0.5);
-    assertExists(point);
-    return Vec.add([x, y], point);
+  static getMiddlePosition(
+    element: ConnectorElementModel,
+    label: ConnectorLabelElementModel
+  ) {
+    return element.getPointByTime({
+      t: label.t,
+    });
   }
 
   getContainerOffset() {
     const { VERTICAL_PADDING, HORIZONTAL_PADDING, BORDER_WIDTH } =
-      EdgelessConnectorTextEditor;
+      EdgelessConnectorLabelEditor;
     return `-${HORIZONTAL_PADDING + BORDER_WIDTH}px, -${
       VERTICAL_PADDING + BORDER_WIDTH
     }px`;
@@ -277,27 +205,29 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
     if (!this.edgeless) {
       throw new Error('edgeless is not set.');
     }
-    if (!this.element) {
-      throw new Error('text element is not set.');
+    if (!this.connector) {
+      throw new Error('connector element is not set.');
+    }
+    if (!this.label) {
+      throw new Error('label element is not set.');
     }
   }
 
   override firstUpdated(): void {
-    const edgeless = this.edgeless;
-    const element = this.element;
-    const { dispatcher } = this.edgeless;
+    const { edgeless, label } = this;
+    const { dispatcher } = edgeless;
     assertExists(dispatcher);
 
     this.updateComplete
       .then(() => {
         this.inlineEditor.slots.renderComplete.on(() => {
-          this._updateRect();
+          this._updateLabelRect();
           this.requestUpdate();
         });
 
         this.disposables.add(
           edgeless.service.surface.elementUpdated.on(({ id }) => {
-            if (id === element.id) this.requestUpdate();
+            if (id === label.id) this.requestUpdate();
           })
         );
 
@@ -311,11 +241,7 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
         this.disposables.add(dispatcher.add('doubleClick', () => true));
 
         this.disposables.add(() => {
-          if (element.text?.length === 0) {
-            element.text = undefined;
-          } else {
-            element.displayText = true;
-          }
+          label.display = true;
 
           edgeless.service.selection.set({
             elements: [],
@@ -366,19 +292,22 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
       rotate,
       hasMaxWidth,
       w,
-    } = this.element;
+    } = this.label;
     assertExists(text);
 
     const lineHeight = getLineHeight(fontFamily, fontSize);
-    const rect = getSelectedRect([this.element]);
+    const rect = getSelectedRect([this.label]);
 
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;
-    const [visualX, visualY] = this.getVisualPosition(this.element);
+    const [midX, midY] = EdgelessConnectorLabelEditor.getMiddlePosition(
+      this.connector,
+      this.label
+    );
     // const containerOffset = this.getContainerOffset();
     const transformOperation = [
       'translate(-50%, -50%)',
       `translate(${translateX}px, ${translateY}px)`,
-      `translate(${visualX * zoom}px, ${visualY * zoom}px)`,
+      `translate(${midX * zoom}px, ${midY * zoom}px)`,
       `scale(${zoom})`,
       `rotate(${rotate}deg)`,
       // `translate(${containerOffset})`,
@@ -410,14 +339,14 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
               position: 'absolute',
               left: 0,
               top: 0,
-              padding: `${EdgelessConnectorTextEditor.VERTICAL_PADDING}px
-        ${EdgelessConnectorTextEditor.HORIZONTAL_PADDING}px`,
+              padding: `${EdgelessConnectorLabelEditor.VERTICAL_PADDING}px
+        ${EdgelessConnectorLabelEditor.HORIZONTAL_PADDING}px`,
             })
           : nothing}
       ></rich-text>
       ${isEmpty
         ? html`<span class="edgeless-connector-text-editor-placeholder">
-            Add Text
+            Add text
           </span>`
         : nothing}
     </div>`;
@@ -426,6 +355,6 @@ export class EdgelessConnectorTextEditor extends WithDisposable(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-connector-text-editor': EdgelessConnectorTextEditor;
+    'edgeless-connector-label-editor': EdgelessConnectorLabelEditor;
   }
 }

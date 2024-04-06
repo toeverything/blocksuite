@@ -1,25 +1,24 @@
-import type { Y } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { HitTestOptions } from '../../root-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import { Bound } from '../utils/bound.js';
-import { getBezierNearestPoint } from '../utils/curve.js';
+import {
+  getBezierNearestPoint,
+  getBezierNearestTime,
+  getBezierPoint,
+} from '../utils/curve.js';
 import { getBezierParameters } from '../utils/curve.js';
 import {
   linePolylineIntersects,
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
 import { PointLocation } from '../utils/point-location.js';
+import { Polyline } from '../utils/polyline.js';
 import { type IVec2, Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import { type BaseProps, ElementModel, LocalModel } from './base.js';
-import type { StrokeStyle, TextAlign, VerticalAlign } from './common.js';
-import {
-  FontFamily,
-  type FontStyle,
-  FontWeight,
-  TextResizing,
-} from './common.js';
+import type { StrokeStyle } from './common.js';
 import { derive, local, yfield } from './decorators.js';
 
 export enum ConnectorEndpoint {
@@ -124,38 +123,9 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   @yfield('Arrow')
   rearEndpointStyle!: PointStyle;
 
-  @local()
-  displayText?: boolean;
-
+  // Label's ID
   @yfield()
-  textXYWH?: SerializedXYWH;
-
-  @yfield()
-  text?: Y.Text;
-
-  @yfield('#000000')
-  color!: string;
-
-  @yfield(FontFamily.Inter)
-  fontFamily!: string;
-
-  @yfield(FontWeight.Regular)
-  fontWeight!: FontWeight;
-
-  @yfield(16)
-  fontSize!: number;
-
-  @yfield('normal')
-  fontStyle!: FontStyle;
-
-  @yfield('center')
-  textVerticalAlign!: VerticalAlign;
-
-  @yfield('center')
-  textAlign!: TextAlign;
-
-  @yfield(TextResizing.AUTO_HEIGHT)
-  textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
+  label?: string;
 
   moveTo(bound: Bound) {
     const oldBound = Bound.deserialize(this.xywh);
@@ -212,6 +182,71 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     const result = super.serialize();
     result.xywh = this.xywh;
     return result;
+  }
+
+  getPointByTime({ t = 0.5, bounds }: { t: number; bounds?: Bound }) {
+    const { mode, path } = this;
+
+    let { x, y } = this;
+    if (bounds) {
+      x = bounds.x;
+      y = bounds.y;
+    }
+
+    if (mode === ConnectorMode.Straight) {
+      const first = path[0];
+      const last = path[path.length - 1];
+      return Vec.add([x, y], Vec.lrp(first, last, t));
+    }
+
+    if (mode === ConnectorMode.Orthogonal) {
+      const points = path.map<IVec2>(p => [p[0], p[1]]);
+      const point = Polyline.pointAt(points, t);
+      assertExists(point);
+      return Vec.add([x, y], point);
+    }
+
+    const b = getBezierParameters(path);
+    const point = getBezierPoint(b, t);
+    assertExists(point);
+    return Vec.add([x, y], point);
+  }
+
+  getTimeByPoint({ point, bounds }: { point: IVec2; bounds?: Bound }) {
+    const { mode, path } = this;
+
+    let { x, y, w, h } = this;
+    if (bounds) {
+      x = bounds.x;
+      y = bounds.y;
+      w = bounds.w;
+      h = bounds.h;
+    }
+
+    // relatived point
+    const rp = Vec.sub(
+      [Vec.clamp(point[0], x, x + w), Vec.clamp(point[1], y, y + h)],
+      [x, y]
+    );
+
+    if (mode === ConnectorMode.Straight) {
+      const s = path[0];
+      const e = path[path.length - 1];
+      const pl = Vec.dist(s, rp);
+      const fl = Vec.dist(s, e);
+      return pl / fl;
+    }
+
+    if (mode === ConnectorMode.Orthogonal) {
+      const points = path.map<IVec2>(p => [p[0], p[1]]);
+      const p = Polyline.nearestPoint(points, rp as IVec2);
+      const fl = Polyline.len(points);
+      const pl = Polyline.lenAtPoint(points, p);
+      return pl / fl;
+    }
+
+    const b = getBezierParameters(path);
+    return getBezierNearestTime(b, rp);
   }
 }
 

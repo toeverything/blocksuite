@@ -15,6 +15,7 @@ import {
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import { DEFAULT_SEED } from '../../../../surface-block/consts.js';
 import { type Connection } from '../../../../surface-block/element-model/connector.js';
 import {
   type ConnectorElementModel,
@@ -264,7 +265,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const fill = computedStyle.getPropertyValue(fillColor);
 
     const options = {
-      seed: 666,
+      seed: DEFAULT_SEED,
       roughness: roughness,
       strokeLineDash: [0, 0],
       stroke,

@@ -39,6 +39,7 @@ import { TextElementModel } from '../../../../surface-block/element-model/text.j
 import type { ElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
+  ConnectorLabelElementModel,
   deserializeXYWH,
   GroupElementModel,
   ShapeElementModel,
@@ -1088,7 +1089,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       _updateCursor,
     } = this;
 
-    const hasResizeHandles = !selection.editing && !doc.readonly;
+    const hasResizeHandles =
+      !selection.editing && !doc.readonly && !elements.some(e => !e.resizeable);
 
     const resizeHandles = hasResizeHandles
       ? ResizeHandles(
@@ -1128,7 +1130,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const elementHandle =
       elements.length > 1 &&
-      !elements.reduce((p, e) => p && e instanceof ConnectorElementModel, true)
+      !elements.reduce(
+        (p, e) =>
+          p &&
+          (e instanceof ConnectorElementModel ||
+            e instanceof ConnectorLabelElementModel),
+        true
+      )
         ? elements.map(element => {
             const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
             const [x, y] = edgeless.service.viewport.toViewCoord(
@@ -1155,7 +1163,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElementModel;
 
-    if (elements.length === 1 && elements[0] instanceof ConnectorElementModel) {
+    if (
+      elements.length === 1 &&
+      (elements[0] instanceof ConnectorElementModel ||
+        elements[0] instanceof ConnectorLabelElementModel)
+    ) {
       _selectedRect.width = 0;
       _selectedRect.height = 0;
       _selectedRect.borderWidth = 0;

@@ -6,7 +6,7 @@ import type {
   FontStyle,
   FontWeight,
 } from '../../../element-model/common.js';
-import type { ConnectorElementModel } from '../../../element-model/connector.js';
+import type { ConnectorLabelElementModel } from '../../../element-model/connector-label.js';
 import type { TextElementModel } from '../../../element-model/text.js';
 import type { Bound } from '../../../utils/bound.js';
 import {
@@ -389,7 +389,7 @@ export const truncateTextByWidth = (
 };
 
 export function getTextCursorPosition(
-  model: ConnectorElementModel | TextElementModel,
+  model: ConnectorLabelElementModel | TextElementModel,
   coord: { x: number; y: number }
 ) {
   const leftTop = getPointsFromBoundsWithRotation(model)[0];
@@ -409,7 +409,7 @@ export function getTextCursorPosition(
 }
 
 export function getCursorByCoord(
-  model: ConnectorElementModel | TextElementModel,
+  model: ConnectorLabelElementModel | TextElementModel,
   coord: { x: number; y: number }
 ) {
   assertExists(model.text);

@@ -40,7 +40,7 @@ export class Polyline {
     return Polyline.pointAtLen(points, len);
   }
 
-  static pointAtLen(points: IVec2[], len: number): number[] | null {
+  static pointAtLen(points: IVec2[], len: number): IVec2 | null {
     const n = points.length;
     if (n === 0) {
       return null;
@@ -65,7 +65,7 @@ export class Polyline {
 
       if (len <= tmp + d) {
         const t = ((fromStart ? 1 : -1) * (len - tmp)) / d;
-        return Vec.lrp(a, b, t);
+        return Vec.lrp(a, b, t) as IVec2;
       }
 
       tmp += d;
@@ -73,5 +73,42 @@ export class Polyline {
 
     const lastPoint = fromStart ? points[n - 1] : points[0];
     return lastPoint;
+  }
+
+  static nearestPoint(points: IVec2[], point: IVec2): IVec2 {
+    const n = points.length;
+    const r: IVec2 = [0, 0];
+    let len = Infinity;
+    for (let i = 0; i < n - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+      const p = Vec.nearestPointOnLineSegment(a, b, point, true);
+      const d = Vec.dist(p, point);
+      if (d < len) {
+        len = d;
+        r[0] = p[0];
+        r[1] = p[1];
+      }
+    }
+    return r;
+  }
+
+  static lenAtPoint(points: IVec2[], point: IVec2) {
+    const n = points.length;
+    let len = n;
+    for (let i = 0; i < n - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+      const aa = Vec.angle(a, point);
+      const ba = Vec.angle(b, point);
+
+      if ((aa + ba) % Math.PI === 0) {
+        len += Vec.dist(a, point);
+        return len;
+      }
+
+      len += Vec.dist(a, b);
+    }
+    return len;
   }
 }

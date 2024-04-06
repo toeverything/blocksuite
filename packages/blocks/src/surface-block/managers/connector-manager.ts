@@ -8,12 +8,13 @@ import type {
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import { Overlay } from '../canvas-renderer/renderer.js';
 import type { IBound } from '../consts.js';
-import type {
-  Connection,
+import {
+  type Connection,
   ConnectorElementModel,
-  LocalConnectorElementModel,
+  ConnectorMode,
+  type LocalConnectorElementModel,
 } from '../element-model/connector.js';
-import { ConnectorMode } from '../element-model/connector.js';
+import type { ConnectorLabelElementModel } from '../element-model/connector-label.js';
 import { AStarRunner } from '../utils/a-star.js';
 import { Bound, getBoundFromPoints } from '../utils/bound.js';
 import { getBezierParameters } from '../utils/curve.js';
@@ -1147,6 +1148,27 @@ export class ConnectorPathGenerator {
     // the property assignment order matters
     connector.xywh = bound.serialize();
     connector.path = relativePoints;
+
+    if (
+      connector instanceof ConnectorElementModel &&
+      connector.label &&
+      connector.surface.hasElementById(connector.label)
+    ) {
+      const label = connector.surface.getElementById(
+        connector.label
+      )! as ConnectorLabelElementModel;
+      const [x, y] = connector.getPointByTime({
+        bounds: Bound.deserialize(connector.xywh),
+        t: label.t,
+      });
+      const bounds = Bound.fromXYWH(label.deserializedXYWH);
+      bounds.x = x - bounds.w / 2;
+      bounds.y = y - bounds.h / 2;
+      connector.surface.updateElement(label.id, {
+        xywh: bounds.serialize(),
+      });
+    }
+
     connector.updatingPath = false;
   }
 

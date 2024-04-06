@@ -28,7 +28,11 @@ import {
 } from '../../../../surface-block/element-model/common.js';
 import type { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import { TextAlign } from '../../../../surface-block/elements/consts.js';
-import type { ShapeElementModel } from '../../../../surface-block/index.js';
+import type {
+  ConnectorElementModel,
+  ConnectorLabelElementModel,
+  ShapeElementModel,
+} from '../../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
@@ -282,6 +286,30 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _updateElementBound = (element: EdgelessCanvasTextElement) => {
     const elementType = this.elementType;
+
+    if (elementType === CanvasElementType.CONNECTOR_LABEL) {
+      // the change of font family will change the bound of the text
+      const newBound = normalizeTextBound(
+        element as TextElementModel,
+        new Bound(element.x, element.y, element.w, element.h)
+      );
+
+      const connector = this.service.getElementById(
+        (element as ConnectorLabelElementModel).connector
+      )! as ConnectorElementModel;
+
+      const [x, y] = connector.getPointByTime({
+        t: (element as ConnectorLabelElementModel).t,
+      });
+      newBound.x = x - newBound.w / 2;
+      newBound.y = y - newBound.h / 2;
+
+      this.service.updateElement(element.id, {
+        xywh: newBound.serialize(),
+      });
+      return;
+    }
+
     if (elementType === CanvasElementType.TEXT) {
       // the change of font family will change the bound of the text
       const newBound = normalizeTextBound(
@@ -291,15 +319,16 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.service.updateElement(element.id, {
         xywh: newBound.serialize(),
       });
-    } else {
-      const newBound = normalizeShapeBound(
-        element as ShapeElementModel,
-        new Bound(element.x, element.y, element.w, element.h)
-      );
-      this.service.updateElement(element.id, {
-        xywh: newBound.serialize(),
-      });
+      return;
     }
+
+    const newBound = normalizeShapeBound(
+      element as ShapeElementModel,
+      new Bound(element.x, element.y, element.w, element.h)
+    );
+    this.service.updateElement(element.id, {
+      xywh: newBound.serialize(),
+    });
   };
 
   private _setTextColor = (color: CssVariableName) => {

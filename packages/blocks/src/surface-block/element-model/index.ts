@@ -4,6 +4,7 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 import { ElementModel } from './base.js';
 import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
+import { ConnectorLabelElementModel } from './connector-label.js';
 import {
   initializedObservers,
   initializeWatchers,
@@ -17,6 +18,7 @@ import { TextElementModel } from './text.js';
 const elementsCtorMap = {
   group: GroupElementModel,
   connector: ConnectorElementModel,
+  'connector-label': ConnectorLabelElementModel,
   shape: ShapeElementModel,
   brush: BrushElementModel,
   text: TextElementModel,
@@ -186,6 +188,7 @@ export function createModelFromProps(
 export {
   BrushElementModel,
   ConnectorElementModel,
+  ConnectorLabelElementModel,
   ElementModel,
   GroupElementModel,
   MindmapElementModel,
@@ -196,6 +199,7 @@ export {
 export type CanvasElement =
   | BrushElementModel
   | ConnectorElementModel
+  | ConnectorLabelElementModel
   | ShapeElementModel
   | TextElementModel
   | GroupElementModel
@@ -205,6 +209,7 @@ export enum CanvasElementType {
   SHAPE = 'shape',
   BRUSH = 'brush',
   CONNECTOR = 'connector',
+  CONNECTOR_LABEL = 'connector-label',
   TEXT = 'text',
   GROUP = 'group',
   MINDMAP = 'mindmap',
@@ -214,6 +219,7 @@ export type ElementModelMap = {
   ['shape']: ShapeElementModel;
   ['brush']: BrushElementModel;
   ['connector']: ConnectorElementModel;
+  ['connector-label']: ConnectorLabelElementModel;
   ['text']: TextElementModel;
   ['group']: GroupElementModel;
   ['mindmap']: MindmapElementModel;

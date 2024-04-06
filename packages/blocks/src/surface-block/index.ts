@@ -25,6 +25,7 @@ export {
   DEFAULT_REAR_END_POINT_STYLE,
   type PointStyle,
 } from './element-model/connector.js';
+export { ConnectorLabelElementModel } from './element-model/connector-label.js';
 export { GroupElementModel } from './element-model/group.js';
 export { CanvasElementType } from './element-model/index.js';
 export { ShapeElementModel } from './element-model/shape.js';

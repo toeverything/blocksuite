@@ -2,6 +2,7 @@ import '../buttons/tool-icon-button.js';
 import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
+import './change-connector-label-button.js';
 import './change-note-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
@@ -50,13 +51,12 @@ import type { ImageBlockModel } from '../../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
 import {
-  type ElementModel,
-  GroupElementModel,
-} from '../../../../surface-block/index.js';
-import {
   type BrushElementModel,
   clamp,
   type ConnectorElementModel,
+  ConnectorLabelElementModel,
+  type ElementModel,
+  GroupElementModel,
   type ShapeElementModel,
   type TextElementModel,
 } from '../../../../surface-block/index.js';
@@ -77,6 +77,7 @@ type CategorizedElements = {
   text?: TextElementModel[];
   group?: GroupElementModel[];
   connector?: ConnectorElementModel[];
+  connectorLabel?: ConnectorLabelElementModel[];
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
@@ -209,6 +210,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'attachment';
       } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
         return 'embedCard';
+      } else if (model instanceof ConnectorLabelElementModel) {
+        return 'connectorLabel';
       }
 
       return (model as ElementModel).type;
@@ -255,13 +258,27 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   private _ConnectorButton(connectorElements?: ConnectorElementModel[]) {
     return connectorElements?.length
-      ? html` <edgeless-change-connector-button
+      ? html`<edgeless-change-connector-button
           .elements=${connectorElements}
           .doc=${this.doc}
           .surface=${this.surface}
           .edgeless=${this.edgeless}
         >
         </edgeless-change-connector-button>`
+      : nothing;
+  }
+
+  private _ConnectorLabelButton(
+    connectorLabelElements?: ConnectorLabelElementModel[]
+  ) {
+    return connectorLabelElements?.length
+      ? html`<edgeless-change-connector-label-button
+          .labels=${connectorLabelElements}
+          .doc=${this.doc}
+          .surface=${this.surface}
+          .edgeless=${this.edgeless}
+        >
+        </edgeless-change-connector-label-button>`
       : nothing;
   }
 
@@ -468,6 +485,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       shape,
       brush,
       connector,
+      connectorLabel,
       note,
       text,
       frame,
@@ -491,6 +509,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._ShapeButton(shape),
           this._BrushButton(brush),
           this._ConnectorButton(connector),
+          this._ConnectorLabelButton(connectorLabel),
           this._NoteButton(note),
           this._TextButton(text),
           this._FrameButton(frame),

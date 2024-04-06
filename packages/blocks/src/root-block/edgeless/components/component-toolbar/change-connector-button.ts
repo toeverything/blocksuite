@@ -4,7 +4,7 @@ import '../buttons/menu-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type Doc, DocCollection } from '@blocksuite/store';
+import { type Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -35,8 +35,10 @@ import { LineWidth } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import type { PointStyle } from '../../../../surface-block/index.js';
 import {
+  CanvasElementType,
   type ConnectorElementModel,
   ConnectorEndpoint,
+  type ConnectorLabelElementModel,
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
@@ -44,7 +46,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { mountConnectorTextEditor } from '../../utils/text.js';
+import { mountConnectorLabelEditor } from '../../utils/text.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import {
   type ColorEvent,
@@ -280,11 +282,19 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   private _setConnectorText() {
     const connector = this.elements[0];
     assertExists(connector);
-    if (!connector.text) {
-      connector.text = new DocCollection.Y.Text();
+    if (!connector.label) {
+      connector.label = this.service.addElement(
+        CanvasElementType.CONNECTOR_LABEL,
+        {
+          connector: connector.id,
+        }
+      );
     }
-    connector.displayText = false;
-    mountConnectorTextEditor(connector, this.edgeless);
+    const label = this.service.getElementById(
+      connector.label
+    )! as ConnectorLabelElementModel;
+    label.display = false;
+    mountConnectorLabelEditor(connector, label, this.edgeless);
   }
 
   override render() {

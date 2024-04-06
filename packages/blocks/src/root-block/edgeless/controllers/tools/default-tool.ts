@@ -26,6 +26,7 @@ import {
   Bound,
   type CanvasElement,
   ConnectorElementModel,
+  ConnectorLabelElementModel,
   type IVec,
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
@@ -43,6 +44,7 @@ import {
 } from '../../utils/query.js';
 import {
   addText,
+  mountConnectorLabelEditor,
   mountFrameTitleEditor,
   mountGroupTitleEditor,
   mountShapeTextEditor,
@@ -135,6 +137,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _setNoneSelectionState() {
     if (this.selection.empty) return;
 
+    const label = this.selection.elements.find(
+      e => e instanceof ConnectorLabelElementModel
+    ) as ConnectorLabelElementModel;
+    if (label) {
+      label.actived = false;
+    }
+
     this.selection.clear();
     resetNativeSelection(null);
   }
@@ -220,7 +229,19 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
     }
 
-    this.selection.set({
+    // select connector label
+    if (selectedIds.length === 1) {
+      const prevElement = this._service.getElementById(selectedIds[0]);
+      if (
+        prevElement &&
+        prevElement instanceof ConnectorLabelElementModel &&
+        prevElement !== element
+      ) {
+        prevElement.actived = false;
+      }
+    }
+
+    const selection = {
       // hold shift key to multi select or de-select element
       elements: e.keys.shift
         ? this.selection.has(element.id)
@@ -228,7 +249,16 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           : [...selectedIds, element.id]
         : [element.id],
       editing: false,
-    });
+    };
+
+    if (
+      selection.elements.length === 1 &&
+      element instanceof ConnectorLabelElementModel
+    ) {
+      element.actived = true;
+    }
+
+    this.selection.set(selection);
   }
 
   private _getSnapAxis(dx: number, dy: number): 'x' | 'y' {
@@ -352,6 +382,17 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       return;
     } else {
       const [modelX, modelY] = this._service.viewport.toModelCoord(e.x, e.y);
+
+      if (selected instanceof ConnectorLabelElementModel) {
+        const connector = this._service.getElementById(
+          selected.connector
+        )! as ConnectorElementModel;
+        mountConnectorLabelEditor(connector, selected, this._edgeless, {
+          x: modelX,
+          y: modelY,
+        });
+        return;
+      }
       if (selected instanceof TextElementModel) {
         mountTextElementEditor(selected, this._edgeless, {
           x: modelX,
@@ -397,6 +438,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     } else {
       const selected = this._pick(e.x, e.y);
       if (selected) {
+        const label = this.selection.elements.find(
+          e => e instanceof ConnectorLabelElementModel
+        ) as ConnectorLabelElementModel;
+        if (label && selected !== label) {
+          label.actived = false;
+        }
+
         this._setSelectionState([selected.id], false);
         return DefaultModeDragType.ContentMoving;
       } else {
@@ -464,14 +512,18 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const h = Math.abs(startY - curY);
     const bound = new Bound(x, y, w, h);
 
-    const elements = service.pickElementsByBound(bound);
+    const pickedElements = service.pickElementsByBound(bound);
 
-    const set = new Set(
-      tools.shiftKey ? [...elements, ...selection.elements] : elements
+    const elements = Array.from(
+      new Set(
+        tools.shiftKey
+          ? [...pickedElements, ...selection.elements]
+          : pickedElements
+      )
     );
 
     this._setSelectionState(
-      Array.from(set).map(element => element.id),
+      elements.map(element => element.id),
       false
     );
 
@@ -606,7 +658,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     );
 
     this._alignBound = this._edgeless.service.snap.setupAlignables(
-      this._toBeMoved
+      this._toBeMoved.filter(e => !(e instanceof ConnectorLabelElementModel))
     );
 
     // If the drag type is selecting, set up the dragging area disposable group
@@ -659,6 +711,32 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
         const dx = (e.x - this._dragStartPos[0]) / zoom;
         const dy = (e.y - this._dragStartPos[1]) / zoom;
+
+        if (
+          this._toBeMoved.length === 1 &&
+          this._toBeMoved[0] instanceof ConnectorLabelElementModel
+        ) {
+          const bounds = this._selectedBounds[0].clone();
+          const x = bounds.x + bounds.w / 2 + dx;
+          const y = bounds.y + bounds.h / 2 + dy;
+          const connector = this._service.getElementById(
+            this._toBeMoved[0].connector
+          )! as ConnectorElementModel;
+          const t = connector.getTimeByPoint({
+            point: [x, y],
+          });
+          const point = connector.getPointByTime({
+            t,
+          });
+          bounds.x = point[0] - bounds.w / 2;
+          bounds.y = point[1] - bounds.h / 2;
+          this._service.updateElement(this._toBeMoved[0].id, {
+            xywh: bounds.serialize(),
+            t,
+          });
+          return;
+        }
+
         const curBound = this._alignBound.clone();
         curBound.x += dx;
         curBound.y += dy;

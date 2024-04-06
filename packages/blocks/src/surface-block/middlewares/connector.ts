@@ -4,6 +4,8 @@ import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
 export function connectorMiddleware(surface: SurfaceBlockModel) {
+  const hasElementById = (id: string) =>
+    surface.hasElementById(id) ?? surface.doc.hasBlockById(id);
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
     (surface.doc.getBlockById(id) as EdgelessModel);
@@ -12,9 +14,9 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
   });
   const updateConnectorPath = (connector: ConnectorElementModel) => {
     if (
-      ((connector.source?.id && getElementById(connector.source.id)) ||
+      ((connector.source?.id && hasElementById(connector.source.id)) ||
         (!connector.source?.id && connector.source?.position)) &&
-      ((connector.target?.id && getElementById(connector.target.id)) ||
+      ((connector.target?.id && hasElementById(connector.target.id)) ||
         (!connector.target?.id && connector.target?.position))
     ) {
       pathGenerator.updatePath(connector);
