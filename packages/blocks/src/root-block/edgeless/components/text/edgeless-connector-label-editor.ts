@@ -13,6 +13,7 @@ import {
   Bound,
   type ConnectorElementModel,
   type ConnectorLabelElementModel,
+  Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 // import { deleteElements } from '../../utils/crud.js';
@@ -26,6 +27,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
   static HORIZONTAL_PADDING = 2;
   static VERTICAL_PADDING = 2;
   static BORDER_WIDTH = 1;
+  static MAX_WIDTH = 280;
 
   static override styles = css`
     .edgeless-connector-text-editor {
@@ -168,13 +170,10 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
     const newWidth = this.inlineEditorContainer.scrollWidth;
     const newHeight = this.inlineEditorContainer.scrollHeight;
-    const midpoint = EdgelessConnectorLabelEditor.getMiddlePosition(
-      connector,
-      label
-    );
+    const point = EdgelessConnectorLabelEditor.getPosition(connector, label.t);
     const bound = new Bound(
-      midpoint[0] - newWidth / 2,
-      midpoint[1] - newHeight / 2,
+      point[0] - newWidth / 2,
+      point[1] - newHeight / 2,
       newWidth,
       newHeight
     );
@@ -183,12 +182,9 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     });
   };
 
-  static getMiddlePosition(
-    element: ConnectorElementModel,
-    label: ConnectorLabelElementModel
-  ) {
-    return element.getPointByTime({
-      t: label.t,
+  static getPosition(connector: ConnectorElementModel, t = 0.5) {
+    return connector.getPointByTime({
+      t,
     });
   }
 
@@ -282,55 +278,48 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
   }
 
   override render() {
-    const {
-      text,
-      fontFamily,
-      fontSize,
-      fontWeight,
-      color,
-      textAlign,
-      rotate,
-      hasMaxWidth,
-      w,
-    } = this.label;
-    assertExists(text);
+    const { connector, label } = this;
+    const { fontFamily, fontSize, fontWeight, color, textAlign, rotate, w, t } =
+      label;
 
     const lineHeight = getLineHeight(fontFamily, fontSize);
-    const rect = getSelectedRect([this.label]);
+    const rect = getSelectedRect([label]);
 
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;
-    const [midX, midY] = EdgelessConnectorLabelEditor.getMiddlePosition(
-      this.connector,
-      this.label
+    const [x, y] = Vec.mul(
+      EdgelessConnectorLabelEditor.getPosition(connector, t),
+      zoom
     );
     // const containerOffset = this.getContainerOffset();
     const transformOperation = [
       'translate(-50%, -50%)',
       `translate(${translateX}px, ${translateY}px)`,
-      `translate(${midX * zoom}px, ${midY * zoom}px)`,
+      `translate(${x}px, ${y}px)`,
       `scale(${zoom})`,
       `rotate(${rotate}deg)`,
       // `translate(${containerOffset})`,
     ];
 
-    const isEmpty = !text.length && !this._isComposition;
+    const isEmpty = !label.text.length && !this._isComposition;
+
+    const maxWidth = Math.max(w, EdgelessConnectorLabelEditor.MAX_WIDTH);
 
     return html`<div
       style=${styleMap({
         transform: transformOperation.join(' '),
-        minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
-        maxWidth: hasMaxWidth ? `${w}px` : 'none',
+        minWidth: `${rect.width}px`,
+        maxWidth: `${maxWidth}px`,
         fontFamily: `"${fontFamily}"`,
         fontSize: `${fontSize}px`,
         fontWeight,
-        color: isCssVariable(color) ? `var(${color})` : color,
         textAlign,
         lineHeight: `${lineHeight}px`,
+        color: isCssVariable(color) ? `var(${color})` : color,
       })}
       class="edgeless-connector-text-editor"
     >
       <rich-text
-        .yText=${text}
+        .yText=${label.text}
         .enableFormat=${false}
         .enableAutoScrollHorizontally=${false}
         .enableAutoScrollVertically=${false}
