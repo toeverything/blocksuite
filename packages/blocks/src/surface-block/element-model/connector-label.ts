@@ -18,6 +18,9 @@ export class ConnectorLabelElementModel extends TextElementModel {
   @yfield()
   override xywh: SerializedXYWH = '[0,0,65,19]';
 
+  @yfield()
+  override hasMaxWidth = true;
+
   // Connector's ID
   @yfield()
   connector!: string;

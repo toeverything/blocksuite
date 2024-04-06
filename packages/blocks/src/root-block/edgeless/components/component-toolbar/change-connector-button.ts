@@ -283,10 +283,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     const connector = this.elements[0];
     assertExists(connector);
     if (!connector.label) {
+      const [x, y] = connector.getPointByTime();
       connector.label = this.service.addElement(
         CanvasElementType.CONNECTOR_LABEL,
         {
           connector: connector.id,
+          xywh: `[${x - 65 / 2},${y - 19 / 2},65,19]`,
         }
       );
     }

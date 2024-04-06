@@ -125,6 +125,9 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   @yfield()
   label?: string;
 
+  // @yfield()
+  // hull?: number;
+
   moveTo(bound: Bound) {
     const oldBound = Bound.deserialize(this.xywh);
     const offset = Vec.sub([bound.x, bound.y], [oldBound.x, oldBound.y]);
@@ -162,9 +165,9 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     return this.absolutePath.some(point => bounds.containsPoint(point));
   }
 
-  override getNearestPoint(point: IVec2): IVec2 {
-    return polyLineNearestPoint(this.absolutePath, point) as IVec2;
-  }
+  // override getNearestPoint(point: IVec2): IVec2 {
+  //   return polyLineNearestPoint(this.absolutePath, point) as IVec2;
+  // }
 
   override intersectWithLine(start: IVec2, end: IVec2) {
     return linePolylineIntersects(start, end, this.absolutePath);
@@ -182,7 +185,11 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     return result;
   }
 
-  getPointByTime({ t = 0.5, bounds }: { t: number; bounds?: Bound }) {
+  getPointByTime(
+    { t, bounds }: { t: number; bounds?: Bound } = {
+      t: 0.5,
+    }
+  ) {
     const { mode, path } = this;
 
     let { x, y } = this;
@@ -245,6 +252,34 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
 
     const b = getBezierParameters(path);
     return getBezierNearestTime(b, rp);
+  }
+
+  override getNearestPoint(point: IVec2) {
+    const { mode, path } = this;
+    const { x, y } = this;
+
+    if (mode === ConnectorMode.Straight) {
+      const first = path[0];
+      const last = path[path.length - 1];
+      return Vec.add(
+        [x, y],
+        Vec.nearestPointOnLineSegment(first, last, point, true)
+      );
+    }
+
+    if (mode === ConnectorMode.Orthogonal) {
+      const points = path.map<IVec2>(p => [p[0], p[1]]);
+      return Polyline.nearestPoint(points, point);
+    }
+
+    const b = getBezierParameters(path);
+    const t = getBezierNearestTime(b, point);
+    const p = getBezierPoint(b, t);
+    if (p) {
+      return p;
+    }
+
+    return [x, y];
   }
 }
 
