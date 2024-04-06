@@ -1,8 +1,7 @@
 import type { ElementModel, IBound } from '../../index.js';
 import type { Renderer } from '../renderer.js';
 import { brush } from './brush/index.js';
-import { connector } from './connector/index.js';
-import { connectorLabel } from './connector/label.js';
+import { connector, connectorLabel } from './connector/index.js';
 import { group } from './group/index.js';
 import { mindmap } from './mindmap.js';
 import { shape } from './shape/index.js';

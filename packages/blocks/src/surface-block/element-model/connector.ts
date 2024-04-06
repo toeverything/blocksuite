@@ -1,14 +1,12 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import type { HitTestOptions } from '../../root-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import { Bound } from '../utils/bound.js';
 import {
   getBezierNearestPoint,
   getBezierNearestTime,
+  getBezierParameters,
   getBezierPoint,
 } from '../utils/curve.js';
-import { getBezierParameters } from '../utils/curve.js';
 import {
   linePolylineIntersects,
   polyLineNearestPoint,
@@ -202,13 +200,13 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     if (mode === ConnectorMode.Orthogonal) {
       const points = path.map<IVec2>(p => [p[0], p[1]]);
       const point = Polyline.pointAt(points, t);
-      assertExists(point);
+      if (!point) return [x, y];
       return Vec.add([x, y], point);
     }
 
     const b = getBezierParameters(path);
     const point = getBezierPoint(b, t);
-    assertExists(point);
+    if (!point) return [x, y];
     return Vec.add([x, y], point);
   }
 
