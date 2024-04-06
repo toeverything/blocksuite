@@ -17,6 +17,7 @@ import type {
   Connection,
   ConnectorElementModel,
 } from './element-model/connector.js';
+import { ConnectorLabelElementModel } from './element-model/connector-label.js';
 import {
   createElementModel,
   createModelFromProps,
@@ -467,6 +468,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
         const connected = [...(this._connectorToElements.get(id) || [])];
 
         connected.forEach(connectedId => removeConnector(connectedId, id));
+        return;
       }
     });
   }
@@ -572,6 +574,17 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this.doc.transact(() => {
       const element = this.getElementById(id)!;
       const group = this.getGroup(id);
+
+      if (element instanceof ConnectorLabelElementModel) {
+        if (this.hasElementById(element.connector)) {
+          const connector = this.getElementById(
+            element.connector
+          )! as ConnectorElementModel;
+          connector.label = undefined;
+        }
+      }
+
+      this.elements.getValue()!.delete(id);
 
       if (element instanceof GroupLikeModel) {
         element.childIds.forEach(childId => {

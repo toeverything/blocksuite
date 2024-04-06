@@ -6,6 +6,8 @@ import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 export const connectorMiddleware: SurfaceMiddleware = (
   surface: SurfaceBlockModel
 ) => {
+  const hasElementById = (id: string) =>
+    surface.hasElementById(id) ?? surface.doc.hasBlockById(id);
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
     (surface.doc.getBlockById(id) as EdgelessModel);
@@ -14,9 +16,9 @@ export const connectorMiddleware: SurfaceMiddleware = (
   });
   const updateConnectorPath = (connector: ConnectorElementModel) => {
     if (
-      ((connector.source?.id && getElementById(connector.source.id)) ||
+      ((connector.source?.id && hasElementById(connector.source.id)) ||
         (!connector.source?.id && connector.source?.position)) &&
-      ((connector.target?.id && getElementById(connector.target.id)) ||
+      ((connector.target?.id && hasElementById(connector.target.id)) ||
         (!connector.target?.id && connector.target?.position))
     ) {
       pathGenerator.updatePath(connector);

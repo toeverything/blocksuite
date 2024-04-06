@@ -75,6 +75,7 @@ export class EdgelessBlockModel<
   implements IEdgelessElement
 {
   connectable = true;
+  resizeable = true;
   rotate = 0;
 
   private _externalXYWH: SerializedXYWH | undefined = undefined;

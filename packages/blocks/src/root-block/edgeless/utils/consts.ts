@@ -1,6 +1,7 @@
 import { LineWidth } from '../../../_common/types.js';
 import {
   DEFAULT_ROUGHNESS,
+  DEFAULT_SEED,
   StrokeStyle,
 } from '../../../surface-block/consts.js';
 
@@ -27,7 +28,7 @@ export const SHAPE_OVERLAY_HEIGHT = 100;
 export const SHAPE_OVERLAY_OFFSET_X = 6;
 export const SHAPE_OVERLAY_OFFSET_Y = 6;
 export const SHAPE_OVERLAY_OPTIONS = {
-  seed: 666,
+  seed: DEFAULT_SEED,
   roughness: DEFAULT_ROUGHNESS,
   strokeStyle: StrokeStyle.Solid,
   strokeLineDash: [] as number[],

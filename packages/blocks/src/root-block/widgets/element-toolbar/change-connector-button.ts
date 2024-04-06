@@ -4,7 +4,6 @@ import '../../edgeless/components/panel/color-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -35,13 +34,15 @@ import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import type { PointStyle } from '../../../surface-block/index.js';
 import {
+  CanvasElementType,
   type ConnectorElementModel,
   ConnectorEndpoint,
+  type ConnectorLabelElementModel,
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
   StrokeStyle,
-} from '../../../surface-block/index.js';
+} from '../../../../surface-block/index.js';
 import type { LineStyleButtonProps } from '../../edgeless/components/buttons/line-style-button.js';
 import {
   type ColorEvent,
@@ -50,7 +51,7 @@ import {
 } from '../../edgeless/components/panel/color-panel.js';
 import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import { mountConnectorTextEditor } from '../../edgeless/utils/text.js';
+import { mountConnectorLabelEditor } from '../../edgeless/utils/text.js';
 
 function getMostCommonColor(
   elements: ConnectorElementModel[]
@@ -277,11 +278,19 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   private _setConnectorText() {
     const connector = this.elements[0];
     assertExists(connector);
-    if (!connector.text) {
-      connector.text = new DocCollection.Y.Text();
+    if (!connector.label) {
+      connector.label = this.service.addElement(
+        CanvasElementType.CONNECTOR_LABEL,
+        {
+          connector: connector.id,
+        }
+      );
     }
-    connector.displayText = false;
-    mountConnectorTextEditor(connector, this.edgeless);
+    const label = this.service.getElementById(
+      connector.label
+    )! as ConnectorLabelElementModel;
+    label.display = false;
+    mountConnectorLabelEditor(connector, label, this.edgeless);
   }
 
   override render() {

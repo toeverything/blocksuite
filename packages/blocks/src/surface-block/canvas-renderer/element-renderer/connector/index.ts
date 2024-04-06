@@ -1,24 +1,15 @@
-import { assertExists } from '@blocksuite/global/utils';
-
-import {
+import type {
   ConnectorElementModel,
-  type LocalConnectorElementModel,
-  type PointStyle,
+  LocalConnectorElementModel,
+  PointStyle,
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
-import { type PointLocation, Vec } from '../../../index.js';
-import { getBezierParameters, getBezierPoint } from '../../../utils/curve.js';
-import { Polyline } from '../../../utils/polyline.js';
-import type { Renderer } from '../../renderer.js';
 import {
-  deltaInsertsToChunks,
-  getFontString,
-  getLineHeight,
-  getTextWidth,
-  isRTL,
-  type TextDelta,
-  wrapTextDeltas,
-} from '../text/utils.js';
+  // deserializeXYWH,
+  type PointLocation,
+} from '../../../index.js';
+import { getBezierParameters } from '../../../utils/curve.js';
+import type { Renderer } from '../../renderer.js';
 import {
   getArrowOptions,
   renderArrow,
@@ -59,14 +50,6 @@ export function connector(
   );
   renderEndpoint(model, points, ctx, renderer, 'Front', frontEndpointStyle);
   renderEndpoint(model, points, ctx, renderer, 'Rear', rearEndpointStyle);
-
-  if (
-    model instanceof ConnectorElementModel &&
-    model.displayText &&
-    model.text?.length
-  ) {
-    renderLabel(matrix, model, ctx, renderer, points);
-  }
 }
 
 function renderPoints(
@@ -161,108 +144,4 @@ function renderEndpoint(
       renderDiamond(location, ctx, rc, arrowOptions);
       break;
   }
-}
-
-function renderLabel(
-  matrix: DOMMatrix,
-  model: ConnectorElementModel,
-  ctx: CanvasRenderingContext2D,
-  renderer: Renderer,
-  path: PointLocation[]
-) {
-  const {
-    mode,
-    color,
-    fontSize,
-    fontWeight,
-    fontStyle,
-    fontFamily,
-    textAlign,
-    // strokeWidth,
-    // rotate,
-  } = model;
-  assertExists(model.text);
-
-  const [, , w, _] = model.deserializedXYWH;
-  const points: [number, number][] = path.map(p => [p[0], p[1]]);
-
-  // const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
-  const font = getFontString({
-    fontStyle,
-    fontWeight,
-    fontSize,
-    fontFamily,
-  });
-  const deltas = wrapTextDeltas(model.text, font, w);
-  const lines = deltaInsertsToChunks(deltas);
-  const lineHeight = getLineHeight(fontFamily, fontSize);
-  const textHeight = (lines.length - 1) * lineHeight * 0.5;
-
-  let x = 0;
-  let y = -textHeight;
-  y += 0.5; // text-editor: border-width / 2
-  if (mode === ConnectorMode.Straight) {
-    const first = points[0];
-    const last = points[path.length - 1];
-    const point = Vec.lrp(first, last, 0.5);
-    x = point[0];
-    y += point[1];
-  } else if (mode === ConnectorMode.Orthogonal) {
-    const point = Polyline.pointAt(points, 0.5);
-    assertExists(point);
-    x = point[0];
-    y += point[1];
-  } else {
-    const b = getBezierParameters(path);
-    const point = getBezierPoint(b, 0.5);
-    assertExists(point);
-    x = point[0];
-    y += point[1];
-  }
-
-  ctx.setTransform(matrix.translate(x, y));
-  ctx.font = font;
-  ctx.textAlign = textAlign;
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = renderer.getVariableColor(color);
-
-  const maxTextWidth = getMaxTextWidth(lines, font);
-
-  for (const [index, line] of lines.entries()) {
-    for (const delta of line) {
-      const str = delta.insert;
-      const rtl = isRTL(str);
-      const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
-      if (shouldTemporarilyAttach) {
-        // to correctly render RTL text mixed with LTR, we have to append it
-        // to the DOM
-        document.body.append(ctx.canvas);
-      }
-
-      ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
-
-      const x =
-        textAlign === 'center'
-          ? 0
-          : textAlign === 'right'
-            ? maxTextWidth * (rtl ? -0.5 : 0.5)
-            : maxTextWidth * (rtl ? 0.5 : -0.5);
-      ctx.fillText(str, x, index * lineHeight, w);
-
-      if (shouldTemporarilyAttach) {
-        ctx.canvas.remove();
-      }
-    }
-  }
-}
-
-function getMaxTextWidth(lines: TextDelta[][], font: string) {
-  return lines.reduce(
-    (width, line) =>
-      line.reduce(
-        (width, delta) => Math.max(width, getTextWidth(delta.insert, font)),
-        width
-      ),
-    0
-  );
 }

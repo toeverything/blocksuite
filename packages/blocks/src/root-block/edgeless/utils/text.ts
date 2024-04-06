@@ -12,13 +12,14 @@ import {
   Bound,
   CanvasElementType,
   type ConnectorElementModel,
+  type ConnectorLabelElementModel,
   type IModelCoord,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
   isTransparent,
 } from '../components/panel/color-panel.js';
-import { EdgelessConnectorTextEditor } from '../components/text/edgeless-connector-text-editor.js';
+import { EdgelessConnectorLabelEditor } from '../components/text/edgeless-connector-label-editor.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
@@ -127,22 +128,20 @@ export function mountGroupTitleEditor(
   });
 }
 
-export function mountConnectorTextEditor(
+export function mountConnectorLabelEditor(
   connector: ConnectorElementModel,
+  label: ConnectorLabelElementModel,
   edgeless: EdgelessRootBlockComponent,
   focusCoord?: IModelCoord
 ) {
-  assertExists(connector.text);
-  let cursorIndex = connector.text.length;
+  let cursorIndex = label.text.length;
   if (focusCoord) {
-    cursorIndex = Math.min(
-      getCursorByCoord(connector, focusCoord),
-      cursorIndex
-    );
+    cursorIndex = Math.min(getCursorByCoord(label, focusCoord), cursorIndex);
   }
 
-  const editor = new EdgelessConnectorTextEditor();
-  editor.element = connector;
+  const editor = new EdgelessConnectorLabelEditor();
+  editor.connector = connector;
+  editor.label = label;
   editor.edgeless = edgeless;
 
   edgeless.rootElementContainer.append(editor);
