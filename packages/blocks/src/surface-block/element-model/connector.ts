@@ -165,9 +165,28 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     return this.absolutePath.some(point => bounds.containsPoint(point));
   }
 
-  // override getNearestPoint(point: IVec2): IVec2 {
-  //   return polyLineNearestPoint(this.absolutePath, point) as IVec2;
-  // }
+  override getNearestPoint(point: IVec2) {
+    const { mode, absolutePath: path } = this;
+
+    if (mode === ConnectorMode.Straight) {
+      const first = path[0];
+      const last = path[path.length - 1];
+      return Vec.nearestPointOnLineSegment(first, last, point, true);
+    }
+
+    if (mode === ConnectorMode.Orthogonal) {
+      const points = path.map<IVec2>(p => [p[0], p[1]]);
+      return Polyline.nearestPoint(points, point);
+    }
+
+    const b = getBezierParameters(path);
+    const t = getBezierNearestTime(b, point);
+    const p = getBezierPoint(b, t);
+    if (p) return p;
+
+    const { x, y } = this;
+    return [x, y];
+  }
 
   override intersectWithLine(start: IVec2, end: IVec2) {
     return linePolylineIntersects(start, end, this.absolutePath);
@@ -247,29 +266,6 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
 
     const b = getBezierParameters(path);
     return getBezierNearestTime(b, point);
-  }
-
-  override getNearestPoint(point: IVec2) {
-    const { mode, absolutePath: path } = this;
-
-    if (mode === ConnectorMode.Straight) {
-      const first = path[0];
-      const last = path[path.length - 1];
-      return Vec.nearestPointOnLineSegment(first, last, point, true);
-    }
-
-    if (mode === ConnectorMode.Orthogonal) {
-      const points = path.map<IVec2>(p => [p[0], p[1]]);
-      return Polyline.nearestPoint(points, point);
-    }
-
-    const b = getBezierParameters(path);
-    const t = getBezierNearestTime(b, point);
-    const p = getBezierPoint(b, t);
-    if (p) return p;
-
-    const { x, y } = this;
-    return [x, y];
   }
 }
 
