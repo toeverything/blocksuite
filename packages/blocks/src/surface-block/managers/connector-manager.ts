@@ -17,6 +17,10 @@ import { ConnectorMode } from '../element-model/connector.js';
 import { AStarRunner } from '../utils/a-star.js';
 import { Bound, getBoundFromPoints } from '../utils/bound.js';
 import {
+  getBezierCurveBoundingBox,
+  getBezierParameters,
+} from '../utils/curve.js';
+import {
   almostEqual,
   clamp,
   getBoundsWithRotation,
@@ -1132,8 +1136,10 @@ export class ConnectorPathGenerator {
     path?: PointLocation[]
   ) {
     const points = path ?? this._generateConnectorPath(connector) ?? [];
-
-    const bound = getBoundFromPoints(points);
+    const bound =
+      connector.mode === ConnectorMode.Curve
+        ? getBezierCurveBoundingBox(getBezierParameters(points))
+        : getBoundFromPoints(points);
     const relativePoints = points.map(p => {
       return p.setVec(Vec.sub(p, [bound.x, bound.y]));
     });
