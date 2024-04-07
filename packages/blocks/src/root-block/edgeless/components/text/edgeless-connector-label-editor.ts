@@ -170,22 +170,18 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
     const newWidth = this.inlineEditorContainer.scrollWidth;
     const newHeight = this.inlineEditorContainer.scrollHeight;
-    const point = EdgelessConnectorLabelEditor.getPosition(connector, label.t);
-    const bound = new Bound(
-      point[0] - newWidth / 2,
-      point[1] - newHeight / 2,
-      newWidth,
-      newHeight
+    const point = Vec.sub(
+      EdgelessConnectorLabelEditor.getPosition(connector, label.time),
+      [newWidth / 2, newHeight / 2]
     );
+    const bounds = new Bound(point[0], point[1], newWidth, newHeight);
     edgeless.service.updateElement(label.id, {
-      xywh: bound.serialize(),
+      xywh: bounds.serialize(),
     });
   };
 
-  static getPosition(connector: ConnectorElementModel, t = 0.5) {
-    return connector.getPointByTime({
-      t,
-    });
+  static getPosition(connector: ConnectorElementModel, time = 0.5) {
+    return connector.getPointByTime(time);
   }
 
   getContainerOffset() {
@@ -279,15 +275,23 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
   override render() {
     const { connector, label } = this;
-    const { fontFamily, fontSize, fontWeight, color, textAlign, rotate, w, t } =
-      label;
+    const {
+      fontFamily,
+      fontSize,
+      fontWeight,
+      color,
+      textAlign,
+      rotate,
+      time,
+      w,
+    } = label;
 
     const lineHeight = getLineHeight(fontFamily, fontSize);
     const rect = getSelectedRect([label]);
 
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;
     const [x, y] = Vec.mul(
-      EdgelessConnectorLabelEditor.getPosition(connector, t),
+      EdgelessConnectorLabelEditor.getPosition(connector, time),
       zoom
     );
     // const containerOffset = this.getContainerOffset();

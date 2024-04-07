@@ -26,9 +26,9 @@ export class ConnectorLabelElementModel extends TextElementModel {
   connector!: string;
 
   // Along the path, 0.5 by default.
-  // `t`: [0, 1];
+  // `time`: [0, 1];
   @yfield(0.5)
-  t!: number;
+  time!: number;
 
   // Background color when `actived`.
   @local()

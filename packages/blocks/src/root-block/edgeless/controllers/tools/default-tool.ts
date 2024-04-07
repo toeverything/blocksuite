@@ -389,13 +389,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       if (selected instanceof ConnectorElementModel) {
         if (!selected.label) {
           const point = selected.getNearestPoint([modelX, modelY]) as IVec2;
-          const t = selected.getTimeByPoint({ point });
+          const time = selected.getTimeByPoint(point);
           selected.label = this._service.addElement(
             CanvasElementType.CONNECTOR_LABEL,
             {
               connector: selected.id,
               xywh: `[${point[0] - 65 / 2},${point[1] - 19 / 2},65,19]`,
-              t,
+              time,
             }
           );
         }
@@ -745,17 +745,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           const connector = this._service.getElementById(
             this._toBeMoved[0].connector
           )! as ConnectorElementModel;
-          const t = connector.getTimeByPoint({
-            point: [x, y],
-          });
-          const point = connector.getPointByTime({
-            t,
-          });
+          const time = connector.getTimeByPoint([x, y]);
+          const point = connector.getPointByTime(time);
           bounds.x = point[0] - bounds.w / 2;
           bounds.y = point[1] - bounds.h / 2;
           this._service.updateElement(this._toBeMoved[0].id, {
             xywh: bounds.serialize(),
-            t,
+            time,
           });
           return;
         }

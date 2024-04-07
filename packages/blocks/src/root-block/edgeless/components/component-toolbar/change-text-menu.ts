@@ -28,10 +28,10 @@ import {
 } from '../../../../surface-block/element-model/common.js';
 import type { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import { TextAlign } from '../../../../surface-block/elements/consts.js';
-import type {
-  ConnectorElementModel,
+import {
+  type ConnectorElementModel,
   ConnectorLabelElementModel,
-  ShapeElementModel,
+  type ShapeElementModel,
 } from '../../../../surface-block/index.js';
 import {
   Bound,
@@ -287,20 +287,19 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _updateElementBound = (element: EdgelessCanvasTextElement) => {
     const elementType = this.elementType;
 
-    if (elementType === CanvasElementType.CONNECTOR_LABEL) {
+    if (
+      elementType === CanvasElementType.CONNECTOR_LABEL &&
+      element instanceof ConnectorLabelElementModel
+    ) {
       // the change of font family will change the bound of the text
       const newBound = normalizeTextBound(
         element as TextElementModel,
         new Bound(element.x, element.y, element.w, element.h)
       );
-
       const connector = this.service.getElementById(
-        (element as ConnectorLabelElementModel).connector
+        element.connector
       )! as ConnectorElementModel;
-
-      const [x, y] = connector.getPointByTime({
-        t: (element as ConnectorLabelElementModel).t,
-      });
+      const [x, y] = connector.getPointByTime(element.time);
       newBound.x = x - newBound.w / 2;
       newBound.y = y - newBound.h / 2;
 

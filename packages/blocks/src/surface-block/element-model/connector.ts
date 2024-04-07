@@ -185,40 +185,8 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     return result;
   }
 
-  getPointByTime(
-    { t, bounds }: { t: number; bounds?: Bound } = {
-      t: 0.5,
-    }
-  ) {
-    const { mode, path } = this;
-
-    let { x, y } = this;
-    if (bounds) {
-      x = bounds.x;
-      y = bounds.y;
-    }
-
-    if (mode === ConnectorMode.Straight) {
-      const first = path[0];
-      const last = path[path.length - 1];
-      return Vec.add([x, y], Vec.lrp(first, last, t));
-    }
-
-    if (mode === ConnectorMode.Orthogonal) {
-      const points = path.map<IVec2>(p => [p[0], p[1]]);
-      const point = Polyline.pointAt(points, t);
-      if (!point) return [x, y];
-      return Vec.add([x, y], point);
-    }
-
-    const b = getBezierParameters(path);
-    const point = getBezierPoint(b, t);
-    if (!point) return [x, y];
-    return Vec.add([x, y], point);
-  }
-
-  getTimeByPoint({ point, bounds }: { point: IVec2; bounds?: Bound }) {
-    const { mode, path } = this;
+  getPointByTime(time = 0.5, bounds?: Bound) {
+    const { mode, absolutePath: path } = this;
 
     let { x, y, w, h } = this;
     if (bounds) {
@@ -228,57 +196,80 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
       h = bounds.h;
     }
 
-    // relatived point
-    const rp = Vec.sub(
-      [Vec.clamp(point[0], x, x + w), Vec.clamp(point[1], y, y + h)],
-      [x, y]
-    );
+    if (mode === ConnectorMode.Straight) {
+      const first = path[0];
+      const last = path[path.length - 1];
+      return Vec.lrp(first, last, time);
+    }
+
+    if (mode === ConnectorMode.Orthogonal) {
+      const points = path.map<IVec2>(p => [p[0], p[1]]);
+      const point = Polyline.pointAt(points, time);
+      if (point) return point;
+      return [x + w / 2, y + h / 2];
+    }
+
+    const b = getBezierParameters(path);
+    const point = getBezierPoint(b, time);
+    if (point) return point;
+    return [x + w / 2, y + h / 2];
+  }
+
+  getTimeByPoint(point: IVec2, bounds?: Bound) {
+    const { mode, absolutePath: path } = this;
+
+    let { x, y, w, h } = this;
+    if (bounds) {
+      x = bounds.x;
+      y = bounds.y;
+      w = bounds.w;
+      h = bounds.h;
+    }
+
+    point[0] = Vec.clamp(point[0], x, x + w);
+    point[1] = Vec.clamp(point[1], y, y + h);
 
     if (mode === ConnectorMode.Straight) {
       const s = path[0];
       const e = path[path.length - 1];
-      const pl = Vec.dist(s, rp);
+      const pl = Vec.dist(s, point);
       const fl = Vec.dist(s, e);
       return pl / fl;
     }
 
     if (mode === ConnectorMode.Orthogonal) {
       const points = path.map<IVec2>(p => [p[0], p[1]]);
-      const p = Polyline.nearestPoint(points, rp as IVec2);
-      const fl = Polyline.len(points);
+      const p = Polyline.nearestPoint(points, point);
       const pl = Polyline.lenAtPoint(points, p);
+      const fl = Polyline.len(points);
       return pl / fl;
     }
 
     const b = getBezierParameters(path);
-    return getBezierNearestTime(b, rp);
+    return getBezierNearestTime(b, point);
   }
 
   override getNearestPoint(point: IVec2) {
-    const { mode, path } = this;
-    const { x, y } = this;
-
-    const offset = [x, y];
-    const rp = Vec.sub(point, offset) as IVec2;
+    const { mode, absolutePath: path } = this;
 
     if (mode === ConnectorMode.Straight) {
       const first = path[0];
       const last = path[path.length - 1];
-      const p = Vec.nearestPointOnLineSegment(first, last, rp, true);
-      return Vec.add(offset, p);
+      return Vec.nearestPointOnLineSegment(first, last, point, true);
     }
 
     if (mode === ConnectorMode.Orthogonal) {
       const points = path.map<IVec2>(p => [p[0], p[1]]);
-      return Vec.add(offset, Polyline.nearestPoint(points, rp));
+      return Polyline.nearestPoint(points, point);
     }
 
     const b = getBezierParameters(path);
-    const t = getBezierNearestTime(b, rp);
+    const t = getBezierNearestTime(b, point);
     const p = getBezierPoint(b, t);
-    if (p) return Vec.add(offset, p);
+    if (p) return p;
 
-    return offset;
+    const { x, y } = this;
+    return [x, y];
   }
 }
 
