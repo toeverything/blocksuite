@@ -13,11 +13,10 @@ import {
   type ElementModel,
   GroupLikeModel,
 } from './element-model/base.js';
-import {
-  type Connection,
+import type {
+  Connection,
   ConnectorElementModel,
 } from './element-model/connector.js';
-import { ConnectorLabelElementModel } from './element-model/connector-label.js';
 import {
   createElementModel,
   createModelFromProps,
@@ -556,20 +555,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.doc.transact(() => {
       const element = this.getElementById(id)!;
-
-      if (element instanceof ConnectorElementModel && element.label) {
-        this.removeElement(element.label);
-      }
-
-      if (element instanceof ConnectorLabelElementModel) {
-        if (this.hasElementById(element.connector)) {
-          const connector = this.getElementById(
-            element.connector
-          )! as ConnectorElementModel;
-          connector.label = undefined;
-          // element.connector = undefined;
-        }
-      }
 
       this.elements.getValue()!.delete(id);
 

@@ -35,10 +35,8 @@ import { LineWidth } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import type { PointStyle } from '../../../../surface-block/index.js';
 import {
-  CanvasElementType,
   type ConnectorElementModel,
   ConnectorEndpoint,
-  type ConnectorLabelElementModel,
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
@@ -282,18 +280,8 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   private _setConnectorText() {
     const connector = this.elements[0];
     assertExists(connector);
-    if (!connector.label) {
-      connector.label = this.service.addElement(
-        CanvasElementType.CONNECTOR_LABEL,
-        {
-          connector: connector.id,
-        }
-      );
-    }
-    const label = this.service.getElementById(
-      connector.label
-    )! as ConnectorLabelElementModel;
-    mountConnectorLabelEditor(connector, label, this.edgeless);
+    const connectorLabel = this.edgeless.upsertConnectorLabel(connector);
+    mountConnectorLabelEditor(connector, connectorLabel, this.edgeless);
   }
 
   override render() {

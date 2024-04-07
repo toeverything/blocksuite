@@ -17,7 +17,6 @@ import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { GroupLikeModel } from '../../../../surface-block/element-model/base.js';
 import {
-  CanvasElementType,
   GroupElementModel,
   MindmapElementModel,
   ShapeElementModel,
@@ -29,7 +28,6 @@ import {
   ConnectorElementModel,
   ConnectorLabelElementModel,
   type IVec,
-  type IVec2,
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import type {
@@ -385,33 +383,22 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     } else {
       const [modelX, modelY] = this._service.viewport.toModelCoord(e.x, e.y);
 
+      let connector;
       let connectorLabel;
       if (selected instanceof ConnectorElementModel) {
-        if (!selected.label) {
-          const point = selected.getNearestPoint([modelX, modelY]) as IVec2;
-          const time = selected.getTimeByPoint(point);
-          selected.label = this._service.addElement(
-            CanvasElementType.CONNECTOR_LABEL,
-            {
-              connector: selected.id,
-              xywh: `[${point[0] - 65 / 2},${point[1] - 19 / 2},65,19]`,
-              time,
-            }
-          );
-        }
-        connectorLabel = this._service.getElementById(
-          selected.label
-        )! as ConnectorLabelElementModel;
-      }
-
-      if (selected instanceof ConnectorLabelElementModel) {
+        connector = selected;
+        connectorLabel = this._edgeless.upsertConnectorLabel(selected, [
+          modelX,
+          modelY,
+        ]);
+      } else if (selected instanceof ConnectorLabelElementModel) {
         connectorLabel = selected;
-      }
-
-      if (connectorLabel) {
-        const connector = this._service.getElementById(
+        connector = this._service.getElementById(
           connectorLabel.connector
         )! as ConnectorElementModel;
+      }
+
+      if (connector && connectorLabel) {
         mountConnectorLabelEditor(connector, connectorLabel, this._edgeless);
         return;
       }

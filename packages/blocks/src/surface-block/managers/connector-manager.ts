@@ -1149,24 +1149,25 @@ export class ConnectorPathGenerator {
     connector.xywh = bound.serialize();
     connector.path = relativePoints;
 
-    if (
-      connector instanceof ConnectorElementModel &&
-      connector.label &&
-      connector.surface.hasElementById(connector.label)
-    ) {
-      const label = connector.surface.getElementById(
-        connector.label
-      )! as ConnectorLabelElementModel;
-      const [x, y] = connector.getPointByTime(
-        label.time,
-        Bound.deserialize(connector.xywh)
-      );
-      const bounds = Bound.fromXYWH(label.deserializedXYWH);
-      bounds.x = x - bounds.w / 2;
-      bounds.y = y - bounds.h / 2;
-      connector.surface.updateElement(label.id, {
-        xywh: bounds.serialize(),
-      });
+    if (connector instanceof ConnectorElementModel) {
+      const id = connector.label;
+      if (id) {
+        if (connector.surface.hasElementById(id)) {
+          const label = connector.surface.getElementById(
+            id
+          )! as ConnectorLabelElementModel;
+          const [x, y] = connector.getPointByTime(label.time, bound);
+          const bounds = Bound.fromXYWH(label.deserializedXYWH);
+          bounds.x = x - bounds.w / 2;
+          bounds.y = y - bounds.h / 2;
+          connector.surface.updateElement(id, {
+            xywh: bounds.serialize(),
+          });
+        } else {
+          // clear
+          connector.label = undefined;
+        }
+      }
     }
 
     connector.updatingPath = false;

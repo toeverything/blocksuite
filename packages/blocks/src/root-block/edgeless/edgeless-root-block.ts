@@ -44,11 +44,17 @@ import type {
   ImageBlockModel,
   ImageBlockProps,
 } from '../../image-block/image-model.js';
-import type { AttachmentBlockProps } from '../../index.js';
+import type {
+  AttachmentBlockProps,
+  ConnectorElementModel,
+} from '../../index.js';
 import {
   Bound,
+  CanvasElementType,
+  type ConnectorLabelElementModel,
   type IBound,
   type IVec,
+  type IVec2,
   normalizeWheelDeltaY,
   serializeXYWH,
   Vec,
@@ -527,6 +533,30 @@ export class EdgelessRootBlockComponent extends BlockElement<
     });
 
     return blockIds;
+  }
+
+  // Update or create Label
+  upsertConnectorLabel(connector: ConnectorElementModel, point?: IVec2) {
+    let label;
+    if (connector.label) {
+      label = this.service.getElementById(connector.label);
+    }
+    if (!label) {
+      const props: Record<string, unknown> = {
+        connector: connector.id,
+      };
+      if (point) {
+        point = connector.getNearestPoint(point) as IVec2;
+        props.xywh = `[${point[0] - 65 / 2},${point[1] - 19 / 2},65,19]`;
+        props.time = connector.getTimeByPoint(point);
+      }
+      connector.label = this.service.addElement(
+        CanvasElementType.CONNECTOR_LABEL,
+        props
+      );
+      label = this.service.getElementById(connector.label)!;
+    }
+    return label as ConnectorLabelElementModel;
   }
 
   /*
