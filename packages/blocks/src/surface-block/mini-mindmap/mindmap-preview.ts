@@ -22,7 +22,7 @@ import type { AffineAIPanelWidget } from '../../root-block/widgets/ai-panel/ai-p
 import type { MindmapElementModel } from '../element-model/mindmap.js';
 import { MindmapStyle } from '../element-model/utils/mindmap/style.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
-import { MindmapRootBlock } from './page-root-block.js';
+import { MindmapRootBlock } from './mindmap-root-block.js';
 import { MiniMindmapSchema, MiniMindmapSpecs } from './spec.js';
 import { MindmapSurfaceBlock } from './surface-block.js';
 
