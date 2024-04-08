@@ -3,7 +3,6 @@ import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
-  type AffineTextAttributes,
   type AIItemConfig,
   type AIItemGroupConfig,
   defaultImageProxyMiddleware,
@@ -15,13 +14,12 @@ import {
   ResetIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { INLINE_ROOT_ATTR } from '@blocksuite/inline/consts';
-import type { InlineRootElement } from '@blocksuite/inline/inline-editor';
 import type { Doc } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 
 import { textRenderer } from '../messages/text.js';
 import type { AffineAIItemConfig, AIActionItem, AIConfig } from '../types.js';
+import { getSelectedTextContent } from '../utils/selection-utils.js';
 
 export function bindEventSource(
   stream: EventSource,
@@ -73,43 +71,14 @@ export function buildAIActionGroups(config: AIConfig): AIItemGroupConfig[] {
     panel: AffineAIPanelWidget
   ): AffineAIPanelWidgetConfig['generateAnswer'] => {
     return ({ input: _input, update, finish, signal }) => {
-      const { selectedBlocks: blocks, currentTextSelection: textSelection } =
-        getSelections(panel.host);
+      const { selectedBlocks: blocks } = getSelections(panel.host);
 
-      if (!blocks || blocks.length === 0) return;
+      if (!blocks || blocks.length === 0 || !item.textToTextStream) return;
 
-      let text = '';
-
-      if (textSelection) {
-        const selectedInlineEditors = blocks.flatMap(el => {
-          const inlineRoot = el.querySelector<
-            InlineRootElement<AffineTextAttributes>
-          >(`[${INLINE_ROOT_ATTR}]`);
-          if (inlineRoot && inlineRoot.inlineEditor.getInlineRange()) {
-            return inlineRoot.inlineEditor;
-          }
-          return [];
-        });
-
-        text = selectedInlineEditors
-          .map(inlineEditor => {
-            const inlineRange = inlineEditor.getInlineRange();
-            if (!inlineRange) return '';
-            const delta = inlineEditor.getDeltaByRangeIndex(inlineRange.index);
-            if (!delta) return '';
-            return delta.insert.slice(
-              inlineRange.index,
-              inlineRange.index + inlineRange.length
-            );
-          })
-          .join('');
-      } else {
-        text = blocks
-          .map(block => block.model.text?.toString() ?? '')
-          .join('\n');
-      }
-      item
-        .textToTextStream?.(panel.host.doc, text)
+      getSelectedTextContent(panel.host)
+        .then(markdown => {
+          return item.textToTextStream!(panel.host.doc, markdown);
+        })
         .then(stream => {
           bindEventSource(stream, { update, finish, signal });
         })
