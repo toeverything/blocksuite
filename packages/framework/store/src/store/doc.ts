@@ -6,11 +6,12 @@ import { Text } from '../reactive/text.js';
 import type { BlockModel } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
-import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
+import { syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
 import type { BlockSelector, YBlock } from './block/index.js';
 import { BlockTree } from './block/index.js';
 import type { DocCollection } from './collection.js';
+import { DocCRUD } from './doc/crud.js';
 import { Space } from './space.js';
 
 export type YBlocks = Y.Map<YBlock>;
@@ -38,6 +39,7 @@ export class Doc extends Space<FlatBlockMap> {
   private readonly _collection: DocCollection;
   private readonly _idGenerator: IdGenerator;
   private readonly _blockTree: BlockTree;
+  private readonly _docCRUD: DocCRUD;
   private _history!: Y.UndoManager;
   private _root: BlockModel | null = null;
   /** Indicate whether the block tree is ready */
@@ -92,6 +94,7 @@ export class Doc extends Space<FlatBlockMap> {
       doc: this,
       schema: collection.schema,
     });
+    this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
   }
 
   get readonly() {
@@ -355,43 +358,17 @@ export class Doc extends Space<FlatBlockMap> {
     if (this.readonly) {
       throw new Error('cannot modify data in readonly mode');
     }
-    if (!flavour) {
-      throw new Error('Block props must contain flavour');
-    }
-    const parentModel =
-      typeof parent === 'string' ? this.getBlockById(parent) : parent;
-
-    this.schema.validate(
-      flavour,
-      parentModel?.flavour,
-      blockProps.children?.map(child => child.flavour)
-    );
 
     const id = blockProps.id ?? this._idGenerator();
-    const clonedProps: BlockSysProps & Partial<BlockProps> = {
-      id,
-      flavour,
-      ...blockProps,
-    };
 
     this.transact(() => {
-      this._blockTree.addBlock(id, flavour, { ...blockProps });
-      // set the yBlock at the very beginning, otherwise yBlock will be always empty
-
-      assertValidChildren(this._yBlocks, clonedProps);
-      const schema = this.getSchemaByFlavour(flavour);
-      assertExists(schema);
-
-      const parentId =
-        parentModel?.id ??
-        (schema.model.role === 'root' ? undefined : this._root?.id);
-
-      if (parentId) {
-        const yParent = this._yBlocks.get(parentId) as YBlock;
-        const yChildren = yParent.get('sys:children') as Y.Array<string>;
-        const index = parentIndex ?? yChildren.length;
-        yChildren.insert(index, [id]);
-      }
+      this._docCRUD.addBlock(
+        id,
+        flavour,
+        { ...blockProps },
+        typeof parent === 'string' ? parent : parent?.id,
+        parentIndex
+      );
     });
 
     return id;
@@ -408,84 +385,12 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    if (!newParent) {
-      return;
-    }
-
-    // A map to store parent block and their respective child blocks
-    const childBlocksPerParent = new Map<BlockModel, BlockModel[]>();
-    blocksToMove.forEach(block => {
-      const parent = this.getParent(block);
-      if (!parent) return;
-
-      this.schema.validate(block.flavour, newParent.flavour);
-
-      const children = childBlocksPerParent.get(parent);
-      if (!children) {
-        childBlocksPerParent.set(parent, [block]);
-        return;
-      }
-
-      const last = children[children.length - 1];
-      if (this.getNextSibling(last) !== block) {
-        throw new Error(
-          'The blocks to move are not contiguous under their parent'
-        );
-      }
-
-      children.push(block);
-      return;
-    });
-
     this.transact(() => {
-      let insertIndex = 0;
-      Array.from(childBlocksPerParent.entries()).forEach(
-        ([parentBlock, blocksToMove], index) => {
-          const targetParentBlock = this._yBlocks.get(newParent.id) as YBlock;
-          const targetParentChildren = targetParentBlock.get(
-            'sys:children'
-          ) as Y.Array<string>;
-          const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
-          const sourceParentChildren = sourceParentBlock.get(
-            'sys:children'
-          ) as Y.Array<string>;
-
-          // Get the IDs of blocks to move
-          const idsOfBlocksToMove = blocksToMove.map(({ id }) => id);
-
-          // Remove the blocks from their current parent
-          const startIndex = sourceParentChildren
-            .toArray()
-            .findIndex(id => id === idsOfBlocksToMove[0]);
-          sourceParentChildren.delete(startIndex, idsOfBlocksToMove.length);
-
-          const updateInsertIndex = () => {
-            const first = index === 0;
-            if (!first) {
-              insertIndex++;
-              return;
-            }
-
-            if (!targetSibling) {
-              insertIndex = targetParentChildren.length;
-              return;
-            }
-
-            const targetIndex = targetParentChildren
-              .toArray()
-              .findIndex(id => id === targetSibling.id);
-            if (targetIndex === -1) {
-              throw new Error('Target sibling not found');
-            }
-            insertIndex = shouldInsertBeforeSibling
-              ? targetIndex
-              : targetIndex + 1;
-          };
-
-          updateInsertIndex();
-
-          targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
-        }
+      this._docCRUD.moveBlocks(
+        blocksToMove.map(model => model.id),
+        newParent.id,
+        targetSibling?.id ?? null,
+        shouldInsertBeforeSibling
       );
     });
   }
@@ -521,16 +426,11 @@ export class Doc extends Space<FlatBlockMap> {
         return;
       }
 
-      // TODO: diff children changes
-      // All child nodes will be deleted in the current behavior, then added again.
-      // Through diff children changes, the experience can be improved.
       if (callBackOrProps.children) {
-        const yChildren = new Y.Array<string>();
-        yChildren.insert(
-          0,
+        this._docCRUD.updateBlockChildren(
+          model.id,
           callBackOrProps.children.map(child => child.id)
         );
-        yBlock.set('sys:children', yChildren);
       }
 
       const schema = this.schema.flavourSchemaMap.get(model.flavour);
@@ -553,18 +453,7 @@ export class Doc extends Space<FlatBlockMap> {
       parent.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
     const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
-    if (props.length > 1) {
-      const blocks: Array<{
-        flavour: string;
-        blockProps: Partial<BlockProps>;
-      }> = [];
-      props.forEach(prop => {
-        const { flavour, ...blockProps } = prop;
-        assertExists(flavour);
-        blocks.push({ flavour, blockProps });
-      });
-      return this.addBlocks(blocks, parent.id, insertIndex);
-    } else {
+    if (props.length <= 1) {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
       const id = this.addBlock(
@@ -575,6 +464,17 @@ export class Doc extends Space<FlatBlockMap> {
       );
       return [id];
     }
+
+    const blocks: Array<{
+      flavour: string;
+      blockProps: Partial<BlockProps>;
+    }> = [];
+    props.forEach(prop => {
+      const { flavour, ...blockProps } = prop;
+      assertExists(flavour);
+      blocks.push({ flavour, blockProps });
+    });
+    return this.addBlocks(blocks, parent.id, insertIndex);
   }
 
   deleteBlock(
@@ -591,75 +491,20 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    const { bringChildrenTo, deleteChildren } = options;
-    if (bringChildrenTo && deleteChildren) {
-      console.error(
-        'Cannot bring children to another block and delete them at the same time'
-      );
-      return;
-    }
-
-    const yModel = this._yBlocks.get(model.id) as YBlock;
-    const yModelChildren = yModel.get('sys:children') as Y.Array<string>;
-
-    const parent = this.getParent(model);
-    assertExists(parent);
-    const yParent = this._yBlocks.get(parent.id) as YBlock;
-    const yParentChildren = yParent.get('sys:children') as Y.Array<string>;
-    const modelIndex = yParentChildren.toArray().indexOf(model.id);
+    const opts = (
+      options && options.bringChildrenTo
+        ? {
+            ...options,
+            bringChildrenTo: options.bringChildrenTo.id,
+          }
+        : options
+    ) as {
+      bringChildrenTo?: string;
+      deleteChildren?: boolean;
+    };
 
     this.transact(() => {
-      if (modelIndex > -1) {
-        yParentChildren.delete(modelIndex, 1);
-      }
-
-      const apply = () => {
-        if (bringChildrenTo) {
-          const bringChildrenToModel = () => {
-            assertExists(bringChildrenTo);
-            // validate children flavour
-            model.children.forEach(child => {
-              this.schema.validate(child.flavour, bringChildrenTo.flavour);
-            });
-
-            if (bringChildrenTo.id === parent.id) {
-              // When bring children to parent, insert children to the original position of model
-              yParentChildren.insert(modelIndex, yModelChildren.toArray());
-              return;
-            }
-
-            const yBringChildrenTo = this._yBlocks.get(
-              bringChildrenTo.id
-            ) as YBlock;
-            const yBringChildrenToChildren = yBringChildrenTo.get(
-              'sys:children'
-            ) as Y.Array<string>;
-            yBringChildrenToChildren.push(yModelChildren.toArray());
-            return;
-          };
-
-          bringChildrenToModel();
-          return;
-        }
-
-        if (deleteChildren) {
-          // delete children recursively
-          const deleteById = (id: string) => {
-            const yBlock = this._yBlocks.get(id) as YBlock;
-
-            const yChildren = yBlock.get('sys:children') as Y.Array<string>;
-            yChildren.forEach(id => deleteById(id));
-
-            this._blockTree.removeBlock(id);
-          };
-
-          yModelChildren.forEach(id => deleteById(id));
-        }
-      };
-
-      apply();
-
-      this._blockTree.removeBlock(model.id);
+      this._docCRUD.deleteBlock(model.id, opts);
     });
   }
 
