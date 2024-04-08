@@ -78,8 +78,6 @@ export const groupRelationMiddleware: SurfaceMiddleware = (
         // remove the child from group when child is removed
         const group = surface.getGroup(id)!;
 
-        console.log('remove', id, group);
-
         group?.removeDescendant(id);
       }),
     surface.elementUpdated
