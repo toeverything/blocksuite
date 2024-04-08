@@ -74,6 +74,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     local: boolean;
   }) => void;
   protected _disposable = new DisposableGroup();
+  protected _id: string;
 
   yMap: Y.Map<unknown>;
   surface!: SurfaceBlockModel;
@@ -115,6 +116,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   }
 
   constructor(options: {
+    id: string;
     yMap: Y.Map<unknown>;
     model: SurfaceBlockModel;
     stashedStore: Map<unknown, unknown>;
@@ -124,8 +126,9 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       local: boolean;
     }) => void;
   }) {
-    const { yMap, model, stashedStore, onChange } = options;
+    const { id, yMap, model, stashedStore, onChange } = options;
 
+    this._id = id;
     this.yMap = yMap;
     this.surface = model;
     this._stashed = stashedStore as Map<keyof Props, unknown>;
@@ -178,7 +181,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   }
 
   get id() {
-    return this.yMap.get('id') as string;
+    return this._id;
   }
 
   get elementBound() {

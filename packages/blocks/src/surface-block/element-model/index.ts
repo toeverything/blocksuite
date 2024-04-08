@@ -54,6 +54,7 @@ export function createElementModel(
 
   let mounted = false;
   const elementModel = new Ctor({
+    id,
     yMap,
     model,
     stashedStore: stashed,
