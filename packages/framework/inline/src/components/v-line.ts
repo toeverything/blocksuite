@@ -53,7 +53,7 @@ export class VLine extends LitElement {
   protected override firstUpdated(): void {
     this.style.display = 'block';
 
-    this.addEventListener('click', e => {
+    this.addEventListener('mousedown', e => {
       if (e.detail >= 3) {
         e.preventDefault();
 
