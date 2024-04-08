@@ -212,7 +212,11 @@ export class AffineAIPanelWidget extends WidgetElement {
       if (prevState === 'hidden') {
         this._selection = this.host.selection.find('text');
         requestAnimationFrame(() => {
-          this.scrollIntoView();
+          this.scrollIntoView({
+            behavior: 'instant',
+            block: 'center',
+            inline: 'center',
+          });
         });
       } else {
         // restore selection

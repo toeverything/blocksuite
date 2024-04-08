@@ -54,13 +54,22 @@ export class AIAnswerText extends LitElement {
 
   private _previewDoc: Doc | null = null;
 
-  override async updated(changedProperties: PropertyValues) {
+  override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
     if (changedProperties.has('answer')) {
-      this._previewDoc = await markDownToDoc(this.host, this.answer);
-      this._previewDoc.awarenessStore.setReadonly(this._previewDoc, true);
-      this.requestUpdate();
+      markDownToDoc(this.host, this.answer)
+        .then(doc => {
+          this._previewDoc = doc;
+          this._previewDoc.awarenessStore.setReadonly(this._previewDoc, true);
+          this.requestUpdate();
+        })
+        .catch(console.error);
     }
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._previewDoc = null;
   }
 
   override render() {
@@ -85,8 +94,9 @@ export const textRenderer: AffineAIPanelWidgetConfig['answerRenderer'] = (
   host: EditorHost,
   answer: string
 ) => {
-  return html`<ai-answer-text
-    .host=${host}
-    .answer=${answer}
-  ></ai-answer-text>`;
+  // Create a new component instance for each answer
+  const element = document.createElement('ai-answer-text') as AIAnswerText;
+  element.host = host;
+  element.answer = answer;
+  return html`${element}`;
 };
