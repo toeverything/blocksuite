@@ -990,3 +990,25 @@ test('markdown shortcut using keyboard util', async ({ page }) => {
     },
   ]);
 });
+
+test('triple click to select line', async ({ page }) => {
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
+
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  await page.waitForTimeout(100);
+  await type(page, 'abc\nabc abc abc\nabc');
+
+  expect(await editorA.innerText()).toBe('abc\nabc abc abc\nabc');
+
+  const rect = await getInlineRangeIndexRect(page, [0, 10]);
+  await page.mouse.click(rect.x, rect.y, {
+    clickCount: 3,
+  });
+  await assertSelection(page, 0, 4, 11);
+
+  await press(page, 'Backspace');
+  expect(await editorA.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nabc');
+});
