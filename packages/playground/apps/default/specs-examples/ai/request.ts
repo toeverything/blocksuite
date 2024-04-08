@@ -1,17 +1,26 @@
-import { CopilotClient } from '@blocksuite/presets';
-import type { Doc } from '@blocksuite/store';
+import { CopilotClient, toTextStream } from '@blocksuite/presets';
 
-export async function textToTextStream(
-  doc: Doc,
-  prompt: string
-): Promise<EventSource> {
+const TIMEOUT = 5000;
+
+export function textToTextStream({
+  docId,
+  workspaceId,
+  prompt,
+}: {
+  docId: string;
+  workspaceId: string;
+  prompt: string;
+}): BlockSuitePresets.TextStream {
   const client = new CopilotClient('http://localhost:3010');
-  const session = await client.createSession({
-    workspaceId: doc.collection.id,
-    docId: doc.id,
-    model: 'Gpt4TurboPreview',
-    promptName: 'Summary',
-  });
-
-  return client.textToTextStream(prompt, session);
+  return {
+    [Symbol.asyncIterator]: async function* () {
+      const session = await client.createSession({
+        workspaceId,
+        docId,
+        promptName: 'Summary', // placeholder
+      });
+      const eventSource = client.textToTextStream(prompt, session);
+      yield* toTextStream(eventSource, { timeout: TIMEOUT });
+    },
+  };
 }

@@ -1,5 +1,10 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { MarkdownAdapter } from '@blocksuite/blocks';
+import {
+  defaultImageProxyMiddleware,
+  MarkdownAdapter,
+  MixTextAdapter,
+  pasteMiddleware,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
@@ -15,19 +20,23 @@ export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
 
   return markdown.file;
 }
+
 export const markdownToSnapshot = async (
   markdown: string,
   host: EditorHost
 ) => {
-  const job = new Job({ collection: host.std.doc.collection });
-  const markdownAdapter = new MarkdownAdapter();
+  const job = new Job({
+    collection: host.std.doc.collection,
+    middlewares: [defaultImageProxyMiddleware, pasteMiddleware(host.std)],
+  });
+  const markdownAdapter = new MixTextAdapter();
   const { blockVersions, workspaceVersion, pageVersion } =
     host.std.doc.collection.meta;
   if (!blockVersions || !workspaceVersion || !pageVersion)
     throw new Error(
       'Need blockVersions, workspaceVersion, pageVersion meta information to get slice'
     );
-
+  markdownAdapter.applyConfigs(job.adapterConfigs);
   const payload = {
     file: markdown,
     assets: job.assetsManager,
@@ -46,6 +55,7 @@ export const markdownToSnapshot = async (
     job,
   };
 };
+
 export async function insertFromMarkdown(
   host: EditorHost,
   markdown: string,
@@ -54,7 +64,7 @@ export async function insertFromMarkdown(
 ) {
   const { snapshot, job } = await markdownToSnapshot(markdown, host);
 
-  const snapshots = snapshot.content[0].children;
+  const snapshots = snapshot.content.flatMap(x => x.children);
 
   const models: BlockModel[] = [];
   for (let i = 0; i < snapshots.length; i++) {
@@ -69,4 +79,15 @@ export async function insertFromMarkdown(
   }
 
   return models;
+}
+
+// FIXME: replace when selection is block is buggy right not
+export async function replaceFromMarkdown(
+  host: EditorHost,
+  markdown: string,
+  parent?: string,
+  index?: number
+) {
+  const { snapshot, job } = await markdownToSnapshot(markdown, host);
+  await job.snapshotToSlice(snapshot, host.doc, parent, index);
 }

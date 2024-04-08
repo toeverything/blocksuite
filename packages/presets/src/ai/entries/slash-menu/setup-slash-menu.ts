@@ -6,13 +6,10 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { handleAskAIAction } from '../../config/builder.js';
-import type { AIConfig } from '../../types.js';
+import { handleAskAIAction } from '../../actions/handler.js';
+import { AIProvider } from '../../provider.js';
 
-export function setupSlashMenuEntry(
-  slashMenu: AffineSlashMenuWidget,
-  { getAskAIStream }: AIConfig
-) {
+export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
   const menus = slashMenu.options.menus.slice();
   menus.unshift({
     name: 'AI',
@@ -34,8 +31,8 @@ export function setupSlashMenuEntry(
             rootElement.model.id
           ) as AffineAIPanelWidget;
           assertExists(affineAIPanelWidget);
-          assertExists(getAskAIStream);
-          handleAskAIAction(affineAIPanelWidget, getAskAIStream);
+          assertExists(AIProvider.actions.chat);
+          handleAskAIAction(affineAIPanelWidget);
         },
       },
     ],

@@ -91,7 +91,6 @@ export class CopilotClient {
   async createSession(options: {
     workspaceId: string;
     docId: string;
-    model: string;
     promptName: string;
   }) {
     const res = await this.graphQLClient.mutate({
