@@ -69,17 +69,14 @@ export class DocCRUD {
     this._yBlocks.set(id, yBlock);
 
     const version = schema.version;
+    const children = (
+      initialProps.children as undefined | (string | BlockModel)[]
+    )?.map(child => (typeof child === 'string' ? child : child.id));
+
     yBlock.set('sys:id', id);
     yBlock.set('sys:flavour', flavour);
     yBlock.set('sys:version', version);
-    yBlock.set(
-      'sys:children',
-      Y.Array.from(
-        (initialProps.children as undefined | (string | BlockModel)[])?.map(
-          child => (typeof child === 'string' ? child : child.id)
-        ) ?? []
-      )
-    );
+    yBlock.set('sys:children', Y.Array.from(children ?? []));
 
     const defaultProps = schema.model.props?.(internalPrimitives) ?? {};
     const props = {
