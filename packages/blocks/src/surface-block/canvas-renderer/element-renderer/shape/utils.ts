@@ -192,10 +192,9 @@ export function updateMindmapNodeRect(shape: ShapeElementModel) {
   const font = getFontString(shape);
 
   if (!shape.text) {
-    return shape.w;
+    return;
   }
 
-  console.log(font, shape.maxWidth, Number.MAX_SAFE_INTEGER);
   const lines = deltaInsertsToChunks(
     wrapTextDeltas(shape.text, font, shape.maxWidth || Number.MAX_SAFE_INTEGER)
   );
