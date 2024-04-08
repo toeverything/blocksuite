@@ -58,6 +58,12 @@ export class DocCRUD {
     const schema = this._schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Could not find schema for flavour ${flavour}`);
 
+    const parentFlavour = parent
+      ? this._yBlocks.get(parent)?.get('sys:flavour')
+      : undefined;
+
+    this._schema.validate(flavour, parentFlavour);
+
     const yBlock = new Y.Map() as YBlock;
     this._yBlocks.set(id, yBlock);
 
@@ -132,6 +138,15 @@ export class DocCRUD {
       if (bringChildrenTo) {
         const bringChildrenToModel = () => {
           assertExists(bringChildrenTo);
+          const model = this._yBlocks.get(bringChildrenTo);
+          if (!model) return;
+          const bringFlavour = model.get('sys:flavour');
+
+          yModelChildren.forEach(child => {
+            const childModel = this._yBlocks.get(child);
+            if (!childModel) return;
+            this._schema.validate(childModel.get('sys:flavour'), bringFlavour);
+          });
 
           if (bringChildrenTo === parent) {
             // When bring children to parent, insert children to the original position of model
