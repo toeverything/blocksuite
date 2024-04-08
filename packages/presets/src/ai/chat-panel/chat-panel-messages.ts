@@ -8,7 +8,6 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { type CopilotClient, textRenderer } from '../../ai/index.js';
 import {
   AffineAvatorIcon,
   AffineIcon,
@@ -18,6 +17,8 @@ import {
   NewBlockIcon,
   ReplaceIcon,
 } from '../_common/icons.js';
+import type { CopilotClient } from '../copilot-client.js';
+import { textRenderer } from '../messages/text.js';
 import type { ChatMessage } from './index.js';
 
 @customElement('chat-panel-messages')
