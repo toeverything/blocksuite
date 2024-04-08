@@ -23,10 +23,12 @@ import {
   type CanvasElement,
   type CanvasElementWithText,
   clamp,
+  ConnectorElementModel,
   deserializeXYWH,
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
+  type PointLocation,
   ShapeElementModel,
   TextElementModel,
 } from '../../../surface-block/index.js';
@@ -266,6 +268,7 @@ export function getSelectableBounds(selected: Selectable[]): Map<
   {
     bound: Bound;
     rotate: number;
+    path?: PointLocation[];
   }
 > {
   const bounds = new Map<
@@ -273,15 +276,25 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     {
       bound: Bound;
       rotate: number;
+      path?: PointLocation[];
     }
   >();
   getElementsWithoutGroup(selected).forEach(ele => {
     const bound = Bound.deserialize(ele.xywh);
-
-    bounds.set(ele.id, {
+    const props: {
+      bound: Bound;
+      rotate: number;
+      path?: PointLocation[];
+    } = {
       bound,
       rotate: ele.rotate,
-    });
+    };
+
+    if (ele instanceof ConnectorElementModel) {
+      props.path = [...ele.absolutePath];
+    }
+
+    bounds.set(ele.id, props);
   });
 
   return bounds;

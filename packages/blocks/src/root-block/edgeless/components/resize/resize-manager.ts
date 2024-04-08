@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { IPoint } from '../../../../_common/types.js';
+import type { PointLocation } from '../../../../surface-block/index.js';
 import {
   Bound,
   getQuadBoundsWithRotation,
@@ -20,6 +21,8 @@ type ResizeMoveHandler = (
     string,
     {
       bound: Bound;
+      scale?: { x: number; y: number };
+      matrix?: DOMMatrix;
     }
   >,
   direction: HandleDirection
@@ -62,6 +65,7 @@ export class HandleResizeManager {
     {
       bound: Bound;
       rotate: number;
+      path?: PointLocation[];
     }
   >();
 
@@ -446,6 +450,8 @@ export class HandleResizeManager {
       string,
       {
         bound: Bound;
+        scale?: { x: number; y: number };
+        matrix?: DOMMatrix;
       }
     >();
 
@@ -484,6 +490,8 @@ export class HandleResizeManager {
               newWidth,
               newHeight
             ),
+            scale,
+            matrix: m2,
           });
         };
       }
