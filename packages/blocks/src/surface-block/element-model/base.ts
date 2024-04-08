@@ -297,6 +297,12 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   serialize() {
     return this.yMap.toJSON();
   }
+
+  /**
+   * `onCreated` function will be executed when
+   * element is created in local rather than remote peers
+   */
+  onCreated() {}
 }
 
 export abstract class GroupLikeModel<

@@ -1,25 +1,30 @@
 import { BlockElement } from '@blocksuite/block-std';
-import { css, html } from 'lit';
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
 
 import type { RootBlockModel } from '../../root-block/root-model.js';
 
-export class MindmapPageBlock extends BlockElement<RootBlockModel> {
-  static override styles = css`
-    .affine-mini-mindmap-root {
-      position: absolute;
-      top: 0;
-      left: 0;
-      contain: size layout style;
-
-      background-color: var(--affine-background-primary-color);
-      background-image: radial-gradient(
-        var(--affine-edgeless-grid-color) 1px,
-        var(--affine-background-primary-color) 1px
-      );
-    }
-  `;
-
+@customElement('mini-mindmap-root-block')
+export class MindmapRootBlock extends BlockElement<RootBlockModel> {
   override render() {
-    return html` <div class="affine-mini-mindmap-root">${this.content}</div> `;
+    return html`
+      <style>
+        .affine-mini-mindmap-root {
+          display: block;
+          width: 100%;
+          height: 100%;
+
+          background-size: 20px 20px;
+          background-color: var(--affine-background-primary-color);
+          background-image: radial-gradient(
+            var(--affine-edgeless-grid-color) 1px,
+            var(--affine-background-primary-color) 1px
+          );
+        }
+      </style>
+      <div class="affine-mini-mindmap-root">
+        ${this.host.renderChildren(this.model)}
+      </div>
+    `;
   }
 }

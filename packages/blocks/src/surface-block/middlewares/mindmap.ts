@@ -70,7 +70,7 @@ export function mindmapMiddleware(surface: SurfaceBlockModel) {
       // Recalculate mindmap connectors when child xywh is updated
       const mindmap = surface.getGroup(id);
       if (mindmap instanceof MindmapElementModel && props['xywh']) {
-        updateConnection(mindmap);
+        updateLayout(mindmap);
       }
 
       /**

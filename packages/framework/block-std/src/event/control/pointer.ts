@@ -79,6 +79,8 @@ export class PointerControl {
       this._pointerDownCount = 1;
     }
 
+    console.log('pointerdown', event);
+
     const pointerEventState = new PointerEventState({
       event,
       rect: this._rect,

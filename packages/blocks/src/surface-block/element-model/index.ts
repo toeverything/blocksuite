@@ -36,6 +36,7 @@ export function createElementModel(
       local: boolean;
     }) => void;
     skipFieldInit?: boolean;
+    newCreate?: boolean;
   }
 ): {
   model: ElementModel;
@@ -80,6 +81,7 @@ export function createElementModel(
     );
     elementModel['_preserved'].clear();
     mounted = true;
+    options.newCreate && elementModel.onCreated();
   };
 
   return {
@@ -167,7 +169,10 @@ export function createModelFromProps(
     id as string,
     yMap,
     model,
-    options
+    {
+      ...options,
+      newCreate: true,
+    }
   );
 
   props = propsToY(type as string, props);

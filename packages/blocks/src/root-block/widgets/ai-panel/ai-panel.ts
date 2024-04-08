@@ -17,7 +17,10 @@ import type {
 } from './components/index.js';
 
 export interface AffineAIPanelWidgetConfig {
-  answerRenderer: (answer: string) => TemplateResult<1>;
+  answerRenderer: (
+    answer: string,
+    state: AffineAIPanelState
+  ) => TemplateResult<1> | typeof nothing;
   generateAnswer: (props: {
     input: string;
     update: (answer: string) => void;
@@ -72,6 +75,8 @@ export class AffineAIPanelWidget extends WidgetElement {
     }
   `;
 
+  ctx: unknown = null;
+
   @property({ attribute: false })
   config: AffineAIPanelWidgetConfig | null = null;
 
@@ -118,7 +123,6 @@ export class AffineAIPanelWidget extends WidgetElement {
     const text = this._inputText;
     assertExists(text);
 
-    this._resetAbortController();
     // reset answer
     this._answer = null;
 
@@ -132,8 +136,6 @@ export class AffineAIPanelWidget extends WidgetElement {
       } else {
         this.state = 'finished';
       }
-
-      this._resetAbortController();
     };
 
     this.state = 'generating';
@@ -214,7 +216,8 @@ export class AffineAIPanelWidget extends WidgetElement {
                   .finish=${false}
                   .config=${config.finishStateConfig}
                 >
-                  ${this.answer && config.answerRenderer(this.answer)}
+                  ${this.answer &&
+                  config.answerRenderer(this.answer, this.state)}
                 </ai-panel-answer>
               `
             : nothing}
@@ -227,7 +230,7 @@ export class AffineAIPanelWidget extends WidgetElement {
         'finished',
         () => html`
           <ai-panel-answer .config=${config.finishStateConfig}>
-            ${this.answer && config.answerRenderer(this.answer)}
+            ${this.answer && config.answerRenderer(this.answer, this.state)}
           </ai-panel-answer>
         `,
       ],

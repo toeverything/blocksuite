@@ -8,5 +8,7 @@ export class MindmapService extends BlockService<RootBlockModel> {
 
   override mounted(): void {}
 
-  center() {}
+  center() {
+    this.requestCenter.emit();
+  }
 }

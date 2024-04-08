@@ -1,3 +1,4 @@
+import { assertType } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
@@ -26,11 +27,19 @@ import {
   mindmapStyleGetters,
 } from './utils/mindmap/style.js';
 
-const nodeSchema = z.record(
-  z.object({
-    parent: z.string().optional(),
-  })
-);
+const baseNodeSchema = z.object({
+  text: z.string(),
+});
+
+type Node = z.infer<typeof baseNodeSchema> & {
+  children?: Node[];
+};
+
+const nodeSchema: z.ZodType<Node> = baseNodeSchema.extend({
+  children: z.lazy(() => nodeSchema.array()).optional(),
+});
+
+type NodeType = z.infer<typeof nodeSchema>;
 
 type MindmapElementProps = BaseProps & {
   nodes: Y.Map<NodeDetail>;
@@ -41,19 +50,52 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     return 'mindmap';
   }
 
+  override onCreated(): void {
+    this.buildTree();
+    this.layout();
+    this.applyStyle();
+  }
+
   pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
     getElementById: (id: string) =>
       this.surface.getElementById(id) ??
       (this.surface.doc.getBlockById(id) as EdgelessModel),
   });
 
-  @convert(initalValue => {
+  @convert((initalValue, instance) => {
     if (!(initalValue instanceof DocCollection.Y.Map)) {
       nodeSchema.parse(initalValue);
-      const map = new DocCollection.Y.Map() as MindmapElementProps['nodes'];
 
-      Object.keys(initalValue).forEach(key => {
-        map.set(key, initalValue[key]);
+      assertType<NodeType>(initalValue);
+
+      const map = new DocCollection.Y.Map() as MindmapElementProps['nodes'];
+      const surface = instance.surface;
+      const doc = surface.doc;
+      const recursive = (
+        node: NodeType,
+        parent: string | null = null,
+        index: string = 'a0'
+      ) => {
+        const id = surface.addElement({
+          type: 'shape',
+          text: node.text,
+          xywh: `[0, 0, 100, 30]`,
+        });
+
+        map.set(id, {
+          index,
+          parent: parent ?? undefined,
+        });
+
+        let curIdx = 'a0';
+        node.children?.forEach(childNode => {
+          recursive(childNode, id, curIdx);
+          curIdx = generateKeyBetween(curIdx, null);
+        });
+      };
+
+      doc.transact(() => {
+        recursive(initalValue);
       });
 
       return map;
@@ -109,6 +151,10 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   private _tree!: MindmapRoot;
 
   private _nodeMap = new Map<string, MindmapNode>();
+
+  get tree() {
+    return this._tree;
+  }
 
   get nodeMap() {
     return this._nodeMap;
@@ -468,6 +514,8 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   }
 
   applyStyle() {
+    console.log('applyStyle', this.style);
+
     this.surface.doc.transact(() => {
       const style = this.styleGetter;
       applyNodeStyle(this._tree, style.root);

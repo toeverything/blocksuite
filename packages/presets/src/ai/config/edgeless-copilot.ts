@@ -1,18 +1,30 @@
 import type { EditorHost } from '@blocksuite/block-std';
-
-import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
-import type { AIItemConfig } from '../../../_common/components/ai-item/types.js';
+import type {
+  AIItemConfig,
+  AIItemGroupConfig,
+  CopilotSelectionController,
+  EdgelessCopilotWidget,
+  EdgelessRootService,
+  MindmapElementModel,
+  SurfaceBlockModel,
+} from '@blocksuite/blocks';
 import {
+  AFFINE_AI_PANEL_WIDGET,
+  AFFINE_EDGELESS_COPILOT_WIDGET,
+  AffineAIPanelWidget,
   AIPenIcon,
   ChatWithAIIcon,
+  ImageBlockModel,
+  InsertBelowIcon,
   MakeItRealIcon,
-} from '../../../_common/icons/ai.js';
-import type { EditorMode } from '../../../_common/types.js';
-import { ImageBlockModel } from '../../../image-block/image-model.js';
-import { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { EdgelessRootService } from '../../../root-block/edgeless/edgeless-root-service.js';
-import { TextElementModel } from '../../../surface-block/index.js';
-import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
+  NoteBlockModel,
+  TextElementModel,
+} from '@blocksuite/blocks';
+import { assertExists, assertType } from '@blocksuite/global/utils';
+
+import { CopilotClient } from '../copilot-client.js';
+import { createMindmapRenderer } from '../message/mindmap.js';
+import { getGenerateAnswer } from '../utils.js';
 
 function showWhen(
   host: EditorHost,
@@ -25,6 +37,14 @@ function showWhen(
   return check(edgelessService);
 }
 
+function getService(host: EditorHost) {
+  const edgelessService = host.spec.getService(
+    'affine:page'
+  ) as EdgelessRootService;
+
+  return edgelessService;
+}
+
 function getSelectedElements(service: EdgelessRootService) {
   return (service.tool.controllers['copilot'] as CopilotSelectionController)
     .selectedElements;
@@ -33,7 +53,7 @@ function getSelectedElements(service: EdgelessRootService) {
 const createMediaPost: AIItemConfig = {
   name: 'Create a social media post',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -52,7 +72,7 @@ const createMediaPost: AIItemConfig = {
 const createImage: AIItemConfig = {
   name: 'Create an image',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host: EditorHost) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -72,7 +92,7 @@ const createImage: AIItemConfig = {
 const createMindmap: AIItemConfig = {
   name: 'Create a mindmap',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host: EditorHost) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -81,9 +101,86 @@ const createMindmap: AIItemConfig = {
         return (
           selected.length === 0 ||
           selected[0] instanceof ImageBlockModel ||
-          selected[0] instanceof NoteBlockModel
+          selected[0] instanceof TextElementModel
         );
       })
+    );
+  },
+  handler: host => {
+    const rootBlockId = host.doc.root?.id;
+    assertExists(rootBlockId);
+
+    const aiPanel = host.view.getWidget(AFFINE_AI_PANEL_WIDGET, rootBlockId);
+    const copilotPanel = host.view.getWidget(
+      AFFINE_EDGELESS_COPILOT_WIDGET,
+      rootBlockId
+    );
+    const selectedElement = getSelectedElements(getService(host))[0];
+
+    if (!(aiPanel instanceof AffineAIPanelWidget) || !selectedElement) return;
+
+    assertType<EdgelessCopilotWidget>(copilotPanel);
+    copilotPanel.hide();
+
+    const selectionRect = copilotPanel.selectionModelRect;
+    const copilotClient = new CopilotClient('http://localhost:3010');
+
+    aiPanel.config = {
+      answerRenderer: createMindmapRenderer(host, aiPanel),
+      generateAnswer: getGenerateAnswer({
+        copilotClient,
+        panel: aiPanel,
+      }),
+
+      finishStateConfig: {
+        responses: [
+          {
+            name: 'Insert',
+            icon: InsertBelowIcon,
+            handler: () => {
+              const [surface] = host.doc.getBlockByFlavour('affine:surface');
+
+              assertType<SurfaceBlockModel>(surface);
+
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const data = aiPanel.ctx as any;
+              aiPanel.hide();
+
+              console.log(data.node, 'mindmap');
+
+              const mindmapId = surface.addElement({
+                type: 'mindmap',
+                children: data.node,
+                style: data.style,
+              });
+              const mindmap = surface.getElementById(
+                mindmapId
+              ) as MindmapElementModel;
+
+              console.log(mindmap.tree);
+
+              host.doc.transact(() => {
+                const rootElement = mindmap.tree.element;
+
+                if (selectionRect) {
+                  rootElement.xywh = `[${selectionRect.x},${selectionRect.y},${rootElement.w},${rootElement.h}]`;
+                }
+              });
+            },
+          },
+        ],
+        actions: [],
+      },
+      errorStateConfig: {
+        upgrade: () => {},
+        responses: [],
+      },
+    };
+
+    aiPanel.toggle(
+      (copilotPanel as EdgelessCopilotWidget)['_selectionRectEl'],
+      `Use the nested unordered list syntax without other extra text style in Markdown to create a structure similar to a mind map without any unnecessary plain text description.
+    Analyze the following questions or topics: "${(selectedElement as TextElementModel).text.toString()}"`
     );
   },
 };
@@ -91,7 +188,7 @@ const createMindmap: AIItemConfig = {
 const createPresentation: AIItemConfig = {
   name: 'Create a presentation',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host: EditorHost) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -110,7 +207,7 @@ const createPresentation: AIItemConfig = {
 const createOutline: AIItemConfig = {
   name: 'Create an outline',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host: EditorHost) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -128,7 +225,7 @@ const createOutline: AIItemConfig = {
 const createStory: AIItemConfig = {
   name: 'Create creative story',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host: EditorHost) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -146,7 +243,7 @@ const createStory: AIItemConfig = {
 const createEssay: AIItemConfig = {
   name: 'Create an essay',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host: EditorHost) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -164,7 +261,7 @@ const createEssay: AIItemConfig = {
 const createSummary: AIItemConfig = {
   name: 'Create a summary from this doc',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host: EditorHost) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -182,7 +279,7 @@ const createSummary: AIItemConfig = {
 const createTitle: AIItemConfig = {
   name: 'Create a title for this doc',
   icon: AIPenIcon,
-  showWhen: (_, editorMode: EditorMode, host: EditorHost) => {
+  showWhen: (_, editorMode, host: EditorHost) => {
     return (
       editorMode === 'edgeless' &&
       showWhen(host, service => {
@@ -197,7 +294,7 @@ const createTitle: AIItemConfig = {
   },
 };
 
-export const dragWithAI = {
+export const draftWithAI = {
   name: 'draft with ai',
   items: [
     createMediaPost,
