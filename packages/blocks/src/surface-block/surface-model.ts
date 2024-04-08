@@ -18,6 +18,8 @@ import type {
   ConnectorElementModel,
 } from './element-model/connector.js';
 import {
+  CanvasElementType,
+  type ConnectorLabelElementModel,
   createElementModel,
   createModelFromProps,
   type ElementModelMap,
@@ -185,6 +187,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _elementToGroup: Map<string, string> = new Map();
   private _connectorToElements: Map<string, string[]> = new Map();
   private _elementToConnector: Map<string, string[]> = new Map();
+  private _connectorToLabel: Map<string, string> = new Map();
 
   /**
    * Hooks is used to attach extra logic when calling `addElement`、`updateElement`(or assign property directly) and `removeElement`.
@@ -424,7 +427,16 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       element: ElementModel,
       type: 'add' | 'remove'
     ) => {
-      if (element.type !== 'connector') return;
+      if (element.type === CanvasElementType.CONNECTOR_LABEL) {
+        if (type === 'add') {
+          const label = element as ConnectorLabelElementModel;
+          label.connectorId = label.connector;
+          this._connectorToLabel.set(label.connector, label.id);
+        }
+        return;
+      }
+
+      if (element.type !== CanvasElementType.CONNECTOR) return;
 
       const connector = element as ConnectorElementModel;
       const connected = [connector.source.id, connector.target.id];
@@ -462,11 +474,24 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       updateConnectorMap(this.getElementById(id.id)!, 'add')
     );
 
-    this.elementRemoved.on(({ id, type }) => {
-      if (type === 'connector') {
+    this.elementRemoved.on(({ id, type, model }) => {
+      if (type === CanvasElementType.CONNECTOR) {
         const connected = [...(this._connectorToElements.get(id) || [])];
 
         connected.forEach(connectedId => removeConnector(connectedId, id));
+
+        // auto remove label
+        const labelId = this._connectorToLabel.get(id);
+        if (labelId) {
+          this.removeElement(labelId);
+          this._connectorToLabel.delete(id);
+        }
+        return;
+      }
+
+      if (type === CanvasElementType.CONNECTOR_LABEL) {
+        const label = model as ConnectorLabelElementModel;
+        this._connectorToLabel.delete(label.connectorId);
         return;
       }
     });
@@ -566,7 +591,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       throw new Error('Cannot remove element in readonly mode');
     }
 
-    if (!this.getElementById(id)) {
+    if (!this.hasElementById(id)) {
       return;
     }
 

@@ -51,6 +51,7 @@ type ConnectorElementProps = BaseProps & {
   rough?: boolean;
   source: Connection;
   target: Connection;
+  label?: string;
 
   frontEndpointStyle?: PointStyle;
   rearEndpointStyle?: PointStyle;

@@ -1,8 +1,13 @@
 import { type SerializedXYWH } from '../utils/xywh.js';
-import { local, yfield } from './decorators.js';
-import { TextElementModel } from './text.js';
+import { derive, local, yfield } from './decorators.js';
+import { TextElementModel, type TextElementProps } from './text.js';
 
-export class ConnectorLabelElementModel extends TextElementModel {
+export type ConnectorLabelElementProps = TextElementProps & {
+  connector: string;
+  time: number;
+};
+
+export class ConnectorLabelElementModel extends TextElementModel<ConnectorLabelElementProps> {
   static MAX_WIDTH = 280;
 
   override get type() {
@@ -17,6 +22,16 @@ export class ConnectorLabelElementModel extends TextElementModel {
     return false;
   }
 
+  private _connectorId!: string;
+
+  get connectorId() {
+    return this._connectorId;
+  }
+
+  set connectorId(id: string) {
+    this._connectorId = id;
+  }
+
   @yfield()
   override xywh: SerializedXYWH = '[0,0,65,19]';
 
@@ -24,6 +39,11 @@ export class ConnectorLabelElementModel extends TextElementModel {
   override hasMaxWidth = true;
 
   // Connector's ID
+  @derive((connectorId: string, _: ConnectorLabelElementModel) => {
+    return {
+      connectorId,
+    };
+  })
   @yfield()
   connector!: string;
 

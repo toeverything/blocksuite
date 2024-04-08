@@ -26,7 +26,7 @@ export function deleteElements(
       if (children.length > 1) {
         surface.doc.deleteBlock(element);
       }
-    } else {
+    } else if (element.id) {
       service.removeElement(element.id);
     }
   });

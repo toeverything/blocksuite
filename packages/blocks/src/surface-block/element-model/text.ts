@@ -29,7 +29,9 @@ export type TextElementProps = BaseProps & {
   hasMaxWidth?: boolean;
 };
 
-export class TextElementModel extends ElementModel<TextElementProps> {
+export class TextElementModel<
+  T extends TextElementProps,
+> extends ElementModel<T> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text as string);
