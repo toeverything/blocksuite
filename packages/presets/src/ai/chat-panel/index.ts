@@ -6,9 +6,9 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
-import { CopilotClient } from '../../ai/index.js';
 import type { AffineEditorContainer } from '../../editors/index.js';
 import { SmallHintIcon } from '../_common/icons.js';
+import { CopilotClient } from '../copilot-client.js';
 import type { ChatPanelMessages } from './chat-panel-messages.js';
 
 export type ChatMessage = {
