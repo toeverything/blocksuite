@@ -28,7 +28,7 @@ export interface AffineAIPanelWidgetConfig {
     answer: string,
     state: AffineAIPanelState
   ) => TemplateResult<1> | typeof nothing;
-  generateAnswer: (props: {
+  generateAnswer?: (props: {
     input: string;
     update: (answer: string) => void;
     finish: (type: 'success' | 'error' | 'aborted') => void;

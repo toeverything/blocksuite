@@ -319,7 +319,7 @@ function buildResponseConfig(panel: AffineAIPanelWidget) {
 
 export function buildAIPanelConfig(
   panel: AffineAIPanelWidget
-): Partial<AffineAIPanelWidgetConfig> {
+): AffineAIPanelWidgetConfig {
   return {
     answerRenderer: textRenderer,
     finishStateConfig: {
