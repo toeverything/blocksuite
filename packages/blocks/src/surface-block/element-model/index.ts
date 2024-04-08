@@ -4,11 +4,8 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 import { ElementModel } from './base.js';
 import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
-import {
-  initializedObservers,
-  initializeWatchers,
-  setCreateState,
-} from './decorators.js';
+import { initializedObservers, initializeWatchers } from './decorators.js';
+import { getDecoratorState } from './decorators/common.js';
 import { GroupElementModel } from './group.js';
 import { MindmapElementModel } from './mindmap.js';
 import { ShapeElementModel } from './shape.js';
@@ -49,8 +46,10 @@ export function createElementModel(
   if (!Ctor) {
     throw new Error(`Invalid element type: ${yMap.get('type')}`);
   }
+  const state = getDecoratorState();
 
-  setCreateState(true, options.skipFieldInit ?? false);
+  state.creating = true;
+  state.skipYfield = options.skipFieldInit ?? false;
 
   let mounted = false;
   const elementModel = new Ctor({
@@ -61,7 +60,8 @@ export function createElementModel(
     onChange: payload => mounted && options.onChange({ id, ...payload }),
   }) as ElementModel;
 
-  setCreateState(false, false);
+  state.creating = false;
+  state.skipYfield = false;
 
   const unmount = () => {
     mounted = false;

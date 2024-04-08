@@ -134,7 +134,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     this._stashed = stashedStore as Map<keyof Props, unknown>;
     this._onChange = onChange;
 
-    // base class properties is initialized before yMap has been set
+    // class properties is initialized before yMap has been set
     // so we need to manually assign the default value here
     this.index = 'a0';
     this.seed = randomSeed();
@@ -218,7 +218,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
           prototype,
           prop as string,
           original,
-          this
+          this as unknown as ElementModel
         );
 
         this._stashed.set(prop, value);
@@ -230,6 +230,16 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
             [prop]: oldValue,
           },
           local: true,
+        });
+
+        this.surface['hooks'].update.emit({
+          id: this.id,
+          props: {
+            [prop]: value,
+          },
+          oldValues: {
+            [prop]: oldValue,
+          },
         });
 
         updateDerivedProp(derivedProps, this as unknown as ElementModel);
@@ -343,6 +353,16 @@ export abstract class GroupLikeModel<
         childIds: oldChildIds,
       },
       local: fromLocal,
+    });
+
+    this.surface['hooks'].update.emit({
+      id: this.id,
+      props: {
+        childIds: value,
+      },
+      oldValues: {
+        childIds: oldChildIds,
+      },
     });
   }
 

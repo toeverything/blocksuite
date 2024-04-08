@@ -411,6 +411,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   }
 
   calcConnection() {
+    this.connectors = new Map();
     const walk = (
       node: MindmapNode,
       layoutDir: LayoutType.LEFT | LayoutType.RIGHT,

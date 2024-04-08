@@ -1,9 +1,11 @@
 import type { EdgelessModel } from '../../root-block/edgeless/type.js';
 import { GroupLikeModel } from '../element-model/base.js';
-import type { SurfaceBlockModel } from '../surface-model.js';
+import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 import type { Bound } from '../utils/bound.js';
 
-export function groupSizeMiddleware(surface: SurfaceBlockModel) {
+export const groupSizeMiddleware: SurfaceMiddleware = (
+  surface: SurfaceBlockModel
+) => {
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
     (surface.doc.getBlockById(id) as EdgelessModel);
@@ -64,15 +66,19 @@ export function groupSizeMiddleware(surface: SurfaceBlockModel) {
   return () => {
     disposables.forEach(d => d.dispose());
   };
-}
+};
 
-export function groupRelationMiddleware(surface: SurfaceBlockModel) {
+export const groupRelationMiddleware: SurfaceMiddleware = (
+  surface: SurfaceBlockModel
+) => {
   const disposables = [
     surface.elementRemoved
       .filter(payload => payload.local)
       .on(({ id }) => {
         // remove the child from group when child is removed
         const group = surface.getGroup(id)!;
+
+        console.log('remove', id, group);
 
         group?.removeDescendant(id);
       }),
@@ -93,4 +99,4 @@ export function groupRelationMiddleware(surface: SurfaceBlockModel) {
   return () => {
     disposables.forEach(d => d.dispose());
   };
-}
+};
