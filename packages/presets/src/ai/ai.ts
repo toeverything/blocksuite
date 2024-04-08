@@ -36,7 +36,7 @@ export function getAISpecs(config: AIConfig) {
               if (view.component instanceof AffineAIPanelWidget) {
                 view.component.config = buildAIPanelConfig(view.component);
                 if (config.getAskAIStream) {
-                  setupSpaceEntry(view.component, config.getAskAIStream);
+                  setupSpaceEntry(view.component, config);
                 }
               }
 
@@ -46,9 +46,7 @@ export function getAISpecs(config: AIConfig) {
               }
 
               if (view.component instanceof AffineSlashMenuWidget) {
-                if (config.getAskAIStream) {
-                  setupSlashMenuEntry(view.component, config.getAskAIStream);
-                }
+                setupSlashMenuEntry(view.component, config);
               }
             })
           );

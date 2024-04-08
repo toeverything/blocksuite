@@ -36,16 +36,33 @@ export interface IModelCoord {
   y: number;
 }
 
-export enum CanvasTextFontFamily {
-  Inter = 'blocksuite:surface:Inter',
-  Kalam = 'blocksuite:surface:Kalam',
-  Satoshi = 'blocksuite:surface:Satoshi',
-  Poppins = 'blocksuite:surface:Poppins',
-  Lora = 'blocksuite:surface:Lora',
-  BebasNeue = 'blocksuite:surface:BebasNeue',
-  OrelegaOne = 'blocksuite:surface:OrelegaOne',
-}
-export const CanvasTextFontFamilies = Object.values(CanvasTextFontFamily);
+export const CanvasTextFontFamily = {
+  Inter: 'blocksuite:surface:Inter',
+  Kalam: 'blocksuite:surface:Kalam',
+  Satoshi: 'blocksuite:surface:Satoshi',
+  Poppins: 'blocksuite:surface:Poppins',
+  Lora: 'blocksuite:surface:Lora',
+  BebasNeue: 'blocksuite:surface:BebasNeue',
+  OrelegaOne: 'blocksuite:surface:OrelegaOne',
+} as const;
+export type CanvasTextFontFamilyKeyType = keyof typeof CanvasTextFontFamily;
+export type CanvasTextFontFamilyValueType =
+  (typeof CanvasTextFontFamily)[CanvasTextFontFamilyKeyType];
+
+export const CanvasTextFontFamilyKey: CanvasTextFontFamilyKeyType[] =
+  Object.keys(CanvasTextFontFamily) as CanvasTextFontFamilyKeyType[];
+export const CanvasTextFontFamilyValue: CanvasTextFontFamilyValueType[] =
+  Object.values(CanvasTextFontFamily);
+
+export const CanvasTextFontFamilyName = {
+  Inter: 'Inter',
+  Kalam: 'Kalam',
+  Satoshi: 'Satoshi',
+  Poppins: 'Poppins',
+  Lora: 'Lora',
+  BebasNeue: 'Bebas Neue',
+  OrelegaOne: 'Orelega One',
+} as const satisfies Record<CanvasTextFontFamilyKeyType, string>;
 
 export enum CanvasTextFontWeight {
   Light = '300',

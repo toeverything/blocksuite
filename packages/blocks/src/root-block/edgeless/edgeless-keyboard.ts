@@ -172,6 +172,15 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
         },
         'Shift-s': () => {
+          if (
+            this.rootElement.service.selection.editing ||
+            !(
+              rootElement.tools.currentController instanceof ShapeToolController
+            )
+          ) {
+            return;
+          }
+
           const attr = rootElement.service.editSession.getLastProps('shape');
 
           const nextShapeType = getNextShapeType(
@@ -187,10 +196,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
           updateShapeProps(nextShapeType, rootElement);
 
-          const controller = rootElement.tools.currentController;
-          if (controller instanceof ShapeToolController) {
-            controller.createOverlay();
-          }
+          const controller = rootElement.tools
+            .currentController as ShapeToolController;
+          controller.createOverlay();
         },
         'Mod-g': ctx => {
           if (
@@ -361,8 +369,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _space(event: KeyboardEvent) {
     /*
-      Call this function with a check for !event.repeat to consider only the first keydown (not repeat). This way, you can use onPressSpaceBar in a tool to determine if the space bar is pressed or not.
-    */
+    Call this function with a check for !event.repeat to consider only the first keydown (not repeat). This way, you can use onPressSpaceBar in a tool to determine if the space bar is pressed or not.
+  */
 
     const edgeless = this.rootElement;
     const selection = edgeless.service.selection;

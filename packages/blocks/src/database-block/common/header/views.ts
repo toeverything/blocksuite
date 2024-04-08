@@ -1,10 +1,13 @@
+import '../component/overflow/overflow.js';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  eventToVRect,
   popFilterableSimpleMenu,
   popMenu,
 } from '../../../_common/components/menu/index.js';
@@ -13,6 +16,7 @@ import {
   AddCursorIcon,
   DeleteIcon,
   DuplicateIcon,
+  MoreHorizontalIcon,
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../_common/icons/index.js';
@@ -33,6 +37,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     }
 
     .database-view-button {
+      height: 100%;
       cursor: pointer;
       padding: 4px 8px;
       border-radius: 4px;
@@ -44,7 +49,6 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     }
 
     .database-view-button .name {
-      display: flex;
       align-items: center;
       height: 22px;
       max-width: 100px;
@@ -73,7 +77,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     return this.viewSource.readonly;
   }
 
-  _addViewMenu(event: MouseEvent) {
+  _addViewMenu = (event: MouseEvent) => {
     popFilterableSimpleMenu(
       event.target as HTMLElement,
       viewManager.all.map(v => {
@@ -90,22 +94,35 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         };
       })
     );
-  }
+  };
 
-  _showMore(event: MouseEvent) {
+  _showMore = (event: MouseEvent) => {
     const views = this.viewSource.views;
     popFilterableSimpleMenu(event.target as HTMLElement, [
-      ...views.map(v => ({
-        type: 'action' as const,
-        icon: html`<uni-lit
-          .uni=${viewRendererManager.getView(v.view.mode).icon}
-        ></uni-lit>`,
-        name: v.view.name,
-        isSelected: this.viewSource.currentViewId === v.view.id,
-        select: () => {
-          this.viewSource.selectView(v.view.id);
-        },
-      })),
+      ...views.map(v => {
+        const openViewOption = (event: MouseEvent) => {
+          event.stopPropagation();
+          this.openViewOption(eventToVRect(event), v.view.id);
+        };
+        return {
+          type: 'action' as const,
+          icon: html`<uni-lit
+            .uni=${viewRendererManager.getView(v.view.mode).icon}
+          ></uni-lit>`,
+          name: v.view.name,
+          isSelected: this.viewSource.currentViewId === v.view.id,
+          select: () => {
+            this.viewSource.selectView(v.view.id);
+          },
+          postfix: html`<div
+            class="dv-hover dv-round-4"
+            @click="${openViewOption}"
+            style="display:flex;align-items:center;"
+          >
+            ${MoreHorizontalIcon}
+          </div>`,
+        };
+      }),
       {
         type: 'group',
         name: '',
@@ -126,13 +143,8 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           }),
       },
     ]);
-  }
-
-  _clickView(event: MouseEvent, id: string) {
-    if (this.viewSource.currentViewId !== id) {
-      this.viewSource.selectView(id);
-      return;
-    }
+  };
+  openViewOption = (target: ReferenceElement, id: string) => {
     if (this.readonly) {
       return;
     }
@@ -142,7 +154,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     if (!view) {
       return;
     }
-    popMenu(event.target as HTMLElement, {
+    popMenu(target, {
       options: {
         input: {
           initValue: view.view.name,
@@ -163,7 +175,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
             select: () => {
               this.closest('affine-data-view-native')
                 ?.querySelector('data-view-header-tools-view-options')
-                ?.clickMoreAction(event);
+                ?.openMoreAction(target);
             },
           },
           {
@@ -218,6 +230,13 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         ],
       },
     });
+  };
+  _clickView(event: MouseEvent, id: string) {
+    if (this.viewSource.currentViewId !== id) {
+      this.viewSource.selectView(id);
+      return;
+    }
+    this.openViewOption(eventToVRect(event), id);
   }
 
   override connectedCallback() {
@@ -229,9 +248,9 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  renderMore() {
+  renderMore = (count: number) => {
     const views = this.viewSource.views;
-    if (views.length <= 3) {
+    if (count === views.length) {
       if (this.readonly) {
         return;
       }
@@ -244,40 +263,42 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     }
     return html`
       <div class="database-view-button dv-hover" @click="${this._showMore}">
-        ${views.length - 3} More
+        ${views.length - count} More
       </div>
     `;
-  }
+  };
+
+  renderViews = () => {
+    const views = this.viewSource.views;
+    return views.map(view => () => {
+      const classList = classMap({
+        'database-view-button': true,
+        'dv-hover': true,
+        active: this.viewSource.currentViewId === view.view.id,
+      });
+      return html`
+        <div
+          class="${classList}"
+          style="margin-right: 4px;"
+          @click="${(event: MouseEvent) =>
+            this._clickView(event, view.view.id)}"
+        >
+          <uni-lit
+            class="icon"
+            .uni="${viewRendererManager.getView(view.view.mode).icon}"
+          ></uni-lit>
+          <div class="name">${view.view.name}</div>
+        </div>
+      `;
+    });
+  };
 
   override render() {
-    const views = this.viewSource.views;
-    const i = views.findIndex(v => v.view.id === this.viewSource.currentViewId);
-    const needShow =
-      i > 2 ? [...views.slice(0, 2), views[i]] : views.slice(0, 3);
     return html`
-      ${repeat(
-        needShow,
-        v => v.view.id,
-        view => {
-          const classList = classMap({
-            'database-view-button': true,
-            'dv-hover': true,
-            active: this.viewSource.currentViewId === view.view.id,
-          });
-          return html` <div
-            class="${classList}"
-            @click="${(event: MouseEvent) =>
-              this._clickView(event, view.view.id)}"
-          >
-            <uni-lit
-              class="icon"
-              .uni="${viewRendererManager.getView(view.view.mode).icon}"
-            ></uni-lit>
-            <div class="name">${view.view.name}</div>
-          </div>`;
-        }
-      )}
-      ${this.renderMore()}
+      <component-overflow
+        .renderItem="${this.renderViews()}"
+        .renderMore="${this.renderMore}"
+      ></component-overflow>
     `;
   }
 }

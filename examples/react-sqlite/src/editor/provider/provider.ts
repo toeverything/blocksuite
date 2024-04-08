@@ -1,4 +1,4 @@
-import { DocCollection, Y, Schema, BlobStorage } from '@blocksuite/store';
+import { DocCollection, type Y, Schema, BlobStorage } from '@blocksuite/store';
 import { Database } from 'sql.js';
 import { client } from './db';
 import { AffineSchemas } from '@blocksuite/blocks';
@@ -63,9 +63,10 @@ export class CollectionProvider {
 
   private static _initEmptyCollection(db: Database) {
     const provider = new CollectionProvider(db);
-    provider.collection = createCollection(db, `${Math.random()}`.slice(2));
+    const id = `${Math.random()}`.slice(2, 12);
+    provider.collection = createCollection(db, id);
     provider._connectCollection();
-    client.insertRoot(db, provider.collection.id);
+    client.insertRoot(db, id);
     createFirstDoc(provider.collection);
     return provider;
   }

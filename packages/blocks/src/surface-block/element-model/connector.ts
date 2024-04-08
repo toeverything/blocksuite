@@ -194,8 +194,8 @@ export class LocalConnectorElementModel extends LocalModel {
   set path(value: PointLocation[]) {
     const { x, y } = this;
 
+    this._path = value;
     this.absolutePath = value.map(p => p.clone().setVec([p[0] + x, p[1] + y]));
-    this._path = this.path;
   }
 
   absolutePath: PointLocation[] = [];

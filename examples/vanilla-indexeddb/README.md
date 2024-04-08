@@ -2,6 +2,8 @@
 
 This example attaches single BlockSuite document with `y-indexeddb`, demonstrating basic provider usage.
 
+Note that here we only save single document in IndexedDB. To persist a doc collection with multiple documents, please refer to the [react-indexeddb](../react-indexeddb/) example.
+
 ## Development
 
 ```sh
