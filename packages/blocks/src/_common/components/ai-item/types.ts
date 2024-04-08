@@ -22,5 +22,5 @@ export interface AIItemConfig {
 
 export interface AISubItemConfig {
   type: string;
-  handler?: () => void;
+  handler?: (host: EditorHost) => void;
 }

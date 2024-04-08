@@ -1,7 +1,7 @@
 import type { Y } from '@blocksuite/store';
 
 import type {
-  CanvasTextFontFamily,
+  CanvasTextFontFamilyValueType,
   CanvasTextFontStyle,
   CanvasTextFontWeight,
   ShapeStyle,
@@ -28,7 +28,7 @@ export interface IShape extends ISurfaceElement {
   text?: Y.Text;
   color?: string;
   fontSize?: SHAPE_TEXT_FONT_SIZE;
-  fontFamily?: CanvasTextFontFamily;
+  fontFamily?: CanvasTextFontFamilyValueType;
   fontWeight?: CanvasTextFontWeight;
   fontStyle?: CanvasTextFontStyle;
   textAlign?: TextAlign;

@@ -2,8 +2,8 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  CanvasTextFontFamilies,
   CanvasTextFontFamily,
+  CanvasTextFontFamilyValue,
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../../../surface-block/consts.js';
@@ -69,7 +69,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
     fontStyle: CanvasTextFontStyle = CanvasTextFontStyle.Normal
   ) {
     // Compatible with old data
-    if (!CanvasTextFontFamilies.includes(this.fontFamily)) return false;
+    if (!CanvasTextFontFamilyValue.includes(this.fontFamily)) return false;
 
     const fontFace = getFontFaces()
       .filter(isSameFontFamily(this.fontFamily))

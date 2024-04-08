@@ -1,52 +1,13 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
 import {
-  AFFINE_AI_PANEL_WIDGET,
-  AffineAIPanelWidget,
-  AIDoneIcon,
   type AIItemGroupConfig,
   AIPenIcon,
   AISearchIcon,
-  type AISubItemConfig,
   ExplainIcon,
-  ImproveWritingIcon,
-  LanguageIcon,
-  LongerIcon,
   MakeItRealIcon,
   matchFlavours,
-  ShorterIcon,
   TagIcon,
-  ToneIcon,
 } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
-
-import { CopilotClient } from '../../copilot-client.js';
-import { textRenderer } from '../../message/text.js';
-import { getGenerateAnswer } from '../../utils.js';
-
-export const translateSubItem: AISubItemConfig[] = [
-  {
-    type: 'English',
-    handler: () => {
-      // TODO: implement the logic to translate to English
-    },
-  },
-  { type: 'Spanish' },
-  { type: 'German' },
-  { type: 'French' },
-  { type: 'Italian' },
-  { type: 'Simplified Chinese' },
-  { type: 'Traditional Chinese' },
-  { type: 'Japanese' },
-  { type: 'Russian' },
-  { type: 'Korean' },
-];
-
-export const toneSubItem: AISubItemConfig[] = [
-  { type: 'professional' },
-  { type: 'informal' },
-  { type: 'friendly' },
-  { type: 'critical' },
-];
 
 // TODO: improve the logic, to make it more accurate
 const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
@@ -74,133 +35,6 @@ const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
 
   const model = selectedModels[0];
   return matchFlavours(model, ['affine:code']);
-};
-
-const DocAIGroup: AIItemGroupConfig = {
-  name: 'doc',
-  items: [
-    {
-      name: 'Summary',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
-      handler: host => {
-        const rootBlockId = host.doc.root?.id;
-        assertExists(rootBlockId);
-        const aiPanel = host.view.getWidget(
-          AFFINE_AI_PANEL_WIDGET,
-          rootBlockId
-        );
-        if (!(aiPanel instanceof AffineAIPanelWidget)) return;
-
-        host.command
-          .chain()
-          .getTextSelection()
-          .getSelectedBlocks()
-          .inline(ctx => {
-            const blocks = ctx.selectedBlocks;
-            if (!blocks || blocks.length === 0) return;
-
-            const text = blocks.reduce((acc, block) => {
-              return acc + block.model.text?.toString();
-            }, '');
-
-            const copilotClient = new CopilotClient('http://localhost:3010');
-
-            aiPanel.config = {
-              answerRenderer: textRenderer,
-              generateAnswer: getGenerateAnswer({
-                copilotClient,
-                panel: aiPanel,
-              }),
-
-              finishStateConfig: {
-                responses: [],
-                actions: [],
-              },
-              errorStateConfig: {
-                upgrade: () => {},
-                responses: [],
-              },
-            };
-            aiPanel.toggle(
-              blocks[0],
-              `
-            Summarize the key points from the following content in a clear and concise manner,
-            suitable for a reader who is seeking a quick understanding of the original content.
-            Ensure to capture the main ideas and any significant details without unnecessary elaboration:
-
-            ${text}
-            `
-            );
-
-            host.selection.clear();
-          })
-          .run();
-      },
-    },
-  ],
-};
-
-const EditAIGroup: AIItemGroupConfig = {
-  name: 'edit',
-  items: [
-    {
-      name: 'Translate to',
-      icon: LanguageIcon,
-      showWhen: textBlockShowWhen,
-      subItem: translateSubItem,
-    },
-    {
-      name: 'Change tone to',
-      icon: ToneIcon,
-      showWhen: textBlockShowWhen,
-      subItem: toneSubItem,
-    },
-    {
-      name: 'Improve writing for it',
-      icon: ImproveWritingIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Improve grammar for it',
-      icon: AIDoneIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Fix spelling for it',
-      icon: AIDoneIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Create headings',
-      icon: AIPenIcon,
-      showWhen: chain => {
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['block', 'text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length === 0) return false;
-
-        return selectedModels.every(
-          model =>
-            matchFlavours(model, ['affine:paragraph', 'affine:list']) &&
-            !model.type.startsWith('h')
-        );
-      },
-    },
-    {
-      name: 'Make longer',
-      icon: LongerIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Make shorter',
-      icon: ShorterIcon,
-      showWhen: textBlockShowWhen,
-    },
-  ],
 };
 
 const DraftAIGroup: AIItemGroupConfig = {
@@ -442,8 +276,6 @@ const OthersAIGroup: AIItemGroupConfig = {
 };
 
 export const AIItemGroups: AIItemGroupConfig[] = [
-  DocAIGroup,
-  EditAIGroup,
   DraftAIGroup,
   MindMapAIGroup,
   CreateAIGroup,

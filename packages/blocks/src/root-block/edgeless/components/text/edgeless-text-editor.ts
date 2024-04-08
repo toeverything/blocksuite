@@ -1,6 +1,10 @@
 import '../../../../_common/components/rich-text/rich-text.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  RangeManager,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -248,6 +252,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     if (!this.element) {
       throw new Error('text element is not set.');
     }
+
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
   }
 
   override firstUpdated(): void {

@@ -1,4 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  RangeManager,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -90,6 +94,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       elements: [this.element.id],
       editing: true,
     });
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
   }
 
   override firstUpdated(): void {

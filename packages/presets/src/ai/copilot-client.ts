@@ -91,7 +91,6 @@ export class CopilotClient {
   async createSession(options: {
     workspaceId: string;
     docId: string;
-    action: boolean;
     model: string;
     promptName: string;
   }) {

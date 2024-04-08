@@ -265,7 +265,6 @@ export class EdgelessRootService extends RootService {
 
     const block = this.doc.getBlockById(id);
     if (block) {
-      const block = this.doc.getBlockById(id)!;
       this.editSession.record(block.flavour as EdgelessElementType, props);
       this.doc.updateBlock(block, props);
     }
