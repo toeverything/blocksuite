@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import { native2Y } from '../../reactive/index.js';
+import type { BlockModel } from '../../schema/index.js';
 import { internalPrimitives, type Schema } from '../../schema/index.js';
 import type { YBlock } from '../block/index.js';
 
@@ -71,7 +72,14 @@ export class DocCRUD {
     yBlock.set('sys:id', id);
     yBlock.set('sys:flavour', flavour);
     yBlock.set('sys:version', version);
-    yBlock.set('sys:children', new Y.Array());
+    yBlock.set(
+      'sys:children',
+      Y.Array.from(
+        (initialProps.children as undefined | (string | BlockModel)[])?.map(
+          child => (typeof child === 'string' ? child : child.id)
+        ) ?? []
+      )
+    );
 
     const defaultProps = schema.model.props?.(internalPrimitives) ?? {};
     const props = {
@@ -81,6 +89,7 @@ export class DocCRUD {
 
     delete props.id;
     delete props.flavour;
+    delete props.children;
 
     Object.entries(props).forEach(([key, value]) => {
       if (value === undefined) return;
