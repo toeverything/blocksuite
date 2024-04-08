@@ -21,7 +21,7 @@ export function groupSizeMiddleware(surface: SurfaceBlockModel) {
 
     group.xywh = bound?.serialize() ?? '[0,0,0,0]';
   };
-  const addGroupUpdateList = (group: GroupLikeModel) => {
+  const addGroupSizeUpdateList = (group: GroupLikeModel) => {
     groupSet.add(group);
 
     if (!pending) {
@@ -42,7 +42,7 @@ export function groupSizeMiddleware(surface: SurfaceBlockModel) {
       const group = surface.getGroup(id);
 
       if (group instanceof GroupLikeModel && props['xywh']) {
-        addGroupUpdateList(group);
+        addGroupSizeUpdateList(group);
       }
     }),
     surface.elementAdded.on(({ id }) => {
@@ -50,10 +50,16 @@ export function groupSizeMiddleware(surface: SurfaceBlockModel) {
       const group = surface.getElementById(id);
 
       if (group instanceof GroupLikeModel) {
-        addGroupUpdateList(group);
+        addGroupSizeUpdateList(group);
       }
     }),
   ];
+
+  surface.elementModels.forEach(model => {
+    if (model instanceof GroupLikeModel) {
+      addGroupSizeUpdateList(model);
+    }
+  });
 
   return () => {
     disposables.forEach(d => d.dispose());

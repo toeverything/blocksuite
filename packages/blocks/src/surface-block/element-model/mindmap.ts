@@ -53,7 +53,6 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   override onCreated(): void {
     this.buildTree();
     this.layout();
-    this.applyStyle();
   }
 
   pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
@@ -404,6 +403,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   }
 
   layout() {
+    if (!this.tree) return;
     this.connectors = new Map();
     this.surface.doc.transact(() => {
       layout(this._tree, this);
@@ -514,8 +514,6 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   }
 
   applyStyle() {
-    console.log('applyStyle', this.style);
-
     this.surface.doc.transact(() => {
       const style = this.styleGetter;
       applyNodeStyle(this._tree, style.root);

@@ -175,7 +175,7 @@ export class StyleThree extends MindmapStyleGetter {
     fontWeight: FontWeight.SemiBold,
     color: '--affine-palette-shape-magenta',
 
-    filled: false,
+    filled: true,
     fillColor: 'transparent',
   };
 

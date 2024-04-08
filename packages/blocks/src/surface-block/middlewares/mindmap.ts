@@ -87,6 +87,12 @@ export function mindmapMiddleware(surface: SurfaceBlockModel) {
     }),
   ];
 
+  surface.elementModels.forEach(model => {
+    if (model instanceof MindmapElementModel) {
+      updateConnection(model);
+    }
+  });
+
   return () => {
     disposables.forEach(disposable => disposable.dispose());
   };
