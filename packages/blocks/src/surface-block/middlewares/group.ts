@@ -72,14 +72,6 @@ export const groupRelationMiddleware: SurfaceMiddleware = (
   surface: SurfaceBlockModel
 ) => {
   const disposables = [
-    surface.elementRemoved
-      .filter(payload => payload.local)
-      .on(({ id }) => {
-        // remove the child from group when child is removed
-        const group = surface.getGroup(id)!;
-
-        group?.removeDescendant(id);
-      }),
     surface.elementUpdated
       .filter(payload => payload.local)
       .on(({ id, props }) => {

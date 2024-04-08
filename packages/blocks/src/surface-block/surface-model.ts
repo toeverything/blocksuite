@@ -571,14 +571,19 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.doc.transact(() => {
       const element = this.getElementById(id)!;
-
-      this.elements.getValue()!.delete(id);
+      const group = this.getGroup(id);
 
       if (element instanceof GroupLikeModel) {
         element.childIds.forEach(childId => {
           this.removeElement(childId);
         });
       }
+
+      if (group) {
+        group.removeDescendant(id);
+      }
+
+      this.elements.getValue()!.delete(id);
 
       this.hooks.remove.emit({
         id,
