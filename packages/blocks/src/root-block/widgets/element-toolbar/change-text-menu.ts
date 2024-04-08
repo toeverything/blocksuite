@@ -294,7 +294,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       // the change of font family will change the bound of the text
       const newBound = normalizeTextBound(
         element as TextElementModel,
-        new Bound(element.x, element.y, element.w, element.h)
+        Bound.deserialize(element.xywh)
       );
       const connector = this.service.getElementById(
         element.connector

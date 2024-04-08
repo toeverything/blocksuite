@@ -12,11 +12,11 @@ import { getLineHeight } from '../../../../surface-block/canvas-renderer/element
 import {
   Bound,
   type ConnectorElementModel,
-  type ConnectorLabelElementModel,
+  ConnectorLabelElementModel,
   Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-// import { deleteElements } from '../../utils/crud.js';
+import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('edgeless-connector-label-editor')
@@ -27,7 +27,6 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
   static HORIZONTAL_PADDING = 2;
   static VERTICAL_PADDING = 2;
   static BORDER_WIDTH = 1;
-  static MAX_WIDTH = 280;
 
   static override styles = css`
     .edgeless-connector-text-editor {
@@ -235,6 +234,10 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
         this.disposables.add(() => {
           label.display = true;
 
+          if (label.text.length === 0) {
+            deleteElements(edgeless.surface, [label]);
+          }
+
           edgeless.service.selection.set({
             elements: [],
             editing: false,
@@ -263,6 +266,9 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
             this.requestUpdate();
           }
         );
+
+        label.display = false;
+        label.actived = false;
       })
       .catch(console.error);
   }
@@ -275,16 +281,8 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
   override render() {
     const { connector, label } = this;
-    const {
-      fontFamily,
-      fontSize,
-      fontWeight,
-      color,
-      textAlign,
-      rotate,
-      time,
-      w,
-    } = label;
+    const { fontFamily, fontSize, fontWeight, color, textAlign, rotate, time } =
+      label;
 
     const lineHeight = getLineHeight(fontFamily, fontSize);
     const rect = getSelectedRect([label]);
@@ -306,13 +304,11 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
     const isEmpty = !label.text.length && !this._isComposition;
 
-    const maxWidth = Math.max(w, EdgelessConnectorLabelEditor.MAX_WIDTH);
-
     return html`<div
       style=${styleMap({
         transform: transformOperation.join(' '),
         minWidth: `${rect.width}px`,
-        maxWidth: `${maxWidth}px`,
+        maxWidth: `${ConnectorLabelElementModel.MAX_WIDTH}px`,
         fontFamily: `"${fontFamily}"`,
         fontSize: `${fontSize}px`,
         fontWeight,

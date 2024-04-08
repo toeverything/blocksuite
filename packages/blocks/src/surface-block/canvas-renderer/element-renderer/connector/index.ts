@@ -196,7 +196,8 @@ export function connectorLabel(
   ctx.textBaseline = 'middle';
   ctx.fillStyle = renderer.getVariableColor(color);
 
-  const maxTextWidth = getMaxTextWidth(lines, font);
+  const maxTextWidth =
+    textAlign === 'center' ? 0 : getMaxTextWidth(lines, font);
 
   for (const [index, line] of lines.entries()) {
     for (const delta of line) {
@@ -212,11 +213,16 @@ export function connectorLabel(
       ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
 
       const x =
-        textAlign === 'center'
-          ? 0
+        maxTextWidth *
+        (textAlign === 'center'
+          ? 1
           : textAlign === 'right'
-            ? maxTextWidth * (rtl ? -0.5 : 0.5)
-            : maxTextWidth * (rtl ? 0.5 : -0.5);
+            ? rtl
+              ? -0.5
+              : 0.5
+            : rtl
+              ? 0.5
+              : -0.5);
       ctx.fillText(str, x + hw, index * lineHeight - textHeight + hh);
 
       if (shouldTemporarilyAttach) {

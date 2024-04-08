@@ -3,6 +3,8 @@ import { local, yfield } from './decorators.js';
 import { TextElementModel } from './text.js';
 
 export class ConnectorLabelElementModel extends TextElementModel {
+  static MAX_WIDTH = 280;
+
   override get type() {
     return 'connector-label';
   }
