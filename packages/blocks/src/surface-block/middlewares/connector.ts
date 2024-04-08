@@ -7,7 +7,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
   surface: SurfaceBlockModel
 ) => {
   const hasElementById = (id: string) =>
-    surface.hasElementById(id) ?? surface.doc.hasBlockById(id);
+    surface.hasElementById(id) || surface.doc.hasBlockById(id);
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
     (surface.doc.getBlockById(id) as EdgelessModel);
