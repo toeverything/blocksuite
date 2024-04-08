@@ -23,7 +23,7 @@ import {
 import { assertExists, assertType } from '@blocksuite/global/utils';
 
 import { CopilotClient } from '../copilot-client.js';
-import { createMindmapRenderer } from '../message/mindmap.js';
+import { createMindmapRenderer } from '../messages/mindmap.js';
 import { getGenerateAnswer } from '../utils.js';
 
 function showWhen(
