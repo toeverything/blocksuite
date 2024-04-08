@@ -82,9 +82,9 @@ export function buildAIActionGroups(config: AIConfig): AIItemGroupConfig[] {
 
       if (textSelection) {
         const selectedInlineEditors = blocks.flatMap(el => {
-          const inlineRoot = el.querySelector<
-            InlineRootElement<AffineTextAttributes>
-          >(`[${INLINE_ROOT_ATTR}]`);
+          const inlineRoot = <InlineRootElement<AffineTextAttributes>>(
+            el.querySelector(`[${INLINE_ROOT_ATTR}]`)
+          );
           if (inlineRoot && inlineRoot.inlineEditor.getInlineRange()) {
             return inlineRoot.inlineEditor;
           }
