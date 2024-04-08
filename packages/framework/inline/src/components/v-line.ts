@@ -13,6 +13,20 @@ export class VLine extends LitElement {
   @property({ attribute: false })
   elements: [TemplateResult<1>, DeltaInsert][] = [];
 
+  get inlineEditor() {
+    const rootElement = this.closest(
+      `[${INLINE_ROOT_ATTR}]`
+    ) as InlineRootElement;
+    assertExists(rootElement, 'v-line must be inside a v-root');
+    const inlineEditor = rootElement.inlineEditor;
+    assertExists(
+      inlineEditor,
+      'v-line must be inside a v-root with inline-editor'
+    );
+
+    return inlineEditor;
+  }
+
   get vElements() {
     return Array.from(this.querySelectorAll('v-element'));
   }
@@ -38,6 +52,19 @@ export class VLine extends LitElement {
 
   protected override firstUpdated(): void {
     this.style.display = 'block';
+
+    this.addEventListener('click', e => {
+      if (e.detail >= 3) {
+        e.preventDefault();
+
+        const range = document.createRange();
+        range.selectNodeContents(this);
+        const selection = window.getSelection();
+        assertExists(selection);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    });
   }
 
   override render() {
@@ -47,16 +74,7 @@ export class VLine extends LitElement {
 
     if (!this.isConnected) return;
 
-    const rootElement = this.closest(
-      `[${INLINE_ROOT_ATTR}]`
-    ) as InlineRootElement;
-    assertExists(rootElement, 'v-line must be inside a v-root');
-    const inlineEditor = rootElement.inlineEditor;
-    assertExists(
-      inlineEditor,
-      'v-line must be inside a v-root with inline-editor'
-    );
-
+    const inlineEditor = this.inlineEditor;
     const renderElements = this.elements.flatMap(([template, delta], index) => {
       if (inlineEditor.isEmbed(delta)) {
         if (delta.insert.length !== 1) {
