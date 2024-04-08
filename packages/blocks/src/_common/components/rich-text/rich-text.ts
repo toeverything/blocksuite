@@ -42,6 +42,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       cursor: text;
     }
 
+    .inline-editor.readonly {
+      cursor: default;
+    }
+
     rich-text .nowrap-lines {
       overflow-x: auto;
     }
@@ -379,6 +383,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     const classes = classMap({
       'inline-editor': true,
       'nowrap-lines': !this.wrapText,
+      readonly: this.readonly,
     });
 
     return html`<div class=${classes}></div>`;

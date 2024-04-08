@@ -10,7 +10,13 @@ import { RangeBinding } from './range-binding.js';
  * CRUD for Range and TextSelection
  */
 export class RangeManager {
+  /**
+   * Used to mark certain elements so that they are excluded when synchronizing the native range and text selection (such as database block).
+   */
   static rangeSyncExcludeAttr = 'data-range-sync-exclude';
+  /**
+   * Used to exclude certain elements when using `getSelectedBlockElementsByRange`.
+   */
   static rangeQueryExcludeAttr = 'data-range-query-exclude';
 
   readonly binding = new RangeBinding(this);
@@ -216,8 +222,7 @@ export class RangeManager {
     if (!el) return null;
     const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
     if (!block) return null;
-    if (block.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
-      return null;
+    if (this._isRangeSyncExcluded(block)) return null;
     return block;
   }
   getClosestInlineEditor(node: Node) {
@@ -226,9 +231,7 @@ export class RangeManager {
     const inlineRoot = el.closest<InlineRootElement>(`[${INLINE_ROOT_ATTR}]`);
     if (!inlineRoot) return null;
 
-    // check range exclude attr
-    const closestBlock = this.getClosestBlock(inlineRoot);
-    if (!closestBlock) return null;
+    if (this._isRangeSyncExcluded(inlineRoot)) return null;
 
     return inlineRoot.inlineEditor;
   }
@@ -242,10 +245,12 @@ export class RangeManager {
     );
     if (!inlineRoot) return null;
 
-    // check range exclude attr
-    const closestBlock = this.getClosestBlock(inlineRoot);
-    if (!closestBlock) return null;
+    if (this._isRangeSyncExcluded(inlineRoot)) return null;
 
     return inlineRoot.inlineEditor;
+  }
+
+  private _isRangeSyncExcluded(el: Element) {
+    return !!el.closest(`[${RangeManager.rangeSyncExcludeAttr}="true"]`);
   }
 }

@@ -230,6 +230,7 @@ export class ParagraphBlockComponent extends BlockElement<
       return;
 
     if (
+      this.doc.readonly ||
       this.inlineEditor.yTextLength > 0 ||
       this.inlineEditor.isComposing ||
       !this.selected ||
