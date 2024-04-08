@@ -468,7 +468,7 @@ export function normalizeTextBound(
     attributes: delta.attributes,
   })) as TextDelta[];
   lines = deltaInsertsToChunks(insertDeltas);
-  if (!dragging && !text.hasMaxWidth) {
+  if (!dragging) {
     lines = deltaInsertsToChunks(deltas);
     const widestLineWidth = Math.max(
       ...yText
