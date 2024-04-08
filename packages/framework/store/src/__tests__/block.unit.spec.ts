@@ -6,7 +6,7 @@ import {
   Schema,
   type SchemaToModel,
 } from '../schema/index.js';
-import { Block } from '../store/block/block.js';
+import { Block, type YBlock } from '../store/block/block.js';
 import { DocCollection, Generator } from '../store/index.js';
 
 const pageSchema = defineBlockSchema({
@@ -42,7 +42,7 @@ function createTestDoc(docId = defaultDocId) {
 test('init block without props should add default props', () => {
   const doc = createTestDoc();
   const yDoc = new Y.Doc();
-  const yBlock = yDoc.getMap('yBlock');
+  const yBlock = yDoc.getMap('yBlock') as YBlock;
   yBlock.set('sys:id', '0');
   yBlock.set('sys:flavour', 'page');
   yBlock.set('sys:children', new Y.Array());
