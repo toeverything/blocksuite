@@ -90,98 +90,21 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     this._keeping = keeping;
   }
 
-  getCoordsOnRightAlign(
-    rect: { w: number; h: number; r: number; x: number; y: number },
-    w1: number,
-    h1: number
-  ): { x: number; y: number } {
-    const centerX = rect.x + rect.w / 2;
-    const centerY = rect.y + rect.h / 2;
-
-    let deltaXPrime =
-      (rect.w / 2) * Math.cos(rect.r) - (-rect.h / 2) * Math.sin(rect.r);
-    let deltaYPrime =
-      (rect.w / 2) * Math.sin(rect.r) + (-rect.h / 2) * Math.cos(rect.r);
-
-    const vX = centerX + deltaXPrime;
-    const vY = centerY + deltaYPrime;
-
-    deltaXPrime = (w1 / 2) * Math.cos(rect.r) - (-h1 / 2) * Math.sin(rect.r);
-    deltaYPrime = (w1 / 2) * Math.sin(rect.r) + (-h1 / 2) * Math.cos(rect.r);
-
-    const newCenterX = vX - deltaXPrime;
-    const newCenterY = vY - deltaYPrime;
-
-    return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
-  }
-
-  getCoordsOnCenterAlign(
-    rect: { w: number; h: number; r: number; x: number; y: number },
-    w1: number,
-    h1: number
-  ): { x: number; y: number } {
-    const centerX = rect.x + rect.w / 2;
-    const centerY = rect.y + rect.h / 2;
-
-    let deltaXPrime = 0;
-    let deltaYPrime = (-rect.h / 2) * Math.cos(rect.r);
-
-    const vX = centerX + deltaXPrime;
-    const vY = centerY + deltaYPrime;
-
-    deltaXPrime = 0;
-    deltaYPrime = (-h1 / 2) * Math.cos(rect.r);
-
-    const newCenterX = vX - deltaXPrime;
-    const newCenterY = vY - deltaYPrime;
-
-    return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
-  }
-
-  getCoordsOnLeftAlign(
-    rect: { w: number; h: number; r: number; x: number; y: number },
-    w1: number,
-    h1: number
-  ): { x: number; y: number } {
-    const cX = rect.x + rect.w / 2;
-    const cY = rect.y + rect.h / 2;
-
-    let deltaXPrime =
-      (-rect.w / 2) * Math.cos(rect.r) + (rect.h / 2) * Math.sin(rect.r);
-    let deltaYPrime =
-      (-rect.w / 2) * Math.sin(rect.r) - (rect.h / 2) * Math.cos(rect.r);
-
-    const vX = cX + deltaXPrime;
-    const vY = cY + deltaYPrime;
-
-    deltaXPrime = (-w1 / 2) * Math.cos(rect.r) + (h1 / 2) * Math.sin(rect.r);
-    deltaYPrime = (-w1 / 2) * Math.sin(rect.r) - (h1 / 2) * Math.cos(rect.r);
-
-    const newCenterX = vX - deltaXPrime;
-    const newCenterY = vY - deltaYPrime;
-
-    return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
-  }
-
   private _updateLabelRect = () => {
     const { connector, edgeless, label } = this;
     if (!connector || !edgeless || !label) return;
 
     const newWidth = this.inlineEditorContainer.scrollWidth;
     const newHeight = this.inlineEditorContainer.scrollHeight;
-    const point = Vec.sub(
-      EdgelessConnectorLabelEditor.getPosition(connector, label.time),
-      [newWidth / 2, newHeight / 2]
-    );
+    const point = Vec.sub(connector.getPointByTime(label.time), [
+      newWidth / 2,
+      newHeight / 2,
+    ]);
     const bounds = new Bound(point[0], point[1], newWidth, newHeight);
     edgeless.service.updateElement(label.id, {
       xywh: bounds.serialize(),
     });
   };
-
-  static getPosition(connector: ConnectorElementModel, time = 0.5) {
-    return connector.getPointByTime(time);
-  }
 
   getContainerOffset() {
     const { VERTICAL_PADDING, HORIZONTAL_PADDING, BORDER_WIDTH } =
@@ -288,10 +211,7 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     const rect = getSelectedRect([label]);
 
     const { translateX, translateY, zoom } = this.edgeless.service.viewport;
-    const [x, y] = Vec.mul(
-      EdgelessConnectorLabelEditor.getPosition(connector, time),
-      zoom
-    );
+    const [x, y] = Vec.mul(connector.getPointByTime(time), zoom);
     // const containerOffset = this.getContainerOffset();
     const transformOperation = [
       'translate(-50%, -50%)',
