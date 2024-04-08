@@ -2,9 +2,9 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { EdgelessRootService } from '@blocksuite/blocks';
 import type { BlockSnapshot } from '@blocksuite/store';
 
-import { basicTheme } from '../copilot-panel/chat/template.js';
-import { markdownToSnapshot } from '../copilot-panel/utils/markdown-utils.js';
-import { getSurfaceElementFromEditor } from '../copilot-panel/utils/selection-utils.js';
+import { markdownToSnapshot } from '../_common/markdown-utils.js';
+import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
+import { basicTheme } from '../slides/template.js';
 
 type PPTSection = {
   title: string;
@@ -21,7 +21,7 @@ type PPTDoc = {
 export const PPTBuilder = (host: EditorHost) => {
   const service = host.spec.getService<EdgelessRootService>('affine:page');
   const docs: PPTDoc[] = [];
-
+  let done = false;
   const addDoc = async (block: BlockSnapshot) => {
     const sections = block.children.map(v => {
       const title = getText(v);
@@ -39,8 +39,13 @@ export const PPTBuilder = (host: EditorHost) => {
       sections,
     };
     docs.push(doc);
+
+    if (doc.sections.length !== 3 || doc.isCover) return;
+    if (done) return;
+    done = true;
     const job = service.createTemplateJob('template');
     const { images, content } = await basicTheme(doc);
+
     if (images.length) {
       await Promise.all(
         images.map(({ id, url }) =>

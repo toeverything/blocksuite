@@ -42,6 +42,8 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
             .catch(console.error);
         })
     );
+
+    this.toggleDisplay();
   }
 
   override render() {

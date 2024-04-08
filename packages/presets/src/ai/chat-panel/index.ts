@@ -78,7 +78,10 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   sessionId!: string;
 
   @state()
-  messages: ChatMessage[] = [];
+  messages: ChatMessage[] = [
+    { role: 'user', content: 'hello' },
+    { role: 'assistant', content: 'hi' },
+  ];
 
   @state()
   status: ChatStatus = 'idle';
@@ -98,7 +101,6 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       sessitonId = await this._copilotClient.createSession({
         workspaceId: editor.doc.collection.id,
         docId: editor.doc.id,
-        action: false,
         model: 'Gpt35Turbo',
         promptName: '',
       });
