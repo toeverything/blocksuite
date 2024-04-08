@@ -599,8 +599,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       const element = this.getElementById(id)!;
       const group = this.getGroup(id);
 
-      this.elements.getValue()!.delete(id);
-
       if (element instanceof GroupLikeModel) {
         element.childIds.forEach(childId => {
           if (this.hasElementById(childId)) {
