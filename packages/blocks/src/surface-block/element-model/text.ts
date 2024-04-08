@@ -30,7 +30,7 @@ export type TextElementProps = BaseProps & {
 };
 
 export class TextElementModel<
-  T extends TextElementProps,
+  T extends TextElementProps = TextElementProps,
 > extends ElementModel<T> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
