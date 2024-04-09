@@ -24,7 +24,10 @@ import type {
 } from './components/index.js';
 
 export interface AffineAIPanelWidgetConfig {
-  answerRenderer: (answer: string) => TemplateResult<1>;
+  answerRenderer: (
+    answer: string,
+    state: AffineAIPanelState
+  ) => TemplateResult<1> | typeof nothing;
   generateAnswer?: (props: {
     input: string;
     update: (answer: string) => void;
@@ -79,6 +82,8 @@ export class AffineAIPanelWidget extends WidgetElement {
     }
   `;
 
+  ctx: unknown = null;
+
   @property({ attribute: false })
   config: AffineAIPanelWidgetConfig | null = null;
 
@@ -87,6 +92,8 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   @query('.mock-selection-container')
   mockSelectionContainer!: HTMLDivElement;
+
+  private _stopAutoUpdate?: undefined | (() => void);
 
   toggle = (reference: ReferenceElement, input?: string) => {
     if (input) {
@@ -98,26 +105,26 @@ export class AffineAIPanelWidget extends WidgetElement {
       this.state = 'input';
     }
 
-    this._abortController.signal.addEventListener(
-      'abort',
-      autoUpdate(reference, this, () => {
-        computePosition(reference, this, {
-          placement: 'bottom-start',
-        })
-          .then(({ x, y }) => {
-            this.style.left = `${x}px`;
-            this.style.top = `${y}px`;
-          })
-          .catch(console.error);
+    this._stopAutoUpdate?.();
+    this._stopAutoUpdate = autoUpdate(reference, this, () => {
+      computePosition(reference, this, {
+        placement: 'bottom-start',
       })
-    );
+        .then(({ x, y }) => {
+          this.style.left = `${x}px`;
+          this.style.top = `${y}px`;
+        })
+        .catch(console.error);
+    });
   };
 
   hide = () => {
     this._resetAbortController();
+    this._stopAutoUpdate?.();
     this.state = 'hidden';
     this._inputText = null;
     this._answer = null;
+    this._stopAutoUpdate = undefined;
   };
 
   /**
@@ -130,6 +137,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     assertExists(this.config.generateAnswer);
 
     this._resetAbortController();
+
     // reset answer
     this._answer = null;
 
@@ -269,7 +277,8 @@ export class AffineAIPanelWidget extends WidgetElement {
                   .finish=${false}
                   .config=${config.finishStateConfig}
                 >
-                  ${this.answer && config.answerRenderer(this.answer)}
+                  ${this.answer &&
+                  config.answerRenderer(this.answer, this.state)}
                 </ai-panel-answer>
               `
             : nothing}
@@ -282,7 +291,7 @@ export class AffineAIPanelWidget extends WidgetElement {
         'finished',
         () => html`
           <ai-panel-answer .config=${config.finishStateConfig}>
-            ${this.answer && config.answerRenderer(this.answer)}
+            ${this.answer && config.answerRenderer(this.answer, this.state)}
           </ai-panel-answer>
         `,
       ],

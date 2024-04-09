@@ -9,9 +9,11 @@ import {
   deltaInsertsToChunks,
   getFontString,
   getLineHeight,
+  getLineWidth,
   getTextWidth,
   type TextDelta,
   wrapText,
+  wrapTextDeltas,
 } from '../text/utils.js';
 
 export const SHAPE_TEXT_PADDING = 20;
@@ -184,4 +186,33 @@ export function normalizeShapeBound(
   }
 
   return bound;
+}
+
+export function updateMindmapNodeRect(shape: ShapeElementModel) {
+  const font = getFontString(shape);
+
+  if (!shape.text) {
+    return;
+  }
+
+  const lines = deltaInsertsToChunks(
+    wrapTextDeltas(shape.text, font, shape.maxWidth || Number.MAX_SAFE_INTEGER)
+  );
+  const lineHeight = getLineHeight(font, shape.fontSize);
+  let maxWidth = 0;
+  let height = 0;
+
+  lines.forEach(line => {
+    for (const delta of line) {
+      const str = delta.insert;
+
+      maxWidth = Math.max(maxWidth, getLineWidth(str, font));
+      height += lineHeight;
+    }
+  });
+
+  maxWidth += SHAPE_TEXT_PADDING * 2;
+  height += SHAPE_TEXT_VERTICAL_PADDING * 2;
+
+  shape.xywh = `[${shape.x},${shape.y},${maxWidth},${height}]`;
 }

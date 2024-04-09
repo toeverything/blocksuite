@@ -7,14 +7,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import {
   MOUSE_BUTTON,
-  on,
   once,
   requestConnectedFrame,
 } from '../../../_common/utils/event.js';
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { RootBlockModel } from '../../index.js';
-import { actionWithAI, dragWithAI } from '../edgeless-copilot-panel/config.js';
+import { type RootBlockModel } from '../../root-model.js';
+import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
+import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
 
 export const AFFINE_EDGELESS_COPILOT_WIDGET = 'affine-edgeless-copilot-widget';
@@ -47,19 +47,36 @@ export class EdgelessCopilotWidget extends WidgetElement<
   @query('.copilot-selection-rect')
   private _selectionRectEl!: HTMLDivElement;
 
+  private _selectionModelRect!: DOMRect;
+
   private _clickOutsideOff: (() => void) | null = null;
   private _listenClickOutsideId: number | null = null;
 
   private _copilotPanel!: EdgelessCopilotPanel | null;
   private _showCopilotPanelOff: (() => void) | null = null;
 
-  groups: AIItemGroupConfig[] = [actionWithAI, dragWithAI];
+  groups: AIItemGroupConfig[] = [];
+
+  get selectionRect() {
+    return this._selectionRect;
+  }
+
+  get selectionModelRect() {
+    return this._selectionModelRect;
+  }
 
   get edgeless() {
     return this.blockElement;
   }
 
+  hide() {
+    this._copilotPanel?.hide();
+    this._showCopilotPanelOff?.();
+  }
+
   private _updateSelection(rect: DOMRect) {
+    this._selectionModelRect = rect;
+
     const zoom = this.edgeless.service.viewport.zoom;
     const [x, y] = this.edgeless.service.viewport.toViewCoord(
       rect.left,
@@ -83,10 +100,17 @@ export class EdgelessCopilotWidget extends WidgetElement<
           return;
         }
 
-        const off = on(this.ownerDocument, 'mousedown', e => {
+        const off = this.blockElement.dispatcher.add('pointerDown', ctx => {
+          const e = ctx.get('pointerState').raw;
+          const aiPanel = this.host.view.getWidget(
+            AFFINE_AI_PANEL_WIDGET,
+            this.doc.root!.id
+          ) as AffineAIPanelWidget;
+
           if (
             e.button === MOUSE_BUTTON.MAIN &&
-            !this.contains(e.target as HTMLElement)
+            !this.contains(e.target as HTMLElement) &&
+            (!aiPanel || !aiPanel.contains(e.target as HTMLElement))
           ) {
             off();
             this._copilotPanel?.remove();
