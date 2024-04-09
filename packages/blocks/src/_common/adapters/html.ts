@@ -991,6 +991,33 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .closeNode();
           break;
         }
+        case 'iframe': {
+          const src = o.node.properties?.src;
+          if (typeof src !== 'string') {
+            break;
+          }
+          if (src.startsWith('https://www.youtube.com/embed/')) {
+            const videoId = src.substring(
+              'https://www.youtube.com/embed/'.length,
+              src.indexOf('?') !== -1 ? src.indexOf('?') : undefined
+            );
+            context
+              .openNode(
+                {
+                  type: 'block',
+                  id: nanoid(),
+                  flavour: 'affine:embed-youtube',
+                  props: {
+                    url: `https://www.youtube.com/watch?v=${videoId}`,
+                  },
+                  children: [],
+                },
+                'children'
+              )
+              .closeNode();
+          }
+          break;
+        }
       }
     });
     walker.setLeave((o, context) => {
