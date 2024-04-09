@@ -49,6 +49,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     return this.inlineEditor.rootElement;
   }
 
+  private _lastXYWH = '';
   private _keeping = false;
   private _resizeObserver: ResizeObserver | null = null;
 
@@ -61,6 +62,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     const containerHeight = this.richText.offsetHeight;
     const containerWidth = this.richText.offsetWidth;
     const textResizing = this.element.textResizing;
+
+    if (this._lastXYWH !== this.element.xywh) {
+      this.requestUpdate();
+    }
 
     if (
       (containerHeight !== this.element.h &&
@@ -285,6 +290,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       gap: '0',
       zIndex: '1',
     });
+
+    this._lastXYWH = this.element.xywh;
 
     return html`<rich-text
       .yText=${this.element.text}

@@ -2,32 +2,15 @@
 import '../_common/components/block-selection.js';
 
 import { BlockElement } from '@blocksuite/block-std';
-import { css, html } from 'lit';
+import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { DividerBlockModel } from './divider-model.js';
+import { dividerBlockStyles } from './styles.js';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
-  static override styles = css`
-    .affine-divider-block-container {
-      position: relative;
-      width: 100%;
-      height: 1px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 18px 8px;
-      margin-top: var(--affine-paragraph-space);
-    }
-    hr {
-      border: none;
-      border-top: 1px solid var(--affine-divider-color);
-      width: 100%;
-    }
-  `;
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -52,6 +35,9 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
 
     return html`
       <div class="affine-divider-block-container">
+        <style>
+          ${dividerBlockStyles}
+        </style>
         <hr />
 
         ${children}

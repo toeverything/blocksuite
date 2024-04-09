@@ -115,3 +115,13 @@ export const getFirstImageInFrame = (
   }) as ImageBlockModel | undefined;
   return image?.id;
 };
+
+export const getSelections = (host: EditorHost) => {
+  const [_, data] = host.command
+    .chain()
+    .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
+    .getSelectedBlocks({ types: ['text', 'block'] })
+    .run();
+
+  return data;
+};

@@ -98,6 +98,7 @@ export type {
   TemplateCategory,
   TemplateManager,
 } from './root-block/edgeless/components/toolbar/template/template-type.js';
+export { CopilotSelectionController } from './root-block/edgeless/controllers/tools/copilot-tool.js';
 export * from './root-block/index.js';
 export * from './schemas.js';
 export {
@@ -110,6 +111,10 @@ export {
   ElementModel,
   generateKeyBetween,
   GroupElementModel,
+  MindmapElementModel,
+  MindmapRootBlock,
+  MindmapService,
+  MindmapSurfaceBlock,
   type PointStyle,
   type SerializedXYWH,
   ShapeElementModel,
@@ -118,6 +123,7 @@ export {
   SurfaceBlockModel,
   TextElementModel,
 } from './surface-block/index.js';
+export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
