@@ -26,7 +26,7 @@ import type {
 export interface AffineAIPanelWidgetConfig {
   answerRenderer: (
     answer: string,
-    state: AffineAIPanelState
+    state?: AffineAIPanelState
   ) => TemplateResult<1> | typeof nothing;
   generateAnswer?: (props: {
     input: string;
@@ -62,8 +62,8 @@ export class AffineAIPanelWidget extends WidgetElement {
 
       outline: none;
       border-radius: var(--8, 8px);
-      border: 1px solid var(--light-detailColor-borderColor, #e3e2e4);
-      background: var(--light-background-backgroundOverlayPanelColor, #fbfbfc);
+      border: 1px solid var(--affine-border-color);
+      background: var(--affine-background-overlay-panel-color);
 
       /* light/toolbarShadow */
       box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.14);
