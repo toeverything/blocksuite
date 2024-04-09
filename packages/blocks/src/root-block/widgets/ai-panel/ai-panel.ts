@@ -93,6 +93,8 @@ export class AffineAIPanelWidget extends WidgetElement {
   @query('.mock-selection-container')
   mockSelectionContainer!: HTMLDivElement;
 
+  private _stopAutoUpdate?: undefined | (() => void);
+
   toggle = (reference: ReferenceElement, input?: string) => {
     if (input) {
       this._inputText = input;
@@ -103,23 +105,22 @@ export class AffineAIPanelWidget extends WidgetElement {
       this.state = 'input';
     }
 
-    this._abortController.signal.addEventListener(
-      'abort',
-      autoUpdate(reference, this, () => {
-        computePosition(reference, this, {
-          placement: 'bottom-start',
-        })
-          .then(({ x, y }) => {
-            this.style.left = `${x}px`;
-            this.style.top = `${y}px`;
-          })
-          .catch(console.error);
+    this._stopAutoUpdate?.();
+    this._stopAutoUpdate = autoUpdate(reference, this, () => {
+      computePosition(reference, this, {
+        placement: 'bottom-start',
       })
-    );
+        .then(({ x, y }) => {
+          this.style.left = `${x}px`;
+          this.style.top = `${y}px`;
+        })
+        .catch(console.error);
+    });
   };
 
   hide = () => {
     this._resetAbortController();
+    this._stopAutoUpdate?.();
     this.state = 'hidden';
     this._inputText = null;
     this._answer = null;
@@ -134,6 +135,8 @@ export class AffineAIPanelWidget extends WidgetElement {
     assertExists(text);
     assertExists(this.config.generateAnswer);
 
+    this._resetAbortController();
+
     // reset answer
     this._answer = null;
 
@@ -147,6 +150,8 @@ export class AffineAIPanelWidget extends WidgetElement {
       } else {
         this.state = 'finished';
       }
+
+      this._resetAbortController();
     };
 
     this.state = 'generating';
