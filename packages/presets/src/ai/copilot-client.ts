@@ -186,7 +186,7 @@ export class CopilotClient {
 
   async textToText(text: string, sessionId: string) {
     const res = await fetch(
-      `${this.backendUrl}/api/copilot/chat/${sessionId}?message=${text}`
+      `${this.backendUrl}/api/copilot/chat/${sessionId}?message=${encodeURIComponent(text)}`
     );
     if (!res.ok) return;
     return res.text();
@@ -194,7 +194,7 @@ export class CopilotClient {
 
   textToTextStream(text: string, sessionId: string) {
     return new EventSource(
-      `${this.backendUrl}/api/copilot/chat/${sessionId}/stream?message=${text}`
+      `${this.backendUrl}/api/copilot/chat/${sessionId}/stream?message=${encodeURIComponent(text)}`
     );
   }
 }
