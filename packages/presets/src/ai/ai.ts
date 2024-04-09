@@ -11,14 +11,13 @@ import {
 } from '@blocksuite/blocks';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import { buildAIActionGroups, buildAIPanelConfig } from './config/builder.js';
+import { buildAIPanelConfig } from './ai-panel.js';
 import { setupEdgelessCopilot } from './entries/edgeless/index.js';
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
-import type { AIConfig } from './types.js';
 
-export function getAISpecs(config: AIConfig) {
+export function getAISpecs() {
   const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
       const newPageSpec: BlockSpec = {
@@ -37,18 +36,15 @@ export function getAISpecs(config: AIConfig) {
             slots.widgetConnected.on(view => {
               if (view.component instanceof AffineAIPanelWidget) {
                 view.component.config = buildAIPanelConfig(view.component);
-                if (config.getAskAIStream) {
-                  setupSpaceEntry(view.component, config);
-                }
+                setupSpaceEntry(view.component);
               }
 
               if (view.component instanceof AffineFormatBarWidget) {
-                const actionGroups = buildAIActionGroups(config);
-                setupFormatBarEntry(view.component, actionGroups);
+                setupFormatBarEntry(view.component);
               }
 
               if (view.component instanceof AffineSlashMenuWidget) {
-                setupSlashMenuEntry(view.component, config);
+                setupSlashMenuEntry(view.component);
               }
             })
           );
