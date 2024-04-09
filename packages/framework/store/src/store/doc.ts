@@ -38,7 +38,7 @@ type DocOptions = {
 export class Doc extends Space<FlatBlockMap> {
   private readonly _collection: DocCollection;
   private readonly _idGenerator: IdGenerator;
-  private readonly _blockTree: BlockCollection;
+  private readonly _blockCollection: BlockCollection;
   private readonly _docCRUD: DocCRUD;
   private _history!: Y.UndoManager;
   private _root: BlockModel | null = null;
@@ -91,7 +91,7 @@ export class Doc extends Space<FlatBlockMap> {
     this._collection = collection;
     this._idGenerator = idGenerator;
     this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
-    this._blockTree = new BlockCollection({
+    this._blockCollection = new BlockCollection({
       doc: this,
       crud: this._docCRUD,
       schema: collection.schema,
@@ -195,20 +195,20 @@ export class Doc extends Space<FlatBlockMap> {
   }
 
   hasBlockById(id: string): boolean {
-    return this._blockTree.hasBlock(id);
+    return this._blockCollection.hasBlock(id);
   }
 
   getBlockById<Model extends BlockModel = BlockModel>(
     id: string
   ): Model | null {
-    return (this._blockTree.getBlock(id)?.model as Model) ?? null;
+    return (this._blockCollection.getBlock(id)?.model as Model) ?? null;
   }
 
   getBlockByFlavour(blockFlavour: string | string[]) {
     const flavours =
       typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
 
-    return Array.from(this._blockTree.blocks.values())
+    return Array.from(this._blockCollection.blocks.values())
       .filter(({ flavour }) => flavours.includes(flavour))
       .map(x => x.model);
   }
@@ -305,14 +305,7 @@ export class Doc extends Space<FlatBlockMap> {
   }
 
   getBlocks() {
-    const blocks: BlockModel[] = [];
-    const allBlocks = this._blockTree.blocks;
-
-    allBlocks.forEach(({ model }) => {
-      blocks.push(model);
-    });
-
-    return blocks;
+    return this._blockCollection.getBlocks();
   }
 
   addBlocks(
@@ -547,7 +540,7 @@ export class Doc extends Space<FlatBlockMap> {
   }
 
   setSelector(selector?: BlockSelector) {
-    this._blockTree.updateSelector(selector);
+    this._blockCollection.updateSelector(selector);
   }
 
   private _initYBlocks() {
@@ -582,15 +575,15 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    this._blockTree.onBlockAdded(id);
-    const block = this._blockTree.getBlock(id);
+    this._blockCollection.onBlockAdded(id);
+    const block = this._blockCollection.getBlock(id);
     assertExists(block);
     const model = block.model;
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
       yChildren.forEach((id: string, index) => {
-        const hasChild = this._blockTree.blocks.has(id);
+        const hasChild = this._blockCollection.blocks.has(id);
 
         if (!hasChild) {
           this._handleYBlockAdd(id);
@@ -616,7 +609,7 @@ export class Doc extends Space<FlatBlockMap> {
       this.slots.rootDeleted.emit(id);
     }
     assertExists(model);
-    this._blockTree.onBlockRemoved(id);
+    this._blockCollection.onBlockRemoved(id);
     this.slots.blockUpdated.emit({
       type: 'delete',
       id,
