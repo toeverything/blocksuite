@@ -1,31 +1,23 @@
 import type { BlockModel, Schema } from '../../schema/index.js';
 import type { Doc } from '../doc.js';
+import type { DocCRUD } from '../doc/crud.js';
 import type { BlockOptions } from './block.js';
 import { Block } from './block.js';
 
 export type BlockSelector = (block: Block) => boolean;
 
-type BlockTreeOptions = {
+type BlockCollectionOptions = {
   schema: Schema;
   doc: Doc;
+  crud: DocCRUD;
 };
 
-export class BlockTree {
+export class BlockCollection {
   protected readonly _schema: Schema;
   protected readonly _blocks: Map<string, Block> = new Map();
   protected readonly _doc: Doc;
+  protected readonly _crud: DocCRUD;
   protected _selector?: BlockSelector;
-
-  get _root() {
-    const rootBlock = Array.from(this._blocks.values()).find(block => {
-      return block.model.role === 'root';
-    });
-    if (!rootBlock) {
-      return null;
-    }
-
-    return rootBlock;
-  }
 
   hasBlock(id: string) {
     return this._blocks.has(id);
@@ -69,25 +61,14 @@ export class BlockTree {
   }
 
   getParent(target: BlockModel | string): BlockModel | null {
-    const root = this._root;
     const targetId = typeof target === 'string' ? target : target.id;
-    if (!root || root.id === targetId) return null;
+    const parentId = this._crud.getParent(targetId);
+    if (!parentId) return null;
 
-    const findParent = (parentId: string): BlockModel | null => {
-      const parentBlock = this.getBlock(parentId);
-      if (!parentBlock) return null;
+    const parent = this._blocks.get(parentId);
+    if (!parent) return null;
 
-      for (const [childId] of parentBlock.model.childMap) {
-        if (childId === targetId) return parentBlock.model;
-
-        const parent = findParent(childId);
-        if (parent !== null) return parent;
-      }
-
-      return null;
-    };
-
-    return findParent(root.id);
+    return parent.model;
   }
 
   getPrev(block: BlockModel | string) {
@@ -145,8 +126,9 @@ export class BlockTree {
     return fn(parent, index);
   }
 
-  constructor({ schema, doc }: BlockTreeOptions) {
+  constructor({ schema, doc, crud }: BlockCollectionOptions) {
     this._doc = doc;
+    this._crud = crud;
     this._schema = schema;
   }
 

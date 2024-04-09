@@ -12,7 +12,7 @@ export class DocCRUD {
     private readonly _schema: Schema
   ) {}
 
-  get _root() {
+  get root() {
     let rootId: string | null = null;
     this._yBlocks.forEach(yBlock => {
       const flavour = yBlock.get('sys:flavour');
@@ -27,7 +27,7 @@ export class DocCRUD {
   }
 
   getParent(targetId: string): string | null {
-    const root = this._root;
+    const root = this.root;
     if (!root || root === targetId) return null;
 
     const findParent = (parentId: string): string | null => {
@@ -95,7 +95,7 @@ export class DocCRUD {
     });
 
     const parentId =
-      parent ?? (schema.model.role === 'root' ? null : this._root);
+      parent ?? (schema.model.role === 'root' ? null : this.root);
 
     if (!parentId) return;
 

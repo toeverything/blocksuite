@@ -9,7 +9,7 @@ import type { IdGenerator } from '../utils/id-generator.js';
 import { syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
 import type { BlockSelector, YBlock } from './block/index.js';
-import { BlockTree } from './block/index.js';
+import { BlockCollection } from './block/index.js';
 import type { DocCollection } from './collection.js';
 import { DocCRUD } from './doc/crud.js';
 import { Space } from './space.js';
@@ -38,7 +38,7 @@ type DocOptions = {
 export class Doc extends Space<FlatBlockMap> {
   private readonly _collection: DocCollection;
   private readonly _idGenerator: IdGenerator;
-  private readonly _blockTree: BlockTree;
+  private readonly _blockTree: BlockCollection;
   private readonly _docCRUD: DocCRUD;
   private _history!: Y.UndoManager;
   private _root: BlockModel | null = null;
@@ -90,11 +90,12 @@ export class Doc extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._collection = collection;
     this._idGenerator = idGenerator;
-    this._blockTree = new BlockTree({
+    this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
+    this._blockTree = new BlockCollection({
       doc: this,
+      crud: this._docCRUD,
       schema: collection.schema,
     });
-    this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
   }
 
   get readonly() {
