@@ -200,33 +200,3 @@ test('always get latest value in onChange', () => {
   rootModel.style.color = 'yellow';
   expect(value).toEqual({ color: 'yellow' });
 });
-
-test('with selector', () => {
-  const options = createTestOptions();
-  const collection = new DocCollection(options);
-
-  const doc = collection.createDoc({ id: 'home' });
-  doc.load();
-
-  doc.addBlock('affine:page');
-
-  const rootModel = doc.root as RootBlockModel;
-  expect(rootModel).not.toBeNull();
-
-  const noteId = doc.addBlock('affine:note', {}, rootModel.id);
-  const paragraphId = doc.addBlock('affine:paragraph', {}, noteId);
-
-  expect(doc.getBlockById(noteId)).not.toBeNull();
-  expect(doc.getBlockById(paragraphId)).not.toBeNull();
-  expect(doc.getBlockById(noteId)?.children).toHaveLength(1);
-
-  doc.setSelector(() => false);
-  expect(doc.getBlockById(noteId)).toBeNull();
-  expect(doc.getBlockById(paragraphId)).toBeNull();
-
-  doc.setSelector(block => block.id !== paragraphId);
-  expect(doc.getBlockById(noteId)).not.toBeNull();
-  expect(doc.getBlockById(paragraphId)).toBeNull();
-
-  expect(doc.getBlockById(noteId)?.children).toHaveLength(0);
-});

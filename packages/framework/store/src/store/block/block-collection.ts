@@ -10,6 +10,7 @@ type BlockCollectionOptions = {
   schema: Schema;
   doc: Doc;
   crud: DocCRUD;
+  selector: BlockSelector;
 };
 
 export class BlockCollection {
@@ -17,7 +18,24 @@ export class BlockCollection {
   protected readonly _blocks: Map<string, Block> = new Map();
   protected readonly _doc: Doc;
   protected readonly _crud: DocCRUD;
-  protected _selector?: BlockSelector;
+  protected readonly _selector: BlockSelector;
+
+  constructor({ schema, doc, crud, selector }: BlockCollectionOptions) {
+    this._doc = doc;
+    this._crud = crud;
+    this._schema = schema;
+    this._selector = selector;
+
+    this._yBlocks.forEach((_, id) => {
+      if (!this._blocks.has(id)) {
+        this.onBlockAdded(id);
+      }
+    });
+  }
+
+  get doc() {
+    return this._doc;
+  }
 
   hasBlock(id: string) {
     return this._blocks.has(id);
@@ -130,30 +148,6 @@ export class BlockCollection {
     return fn(parent, index);
   }
 
-  constructor({ schema, doc, crud }: BlockCollectionOptions) {
-    this._doc = doc;
-    this._crud = crud;
-    this._schema = schema;
-  }
-
-  updateSelector(selector?: BlockSelector) {
-    this._selector = selector;
-    this._blocks.forEach(block => {
-      const shouldAdd = selector?.(block) ?? true;
-      if (!shouldAdd) {
-        this.onBlockRemoved(block.id);
-      }
-    });
-
-    this._yBlocks.forEach((_, id) => {
-      if (!this._blocks.has(id)) {
-        this.onBlockAdded(id);
-      }
-    });
-
-    this._doc.slots.selectorUpdated.emit(selector);
-  }
-
   onBlockAdded(id: string) {
     if (this._blocks.has(id)) {
       return;
@@ -180,11 +174,9 @@ export class BlockCollection {
     };
     const block = new Block(this._schema, yBlock, this._doc, options);
 
-    const shouldAdd = this._selector ? this._selector(block) : true;
+    const shouldAdd = this._selector(block);
 
-    if (!shouldAdd) {
-      return;
-    }
+    if (!shouldAdd) return;
 
     this._blocks.set(id, block);
     block.model.created.emit();

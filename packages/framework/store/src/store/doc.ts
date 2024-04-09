@@ -7,7 +7,7 @@ import type { BlockModel } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import { syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
-import type { BlockSelector, YBlock } from './block/index.js';
+import type { YBlock } from './block/index.js';
 import { BlockCollection } from './block/index.js';
 import type { DocCollection } from './collection.js';
 import { DocCRUD } from './doc/crud.js';
@@ -55,7 +55,6 @@ export class Doc extends Space<FlatBlockMap> {
      */
     rootAdded: new Slot<BlockModel>(),
     rootDeleted: new Slot<string>(),
-    selectorUpdated: new Slot<BlockSelector | undefined>(),
     blockUpdated: new Slot<
       | {
           type: 'add';
@@ -93,6 +92,7 @@ export class Doc extends Space<FlatBlockMap> {
       doc: this,
       crud: this._docCRUD,
       schema: collection.schema,
+      selector: () => true,
     });
   }
 
@@ -468,10 +468,6 @@ export class Doc extends Space<FlatBlockMap> {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
     }
-  }
-
-  setSelector(selector?: BlockSelector) {
-    this._blockCollection.updateSelector(selector);
   }
 
   private _initYBlocks() {
