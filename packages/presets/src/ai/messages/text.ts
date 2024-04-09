@@ -1,12 +1,11 @@
 import { type EditorHost } from '@blocksuite/block-std';
-import {
-  type AffineAIPanelWidgetConfig,
-  PageEditorBlockSpecs,
-} from '@blocksuite/blocks';
+import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 
+import { CustomPageEditorBlockSpecs } from '../utils/custom-specs.js';
 import { markDownToDoc } from '../utils/markdown-utils.js';
 
 @customElement('ai-answer-text')
@@ -73,12 +72,14 @@ export class AIAnswerText extends LitElement {
   }
 
   override render() {
-    console.log('answer: ', this.answer);
     if (!this._previewDoc) return nothing;
     return html`
       <div class="ai-answer-text-container">
         <div class="ai-answer-text-editor affine-page-viewport">
-          ${this.host.renderSpecPortal(this._previewDoc, PageEditorBlockSpecs)}
+          ${this.host.renderSpecPortal(
+            this._previewDoc,
+            CustomPageEditorBlockSpecs
+          )}
         </div>
       </div>
     `;
@@ -95,9 +96,8 @@ export const textRenderer: AffineAIPanelWidgetConfig['answerRenderer'] = (
   host: EditorHost,
   answer: string
 ) => {
-  // Create a new component instance for each answer
-  const element = document.createElement('ai-answer-text') as AIAnswerText;
-  element.host = host;
-  element.answer = answer;
-  return html`${element}`;
+  return html`${keyed(
+    answer,
+    html`<ai-answer-text .host=${host} .answer=${answer}></ai-answer-text>`
+  )}`;
 };
