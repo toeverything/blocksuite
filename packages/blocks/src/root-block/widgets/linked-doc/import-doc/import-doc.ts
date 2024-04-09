@@ -257,7 +257,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
     const pageIds: string[] = [];
     for (const file of files) {
       const text = await file.text();
-      const [fileName] = file.name.split('.');
+      const [fileName] = file.name.split('.').slice(0, -1).join('.');
       const needLoading = file.size > SHOW_LOADING_SIZE;
       if (needLoading) {
         this.hidden = false;
