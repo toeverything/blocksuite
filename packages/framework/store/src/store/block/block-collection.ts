@@ -79,8 +79,10 @@ export class BlockCollection {
   }
 
   getPrevs(block: BlockModel | string) {
-    return this._getSiblings(block, (parent, index) =>
-      parent.children.slice(0, index)
+    return (
+      this._getSiblings(block, (parent, index) =>
+        parent.children.slice(0, index)
+      ) ?? []
     );
   }
 
@@ -92,8 +94,10 @@ export class BlockCollection {
   }
 
   getNexts(block: BlockModel | string) {
-    return this._getSiblings(block, (parent, index) =>
-      parent.children.slice(index + 1)
+    return (
+      this._getSiblings(block, (parent, index) =>
+        parent.children.slice(index + 1)
+      ) ?? []
     );
   }
 
