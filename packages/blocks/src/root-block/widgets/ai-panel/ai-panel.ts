@@ -124,6 +124,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     this.state = 'hidden';
     this._inputText = null;
     this._answer = null;
+    this._stopAutoUpdate = undefined;
   };
 
   /**
