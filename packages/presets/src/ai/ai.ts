@@ -1,3 +1,5 @@
+import './actions/index.js'; // ensure global namespace is populated
+
 import type { BlockSpec } from '@blocksuite/block-std';
 import {
   AFFINE_AI_PANEL_WIDGET,
