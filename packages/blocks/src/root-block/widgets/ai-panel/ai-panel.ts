@@ -1,6 +1,5 @@
 import './components/index.js';
 
-import type { EditorHost } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -27,8 +26,7 @@ import type {
 export interface AffineAIPanelWidgetConfig {
   answerRenderer: (
     answer: string,
-    state?: AffineAIPanelState,
-    host?: EditorHost,
+    state?: AffineAIPanelState
   ) => TemplateResult<1> | typeof nothing;
   generateAnswer?: (props: {
     input: string;
@@ -280,7 +278,7 @@ export class AffineAIPanelWidget extends WidgetElement {
                   .config=${config.finishStateConfig}
                 >
                   ${this.answer &&
-                  config.answerRenderer(this.answer, this.state, this.host)}
+                  config.answerRenderer(this.answer, this.state)}
                 </ai-panel-answer>
               `
             : nothing}
@@ -293,7 +291,7 @@ export class AffineAIPanelWidget extends WidgetElement {
         'finished',
         () => html`
           <ai-panel-answer .config=${config.finishStateConfig}>
-            ${this.answer && config.answerRenderer(this.answer, this.state, this.host)}
+            ${this.answer && config.answerRenderer(this.answer, this.state)}
           </ai-panel-answer>
         `,
       ],

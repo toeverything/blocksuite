@@ -92,12 +92,13 @@ declare global {
   }
 }
 
-export const textRenderer: AffineAIPanelWidgetConfig['answerRenderer'] = (
-  host: EditorHost,
-  answer: string
-) => {
-  return html`${keyed(
-    answer,
-    html`<ai-answer-text .host=${host} .answer=${answer}></ai-answer-text>`
-  )}`;
+export const createTextRenderer: (
+  host: EditorHost
+) => AffineAIPanelWidgetConfig['answerRenderer'] = host => {
+  return answer => {
+    return html`${keyed(
+      answer,
+      html`<ai-answer-text .host=${host} .answer=${answer}></ai-answer-text>`
+    )}`;
+  };
 };
