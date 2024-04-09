@@ -2276,4 +2276,1365 @@ export const three_section_templates = [
       ],
     },
   },
+  {
+    type: 'page',
+    meta: {
+      id: 'doc:home',
+      title: '',
+      createDate: 1711615521774,
+      tags: [],
+    },
+    blocks: {
+      type: 'block',
+      id: 'aa6W7J2mx2',
+      flavour: 'affine:page',
+      version: 2,
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'PMd-PuXWK7',
+          flavour: 'affine:surface',
+          version: 5,
+          props: {
+            elements: {
+              '-Z2wOyOCUl': {
+                index: 'aV',
+                seed: 378347608,
+                xywh: '[-1449.4324619593883,-2345.0758660422707,67.74408298065555,68.33333333333334]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: '-Z2wOyOCUl',
+                color: '--affine-palette-line-white',
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '1',
+                    },
+                  ],
+                },
+              },
+              akLeN9eL3Z: {
+                index: 'aZ',
+                seed: 378347608,
+                xywh: '[-826.8947976664532,-2345.525578446396,67.74408298065555,68]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'akLeN9eL3Z',
+                color: '--affine-palette-line-white',
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '2',
+                    },
+                  ],
+                },
+              },
+              oNyyPV1iJg: {
+                index: 'ad',
+                seed: 378347608,
+                xywh: '[-199.14972218215394,-2345.525578446396,67.74408298065555,68]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'oNyyPV1iJg',
+                color: '--affine-palette-line-white',
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '3',
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'CnuFtpWnKL',
+              flavour: 'affine:frame',
+              version: 1,
+              props: {
+                title: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'title',
+                    },
+                  ],
+                },
+                background: '--affine-palette-transparent',
+                index: 'a2',
+                xywh: '[-1509.6661094585195,-2898.612292265666,1879.6362584319918,1087.2819474283258]',
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'u4QIphd0DC',
+              flavour: 'affine:image',
+              version: 1,
+              props: {
+                caption: 'section1.image',
+                sourceId: 'PiQbzGAzz2UgK4kqceCMRwNJGD27VuPXmkUV1VIdUpI=',
+                width: 150,
+                height: 150,
+                index: 'aM',
+                xywh: '[-1505.2500792932615,-2897.12415151353,1872.7618916829429,375.04758562360485]',
+                rotate: 0,
+                size: 3837,
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'vep0c6lfir',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            background: '--affine-palette-transparent',
+            hidden: false,
+            displayMode: 'edgeless',
+            index: 'aB',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 2.111112543040462,
+              collapse: true,
+              collapsedHeight: 111.99999999999983,
+            },
+            xywh: '[-1505.2500792932615,-2547.3538041961356,1870.0890697914701,236.44460482053137]',
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'fSKn6ISVDM',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'sm_bXJ4OIr',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            background: '--affine-palette-transparent',
+            hidden: false,
+            displayMode: 'edgeless',
+            index: 'aF',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.6183018598440544,
+              collapse: true,
+              collapsedHeight: 109.30854828921595,
+            },
+            xywh: '[-1486.6960783271422,-2335.8151977557804,589.0618769832358,176.8942269932918]',
+          },
+          children: [
+            {
+              type: 'block',
+              id: '8B4rgaGfZO',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section1.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: '-e1FBf1VVV',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1480.2945382606815,-2251.702128477929,578.2112678162102,409.5622543957249]',
+            background: '--affine-palette-transparent',
+            index: 'aL',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              collapse: true,
+              collapsedHeight: 295.169253504954,
+              scale: 1.387550530864662,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'iPmO1_z9Gt',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h2',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section1.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'wkyVSsZhvb',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-863.400071943408,-2335.8151977557804,589.0618769832358,176.8942269932918]',
+            background: '--affine-palette-transparent',
+            index: 'aX',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.6183018598440544,
+              collapse: true,
+              collapsedHeight: 109.30854828921595,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'TI-VP1M95O',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section2.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'o27HkMC_--',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-856.9985318769473,-2251.702128477929,578.2112678162102,409.5622543957249]',
+            background: '--affine-palette-transparent',
+            index: 'aY',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              collapse: true,
+              collapsedHeight: 295.169253504954,
+              scale: 1.387550530864662,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'VFwX1ginQI',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h2',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section2.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'VJ0XDj4Fpr',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-235.65499645910882,-2335.8151977557804,589.0618769832358,176.8942269932918]',
+            background: '--affine-palette-transparent',
+            index: 'ab',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.6183018598440544,
+              collapse: true,
+              collapsedHeight: 109.30854828921595,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: '-iCGy0T361',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section3.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'SnAzf_Dy6D',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-229.2534563926481,-2251.702128477929,578.2112678162102,409.5622543957249]',
+            background: '--affine-palette-transparent',
+            index: 'ac',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              collapse: true,
+              collapsedHeight: 295.169253504954,
+              scale: 1.387550530864662,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'GlVIaFF6sF',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h2',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section3.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'page',
+    meta: {
+      id: 'doc:home',
+      title: '',
+      createDate: 1711619462579,
+      tags: [],
+    },
+    blocks: {
+      type: 'block',
+      id: 'Z1ykl12cSx',
+      flavour: 'affine:page',
+      version: 2,
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'nk3_3Ly7J4',
+          flavour: 'affine:surface',
+          version: 5,
+          props: {
+            elements: {
+              UVupGyyZN1: {
+                index: 'a8',
+                seed: 976364174,
+                xywh: '[-2009.1406565044413,1.1999424525670292,6.286634692326288,1095.5964434998189]',
+                rotate: 0,
+                shapeType: 'rect',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'UVupGyyZN1',
+                color: '--affine-palette-line-black',
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+              },
+              NJxtDRr8Wz: {
+                index: 'aA',
+                seed: 1481900971,
+                xywh: '[-2037.1821400826323,194.25718279849224,68.49881720241342,68.49881720241348]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'NJxtDRr8Wz',
+                color: '--affine-palette-line-white',
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '1',
+                    },
+                  ],
+                },
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+              },
+              Og7Aa0FT4P: {
+                index: 'aC',
+                seed: 1481900971,
+                xywh: '[-2037.182140082632,515.3284845766241,68.49881720241342,68]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'Og7Aa0FT4P',
+                color: '--affine-palette-line-white',
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '2',
+                    },
+                  ],
+                },
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+              },
+              xurVVzewkV: {
+                index: 'aE',
+                seed: 1481900971,
+                xywh: '[-2037.182140082632,835.9009691523424,68.49881720241342,68]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'xurVVzewkV',
+                color: '--affine-palette-line-white',
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '3',
+                    },
+                  ],
+                },
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+              },
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'TVg0_H3pS-',
+              flavour: 'affine:frame',
+              version: 1,
+              props: {
+                title: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'title',
+                    },
+                  ],
+                },
+                background: '--affine-palette-transparent',
+                xywh: '[-2101.800074986049,1.1999424525670292,1933.7142508370534,1095.9999738420759]',
+                index: 'a0',
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'aWw5W79SOg',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-2000.764655559536,43.90652033724916,1164.4965343960564,222.84947966365655]',
+            background: '--affine-palette-transparent',
+            index: 'a5',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 2,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.947683980335685,
+              collapse: true,
+              collapsedHeight: 114.01012331779694,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'AkKDNgzKb_',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h4',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section1.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: '5zMsJG3EQa',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1997.764655559536,134.577479626362,1819.3423114296422,286.9259086458013]',
+            background: '--affine-palette-transparent',
+            index: 'a6',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.89399503318206,
+              collapse: true,
+              collapsedHeight: 151.49242929309233,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'kt2gfL8Bn7',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section1.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'acZgwhfCWY',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1997.764655559536,457.07244815577957,1819.3423114296422,286.9259086458013]',
+            background: '--affine-palette-transparent',
+            index: 'aG',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.89399503318206,
+              collapse: true,
+              collapsedHeight: 151.49242929309233,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: '8vRFcSMg1V',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section2.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'YeHO9NCElw',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-2000.764655559536,366.40148886666674,1164.4965343960564,222.84947966365655]',
+            background: '--affine-palette-transparent',
+            index: 'aF',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 2,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.947683980335685,
+              collapse: true,
+              collapsedHeight: 114.01012331779694,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'mHjARC9Fhu',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h4',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section2.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'BHC3GyNAdu',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1997.764655559536,779.567416685197,1819.3423114296422,286.9259086458013]',
+            background: '--affine-palette-transparent',
+            index: 'aK',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.89399503318206,
+              collapse: true,
+              collapsedHeight: 151.49242929309233,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'y5Jbozh1vt',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section3.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'I82USJCVZw',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-2000.764655559536,688.8964573960843,1164.4965343960564,222.84947966365655]',
+            background: '--affine-palette-transparent',
+            index: 'aJ',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 2,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.947683980335685,
+              collapse: true,
+              collapsedHeight: 114.01012331779694,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'GejxhqB-wj',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h4',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section3.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    type: 'page',
+    meta: {
+      id: 'doc:home',
+      title: '',
+      createDate: 1711619462579,
+      tags: [],
+    },
+    blocks: {
+      type: 'block',
+      id: 'Z1ykl12cSx',
+      flavour: 'affine:page',
+      version: 2,
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'nk3_3Ly7J4',
+          flavour: 'affine:surface',
+          version: 5,
+          props: {
+            elements: {
+              NJxtDRr8Wz: {
+                index: 'aA',
+                seed: 1481900971,
+                xywh: '[-1962.5154937610178,107.58622350937945,68.49881720241342,68.49881720241348]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'NJxtDRr8Wz',
+                color: '--affine-palette-line-white',
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '1',
+                    },
+                  ],
+                },
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+              },
+              Lu4iLMmzDn: {
+                index: 'aQ',
+                seed: 1481900971,
+                xywh: '[-1136.8615154265685,439.7072383836723,68.49881720241342,68]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'Lu4iLMmzDn',
+                color: '--affine-palette-line-white',
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '2',
+                    },
+                  ],
+                },
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+              },
+              TOtG2mlRAJ: {
+                index: 'aU',
+                seed: 1481900971,
+                xywh: '[-1962.194869104954,720.7809129074261,68.49881720241342,68]',
+                rotate: 0,
+                shapeType: 'ellipse',
+                radius: 0,
+                filled: true,
+                fillColor: '--affine-palette-shape-navy',
+                strokeWidth: 2,
+                strokeColor: '--affine-palette-transparent',
+                strokeStyle: 'solid',
+                shapeStyle: 'General',
+                roughness: 1.4,
+                textResizing: 1,
+                maxWidth: false,
+                type: 'shape',
+                id: 'TOtG2mlRAJ',
+                color: '--affine-palette-line-white',
+                text: {
+                  'affine:surface:text': true,
+                  delta: [
+                    {
+                      insert: '3',
+                    },
+                  ],
+                },
+                fontFamily: 'blocksuite:surface:Inter',
+                fontSize: 40,
+              },
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'TVg0_H3pS-',
+              flavour: 'affine:frame',
+              version: 1,
+              props: {
+                title: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'title',
+                    },
+                  ],
+                },
+                background: '--affine-palette-transparent',
+                xywh: '[-2101.800074986049,1.1999424525670292,1933.7142508370534,1095.9999738420759]',
+                index: 'a0',
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'UBMo_osmTh',
+              flavour: 'affine:image',
+              version: 1,
+              props: {
+                caption: 'section1.image',
+                sourceId: 'PiQbzGAzz2UgK4kqceCMRwNJGD27VuPXmkUV1VIdUpI=',
+                width: 150,
+                height: 150,
+                index: 'aV',
+                xywh: '[-1893.6960519025406,418.3619095202094,457.3333740234375,236.77541357147118]',
+                rotate: 0,
+                size: 3837,
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'NLvbZwU4PA',
+              flavour: 'affine:image',
+              version: 1,
+              props: {
+                caption: 'section2.image',
+                sourceId: 'PiQbzGAzz2UgK4kqceCMRwNJGD27VuPXmkUV1VIdUpI=',
+                width: 150,
+                height: 150,
+                index: 'aX',
+                xywh: '[-783.0291919578789,134.577479626362,457.3333740234375,236.77541357147118]',
+                rotate: 0,
+                size: 3837,
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: '-PNfQ_u1PE',
+              flavour: 'affine:image',
+              version: 1,
+              props: {
+                caption: 'section3.image',
+                sourceId: 'PiQbzGAzz2UgK4kqceCMRwNJGD27VuPXmkUV1VIdUpI=',
+                width: 150,
+                height: 150,
+                index: 'aZ',
+                xywh: '[-783.0291919578789,747.4910080481044,457.3333740234375,236.77541357147118]',
+                rotate: 0,
+                size: 3837,
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'aWw5W79SOg',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1926.0980092379216,43.90652033724916,921.8298066942334,222.84947966365655]',
+            background: '--affine-palette-transparent',
+            index: 'a5',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 2,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.947683980335685,
+              collapse: true,
+              collapsedHeight: 114.01012331779694,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'AkKDNgzKb_',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h4',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section1.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: '5zMsJG3EQa',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1923.0980092379216,134.577479626362,918.008998441361,286.9259086458013]',
+            background: '--affine-palette-transparent',
+            index: 'a6',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.89399503318206,
+              collapse: true,
+              collapsedHeight: 151.49242929309233,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'kt2gfL8Bn7',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section1.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'S53e3TYzsE',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1100.2521508241273,375.28962019689266,775.1631400275667,222.8494796636565]',
+            background: '--affine-palette-transparent',
+            index: 'aO',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 2,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.947683980335685,
+              collapse: true,
+              collapsedHeight: 114.41767859344831,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'y0bj85ZiWg',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h4',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section2.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'A-DYYZeyH3',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1097.2521508241273,465.9605794860054,764.6756651080276,286.9259086458014]',
+            background: '--affine-palette-transparent',
+            index: 'aP',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.89399503318206,
+              collapse: true,
+              collapsedHeight: 151.49242929309239,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'zWwZJYEzgz',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section2.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'u2tLVHn1OH',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1926.0980092379218,656.8200487589916,921.8298066942334,222.84947966365655]',
+            background: '--affine-palette-transparent',
+            index: 'aS',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 2,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.947683980335685,
+              collapse: true,
+              collapsedHeight: 114.01012331779694,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: '8kjIjQLSP5',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h4',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section3.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'h65JXM7SYI',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1923.0980092379218,747.4910080481044,918.008998441361,286.9259086458013]',
+            background: '--affine-palette-transparent',
+            index: 'aT',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.89399503318206,
+              collapse: true,
+              collapsedHeight: 151.49242929309233,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: '7yVFZDxhWf',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section3.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

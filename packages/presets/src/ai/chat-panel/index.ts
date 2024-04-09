@@ -21,6 +21,10 @@ export type ChatStatus = 'loading' | 'success' | 'error' | 'idle';
 @customElement('chat-panel')
 export class ChatPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
+    chat-panel {
+      width: 100%;
+    }
+
     .chat-panel-container {
       display: flex;
       flex-direction: column;
@@ -97,19 +101,27 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     let sessitonId = localStorage.getItem(
       `blocksuite:chat:${editor.doc.id}:session`
     );
-    if (!sessitonId) {
-      sessitonId = await this._copilotClient.createSession({
-        workspaceId: editor.doc.collection.id,
-        docId: editor.doc.id,
-        model: 'Gpt35Turbo',
-        promptName: '',
-      });
-    }
-    this.sessionId = sessitonId;
-    localStorage.setItem(
-      `blocksuite:chat:${editor.doc.id}:session`,
-      sessitonId
+
+    sessitonId = await this._copilotClient.createSession({
+      workspaceId: editor.doc.collection.id,
+      docId: editor.doc.id,
+      promptName: 'debug:chat:gpt4',
+    });
+    console.log(
+      '------------------------------------------------------------------'
     );
+    console.log(sessitonId);
+    const sessions = await this._copilotClient.getSessions(
+      editor.doc.collection.id
+    );
+    console.log(sessions);
+    // if (!sessitonId) {
+    // }
+    this.sessionId = sessitonId;
+    // localStorage.setItem(
+    //   `blocksuite:chat:${editor.doc.id}:session`,
+    //   sessitonId
+    // );
     await this.updateMessages();
   }
 
@@ -118,9 +130,11 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   }
 
   updateMessages = async () => {
-    const histories = await this._copilotClient.getAnonymousHistories(
-      this.editor.doc.collection.id,
-      this.editor.doc.id
+    const { editor } = this;
+
+    const histories = await this._copilotClient.getHistories(
+      editor.doc.collection.id,
+      editor.doc.id
     );
     this.messages =
       histories.find(h => h.sessionId === this.sessionId)?.messages ||

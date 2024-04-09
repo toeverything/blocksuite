@@ -9,7 +9,6 @@ import { basicTheme, type PPTDoc, type PPTSection } from './template.js';
 export const PPTBuilder = (host: EditorHost) => {
   const service = host.spec.getService<EdgelessRootService>('affine:page');
   const docs: PPTDoc[] = [];
-  let done = false;
   const addDoc = async (block: BlockSnapshot) => {
     const sections = block.children.map(v => {
       const title = getText(v);
@@ -28,9 +27,7 @@ export const PPTBuilder = (host: EditorHost) => {
     };
     docs.push(doc);
 
-    if (doc.sections.length !== 4 || doc.isCover) return;
-    if (done) return;
-    done = true;
+    if (doc.isCover) return;
     const job = service.createTemplateJob('template');
     const { images, content } = await basicTheme(doc);
 

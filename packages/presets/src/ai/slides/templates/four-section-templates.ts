@@ -570,4 +570,525 @@ export const four_section_templates = [
       ],
     },
   },
+  {
+    type: 'page',
+    meta: {
+      id: 'doc:home',
+      title: '',
+      createDate: 1711615521774,
+      tags: [],
+    },
+    blocks: {
+      type: 'block',
+      id: 'aa6W7J2mx2',
+      flavour: 'affine:page',
+      version: 2,
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'PMd-PuXWK7',
+          flavour: 'affine:surface',
+          version: 5,
+          props: {
+            elements: {},
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'CnuFtpWnKL',
+              flavour: 'affine:frame',
+              version: 1,
+              props: {
+                title: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'title',
+                    },
+                  ],
+                },
+                background: '--affine-palette-transparent',
+                index: 'a2',
+                xywh: '[-1509.6661094585195,-2898.612292265666,1960.6362584319918,1087.2819474283258]',
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: '2Y9Hkx2NH_',
+              flavour: 'affine:image',
+              version: 1,
+              props: {
+                caption: 'section1.image',
+                sourceId: 'PiQbzGAzz2UgK4kqceCMRwNJGD27VuPXmkUV1VIdUpI=',
+                width: 150,
+                height: 150,
+                index: 'acV',
+                xywh: '[-1477.8992703984247,-2695.0139716592407,442.8571428571429,291.42860049293176]',
+                rotate: 0,
+                size: 3837,
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'wfAA7nMj9S',
+              flavour: 'affine:image',
+              version: 1,
+              props: {
+                caption: 'section2.image',
+                sourceId: 'PiQbzGAzz2UgK4kqceCMRwNJGD27VuPXmkUV1VIdUpI=',
+                width: 150,
+                height: 150,
+                xywh: '[-1016.5659574101433,-2695.0139716592407,442.8571428571429,291.42860049293176]',
+
+                index: 'ae',
+                rotate: 0,
+                size: 3837,
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'v0kbq9Ge2L',
+              flavour: 'affine:image',
+              version: 1,
+              props: {
+                caption: 'section3.image',
+                sourceId: 'PiQbzGAzz2UgK4kqceCMRwNJGD27VuPXmkUV1VIdUpI=',
+                width: 150,
+                height: 150,
+                xywh: '[-555.2326444218619,-2695.0139716592407,442.8571428571429,291.42860049293176]',
+
+                index: 'ag',
+                rotate: 0,
+                size: 3837,
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'U0VKdP1QXx',
+              flavour: 'affine:image',
+              version: 1,
+              props: {
+                caption: 'section4.image',
+                sourceId: 'PiQbzGAzz2UgK4kqceCMRwNJGD27VuPXmkUV1VIdUpI=',
+                width: 150,
+                height: 150,
+                xywh: '[-93.89933143358057,-2695.0139716592407,442.8571428571429,291.42860049293176]',
+
+                index: 'ai',
+                rotate: 0,
+                size: 3837,
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'vep0c6lfir',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            background: '--affine-palette-transparent',
+            hidden: false,
+            displayMode: 'edgeless',
+            index: 'aB',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 2.111112543040462,
+              collapse: true,
+              collapsedHeight: 111.99999999999983,
+            },
+            xywh: '[-1505.2500792932615,-2892.496670058301,1870.0890697914701,236.44460482053137]',
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'fSKn6ISVDM',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'sm_bXJ4OIr',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            background: '--affine-palette-transparent',
+            hidden: false,
+            displayMode: 'edgeless',
+            index: 'aF',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.6183018598440544,
+              collapse: true,
+              collapsedHeight: 135.67362421639123,
+            },
+            xywh: '[-1509.6661094585195,-2449.148531089114,589.0618769832358,219.56087840116928]',
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'Z0vZzczM9m',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section1.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: '-e1FBf1VVV',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1503.264569392059,-2279.702158995507,505.068393234737,409.5622543957249]',
+            background: '--affine-palette-transparent',
+            index: 'aL',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              collapse: true,
+              collapsedHeight: 295.169253504954,
+              scale: 1.387550530864662,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'nVm30fhD_V',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h2',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section1.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'SWuXaO4zVD',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1048.5978722078141,-2279.702158995507,505.068393234737,409.5622543957249]',
+            background: '--affine-palette-transparent',
+            index: 'am',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              collapse: true,
+              collapsedHeight: 295.169253504954,
+              scale: 1.387550530864662,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'm44JtQOkYX',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h2',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section2.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'dUtL3CwWVp',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-1054.9994122742746,-2449.148531089114,589.0618769832358,219.56087840116928]',
+            background: '--affine-palette-transparent',
+            index: 'al',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.6183018598440544,
+              collapse: true,
+              collapsedHeight: 135.67362421639123,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: '_ufa27y_Mw',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section2.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'LUjOSttIUe',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-589.9311851960954,-2279.702158995507,505.068393234737,409.5622543957249]',
+            background: '--affine-palette-transparent',
+            index: 'aq',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              collapse: true,
+              collapsedHeight: 295.169253504954,
+              scale: 1.387550530864662,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'QyiTDLrbQs',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h2',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section3.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'SgzW7o7hMY',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-596.3327252625559,-2449.148531089114,589.0618769832358,219.56087840116928]',
+            background: '--affine-palette-transparent',
+            index: 'ap',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.6183018598440544,
+              collapse: true,
+              collapsedHeight: 135.67362421639123,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'PE0lR8TFaS',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section3.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: '3yZ-tCMJ5n',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-132.59791289791826,-2279.702158995507,505.068393234737,409.5622543957249]',
+            background: '--affine-palette-transparent',
+            index: 'au',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              collapse: true,
+              collapsedHeight: 295.169253504954,
+              scale: 1.387550530864662,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'NIHjcRX-f8',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h2',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section4.content',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'KK8h_OiRqv',
+          flavour: 'affine:note',
+          version: 1,
+          props: {
+            xywh: '[-138.99945296437875,-2449.148531089114,589.0618769832358,219.56087840116928]',
+            background: '--affine-palette-transparent',
+            index: 'at',
+            hidden: false,
+            displayMode: 'edgeless',
+            edgeless: {
+              style: {
+                borderRadius: 0,
+                borderSize: 4,
+                borderStyle: 'none',
+                shadowType: '',
+              },
+              scale: 1.6183018598440544,
+              collapse: true,
+              collapsedHeight: 135.67362421639123,
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'hv1g2gHWbM',
+              flavour: 'affine:paragraph',
+              version: 1,
+              props: {
+                type: 'h1',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'section4.title',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

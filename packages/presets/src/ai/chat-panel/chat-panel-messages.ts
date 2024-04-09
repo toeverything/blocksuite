@@ -118,12 +118,13 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderItem(message: ChatMessage) {
-    if (message.role === 'user') {
-      return textRenderer(message.content);
-    } else {
-      return html`<ai-slides-renderer .host=${this.host}>
-      </ai-slides-renderer>`;
-    }
+    return textRenderer(message.content);
+    // if (message.role === 'user') {
+    //   return textRenderer(message.content);
+    // } else {
+    //   // return iframeRenderer('<html><body><div>123</div></body></html>');
+    //   return html`<ai-slides-renderer> </ai-slides-renderer>`;
+    // }
   }
 
   scrollToDown() {

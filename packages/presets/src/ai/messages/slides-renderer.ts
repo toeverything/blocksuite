@@ -1,4 +1,3 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { DocCollection, Schema } from '@blocksuite/store';
@@ -16,9 +15,6 @@ const testData =
 export class AISlidesRenderer extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   text = testData;
-
-  @property({ attribute: false })
-  host!: EditorHost;
 
   private _editorContainer: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
   private _editor!: AffineEditorContainer;
@@ -48,7 +44,7 @@ export class AISlidesRenderer extends WithDisposable(ShadowlessElement) {
     this._editorContainer.value?.append(editor);
 
     requestAnimationFrame(() => {
-      PPTBuilder(this.host).process(this.text).catch(console.error);
+      PPTBuilder(editor.host).process(this.text).catch(console.error);
     });
   }
 

@@ -2,9 +2,6 @@ import { Bound } from '@blocksuite/blocks';
 import { nanoid } from '@blocksuite/store';
 
 import { basicCover } from './templates/cover.js';
-import { four_section_templates } from './templates/four-section-templates.js';
-import { one_section_templates } from './templates/one-section-templates.js';
-import { three_section_templates } from './templates/three-section-templates.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const replaceText = (text: Record<string, string>, template: any) => {
@@ -108,19 +105,22 @@ export type PPTSection = {
   content: string;
   keywords: string;
 };
+
 type TemplateImage = {
   id: string;
   url: string;
 };
+
 type DocTemplate = {
   images: TemplateImage[];
   content: unknown;
 };
+
 const createBasicCover = async (
   title: string,
   section1: PPTSection
 ): Promise<DocTemplate> => {
-  const template = basicCover();
+  const template = basicCover;
   replaceText(
     {
       title: title,
@@ -148,7 +148,8 @@ const basic1section = async (
   title: string,
   section1: PPTSection
 ): Promise<DocTemplate> => {
-  const template = getRandomElement(one_section_templates);
+  const templates = (await import('./templates/one.json')).default;
+  const template = getRandomElement(templates);
   replaceText(
     {
       title: title,
@@ -177,7 +178,8 @@ const basic2section = async (
   section1: PPTSection,
   section2: PPTSection
 ): Promise<DocTemplate> => {
-  const template = one_section_templates[1];
+  const templates = (await import('./templates/two.json')).default;
+  const template = getRandomElement(templates);
   replaceText(
     {
       title: title,
@@ -208,7 +210,8 @@ const basic3section = async (
   section2: PPTSection,
   section3: PPTSection
 ): Promise<DocTemplate> => {
-  const template = getRandomElement(three_section_templates);
+  const templates = (await import('./templates/three.json')).default;
+  const template = getRandomElement(templates);
   replaceText(
     {
       title: title,
@@ -235,6 +238,7 @@ const basic3section = async (
     content: template,
   };
 };
+
 const basic4section = async (
   title: string,
   section1: PPTSection,
@@ -242,7 +246,8 @@ const basic4section = async (
   section3: PPTSection,
   section4: PPTSection
 ): Promise<DocTemplate> => {
-  const template = getRandomElement(four_section_templates);
+  const templates = (await import('./templates/four.json')).default;
+  const template = getRandomElement(templates);
   replaceText(
     {
       title: title,

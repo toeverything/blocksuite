@@ -1,4 +1,4 @@
-export const basicCover = () => ({
+export const basicCover = {
   type: 'page',
   meta: {
     id: 'doc:home',
@@ -92,4 +92,4 @@ export const basicCover = () => ({
       },
     ],
   },
-});
+};
