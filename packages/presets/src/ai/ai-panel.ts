@@ -2,10 +2,10 @@ import type { EditorHost } from '@blocksuite/block-std';
 import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
+  DiscardIcon,
 } from '@blocksuite/blocks';
 import {
   type AffineAIPanelWidgetConfig,
-  DeleteIcon,
   InsertBelowIcon,
   ReplaceIcon,
   ResetIcon,
@@ -104,7 +104,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
     },
     {
       name: 'Discard',
-      icon: DeleteIcon,
+      icon: DiscardIcon,
       handler: () => {
         panel.hide();
       },

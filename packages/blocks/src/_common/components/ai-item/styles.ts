@@ -18,7 +18,10 @@ export const menuItemStyles = css`
   }
   .item-icon {
     display: flex;
-    color: var(--affine-brand-color);
+    color: var(--item-icon-color, var(--affine-brand-color));
+  }
+  .menu-item:hover .item-icon {
+    color: var(--item-icon-hover-color, var(--affine-brand-color));
   }
   .item-name {
     display: flex;

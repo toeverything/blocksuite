@@ -12,6 +12,8 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 100%;
+      padding: 8px 12px;
+      box-sizing: border-box;
     }
 
     .generating-tip {

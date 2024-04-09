@@ -1,5 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type {
@@ -22,6 +23,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      padding: 12px 0px;
     }
 
     .answer {
@@ -31,6 +33,8 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       align-items: flex-start;
       gap: 4px;
       align-self: stretch;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      padding: 0 12px;
     }
 
     .answer-head {
@@ -39,7 +43,6 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       color: var(--affine-text-secondary-color);
 
       /* light/xsMedium */
-      font-family: Inter;
       font-size: var(--affine-font-xs);
       font-style: normal;
       font-weight: 500;
@@ -55,8 +58,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
         'liga' off;
 
       /* light/sm */
-      font-family: Inter;
-      font-size: 14px;
+      font-size: var(--affine-font-xs);
       font-style: normal;
       font-weight: 400;
       line-height: 22px; /* 157.143% */
@@ -64,10 +66,12 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
 
     .finish-tip {
       display: flex;
+      box-sizing: border-box;
       width: 100%;
       height: 22px;
       align-items: center;
       gap: 8px;
+      padding: 0 12px;
 
       color: var(--affine-text-secondary-color);
 
@@ -78,7 +82,6 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
         flex: 1 0 0;
 
         /* light/xs */
-        font-family: Inter;
         font-size: var(--affine-font-xs);
         font-style: normal;
         font-weight: 400;
@@ -100,13 +103,16 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
           border-radius: 8px;
 
           &:hover {
-            background: var(
-              --light-detailColor-hoverColor,
-              rgba(0, 0, 0, 0.04)
-            );
+            background: var(--affine-hover-color);
           }
         }
       }
+    }
+
+    .response-list-container ai-item-list {
+      /* set item icon color outside ai-item */
+      --item-icon-color: var(--affine-icon-secondary);
+      --item-icon-hover-color: var(--affine-icon-color);
     }
   `;
 
@@ -119,7 +125,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
   override render() {
     const responseGroups: AIItemGroupConfig[] = [
       {
-        name: 'Responses',
+        name: 'Response',
         items: this.config.responses,
       },
     ];
@@ -143,7 +149,9 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
             ${this.config.responses.length > 0
               ? html`
                   <ai-panel-divider></ai-panel-divider>
-                  <ai-item-list .groups=${responseGroups}></ai-item-list>
+                  <div class="response-list-container">
+                    <ai-item-list .groups=${responseGroups}></ai-item-list>
+                  </div>
                 `
               : nothing}
             ${this.config.responses.length > 0 && this.config.actions.length > 0
@@ -151,7 +159,9 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
               : nothing}
             ${this.config.actions.length > 0
               ? html`
-                  <ai-item-list .groups=${this.config.actions}></ai-item-list>
+                  <div class="action-list-container">
+                    <ai-item-list .groups=${this.config.actions}></ai-item-list>
+                  </div>
                 `
               : nothing}
           `
