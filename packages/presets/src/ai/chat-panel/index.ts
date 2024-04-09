@@ -82,15 +82,12 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   sessionId!: string;
 
   @state()
-  messages: ChatMessage[] = [
-    { role: 'user', content: 'hello' },
-    { role: 'assistant', content: 'hi' },
-  ];
+  messages: ChatMessage[] = [];
 
   @state()
   status: ChatStatus = 'idle';
 
-  private _copilotClient = new CopilotClient('http://localhost:3010');
+  private _copilotClient = new CopilotClient('http://localhost:8080');
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
@@ -98,31 +95,28 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     const { editor } = this;
-    let sessitonId = localStorage.getItem(
-      `blocksuite:chat:${editor.doc.id}:session`
-    );
 
-    sessitonId = await this._copilotClient.createSession({
-      workspaceId: editor.doc.collection.id,
-      docId: editor.doc.id,
-      promptName: 'debug:chat:gpt4',
-    });
-    console.log(
-      '------------------------------------------------------------------'
+    const histories = await this._copilotClient.getHistories(
+      editor.doc.collection.id,
+      editor.doc.id,
+      { action: false }
     );
-    console.log(sessitonId);
-    const sessions = await this._copilotClient.getSessions(
-      editor.doc.collection.id
-    );
-    console.log(sessions);
-    // if (!sessitonId) {
-    // }
-    this.sessionId = sessitonId;
-    // localStorage.setItem(
-    //   `blocksuite:chat:${editor.doc.id}:session`,
-    //   sessitonId
-    // );
-    await this.updateMessages();
+    let sessionId: string;
+    if (histories.length === 0) {
+      sessionId = await this._copilotClient.createSession({
+        workspaceId: editor.doc.collection.id,
+        docId: editor.doc.id,
+        promptName: 'debug:chat:gpt4',
+      });
+      this.messages =
+        histories.find(h => h.sessionId === sessionId)?.messages ||
+        this.messages;
+      this.scrollToDown();
+    } else {
+      sessionId = histories[0].sessionId;
+    }
+
+    this.sessionId = sessionId;
   }
 
   get rootService() {
@@ -134,7 +128,8 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
 
     const histories = await this._copilotClient.getHistories(
       editor.doc.collection.id,
-      editor.doc.id
+      editor.doc.id,
+      { action: false }
     );
     this.messages =
       histories.find(h => h.sessionId === this.sessionId)?.messages ||
