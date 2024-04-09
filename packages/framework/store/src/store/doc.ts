@@ -4,7 +4,6 @@ import * as Y from 'yjs';
 
 import { Text } from '../reactive/text.js';
 import type { BlockModel } from '../schema/base.js';
-import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import { syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
@@ -208,104 +207,35 @@ export class Doc extends Space<FlatBlockMap> {
     const flavours =
       typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
 
-    return Array.from(this._blockCollection.blocks.values())
-      .filter(({ flavour }) => flavours.includes(flavour))
-      .map(x => x.model);
+    return this.getBlocks().filter(model => flavours.includes(model.flavour));
   }
 
   getParent(target: BlockModel | string): BlockModel | null {
-    const root = this._root;
-    const targetId = typeof target === 'string' ? target : target.id;
-    if (!root || root.id === targetId) return null;
-
-    const findParent = (parentId: string): BlockModel | null => {
-      const parentModel = this.getBlockById(parentId);
-      if (!parentModel) return null;
-
-      for (const [childId] of parentModel.childMap) {
-        if (childId === targetId) return parentModel;
-
-        const parent = findParent(childId);
-        if (parent !== null) return parent;
-      }
-
-      return null;
-    };
-
-    const parent = findParent(root.id);
-    if (parent !== null) return parent;
-
-    return null;
+    return this._blockCollection.getParent(target);
   }
 
   getPreviousSibling(block: BlockModel) {
-    const parent = this.getParent(block);
-    if (!parent) {
-      return null;
-    }
-    const index = parent.children.indexOf(block);
-    if (index === -1) {
-      throw new Error(
-        "Failed to getPreviousSiblings! Block not found in parent's children"
-      );
-    }
-    return parent.children[index - 1] ?? null;
+    return this._blockCollection.getPrev(block);
   }
 
   getPreviousSiblings(block: BlockModel) {
-    const parent = this.getParent(block);
-    if (!parent) {
-      return [];
-    }
-    const index = parent.children.indexOf(block);
-    if (index === -1) {
-      throw new Error(
-        "Failed to getPreviousSiblings! Block not found in parent's children"
-      );
-    }
-    return parent.children.slice(0, index);
+    return this._blockCollection.getPrevs(block);
   }
 
   getNextSibling(block: BlockModel) {
-    const parent = this.getParent(block);
-    if (!parent) {
-      return null;
-    }
-    const index = parent.children.indexOf(block);
-    if (index === -1) {
-      throw new Error(
-        "Failed to getPreviousSiblings! Block not found in parent's children"
-      );
-    }
-    return parent.children[index + 1] ?? null;
+    return this._blockCollection.getNext(block);
   }
 
   getNextSiblings(block: BlockModel) {
-    const parent = this.getParent(block);
-    if (!parent) {
-      return [];
-    }
-    const index = parent.children.indexOf(block);
-    if (index === -1) {
-      throw new Error(
-        "Failed to getNextSiblings! Block not found in parent's children"
-      );
-    }
-    return parent.children.slice(index + 1);
+    return this._blockCollection.getNexts(block);
   }
 
   getSchemaByFlavour(flavour: string) {
     return this.schema.flavourSchemaMap.get(flavour);
   }
 
-  getInitialPropsByFlavour(flavour: string) {
-    const schema = this.schema.flavourSchemaMap.get(flavour);
-    assertExists(schema);
-    return schema.model.props?.(internalPrimitives) ?? {};
-  }
-
   getBlocks() {
-    return this._blockCollection.getBlocks();
+    return this._blockCollection.getBlocks().map(block => block.model);
   }
 
   addBlocks(
@@ -556,18 +486,12 @@ export class Doc extends Space<FlatBlockMap> {
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
-  private _getYBlock(id: string): YBlock | null {
-    const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) return null;
-    return yBlock;
-  }
-
   private _historyObserver = () => {
     this.slots.historyUpdated.emit();
   };
 
   private _handleYBlockAdd(id: string) {
-    const yBlock = this._getYBlock(id);
+    const yBlock = this._yBlocks.get(id) as YBlock | undefined;
     if (!yBlock) {
       console.warn(
         `Failed to handle yBlock add, yBlock with id-${id} not found`
