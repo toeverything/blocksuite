@@ -11,7 +11,7 @@ export function textToTextStream({
   workspaceId: string;
   prompt: string;
 }): BlockSuitePresets.TextStream {
-  const client = new CopilotClient();
+  const client = new CopilotClient('http://localhost:3010');
   return {
     [Symbol.asyncIterator]: async function* () {
       const session = await client.createSession({
