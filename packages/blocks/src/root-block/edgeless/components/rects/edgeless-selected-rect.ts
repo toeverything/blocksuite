@@ -1143,6 +1143,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
               top: `${y - top - borderWidth}px`,
               width: `${w * this.zoom}px`,
               height: `${h * this.zoom}px`,
+              transform: `rotate(${element.rotate}deg)`,
               border: `1px solid var(--affine-primary-color)`,
             };
             return html`<div
