@@ -146,8 +146,6 @@ const createMindmap: AIItemConfig = {
               const data = aiPanel.ctx as any;
               aiPanel.hide();
 
-              console.log(data.node, 'mindmap');
-
               const mindmapId = surface.addElement({
                 type: 'mindmap',
                 children: data.node,
@@ -156,8 +154,6 @@ const createMindmap: AIItemConfig = {
               const mindmap = surface.getElementById(
                 mindmapId
               ) as MindmapElementModel;
-
-              console.log(mindmap.tree);
 
               host.doc.transact(() => {
                 const rootElement = mindmap.tree.element;
