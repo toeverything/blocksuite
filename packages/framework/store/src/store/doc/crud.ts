@@ -12,7 +12,7 @@ export class DocCRUD {
     private readonly _schema: Schema
   ) {}
 
-  get root() {
+  get root(): string | null {
     let rootId: string | null = null;
     this._yBlocks.forEach(yBlock => {
       const flavour = yBlock.get('sys:flavour');

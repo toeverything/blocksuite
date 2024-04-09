@@ -40,7 +40,6 @@ export class Doc extends Space<FlatBlockMap> {
   private readonly _blockCollection: BlockCollection;
   private readonly _docCRUD: DocCRUD;
   private _history!: Y.UndoManager;
-  private _root: BlockModel | null = null;
   /** Indicate whether the block tree is ready */
   private _ready = false;
   private _shouldTransact = true;
@@ -126,7 +125,9 @@ export class Doc extends Space<FlatBlockMap> {
   }
 
   get root() {
-    return this._root;
+    const rootId = this._docCRUD.root;
+    if (!rootId) return null;
+    return this._blockCollection.getBlock(rootId)?.model ?? null;
   }
 
   get isEmpty() {
@@ -518,8 +519,7 @@ export class Doc extends Space<FlatBlockMap> {
     }
 
     if (model.role === 'root') {
-      this._root = model;
-      this.slots.rootAdded.emit(this._root);
+      this.slots.rootAdded.emit(model);
       return;
     }
 
@@ -529,7 +529,7 @@ export class Doc extends Space<FlatBlockMap> {
   private _handleYBlockDelete(id: string) {
     const model = this.getBlockById(id);
 
-    if (model === this._root) {
+    if (model === this.root) {
       this.slots.rootDeleted.emit(id);
     }
     assertExists(model);
