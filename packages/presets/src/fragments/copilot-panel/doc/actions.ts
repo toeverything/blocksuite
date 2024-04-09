@@ -1,3 +1,4 @@
+import type { ChatMessage } from '../chat/logic.js';
 import { getChatService, userText } from './api.js';
 
 export function runChangeToneAction({
@@ -147,9 +148,13 @@ export function runTranslateAction(payload: {
   ]);
 }
 
-export function runAnalysisAction(payload: { input: string }) {
+export function runAnalysisAction(payload: {
+  input: string;
+  background: ChatMessage[];
+}) {
   const { input } = payload;
   return getChatService().chat([
+    ...payload.background,
     userText(
       `Use the nested unordered list syntax in Markdown to create a structure similar to a mind map. 
       Analyze the following questions:
@@ -160,10 +165,12 @@ export function runAnalysisAction(payload: { input: string }) {
 
 export function runPartAnalysisAction(payload: {
   input: string;
+  background: ChatMessage[];
   path: string[];
 }) {
   const { input, path } = payload;
   return getChatService().chat([
+    ...payload.background,
     userText(
       `The following is a small part of a mind map. You need to use the markdown unordered list starts with \`-\` nesting syntax to analyze the issue in a structure similar to the mind map. Only output the supplementary content starting from the issue node; do not output any additional content.Do not output nodes that already exist in path.
 Issue Path:
@@ -173,9 +180,13 @@ ${input}`
     ),
   ]);
 }
-export const runPPTGenerateAction = (payload: { input: string }) => {
+export const runPPTGenerateAction = (payload: {
+  input: string;
+  background: ChatMessage[];
+}) => {
   const { input } = payload;
   return getChatService().chat([
+    ...payload.background,
     userText(
       `
 I want to write a PPT, that has many pages, each page has 1 to 4 sections,

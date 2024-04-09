@@ -153,6 +153,19 @@ export class AIChatLogic {
     ]);
   };
 
+  get docs() {
+    return [...this.host.doc.collection.docs.values()];
+  }
+
+  async docBackground(): Promise<ChatMessage[]> {
+    return [
+      {
+        role: 'system',
+        content: `the background is:\n${await Promise.all(this.docs.map(v => docToMarkdown(v))).then(list => list.join('\n'))}`,
+      },
+    ];
+  }
+
   genAnswer = async (text: string) => {
     if (this.loading) {
       return;
@@ -168,6 +181,7 @@ export class AIChatLogic {
     this.reactiveData.value = '';
     const r = await this.startRequest(async () => {
       const iter = getChatService().chat([
+        ...(await this.docBackground()),
         ...background.messages,
         ...this.reactiveData.history,
       ]);
@@ -300,7 +314,8 @@ export class AIChatLogic {
   createAction(
     name: string,
     action: (
-      input: string
+      input: string,
+      background: ChatMessage[]
     ) => Promise<AsyncIterable<string>> | AsyncIterable<string>
   ) {
     return async (text?: string): Promise<void> => {
@@ -320,7 +335,7 @@ export class AIChatLogic {
         },
       ];
       const result = await this.startRequest(async () => {
-        const strings = await action(input);
+        const strings = await action(input, await this.docBackground());
         let r = '';
         for await (const item of strings) {
           r += item;
@@ -420,13 +435,13 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Create mind-map',
-      action: this.createAction('Create mind-map', input => {
+      action: this.createAction('Create mind-map', (input, background) => {
         const service = getEdgelessService(this.host);
         const [x, y] = [service.viewport.centerX, service.viewport.centerY];
         const reactiveData = this.reactiveData;
         const build = mindMapBuilder(this.host, x, y);
         return (async function* () {
-          const strings = runAnalysisAction({ input });
+          const strings = runAnalysisAction({ input, background });
           let text = '';
           for await (const item of strings) {
             yield item;
@@ -442,11 +457,11 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Create presentation',
-      action: this.createAction('Create mind-map', input => {
+      action: this.createAction('Create mind-map', (input, background) => {
         const reactiveData = this.reactiveData;
         const build = pptBuilder(this.host);
         return (async function* () {
-          const strings = runPPTGenerateAction({ input });
+          const strings = runPPTGenerateAction({ input, background });
           let text = '';
           for await (const item of strings) {
             yield item;
@@ -521,9 +536,9 @@ export class AIChatLogic {
             return oldTree;
           }
         );
-        await this.createAction('Part analysis', input => {
+        await this.createAction('Part analysis', (input, background) => {
           return (async function* () {
-            const strings = runPartAnalysisAction({ input, path });
+            const strings = runPartAnalysisAction({ input, path, background });
             let text = '';
             for await (const item of strings) {
               yield item;
