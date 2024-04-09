@@ -1,15 +1,14 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import { Slice } from '@blocksuite/store';
-
 import type {
+  EdgelessBlock,
   FrameBlockModel,
   ImageBlockModel,
   SurfaceBlockComponent,
-} from '../../../index.js';
-import { BlocksUtils } from '../../../index.js';
-import type { EdgelessBlock } from '../../../root-block/index.js';
-import { EdgelessRootService } from '../../../root-block/index.js';
+} from '@blocksuite/blocks';
+import { BlocksUtils, EdgelessRootService } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
+import { Slice } from '@blocksuite/store';
+
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
 export const getRootService = (host: EditorHost) => {
@@ -115,4 +114,14 @@ export const getFirstImageInFrame = (
     return false;
   }) as ImageBlockModel | undefined;
   return image?.id;
+};
+
+export const getSelections = (host: EditorHost) => {
+  const [_, data] = host.command
+    .chain()
+    .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
+    .getSelectedBlocks({ types: ['text', 'block'] })
+    .run();
+
+  return data;
 };
