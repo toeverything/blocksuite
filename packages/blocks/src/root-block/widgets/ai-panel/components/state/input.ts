@@ -53,6 +53,14 @@ export class AIPanelInput extends WithDisposable(LitElement) {
         font-weight: 400;
         line-height: 22px; /* 157.143% */
       }
+
+      textarea::placeholder {
+        color: var(--affine-placeholder-color);
+      }
+
+      textarea::-moz-placeholder {
+        color: var(--affine-placeholder-color);
+      }
     }
 
     .arrow {

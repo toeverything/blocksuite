@@ -89,14 +89,14 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       },
     },
     {
-      name: 'Insert',
+      name: 'Insert below',
       icon: InsertBelowIcon,
       handler: () => {
         insertBelow().catch(console.error);
       },
     },
     {
-      name: 'Replace',
+      name: 'Replace selection',
       icon: ReplaceIcon,
       handler: () => {
         replace().catch(console.error);

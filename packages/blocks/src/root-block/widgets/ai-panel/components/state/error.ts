@@ -56,7 +56,6 @@ export class AIPanelError extends WithDisposable(LitElement) {
             'clig' off,
             'liga' off;
           /* light/sm */
-          font-family: Inter;
           font-size: var(--affine-font-sm);
           font-style: normal;
           font-weight: 400;
