@@ -1,8 +1,6 @@
 import { Bound } from '@blocksuite/blocks';
 import { nanoid } from '@blocksuite/store';
 
-import { basicCover } from './templates/cover.js';
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const replaceText = (text: Record<string, string>, template: any) => {
   if (template != null && typeof template === 'object') {
@@ -120,7 +118,8 @@ const createBasicCover = async (
   title: string,
   section1: PPTSection
 ): Promise<DocTemplate> => {
-  const template = basicCover;
+  const templates = (await import('./templates/cover.json')).default;
+  const template = getRandomElement(templates);
   replaceText(
     {
       title: title,
