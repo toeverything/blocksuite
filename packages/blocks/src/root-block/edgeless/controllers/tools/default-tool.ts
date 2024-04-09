@@ -27,6 +27,7 @@ import {
   type CanvasElement,
   ConnectorElementModel,
   type IVec,
+  type PointLocation,
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import type {
@@ -82,6 +83,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _isDoubleClickedOnMask = false;
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
+  private _selectedPaths = new Map<string, PointLocation[]>();
   private _toBeMoved: EdgelessModel[] = [];
   private _autoPanTimer: number | null = null;
   private _dragging = false;
@@ -258,7 +260,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     if (selected instanceof ConnectorElementModel) {
+      const path = this._selectedPaths.get(selected.id)!;
       selected.moveTo(bound);
+      ConnectorElementModel.move(selected, bound, path, [delta[0], delta[1]]);
+      return;
     }
 
     this._service.updateElement(selected.id, {
@@ -601,9 +606,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartModelCoord = [startX, startY];
     this._dragLastModelCoord = [startX, startY];
 
-    this._selectedBounds = this._toBeMoved.map(element =>
-      Bound.deserialize(element.xywh)
-    );
+    this._selectedBounds = this._toBeMoved.map(element => {
+      if (element instanceof ConnectorElementModel) {
+        this._selectedPaths.set(
+          element.id,
+          element.absolutePath.map(p => p.clone())
+        );
+      }
+      return Bound.deserialize(element.xywh);
+    });
 
     this._alignBound = this._edgeless.service.snap.setupAlignables(
       this._toBeMoved
@@ -721,6 +732,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = [0, 0];
     this._dragLastPos = [0, 0];
     this._selectedBounds = [];
+    this._selectedPaths.clear();
     this._edgeless.service.snap.cleanupAlignables();
     surface.overlays.frame.clear();
     this._toBeMoved = [];

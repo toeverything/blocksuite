@@ -134,6 +134,42 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     }
   }
 
+  static move(
+    connector: ConnectorElementModel,
+    bounds: Bound,
+    originalPath: PointLocation[],
+    delta: IVec2
+  ) {
+    const { mode } = connector;
+    const offset = [bounds.x, bounds.y];
+
+    connector.updatingPath = true;
+    connector.xywh = bounds.serialize();
+    if (mode === ConnectorMode.Curve) {
+      connector.path = originalPath.map(point => {
+        const [p, t, absIn, absOut] = [
+          point,
+          point.tangent,
+          point.absIn,
+          point.absOut,
+        ]
+          .map(p => Vec.add([p[0], p[1]], delta))
+          .map(p => Vec.sub([p[0], p[1]], offset));
+        const ip = Vec.sub(absIn, p);
+        const op = Vec.sub(absOut, p);
+        return new PointLocation(p, t, ip, op);
+      });
+    } else {
+      connector.path = originalPath.map(point => {
+        const d = Vec.add([point[0], point[1]], delta);
+        const o = Vec.sub(d, offset);
+        return PointLocation.fromVec(o);
+      });
+    }
+
+    connector.updatingPath = false;
+  }
+
   static resize(
     connector: ConnectorElementModel,
     bounds: Bound,
