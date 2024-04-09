@@ -170,6 +170,11 @@ export const SurfaceBlockSchema = defineBlockSchema({
   toModel: () => new SurfaceBlockModel(),
 });
 
+export type SurfaceMiddleware = (
+  surface: SurfaceBlockModel,
+  hooks: SurfaceBlockModel['hooks']
+) => () => void;
+
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _elementModels: Map<
     string,
@@ -180,6 +185,15 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _elementToGroup: Map<string, string> = new Map();
   private _connectorToElements: Map<string, string[]> = new Map();
   private _elementToConnector: Map<string, string[]> = new Map();
+
+  /**
+   * Hooks is used to attach extra logic when calling `addElement`、`updateElement`(or assign property directly) and `removeElement`.
+   * It's usefull when dealing with relation between different model.
+   */
+  protected hooks = {
+    update: new Slot<Omit<ElementUpdatedData, 'local'>>(),
+    remove: new Slot<{ id: string; type: string; model: ElementModel }>(),
+  };
 
   elementUpdated = new Slot<ElementUpdatedData>();
   elementAdded = new Slot<{ id: string; local: boolean }>();
@@ -210,10 +224,10 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   private _applyMiddlewares() {
     this._disposables.push(
-      connectorMiddleware(this),
-      groupRelationMiddleware(this),
-      groupSizeMiddleware(this),
-      mindmapMiddleware(this)
+      connectorMiddleware(this, this.hooks),
+      groupRelationMiddleware(this, this.hooks),
+      groupSizeMiddleware(this, this.hooks),
+      mindmapMiddleware(this, this.hooks)
     );
   }
 
@@ -468,6 +482,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this._elementModels.forEach(({ unmount }) => unmount());
     this._elementModels.clear();
+
+    this.hooks.update.dispose();
+    this.hooks.remove.dispose();
   }
 
   isInMindmap(id: string) {
@@ -554,14 +571,25 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.doc.transact(() => {
       const element = this.getElementById(id)!;
-
-      this.elements.getValue()!.delete(id);
+      const group = this.getGroup(id);
 
       if (element instanceof GroupLikeModel) {
         element.childIds.forEach(childId => {
           this.removeElement(childId);
         });
       }
+
+      if (group) {
+        group.removeDescendant(id);
+      }
+
+      this.elements.getValue()!.delete(id);
+
+      this.hooks.remove.emit({
+        id,
+        model: element as ElementModel,
+        type: element.type,
+      });
     });
   }
 

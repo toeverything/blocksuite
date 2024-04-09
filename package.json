@@ -52,8 +52,8 @@
     "postinstall": "husky"
   },
   "lint-staged": {
-    "*": "prettier --write --cache --ignore-unknown",
-    "*.{ts,tsx,js,jsx}": "eslint --cache --fix"
+    "*": "pnpm exec prettier --write --cache --ignore-unknown",
+    "!(examples/**/*).{ts,tsx,js,jsx}": "pnpm exec eslint --cache --fix"
   },
   "keywords": [],
   "author": "toeverything",

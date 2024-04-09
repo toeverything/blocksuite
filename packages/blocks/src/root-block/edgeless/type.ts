@@ -7,6 +7,8 @@ import type {
   ElementModel,
   GroupLikeModel,
 } from '../../surface-block/element-model/base.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import { Bound } from '../../surface-block/utils/bound.js';
 import {
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
@@ -14,9 +16,7 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '../../surface-block/index.js';
-import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import { Bound } from '../../surface-block/utils/bound.js';
+} from '../../surface-block/utils/math-utils.js';
 import { PointLocation } from '../../surface-block/utils/point-location.js';
 import type { IVec } from '../../surface-block/utils/vec.js';
 import type { SerializedXYWH } from '../../surface-block/utils/xywh.js';

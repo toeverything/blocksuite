@@ -39,6 +39,10 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
     return this.edgeless.service.std.command.chain();
   }
 
+  hide() {
+    this.remove();
+  }
+
   override render() {
     const chain = this._getChain();
     const groups = this.groups.reduce((pre, group) => {
