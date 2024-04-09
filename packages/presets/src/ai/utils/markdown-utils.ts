@@ -6,8 +6,8 @@ import {
   pasteMiddleware,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
-import { Job, type Slice } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
+import { DocCollection, Job, type Slice } from '@blocksuite/store';
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
   const job = new Job({ collection: host.std.doc.collection });
@@ -90,4 +90,25 @@ export async function replaceFromMarkdown(
 ) {
   const { snapshot, job } = await markdownToSnapshot(markdown, host);
   await job.snapshotToSlice(snapshot, host.doc, parent, index);
+}
+
+export async function markDownToDoc(host: EditorHost, answer: string) {
+  const schema = host.std.doc.collection.schema;
+  // Should not create a new doc in the original collection
+  const collection = new DocCollection({ schema });
+  const job = new Job({
+    collection,
+    middlewares: [defaultImageProxyMiddleware],
+  });
+  const mdAdapter = new MarkdownAdapter();
+  mdAdapter.applyConfigs(job.adapterConfigs);
+  const snapshot = await mdAdapter.toDocSnapshot({
+    file: answer,
+    assets: job.assetsManager,
+  });
+  const doc = await job.snapshotToDoc(snapshot);
+  if (!doc) {
+    console.error('Failed to convert markdown to doc');
+  }
+  return doc as Doc;
 }

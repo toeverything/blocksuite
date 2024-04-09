@@ -30,7 +30,7 @@ export class AIProvider {
     AIProvider.instance.actions[id] = action;
   }
 
-  static provideUserInfo(fn: () => AIUserInfo | null) {
+  static provideUserInfo(fn: () => AIUserInfo | Promise<AIUserInfo> | null) {
     AIProvider.instance.userInfoFn = fn;
   }
 
