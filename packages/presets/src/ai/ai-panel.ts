@@ -13,40 +13,27 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 
 import { createTextRenderer } from './messages/text.js';
-import {
-  insertFromMarkdown,
-  replaceFromMarkdown,
-} from './utils/markdown-utils.js';
+import { insertFromMarkdown } from './utils/markdown-utils.js';
+import { getSelections } from './utils/selection-utils.js';
 
 export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   const host = panel.host;
 
   const getSelection = () => {
-    let paths: string[] = [];
-    const textSelection = host.selection.find('text');
+    const { selectedBlocks: blocks } = getSelections(panel.host);
+    if (!blocks || !blocks.length) return null;
 
-    if (textSelection) {
-      paths = textSelection.to?.path ?? textSelection.path;
-    } else {
-      const blockSelection = host.selection.find('block');
-      if (blockSelection) {
-        paths = blockSelection.path;
-      }
-    }
-
-    if (!paths) return null;
-    const block = host.view.viewFromPath('block', paths);
-    if (!block) return null;
-    const blockParent = host.view.viewFromPath('block', block.parentPath);
-    if (!blockParent) return;
-    const blockIndex = blockParent.model.children.findIndex(
-      x => x.id === block.model.id
-    );
+    const firstBlockId = blocks[0].model.id;
+    const firstBlockParent = blocks[0].parentBlockElement;
+    const lastBlockId = blocks.at(-1)!.model.id;
+    const lastBlockParent = blocks.at(-1)!.parentBlockElement;
 
     return {
-      block,
-      blockParent,
-      blockIndex,
+      blocks,
+      firstBlockId,
+      lastBlockId,
+      firstBlockParent,
+      lastBlockParent,
     };
   };
 
@@ -54,12 +41,30 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
     const selection = getSelection();
     if (!selection || !panel.answer) return;
 
-    await replaceFromMarkdown(
+    const { blocks, firstBlockId, firstBlockParent } = selection;
+    // update selected block
+    const firstIndex = firstBlockParent.model.children.findIndex(
+      child => child.id === firstBlockId
+    ) as number;
+
+    blocks.forEach(block => {
+      host.doc.deleteBlock(block.model);
+    });
+
+    const models = await insertFromMarkdown(
       host,
       panel.answer,
-      selection.block.model.id,
-      selection.blockIndex
+      firstBlockParent.model.id,
+      firstIndex
     );
+
+    setTimeout(() => {
+      const parentPath = firstBlockParent.path;
+      const selections = models
+        .map(model => [...parentPath, model.id])
+        .map(path => host.selection.create('block', { path }));
+      host.selection.setGroup('note', selections);
+    }, 0);
 
     panel.hide();
   };
@@ -67,16 +72,29 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   const insertBelow = async () => {
     const selection = getSelection();
 
-    if (!selection) {
+    if (!selection || !panel.answer) {
       return;
     }
 
-    await insertFromMarkdown(
+    const { lastBlockParent, lastBlockId } = selection;
+    const lastBlockIndex = lastBlockParent.model.children.findIndex(
+      child => child.id === lastBlockId
+    ) as number;
+
+    const models = await insertFromMarkdown(
       host,
-      panel.answer ?? '',
-      selection.blockParent.model.id,
-      selection.blockIndex + 1
+      panel.answer,
+      lastBlockParent.model.id,
+      lastBlockIndex + 1
     );
+
+    setTimeout(() => {
+      const parentPath = lastBlockParent.path;
+      const selections = models
+        .map(model => [...parentPath, model.id])
+        .map(path => host.selection.create('block', { path }));
+      host.selection.setGroup('note', selections);
+    }, 0);
 
     panel.hide();
   };
