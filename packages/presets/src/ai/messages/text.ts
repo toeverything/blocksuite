@@ -7,7 +7,7 @@ import type { Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { markDownToDoc } from '../utils.js';
+import { markDownToDoc } from '../utils/markdown-utils.js';
 
 @customElement('ai-answer-text')
 export class AIAnswerText extends LitElement {
@@ -73,6 +73,7 @@ export class AIAnswerText extends LitElement {
   }
 
   override render() {
+    console.log('answer: ', this.answer);
     if (!this._previewDoc) return nothing;
     return html`
       <div class="ai-answer-text-container">

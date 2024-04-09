@@ -213,9 +213,7 @@ export class AffineAIPanelWidget extends WidgetElement {
         this._selection = this.host.selection.find('text');
         requestAnimationFrame(() => {
           this.scrollIntoView({
-            behavior: 'instant',
             block: 'center',
-            inline: 'center',
           });
         });
       } else {
