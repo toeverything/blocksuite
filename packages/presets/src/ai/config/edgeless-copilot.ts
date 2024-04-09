@@ -22,9 +22,7 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists, assertType } from '@blocksuite/global/utils';
 
-import { CopilotClient } from '../copilot-client.js';
 import { createMindmapRenderer } from '../messages/mindmap.js';
-import { getGenerateAnswer } from '../utils.js';
 
 function showWhen(
   host: EditorHost,
@@ -123,14 +121,10 @@ const createMindmap: AIItemConfig = {
     copilotPanel.hide();
 
     const selectionRect = copilotPanel.selectionModelRect;
-    const copilotClient = new CopilotClient('http://localhost:3010');
 
     aiPanel.config = {
       answerRenderer: createMindmapRenderer(host, aiPanel),
-      generateAnswer: getGenerateAnswer({
-        copilotClient,
-        panel: aiPanel,
-      }),
+      generateAnswer: () => {},
 
       finishStateConfig: {
         responses: [
