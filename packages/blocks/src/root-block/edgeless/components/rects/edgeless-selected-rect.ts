@@ -36,13 +36,15 @@ import type {
 import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { TextElementModel } from '../../../../surface-block/element-model/text.js';
-import type { ElementModel } from '../../../../surface-block/index.js';
+import type {
+  ElementModel,
+  PointLocation,
+} from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   deserializeXYWH,
   GroupElementModel,
   ShapeElementModel,
-  Vec,
 } from '../../../../surface-block/index.js';
 import {
   Bound,
@@ -621,13 +623,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       {
         bound: Bound;
         matrix?: DOMMatrix;
+        path?: PointLocation[];
       }
     >,
     direction: HandleDirection
   ) => {
     const { edgeless } = this;
 
-    newBounds.forEach(({ bound, matrix }, id) => {
+    newBounds.forEach(({ bound, matrix, path }, id) => {
       const element = edgeless.service.getElementById(id);
       if (!element) return;
 
@@ -757,46 +760,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             });
           }
         } else {
-          if (element instanceof ShapeElementModel) {
-            bound = normalizeShapeBound(element, bound);
-          } else if (element instanceof ConnectorElementModel && matrix) {
-            const path = this._resizeManager.bounds
-              .get(element.id)!
-              .path.map(point => {
-                point = point.clone();
-                const { x, y } = new DOMPoint(
-                  point[0],
-                  point[1]
-                ).matrixTransform(matrix);
-                const { x: m, y: n } = new DOMPoint(
-                  ...point.tangent
-                ).matrixTransform(matrix);
-                point.tangent = [m, n];
-                const { x: m0, y: n0 } = new DOMPoint(
-                  ...point.absIn
-                ).matrixTransform(matrix);
-                point.in = Vec.sub([m0, n0], [x, y]);
-                const { x: m1, y: n1 } = new DOMPoint(
-                  ...point.absOut
-                ).matrixTransform(matrix);
-                point.out = Vec.sub([m1, n1], [x, y]);
-                point[0] = x;
-                point[1] = y;
-                return point;
-              });
-            element.updatingPath = true;
-            element.xywh = bound.serialize();
-            element.path = path.map(p => {
-              const [x, y] = Vec.sub([p[0], p[1]], [bound.x, bound.y]);
-              return p.setVec([x, y]);
-            });
-            element.updatingPath = false;
-
-            // edgeless.service.updateElement(id, {
-            //   xywh: bound.serialize(),
-            // });
+          if (element instanceof ConnectorElementModel && path && matrix) {
+            ConnectorElementModel.resize(element, bound, path, matrix);
             return;
           }
+
+          if (element instanceof ShapeElementModel) {
+            bound = normalizeShapeBound(element, bound);
+          }
+
           edgeless.service.updateElement(id, {
             xywh: bound.serialize(),
           });

@@ -263,35 +263,25 @@ export function getSelectedRect(selected: Selectable[]): DOMRect {
   );
 }
 
-export function getSelectableBounds(selected: Selectable[]): Map<
-  string,
-  {
-    bound: Bound;
-    rotate: number;
-    path?: PointLocation[];
-  }
-> {
-  const bounds = new Map<
-    string,
-    {
-      bound: Bound;
-      rotate: number;
-      path?: PointLocation[];
-    }
-  >();
+export interface SelectableBounds {
+  bound: Bound;
+  rotate: number;
+  path?: PointLocation[];
+}
+
+export function getSelectableBounds(
+  selected: Selectable[]
+): Map<string, SelectableBounds> {
+  const bounds = new Map<string, SelectableBounds>();
   getElementsWithoutGroup(selected).forEach(ele => {
     const bound = Bound.deserialize(ele.xywh);
-    const props: {
-      bound: Bound;
-      rotate: number;
-      path?: PointLocation[];
-    } = {
+    const props: SelectableBounds = {
       bound,
       rotate: ele.rotate,
     };
 
     if (ele instanceof ConnectorElementModel) {
-      props.path = [...ele.absolutePath];
+      props.path = ele.absolutePath.map(p => p.clone());
     }
 
     bounds.set(ele.id, props);

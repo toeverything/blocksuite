@@ -134,6 +134,43 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     }
   }
 
+  static resize(
+    connector: ConnectorElementModel,
+    bounds: Bound,
+    originalPath: PointLocation[],
+    matrix: DOMMatrix
+  ) {
+    const { mode } = connector;
+
+    connector.updatingPath = true;
+    connector.xywh = bounds.serialize();
+
+    const offset = [bounds.x, bounds.y];
+    if (mode === ConnectorMode.Curve) {
+      connector.path = originalPath.map(point => {
+        const [p, t, absIn, absOut] = [
+          point,
+          point.tangent,
+          point.absIn,
+          point.absOut,
+        ]
+          .map(p => new DOMPoint(...p).matrixTransform(matrix))
+          .map(p => Vec.sub([p.x, p.y], offset));
+        const ip = Vec.sub(absIn, p);
+        const op = Vec.sub(absOut, p);
+        return new PointLocation(p, t, ip, op);
+      });
+    } else {
+      connector.path = originalPath.map(point => {
+        const { x, y } = new DOMPoint(...point).matrixTransform(matrix);
+        const p = Vec.sub([x, y], offset);
+        return PointLocation.fromVec(p);
+      });
+    }
+
+    connector.updatingPath = false;
+  }
+
   override hitTest(
     x: number,
     y: number,

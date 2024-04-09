@@ -8,6 +8,7 @@ import {
   rotatePoints,
 } from '../../../../surface-block/index.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
+import type { SelectableBounds } from '../../utils/query.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
 // 15deg
@@ -21,7 +22,6 @@ type ResizeMoveHandler = (
     string,
     {
       bound: Bound;
-      scale?: { x: number; y: number };
       matrix?: DOMMatrix;
     }
   >,
@@ -147,15 +147,7 @@ export class HandleResizeManager {
     return this._originalRect;
   }
 
-  updateBounds(
-    bounds: Map<
-      string,
-      {
-        bound: Bound;
-        rotate: number;
-      }
-    >
-  ) {
+  updateBounds(bounds: Map<string, SelectableBounds>) {
     this._bounds = bounds;
   }
 
@@ -450,12 +442,12 @@ export class HandleResizeManager {
       string,
       {
         bound: Bound;
-        scale?: { x: number; y: number };
         matrix?: DOMMatrix;
+        path?: PointLocation[];
       }
     >();
 
-    let process: (value: { bound: Bound; rotate: number }, key: string) => void;
+    let process: (value: SelectableBounds, key: string) => void;
 
     if (isCorner || isAll || isEdgeAndCorner) {
       if (this._bounds.size === 1) {
@@ -476,7 +468,7 @@ export class HandleResizeManager {
           .translateSelf(-fp.x, -fp.y);
 
         // TODO: on same rotate
-        process = ({ bound: { x, y, w, h } }, id) => {
+        process = ({ bound: { x, y, w, h }, path }, id) => {
           const cx = x + w / 2;
           const cy = y + h / 2;
           const center = new DOMPoint(cx, cy).matrixTransform(m2);
@@ -490,8 +482,8 @@ export class HandleResizeManager {
               newWidth,
               newHeight
             ),
-            scale,
             matrix: m2,
+            path,
           });
         };
       }
@@ -505,7 +497,7 @@ export class HandleResizeManager {
         fixedPoint.y,
         0
       );
-      process = ({ bound: { x, y, w, h }, rotate = 0 }, id) => {
+      process = ({ bound: { x, y, w, h }, rotate = 0, path }, id) => {
         const cx = x + w / 2;
         const cy = y + h / 2;
 
@@ -547,6 +539,8 @@ export class HandleResizeManager {
             newWidth,
             newHeight
           ),
+          matrix: m2,
+          path,
         });
       };
     }
