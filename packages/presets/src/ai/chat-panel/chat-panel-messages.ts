@@ -1,5 +1,6 @@
 import '../messages/slides-renderer.js';
 import './ai-loading.js';
+import '../messages/text.js';
 
 import type { TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
@@ -19,7 +20,6 @@ import {
   ReplaceIcon,
 } from '../_common/icons.js';
 import type { CopilotClient } from '../copilot-client.js';
-import { textRenderer } from '../messages/text.js';
 import type { ChatMessage, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
@@ -32,7 +32,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     .chat-panel-messages {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 12px;
       height: 100%;
       position: relative;
       overflow-y: auto;
@@ -122,7 +122,10 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderItem(message: ChatMessage) {
-    return textRenderer(message.content);
+    return html`<ai-answer-text
+      .host=${this.host}
+      .answer=${message.content}
+    ></ai-answer-text>`;
     // if (message.role === 'user') {
     //   return textRenderer(message.content);
     // } else {
