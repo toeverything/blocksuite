@@ -57,6 +57,19 @@ const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   return matchFlavours(model, ['affine:code']);
 };
 
+const imageBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
+  const [_, ctx] = chain
+    .getSelectedModels({
+      types: ['block'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  if (!selectedModels || selectedModels.length > 1) return false;
+
+  const model = selectedModels[0];
+  return matchFlavours(model, ['affine:image']);
+};
+
 const DocAIGroup: AIItemGroupConfig = {
   name: 'doc with ai',
   items: [
@@ -149,8 +162,21 @@ const CodeAIGroup: AIItemGroupConfig = {
   ],
 };
 
+const ImageAIGroup: AIItemGroupConfig = {
+  name: 'image with ai',
+  items: [
+    {
+      name: 'Explain this image',
+      icon: AIPenIcon,
+      showWhen: imageBlockShowWhen,
+      handler: actionToHandler('explainImage'),
+    },
+  ],
+};
+
 export const AIItemGroups: AIItemGroupConfig[] = [
   DocAIGroup,
   EditAIGroup,
   CodeAIGroup,
+  ImageAIGroup,
 ];

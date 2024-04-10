@@ -114,7 +114,7 @@ export class CopilotClient {
     sessionId: string;
     content: string;
     params?: string;
-    attachments?: Blob[];
+    attachments?: string[];
   }) {
     const res = await this.graphQLClient.mutate({
       mutation: CREATE_COPILOT_MESSAGE,

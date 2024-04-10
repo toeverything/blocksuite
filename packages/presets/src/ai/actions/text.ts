@@ -23,6 +23,7 @@ declare global {
     interface AITextActionOptions {
       input: string;
       stream?: boolean;
+      attachments?: string[]; // blob could only be strings for the moments (url or data urls)
 
       // the following seems not necessary?
       docId: string;
@@ -70,6 +71,10 @@ declare global {
         options: T
       ): AIActionTextResponse<T>;
       checkCodeErrors<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+
+      explainImage<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
 

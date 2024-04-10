@@ -126,4 +126,15 @@ export function setupAIProvider() {
       prompt,
     });
   });
+
+  AIProvider.provideAction('explainImage', options => {
+    assertExists(options.stream);
+    const prompt = `Describe the scene captured in this image, focusing on the details, colors, emotions, and any interactions between subjects or objects present.`;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+      attachments: options.attachments,
+    });
+  });
 }

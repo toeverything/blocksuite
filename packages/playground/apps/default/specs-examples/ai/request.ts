@@ -2,25 +2,40 @@ import { CopilotClient, toTextStream } from '@blocksuite/presets';
 
 const TIMEOUT = 5000;
 
+const backendUrl = 'http://localhost:3010';
+
 export function textToTextStream({
   docId,
   workspaceId,
   prompt,
+  attachments,
 }: {
   docId: string;
   workspaceId: string;
   prompt: string;
+  attachments?: string[];
 }): BlockSuitePresets.TextStream {
-  const client = new CopilotClient('http://localhost:3010');
+  const client = new CopilotClient(backendUrl);
   return {
     [Symbol.asyncIterator]: async function* () {
+      const hasAttachments = attachments && attachments.length > 0;
       const session = await client.createSession({
         workspaceId,
         docId,
-        promptName: 'Summary', // placeholder
+        promptName: hasAttachments ? 'debug:action:vision4' : 'Summary',
       });
-      const eventSource = client.textToTextStream(prompt, session);
-      yield* toTextStream(eventSource, { timeout: TIMEOUT });
+      if (hasAttachments) {
+        const messageId = await client.createMessage({
+          sessionId: session,
+          content: prompt,
+          attachments: attachments,
+        });
+        const eventSource = client.textStream(messageId, session);
+        yield* toTextStream(eventSource, { timeout: TIMEOUT });
+      } else {
+        const eventSource = client.textToTextStream(prompt, session);
+        yield* toTextStream(eventSource, { timeout: TIMEOUT });
+      }
     },
   };
 }
