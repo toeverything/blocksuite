@@ -1,30 +1,29 @@
 import { expect, test, vi } from 'vitest';
 import * as Y from 'yjs';
 
-import type { SchemaToModel } from '../schema/index.js';
-import { defineBlockSchema, Schema } from '../schema/index.js';
+import { Schema } from '../schema/index.js';
 import { DocCollection, Generator } from '../store/index.js';
+import {
+  DividerBlockSchema,
+  ListBlockSchema,
+  NoteBlockSchema,
+  ParagraphBlockSchema,
+  type RootBlockModel,
+  RootBlockSchema,
+} from './test-schema.js';
 
-const docSchema = defineBlockSchema({
-  flavour: 'page',
-  props: internal => ({
-    title: internal.Text(),
-    count: 0,
-    style: {} as Record<string, unknown>,
-    items: [] as unknown[],
-  }),
-  metadata: {
-    role: 'root',
-    version: 1,
-  },
-});
-
-type RootBlockModel = SchemaToModel<typeof docSchema>;
+const BlockSchemas = [
+  RootBlockSchema,
+  ParagraphBlockSchema,
+  ListBlockSchema,
+  NoteBlockSchema,
+  DividerBlockSchema,
+];
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
-  schema.register([docSchema]);
+  schema.register(BlockSchemas);
   return { id: 'test-collection', idGenerator, schema };
 }
 
@@ -35,7 +34,7 @@ test('trigger props updated', () => {
   const doc = collection.createDoc({ id: 'home' });
   doc.load();
 
-  doc.addBlock('page');
+  doc.addBlock('affine:page');
 
   const rootModel = doc.root as RootBlockModel;
 
@@ -94,7 +93,7 @@ test('stash and pop', () => {
   const doc = collection.createDoc({ id: 'home' });
   doc.load();
 
-  doc.addBlock('page');
+  doc.addBlock('affine:page');
 
   const rootModel = doc.root as RootBlockModel;
 
@@ -163,7 +162,7 @@ test('always get latest value in onChange', () => {
   const doc = collection.createDoc({ id: 'home' });
   doc.load();
 
-  doc.addBlock('page');
+  doc.addBlock('affine:page');
 
   const rootModel = doc.root as RootBlockModel;
 
