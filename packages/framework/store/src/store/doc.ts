@@ -499,17 +499,6 @@ export class Doc extends Space<FlatBlockMap> {
     const flavour = yBlock.get('sys:flavour');
     this.slots.blockUpdated.emit({ type: 'add', id, flavour });
 
-    const yChildren = yBlock.get('sys:children');
-    if (yChildren instanceof Y.Array) {
-      yChildren.forEach((id: string) => {
-        const hasChild = this._blockCollection.blocks.has(id);
-
-        if (!hasChild) {
-          this._handleYBlockAdd(id);
-        }
-      });
-    }
-
     const model = this.getBlockById(id);
     if (!model) return;
     if (model.role === 'root') {

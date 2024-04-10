@@ -1,3 +1,5 @@
+import type { Disposable } from '@blocksuite/global/utils';
+
 import type { BlockModel, Schema } from '../../schema/index.js';
 import type { Doc } from '../doc.js';
 import type { DocCRUD } from '../doc/crud.js';
@@ -19,6 +21,7 @@ export class BlockCollection {
   protected readonly _doc: Doc;
   protected readonly _crud: DocCRUD;
   protected readonly _selector: BlockSelector;
+  protected readonly _disposeBlockUpdated: Disposable;
 
   constructor({ schema, doc, crud, selector }: BlockCollectionOptions) {
     this._doc = doc;
@@ -32,18 +35,24 @@ export class BlockCollection {
       }
     });
 
-    this._doc.slots.blockUpdated.on(({ type, id }) => {
-      switch (type) {
-        case 'add': {
-          this._onBlockAdded(id);
-          return;
-        }
-        case 'delete': {
-          this._onBlockRemoved(id);
-          return;
+    this._disposeBlockUpdated = this._doc.slots.blockUpdated.on(
+      ({ type, id }) => {
+        switch (type) {
+          case 'add': {
+            this._onBlockAdded(id);
+            return;
+          }
+          case 'delete': {
+            this._onBlockRemoved(id);
+            return;
+          }
         }
       }
-    });
+    );
+  }
+
+  dispose() {
+    this._disposeBlockUpdated.dispose();
   }
 
   get doc() {
