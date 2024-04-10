@@ -38,7 +38,7 @@ import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import type { DataSource } from './common/datasource/base.js';
-import { DatabaseBlockDatasource } from './common/datasource/database-block-datasource.js';
+import { DatabaseBlockDataSource } from './common/datasource/database-block-datasource.js';
 import { renderFilterBar } from './common/filter/filter-bar.js';
 import { renderTools } from './common/header/tools/tools.js';
 import { DatabaseSelection } from './common/selection.js';
@@ -268,7 +268,7 @@ export class DatabaseBlockComponent extends BlockElement<
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDatasource(this.host, {
+      this._dataSource = new DatabaseBlockDataSource(this.host, {
         type: 'database-block',
         pageId: this.host.doc.id,
         blockId: this.model.id,

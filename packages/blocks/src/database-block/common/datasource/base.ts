@@ -2,7 +2,7 @@ import type { Disposable, Slot } from '@blocksuite/global/utils';
 
 import type { UniComponent } from '../../../_common/components/uni-component/uni-component.js';
 import { DEFAULT_COLUMN_WIDTH } from '../../table/consts.js';
-import type { InsertToPosition } from '../../types.js';
+import type { InsertToPosition, StatCalcOpType } from '../../types.js';
 import {
   type ColumnConfig,
   type ColumnConfigManager,
@@ -34,9 +34,11 @@ export interface DataSource {
   propertyGetName: (propertyId: string) => string;
   propertyGetDefaultWidth: (propertyId: string) => number;
   propertyGetType: (propertyId: string) => string;
+  propertyGetStatCalcOp: (propertyId: string) => StatCalcOpType;
   propertyGetData: (propertyId: string) => Record<string, unknown>;
   propertyGetReadonly: (columnId: string) => boolean;
   propertyChangeName: (propertyId: string, name: string) => void;
+  propertyChangeStatCalcOp: (propertyId: string, op: StatCalcOpType) => void;
   propertyChangeType: (propertyId: string, type: string) => void;
   propertyChangeData: (
     propertyId: string,
@@ -104,6 +106,11 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract propertyChangeName(propertyId: string, name: string): void;
 
+  public abstract propertyChangeStatCalcOp(
+    propertyId: string,
+    type: StatCalcOpType
+  ): void;
+
   public abstract propertyChangeType(propertyId: string, type: string): void;
 
   public abstract propertyDelete(id: string): void;
@@ -136,6 +143,8 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract propertyGetType(propertyId: string): string;
 
+  public abstract propertyGetStatCalcOp(propertyId: string): StatCalcOpType;
+
   public abstract rowAdd(InsertToPosition: InsertToPosition | number): string;
 
   public abstract rowDelete(ids: string[]): void;
@@ -160,21 +169,21 @@ export abstract class BaseDataSource implements DataSource {
   public abstract rowMove(rowId: string, position: InsertToPosition): void;
 }
 
-export type DatabaseBlockDatasourceConfig = {
+export type DatabaseBlockDataSourceConfig = {
   type: 'database-block';
   pageId: string;
   blockId: string;
 };
-export type AllDocDatasourceConfig = {
+export type AllDocDataSourceConfig = {
   type: 'all-pages';
 };
-export type TagsDatasourceConfig = {
+export type TagsDataSourceConfig = {
   type: 'tags';
 };
 export type DataSourceConfig =
-  | DatabaseBlockDatasourceConfig
-  | AllDocDatasourceConfig
-  | TagsDatasourceConfig;
+  | DatabaseBlockDataSourceConfig
+  | AllDocDataSourceConfig
+  | TagsDataSourceConfig;
 export type GetConfig<
   K extends DataSourceConfig['type'],
   T = DataSourceConfig,

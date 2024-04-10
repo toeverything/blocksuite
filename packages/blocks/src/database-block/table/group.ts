@@ -1,3 +1,6 @@
+import './components/column-stats.js';
+import './components/column-stats-cell.js';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { PropertyValues } from 'lit';
 import { css, html } from 'lit';
@@ -132,6 +135,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       },
     ]);
   };
+
   private renderRows(ids: string[]) {
     return html`
       <affine-database-column-header
@@ -167,6 +171,12 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
               ${PlusIcon}<span>New Record</span>
             </div>
           </div>`}
+      ${this.dataViewEle.config.getFlag?.('enable_database_statistics')
+        ? html`
+            <affine-database-column-stats .view="${this.view}">
+            </affine-database-column-stats>
+          `
+        : null}
     `;
   }
 

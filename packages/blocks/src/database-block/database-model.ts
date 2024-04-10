@@ -175,9 +175,10 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
       return id;
     }
     this.doc.transact(() => {
-      const col = {
+      const col: Column = {
         ...column,
         id,
+        statCalcOp: column.statCalcOp ?? 'none',
       };
       this.columns.splice(
         insertPositionToIndex(position, this.columns),

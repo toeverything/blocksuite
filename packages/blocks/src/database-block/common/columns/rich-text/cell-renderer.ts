@@ -242,9 +242,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       }
     };
     this.addEventListener('keydown', selectAll);
-    this.disposables.add(() => {
-      this.removeEventListener('keydown', selectAll);
-    });
+    this.disposables.addFromEvent(this, 'keydown', selectAll);
   }
 
   override firstUpdated() {

@@ -3,7 +3,11 @@ import { Slot } from '@blocksuite/global/utils';
 
 import type { UniComponent } from '../../_common/components/uni-component/uni-component.js';
 import type { TType } from '../logical/typesystem.js';
-import type { ColumnDataUpdater, InsertToPosition } from '../types.js';
+import type {
+  ColumnDataUpdater,
+  InsertToPosition,
+  StatCalcOpType,
+} from '../types.js';
 import type { FilterGroup, Variable } from './ast.js';
 import type {
   CellRenderer,
@@ -12,6 +16,7 @@ import type {
 } from './columns/manager.js';
 import { columnManager } from './columns/manager.js';
 import { columnRenderer } from './columns/renderer.js';
+import { ColumnDataStats } from './data-stats.js';
 import type { DataSource, DetailSlots } from './datasource/base.js';
 
 export interface DataViewManager {
@@ -81,6 +86,8 @@ export interface DataViewManager {
 
   columnGetName(columnId: string): string;
 
+  columnGetStatCalcOp(columnId: string): StatCalcOpType;
+
   columnGetType(columnId: string): string;
 
   columnGetHide(columnId: string): boolean;
@@ -96,6 +103,8 @@ export interface DataViewManager {
   columnGetReadonly(columnId: string): boolean;
 
   columnUpdateName(columnId: string, name: string): void;
+
+  columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void;
 
   columnUpdateHide(columnId: string, hide: boolean): void;
 
@@ -180,6 +189,8 @@ export interface DataViewColumnManager<
   updateHide(hide: boolean): void;
 
   updateName(name: string): void;
+
+  updateStatCalcOp(op: StatCalcOpType): void;
 
   get updateType(): undefined | ((type: string) => void);
 
@@ -365,6 +376,10 @@ export abstract class BaseDataViewManager implements DataViewManager {
     return this.dataSource.propertyGetName(columnId);
   }
 
+  public columnGetStatCalcOp(columnId: string): StatCalcOpType {
+    return this.dataSource.propertyGetStatCalcOp(columnId);
+  }
+
   public columnGetNextColumn(
     columnId: string
   ): DataViewColumnManager | undefined {
@@ -394,6 +409,10 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   public columnUpdateName(columnId: string, name: string): void {
     this.dataSource.propertyChangeName(columnId, name);
+  }
+
+  public columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void {
+    this.dataSource.propertyChangeStatCalcOp(columnId, op);
   }
 
   public columnUpdateType(columnId: string, type: string): void {
@@ -479,6 +498,8 @@ export abstract class BaseDataViewManager implements DataViewManager {
 export abstract class BaseDataViewColumnManager
   implements DataViewColumnManager
 {
+  public readonly stats = new ColumnDataStats(this);
+
   protected constructor(
     protected propertyId: string,
     public dataViewManager: DataViewManager
@@ -513,6 +534,10 @@ export abstract class BaseDataViewColumnManager
 
   get name(): string {
     return this.dataViewManager.columnGetName(this.id);
+  }
+
+  get statCalcOp(): StatCalcOpType {
+    return this.dataViewManager.columnGetStatCalcOp(this.id);
   }
 
   get renderer(): CellRenderer {
@@ -557,6 +582,10 @@ export abstract class BaseDataViewColumnManager
 
   updateName(name: string): void {
     this.dataViewManager.columnUpdateName(this.id, name);
+  }
+
+  updateStatCalcOp(op: StatCalcOpType): void {
+    this.dataViewManager.columnUpdateStatCalcOp(this.id, op);
   }
 
   get delete(): (() => void) | undefined {

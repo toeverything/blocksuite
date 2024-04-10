@@ -1,5 +1,6 @@
 import type { UniComponent } from '../../../_common/components/uni-component/uni-component.js';
 import type { TType } from '../../logical/typesystem.js';
+import type { StatCalcOpType } from '../../types.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
@@ -132,11 +133,13 @@ export class ColumnConfig<
   ): {
     type: string;
     name: string;
+    statCalcOp: StatCalcOpType;
     data: T;
   } {
     return {
       type: this.type,
       name,
+      statCalcOp: 'none',
       data: data ?? this.ops.defaultData(),
     };
   }

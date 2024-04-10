@@ -1,55 +1,55 @@
 import type { EditorHost } from '@blocksuite/block-std';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
-import { AllDocDatasource } from './all-doc-datasource.js';
+import { AllDocDataSource } from './all-doc-datasource.js';
 import type {
-  AllDocDatasourceConfig,
-  DatabaseBlockDatasourceConfig,
+  AllDocDataSourceConfig,
+  DatabaseBlockDataSourceConfig,
   DataSource,
   DataSourceConfig,
   GetConfig,
-  TagsDatasourceConfig,
+  TagsDataSourceConfig,
 } from './base.js';
-import { DatabaseBlockDatasource } from './database-block-datasource.js';
-import { TagsDatasource } from './tags-datasource.js';
+import { DatabaseBlockDataSource } from './database-block-datasource.js';
+import { TagsDataSource } from './tags-datasource.js';
 
-const datasourceMap: {
+const dataSourceMap: {
   [K in DataSourceConfig['type']]: {
     title: (host: EditorHost, config: GetConfig<K>) => string;
     constructor: new (host: EditorHost, config: GetConfig<K>) => DataSource;
   };
 } = {
   'database-block': {
-    title: (host: EditorHost, config: DatabaseBlockDatasourceConfig) => {
-      const dbblock = host.doc.collection
+    title: (host: EditorHost, config: DatabaseBlockDataSourceConfig) => {
+      const dbBlock = host.doc.collection
         .getDoc(config.pageId)
         ?.getBlockById(config.blockId) as DatabaseBlockModel;
-      return dbblock?.title.toString() ?? '';
+      return dbBlock?.title.toString() ?? '';
     },
-    constructor: DatabaseBlockDatasource,
+    constructor: DatabaseBlockDataSource,
   },
   'all-pages': {
-    title: (_host: EditorHost, _config: AllDocDatasourceConfig) => {
+    title: (_host: EditorHost, _config: AllDocDataSourceConfig) => {
       return 'All Pages';
     },
-    constructor: AllDocDatasource,
+    constructor: AllDocDataSource,
   },
   tags: {
-    title: (_host: EditorHost, _config: TagsDatasourceConfig) => {
+    title: (_host: EditorHost, _config: TagsDataSourceConfig) => {
       return 'Tags';
     },
-    constructor: TagsDatasource,
+    constructor: TagsDataSource,
   },
 };
-export const createDatasource = (
+export const createDataSource = (
   host: EditorHost,
   config: DataSourceConfig
 ): DataSource => {
-  return new datasourceMap[config.type].constructor(host, config as never);
+  return new dataSourceMap[config.type].constructor(host, config as never);
 };
-export const getDatasourceTitle = (
+export const getDataSourceTitle = (
   host: EditorHost,
   config: DataSourceConfig
 ): string => {
-  return datasourceMap[config.type].title(host, config as never);
+  return dataSourceMap[config.type].title(host, config as never);
 };

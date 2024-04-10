@@ -66,6 +66,7 @@ export interface StoreOptions<
 const FLAGS_PRESET = {
   enable_synced_doc_block: false,
   enable_pie_menu: false,
+  enable_database_statistics: false,
   enable_legacy_validation: true,
   enable_expand_database_block: false,
   readonly: {},
