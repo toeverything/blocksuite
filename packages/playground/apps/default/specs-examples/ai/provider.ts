@@ -31,7 +31,10 @@ export function setupAIProvider() {
 
   AIProvider.provideAction('translate', options => {
     assertExists(options.stream);
-    const prompt = `Translate the following content to ${options.lang}: ${options.input}`;
+    const prompt = `Please translate the following content into ${options.lang} and return it to us, adhering to the original format of the content：
+
+    ${options.input}
+    `;
     return textToTextStream({
       docId: options.docId,
       workspaceId: options.workspaceId,
@@ -111,7 +114,12 @@ export function setupAIProvider() {
 
   AIProvider.provideAction('checkCodeErrors', options => {
     assertExists(options.stream);
-    const prompt = `Check the code errors in the following content: ${options.input}`;
+    const prompt = `Check the code errors in the following content and provide the corrected version:
+
+    """
+    ${options.input}
+    """
+    `;
     return textToTextStream({
       docId: options.docId,
       workspaceId: options.workspaceId,
