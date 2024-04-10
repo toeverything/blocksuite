@@ -47,7 +47,7 @@ const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
 const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   const [_, ctx] = chain
     .getSelectedModels({
-      types: ['text'],
+      types: ['block', 'text'],
     })
     .run();
   const { selectedModels } = ctx;

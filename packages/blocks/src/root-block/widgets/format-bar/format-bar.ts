@@ -100,7 +100,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     ) {
       const selectedBlock = this._selectedBlockElements[0];
       if (
-        !matchFlavours(selectedBlock.model, ['affine:paragraph', 'affine:list'])
+        !matchFlavours(selectedBlock.model, [
+          'affine:paragraph',
+          'affine:list',
+          'affine:code',
+        ])
       ) {
         return false;
       }
