@@ -55,7 +55,6 @@ export class AffineAIPanelWidget extends WidgetElement {
     :host {
       display: flex;
       width: 100%;
-      padding: 8px 12px;
       flex-direction: column;
       justify-content: center;
       align-items: flex-start;
@@ -66,7 +65,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       background: var(--affine-background-overlay-panel-color);
 
       /* light/toolbarShadow */
-      box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.14);
+      box-shadow: var(--affine-shadow-1);
 
       gap: 8px;
 
