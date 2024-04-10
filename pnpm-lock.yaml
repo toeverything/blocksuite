@@ -540,6 +540,9 @@ importers:
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
+      '@dotlottie/player-component':
+        specifier: ^2.7.12
+        version: 2.7.12
       '@fal-ai/serverless-client':
         specifier: ^0.9.0
         version: 0.9.0

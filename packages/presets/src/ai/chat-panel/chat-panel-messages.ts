@@ -1,4 +1,5 @@
 import '../messages/slides-renderer.js';
+import './ai-loading.js';
 
 import type { TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
@@ -19,7 +20,7 @@ import {
 } from '../_common/icons.js';
 import type { CopilotClient } from '../copilot-client.js';
 import { textRenderer } from '../messages/text.js';
-import type { ChatMessage } from './index.js';
+import type { ChatMessage, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
@@ -104,6 +105,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   messages!: ChatMessage[];
 
+  @property({ attribute: false })
+  status!: ChatStatus;
+
   @query('.chat-panel-messages')
   messagesContainer!: HTMLDivElement;
 
@@ -125,6 +129,19 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     //   // return iframeRenderer('<html><body><div>123</div></body></html>');
     //   return html`<ai-slides-renderer> </ai-slides-renderer>`;
     // }
+  }
+
+  renderAvator(message: ChatMessage) {
+    return html`<div class="user-info">
+      ${message.role === 'user'
+        ? html`<div class="avator"></div>`
+        : AffineAvatorIcon}
+      ${message.role === 'user' ? 'You' : 'AFFINE AI'}
+    </div>`;
+  }
+
+  renderLoading() {
+    return html` <ai-loading></ai-loading>`;
   }
 
   scrollToDown() {
@@ -283,14 +300,13 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
             </div>`
           : repeat(messages, (message, index) => {
               return html`<div class="message">
-                <div class="user-info">
-                  ${message.role === 'user'
-                    ? html`<div class="avator"></div>`
-                    : AffineAvatorIcon}
-                  ${message.role === 'user' ? 'You' : 'AFFINE AI'}
-                </div>
-                ${this.renderItem(message)}
-                ${index === messages.length - 1
+                ${this.renderAvator(message)} ${this.renderItem(message)}
+                ${this.status === 'loading' && index === messages.length - 1
+                  ? this.renderLoading()
+                  : nothing}
+                ${index === messages.length - 1 &&
+                message.role === 'assistant' &&
+                this.status === 'success'
                   ? this.renderEditorActions(message.content)
                   : nothing}
               </div>`;

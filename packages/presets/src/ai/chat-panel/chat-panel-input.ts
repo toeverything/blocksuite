@@ -5,7 +5,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { CopilotClient } from '../../ai/index.js';
+import { type CopilotClient } from '../../ai/index.js';
 import { ChatSendIcon, CloseIcon, ImageIcon } from '../_common/icons.js';
 import type { ChatMessage, ChatStatus } from './index.js';
 
@@ -104,7 +104,13 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   updateMessages!: (messages: ChatMessage[]) => void;
 
   @property({ attribute: false })
+  addToMessages!: (messages: ChatMessage[]) => void;
+
+  @property({ attribute: false })
   status!: ChatStatus;
+
+  @property({ attribute: false })
+  messages!: ChatMessage[];
 
   @property({ attribute: false })
   updateStatus!: (status: ChatStatus) => void;
@@ -132,10 +138,17 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     this.textarea.value = '';
     this.isInputEmpty = true;
     this.images = [];
-    this.updateMessages([{ role: 'user', content: text }]);
+    this.updateStatus('loading');
+    this.addToMessages([
+      { role: 'user', content: text },
+      { role: 'assistant', content: '' },
+    ]);
     const res = await this.copilotClient.textToText(text, this.sessionId);
     if (res) {
-      this.updateMessages([{ role: 'assistant', content: res }]);
+      this.updateStatus('success');
+      const messages = [...this.messages];
+      messages[messages.length - 1] = { role: 'assistant', content: res };
+      this.updateMessages(messages);
     }
   };
 

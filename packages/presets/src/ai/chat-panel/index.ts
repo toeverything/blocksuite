@@ -95,46 +95,33 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     const { editor } = this;
+    const sessionId = await this._copilotClient.createSession({
+      workspaceId: editor.doc.collection.id,
+      docId: editor.doc.id,
+      promptName: 'debug:chat:gpt4',
+    });
 
     const histories = await this._copilotClient.getHistories(
       editor.doc.collection.id,
       editor.doc.id,
-      { action: false }
+      {
+        sessionId: sessionId,
+      }
     );
-    let sessionId: string;
-    if (histories.length === 0) {
-      sessionId = await this._copilotClient.createSession({
-        workspaceId: editor.doc.collection.id,
-        docId: editor.doc.id,
-        promptName: 'debug:chat:gpt4',
-      });
-      this.messages =
-        histories.find(h => h.sessionId === sessionId)?.messages ||
-        this.messages;
-      this.scrollToDown();
-    } else {
-      sessionId = histories[0].sessionId;
-    }
+
+    this.messages =
+      histories.find(h => h.sessionId === sessionId)?.messages || this.messages;
 
     this.sessionId = sessionId;
+    this.scrollToDown();
   }
 
   get rootService() {
     return this.editor.host.std.spec.getService('affine:page');
   }
 
-  updateMessages = async () => {
-    const { editor } = this;
-
-    const histories = await this._copilotClient.getHistories(
-      editor.doc.collection.id,
-      editor.doc.id,
-      { action: false }
-    );
-    this.messages =
-      histories.find(h => h.sessionId === this.sessionId)?.messages ||
-      this.messages;
-    this.scrollToDown();
+  updateStatus = (status: ChatStatus) => {
+    this.status = status;
   };
 
   addToMessages = (messages: ChatMessage[]) => {
@@ -142,13 +129,14 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     this.scrollToDown();
   };
 
+  updateMessages = (messages: ChatMessage[]) => {
+    this.messages = messages;
+    this.scrollToDown();
+  };
+
   scrollToDown() {
     requestAnimationFrame(() => this._chatMessages.value?.scrollToDown());
   }
-
-  updateStatus = (status: ChatStatus) => {
-    this.status = status;
-  };
 
   override render() {
     return html` <div class="chat-panel-container">
@@ -158,12 +146,15 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         .host=${this.editor.host}
         .copilotClient=${this._copilotClient}
         .messages=${this.messages}
+        .status=${this.status}
       ></chat-panel-messages>
       <chat-panel-input
         .host=${this.editor.host}
         .copilotClient=${this._copilotClient}
         .sessionId=${this.sessionId}
-        .updateMessages=${this.addToMessages}
+        .messages=${this.messages}
+        .updateMessages=${this.updateMessages}
+        .addToMessages=${this.addToMessages}
         .status=${this.status}
         .updateStatus=${this.updateStatus}
       ></chat-panel-input>
