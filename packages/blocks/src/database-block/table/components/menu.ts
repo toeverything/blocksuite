@@ -21,7 +21,7 @@ import {
   commonCalcOps,
   numberColCalcOps,
   type StatCalcOp,
-} from './stat-ops.js';
+} from '../stat-ops.js';
 
 export const openDetail = (
   dataViewEle: DataViewNative,
@@ -151,11 +151,11 @@ export const popColStatOperationMenu = (
       operations = commonCalcOps;
   }
 
-  const menus: Menu[] = operations.map(f => ({
+  const menus: Menu[] = operations.map(op => ({
     type: 'action',
-    name: f.label,
+    name: op.label,
     select: () => {
-      onSelect(f);
+      onSelect(op);
     },
   }));
 

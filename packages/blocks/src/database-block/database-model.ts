@@ -166,9 +166,8 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
 
   addColumn(
     position: InsertToPosition,
-    column: Omit<Column, 'id' | 'statCalcOp'> & {
+    column: Omit<Column, 'id'> & {
       id?: string;
-      calculate?: Column['statCalcOp'];
     }
   ): string {
     const id = column.id ?? this.doc.generateBlockId();
@@ -179,7 +178,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
       const col: Column = {
         ...column,
         id,
-        statCalcOp: column.calculate ?? 'none',
+        statCalcOp: column.statCalcOp ?? 'none',
       };
       this.columns.splice(
         insertPositionToIndex(position, this.columns),
@@ -290,7 +289,6 @@ const migration = {
       id,
       type: 'title',
       name: title,
-      statCalcOp: 'none',
       data: {},
     });
     data.views.forEach(view => {

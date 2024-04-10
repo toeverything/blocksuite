@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { DataViewTableColumnManager } from '../table-view-manager.js';
-import type { StatCalcOpType } from '../types.js';
+import type { DataViewTableColumnManager } from './table-view-manager.js';
+import type { StatCalcOpType } from './types.js';
 
 export interface StatCalcOp {
   type: StatCalcOpType;

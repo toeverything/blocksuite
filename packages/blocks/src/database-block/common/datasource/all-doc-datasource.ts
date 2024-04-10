@@ -138,7 +138,6 @@ export class AllDocDataSource extends BaseDataSource {
   }
 
   public propertyGetStatCalcOp(_propertyId: string): StatCalcOpType {
-    // todo(golok727) change this
     return 'none';
   }
 

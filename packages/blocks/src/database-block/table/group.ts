@@ -171,8 +171,12 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
               ${PlusIcon}<span>New Record</span>
             </div>
           </div>`}
-      <affine-database-column-stats .view="${this.view}">
-      </affine-database-column-stats>
+      ${this.dataViewEle.config.getFlag?.('enable_database_statistics')
+        ? html`
+            <affine-database-column-stats .view="${this.view}">
+            </affine-database-column-stats>
+          `
+        : null}
     `;
   }
 

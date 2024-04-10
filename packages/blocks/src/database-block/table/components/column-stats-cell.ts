@@ -6,15 +6,15 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { positionToVRect } from '../../../_common/components/menu/menu.js';
 import { ArrowDownIcon } from '../../../_common/icons/text.js';
 import { getRootByElement } from '../../../_common/utils/query.js';
-import type { DataViewTableColumnManager } from '../table-view-manager.js';
-import { DEFAULT_COLUMN_MIN_WIDTH } from './../consts.js';
-import { popColStatOperationMenu } from './menu.js';
 import {
   type ColumnDataType,
   getStatCalcOperationFromType,
   type StatCalcOp,
   type StatOpResult,
-} from './stat-ops.js';
+} from '../stat-ops.js';
+import type { DataViewTableColumnManager } from '../table-view-manager.js';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './../consts.js';
+import { popColStatOperationMenu } from './menu.js';
 
 const styles = css`
   .stats-cell {
