@@ -503,14 +503,12 @@ export class Doc extends Space<FlatBlockMap> {
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
-      yChildren.forEach((id: string, index) => {
+      yChildren.forEach((id: string) => {
         const hasChild = this._blockCollection.blocks.has(id);
 
         if (!hasChild) {
           this._handleYBlockAdd(id);
         }
-
-        model.children[index as number] = this.getBlockById(id) as BlockModel;
       });
     }
 
