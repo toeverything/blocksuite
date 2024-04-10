@@ -10,7 +10,7 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 import { limitShift, offset, shift } from '@floating-ui/dom';
-import { css, html, nothing, render, type TemplateResult } from 'lit';
+import { html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
@@ -31,6 +31,7 @@ import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { createLangList } from './components/lang-list.js';
+import { codeBlockStyles } from './styles.js';
 import { getStandardLanguage, isPlaintext } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
@@ -44,92 +45,6 @@ import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
-  static override styles = css`
-    code-block {
-      position: relative;
-      z-index: 1;
-    }
-
-    .affine-code-block-container {
-      font-size: var(--affine-font-sm);
-      line-height: var(--affine-line-height);
-      position: relative;
-      padding: 32px 0px 12px 0px;
-      background: var(--affine-background-code-block);
-      border-radius: 10px;
-      margin-top: 24px;
-      margin-bottom: 24px;
-    }
-
-    .affine-code-block-container .inline-editor {
-      font-family: var(--affine-font-code-family);
-      font-variant-ligatures: none;
-    }
-
-    .affine-code-block-container .lang-list-wrapper {
-      position: absolute;
-      font-size: var(--affine-font-sm);
-      line-height: var(--affine-line-height);
-      top: 12px;
-      left: 12px;
-    }
-
-    .affine-code-block-container > .lang-list-wrapper {
-      visibility: hidden;
-    }
-    .affine-code-block-container:hover > .lang-list-wrapper {
-      visibility: visible;
-    }
-
-    .affine-code-block-container > .lang-list-wrapper > .lang-button {
-      display: flex;
-      justify-content: flex-start;
-      padding: 0 8px;
-    }
-
-    .affine-code-block-container rich-text {
-      /* to make sure the resize observer can be triggered as expected */
-      display: block;
-      position: relative;
-      overflow-x: auto;
-      overflow-y: hidden;
-      padding-bottom: 20px;
-      width: 90%;
-    }
-
-    .affine-code-block-container .rich-text-container {
-      position: relative;
-      border-radius: 4px;
-      padding: 4px 12px 4px 60px;
-    }
-
-    #line-numbers {
-      position: absolute;
-      text-align: right;
-      left: 20px;
-      line-height: var(--affine-line-height);
-      color: var(--affine-text-secondary-color);
-    }
-
-    .affine-code-block-container.wrap #line-numbers {
-      top: calc(var(--affine-line-height) + 4px);
-    }
-
-    .affine-code-block-container.wrap #line-numbers > div {
-      margin-top: calc(var(--top, 0) / 1 - var(--affine-line-height));
-    }
-
-    .code-block-option {
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
-      list-style: none;
-      padding: 4px;
-      width: 40px;
-      background-color: var(--affine-background-overlay-panel-color);
-      margin: 0;
-    }
-  `;
-
   @state()
   private _wrap = false;
 
@@ -187,6 +102,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   private _perviousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: StrictLanguageInfo) {
+    if (!this.host.isConnected) return;
     if (this._highlighter) {
       const loadedLangs = this._highlighter.getLoadedLanguages();
       if (!isPlaintext(lang.id) && !loadedLangs.includes(lang.id)) {
@@ -209,13 +125,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     });
 
     const richText = this.querySelector('rich-text');
-    assertExists(richText);
-    const inlineEditor = richText.inlineEditor;
-    assertExists(inlineEditor);
-    const range = inlineEditor.getInlineRange();
-    inlineEditor.requestUpdate();
-    if (range) {
-      inlineEditor.setInlineRange(range);
+    const inlineEditor = richText?.inlineEditor;
+    if (inlineEditor) {
+      inlineEditor.requestUpdate();
+      const range = inlineEditor.getInlineRange();
+      if (range) {
+        inlineEditor.setInlineRange(range);
+      }
     }
   }
 
@@ -304,19 +220,21 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       };
     });
 
-    this._disposables.add(
-      listenToThemeChange(this, () => {
-        if (!this._highlighter) return;
-        const richText = this.querySelector('rich-text');
-        const inlineEditor = richText?.inlineEditor;
-        if (!inlineEditor) return;
+    const themeDisposable = listenToThemeChange(this, () => {
+      if (!this._highlighter) return;
+      const richText = this.querySelector('rich-text');
+      const inlineEditor = richText?.inlineEditor;
+      if (!inlineEditor) return;
 
-        // update code-line theme
-        setTimeout(() => {
-          inlineEditor.requestUpdate();
-        });
-      })!
-    );
+      // update code-line theme
+      setTimeout(() => {
+        inlineEditor.requestUpdate();
+      });
+    });
+
+    if (themeDisposable) {
+      this._disposables.add(themeDisposable);
+    }
 
     bindContainerHotkey(this);
 
@@ -573,6 +491,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           wrap: this._wrap,
         })}
       >
+        <style>
+          ${codeBlockStyles}
+        </style>
         ${this._curLanguageButtonTemplate()}
         <div class="rich-text-container">
           <div contenteditable="false" id="line-numbers"></div>
