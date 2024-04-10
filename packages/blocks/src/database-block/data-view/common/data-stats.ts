@@ -1,7 +1,7 @@
 import { assertEquals } from '@blocksuite/global/utils';
 
 import type { SelectTag } from '../utils/tags/multi-tag-select.js';
-import type { DataViewColumnManager } from './data-view-manager.js';
+import type { DataViewColumnManager } from '../view/data-view-manager.js';
 
 /**
  * Class for computing statistics on a DataViewColumnManager column.

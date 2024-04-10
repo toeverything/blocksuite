@@ -4,7 +4,7 @@ import { property } from 'lit/decorators.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
-} from '../common/data-view-manager.js';
+} from '../view/data-view-manager.js';
 import type { CellRenderProps, DataViewCellLifeCycle } from './manager.js';
 
 export abstract class BaseCellRenderer<

@@ -19,9 +19,8 @@ import {
   popMenu,
 } from '../../utils/menu/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { viewManager, viewRendererManager } from '../data-view.js';
 import { DeleteIcon } from '../icons/index.js';
-import type { ViewSource } from '../view-source.js';
+import type { SingleViewSource, ViewSource } from '../view-source.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
@@ -80,13 +79,11 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
   _addViewMenu = (event: MouseEvent) => {
     popFilterableSimpleMenu(
       event.target as HTMLElement,
-      viewManager.all.map(v => {
+      this.viewSource.allViewMeta.map(v => {
         return {
           type: 'action',
-          name: v.defaultName,
-          icon: html`<uni-lit
-            .uni=${viewRendererManager.getView(v.type).icon}
-          ></uni-lit>`,
+          name: v.model.defaultName,
+          icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
           select: () => {
             const id = this.viewSource.viewAdd(v.type);
             this.viewSource.selectView(id);
@@ -106,9 +103,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         };
         return {
           type: 'action' as const,
-          icon: html`<uni-lit
-            .uni=${viewRendererManager.getView(v.view.mode).icon}
-          ></uni-lit>`,
+          icon: html`<uni-lit .uni=${this.getRenderer(v).icon}></uni-lit>`,
           name: v.view.name,
           isSelected: this.viewSource.currentViewId === v.view.id,
           select: () => {
@@ -128,13 +123,11 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         name: '',
         hide: () => this.readonly,
         children: () =>
-          viewManager.all.map(v => {
+          this.viewSource.allViewMeta.map(v => {
             return {
               type: 'action',
-              name: `Create ${v.defaultName}`,
-              icon: html`<uni-lit
-                .uni=${viewRendererManager.getView(v.type).icon}
-              ></uni-lit>`,
+              name: `Create ${v.model.defaultName}`,
+              icon: html`<uni-lit .uni=${v.renderer.icon}></uni-lit>`,
               select: () => {
                 const id = this.viewSource.viewAdd(v.type);
                 this.viewSource.selectView(id);
@@ -168,10 +161,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           {
             type: 'action',
             name: 'Edit View',
-            icon: renderUniLit(
-              viewRendererManager.getView(view.view.mode).icon,
-              {}
-            ),
+            icon: renderUniLit(this.getRenderer(view).icon, {}),
             select: () => {
               this.closest('affine-data-view-renderer')
                 ?.querySelector('data-view-header-tools-view-options')
@@ -283,15 +273,16 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           @click="${(event: MouseEvent) =>
             this._clickView(event, view.view.id)}"
         >
-          <uni-lit
-            class="icon"
-            .uni="${viewRendererManager.getView(view.view.mode).icon}"
-          ></uni-lit>
+          <uni-lit class="icon" .uni="${this.getRenderer(view).icon}"></uni-lit>
           <div class="name">${view.view.name}</div>
         </div>
       `;
     });
   };
+
+  private getRenderer(view: SingleViewSource) {
+    return this.viewSource.getViewMeta(view.view.mode).renderer;
+  }
 
   override render() {
     return html`

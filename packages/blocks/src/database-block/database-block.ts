@@ -21,12 +21,8 @@ import {
 } from '../root-block/widgets/drag-handle/utils.js';
 import type { AffineInnerModalWidget } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
-import { Datasource } from './data-source.js';
+import { DatabaseBlockDataSource } from './data-source.js';
 import { dataViewCommonStyle } from './data-view/common/css-variable.js';
-import type { DataViewProps } from './data-view/common/data-view.js';
-import { type DataViewExpose } from './data-view/common/data-view.js';
-import type { DataViewManager } from './data-view/common/data-view-manager.js';
-import type { DataSource } from './data-view/common/datasource/base.js';
 import { renderFilterBar } from './data-view/common/filter/filter-bar.js';
 import { renderTools } from './data-view/common/header/tools/tools.js';
 import {
@@ -37,6 +33,9 @@ import {
   popMenu,
   type ViewSource,
 } from './data-view/index.js';
+import type { DataViewProps } from './data-view/view/data-view.js';
+import { type DataViewExpose } from './data-view/view/data-view.js';
+import type { DataViewManager } from './data-view/view/data-view-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
 import type { DatabaseService } from './database-service.js';
@@ -258,10 +257,10 @@ export class DatabaseBlockComponent extends BlockElement<
     return this.dataView.expose;
   }
 
-  private _dataSource?: DataSource;
-  public get dataSource(): DataSource {
+  private _dataSource?: DatabaseBlockDataSource;
+  public get dataSource(): DatabaseBlockDataSource {
     if (!this._dataSource) {
-      this._dataSource = new Datasource(this.host, {
+      this._dataSource = new DatabaseBlockDataSource(this.host, {
         type: 'database-block',
         pageId: this.host.doc.id,
         blockId: this.model.id,

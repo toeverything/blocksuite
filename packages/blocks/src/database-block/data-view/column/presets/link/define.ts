@@ -4,10 +4,10 @@ import { columnType } from '../../column-config.js';
 export const linkColumnType = columnType('link');
 declare global {
   interface ColumnConfigMap {
-    [linkColumnType.type]: typeof linkPureColumnConfig.model;
+    [linkColumnType.type]: typeof linkColumnModelConfig.model;
   }
 }
-export const linkPureColumnConfig = linkColumnType.modelConfig<string>({
+export const linkColumnModelConfig = linkColumnType.modelConfig<string>({
   name: 'Link',
   type: () => tString.create(),
   defaultData: () => ({}),

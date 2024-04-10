@@ -14,8 +14,8 @@ import {
 } from '../../utils/menu/index.js';
 import { menuTitleItem } from '../../utils/menu/title.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { DataViewKanbanManager } from '../../views/kanban/kanban-view-manager.js';
-import { DataViewTableManager } from '../../views/table/table-view-manager.js';
+import { DataViewKanbanManager } from '../../view/presets/kanban/kanban-view-manager.js';
+import { DataViewTableManager } from '../../view/presets/table/table-view-manager.js';
 import { dataViewCssVariable } from '../css-variable.js';
 import { DeleteIcon } from '../icons/index.js';
 import type { GroupRenderProps } from './matcher.js';

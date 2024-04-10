@@ -6,7 +6,7 @@ import { stopPropagation } from '../../../utils/event.js';
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
-import { numberPureColumnConfig } from './define.js';
+import { numberColumnModelConfig } from './define.js';
 
 @customElement('affine-database-number-cell')
 export class NumberCell extends BaseCellRenderer<number> {
@@ -129,7 +129,7 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   }
 }
 
-export const numberColumnConfig = numberPureColumnConfig.renderConfig({
+export const numberColumnConfig = numberColumnModelConfig.renderConfig({
   icon: createIcon('DatabaseNumber'),
   cellRenderer: {
     view: createFromBaseCellRenderer(NumberCell),

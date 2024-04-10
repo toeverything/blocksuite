@@ -3,10 +3,6 @@ import './common/header/views.js';
 import './common/header/title.js';
 import './common/header/tools/tools.js';
 import './common/filter/filter-bar.js';
-import './views/table/define';
-import './views/table/renderer';
-import './views/kanban/define';
-import './views/kanban/renderer';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
@@ -19,41 +15,23 @@ import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import type { BaseDataView } from './common/base-data-view.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
-import type {
-  DataViewExpose,
-  DataViewProps,
-  DataViewTypes,
-} from './common/data-view.js';
-import { viewRendererManager } from './common/data-view.js';
-import type { DataViewManager } from './common/data-view-manager.js';
-import type { DataSource } from './common/datasource/base.js';
+import type { DataSource } from './common/data-source/base.js';
 import { popSideDetail } from './common/detail/layout.js';
-import type { SingleViewSource, ViewSource } from './common/view-source.js';
+import type { ViewSource } from './common/index.js';
 import type { DataViewSelection, DataViewSelectionState } from './types.js';
-import { renderUniLit } from './utils/uni-component/uni-component.js';
-import { DataViewKanbanManager } from './views/kanban/kanban-view-manager.js';
-import { DataViewTableManager } from './views/table/table-view-manager.js';
+import { renderUniLit } from './utils/uni-component/index.js';
+import type { DataViewExpose, DataViewProps } from './view/data-view.js';
+import type { DataViewBase } from './view/data-view-base.js';
+import type { DataViewManager } from './view/data-view-manager.js';
 
 type ViewProps = {
   view: DataViewManager;
   viewUpdated: Slot;
   selectionUpdated: Slot<DataViewSelectionState>;
   setSelection: (selection?: DataViewSelectionState) => void;
-  bindHotkey: BaseDataView['bindHotkey'];
-  handleEvent: BaseDataView['handleEvent'];
-};
-const ViewManagerMap: Record<
-  DataViewTypes,
-  new (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    viewSource: SingleViewSource<any>,
-    dataSource: DataSource
-  ) => DataViewManager
-> = {
-  table: DataViewTableManager,
-  kanban: DataViewKanbanManager,
+  bindHotkey: DataViewBase['bindHotkey'];
+  handleEvent: DataViewBase['handleEvent'];
 };
 
 export type DataViewRendererConfig = {
@@ -126,10 +104,10 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     if (!this.viewMap[id]) {
       const singleViewSource = this.config.viewSource.viewGet(id);
 
-      const view = new ViewManagerMap[singleViewSource.view.mode](
-        singleViewSource,
-        this.config.dataSource
-      );
+      const view = new (this.config.viewSource.getViewMeta(
+        singleViewSource.view.mode
+      ).model.dataViewManager)();
+      view.init(this.config.dataSource, singleViewSource);
       this.viewMap[id] = {
         view: view,
         viewUpdated: singleViewSource.updateSlot,
@@ -194,7 +172,7 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     return keyed(
       viewData.view.id,
       renderUniLit(
-        viewRendererManager.getView(viewData.view.type).view,
+        this.config.viewSource.getViewMeta(viewData.view.type).renderer.view,
         props,
         { ref: this._view }
       )

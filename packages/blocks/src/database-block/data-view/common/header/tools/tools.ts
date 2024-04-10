@@ -10,8 +10,11 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
-import { type DataViewExpose, viewRendererManager } from '../../data-view.js';
-import type { DataViewManager } from '../../data-view-manager.js';
+import {
+  type DataViewExpose,
+  viewRendererManager,
+} from '../../../view/data-view.js';
+import type { DataViewManager } from '../../../view/data-view-manager.js';
 
 const styles = css`
   .affine-database-toolbar {

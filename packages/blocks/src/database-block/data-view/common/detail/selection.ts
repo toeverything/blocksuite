@@ -1,6 +1,6 @@
-import type { KanbanCard } from '../../views/kanban/card.js';
-import { KanbanCell } from '../../views/kanban/cell.js';
-import type { KanbanCardSelection } from '../../views/kanban/types.js';
+import type { KanbanCard } from '../../view/presets/kanban/card.js';
+import { KanbanCell } from '../../view/presets/kanban/cell.js';
+import type { KanbanCardSelection } from '../../view/presets/kanban/types.js';
 import type { RecordDetail } from './detail.js';
 import { RecordField } from './field.js';
 

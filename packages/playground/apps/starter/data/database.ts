@@ -2,13 +2,13 @@ import {
   checkboxColumnModelConfig,
   type DatabaseBlockModel,
   dateColumnModelConfig,
-  linkPureColumnConfig,
+  linkColumnModelConfig,
   type ListType,
   multiSelectColumnConfig,
-  multiSelectPureColumnConfig,
-  numberPureColumnConfig,
+  multiSelectColumnModelConfig,
+  numberColumnModelConfig,
   type ParagraphType,
-  progressPureColumnConfig,
+  progressColumnModelConfig,
   richTextColumnModelConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -49,7 +49,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
         database.addColumn(
           'end',
-          numberPureColumnConfig.create(numberPureColumnConfig.model.name)
+          numberColumnModelConfig.create(numberColumnModelConfig.model.name)
         );
         const richTextId = database.addColumn(
           'end',
@@ -61,11 +61,11 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         );
         database.addColumn(
           'end',
-          linkPureColumnConfig.create(linkPureColumnConfig.model.name)
+          linkColumnModelConfig.create(linkColumnModelConfig.model.name)
         );
         database.addColumn(
           'end',
-          progressPureColumnConfig.create(progressPureColumnConfig.model.name)
+          progressColumnModelConfig.create(progressColumnModelConfig.model.name)
         );
         database.addColumn(
           'end',
@@ -73,7 +73,9 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         );
         database.addColumn(
           'end',
-          multiSelectPureColumnConfig.create(multiSelectColumnConfig.model.name)
+          multiSelectColumnModelConfig.create(
+            multiSelectColumnConfig.model.name
+          )
         );
         database.updateView(database.views[0].id, () => {
           return {

@@ -1,7 +1,7 @@
 import type { TType } from '../../logical/typesystem.js';
 import type { InsertToPosition } from '../../types.js';
 import { insertPositionToIndex } from '../../utils/insert.js';
-import type { DataViewManager } from '../data-view-manager.js';
+import type { DataViewManager } from '../../view/data-view-manager.js';
 import type { GroupBy, GroupProperty } from '../types.js';
 import type { GroupByConfig } from './matcher.js';
 import { groupByMatcher } from './matcher.js';

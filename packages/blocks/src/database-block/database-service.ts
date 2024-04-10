@@ -9,8 +9,8 @@ import {
 } from '../_common/inline/presets/affine-inline-specs.js';
 import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
 import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
-import type { DataViewTypes } from './data-view/common/data-view.js';
 import { DatabaseSelection } from './data-view/common/selection.js';
+import type { DataViewTypes } from './data-view/view/data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
 
 export class DatabaseService<

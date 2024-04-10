@@ -1,7 +1,11 @@
 import type { Slot } from '@blocksuite/global/utils';
 
 import type { InsertToPosition } from '../types.js';
-import type { DataViewDataType, DataViewTypes } from './data-view.js';
+import type {
+  DataViewDataType,
+  DataViewTypes,
+  ViewMeta,
+} from '../view/data-view.js';
 
 export interface SingleViewSource<
   View extends DataViewDataType = DataViewDataType,
@@ -20,6 +24,8 @@ export interface SingleViewSource<
 }
 
 export interface ViewSource {
+  allViewMeta: ViewMeta[];
+  getViewMeta(type: string): ViewMeta;
   get readonly(): boolean;
   get currentViewId(): string;
   get currentView(): SingleViewSource;

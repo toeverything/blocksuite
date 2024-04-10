@@ -14,7 +14,7 @@ import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
-} from '../data-view-manager.js';
+} from '../../view/data-view-manager.js';
 import {
   DatabaseDuplicate,
   DatabaseMoveLeft,

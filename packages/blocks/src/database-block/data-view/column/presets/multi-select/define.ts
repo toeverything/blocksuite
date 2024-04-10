@@ -10,10 +10,10 @@ import type { SelectColumnData } from '../../types.js';
 export const multiSelectColumnType = columnType('multi-select');
 declare global {
   interface ColumnConfigMap {
-    [multiSelectColumnType.type]: typeof multiSelectPureColumnConfig.model;
+    [multiSelectColumnType.type]: typeof multiSelectColumnModelConfig.model;
   }
 }
-export const multiSelectPureColumnConfig = multiSelectColumnType.modelConfig<
+export const multiSelectColumnModelConfig = multiSelectColumnType.modelConfig<
   string[],
   SelectColumnData
 >({
@@ -69,11 +69,11 @@ export const multiSelectPureColumnConfig = multiSelectColumnType.modelConfig<
   },
   cellToJson: data => data ?? null,
 });
-multiSelectPureColumnConfig.addConvert('select', (column, cells) => ({
+multiSelectColumnModelConfig.addConvert('select', (column, cells) => ({
   column,
   cells: cells.map(v => v?.[0]),
 }));
-multiSelectPureColumnConfig.addConvert('rich-text', (column, cells) => {
+multiSelectColumnModelConfig.addConvert('rich-text', (column, cells) => {
   const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
   return {
     column: {},

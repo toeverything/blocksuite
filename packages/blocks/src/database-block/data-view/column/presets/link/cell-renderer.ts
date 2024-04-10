@@ -11,7 +11,7 @@ import { stopPropagation } from '../../../utils/event.js';
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
-import { linkPureColumnConfig } from './define.js';
+import { linkColumnModelConfig } from './define.js';
 
 @customElement('affine-database-link-cell')
 export class LinkCell extends BaseCellRenderer<string> {
@@ -182,7 +182,7 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
   }
 }
 
-export const linkColumnConfig = linkPureColumnConfig.renderConfig({
+export const linkColumnConfig = linkColumnModelConfig.renderConfig({
   icon: createIcon('LinkIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(LinkCell),

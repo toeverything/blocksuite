@@ -10,8 +10,8 @@ import type { RichText } from '../../../../_common/components/index.js';
 import type { DatabaseBlockComponent } from '../../../database-block.js';
 import { BaseCellRenderer } from '../../column/index.js';
 import { tRichText } from '../../logical/data-type.js';
-import type { DataViewKanbanManager } from '../../views/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../views/table/table-view-manager.js';
+import type { DataViewKanbanManager } from '../../view/presets/kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../view/presets/table/table-view-manager.js';
 
 const styles = css`
   data-view-header-area-text {

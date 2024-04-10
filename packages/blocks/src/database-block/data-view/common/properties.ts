@@ -11,7 +11,7 @@ import { createPopup } from '../utils/menu/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
-} from './data-view-manager.js';
+} from '../view/data-view-manager.js';
 
 const show = html`<svg
   width="24"

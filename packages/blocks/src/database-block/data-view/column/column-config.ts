@@ -1,5 +1,5 @@
 import type { TType } from '../logical/typesystem.js';
-import type { StatCalcOpType } from '../views/table/types.js';
+import type { StatCalcOpType } from '../view/presets/table/types.js';
 import type {
   GetCellDataFromConfig,
   GetColumnDataFromConfig,

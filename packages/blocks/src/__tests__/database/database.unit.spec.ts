@@ -12,7 +12,7 @@ import { DatabaseBlockSchema } from '../../database-block/database-model.js';
 import {
   type Cell,
   type Column,
-  numberPureColumnConfig,
+  numberColumnModelConfig,
   richTextColumnModelConfig,
 } from '../../database-block/index.js';
 import { NoteBlockSchema } from '../../note-block/note-model.js';
@@ -82,7 +82,7 @@ describe('DatabaseManager', () => {
     ) as DatabaseBlockModel;
     db = databaseModel;
 
-    col1 = db.addColumn('end', numberPureColumnConfig.create('Number'));
+    col1 = db.addColumn('end', numberColumnModelConfig.create('Number'));
     col2 = db.addColumn(
       'end',
       selectColumnModelConfig.create('Single Select', { options: selection })
@@ -120,7 +120,7 @@ describe('DatabaseManager', () => {
 
   test('getColumn', () => {
     const column = {
-      ...numberPureColumnConfig.create('testColumnId'),
+      ...numberColumnModelConfig.create('testColumnId'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -130,7 +130,7 @@ describe('DatabaseManager', () => {
   });
 
   test('addColumn', () => {
-    const column = numberPureColumnConfig.create('Test Column');
+    const column = numberColumnModelConfig.create('Test Column');
     const id = db.addColumn('end', column);
     const result = db.getColumn(id);
 
@@ -140,7 +140,7 @@ describe('DatabaseManager', () => {
 
   test('deleteColumn', () => {
     const column = {
-      ...numberPureColumnConfig.create('Test Column'),
+      ...numberColumnModelConfig.create('Test Column'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -159,7 +159,7 @@ describe('DatabaseManager', () => {
       noteBlockId
     );
     const column = {
-      ...numberPureColumnConfig.create('Test Column'),
+      ...numberColumnModelConfig.create('Test Column'),
       id: 'testColumnId',
     };
     const cell: Cell = {

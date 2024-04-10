@@ -6,7 +6,7 @@ import { startDrag } from '../../../utils/drag.js';
 import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
-import { progressPureColumnConfig } from './define.js';
+import { progressColumnModelConfig } from './define.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -230,7 +230,7 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
   }
 }
 
-export const progressColumnConfig = progressPureColumnConfig.renderConfig({
+export const progressColumnConfig = progressColumnModelConfig.renderConfig({
   icon: createIcon('DatabaseProgress'),
   cellRenderer: {
     view: createFromBaseCellRenderer(ProgressCell),

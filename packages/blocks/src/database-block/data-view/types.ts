@@ -1,5 +1,5 @@
-import type { KanbanViewSelectionWithType } from './views/kanban/types.js';
-import type { TableViewSelection } from './views/table/types.js';
+import type { KanbanViewSelectionWithType } from './view/presets/kanban/types.js';
+import type { TableViewSelection } from './view/presets/table/types.js';
 
 export type DataViewSelection =
   | TableViewSelection

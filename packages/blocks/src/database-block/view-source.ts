@@ -1,12 +1,10 @@
 import { Slot } from '@blocksuite/global/utils';
 
-import type { DataViewTypes } from './data-view/common/data-view.js';
-import type {
-  SingleViewSource,
-  ViewSource,
-} from './data-view/common/view-source.js';
+import type { SingleViewSource, ViewSource } from './data-view/common/index.js';
 import type { InsertToPosition } from './data-view/types.js';
-import type { DatabaseBlockModel } from './database-model.js';
+import type { DataViewTypes, ViewMeta } from './data-view/view/data-view.js';
+import { type DatabaseBlockModel } from './database-model.js';
+import { databaseBlockViewMap, databaseBlockViews } from './views/index.js';
 
 export class DatabaseBlockViewSource implements ViewSource {
   constructor(private model: DatabaseBlockModel) {}
@@ -104,5 +102,13 @@ export class DatabaseBlockViewSource implements ViewSource {
 
   public moveTo(id: string, position: InsertToPosition): void {
     this.model.moveViewTo(id, position);
+  }
+
+  public get allViewMeta(): ViewMeta[] {
+    return databaseBlockViews;
+  }
+
+  public getViewMeta(type: string): ViewMeta {
+    return databaseBlockViewMap[type];
   }
 }

@@ -7,10 +7,10 @@ export const numberColumnType = columnType('number');
 
 declare global {
   interface ColumnConfigMap {
-    [numberColumnType.type]: typeof numberPureColumnConfig.model;
+    [numberColumnType.type]: typeof numberColumnModelConfig.model;
   }
 }
-export const numberPureColumnConfig = numberColumnType.modelConfig<
+export const numberColumnModelConfig = numberColumnType.modelConfig<
   number,
   {
     decimal: number;
@@ -28,7 +28,7 @@ export const numberPureColumnConfig = numberColumnType.modelConfig<
   },
   cellToJson: data => data ?? null,
 });
-numberPureColumnConfig.addConvert('rich-text', (_column, cells) => ({
+numberColumnModelConfig.addConvert('rich-text', (_column, cells) => ({
   column: {},
   cells: cells.map(v => new Text(v?.toString()).yText),
 }));

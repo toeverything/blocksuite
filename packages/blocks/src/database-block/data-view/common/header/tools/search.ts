@@ -7,8 +7,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../utils/event.js';
-import type { DataViewKanbanManager } from '../../../views/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../../views/table/table-view-manager.js';
+import type { DataViewKanbanManager } from '../../../view/presets/kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../../view/presets/table/table-view-manager.js';
 import { DatabaseSearchClose, DatabaseSearchIcon } from '../../icons/index.js';
 import { BaseTool } from './base-tool.js';
 

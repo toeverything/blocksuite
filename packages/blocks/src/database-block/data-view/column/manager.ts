@@ -1,8 +1,8 @@
+import type { UniComponent } from '../utils/uni-component/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
-} from '../common/data-view-manager.js';
-import type { UniComponent } from '../utils/uni-component/index.js';
+} from '../view/data-view-manager.js';
 import type { ColumnConfig } from './column-config.js';
 
 export interface CellRenderProps<

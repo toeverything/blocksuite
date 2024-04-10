@@ -8,9 +8,9 @@ import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../utils/menu/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
+import type { DataViewManager } from '../../view/data-view-manager.js';
 import { dataViewCommonStyle } from '../css-variable.js';
-import type { DataViewManager } from '../data-view-manager.js';
-import type { DetailSlotProps } from '../datasource/base.js';
+import type { DetailSlotProps } from '../data-source/base.js';
 import { PlusIcon } from '../icons/index.js';
 import { DetailSelection } from './selection.js';
 

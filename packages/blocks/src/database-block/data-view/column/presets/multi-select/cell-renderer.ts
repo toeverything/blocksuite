@@ -12,7 +12,7 @@ import { createIcon } from '../../../utils/uni-icon.js';
 import { BaseCellRenderer } from '../../base-cell.js';
 import { createFromBaseCellRenderer } from '../../renderer.js';
 import type { SelectColumnData } from '../../types.js';
-import { multiSelectPureColumnConfig } from './define.js';
+import { multiSelectColumnModelConfig } from './define.js';
 
 @customElement('affine-database-multi-select-cell')
 export class MultiSelectCell extends BaseCellRenderer<
@@ -89,12 +89,11 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
   }
 }
 
-export const multiSelectColumnConfig = multiSelectPureColumnConfig.renderConfig(
-  {
+export const multiSelectColumnConfig =
+  multiSelectColumnModelConfig.renderConfig({
     icon: createIcon('DatabaseMultiSelect'),
     cellRenderer: {
       view: createFromBaseCellRenderer(MultiSelectCell),
       edit: createFromBaseCellRenderer(MultiSelectCellEditing),
     },
-  }
-);
+  });

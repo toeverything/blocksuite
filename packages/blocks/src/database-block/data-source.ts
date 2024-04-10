@@ -22,8 +22,8 @@ import {
 import { type DatabaseBlockModel } from './database-model.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 
-export class Datasource extends BaseDataSource {
-  private _model: DatabaseBlockModel;
+export class DatabaseBlockDataSource extends BaseDataSource {
+  private readonly _model: DatabaseBlockModel;
   private _batch = 0;
 
   get doc() {

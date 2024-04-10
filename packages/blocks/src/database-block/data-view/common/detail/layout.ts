@@ -10,7 +10,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { createModal } from '../../utils/menu/index.js';
-import type { DataViewManager } from '../data-view-manager.js';
+import type { DataViewManager } from '../../view/data-view-manager.js';
 import { CrossIcon } from '../icons/index.js';
 import { RecordDetail } from './detail.js';
 

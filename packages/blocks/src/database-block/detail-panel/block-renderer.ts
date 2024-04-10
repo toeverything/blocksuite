@@ -3,9 +3,9 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { DetailSlotProps } from '../data-view/common/datasource/base.js';
-import type { DataViewKanbanManager } from '../data-view/views/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../data-view/views/table/table-view-manager.js';
+import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
+import type { DataViewKanbanManager } from '../data-view/view/presets/kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../data-view/view/presets/table/table-view-manager.js';
 import type { DatabaseBlockComponent } from '../database-block.js';
 
 @customElement('database-datasource-block-renderer')
