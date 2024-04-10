@@ -1,8 +1,9 @@
+import type { ConnectorElementModel } from '@blocksuite/blocks';
+import {
+  type EdgelessRootService,
+  SurfaceBlockComponent,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-
-import type { EdgelessRootService } from '../../../root-block/index.js';
-import type { ConnectorElementModel } from '../../../surface-block/index.js';
-import { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 
 export const getConnectorFromId = (
   id: string,

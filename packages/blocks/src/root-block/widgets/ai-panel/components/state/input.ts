@@ -10,13 +10,15 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 100%;
+      padding: 8px 12px;
+      box-sizing: border-box;
     }
 
     .root {
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      background: var(--light-background-backgroundOverlayPanelColor, #fbfbfc);
+      background: var(--affine-background-overlay-panel-color);
     }
 
     .icon {
@@ -42,14 +44,22 @@ export class AIPanelInput extends WithDisposable(LitElement) {
         overflow: hidden;
         padding: 0px;
 
-        color: var(--light-textColor-textPrimaryColor, #121212);
+        color: var(--affine-text-primary-color);
 
         /* light/sm */
-        font-family: Inter;
-        font-size: 14px;
+        font-family: var(--affine-font-family);
+        font-size: var(--affine-font-sm);
         font-style: normal;
         font-weight: 400;
         line-height: 22px; /* 157.143% */
+      }
+
+      textarea::placeholder {
+        color: var(--affine-placeholder-color);
+      }
+
+      textarea::-moz-placeholder {
+        color: var(--affine-placeholder-color);
       }
     }
 
@@ -103,7 +113,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
           placeholder="Ask AI to edit or generate..."
           rows="1"
           @keydown=${(e: KeyboardEvent) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
               e.preventDefault();
               this.onFinish?.(this._textarea.value);
               this.remove();

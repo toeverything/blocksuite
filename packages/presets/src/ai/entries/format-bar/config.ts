@@ -1,13 +1,33 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
 import {
+  AIDoneIcon,
   type AIItemGroupConfig,
   AIPenIcon,
-  AISearchIcon,
-  ExplainIcon,
-  MakeItRealIcon,
+  type AISubItemConfig,
+  ImproveWritingIcon,
+  LanguageIcon,
+  LongerIcon,
   matchFlavours,
-  TagIcon,
+  ShorterIcon,
+  ToneIcon,
 } from '@blocksuite/blocks';
+
+import { actionToHandler } from '../../actions/handler.js';
+import { textTones, translateLangs } from '../../actions/text.js';
+
+export const translateSubItem: AISubItemConfig[] = translateLangs.map(lang => {
+  return {
+    type: lang,
+    handler: actionToHandler('translate', { lang }),
+  };
+});
+
+export const toneSubItem: AISubItemConfig[] = textTones.map(tone => {
+  return {
+    type: tone,
+    handler: actionToHandler('changeTone', { tone }),
+  };
+});
 
 // TODO: improve the logic, to make it more accurate
 const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
@@ -27,7 +47,7 @@ const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
 const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   const [_, ctx] = chain
     .getSelectedModels({
-      types: ['text'],
+      types: ['block', 'text'],
     })
     .run();
   const { selectedModels } = ctx;
@@ -37,186 +57,68 @@ const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   return matchFlavours(model, ['affine:code']);
 };
 
-const DraftAIGroup: AIItemGroupConfig = {
-  name: 'draft',
+const imageBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
+  const [_, ctx] = chain
+    .getSelectedModels({
+      types: ['block'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  if (!selectedModels || selectedModels.length > 1) return false;
+
+  const model = selectedModels[0];
+  return matchFlavours(model, ['affine:image']);
+};
+
+const DocAIGroup: AIItemGroupConfig = {
+  name: 'doc with ai',
   items: [
     {
-      name: 'Write an article about this',
+      name: 'Summary',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Write a Twitter about this',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Write a poem about this',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Write a blog post about this',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Brainstorm ideas about this',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Write a outline from this',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
+      handler: actionToHandler('summary'),
     },
   ],
 };
 
-const MindMapAIGroup: AIItemGroupConfig = {
-  name: 'mindMap',
+const EditAIGroup: AIItemGroupConfig = {
+  name: 'edit with ai',
   items: [
     {
-      name: 'Explain from this mind-map node',
-      icon: ExplainIcon,
-      showWhen: (chain, editorMode) => {
-        if (editorMode === 'page') {
-          return false;
-        }
-
-        // TODO: complete this logic
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length > 1) return false;
-        return true;
-      },
+      name: 'Translate to',
+      icon: LanguageIcon,
+      showWhen: textBlockShowWhen,
+      subItem: translateSubItem,
     },
     {
-      name: 'Brainstorm ideas with mind-map',
-      icon: ExplainIcon,
-      showWhen: (chain, editorMode) => {
-        if (editorMode === 'page') {
-          return false;
-        }
-
-        // TODO: complete this logic
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || !selectedModels.length) return false;
-        return selectedModels.every(model =>
-          matchFlavours(model, ['affine:paragraph', 'affine:list'])
-        );
-      },
+      name: 'Change tone to',
+      icon: ToneIcon,
+      showWhen: textBlockShowWhen,
+      subItem: toneSubItem,
     },
-  ],
-};
-
-const CreateAIGroup: AIItemGroupConfig = {
-  name: 'create',
-  items: [
     {
-      name: 'Make it real',
-      icon: MakeItRealIcon,
-      showWhen: (chain, editorMode) => {
-        if (editorMode === 'page') {
-          return false;
-        }
-
-        // TODO: complete this logic
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length > 1) return false;
-
-        const model = selectedModels[0];
-        return matchFlavours(model, ['affine:frame']);
-      },
+      name: 'Improve writing for it',
+      icon: ImproveWritingIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('improveWriting'),
     },
-  ],
-};
-
-const CodeAIGroup: AIItemGroupConfig = {
-  name: 'code',
-  items: [
     {
-      name: 'Check code error',
+      name: 'Improve grammar for it',
+      icon: AIDoneIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('improveGrammar'),
+    },
+    {
+      name: 'Fix spelling for it',
+      icon: AIDoneIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('fixSpelling'),
+    },
+    {
+      name: 'Create headings',
       icon: AIPenIcon,
-      showWhen: codeBlockShowWhen,
-    },
-  ],
-};
-
-const PresentationAIGroup: AIItemGroupConfig = {
-  name: 'presentation',
-  items: [
-    {
-      name: 'Create a presentation',
-      icon: AIPenIcon,
-      showWhen: (chain, editorMode) => {
-        if (editorMode === 'page') {
-          return false;
-        }
-
-        // TODO: complete this logic
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || !selectedModels.length) return false;
-        return selectedModels.every(model =>
-          matchFlavours(model, ['affine:paragraph', 'affine:list'])
-        );
-      },
-    },
-  ],
-};
-
-const DrawAIGroup: AIItemGroupConfig = {
-  name: 'draw',
-  items: [
-    {
-      name: 'Generate a image about this',
-      icon: MakeItRealIcon,
-      showWhen: (chain, editorMode) => {
-        if (editorMode === 'page') {
-          return false;
-        }
-
-        // TODO: complete this logic
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['text'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length > 1) return false;
-
-        const model = selectedModels[0];
-        return matchFlavours(model, ['affine:frame']);
-      },
-    },
-  ],
-};
-
-const OthersAIGroup: AIItemGroupConfig = {
-  name: 'others',
-  items: [
-    {
-      name: 'Summary the webpage',
-      icon: AIPenIcon,
+      handler: actionToHandler('createHeadings'),
       showWhen: chain => {
         const [_, ctx] = chain
           .getSelectedModels({
@@ -224,63 +126,57 @@ const OthersAIGroup: AIItemGroupConfig = {
           })
           .run();
         const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length > 1) return false;
+        if (!selectedModels || selectedModels.length === 0) return false;
 
-        const model = selectedModels[0];
-        return matchFlavours(model, [
-          'affine:bookmark',
-          'affine:embed-linked-doc',
-        ]);
+        return selectedModels.every(
+          model =>
+            matchFlavours(model, ['affine:paragraph', 'affine:list']) &&
+            !model.type.startsWith('h')
+        );
       },
     },
+    {
+      name: 'Make longer',
+      icon: LongerIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('makeLonger'),
+    },
+    {
+      name: 'Make shorter',
+      icon: ShorterIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('makeShorter'),
+    },
+  ],
+};
+
+const CodeAIGroup: AIItemGroupConfig = {
+  name: 'code with ai',
+  items: [
+    {
+      name: 'Check code error',
+      icon: AIPenIcon,
+      showWhen: codeBlockShowWhen,
+      handler: actionToHandler('checkCodeErrors'),
+    },
+  ],
+};
+
+const ImageAIGroup: AIItemGroupConfig = {
+  name: 'image with ai',
+  items: [
     {
       name: 'Explain this image',
       icon: AIPenIcon,
-      showWhen: chain => {
-        const [_, ctx] = chain
-          .getSelectedModels({
-            types: ['block', 'text', 'image'],
-          })
-          .run();
-        const { selectedModels } = ctx;
-        if (!selectedModels || selectedModels.length > 1) return false;
-
-        const model = selectedModels[0];
-        return matchFlavours(model, ['affine:image', 'affine:surface-ref']);
-      },
-    },
-    {
-      name: 'Explain this code',
-      icon: AIPenIcon,
-      showWhen: codeBlockShowWhen,
-    },
-    {
-      name: 'Find handler items from it',
-      icon: AISearchIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Explain this',
-      icon: ExplainIcon,
-      showWhen: textBlockShowWhen,
-    },
-    {
-      name: 'Add tag for this doc',
-      icon: TagIcon,
-      showWhen: () => {
-        // TODO: nice to have, currently not supported
-        return false;
-      },
+      showWhen: imageBlockShowWhen,
+      handler: actionToHandler('explainImage'),
     },
   ],
 };
 
 export const AIItemGroups: AIItemGroupConfig[] = [
-  DraftAIGroup,
-  MindMapAIGroup,
-  CreateAIGroup,
+  DocAIGroup,
+  EditAIGroup,
   CodeAIGroup,
-  PresentationAIGroup,
-  DrawAIGroup,
-  OthersAIGroup,
+  ImageAIGroup,
 ];

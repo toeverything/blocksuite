@@ -6,9 +6,9 @@ import {
   Schema,
   type SchemaToModel,
 } from '../schema/index.js';
-import { Block } from '../store/block/block.js';
+import { Block, type YBlock } from '../store/block/block.js';
+import { DocCollection, Generator } from '../store/index.js';
 
-const schema = new Schema();
 const pageSchema = defineBlockSchema({
   flavour: 'page',
   props: internal => ({
@@ -22,16 +22,32 @@ const pageSchema = defineBlockSchema({
   },
 });
 type RootModel = SchemaToModel<typeof pageSchema>;
-schema.register([pageSchema]);
+
+function createTestOptions() {
+  const idGenerator = Generator.AutoIncrement;
+  const schema = new Schema();
+  schema.register([pageSchema]);
+  return { id: 'test-collection', idGenerator, schema };
+}
+
+const defaultDocId = 'doc:home';
+function createTestDoc(docId = defaultDocId) {
+  const options = createTestOptions();
+  const collection = new DocCollection(options);
+  const doc = collection.createDoc({ id: docId });
+  doc.load();
+  return doc;
+}
 
 test('init block without props should add default props', () => {
-  const doc = new Y.Doc();
-  const yBlock = doc.getMap('yBlock');
+  const doc = createTestDoc();
+  const yDoc = new Y.Doc();
+  const yBlock = yDoc.getMap('yBlock') as YBlock;
   yBlock.set('sys:id', '0');
   yBlock.set('sys:flavour', 'page');
   yBlock.set('sys:children', new Y.Array());
 
-  const block = new Block(schema, yBlock);
+  const block = new Block(doc.schema, yBlock, doc);
   const model = block.model as RootModel;
 
   expect(yBlock.get('prop:count')).toBe(0);

@@ -4,13 +4,13 @@ import * as Y from 'yjs';
 
 import { Text } from '../reactive/text.js';
 import type { BlockModel } from '../schema/base.js';
-import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
-import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
+import { syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
 import type { YBlock } from './block/index.js';
-import { BlockTree } from './block/index.js';
+import { BlockCollection } from './block/index.js';
 import type { DocCollection } from './collection.js';
+import { DocCRUD } from './doc/crud.js';
 import { Space } from './space.js';
 
 export type YBlocks = Y.Map<YBlock>;
@@ -37,9 +37,9 @@ type DocOptions = {
 export class Doc extends Space<FlatBlockMap> {
   private readonly _collection: DocCollection;
   private readonly _idGenerator: IdGenerator;
-  private readonly _blockTree: BlockTree;
+  private readonly _blockCollection: BlockCollection;
+  private readonly _docCRUD: DocCRUD;
   private _history!: Y.UndoManager;
-  private _root: BlockModel | null = null;
   /** Indicate whether the block tree is ready */
   private _ready = false;
   private _shouldTransact = true;
@@ -87,9 +87,12 @@ export class Doc extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._collection = collection;
     this._idGenerator = idGenerator;
-    this._blockTree = new BlockTree({
+    this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
+    this._blockCollection = new BlockCollection({
+      doc: this,
+      crud: this._docCRUD,
       schema: collection.schema,
-      yBlocks: this.yBlocks,
+      selector: () => true,
     });
   }
 
@@ -122,7 +125,9 @@ export class Doc extends Space<FlatBlockMap> {
   }
 
   get root() {
-    return this._root;
+    const rootId = this._docCRUD.root;
+    if (!rootId) return null;
+    return this._blockCollection.getBlock(rootId)?.model ?? null;
   }
 
   get isEmpty() {
@@ -190,124 +195,48 @@ export class Doc extends Space<FlatBlockMap> {
   }
 
   hasBlockById(id: string): boolean {
-    return this._blockTree.hasBlock(id);
+    return this._blockCollection.hasBlock(id);
   }
 
   getBlockById<Model extends BlockModel = BlockModel>(
     id: string
   ): Model | null {
-    return (this._blockTree.getBlock(id)?.model as Model) ?? null;
+    return (this._blockCollection.getBlock(id)?.model as Model) ?? null;
   }
 
   getBlockByFlavour(blockFlavour: string | string[]) {
     const flavours =
       typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
 
-    return Array.from(this._blockTree.blocks.values())
-      .filter(({ flavour }) => flavours.includes(flavour))
-      .map(x => x.model);
+    return this.getBlocks().filter(model => flavours.includes(model.flavour));
   }
 
   getParent(target: BlockModel | string): BlockModel | null {
-    const root = this._root;
-    const targetId = typeof target === 'string' ? target : target.id;
-    if (!root || root.id === targetId) return null;
-
-    const findParent = (parentId: string): BlockModel | null => {
-      const parentModel = this.getBlockById(parentId);
-      if (!parentModel) return null;
-
-      for (const [childId] of parentModel.childMap) {
-        if (childId === targetId) return parentModel;
-
-        const parent = findParent(childId);
-        if (parent !== null) return parent;
-      }
-
-      return null;
-    };
-
-    const parent = findParent(root.id);
-    if (parent !== null) return parent;
-
-    return null;
+    return this._blockCollection.getParent(target);
   }
 
   getPreviousSibling(block: BlockModel) {
-    const parent = this.getParent(block);
-    if (!parent) {
-      return null;
-    }
-    const index = parent.children.indexOf(block);
-    if (index === -1) {
-      throw new Error(
-        "Failed to getPreviousSiblings! Block not found in parent's children"
-      );
-    }
-    return parent.children[index - 1] ?? null;
+    return this._blockCollection.getPrev(block);
   }
 
   getPreviousSiblings(block: BlockModel) {
-    const parent = this.getParent(block);
-    if (!parent) {
-      return [];
-    }
-    const index = parent.children.indexOf(block);
-    if (index === -1) {
-      throw new Error(
-        "Failed to getPreviousSiblings! Block not found in parent's children"
-      );
-    }
-    return parent.children.slice(0, index);
+    return this._blockCollection.getPrevs(block);
   }
 
   getNextSibling(block: BlockModel) {
-    const parent = this.getParent(block);
-    if (!parent) {
-      return null;
-    }
-    const index = parent.children.indexOf(block);
-    if (index === -1) {
-      throw new Error(
-        "Failed to getPreviousSiblings! Block not found in parent's children"
-      );
-    }
-    return parent.children[index + 1] ?? null;
+    return this._blockCollection.getNext(block);
   }
 
   getNextSiblings(block: BlockModel) {
-    const parent = this.getParent(block);
-    if (!parent) {
-      return [];
-    }
-    const index = parent.children.indexOf(block);
-    if (index === -1) {
-      throw new Error(
-        "Failed to getNextSiblings! Block not found in parent's children"
-      );
-    }
-    return parent.children.slice(index + 1);
+    return this._blockCollection.getNexts(block);
   }
 
   getSchemaByFlavour(flavour: string) {
     return this.schema.flavourSchemaMap.get(flavour);
   }
 
-  getInitialPropsByFlavour(flavour: string) {
-    const schema = this.schema.flavourSchemaMap.get(flavour);
-    assertExists(schema);
-    return schema.model.props?.(internalPrimitives) ?? {};
-  }
-
   getBlocks() {
-    const blocks: BlockModel[] = [];
-    const allBlocks = this._blockTree.blocks;
-
-    allBlocks.forEach(({ model }) => {
-      blocks.push(model);
-    });
-
-    return blocks;
+    return this._blockCollection.getBlocks().map(block => block.model);
   }
 
   addBlocks(
@@ -354,43 +283,17 @@ export class Doc extends Space<FlatBlockMap> {
     if (this.readonly) {
       throw new Error('cannot modify data in readonly mode');
     }
-    if (!flavour) {
-      throw new Error('Block props must contain flavour');
-    }
-    const parentModel =
-      typeof parent === 'string' ? this.getBlockById(parent) : parent;
-
-    this.schema.validate(
-      flavour,
-      parentModel?.flavour,
-      blockProps.children?.map(child => child.flavour)
-    );
 
     const id = blockProps.id ?? this._idGenerator();
-    const clonedProps: BlockSysProps & Partial<BlockProps> = {
-      id,
-      flavour,
-      ...blockProps,
-    };
 
     this.transact(() => {
-      this._blockTree.addBlock(id, flavour, { ...blockProps });
-      // set the yBlock at the very beginning, otherwise yBlock will be always empty
-
-      assertValidChildren(this._yBlocks, clonedProps);
-      const schema = this.getSchemaByFlavour(flavour);
-      assertExists(schema);
-
-      const parentId =
-        parentModel?.id ??
-        (schema.model.role === 'root' ? undefined : this._root?.id);
-
-      if (parentId) {
-        const yParent = this._yBlocks.get(parentId) as YBlock;
-        const yChildren = yParent.get('sys:children') as Y.Array<string>;
-        const index = parentIndex ?? yChildren.length;
-        yChildren.insert(index, [id]);
-      }
+      this._docCRUD.addBlock(
+        id,
+        flavour,
+        { ...blockProps },
+        typeof parent === 'string' ? parent : parent?.id,
+        parentIndex
+      );
     });
 
     return id;
@@ -407,83 +310,13 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    if (!newParent) {
-      throw new Error("Can't find new parent block");
-    }
-
-    // A map to store parent block and their respective child blocks
-    const childBlocksPerParent = new Map<BlockModel, BlockModel[]>();
-    blocksToMove.forEach(block => {
-      const parentBlock = this.getParent(block);
-      if (!parentBlock) {
-        throw new Error("Can't find parent block for the current block");
-      }
-
-      this.schema.validate(block.flavour, newParent.flavour);
-
-      const childrenBlocksOfCurrentParent =
-        childBlocksPerParent.get(parentBlock);
-      if (childrenBlocksOfCurrentParent) {
-        if (
-          this.getNextSibling(
-            childrenBlocksOfCurrentParent[
-              childrenBlocksOfCurrentParent.length - 1
-            ]
-          ) !== block
-        ) {
-          throw new Error(
-            'The blocks to move are not contiguous under their parent'
-          );
-        }
-        childrenBlocksOfCurrentParent.push(block);
-      } else {
-        childBlocksPerParent.set(parentBlock, [block]);
-      }
-    });
-
     this.transact(() => {
-      let insertIndex = 0;
-      let first = true;
-      for (const [parentBlock, blocksToMove] of childBlocksPerParent) {
-        const targetParentBlock = this._yBlocks.get(newParent.id) as YBlock;
-        const targetParentChildren = targetParentBlock.get(
-          'sys:children'
-        ) as Y.Array<string>;
-        const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
-        const sourceParentChildren = sourceParentBlock.get(
-          'sys:children'
-        ) as Y.Array<string>;
-
-        // Get the IDs of blocks to move
-        const idsOfBlocksToMove = blocksToMove.map(({ id }) => id);
-
-        // Remove the blocks from their current parent
-        const startIndex = sourceParentChildren
-          .toArray()
-          .findIndex(id => id === idsOfBlocksToMove[0]);
-        sourceParentChildren.delete(startIndex, idsOfBlocksToMove.length);
-
-        if (first) {
-          if (targetSibling) {
-            const targetIndex = targetParentChildren
-              .toArray()
-              .findIndex(id => id === targetSibling.id);
-            if (targetIndex === -1) {
-              throw new Error('Target sibling not found');
-            }
-            insertIndex = shouldInsertBeforeSibling
-              ? targetIndex
-              : targetIndex + 1;
-          } else {
-            insertIndex = targetParentChildren.length;
-          }
-          first = false;
-        } else {
-          insertIndex++;
-        }
-
-        targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
-      }
+      this._docCRUD.moveBlocks(
+        blocksToMove.map(model => model.id),
+        newParent.id,
+        targetSibling?.id ?? null,
+        shouldInsertBeforeSibling
+      );
     });
   }
 
@@ -513,26 +346,22 @@ export class Doc extends Space<FlatBlockMap> {
     assertExists(yBlock);
 
     this.transact(() => {
-      if (!isCallback) {
-        // TODO diff children changes
-        // All child nodes will be deleted in the current behavior, then added again.
-        // Through diff children changes, the experience can be improved.
-        if (callBackOrProps.children) {
-          const yChildren = new Y.Array<string>();
-          yChildren.insert(
-            0,
-            callBackOrProps.children.map(child => child.id)
-          );
-          yBlock.set('sys:children', yChildren);
-        }
-
-        const schema = this.schema.flavourSchemaMap.get(model.flavour);
-        assertExists(schema);
-        syncBlockProps(schema, model, yBlock, callBackOrProps);
+      if (isCallback) {
+        callBackOrProps();
         return;
       }
 
-      callBackOrProps();
+      if (callBackOrProps.children) {
+        this._docCRUD.updateBlockChildren(
+          model.id,
+          callBackOrProps.children.map(child => child.id)
+        );
+      }
+
+      const schema = this.schema.flavourSchemaMap.get(model.flavour);
+      assertExists(schema);
+      syncBlockProps(schema, model, yBlock, callBackOrProps);
+      return;
     });
   }
 
@@ -549,18 +378,7 @@ export class Doc extends Space<FlatBlockMap> {
       parent.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
     const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
-    if (props.length > 1) {
-      const blocks: Array<{
-        flavour: string;
-        blockProps: Partial<BlockProps>;
-      }> = [];
-      props.forEach(prop => {
-        const { flavour, ...blockProps } = prop;
-        assertExists(flavour);
-        blocks.push({ flavour, blockProps });
-      });
-      return this.addBlocks(blocks, parent.id, insertIndex);
-    } else {
+    if (props.length <= 1) {
       assertExists(props[0].flavour);
       const { flavour, ...blockProps } = props[0];
       const id = this.addBlock(
@@ -571,6 +389,17 @@ export class Doc extends Space<FlatBlockMap> {
       );
       return [id];
     }
+
+    const blocks: Array<{
+      flavour: string;
+      blockProps: Partial<BlockProps>;
+    }> = [];
+    props.forEach(prop => {
+      const { flavour, ...blockProps } = prop;
+      assertExists(flavour);
+      blocks.push({ flavour, blockProps });
+    });
+    return this.addBlocks(blocks, parent.id, insertIndex);
   }
 
   deleteBlock(
@@ -587,67 +416,20 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    const { bringChildrenTo, deleteChildren } = options;
-    if (bringChildrenTo && deleteChildren) {
-      console.error(
-        'Cannot bring children to another block and delete them at the same time'
-      );
-      return;
-    }
-
-    const yModel = this._yBlocks.get(model.id) as YBlock;
-    const yModelChildren = yModel.get('sys:children') as Y.Array<string>;
-
-    const parent = this.getParent(model);
-    assertExists(parent);
-    const yParent = this._yBlocks.get(parent.id) as YBlock;
-    const yParentChildren = yParent.get('sys:children') as Y.Array<string>;
-    const modelIndex = yParentChildren.toArray().indexOf(model.id);
+    const opts = (
+      options && options.bringChildrenTo
+        ? {
+            ...options,
+            bringChildrenTo: options.bringChildrenTo.id,
+          }
+        : options
+    ) as {
+      bringChildrenTo?: string;
+      deleteChildren?: boolean;
+    };
 
     this.transact(() => {
-      if (modelIndex > -1) {
-        yParentChildren.delete(modelIndex, 1);
-      }
-
-      if (bringChildrenTo) {
-        // validate children flavour
-        model.children.forEach(child => {
-          this.schema.validate(child.flavour, bringChildrenTo.flavour);
-        });
-
-        if (bringChildrenTo.id === parent.id) {
-          // When bring children to parent, insert children to the original position of model
-          yParentChildren.insert(modelIndex, yModelChildren.toArray());
-        } else {
-          const yBringChildrenTo = this._yBlocks.get(
-            bringChildrenTo.id
-          ) as YBlock;
-          const yBringChildrenToChildren = yBringChildrenTo.get(
-            'sys:children'
-          ) as Y.Array<string>;
-          yBringChildrenToChildren.push(yModelChildren.toArray());
-        }
-      } else {
-        if (deleteChildren) {
-          // delete children recursively
-          const dl = (id: string) => {
-            const yBlock = this._yBlocks.get(id) as YBlock;
-
-            const yChildren = yBlock.get('sys:children') as Y.Array<string>;
-            yChildren.forEach(id => {
-              dl(id);
-            });
-
-            this._blockTree.removeBlock(id);
-          };
-
-          yModelChildren.forEach(id => {
-            dl(id);
-          });
-        }
-      }
-
-      this._blockTree.removeBlock(model.id);
+      this._docCRUD.deleteBlock(model.id, opts);
     });
   }
 
@@ -668,9 +450,7 @@ export class Doc extends Space<FlatBlockMap> {
       this._handleYBlockAdd(id);
     });
 
-    if (initFn) {
-      initFn();
-    }
+    initFn?.();
 
     this._ready = true;
     this.slots.ready.emit();
@@ -703,18 +483,12 @@ export class Doc extends Space<FlatBlockMap> {
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
-  private _getYBlock(id: string): YBlock | null {
-    const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) return null;
-    return yBlock;
-  }
-
   private _historyObserver = () => {
     this.slots.historyUpdated.emit();
   };
 
   private _handleYBlockAdd(id: string) {
-    const yBlock = this._getYBlock(id);
+    const yBlock = this._yBlocks.get(id) as YBlock | undefined;
     if (!yBlock) {
       console.warn(
         `Failed to handle yBlock add, yBlock with id-${id} not found`
@@ -722,54 +496,23 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    this._blockTree.onBlockAdded(id, this, {
-      onChange: (block, key) => {
-        if (key) {
-          block.model.propsUpdated.emit({ key });
-        }
+    const flavour = yBlock.get('sys:flavour');
+    this.slots.blockUpdated.emit({ type: 'add', id, flavour });
 
-        this.slots.blockUpdated.emit({
-          type: 'update',
-          id,
-          flavour: block.flavour,
-          props: { key },
-        });
-      },
-    });
-    const block = this._blockTree.getBlock(id);
-    assertExists(block);
-    const model = block.model;
-
-    const yChildren = yBlock.get('sys:children');
-    if (yChildren instanceof Y.Array) {
-      yChildren.forEach((id: string, index) => {
-        const hasChild = this._blockTree.blocks.has(id);
-
-        if (!hasChild) {
-          this._handleYBlockAdd(id);
-        }
-
-        model.children[index as number] = this.getBlockById(id) as BlockModel;
-      });
-    }
-
+    const model = this.getBlockById(id);
+    if (!model) return;
     if (model.role === 'root') {
-      this._root = model;
-      this.slots.rootAdded.emit(this._root);
-      return;
+      this.slots.rootAdded.emit(model);
     }
-
-    this.slots.blockUpdated.emit({ type: 'add', id, flavour: model.flavour });
   }
 
   private _handleYBlockDelete(id: string) {
     const model = this.getBlockById(id);
+    if (!model) return;
 
-    if (model === this._root) {
+    if (model === this.root) {
       this.slots.rootDeleted.emit(id);
     }
-    assertExists(model);
-    this._blockTree.onBlockRemoved(id);
     this.slots.blockUpdated.emit({
       type: 'delete',
       id,
@@ -781,27 +524,26 @@ export class Doc extends Space<FlatBlockMap> {
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
     // event on top-level block store
-    if (event.target === this._yBlocks) {
-      event.keys.forEach((value, id) => {
-        if (value.action === 'add') {
-          this._handleYBlockAdd(id);
-        } else if (value.action === 'delete') {
-          this._handleYBlockDelete(id);
-        } else {
-          // fires when undoing delete-and-add operation on a block
-          // console.warn('update action on top-level block store', event);
-        }
-      });
+    if (event.target !== this._yBlocks) {
+      return;
     }
+    event.keys.forEach((value, id) => {
+      if (value.action === 'add') {
+        this._handleYBlockAdd(id);
+        return;
+      }
+      if (value.action === 'delete') {
+        this._handleYBlockDelete(id);
+        return;
+      }
+    });
   }
 
   // Handle all the events that happen at _any_ level (potentially deep inside the structure).
   // So, we apply a listener at the top level for the flat structure of the current
   // doc/space container.
   private _handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
-    for (const event of events) {
-      this._handleYEvent(event);
-    }
+    events.forEach(event => this._handleYEvent(event));
   };
 
   private _handleVersion() {

@@ -1,4 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  RangeManager,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -45,6 +49,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     return this.inlineEditor.rootElement;
   }
 
+  private _lastXYWH = '';
   private _keeping = false;
   private _resizeObserver: ResizeObserver | null = null;
 
@@ -57,6 +62,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     const containerHeight = this.richText.offsetHeight;
     const containerWidth = this.richText.offsetWidth;
     const textResizing = this.element.textResizing;
+
+    if (this._lastXYWH !== this.element.xywh) {
+      this.requestUpdate();
+    }
 
     if (
       (containerHeight !== this.element.h &&
@@ -90,6 +99,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       elements: [this.element.id],
       editing: true,
     });
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
   }
 
   override firstUpdated(): void {
@@ -276,6 +290,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       gap: '0',
       zIndex: '1',
     });
+
+    this._lastXYWH = this.element.xywh;
 
     return html`<rich-text
       .yText=${this.element.text}

@@ -1,15 +1,15 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import {
+  BlocksUtils,
+  type EdgelessBlock,
+  EdgelessRootService,
+  type FrameBlockModel,
+  type ImageBlockModel,
+  type SurfaceBlockComponent,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 
-import type {
-  FrameBlockModel,
-  ImageBlockModel,
-  SurfaceBlockComponent,
-} from '../../../index.js';
-import { BlocksUtils } from '../../../index.js';
-import type { EdgelessBlock } from '../../../root-block/index.js';
-import { EdgelessRootService } from '../../../root-block/index.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
 export const getRootService = (host: EditorHost) => {

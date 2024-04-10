@@ -207,7 +207,7 @@ export class RootService extends BlockService<RootBlockModel> {
     return note;
   }
 
-  appendParagraph = () => {
+  appendParagraph = (text: string = '') => {
     const { doc } = this;
     if (!doc.root) return;
     if (doc.readonly) return;
@@ -215,7 +215,15 @@ export class RootService extends BlockService<RootBlockModel> {
     if (!noteId) {
       noteId = doc.addBlock('affine:note', {}, doc.root.id);
     }
-    const id = doc.addBlock('affine:paragraph', {}, noteId);
-    asyncFocusRichText(this.host as EditorHost, id)?.catch(console.error);
+    const id = doc.addBlock(
+      'affine:paragraph',
+      { text: new doc.Text(text) },
+      noteId
+    );
+
+    asyncFocusRichText(this.host as EditorHost, id, {
+      index: text.length,
+      length: 0,
+    })?.catch(console.error);
   };
 }

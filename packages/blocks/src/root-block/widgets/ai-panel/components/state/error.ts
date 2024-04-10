@@ -1,5 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type {
@@ -20,6 +21,8 @@ export class AIPanelError extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      padding: 12px 0px;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
     .error {
@@ -29,6 +32,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
       align-items: flex-start;
       gap: 8px;
       align-self: stretch;
+      padding: 0px 12px;
       .answer-tip {
         display: flex;
         flex-direction: column;
@@ -38,26 +42,21 @@ export class AIPanelError extends WithDisposable(LitElement) {
         align-self: stretch;
         .top {
           align-self: stretch;
-          color: var(
-            --light-textColor-textSecondaryColor,
-            var(--textColor-textSecondaryColor, #8e8d91)
-          );
+          color: var(--affine-text-secondary-color);
           /* light/xsMedium */
-          font-family: Inter;
-          font-size: 12px;
+          font-size: var(--affine-font-xs);
           font-style: normal;
           font-weight: 500;
           line-height: 20px; /* 166.667% */
         }
         .bottom {
           align-self: stretch;
-          color: var(--light-detailColor-statusColor-errorColor, #eb4335);
+          color: var(--affine-error-color, #eb4335);
           font-feature-settings:
             'clig' off,
             'liga' off;
           /* light/sm */
-          font-family: Inter;
-          font-size: 14px;
+          font-size: var(--affine-font-sm);
           font-style: normal;
           font-weight: 400;
           line-height: 22px; /* 157.143% */
@@ -70,24 +69,23 @@ export class AIPanelError extends WithDisposable(LitElement) {
         align-items: center;
         gap: 4px;
         border-radius: 8px;
-        border: 1px solid var(--light-detailColor-borderColor, #e3e2e4);
+        border: 1px solid var(--affine-border-color, #e3e2e4);
         background: var(--light-white-white, #fff);
         .content {
           display: flex;
           padding: 0px 4px;
           justify-content: center;
           align-items: center;
-          color: var(--light-textColor-textPrimaryColor, #121212);
+          color: var(--affine-text-primary-color, #121212);
           /* light/xsMedium */
-          font-family: Inter;
-          font-size: 12px;
+          font-size: var(--affine-font-xs);
           font-style: normal;
           font-weight: 500;
           line-height: 20px; /* 166.667% */
         }
       }
       .upgrade:hover {
-        background: var(--light-detailColor-hoverColor, rgba(0, 0, 0, 0.04));
+        background: var(--affine-hover-color, rgba(0, 0, 0, 0.04));
       }
     }
   `;

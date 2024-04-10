@@ -27,10 +27,16 @@ export {
 } from './element-model/connector.js';
 export { GroupElementModel } from './element-model/group.js';
 export { CanvasElementType } from './element-model/index.js';
+export { MindmapElementModel } from './element-model/mindmap.js';
 export { ShapeElementModel } from './element-model/shape.js';
 export { TextElementModel } from './element-model/text.js';
 export * from './elements/index.js';
 export { ShapeType } from './elements/shape/consts.js';
+export {
+  MindmapRootBlock,
+  MindmapService,
+  MindmapSurfaceBlock,
+} from './mini-mindmap/index.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
 export { RoughCanvas } from './rough/canvas.js';
 export type { Options } from './rough/core.js';
