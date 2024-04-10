@@ -33,9 +33,7 @@ export function setupAIProvider() {
     assertExists(options.stream);
     const prompt = `Please translate the following content into ${options.lang} and return it to us, adhering to the original format of the content：
 
-    """
     ${options.input}
-    """
     `;
     return textToTextStream({
       docId: options.docId,
