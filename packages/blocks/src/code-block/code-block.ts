@@ -102,7 +102,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   private _perviousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: StrictLanguageInfo) {
-    if (!this.host.isConnected) return;
     if (this._highlighter) {
       const loadedLangs = this._highlighter.getLoadedLanguages();
       if (!isPlaintext(lang.id) && !loadedLangs.includes(lang.id)) {
@@ -126,12 +125,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     const richText = this.querySelector('rich-text');
     const inlineEditor = richText?.inlineEditor;
-    if (inlineEditor) {
-      inlineEditor.requestUpdate();
-      const range = inlineEditor.getInlineRange();
-      if (range) {
-        inlineEditor.setInlineRange(range);
-      }
+    if (!inlineEditor) return;
+
+    inlineEditor.requestUpdate();
+    const range = inlineEditor.getInlineRange();
+    if (range) {
+      inlineEditor.setInlineRange(range);
     }
   }
 
