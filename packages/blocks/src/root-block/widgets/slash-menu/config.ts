@@ -17,7 +17,6 @@ import {
   DualLinkIcon,
   DuplicateIcon,
   FrameIcon,
-  GroupingIcon,
   ImageIcon20,
   NewDocIcon,
   NowIcon,
@@ -35,6 +34,7 @@ import {
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
+import { GroupingIcon } from '../../../database-block/data-view/common/icons/index.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';

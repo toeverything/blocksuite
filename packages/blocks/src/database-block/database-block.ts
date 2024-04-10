@@ -1,28 +1,16 @@
-// related component
-import './common/group-by/define.js';
-import './common/header/views.js';
-import './common/header/title.js';
-import './common/header/tools/tools.js';
-import './common/filter/filter-bar.js';
-import './data-view.js';
-
 import { BlockElement, PathFinder, RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
 import { DragIndicator } from '../_common/components/index.js';
-import { popMenu } from '../_common/components/menu/index.js';
-import { defineUniComponent } from '../_common/components/uni-component/uni-component.js';
 import {
   CopyIcon,
   DeleteIcon,
   MoreHorizontalIcon,
 } from '../_common/icons/index.js';
-import type { DataViewSelection } from '../_common/utils/index.js';
 import { Rect } from '../_common/utils/index.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
@@ -33,21 +21,26 @@ import {
 } from '../root-block/widgets/drag-handle/utils.js';
 import type { AffineInnerModalWidget } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
-import { dataViewCommonStyle } from './common/css-variable.js';
-import type { DataViewProps, DataViewTypes } from './common/data-view.js';
-import { type DataViewExpose } from './common/data-view.js';
-import type { DataViewManager } from './common/data-view-manager.js';
-import type { DataSource } from './common/datasource/base.js';
-import { DatabaseBlockDataSource } from './common/datasource/database-block-datasource.js';
-import { renderFilterBar } from './common/filter/filter-bar.js';
-import { renderTools } from './common/header/tools/tools.js';
-import { DatabaseSelection } from './common/selection.js';
-import type { SingleViewSource, ViewSource } from './common/view-source.js';
-import type { DataViewNative, DataViewNativeConfig } from './data-view.js';
+import { Datasource } from './data-source.js';
+import { dataViewCommonStyle } from './data-view/common/css-variable.js';
+import type { DataViewProps } from './data-view/common/data-view.js';
+import { type DataViewExpose } from './data-view/common/data-view.js';
+import type { DataViewManager } from './data-view/common/data-view-manager.js';
+import type { DataSource } from './data-view/common/datasource/base.js';
+import { renderFilterBar } from './data-view/common/filter/filter-bar.js';
+import { renderTools } from './data-view/common/header/tools/tools.js';
+import {
+  DatabaseSelection,
+  DataView,
+  type DataViewSelection,
+  defineUniComponent,
+  popMenu,
+  type ViewSource,
+} from './data-view/index.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
 import type { DatabaseService } from './database-service.js';
-import type { InsertToPosition } from './types.js';
+import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<
@@ -259,16 +252,16 @@ export class DatabaseBlockComponent extends BlockElement<
     );
   }
 
-  private _view = createRef<DataViewNative>();
+  private dataView = new DataView();
 
   get view() {
-    return this._view.value?.expose;
+    return this.dataView.expose;
   }
 
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDataSource(this.host, {
+      this._dataSource = new Datasource(this.host, {
         type: 'database-block',
         pageId: this.host.doc.id,
         blockId: this.model.id,
@@ -276,10 +269,6 @@ export class DatabaseBlockComponent extends BlockElement<
     }
     return this._dataSource;
   }
-
-  public focusFirstCell = () => {
-    this._view.value?.focusFirstCell();
-  };
 
   private renderViews = () => {
     return html` <data-view-header-views
@@ -371,27 +360,23 @@ export class DatabaseBlockComponent extends BlockElement<
   }
 
   override renderBlock() {
-    const config: DataViewNativeConfig = {
-      bindHotkey: this._bindHotkey,
-      handleEvent: this._handleEvent,
-      getFlag: this.getFlag,
-      selectionUpdated: this.selectionUpdated,
-      setSelection: this.setSelection,
-      dataSource: this.dataSource,
-      viewSource: this.viewSource,
-      headerComponent: this.headerComponent,
-      onDrag: this.onDrag,
-      std: this.std,
-      detailPanelConfig: {
-        target: () => this.innerModalWidget.target,
-      },
-    };
     return html`
       <div contenteditable="false" style="position: relative">
-        <affine-data-view-native
-          ${ref(this._view)}
-          .config="${config}"
-        ></affine-data-view-native>
+        ${this.dataView.render({
+          bindHotkey: this._bindHotkey,
+          handleEvent: this._handleEvent,
+          getFlag: this.getFlag,
+          selectionUpdated: this.selectionUpdated,
+          setSelection: this.setSelection,
+          dataSource: this.dataSource,
+          viewSource: this.viewSource,
+          headerComponent: this.headerComponent,
+          onDrag: this.onDrag,
+          std: this.std,
+          detailPanelConfig: {
+            target: () => this.innerModalWidget.target,
+          },
+        })}
 
         <affine-block-selection
           .block="${this}"
@@ -405,104 +390,5 @@ export class DatabaseBlockComponent extends BlockElement<
 declare global {
   interface HTMLElementTagNameMap {
     'affine-database': DatabaseBlockComponent;
-  }
-}
-
-class DatabaseBlockViewSource implements ViewSource {
-  constructor(private model: DatabaseBlockModel) {}
-
-  get currentViewId(): string {
-    return this.currentId ?? this.model.views[0].id;
-  }
-
-  private viewMap = new Map<string, SingleViewSource>();
-  private currentId?: string;
-
-  public selectView(id: string): void {
-    this.currentId = id;
-    this.updateSlot.emit();
-  }
-
-  public updateSlot = new Slot();
-
-  public get views(): SingleViewSource[] {
-    return this.model.views.map(v => this.viewGet(v.id));
-  }
-
-  public get currentView(): SingleViewSource {
-    return this.viewGet(this.currentViewId);
-  }
-
-  public get readonly(): boolean {
-    return this.model.doc.readonly;
-  }
-
-  public viewAdd(type: DataViewTypes): string {
-    this.model.doc.captureSync();
-    const view = this.model.addView(type);
-    this.model.applyViewsUpdate();
-    return view.id;
-  }
-
-  public viewGet(id: string): SingleViewSource {
-    let result = this.viewMap.get(id);
-    if (!result) {
-      const getView = () => {
-        return this.model.views.find(v => v.id === id);
-      };
-      const view = getView();
-      if (!view) {
-        throw new Error('view not found');
-      }
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      const self = this;
-      const slot = new Slot();
-      this.updateSlot.pipe(slot);
-      result = {
-        duplicate(): void {
-          self.duplicate(id);
-        },
-        get view() {
-          const view = getView();
-          if (!view) {
-            throw new Error('view not found');
-          }
-          return view;
-        },
-        updateView: updater => {
-          this.model.doc.captureSync();
-          this.model.updateView(id, updater);
-          this.model.applyViewsUpdate();
-        },
-        delete: () => {
-          this.model.doc.captureSync();
-          if (this.model.getViewList().length === 1) {
-            this.model.doc.deleteBlock(this.model);
-            return;
-          }
-          this.model.deleteView(id);
-          this.currentId = undefined;
-          this.model.applyViewsUpdate();
-        },
-        get readonly() {
-          return self.model.doc.readonly;
-        },
-        updateSlot: slot,
-        isDeleted() {
-          return self.model.views.every(v => v.id !== id);
-        },
-      };
-      this.viewMap.set(id, result);
-    }
-    return result;
-  }
-
-  public duplicate(id: string): void {
-    const newId = this.model.duplicateView(id);
-    this.selectView(newId);
-  }
-
-  public moveTo(id: string, position: InsertToPosition): void {
-    this.model.moveViewTo(id, position);
   }
 }

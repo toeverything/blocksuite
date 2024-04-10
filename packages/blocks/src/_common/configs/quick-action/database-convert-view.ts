@@ -4,9 +4,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { DataViewTypes } from '../../../database-block/common/data-view.js';
+import type { DataViewTypes } from '../../../database-block/data-view/common/data-view.js';
+import { DatabaseSearchClose } from '../../../database-block/data-view/common/icons/index.js';
 import type { DatabaseBlockModel } from '../../../database-block/database-model.js';
-import { DatabaseSearchClose } from '../../icons/database.js';
 import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,

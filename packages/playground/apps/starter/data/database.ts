@@ -1,16 +1,15 @@
-import type {
-  DatabaseBlockModel,
-  ListType,
-  ParagraphType,
-} from '@blocksuite/blocks';
 import {
-  checkboxPureColumnConfig,
-  datePureColumnConfig,
+  checkboxColumnModelConfig,
+  type DatabaseBlockModel,
+  dateColumnModelConfig,
   linkPureColumnConfig,
+  type ListType,
   multiSelectColumnConfig,
+  multiSelectPureColumnConfig,
   numberPureColumnConfig,
+  type ParagraphType,
   progressPureColumnConfig,
-  richTextPureColumnConfig,
+  richTextColumnModelConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DocCollection, Text } from '@blocksuite/store';
@@ -50,31 +49,31 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
         database.addColumn(
           'end',
-          numberPureColumnConfig.create(numberPureColumnConfig.name)
+          numberPureColumnConfig.create(numberPureColumnConfig.model.name)
         );
         const richTextId = database.addColumn(
           'end',
-          richTextPureColumnConfig.create(richTextPureColumnConfig.name)
+          richTextColumnModelConfig.create(richTextColumnModelConfig.model.name)
         );
         database.addColumn(
           'end',
-          datePureColumnConfig.create(datePureColumnConfig.name)
+          dateColumnModelConfig.create(dateColumnModelConfig.model.name)
         );
         database.addColumn(
           'end',
-          linkPureColumnConfig.create(linkPureColumnConfig.name)
+          linkPureColumnConfig.create(linkPureColumnConfig.model.name)
         );
         database.addColumn(
           'end',
-          progressPureColumnConfig.create(progressPureColumnConfig.name)
+          progressPureColumnConfig.create(progressPureColumnConfig.model.name)
         );
         database.addColumn(
           'end',
-          checkboxPureColumnConfig.create(checkboxPureColumnConfig.name)
+          checkboxColumnModelConfig.create(checkboxColumnModelConfig.model.name)
         );
         database.addColumn(
           'end',
-          multiSelectColumnConfig.create(multiSelectColumnConfig.name)
+          multiSelectPureColumnConfig.create(multiSelectColumnConfig.model.name)
         );
         database.updateView(database.views[0].id, () => {
           return {

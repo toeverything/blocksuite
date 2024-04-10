@@ -1,14 +1,12 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import {
+  ArrowDownSmallIcon,
   DocIcon,
+  DualLinkIcon16,
   LinkedDocIcon,
+  PlusIcon,
   popTagSelect,
   type SelectTag,
-} from '@blocksuite/blocks';
-import {
-  ArrowDownSmallIcon,
-  DualLinkIcon16,
-  PlusIcon,
   TagsIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';

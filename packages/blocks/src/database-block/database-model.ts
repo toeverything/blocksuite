@@ -1,15 +1,19 @@
 import type { MigrationRunner, Text } from '@blocksuite/store';
 import { BlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
-import { getTagColor } from '../_common/components/tags/colors.js';
-import { multiSelectPureColumnConfig } from './common/columns/multi-select/define.js';
-import { selectPureColumnConfig } from './common/columns/select/define.js';
-import { titlePureColumnConfig } from './common/columns/title/define.js';
-import type { DataViewDataType, DataViewTypes } from './common/data-view.js';
-import { viewManager } from './common/data-view.js';
-import type { Column } from './table/types.js';
-import type { Cell, ColumnUpdater, InsertToPosition } from './types.js';
-import { arrayMove, insertPositionToIndex } from './utils/insert.js';
+import { databaseBlockColumnMap } from './columns/index.js';
+import { titlePureColumnConfig } from './columns/title/define.js';
+import { multiSelectPureColumnConfig } from './data-view/column/presets/multi-select/define.js';
+import { selectColumnModelConfig } from './data-view/column/presets/select/define.js';
+import {
+  type DataViewDataType,
+  type DataViewTypes,
+  viewManager,
+} from './data-view/common/data-view.js';
+import type { InsertToPosition } from './data-view/types.js';
+import { arrayMove, insertPositionToIndex } from './data-view/utils/insert.js';
+import { getTagColor } from './data-view/utils/tags/colors.js';
+import type { Cell, Column, ColumnUpdater } from './types.js';
 
 export type DatabaseBlockProps = {
   views: DataViewDataType[];
@@ -34,7 +38,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
   initEmpty(viewType: DataViewTypes) {
     this.addColumn(
       'start',
-      titlePureColumnConfig.create(titlePureColumnConfig.name)
+      titlePureColumnConfig.create(titlePureColumnConfig.model.name)
     );
     this.addView(viewType);
   }
@@ -42,7 +46,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
   initConvert(viewType: DataViewTypes) {
     this.addColumn(
       'end',
-      multiSelectPureColumnConfig.create('Tag', { options: [] })
+      multiSelectPureColumnConfig.model.create('Tag', { options: [] })
     );
     this.initEmpty(viewType);
   }
@@ -51,7 +55,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     const ids = [nanoid(), nanoid(), nanoid()];
     const statusId = this.addColumn(
       'end',
-      selectPureColumnConfig.create('Status', {
+      selectColumnModelConfig.model.create('Status', {
         options: [
           {
             id: ids[0],
@@ -90,7 +94,12 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
   addView(type: DataViewTypes) {
     const id = this.doc.generateBlockId();
     const viewConfig = viewManager.getView(type);
-    const view = viewConfig.init(this, id, viewConfig.defaultName);
+    const view = viewConfig.init(
+      databaseBlockColumnMap,
+      this,
+      id,
+      viewConfig.defaultName
+    );
     this.doc.transact(() => {
       this.views.push(view);
     });
