@@ -496,10 +496,8 @@ export class Doc extends Space<FlatBlockMap> {
       return;
     }
 
-    this._blockCollection.onBlockAdded(id);
-    const block = this._blockCollection.getBlock(id);
-    assertExists(block);
-    const model = block.model;
+    const flavour = yBlock.get('sys:flavour');
+    this.slots.blockUpdated.emit({ type: 'add', id, flavour });
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
@@ -512,22 +510,20 @@ export class Doc extends Space<FlatBlockMap> {
       });
     }
 
+    const model = this.getBlockById(id);
+    if (!model) return;
     if (model.role === 'root') {
       this.slots.rootAdded.emit(model);
-      return;
     }
-
-    this.slots.blockUpdated.emit({ type: 'add', id, flavour: model.flavour });
   }
 
   private _handleYBlockDelete(id: string) {
     const model = this.getBlockById(id);
+    if (!model) return;
 
     if (model === this.root) {
       this.slots.rootDeleted.emit(id);
     }
-    assertExists(model);
-    this._blockCollection.onBlockRemoved(id);
     this.slots.blockUpdated.emit({
       type: 'delete',
       id,

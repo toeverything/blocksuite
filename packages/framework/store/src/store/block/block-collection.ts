@@ -28,7 +28,20 @@ export class BlockCollection {
 
     this._yBlocks.forEach((_, id) => {
       if (!this._blocks.has(id)) {
-        this.onBlockAdded(id);
+        this._onBlockAdded(id);
+      }
+    });
+
+    this._doc.slots.blockUpdated.on(({ type, id }) => {
+      switch (type) {
+        case 'add': {
+          this._onBlockAdded(id);
+          return;
+        }
+        case 'delete': {
+          this._onBlockRemoved(id);
+          return;
+        }
       }
     });
   }
@@ -148,7 +161,7 @@ export class BlockCollection {
     return fn(parent, index);
   }
 
-  onBlockAdded(id: string) {
+  private _onBlockAdded(id: string) {
     if (this._blocks.has(id)) {
       return;
     }
@@ -182,7 +195,7 @@ export class BlockCollection {
     block.model.created.emit();
   }
 
-  onBlockRemoved(id: string) {
+  private _onBlockRemoved(id: string) {
     if (!this._blocks.has(id)) {
       return;
     }
