@@ -6,6 +6,8 @@ import {
   type NormalizedCacheObject,
 } from '@apollo/client/core';
 
+import { toTextStream } from './utils/event-source.js';
+
 const GET_COPILOT_HISTORIES = gql`
   query getCopilotHistories(
     $workspaceId: String!
@@ -76,6 +78,12 @@ const CREATE_COPILOT_SESSIONS = gql`
   }
 `;
 
+const CREATE_COPILOT_MESSAGE = gql`
+  mutation createCopilotMessage($options: CreateChatMessageInput!) {
+    createCopilotMessage(options: $options)
+  }
+`;
+
 export class CopilotClient {
   private graphQLClient: ApolloClient<NormalizedCacheObject>;
 
@@ -100,6 +108,21 @@ export class CopilotClient {
       },
     });
     return res.data.createCopilotSession as string;
+  }
+
+  async createMessage(options: {
+    sessionId: string;
+    content: string;
+    params?: string;
+    attachments?: Blob[];
+  }) {
+    const res = await this.graphQLClient.mutate({
+      mutation: CREATE_COPILOT_MESSAGE,
+      variables: {
+        options,
+      },
+    });
+    return res.data.createCopilotMessage as string;
   }
 
   async getSessions(workspaceId: string) {
@@ -195,6 +218,22 @@ export class CopilotClient {
   textToTextStream(text: string, sessionId: string) {
     return new EventSource(
       `${this.backendUrl}/api/copilot/chat/${sessionId}/stream?message=${encodeURIComponent(text)}`
+    );
+  }
+
+  // Text or image to text
+  textStream(messageId: string, sessionId: string) {
+    return new EventSource(
+      `${this.backendUrl}/api/copilot/chat/${sessionId}/stream?messageId=${messageId}`
+    );
+  }
+
+  // Text or image to image
+  imagesStream(messageId: string, sessionId: string) {
+    return toTextStream(
+      new EventSource(
+        `${this.backendUrl}/api/copilot/chat/${sessionId}/images?messageId=${messageId}`
+      )
     );
   }
 }
