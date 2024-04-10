@@ -1,12 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
-import type { RootService } from '@blocksuite/blocks';
 import { openFileOrFiles } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { ChatSendIcon, CloseIcon, ImageIcon } from '../_common/icons.js';
+import type { CopilotClient } from '../copilot-client.js';
+import type { ChatMessage, ChatStatus } from './index.js';
 
 const MaximumImageCount = 8;
 
@@ -63,6 +64,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     .chat-panel-images img {
       border-radius: 4px;
       border: 1px solid var(--affine-border-color);
+      cursor: pointer;
     }
 
     .close-wrapper {
@@ -76,6 +78,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       position: absolute;
       background-color: var(--affine-white);
       z-index: 1;
+      cursor: pointer;
     }
 
     .close-wrapper:hover {
@@ -92,7 +95,25 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   host!: EditorHost;
 
   @property({ attribute: false })
-  copilot!: RootService['copilot'];
+  copilotClient!: CopilotClient;
+
+  @property({ attribute: false })
+  sessionId!: string;
+
+  @property({ attribute: false })
+  updateMessages!: (messages: ChatMessage[]) => void;
+
+  @property({ attribute: false })
+  addToMessages!: (messages: ChatMessage[]) => void;
+
+  @property({ attribute: false })
+  status!: ChatStatus;
+
+  @property({ attribute: false })
+  messages!: ChatMessage[];
+
+  @property({ attribute: false })
+  updateStatus!: (status: ChatStatus) => void;
 
   @query('textarea')
   textarea!: HTMLTextAreaElement;
@@ -109,7 +130,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   @state()
   isInputEmpty = true;
 
-  send = () => {
+  send = async () => {
     const text = this.textarea.value;
     if (!text) {
       return;
@@ -117,16 +138,18 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     this.textarea.value = '';
     this.isInputEmpty = true;
     this.images = [];
-    this.copilot.askAI(
-      this.copilot.actions.createCommonTextAction([
-        { type: 'text', text },
-        ...this.images.map(image => ({
-          type: 'image_url' as const,
-          image_url: { url: URL.createObjectURL(image) },
-        })),
-      ]),
-      text
-    );
+    this.updateStatus('loading');
+    this.addToMessages([
+      { role: 'user', content: text },
+      { role: 'assistant', content: '' },
+    ]);
+    const res = await this.copilotClient.textToText(text, this.sessionId);
+    if (res) {
+      this.updateStatus('success');
+      const messages = [...this.messages];
+      messages[messages.length - 1] = { role: 'assistant', content: res };
+      this.updateMessages(messages);
+    }
   };
 
   protected override render() {
@@ -191,10 +214,10 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
           @input=${() => {
             this.isInputEmpty = !this.textarea.value;
           }}
-          @keydown=${(evt: KeyboardEvent) => {
+          @keydown=${async (evt: KeyboardEvent) => {
             if (evt.key === 'Enter' && !evt.shiftKey) {
               evt.preventDefault();
-              this.send();
+              await this.send();
             }
           }}
         ></textarea>
