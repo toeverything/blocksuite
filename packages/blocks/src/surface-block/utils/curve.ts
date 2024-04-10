@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import { Bound } from './bound.js';
 import { CURVETIME_EPSILON, isZero } from './math-utils.js';
 import type { PointLocation } from './point-location.js';
 import { type IVec, Vec } from './vec.js';
@@ -147,4 +148,113 @@ export function getBezierParameters(
   points: PointLocation[]
 ): BezierCurveParameters {
   return [points[0], points[0].absOut, points[1].absIn, points[1]];
+}
+
+// https://stackoverflow.com/questions/2587751/an-algorithm-to-find-bounding-box-of-closed-bezier-curves
+export function getBezierCurveBoundingBox(values: BezierCurveParameters) {
+  const [start, controlPoint1, controlPoint2, end] = values;
+
+  const [x0, y0] = start;
+  const [x1, y1] = controlPoint1;
+  const [x2, y2] = controlPoint2;
+  const [x3, y3] = end;
+
+  const points = []; // local extremes
+  const tvalues = []; // t values of local extremes
+  const bounds: [number[], number[]] = [[], []];
+
+  let a;
+  let b;
+  let c;
+  let t;
+  let t1;
+  let t2;
+  let b2ac;
+  let sqrtb2ac;
+
+  for (let i = 0; i < 2; i += 1) {
+    if (i === 0) {
+      b = 6 * x0 - 12 * x1 + 6 * x2;
+      a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
+      c = 3 * x1 - 3 * x0;
+    } else {
+      b = 6 * y0 - 12 * y1 + 6 * y2;
+      a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
+      c = 3 * y1 - 3 * y0;
+    }
+
+    if (Math.abs(a) < 1e-12) {
+      if (Math.abs(b) < 1e-12) {
+        continue;
+      }
+
+      t = -c / b;
+      if (t > 0 && t < 1) tvalues.push(t);
+
+      continue;
+    }
+
+    b2ac = b * b - 4 * c * a;
+    sqrtb2ac = Math.sqrt(b2ac);
+
+    if (b2ac < 0) continue;
+
+    t1 = (-b + sqrtb2ac) / (2 * a);
+    if (t1 > 0 && t1 < 1) tvalues.push(t1);
+
+    t2 = (-b - sqrtb2ac) / (2 * a);
+    if (t2 > 0 && t2 < 1) tvalues.push(t2);
+  }
+
+  let x;
+  let y;
+  let mt;
+  let j = tvalues.length;
+  const jlen = j;
+
+  while (j) {
+    j -= 1;
+    t = tvalues[j];
+    mt = 1 - t;
+
+    x =
+      mt * mt * mt * x0 +
+      3 * mt * mt * t * x1 +
+      3 * mt * t * t * x2 +
+      t * t * t * x3;
+    bounds[0][j] = x;
+
+    y =
+      mt * mt * mt * y0 +
+      3 * mt * mt * t * y1 +
+      3 * mt * t * t * y2 +
+      t * t * t * y3;
+
+    bounds[1][j] = y;
+    points[j] = { X: x, Y: y };
+  }
+
+  tvalues[jlen] = 0;
+  tvalues[jlen + 1] = 1;
+
+  points[jlen] = { X: x0, Y: y0 };
+  points[jlen + 1] = { X: x3, Y: y3 };
+
+  bounds[0][jlen] = x0;
+  bounds[1][jlen] = y0;
+
+  bounds[0][jlen + 1] = x3;
+  bounds[1][jlen + 1] = y3;
+
+  tvalues.length = jlen + 2;
+  bounds[0].length = jlen + 2;
+  bounds[1].length = jlen + 2;
+  points.length = jlen + 2;
+
+  const left = Math.min.apply(null, bounds[0]);
+  const top = Math.min.apply(null, bounds[1]);
+  const right = Math.max.apply(null, bounds[0]);
+  const bottom = Math.max.apply(null, bounds[1]);
+
+  return new Bound(left, top, right - left, bottom - top);
 }

@@ -30,7 +30,11 @@ export type OnFailHandler = (message: string) => void;
 
 const SHOW_LOADING_SIZE = 1024 * 200;
 
-export async function importMarkDown(collection: DocCollection, text: string) {
+export async function importMarkDown(
+  collection: DocCollection,
+  text: string,
+  fileName?: string
+) {
   const job = new Job({
     collection,
     middlewares: [defaultImageProxyMiddleware],
@@ -41,6 +45,17 @@ export async function importMarkDown(collection: DocCollection, text: string) {
     file: text,
     assets: job.assetsManager,
   });
+  if (fileName) {
+    snapshot.meta.title = fileName;
+    snapshot.blocks.props.title = {
+      '$blocksuite:internal:text$': true,
+      delta: [
+        {
+          insert: fileName,
+        },
+      ],
+    };
+  }
   const page = await job.snapshotToDoc(snapshot);
   return page.id;
 }
@@ -242,6 +257,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
     const pageIds: string[] = [];
     for (const file of files) {
       const text = await file.text();
+      const [fileName] = file.name.split('.').slice(0, -1).join('.');
       const needLoading = file.size > SHOW_LOADING_SIZE;
       if (needLoading) {
         this.hidden = false;
@@ -249,7 +265,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
       } else {
         this.abortController.abort();
       }
-      const pageId = await importMarkDown(this.collection, text);
+      const pageId = await importMarkDown(this.collection, text, fileName);
       needLoading && this.abortController.abort();
       pageIds.push(pageId);
     }

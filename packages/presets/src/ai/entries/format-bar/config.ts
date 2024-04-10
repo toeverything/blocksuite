@@ -47,7 +47,7 @@ const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
 const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   const [_, ctx] = chain
     .getSelectedModels({
-      types: ['text'],
+      types: ['block', 'text'],
     })
     .run();
   const { selectedModels } = ctx;
@@ -58,7 +58,7 @@ const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
 };
 
 const DocAIGroup: AIItemGroupConfig = {
-  name: 'doc',
+  name: 'doc with ai',
   items: [
     {
       name: 'Summary',
@@ -70,7 +70,7 @@ const DocAIGroup: AIItemGroupConfig = {
 };
 
 const EditAIGroup: AIItemGroupConfig = {
-  name: 'edit',
+  name: 'edit with ai',
   items: [
     {
       name: 'Translate to',
@@ -138,7 +138,7 @@ const EditAIGroup: AIItemGroupConfig = {
 };
 
 const CodeAIGroup: AIItemGroupConfig = {
-  name: 'code',
+  name: 'code with ai',
   items: [
     {
       name: 'Check code error',

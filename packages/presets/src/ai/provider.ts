@@ -13,7 +13,8 @@ export interface AIUserInfo {
  */
 export class AIProvider {
   private readonly actions: Partial<BlockSuitePresets.AIActions> = {};
-  private userInfoFn: () => AIUserInfo | null = () => null;
+  private userInfoFn: () => AIUserInfo | Promise<AIUserInfo> | null = () =>
+    null;
   private static readonly instance = new AIProvider();
 
   static provideAction<T extends keyof BlockSuitePresets.AIActions>(
@@ -29,7 +30,7 @@ export class AIProvider {
     AIProvider.instance.actions[id] = action;
   }
 
-  static provideUserInfo(fn: () => AIUserInfo | null) {
+  static provideUserInfo(fn: () => AIUserInfo | Promise<AIUserInfo> | null) {
     AIProvider.instance.userInfoFn = fn;
   }
 

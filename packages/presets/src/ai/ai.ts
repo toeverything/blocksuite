@@ -1,3 +1,5 @@
+import './actions/index.js'; // ensure global namespace is populated
+
 import type { BlockSpec } from '@blocksuite/block-std';
 import {
   AFFINE_AI_PANEL_WIDGET,
@@ -5,12 +7,14 @@ import {
   AffineAIPanelWidget,
   AffineFormatBarWidget,
   AffineSlashMenuWidget,
+  EdgelessCopilotWidget,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { buildAIPanelConfig } from './ai-panel.js';
+import { setupEdgelessCopilot } from './entries/edgeless/index.js';
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
@@ -64,7 +68,17 @@ export function getAISpecs() {
             [AFFINE_EDGELESS_COPILOT_WIDGET]: literal`${unsafeStatic(
               AFFINE_EDGELESS_COPILOT_WIDGET
             )}`,
+            [AFFINE_AI_PANEL_WIDGET]: literal`${unsafeStatic(
+              AFFINE_AI_PANEL_WIDGET
+            )}`,
           },
+        },
+        setup(slots) {
+          slots.widgetConnected.on(view => {
+            if (view.component instanceof EdgelessCopilotWidget) {
+              setupEdgelessCopilot(view.component);
+            }
+          });
         },
       };
 

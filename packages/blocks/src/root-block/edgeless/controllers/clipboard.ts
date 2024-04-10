@@ -14,6 +14,7 @@ import {
 import DOMPurify from 'dompurify';
 
 import {
+  CANVAS_EXPROT_IGNORE_TAGS,
   DEFAULT_IMAGE_PROXY_ENDPOINT,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -1166,8 +1167,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
-          element.tagName === 'AFFINE-BLOCK-HUB' ||
-          element.tagName === 'EDGELESS-TOOLBAR' ||
+          CANVAS_EXPROT_IGNORE_TAGS.includes(element.tagName) ||
           element.classList.contains('dg')
         ) {
           return true;

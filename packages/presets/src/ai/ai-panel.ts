@@ -2,17 +2,17 @@ import type { EditorHost } from '@blocksuite/block-std';
 import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
+  DiscardIcon,
 } from '@blocksuite/blocks';
 import {
   type AffineAIPanelWidgetConfig,
-  DeleteIcon,
   InsertBelowIcon,
   ReplaceIcon,
   ResetIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { textRenderer } from './messages/text.js';
+import { createTextRenderer } from './messages/text.js';
 import {
   insertFromMarkdown,
   replaceFromMarkdown,
@@ -89,14 +89,14 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       },
     },
     {
-      name: 'Insert',
+      name: 'Insert below',
       icon: InsertBelowIcon,
       handler: () => {
         insertBelow().catch(console.error);
       },
     },
     {
-      name: 'Replace',
+      name: 'Replace selection',
       icon: ReplaceIcon,
       handler: () => {
         replace().catch(console.error);
@@ -104,7 +104,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
     },
     {
       name: 'Discard',
-      icon: DeleteIcon,
+      icon: DiscardIcon,
       handler: () => {
         panel.hide();
       },
@@ -116,7 +116,7 @@ export function buildAIPanelConfig(
   panel: AffineAIPanelWidget
 ): AffineAIPanelWidgetConfig {
   return {
-    answerRenderer: textRenderer,
+    answerRenderer: createTextRenderer(panel.host),
     finishStateConfig: {
       responses: buildTextResponseConfig(panel),
       actions: [], // ???
