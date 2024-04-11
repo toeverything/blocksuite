@@ -53,17 +53,29 @@ export class BlockCollection extends Space<FlatBlockMap> {
      */
     rootAdded: new Slot<string>(),
     rootDeleted: new Slot<string>(),
+    yBlockUpdated: new Slot<
+      | {
+          type: 'add';
+          id: string;
+        }
+      | {
+          type: 'delete';
+          id: string;
+        }
+    >(),
     blockUpdated: new Slot<
       | {
           type: 'add';
           id: string;
           flavour: string;
+          model: BlockModel;
         }
       | {
           type: 'delete';
           id: string;
           flavour: string;
           parent: string;
+          model: BlockModel;
         }
       | {
           type: 'update';
@@ -243,24 +255,11 @@ export class BlockCollection extends Space<FlatBlockMap> {
   };
 
   private _handleYBlockAdd(id: string) {
-    const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) return;
-
-    const flavour = yBlock.get('sys:flavour');
-    this.slots.blockUpdated.emit({ type: 'add', id, flavour });
+    this.slots.yBlockUpdated.emit({ type: 'add', id });
   }
 
   private _handleYBlockDelete(id: string) {
-    const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) return;
-
-    const flavour = yBlock.get('sys:flavour');
-    this.slots.blockUpdated.emit({
-      type: 'delete',
-      id,
-      flavour,
-      parent: this._docCRUD.getParent(id) ?? '',
-    });
+    this.slots.yBlockUpdated.emit({ type: 'delete', id });
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {

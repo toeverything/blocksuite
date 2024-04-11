@@ -36,7 +36,7 @@ export class Doc {
       }
     });
 
-    this._disposeBlockUpdated = this._blockCollection.slots.blockUpdated.on(
+    this._disposeBlockUpdated = this._blockCollection.slots.yBlockUpdated.on(
       ({ type, id }) => {
         switch (type) {
           case 'add': {
@@ -324,6 +324,13 @@ export class Doc {
     if (block.model.role === 'root') {
       this._blockCollection.slots.rootAdded.emit(id);
     }
+
+    this.slots.blockUpdated.emit({
+      type: 'add',
+      id,
+      flavour: block.model.flavour,
+      model: block.model,
+    });
   }
 
   private _onBlockRemoved(id: string) {
@@ -336,6 +343,14 @@ export class Doc {
     if (block.model.role === 'root') {
       this._blockCollection.slots.rootDeleted.emit(id);
     }
+
+    this.slots.blockUpdated.emit({
+      type: 'delete',
+      id,
+      flavour: block.model.flavour,
+      parent: this.getParent(block.model)?.id ?? '',
+      model: block.model,
+    });
 
     block.model.deleted.emit();
 
