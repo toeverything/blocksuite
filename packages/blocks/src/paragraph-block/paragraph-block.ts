@@ -154,9 +154,6 @@ export class ParagraphBlockComponent extends BlockElement<
           ${paragraphBlockStyles}
         </style>
         <div class="affine-paragraph-rich-text-wrapper ${type}">
-          <div contenteditable="false" class="affine-paragraph-placeholder">
-            ${getPlaceholder(this.model)}
-          </div>
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
@@ -170,6 +167,9 @@ export class ParagraphBlockComponent extends BlockElement<
             .enableClipboard=${false}
             .enableUndoRedo=${false}
           ></rich-text>
+          <div contenteditable="false" class="affine-paragraph-placeholder">
+            ${getPlaceholder(this.model)}
+          </div>
         </div>
 
         ${children}
