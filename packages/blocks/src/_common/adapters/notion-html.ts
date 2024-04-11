@@ -274,7 +274,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'image' +
                   '.' +
                   (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png');
-              const file = new File([await res.blob()], name);
+              const file = new File([await res.blob()], name, {
+                type: res.headers.get('Content-Type') ?? '',
+              });
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
               await assets?.writeToBlob(blobId);
@@ -596,7 +598,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 (imageURL.split('/').at(-1) ?? 'image') +
                   '.' +
                   (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png');
-              const file = new File([await res.blob()], name);
+              const file = new File([await res.blob()], name, {
+                type: res.headers.get('Content-Type') ?? '',
+              });
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
               await assets?.writeToBlob(blobId);
@@ -654,7 +658,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   '.' +
                   (res.headers.get('Content-Type')?.split('/').at(-1) ??
                     'blob');
-              const file = new File([await res.blob()], name);
+              const file = new File([await res.blob()], name, {
+                type: res.headers.get('Content-Type') ?? '',
+              });
               size = file.size;
               type = file.type;
               blobId = await sha(await resCloned.arrayBuffer());

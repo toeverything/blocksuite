@@ -6,7 +6,7 @@ import type {
   DocSnapshot,
   JobMiddleware,
 } from '@blocksuite/store';
-import { getAssetName, Job, sha } from '@blocksuite/store';
+import { extMimeMap, getAssetName, Job, sha } from '@blocksuite/store';
 import JSZip from 'jszip';
 
 import { replaceIdMiddleware } from './middlewares.js';
@@ -98,7 +98,11 @@ async function importDocs(collection: DocCollection, imported: Blob) {
       const nameWithExt = fileObj.name.replace('assets/', '');
       const assetsId = nameWithExt.replace(/\.[^/.]+$/, '');
       const blob = await fileObj.async('blob');
-      const file = new File([blob], nameWithExt);
+      const ext = nameWithExt.split('.').at(-1) ?? '';
+      const mime = extMimeMap.get(ext) ?? '';
+      const file = new File([blob], nameWithExt, {
+        type: mime,
+      });
       assetsMap.set(assetsId, file);
     })
   );
