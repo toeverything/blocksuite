@@ -26,6 +26,7 @@ import {
   Rect,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
+import { viewPresets } from '../../../../database-block/data-view/index.js';
 import {
   addImageBlocks,
   addSiblingImageBlock,
@@ -517,7 +518,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       if (isDatabase) {
         const service =
           this._rootElement.std.spec?.getService('affine:database');
-        service.initDatabaseBlock(doc, model, model.id, 'table');
+        service.initDatabaseBlock(
+          doc,
+          model,
+          model.id,
+          viewPresets.tableViewConfig
+        );
       }
     }
 
@@ -552,7 +558,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       assertExists(model);
       if (isDatabase) {
         const service = rootElement.std.spec?.getService('affine:database');
-        service.initDatabaseBlock(doc, model, model.id, 'table');
+        service.initDatabaseBlock(
+          doc,
+          model,
+          model.id,
+          viewPresets.kanbanViewConfig
+        );
       }
     }
     rootElement.setSelection(noteId, true, focusId, point);

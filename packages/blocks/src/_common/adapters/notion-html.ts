@@ -8,18 +8,21 @@ import type {
   FromSliceSnapshotPayload,
   FromSliceSnapshotResult,
 } from '@blocksuite/store';
-import { type AssetsManager, getAssetName, sha } from '@blocksuite/store';
-import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import {
+  type AssetsManager,
+  ASTWalker,
+  BaseAdapter,
   type BlockSnapshot,
   type DocSnapshot,
+  getAssetName,
+  nanoid,
+  sha,
   type SliceSnapshot,
 } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 
-import { getTagColor } from '../components/tags/colors.js';
+import { getTagColor } from '../../database-block/data-view/utils/tags/colors.js';
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {

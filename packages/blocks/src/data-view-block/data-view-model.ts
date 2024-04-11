@@ -1,7 +1,7 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { FilterGroup } from '../database-block/common/ast.js';
-import type { DataSourceConfig } from '../database-block/common/datasource/base.js';
+import type { FilterGroup } from '../database-block/data-view/common/ast.js';
+import type { DataSourceConfig } from '../database-block/data-view/common/data-source/base.js';
 
 export type DataProperty = {
   id: string;
