@@ -11,19 +11,19 @@ import {
   ArrowDownSmallIcon,
   DuplicateIcon,
 } from '../../../../_common/icons/index.js';
+import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
+import {
+  ConvertIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+} from '../../common/icons/index.js';
 import {
   eventToVRect,
   popFilterableSimpleMenu,
   positionToVRect,
 } from '../../utils/menu/index.js';
 import { menuTitle } from '../../utils/menu/title.js';
-import type { Filter, FilterGroup, Variable } from '../ast.js';
-import {
-  ConvertIcon,
-  DeleteIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-} from '../icons/index.js';
 import { popAddNewFilter } from './condition.js';
 import type { FilterGroupView } from './filter-group.js';
 import { getDepth } from './filter-group.js';

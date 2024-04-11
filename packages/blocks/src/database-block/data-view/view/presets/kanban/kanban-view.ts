@@ -202,7 +202,12 @@ export class DataViewKanban extends DataViewBase<
     }
 
     return html`
-      ${renderUniLit(this.header, { view: this.view, viewMethods: this })}
+      ${renderUniLit(this.headerWidget, {
+        view: this.view,
+        viewMethods: this,
+        viewSource: this.viewSource,
+        dataSource: this.dataSource,
+      })}
       <div class="affine-data-view-kanban-groups" @wheel="${this.onWheel}">
         ${repeat(
           groups,

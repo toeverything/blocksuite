@@ -480,12 +480,11 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
   get vars(): Variable[] {
     return this.columnsWithoutFilter.map(id => {
       const v = this.columnGet(id);
+      const propertyMeta = this.dataSource.getPropertyMeta(v.type);
       return {
         id: v.id,
         name: v.name,
-        type: this.dataSource
-          .getPropertyMeta(this.columnGetType(v.type))
-          .model.dataType(v.data),
+        type: propertyMeta.model.dataType(v.data),
         icon: v.icon,
       };
     });

@@ -1,13 +1,13 @@
-import '../../../common/filter/filter-group.js';
+import '../../../filter/filter-group.js';
 
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import type { FilterGroup } from '../../../common/ast.js';
-import { popCreateFilter } from '../../../common/ref/ref.js';
-import { eventToVRect } from '../../../utils/menu/index.js';
-import { FilterIcon } from '../../icons/index.js';
-import { BaseTool } from './base-tool.js';
+import type { FilterGroup } from '../../../../common/ast.js';
+import { FilterIcon } from '../../../../common/icons/index.js';
+import { popCreateFilter } from '../../../../common/ref/ref.js';
+import { eventToVRect } from '../../../../utils/menu/index.js';
+import { WidgetBase } from '../../../widget-base.js';
 
 const styles = css`
   .affine-database-filter-button {
@@ -32,7 +32,7 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-filter')
-export class DataViewHeaderToolsFilter extends BaseTool {
+export class DataViewHeaderToolsFilter extends WidgetBase {
   static override styles = styles;
 
   private get readonly() {

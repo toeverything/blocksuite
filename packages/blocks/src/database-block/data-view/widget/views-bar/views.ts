@@ -1,9 +1,8 @@
-import '../component/overflow/overflow.js';
+import '../../common/component/overflow/overflow.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import {
@@ -13,17 +12,18 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../../_common/icons/index.js';
+import { DeleteIcon } from '../../common/icons/index.js';
+import type { SingleViewSource } from '../../common/index.js';
 import {
   eventToVRect,
   popFilterableSimpleMenu,
   popMenu,
-} from '../../utils/menu/index.js';
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
-import { DeleteIcon } from '../icons/index.js';
-import type { SingleViewSource, ViewSource } from '../view-source.js';
+} from '../../utils/index.js';
+import { renderUniLit } from '../../utils/uni-component/index.js';
+import { WidgetBase } from '../widget-base.js';
 
 @customElement('data-view-header-views')
-export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
+export class DataViewHeaderViews extends WidgetBase {
   static override styles = css`
     data-view-header-views {
       height: 32px;
@@ -70,8 +70,6 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-hover-color-filled);
     }
   `;
-  @property({ attribute: false })
-  viewSource!: ViewSource;
   get readonly() {
     return this.viewSource.readonly;
   }

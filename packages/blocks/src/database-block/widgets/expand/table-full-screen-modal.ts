@@ -2,11 +2,11 @@ import { BlockElement } from '@blocksuite/block-std';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { DatabaseBlockModel } from '../../../../../database-model.js';
 import {
   DatabaseTableViewClose,
   DatabaseTableViewIcon,
-} from '../../../icons/index.js';
+} from '../../data-view/common/icons/index.js';
+import type { DatabaseBlockModel } from '../../database-model.js';
 import { fullScreenStyles } from './styles.js';
 
 @customElement('affine-database-table-view-full-screen')

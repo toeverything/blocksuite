@@ -8,9 +8,11 @@ import type { Disposable, Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
+import type { DataSource } from '../common/data-source/base.js';
+import type { ViewSource } from '../common/index.js';
 import type { DataViewRenderer } from '../data-view.js';
 import type { DataViewSelection, InsertToPosition } from '../types.js';
-import type { UniComponent } from '../utils/uni-component/index.js';
+import type { DataViewWidget } from '../widget/types.js';
 import type { DataViewExpose, DataViewProps } from './data-view.js';
 import type { DataViewManager } from './data-view-manager.js';
 
@@ -25,12 +27,17 @@ export abstract class DataViewBase<
   std!: BlockStdScope;
 
   @property({ attribute: false })
-  header!: UniComponent<{ viewMethods: DataViewExpose; view: T }>;
+  headerWidget!: DataViewWidget;
 
   @property({ attribute: false })
   dataViewEle!: DataViewRenderer;
+
   @property({ attribute: false })
   view!: T;
+  @property({ attribute: false })
+  viewSource!: ViewSource;
+  @property({ attribute: false })
+  dataSource!: DataSource;
 
   @property({ attribute: false })
   bindHotkey!: (hotkeys: Record<string, UIEventHandler>) => Disposable;

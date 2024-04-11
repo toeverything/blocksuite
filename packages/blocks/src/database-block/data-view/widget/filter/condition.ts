@@ -1,5 +1,5 @@
-import '../ref/ref.js';
-import '../literal/define.js';
+import '../../common/ref/ref.js';
+import '../../common/literal/define.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { ReferenceElement } from '@floating-ui/dom';
@@ -7,23 +7,23 @@ import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { tBoolean } from '../../logical/data-type.js';
-import { typesystem } from '../../logical/typesystem.js';
-import { popFilterableSimpleMenu } from '../../utils/menu/index.js';
 import type {
   FilterGroup,
   SingleFilter,
   Variable,
   VariableOrProperty,
-} from '../ast.js';
+} from '../../common/ast.js';
 import {
   firstFilter,
   firstFilterByRef,
   firstFilterInGroup,
   getRefType,
-} from '../ast.js';
-import { CrossIcon } from '../icons/index.js';
-import { popLiteralEdit, renderLiteral } from '../literal/matcher.js';
+} from '../../common/ast.js';
+import { CrossIcon } from '../../common/icons/index.js';
+import { popLiteralEdit, renderLiteral } from '../../common/literal/matcher.js';
+import { tBoolean } from '../../logical/data-type.js';
+import { typesystem } from '../../logical/typesystem.js';
+import { popFilterableSimpleMenu } from '../../utils/menu/index.js';
 import { filterMatcher } from './matcher/matcher.js';
 
 @customElement('filter-condition-view')

@@ -1,4 +1,4 @@
-import '../../../common/filter/filter-group.js';
+import '../../../filter/filter-group.js';
 
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
@@ -6,11 +6,14 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { stopPropagation } from '../../../utils/event.js';
-import type { DataViewKanbanManager } from '../../../view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../../view/presets/table/table-view-manager.js';
-import { DatabaseSearchClose, DatabaseSearchIcon } from '../../icons/index.js';
-import { BaseTool } from './base-tool.js';
+import {
+  DatabaseSearchClose,
+  DatabaseSearchIcon,
+} from '../../../../common/icons/index.js';
+import { stopPropagation } from '../../../../utils/event.js';
+import type { DataViewKanbanManager } from '../../../../view/presets/kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../../../view/presets/table/table-view-manager.js';
+import { WidgetBase } from '../../../widget-base.js';
 
 const styles = css`
   .affine-database-search-container {
@@ -91,9 +94,9 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-search')
-export class DataViewHeaderToolsSearch extends BaseTool<
-  DataViewTableManager | DataViewKanbanManager
-> {
+export class DataViewHeaderToolsSearch extends WidgetBase {
+  public override view!: DataViewTableManager | DataViewKanbanManager;
+
   get showSearch(): boolean {
     return this._showSearch;
   }

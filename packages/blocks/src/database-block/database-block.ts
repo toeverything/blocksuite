@@ -12,19 +12,19 @@ import {
   MoreHorizontalIcon,
 } from '../_common/icons/index.js';
 import { Rect } from '../_common/utils/index.js';
-import type { NoteBlockComponent } from '../note-block/note-block.js';
-import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
-import { AffineDragHandleWidget } from '../root-block/widgets/drag-handle/drag-handle.js';
+import type { NoteBlockComponent } from '../note-block/index.js';
+import type { AffineInnerModalWidget } from '../root-block/index.js';
+import {
+  AffineDragHandleWidget,
+  EdgelessRootBlockComponent,
+} from '../root-block/index.js';
 import {
   captureEventTarget,
   getDropResult,
 } from '../root-block/widgets/drag-handle/utils.js';
-import type { AffineInnerModalWidget } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { dataViewCommonStyle } from './data-view/common/css-variable.js';
-import { renderFilterBar } from './data-view/common/filter/filter-bar.js';
-import { renderTools } from './data-view/common/header/tools/tools.js';
 import {
   DatabaseSelection,
   DataView,
@@ -32,10 +32,15 @@ import {
   defineUniComponent,
   popMenu,
   type ViewSource,
+  widgetPresets,
 } from './data-view/index.js';
+import { renderUniLit } from './data-view/utils/uni-component/index.js';
 import type { DataViewProps } from './data-view/view/data-view.js';
 import { type DataViewExpose } from './data-view/view/data-view.js';
-import type { DataViewManager } from './data-view/view/data-view-manager.js';
+import type {
+  DataViewWidget,
+  DataViewWidgetProps,
+} from './data-view/widget/types.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
 import type { DatabaseService } from './database-service.js';
@@ -269,12 +274,6 @@ export class DatabaseBlockComponent extends BlockElement<
     return this._dataSource;
   }
 
-  private renderViews = () => {
-    return html` <data-view-header-views
-      style="flex:1"
-      .viewSource="${this._viewSource}"
-    ></data-view-header-views>`;
-  };
   private renderTitle = (dataViewMethod: DataViewExpose) => {
     const addRow = () => dataViewMethod.addRow?.('start');
     return html` <affine-database-title
@@ -284,30 +283,39 @@ export class DatabaseBlockComponent extends BlockElement<
       .onPressEnterKey="${addRow}"
     ></affine-database-title>`;
   };
-  private renderReference = () => {
-    return html` <div></div>`;
-  };
 
-  headerComponent = defineUniComponent(
-    ({
-      view,
-      viewMethods,
-    }: {
-      view: DataViewManager;
-      viewMethods: DataViewExpose;
-    }) => {
+  toolsWidget: DataViewWidget = widgetPresets.createTools({
+    table: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+      widgetPresets.tools.tableAddRow,
+    ],
+    kanban: [
+      widgetPresets.tools.filter,
+      widgetPresets.tools.expand,
+      widgetPresets.tools.search,
+      widgetPresets.tools.viewOptions,
+    ],
+  });
+
+  headerWidget: DataViewWidget = defineUniComponent(
+    (props: DataViewWidgetProps) => {
       return html`
         <div style="margin-bottom: 16px;display:flex;flex-direction: column">
           <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
-            ${this.renderTitle(viewMethods)} ${this.renderDatabaseOps()}
-            ${this.renderReference()}
+            ${this.renderTitle(props.viewMethods)} ${this.renderDatabaseOps()}
           </div>
           <div
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
           >
-            ${this.renderViews()} ${renderTools(view, viewMethods)}
+            <div style="flex:1">
+              ${renderUniLit(widgetPresets.viewBar, props)}
+            </div>
+            ${renderUniLit(this.toolsWidget, props)}
           </div>
-          ${renderFilterBar(view)}
+          ${renderUniLit(widgetPresets.filterBar, props)}
         </div>
       `;
     }
@@ -369,7 +377,7 @@ export class DatabaseBlockComponent extends BlockElement<
           setSelection: this.setSelection,
           dataSource: this.dataSource,
           viewSource: this.viewSource,
-          headerComponent: this.headerComponent,
+          headerWidget: this.headerWidget,
           onDrag: this.onDrag,
           std: this.std,
           detailPanelConfig: {

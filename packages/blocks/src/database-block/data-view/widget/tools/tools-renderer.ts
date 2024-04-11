@@ -1,20 +1,19 @@
-import './search.js';
-import './filter.js';
-import './view-options.js';
-import './add-row/add-row.js';
+import './presets/search/search.js';
+import './presets/filter/filter.js';
+import './presets/view-options/view-options.js';
+import './presets/table-add-row/add-row.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
-import {
-  type DataViewExpose,
-  viewRendererManager,
-} from '../../../view/data-view.js';
-import type { DataViewManager } from '../../../view/data-view-manager.js';
+import type { ViewSource } from '../../common/index.js';
+import { renderUniLit } from '../../utils/uni-component/index.js';
+import { type DataViewExpose } from '../../view/data-view.js';
+import type { DataViewManager } from '../../view/data-view-manager.js';
+import type { DataViewWidget, DataViewWidgetProps } from '../types.js';
+import { WidgetBase } from '../widget-base.js';
 
 const styles = css`
   .affine-database-toolbar {
@@ -44,15 +43,10 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools')
-export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
+export class DataViewHeaderTools extends WidgetBase {
   static override styles = styles;
-
   @property({ attribute: false })
-  viewMethod!: DataViewExpose;
-
-  @property({ attribute: false })
-  view!: DataViewManager;
-
+  toolsMap!: Record<string, DataViewWidget[]>;
   @state()
   public showToolBar = false;
 
@@ -64,12 +58,14 @@ export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
       'show-toolbar': this.showToolBar,
       'affine-database-toolbar': true,
     });
-    const tools = viewRendererManager.getView(this.view.type).tools;
+    const tools = this.toolsMap[this.view.type];
     return html` <div class="${classList}">
       ${repeat(tools ?? [], uni => {
-        const props = {
+        const props: DataViewWidgetProps = {
           view: this.view,
-          viewMethod: this.viewMethod,
+          viewMethods: this.viewMethods,
+          viewSource: this.viewSource,
+          dataSource: this.dataSource,
         };
         return renderUniLit(uni, props);
       })}
@@ -84,10 +80,12 @@ declare global {
 }
 export const renderTools = (
   view: DataViewManager,
-  viewMethod: DataViewExpose
+  viewMethods: DataViewExpose,
+  viewSource: ViewSource
 ) => {
   return html` <data-view-header-tools
-    .viewMethod="${viewMethod}"
+    .viewMethods="${viewMethods}"
     .view="${view}"
+    .viewSource="${viewSource}"
   ></data-view-header-tools>`;
 };

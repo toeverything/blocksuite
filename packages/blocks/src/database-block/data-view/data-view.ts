@@ -1,8 +1,8 @@
 import './common/group-by/define.js';
-import './common/header/views.js';
-import './common/header/title.js';
-import './common/header/tools/tools.js';
-import './common/filter/filter-bar.js';
+import './widget/views-bar/views.js';
+import '../components/title/index.js';
+import './widget/tools/tools-renderer.js';
+import './widget/filter/filter-bar.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
@@ -45,7 +45,7 @@ export type DataViewRendererConfig = {
   detailPanelConfig?: {
     target?: () => ReferenceElement;
   };
-  headerComponent: DataViewProps['header'];
+  headerWidget: DataViewProps['headerWidget'];
   onDrag?: DataViewProps['onDrag'];
   std: BlockStdScope;
 };
@@ -160,7 +160,7 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     const props: DataViewProps = {
       dataViewEle: this,
       view: viewData.view,
-      header: this.config.headerComponent,
+      headerWidget: this.config.headerWidget,
       selectionUpdated: viewData.selectionUpdated,
       setSelection: viewData.setSelection,
       bindHotkey: viewData.bindHotkey,
@@ -168,6 +168,8 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
       getFlag: this.config.getFlag,
       onDrag: this.config.onDrag,
       std: this.config.std,
+      viewSource: this.config.viewSource,
+      dataSource: this.config.dataSource,
     };
     return keyed(
       viewData.view.id,

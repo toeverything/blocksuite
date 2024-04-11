@@ -4,12 +4,11 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { AddCursorIcon } from '../../../../_common/icons/index.js';
+import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
+import { CrossIcon, FilterIcon } from '../../common/icons/index.js';
+import { popCreateFilter } from '../../common/ref/ref.js';
 import { createPopup, eventToVRect } from '../../utils/menu/index.js';
 import { renderTemplate } from '../../utils/uni-component/render-template.js';
-import type { DataViewManager } from '../../view/data-view-manager.js';
-import type { Filter, FilterGroup, Variable } from '../ast.js';
-import { CrossIcon, FilterIcon } from '../icons/index.js';
-import { popCreateFilter } from '../ref/ref.js';
 import { popFilterModal } from './filter-modal.js';
 
 @customElement('filter-bar')
@@ -211,13 +210,3 @@ declare global {
     'filter-bar': FilterBar;
   }
 }
-export const renderFilterBar = (view?: DataViewManager) => {
-  if (!view || !view.filterVisible) {
-    return;
-  }
-  return html`<filter-bar
-    .vars=${view.vars}
-    .data=${view.filter}
-    .setData=${view.updateFilter.bind(view)}
-  ></filter-bar>`;
-};

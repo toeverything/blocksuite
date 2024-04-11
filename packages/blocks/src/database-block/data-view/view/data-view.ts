@@ -8,15 +8,14 @@ import type { Doc } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { ColumnMeta } from '../column/column-config.js';
+import type { DataSource } from '../common/data-source/base.js';
+import type { ViewSource } from '../common/index.js';
 import type { DataViewRenderer } from '../data-view.js';
 import type { DataViewSelection, InsertToPosition } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
+import type { DataViewWidget } from '../widget/types.js';
 import type { DataViewManagerBase } from './data-view-manager.js';
 import { type DataViewManager } from './data-view-manager.js';
-
-export type DataViewHeaderComponentProp<
-  T extends DataViewManager = DataViewManager,
-> = UniComponent<{ viewMethods: DataViewExpose; view: T }>;
 
 export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
@@ -24,9 +23,11 @@ export interface DataViewProps<
 > {
   dataViewEle: DataViewRenderer;
 
-  header?: DataViewHeaderComponentProp<T>;
+  headerWidget?: DataViewWidget;
 
   view: T;
+  viewSource: ViewSource;
+  dataSource: DataSource;
 
   bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable;
 
@@ -98,13 +99,12 @@ export type DataViewToolsProps<
   Manager extends DataViewManager = DataViewManager,
 > = {
   view: Manager;
-  viewMethod: DataViewExpose;
+  viewMethods: DataViewExpose;
 };
 
 export interface DataViewRendererConfig {
   view: UniComponent<DataViewProps, DataViewExpose>;
   icon: UniComponent;
-  tools?: UniComponent<DataViewToolsProps>[];
 }
 
 export type ViewMeta<

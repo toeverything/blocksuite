@@ -12,18 +12,18 @@ import {
   ArrowDownSmallIcon,
   DuplicateIcon,
 } from '../../../../_common/icons/index.js';
-import {
-  eventToVRect,
-  popFilterableSimpleMenu,
-} from '../../utils/menu/index.js';
-import type { Filter, FilterGroup, Variable } from '../ast.js';
-import { firstFilter } from '../ast.js';
+import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
+import { firstFilter } from '../../common/ast.js';
 import {
   ConvertIcon,
   DeleteIcon,
   MoreHorizontalIcon,
   PlusIcon,
-} from '../icons/index.js';
+} from '../../common/icons/index.js';
+import {
+  eventToVRect,
+  popFilterableSimpleMenu,
+} from '../../utils/menu/index.js';
 import { popAddNewFilter } from './condition.js';
 
 @customElement('filter-group-view')

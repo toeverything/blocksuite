@@ -6,8 +6,8 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { RichText } from '../../../../_common/components/index.js';
-import type { DatabaseBlockComponent } from '../../../database-block.js';
+import type { RichText } from '../../../_common/components/index.js';
+import type { DatabaseBlockComponent } from '../../database-block.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {

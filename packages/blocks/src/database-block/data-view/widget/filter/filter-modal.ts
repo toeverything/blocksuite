@@ -6,8 +6,8 @@ import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { FilterGroup, Variable } from '../../common/ast.js';
 import { createPopup } from '../../utils/menu/index.js';
-import type { FilterGroup, Variable } from '../ast.js';
 
 @customElement('advanced-filter-modal')
 export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {

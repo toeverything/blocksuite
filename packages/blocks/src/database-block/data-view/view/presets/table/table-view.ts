@@ -270,7 +270,12 @@ export class DataViewTable extends DataViewBase<
 
   override render() {
     return html`
-      ${renderUniLit(this.header, { view: this.view, viewMethods: this })}
+      ${renderUniLit(this.headerWidget, {
+        view: this.view,
+        viewMethods: this,
+        viewSource: this.viewSource,
+        dataSource: this.dataSource,
+      })}
       <div class="affine-database-table">
         <div class="affine-database-block-table" @wheel="${this.onWheel}">
           <div class="affine-database-table-container">

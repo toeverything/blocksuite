@@ -7,18 +7,22 @@ import {
   DeleteIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
-} from '../../../../../_common/icons/index.js';
-import { eventToVRect, popMenu } from '../../../utils/menu/index.js';
-import type { DataViewKanbanManager } from '../../../view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../../view/presets/table/table-view-manager.js';
-import { popFilterModal } from '../../filter/filter-modal.js';
+} from '../../../../../../_common/icons/index.js';
 import {
   popGroupSetting,
   popSelectGroupByProperty,
-} from '../../group-by/setting.js';
-import { FilterIcon, GroupingIcon, InfoIcon } from '../../icons/index.js';
-import { popPropertiesSetting } from '../../properties.js';
-import { BaseTool } from './base-tool.js';
+} from '../../../../common/group-by/setting.js';
+import {
+  FilterIcon,
+  GroupingIcon,
+  InfoIcon,
+} from '../../../../common/icons/index.js';
+import { popPropertiesSetting } from '../../../../common/properties.js';
+import { eventToVRect, popMenu } from '../../../../utils/menu/index.js';
+import type { DataViewKanbanManager } from '../../../../view/presets/kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../../../view/presets/table/table-view-manager.js';
+import { popFilterModal } from '../../../filter/filter-modal.js';
+import { WidgetBase } from '../../../widget-base.js';
 
 const styles = css`
   .affine-database-toolbar-item.more-action {
@@ -45,11 +49,9 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-view-options')
-export class DataViewHeaderToolsViewOptions extends BaseTool<
-  DataViewKanbanManager | DataViewTableManager
-> {
+export class DataViewHeaderToolsViewOptions extends WidgetBase {
   static override styles = styles;
-
+  public override view!: DataViewTableManager | DataViewKanbanManager;
   showToolBar(show: boolean) {
     const tools = this.closest('data-view-header-tools');
     if (tools) {

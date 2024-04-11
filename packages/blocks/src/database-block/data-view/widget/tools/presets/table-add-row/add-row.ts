@@ -4,7 +4,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { PlusIcon } from '../../../../../../_common/icons/index.js';
 import type { InsertToPosition } from '../../../../types.js';
 import { startDrag } from '../../../../utils/drag.js';
-import { BaseTool } from '../base-tool.js';
+import { WidgetBase } from '../../../widget-base.js';
 import { NewRecordPreview } from './new-record-preview.js';
 
 const styles = css`
@@ -31,7 +31,7 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-add-row')
-export class DataViewHeaderToolsAddRow extends BaseTool {
+export class DataViewHeaderToolsAddRow extends WidgetBase {
   static override styles = styles;
 
   @state()
@@ -115,7 +115,7 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
       },
       onDrop: data => {
         if (data.position) {
-          this.viewMethod.addRow?.(data.position);
+          this.viewMethods.addRow?.(data.position);
         }
       },
       onClear: () => {
@@ -126,12 +126,12 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
   };
 
   addRow = (position: InsertToPosition | number) => {
-    this.viewMethod.addRow?.(position);
+    this.viewMethods.addRow?.(position);
   };
 
   private _onAddNewRecord = () => {
     if (this.readonly) return;
-    const selection = this.viewMethod.getSelection?.();
+    const selection = this.viewMethods.getSelection?.();
     if (!selection) {
       this.addRow('start');
     } else if (selection.type === 'table') {

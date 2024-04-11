@@ -10,16 +10,14 @@ import type { PropertyValues } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import {
-  CrossIcon,
-  ExpandWideIcon,
-} from '../../../../../../_common/icons/index.js';
-import type { DatabaseBlockComponent } from '../../../../../database-block.js';
-import type { DataViewRendererConfig } from '../../../../data-view.js';
-import type { DataViewSelection } from '../../../../types.js';
-import { createModal } from '../../../../utils/menu/index.js';
-import { renderTemplate } from '../../../../utils/uni-component/render-template.js';
-import { DatabaseSelection } from '../../../selection.js';
+import { CrossIcon, ExpandWideIcon } from '../../../_common/icons/index.js';
+import { DatabaseSelection } from '../../data-view/common/selection.js';
+import type { DataViewRendererConfig } from '../../data-view/data-view.js';
+import type { DataViewSelection } from '../../data-view/types.js';
+import { createModal } from '../../data-view/utils/menu/index.js';
+import { renderTemplate } from '../../data-view/utils/uni-component/render-template.js';
+import { WidgetBase } from '../../data-view/widget/widget-base.js';
+import type { DatabaseBlockComponent } from '../../database-block.js';
 
 export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
   const viewComponent = new DatabaseBlockModalPreview();
@@ -84,9 +82,7 @@ export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
 }
 
 @customElement('expand-database-block-modal')
-export class ExpandDatabaseBlockModal extends WithDisposable(
-  ShadowlessElement
-) {
+export class ExpandDatabaseBlockModal extends WidgetBase {
   expandDatabase = () => {
     const database = this.closest('affine-database');
     if (database) {
@@ -188,7 +184,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
       setSelection: this.setSelection,
       dataSource: this.database.dataSource,
       viewSource: this.database.viewSource,
-      headerComponent: this.database.headerComponent,
+      headerWidget: this.database.headerWidget,
       std: this.database.std,
     };
     return html`
