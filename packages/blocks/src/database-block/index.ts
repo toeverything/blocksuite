@@ -1,5 +1,4 @@
 export { richTextColumnConfig } from './columns/rich-text/cell-renderer.js';
-export { richTextColumnModelConfig } from './columns/rich-text/define.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { DatabaseService } from './database-service.js';
 
@@ -13,7 +12,7 @@ export * from './database-block.js';
 export * from './database-model.js';
 export * from './database-service.js';
 export * from './types.js';
-export * from './utils.js';
+export { databaseViewInitConvert, databaseViewInitEmpty } from './utils.js';
 declare global {
   namespace BlockSuite {
     interface BlockServices {
