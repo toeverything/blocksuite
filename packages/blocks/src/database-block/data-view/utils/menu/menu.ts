@@ -682,6 +682,7 @@ export const createModal = (container: HTMLElement = document.body) => {
   div.style.width = '100vw';
   div.style.height = '100vh';
   div.style.zIndex = '1001';
+  div.style.fontFamily = 'var(--affine-font-family)';
   container.append(div);
   return div;
 };

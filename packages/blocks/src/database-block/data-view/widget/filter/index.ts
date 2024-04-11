@@ -1,3 +1,5 @@
+import './filter-bar.js';
+
 import { html } from 'lit';
 
 import { defineUniComponent } from '../../utils/uni-component/index.js';
