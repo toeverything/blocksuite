@@ -6,11 +6,9 @@ import { customElement, property } from 'lit/decorators.js';
 
 import { DatabaseSearchClose } from '../../../database-block/data-view/common/icons/index.js';
 import type { ViewMeta } from '../../../database-block/data-view/index.js';
+import { viewPresets } from '../../../database-block/data-view/index.js';
 import type { DatabaseBlockModel } from '../../../database-block/index.js';
-import {
-  databaseViewInitConvert,
-  viewPresets,
-} from '../../../database-block/index.js';
+import { databaseViewInitConvert } from '../../../database-block/utils.js';
 import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
