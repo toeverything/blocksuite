@@ -4,7 +4,7 @@ import { type BlockModel, Text, type Y } from '@blocksuite/store';
 
 import { getIcon } from './block-icons.js';
 import {
-  databaseBlockColumnMap,
+  databaseBlockAllColumnMap,
   databaseBlockColumns,
 } from './columns/index.js';
 import type { StatCalcOpType } from './data-view/index.js';
@@ -155,7 +155,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     this.doc.captureSync();
     return this._model.addColumn(
       insertToPosition,
-      databaseBlockColumnMap[
+      databaseBlockAllColumnMap[
         type ?? columnPresets.multiSelectColumnConfig.type
       ].model.create(this.newColumnName())
     );
@@ -184,12 +184,12 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     const currentCells = rows.map(rowId =>
       this.cellGetValue(rowId, propertyId)
     );
-    const result = databaseBlockColumnMap[currentType].model?.convertCell(
+    const result = databaseBlockAllColumnMap[currentType].model?.convertCell(
       toType,
       currentData,
       currentCells
     ) ?? {
-      column: databaseBlockColumnMap[toType].model.defaultData(),
+      column: databaseBlockAllColumnMap[toType].model.defaultData(),
       cells: currentCells.map(() => undefined),
     };
     this.doc.captureSync();
@@ -309,7 +309,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public getPropertyMeta(type: string): ColumnMeta<any, any, any> {
-    return databaseBlockColumnMap[type];
+    return databaseBlockAllColumnMap[type];
   }
 
   public override get detailSlots(): DetailSlots {

@@ -13,10 +13,14 @@ export const databaseBlockColumns = [
   columnPresets.checkboxColumnConfig,
   richTextColumnConfig,
 ];
-export const databaseBlockHiddenColumns = [titleColumnConfig];
-export const databaseBlockColumnMap = Object.fromEntries(
-  [...databaseBlockColumns, ...databaseBlockHiddenColumns].map(v => [
-    v.type,
-    v as ColumnMeta,
-  ])
+export const databaseBlockHiddenColumns = [
+  columnPresets.imageColumnConfig,
+  titleColumnConfig,
+];
+const databaseBlockAllColumns = [
+  ...databaseBlockColumns,
+  ...databaseBlockHiddenColumns,
+];
+export const databaseBlockAllColumnMap = Object.fromEntries(
+  databaseBlockAllColumns.map(v => [v.type, v as ColumnMeta])
 );

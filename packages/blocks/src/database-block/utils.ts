@@ -1,6 +1,6 @@
 import { nanoid } from '@blocksuite/store';
 
-import { databaseBlockColumnMap } from './columns/index.js';
+import { databaseBlockAllColumnMap } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
 import type { ViewMeta } from './data-view/index.js';
 import { columnPresets } from './data-view/index.js';
@@ -78,7 +78,7 @@ export const databaseViewAddView = (
 ) => {
   const id = model.doc.generateBlockId();
   const view = viewMeta.model.init(
-    databaseBlockColumnMap,
+    databaseBlockAllColumnMap,
     model,
     id,
     viewMeta.model.defaultName
