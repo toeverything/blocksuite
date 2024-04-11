@@ -9,7 +9,7 @@ import {
   type Cell,
   type Column,
   columnPresets,
-  richTextColumnModelConfig,
+  richTextColumnConfig,
 } from '../../database-block/index.js';
 import { NoteBlockSchema } from '../../note-block/note-model.js';
 import { ParagraphBlockSchema } from '../../paragraph-block/paragraph-model.js';
@@ -86,7 +86,7 @@ describe('DatabaseManager', () => {
       'end',
       selectColumnModelConfig.create('Single Select', { options: selection })
     );
-    col3 = db.addColumn('end', richTextColumnModelConfig.create('Rich Text'));
+    col3 = db.addColumn('end', richTextColumnConfig.model.create('Rich Text'));
 
     doc.updateBlock(databaseModel, {
       columns: [col1, col2, col3],
