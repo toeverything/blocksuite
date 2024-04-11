@@ -2,10 +2,9 @@ import { nanoid } from '@blocksuite/store';
 
 import { databaseBlockColumnMap } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
-import { multiSelectColumnModelConfig } from './data-view/column/presets/multi-select/define.js';
-import { selectColumnModelConfig } from './data-view/column/presets/select/define.js';
+import type { ViewMeta } from './data-view/index.js';
+import { columnPresets } from './data-view/index.js';
 import { getTagColor } from './data-view/utils/tags/colors.js';
-import type { ViewMeta } from './data-view/view/data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
 
 export const databaseViewInitEmpty = (
@@ -25,7 +24,7 @@ export const databaseViewInitConvert = (
 ) => {
   model.addColumn(
     'end',
-    multiSelectColumnModelConfig.model.create('Tag', { options: [] })
+    columnPresets.multiSelectColumnConfig.model.create('Tag', { options: [] })
   );
   databaseViewInitEmpty(model, viewMeta);
 };
@@ -37,7 +36,7 @@ export const databaseViewInitTemplate = (
   const ids = [nanoid(), nanoid(), nanoid()];
   const statusId = model.addColumn(
     'end',
-    selectColumnModelConfig.model.create('Status', {
+    columnPresets.selectColumnConfig.model.create('Status', {
       options: [
         {
           id: ids[0],

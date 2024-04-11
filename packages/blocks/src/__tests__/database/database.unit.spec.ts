@@ -8,7 +8,7 @@ import { DatabaseBlockSchema } from '../../database-block/database-model.js';
 import {
   type Cell,
   type Column,
-  numberColumnModelConfig,
+  columnPresets,
   richTextColumnModelConfig,
 } from '../../database-block/index.js';
 import { NoteBlockSchema } from '../../note-block/note-model.js';
@@ -78,7 +78,10 @@ describe('DatabaseManager', () => {
     ) as DatabaseBlockModel;
     db = databaseModel;
 
-    col1 = db.addColumn('end', numberColumnModelConfig.create('Number'));
+    col1 = db.addColumn(
+      'end',
+      columnPresets.numberColumnConfig.model.create('Number')
+    );
     col2 = db.addColumn(
       'end',
       selectColumnModelConfig.create('Single Select', { options: selection })
@@ -116,7 +119,7 @@ describe('DatabaseManager', () => {
 
   test('getColumn', () => {
     const column = {
-      ...numberColumnModelConfig.create('testColumnId'),
+      ...columnPresets.numberColumnConfig.model.create('testColumnId'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -126,7 +129,7 @@ describe('DatabaseManager', () => {
   });
 
   test('addColumn', () => {
-    const column = numberColumnModelConfig.create('Test Column');
+    const column = columnPresets.numberColumnConfig.model.create('Test Column');
     const id = db.addColumn('end', column);
     const result = db.getColumn(id);
 
@@ -136,7 +139,7 @@ describe('DatabaseManager', () => {
 
   test('deleteColumn', () => {
     const column = {
-      ...numberColumnModelConfig.create('Test Column'),
+      ...columnPresets.numberColumnConfig.model.create('Test Column'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -155,7 +158,7 @@ describe('DatabaseManager', () => {
       noteBlockId
     );
     const column = {
-      ...numberColumnModelConfig.create('Test Column'),
+      ...columnPresets.numberColumnConfig.model.create('Test Column'),
       id: 'testColumnId',
     };
     const cell: Cell = {

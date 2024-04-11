@@ -1,5 +1,5 @@
-import type { ViewMeta } from '../data-view/view/data-view.js';
-import { viewPresets } from '../data-view/view/index.js';
+import type { ViewMeta } from '../data-view/index.js';
+import { viewPresets } from '../data-view/index.js';
 
 export const databaseBlockViews: ViewMeta[] = [
   viewPresets.tableViewConfig,

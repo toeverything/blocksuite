@@ -1,8 +1,4 @@
 import './common/group-by/define.js';
-import './widget/views-bar/views.js';
-import '../components/title/index.js';
-import './widget/tools/tools-renderer.js';
-import './widget/filter/filter-bar.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';

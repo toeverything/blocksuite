@@ -1,3 +1,5 @@
+import './components/title/index.js';
+
 import { BlockElement, PathFinder, RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
@@ -28,19 +30,17 @@ import { dataViewCommonStyle } from './data-view/common/css-variable.js';
 import {
   DatabaseSelection,
   DataView,
+  type DataViewExpose,
+  type DataViewProps,
   type DataViewSelection,
+  type DataViewWidget,
+  type DataViewWidgetProps,
   defineUniComponent,
   popMenu,
+  renderUniLit,
   type ViewSource,
   widgetPresets,
 } from './data-view/index.js';
-import { renderUniLit } from './data-view/utils/uni-component/index.js';
-import type { DataViewProps } from './data-view/view/data-view.js';
-import { type DataViewExpose } from './data-view/view/data-view.js';
-import type {
-  DataViewWidget,
-  DataViewWidgetProps,
-} from './data-view/widget/types.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
 import type { DatabaseService } from './database-service.js';

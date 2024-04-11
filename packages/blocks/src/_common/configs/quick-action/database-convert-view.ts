@@ -5,8 +5,8 @@ import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { DatabaseSearchClose } from '../../../database-block/data-view/common/icons/index.js';
-import type { ViewMeta } from '../../../database-block/data-view/view/data-view.js';
-import type { DatabaseBlockModel } from '../../../database-block/database-model.js';
+import type { ViewMeta } from '../../../database-block/data-view/index.js';
+import type { DatabaseBlockModel } from '../../../database-block/index.js';
 import {
   databaseViewInitConvert,
   viewPresets,

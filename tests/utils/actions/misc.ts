@@ -3,13 +3,13 @@ import '../declare-test-window.js';
 
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import { viewPresets } from '@blocks/database-block/data-view/view/index.js';
 import {
   type DatabaseBlockModel,
   databaseViewInitEmpty,
   type ListType,
   type RichText,
   type ThemeObserver,
+  viewPresets,
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
 import { type InlineRange, type InlineRootElement } from '@inline/index.js';
