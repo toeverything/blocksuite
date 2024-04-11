@@ -101,11 +101,11 @@ export class Doc {
   }
 
   get undo() {
-    return this._blockCollection.undo;
+    return this._blockCollection.undo.bind(this._blockCollection);
   }
 
   get redo() {
-    return this._blockCollection.redo;
+    return this._blockCollection.redo.bind(this._blockCollection);
   }
 
   get root() {
