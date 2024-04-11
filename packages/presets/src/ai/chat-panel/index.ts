@@ -16,6 +16,14 @@ export type ChatMessage = {
   role: 'user' | 'assistant';
 };
 
+export type ChatAction = {
+  action: string;
+  messages: ChatMessage[];
+  sessionId: string;
+};
+
+export type ChatItem = ChatMessage | ChatAction;
+
 export type ChatStatus = 'loading' | 'success' | 'error' | 'idle';
 
 @customElement('chat-panel')
@@ -82,12 +90,12 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   sessionId!: string;
 
   @state()
-  messages: ChatMessage[] = [];
+  items: ChatItem[] = [];
 
   @state()
   status: ChatStatus = 'idle';
 
-  private _copilotClient = new CopilotClient('http://localhost:8080');
+  private _copilotClient = new CopilotClient();
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
@@ -104,13 +112,19 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     const histories = await this._copilotClient.getHistories(
       editor.doc.collection.id,
       editor.doc.id,
-      {
-        sessionId: sessionId,
-      }
+      { sessionId: sessionId }
     );
 
-    this.messages =
-      histories.find(h => h.sessionId === sessionId)?.messages || this.messages;
+    const actions = await this._copilotClient.getHistories(
+      editor.doc.collection.id,
+      editor.doc.id,
+      { action: true }
+    );
+
+    this.items = [...actions];
+    if (histories[0]) {
+      this.items = [...this.items, ...histories[0].messages];
+    }
 
     this.sessionId = sessionId;
     this.scrollToDown();
@@ -124,13 +138,13 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     this.status = status;
   };
 
-  addToMessages = (messages: ChatMessage[]) => {
-    this.messages = [...this.messages, ...messages];
+  addToItems = (messages: ChatItem[]) => {
+    this.items = [...this.items, ...messages];
     this.scrollToDown();
   };
 
-  updateMessages = (messages: ChatMessage[]) => {
-    this.messages = messages;
+  updateItems = (messages: ChatItem[]) => {
+    this.items = messages;
     this.scrollToDown();
   };
 
@@ -145,16 +159,16 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         ${ref(this._chatMessages)}
         .host=${this.editor.host}
         .copilotClient=${this._copilotClient}
-        .messages=${this.messages}
+        .items=${this.items}
         .status=${this.status}
       ></chat-panel-messages>
       <chat-panel-input
         .host=${this.editor.host}
         .copilotClient=${this._copilotClient}
         .sessionId=${this.sessionId}
-        .messages=${this.messages}
-        .updateMessages=${this.updateMessages}
-        .addToMessages=${this.addToMessages}
+        .items=${this.items}
+        .updateItems=${this.updateItems}
+        .addToItems=${this.addToItems}
         .status=${this.status}
         .updateStatus=${this.updateStatus}
       ></chat-panel-input>

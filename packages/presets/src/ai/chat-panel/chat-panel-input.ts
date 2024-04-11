@@ -7,7 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { ChatSendIcon, CloseIcon, ImageIcon } from '../_common/icons.js';
 import type { CopilotClient } from '../copilot-client.js';
-import type { ChatMessage, ChatStatus } from './index.js';
+import type { ChatItem, ChatStatus } from './index.js';
 
 const MaximumImageCount = 8;
 
@@ -101,16 +101,16 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   sessionId!: string;
 
   @property({ attribute: false })
-  updateMessages!: (messages: ChatMessage[]) => void;
+  updateItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
-  addToMessages!: (messages: ChatMessage[]) => void;
+  addToItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
   status!: ChatStatus;
 
   @property({ attribute: false })
-  messages!: ChatMessage[];
+  items!: ChatItem[];
 
   @property({ attribute: false })
   updateStatus!: (status: ChatStatus) => void;
@@ -139,16 +139,16 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     this.isInputEmpty = true;
     this.images = [];
     this.updateStatus('loading');
-    this.addToMessages([
+    this.addToItems([
       { role: 'user', content: text },
       { role: 'assistant', content: '' },
     ]);
     const res = await this.copilotClient.textToText(text, this.sessionId);
     if (res) {
       this.updateStatus('success');
-      const messages = [...this.messages];
+      const messages = [...this.items];
       messages[messages.length - 1] = { role: 'assistant', content: res };
-      this.updateMessages(messages);
+      this.updateItems(messages);
     }
   };
 
