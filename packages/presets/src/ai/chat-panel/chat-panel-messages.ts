@@ -11,8 +11,11 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  ActionIcon,
   AffineAvatorIcon,
   AffineIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
   CreateAsPageIcon,
   DownArrowIcon,
   InsertBelowIcon,
@@ -21,7 +24,83 @@ import {
 } from '../_common/icons.js';
 import type { CopilotClient } from '../copilot-client.js';
 import { createTextRenderer } from '../messages/text.js';
-import type { ChatMessage, ChatStatus } from './index.js';
+import { AIProvider } from '../provider.js';
+import type { ChatAction, ChatItem, ChatStatus } from './index.js';
+
+@customElement('action-text')
+class ActionText extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    .original-text {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 4px;
+      border: 1px solid var(--affine-border-color);
+      margin-bottom: 12px;
+    }
+    .action {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      height: 22px;
+      margin-bottom: 12px;
+    }
+
+    .action div:last-child {
+      margin-left: auto;
+    }
+
+    .answer-prompt {
+      padding: 8px;
+      background-color: var(--affine-background-secondary-color);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--affine-text-primary-color);
+    }
+
+    .answer-prompt .subtitle {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--affine-text-secondary-color);
+    }
+  `;
+
+  @state()
+  promptShow = false;
+
+  @property({ attribute: false })
+  item!: ChatAction;
+
+  @property({ attribute: false })
+  host!: EditorHost;
+
+  protected override render() {
+    const { item } = this;
+
+    const originalText = item.messages[1].content;
+    return html`<style></style>
+      <div class="original-text">${originalText}</div>
+      <div class="action">
+        ${ActionIcon}
+        <div>${item.action}</div>
+        <div @click=${() => (this.promptShow = !this.promptShow)}>
+          ${this.promptShow ? ArrowUpIcon : ArrowDownIcon}
+        </div>
+      </div>
+      ${this.promptShow
+        ? html`
+            <div class="answer-prompt">
+              <div class="subtitle">Answer</div>
+              ${createTextRenderer(this.host)(item.messages[2].content)}
+              <div class="subtitle">Prompt</div>
+              ${createTextRenderer(this.host)(item.messages[0].content)}
+            </div>
+          `
+        : nothing} `;
+  }
+}
 
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
@@ -58,6 +137,10 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       font-weight: 600;
     }
 
+    .item-wrapper {
+      margin-left: 32px;
+    }
+
     .user-info {
       display: flex;
       align-items: center;
@@ -66,13 +149,26 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       color: var(--affine-text-primary-color);
       font-size: 14px;
       font-weight: 500;
+      user-select: none;
+    }
+
+    .avator-container {
+      width: 24px;
+      height: 24px;
     }
 
     .avator {
-      width: 24px;
-      height: 24px;
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
       background-color: var(--affine-primary-color);
+    }
+
+    .avator-container img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
     }
 
     .down-indicator {
@@ -97,6 +193,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   @state()
   showDownIndicator = false;
 
+  @state()
+  avatorUrl = '';
+
   @property({ attribute: false })
   host!: EditorHost;
 
@@ -104,7 +203,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   copilotClient!: CopilotClient;
 
   @property({ attribute: false })
-  messages!: ChatMessage[];
+  items!: ChatItem[];
 
   @property({ attribute: false })
   status!: ChatStatus;
@@ -114,16 +213,31 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
   private _currentTextSelection: TextSelection | null = null;
 
-  public override connectedCallback() {
+  public override async connectedCallback() {
     super.connectedCallback();
     this.host.selection.slots.changed.on(() => {
       this._currentTextSelection =
         this.host.selection.find('text') ?? this._currentTextSelection;
     });
+
+    const res = await AIProvider.userInfo;
+    this.avatorUrl = res?.avatarUrl ?? '';
   }
 
-  renderItem(message: ChatMessage) {
-    return createTextRenderer(this.host)(message.content);
+  renderItem(item: ChatItem) {
+    if ('role' in item) {
+      return createTextRenderer(this.host)(item.content);
+    } else {
+      switch (item.action) {
+        case 'Create a presentation':
+          return createTextRenderer(this.host)('');
+        default:
+          return html`<action-text
+            .item=${item}
+            .host=${this.host}
+          ></action-text>`;
+      }
+    }
     // if (message.role === 'user') {
     //   return textRenderer(message.content);
     // } else {
@@ -132,12 +246,18 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     // }
   }
 
-  renderAvator(message: ChatMessage) {
+  renderAvator(item: ChatItem) {
+    const isUser = 'role' in item && item.role === 'user';
+
     return html`<div class="user-info">
-      ${message.role === 'user'
-        ? html`<div class="avator"></div>`
+      ${isUser
+        ? html`<div class="avator-container">
+            ${this.avatorUrl
+              ? html`<img .src=${this.avatorUrl} />`
+              : html`<div class="avator"></div>`}
+          </div>`
         : AffineAvatorIcon}
-      ${message.role === 'user' ? 'You' : 'AFFINE AI'}
+      ${isUser ? 'You' : 'AFFINE AI'}
     </div>`;
   }
 
@@ -149,7 +269,16 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     this.messagesContainer.scrollTo(0, this.messagesContainer.scrollHeight);
   }
 
-  renderEditorActions(content: string) {
+  renderEditorActions(item: ChatItem) {
+    if (
+      !(
+        'role' in item &&
+        item.role === 'assistant' &&
+        this.status === 'success'
+      )
+    )
+      return nothing;
+    const { content } = item;
     return html`
       <style>
         .actions-container {
@@ -282,7 +411,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   protected override render() {
-    const { messages } = this;
+    const { items } = this;
 
     return html`
       <div
@@ -294,21 +423,21 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
             200;
         }}
       >
-        ${messages.length === 0
+        ${items.length === 0
           ? html`<div class="chat-panel-messages-placeholder">
               ${AffineIcon}
               <div>What can I help you with?</div>
             </div>`
-          : repeat(messages, (message, index) => {
+          : repeat(items, (item, index) => {
               return html`<div class="message">
-                ${this.renderAvator(message)} ${this.renderItem(message)}
-                ${this.status === 'loading' && index === messages.length - 1
+                ${this.renderAvator(item)}
+                <div class="item-wrapper">${this.renderItem(item)}</div>
+
+                ${this.status === 'loading' && index === items.length - 1
                   ? this.renderLoading()
                   : nothing}
-                ${index === messages.length - 1 &&
-                message.role === 'assistant' &&
-                this.status === 'success'
-                  ? this.renderEditorActions(message.content)
+                ${index === items.length - 1
+                  ? this.renderEditorActions(item)
                   : nothing}
               </div>`;
             })}
@@ -325,5 +454,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 declare global {
   interface HTMLElementTagNameMap {
     'chat-panel-messages': ChatPanelMessages;
+    'action-text': ActionText;
   }
 }

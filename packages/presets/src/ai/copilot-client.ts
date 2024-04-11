@@ -17,10 +17,12 @@ const GET_COPILOT_HISTORIES = gql`
         histories(docId: $docId, options: $options) {
           sessionId
           tokens
+          action
           messages {
             role
             content
             attachments
+            params
             createdAt
           }
         }
@@ -167,6 +169,7 @@ export class CopilotClient {
     return res.data.currentUser.copilot.histories as {
       sessionId: string;
       tokens: number;
+      action: string;
       messages: {
         content: string;
         createdAt: string;
