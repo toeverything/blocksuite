@@ -425,6 +425,7 @@ export class EdgelessRootService extends RootService {
 
     if (activeGroup && picked && activeGroup.hasDescendant(picked.id)) {
       let index = results.length - 1;
+
       while (
         picked === activeGroup ||
         (picked instanceof GroupLikeModel && picked.hasDescendant(activeGroup))
@@ -433,6 +434,7 @@ export class EdgelessRootService extends RootService {
       }
     } else if (picked) {
       let index = results.length - 1;
+
       while (picked.group !== null) {
         if (--index < 0) {
           picked = null;

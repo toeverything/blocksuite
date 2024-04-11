@@ -70,11 +70,19 @@ export const mindmapMiddleware: SurfaceMiddleware = (
         }
       }),
     surface.elementUpdated.on(({ id, props }) => {
-      if (props['childIds']) {
+      if (props['childIds'] || props['style']) {
         const element = surface.getElementById(id);
 
         if (element instanceof MindmapElementModel) {
           updateConnection(element);
+        }
+      }
+
+      if (props['xywh']) {
+        const element = surface.getElementById(id);
+
+        if (element?.group instanceof MindmapElementModel) {
+          updateConnection(element.group);
         }
       }
     }),

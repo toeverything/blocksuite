@@ -304,7 +304,9 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       throw new Error(`Parent node ${parent} not found`);
     }
 
-    props['text'] = new DocCollection.Y.Text((props['text'] as string) ?? '');
+    props['text'] = new DocCollection.Y.Text(
+      (props['text'] as string) ?? 'New node'
+    );
 
     let id: string;
     this.surface.doc.transact(() => {
@@ -379,6 +381,9 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
           index: 'a0',
         });
       }
+
+      this.buildTree();
+      this.layout();
     });
 
     return id!;
@@ -427,18 +432,13 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
         idx = node.children === children ? idx : node.children.indexOf(child);
 
         const currentPath = [...path, idx];
-        const id = `#${node.id}-${child.id}`;
 
-        if (!this.connectors.has(id)) {
-          this.addConnector(
-            node,
-            child,
-            layoutDir,
-            this.styleGetter.getNodeStyle(child, currentPath).connector
-          );
-        } else {
-          this.pathGenerator.updatePath(this.connectors.get(id)!);
-        }
+        this.addConnector(
+          node,
+          child,
+          layoutDir,
+          this.styleGetter.getNodeStyle(child, currentPath).connector
+        );
 
         walk(child, layoutDir, currentPath);
       });
@@ -503,7 +503,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       ? LayoutType.LEFT
       : root.right.includes(node)
         ? LayoutType.RIGHT
-        : null;
+        : this.layoutType;
   }
 
   private _queued = false;

@@ -3076,13 +3076,13 @@ export const MindmapStyleTwo = svg`
 
 export const MindmapStyleThree = svg`
 <svg xmlns="http://www.w3.org/2000/svg" width="78" height="78" viewBox="0 0 78 78" fill="none">
-  <rect x="46" y="10" width="21" height="14" rx="2.46" fill="#937EE7"/>
-  <rect x="46" y="54" width="21" height="14" rx="2.46" fill="#937EE7"/>
+  <rect x="46" y="10" width="21" height="14" rx="2.46" fill="#ED8CBD"/>
+  <rect x="46" y="54" width="21" height="14" rx="2.46" fill="#ED8CBD"/>
   <path d="M32 39V39C35.866 39 39 35.866 39 32V24C39 20.134 42.134 17 46 17V17" stroke="#BFC0BF" stroke-width="1.25"/>
-  <rect x="46" y="32" width="21" height="14" rx="2.46" fill="#937EE7"/>
+  <rect x="46" y="32" width="21" height="14" rx="2.46" fill="#ED8CBD"/>
   <path d="M32 39H46" stroke="#BFC0BF" stroke-width="1.25"/>
   <path d="M32 39V39C35.866 39 39 42.134 39 46V54C39 57.866 42.134 61 46 61V61" stroke="#BFC0BF" stroke-width="1.25"/>
-  <rect x="9" y="31" width="23" height="16" rx="2.46" fill="#937EE7"/>
+  <rect x="9" y="31" width="23" height="16" rx="2.46" fill="#ED8CBD"/>
 </svg>`;
 
 export const MindmapStyleFour = svg`

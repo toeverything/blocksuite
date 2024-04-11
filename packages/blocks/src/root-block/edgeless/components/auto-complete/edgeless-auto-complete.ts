@@ -453,7 +453,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const mindmapDirection =
       this.current instanceof ShapeElementModel &&
       mindmap instanceof MindmapElementModel
-        ? mindmap.layoutType
+        ? mindmap.getLayoutDir(this.current)
         : null;
 
     switch (mindmapDirection) {
