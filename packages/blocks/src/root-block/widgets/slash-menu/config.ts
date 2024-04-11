@@ -35,6 +35,7 @@ import {
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import { GroupingIcon } from '../../../database-block/data-view/common/icons/index.js';
+import { viewPresets } from '../../../database-block/data-view/view/index.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../embed-loom-block/styles.js';
@@ -483,7 +484,13 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             index + 1
           );
           const service = rootElement.std.spec.getService('affine:database');
-          service.initDatabaseBlock(rootElement.doc, model, id, 'table', false);
+          service.initDatabaseBlock(
+            rootElement.doc,
+            model,
+            id,
+            viewPresets.tableViewConfig,
+            false
+          );
           tryRemoveEmptyLine(model);
         },
       },
@@ -518,7 +525,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             rootElement.doc,
             model,
             id,
-            'kanban',
+            viewPresets.kanbanViewConfig,
             false
           );
           tryRemoveEmptyLine(model);

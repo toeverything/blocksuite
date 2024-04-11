@@ -5,15 +5,19 @@ import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { DatabaseSearchClose } from '../../../database-block/data-view/common/icons/index.js';
-import type { DataViewTypes } from '../../../database-block/data-view/view/data-view.js';
+import type { ViewMeta } from '../../../database-block/data-view/view/data-view.js';
 import type { DatabaseBlockModel } from '../../../database-block/database-model.js';
+import {
+  databaseViewInitConvert,
+  viewPresets,
+} from '../../../database-block/index.js';
 import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
 } from '../../icons/text.js';
 
 interface DatabaseView {
-  type: DataViewTypes;
+  meta: ViewMeta;
   text: string;
   icon: TemplateResult;
   description?: string;
@@ -22,12 +26,12 @@ interface DatabaseView {
 
 const databaseViews: DatabaseView[] = [
   {
-    type: 'table',
+    meta: viewPresets.tableViewConfig,
     text: 'Table view',
     icon: DatabaseTableViewIcon,
   },
   {
-    type: 'kanban',
+    meta: viewPresets.kanbanViewConfig,
     text: 'Kanban view',
     icon: DatabaseKanbanViewIcon,
   },
@@ -161,7 +165,7 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     return this.host.doc;
   }
 
-  private _convertToDatabase(viewType: DataViewTypes) {
+  private _convertToDatabase(viewMeta: ViewMeta) {
     const [_, ctx] = this.host.std.command
       .chain()
       .getSelectedModels({
@@ -184,7 +188,7 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     );
     const databaseModel = this.doc.getBlockById(id) as DatabaseBlockModel;
     assertExists(databaseModel);
-    databaseModel.initConvert(viewType);
+    databaseViewInitConvert(databaseModel, viewMeta);
     databaseModel.applyColumnUpdate();
     this.doc.moveBlocks(selectedModels, databaseModel);
 
@@ -216,13 +220,13 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
             ${databaseViews.map(view => {
               return html`
                 <div
-                  class="modal-view-item ${view.type}"
+                  class="modal-view-item ${view.meta.type}"
                   @mousedown="${(e: Event) => {
                     // prevent range reset
                     e.preventDefault();
                   }}"
                   @click="${() => {
-                    this._convertToDatabase(view.type);
+                    this._convertToDatabase(view.meta);
                   }}"
                 >
                   <div class="modal-view-item-content">

@@ -3,10 +3,12 @@ import '../declare-test-window.js';
 
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import type { RichText } from '@blocks/index.js';
+import { viewPresets } from '@blocks/database-block/data-view/view/index.js';
 import {
   type DatabaseBlockModel,
+  databaseViewInitEmpty,
   type ListType,
+  type RichText,
   type ThemeObserver,
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
@@ -478,7 +480,7 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
       noteId
     );
     const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    model.initEmpty('table');
+    databaseViewInitEmpty(model, viewPresets.tableViewConfig);
     model.applyColumnUpdate();
 
     doc.captureSync();
@@ -540,7 +542,7 @@ export async function initKanbanViewState(
           }
         });
       });
-      model.initEmpty('kanban');
+      databaseViewInitEmpty(model, viewPresets.kanbanViewConfig);
       model.applyColumnUpdate();
       doc.captureSync();
       return { rootId, noteId, databaseId };
@@ -572,7 +574,7 @@ export async function initEmptyDatabaseWithParagraphState(
       noteId
     );
     const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    model.initEmpty('table');
+    databaseViewInitEmpty(model, viewPresets.tableViewConfig);
     model.applyColumnUpdate();
     doc.addBlock('affine:paragraph', {}, noteId);
 

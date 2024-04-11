@@ -4,6 +4,7 @@ import type { SingleViewSource, ViewSource } from './data-view/common/index.js';
 import type { InsertToPosition } from './data-view/types.js';
 import type { DataViewTypes, ViewMeta } from './data-view/view/data-view.js';
 import { type DatabaseBlockModel } from './database-model.js';
+import { databaseViewAddView } from './utils.js';
 import { databaseBlockViewMap, databaseBlockViews } from './views/index.js';
 
 export class DatabaseBlockViewSource implements ViewSource {
@@ -35,9 +36,12 @@ export class DatabaseBlockViewSource implements ViewSource {
     return this.model.doc.readonly;
   }
 
-  public viewAdd(type: DataViewTypes): string {
+  public viewAdd(viewType: DataViewTypes): string {
     this.model.doc.captureSync();
-    const view = this.model.addView(type);
+    const view = databaseViewAddView(
+      this.model,
+      databaseBlockViewMap[viewType]
+    );
     this.model.applyViewsUpdate();
     return view.id;
   }

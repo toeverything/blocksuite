@@ -15,5 +15,6 @@ export { popMenu } from './utils/index.js';
 export { insertPositionToIndex } from './utils/insert.js';
 export { createUniComponentFromWebComponent } from './utils/uni-component/index.js';
 export { defineUniComponent } from './utils/uni-component/index.js';
+export { viewPresets } from './view/index.js';
 export type { StatCalcOpType } from './view/presets/table/types.js';
 export { widgetPresets } from './widget/index.js';

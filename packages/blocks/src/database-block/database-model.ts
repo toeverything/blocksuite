@@ -1,19 +1,10 @@
 import type { MigrationRunner, Text } from '@blocksuite/store';
 import { BlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
-import { databaseBlockColumnMap } from './columns/index.js';
-import { titlePureColumnConfig } from './columns/title/define.js';
-import { multiSelectColumnModelConfig } from './data-view/column/presets/multi-select/define.js';
-import { selectColumnModelConfig } from './data-view/column/presets/select/define.js';
 import type { InsertToPosition } from './data-view/types.js';
 import { arrayMove, insertPositionToIndex } from './data-view/utils/insert.js';
-import { getTagColor } from './data-view/utils/tags/colors.js';
-import {
-  type DataViewDataType,
-  type DataViewTypes,
-} from './data-view/view/data-view.js';
+import type { DataViewDataType } from './data-view/view/data-view.js';
 import type { Cell, Column, ColumnUpdater } from './types.js';
-import { databaseBlockViewMap } from './views/index.js';
 
 export type DatabaseBlockProps = {
   views: DataViewDataType[];
@@ -33,77 +24,6 @@ export type SerializedCells = {
 export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
   getViewList() {
     return this.views;
-  }
-
-  initEmpty(viewType: DataViewTypes) {
-    this.addColumn(
-      'start',
-      titlePureColumnConfig.create(titlePureColumnConfig.model.name)
-    );
-    this.addView(viewType);
-  }
-
-  initConvert(viewType: DataViewTypes) {
-    this.addColumn(
-      'end',
-      multiSelectColumnModelConfig.model.create('Tag', { options: [] })
-    );
-    this.initEmpty(viewType);
-  }
-
-  initTemplate(viewType: DataViewTypes) {
-    const ids = [nanoid(), nanoid(), nanoid()];
-    const statusId = this.addColumn(
-      'end',
-      selectColumnModelConfig.model.create('Status', {
-        options: [
-          {
-            id: ids[0],
-            color: getTagColor(),
-            value: 'TODO',
-          },
-          {
-            id: ids[1],
-            color: getTagColor(),
-            value: 'In Progress',
-          },
-          {
-            id: ids[2],
-            color: getTagColor(),
-            value: 'Done',
-          },
-        ],
-      })
-    );
-    for (let i = 0; i < 4; i++) {
-      const rowId = this.doc.addBlock(
-        'affine:paragraph',
-        {
-          text: new this.doc.Text(`Task ${i + 1}`),
-        },
-        this.id
-      );
-      this.updateCell(rowId, {
-        columnId: statusId,
-        value: ids[i],
-      });
-    }
-    this.initEmpty(viewType);
-  }
-
-  addView(type: DataViewTypes) {
-    const id = this.doc.generateBlockId();
-    const viewConfig = databaseBlockViewMap[type];
-    const view = viewConfig.model.init(
-      databaseBlockColumnMap,
-      this,
-      id,
-      viewConfig.model.defaultName
-    );
-    this.doc.transact(() => {
-      this.views.push(view);
-    });
-    return view;
   }
   duplicateView(id: string): string {
     const newId = this.doc.generateBlockId();
