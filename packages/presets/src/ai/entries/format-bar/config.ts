@@ -150,6 +150,48 @@ const EditAIGroup: AIItemGroupConfig = {
   ],
 };
 
+const DraftAIGroup: AIItemGroupConfig = {
+  name: 'draft',
+  items: [
+    {
+      name: 'Write an article about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writeArticle'),
+    },
+    {
+      name: 'Write a Twitter about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writeTwitterPost'),
+    },
+    {
+      name: 'Write a poem about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writePoem'),
+    },
+    {
+      name: 'Write a blog post about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writeBlogPost'),
+    },
+    {
+      name: 'Brainstorm ideas about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('brainstorm'),
+    },
+    {
+      name: 'Write a outline from this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writeOutline'),
+    },
+  ],
+};
+
 const CodeAIGroup: AIItemGroupConfig = {
   name: 'code with ai',
   items: [
@@ -158,6 +200,12 @@ const CodeAIGroup: AIItemGroupConfig = {
       icon: AIPenIcon,
       showWhen: codeBlockShowWhen,
       handler: actionToHandler('checkCodeErrors'),
+    },
+    {
+      name: 'Explain this code',
+      icon: AIPenIcon,
+      showWhen: codeBlockShowWhen,
+      handler: actionToHandler('explainCode'),
     },
   ],
 };
@@ -177,6 +225,7 @@ const ImageAIGroup: AIItemGroupConfig = {
 export const AIItemGroups: AIItemGroupConfig[] = [
   DocAIGroup,
   EditAIGroup,
+  DraftAIGroup,
   CodeAIGroup,
   ImageAIGroup,
 ];
