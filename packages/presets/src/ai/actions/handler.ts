@@ -13,7 +13,7 @@ import {
   getSelections,
 } from '../utils/selection-utils.js';
 
-function bindEventSource(
+export function bindEventSource(
   stream: BlockSuitePresets.TextStream,
   {
     update,
@@ -45,7 +45,7 @@ function bindEventSource(
   });
 }
 
-function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
+export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
@@ -80,7 +80,9 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   };
 }
 
-function actionToGenerateAnswer<T extends keyof BlockSuitePresets.AIActions>(
+export function actionToGenerateAnswer<
+  T extends keyof BlockSuitePresets.AIActions,
+>(
   id: T,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],

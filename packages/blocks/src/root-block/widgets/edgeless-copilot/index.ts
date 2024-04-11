@@ -45,7 +45,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
   private _visible = false;
 
   @query('.copilot-selection-rect')
-  private _selectionRectEl!: HTMLDivElement;
+  selectionElem!: HTMLDivElement;
 
   private _selectionModelRect!: DOMRect;
 
@@ -127,12 +127,12 @@ export class EdgelessCopilotWidget extends WidgetElement<
   private _showCopilotPanel() {
     this._showCopilotPanelOff?.();
     this._showCopilotPanelOff = once(this.ownerDocument, 'pointerup', () => {
-      if (!this._selectionRectEl) {
+      if (!this.selectionElem) {
         return;
       }
 
       const panel = new EdgelessCopilotPanel();
-      const referenceElement = this._selectionRectEl;
+      const referenceElement = this.selectionElem;
       panel.host = this.host;
       panel.groups = this.groups;
       panel.edgeless = this.edgeless;

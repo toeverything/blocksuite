@@ -6,6 +6,11 @@ import { z } from 'zod';
 import type { EdgelessModel } from '../../_common/types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  type XYWH,
+} from '../utils/xywh.js';
 import { type BaseProps, GroupLikeModel } from './base.js';
 import { TextResizing } from './common.js';
 import { LocalConnectorElementModel } from './connector.js';
@@ -539,6 +544,23 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       };
 
       walk(this._tree, [0]);
+    });
+  }
+
+  moveTo(targetXYWH: SerializedXYWH | XYWH) {
+    const { x, y } = this;
+    const targetPos =
+      typeof targetXYWH === 'string' ? deserializeXYWH(targetXYWH) : targetXYWH;
+    const offsetX = targetPos[0] - x;
+    const offsetY = targetPos[1] - y + targetPos[3];
+
+    this.surface.doc.transact(() => {
+      this.childElements.forEach(el => {
+        const deserializedXYWH = deserializeXYWH(el.xywh);
+
+        el.xywh =
+          `[${deserializedXYWH[0] + offsetX},${deserializedXYWH[1] + offsetY},${deserializedXYWH[2]},${deserializedXYWH[3]}]` as SerializedXYWH;
+      });
     });
   }
 }

@@ -2,6 +2,7 @@ import { css } from 'lit';
 
 export const menuItemStyles = css`
   .menu-item {
+    position: relative;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -41,6 +42,10 @@ export const menuItemStyles = css`
   .enter-icon,
   .arrow-right-icon {
     color: var(--affine-icon-color);
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-40%);
   }
   .enter-icon {
     display: none;

@@ -1,7 +1,23 @@
 import type { EdgelessCopilotWidget } from '@blocksuite/blocks';
 
-import { actionWithAI, draftWithAI } from '../../config/edgeless-copilot.js';
+import {
+  createGroup,
+  docGroup,
+  draftGroup,
+  editGroup,
+  mindmapGroup,
+  othersGroup,
+  presentationGroup,
+} from './actions-config.js';
 
 export function setupEdgelessCopilot(widget: EdgelessCopilotWidget) {
-  widget.groups = [actionWithAI, draftWithAI];
+  widget.groups = [
+    docGroup,
+    editGroup,
+    draftGroup,
+    mindmapGroup,
+    presentationGroup,
+    createGroup,
+    othersGroup,
+  ];
 }

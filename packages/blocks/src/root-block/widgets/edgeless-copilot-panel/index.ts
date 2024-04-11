@@ -2,11 +2,11 @@ import '../../../_common/components/ai-item/ai-item-list.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
-import { stopPropagation } from '../../../_common/utils/event.js';
+import { on, stopPropagation } from '../../../_common/utils/event.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-copilot-panel')
@@ -40,6 +40,11 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
     return this.edgeless.service.std.command.chain();
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this._disposables.add(on(this, 'wheel', stopPropagation));
+  }
+
   hide() {
     this.remove();
   }
@@ -55,6 +60,8 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
 
       return pre;
     }, [] as AIItemGroupConfig[]);
+
+    if (groups.every(group => group.items.length === 0)) return nothing;
 
     return html`
       <div class="edgeless-copilot-panel" @pointerdown=${stopPropagation}>
