@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -63,7 +64,8 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     this.updateMoreFilterPanel?.();
   }
   private addFilter = (e: MouseEvent) => {
-    popCreateFilter(eventToVRect(e), {
+    const position = eventToVRect(e);
+    popCreateFilter(position, {
       vars: this.vars,
       onSelect: filter => {
         const index = this.data.conditions.length;
@@ -72,17 +74,17 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
           conditions: [...this.data.conditions, filter],
         });
         requestAnimationFrame(() => {
-          this.expandGroup(e, index);
+          this.expandGroup(position, index);
         });
       },
     });
   };
-  private expandGroup = (e: MouseEvent, i: number) => {
+  private expandGroup = (position: ReferenceElement, i: number) => {
     const value = this.data.conditions[i];
     if (value.type !== 'group') {
       return;
     }
-    popFilterModal(eventToVRect(e), {
+    popFilterModal(position, {
       isRoot: false,
       vars: this.vars,
       value: value,
@@ -95,16 +97,16 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       },
     });
   };
-  renderMoreFilter = (): TemplateResult => {
+  renderMoreFilter = (count: number): TemplateResult => {
     return html` <div
       class="dv-shadow-2 dv-round-8"
       style="padding: 8px;background-color: var(--affine-background-overlay-panel-color);display:flex;flex-direction: column;gap: 8px;"
     >
       ${repeat(
-        this.data.conditions.slice(2),
+        this.data.conditions.slice(count),
         (_, i) =>
           html` <div style="width: max-content;">
-            ${this.renderCondition(i + 2)}
+            ${this.renderCondition(i + count)}
           </div>`
       )}
       <div class="dv-divider-h"></div>
@@ -113,11 +115,12 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   };
   updateMoreFilterPanel?: () => void;
 
-  showMoreFilter(e: MouseEvent) {
-    const ins = renderTemplate(this.renderMoreFilter);
+  showMoreFilter = (e: MouseEvent, count: number) => {
+    const ins = renderTemplate(() => this.renderMoreFilter(count));
     ins.style.position = 'absolute';
     this.updateMoreFilterPanel = () => {
-      if (this.data.conditions.length <= 2) {
+      const max = this.data.conditions.length;
+      if (count === max) {
         close();
         this.updateMoreFilterPanel = undefined;
         return;
@@ -129,29 +132,34 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
         this.updateMoreFilterPanel = undefined;
       },
     });
-  }
+  };
 
-  renderAddFilter() {
+  renderAddFilter = () => {
     return html` <div
+      style="height: 100%;"
       class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
       @click="${this.addFilter}"
     >
       ${AddCursorIcon} Add filter
     </div>`;
-  }
+  };
 
-  renderAddFilterOrMore() {
-    const count = this.data.conditions.length;
-    if (count <= 2) {
+  renderMore = (count: number) => {
+    const max = this.data.conditions.length;
+    if (count === max) {
       return this.renderAddFilter();
     }
+    const showMore = (e: MouseEvent) => {
+      this.showMoreFilter(e, count);
+    };
     return html` <div
       class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
-      @click="${this.showMoreFilter}"
+      style="height: 100%;"
+      @click="${showMore}"
     >
-      ${count - 2} More
+      ${max - count} More
     </div>`;
-  }
+  };
 
   renderCondition(i: number) {
     const condition = this.data.conditions[i];
@@ -160,6 +168,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     };
     if (condition.type === 'filter') {
       return html` <filter-condition-view
+        style="margin-right: 8px;"
         .vars="${this.vars}"
         .data="${condition}"
         .setData="${(v: Filter) => this._setFilter(i, v)}"
@@ -167,11 +176,14 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ></filter-condition-view>`;
     }
     const expandGroup = (e: MouseEvent) => {
-      this.expandGroup(e, i);
+      this.expandGroup(eventToVRect(e), i);
     };
     const length = condition.conditions.length;
     const text = length > 1 ? `${length} rules` : `${length} rule`;
-    return html` <div class="filter-group-tag dv-icon-16 dv-border dv-round-8">
+    return html` <div
+      style="margin-right: 8px;"
+      class="filter-group-tag dv-icon-16 dv-border dv-round-8"
+    >
       <div
         class="dv-round-4 dv-hover"
         @click="${expandGroup}"
@@ -189,11 +201,16 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     </div>`;
   }
 
+  renderFilters() {
+    return this.data.conditions.map((_, i) => () => this.renderCondition(i));
+  }
+
   override render() {
-    const conditions = this.data.conditions;
     return html`
-      ${repeat(conditions.slice(0, 2), (_, i) => this.renderCondition(i))}
-      ${this.renderAddFilterOrMore()}
+      <component-overflow
+        .renderItem="${this.renderFilters()}"
+        .renderMore="${this.renderMore}"
+      ></component-overflow>
     `;
   }
 
