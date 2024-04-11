@@ -26,7 +26,7 @@ import {
   Rect,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
-import { viewPresets } from '../../../../database-block/index.js';
+import { viewPresets } from '../../../../database-block/data-view/index.js';
 import {
   addImageBlocks,
   addSiblingImageBlock,
