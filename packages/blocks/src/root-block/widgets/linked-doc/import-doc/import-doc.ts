@@ -1,7 +1,7 @@
 import '../../../../_common/components/loader.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { type DocCollection, sha } from '@blocksuite/store';
+import { type DocCollection, extMimeMap, sha } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
@@ -129,9 +129,11 @@ export async function importNotion(collection: DocCollection, file: File) {
         continue;
       }
       const blob = await zipFile.files[file].async('blob');
+      const ext = file.split('.').at(-1) ?? '';
+      const mime = extMimeMap.get(ext) ?? '';
       pendingAssets.set(
         await sha(await blob.arrayBuffer()),
-        new File([blob], fileName)
+        new File([blob], fileName, { type: mime })
       );
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {

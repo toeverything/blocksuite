@@ -116,9 +116,98 @@ export function setupAIProvider() {
     assertExists(options.stream);
     const prompt = `Check the code errors in the following content and provide the corrected version:
 
-    """
     ${options.input}
-    """
+    `;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('explainCode', options => {
+    assertExists(options.stream);
+    const prompt = `Explain the code in the following content, focusing on the logic, functions, and expected outcomes:
+
+    ${options.input}
+    `;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('writeArticle', options => {
+    assertExists(options.stream);
+    const prompt = `Write an article based on the following content, focusing on the main ideas, structure, and flow:
+
+    ${options.input}
+    `;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('writeTwitterPost', options => {
+    assertExists(options.stream);
+    const prompt = `Write a Twitter post based on the following content, keeping it concise and engaging:
+
+    ${options.input}
+    `;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('writePoem', options => {
+    assertExists(options.stream);
+    const prompt = `Write a poem based on the following content, focusing on the emotions, imagery, and rhythm:
+
+    ${options.input}
+    `;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('writeBlogPost', options => {
+    assertExists(options.stream);
+    const prompt = `Write a blog post based on the following content, focusing on the insights, analysis, and personal perspective:
+
+    ${options.input}
+    `;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('brainstorm', options => {
+    assertExists(options.stream);
+    const prompt = `Brainstorm ideas based on the following content, exploring different angles, perspectives, and approaches:
+
+    ${options.input}
+    `;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('writeOutline', options => {
+    assertExists(options.stream);
+    const prompt = `Write an outline based on the following content, organizing the main points, subtopics, and structure:
+
+    ${options.input}
     `;
     return textToTextStream({
       docId: options.docId,

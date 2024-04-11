@@ -73,6 +73,27 @@ declare global {
       checkCodeErrors<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
+      explainCode<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      writeArticle<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      writeTwitterPost<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      writePoem<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      writeBlogPost<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      brainstorm<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      writeOutline<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
 
       explainImage<T extends AITextActionOptions>(
         options: T
