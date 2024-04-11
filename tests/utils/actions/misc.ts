@@ -461,7 +461,7 @@ export async function initEmptyEdgelessState(page: Page) {
 }
 
 export async function initEmptyDatabaseState(page: Page, rootId?: string) {
-  const ids = await page.evaluate(rootId => {
+  const ids = await page.evaluate(async rootId => {
     const { doc } = window;
     doc.captureSync();
     if (!rootId) {
@@ -478,8 +478,9 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
       noteId
     );
     const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    const host = document.querySelector('editor-host');
-    const databaseService = host?.std.spec.getService('affine:database');
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const databaseBlock = document.querySelector('affine-database');
+    const databaseService = databaseBlock?.service;
     if (databaseService) {
       databaseService.databaseViewInitEmpty(
         model,
@@ -503,7 +504,7 @@ export async function initKanbanViewState(
   rootId?: string
 ) {
   const ids = await page.evaluate(
-    ({ rootId, config }) => {
+    async ({ rootId, config }) => {
       const { doc } = window;
 
       doc.captureSync();
@@ -547,8 +548,9 @@ export async function initKanbanViewState(
           }
         });
       });
-      const host = document.querySelector('editor-host');
-      const databaseService = host?.std.spec.getService('affine:database');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const databaseBlock = document.querySelector('affine-database');
+      const databaseService = databaseBlock?.service;
       if (databaseService) {
         databaseService.databaseViewInitEmpty(
           model,
@@ -568,7 +570,7 @@ export async function initEmptyDatabaseWithParagraphState(
   page: Page,
   rootId?: string
 ) {
-  const ids = await page.evaluate(rootId => {
+  const ids = await page.evaluate(async rootId => {
     const { doc } = window;
     doc.captureSync();
     if (!rootId) {
@@ -585,8 +587,9 @@ export async function initEmptyDatabaseWithParagraphState(
       noteId
     );
     const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    const host = document.querySelector('editor-host');
-    const databaseService = host?.std.spec.getService('affine:database');
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const databaseBlock = document.querySelector('affine-database');
+    const databaseService = databaseBlock?.service;
     if (databaseService) {
       databaseService.databaseViewInitEmpty(
         model,
