@@ -6,8 +6,6 @@ import {
   type NormalizedCacheObject,
 } from '@apollo/client/core';
 
-import { toTextStream } from './utils/event-source.js';
-
 const GET_COPILOT_HISTORIES = gql`
   query getCopilotHistories(
     $workspaceId: String!
@@ -228,12 +226,10 @@ export class CopilotClient {
     );
   }
 
-  // Text or image to image
+  // Text or image to images
   imagesStream(messageId: string, sessionId: string) {
-    return toTextStream(
-      new EventSource(
-        `${this.backendUrl}/api/copilot/chat/${sessionId}/images?messageId=${messageId}`
-      )
+    return new EventSource(
+      `${this.backendUrl}/api/copilot/chat/${sessionId}/images?messageId=${messageId}`
     );
   }
 }

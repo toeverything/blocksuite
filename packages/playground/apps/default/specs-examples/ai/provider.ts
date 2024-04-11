@@ -19,7 +19,7 @@ export function setupAIProvider() {
     Summarize the key points from the following content in a clear and concise manner,
     suitable for a reader who is seeking a quick understanding of the original content.
     Ensure to capture the main ideas and any significant details without unnecessary elaboration:
-  
+
     ${options.input}
     `;
     return textToTextStream({
@@ -177,6 +177,17 @@ export function setupAIProvider() {
     });
   });
 
+  AIProvider.provideAction('writeOutline', options => {
+    assertExists(options.stream);
+    const prompt = `Write an outline from the following content in Markdown: ${options.input}`;
+
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
   AIProvider.provideAction('writeBlogPost', options => {
     assertExists(options.stream);
     const prompt = `Write a blog post based on the following content, focusing on the insights, analysis, and personal perspective:
@@ -203,12 +214,44 @@ export function setupAIProvider() {
     });
   });
 
+  AIProvider.provideAction('findActions', options => {
+    assertExists(options.stream);
+    const prompt = `Find actions related to the following content and return content in markdown: ${options.input}`;
+
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
   AIProvider.provideAction('writeOutline', options => {
     assertExists(options.stream);
     const prompt = `Write an outline based on the following content, organizing the main points, subtopics, and structure:
 
     ${options.input}
     `;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('brainstormMindmap', options => {
+    assertExists(options.stream);
+    const prompt = `Use the nested unordered list syntax without other extra text style in Markdown to create a structure similar to a mind map without any unnecessary plain text description. Analyze the following questions or topics: ${options.input}`;
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
+
+  AIProvider.provideAction('explain', options => {
+    assertExists(options.stream);
+    const prompt = `Explain the following content in Markdown: ${options.input}`;
+
     return textToTextStream({
       docId: options.docId,
       workspaceId: options.workspaceId,
@@ -224,6 +267,18 @@ export function setupAIProvider() {
       workspaceId: options.workspaceId,
       prompt,
       attachments: options.attachments,
+    });
+  });
+
+  AIProvider.provideAction('makeItReal', options => {
+    assertExists(options.stream);
+    const prompt = 'Make it real';
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+      attachments: options.attachments,
+      params: options.params,
     });
   });
 }

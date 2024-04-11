@@ -17,5 +17,5 @@ packages=(
 
 for package in "${packages[@]}"
 do
-  rm -rf "packages/$package/dist" "packages/$package/tsconfig.tsbuildinfo" "test-results"
+  rm -rf "packages/$package/dist" "packages/$package/tsconfig.tsbuildinfo" "test-results" "packages/$package/node_modules/.vite"
 done
