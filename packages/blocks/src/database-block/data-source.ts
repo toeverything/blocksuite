@@ -189,7 +189,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
       currentData,
       currentCells
     ) ?? {
-      column: databaseBlockColumnMap[currentType].model.defaultData(),
+      column: databaseBlockColumnMap[toType].model.defaultData(),
       cells: currentCells.map(() => undefined),
     };
     this.doc.captureSync();

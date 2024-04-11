@@ -52,6 +52,7 @@ groupByMatcher.register(tArray(tTag.create()), {
     return '';
   },
   defaultKeys: type => {
+    console.log(type);
     if (isTArray(type) && tTag.is(type.ele) && type.ele.data) {
       return [
         ungroups,
