@@ -135,7 +135,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete
       .then(() => {
-        this.inlineEditor.focusEnd();
+        if (this.element.group instanceof MindmapElementModel) {
+          this.inlineEditor.selectAll();
+        } else {
+          this.inlineEditor.focusEnd();
+        }
 
         this.disposables.add(
           this.inlineEditor.slots.renderComplete.on(() => {
