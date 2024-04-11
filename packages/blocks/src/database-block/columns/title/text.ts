@@ -6,12 +6,12 @@ import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { RichText } from '../../../../_common/components/index.js';
-import type { DatabaseBlockComponent } from '../../../database-block.js';
-import { BaseCellRenderer } from '../../column/index.js';
-import { tRichText } from '../../logical/data-type.js';
-import type { DataViewKanbanManager } from '../../view/presets/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../view/presets/table/table-view-manager.js';
+import type { RichText } from '../../../_common/components/index.js';
+import { BaseCellRenderer } from '../../data-view/column/index.js';
+import { tRichText } from '../../data-view/logical/data-type.js';
+import type { DataViewKanbanManager } from '../../data-view/view/presets/kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../data-view/view/presets/table/table-view-manager.js';
+import type { DatabaseBlockComponent } from '../../database-block.js';
 
 const styles = css`
   data-view-header-area-text {

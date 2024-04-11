@@ -10,9 +10,10 @@ import {
 import { affineInlineMarkdownMatches } from '../_common/inline/presets/markdown.js';
 import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-node/reference-config.js';
 import { DatabaseSelection } from './data-view/common/selection.js';
+import { viewPresets } from './data-view/index.js';
 import type { ViewMeta } from './data-view/view/data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { databaseViewInitTemplate } from './utils.js';
+import { databaseViewInitEmpty, databaseViewInitTemplate } from './utils.js';
 
 export class DatabaseService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
@@ -32,6 +33,8 @@ export class DatabaseService<
     this.inlineManager.registerSpecs(inlineSpecs);
     this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
   }
+  databaseViewInitEmpty = databaseViewInitEmpty;
+  viewPresets = viewPresets;
 
   initDatabaseBlock(
     doc: Doc,

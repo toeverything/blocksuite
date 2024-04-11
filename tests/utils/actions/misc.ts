@@ -5,11 +5,9 @@ import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import {
   type DatabaseBlockModel,
-  databaseViewInitEmpty,
   type ListType,
   type RichText,
   type ThemeObserver,
-  viewPresets,
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
 import { type InlineRange, type InlineRootElement } from '@inline/index.js';
@@ -480,7 +478,14 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
       noteId
     );
     const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    databaseViewInitEmpty(model, viewPresets.tableViewConfig);
+    const host = document.querySelector('editor-host');
+    const databaseService = host?.std.spec.getService('affine:database');
+    if (databaseService) {
+      databaseService.databaseViewInitEmpty(
+        model,
+        databaseService.viewPresets.tableViewConfig
+      );
+    }
     model.applyColumnUpdate();
 
     doc.captureSync();
@@ -542,7 +547,14 @@ export async function initKanbanViewState(
           }
         });
       });
-      databaseViewInitEmpty(model, viewPresets.kanbanViewConfig);
+      const host = document.querySelector('editor-host');
+      const databaseService = host?.std.spec.getService('affine:database');
+      if (databaseService) {
+        databaseService.databaseViewInitEmpty(
+          model,
+          databaseService.viewPresets.kanbanViewConfig
+        );
+      }
       model.applyColumnUpdate();
       doc.captureSync();
       return { rootId, noteId, databaseId };
@@ -558,7 +570,6 @@ export async function initEmptyDatabaseWithParagraphState(
 ) {
   const ids = await page.evaluate(rootId => {
     const { doc } = window;
-
     doc.captureSync();
     if (!rootId) {
       rootId = doc.addBlock('affine:page', {
@@ -574,7 +585,14 @@ export async function initEmptyDatabaseWithParagraphState(
       noteId
     );
     const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    databaseViewInitEmpty(model, viewPresets.tableViewConfig);
+    const host = document.querySelector('editor-host');
+    const databaseService = host?.std.spec.getService('affine:database');
+    if (databaseService) {
+      databaseService.databaseViewInitEmpty(
+        model,
+        databaseService.viewPresets.tableViewConfig
+      );
+    }
     model.applyColumnUpdate();
     doc.addBlock('affine:paragraph', {}, noteId);
 

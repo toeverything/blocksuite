@@ -1,4 +1,3 @@
-import type { CellRenderer } from '../../../column/index.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import {
   GroupHelper,
@@ -15,7 +14,6 @@ import {
   DataViewColumnManagerBase,
   DataViewManagerBase,
 } from '../../data-view-manager.js';
-import { headerRenderer } from './components/header-cell.js';
 
 type TableViewData = _DataViewDataTypeMap['table'];
 
@@ -357,12 +355,5 @@ export class DataViewTableColumnManager extends DataViewColumnManagerBase {
 
   updateWidth(width: number): void {
     this.dataViewManager.columnUpdateWidth(this.id, width);
-  }
-
-  public override get renderer(): CellRenderer {
-    if (this.id === this.dataViewManager.header.titleColumn) {
-      return headerRenderer;
-    }
-    return super.renderer;
   }
 }

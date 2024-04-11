@@ -1,7 +1,7 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { BaseCellRenderer } from '../../column/index.js';
+import { BaseCellRenderer } from '../../data-view/column/index.js';
 
 @customElement('data-view-header-area-icon')
 export class IconCell extends BaseCellRenderer<string> {

@@ -1,4 +1,3 @@
-import type { CellRenderer } from '../../../column/index.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import {
   GroupHelper,
@@ -15,7 +14,6 @@ import {
   DataViewManagerBase,
 } from '../../data-view-manager.js';
 import type { KanbanViewData } from './define.js';
-import { headerRenderer } from './header-cell.js';
 
 export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
   private updateView(
@@ -331,12 +329,5 @@ export class DataViewKanbanColumnManager extends DataViewColumnManagerBase {
     override dataViewManager: DataViewKanbanManager
   ) {
     super(propertyId, dataViewManager);
-  }
-
-  public override get renderer(): CellRenderer {
-    if (this.id === this.dataViewManager.header.titleColumn) {
-      return headerRenderer;
-    }
-    return super.renderer;
   }
 }
