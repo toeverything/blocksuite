@@ -244,12 +244,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   private _handleYBlockAdd(id: string) {
     const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) {
-      console.warn(
-        `Failed to handle yBlock add, yBlock with id-${id} not found`
-      );
-      return;
-    }
+    if (!yBlock) return;
 
     const flavour = yBlock.get('sys:flavour');
     this.slots.blockUpdated.emit({ type: 'add', id, flavour });
@@ -257,12 +252,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   private _handleYBlockDelete(id: string) {
     const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) {
-      console.warn(
-        `Failed to handle yBlock delete, yBlock with id-${id} not found`
-      );
-      return;
-    }
+    if (!yBlock) return;
 
     const flavour = yBlock.get('sys:flavour');
     this.slots.blockUpdated.emit({
