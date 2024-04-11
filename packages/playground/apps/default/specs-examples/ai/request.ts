@@ -9,11 +9,13 @@ export function textToTextStream({
   workspaceId,
   prompt,
   attachments,
+  params,
 }: {
   docId: string;
   workspaceId: string;
   prompt: string;
   attachments?: string[];
+  params?: string;
 }): BlockSuitePresets.TextStream {
   const client = new CopilotClient(backendUrl);
   return {
@@ -28,7 +30,8 @@ export function textToTextStream({
         const messageId = await client.createMessage({
           sessionId: session,
           content: prompt,
-          attachments: attachments,
+          attachments,
+          params,
         });
         const eventSource = client.textStream(messageId, session);
         yield* toTextStream(eventSource, { timeout: TIMEOUT });

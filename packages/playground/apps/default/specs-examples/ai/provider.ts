@@ -19,7 +19,7 @@ export function setupAIProvider() {
     Summarize the key points from the following content in a clear and concise manner,
     suitable for a reader who is seeking a quick understanding of the original content.
     Ensure to capture the main ideas and any significant details without unnecessary elaboration:
-  
+
     ${options.input}
     `;
     return textToTextStream({
@@ -267,6 +267,18 @@ export function setupAIProvider() {
       workspaceId: options.workspaceId,
       prompt,
       attachments: options.attachments,
+    });
+  });
+
+  AIProvider.provideAction('makeItReal', options => {
+    assertExists(options.stream);
+    const prompt = 'Make it real';
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+      attachments: options.attachments,
+      params: options.params,
     });
   });
 }

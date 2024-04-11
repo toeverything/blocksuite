@@ -12,6 +12,7 @@ import type {
 import {
   AFFINE_EDGELESS_COPILOT_WIDGET,
   DeleteIcon,
+  EmbedHtmlBlockSpec,
   InsertBelowIcon,
   NoteDisplayMode,
   ResetIcon,
@@ -20,6 +21,7 @@ import {
 
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getAIPanel } from '../ai-panel.js';
+import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
 
 export type CtxRecord = {
   get(): Record<string, unknown>;
@@ -144,6 +146,33 @@ export const responses: {
           ]);
         });
       }
+    });
+  },
+  makeItReal: host => {
+    const aiPanel = getAIPanel(host);
+    const html = aiPanel.answer;
+    if (!html) return;
+
+    const copilotPanel = getCopilotPanel(host);
+    const [surface] = host.doc.getBlockByFlavour(
+      'affine:surface'
+    ) as SurfaceBlockModel[];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const selectionRect = copilotPanel.selectionModelRect;
+
+    copilotPanel.hide();
+    aiPanel.hide();
+
+    const edgelessRoot = getEdgelessRootFromEditor(host);
+    const { left, top, height } = selectionRect;
+
+    host.doc.transact(() => {
+      edgelessRoot.doc.addBlock(
+        EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
+        { html, xywh: `[${left},${top + height + 20},400,200]` },
+        surface.id
+      );
     });
   },
 };

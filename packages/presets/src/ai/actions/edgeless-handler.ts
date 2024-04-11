@@ -5,6 +5,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 
 import { getAIPanel } from '../ai-panel.js';
+import { iframeRenderer } from '../messages/iframe.js';
 import { createMindmapRenderer } from '../messages/mindmap.js';
 import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
@@ -31,6 +32,10 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
     return createMindmapRenderer(host, ctx);
   }
 
+  if (id === 'makeItReal') {
+    return iframeRenderer;
+  }
+
   return createTextRenderer(host);
 }
 
@@ -51,11 +56,38 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
-  >
+  >,
+  getAttachments?: (host: EditorHost) => Promise<string[] | void>
 ) {
   const action = AIProvider.actions[id];
 
   if (!action || typeof action !== 'function') return;
+
+  if (getAttachments && typeof getAttachments === 'function') {
+    return (host: EditorHost): BlockSuitePresets.TextStream => {
+      let stream: BlockSuitePresets.TextStream | undefined;
+      return {
+        async *[Symbol.asyncIterator]() {
+          const options = {
+            ...variants,
+            stream: true,
+            docId: host.doc.id,
+            workspaceId: host.doc.collection.id,
+          } as Parameters<typeof action>[0];
+
+          const attachments = await getAttachments(host);
+          if (attachments && attachments.length) {
+            options.attachments = attachments;
+          }
+
+          // @ts-expect-error todo: maybe fix this
+          stream = action(options);
+          if (!stream) return;
+          yield* stream;
+        },
+      };
+    };
+  }
 
   return (host: EditorHost): BlockSuitePresets.TextStream => {
     let stream: BlockSuitePresets.TextStream | undefined;
@@ -86,7 +118,8 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
-  >
+  >,
+  getAttachments?: (host: EditorHost) => Promise<string[] | void>
 ) {
   return (host: EditorHost) => {
     return ({
@@ -103,7 +136,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
 
       if (selectedElements.length === 0) return;
 
-      const stream = actionToStream(id, variants)?.(host);
+      const stream = actionToStream(id, variants, getAttachments)?.(host);
 
       if (!stream) return;
 
@@ -117,7 +150,8 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
-  >
+  >,
+  getAttachments?: (host: EditorHost) => Promise<string[] | void>
 ) {
   return (host: EditorHost) => {
     const aiPanel = getAIPanel(host);
@@ -137,7 +171,11 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     assertExists(aiPanel.config);
 
     aiPanel.host = host;
-    aiPanel.config.generateAnswer = actionToGeneration(id, variants)(host);
+    aiPanel.config.generateAnswer = actionToGeneration(
+      id,
+      variants,
+      getAttachments
+    )(host);
     aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
 
@@ -165,4 +203,9 @@ export function mindmapShowWhen(_: unknown, __: unknown, host: EditorHost) {
   const selected = getCopilotSelectedElems(host);
 
   return selected[0] instanceof MindmapElementModel;
+}
+
+export function makeItRealShowWhen(_: unknown, __: unknown, host: EditorHost) {
+  const selected = getCopilotSelectedElems(host);
+  return selected.length > 0;
 }
