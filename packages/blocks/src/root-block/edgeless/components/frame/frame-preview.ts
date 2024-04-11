@@ -310,8 +310,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
         // Should only check for add and delete events, the update event will be handled by the surface renderer
         if (type === 'update') return;
 
-        const model =
-          type === 'delete' ? event.model : doc.getBlockById(event.id);
+        const model = doc.getBlockById(event.id);
         if (!model || !isTopLevelBlock(model) || !model.xywh) return;
 
         const frameBound = Bound.deserialize(this.frame.xywh);

@@ -152,9 +152,9 @@ export class AIChatLogic {
   };
 
   syncWorkspace = async () => {
-    this.reactiveData.syncedDocs = await this.embeddingDocs([
-      ...this.host.doc.collection.docs.values(),
-    ]);
+    this.reactiveData.syncedDocs = await this.embeddingDocs(
+      [...this.host.doc.collection.docs.values()].map(v => v.getDoc())
+    );
   };
 
   get docs() {
@@ -165,7 +165,7 @@ export class AIChatLogic {
     return [
       {
         role: 'system',
-        content: `the background is:\n${await Promise.all(this.docs.map(v => docToMarkdown(v))).then(list => list.join('\n'))}`,
+        content: `the background is:\n${await Promise.all(this.docs.map(v => docToMarkdown(v.getDoc()))).then(list => list.join('\n'))}`,
       },
     ];
   }

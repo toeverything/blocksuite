@@ -12,7 +12,8 @@ import {
   CommentPanel,
   CopilotPanel,
 } from '@blocksuite/presets';
-import type { DocCollection } from '@blocksuite/store';
+import type { BlockCollection } from '@blocksuite/store';
+import { type DocCollection } from '@blocksuite/store';
 
 import { CustomChatPanel } from '../../_common/components/custom-chat-panel.js';
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';
@@ -35,8 +36,10 @@ function configureFormatBar(formatBar: AffineFormatBarWidget) {
 }
 
 export async function mountDefaultDocEditor(collection: DocCollection) {
-  const doc = collection.docs.values().next().value;
-  assertExists(doc, 'Need to create a doc first');
+  const blockCollection = collection.docs.values().next()
+    .value as BlockCollection;
+  assertExists(blockCollection, 'Need to create a doc first');
+  const doc = blockCollection.getDoc();
 
   assertExists(doc.ready, 'Doc is not ready');
   assertExists(doc.root, 'Doc root is not ready');

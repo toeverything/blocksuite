@@ -40,7 +40,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
         )?.model;
         if (!currentModel) return;
 
-        const previousSiblingModel = doc.getPreviousSibling(currentModel);
+        const previousSiblingModel = doc.getPrev(currentModel);
         if (!previousSiblingModel) return;
 
         const parentModel = blockElement.doc.getParent(previousSiblingModel);
@@ -69,7 +69,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
         )?.model;
         if (!currentModel) return;
 
-        const previousSiblingModel = doc.getPreviousSibling(currentModel);
+        const previousSiblingModel = doc.getPrev(currentModel);
         if (!previousSiblingModel) return;
 
         const parentModel = doc.getParent(previousSiblingModel);
@@ -99,7 +99,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
         )?.model;
         if (!currentModel) return;
 
-        const nextSiblingModel = doc.getNextSibling(currentModel);
+        const nextSiblingModel = doc.getNext(currentModel);
         if (!nextSiblingModel) return;
 
         const parentModel = doc.getParent(nextSiblingModel);
@@ -124,7 +124,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
         )?.model;
         if (!currentModel) return;
 
-        const nextSiblingModel = doc.getNextSibling(currentModel);
+        const nextSiblingModel = doc.getNext(currentModel);
         if (!nextSiblingModel) return;
 
         const parentModel = doc.getParent(nextSiblingModel);

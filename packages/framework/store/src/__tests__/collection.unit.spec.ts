@@ -347,7 +347,8 @@ describe('addBlock', () => {
         title: new doc.Text(),
       })
     );
-    const block = await waitOnce(doc.slots.rootAdded);
+    const blockId = await waitOnce(doc.slots.rootAdded);
+    const block = doc.getBlockById(blockId) as BlockModel;
     assert.equal(block.flavour, 'affine:page');
   });
 
@@ -853,12 +854,10 @@ describe('getBlock', () => {
     doc.addBlock('affine:paragraph', {}, noteId);
     doc.addBlock('affine:paragraph', {}, noteId);
 
-    const result = doc.getPreviousSibling(
-      rootModel.children[0].children[1]
-    ) as BlockModel;
+    const result = doc.getPrev(rootModel.children[0].children[1]) as BlockModel;
     assert.equal(result, rootModel.children[0].children[0]);
 
-    const invalid = doc.getPreviousSibling(rootModel.children[0].children[0]);
+    const invalid = doc.getPrev(rootModel.children[0].children[0]);
     assert.equal(invalid, null);
   });
 });

@@ -2,7 +2,8 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { PageRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
-import type { Doc, DocCollection } from '@blocksuite/store';
+import type { BlockCollection } from '@blocksuite/store';
+import { type DocCollection } from '@blocksuite/store';
 
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
@@ -14,8 +15,10 @@ const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
 export async function mountDefaultDocEditor(collection: DocCollection) {
-  const doc = collection.docs.values().next().value as Doc;
-  assertExists(doc, 'Need to create a doc first');
+  const blockCollection = collection.docs.values().next()
+    .value as BlockCollection;
+  assertExists(blockCollection, 'Need to create a doc first');
+  const doc = blockCollection.getDoc();
 
   assertExists(doc.ready, 'Doc is not ready');
   assertExists(doc.root, 'Doc root is not ready');

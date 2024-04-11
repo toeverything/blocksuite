@@ -4,7 +4,8 @@ import * as Y from 'yjs';
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
 import { blob, DocCollectionAddonType, indexer, test } from './addon/index.js';
-import { Doc } from './doc.js';
+import { BlockCollection } from './doc/block-collection.js';
+import type { Doc } from './doc/index.js';
 import { DocCollectionMeta, type DocMeta } from './meta.js';
 import { Store, type StoreOptions } from './store.js';
 
@@ -66,7 +67,7 @@ export class DocCollection extends DocCollectionAddonType {
   }
 
   get docs() {
-    return this._store.spaces as Map<string, Doc>;
+    return this._store.spaces as Map<string, BlockCollection>;
   }
 
   get doc() {
@@ -94,14 +95,18 @@ export class DocCollection extends DocCollectionAddonType {
   }
 
   getDoc(docId: string): Doc | null {
-    const space = this.docs.get(docId) as Doc | undefined;
+    const collection = this.getBlockCollection(docId);
+    return collection?.getDoc() ?? null;
+  }
 
+  getBlockCollection(docId: string): BlockCollection | null {
+    const space = this.docs.get(docId) as BlockCollection | undefined;
     return space ?? null;
   }
 
   private _bindDocMetaEvents() {
     this.meta.docMetaAdded.on(docId => {
-      const doc = new Doc({
+      const doc = new BlockCollection({
         id: docId,
         collection: this,
         doc: this.doc,
@@ -115,9 +120,10 @@ export class DocCollection extends DocCollectionAddonType {
     this.meta.docMetaUpdated.on(() => this.slots.docUpdated.emit());
 
     this.meta.docMetaRemoved.on(id => {
-      const doc = this.getDoc(id) as Doc;
-      this._store.removeSpace(doc);
-      doc.remove();
+      const space = this.getBlockCollection(id);
+      if (!space) return;
+      this._store.removeSpace(space);
+      space.remove();
       this.slots.docRemoved.emit(id);
     });
   }
@@ -167,12 +173,12 @@ export class DocCollection extends DocCollectionAddonType {
     const docMeta = this.meta.getDocMeta(docId);
     assertExists(docMeta);
 
-    const doc = this.getDoc(docId);
-    if (!doc) return;
+    const blockCollection = this.getBlockCollection(docId);
+    if (!blockCollection) return;
 
-    doc.dispose();
+    blockCollection.dispose();
     this.meta.removeDocMeta(docId);
-    this._store.removeSpace(doc);
+    this._store.removeSpace(blockCollection);
   }
 
   /**

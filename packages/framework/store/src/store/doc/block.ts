@@ -5,7 +5,7 @@ import { Boxed, type UnRecord, y2Native } from '../../reactive/index.js';
 import { createYProxy, native2Y } from '../../reactive/index.js';
 import { BlockModel, internalPrimitives } from '../../schema/base.js';
 import type { Schema } from '../../schema/index.js';
-import type { Doc } from '../doc.js';
+import type { Doc } from './doc.js';
 
 export type YBlock = Y.Map<unknown> & {
   get(prop: 'sys:id'): string;

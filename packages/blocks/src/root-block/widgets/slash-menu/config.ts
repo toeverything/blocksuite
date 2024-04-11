@@ -626,7 +626,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         icon: ArrowUpBigIcon,
         action: ({ rootElement, model }) => {
           const doc = rootElement.doc;
-          const previousSiblingModel = doc.getPreviousSibling(model);
+          const previousSiblingModel = doc.getPrev(model);
           if (!previousSiblingModel) return;
 
           const parentModel = doc.getParent(previousSiblingModel);
@@ -640,7 +640,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         icon: ArrowDownBigIcon,
         action: ({ rootElement, model }) => {
           const doc = rootElement.doc;
-          const nextSiblingModel = doc.getNextSibling(model);
+          const nextSiblingModel = doc.getNext(model);
           if (!nextSiblingModel) return;
 
           const parentModel = doc.getParent(nextSiblingModel);

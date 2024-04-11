@@ -2,7 +2,7 @@ import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { YArrayEvent, YMapEvent, YTextEvent } from 'yjs';
 
-import type { YBlock } from '../store/block/block.js';
+import type { YBlock } from '../store/doc/block.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 
 type DocId = string;
