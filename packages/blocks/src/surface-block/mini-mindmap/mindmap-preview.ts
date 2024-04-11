@@ -18,7 +18,6 @@ import {
   MindmapStyleThree,
   MindmapStyleTwo,
 } from '../../_common/icons/edgeless.js';
-import type { AffineAIPanelWidget } from '../../root-block/widgets/ai-panel/ai-panel.js';
 import type { MindmapElementModel } from '../element-model/mindmap.js';
 import { MindmapStyle } from '../element-model/utils/mindmap/style.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
@@ -95,7 +94,10 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
   answer!: string;
 
   @property({ attribute: false })
-  aiPanel!: AffineAIPanelWidget;
+  ctx!: {
+    get(): Record<string, unknown>;
+    set(data: Record<string, unknown>): void;
+  };
 
   @query('editor-host')
   portalHost!: EditorHost;
@@ -202,11 +204,10 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       this._mindmap.style = style;
     });
 
-    (
-      this.aiPanel.ctx as {
-        style: MindmapStyle;
-      }
-    ).style = style;
+    this.ctx.set({
+      ...this.ctx.get(),
+      style,
+    });
     this.requestUpdate();
   }
 
@@ -229,11 +230,11 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
 
     const centerPosition = this._mindmap.tree.element.xywh;
 
-    this.aiPanel.ctx = {
+    this.ctx.set({
       node: mindmapNode,
       style: MindmapStyle.FOUR,
       centerPosition,
-    };
+    });
   }
 
   override render() {

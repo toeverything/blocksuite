@@ -30,6 +30,11 @@ declare global {
       workspaceId: string;
     }
 
+    interface AIImageActionOptions extends AITextActionOptions {
+      content: string;
+      params?: string;
+    }
+
     type TextStream = {
       [Symbol.asyncIterator](): AsyncIterableIterator<string>;
     };
@@ -99,11 +104,38 @@ declare global {
         options: T
       ): AIActionTextResponse<T>;
 
+      findActions<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+
+      // mindmap
+      brainstormMindmap<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      expandMindmap<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+
+      // presentation
+      createSlides<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+
+      // explain this
+      explain<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+
       // actions with variants
       translate<T extends TranslateOptions>(
         options: T
       ): AIActionTextResponse<T>;
       changeTone<T extends ChangeToneOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+
+      // make it real, image to text
+      makeItReal<T extends AIImageActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
     }

@@ -20,6 +20,7 @@ import {
   ReplaceIcon,
 } from '../_common/icons.js';
 import type { CopilotClient } from '../copilot-client.js';
+import { createTextRenderer } from '../messages/text.js';
 import type { ChatMessage, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
@@ -122,10 +123,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderItem(message: ChatMessage) {
-    return html`<ai-answer-text
-      .host=${this.host}
-      .answer=${message.content}
-    ></ai-answer-text>`;
+    return createTextRenderer(this.host)(message.content);
     // if (message.role === 'user') {
     //   return textRenderer(message.content);
     // } else {
