@@ -1,6 +1,3 @@
-// related component
-import '../database-block/table/table-view.js';
-
 import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
