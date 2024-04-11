@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-import '../../database-block/kanban/define.js';
-import '../../database-block/table/define.js';
-
 import type { BlockModel, Doc } from '@blocksuite/store';
 import { DocCollection, Generator, Schema } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
