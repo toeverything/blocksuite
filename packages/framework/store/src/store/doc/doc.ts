@@ -162,6 +162,10 @@ export class Doc {
     return this._blockCollection.generateBlockId.bind(this._blockCollection);
   }
 
+  get clear() {
+    return this._blockCollection.clear.bind(this._blockCollection);
+  }
+
   getSchemaByFlavour(flavour: BlockSuite.Flavour) {
     return this._schema.flavourSchemaMap.get(flavour);
   }
@@ -191,8 +195,10 @@ export class Doc {
    * @deprecated
    * Use `getBlock` instead.
    */
-  getBlockById(id: string) {
-    return this.getBlock(id)?.model ?? null;
+  getBlockById<Model extends BlockModel = BlockModel>(
+    id: string
+  ): Model | null {
+    return (this.getBlock(id)?.model ?? null) as Model | null;
   }
 
   /**
