@@ -18,39 +18,25 @@ import {
   insertFromMarkdown,
   markdownToSnapshot,
 } from './utils/markdown-utils.js';
+import { getSelections } from './utils/selection-utils.js';
 
 export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   const host = panel.host;
-  const chain = host.std.command.chain();
 
   const getSelection = () => {
     const textSelection = host.selection.find('text');
     const mode = textSelection ? 'flat' : 'highest';
-    const [_, { selectedBlocks }] = chain
-      .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
-      .getSelectedBlocks({
-        types: ['block', 'text'],
-        mode,
-      })
-      .run();
+    const { selectedBlocks } = getSelections(host, mode);
     assertExists(selectedBlocks);
     const length = selectedBlocks.length;
     const firstBlock = selectedBlocks[0];
     const lastBlock = selectedBlocks[length - 1];
-    const firstBlockId = firstBlock.model.id;
-    const lastBlockId = lastBlock.model.id;
-    const firstBlockParent = firstBlock.parentBlockElement;
-    const lastBlockParent = lastBlock.parentBlockElement;
     const selectedModels = selectedBlocks.map(block => block.model);
-    assertExists(firstBlockParent);
-    assertExists(lastBlockParent);
     return {
       textSelection,
       selectedModels,
-      firstBlockId,
-      lastBlockId,
-      firstBlockParent,
-      lastBlockParent,
+      firstBlock,
+      lastBlock,
     };
   };
 
@@ -66,10 +52,10 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
     const selection = getSelection();
     if (!selection || !panel.answer) return;
 
-    const { textSelection, firstBlockId, firstBlockParent, selectedModels } =
-      selection;
+    const { textSelection, firstBlock, selectedModels } = selection;
+    const firstBlockParent = firstBlock.parentBlockElement;
     const firstIndex = firstBlockParent.model.children.findIndex(
-      model => model.id === firstBlockId
+      model => model.id === firstBlock.model.id
     );
 
     if (textSelection) {
@@ -88,7 +74,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       const models = await insertFromMarkdown(
         host,
         panel.answer ?? '',
-        firstBlockParent.id,
+        firstBlockParent.model.id,
         firstIndex
       );
 
@@ -109,9 +95,10 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       return;
     }
 
-    const { lastBlockId, lastBlockParent } = selection;
+    const { lastBlock } = selection;
+    const lastBlockParent = lastBlock.parentBlockElement;
     const lastIndex = lastBlockParent.model.children.findIndex(
-      model => model.id === lastBlockId
+      model => model.id === lastBlock.model.id
     );
 
     const models = await insertFromMarkdown(
@@ -129,6 +116,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
 
     panel.hide();
   };
+
   return [
     {
       name: 'Insert below',

@@ -147,11 +147,14 @@ export const getFirstImageInFrame = (
   return image?.id;
 };
 
-export const getSelections = (host: EditorHost) => {
+export const getSelections = (
+  host: EditorHost,
+  mode: 'flat' | 'highest' = 'flat'
+) => {
   const [_, data] = host.command
     .chain()
     .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
-    .getSelectedBlocks({ types: ['text', 'block'] })
+    .getSelectedBlocks({ types: ['text', 'block'], mode })
     .run();
 
   return data;
