@@ -15,7 +15,7 @@ export function textToTextStream({
   workspaceId: string;
   prompt: string;
   attachments?: string[];
-  params?: string;
+  params?: Record<string, string>;
 }): BlockSuitePresets.TextStream {
   const client = new CopilotClient(backendUrl);
   return {
