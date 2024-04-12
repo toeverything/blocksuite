@@ -86,30 +86,31 @@ export function getSelectedModels(editorHost: EditorHost) {
   return selectedModels;
 }
 
+function traverse(model: DraftModel, drafts: DraftModel[]) {
+  const isDatabase = model.flavour === 'affine:database';
+  const children = isDatabase
+    ? model.children
+    : model.children.filter(child => {
+        const idx = drafts.findIndex(m => m.id === child.id);
+        return idx >= 0;
+      });
+
+  children.forEach(child => {
+    const idx = drafts.findIndex(m => m.id === child.id);
+    if (idx >= 0) {
+      drafts.splice(idx, 1);
+    }
+    traverse(child, drafts);
+  });
+  model.children = children;
+}
+
 export async function getSelectedTextContent(editorHost: EditorHost) {
   const selectedModels = getSelectedModels(editorHost);
   assertExists(selectedModels);
 
   const drafts = selectedModels.map(toDraftModel);
-  const traverse = (model: DraftModel) => {
-    const isDatabase = model.flavour === 'affine:database';
-    const children = isDatabase
-      ? model.children
-      : model.children.filter(child => {
-          const idx = drafts.findIndex(m => m.id === child.id);
-          return idx >= 0;
-        });
-
-    children.forEach(child => {
-      const idx = drafts.findIndex(m => m.id === child.id);
-      if (idx >= 0) {
-        drafts.splice(idx, 1);
-      }
-      traverse(child);
-    });
-    model.children = children;
-  };
-  drafts.forEach(traverse);
+  drafts.forEach(draft => traverse(draft, drafts));
   const slice = Slice.fromModels(editorHost.std.doc, drafts);
   return getMarkdownFromSlice(editorHost, slice);
 }
