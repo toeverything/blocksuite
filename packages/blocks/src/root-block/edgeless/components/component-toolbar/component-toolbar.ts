@@ -199,6 +199,15 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   private _groupSelected(): CategorizedElements {
+    if (
+      this.selection.elements.length === 1 &&
+      this.selection.elements[0] instanceof ConnectorLabelElementModel
+    ) {
+      return {
+        connectorLabel: [this.selection.elements[0]],
+      };
+    }
+
     const result = groupBy(this.selection.elements, model => {
       if (isNoteBlock(model)) {
         return 'note';
@@ -211,7 +220,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
         return 'embedCard';
       } else if (model instanceof ConnectorLabelElementModel) {
-        return 'connectorLabel';
+        return 'connector';
       }
 
       return (model as ElementModel).type;
