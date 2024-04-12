@@ -19,6 +19,7 @@ import {
   updateMindmapNodeRect,
 } from '@blocksuite/blocks';
 
+import { jpegBase64ToFile } from '../../fragments/copilot-panel/edgeless/edit-image.js';
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getAIPanel } from '../ai-panel.js';
 import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
@@ -173,6 +174,31 @@ export const responses: {
         { html, xywh: `[${left},${top + height + 20},400,200]` },
         surface.id
       );
+    });
+  },
+  generateAImage: host => {
+    const aiPanel = getAIPanel(host);
+    const image = aiPanel.answer;
+    if (!image) return;
+
+    const copilotPanel = getCopilotPanel(host);
+    // const [surface] = host.doc.getBlockByFlavour(
+    //   'affine:surface'
+    // ) as SurfaceBlockModel[];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // const selectionRect = copilotPanel.selectionModelRect;
+
+    copilotPanel.hide();
+    aiPanel.hide();
+
+    // const edgelessRoot = getEdgelessRootFromEditor(host);
+    // const { left, top, height } = selectionRect;
+
+    host.doc.transact(() => {
+      const imgFile = jpegBase64ToFile(image, 'img');
+      const edgelessRoot = getEdgelessRootFromEditor(host);
+      edgelessRoot.addImages([imgFile]).catch(console.error);
     });
   },
 };

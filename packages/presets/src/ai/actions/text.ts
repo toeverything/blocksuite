@@ -138,6 +138,9 @@ declare global {
       makeItReal<T extends AIImageActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
+      generateAImage<T extends AIImageActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
     }
   }
 }
