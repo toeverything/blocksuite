@@ -967,13 +967,6 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           children.forEach(child => {
             context.openNode(child, 'children').closeNode();
           });
-          console.log({
-            columns,
-            rows: context.getGlobalContextStack<BlocksuiteTableRow>(
-              'hast:table:rows'
-            ),
-            children,
-          });
           context.closeNode();
           break;
         }
