@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { Boxed } from '../reactive/boxed.js';
 import { Text } from '../reactive/text.js';
-import type { YBlock } from '../store/block/block.js';
+import type { YBlock } from '../store/doc/block.js';
 import type { Doc } from '../store/index.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
 

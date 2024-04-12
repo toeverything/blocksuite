@@ -55,7 +55,7 @@ export function handleBlockEndEnter(
 ) {
   const doc = model.doc;
   const parent = doc.getParent(model);
-  const nextSibling = doc.getNextSibling(model);
+  const nextSibling = doc.getNext(model);
   if (!parent) {
     return;
   }
@@ -89,7 +89,7 @@ export function handleBlockEndEnter(
         doc.deleteBlock(model);
       }
 
-      const nextModel = doc.getNextSibling(newParent);
+      const nextModel = doc.getNext(newParent);
       if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
         asyncFocusRichText(editorHost, nextModel.id, {
           index: nextModel.text.yText.length,
@@ -140,7 +140,7 @@ export function handleBlockEndEnter(
       model.type === 'numbered'
     ) {
       doc.updateBlock(next, {});
-      next = doc.getNextSibling(next);
+      next = doc.getNext(next);
     }
   }
 
@@ -209,12 +209,12 @@ export function handleIndent(
   offset = 0
 ) {
   const doc = model.doc;
-  const previousSibling = doc.getPreviousSibling(model);
+  const previousSibling = doc.getPrev(model);
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
     return;
   }
-  const nextSiblings = doc.getNextSiblings(model);
+  const nextSiblings = doc.getNexts(model);
 
   doc.captureSync();
   doc.moveBlocks([model], previousSibling);
@@ -259,7 +259,7 @@ export function handleMultiBlockIndent(
   let firstIndentIndex = -1;
   let previousSibling: BlockModel | null = null;
   for (let i = 0; i < models.length; i++) {
-    previousSibling = doc.getPreviousSibling(models[i]);
+    previousSibling = doc.getPrev(models[i]);
     if (previousSibling && supportsChildren(previousSibling)) {
       firstIndentIndex = i;
       break;
@@ -316,8 +316,8 @@ export function handleUnindent(
   if (!grandParent) return;
   doc.captureSync();
 
-  const nextSiblings = doc.getNextSiblings(model);
-  const parentNextSiblings = doc.getNextSiblings(parent);
+  const nextSiblings = doc.getNexts(model);
+  const parentNextSiblings = doc.getNexts(parent);
   doc.moveBlocks(nextSiblings, model);
   doc.moveBlocks([model], grandParent, parent, false);
 
@@ -433,7 +433,7 @@ function handleListBlockBackspace(
   const parent = doc.getParent(model);
   if (!parent) return false;
 
-  const nextSiblings = doc.getNextSiblings(model);
+  const nextSiblings = doc.getNexts(model);
   const index = parent.children.indexOf(model);
   const blockProps = {
     type: 'text' as const,
@@ -489,7 +489,7 @@ function handleListBlockForwardDelete(
       return true;
     }
   } else {
-    const nextSibling = doc.getNextSibling(model);
+    const nextSibling = doc.getNext(model);
     if (nextSibling) {
       model.text?.join(nextSibling.text as Text);
       if (nextSibling.children) {
@@ -600,7 +600,7 @@ function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
   }
 
   // Preserve at least one block to be able to focus on container click
-  if (doc.getNextSibling(model) || model.children.length > 0) {
+  if (doc.getNext(model) || model.children.length > 0) {
     const parent = doc.getParent(model);
     assertExists(parent);
     doc.deleteBlock(model, {
@@ -870,7 +870,7 @@ function handleParagraphBlockForwardDelete(
 
   const parent = doc.getParent(model);
   if (!parent) return false;
-  const nextSibling = doc.getNextSibling(model);
+  const nextSibling = doc.getNext(model);
   const firstChild = model.firstChild();
   if (matchFlavours(parent, ['affine:database'])) {
     // TODO

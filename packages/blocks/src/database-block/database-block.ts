@@ -361,7 +361,7 @@ export class DatabaseBlockComponent extends BlockElement<
   };
 
   get innerModalWidget() {
-    return this.rootElement.widgetElements[
+    return this.rootElement!.widgetElements[
       AFFINE_INNER_MODAL_WIDGET
     ] as AffineInnerModalWidget;
   }

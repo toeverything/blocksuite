@@ -245,7 +245,9 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       ? [root.childrenUpdated, slots.blockUpdated]
       : [slots.blockUpdated];
 
-    slots.rootAdded.on(root => {
+    slots.rootAdded.on(rootId => {
+      const root = this.doc.getBlockById(rootId);
+      if (!root) return;
       this._clearDocDisposables();
       this._docDisposables = new DisposableGroup();
       this._docDisposables.add(

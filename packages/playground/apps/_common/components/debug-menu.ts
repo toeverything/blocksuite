@@ -402,9 +402,10 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await ZipTransformer.exportDocs(this.collection, [
-      ...this.collection.docs.values(),
-    ]);
+    const file = await ZipTransformer.exportDocs(
+      this.collection,
+      [...this.collection.docs.values()].map(collection => collection.getDoc())
+    );
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -483,7 +484,7 @@ export class DebugMenu extends ShadowlessElement {
 
   private _toggleReadonly() {
     const doc = this.doc;
-    doc.awarenessStore.setReadonly(doc, !doc.readonly);
+    doc.awarenessStore.setReadonly(doc.blockCollection, !doc.readonly);
   }
 
   private _shareSelection() {

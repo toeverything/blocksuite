@@ -2,9 +2,9 @@ import type { Command } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-function getNextSibling(std: BlockSuite.Std, blockElement: BlockElement) {
+function getNext(std: BlockSuite.Std, blockElement: BlockElement) {
   const view = std.view;
-  const next = std.doc.getNextSibling(blockElement.model);
+  const next = std.doc.getNext(blockElement.model);
   if (!next) return null;
   return view.getBlock(next.id);
 }
@@ -20,7 +20,7 @@ function getNextBlock(std: BlockSuite.Std, path: string[]) {
   }
 
   if (!next) {
-    next = getNextSibling(std, focusBlock);
+    next = getNext(std, focusBlock);
   }
 
   if (next && !next.contains(focusBlock)) {

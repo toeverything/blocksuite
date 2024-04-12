@@ -145,7 +145,7 @@ export class LayerManager {
           }
         }
         if (payload.type === 'delete') {
-          const block = payload.model;
+          const block = doc.getBlockById(payload.id);
 
           if (block instanceof EdgelessBlockModel) {
             this.delete(block as EdgelessBlockModel);

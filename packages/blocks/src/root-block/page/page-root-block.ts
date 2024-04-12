@@ -264,7 +264,7 @@ export class PageRootBlockComponent extends BlockElement<
           path = path.slice(0, -1);
         }
         if (!model) return;
-        const prevNote = this.doc.getPreviousSibling(model);
+        const prevNote = this.doc.getPrev(model);
         if (!prevNote || prevNote.flavour !== 'affine:note') {
           const isFirstText = sel.is('text') && sel.start.index === 0;
           const isBlock = sel.is('block');

@@ -86,7 +86,7 @@ export const updateBlockType: Command<
       return next({ updatedBlocks: [] });
     }
     const index = parent.children.indexOf(model);
-    const nextSibling = doc.getNextSibling(model);
+    const nextSibling = doc.getNext(model);
     let nextSiblingId = nextSibling?.id as string;
     const id = doc.addBlock('affine:divider', {}, parent, index + 1);
     if (!nextSibling) {
