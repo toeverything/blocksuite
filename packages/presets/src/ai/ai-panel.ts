@@ -78,11 +78,8 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
         firstIndex
       );
 
-      host.updateComplete
-        .then(() => {
-          setBlockSelection(firstBlockParent, models);
-        })
-        .catch(console.error);
+      await host.updateComplete;
+      setBlockSelection(firstBlockParent, models);
     }
 
     panel.hide();
@@ -108,11 +105,8 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       lastIndex + 1
     );
 
-    host.updateComplete
-      .then(() => {
-        setBlockSelection(lastBlockParent, models);
-      })
-      .catch(console.error);
+    await host.updateComplete;
+    setBlockSelection(lastBlockParent, models);
 
     panel.hide();
   };
