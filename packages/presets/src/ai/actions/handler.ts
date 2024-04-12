@@ -59,6 +59,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
       async *[Symbol.asyncIterator]() {
         const panel = getAIPanel(host);
         const markdown = await getSelectedTextContent(panel.host);
+        console.log('markdown: ', markdown);
 
         const options = {
           ...variants,

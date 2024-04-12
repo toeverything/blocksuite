@@ -7,7 +7,7 @@ import type {
 } from '@blocksuite/blocks';
 import { BlocksUtils, EdgelessRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { Slice } from '@blocksuite/store';
+import { type DraftModel, Slice, toDraftModel } from '@blocksuite/store';
 
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
@@ -75,11 +75,42 @@ export async function selectedToPng(editor: EditorHost) {
   return (await selectedToCanvas(editor))?.toDataURL('image/png');
 }
 
+export function getSelectedModels(editorHost: EditorHost) {
+  const chain = editorHost.std.command.chain();
+  const [_, ctx] = chain
+    .getSelectedModels({
+      types: ['block', 'text'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  return selectedModels;
+}
+
 export async function getSelectedTextContent(editorHost: EditorHost) {
-  const slice = Slice.fromModels(
-    editorHost.std.doc,
-    getRootService(editorHost).selectedModels
-  );
+  const selectedModels = getSelectedModels(editorHost);
+  assertExists(selectedModels);
+
+  const drafts = selectedModels.map(toDraftModel);
+  const traverse = (model: DraftModel) => {
+    const isDatabase = model.flavour === 'affine:database';
+    const children = isDatabase
+      ? model.children
+      : model.children.filter(child => {
+          const idx = drafts.findIndex(m => m.id === child.id);
+          return idx >= 0;
+        });
+
+    children.forEach(child => {
+      const idx = drafts.findIndex(m => m.id === child.id);
+      if (idx >= 0) {
+        drafts.splice(idx, 1);
+      }
+      traverse(child);
+    });
+    model.children = children;
+  };
+  drafts.forEach(traverse);
+  const slice = Slice.fromModels(editorHost.std.doc, drafts);
   return getMarkdownFromSlice(editorHost, slice);
 }
 

@@ -1,4 +1,9 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type { TextSelection } from '@blocksuite/block-std';
+import {
+  type EditorHost,
+  PathFinder,
+  type TextRangePoint,
+} from '@blocksuite/block-std';
 import {
   defaultImageProxyMiddleware,
   MarkdownAdapter,
@@ -6,12 +11,66 @@ import {
   pasteMiddleware,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type {
+  BlockModel,
+  BlockSnapshot,
+  Doc,
+  DraftModel,
+  SliceSnapshot,
+} from '@blocksuite/store';
 import { DocCollection, Job, type Slice } from '@blocksuite/store';
+
+const updateSnapshotText = (
+  point: TextRangePoint,
+  snapshot: BlockSnapshot,
+  model: DraftModel
+) => {
+  const { index, length } = point;
+  if (!snapshot.props.text || length === 0) {
+    return;
+  }
+  (snapshot.props.text as Record<string, unknown>).delta =
+    model.text?.sliceToDelta(index, length + index);
+};
+
+function processSnapshot(
+  snapshot: BlockSnapshot,
+  text: TextSelection,
+  host: EditorHost
+) {
+  const model = host.doc.getBlockById(snapshot.id);
+  assertExists(model);
+
+  const modelId = model.id;
+  if (PathFinder.id(text.from.path) === modelId) {
+    updateSnapshotText(text.from, snapshot, model);
+  }
+  if (text.to && PathFinder.id(text.to.path) === modelId) {
+    updateSnapshotText(text.to, snapshot, model);
+  }
+
+  // If the snapshot has children, handle them recursively
+  snapshot.children.forEach(childSnapshot =>
+    processSnapshot(childSnapshot, text, host)
+  );
+}
+
+/**
+ * Processes the text in the given snapshot if there is a text selection.
+ * Only the selected portion of the snapshot will be processed.
+ */
+function processTextInSnapshot(snapshot: SliceSnapshot, host: EditorHost) {
+  const { content } = snapshot;
+  const text = host.selection.find('text');
+  if (!content.length || !text) return;
+
+  content.forEach(snapshot => processSnapshot(snapshot, text, host));
+}
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
   const job = new Job({ collection: host.std.doc.collection });
   const snapshot = await job.sliceToSnapshot(slice);
+  processTextInSnapshot(snapshot, host);
   const markdownAdapter = new MarkdownAdapter();
   const markdown = await markdownAdapter.fromSliceSnapshot({
     snapshot,

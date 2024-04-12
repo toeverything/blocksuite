@@ -73,10 +73,15 @@ export class Clipboard {
   private async _getClipboardItem(slice: Slice, type: string) {
     const job = this._getJob();
     const adapterItem = this._adapterMap.get(type);
+    console.log('type: ', type, 'adapterItem: ', adapterItem);
     assertExists(adapterItem);
     const { adapter } = adapterItem;
     const snapshot = await job.sliceToSnapshot(slice);
+    console.log('snapshot: ', snapshot);
     adapter.applyConfigs(job.adapterConfigs);
+    if (type === 'BLOCKSUITE/SNAPSHOT') {
+      console.log('adapter: ', adapter.fromSliceSnapshot);
+    }
     return (
       await adapter.fromSliceSnapshot({ snapshot, assets: job.assetsManager })
     ).file;
