@@ -112,9 +112,9 @@ export class CopilotClient {
 
   async createMessage(options: {
     sessionId: string;
-    content: string;
-    params?: string;
+    content?: string;
     attachments?: string[];
+    params?: Record<string, string>;
   }) {
     const res = await this.graphQLClient.mutate({
       mutation: CREATE_COPILOT_MESSAGE,
