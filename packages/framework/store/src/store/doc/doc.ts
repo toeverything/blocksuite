@@ -7,7 +7,7 @@ import { Block } from './block.js';
 import type { BlockCollection, BlockProps } from './block-collection.js';
 import type { DocCRUD } from './crud.js';
 
-export type BlockSelector = (block: Block) => boolean;
+export type BlockSelector = (block: Block, doc: Doc) => boolean;
 
 type DocOptions = {
   schema: Schema;
@@ -314,7 +314,7 @@ export class Doc {
     };
     const block = new Block(this._schema, yBlock, this, options);
 
-    const shouldAdd = this._selector(block);
+    const shouldAdd = this._selector(block, this);
 
     if (!shouldAdd) return;
 
