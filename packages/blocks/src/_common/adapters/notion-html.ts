@@ -248,6 +248,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           if (!assets) {
             break;
           }
+          if (context.getGlobalContext('hast:disableimg')) {
+            break;
+          }
           const image = o.node;
           const imageURL =
             typeof image?.properties.src === 'string'
@@ -708,6 +711,8 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               id: columnId,
             }
           );
+          // disable icon img in th
+          context.setGlobalContext('hast:disableimg', true);
           break;
         }
         case 'tr': {
@@ -717,8 +722,55 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'hast:table:column'
               );
             const row = Object.create(null);
+            let plainTable = false;
             hastGetElementChildren(o.node).forEach((child, index) => {
-              if (hastQuerySelector(child, '.cell-title')) {
+              if (plainTable || columns[index] === undefined) {
+                plainTable = true;
+                if (columns[index] === undefined) {
+                  columns.push({
+                    type: 'rich-text',
+                    name: '',
+                    data: Object.create(null),
+                    id: nanoid(),
+                  });
+                  context.pushGlobalContextStack<BlockSnapshot>(
+                    'hast:table:children',
+                    {
+                      type: 'block',
+                      id: nanoid(),
+                      flavour: 'affine:paragraph',
+                      props: {
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: this._hastToDelta(child),
+                        },
+                        type: 'text',
+                      },
+                      children: [],
+                    }
+                  );
+                }
+                context.pushGlobalContextStack<BlockSnapshot>(
+                  'hast:table:children',
+                  {
+                    type: 'block',
+                    id: nanoid(),
+                    flavour: 'affine:paragraph',
+                    props: {
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: this._hastToDelta(child),
+                      },
+                      type: 'text',
+                    },
+                    children: [],
+                  }
+                );
+                row[columns[index].id] = {
+                  columnId: columns[index].id,
+                  value: hastGetTextContent(child),
+                };
+              } else if (hastQuerySelector(child, '.cell-title')) {
                 context.pushGlobalContextStack<BlockSnapshot>(
                   'hast:table:children',
                   {
@@ -915,7 +967,18 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           children.forEach(child => {
             context.openNode(child, 'children').closeNode();
           });
+          console.log({
+            columns,
+            rows: context.getGlobalContextStack<BlocksuiteTableRow>(
+              'hast:table:rows'
+            ),
+            children,
+          });
           context.closeNode();
+          break;
+        }
+        case 'th': {
+          context.setGlobalContext('hast:disableimg', false);
           break;
         }
       }
