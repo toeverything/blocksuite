@@ -33,7 +33,7 @@ type DocOptions = {
   idGenerator?: IdGenerator;
 };
 
-const defaultSelector = () => true;
+export const defaultBlockSelector = () => true;
 
 export class BlockCollection extends Space<FlatBlockMap> {
   private readonly _collection: DocCollection;
@@ -102,7 +102,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
     this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
   }
 
-  getDoc(selector: BlockSelector = defaultSelector) {
+  getDoc(selector: BlockSelector = defaultBlockSelector) {
     if (this._docMap.has(selector)) {
       return this._docMap.get(selector)!;
     }

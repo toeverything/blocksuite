@@ -4,8 +4,11 @@ import * as Y from 'yjs';
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
 import { blob, DocCollectionAddonType, indexer, test } from './addon/index.js';
-import { BlockCollection } from './doc/block-collection.js';
-import type { Doc } from './doc/index.js';
+import {
+  BlockCollection,
+  defaultBlockSelector,
+} from './doc/block-collection.js';
+import type { BlockSelector, Doc } from './doc/index.js';
 import { DocCollectionMeta, type DocMeta } from './meta.js';
 import { Store, type StoreOptions } from './store.js';
 
@@ -94,9 +97,12 @@ export class DocCollection extends DocCollectionAddonType {
     return this.docs.has(docId);
   }
 
-  getDoc(docId: string): Doc | null {
+  getDoc(
+    docId: string,
+    selector: BlockSelector = defaultBlockSelector
+  ): Doc | null {
     const collection = this.getBlockCollection(docId);
-    return collection?.getDoc() ?? null;
+    return collection?.getDoc(selector) ?? null;
   }
 
   getBlockCollection(docId: string): BlockCollection | null {
@@ -133,20 +139,10 @@ export class DocCollection extends DocCollectionAddonType {
    * If the `init` parameter is passed, a `surface`, `note`, and `paragraph` block
    * will be created in the doc simultaneously.
    */
-  createDoc(options: { id?: string } | string = {}) {
-    // Migration guide
-    if (typeof options === 'string') {
-      options = { id: options };
-      console.warn(
-        '`createDoc(docId)` is deprecated, use `createDoc()` directly or `createDoc({ id: docId })` instead'
-      );
-      console.warn(
-        'More details see https://github.com/toeverything/blocksuite/pull/2272'
-      );
-    }
+  createDoc(options: { id?: string; selector?: BlockSelector } = {}) {
     // End of migration guide. Remove this in the next major version
 
-    const { id: docId = this.idGenerator() } = options;
+    const { id: docId = this.idGenerator(), selector } = options;
     if (this._hasDoc(docId)) {
       throw new Error('dac already exists');
     }
@@ -157,7 +153,7 @@ export class DocCollection extends DocCollectionAddonType {
       createDate: Date.now(),
       tags: [],
     });
-    return this.getDoc(docId) as Doc;
+    return this.getDoc(docId, selector) as Doc;
   }
 
   /** Update doc meta state. Note that this intentionally does not mutate doc state. */
