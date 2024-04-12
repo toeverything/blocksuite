@@ -33,9 +33,9 @@ const handlePoint = (
 
 const sliceText = (slots: JobSlots, std: EditorHost['std']) => {
   slots.afterExport.on(payload => {
-    // console.log('payload: ', payload);
     if (payload.type === 'block') {
       const snapshot = payload.snapshot;
+
       const model = payload.model;
       const text = std.selection.find('text');
       if (text && PathFinder.id(text.from.path) === model.id) {

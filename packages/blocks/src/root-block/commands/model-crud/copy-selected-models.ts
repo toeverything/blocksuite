@@ -8,7 +8,6 @@ export const copySelectedModelsCommand: Command<'selectedModels' | 'onCopy'> = (
   next
 ) => {
   const models = ctx.selectedModels;
-  console.log('selected models: ', models);
   assertExists(
     models,
     '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
@@ -36,7 +35,6 @@ export const copySelectedModelsCommand: Command<'selectedModels' | 'onCopy'> = (
   };
   drafts.forEach(traverse);
 
-  console.log('draft models: ', drafts);
   const slice = Slice.fromModels(ctx.std.doc, drafts);
 
   ctx.std.clipboard
