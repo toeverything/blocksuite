@@ -99,6 +99,7 @@ export type {
   TemplateManager,
 } from './root-block/edgeless/components/toolbar/template/template-type.js';
 export { CopilotSelectionController } from './root-block/edgeless/controllers/tools/copilot-tool.js';
+export type { EdgelessModel } from './root-block/edgeless/type.js';
 export * from './root-block/index.js';
 export * from './schemas.js';
 export {
@@ -122,6 +123,7 @@ export {
   StrokeStyle,
   SurfaceBlockModel,
   TextElementModel,
+  updateMindmapNodeRect,
 } from './surface-block/index.js';
 export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';

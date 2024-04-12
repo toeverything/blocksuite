@@ -156,3 +156,43 @@ export const getSelections = (host: EditorHost) => {
 
   return data;
 };
+
+function readBlobAsURL(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (typeof e.target?.result === 'string') {
+        resolve(e.target.result);
+      } else {
+        reject();
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+export const getSelectedImagesAsDataUrls = (host: EditorHost) => {
+  const [_, data] = host.command
+    .chain()
+    .tryAll(chain => [
+      chain.getTextSelection(),
+      chain.getBlockSelections(),
+      chain.getImageSelections(),
+    ])
+    .getSelectedBlocks({
+      types: ['image'],
+    })
+    .run();
+  return Promise.all(
+    data.currentBlockSelections
+      ?.map(s => {
+        const sourceId = host.doc.getBlockById<ImageBlockModel>(
+          s.blockId
+        )?.sourceId;
+        return sourceId ? host.doc.blob.get(sourceId) : null;
+      })
+      .filter((b): b is Promise<Blob> | Blob => !!b)
+      .map(async b => readBlobAsURL(await b)) ?? []
+  );
+};

@@ -113,7 +113,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
           placeholder="Ask AI to edit or generate..."
           rows="1"
           @keydown=${(e: KeyboardEvent) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
               e.preventDefault();
               this.onFinish?.(this._textarea.value);
               this.remove();

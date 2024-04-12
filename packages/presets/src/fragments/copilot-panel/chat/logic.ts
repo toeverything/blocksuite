@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import {
   BlocksUtils,
+  EmbedHtmlBlockSpec,
   MarkdownAdapter,
   type ShapeElementModel,
   SurfaceBlockComponent,
@@ -28,6 +29,7 @@ import {
   runTranslateAction,
 } from '../doc/actions.js';
 import { getChatService } from '../doc/api.js';
+import { genHtml } from '../edgeless/gen-html.js';
 import type { AILogic } from '../logic.js';
 import { findLeaf, findTree, getConnectorPath } from '../utils/connector.js';
 import {
@@ -35,11 +37,13 @@ import {
   markdownToSnapshot,
 } from '../utils/markdown-utils.js';
 import {
+  getEdgelessRootFromEditor,
   getEdgelessService,
   getRootService,
   getSelectedTextContent,
   getSurfaceElementFromEditor,
   selectedToCanvas,
+  selectedToPng,
 } from '../utils/selection-utils.js';
 import { basicTheme, type PPTDoc, type PPTSection } from './template.js';
 
@@ -550,6 +554,29 @@ export class AIChatLogic {
             }
           })();
         })(text);
+      },
+    },
+    {
+      type: 'action',
+      name: 'Make it real',
+      hide: () => {
+        const service = getEdgelessService(this.host);
+        const elements = service.selection.elements;
+        return elements.length === 0;
+      },
+      action: async () => {
+        const img = await selectedToPng(this.host);
+        if (!img) return;
+
+        const html = await genHtml(img);
+        if (!html) return;
+
+        const edgelessRoot = getEdgelessRootFromEditor(this.host);
+        edgelessRoot.doc.addBlock(
+          EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
+          { html, design: img, xywh: '[0, 400, 400, 200]' },
+          edgelessRoot.surface.model.id
+        );
       },
     },
   ];

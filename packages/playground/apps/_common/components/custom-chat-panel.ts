@@ -29,6 +29,10 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
     this._show = !this._show;
   }
 
+  public show() {
+    this._show = true;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
     const { editor } = this;

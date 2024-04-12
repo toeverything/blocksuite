@@ -216,10 +216,19 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return result as CategorizedElements;
   }
 
-  private _MindmapButton(mindmapElements?: MindmapElementModel[]) {
-    return mindmapElements?.length
+  private _MindmapButton(shapeElements?: ShapeElementModel[]) {
+    return shapeElements?.length &&
+      shapeElements.every(shapeElement => {
+        const mindmap = this.edgeless.service.surface.getGroup(
+          shapeElement.id
+        ) as MindmapElementModel;
+
+        return (
+          mindmap?.type === 'mindmap' && mindmap.tree.element === shapeElement
+        );
+      })
       ? html`<edgeless-change-mindmap-button
-          .elements=${mindmapElements}
+          .elements=${shapeElements.map(el => el.group)}
           .edgeless=${this.edgeless}
         >
         </edgeless-change-mindmap-button>`
@@ -475,7 +484,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       embedCard,
       attachment,
       image,
-      mindmap,
     } = groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -487,7 +495,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     const buttons = selectedAtLeastTwoTypes
       ? []
       : [
-          this._MindmapButton(mindmap),
+          this._MindmapButton(shape),
           this._ShapeButton(shape),
           this._BrushButton(brush),
           this._ConnectorButton(connector),

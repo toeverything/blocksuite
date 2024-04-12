@@ -1,3 +1,5 @@
+import { Slot } from '@blocksuite/store';
+
 export interface AIUserInfo {
   id: string;
   email: string;
@@ -10,12 +12,20 @@ export interface AIUserInfo {
  *
  * To use it, downstream (affine) has to provide AI actions implementation,
  * user info etc
+ *
+ * todo: breakdown into different parts?
  */
 export class AIProvider {
+  private static readonly instance = new AIProvider();
   private readonly actions: Partial<BlockSuitePresets.AIActions> = {};
   private userInfoFn: () => AIUserInfo | Promise<AIUserInfo> | null = () =>
     null;
-  private static readonly instance = new AIProvider();
+  private readonly slots = {
+    // use case: when user selects "continue in chat" in an ask ai result panel
+    // do we need to pass the context to the chat panel?
+    requestContinueInChat: new Slot<boolean>(),
+    // add more if needed
+  };
 
   static provideAction<T extends keyof BlockSuitePresets.AIActions>(
     id: T,
@@ -42,5 +52,7 @@ export class AIProvider {
     return AIProvider.instance.userInfoFn();
   }
 
-  // todo: add histories and other methods
+  static get slots() {
+    return AIProvider.instance.slots;
+  }
 }

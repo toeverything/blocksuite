@@ -7,7 +7,11 @@ export function setupSpaceEntry(panel: AffineAIPanelWidget) {
   panel.handleEvent('keyDown', ctx => {
     const host = panel.host;
     const keyboardState = ctx.get('keyboardState');
-    if (AIProvider.actions.chat && keyboardState.raw.key === ' ') {
+    if (
+      AIProvider.actions.chat &&
+      keyboardState.raw.key === ' ' &&
+      !keyboardState.raw.isComposing
+    ) {
       const selection = host.selection.find('text');
       if (selection && selection.isCollapsed() && selection.from.index === 0) {
         const block = host.view.viewFromPath('block', selection.path);

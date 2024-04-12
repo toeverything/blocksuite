@@ -1,16 +1,11 @@
-import type {
-  DatabaseBlockModel,
-  ListType,
-  ParagraphType,
-} from '@blocksuite/blocks';
 import {
-  checkboxPureColumnConfig,
-  datePureColumnConfig,
-  linkPureColumnConfig,
-  multiSelectColumnConfig,
-  numberPureColumnConfig,
-  progressPureColumnConfig,
-  richTextPureColumnConfig,
+  columnPresets,
+  type DatabaseBlockModel,
+  databaseViewAddView,
+  type ListType,
+  type ParagraphType,
+  richTextColumnConfig,
+  viewPresets,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DocCollection, Text } from '@blocksuite/store';
@@ -46,36 +41,28 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
     new Promise(resolve => requestAnimationFrame(resolve))
       .then(() => {
         const service = window.host.std.spec.getService('affine:database');
-        service.initDatabaseBlock(doc, model, databaseId, 'table', true);
-        const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
-        database.addColumn(
-          'end',
-          numberPureColumnConfig.create(numberPureColumnConfig.name)
+        service.initDatabaseBlock(
+          doc,
+          model,
+          databaseId,
+          viewPresets.tableViewConfig,
+          true
         );
+        const database = doc.getBlockById(databaseId) as DatabaseBlockModel;
         const richTextId = database.addColumn(
           'end',
-          richTextPureColumnConfig.create(richTextPureColumnConfig.name)
+          richTextColumnConfig.model.create(richTextColumnConfig.model.name)
         );
-        database.addColumn(
-          'end',
-          datePureColumnConfig.create(datePureColumnConfig.name)
-        );
-        database.addColumn(
-          'end',
-          linkPureColumnConfig.create(linkPureColumnConfig.name)
-        );
-        database.addColumn(
-          'end',
-          progressPureColumnConfig.create(progressPureColumnConfig.name)
-        );
-        database.addColumn(
-          'end',
-          checkboxPureColumnConfig.create(checkboxPureColumnConfig.name)
-        );
-        database.addColumn(
-          'end',
-          multiSelectColumnConfig.create(multiSelectColumnConfig.name)
-        );
+        Object.values([
+          columnPresets.multiSelectColumnConfig,
+          columnPresets.dateColumnConfig,
+          columnPresets.numberColumnConfig,
+          columnPresets.linkColumnConfig,
+          columnPresets.checkboxColumnConfig,
+          columnPresets.progressColumnConfig,
+        ]).forEach(column => {
+          database.addColumn('end', column.model.create(column.model.name));
+        });
         database.updateView(database.views[0].id, () => {
           return {
             groupBy: {
@@ -130,7 +117,7 @@ export const database: InitFn = (collection: DocCollection, id: string) => {
         doc.addBlock('affine:paragraph', {}, noteId);
         doc.addBlock('affine:paragraph', {}, noteId);
         doc.addBlock('affine:paragraph', {}, noteId);
-        database.addView('kanban');
+        databaseViewAddView(database, viewPresets.kanbanViewConfig);
 
         doc.resetHistory();
       })

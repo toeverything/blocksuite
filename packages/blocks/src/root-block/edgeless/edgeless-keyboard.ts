@@ -98,7 +98,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             mindmapId
           ) as MindmapElementModel;
           const nodeId = mindmap.addNode(null, 'shape', undefined, undefined, {
-            text: 'Mindmap',
+            text: 'Mind Map',
             xywh: `[${x},${y},150,30]`,
           });
 

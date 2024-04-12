@@ -2,10 +2,9 @@ import type { BlockElement, EditorHost } from '@blocksuite/block-std';
 import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
-  DiscardIcon,
-} from '@blocksuite/blocks';
-import {
   type AffineAIPanelWidgetConfig,
+  ChatWithAIIcon,
+  DiscardIcon,
   InsertBelowIcon,
   ReplaceIcon,
   ResetIcon,
@@ -14,6 +13,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import { createTextRenderer } from './messages/text.js';
+import { AIProvider } from './provider.js';
 import {
   insertFromMarkdown,
   markdownToSnapshot,
@@ -131,13 +131,6 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   };
   return [
     {
-      name: 'Regenerate',
-      icon: ResetIcon,
-      handler: () => {
-        panel.generate();
-      },
-    },
-    {
       name: 'Insert below',
       icon: InsertBelowIcon,
       handler: () => {
@@ -168,7 +161,27 @@ export function buildAIPanelConfig(
     answerRenderer: createTextRenderer(panel.host),
     finishStateConfig: {
       responses: buildTextResponseConfig(panel),
-      actions: [], // ???
+      actions: [
+        {
+          name: '',
+          items: [
+            {
+              name: 'Continue in chat',
+              icon: ChatWithAIIcon,
+              handler: () => {
+                AIProvider.slots.requestContinueInChat.emit(true);
+              },
+            },
+            {
+              name: 'Regenerate',
+              icon: ResetIcon,
+              handler: () => {
+                panel.generate();
+              },
+            },
+          ],
+        },
+      ], // ???
     },
     errorStateConfig: {
       upgrade: () => {},

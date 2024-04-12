@@ -3,9 +3,11 @@
   "compilerOptions": {
     "rootDir": "./src/",
     "outDir": "./dist/",
-    "noEmit": false
+    "noEmit": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
-  "include": ["./src"],
+  "include": ["./src", "./src/**/*.json"],
   "references": [
     {
       "path": "../framework/global"

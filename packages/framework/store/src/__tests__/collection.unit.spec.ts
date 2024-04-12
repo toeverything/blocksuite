@@ -218,6 +218,9 @@ describe('basic', () => {
         'space:0': {
           blocks: {
             '0': {
+              'prop:count': 0,
+              'prop:items': [],
+              'prop:style': {},
               'prop:title': '',
               'sys:children': [],
               'sys:flavour': 'affine:page',
@@ -247,6 +250,9 @@ describe('addBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -262,6 +268,9 @@ describe('addBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -288,6 +297,9 @@ describe('addBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -467,6 +479,9 @@ describe('deleteBlock', () => {
     doc.addBlock('affine:paragraph', {}, noteId);
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -502,6 +517,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -522,6 +540,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -568,6 +589,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -612,6 +636,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -674,6 +701,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -731,6 +761,9 @@ describe('deleteBlock', () => {
     // before delete
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -758,6 +791,9 @@ describe('deleteBlock', () => {
     // after delete
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -838,6 +874,9 @@ describe('collection.exportJSX works', () => {
 
     expect(collection.exportJSX()).toMatchInlineSnapshot(`
       <affine:page
+        prop:count={0}
+        prop:items={[]}
+        prop:style={{}}
         prop:title="hello"
       />
     `);
@@ -865,7 +904,11 @@ describe('collection.exportJSX works', () => {
     });
 
     expect(collection.exportJSX()).toMatchInlineSnapshot(/* xml */ `
-      <affine:page>
+      <affine:page
+        prop:count={0}
+        prop:items={[]}
+        prop:style={{}}
+      >
         <affine:note>
           <affine:paragraph
             prop:type="text"

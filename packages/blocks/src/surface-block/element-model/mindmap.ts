@@ -6,6 +6,11 @@ import { z } from 'zod';
 import type { EdgelessModel } from '../../_common/types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  type XYWH,
+} from '../utils/xywh.js';
 import { type BaseProps, GroupLikeModel } from './base.js';
 import { TextResizing } from './common.js';
 import { LocalConnectorElementModel } from './connector.js';
@@ -299,7 +304,9 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       throw new Error(`Parent node ${parent} not found`);
     }
 
-    props['text'] = new DocCollection.Y.Text((props['text'] as string) ?? '');
+    props['text'] = new DocCollection.Y.Text(
+      (props['text'] as string) ?? 'New node'
+    );
 
     let id: string;
     this.surface.doc.transact(() => {
@@ -374,6 +381,9 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
           index: 'a0',
         });
       }
+
+      this.buildTree();
+      this.layout();
     });
 
     return id!;
@@ -422,18 +432,13 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
         idx = node.children === children ? idx : node.children.indexOf(child);
 
         const currentPath = [...path, idx];
-        const id = `#${node.id}-${child.id}`;
 
-        if (!this.connectors.has(id)) {
-          this.addConnector(
-            node,
-            child,
-            layoutDir,
-            this.styleGetter.getNodeStyle(child, currentPath).connector
-          );
-        } else {
-          this.pathGenerator.updatePath(this.connectors.get(id)!);
-        }
+        this.addConnector(
+          node,
+          child,
+          layoutDir,
+          this.styleGetter.getNodeStyle(child, currentPath).connector
+        );
 
         walk(child, layoutDir, currentPath);
       });
@@ -498,7 +503,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       ? LayoutType.LEFT
       : root.right.includes(node)
         ? LayoutType.RIGHT
-        : null;
+        : this.layoutType;
   }
 
   private _queued = false;
@@ -539,6 +544,23 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       };
 
       walk(this._tree, [0]);
+    });
+  }
+
+  moveTo(targetXYWH: SerializedXYWH | XYWH) {
+    const { x, y } = this;
+    const targetPos =
+      typeof targetXYWH === 'string' ? deserializeXYWH(targetXYWH) : targetXYWH;
+    const offsetX = targetPos[0] - x;
+    const offsetY = targetPos[1] - y + targetPos[3];
+
+    this.surface.doc.transact(() => {
+      this.childElements.forEach(el => {
+        const deserializedXYWH = deserializeXYWH(el.xywh);
+
+        el.xywh =
+          `[${deserializedXYWH[0] + offsetX},${deserializedXYWH[1] + offsetY},${deserializedXYWH[2]},${deserializedXYWH[3]}]` as SerializedXYWH;
+      });
     });
   }
 }

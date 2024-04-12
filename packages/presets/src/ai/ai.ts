@@ -19,8 +19,8 @@ import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
 
-export function getAISpecs() {
-  const pageModeSpecs = PageEditorBlockSpecs.map(spec => {
+export function patchDocSpecs(specs: BlockSpec[]) {
+  return specs.map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
       const newPageSpec: BlockSpec = {
         ...spec,
@@ -56,8 +56,10 @@ export function getAISpecs() {
     }
     return spec;
   });
+}
 
-  const edgelessModeSpecs = EdgelessEditorBlockSpecs.map(spec => {
+export function patchEdgelessSpecs(specs: BlockSpec[]) {
+  return specs.map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
       const newEdgelessSpec: BlockSpec = {
         ...spec,
@@ -75,6 +77,10 @@ export function getAISpecs() {
         },
         setup(slots) {
           slots.widgetConnected.on(view => {
+            if (view.component instanceof AffineAIPanelWidget) {
+              view.component.config = buildAIPanelConfig(view.component);
+            }
+
             if (view.component instanceof EdgelessCopilotWidget) {
               setupEdgelessCopilot(view.component);
             }
@@ -86,6 +92,12 @@ export function getAISpecs() {
     }
     return spec;
   });
+}
+
+export function getAISpecs() {
+  const pageModeSpecs = patchDocSpecs(PageEditorBlockSpecs);
+
+  const edgelessModeSpecs = patchEdgelessSpecs(EdgelessEditorBlockSpecs);
 
   return {
     pageModeSpecs,

@@ -8,11 +8,12 @@ import { assertExists } from '@blocksuite/global/utils';
 import { getAIPanel } from '../ai-panel.js';
 import { AIProvider } from '../provider.js';
 import {
+  getSelectedImagesAsDataUrls,
   getSelectedTextContent,
   getSelections,
 } from '../utils/selection-utils.js';
 
-function bindEventSource(
+export function bindEventSource(
   stream: BlockSuitePresets.TextStream,
   {
     update,
@@ -44,7 +45,7 @@ function bindEventSource(
   });
 }
 
-function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
+export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
@@ -58,10 +59,13 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     return {
       async *[Symbol.asyncIterator]() {
         const panel = getAIPanel(host);
-        const markdown = await getSelectedTextContent(panel.host);
-
+        const [markdown, attachments] = await Promise.all([
+          getSelectedTextContent(panel.host),
+          getSelectedImagesAsDataUrls(panel.host),
+        ]);
         const options = {
           ...variants,
+          attachments,
           input: markdown,
           stream: true,
           docId: host.doc.id,
@@ -76,7 +80,9 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   };
 }
 
-function actionToGenerateAnswer<T extends keyof BlockSuitePresets.AIActions>(
+export function actionToGenerateAnswer<
+  T extends keyof BlockSuitePresets.AIActions,
+>(
   id: T,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],

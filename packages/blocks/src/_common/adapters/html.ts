@@ -727,7 +727,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                     '.' +
                     (res.headers.get('Content-Type')?.split('/').at(-1) ??
                       'png');
-                const file = new File([await res.blob()], name);
+                const file = new File([await res.blob()], name, {
+                  type: res.headers.get('Content-Type') ?? '',
+                });
                 blobId = await sha(await clonedRes.arrayBuffer());
                 assets?.getAssets().set(blobId, file);
                 await assets?.writeToBlob(blobId);

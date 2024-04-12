@@ -57,6 +57,19 @@ const codeBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
   return matchFlavours(model, ['affine:code']);
 };
 
+const imageBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
+  const [_, ctx] = chain
+    .getSelectedModels({
+      types: ['block'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  if (!selectedModels || selectedModels.length > 1) return false;
+
+  const model = selectedModels[0];
+  return matchFlavours(model, ['affine:image']);
+};
+
 const DocAIGroup: AIItemGroupConfig = {
   name: 'doc with ai',
   items: [
@@ -137,6 +150,48 @@ const EditAIGroup: AIItemGroupConfig = {
   ],
 };
 
+const DraftAIGroup: AIItemGroupConfig = {
+  name: 'draft',
+  items: [
+    {
+      name: 'Write an article about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writeArticle'),
+    },
+    {
+      name: 'Write a Twitter about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writeTwitterPost'),
+    },
+    {
+      name: 'Write a poem about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writePoem'),
+    },
+    {
+      name: 'Write a blog post about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writeBlogPost'),
+    },
+    {
+      name: 'Brainstorm ideas about this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('brainstorm'),
+    },
+    {
+      name: 'Write a outline from this',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('writeOutline'),
+    },
+  ],
+};
+
 const CodeAIGroup: AIItemGroupConfig = {
   name: 'code with ai',
   items: [
@@ -146,11 +201,31 @@ const CodeAIGroup: AIItemGroupConfig = {
       showWhen: codeBlockShowWhen,
       handler: actionToHandler('checkCodeErrors'),
     },
+    {
+      name: 'Explain this code',
+      icon: AIPenIcon,
+      showWhen: codeBlockShowWhen,
+      handler: actionToHandler('explainCode'),
+    },
+  ],
+};
+
+const ImageAIGroup: AIItemGroupConfig = {
+  name: 'image with ai',
+  items: [
+    {
+      name: 'Explain this image',
+      icon: AIPenIcon,
+      showWhen: imageBlockShowWhen,
+      handler: actionToHandler('explainImage'),
+    },
   ],
 };
 
 export const AIItemGroups: AIItemGroupConfig[] = [
   DocAIGroup,
   EditAIGroup,
+  DraftAIGroup,
   CodeAIGroup,
+  ImageAIGroup,
 ];
