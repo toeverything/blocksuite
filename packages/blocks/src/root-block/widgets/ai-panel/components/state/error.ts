@@ -101,8 +101,8 @@ export class AIPanelError extends WithDisposable(LitElement) {
         <div class="answer-tip">
           <div class="top">Answer</div>
           <div class="bottom">
-            An error occurred, If this issue persists please contact us through
-            our help center at help.openai.com
+            An error occurred, If this issue persists please let us know
+            contact@toeverything.info
           </div>
         </div>
         <div @click=${this.config.upgrade} class="upgrade">
