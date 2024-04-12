@@ -33,6 +33,8 @@ type DocOptions = {
   idGenerator?: IdGenerator;
 };
 
+const defaultSelector = () => true;
+
 export class BlockCollection extends Space<FlatBlockMap> {
   private readonly _collection: DocCollection;
   private readonly _idGenerator: IdGenerator;
@@ -41,6 +43,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
   /** Indicate whether the block tree is ready */
   private _ready = false;
   private _shouldTransact = true;
+  private _docMap: Map<BlockSelector, Doc> = new Map();
 
   readonly slots = {
     /** This is always triggered after `doc.load` is called. */
@@ -99,13 +102,18 @@ export class BlockCollection extends Space<FlatBlockMap> {
     this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
   }
 
-  getDoc(selector: BlockSelector = () => true) {
-    return new Doc({
+  getDoc(selector: BlockSelector = defaultSelector) {
+    if (this._docMap.has(selector)) {
+      return this._docMap.get(selector)!;
+    }
+    const doc = new Doc({
       blockCollection: this,
       crud: this._docCRUD,
       schema: this.collection.schema,
       selector,
     });
+    this._docMap.set(selector, doc);
+    return doc;
   }
 
   get readonly() {

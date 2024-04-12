@@ -334,11 +334,8 @@ export class Doc {
   }
 
   private _onBlockRemoved(id: string) {
-    if (!this._blocks.has(id)) {
-      return;
-    }
-
-    const block = this._blocks.get(id)!;
+    const block = this.getBlock(id);
+    if (!block) return;
 
     if (block.model.role === 'root') {
       this._blockCollection.slots.rootDeleted.emit(id);
@@ -352,10 +349,9 @@ export class Doc {
       model: block.model,
     });
 
-    block.model.deleted.emit();
-
     block.model.dispose();
     this._blocks.delete(id);
+    block.model.deleted.emit();
   }
 
   addBlocks(
