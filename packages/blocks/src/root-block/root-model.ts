@@ -9,7 +9,8 @@ export class RootBlockModel extends BlockModel<RootBlockProps> {
   constructor() {
     super();
     this.created.on(() => {
-      this.doc.slots.rootAdded.on(model => {
+      this.doc.slots.rootAdded.on(id => {
+        const model = this.doc.getBlockById(id);
         if (model instanceof RootBlockModel) {
           const newDocMeta = this.doc.collection.meta.getDocMeta(model.doc.id);
           if (!newDocMeta || newDocMeta.title !== model.title.toString()) {

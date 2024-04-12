@@ -1,11 +1,7 @@
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  type BlobStorage,
-  type Doc,
-  DocCollection,
-  Text,
-} from '@blocksuite/store';
+import type { BlockCollection } from '@blocksuite/store';
+import { type BlobStorage, DocCollection, Text } from '@blocksuite/store';
 import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
 
 import { AffineEditorContainer } from '../../index.js';
@@ -53,8 +49,11 @@ async function createEditor(
   mode: 'edgeless' | 'page' = 'page'
 ) {
   const app = document.createElement('div');
-  const doc = collection.docs.values().next().value as Doc | undefined;
-  assertExists(doc, 'Need to create a doc first');
+  const blockCollection = collection.docs.values().next().value as
+    | BlockCollection
+    | undefined;
+  assertExists(blockCollection, 'Need to create a doc first');
+  const doc = blockCollection.getDoc();
   const editor = new AffineEditorContainer();
   editor.doc = doc;
   editor.mode = mode;

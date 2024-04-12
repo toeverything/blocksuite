@@ -65,7 +65,7 @@ export function getNextBlock(
   }
   let currentBlock: typeof model | null = model;
   while (currentBlock) {
-    const nextSibling = doc.getNextSibling(currentBlock);
+    const nextSibling = doc.getNext(currentBlock);
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
       if (matchFlavours(nextSibling, ['affine:note'])) {
