@@ -10,17 +10,14 @@ import type {
   PageRootBlockComponent,
   PageRootService,
 } from '@blocksuite/blocks';
-import {
-  EdgelessEditorBlockSpecs,
-  PageEditorBlockSpecs,
-  ThemeObserver,
-} from '@blocksuite/blocks';
+import { PageEditorBlockSpecs, ThemeObserver } from '@blocksuite/blocks';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
+import { CommunityEdgelessEditorBlockSpecs } from '../specs/community.js';
 import type { EdgelessEditor } from './edgeless-editor.js';
 import type { PageEditor } from './page-editor.js';
 
@@ -106,7 +103,7 @@ export class AffineEditorContainer
   }
 
   @property({ attribute: false })
-  edgelessSpecs = EdgelessEditorBlockSpecs;
+  edgelessSpecs = CommunityEdgelessEditorBlockSpecs;
 
   @state()
   private get _edgelessSpecs() {

@@ -1,8 +1,5 @@
-import {
-  AttachmentService,
-  EdgelessEditorBlockSpecs,
-  PageEditorBlockSpecs,
-} from '@blocksuite/blocks';
+import { AttachmentService, PageEditorBlockSpecs } from '@blocksuite/blocks';
+import { CommunityEdgelessEditorBlockSpecs } from '@blocksuite/presets';
 
 class CustomAttachmentService extends AttachmentService {
   override mounted(): void {
@@ -21,7 +18,7 @@ export function getCustomAttachmentSpecs() {
     }
     return spec;
   });
-  const edgelessModeSpecs = EdgelessEditorBlockSpecs.map(spec => {
+  const edgelessModeSpecs = CommunityEdgelessEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:attachment') {
       return {
         ...spec,

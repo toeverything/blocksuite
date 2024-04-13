@@ -3,12 +3,13 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { PageEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
+
+import { CommunityEdgelessEditorBlockSpecs } from '../specs/community.js';
 
 noop(EditorHost);
 
@@ -49,7 +50,7 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
   doc!: Doc;
 
   @property({ attribute: false })
-  specs = PageEditorBlockSpecs;
+  specs = CommunityEdgelessEditorBlockSpecs;
 
   @property({ type: Boolean })
   hasViewport = true;

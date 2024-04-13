@@ -32,6 +32,7 @@ import {
   on,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
+import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
 import {
   setAttachmentUploaded,
   setAttachmentUploading,
@@ -44,7 +45,7 @@ import type {
   ImageBlockModel,
   ImageBlockProps,
 } from '../../image-block/image-model.js';
-import type { AttachmentBlockProps } from '../../index.js';
+import type { EdgelessRootBlockWidgetName } from '../../specs/index.js';
 import {
   Bound,
   type IBound,
@@ -58,9 +59,7 @@ import type {
   SurfaceBlockComponent,
 } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import type { FontLoader } from '../font-loader/font-loader.js';
 import type { RootBlockModel } from '../root-model.js';
-import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
@@ -156,8 +155,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   @query('affine-surface')
   surface!: SurfaceBlockComponent;
-
-  fontLoader!: FontLoader;
 
   get tools() {
     return this.service.tool;

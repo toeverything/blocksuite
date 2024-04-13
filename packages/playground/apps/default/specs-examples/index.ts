@@ -1,7 +1,5 @@
-import {
-  EdgelessEditorBlockSpecs,
-  PageEditorBlockSpecs,
-} from '@blocksuite/blocks';
+import { PageEditorBlockSpecs } from '@blocksuite/blocks';
+import { CommunityEdgelessEditorBlockSpecs } from '@blocksuite/presets';
 
 import { setupAIProvider } from './ai/provider.js';
 import { getAISpecs } from './ai/spec.js';
@@ -14,7 +12,7 @@ export function getExampleSpecs() {
   const type = params.get('exampleSpec');
 
   let pageModeSpecs = PageEditorBlockSpecs;
-  let edgelessModeSpecs = EdgelessEditorBlockSpecs;
+  let edgelessModeSpecs = CommunityEdgelessEditorBlockSpecs;
 
   if (type === 'attachment') {
     const specs = getCustomAttachmentSpecs();

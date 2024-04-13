@@ -1,7 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import {
   AffineFormatBarWidget,
-  EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
@@ -10,6 +9,7 @@ import {
   AffineEditorContainer,
   affineFormatBarItemConfig,
   CommentPanel,
+  CommunityEdgelessEditorBlockSpecs,
   CopilotPanel,
 } from '@blocksuite/presets';
 import type { BlockCollection } from '@blocksuite/store';
@@ -68,11 +68,12 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
     }
     return spec;
   });
-  editor.edgelessSpecs = [...EdgelessEditorBlockSpecs].map(spec => {
+  editor.edgelessSpecs = [...CommunityEdgelessEditorBlockSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
       spec = {
         ...spec,
         setup: (slots, disposable) => {
+          spec.setup?.(slots, disposable);
           slots.mounted.once(() => {
             const onFormatBarConnected = slots.widgetConnected.on(view => {
               if (view.component instanceof AffineFormatBarWidget) {

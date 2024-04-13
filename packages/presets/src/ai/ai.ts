@@ -8,11 +8,11 @@ import {
   AffineFormatBarWidget,
   AffineSlashMenuWidget,
   EdgelessCopilotWidget,
-  EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
+import { CommunityEdgelessEditorBlockSpecs } from '../specs/community.js';
 import { buildAIPanelConfig } from './ai-panel.js';
 import { setupEdgelessCopilot } from './entries/edgeless/index.js';
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
@@ -34,6 +34,7 @@ export function patchDocSpecs(specs: BlockSpec[]) {
           },
         },
         setup: (slots, disposableGroup) => {
+          spec.setup?.(slots, disposableGroup);
           disposableGroup.add(
             slots.widgetConnected.on(view => {
               if (view.component instanceof AffineAIPanelWidget) {
@@ -97,7 +98,9 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
 export function getAISpecs() {
   const pageModeSpecs = patchDocSpecs(PageEditorBlockSpecs);
 
-  const edgelessModeSpecs = patchEdgelessSpecs(EdgelessEditorBlockSpecs);
+  const edgelessModeSpecs = patchEdgelessSpecs(
+    CommunityEdgelessEditorBlockSpecs
+  );
 
   return {
     pageModeSpecs,

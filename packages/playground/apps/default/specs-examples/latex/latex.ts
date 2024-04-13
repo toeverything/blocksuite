@@ -1,7 +1,6 @@
 import './latex-node.js';
 
 import {
-  EdgelessEditorBlockSpecs,
   type InlineMarkdownMatch,
   type InlineSpecs,
   ListService,
@@ -12,6 +11,7 @@ import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
+import { CommunityEdgelessEditorBlockSpecs } from '@blocksuite/presets';
 import { html } from 'lit';
 import { z } from 'zod';
 
@@ -136,7 +136,7 @@ export function getLatexSpecs() {
     }
     return spec;
   });
-  const edgelessModeSpecs = EdgelessEditorBlockSpecs.map(spec => {
+  const edgelessModeSpecs = CommunityEdgelessEditorBlockSpecs.map(spec => {
     if (spec.schema.model.flavour === 'affine:paragraph') {
       return {
         ...spec,

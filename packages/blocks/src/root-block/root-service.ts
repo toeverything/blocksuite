@@ -18,7 +18,6 @@ import { type EmbedCardStyle, NoteDisplayMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import { CanvasTextFonts } from '../surface-block/consts.js';
 import { EditSessionStorage } from '../surface-block/managers/edit-session.js';
 import {
   copySelectedModelsCommand,
@@ -36,7 +35,6 @@ import {
   getSelectedModelsCommand,
   getTextSelectionCommand,
 } from './commands/index.js';
-import { FontLoader } from './font-loader/font-loader.js';
 import type { RootBlockModel } from './root-model.js';
 import type { RootBlockComponent } from './types.js';
 
@@ -48,7 +46,6 @@ export type EmbedOptions = {
 };
 
 export class RootService extends BlockService<RootBlockModel> {
-  readonly fontLoader = new FontLoader();
   readonly editSession: EditSessionStorage = new EditSessionStorage(this);
   public readonly copilot = new Copilot();
 
@@ -138,8 +135,6 @@ export class RootService extends BlockService<RootBlockModel> {
       .add('formatNative', formatNativeCommand)
       .add('formatText', formatTextCommand);
 
-    this.loadFonts();
-
     this.exportManager = new ExportManager(this, this._exportOptions);
 
     this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
@@ -183,10 +178,6 @@ export class RootService extends BlockService<RootBlockModel> {
 
   get selectedModels() {
     return this.selectedBlocks.map(block => block.model);
-  }
-
-  loadFonts() {
-    this.fontLoader.load(CanvasTextFonts);
   }
 
   private _getLastNoteBlock() {

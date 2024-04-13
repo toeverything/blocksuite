@@ -4,12 +4,13 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import type { SurfaceBlockComponent } from '@blocksuite/blocks';
-import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
+
+import { CommunityEdgelessEditorBlockSpecs } from '../specs/community.js';
 
 noop(EditorHost);
 
@@ -45,7 +46,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   doc!: Doc;
 
   @property({ attribute: false })
-  specs = EdgelessEditorBlockSpecs;
+  specs = CommunityEdgelessEditorBlockSpecs;
 
   private _host: Ref<EditorHost> = createRef<EditorHost>();
 

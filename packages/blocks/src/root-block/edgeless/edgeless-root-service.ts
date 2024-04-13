@@ -23,6 +23,7 @@ import type { ReorderingDirection } from '../../surface-block/managers/layer-man
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { Bound } from '../../surface-block/utils/bound.js';
+import { FontLoader } from '../font-loader/font-loader.js';
 import { RootService } from '../root-service.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -53,6 +54,8 @@ import {
 } from './utils/viewport.js';
 
 export class EdgelessRootService extends RootService {
+  readonly fontLoader = new FontLoader();
+
   TemplateJob = TemplateJob;
 
   slots = {

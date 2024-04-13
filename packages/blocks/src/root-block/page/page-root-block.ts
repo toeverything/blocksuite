@@ -15,8 +15,8 @@ import {
   NoteDisplayMode,
 } from '../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
+import type { PageRootBlockWidgetName } from '../../specs/base/page-root.js';
 import { PageClipboard } from '../clipboard/index.js';
-import type { PageRootBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { RootBlockModel } from '../root-model.js';
 import type { PageRootService } from './page-root-service.js';
