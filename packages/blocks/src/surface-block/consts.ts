@@ -411,7 +411,7 @@ export const CommunityCanvasTextFonts: FontConfig[] = [
   // BebasNeue, https://fonts.cdnfonts.com/css/bebas-neue?styles=169713,17622,17620
   {
     font: CanvasTextFontFamily.BebasNeue,
-    url: 'https://fonts.cdnfonts.com/s/14902/BebasNeue Light.woff',
+    url: 'https://fonts.cdnfonts.com/s/14902/BebasNeue%20Light.woff',
     weight: CanvasTextFontWeight.Light,
     style: CanvasTextFontStyle.Normal,
   },
