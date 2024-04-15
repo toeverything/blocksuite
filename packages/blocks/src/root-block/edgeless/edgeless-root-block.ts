@@ -365,7 +365,10 @@ export class EdgelessRootBlockComponent extends BlockElement<
     );
   }
 
-  async addImages(files: File[], point?: Point): Promise<string[]> {
+  async addImages(
+    files: File[],
+    point?: Point | { x: number; y: number }
+  ): Promise<string[]> {
     const imageFiles = [...files].filter(file =>
       file.type.startsWith('image/')
     );
