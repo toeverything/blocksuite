@@ -24,6 +24,12 @@ export const menuItemStyles = css`
   .menu-item:hover .item-icon {
     color: var(--item-icon-hover-color, var(--affine-brand-color));
   }
+  .menu-item.discard:hover {
+    background: var(--affine-background-error-color);
+    .item-icon {
+      color: var(--affine-error-color);
+    }
+  }
   .item-name {
     display: flex;
     padding: 0px 4px;

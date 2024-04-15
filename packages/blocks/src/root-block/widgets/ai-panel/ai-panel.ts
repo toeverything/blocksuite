@@ -19,6 +19,10 @@ import {
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { PageRootBlockComponent } from '../../page/page-root-block.js';
+import type { AIPanelDiscardModal } from './components/discard-modal.js';
+import { toggleDiscardModal } from './components/discard-modal.js';
 import type {
   AIPanelAnswerConfig,
   AIPanelErrorConfig,
@@ -93,7 +97,21 @@ export class AffineAIPanelWidget extends WidgetElement {
   @query('.mock-selection-container')
   mockSelectionContainer!: HTMLDivElement;
 
+  get rootElement() {
+    return this.blockElement as
+      | PageRootBlockComponent
+      | EdgelessRootBlockComponent;
+  }
+
   private _stopAutoUpdate?: undefined | (() => void);
+
+  private _discardModal: AIPanelDiscardModal | null = null;
+  private _clearDiscardModal = () => {
+    if (this._discardModal) {
+      this._discardModal.remove();
+      this._discardModal = null;
+    }
+  };
 
   toggle = (reference: ReferenceElement, input?: string) => {
     if (input) {
@@ -130,6 +148,12 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._inputText = null;
     this._answer = null;
     this._stopAutoUpdate = undefined;
+  };
+
+  discard = () => {
+    if (this.state === 'hidden') return;
+    this._clearDiscardModal();
+    this._discardModal = toggleDiscardModal(this.hide);
   };
 
   /**
@@ -204,17 +228,23 @@ export class AffineAIPanelWidget extends WidgetElement {
     this.disposables.addFromEvent(document, 'mousedown', this._onDocumentClick);
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearDiscardModal();
+  }
+
   private _onDocumentClick = (e: MouseEvent) => {
     if (this.state !== 'hidden') {
       e.preventDefault();
     }
 
     if (
+      e.target !== this._discardModal &&
       e.target !== this &&
       !this.contains(e.target as Node) &&
       this.state !== 'generating'
     ) {
-      this.hide();
+      this.discard();
     }
   };
 
@@ -269,7 +299,7 @@ export class AffineAIPanelWidget extends WidgetElement {
         'input',
         () =>
           html`<ai-panel-input
-            .onBlur=${this.hide}
+            .onBlur=${this.discard}
             .onFinish=${this._inputFinish}
           ></ai-panel-input>`,
       ],

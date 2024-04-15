@@ -89,7 +89,8 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       }
 
       .right {
-        display: flex;
+        /** TODO: need to implement answer copy action */
+        display: none;
         align-items: center;
         gap: 16px;
 
