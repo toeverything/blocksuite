@@ -215,7 +215,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             this.isInputEmpty = !this.textarea.value;
           }}
           @keydown=${async (evt: KeyboardEvent) => {
-            if (evt.key === 'Enter' && !evt.shiftKey) {
+            if (evt.key === 'Enter' && !evt.shiftKey && !evt.isComposing) {
               evt.preventDefault();
               await this.send();
             }
