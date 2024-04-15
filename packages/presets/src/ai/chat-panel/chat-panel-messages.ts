@@ -101,7 +101,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       position: absolute;
       left: 50%;
       transform: translate(-50%, 0);
-      bottom: 50px;
+      bottom: 24px;
       z-index: 1;
       border-radius: 50%;
       width: 32px;
@@ -226,12 +226,14 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
         .action {
           width: fit-content;
-          padding: 4px 12px;
+          height: 32px;
+          padding: 12px;
           border-radius: 8px;
           border: 1px solid var(--affine-border-color);
           background-color: var(--affine-white-10);
           display: flex;
           flex-direction: row;
+          align-items: center;
           gap: 4px;
           font-size: 15px;
           font-weight: 500;
@@ -362,10 +364,11 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               return html`<div class="message">
                 ${this.renderAvatar(item)}
                 <div class="item-wrapper">${this.renderItem(item)}</div>
-
-                ${this.status === 'loading' && index === items.length - 1
-                  ? this.renderLoading()
-                  : nothing}
+                <div class="item-wrapper">
+                  ${this.status === 'loading' && index === items.length - 1
+                    ? this.renderLoading()
+                    : nothing}
+                </div>
                 ${index === items.length - 1
                   ? this.renderEditorActions(item)
                   : nothing}

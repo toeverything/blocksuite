@@ -10,7 +10,7 @@ import type { ChatAction } from '../index.js';
 @customElement('action-wrapper')
 export class ActionWrapper extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .action {
+    .action-name {
       display: flex;
       align-items: center;
       gap: 18px;
@@ -18,7 +18,7 @@ export class ActionWrapper extends WithDisposable(ShadowlessElement) {
       margin-bottom: 12px;
     }
 
-    .action div:last-child {
+    .action-name div:last-child {
       margin-left: auto;
       cursor: pointer;
     }
@@ -56,7 +56,7 @@ export class ActionWrapper extends WithDisposable(ShadowlessElement) {
     const originalText = item.messages[1].content;
     return html`<style></style>
       <slot></slot>
-      <div class="action">
+      <div class="action-name">
         ${ActionIcon}
         <div>${item.action}</div>
         <div @click=${() => (this.promptShow = !this.promptShow)}>

@@ -16,6 +16,8 @@ export class ActionText extends WithDisposable(ShadowlessElement) {
       border-radius: 4px;
       border: 1px solid var(--affine-border-color);
       margin-bottom: 12px;
+      font-size: var(--affine-font-sm);
+      line-height: 22px;
     }
   `;
 
