@@ -20,8 +20,7 @@ const getImageUrlByKeyword =
   (keyword: string) =>
   async (w: number, h: number): Promise<string> => {
     const url = new URL('https://api.unsplash.com/search/photos');
-    const params = new URLSearchParams(window.location.search);
-    const unsplashKey = params.get('unsplashKey');
+    const unsplashKey = 'BONl2qMSdMLIexsUIOmi7Bh2dSO8hBUZQq2sUR0E4Jc'; //params.get('unsplashKey');
     url.searchParams.set('client_id', unsplashKey ?? '');
     url.searchParams.set('query', keyword);
     const result: {
@@ -104,7 +103,7 @@ export type PPTSection = {
   keywords: string;
 };
 
-type TemplateImage = {
+export type TemplateImage = {
   id: string;
   url: string;
 };

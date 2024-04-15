@@ -7,6 +7,7 @@ import { Slice } from '@blocksuite/store';
 import { getAIPanel } from '../ai-panel.js';
 import { iframeRenderer } from '../messages/iframe.js';
 import { createMindmapRenderer } from '../messages/mindmap.js';
+import { createSlidesRenderer } from '../messages/slides-renderer.js';
 import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
@@ -30,6 +31,10 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
 ): AnwserRenderer {
   if (id === 'brainstormMindmap' || id === 'expandMindmap') {
     return createMindmapRenderer(host, ctx);
+  }
+
+  if (id === 'createSlides') {
+    return createSlidesRenderer(host, ctx);
   }
 
   if (id === 'makeItReal') {

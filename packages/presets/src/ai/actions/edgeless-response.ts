@@ -20,6 +20,7 @@ import {
 } from '@blocksuite/blocks';
 
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
+import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
 import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
 
@@ -174,6 +175,29 @@ export const responses: {
         surface.id
       );
     });
+  },
+  createSlides: (host, ctx) => {
+    const data = ctx.get();
+    const contents = data.contents as unknown[];
+    const images = data.images as { url: string; id: string }[][];
+    const service = host.spec.getService<EdgelessRootService>('affine:page');
+
+    (async function () {
+      for (let i = 0; i < contents.length - 1; i++) {
+        const image = images[i];
+        const content = contents[i];
+        const job = service.createTemplateJob('template');
+        await Promise.all(
+          image.map(({ id, url }) =>
+            fetch(url)
+              .then(res => res.blob())
+              .then(blob => job.job.assets.set(id, blob))
+          )
+        );
+        await job.insertTemplate(content);
+        getSurfaceElementFromEditor(host).refresh();
+      }
+    })().catch(console.error);
   },
 };
 
