@@ -1,5 +1,11 @@
 import { WidgetElement } from '@blocksuite/block-std';
-import { autoUpdate, computePosition, offset, shift } from '@floating-ui/dom';
+import {
+  autoUpdate,
+  computePosition,
+  flip,
+  offset,
+  shift,
+} from '@floating-ui/dom';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -145,7 +151,13 @@ export class EdgelessCopilotWidget extends WidgetElement<
         autoUpdate(referenceElement, panel, () => {
           computePosition(referenceElement, panel, {
             placement: 'right-start',
-            middleware: [offset({ mainAxis: 15, crossAxis: -60 }), shift()],
+            middleware: [
+              offset({ mainAxis: 15, crossAxis: -60 }),
+              shift({
+                padding: 20,
+              }),
+              flip(),
+            ],
           })
             .then(({ x, y }) => {
               panel.style.left = `${x}px`;
