@@ -151,6 +151,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     if ('role' in item) {
       return createTextRenderer(this.host)(item.content);
     } else {
+      if (item.messages?.length !== 3) return nothing;
       switch (item.action) {
         case 'Create a presentation':
           return html`<action-slides
