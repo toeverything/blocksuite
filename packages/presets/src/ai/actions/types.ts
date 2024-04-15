@@ -138,6 +138,9 @@ declare global {
       makeItReal<T extends AIImageActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
+      createImage<T extends AIImageActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
     }
 
     // todo: should be refactored to get rid of implement details (like messages, action, role, etc.)

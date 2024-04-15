@@ -107,9 +107,12 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       )) ?? [];
 
     const actions =
-      (await AIProvider.histories?.actions(editor.doc.collection.id)) ?? [];
+      (await AIProvider.histories?.actions(
+        editor.doc.collection.id,
+        editor.doc.id
+      )) ?? [];
 
-    this.items = [...actions];
+    this.items = [...actions.reverse()];
     if (histories[0]) {
       this.items = [...this.items, ...histories[0].messages];
     }

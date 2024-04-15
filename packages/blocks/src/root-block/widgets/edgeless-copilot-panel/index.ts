@@ -25,6 +25,10 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
       border-radius: 8px;
       z-index: var(--affine-z-index-popover);
     }
+
+    .edgeless-copilot-panel {
+      width: 100%;
+    }
   `;
 
   @property({ attribute: false })
