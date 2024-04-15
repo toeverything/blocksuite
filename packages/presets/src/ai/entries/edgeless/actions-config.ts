@@ -179,10 +179,10 @@ export const createGroup: AIItemGroupConfig = {
         const edgelessRoot = getEdgelessRootFromEditor(host);
         const { notes, frames, shapes, images } =
           BlocksUtils.splitElements(selectedElements);
-        let content;
 
         // text to image
         if (selectedElements.length === 1) {
+          let content;
           if (notes.length === 1) {
             const note = notes[0];
             content = note.text?.length && note.text.toString();
@@ -193,10 +193,11 @@ export const createGroup: AIItemGroupConfig = {
               shape.text.length &&
               shape.text.toString();
           }
-          if (!content) return;
-          return {
-            content,
-          };
+          if (content) {
+            return {
+              content,
+            };
+          }
         }
 
         // image to image
