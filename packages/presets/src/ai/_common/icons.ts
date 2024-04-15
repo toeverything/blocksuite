@@ -302,7 +302,7 @@ export const CreateAsPageIcon = html`<svg
   </defs>
 </svg> `;
 
-export const AffineAvatorIcon = html`<svg
+export const AffineAvatarIcon = html`<svg
   width="24"
   height="24"
   viewBox="0 0 24 24"

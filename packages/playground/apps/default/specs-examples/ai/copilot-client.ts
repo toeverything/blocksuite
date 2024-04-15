@@ -87,7 +87,7 @@ const CREATE_COPILOT_MESSAGE = gql`
 export class CopilotClient {
   private graphQLClient: ApolloClient<NormalizedCacheObject>;
 
-  constructor(readonly backendUrl: string = 'https://affine.fail') {
+  constructor(readonly backendUrl: string = window.location.origin) {
     this.graphQLClient = new ApolloClient({
       link: new HttpLink({
         uri: `${backendUrl}/graphql`,

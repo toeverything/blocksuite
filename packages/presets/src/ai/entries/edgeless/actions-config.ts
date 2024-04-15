@@ -9,7 +9,7 @@ import {
   noteBlockShowWen,
 } from '../../actions/edgeless-handler.js';
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
-import { translateLangs } from '../../actions/text.js';
+import { translateLangs } from '../../actions/types.js';
 import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
