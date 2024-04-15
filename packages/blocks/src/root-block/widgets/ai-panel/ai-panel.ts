@@ -7,6 +7,7 @@ import {
   autoUpdate,
   computePosition,
   type ReferenceElement,
+  shift,
 } from '@floating-ui/dom';
 import {
   css,
@@ -108,6 +109,11 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._stopAutoUpdate = autoUpdate(reference, this, () => {
       computePosition(reference, this, {
         placement: 'bottom-start',
+        middleware: [
+          shift({
+            padding: 20,
+          }),
+        ],
       })
         .then(({ x, y }) => {
           this.style.left = `${x}px`;

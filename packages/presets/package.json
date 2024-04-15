@@ -13,7 +13,6 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
-    "@apollo/client": "^3.9.9",
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
@@ -23,7 +22,6 @@
     "@floating-ui/dom": "^1.6.3",
     "@toeverything/theme": "^0.7.29",
     "@dotlottie/player-component": "^2.7.12",
-    "graphql": "^16.8.1",
     "lit": "^3.1.2",
     "openai": "^4.29.2"
   },

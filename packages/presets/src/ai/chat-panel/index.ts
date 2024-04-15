@@ -1,5 +1,5 @@
-import './chat-panel-messages.js';
 import './chat-panel-input.js';
+import './chat-panel-messages.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
@@ -8,7 +8,7 @@ import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
 import type { AffineEditorContainer } from '../../editors/index.js';
 import { SmallHintIcon } from '../_common/icons.js';
-import { CopilotClient } from '../copilot-client.js';
+import { AIProvider } from '../provider.js';
 import type { ChatPanelMessages } from './chat-panel-messages.js';
 
 export type ChatMessage = {
@@ -87,15 +87,11 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   editor!: AffineEditorContainer;
 
   @state()
-  sessionId!: string;
-
-  @state()
   items: ChatItem[] = [];
 
   @state()
   status: ChatStatus = 'idle';
 
-  private _copilotClient = new CopilotClient();
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
@@ -103,30 +99,21 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     const { editor } = this;
-    const sessionId = await this._copilotClient.createSession({
-      workspaceId: editor.doc.collection.id,
-      docId: editor.doc.id,
-      promptName: 'debug:chat:gpt4',
-    });
 
-    const histories = await this._copilotClient.getHistories(
-      editor.doc.collection.id,
-      editor.doc.id,
-      { sessionId: sessionId }
-    );
+    const histories =
+      (await AIProvider.histories?.chats(
+        editor.doc.collection.id,
+        editor.doc.id
+      )) ?? [];
 
-    const actions = await this._copilotClient.getHistories(
-      editor.doc.collection.id,
-      editor.doc.id,
-      { action: true }
-    );
+    const actions =
+      (await AIProvider.histories?.actions(editor.doc.collection.id)) ?? [];
 
     this.items = [...actions];
     if (histories[0]) {
       this.items = [...this.items, ...histories[0].messages];
     }
 
-    this.sessionId = sessionId;
     this.scrollToDown();
   }
 
@@ -158,14 +145,11 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       <chat-panel-messages
         ${ref(this._chatMessages)}
         .host=${this.editor.host}
-        .copilotClient=${this._copilotClient}
         .items=${this.items}
         .status=${this.status}
       ></chat-panel-messages>
       <chat-panel-input
         .host=${this.editor.host}
-        .copilotClient=${this._copilotClient}
-        .sessionId=${this.sessionId}
         .items=${this.items}
         .updateItems=${this.updateItems}
         .addToItems=${this.addToItems}

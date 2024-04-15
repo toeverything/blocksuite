@@ -6,7 +6,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { ChatSendIcon, CloseIcon, ImageIcon } from '../_common/icons.js';
-import type { CopilotClient } from '../copilot-client.js';
+import { AIProvider } from '../provider.js';
 import type { ChatItem, ChatStatus } from './index.js';
 
 const MaximumImageCount = 8;
@@ -95,12 +95,6 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   host!: EditorHost;
 
   @property({ attribute: false })
-  copilotClient!: CopilotClient;
-
-  @property({ attribute: false })
-  sessionId!: string;
-
-  @property({ attribute: false })
   updateItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
@@ -143,7 +137,12 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       { role: 'user', content: text },
       { role: 'assistant', content: '' },
     ]);
-    const res = await this.copilotClient.textToText(text, this.sessionId);
+    const res = await AIProvider.actions.chat?.({
+      input: text,
+      attachments: this.images,
+      docId: this.host.doc.id,
+      workspaceId: this.host.doc.collection.id,
+    });
     if (res) {
       this.updateStatus('success');
       const messages = [...this.items];

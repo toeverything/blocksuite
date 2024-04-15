@@ -161,22 +161,7 @@ export const getSelections = (
   return data;
 };
 
-function readBlobAsURL(blob: Blob) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      if (typeof e.target?.result === 'string') {
-        resolve(e.target.result);
-      } else {
-        reject();
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-export const getSelectedImagesAsDataUrls = (host: EditorHost) => {
+export const getSelectedImagesAsBlobs = (host: EditorHost) => {
   const [_, data] = host.command
     .chain()
     .tryAll(chain => [
@@ -196,7 +181,6 @@ export const getSelectedImagesAsDataUrls = (host: EditorHost) => {
         )?.sourceId;
         return sourceId ? host.doc.blob.get(sourceId) : null;
       })
-      .filter((b): b is Promise<Blob> | Blob => !!b)
-      .map(async b => readBlobAsURL(await b)) ?? []
+      .filter((b): b is Promise<Blob> | Blob => !!b) ?? []
   );
 };

@@ -16,7 +16,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
-  AffineAvatorIcon,
+  AffineAvatarIcon,
   AffineIcon,
   CreateAsPageIcon,
   DownArrowIcon,
@@ -24,7 +24,6 @@ import {
   NewBlockIcon,
   ReplaceIcon,
 } from '../_common/icons.js';
-import type { CopilotClient } from '../copilot-client.js';
 import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
 import type { ChatItem, ChatStatus } from './index.js';
@@ -79,19 +78,19 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       user-select: none;
     }
 
-    .avator-container {
+    .avatar-container {
       width: 24px;
       height: 24px;
     }
 
-    .avator {
+    .avatar {
       width: 100%;
       height: 100%;
       border-radius: 50%;
       background-color: var(--affine-primary-color);
     }
 
-    .avator-container img {
+    .avatar-container img {
       width: 100%;
       height: 100%;
       border-radius: 50%;
@@ -121,13 +120,10 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   showDownIndicator = false;
 
   @state()
-  avatorUrl = '';
+  avatarUrl = '';
 
   @property({ attribute: false })
   host!: EditorHost;
-
-  @property({ attribute: false })
-  copilotClient!: CopilotClient;
 
   @property({ attribute: false })
   items!: ChatItem[];
@@ -148,7 +144,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     });
 
     const res = await AIProvider.userInfo;
-    this.avatorUrl = res?.avatarUrl ?? '';
+    this.avatarUrl = res?.avatarUrl ?? '';
   }
 
   renderItem(item: ChatItem) {
@@ -180,17 +176,17 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  renderAvator(item: ChatItem) {
+  renderAvatar(item: ChatItem) {
     const isUser = 'role' in item && item.role === 'user';
 
     return html`<div class="user-info">
       ${isUser
-        ? html`<div class="avator-container">
-            ${this.avatorUrl
-              ? html`<img .src=${this.avatorUrl} />`
-              : html`<div class="avator"></div>`}
+        ? html`<div class="avatar-container">
+            ${this.avatarUrl
+              ? html`<img .src=${this.avatarUrl} />`
+              : html`<div class="avatar"></div>`}
           </div>`
-        : AffineAvatorIcon}
+        : AffineAvatarIcon}
       ${isUser ? 'You' : 'AFFINE AI'}
     </div>`;
   }
@@ -364,7 +360,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
             </div>`
           : repeat(items, (item, index) => {
               return html`<div class="message">
-                ${this.renderAvator(item)}
+                ${this.renderAvatar(item)}
                 <div class="item-wrapper">${this.renderItem(item)}</div>
 
                 ${this.status === 'loading' && index === items.length - 1
