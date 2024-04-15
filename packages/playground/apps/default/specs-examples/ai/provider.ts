@@ -281,4 +281,15 @@ export function setupAIProvider() {
       params: options.params,
     });
   });
+
+  AIProvider.provide('createSlides', options => {
+    assertExists(options.stream);
+    const prompt = `I want to write a PPT, that has many pages, each page has 1 to 4 sections,\neach section has a title of no more than 30 words and no more than 500 words of content,\nbut also need some keywords that match the content of the paragraph used to generate images,\nTry to have a different number of section per page\nThe first page is the cover, which generates a general title (no more than 4 words) and description based on the topic\nthis is a template:\n- page name\n  - title\n    - keywords\n    - description\n- page name\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n- page name\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n- page name\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n- page name\n  - section name\n    - keywords\n    - content\n\n\nplease help me to write this ppt, do not output any content that does not belong to the ppt content itself outside of the content, Directly output the title content keywords without prefix like Title:xxx, Content: xxx, Keywords: xxx\nThe PPT is based on the following topics:\n\n${options.input}`;
+
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
+    });
+  });
 }

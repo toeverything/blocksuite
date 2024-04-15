@@ -144,11 +144,12 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       docId: this.host.doc.id,
       workspaceId: this.host.doc.collection.id,
     });
+
     if (res) {
+      const items = [...this.items];
+      items[items.length - 1] = { role: 'assistant', content: res };
       this.updateStatus('success');
-      const messages = [...this.items];
-      messages[messages.length - 1] = { role: 'assistant', content: res };
-      this.updateItems(messages);
+      this.updateItems(items);
     }
   };
 

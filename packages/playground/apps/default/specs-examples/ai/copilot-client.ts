@@ -22,7 +22,6 @@ const GET_COPILOT_HISTORIES = gql`
             role
             content
             attachments
-            params
             createdAt
           }
         }

@@ -4,11 +4,19 @@ import type { BlockSnapshot } from '@blocksuite/store';
 
 import { markdownToSnapshot } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
-import { basicTheme, type PPTDoc, type PPTSection } from './template.js';
+import {
+  basicTheme,
+  type PPTDoc,
+  type PPTSection,
+  type TemplateImage,
+} from './template.js';
 
 export const PPTBuilder = (host: EditorHost) => {
   const service = host.spec.getService<EdgelessRootService>('affine:page');
   const docs: PPTDoc[] = [];
+  const contents: unknown[] = [];
+  const allImages: TemplateImage[][] = [];
+
   const addDoc = async (block: BlockSnapshot) => {
     const sections = block.children.map(v => {
       const title = getText(v);
@@ -30,7 +38,8 @@ export const PPTBuilder = (host: EditorHost) => {
     if (doc.isCover) return;
     const job = service.createTemplateJob('template');
     const { images, content } = await basicTheme(doc);
-
+    contents.push(content);
+    allImages.push(images);
     if (images.length) {
       await Promise.all(
         images.map(({ id, url }) =>
@@ -54,6 +63,7 @@ export const PPTBuilder = (host: EditorHost) => {
         const { centerX, centerY, zoom } = service.getFitToScreenData();
         service.viewport.setViewport(zoom, [centerX, centerY]);
       }
+      return { contents, images: allImages };
     },
     done: async (text: string) => {
       const snapshot = await markdownToSnapshot(text, host);
