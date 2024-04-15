@@ -1,13 +1,13 @@
-import '../buttons/tool-icon-button.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { FrameIcon } from '../../../../_common/icons/index.js';
-import { Bound } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import { FrameIcon } from '../../../_common/icons/index.js';
+import { Bound } from '../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-add-frame-button')
 export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
@@ -39,4 +39,10 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-add-frame-button': EdgelessAddFrameButton;
   }
+}
+
+export function renderAddFrameButton(edgeless: EdgelessRootBlockComponent) {
+  return html`<edgeless-add-frame-button
+    .edgeless=${edgeless}
+  ></edgeless-add-frame-button>`;
 }

@@ -1,12 +1,12 @@
-import '../buttons/tool-icon-button.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { GroupIcon } from '../../../../_common/icons/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import { GroupIcon } from '../../../_common/icons/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
@@ -39,4 +39,10 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-add-group-button': EdgelessAddGroupButton;
   }
+}
+
+export function renderAddGroupButton(edgeless: EdgelessRootBlockComponent) {
+  return html`<edgeless-add-group-button
+    .edgeless=${edgeless}
+  ></edgeless-add-group-button>`;
 }

@@ -1,8 +1,7 @@
-import '../buttons/tool-icon-button.js';
-import '../panel/card-style-panel.js';
 import './component-toolbar-menu-divider.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/panel/card-style-panel.js';
 
-import type { BlockStdScope } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -18,16 +17,16 @@ import {
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { toggleEmbedCardEditModal } from '../../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
-import { toast } from '../../../../_common/components/toast.js';
+import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
+import { toast } from '../../../_common/components/toast.js';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '../../../../_common/consts.js';
+} from '../../../_common/consts.js';
 import {
   BookmarkIcon,
   SmallArrowDownIcon,
-} from '../../../../_common/icons/edgeless.js';
+} from '../../../_common/icons/edgeless.js';
 import {
   CaptionIcon,
   CopyIcon,
@@ -38,53 +37,50 @@ import {
   ExpandFullIcon,
   OpenIcon,
   PaletteIcon,
-} from '../../../../_common/icons/text.js';
-import type { EmbedCardStyle } from '../../../../_common/types.js';
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
-import { BookmarkStyles } from '../../../../bookmark-block/bookmark-model.js';
+} from '../../../_common/icons/text.js';
+import type { EmbedCardStyle } from '../../../_common/types.js';
+import { createButtonPopper } from '../../../_common/utils/button-popper.js';
+import { getEmbedCardIcons } from '../../../_common/utils/url.js';
+import { BookmarkStyles } from '../../../bookmark-block/bookmark-model.js';
 import type {
   BookmarkBlockComponent,
   BookmarkBlockModel,
-} from '../../../../bookmark-block/index.js';
+} from '../../../bookmark-block/index.js';
 import type {
   EmbedFigmaBlockComponent,
   EmbedFigmaModel,
-} from '../../../../embed-figma-block/index.js';
+} from '../../../embed-figma-block/index.js';
 import type {
   EmbedGithubBlockComponent,
   EmbedGithubModel,
-} from '../../../../embed-github-block/index.js';
-import type { EmbedHtmlModel } from '../../../../embed-html-block/index.js';
+} from '../../../embed-github-block/index.js';
+import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
 import type {
   EmbedLinkedDocBlockComponent,
   EmbedLinkedDocModel,
-} from '../../../../embed-linked-doc-block/index.js';
+} from '../../../embed-linked-doc-block/index.js';
 import type {
   EmbedLoomBlockComponent,
   EmbedLoomModel,
-} from '../../../../embed-loom-block/index.js';
+} from '../../../embed-loom-block/index.js';
 import type {
   EmbedSyncedDocBlockComponent,
   EmbedSyncedDocModel,
-} from '../../../../embed-synced-doc-block/index.js';
+} from '../../../embed-synced-doc-block/index.js';
 import type {
   EmbedYoutubeBlockComponent,
   EmbedYoutubeModel,
-} from '../../../../embed-youtube-block/index.js';
-import {
-  Bound,
-  type EdgelessBlockType,
-} from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EmbedOptions } from '../../../root-service.js';
+} from '../../../embed-youtube-block/index.js';
+import { Bound, type EdgelessBlockType } from '../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
   isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
   isEmbedSyncedDocBlock,
-} from '../../utils/query.js';
+} from '../../edgeless/utils/query.js';
+import type { EmbedOptions } from '../../root-service.js';
 
 @customElement('edgeless-change-embed-card-button')
 export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
@@ -251,10 +247,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedLoomModel;
 
   @property({ attribute: false })
-  std!: BlockStdScope;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  edgeless!: EdgelessRootBlockComponent;
 
   @state()
   private _showPopper = false;
@@ -279,8 +272,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return this.model.doc;
   }
 
-  private get edgeless() {
-    return this.surface.edgeless;
+  private get std() {
+    return this.edgeless.std;
   }
 
   private _embedOptions: EmbedOptions | null = null;
@@ -288,14 +281,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   private _cardStylePopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private get _rootService() {
-    return this.surface.std.spec.getService('affine:page');
+    return this.std.spec.getService('affine:page');
   }
 
   private get _blockElement() {
-    const blockSelection =
-      this.surface.edgeless.service.selection.selections.filter(sel =>
-        sel.elements.includes(this.model.id)
-      );
+    const blockSelection = this.edgeless.service.selection.selections.filter(
+      sel => sel.elements.includes(this.model.id)
+    );
     if (blockSelection.length !== 1) {
       return;
     }
@@ -449,7 +441,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     navigator.clipboard.writeText(this.model.url).catch(console.error);
     toast(this.std.host as EditorHost, 'Copied link to clipboard');
-    this.surface.selection.clear();
+    this.edgeless.service.selection.clear();
   }
 
   private _setCardStyle(style: EmbedCardStyle) {
@@ -496,7 +488,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     const blockId = this.edgeless.service.addBlock(
       targetFlavour as EdgelessBlockType,
       { url, xywh: bound.serialize(), style: targetStyle, caption },
-      this.surface.model
+      this.edgeless.surface.model
     );
     this.edgeless.service.selection.set({
       editing: false,
@@ -539,8 +531,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         xywh: bound.serialize(),
         style: targetStyle,
       },
-      this.surface.model
+      this.edgeless.surface.model
     );
+
     this.edgeless.service.selection.set({
       editing: false,
       elements: [blockId],
@@ -805,4 +798,18 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-change-embed-card-button': EdgelessChangeEmbedCardButton;
   }
+}
+
+export function renderEmbedButton(
+  edgeless: EdgelessRootBlockComponent,
+  models?: EdgelessChangeEmbedCardButton['model'][]
+) {
+  if (models?.length !== 1) return nothing;
+
+  return html`
+    <edgeless-change-embed-card-button
+      .model=${models[0]}
+      .edgeless=${edgeless}
+    ></edgeless-change-embed-card-button>
+  `;
 }

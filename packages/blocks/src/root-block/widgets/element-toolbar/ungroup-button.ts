@@ -4,9 +4,9 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { UngroupButtonIcon } from '../../../../_common/icons/index.js';
-import { GroupElementModel } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import { UngroupButtonIcon } from '../../../_common/icons/index.js';
+import { GroupElementModel } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 
 @customElement('edgeless-ungroup-button')
 export class EdgelessUngroupButton extends WithDisposable(LitElement) {

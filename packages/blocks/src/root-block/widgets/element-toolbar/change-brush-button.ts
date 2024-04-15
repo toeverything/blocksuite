@@ -1,25 +1,24 @@
-import '../buttons/tool-icon-button.js';
-import '../panel/color-panel.js';
-import '../panel/line-width-panel.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/panel/color-panel.js';
+import '../../edgeless/components/panel/line-width-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import type { Doc } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { LineWidth } from '../../../../_common/types.js';
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import type { BrushElementModel } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import { LineWidth } from '../../../_common/types.js';
+import { createButtonPopper } from '../../../_common/utils/button-popper.js';
+import { countBy, maxBy } from '../../../_common/utils/iterable.js';
+import type { BrushElementModel } from '../../../surface-block/index.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
-} from '../panel/color-panel.js';
-import type { LineWidthEvent } from '../panel/line-width-panel.js';
+} from '../../edgeless/components/panel/color-panel.js';
+import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 function getMostCommonColor(
   elements: BrushElementModel[]
@@ -96,10 +95,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   elements: BrushElementModel[] = [];
 
   @property({ attribute: false })
-  doc!: Doc;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  edgeless!: EdgelessRootBlockComponent;
 
   @state()
   private _showPopper = false;
@@ -115,6 +111,14 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
+
+  get surface() {
+    return this.edgeless.surface;
+  }
+
+  get doc() {
+    return this.edgeless.doc;
+  }
 
   get service() {
     return this.surface.edgeless.service;
@@ -199,4 +203,17 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-change-brush-button': EdgelessChangeBrushButton;
   }
+}
+
+export function renderChangeBrushButton(
+  edgeless: EdgelessRootBlockComponent,
+  brushElements?: BrushElementModel[]
+) {
+  return brushElements?.length
+    ? html`<edgeless-change-brush-button
+        .elements=${brushElements}
+        .edgeless=${edgeless}
+      >
+      </edgeless-change-brush-button>`
+    : nothing;
 }

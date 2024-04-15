@@ -1,27 +1,26 @@
-import '../buttons/tool-icon-button.js';
-import '../panel/card-style-panel.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/panel/card-style-panel.js';
 import './component-toolbar-menu-divider.js';
 
-import type { BlockStdScope } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '../../../../_common/consts.js';
-import { CaptionIcon, PaletteIcon } from '../../../../_common/icons/text.js';
-import type { EmbedCardStyle } from '../../../../_common/types.js';
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
+} from '../../../_common/consts.js';
+import { CaptionIcon, PaletteIcon } from '../../../_common/icons/text.js';
+import type { EmbedCardStyle } from '../../../_common/types.js';
+import { createButtonPopper } from '../../../_common/utils/button-popper.js';
+import { getEmbedCardIcons } from '../../../_common/utils/url.js';
 import type {
   AttachmentBlockComponent,
   AttachmentBlockModel,
-} from '../../../../index.js';
-import { Bound } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+  EdgelessRootBlockComponent,
+} from '../../../index.js';
+import { Bound } from '../../../surface-block/index.js';
 
 @customElement('edgeless-change-attachment-button')
 export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
@@ -57,10 +56,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   model!: AttachmentBlockModel;
 
   @property({ attribute: false })
-  std!: BlockStdScope;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  edgeless!: EdgelessRootBlockComponent;
 
   @state()
   private _showPopper = false;
@@ -75,13 +71,16 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     return this.model.doc;
   }
 
+  get std() {
+    return this.edgeless.std;
+  }
+
   private _cardStylePopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private get _blockElement() {
-    const blockSelection =
-      this.surface.edgeless.service.selection.selections.filter(sel =>
-        sel.elements.includes(this.model.id)
-      );
+    const blockSelection = this.edgeless.service.selection.selections.filter(
+      sel => sel.elements.includes(this.model.id)
+    );
     if (blockSelection.length !== 1) {
       return;
     }
@@ -185,4 +184,18 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-change-attachment-button': EdgelessChangeAttachmentButton;
   }
+}
+
+export function renderAttachmentButton(
+  edgeless: EdgelessRootBlockComponent,
+  attachments?: AttachmentBlockModel[]
+) {
+  if (attachments?.length !== 1) return nothing;
+
+  return html`
+    <edgeless-change-attachment-button
+      .model=${attachments[0]}
+      .edgeless=${edgeless}
+    ></edgeless-change-attachment-button>
+  `;
 }
