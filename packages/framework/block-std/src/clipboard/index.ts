@@ -39,6 +39,10 @@ export class Clipboard {
     this._adapterMap.delete(mimeType);
   };
 
+  get configs() {
+    return this._getJob().adapterConfigs;
+  }
+
   private _getJob() {
     return new Job({
       middlewares: this._jobMiddlewares,

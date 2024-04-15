@@ -21,6 +21,7 @@ import {
 
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getAIPanel } from '../ai-panel.js';
+import { fetchImageToFile } from '../utils/image.js';
 import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
 
 export type CtxRecord = {
@@ -174,6 +175,39 @@ export const responses: {
         surface.id
       );
     });
+  },
+  createImage: host => {
+    const aiPanel = getAIPanel(host);
+    // `DataURL` or `URL`
+    const data = aiPanel.answer;
+    if (!data) return;
+
+    const copilotPanel = getCopilotPanel(host);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const selectionRect = copilotPanel.selectionModelRect;
+
+    copilotPanel.hide();
+    aiPanel.hide();
+
+    const filename = 'image';
+    const imageProxy = host.std.clipboard.configs.get('imageProxy');
+
+    fetchImageToFile(data, filename, imageProxy)
+      .then(img => {
+        if (!img) return;
+
+        const edgelessRoot = getEdgelessRootFromEditor(host);
+        const { left, top, height } = selectionRect;
+        const [x, y] = edgelessRoot.service.viewport.toViewCoord(
+          left,
+          top + height + 20
+        );
+
+        host.doc.transact(() => {
+          edgelessRoot.addImages([img], { x, y }).catch(console.error);
+        });
+      })
+      .catch(console.error);
   },
 };
 

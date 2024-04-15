@@ -1,6 +1,10 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import type { AIItemGroupConfig } from '@blocksuite/blocks';
-import { AIPenIcon, BlocksUtils, LanguageIcon } from '@blocksuite/blocks';
+import {
+  AIPenIcon,
+  BlocksUtils,
+  LanguageIcon,
+  TextElementModel,
+} from '@blocksuite/blocks';
 
 import {
   actionToHandler,
@@ -167,33 +171,79 @@ export const createGroup: AIItemGroupConfig = {
   name: 'create',
   items: [
     {
+      name: 'Create an image',
+      icon: AIPenIcon,
+      showWhen: makeItRealShowWhen,
+      handler: actionToHandler('createImage', undefined, async host => {
+        const selectedElements = getCopilotSelectedElems(host);
+        const edgelessRoot = getEdgelessRootFromEditor(host);
+        const { notes, frames, shapes, images } =
+          BlocksUtils.splitElements(selectedElements);
+        let content;
+
+        // text to image
+        if (selectedElements.length === 1) {
+          if (notes.length === 1) {
+            const note = notes[0];
+            content = note.text?.length && note.text.toString();
+          } else if (shapes.length === 1) {
+            const shape = shapes[0];
+            content =
+              shape instanceof TextElementModel &&
+              shape.text.length &&
+              shape.text.toString();
+          }
+          if (!content) return;
+          return {
+            content,
+          };
+        }
+
+        // image to image
+        if (
+          notes.length + frames.length + images.length + shapes.length ===
+          0
+        ) {
+          return;
+        }
+        const canvas = await edgelessRoot.clipboardController.toCanvas(
+          [...notes, ...frames, ...images],
+          shapes
+        );
+        if (!canvas) return;
+        const png = canvas.toDataURL('image/png');
+        if (!png) return;
+        return {
+          attachments: [png],
+        };
+      }),
+    },
+    {
       name: 'Make it real',
       icon: AIPenIcon,
       showWhen: makeItRealShowWhen,
-      handler: actionToHandler(
-        'makeItReal',
-        undefined,
-        async (host: EditorHost) => {
-          const selectedElements = getCopilotSelectedElems(host);
-          const edgelessRoot = getEdgelessRootFromEditor(host);
-          const { notes, frames, shapes, images } =
-            BlocksUtils.splitElements(selectedElements);
-          if (
-            notes.length + frames.length + images.length + shapes.length ===
-            0
-          ) {
-            return;
-          }
-          const canvas = await edgelessRoot.clipboardController.toCanvas(
-            [...notes, ...frames, ...images],
-            shapes
-          );
-          if (!canvas) return;
-          const png = canvas.toDataURL('image/png');
-          if (!png) return;
-          return [png];
+      handler: actionToHandler('makeItReal', undefined, async host => {
+        const selectedElements = getCopilotSelectedElems(host);
+        const edgelessRoot = getEdgelessRootFromEditor(host);
+        const { notes, frames, shapes, images } =
+          BlocksUtils.splitElements(selectedElements);
+        if (
+          notes.length + frames.length + images.length + shapes.length ===
+          0
+        ) {
+          return;
         }
-      ),
+        const canvas = await edgelessRoot.clipboardController.toCanvas(
+          [...notes, ...frames, ...images],
+          shapes
+        );
+        if (!canvas) return;
+        const png = canvas.toDataURL('image/png');
+        if (!png) return;
+        return {
+          attachments: [png],
+        };
+      }),
     },
   ],
 };
