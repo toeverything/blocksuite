@@ -199,6 +199,7 @@ export const responses: {
         getSurfaceElementFromEditor(host).refresh();
       }
     })().catch(console.error);
+  },
   createImage: host => {
     const aiPanel = getAIPanel(host);
     // `DataURL` or `URL`
