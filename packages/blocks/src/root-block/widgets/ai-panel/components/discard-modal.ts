@@ -61,6 +61,7 @@ export class AIPanelDiscardModal extends LitElement {
       height: 24px;
       width: 24px;
       color: var(--affine-icon-color);
+      border-radius: 4px;
     }
 
     .modal-header-icon:hover {

@@ -19,8 +19,6 @@ import {
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { PageRootBlockComponent } from '../../page/page-root-block.js';
 import type { AIPanelDiscardModal } from './components/discard-modal.js';
 import { toggleDiscardModal } from './components/discard-modal.js';
 import type {
@@ -96,12 +94,6 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   @query('.mock-selection-container')
   mockSelectionContainer!: HTMLDivElement;
-
-  get rootElement() {
-    return this.blockElement as
-      | PageRootBlockComponent
-      | EdgelessRootBlockComponent;
-  }
 
   private _stopAutoUpdate?: undefined | (() => void);
 
