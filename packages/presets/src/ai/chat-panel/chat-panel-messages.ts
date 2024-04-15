@@ -1,6 +1,11 @@
 import '../messages/slides-renderer.js';
 import './ai-loading.js';
 import '../messages/text.js';
+import './actions/text.js';
+import './actions/action-wrapper.js';
+import './actions/make-real.js';
+import './actions/slides.js';
+import './actions/mindmap.js';
 
 import type { TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
@@ -11,11 +16,8 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
-  ActionIcon,
   AffineAvatarIcon,
   AffineIcon,
-  ArrowDownIcon,
-  ArrowUpIcon,
   CreateAsPageIcon,
   DownArrowIcon,
   InsertBelowIcon,
@@ -24,82 +26,7 @@ import {
 } from '../_common/icons.js';
 import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
-import type { ChatAction, ChatItem, ChatStatus } from './index.js';
-
-@customElement('action-text')
-class ActionText extends WithDisposable(ShadowlessElement) {
-  static override styles = css`
-    .original-text {
-      width: 100%;
-      padding: 10px 16px;
-      border-radius: 4px;
-      border: 1px solid var(--affine-border-color);
-      margin-bottom: 12px;
-    }
-    .action {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      height: 22px;
-      margin-bottom: 12px;
-    }
-
-    .action div:last-child {
-      margin-left: auto;
-    }
-
-    .answer-prompt {
-      padding: 8px;
-      background-color: var(--affine-background-secondary-color);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--affine-text-primary-color);
-    }
-
-    .answer-prompt .subtitle {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--affine-text-secondary-color);
-    }
-  `;
-
-  @state()
-  promptShow = false;
-
-  @property({ attribute: false })
-  item!: ChatAction;
-
-  @property({ attribute: false })
-  host!: EditorHost;
-
-  protected override render() {
-    const { item } = this;
-
-    const originalText = item.messages[1].content;
-    return html`<style></style>
-      <div class="original-text">${originalText}</div>
-      <div class="action">
-        ${ActionIcon}
-        <div>${item.action}</div>
-        <div @click=${() => (this.promptShow = !this.promptShow)}>
-          ${this.promptShow ? ArrowUpIcon : ArrowDownIcon}
-        </div>
-      </div>
-      ${this.promptShow
-        ? html`
-            <div class="answer-prompt">
-              <div class="subtitle">Answer</div>
-              ${createTextRenderer(this.host)(item.messages[2].content)}
-              <div class="subtitle">Prompt</div>
-              ${createTextRenderer(this.host)(item.messages[0].content)}
-            </div>
-          `
-        : nothing} `;
-  }
-}
+import type { ChatItem, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
@@ -174,7 +101,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       position: absolute;
       left: 50%;
       transform: translate(-50%, 0);
-      bottom: 50px;
+      bottom: 24px;
       z-index: 1;
       border-radius: 50%;
       width: 32px;
@@ -226,7 +153,20 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     } else {
       switch (item.action) {
         case 'Create a presentation':
-          return createTextRenderer(this.host)('');
+          return html`<action-slides
+            .host=${this.host}
+            .item=${item}
+          ></action-slides>`;
+        case 'Make it real':
+          return html`<action-make-real
+            .host=${this.host}
+            .item=${item}
+          ></action-make-real>`;
+        case 'Brainstorm mindmap':
+          return html`<action-mindmap
+            .host=${this.host}
+            .item=${item}
+          ></action-mindmap>`;
         default:
           return html`<action-text
             .item=${item}
@@ -234,12 +174,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           ></action-text>`;
       }
     }
-    // if (message.role === 'user') {
-    //   return textRenderer(message.content);
-    // } else {
-    //   // return iframeRenderer('<html><body><div>123</div></body></html>');
-    //   return html`<ai-slides-renderer> </ai-slides-renderer>`;
-    // }
   }
 
   renderAvatar(item: ChatItem) {
@@ -292,12 +226,14 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
         .action {
           width: fit-content;
-          padding: 4px 12px;
+          height: 32px;
+          padding: 12px;
           border-radius: 8px;
           border: 1px solid var(--affine-border-color);
           background-color: var(--affine-white-10);
           display: flex;
           flex-direction: row;
+          align-items: center;
           gap: 4px;
           font-size: 15px;
           font-weight: 500;
@@ -428,10 +364,11 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               return html`<div class="message">
                 ${this.renderAvatar(item)}
                 <div class="item-wrapper">${this.renderItem(item)}</div>
-
-                ${this.status === 'loading' && index === items.length - 1
-                  ? this.renderLoading()
-                  : nothing}
+                <div class="item-wrapper">
+                  ${this.status === 'loading' && index === items.length - 1
+                    ? this.renderLoading()
+                    : nothing}
+                </div>
                 ${index === items.length - 1
                   ? this.renderEditorActions(item)
                   : nothing}
@@ -450,6 +387,5 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 declare global {
   interface HTMLElementTagNameMap {
     'chat-panel-messages': ChatPanelMessages;
-    'action-text': ActionText;
   }
 }
