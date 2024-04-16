@@ -265,7 +265,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       return;
     }
 
-    let offset = 80;
+    let offset = 70;
     if (this.selection.elements.some(ele => isFrameBlock(ele))) {
       offset += 10;
     }
