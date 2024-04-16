@@ -49,10 +49,9 @@ import { AFFINE_SLASH_MENU_WIDGET } from '../root-block/widgets/slash-menu/index
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
-import {
-  SurfaceRefBlockSchema,
-  SurfaceRefBlockService,
-} from '../surface-ref-block/index.js';
+import { surfaceRefSpec } from '../surface-ref-block/index.js';
+import { PreviewEditorBlockSpecs } from './preview-spec.js';
+import { SpecProvider } from './spec-provider.js';
 
 const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
   schema: RootBlockSchema,
@@ -217,16 +216,7 @@ export const PageEditorBlockSpecs: BlockSpec[] = [
     },
     service: SurfacePageService,
   },
-  {
-    schema: SurfaceRefBlockSchema,
-    service: SurfaceRefBlockService,
-    view: {
-      component: literal`affine-surface-ref`,
-      widgets: {
-        surfaceToolbar: literal`affine-surface-ref-toolbar`,
-      },
-    },
-  },
+  surfaceRefSpec,
 ];
 
 export const EdgelessEditorBlockSpecs: BlockSpec[] = [
@@ -245,11 +235,11 @@ export const EdgelessEditorBlockSpecs: BlockSpec[] = [
       component: literal`affine-frame`,
     },
   },
-  {
-    schema: SurfaceRefBlockSchema,
-    service: SurfaceRefBlockService,
-    view: {
-      component: literal`affine-edgeless-surface-ref`,
-    },
-  },
+  surfaceRefSpec,
 ];
+
+export * from './preview-spec.js';
+
+SpecProvider.getInstance().addSpec('page', PageEditorBlockSpecs);
+SpecProvider.getInstance().addSpec('edgeless', EdgelessEditorBlockSpecs);
+SpecProvider.getInstance().addSpec('preview', PreviewEditorBlockSpecs);
