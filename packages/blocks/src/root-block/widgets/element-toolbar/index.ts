@@ -336,17 +336,22 @@ export class EdgelessComponentToolbar extends WidgetElement<
       buttons.push(renderMenuDivider());
     }
 
-    return html` <div
-      class="edgeless-component-toolbar-container"
-      style="position: absolute; left: ${this.left}px; top: ${this.top}px"
-      @pointerdown=${stopPropagation}
-    >
-      ${join(buttons, () => '')}
-      <edgeless-more-button
-        .edgeless=${edgeless}
-        .vertical=${true}
-      ></edgeless-more-button>
-    </div>`;
+    return html` <style>
+        :host {
+          left: ${this.left}px;
+          top: ${this.top}px;
+        }
+      </style>
+      <div
+        class="edgeless-component-toolbar-container"
+        @pointerdown=${stopPropagation}
+      >
+        ${join(buttons, () => '')}
+        <edgeless-more-button
+          .edgeless=${edgeless}
+          .vertical=${true}
+        ></edgeless-more-button>
+      </div>`;
   }
 }
 
