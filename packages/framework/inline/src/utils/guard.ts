@@ -18,6 +18,12 @@ export function isVLine(element: unknown): element is HTMLElement {
   );
 }
 
+export function isInEmptyLine(element: Node) {
+  const el = element instanceof Element ? element : element.parentElement;
+  const vLine = el?.closest<VLine>('v-line');
+  return !!vLine && vLine.vTextLength === 0;
+}
+
 export function isInlineRoot(element: unknown): element is HTMLElement {
   return element instanceof HTMLElement && element.dataset.vRoot === 'true';
 }

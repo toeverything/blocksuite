@@ -5,6 +5,7 @@ import {
   findDocumentOrShadowRoot,
   isInEmbedElement,
   isInEmbedGap,
+  isInEmptyLine,
 } from '../utils/index.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
@@ -238,21 +239,38 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     )
       return;
 
-    if (!this.editor.getInlineRange()) return;
+    const tmpInlineRange = this.editor.toInlineRange(range);
+    if (!tmpInlineRange) return;
 
-    if (
-      isInEmbedGap(range.commonAncestorContainer) &&
-      event.inputType.startsWith('delete')
-    ) {
-      const inlineRange = this.editor.getInlineRange();
-      if (!inlineRange) return;
-      if (inlineRange.length === 0 && inlineRange.index > 0) {
+    let ifHandleTargetRange = true;
+
+    if (event.inputType.startsWith('delete')) {
+      if (
+        isInEmbedGap(range.commonAncestorContainer) &&
+        tmpInlineRange.length === 0 &&
+        tmpInlineRange.index > 0
+      ) {
         this.editor.setInlineRange({
-          index: inlineRange.index - 1,
+          index: tmpInlineRange.index - 1,
           length: 1,
         });
+        ifHandleTargetRange = false;
+      } else if (
+        isInEmptyLine(range.commonAncestorContainer) &&
+        tmpInlineRange.length === 0 &&
+        tmpInlineRange.index > 0
+      ) {
+        // do not use target range when deleting across lines
+        // https://github.com/toeverything/blocksuite/issues/5381
+        this.editor.setInlineRange({
+          index: tmpInlineRange.index - 1,
+          length: 1,
+        });
+        ifHandleTargetRange = false;
       }
-    } else {
+    }
+
+    if (ifHandleTargetRange) {
       const targetRanges = event.getTargetRanges();
       if (targetRanges.length > 0) {
         const staticRange = targetRanges[0];
