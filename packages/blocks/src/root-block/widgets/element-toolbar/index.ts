@@ -146,6 +146,17 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     when: (model: EdgelessModel[]) => boolean;
   }[] = [];
 
+  @state({
+    hasChanged: (value: string[], oldValue: string[]) => {
+      if (value.length !== oldValue?.length) {
+        return true;
+      }
+
+      return value.some((id, index) => id !== oldValue[index]);
+    },
+  })
+  selectedIds: string[] = [];
+
   get edgeless() {
     return this.blockElement as EdgelessRootBlockComponent;
   }
@@ -200,7 +211,12 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     _disposables.add(
       this.selection.slots.updated.on(() => {
-        this._recalculatePosition();
+        if (this.selection.selectedIds.length === 0 || this.selection.editing) {
+          this.toolbarVisible = false;
+        } else {
+          this.toolbarVisible = true;
+          this._recalculatePosition();
+        }
       })
     );
 
@@ -211,18 +227,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     _disposables.add(
       this.doc.slots.blockUpdated.on(this._updateOnSelectedChange)
-    );
-
-    _disposables.add(
-      edgeless.service.selection.slots.updated.on(() => {
-        const selection = edgeless.service.selection;
-
-        if (selection.selectedIds.length === 0 || selection.editing) {
-          this.toolbarVisible = false;
-        } else {
-          this.toolbarVisible = true;
-        }
-      })
     );
 
     _disposables.add(
@@ -278,6 +282,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     this.left = left;
     this.top = top;
+
+    this.selectedIds = this.selection.selectedIds;
   }
 
   registerEntry(entry: CustomEntry) {
