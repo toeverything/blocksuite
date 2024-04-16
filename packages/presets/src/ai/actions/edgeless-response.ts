@@ -73,7 +73,7 @@ export function getElementToolbar(
 
 export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
   const service = getService(host);
-  const copilogWidget = getCopilotPanel(host);
+  const copilogWidget = getEdgelessCopilotWidget(host);
 
   if (copilogWidget.visible) {
     return (service.tool.controllers['copilot'] as CopilotSelectionController)
