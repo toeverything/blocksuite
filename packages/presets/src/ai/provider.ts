@@ -21,6 +21,7 @@ export class AIProvider {
   private readonly actions: Partial<BlockSuitePresets.AIActions> = {};
   private userInfoFn: () => AIUserInfo | Promise<AIUserInfo> | null = () =>
     null;
+  private photoEngine: BlockSuitePresets.AIPhotoEngineService | null = null;
   private histories: BlockSuitePresets.AIHistoryService | null = null;
   private readonly slots = {
     // use case: when user selects "continue in chat" in an ask ai result panel
@@ -28,14 +29,6 @@ export class AIProvider {
     requestContinueInChat: new Slot<{ host: EditorHost; show: boolean }>(),
     // add more if needed
   };
-
-  // actions:
-  static provide<T extends keyof BlockSuitePresets.AIActions>(
-    id: T,
-    action: (
-      ...options: Parameters<BlockSuitePresets.AIActions[T]>
-    ) => ReturnType<BlockSuitePresets.AIActions[T]>
-  ): void;
 
   static provide(
     id: 'userInfo',
@@ -47,12 +40,28 @@ export class AIProvider {
     service: BlockSuitePresets.AIHistoryService
   ): void;
 
+  static provide(
+    id: 'photoEngine',
+    engine: BlockSuitePresets.AIPhotoEngineService
+  ): void;
+
+  // actions:
+  static provide<T extends keyof BlockSuitePresets.AIActions>(
+    id: T,
+    action: (
+      ...options: Parameters<BlockSuitePresets.AIActions[T]>
+    ) => ReturnType<BlockSuitePresets.AIActions[T]>
+  ): void;
+
   static provide(id: unknown, action: unknown) {
     if (id === 'userInfo') {
       AIProvider.instance.userInfoFn = action as () => AIUserInfo;
     } else if (id === 'histories') {
       AIProvider.instance.histories =
         action as BlockSuitePresets.AIHistoryService;
+    } else if (id === 'photoEngine') {
+      AIProvider.instance.photoEngine =
+        action as BlockSuitePresets.AIPhotoEngineService;
     } else {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       AIProvider.instance.provideAction(id as any, action as any);
@@ -95,6 +104,10 @@ export class AIProvider {
     this.actions[id] = action;
   }
 
+  static get slots() {
+    return AIProvider.instance.slots;
+  }
+
   static get actions() {
     return AIProvider.instance.actions;
   }
@@ -103,8 +116,8 @@ export class AIProvider {
     return AIProvider.instance.userInfoFn();
   }
 
-  static get slots() {
-    return AIProvider.instance.slots;
+  static get photoEngine() {
+    return AIProvider.instance.photoEngine;
   }
 
   static get histories() {

@@ -1,6 +1,8 @@
 import { Bound } from '@blocksuite/blocks';
 import { nanoid } from '@blocksuite/store';
 
+import { AIProvider } from '../provider.js';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const replaceText = (text: Record<string, string>, template: any) => {
   if (template != null && typeof template === 'object') {
@@ -19,27 +21,17 @@ const replaceText = (text: Record<string, string>, template: any) => {
 const getImageUrlByKeyword =
   (keyword: string) =>
   async (w: number, h: number): Promise<string> => {
-    const url = new URL('https://api.unsplash.com/search/photos');
-    const unsplashKey = 'BONl2qMSdMLIexsUIOmi7Bh2dSO8hBUZQq2sUR0E4Jc'; //params.get('unsplashKey');
-    url.searchParams.set('client_id', unsplashKey ?? '');
-    url.searchParams.set('query', keyword);
-    const result: {
-      results: {
-        urls: {
-          regular: string;
-        };
-      }[];
-    } = await fetch(url.toString()).then(res => res.json());
-    const randomImage =
-      result.results[Math.floor(Math.random() * result.results.length)].urls
-        .regular;
-    const image = new URL(randomImage);
-    image.searchParams.set('fit', 'crop');
-    image.searchParams.set('crop', 'edges');
-    image.searchParams.set('dpr', '3');
-    image.searchParams.set('w', `${w}`);
-    image.searchParams.set('height', `${h}`);
-    return image.toString();
+    const photos = await AIProvider.photoEngine?.searchImages({
+      query: keyword,
+      width: w,
+      height: h,
+    });
+
+    if (photos == null || photos.length === 0) {
+      return ''; // fixme: give a default image
+    }
+
+    return photos[Math.floor(Math.random() * photos.length)];
   };
 
 const getImages = async (
