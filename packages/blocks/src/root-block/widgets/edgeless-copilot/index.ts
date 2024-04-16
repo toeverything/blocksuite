@@ -75,7 +75,11 @@ export class EdgelessCopilotWidget extends WidgetElement<
     return this.blockElement;
   }
 
-  hide() {
+  set visible(visible: boolean) {
+    this._visible = visible;
+  }
+
+  hideCopilotPanel() {
     this._copilotPanel?.hide();
     this._showCopilotPanelOff?.();
   }
@@ -116,7 +120,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
           if (
             e.button === MOUSE_BUTTON.MAIN &&
             !this.contains(e.target as HTMLElement) &&
-            (!aiPanel || !aiPanel.contains(e.target as HTMLElement))
+            (!aiPanel || aiPanel.state === 'hidden')
           ) {
             off();
             this._copilotPanel?.remove();

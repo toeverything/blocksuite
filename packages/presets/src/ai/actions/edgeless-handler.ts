@@ -15,8 +15,8 @@ import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
   actionToResponse,
-  getCopilotPanel,
   getCopilotSelectedElems,
+  getEdgelessCopilotWidget,
 } from './edgeless-response.js';
 import { bindEventSource } from './handler.js';
 
@@ -174,7 +174,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
 ) {
   return (host: EditorHost) => {
     const aiPanel = getAIPanel(host);
-    const copilotPanel = getCopilotPanel(host);
+    const edgelessCopilot = getEdgelessCopilotWidget(host);
     let internal: Record<string, unknown> = {};
     const ctx = {
       get() {
@@ -185,7 +185,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
       },
     };
 
-    copilotPanel.hide();
+    edgelessCopilot.hideCopilotPanel();
 
     assertExists(aiPanel.config);
 
@@ -197,8 +197,11 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     )(host);
     aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
+    aiPanel.config.discardCallback = () => {
+      edgelessCopilot.visible = false;
+    };
 
-    aiPanel.toggle(copilotPanel.selectionElem, 'placeholder');
+    aiPanel.toggle(edgelessCopilot.selectionElem, 'placeholder');
   };
 }
 

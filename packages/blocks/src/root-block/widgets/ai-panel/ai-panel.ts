@@ -41,6 +41,7 @@ export interface AffineAIPanelWidgetConfig {
 
   finishStateConfig: AIPanelAnswerConfig;
   errorStateConfig: AIPanelErrorConfig;
+  discardCallback?: () => void;
 }
 
 export type AffineAIPanelState =
@@ -104,6 +105,10 @@ export class AffineAIPanelWidget extends WidgetElement {
       this._discardModal = null;
     }
   };
+  private _discardCallback = () => {
+    this.hide();
+    this.config?.discardCallback?.();
+  };
 
   toggle = (reference: ReferenceElement, input?: string) => {
     if (input) {
@@ -142,10 +147,10 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._stopAutoUpdate = undefined;
   };
 
-  discard = () => {
+  discard = (callback: () => void = this._discardCallback) => {
     if (this.state === 'hidden') return;
     this._clearDiscardModal();
-    this._discardModal = toggleDiscardModal(this.hide);
+    this._discardModal = toggleDiscardModal(callback);
   };
 
   /**
@@ -291,7 +296,7 @@ export class AffineAIPanelWidget extends WidgetElement {
         'input',
         () =>
           html`<ai-panel-input
-            .onBlur=${this.discard}
+            .onBlur=${() => this.discard()}
             .onFinish=${this._inputFinish}
           ></ai-panel-input>`,
       ],

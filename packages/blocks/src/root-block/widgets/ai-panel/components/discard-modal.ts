@@ -120,20 +120,20 @@ export class AIPanelDiscardModal extends LitElement {
     }
   `;
 
-  private _discardAction: () => void;
+  private _discardCallback: () => void;
 
   private _close() {
     this.remove();
   }
 
   private _discard() {
-    this._discardAction();
+    this._discardCallback();
     this.remove();
   }
 
-  constructor(discard: () => void) {
+  constructor(callback: () => void) {
     super();
-    this._discardAction = discard;
+    this._discardCallback = callback;
   }
 
   override render() {
@@ -157,8 +157,8 @@ export class AIPanelDiscardModal extends LitElement {
   }
 }
 
-export function toggleDiscardModal(discard: () => void) {
-  const discardModal = new AIPanelDiscardModal(discard);
+export function toggleDiscardModal(callback: () => void) {
+  const discardModal = new AIPanelDiscardModal(callback);
   document.body.append(discardModal);
   return discardModal;
 }
