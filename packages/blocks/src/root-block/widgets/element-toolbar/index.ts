@@ -3,7 +3,7 @@ import './more-button.js';
 
 import { WidgetElement } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
@@ -38,6 +38,7 @@ import {
   type TextElementModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessModel } from '../../edgeless/type.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
@@ -86,11 +87,16 @@ type CategorizedElements = {
     EmbedLoomModel[];
 };
 
+type CustomEntry = {
+  render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
+  when: (model: EdgelessModel[]) => boolean;
+};
+
 export const EDGELESS_ELEMENT_TOOLBAR_WIDGET =
   'edgeless-element-toolbar-widget';
 
 @customElement(EDGELESS_ELEMENT_TOOLBAR_WIDGET)
-export class EdgelessComponentToolbar extends WidgetElement<
+export class EdgelessElementToolbarWidget extends WidgetElement<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
@@ -133,6 +139,12 @@ export class EdgelessComponentToolbar extends WidgetElement<
 
   @state()
   private _dragging = false;
+
+  @state()
+  private _registeredEntries: {
+    render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
+    when: (model: EdgelessModel[]) => boolean;
+  }[] = [];
 
   get edgeless() {
     return this.blockElement as EdgelessRootBlockComponent;
@@ -268,6 +280,10 @@ export class EdgelessComponentToolbar extends WidgetElement<
     this.top = top;
   }
 
+  registerEntry(entry: CustomEntry) {
+    this._registeredEntries.push(entry);
+  }
+
   override render() {
     if (this.doc.readonly || this._dragging || !this.toolbarVisible) {
       return nothing;
@@ -335,6 +351,15 @@ export class EdgelessComponentToolbar extends WidgetElement<
       buttons.push(renderMenuDivider());
     }
 
+    const registeredEntries = this._registeredEntries
+      .filter(entry => entry.when(elements))
+      .map(entry => entry.render(this.edgeless));
+
+    if (registeredEntries.length) {
+      buttons.unshift(renderMenuDivider());
+      registeredEntries.forEach(entry => entry && buttons.unshift(entry));
+    }
+
     return html` <style>
         :host {
           left: ${this.left}px;
@@ -356,6 +381,6 @@ export class EdgelessComponentToolbar extends WidgetElement<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-element-toolbar-widget': EdgelessComponentToolbar;
+    'edgeless-element-toolbar-widget': EdgelessElementToolbarWidget;
   }
 }

@@ -15,6 +15,7 @@ import {
   actionToResponse,
   getCopilotPanel,
   getCopilotSelectedElems,
+  getElementToolbar,
 } from './edgeless-response.js';
 import { bindEventSource } from './handler.js';
 
@@ -179,7 +180,11 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
 
-    aiPanel.toggle(copilotPanel.selectionElem, 'placeholder');
+    if (copilotPanel.visible) {
+      aiPanel.toggle(copilotPanel.selectionElem, 'placeholder');
+    } else {
+      aiPanel.toggle(getElementToolbar(host), 'placeholder');
+    }
   };
 }
 
