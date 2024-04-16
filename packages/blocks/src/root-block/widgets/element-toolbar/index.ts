@@ -194,7 +194,6 @@ export class EdgelessComponentToolbar extends WidgetElement<
 
     pickValues(this.edgeless.service.surface, [
       'elementAdded',
-      'elementRemoved',
       'elementUpdated',
     ]).forEach(slot => _disposables.add(slot.on(this._updateOnSelectedChange)));
 
