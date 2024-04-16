@@ -151,7 +151,10 @@ export function buildAIPanelConfig(
               name: 'Continue in chat',
               icon: ChatWithAIIcon,
               handler: () => {
-                AIProvider.slots.requestContinueInChat.emit(true);
+                AIProvider.slots.requestContinueInChat.emit({
+                  host: panel.host,
+                  show: true,
+                });
               },
             },
             {

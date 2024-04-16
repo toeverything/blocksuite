@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/store';
 
 export interface AIUserInfo {
@@ -24,7 +25,7 @@ export class AIProvider {
   private readonly slots = {
     // use case: when user selects "continue in chat" in an ask ai result panel
     // do we need to pass the context to the chat panel?
-    requestContinueInChat: new Slot<boolean>(),
+    requestContinueInChat: new Slot<{ host: EditorHost; show: boolean }>(),
     // add more if needed
   };
 
