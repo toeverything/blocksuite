@@ -1,5 +1,4 @@
 import '../../edgeless/components/buttons/tool-icon-button.js';
-import './release-from-group-button.js';
 import './more-button.js';
 
 import { WidgetElement } from '@blocksuite/block-std';
@@ -174,7 +173,7 @@ export class EdgelessComponentToolbar extends WidgetElement<
     const id = typeof element === 'string' ? element : element.id;
 
     if (this.isConnected && this.selection.has(id)) {
-      this.requestUpdate();
+      this._recalculatePosition();
     }
   };
 
