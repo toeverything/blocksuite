@@ -8,9 +8,10 @@ import {
 
 import {
   actionToHandler,
+  explainImageShowWhen,
   makeItRealShowWhen,
   mindmapShowWhen,
-  noteBlockShowWen,
+  noteOrTextBlockShowWen,
 } from '../../actions/edgeless-handler.js';
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
 import { translateLangs } from '../../actions/types.js';
@@ -29,7 +30,7 @@ export const docGroup: AIItemGroupConfig = {
     {
       name: 'Summary',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('summary'),
     },
   ],
@@ -41,13 +42,13 @@ export const othersGroup: AIItemGroupConfig = {
     {
       name: 'Find actions from it',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('findActions'),
     },
     {
       name: 'Explain this',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: explainImageShowWhen,
       handler: actionToHandler('explain'),
     },
   ],
@@ -59,37 +60,37 @@ export const editGroup: AIItemGroupConfig = {
     {
       name: 'Translate to',
       icon: LanguageIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       subItem: translateSubItem,
     },
     {
       name: 'Improve writing for it',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('improveWriting'),
     },
     {
       name: 'Improve grammar for it',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('improveGrammar'),
     },
     {
       name: 'Fix spelling ',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('fixSpelling'),
     },
     {
       name: 'Make longer',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('makeLonger'),
     },
     {
       name: 'Make shorter',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('makeShorter'),
     },
   ],
@@ -101,37 +102,37 @@ export const draftGroup: AIItemGroupConfig = {
     {
       name: 'Write an article about this',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('writeArticle'),
     },
     {
       name: 'Write a tweet about this',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('writeTwitterPost'),
     },
     {
       name: 'Write a poem about this',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('writePoem'),
     },
     {
       name: 'Write a blog post about this',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('writeBlogPost'),
     },
     {
       name: 'Write a outline from this',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('writeOutline'),
     },
     {
       name: 'Brainstorm ideas about this',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('brainstorm'),
     },
   ],
@@ -149,7 +150,7 @@ export const mindmapGroup: AIItemGroupConfig = {
     {
       name: 'Brainstorm ideas with Mindmap',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('brainstormMindmap'),
     },
   ],
@@ -161,7 +162,7 @@ export const presentationGroup: AIItemGroupConfig = {
     {
       name: 'Create a presentation',
       icon: AIPenIcon,
-      showWhen: noteBlockShowWen,
+      showWhen: noteOrTextBlockShowWen,
       handler: actionToHandler('createSlides'),
     },
   ],
