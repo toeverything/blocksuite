@@ -354,6 +354,6 @@ export class EdgelessComponentToolbar extends WidgetElement<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-component-toolbar': EdgelessComponentToolbar;
+    'edgeless-element-toolbar-widget': EdgelessComponentToolbar;
   }
 }
