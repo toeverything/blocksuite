@@ -14,8 +14,11 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
-      box-sizing: border-box;
       position: absolute;
+    }
+
+    .edgeless-copilot-panel {
+      box-sizing: border-box;
       padding: 8px;
       min-width: 294px;
       max-height: 374px;
@@ -24,10 +27,6 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       z-index: var(--affine-z-index-popover);
-    }
-
-    .edgeless-copilot-panel {
-      width: 100%;
     }
   `;
 
