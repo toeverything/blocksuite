@@ -130,7 +130,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       name: 'Discard',
       icon: DiscardIcon,
       handler: () => {
-        panel.hide();
+        panel.discard();
       },
     },
   ];

@@ -70,7 +70,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
         gap: 4px;
         border-radius: 8px;
         border: 1px solid var(--affine-border-color, #e3e2e4);
-        background: var(--light-white-white, #fff);
+        background: var(--affine-white, #fff);
         .content {
           display: flex;
           padding: 0px 4px;

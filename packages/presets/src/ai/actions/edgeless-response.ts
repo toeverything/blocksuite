@@ -67,7 +67,7 @@ export function discard(
     name: 'Discard',
     icon: DeleteIcon,
     handler: () => {
-      panel.hide();
+      panel.discard();
     },
   };
 }
