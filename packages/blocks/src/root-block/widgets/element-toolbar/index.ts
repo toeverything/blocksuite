@@ -241,29 +241,28 @@ export class EdgelessComponentToolbar extends WidgetElement<
 
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-
     const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
-    const rect = this.getBoundingClientRect();
 
     let left, top;
     if (x >= width || right <= 0 || y >= height || bottom <= 0) {
-      left = right <= 0 ? x - rect.width : x;
-      top = bottom <= 0 ? y - rect.height : y;
+      left = x;
+      top = y;
 
       this.left = left;
       this.top = top;
+      return;
     }
 
-    let offset = 60;
+    let offset = 50;
     if (this.selection.elements.some(ele => isFrameBlock(ele))) {
-      offset += 24;
+      offset += 10;
     }
 
-    top = y - rect.height - offset;
+    top = y - offset;
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
-    left = clamp(x, 10, width - rect.width - 10);
-    top = clamp(top, 10, height - rect.height - 100);
+    left = clamp(x, 10, width - 10);
+    top = clamp(top, 10, height - 100);
 
     this.left = left;
     this.top = top;
