@@ -5,11 +5,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 
 import { getAIPanel } from '../ai-panel.js';
-import { iframeRenderer } from '../messages/iframe.js';
-import { imageRenderer } from '../messages/image.js';
 import { createMindmapRenderer } from '../messages/mindmap.js';
 import { createSlidesRenderer } from '../messages/slides-renderer.js';
 import { createTextRenderer } from '../messages/text.js';
+import {
+  createIframeRenderer,
+  createImageRenderer,
+} from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
 import type { CtxRecord } from './edgeless-response.js';
@@ -39,11 +41,11 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   }
 
   if (id === 'makeItReal') {
-    return iframeRenderer;
+    return createIframeRenderer;
   }
 
   if (id === 'createImage') {
-    return imageRenderer;
+    return createImageRenderer;
   }
 
   return createTextRenderer(host);
