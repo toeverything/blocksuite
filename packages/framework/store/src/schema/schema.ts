@@ -4,7 +4,7 @@ import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
 import { collectionMigrations, docMigrations } from '../migration/index.js';
-import { Block, type YBlock } from '../store/block/block.js';
+import { Block, type YBlock } from '../store/doc/block.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
 import { MigrationError, SchemaValidateError } from './error.js';

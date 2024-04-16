@@ -14,7 +14,7 @@ export async function type(page: Page, content: string) {
 
 export async function press(page: Page, content: string) {
   await page.keyboard.press(content, { delay: 50 });
-  await page.waitForTimeout(100);
+  await page.waitForTimeout(50);
 }
 
 export async function enterInlineEditorPlayground(page: Page) {
@@ -119,8 +119,8 @@ export async function getInlineRichTextLine(
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const editor = (richTexts[i] as any).inlineEditor as InlineEditor;
-      const line = editor.getLine(index);
-      return [line[0].textContent, line[1]] as const;
+      const { line, rangeIndexRelatedToLine } = editor.getLine(index);
+      return [line.vTextContent, rangeIndexRelatedToLine] as const;
     },
     [index, i]
   );

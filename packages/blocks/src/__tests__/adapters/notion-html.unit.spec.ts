@@ -1513,4 +1513,167 @@ describe('notion html to snapshot', () => {
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
+
+  test('plain table', async () => {
+    const html = `<div class="page-body">
+    <table id="511819ef-9f6a-4aff-9d11-174e04311b6e" class="simple-table"><tbody><tr id="2d1f2bc0-8c5f-457f-b248-b30096c2d4dd"><td id="ldE" class="">aa</td><td id="KwQz" class=""></td></tr><tr id="459350cc-7a96-44bf-8859-b74d7f4df29d"><td id="ldE" class="">1</td><td id="KwQz" class=""></td></tr><tr id="1425a8de-12d0-4aa1-b120-2bff9eeb4ee8"><td id="ldE" class=""></td><td id="KwQz" class=""></td></tr></tbody></table>
+    </div>`;
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: 'both',
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:database',
+          props: {
+            views: [
+              {
+                id: 'matchesReplaceMap[2]',
+                name: 'Table View',
+                mode: 'table',
+                columns: [],
+                filter: {
+                  type: 'group',
+                  op: 'and',
+                  conditions: [],
+                },
+                header: {
+                  titleColumn: '',
+                  iconColumn: 'type',
+                },
+              },
+            ],
+            title: {
+              '$blocksuite:internal:text$': true,
+              delta: [],
+            },
+            columns: [
+              {
+                type: 'rich-text',
+                name: '',
+                data: {},
+                id: 'matchesReplaceMap[17]',
+              },
+              {
+                type: 'rich-text',
+                name: '',
+                data: {},
+                id: 'matchesReplaceMap[19]',
+              },
+            ],
+            cells: {
+              'matchesReplaceMap[20]': {
+                'matchesReplaceMap[17]': {
+                  columnId: 'matchesReplaceMap[17]',
+                  value: 'aa',
+                },
+                'matchesReplaceMap[19]': {
+                  columnId: 'matchesReplaceMap[19]',
+                  value: '',
+                },
+              },
+              'matchesReplaceMap[21]': {
+                'matchesReplaceMap[17]': {
+                  columnId: 'matchesReplaceMap[17]',
+                  value: '1',
+                },
+                'matchesReplaceMap[19]': {
+                  columnId: 'matchesReplaceMap[19]',
+                  value: '',
+                },
+              },
+              'matchesReplaceMap[22]': {
+                'matchesReplaceMap[17]': {
+                  columnId: 'matchesReplaceMap[17]',
+                  value: '',
+                },
+                'matchesReplaceMap[19]': {
+                  columnId: 'matchesReplaceMap[19]',
+                  value: '',
+                },
+              },
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[20]',
+              flavour: 'affine:paragraph',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aa',
+                    },
+                  ],
+                },
+                type: 'text',
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[21]',
+              flavour: 'affine:paragraph',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aa',
+                    },
+                  ],
+                },
+                type: 'text',
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[22]',
+              flavour: 'affine:paragraph',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                type: 'text',
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[23]',
+              flavour: 'affine:paragraph',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                type: 'text',
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const adapter = new NotionHtmlAdapter();
+    const rawBlockSnapshot = await adapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
 });

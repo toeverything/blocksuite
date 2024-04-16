@@ -5,16 +5,20 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 
 import { getAIPanel } from '../ai-panel.js';
-import { iframeRenderer } from '../messages/iframe.js';
 import { createMindmapRenderer } from '../messages/mindmap.js';
+import { createSlidesRenderer } from '../messages/slides-renderer.js';
 import { createTextRenderer } from '../messages/text.js';
+import {
+  createIframeRenderer,
+  createImageRenderer,
+} from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
   actionToResponse,
-  getCopilotPanel,
   getCopilotSelectedElems,
+  getEdgelessCopilotWidget,
   getElementToolbar,
 } from './edgeless-response.js';
 import { bindEventSource } from './handler.js';
@@ -33,8 +37,16 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
     return createMindmapRenderer(host, ctx);
   }
 
+  if (id === 'createSlides') {
+    return createSlidesRenderer(host, ctx);
+  }
+
   if (id === 'makeItReal') {
-    return iframeRenderer;
+    return createIframeRenderer;
+  }
+
+  if (id === 'createImage') {
+    return createImageRenderer;
   }
 
   return createTextRenderer(host);
@@ -58,13 +70,16 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  getAttachments?: (host: EditorHost) => Promise<string[] | void>
+  extract?: (host: EditorHost) => Promise<{
+    content?: string;
+    attachments?: string[];
+  } | void>
 ) {
   const action = AIProvider.actions[id];
 
   if (!action || typeof action !== 'function') return;
 
-  if (getAttachments && typeof getAttachments === 'function') {
+  if (extract && typeof extract === 'function') {
     return (host: EditorHost): BlockSuitePresets.TextStream => {
       let stream: BlockSuitePresets.TextStream | undefined;
       return {
@@ -76,9 +91,9 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
             workspaceId: host.doc.collection.id,
           } as Parameters<typeof action>[0];
 
-          const attachments = await getAttachments(host);
-          if (attachments && attachments.length) {
-            options.attachments = attachments;
+          const data = await extract(host);
+          if (data) {
+            Object.assign(options, data);
           }
 
           // @ts-expect-error todo: maybe fix this
@@ -120,7 +135,10 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  getAttachments?: (host: EditorHost) => Promise<string[] | void>
+  extract?: (host: EditorHost) => Promise<{
+    content?: string;
+    attachments?: string[];
+  } | void>
 ) {
   return (host: EditorHost) => {
     return ({
@@ -137,7 +155,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
 
       if (selectedElements.length === 0) return;
 
-      const stream = actionToStream(id, variants, getAttachments)?.(host);
+      const stream = actionToStream(id, variants, extract)?.(host);
 
       if (!stream) return;
 
@@ -152,11 +170,14 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  getAttachments?: (host: EditorHost) => Promise<string[] | void>
+  extract?: (host: EditorHost) => Promise<{
+    content?: string;
+    attachments?: string[];
+  } | void>
 ) {
   return (host: EditorHost) => {
     const aiPanel = getAIPanel(host);
-    const copilotPanel = getCopilotPanel(host);
+    const edgelessCopilot = getEdgelessCopilotWidget(host);
     let internal: Record<string, unknown> = {};
     const ctx = {
       get() {
@@ -167,7 +188,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
       },
     };
 
-    copilotPanel.hide();
+    edgelessCopilot.hideCopilotPanel();
 
     assertExists(aiPanel.config);
 
@@ -175,13 +196,16 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.generateAnswer = actionToGeneration(
       id,
       variants,
-      getAttachments
+      extract
     )(host);
     aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
+    aiPanel.config.discardCallback = () => {
+      edgelessCopilot.visible = false;
+    };
 
-    if (copilotPanel.visible) {
-      aiPanel.toggle(copilotPanel.selectionElem, 'placeholder');
+    if (edgelessCopilot.visible) {
+      aiPanel.toggle(edgelessCopilot.selectionElem, 'placeholder');
     } else {
       aiPanel.toggle(getElementToolbar(host), 'placeholder');
     }

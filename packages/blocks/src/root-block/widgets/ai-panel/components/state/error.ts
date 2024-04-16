@@ -70,7 +70,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
         gap: 4px;
         border-radius: 8px;
         border: 1px solid var(--affine-border-color, #e3e2e4);
-        background: var(--light-white-white, #fff);
+        background: var(--affine-white, #fff);
         .content {
           display: flex;
           padding: 0px 4px;
@@ -101,8 +101,8 @@ export class AIPanelError extends WithDisposable(LitElement) {
         <div class="answer-tip">
           <div class="top">Answer</div>
           <div class="bottom">
-            An error occurred, If this issue persists please contact us through
-            our help center at help.openai.com
+            An error occurred, If this issue persists please let us know
+            contact@toeverything.info
           </div>
         </div>
         <div @click=${this.config.upgrade} class="upgrade">

@@ -7,7 +7,7 @@ import type {
 } from '@blocksuite/blocks';
 import { BlocksUtils, EdgelessRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import { Slice } from '@blocksuite/store';
+import { type DraftModel, Slice, toDraftModel } from '@blocksuite/store';
 
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
@@ -75,11 +75,43 @@ export async function selectedToPng(editor: EditorHost) {
   return (await selectedToCanvas(editor))?.toDataURL('image/png');
 }
 
+export function getSelectedModels(editorHost: EditorHost) {
+  const chain = editorHost.std.command.chain();
+  const [_, ctx] = chain
+    .getSelectedModels({
+      types: ['block', 'text'],
+    })
+    .run();
+  const { selectedModels } = ctx;
+  return selectedModels;
+}
+
+function traverse(model: DraftModel, drafts: DraftModel[]) {
+  const isDatabase = model.flavour === 'affine:database';
+  const children = isDatabase
+    ? model.children
+    : model.children.filter(child => {
+        const idx = drafts.findIndex(m => m.id === child.id);
+        return idx >= 0;
+      });
+
+  children.forEach(child => {
+    const idx = drafts.findIndex(m => m.id === child.id);
+    if (idx >= 0) {
+      drafts.splice(idx, 1);
+    }
+    traverse(child, drafts);
+  });
+  model.children = children;
+}
+
 export async function getSelectedTextContent(editorHost: EditorHost) {
-  const slice = Slice.fromModels(
-    editorHost.std.doc,
-    getRootService(editorHost).selectedModels
-  );
+  const selectedModels = getSelectedModels(editorHost);
+  assertExists(selectedModels);
+
+  const drafts = selectedModels.map(toDraftModel);
+  drafts.forEach(draft => traverse(draft, drafts));
+  const slice = Slice.fromModels(editorHost.std.doc, drafts);
   return getMarkdownFromSlice(editorHost, slice);
 }
 
@@ -116,32 +148,20 @@ export const getFirstImageInFrame = (
   return image?.id;
 };
 
-export const getSelections = (host: EditorHost) => {
+export const getSelections = (
+  host: EditorHost,
+  mode: 'flat' | 'highest' = 'flat'
+) => {
   const [_, data] = host.command
     .chain()
     .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
-    .getSelectedBlocks({ types: ['text', 'block'] })
+    .getSelectedBlocks({ types: ['text', 'block'], mode })
     .run();
 
   return data;
 };
 
-function readBlobAsURL(blob: Blob) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      if (typeof e.target?.result === 'string') {
-        resolve(e.target.result);
-      } else {
-        reject();
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-export const getSelectedImagesAsDataUrls = (host: EditorHost) => {
+export const getSelectedImagesAsBlobs = (host: EditorHost) => {
   const [_, data] = host.command
     .chain()
     .tryAll(chain => [
@@ -161,7 +181,6 @@ export const getSelectedImagesAsDataUrls = (host: EditorHost) => {
         )?.sourceId;
         return sourceId ? host.doc.blob.get(sourceId) : null;
       })
-      .filter((b): b is Promise<Blob> | Blob => !!b)
-      .map(async b => readBlobAsURL(await b)) ?? []
+      .filter((b): b is Promise<Blob> | Blob => !!b) ?? []
   );
 };

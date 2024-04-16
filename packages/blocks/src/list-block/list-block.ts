@@ -106,7 +106,7 @@ export class ListBlockComponent extends BlockElement<
         let current: BlockElement | null = this as BlockElement;
         while (current?.tagName == 'AFFINE-LIST') {
           current.requestUpdate();
-          const next = this.std.doc.getNextSibling(current.model);
+          const next = this.std.doc.getNext(current.model);
           const id = next?.id;
           current = id ? this.std.view.getBlock(id) : null;
         }

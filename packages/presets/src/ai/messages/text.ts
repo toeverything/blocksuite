@@ -59,7 +59,10 @@ export class AIAnswerText extends LitElement {
       markDownToDoc(this.host, this.answer)
         .then(doc => {
           this._previewDoc = doc;
-          this._previewDoc.awarenessStore.setReadonly(this._previewDoc, true);
+          this._previewDoc.awarenessStore.setReadonly(
+            this._previewDoc.blockCollection,
+            true
+          );
           this.requestUpdate();
         })
         .catch(console.error);

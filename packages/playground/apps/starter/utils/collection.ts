@@ -1,6 +1,6 @@
 import { AffineSchemas, TestUtils } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
+import type { BlockCollection } from '@blocksuite/store';
 import {
   type BlobStorage,
   createIndexeddbStorage,
@@ -77,12 +77,18 @@ export function createStarterDocCollection() {
 export async function initStarterDocCollection(collection: DocCollection) {
   // init from other clients
   if (room && !params.has('init')) {
-    let firstDoc = collection.docs.values().next().value as Doc | undefined;
+    const firstCollection = collection.docs.values().next().value as
+      | BlockCollection
+      | undefined;
+    let firstDoc = firstCollection?.getDoc();
     if (!firstDoc) {
       await new Promise<string>(resolve =>
         collection.slots.docAdded.once(resolve)
       );
-      firstDoc = collection.docs.values().next().value;
+      const firstCollection = collection.docs.values().next().value as
+        | BlockCollection
+        | undefined;
+      firstDoc = firstCollection?.getDoc();
     }
     assertExists(firstDoc);
     const doc = firstDoc;

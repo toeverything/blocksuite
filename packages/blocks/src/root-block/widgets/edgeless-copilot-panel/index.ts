@@ -12,10 +12,13 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 @customElement('edgeless-copilot-panel')
 export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   static override styles = css`
-    .edgeless-copilot-panel {
+    :host {
       display: flex;
-      box-sizing: border-box;
       position: absolute;
+    }
+
+    .edgeless-copilot-panel {
+      box-sizing: border-box;
       padding: 8px;
       min-width: 294px;
       max-height: 374px;

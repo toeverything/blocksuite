@@ -1,2 +1,2 @@
-export * from './iframe.js';
 export * from './text.js';
+export * from './wrapper.js';

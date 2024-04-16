@@ -24,10 +24,16 @@ const autoIdentifyLink = (ctx: HookContext<AffineTextAttributes>) => {
     return;
   }
 
-  const [line] = ctx.inlineEditor.getLine(ctx.inlineRange.index);
+  const { line, lineIndex, rangeIndexRelatedToLine } = ctx.inlineEditor.getLine(
+    ctx.inlineRange.index
+  );
 
-  const verifyData = line.textContent
-    .slice(0, ctx.inlineRange.index)
+  if (lineIndex !== 0) {
+    return;
+  }
+
+  const verifyData = line.vTextContent
+    .slice(0, rangeIndexRelatedToLine)
     .split(' ');
 
   const verifyStr = verifyData[verifyData.length - 1];

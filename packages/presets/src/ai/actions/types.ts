@@ -23,7 +23,7 @@ declare global {
     interface AITextActionOptions {
       input: string;
       stream?: boolean;
-      attachments?: string[]; // blob could only be strings for the moments (url or data urls)
+      attachments?: (string | File | Blob)[]; // blob could only be strings for the moments (url or data urls)
 
       // the following seems not necessary?
       docId: string;
@@ -31,8 +31,8 @@ declare global {
     }
 
     interface AIImageActionOptions extends AITextActionOptions {
-      content: string;
-      params?: string;
+      content?: string;
+      params?: Record<string, string>;
     }
 
     type TextStream = {
@@ -51,7 +51,7 @@ declare global {
     }
 
     interface AIActions {
-      // todo: fine tune chat action here
+      // chat is a bit special because it's has a internally maintained session
       chat<T extends AITextActionOptions>(options: T): AIActionTextResponse<T>;
 
       summary<T extends AITextActionOptions>(
@@ -138,6 +138,33 @@ declare global {
       makeItReal<T extends AIImageActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
+      createImage<T extends AIImageActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+    }
+
+    // todo: should be refactored to get rid of implement details (like messages, action, role, etc.)
+    interface AIHistory {
+      sessionId: string;
+      tokens: number;
+      action: string;
+      messages: {
+        content: string;
+        createdAt: string;
+        role: 'user' | 'assistant';
+      }[];
+    }
+
+    interface AIHistoryService {
+      // non chat histories
+      actions: (
+        workspaceId: string,
+        docId?: string
+      ) => Promise<AIHistory[] | undefined>;
+      chats: (
+        workspaceId: string,
+        docId?: string
+      ) => Promise<AIHistory[] | undefined>;
     }
   }
 }

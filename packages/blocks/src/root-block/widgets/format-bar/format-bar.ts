@@ -84,7 +84,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     const layout = document.querySelector('side-layout-modal');
     if (layout) return false;
 
-    const readonly = this.doc.awarenessStore.isReadonly(this.doc);
+    const readonly = this.doc.awarenessStore.isReadonly(
+      this.doc.blockCollection
+    );
     if (readonly) return false;
 
     if (

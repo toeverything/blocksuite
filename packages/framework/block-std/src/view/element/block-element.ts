@@ -83,12 +83,13 @@ export class BlockElement<
       .filter((x): x is BlockElement => !!x);
   }
 
-  get rootElement() {
-    const rootElement = this.host.view.viewFromPath('block', [
-      this.doc.root!.id,
-    ]);
-    assertExists(rootElement);
-    return rootElement;
+  get rootElement(): BlockElement | null {
+    const rootId = this.doc.root?.id;
+    if (!rootId) {
+      return null;
+    }
+    const rootElement = this.host.view.getBlock(rootId);
+    return rootElement ?? null;
   }
 
   get topContenteditableElement(): BlockElement | null {

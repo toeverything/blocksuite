@@ -1,8 +1,25 @@
-import { CopilotClient, toTextStream } from '@blocksuite/presets';
+import { toTextStream } from '@blocksuite/presets';
+
+import { CopilotClient } from './copilot-client';
 
 const TIMEOUT = 5000;
 
 const backendUrl = 'http://localhost:3010';
+
+function readBlobAsURL(blob: Blob | File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (typeof e.target?.result === 'string') {
+        resolve(e.target.result);
+      } else {
+        reject();
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
 
 export function textToTextStream({
   docId,
@@ -14,8 +31,8 @@ export function textToTextStream({
   docId: string;
   workspaceId: string;
   prompt: string;
-  attachments?: string[];
-  params?: string;
+  attachments?: (Blob | File | string)[];
+  params?: Record<string, string>;
 }): BlockSuitePresets.TextStream {
   const client = new CopilotClient(backendUrl);
   return {
@@ -30,7 +47,9 @@ export function textToTextStream({
         const messageId = await client.createMessage({
           sessionId: session,
           content: prompt,
-          attachments,
+          attachments: await Promise.all(
+            attachments.map(a => (typeof a === 'string' ? a : readBlobAsURL(a)))
+          ),
           params,
         });
         const eventSource = client.textStream(messageId, session);

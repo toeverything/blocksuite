@@ -4,7 +4,7 @@ import * as Y from 'yjs';
 import { native2Y } from '../../reactive/index.js';
 import type { BlockModel } from '../../schema/index.js';
 import { internalPrimitives, type Schema } from '../../schema/index.js';
-import type { YBlock } from '../block/index.js';
+import type { YBlock } from './index.js';
 
 export class DocCRUD {
   constructor(

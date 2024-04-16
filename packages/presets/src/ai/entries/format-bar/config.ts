@@ -13,7 +13,7 @@ import {
 } from '@blocksuite/blocks';
 
 import { actionToHandler } from '../../actions/handler.js';
-import { textTones, translateLangs } from '../../actions/text.js';
+import { textTones, translateLangs } from '../../actions/types.js';
 
 export const translateSubItem: AISubItemConfig[] = translateLangs.map(lang => {
   return {

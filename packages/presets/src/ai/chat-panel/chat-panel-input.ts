@@ -6,7 +6,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { ChatSendIcon, CloseIcon, ImageIcon } from '../_common/icons.js';
-import type { CopilotClient } from '../copilot-client.js';
+import { AIProvider } from '../provider.js';
 import type { ChatItem, ChatStatus } from './index.js';
 
 const MaximumImageCount = 8;
@@ -47,6 +47,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     textarea::placeholder {
       font-size: 14px;
       font-weight: 400;
+      font-family: var(--affine-font-family);
       color: var(--affine-placeholder-color);
     }
 
@@ -95,12 +96,6 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   host!: EditorHost;
 
   @property({ attribute: false })
-  copilotClient!: CopilotClient;
-
-  @property({ attribute: false })
-  sessionId!: string;
-
-  @property({ attribute: false })
   updateItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
@@ -143,12 +138,18 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       { role: 'user', content: text },
       { role: 'assistant', content: '' },
     ]);
-    const res = await this.copilotClient.textToText(text, this.sessionId);
+    const res = await AIProvider.actions.chat?.({
+      input: text,
+      attachments: this.images,
+      docId: this.host.doc.id,
+      workspaceId: this.host.doc.collection.id,
+    });
+
     if (res) {
+      const items = [...this.items];
+      items[items.length - 1] = { role: 'assistant', content: res };
       this.updateStatus('success');
-      const messages = [...this.items];
-      messages[messages.length - 1] = { role: 'assistant', content: res };
-      this.updateItems(messages);
+      this.updateItems(items);
     }
   };
 
@@ -215,7 +216,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             this.isInputEmpty = !this.textarea.value;
           }}
           @keydown=${async (evt: KeyboardEvent) => {
-            if (evt.key === 'Enter' && !evt.shiftKey) {
+            if (evt.key === 'Enter' && !evt.shiftKey && !evt.isComposing) {
               evt.preventDefault();
               await this.send();
             }

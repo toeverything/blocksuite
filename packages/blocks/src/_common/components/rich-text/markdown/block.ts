@@ -34,8 +34,8 @@ export function tryConvertBlock(
     return KEYBOARD_ALLOW_DEFAULT;
   }
 
-  const [, offset] = inline.getLine(range.index);
-  if (offset > prefixText.length) {
+  const { lineIndex, rangeIndexRelatedToLine } = inline.getLine(range.index);
+  if (lineIndex !== 0 || rangeIndexRelatedToLine > prefixText.length) {
     return KEYBOARD_ALLOW_DEFAULT;
   }
   const isParagraph = matchFlavours(model, ['affine:paragraph']);

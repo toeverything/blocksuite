@@ -4,7 +4,7 @@ import { AIProvider } from '@blocksuite/presets';
 import { textToTextStream } from './request';
 
 export function setupAIProvider() {
-  AIProvider.provideAction('chat', options => {
+  AIProvider.provide('chat', options => {
     assertExists(options.stream);
     return textToTextStream({
       docId: options.docId,
@@ -13,7 +13,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('summary', options => {
+  AIProvider.provide('summary', options => {
     assertExists(options.stream);
     const prompt = `
     Summarize the key points from the following content in a clear and concise manner,
@@ -29,7 +29,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('translate', options => {
+  AIProvider.provide('translate', options => {
     assertExists(options.stream);
     const prompt = `Please translate the following content into ${options.lang} and return it to us, adhering to the original format of the content：
 
@@ -42,7 +42,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('changeTone', options => {
+  AIProvider.provide('changeTone', options => {
     assertExists(options.stream);
     const prompt = `Change the tone of the following content to ${options.tone}: ${options.input}`;
     return textToTextStream({
@@ -52,7 +52,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('improveWriting', options => {
+  AIProvider.provide('improveWriting', options => {
     assertExists(options.stream);
     const prompt = `Improve the writing of the following content: ${options.input}`;
     return textToTextStream({
@@ -62,7 +62,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('improveGrammar', options => {
+  AIProvider.provide('improveGrammar', options => {
     assertExists(options.stream);
     const prompt = `Improve the grammar of the following content: ${options.input}`;
     return textToTextStream({
@@ -72,7 +72,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('fixSpelling', options => {
+  AIProvider.provide('fixSpelling', options => {
     assertExists(options.stream);
     const prompt = `Fix the spelling of the following content: ${options.input}`;
     return textToTextStream({
@@ -82,7 +82,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('createHeadings', options => {
+  AIProvider.provide('createHeadings', options => {
     assertExists(options.stream);
     const prompt = `Create headings for the following content: ${options.input}`;
     return textToTextStream({
@@ -92,7 +92,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('makeLonger', options => {
+  AIProvider.provide('makeLonger', options => {
     assertExists(options.stream);
     const prompt = `Make the following content longer: ${options.input}`;
     return textToTextStream({
@@ -102,7 +102,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('makeShorter', options => {
+  AIProvider.provide('makeShorter', options => {
     assertExists(options.stream);
     const prompt = `Make the following content shorter: ${options.input}`;
     return textToTextStream({
@@ -112,7 +112,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('checkCodeErrors', options => {
+  AIProvider.provide('checkCodeErrors', options => {
     assertExists(options.stream);
     const prompt = `Check the code errors in the following content and provide the corrected version:
 
@@ -125,7 +125,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('explainCode', options => {
+  AIProvider.provide('explainCode', options => {
     assertExists(options.stream);
     const prompt = `Explain the code in the following content, focusing on the logic, functions, and expected outcomes:
 
@@ -138,7 +138,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('writeArticle', options => {
+  AIProvider.provide('writeArticle', options => {
     assertExists(options.stream);
     const prompt = `Write an article based on the following content, focusing on the main ideas, structure, and flow:
 
@@ -151,7 +151,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('writeTwitterPost', options => {
+  AIProvider.provide('writeTwitterPost', options => {
     assertExists(options.stream);
     const prompt = `Write a Twitter post based on the following content, keeping it concise and engaging:
 
@@ -164,7 +164,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('writePoem', options => {
+  AIProvider.provide('writePoem', options => {
     assertExists(options.stream);
     const prompt = `Write a poem based on the following content, focusing on the emotions, imagery, and rhythm:
 
@@ -177,7 +177,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('writeOutline', options => {
+  AIProvider.provide('writeOutline', options => {
     assertExists(options.stream);
     const prompt = `Write an outline from the following content in Markdown: ${options.input}`;
 
@@ -188,7 +188,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('writeBlogPost', options => {
+  AIProvider.provide('writeBlogPost', options => {
     assertExists(options.stream);
     const prompt = `Write a blog post based on the following content, focusing on the insights, analysis, and personal perspective:
 
@@ -201,7 +201,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('brainstorm', options => {
+  AIProvider.provide('brainstorm', options => {
     assertExists(options.stream);
     const prompt = `Brainstorm ideas based on the following content, exploring different angles, perspectives, and approaches:
 
@@ -214,7 +214,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('findActions', options => {
+  AIProvider.provide('findActions', options => {
     assertExists(options.stream);
     const prompt = `Find actions related to the following content and return content in markdown: ${options.input}`;
 
@@ -225,7 +225,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('writeOutline', options => {
+  AIProvider.provide('writeOutline', options => {
     assertExists(options.stream);
     const prompt = `Write an outline based on the following content, organizing the main points, subtopics, and structure:
 
@@ -238,7 +238,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('brainstormMindmap', options => {
+  AIProvider.provide('brainstormMindmap', options => {
     assertExists(options.stream);
     const prompt = `Use the nested unordered list syntax without other extra text style in Markdown to create a structure similar to a mind map without any unnecessary plain text description. Analyze the following questions or topics: ${options.input}`;
     return textToTextStream({
@@ -248,7 +248,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('explain', options => {
+  AIProvider.provide('explain', options => {
     assertExists(options.stream);
     const prompt = `Explain the following content in Markdown: ${options.input}`;
 
@@ -259,7 +259,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('explainImage', options => {
+  AIProvider.provide('explainImage', options => {
     assertExists(options.stream);
     const prompt = `Describe the scene captured in this image, focusing on the details, colors, emotions, and any interactions between subjects or objects present.`;
     return textToTextStream({
@@ -270,7 +270,7 @@ export function setupAIProvider() {
     });
   });
 
-  AIProvider.provideAction('makeItReal', options => {
+  AIProvider.provide('makeItReal', options => {
     assertExists(options.stream);
     const prompt = 'Make it real';
     return textToTextStream({
@@ -279,6 +279,17 @@ export function setupAIProvider() {
       prompt,
       attachments: options.attachments,
       params: options.params,
+    });
+  });
+
+  AIProvider.provide('createSlides', options => {
+    assertExists(options.stream);
+    const prompt = `I want to write a PPT, that has many pages, each page has 1 to 4 sections,\neach section has a title of no more than 30 words and no more than 500 words of content,\nbut also need some keywords that match the content of the paragraph used to generate images,\nTry to have a different number of section per page\nThe first page is the cover, which generates a general title (no more than 4 words) and description based on the topic\nthis is a template:\n- page name\n  - title\n    - keywords\n    - description\n- page name\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n- page name\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n- page name\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n  - section name\n    - keywords\n    - content\n- page name\n  - section name\n    - keywords\n    - content\n\n\nplease help me to write this ppt, do not output any content that does not belong to the ppt content itself outside of the content, Directly output the title content keywords without prefix like Title:xxx, Content: xxx, Keywords: xxx\nThe PPT is based on the following topics:\n\n${options.input}`;
+
+    return textToTextStream({
+      docId: options.docId,
+      workspaceId: options.workspaceId,
+      prompt,
     });
   });
 }

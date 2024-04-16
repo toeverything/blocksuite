@@ -5,10 +5,12 @@ function delay(ms: number) {
 // do we really need to export this?
 export function toTextStream(
   eventSource: EventSource,
-  options?: {
+  options: {
     timeout?: number;
-  }
+    type?: 'attachment' | 'message';
+  } = {}
 ): BlockSuitePresets.TextStream {
+  const { timeout, type = 'message' } = options;
   return {
     [Symbol.asyncIterator]: async function* () {
       const messageQueue: string[] = [];
@@ -17,13 +19,13 @@ export function toTextStream(
         resolve => (resolveMessagePromise = resolve)
       );
 
-      eventSource.onmessage = event => {
+      eventSource.addEventListener(type, event => {
         messageQueue.push(event.data);
         resolveMessagePromise();
         messagePromise = new Promise(
           resolve => (resolveMessagePromise = resolve)
         );
-      };
+      });
 
       eventSource.onerror = () => {
         resolveMessagePromise();
@@ -34,10 +36,10 @@ export function toTextStream(
         while (eventSource.readyState !== EventSource.CLOSED) {
           if (messageQueue.length === 0) {
             // Wait for the next message or timeout
-            await (options?.timeout
+            await (timeout
               ? Promise.race([
                   messagePromise,
-                  delay(options.timeout).then(() => {
+                  delay(timeout).then(() => {
                     throw new Error('Timeout');
                   }),
                 ])

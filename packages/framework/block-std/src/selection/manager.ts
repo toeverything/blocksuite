@@ -70,9 +70,11 @@ export class SelectionManager {
   }
 
   get value() {
-    return this._store.getLocalSelection(this.std.doc).map(json => {
-      return this._jsonToSelection(json);
-    });
+    return this._store
+      .getLocalSelection(this.std.doc.blockCollection)
+      .map(json => {
+        return this._jsonToSelection(json);
+      });
   }
 
   fromJSON(json: Record<string, unknown>[]) {
@@ -84,7 +86,7 @@ export class SelectionManager {
 
   set(selections: BaseSelection[]) {
     this._store.setLocalSelection(
-      this.std.doc,
+      this.std.doc.blockCollection,
       selections.map(s => s.toJSON())
     );
     this.slots.changed.emit(selections);

@@ -58,9 +58,10 @@ export class AIItem extends WithDisposable(LitElement) {
   override render() {
     const { item } = this;
     const hasSubConfig = !!item.subItem && item.subItem.length > 0;
+    const className = item.name.split(' ').join('-').toLocaleLowerCase();
 
     return html`<div
-      class="menu-item"
+      class="menu-item ${className}"
       @click=${() => {
         if (typeof item.handler === 'function') {
           item.handler(this.host);

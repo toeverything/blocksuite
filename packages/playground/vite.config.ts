@@ -1,5 +1,6 @@
+import fs from 'node:fs';
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import path, { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { defineConfig, loadEnv } from 'vite';
@@ -10,6 +11,7 @@ import { hmrPlugin } from './scripts/hmr-plugin';
 
 const require = createRequire(import.meta.url);
 const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
+const chunkSizeReport = !!process.env.CHUNK_SIZE_REPORT;
 
 const cache = new Map();
 
@@ -27,11 +29,13 @@ function isDepInclude(
   if (cache.has(key)) {
     return cache.get(key);
   }
-  if (depPaths.includes(id)) {
-    importChain.forEach(item =>
-      cache.set(`${item}-${depPaths.join('|')}`, true)
-    );
-    return true;
+  for (const depPath of depPaths) {
+    if (id.includes(depPath)) {
+      importChain.forEach(item =>
+        cache.set(`${item}-${depPaths.join('|')}`, true)
+      );
+      return true;
+    }
   }
   const moduleInfo = getModuleInfo(id);
   if (!moduleInfo || !moduleInfo.importers) {
@@ -55,6 +59,25 @@ const chunkGroups = {
     require.resolve('@blocksuite/inline'),
     require.resolve('@blocksuite/store'),
     require.resolve('@blocksuite/sync'),
+  ],
+  datefns: [path.dirname(require.resolve('date-fns'))],
+  dompurify: [path.dirname(require.resolve('dompurify'))],
+  shiki: [path.dirname(require.resolve('@shikijs/core'))],
+  unified: [
+    path.dirname(require.resolve('unified')),
+    path.dirname(require.resolve('rehype-parse')),
+    path.dirname(require.resolve('rehype-stringify')),
+    path.dirname(require.resolve('remark-parse')),
+    path.dirname(require.resolve('remark-stringify')),
+    path.dirname(require.resolve('mdast-util-gfm-autolink-literal')),
+    path.dirname(require.resolve('mdast-util-gfm-strikethrough')),
+    path.dirname(require.resolve('mdast-util-gfm-table')),
+    path.dirname(require.resolve('mdast-util-gfm-task-list-item')),
+    path.dirname(require.resolve('micromark-extension-gfm-autolink-literal')),
+    path.dirname(require.resolve('micromark-extension-gfm-strikethrough')),
+    path.dirname(require.resolve('micromark-extension-gfm-table')),
+    path.dirname(require.resolve('micromark-extension-gfm-task-list-item')),
+    path.dirname(require.resolve('micromark-util-combine-extensions')),
   ],
   blocks: [
     require.resolve('@blocksuite/blocks'),
@@ -131,6 +154,15 @@ export default ({ mode }) => {
             for (const group of Object.keys(chunkGroups)) {
               const deps = chunkGroups[group];
               if (isDepInclude(id, deps, [], getModuleInfo)) {
+                if (chunkSizeReport && id.includes('node_modules')) {
+                  console.log(group + ':', id);
+                  console.log(
+                    group + ':',
+                    fs.statSync(id.replace('\x00', '').replace(/\?.*/, ''))
+                      .size / 1024,
+                    'KB'
+                  );
+                }
                 return group;
               }
             }
