@@ -26,6 +26,7 @@ export class AIProvider {
     // use case: when user selects "continue in chat" in an ask ai result panel
     // do we need to pass the context to the chat panel?
     requestContinueInChat: new Slot<{ host: EditorHost; show: boolean }>(),
+    requestUpgradePlan: new Slot<{ host: EditorHost }>(),
     // add more if needed
   };
 
@@ -57,29 +58,6 @@ export class AIProvider {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       AIProvider.instance.provideAction(id as any, action as any);
     }
-  }
-
-  /**
-   * @deprecated use `provide` instead
-   */
-  static provideAction<T extends keyof BlockSuitePresets.AIActions>(
-    id: T,
-    action: (
-      ...options: Parameters<BlockSuitePresets.AIActions[T]>
-    ) => ReturnType<BlockSuitePresets.AIActions[T]>
-  ): void {
-    if (AIProvider.instance.actions[id]) {
-      console.warn(`AI action ${id} is already provided`);
-    }
-    // @ts-expect-error todo: maybe fix this
-    AIProvider.instance.actions[id] = action;
-  }
-
-  /**
-   * @deprecated use `provide` instead
-   */
-  static provideUserInfo(fn: () => AIUserInfo | Promise<AIUserInfo> | null) {
-    AIProvider.instance.userInfoFn = fn;
   }
 
   private provideAction<T extends keyof BlockSuitePresets.AIActions>(

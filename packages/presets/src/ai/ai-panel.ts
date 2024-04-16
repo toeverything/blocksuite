@@ -166,10 +166,12 @@ export function buildAIPanelConfig(
             },
           ],
         },
-      ], // ???
+      ],
     },
     errorStateConfig: {
-      upgrade: () => {},
+      upgrade: () => {
+        AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
+      },
       responses: [],
     },
   };
