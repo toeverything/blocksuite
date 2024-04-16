@@ -11,7 +11,7 @@ import {
   explainImageShowWhen,
   makeItRealShowWhen,
   mindmapShowWhen,
-  noteOrTextBlockShowWen,
+  noteBlockOrTextShowWen,
 } from '../../actions/edgeless-handler.js';
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
 import { translateLangs } from '../../actions/types.js';
@@ -30,7 +30,7 @@ export const docGroup: AIItemGroupConfig = {
     {
       name: 'Summary',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('summary'),
     },
   ],
@@ -42,7 +42,7 @@ export const othersGroup: AIItemGroupConfig = {
     {
       name: 'Find actions from it',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('findActions'),
     },
     {
@@ -60,37 +60,37 @@ export const editGroup: AIItemGroupConfig = {
     {
       name: 'Translate to',
       icon: LanguageIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       subItem: translateSubItem,
     },
     {
       name: 'Improve writing for it',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('improveWriting'),
     },
     {
       name: 'Improve grammar for it',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('improveGrammar'),
     },
     {
       name: 'Fix spelling ',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('fixSpelling'),
     },
     {
       name: 'Make longer',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('makeLonger'),
     },
     {
       name: 'Make shorter',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('makeShorter'),
     },
   ],
@@ -102,37 +102,37 @@ export const draftGroup: AIItemGroupConfig = {
     {
       name: 'Write an article about this',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('writeArticle'),
     },
     {
       name: 'Write a tweet about this',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('writeTwitterPost'),
     },
     {
       name: 'Write a poem about this',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('writePoem'),
     },
     {
       name: 'Write a blog post about this',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('writeBlogPost'),
     },
     {
       name: 'Write a outline from this',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('writeOutline'),
     },
     {
       name: 'Brainstorm ideas about this',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('brainstorm'),
     },
   ],
@@ -150,7 +150,7 @@ export const mindmapGroup: AIItemGroupConfig = {
     {
       name: 'Brainstorm ideas with Mindmap',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('brainstormMindmap'),
     },
   ],
@@ -162,7 +162,7 @@ export const presentationGroup: AIItemGroupConfig = {
     {
       name: 'Create a presentation',
       icon: AIPenIcon,
-      showWhen: noteOrTextBlockShowWen,
+      showWhen: noteBlockOrTextShowWen,
       handler: actionToHandler('createSlides'),
     },
   ],

@@ -235,7 +235,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   };
 }
 
-export function noteOrTextBlockShowWen(
+export function noteBlockOrTextShowWen(
   _: unknown,
   __: unknown,
   host: EditorHost

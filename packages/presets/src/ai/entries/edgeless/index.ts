@@ -6,7 +6,6 @@ import type {
 import {
   EdgelessCopilotToolbarEntry,
   type EdgelessCopilotWidget,
-  NoteBlockModel,
 } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { html } from 'lit';
@@ -41,8 +40,8 @@ export function setupEdgelessElementToolbarEntry(
   widget: EdgelessElementToolbarWidget
 ) {
   widget.registerEntry({
-    when: models => {
-      return models.length === 1 && models[0] instanceof NoteBlockModel;
+    when: () => {
+      return true;
     },
     render: (edgeless: EdgelessRootBlockComponent) => {
       const chain = edgeless.service.std.command.chain();
