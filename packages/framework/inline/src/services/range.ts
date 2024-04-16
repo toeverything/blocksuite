@@ -168,23 +168,28 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
   }
 
   // the number is related to the VLine's textLength
-  getLine(rangeIndex: InlineRange['index']): readonly [VLine, number] {
+  getLine(rangeIndex: InlineRange['index']): {
+    line: VLine;
+    lineIndex: number;
+    rangeIndexRelatedToLine: number;
+  } {
     const lineElements = Array.from(
       this.rootElement.querySelectorAll('v-line')
     );
 
-    let index = 0;
-    for (const lineElement of lineElements) {
-      if (rangeIndex >= index && rangeIndex <= index + lineElement.textLength) {
-        return [lineElement, rangeIndex - index] as const;
-      }
+    let beforeIndex = 0;
+    for (const [lineIndex, lineElement] of lineElements.entries()) {
       if (
-        rangeIndex === index + lineElement.textLength &&
-        rangeIndex === this.editor.yTextLength
+        rangeIndex >= beforeIndex &&
+        rangeIndex < beforeIndex + lineElement.vTextLength + 1
       ) {
-        return [lineElement, rangeIndex - index] as const;
+        return {
+          line: lineElement,
+          lineIndex,
+          rangeIndexRelatedToLine: rangeIndex - beforeIndex,
+        };
       }
-      index += lineElement.textLength + 1;
+      beforeIndex += lineElement.vTextLength + 1;
     }
 
     throw new Error('failed to find line');
