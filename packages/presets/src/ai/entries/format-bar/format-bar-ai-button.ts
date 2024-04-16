@@ -1,12 +1,10 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
-import {
-  type AIItemGroupConfig,
-  AIStarIcon,
-  createButtonPopper,
-  isInsidePageEditor,
-} from '@blocksuite/blocks';
+import { createButtonPopper, isInsidePageEditor } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+
+import { AIStarIcon } from '../../_common/icons.js';
+import type { AIItemGroupConfig } from '../../widgets/ai-item/types.js';
 
 @customElement('format-bar-ai-button')
 export class FormatBarAIButton extends WithDisposable(LitElement) {

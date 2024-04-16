@@ -1,9 +1,9 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { ArrowUpBigIcon } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { AIStarIcon } from '../../../../../_common/icons/ai.js';
-import { ArrowUpBigIcon } from '../../../../../_common/icons/text.js';
+import { AIStarIcon } from '../../../../_common/icons.js';
 
 @customElement('ai-panel-input')
 export class AIPanelInput extends WithDisposable(LitElement) {

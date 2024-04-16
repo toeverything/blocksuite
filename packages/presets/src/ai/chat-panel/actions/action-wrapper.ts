@@ -4,7 +4,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { ActionIcon, ArrowDownIcon, ArrowUpIcon } from '../../_common/icons.js';
-import { createTextRenderer } from '../../messages/text.js';
+import { createTextRenderer } from '../../widgets/messages/text.js';
 import type { ChatAction } from '../index.js';
 
 @customElement('action-wrapper')

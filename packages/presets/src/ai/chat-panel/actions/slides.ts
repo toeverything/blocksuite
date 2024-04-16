@@ -1,5 +1,5 @@
 import './action-wrapper.js';
-import '../../messages/slides-renderer.js';
+import '../../widgets/messages/slides-renderer.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';

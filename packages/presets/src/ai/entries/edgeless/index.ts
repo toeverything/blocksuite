@@ -1,5 +1,4 @@
-import type { EdgelessCopilotWidget } from '@blocksuite/blocks';
-
+import type { EdgelessCopilotWidget } from '../../widgets/edgeless-copilot/index.js';
 import {
   createGroup,
   docGroup,

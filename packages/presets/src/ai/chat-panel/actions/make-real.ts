@@ -6,7 +6,7 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { createIframeRenderer } from '../../messages/wrapper.js';
+import { createIframeRenderer } from '../../widgets/messages/wrapper.js';
 import type { ChatAction } from '../index.js';
 
 @customElement('action-make-real')

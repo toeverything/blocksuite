@@ -1,19 +1,19 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { AffineAIPanelWidget } from '@blocksuite/blocks';
 import { MindmapElementModel, NoteBlockModel } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 
 import { getAIPanel } from '../ai-panel.js';
-import { createMindmapRenderer } from '../messages/mindmap.js';
-import { createSlidesRenderer } from '../messages/slides-renderer.js';
-import { createTextRenderer } from '../messages/text.js';
+import { AIProvider } from '../provider.js';
+import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
+import type { AffineAIPanelWidget } from '../widgets/ai-panel/ai-panel.js';
+import { createMindmapRenderer } from '../widgets/messages/mindmap.js';
+import { createSlidesRenderer } from '../widgets/messages/slides-renderer.js';
+import { createTextRenderer } from '../widgets/messages/text.js';
 import {
   createIframeRenderer,
   createImageRenderer,
-} from '../messages/wrapper.js';
-import { AIProvider } from '../provider.js';
-import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
+} from '../widgets/messages/wrapper.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
   actionToResponse,

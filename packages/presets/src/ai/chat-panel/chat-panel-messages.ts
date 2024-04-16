@@ -1,6 +1,6 @@
-import '../messages/slides-renderer.js';
+import '../widgets/messages/slides-renderer.js';
 import './ai-loading.js';
-import '../messages/text.js';
+import '../widgets/messages/text.js';
 import './actions/text.js';
 import './actions/action-wrapper.js';
 import './actions/make-real.js';
@@ -24,8 +24,8 @@ import {
   NewBlockIcon,
   ReplaceIcon,
 } from '../_common/icons.js';
-import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
+import { createTextRenderer } from '../widgets/messages/text.js';
 import type { ChatItem, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')

@@ -1,4 +1,3 @@
-export * from './ai-item/index.js';
 export * from './block-selection.js';
 export * from './drag-indicator.js';
 export * from './file-drop-manager.js';

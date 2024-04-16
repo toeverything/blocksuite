@@ -1,6 +1,7 @@
-import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
+
+import type { AffineAIPanelWidgetConfig } from '../ai-panel/ai-panel.js';
 
 @customElement('ai-answer-wrapper')
 export class AIAnswerWrapper extends LitElement {

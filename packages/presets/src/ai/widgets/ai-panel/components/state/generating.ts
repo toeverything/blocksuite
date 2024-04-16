@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   AIStarIconWithAnimation,
   AIStopIcon,
-} from '../../../../../_common/icons/ai.js';
+} from '../../../../_common/icons.js';
 
 @customElement('ai-panel-generating')
 export class AIPanelGenerating extends WithDisposable(LitElement) {

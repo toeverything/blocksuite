@@ -1,8 +1,7 @@
+import { CloseIcon } from '@blocksuite/blocks';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
-
-import { CloseIcon } from '../../../../_common/icons/import-export.js';
 
 @customElement('ai-panel-discard-modal')
 export class AIPanelDiscardModal extends LitElement {

@@ -1,11 +1,6 @@
-import type { AIItemGroupConfig } from '@blocksuite/blocks';
-import {
-  AIPenIcon,
-  BlocksUtils,
-  LanguageIcon,
-  TextElementModel,
-} from '@blocksuite/blocks';
+import { BlocksUtils, TextElementModel } from '@blocksuite/blocks';
 
+import { AIPenIcon, LanguageIcon } from '../../_common/icons.js';
 import {
   actionToHandler,
   makeItRealShowWhen,
@@ -15,6 +10,7 @@ import {
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
 import { translateLangs } from '../../actions/types.js';
 import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
+import type { AIItemGroupConfig } from '../../widgets/ai-item/types.js';
 
 const translateSubItem = translateLangs.map(lang => {
   return {

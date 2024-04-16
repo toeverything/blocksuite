@@ -2,12 +2,8 @@ import './actions/index.js'; // ensure global namespace is populated
 
 import type { BlockSpec } from '@blocksuite/block-std';
 import {
-  AFFINE_AI_PANEL_WIDGET,
-  AFFINE_EDGELESS_COPILOT_WIDGET,
-  AffineAIPanelWidget,
   AffineFormatBarWidget,
   AffineSlashMenuWidget,
-  EdgelessCopilotWidget,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
@@ -18,6 +14,14 @@ import { setupEdgelessCopilot } from './entries/edgeless/index.js';
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
+import {
+  AFFINE_AI_PANEL_WIDGET,
+  AffineAIPanelWidget,
+} from './widgets/ai-panel/ai-panel.js';
+import {
+  AFFINE_EDGELESS_COPILOT_WIDGET,
+  EdgelessCopilotWidget,
+} from './widgets/edgeless-copilot/index.js';
 
 export function patchDocSpecs(specs: BlockSpec[]) {
   return specs.map(spec => {

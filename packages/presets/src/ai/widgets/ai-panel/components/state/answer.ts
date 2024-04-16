@@ -1,4 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { CopyIcon, WarningIcon } from '@blocksuite/blocks';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -6,9 +7,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type {
   AIItemConfig,
   AIItemGroupConfig,
-} from '../../../../../_common/components/ai-item/index.js';
-import { WarningIcon } from '../../../../../_common/icons/misc.js';
-import { CopyIcon } from '../../../../../_common/icons/text.js';
+} from '../../../ai-item/types.js';
 
 export type AIPanelAnswerConfig = {
   responses: AIItemConfig[];

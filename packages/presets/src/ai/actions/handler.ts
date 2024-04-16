@@ -1,8 +1,4 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type {
-  AffineAIPanelWidget,
-  AffineAIPanelWidgetConfig,
-} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
 import { getAIPanel } from '../ai-panel.js';
@@ -12,6 +8,10 @@ import {
   getSelectedTextContent,
   getSelections,
 } from '../utils/selection-utils.js';
+import type {
+  AffineAIPanelWidget,
+  AffineAIPanelWidgetConfig,
+} from '../widgets/ai-panel/ai-panel.js';
 
 export function bindEventSource(
   stream: BlockSuitePresets.TextStream,

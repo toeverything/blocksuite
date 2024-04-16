@@ -1,24 +1,21 @@
 import type { BlockElement, EditorHost } from '@blocksuite/block-std';
-import {
-  AFFINE_AI_PANEL_WIDGET,
-  AffineAIPanelWidget,
-  type AffineAIPanelWidgetConfig,
-  ChatWithAIIcon,
-  DiscardIcon,
-  InsertBelowIcon,
-  ReplaceIcon,
-  ResetIcon,
-} from '@blocksuite/blocks';
+import { InsertBelowIcon, ReplaceIcon, ResetIcon } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { createTextRenderer } from './messages/text.js';
+import { ChatWithAIIcon, DiscardIcon } from './_common/icons.js';
 import { AIProvider } from './provider.js';
 import {
   insertFromMarkdown,
   markdownToSnapshot,
 } from './utils/markdown-utils.js';
 import { getSelections } from './utils/selection-utils.js';
+import {
+  AFFINE_AI_PANEL_WIDGET,
+  AffineAIPanelWidget,
+  type AffineAIPanelWidgetConfig,
+} from './widgets/ai-panel/ai-panel.js';
+import { createTextRenderer } from './widgets/messages/text.js';
 
 export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   const host = panel.host;

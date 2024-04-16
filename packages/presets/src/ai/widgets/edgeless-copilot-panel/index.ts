@@ -1,13 +1,13 @@
-import '../../../_common/components/ai-item/ai-item-list.js';
+import '../ai-item/ai-item-list.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
+import { type EdgelessRootBlockComponent, on } from '@blocksuite/blocks';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
-import { on, stopPropagation } from '../../../_common/utils/event.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { stopPropagation } from '../../utils/selection-utils.js';
+import type { AIItemGroupConfig } from '../ai-item/types.js';
 
 @customElement('edgeless-copilot-panel')
 export class EdgelessCopilotPanel extends WithDisposable(LitElement) {

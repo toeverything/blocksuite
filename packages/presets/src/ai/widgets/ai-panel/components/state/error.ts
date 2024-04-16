@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type {
   AIItemConfig,
   AIItemGroupConfig,
-} from '../../../../../_common/components/index.js';
+} from '../../../ai-item/types.js';
 
 export interface AIPanelErrorConfig {
   upgrade: () => void;

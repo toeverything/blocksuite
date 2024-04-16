@@ -1,13 +1,11 @@
-import type { AffineAIPanelWidget } from '@blocksuite/blocks';
-import {
-  AFFINE_AI_PANEL_WIDGET,
-  AffineSlashMenuWidget,
-  AIStarIcon,
-} from '@blocksuite/blocks';
+import { AffineSlashMenuWidget } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
+import { AIStarIcon } from '../../_common/icons.js';
 import { handleAskAIAction } from '../../actions/handler.js';
 import { AIProvider } from '../../provider.js';
+import type { AffineAIPanelWidget } from '../../widgets/ai-panel/ai-panel.js';
+import { AFFINE_AI_PANEL_WIDGET } from '../../widgets/ai-panel/ai-panel.js';
 
 export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
   const menus = slashMenu.options.menus.slice();

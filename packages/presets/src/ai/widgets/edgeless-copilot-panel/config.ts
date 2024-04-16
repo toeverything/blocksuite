@@ -1,18 +1,19 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import {
+  type CopilotSelectionController,
+  type EdgelessRootService,
+  type EditorMode,
+  ImageBlockModel,
+  NoteBlockModel,
+  TextElementModel,
+} from '@blocksuite/blocks';
 
-import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
-import type { AIItemConfig } from '../../../_common/components/ai-item/types.js';
 import {
   AIPenIcon,
   ChatWithAIIcon,
   MakeItRealIcon,
-} from '../../../_common/icons/ai.js';
-import type { EditorMode } from '../../../_common/types.js';
-import { ImageBlockModel } from '../../../image-block/image-model.js';
-import { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { EdgelessRootService } from '../../../root-block/edgeless/edgeless-root-service.js';
-import { TextElementModel } from '../../../surface-block/index.js';
-import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
+} from '../../_common/icons.js';
+import type { AIItemConfig, AIItemGroupConfig } from '../ai-item/types.js';
 
 function showWhen(
   host: EditorHost,

@@ -1,4 +1,14 @@
 import { WidgetElement } from '@blocksuite/block-std';
+import type {
+  CopilotSelectionController,
+  EdgelessRootBlockComponent,
+} from '@blocksuite/blocks';
+import {
+  MOUSE_BUTTON,
+  once,
+  requestConnectedFrame,
+  type RootBlockModel,
+} from '@blocksuite/blocks';
 import {
   autoUpdate,
   computePosition,
@@ -10,15 +20,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
-import {
-  MOUSE_BUTTON,
-  once,
-  requestConnectedFrame,
-} from '../../../_common/utils/event.js';
-import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import { type RootBlockModel } from '../../root-model.js';
+import type { AIItemGroupConfig } from '../ai-item/types.js';
 import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';

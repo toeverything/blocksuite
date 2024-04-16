@@ -1,8 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  AffineAIPanelWidget,
   CopilotSelectionController,
-  EdgelessCopilotWidget,
   EdgelessModel,
   EdgelessRootService,
   MindmapElementModel,
@@ -10,7 +8,6 @@ import type {
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import {
-  AFFINE_EDGELESS_COPILOT_WIDGET,
   DeleteIcon,
   EmbedHtmlBlockSpec,
   InsertBelowIcon,
@@ -24,6 +21,11 @@ import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
 import { fetchImageToFile } from '../utils/image.js';
 import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
+import type { AffineAIPanelWidget } from '../widgets/ai-panel/ai-panel.js';
+import {
+  AFFINE_EDGELESS_COPILOT_WIDGET,
+  type EdgelessCopilotWidget,
+} from '../widgets/edgeless-copilot/index.js';
 
 export type CtxRecord = {
   get(): Record<string, unknown>;

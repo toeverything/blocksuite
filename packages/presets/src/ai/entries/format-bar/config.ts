@@ -1,19 +1,21 @@
 import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
+import { matchFlavours } from '@blocksuite/blocks';
+
 import {
   AIDoneIcon,
-  type AIItemGroupConfig,
   AIPenIcon,
-  type AISubItemConfig,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
-  matchFlavours,
   ShorterIcon,
   ToneIcon,
-} from '@blocksuite/blocks';
-
+} from '../../_common/icons.js';
 import { actionToHandler } from '../../actions/handler.js';
 import { textTones, translateLangs } from '../../actions/types.js';
+import type {
+  AIItemGroupConfig,
+  AISubItemConfig,
+} from '../../widgets/ai-item/types.js';
 
 export const translateSubItem: AISubItemConfig[] = translateLangs.map(lang => {
   return {

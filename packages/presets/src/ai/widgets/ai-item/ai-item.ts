@@ -2,13 +2,13 @@ import './ai-sub-item-list.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
+import { HoverController } from '@blocksuite/blocks';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
-import { ArrowRightIcon, EnterIcon } from '../../icons/ai.js';
-import { HoverController } from '../hover/controller.js';
+import { ArrowRightIcon, EnterIcon } from '../../_common/icons.js';
 import { menuItemStyles } from './styles.js';
 import type { AIItemConfig } from './types.js';
 

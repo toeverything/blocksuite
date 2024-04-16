@@ -4,7 +4,7 @@ import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { EnterIcon } from '../../icons/ai.js';
+import { EnterIcon } from '../../_common/icons.js';
 import { menuItemStyles } from './styles.js';
 import type { AIItemConfig, AISubItemConfig } from './types.js';
 

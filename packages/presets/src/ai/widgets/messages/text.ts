@@ -1,12 +1,12 @@
 import { type EditorHost } from '@blocksuite/block-std';
-import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
-import { CustomPageEditorBlockSpecs } from '../utils/custom-specs.js';
-import { markDownToDoc } from '../utils/markdown-utils.js';
+import { CustomPageEditorBlockSpecs } from '../../utils/custom-specs.js';
+import { markDownToDoc } from '../../utils/markdown-utils.js';
+import type { AffineAIPanelWidgetConfig } from '../ai-panel/ai-panel.js';
 
 @customElement('ai-answer-text')
 export class AIAnswerText extends LitElement {

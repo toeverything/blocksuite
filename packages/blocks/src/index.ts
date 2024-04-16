@@ -18,12 +18,13 @@ import { isCanvasElement } from './root-block/edgeless/utils/query.js';
 import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
-export * from './_common/components/ai-item/index.js';
 export type { SelectTag } from './_common/components/index.js';
 export {
+  HoverController,
   popTagSelect,
   RichText,
   scrollbarStyle,
+  whenHover,
 } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
@@ -31,15 +32,6 @@ export {
   defineEmbedModel,
   EmbedBlockElement,
 } from './_common/embed-block-helper/index.js';
-export {
-  ArrowDownSmallIcon,
-  CloseIcon,
-  DocIcon,
-  DualLinkIcon16,
-  LinkedDocIcon,
-  PlusIcon,
-  TagsIcon,
-} from './_common/icons/index.js';
 export * from './_common/icons/index.js';
 export * from './_common/inline/inline-manager.js';
 export {
@@ -62,13 +54,19 @@ export {
   ThemeObserver,
 } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
-export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
+export {
+  type AbstractEditor,
+  type EditorMode,
+  NoteDisplayMode,
+} from './_common/types.js';
 export {
   createButtonPopper,
   matchFlavours,
+  MOUSE_BUTTON,
   on,
   once,
   openFileOrFiles,
+  requestConnectedFrame,
 } from './_common/utils/index.js';
 export { createDefaultDoc } from './_common/utils/init.js';
 export { getThemeMode, isInsidePageEditor } from './_common/utils/query.js';

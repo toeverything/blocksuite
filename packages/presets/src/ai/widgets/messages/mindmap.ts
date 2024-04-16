@@ -1,8 +1,9 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
 import { MiniMindmapPreview } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
+
+import type { AffineAIPanelWidgetConfig } from '../ai-panel/ai-panel.js';
 
 noop(MiniMindmapPreview);
 
