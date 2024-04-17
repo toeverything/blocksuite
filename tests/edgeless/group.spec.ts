@@ -57,7 +57,9 @@ test.describe('group', () => {
       page,
     }) => {
       await clickView(page, [50, 50]);
-      await expect(page.locator('edgeless-component-toolbar')).toBeVisible();
+      await expect(
+        page.locator('edgeless-element-toolbar-widget')
+      ).toBeVisible();
       await expect(page.locator('edgeless-add-group-button')).not.toBeVisible();
     });
 
