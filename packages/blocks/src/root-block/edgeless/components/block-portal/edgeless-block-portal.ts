@@ -8,7 +8,6 @@ import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
-import '../component-toolbar/component-toolbar.js';
 import '../presentation/edgeless-navigator-black-background.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
@@ -135,9 +134,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @state()
   private _slicerAnchorNote: NoteBlockModel | null = null;
-
-  @state()
-  private _dragging = false;
 
   private _surfaceRefReferenceSet = new Set<string>();
 
@@ -318,18 +314,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.host.event.add('pointerMove', ctx => {
-        this._dragging = ctx.get('pointerState').dragging;
-      })
-    );
-
-    _disposables.add(
-      edgeless.host.event.add('pointerUp', () => {
-        this._dragging = false;
-      })
-    );
-
-    _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
         this._isResizing = true;
       })
@@ -468,11 +452,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       <edgeless-selected-rect
         .edgeless=${edgeless}
         .toolbarVisible=${this._toolbarVisible}
-        .setToolbarVisible=${(v: boolean) => {
-          this._toolbarVisible = v;
-        }}
         .autoCompleteOff=${this._enableNoteSlicer}
       ></edgeless-selected-rect>
+
       ${!readonly
         ? html`<edgeless-index-label
             .pageVisibleElementsMap=${pageVisibleBlocks}
@@ -482,13 +464,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             .show=${this._showIndexLabel}
           ></edgeless-index-label>`
         : nothing}
-      ${this._toolbarVisible && !doc.readonly && !this._dragging
-        ? html`<edgeless-component-toolbar
-            .edgeless=${edgeless}
-            .enableNoteSlicer=${this._enableNoteSlicer}
-          >
-          </edgeless-component-toolbar>`
-        : nothing}
+
       <edgeless-navigator-black-background
         .edgeless=${edgeless}
       ></edgeless-navigator-black-background>

@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -12,13 +12,14 @@ import {
   MindmapStyleOne,
   MindmapStyleThree,
   MindmapStyleTwo,
-} from '../../../../_common/icons/edgeless.js';
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import type { MindmapElementModel } from '../../../../surface-block/element-model/mindmap.js';
-import { LayoutType } from '../../../../surface-block/element-model/utils/mindmap/layout.js';
-import { MindmapStyle } from '../../../../surface-block/element-model/utils/mindmap/style.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
+} from '../../../_common/icons/edgeless.js';
+import { createButtonPopper } from '../../../_common/utils/button-popper.js';
+import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
+import type { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
+import { LayoutType } from '../../../surface-block/element-model/utils/mindmap/layout.js';
+import { MindmapStyle } from '../../../surface-block/element-model/utils/mindmap/style.js';
+import type { EdgelessToolIconButton } from '../../edgeless/components/buttons/tool-icon-button.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-change-mindmap-button')
 export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
@@ -309,4 +310,26 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
       )}
     </div>`;
   }
+}
+
+export function renderMindmapButton(
+  edgeless: EdgelessRootBlockComponent,
+  shapeElements?: ShapeElementModel[]
+) {
+  return shapeElements?.length &&
+    shapeElements.every(shapeElement => {
+      const mindmap = edgeless.service.surface.getGroup(
+        shapeElement.id
+      ) as MindmapElementModel;
+
+      return (
+        mindmap?.type === 'mindmap' && mindmap.tree.element === shapeElement
+      );
+    })
+    ? html`<edgeless-change-mindmap-button
+        .elements=${shapeElements.map(el => el.group)}
+        .edgeless=${edgeless}
+      >
+      </edgeless-change-mindmap-button>`
+    : nothing;
 }

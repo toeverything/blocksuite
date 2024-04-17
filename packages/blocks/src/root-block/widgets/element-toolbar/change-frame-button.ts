@@ -1,28 +1,28 @@
-import '../buttons/tool-icon-button.js';
-import './component-toolbar-menu-divider.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../element-toolbar/component-toolbar-menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { toast } from '../../../../_common/components/toast.js';
-import { NoteIcon, RenameIcon } from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { NoteDisplayMode } from '../../../../_common/types.js';
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import { matchFlavours } from '../../../../_common/utils/model.js';
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
+import { toast } from '../../../_common/components/toast.js';
+import { NoteIcon, RenameIcon } from '../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import { NoteDisplayMode } from '../../../_common/types.js';
+import { createButtonPopper } from '../../../_common/utils/button-popper.js';
+import { matchFlavours } from '../../../_common/utils/model.js';
+import type { FrameBlockModel } from '../../../frame-block/index.js';
 import {
   deserializeXYWH,
   serializeXYWH,
-} from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
-import { mountFrameTitleEditor } from '../../utils/text.js';
-import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
-import type { ColorEvent } from '../panel/color-panel.js';
-import { ColorUnit } from '../panel/color-panel.js';
+} from '../../../surface-block/index.js';
+import type { EdgelessToolIconButton } from '../../edgeless/components/buttons/tool-icon-button.js';
+import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import { ColorUnit } from '../../edgeless/components/panel/color-panel.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { DEFAULT_NOTE_HEIGHT } from '../../edgeless/utils/consts.js';
+import { mountFrameTitleEditor } from '../../edgeless/utils/text.js';
 
 const FRAME_BACKGROUND: CssVariableName[] = [
   '--affine-tag-gray',
@@ -80,8 +80,9 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       height: 24px;
     }
   `;
+
   @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
   frames: FrameBlockModel[] = [];
@@ -96,7 +97,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   private _frameBackground: ReturnType<typeof createButtonPopper> | null = null;
 
   get service() {
-    return this.surface.edgeless.service;
+    return this.edgeless.service;
   }
 
   private _setFrameBackground(color: CssVariableName) {
@@ -106,9 +107,9 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   }
 
   private _insertIntoPage() {
-    if (!this.surface.doc.root) return;
+    if (!this.edgeless.doc.root) return;
 
-    const rootModel = this.surface.doc.root;
+    const rootModel = this.edgeless.doc.root;
     const notes = rootModel.children.filter(
       model =>
         matchFlavours(model, ['affine:note']) &&
@@ -125,7 +126,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       targetXYWH[1] = targetXYWH[1] + targetXYWH[3];
       targetXYWH[3] = DEFAULT_NOTE_HEIGHT;
 
-      const newAddedNote = this.surface.doc.addBlock(
+      const newAddedNote = this.edgeless.doc.addBlock(
         'affine:note',
         {
           xywh: serializeXYWH(...targetXYWH),
@@ -136,7 +137,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       targetParent = newAddedNote;
     }
 
-    this.surface.doc.addBlock(
+    this.edgeless.doc.addBlock(
       'affine:surface-ref',
       {
         reference: this.frames[0].id,
@@ -145,7 +146,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       targetParent
     );
 
-    toast(this.surface.host, 'Frame has been inserted into doc');
+    toast(this.edgeless.host, 'Frame has been inserted into doc');
   }
 
   override firstUpdated() {
@@ -182,7 +183,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               .tipPosition=${'bottom'}
               .iconContainerPadding=${0}
               @click=${() =>
-                mountFrameTitleEditor(this.frames[0], this.surface.edgeless)}
+                mountFrameTitleEditor(this.frames[0], this.edgeless)}
             >
               ${RenameIcon}
             </edgeless-tool-icon-button>
@@ -211,4 +212,16 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
         </edgeless-color-panel>
       </div> `;
   }
+}
+
+export function renderFrameButton(
+  edgeless: EdgelessRootBlockComponent,
+  frames?: FrameBlockModel[]
+) {
+  return frames?.length
+    ? html`
+        <edgeless-change-frame-button .edgeless=${edgeless} .frames=${frames}>
+        </edgeless-change-frame-button>
+      `
+    : nothing;
 }

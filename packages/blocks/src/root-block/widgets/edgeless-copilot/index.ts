@@ -63,6 +63,14 @@ export class EdgelessCopilotWidget extends WidgetElement<
 
   groups: AIItemGroupConfig[] = [];
 
+  get visible() {
+    return !!(
+      this._visible &&
+      this._selectionRect?.width &&
+      this._selectionRect?.height
+    );
+  }
+
   get selectionRect() {
     return this._selectionRect;
   }

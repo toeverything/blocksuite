@@ -52,3 +52,7 @@ declare global {
     'component-toolbar-menu-divider': ComponentToolbarMenuDivider;
   }
 }
+
+export function renderMenuDivider() {
+  return html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`;
+}
