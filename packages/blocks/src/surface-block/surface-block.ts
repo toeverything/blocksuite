@@ -40,6 +40,7 @@ export class SurfaceBlockComponent extends BlockElement<
       height: 100%;
       position: relative;
       z-index: 1;
+      pointer-events: none;
     }
 
     edgeless-block-portal-container {
@@ -154,6 +155,7 @@ export class SurfaceBlockComponent extends BlockElement<
 
         canvas.style.setProperty('transform-origin', '0 0');
         canvas.style.setProperty('position', 'absolute');
+        canvas.style.setProperty('pointer-events', 'none');
       },
     });
 
