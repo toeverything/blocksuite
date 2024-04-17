@@ -7,7 +7,7 @@ import './actions/make-real.js';
 import './actions/slides.js';
 import './actions/mindmap.js';
 
-import type { TextSelection } from '@blocksuite/block-std';
+import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { Text } from '@blocksuite/store';
@@ -26,6 +26,7 @@ import {
 } from '../_common/icons.js';
 import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
+import { insertBelow, replace } from '../utils/editor-actions.js';
 import type { ChatItem, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
@@ -135,12 +136,14 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   messagesContainer!: HTMLDivElement;
 
   private _currentTextSelection: TextSelection | null = null;
+  private _currentBlockSelections: BlockSelection[] | null = null;
 
   public override async connectedCallback() {
     super.connectedCallback();
     this.host.selection.slots.changed.on(() => {
       this._currentTextSelection =
         this.host.selection.find('text') ?? this._currentTextSelection;
+      this._currentBlockSelections = this.host.selection.filter('block');
     });
 
     const res = await AIProvider.userInfo;
@@ -246,28 +249,25 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         <div class="action">
           ${ReplaceIcon}
           <div
-            @click=${() => {
+            @click=${async () => {
               if (!this._currentTextSelection) return;
-              this.host.command
+              const [_, data] = this.host.command
                 .chain()
-                .inline((_, next) => {
-                  next({ textSelection: this._currentTextSelection });
-                })
-                .deleteText()
-                .inline((_, next) => {
-                  if (!this._currentTextSelection) return;
-                  const block = this.host.doc.getBlockById(
-                    this._currentTextSelection.blockId
-                  );
-                  if (block?.text) {
-                    block.text.insert(
-                      content,
-                      this._currentTextSelection.start.index
-                    );
-                  }
-                  next();
+                .getSelectedBlocks({
+                  currentTextSelection: this._currentTextSelection,
+                  currentBlockSelections:
+                    this._currentBlockSelections ?? undefined,
                 })
                 .run();
+              if (!data.selectedBlocks) return;
+
+              await replace(
+                this.host,
+                content,
+                data.selectedBlocks[0],
+                data.selectedBlocks.map(block => block.model),
+                this._currentTextSelection
+              );
             }}
           >
             Replace selection
@@ -277,26 +277,23 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           <div class="action">
             ${InsertBelowIcon}
             <div
-              @click=${() => {
-                if (this._currentTextSelection) {
-                  const { path } = this._currentTextSelection;
+              @click=${async () => {
+                if (!this._currentTextSelection) return;
+                const [_, data] = this.host.command
+                  .chain()
+                  .getSelectedBlocks({
+                    currentTextSelection: this._currentTextSelection,
+                    currentBlockSelections:
+                      this._currentBlockSelections ?? undefined,
+                  })
+                  .run();
+                if (!data.selectedBlocks) return;
 
-                  this.host.command
-                    .chain()
-                    .getBlockIndex({ path })
-                    .inline((ctx, next) => {
-                      if (ctx.parentBlock && ctx.blockIndex !== undefined) {
-                        this.host.doc.addBlock(
-                          'affine:paragraph',
-                          { text: new Text(content) },
-                          ctx.parentBlock.model,
-                          ctx.blockIndex + 1
-                        );
-                      }
-                      next();
-                    })
-                    .run();
-                }
+                await insertBelow(
+                  this.host,
+                  content,
+                  data.selectedBlocks[data.selectedBlocks?.length - 1]
+                );
               }}
             >
               Insert below

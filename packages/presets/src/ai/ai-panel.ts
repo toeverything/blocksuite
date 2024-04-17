@@ -1,4 +1,4 @@
-import type { BlockElement, EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
@@ -10,14 +10,10 @@ import {
   ResetIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
-import {
-  insertFromMarkdown,
-  markdownToSnapshot,
-} from './utils/markdown-utils.js';
+import { insertBelow, replace } from './utils/editor-actions.js';
 import { getSelections } from './utils/selection-utils.js';
 
 export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
@@ -40,52 +36,23 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
     };
   };
 
-  const setBlockSelection = (parent: BlockElement, models: BlockModel[]) => {
-    const parentPath = parent.path;
-    const selections = models
-      .map(model => [...parentPath, model.id])
-      .map(path => host.selection.create('block', { path }));
-    host.selection.setGroup('note', selections);
-  };
-
-  const replace = async () => {
+  const _replace = async () => {
     const selection = getSelection();
     if (!selection || !panel.answer) return;
 
     const { textSelection, firstBlock, selectedModels } = selection;
-    const firstBlockParent = firstBlock.parentBlockElement;
-    const firstIndex = firstBlockParent.model.children.findIndex(
-      model => model.id === firstBlock.model.id
+    await replace(
+      host,
+      panel.answer,
+      firstBlock,
+      selectedModels,
+      textSelection
     );
-
-    if (textSelection) {
-      const { snapshot, job } = await markdownToSnapshot(panel.answer, host);
-      await job.snapshotToSlice(
-        snapshot,
-        host.doc,
-        firstBlockParent.model.id,
-        firstIndex + 1
-      );
-    } else {
-      selectedModels.forEach(model => {
-        host.doc.deleteBlock(model);
-      });
-
-      const models = await insertFromMarkdown(
-        host,
-        panel.answer ?? '',
-        firstBlockParent.model.id,
-        firstIndex
-      );
-
-      await host.updateComplete;
-      setBlockSelection(firstBlockParent, models);
-    }
 
     panel.hide();
   };
 
-  const insertBelow = async () => {
+  const _insertBelow = async () => {
     const selection = getSelection();
 
     if (!selection) {
@@ -93,21 +60,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
     }
 
     const { lastBlock } = selection;
-    const lastBlockParent = lastBlock.parentBlockElement;
-    const lastIndex = lastBlockParent.model.children.findIndex(
-      model => model.id === lastBlock.model.id
-    );
-
-    const models = await insertFromMarkdown(
-      host,
-      panel.answer ?? '',
-      lastBlockParent.model.id,
-      lastIndex + 1
-    );
-
-    await host.updateComplete;
-    setBlockSelection(lastBlockParent, models);
-
+    await insertBelow(host, panel.answer ?? '', lastBlock);
     panel.hide();
   };
 
@@ -116,14 +69,14 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       name: 'Insert below',
       icon: InsertBelowIcon,
       handler: () => {
-        insertBelow().catch(console.error);
+        _insertBelow().catch(console.error);
       },
     },
     {
       name: 'Replace selection',
       icon: ReplaceIcon,
       handler: () => {
-        replace().catch(console.error);
+        _replace().catch(console.error);
       },
     },
     {
