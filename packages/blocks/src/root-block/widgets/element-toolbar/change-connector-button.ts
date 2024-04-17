@@ -1,10 +1,9 @@
-import '../buttons/tool-icon-button.js';
-import '../panel/color-panel.js';
-import '../buttons/menu-button.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/buttons/menu-button.js';
+import '../../edgeless/components/panel/color-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import type { Doc } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -27,11 +26,11 @@ import {
   ScribbledStyleIcon,
   SmallArrowDownIcon,
   StraightLineIcon,
-} from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { LineWidth } from '../../../../_common/types.js';
-import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import type { PointStyle } from '../../../../surface-block/index.js';
+} from '../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import { LineWidth } from '../../../_common/types.js';
+import { countBy, maxBy } from '../../../_common/utils/iterable.js';
+import type { PointStyle } from '../../../surface-block/index.js';
 import {
   type ConnectorElementModel,
   ConnectorEndpoint,
@@ -39,16 +38,15 @@ import {
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
   StrokeStyle,
-} from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
+} from '../../../surface-block/index.js';
+import type { LineStyleButtonProps } from '../../edgeless/components/buttons/line-style-button.js';
 import {
   type ColorEvent,
   ColorUnit,
   GET_DEFAULT_LINE_COLOR,
-} from '../panel/color-panel.js';
-import type { LineWidthEvent } from '../panel/line-width-panel.js';
+} from '../../edgeless/components/panel/color-panel.js';
+import type { LineWidthEvent } from '../../edgeless/components/panel/line-width-panel.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 function getMostCommonColor(
   elements: ConnectorElementModel[]
@@ -155,14 +153,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   elements: ConnectorElementModel[] = [];
 
-  @property({ attribute: false })
-  doc!: Doc;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  get doc() {
+    return this.edgeless.doc;
+  }
 
   get service() {
-    return this.surface.edgeless.service;
+    return this.edgeless.service;
   }
 
   private _setConnectorMode(mode: ConnectorMode) {
@@ -589,4 +585,17 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-change-connector-button': EdgelessChangeConnectorButton;
   }
+}
+
+export function renderConnectorButton(
+  edgeless: EdgelessRootBlockComponent,
+  connectorElements?: ConnectorElementModel[]
+) {
+  return connectorElements?.length
+    ? html` <edgeless-change-connector-button
+        .elements=${connectorElements}
+        .edgeless=${edgeless}
+      >
+      </edgeless-change-connector-button>`
+    : nothing;
 }

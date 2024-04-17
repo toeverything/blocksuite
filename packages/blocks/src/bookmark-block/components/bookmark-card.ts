@@ -50,8 +50,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   private _getHostName(url: string) {
     try {
       return new URL(url).hostname;
-    } catch (e) {
-      console.error(e);
+    } catch {
       return url;
     }
   }

@@ -759,8 +759,7 @@ test('hide drag handle when mouse is hovering over the title', async ({
   await expect(dragHandle).toBeVisible();
 });
 
-// FIXME(mirone/#6534)
-test.skip('should create preview when dragging', async ({ page }) => {
+test('should create preview when dragging', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -792,7 +791,7 @@ test.skip('should create preview when dragging', async ({ page }) => {
     undefined,
     async () => {
       await expect(dragPreview).toBeVisible();
-      await expect(dragPreview.locator('[data-block-id]')).toHaveCount(2);
+      await expect(dragPreview.locator('[data-block-id]')).toHaveCount(4);
     }
   );
 });

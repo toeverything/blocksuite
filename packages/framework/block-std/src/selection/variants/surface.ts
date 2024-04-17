@@ -5,6 +5,7 @@ import { BaseSelection } from '../base.js';
 const SurfaceSelectionSchema = z.object({
   elements: z.array(z.string()),
   editing: z.boolean(),
+  inoperable: z.boolean().optional(),
 });
 
 export class SurfaceSelection extends BaseSelection {
@@ -13,12 +14,19 @@ export class SurfaceSelection extends BaseSelection {
 
   readonly elements: string[];
   readonly editing: boolean;
+  readonly inoperable: boolean;
 
-  constructor(path: string[], elements: string[], editing: boolean) {
+  constructor(
+    path: string[],
+    elements: string[],
+    editing: boolean,
+    inoperable = false
+  ) {
     super({ path });
 
     this.elements = elements;
     this.editing = editing;
+    this.inoperable = inoperable;
   }
 
   isEmpty() {
@@ -31,7 +39,8 @@ export class SurfaceSelection extends BaseSelection {
         this.blockId === other.blockId &&
         this.elements.length === other.elements.length &&
         this.elements.every((id, idx) => id === other.elements[idx]) &&
-        this.editing === other.editing
+        this.editing === other.editing &&
+        this.inoperable === other.inoperable
       );
     }
 
@@ -44,19 +53,26 @@ export class SurfaceSelection extends BaseSelection {
       path: this.path,
       elements: this.elements,
       editing: this.editing,
+      inoperable: this.inoperable,
     };
   }
 
   static override fromJSON(
     json:
       | Record<string, unknown>
-      | { path: string[]; elements: string[]; editing: boolean }
+      | {
+          path: string[];
+          elements: string[];
+          editing: boolean;
+          inoperable?: boolean;
+        }
   ): SurfaceSelection {
     SurfaceSelectionSchema.parse(json);
     return new SurfaceSelection(
       json.path as string[],
       json.elements as string[],
-      json.editing as boolean
+      json.editing as boolean,
+      (json.inoperable as boolean) || false
     );
   }
 }

@@ -48,6 +48,9 @@ export class AISubItemList extends WithDisposable(LitElement) {
   @property({ attribute: false })
   abortController!: AbortController;
 
+  @property({ attribute: false })
+  onClick?: () => void;
+
   private _handleClick = (subItem: AISubItemConfig) => {
     if (subItem.handler) {
       // TODO: add parameters to ai handler
@@ -55,6 +58,7 @@ export class AISubItemList extends WithDisposable(LitElement) {
     }
 
     this.abortController.abort();
+    this.onClick?.();
   };
 
   override render() {
