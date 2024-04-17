@@ -13,7 +13,11 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
-import { insertBelow, replace } from './utils/editor-actions.js';
+import {
+  copyTextAnswer,
+  insertBelow,
+  replace,
+} from './utils/editor-actions.js';
 import { getSelections } from './utils/selection-utils.js';
 
 export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
@@ -55,7 +59,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   const _insertBelow = async () => {
     const selection = getSelection();
 
-    if (!selection) {
+    if (!selection || !panel.answer) {
       return;
     }
 
@@ -66,25 +70,52 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
 
   return [
     {
-      name: 'Insert below',
-      icon: InsertBelowIcon,
-      handler: () => {
-        _insertBelow().catch(console.error);
-      },
+      name: 'Response',
+      items: [
+        {
+          name: 'Insert below',
+          icon: InsertBelowIcon,
+          handler: () => {
+            _insertBelow().catch(console.error);
+          },
+        },
+        {
+          name: 'Replace selection',
+          icon: ReplaceIcon,
+          handler: () => {
+            _replace().catch(console.error);
+          },
+        },
+      ],
     },
     {
-      name: 'Replace selection',
-      icon: ReplaceIcon,
-      handler: () => {
-        _replace().catch(console.error);
-      },
-    },
-    {
-      name: 'Discard',
-      icon: DiscardIcon,
-      handler: () => {
-        panel.discard();
-      },
+      name: '',
+      items: [
+        {
+          name: 'Continue in chat',
+          icon: ChatWithAIIcon,
+          handler: () => {
+            AIProvider.slots.requestContinueInChat.emit({
+              host: panel.host,
+              show: true,
+            });
+          },
+        },
+        {
+          name: 'Regenerate',
+          icon: ResetIcon,
+          handler: () => {
+            panel.generate();
+          },
+        },
+        {
+          name: 'Discard',
+          icon: DiscardIcon,
+          handler: () => {
+            panel.discard();
+          },
+        },
+      ],
     },
   ];
 }
@@ -96,30 +127,13 @@ export function buildAIPanelConfig(
     answerRenderer: createTextRenderer(panel.host),
     finishStateConfig: {
       responses: buildTextResponseConfig(panel),
-      actions: [
-        {
-          name: '',
-          items: [
-            {
-              name: 'Continue in chat',
-              icon: ChatWithAIIcon,
-              handler: () => {
-                AIProvider.slots.requestContinueInChat.emit({
-                  host: panel.host,
-                  show: true,
-                });
-              },
-            },
-            {
-              name: 'Regenerate',
-              icon: ResetIcon,
-              handler: () => {
-                panel.generate();
-              },
-            },
-          ],
+      actions: [], // ???
+      copy: {
+        allowed: true,
+        onCopy: () => {
+          return copyTextAnswer(panel);
         },
-      ],
+      },
     },
     errorStateConfig: {
       upgrade: () => {
