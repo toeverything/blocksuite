@@ -116,6 +116,10 @@ export class BlockCollection extends Space<FlatBlockMap> {
     return doc;
   }
 
+  clearSelector(selector: BlockSelector) {
+    this._docMap.delete(selector);
+  }
+
   get readonly() {
     return this.awarenessStore.isReadonly(this);
   }
@@ -126,6 +130,10 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   get history() {
     return this._history;
+  }
+
+  get crud() {
+    return this._docCRUD;
   }
 
   get collection() {
