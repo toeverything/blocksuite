@@ -125,7 +125,8 @@ export class LayerManager {
 
           if (
             block instanceof EdgelessBlockModel &&
-            renderableInEdgeless(doc, surface, block)
+            renderableInEdgeless(doc, surface, block) &&
+            this.blocks.indexOf(block) === -1
           ) {
             this.add(block as EdgelessBlockModel);
           }
