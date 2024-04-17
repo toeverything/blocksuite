@@ -166,5 +166,13 @@ declare global {
         docId?: string
       ) => Promise<AIHistory[] | undefined>;
     }
+
+    interface AIPhotoEngineService {
+      searchImages(options: {
+        width: number;
+        height: number;
+        query: string;
+      }): Promise<string[]>;
+    }
   }
 }

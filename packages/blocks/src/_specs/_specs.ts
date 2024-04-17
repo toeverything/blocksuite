@@ -54,6 +54,8 @@ import {
   SurfaceRefBlockSchema,
   SurfaceRefBlockService,
 } from '../surface-ref-block/index.js';
+import { PreviewEditorBlockSpecs } from './preview-spec.js';
+import { SpecProvider } from './spec-provider.js';
 
 const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
   schema: RootBlockSchema,
@@ -255,3 +257,9 @@ export const EdgelessEditorBlockSpecs: BlockSpec[] = [
     },
   },
 ];
+
+export * from './preview-spec.js';
+
+SpecProvider.getInstance().addSpec('page', PageEditorBlockSpecs);
+SpecProvider.getInstance().addSpec('edgeless', EdgelessEditorBlockSpecs);
+SpecProvider.getInstance().addSpec('preview', PreviewEditorBlockSpecs);

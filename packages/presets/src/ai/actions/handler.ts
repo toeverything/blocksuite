@@ -3,6 +3,7 @@ import type {
   AffineAIPanelWidget,
   AffineAIPanelWidgetConfig,
 } from '@blocksuite/blocks';
+import type { AIError } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
 import { getAIPanel } from '../ai-panel.js';
@@ -21,7 +22,7 @@ export function bindEventSource(
     signal,
   }: {
     update: (text: string) => void;
-    finish: (state: 'success' | 'error' | 'aborted') => void;
+    finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     signal?: AbortSignal;
   }
 ) {
@@ -40,7 +41,7 @@ export function bindEventSource(
     if (err.name === 'AbortError') {
       finish('aborted');
     } else {
-      finish('error');
+      finish('error', err);
     }
   });
 }
@@ -98,7 +99,7 @@ export function actionToGenerateAnswer<
       input: string;
       signal?: AbortSignal;
       update: (text: string) => void;
-      finish: (state: 'success' | 'error' | 'aborted') => void;
+      finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     }) => {
       const { selectedBlocks: blocks } = getSelections(host);
       if (!blocks || blocks.length === 0) return;

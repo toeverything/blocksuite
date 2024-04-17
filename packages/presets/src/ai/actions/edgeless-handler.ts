@@ -1,15 +1,17 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { AffineAIPanelWidget } from '@blocksuite/blocks';
+import type { AffineAIPanelWidget, AIError } from '@blocksuite/blocks';
 import { MindmapElementModel, NoteBlockModel } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 
 import { getAIPanel } from '../ai-panel.js';
-import { iframeRenderer } from '../messages/iframe.js';
-import { imageRenderer } from '../messages/image.js';
 import { createMindmapRenderer } from '../messages/mindmap.js';
 import { createSlidesRenderer } from '../messages/slides-renderer.js';
 import { createTextRenderer } from '../messages/text.js';
+import {
+  createIframeRenderer,
+  createImageRenderer,
+} from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
 import type { CtxRecord } from './edgeless-response.js';
@@ -39,11 +41,11 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   }
 
   if (id === 'makeItReal') {
-    return iframeRenderer;
+    return createIframeRenderer;
   }
 
   if (id === 'createImage') {
-    return imageRenderer;
+    return createImageRenderer;
   }
 
   return createTextRenderer(host);
@@ -146,7 +148,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
       input: string;
       signal?: AbortSignal;
       update: (text: string) => void;
-      finish: (state: 'success' | 'error' | 'aborted') => void;
+      finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     }) => {
       const selectedElements = getCopilotSelectedElems(host);
 

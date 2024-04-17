@@ -6,7 +6,7 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { iframeRenderer } from '../../messages/iframe.js';
+import { createIframeRenderer } from '../../messages/wrapper.js';
 import type { ChatAction } from '../index.js';
 
 @customElement('action-make-real')
@@ -21,7 +21,7 @@ export class ActionMakeReal extends WithDisposable(ShadowlessElement) {
     const answer = this.item.messages[2].content;
     return html`<action-wrapper .host=${this.host} .item=${this.item}>
       <div style=${styleMap({ marginBottom: '12px' })}>
-        ${iframeRenderer(answer, 'finished')}
+        ${createIframeRenderer(answer, 'finished')}
       </div>
     </action-wrapper>`;
   }

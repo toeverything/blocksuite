@@ -2,6 +2,7 @@ import type { AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
 import type { AffineAIPanelWidget } from '@blocksuite/blocks';
 
 import { createTextRenderer } from '../../messages/text.js';
+import { AIProvider } from '../../provider.js';
 
 export function buildEdgelessPanelConfig(
   panel: AffineAIPanelWidget
@@ -13,7 +14,9 @@ export function buildEdgelessPanelConfig(
       actions: [],
     },
     errorStateConfig: {
-      upgrade: () => {},
+      upgrade: () => {
+        AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
+      },
       responses: [],
     },
   };
