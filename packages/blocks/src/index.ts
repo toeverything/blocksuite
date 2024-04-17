@@ -90,7 +90,6 @@ export * from './image-block/index.js';
 export * from './list-block/index.js';
 export * from './note-block/index.js';
 export * from './paragraph-block/index.js';
-export { EdgelessComponentToolbar } from './root-block/edgeless/components/component-toolbar/component-toolbar.js';
 export { EdgelessTemplatePanel } from './root-block/edgeless/components/toolbar/template/template-panel.js';
 export type {
   Template,

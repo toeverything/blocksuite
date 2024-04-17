@@ -2,15 +2,19 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
 
-import type {
-  AIItemConfig,
-  AIItemGroupConfig,
+import {
+  type AIError,
+  AIErrorType,
+  type AIItemConfig,
+  type AIItemGroupConfig,
 } from '../../../../../_common/components/index.js';
 
 export interface AIPanelErrorConfig {
   upgrade: () => void;
   responses: AIItemConfig[];
+  error?: AIError;
 }
 
 @customElement('ai-panel-error')
@@ -60,6 +64,10 @@ export class AIPanelError extends WithDisposable(LitElement) {
           font-style: normal;
           font-weight: 400;
           line-height: 22px; /* 157.143% */
+
+          a {
+            color: inherit;
+          }
         }
       }
       .upgrade {
@@ -95,20 +103,41 @@ export class AIPanelError extends WithDisposable(LitElement) {
 
   override render() {
     const groups: AIItemGroupConfig[] = [{ items: this.config.responses }];
-
-    return html`
-      <div class="error">
+    const errorTemplate = choose(
+      this.config.error?.type,
+      [
+        [
+          AIErrorType.PaymentRequired,
+          () => html`
+            <div class="answer-tip">
+              <div class="top">Answer</div>
+              <div class="bottom">
+                You’ve reached the current usage cap for GPT-4. You can
+                subscribe AFFiNE AI to continue AI experience!
+              </div>
+              <div @click=${this.config.upgrade} class="upgrade">
+                <div class="content">Upgrade</div>
+              </div>
+            </div>
+          `,
+        ],
+      ],
+      // default error handler
+      () => html`
         <div class="answer-tip">
           <div class="top">Answer</div>
           <div class="bottom">
             An error occurred, If this issue persists please let us know
-            contact@toeverything.info
+            <a href="mailto:contact@toeverything.info">
+              contact@toeverything.info
+            </a>
           </div>
         </div>
-        <div @click=${this.config.upgrade} class="upgrade">
-          <div class="content">Upgrade</div>
-        </div>
-      </div>
+      `
+    );
+
+    return html`
+      <div class="error">${errorTemplate}</div>
       ${this.config.responses.length > 0
         ? html`<ai-item-list .groups=${groups}></ai-item-list>`
         : nothing}

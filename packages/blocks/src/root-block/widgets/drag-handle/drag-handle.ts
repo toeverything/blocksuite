@@ -10,7 +10,7 @@ import {
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
-import { type BlockModel } from '@blocksuite/store';
+import { type BlockModel, type BlockSelector } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -39,6 +39,7 @@ import {
 import { PageRootBlockComponent } from '../../../root-block/page/page-root-block.js';
 import type { RootBlockModel } from '../../../root-block/root-model.js';
 import { autoScroll } from '../../../root-block/text-selection/utils.js';
+import { SpecProvider } from '../../../specs/utils/spec-provider.js';
 import { Bound, type IVec } from '../../../surface-block/index.js';
 import type { EdgelessBlockModel } from '../../edgeless/type.js';
 import { DragPreview } from './components/drag-preview.js';
@@ -365,15 +366,30 @@ export class AffineDragHandleWidget extends WidgetElement<
       dragPreview = new DragPreview(dragPreviewOffset);
       dragPreview.append(dragPreviewEl);
     } else {
-      const fragment = document.createDocumentFragment();
       let width = 0;
       blockElements.forEach(element => {
         width = Math.max(width, element.getBoundingClientRect().width);
-        const container = document.createElement('div');
-        // FIXME(mirone/#6534): use `renderSpecPortal` to render preview.
-        // render(this.host.renderModel(element.model), container);
-        fragment.append(container);
       });
+
+      const selectedIds = blockElements.map(
+        blockElement => blockElement.model.id
+      );
+
+      const ids: string[] = [];
+      selectedIds.map(block => {
+        let parent: string | null = block;
+        while (parent && !ids.includes(parent)) {
+          ids.push(parent);
+          parent = this.doc.blockCollection.crud.getParent(parent);
+        }
+      });
+
+      const selector: BlockSelector = block => ids.includes(block.id);
+      const doc = this.doc.blockCollection.getDoc(selector);
+
+      const previewSpec = SpecProvider.getInstance().getSpec('preview');
+      assertExists(previewSpec, 'Preview spec is not found');
+      const previewTemplate = this.host.renderSpecPortal(doc, previewSpec);
 
       const offset = this._calculatePreviewOffset(blockElements, state);
       const posX = state.raw.x - offset.x;
@@ -381,13 +397,16 @@ export class AffineDragHandleWidget extends WidgetElement<
       const altKey = state.raw.altKey;
 
       dragPreview = new DragPreview(offset);
+      dragPreview.template = previewTemplate;
+      dragPreview.onRemove = () => {
+        this.doc.blockCollection.clearSelector(selector);
+      };
       dragPreview.style.width = `${width / this.scale / this.noteScale / this.cumulativeParentScale}px`;
       dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
         this.scale * this.noteScale
       })`;
 
       dragPreview.style.opacity = altKey ? '1' : '0.5';
-      dragPreview.append(fragment);
     }
     this.rootElement.append(dragPreview);
     return dragPreview;

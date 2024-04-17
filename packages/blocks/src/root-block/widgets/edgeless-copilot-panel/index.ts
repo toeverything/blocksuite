@@ -39,6 +39,12 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   groups!: AIItemGroupConfig[];
 
+  @property({ attribute: false })
+  entry?: 'toolbar' | 'selection';
+
+  @property({ attribute: false })
+  onClick?: () => void;
+
   private _getChain() {
     return this.edgeless.service.std.command.chain();
   }
@@ -69,7 +75,13 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
 
     return html`
       <div class="edgeless-copilot-panel">
-        <ai-item-list .host=${this.host} .groups=${groups}></ai-item-list>
+        <ai-item-list
+          .onClick=${() => {
+            this.onClick?.();
+          }}
+          .host=${this.host}
+          .groups=${groups}
+        ></ai-item-list>
       </div>
     `;
   }

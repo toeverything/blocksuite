@@ -1,6 +1,6 @@
-import '../buttons/tool-icon-button.js';
-import '../toolbar/shape/shape-menu.js';
-import '../../../../_common/components/menu-divider.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/toolbar/shape/shape-menu.js';
+import '../../../_common/components/menu-divider.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
@@ -24,11 +24,11 @@ import {
   RefreshIcon,
   SendBackwardIcon,
   SendToBackIcon,
-} from '../../../../_common/icons/index.js';
+} from '../../../_common/icons/index.js';
 import {
   createButtonPopper,
   type ReorderingType,
-} from '../../../../_common/utils/index.js';
+} from '../../../_common/utils/index.js';
 import type {
   AttachmentBlockComponent,
   BookmarkBlockComponent,
@@ -37,19 +37,22 @@ import type {
   EmbedLoomBlockComponent,
   EmbedYoutubeBlockComponent,
   ImageBlockComponent,
-} from '../../../../index.js';
-import { Bound } from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { removeContainedFrames } from '../../frame-manager.js';
-import { duplicate, splitElements } from '../../utils/clipboard-utils.js';
-import { deleteElements } from '../../utils/crud.js';
+} from '../../../index.js';
+import { Bound } from '../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { removeContainedFrames } from '../../edgeless/frame-manager.js';
+import {
+  duplicate,
+  splitElements,
+} from '../../edgeless/utils/clipboard-utils.js';
+import { deleteElements } from '../../edgeless/utils/crud.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
   isEmbeddedLinkBlock,
   isFrameBlock,
   isImageBlock,
-} from '../../utils/query.js';
+} from '../../edgeless/utils/query.js';
 
 type EmbedLinkBlockComponent =
   | EmbedGithubBlockComponent

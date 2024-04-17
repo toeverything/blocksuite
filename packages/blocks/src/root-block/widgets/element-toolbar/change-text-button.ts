@@ -1,13 +1,12 @@
-import '../panel/align-panel.js';
-import '../panel/font-family-panel.js';
+import '../../edgeless/components/panel/align-panel.js';
+import '../../edgeless/components/panel/font-family-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import type { Doc } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { TextElementModel } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { TextElementModel } from '../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-change-text-button')
 export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
@@ -25,17 +24,18 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   texts: TextElementModel[] = [];
 
   @property({ attribute: false })
-  doc!: Doc;
+  edgeless!: EdgelessRootBlockComponent;
 
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  get doc() {
+    return this.edgeless.doc;
+  }
 
   override render() {
     return html`<div class="change-text-container">
       <edgeless-change-text-menu
         .elements=${this.texts}
         .elementType=${'text'}
-        .surface=${this.surface}
+        .edgeless=${this.edgeless}
       ></edgeless-change-text-menu>
     </div>`;
   }
@@ -45,4 +45,17 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-change-text-button': EdgelessChangeTextButton;
   }
+}
+
+export function renderChangeTextButton(
+  edgeless: EdgelessRootBlockComponent,
+  textElements?: TextElementModel[]
+) {
+  return textElements?.length
+    ? html`<edgeless-change-text-button
+        .texts=${textElements}
+        .edgeless=${edgeless}
+      >
+      </edgeless-change-text-button>`
+    : nothing;
 }

@@ -630,7 +630,9 @@ export function findClosestBlockElement(
 ): BlockComponent | null {
   const children = (
     Array.from(container.querySelectorAll(selector)) as BlockComponent[]
-  ).filter(child => PathFinder.includes(child.path, container.path));
+  )
+    .filter(child => child.host === container.host)
+    .filter(child => PathFinder.includes(child.path, container.path));
 
   let lastDistance = Number.POSITIVE_INFINITY;
   let lastChild = null;

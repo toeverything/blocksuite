@@ -8,13 +8,17 @@ import {
   AffineFormatBarWidget,
   AffineSlashMenuWidget,
   EdgelessCopilotWidget,
+  EdgelessElementToolbarWidget,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { CommunityEdgelessEditorBlockSpecs } from '../specs/community.js';
 import { buildAIPanelConfig } from './ai-panel.js';
-import { setupEdgelessCopilot } from './entries/edgeless/index.js';
+import {
+  setupEdgelessCopilot,
+  setupEdgelessElementToolbarEntry,
+} from './entries/edgeless/index.js';
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
@@ -84,6 +88,10 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
 
             if (view.component instanceof EdgelessCopilotWidget) {
               setupEdgelessCopilot(view.component);
+            }
+
+            if (view.component instanceof EdgelessElementToolbarWidget) {
+              setupEdgelessElementToolbarEntry(view.component);
             }
           });
         },

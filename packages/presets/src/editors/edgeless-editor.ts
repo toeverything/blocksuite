@@ -36,7 +36,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
       display: block;
       height: 100%;
       position: relative;
-      overflow: hidden;
+      overflow: clip;
       container-name: viewport;
       container-type: inline-size;
     }
