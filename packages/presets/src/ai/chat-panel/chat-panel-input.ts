@@ -41,6 +41,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       border: none;
       font-size: 14px;
       font-weight: 400;
+      font-family: var(--affine-font-family);
       color: var(--affine-text-primary-color);
     }
 
