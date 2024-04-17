@@ -110,7 +110,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       this._doc.transact(() => {
         _draggingElement.pop('points');
         _draggingElement.pop('xywh');
-      });
+      }, false);
     }
     this._draggingElement = null;
     this._draggingElementId = null;
