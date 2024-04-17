@@ -7,7 +7,7 @@ import {
   Generator,
   Schema,
 } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -92,6 +92,9 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   answer!: string;
+
+  @property({ attribute: false })
+  templateShow = true;
 
   @property({ attribute: false })
   ctx!: {
@@ -246,21 +249,24 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       >
         ${this.host.renderSpecPortal(this.doc, MiniMindmapSpecs)}
       </div>
-      <div class="select-template-title">Select template</div>
-      <div class="template">
-        ${repeat(
-          mindmapStyles,
-          ([style]) => style,
-          ([style, icon]) => {
-            return html`<div
-              class=${`template-item ${curStyle === style ? 'active' : ''}`}
-              @click=${() => this._switchStyle(style as MindmapStyle)}
-            >
-              ${icon}
-            </div>`;
-          }
-        )}
-      </div>
+
+      ${this.templateShow
+        ? html` <div class="select-template-title">Select template</div>
+            <div class="template">
+              ${repeat(
+                mindmapStyles,
+                ([style]) => style,
+                ([style, icon]) => {
+                  return html`<div
+                    class=${`template-item ${curStyle === style ? 'active' : ''}`}
+                    @click=${() => this._switchStyle(style as MindmapStyle)}
+                  >
+                    ${icon}
+                  </div>`;
+                }
+              )}
+            </div>`
+        : nothing}
     </div>`;
   }
 }

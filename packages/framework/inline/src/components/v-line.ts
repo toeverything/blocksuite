@@ -31,15 +31,17 @@ export class VLine extends LitElement {
     return Array.from(this.querySelectorAll('v-element'));
   }
 
+  // vTexts.length > 0 does not mean the line is not empty,
+  // you should use vElements.length or vTextLength because v-element corresponds to the actual delta
   get vTexts() {
     return Array.from(this.querySelectorAll('v-text'));
   }
 
-  get textLength() {
+  get vTextLength() {
     return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
   }
 
-  override get textContent() {
+  get vTextContent() {
     return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
   }
 
@@ -69,6 +71,7 @@ export class VLine extends LitElement {
 
   override render() {
     if (this.elements.length === 0) {
+      // don't use v-element because it not correspond to the actual delta
       return html`<div><v-text .str=${ZERO_WIDTH_SPACE}></v-text></div>`;
     }
 

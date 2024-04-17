@@ -37,9 +37,12 @@
   },
   "license": "MPL-2.0",
   "devDependencies": {
+    "@apollo/client": "^3.9.11",
     "@tweakpane/core": "^2.0.3",
     "@types/micromatch": "^4.0.6",
+    "graphql": "^16.8.1",
     "magic-string": "^0.30.8",
+    "openai": "^4.29.2",
     "vite-plugin-wasm": "^3.3.0"
   }
 }

@@ -8,7 +8,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { getAIPanel } from '../ai-panel.js';
 import { AIProvider } from '../provider.js';
 import {
-  getSelectedImagesAsDataUrls,
+  getSelectedImagesAsBlobs,
   getSelectedTextContent,
   getSelections,
 } from '../utils/selection-utils.js';
@@ -61,7 +61,7 @@ export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
         const panel = getAIPanel(host);
         const [markdown, attachments] = await Promise.all([
           getSelectedTextContent(panel.host),
-          getSelectedImagesAsDataUrls(panel.host),
+          getSelectedImagesAsBlobs(panel.host),
         ]);
         const options = {
           ...variants,

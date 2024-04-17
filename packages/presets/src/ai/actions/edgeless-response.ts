@@ -20,7 +20,9 @@ import {
 } from '@blocksuite/blocks';
 
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
+import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
+import { fetchImageToFile } from '../utils/image.js';
 import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
 
 export type CtxRecord = {
@@ -41,14 +43,16 @@ export function getService(host: EditorHost) {
   return edgelessService;
 }
 
-export function getCopilotPanel(host: EditorHost): EdgelessCopilotWidget {
+export function getEdgelessCopilotWidget(
+  host: EditorHost
+): EdgelessCopilotWidget {
   const rootBlockId = host.doc.root?.id as string;
-  const copilotPanel = host.view.getWidget(
+  const copilotWidget = host.view.getWidget(
     AFFINE_EDGELESS_COPILOT_WIDGET,
     rootBlockId
   ) as EdgelessCopilotWidget;
 
-  return copilotPanel;
+  return copilotWidget;
 }
 
 export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
@@ -59,13 +63,18 @@ export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
 }
 
 export function discard(
-  panel: AffineAIPanelWidget
+  panel: AffineAIPanelWidget,
+  copilot: EdgelessCopilotWidget
 ): FinishConfig['responses'][number] {
   return {
     name: 'Discard',
     icon: DeleteIcon,
     handler: () => {
-      panel.hide();
+      const callback = () => {
+        panel.hide();
+        copilot.visible = false;
+      };
+      panel.discard(callback);
     },
   };
 }
@@ -106,16 +115,16 @@ export const responses: {
 } = {
   brainstormMindmap: (host, ctx) => {
     const aiPanel = getAIPanel(host);
-    const copilotPanel = getCopilotPanel(host);
+    const edgelessCopilot = getEdgelessCopilotWidget(host);
     const [surface] = host.doc.getBlockByFlavour(
       'affine:surface'
     ) as SurfaceBlockModel[];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = ctx.get() as any;
-    const selectionRect = copilotPanel.selectionModelRect;
+    const selectionRect = edgelessCopilot.selectionModelRect;
 
-    copilotPanel.hide();
+    edgelessCopilot.hideCopilotPanel();
     aiPanel.hide();
 
     const mindmapId = surface.addElement({
@@ -153,15 +162,15 @@ export const responses: {
     const html = aiPanel.answer;
     if (!html) return;
 
-    const copilotPanel = getCopilotPanel(host);
+    const edgelessCopilot = getEdgelessCopilotWidget(host);
     const [surface] = host.doc.getBlockByFlavour(
       'affine:surface'
     ) as SurfaceBlockModel[];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const selectionRect = copilotPanel.selectionModelRect;
+    const selectionRect = edgelessCopilot.selectionModelRect;
 
-    copilotPanel.hide();
+    edgelessCopilot.hideCopilotPanel();
     aiPanel.hide();
 
     const edgelessRoot = getEdgelessRootFromEditor(host);
@@ -175,12 +184,68 @@ export const responses: {
       );
     });
   },
+  createSlides: (host, ctx) => {
+    const data = ctx.get();
+    const contents = data.contents as unknown[];
+    const images = data.images as { url: string; id: string }[][];
+    const service = host.spec.getService<EdgelessRootService>('affine:page');
+
+    (async function () {
+      for (let i = 0; i < contents.length - 1; i++) {
+        const image = images[i];
+        const content = contents[i];
+        const job = service.createTemplateJob('template');
+        await Promise.all(
+          image.map(({ id, url }) =>
+            fetch(url)
+              .then(res => res.blob())
+              .then(blob => job.job.assets.set(id, blob))
+          )
+        );
+        await job.insertTemplate(content);
+        getSurfaceElementFromEditor(host).refresh();
+      }
+    })().catch(console.error);
+  },
+  createImage: host => {
+    const aiPanel = getAIPanel(host);
+    // `DataURL` or `URL`
+    const data = aiPanel.answer;
+    if (!data) return;
+
+    const edgelessCopilot = getEdgelessCopilotWidget(host);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const selectionRect = edgelessCopilot.selectionModelRect;
+
+    edgelessCopilot.hideCopilotPanel();
+    aiPanel.hide();
+
+    const filename = 'image';
+    const imageProxy = host.std.clipboard.configs.get('imageProxy');
+
+    fetchImageToFile(data, filename, imageProxy)
+      .then(img => {
+        if (!img) return;
+
+        const edgelessRoot = getEdgelessRootFromEditor(host);
+        const { left, top, height } = selectionRect;
+        const [x, y] = edgelessRoot.service.viewport.toViewCoord(
+          left,
+          top + height + 20
+        );
+
+        host.doc.transact(() => {
+          edgelessRoot.addImages([img], { x, y }).catch(console.error);
+        });
+      })
+      .catch(console.error);
+  },
 };
 
 const defaultHandler = (host: EditorHost) => {
-  const copilotPanel = getCopilotPanel(host);
+  const edgelessCopilot = getEdgelessCopilotWidget(host);
   const doc = host.doc;
-  const currentRect = copilotPanel.selectionModelRect;
+  const currentRect = edgelessCopilot.selectionModelRect;
   const panel = getAIPanel(host);
 
   doc.transact(() => {
@@ -227,7 +292,7 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
     responses: [
       getResponseHandler(id, host, ctx),
       retry(getAIPanel(host)),
-      discard(getAIPanel(host)),
+      discard(getAIPanel(host), getEdgelessCopilotWidget(host)),
     ],
     actions: [],
   };

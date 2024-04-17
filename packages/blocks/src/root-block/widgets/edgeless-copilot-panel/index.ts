@@ -12,10 +12,13 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 @customElement('edgeless-copilot-panel')
 export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   static override styles = css`
-    .edgeless-copilot-panel {
+    :host {
       display: flex;
-      box-sizing: border-box;
       position: absolute;
+    }
+
+    .edgeless-copilot-panel {
+      box-sizing: border-box;
       padding: 8px;
       min-width: 294px;
       max-height: 374px;
@@ -43,6 +46,7 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     this._disposables.add(on(this, 'wheel', stopPropagation));
+    this._disposables.add(on(this, 'pointerdown', stopPropagation));
   }
 
   hide() {
@@ -64,7 +68,7 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
     if (groups.every(group => group.items.length === 0)) return nothing;
 
     return html`
-      <div class="edgeless-copilot-panel" @pointerdown=${stopPropagation}>
+      <div class="edgeless-copilot-panel">
         <ai-item-list .host=${this.host} .groups=${groups}></ai-item-list>
       </div>
     `;

@@ -7,6 +7,7 @@ import {
   autoUpdate,
   computePosition,
   type ReferenceElement,
+  shift,
 } from '@floating-ui/dom';
 import {
   css,
@@ -18,6 +19,8 @@ import {
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
+import type { AIPanelDiscardModal } from './components/discard-modal.js';
+import { toggleDiscardModal } from './components/discard-modal.js';
 import type {
   AIPanelAnswerConfig,
   AIPanelErrorConfig,
@@ -38,6 +41,7 @@ export interface AffineAIPanelWidgetConfig {
 
   finishStateConfig: AIPanelAnswerConfig;
   errorStateConfig: AIPanelErrorConfig;
+  discardCallback?: () => void;
 }
 
 export type AffineAIPanelState =
@@ -94,6 +98,18 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   private _stopAutoUpdate?: undefined | (() => void);
 
+  private _discardModal: AIPanelDiscardModal | null = null;
+  private _clearDiscardModal = () => {
+    if (this._discardModal) {
+      this._discardModal.remove();
+      this._discardModal = null;
+    }
+  };
+  private _discardCallback = () => {
+    this.hide();
+    this.config?.discardCallback?.();
+  };
+
   toggle = (reference: ReferenceElement, input?: string) => {
     if (input) {
       this._inputText = input;
@@ -108,6 +124,11 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._stopAutoUpdate = autoUpdate(reference, this, () => {
       computePosition(reference, this, {
         placement: 'bottom-start',
+        middleware: [
+          shift({
+            padding: 20,
+          }),
+        ],
       })
         .then(({ x, y }) => {
           this.style.left = `${x}px`;
@@ -124,6 +145,12 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._inputText = null;
     this._answer = null;
     this._stopAutoUpdate = undefined;
+  };
+
+  discard = (callback: () => void = this._discardCallback) => {
+    if (this.state === 'hidden') return;
+    this._clearDiscardModal();
+    this._discardModal = toggleDiscardModal(callback);
   };
 
   /**
@@ -198,17 +225,23 @@ export class AffineAIPanelWidget extends WidgetElement {
     this.disposables.addFromEvent(document, 'mousedown', this._onDocumentClick);
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearDiscardModal();
+  }
+
   private _onDocumentClick = (e: MouseEvent) => {
     if (this.state !== 'hidden') {
       e.preventDefault();
     }
 
     if (
+      e.target !== this._discardModal &&
       e.target !== this &&
       !this.contains(e.target as Node) &&
       this.state !== 'generating'
     ) {
-      this.hide();
+      this.discard();
     }
   };
 
@@ -263,7 +296,7 @@ export class AffineAIPanelWidget extends WidgetElement {
         'input',
         () =>
           html`<ai-panel-input
-            .onBlur=${this.hide}
+            .onBlur=${() => this.discard()}
             .onFinish=${this._inputFinish}
           ></ai-panel-input>`,
       ],
