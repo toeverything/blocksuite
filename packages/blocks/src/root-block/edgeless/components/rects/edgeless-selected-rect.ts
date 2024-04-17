@@ -1084,69 +1084,78 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } = this;
 
     const hasResizeHandles = !selection.editing && !doc.readonly;
+    const inoperable = selection.inoperable;
+    const handlers = [];
 
-    const resizeHandles = hasResizeHandles
-      ? ResizeHandles(
-          resizeMode,
-          (e: PointerEvent, direction: HandleDirection) => {
-            const target = e.target as HTMLElement;
-            if (target.classList.contains('rotate') && !this._canRotate()) {
-              return;
+    if (!inoperable) {
+      const resizeHandles = hasResizeHandles
+        ? ResizeHandles(
+            resizeMode,
+            (e: PointerEvent, direction: HandleDirection) => {
+              const target = e.target as HTMLElement;
+              if (target.classList.contains('rotate') && !this._canRotate()) {
+                return;
+              }
+              const proportional = elements.some(
+                el => el instanceof TextElementModel
+              );
+              _resizeManager.onPointerDown(e, direction, proportional);
+            },
+            (
+              dragging: boolean,
+              options?: {
+                type: 'resize' | 'rotate';
+                angle?: number;
+                target?: HTMLElement;
+                point?: IVec;
+              }
+            ) => {
+              if (!this._canRotate() && options?.type === 'rotate') return;
+              _updateCursor(dragging, options);
             }
-            const proportional = elements.some(
-              el => el instanceof TextElementModel
-            );
-            _resizeManager.onPointerDown(e, direction, proportional);
-          },
-          (
-            dragging: boolean,
-            options?: {
-              type: 'resize' | 'rotate';
-              angle?: number;
-              target?: HTMLElement;
-              point?: IVec;
-            }
-          ) => {
-            if (!this._canRotate() && options?.type === 'rotate') return;
-            _updateCursor(dragging, options);
-          }
+          )
+        : nothing;
+
+      const connectorHandle =
+        elements.length === 1 && elements[0] instanceof ConnectorElementModel
+          ? html`<edgeless-connector-handle
+              .connector=${elements[0]}
+              .edgeless=${edgeless}
+            ></edgeless-connector-handle>`
+          : nothing;
+
+      const elementHandle =
+        elements.length > 1 &&
+        !elements.reduce(
+          (p, e) => p && e instanceof ConnectorElementModel,
+          true
         )
-      : nothing;
+          ? elements.map(element => {
+              const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
+              const [x, y] = edgeless.service.viewport.toViewCoord(
+                modelX,
+                modelY
+              );
+              const { left, top, borderWidth } = this._selectedRect;
+              const style = {
+                position: 'absolute',
+                boxSizing: 'border-box',
+                left: `${x - left - borderWidth}px`,
+                top: `${y - top - borderWidth}px`,
+                width: `${w * this.zoom}px`,
+                height: `${h * this.zoom}px`,
+                transform: `rotate(${element.rotate}deg)`,
+                border: `1px solid var(--affine-primary-color)`,
+              };
+              return html`<div
+                class="element-handle"
+                style=${styleMap(style)}
+              ></div>`;
+            })
+          : nothing;
 
-    const connectorHandle =
-      elements.length === 1 && elements[0] instanceof ConnectorElementModel
-        ? html`<edgeless-connector-handle
-            .connector=${elements[0]}
-            .edgeless=${edgeless}
-          ></edgeless-connector-handle>`
-        : nothing;
-
-    const elementHandle =
-      elements.length > 1 &&
-      !elements.reduce((p, e) => p && e instanceof ConnectorElementModel, true)
-        ? elements.map(element => {
-            const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
-            const [x, y] = edgeless.service.viewport.toViewCoord(
-              modelX,
-              modelY
-            );
-            const { left, top, borderWidth } = this._selectedRect;
-            const style = {
-              position: 'absolute',
-              boxSizing: 'border-box',
-              left: `${x - left - borderWidth}px`,
-              top: `${y - top - borderWidth}px`,
-              width: `${w * this.zoom}px`,
-              height: `${h * this.zoom}px`,
-              transform: `rotate(${element.rotate}deg)`,
-              border: `1px solid var(--affine-primary-color)`,
-            };
-            return html`<div
-              class="element-handle"
-              style=${styleMap(style)}
-            ></div>`;
-          })
-        : nothing;
+      handlers.push(resizeHandles, connectorHandle, elementHandle);
+    }
 
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElementModel;
@@ -1186,7 +1195,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         }
       </style>
 
-      ${!doc.readonly && this._canAutoComplete()
+      ${!doc.readonly && !inoperable && this._canAutoComplete()
         ? html`<edgeless-auto-complete
             .current=${this.selection.elements[0]}
             .edgeless=${edgeless}
@@ -1209,7 +1218,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         data-scale-percent=${ifDefined(this._scalePercent)}
         data-scale-direction=${ifDefined(this._scaleDirection)}
       >
-        ${resizeHandles} ${connectorHandle} ${elementHandle}
+        ${handlers}
       </div>
     `;
   }
