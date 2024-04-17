@@ -292,4 +292,30 @@ export function setupAIProvider() {
       prompt,
     });
   });
+
+  // example implementation. does not work without key.
+  AIProvider.provide('photoEngine', {
+    async searchImages(options): Promise<string[]> {
+      const url = new URL('https://api.unsplash.com/search/photos');
+      const unsplashKey = 'placeholder';
+      url.searchParams.set('client_id', unsplashKey ?? '');
+      url.searchParams.set('query', options.query);
+      const result: {
+        results: {
+          urls: {
+            regular: string;
+          };
+        }[];
+      } = await fetch(url.toString()).then(res => res.json());
+      return result.results.map(r => {
+        const url = new URL(r.urls.regular);
+        url.searchParams.set('fit', 'crop');
+        url.searchParams.set('crop', 'edges');
+        url.searchParams.set('dpr', '3');
+        url.searchParams.set('w', `${options.width}`);
+        url.searchParams.set('w', `${options.height}`);
+        return url.toString();
+      });
+    },
+  });
 }

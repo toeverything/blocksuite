@@ -537,7 +537,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     const items = ConfigRenderer(this);
 
-    return html` <div
+    return html`<div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
       @pointerdown="${stopPropagation}"
       @wheel="${stopPropagation}"

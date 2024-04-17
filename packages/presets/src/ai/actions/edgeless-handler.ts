@@ -1,5 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { AffineAIPanelWidget } from '@blocksuite/blocks';
+import type { AffineAIPanelWidget, AIError } from '@blocksuite/blocks';
 import {
   ImageBlockModel,
   MindmapElementModel,
@@ -172,7 +172,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
       input: string;
       signal?: AbortSignal;
       update: (text: string) => void;
-      finish: (state: 'success' | 'error' | 'aborted') => void;
+      finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     }) => {
       const selectedElements = getCopilotSelectedElems(host);
 
