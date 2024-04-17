@@ -93,13 +93,6 @@ export class ListBlockComponent extends BlockElement<
     return result;
   }
 
-  override firstUpdated() {
-    this._updateFollowingListSiblings();
-    this.model.childrenUpdated.on(() => {
-      this._updateFollowingListSiblings();
-    });
-  }
-
   private _updateFollowingListSiblings() {
     this.updateComplete
       .then(() => {
@@ -120,6 +113,21 @@ export class ListBlockComponent extends BlockElement<
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
+    this._updateFollowingListSiblings();
+    this.disposables.add(
+      this.model.childrenUpdated.on(() => {
+        this._updateFollowingListSiblings();
+      })
+    );
+    this.host.std.doc.slots.blockUpdated.on(e => {
+      if (e.type !== 'delete') return;
+      const deletedBlock = this.std.view.getBlock(e.id);
+      if (!deletedBlock) return;
+      if (this !== deletedBlock.nextElementSibling) return;
+      this._updateFollowingListSiblings();
+      return;
+    });
   }
 
   private _toggleChildren() {
