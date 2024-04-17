@@ -13,9 +13,19 @@ export class DragPreview extends ShadowlessElement {
   @property({ attribute: false })
   template: TemplateResult | null = null;
 
+  @property({ attribute: false })
+  onRemove: (() => void) | null = null;
+
   constructor(offset?: Point) {
     super();
     this.offset = offset ?? new Point(0, 0);
+  }
+
+  override disconnectedCallback() {
+    if (this.onRemove) {
+      this.onRemove();
+    }
+    super.disconnectedCallback();
   }
 
   override render() {

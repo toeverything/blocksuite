@@ -10,7 +10,7 @@ import {
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
-import { type BlockModel } from '@blocksuite/store';
+import { type BlockModel, type BlockSelector } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -384,9 +384,8 @@ export class AffineDragHandleWidget extends WidgetElement<
         }
       });
 
-      const doc = this.doc.blockCollection.getDoc(block =>
-        ids.includes(block.id)
-      );
+      const selector: BlockSelector = block => ids.includes(block.id);
+      const doc = this.doc.blockCollection.getDoc(selector);
 
       const previewSpec = SpecProvider.getInstance().getSpec('preview');
       assertExists(previewSpec, 'Preview spec is not found');
@@ -399,6 +398,9 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       dragPreview = new DragPreview(offset);
       dragPreview.template = previewTemplate;
+      dragPreview.onRemove = () => {
+        this.doc.blockCollection.clearSelector(selector);
+      };
       dragPreview.style.width = `${width / this.scale / this.noteScale / this.cumulativeParentScale}px`;
       dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
         this.scale * this.noteScale
