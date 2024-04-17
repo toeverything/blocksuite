@@ -10,6 +10,8 @@ import {
 import { EdgelessToolController } from './index.js';
 
 export class BrushToolController extends EdgelessToolController<BrushTool> {
+  static BRUSH_POP_GAP = 20;
+
   readonly tool = <BrushTool>{
     type: 'brush',
   };
@@ -21,6 +23,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   private _lastPoint: IVec | null = null;
   private _straightLineType: 'horizontal' | 'vertical' | null = null;
   private _pressureSupportedPointerIds: Set<number> = new Set();
+  private _lastPopLength = 0;
 
   onContainerPointerDown(): void {
     noop();
@@ -64,6 +67,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._draggingElement = element;
     this._draggingPathPoints = points;
     this._draggingPathPressures = [e.pressure];
+    this._lastPopLength = 0;
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -102,15 +106,29 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._edgeless.service.updateElement(this._draggingElementId, {
       points: this._tryGetPressurePoints(e),
     });
+
+    if (
+      this._lastPopLength + BrushToolController.BRUSH_POP_GAP <
+      this._draggingElement!.points.length
+    ) {
+      this._lastPopLength = this._draggingElement!.points.length;
+      this._doc.withoutTransact(() => {
+        this._draggingElement!.pop('points');
+        this._draggingElement!.pop('xywh');
+      });
+
+      this._draggingElement!.stash('points');
+      this._draggingElement!.stash('xywh');
+    }
   }
 
   onContainerDragEnd() {
     if (this._draggingElement) {
       const { _draggingElement } = this;
-      this._doc.transact(() => {
+      this._doc.withoutTransact(() => {
         _draggingElement.pop('points');
         _draggingElement.pop('xywh');
-      }, false);
+      });
     }
     this._draggingElement = null;
     this._draggingElementId = null;
