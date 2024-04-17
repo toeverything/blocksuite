@@ -2,6 +2,7 @@ import type { FilterGroup } from '../../../common/ast.js';
 import type { GroupBy, GroupProperty, Sort } from '../../../common/types.js';
 import { type BasicViewDataType, viewType } from '../../data-view.js';
 import { DataViewTableManager } from './table-view-manager.js';
+import type { StatCalcOpType } from './types.js';
 
 export const tableViewType = viewType('table');
 
@@ -13,6 +14,7 @@ declare global {
 export type TableViewColumn = {
   id: string;
   width: number;
+  statCalcType?: StatCalcOpType;
   hide?: boolean;
 };
 type DataType = {

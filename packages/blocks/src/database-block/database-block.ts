@@ -266,7 +266,6 @@ export class DatabaseBlockComponent extends BlockElement<
   public get dataSource(): DatabaseBlockDataSource {
     if (!this._dataSource) {
       this._dataSource = new DatabaseBlockDataSource(this.host, {
-        type: 'database-block',
         pageId: this.host.doc.id,
         blockId: this.model.id,
       });

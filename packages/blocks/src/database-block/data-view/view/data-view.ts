@@ -95,13 +95,6 @@ export interface DataViewConfig<
   ): Data;
 }
 
-export type DataViewToolsProps<
-  Manager extends DataViewManager = DataViewManager,
-> = {
-  view: Manager;
-  viewMethods: DataViewExpose;
-};
-
 export interface DataViewRendererConfig {
   view: UniComponent<DataViewProps, DataViewExpose>;
   icon: UniComponent;

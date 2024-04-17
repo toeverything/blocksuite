@@ -107,7 +107,6 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
       const col: Column = {
         ...column,
         id,
-        statCalcOp: column.statCalcOp ?? 'none',
       };
       this.columns.splice(
         insertPositionToIndex(position, this.columns),
@@ -225,6 +224,7 @@ const migration = {
         view.columns.unshift({
           id,
           width,
+          statCalcType: 'none',
         });
       }
     });

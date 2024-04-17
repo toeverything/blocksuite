@@ -158,7 +158,7 @@ export const columnType = <Type extends string>(type: Type) => ({
       addConvert: model.registerConvert,
       renderConfig: (
         renderer: Omit<Renderer<ColumnData, CellData>, 'type'>
-      ) => ({
+      ): ColumnMeta<Type, CellData, ColumnData> => ({
         type,
         model,
         renderer: createRendererConfig<CellData, ColumnData>({

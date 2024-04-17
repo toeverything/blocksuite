@@ -69,6 +69,7 @@ const FLAGS_PRESET = {
   enable_database_statistics: false,
   enable_legacy_validation: true,
   enable_expand_database_block: false,
+  enable_block_query: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

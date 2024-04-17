@@ -12,7 +12,6 @@ export interface Column<
   type: ColumnType;
   name: string;
   data: Data;
-  statCalcOp?: StatCalcOpType;
 }
 // Common formula types
 export type StatCalcOpBaseTypes =
