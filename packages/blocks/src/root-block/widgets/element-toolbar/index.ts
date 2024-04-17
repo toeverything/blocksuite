@@ -197,6 +197,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     if (this.isConnected && this.selection.has(id)) {
       this._recalculatePosition();
+      this.requestUpdate();
     }
   };
 
