@@ -47,6 +47,9 @@ export class ImageBlockComponent extends BlockElement<
   @property({ attribute: false })
   blobUrl?: string;
 
+  @property({ attribute: false })
+  lastSourceId!: string;
+
   @query('affine-image-block-card')
   private _imageCard?: AffineImageCard;
 
@@ -157,7 +160,6 @@ export class ImageBlockComponent extends BlockElement<
 
   override updated() {
     this._imageCard?.requestUpdate();
-    this._imageElement?.requestUpdate();
   }
 
   override renderBlock() {
@@ -192,7 +194,10 @@ export class ImageBlockComponent extends BlockElement<
             ></affine-image-block-card>`
           : this.isInSurface
             ? html`<affine-edgeless-image
-                .block=${this}
+                .url=${this.blobUrl}
+                @error=${(_: CustomEvent<Error>) => {
+                  this.error = true;
+                }}
               ></affine-edgeless-image>`
             : html`<affine-page-image .block=${this}></affine-page-image>`}
 
