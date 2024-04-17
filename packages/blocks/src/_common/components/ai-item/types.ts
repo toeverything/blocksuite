@@ -24,3 +24,31 @@ export interface AISubItemConfig {
   type: string;
   handler?: (host: EditorHost) => void;
 }
+
+abstract class BaseAIError extends Error {
+  abstract readonly type: AIErrorType;
+}
+
+export enum AIErrorType {
+  PaymentRequired = 'PaymentRequired',
+  GeneralNetworkError = 'GeneralNetworkError',
+}
+
+// todo: move to presets
+// user has used up the quota
+export class PaymentRequiredError extends BaseAIError {
+  readonly type = AIErrorType.PaymentRequired;
+  constructor() {
+    super('Payment required');
+  }
+}
+
+// general 500x error
+export class GeneralNetworkError extends BaseAIError {
+  readonly type = AIErrorType.GeneralNetworkError;
+  constructor() {
+    super('Network error');
+  }
+}
+
+export type AIError = PaymentRequiredError | GeneralNetworkError;

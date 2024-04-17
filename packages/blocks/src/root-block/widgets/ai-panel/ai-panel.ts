@@ -19,6 +19,7 @@ import {
 import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
+import type { AIError } from '../../../_common/components/index.js';
 import type { AIPanelDiscardModal } from './components/discard-modal.js';
 import { toggleDiscardModal } from './components/discard-modal.js';
 import type {
@@ -34,7 +35,7 @@ export interface AffineAIPanelWidgetConfig {
   generateAnswer?: (props: {
     input: string;
     update: (answer: string) => void;
-    finish: (type: 'success' | 'error' | 'aborted') => void;
+    finish: (type: 'success' | 'error' | 'aborted', err?: AIError) => void;
     // Used to allow users to stop actively when generating
     signal: AbortSignal;
   }) => void;
@@ -171,11 +172,14 @@ export class AffineAIPanelWidget extends WidgetElement {
       this._answer = answer;
       this.requestUpdate();
     };
-    const finish = (type: 'success' | 'error' | 'aborted') => {
+    const finish = (type: 'success' | 'error' | 'aborted', err?: AIError) => {
+      assertExists(this.config);
       if (type === 'error') {
         this.state = 'error';
+        this.config.errorStateConfig.error = err;
       } else {
         this.state = 'finished';
+        this.config.errorStateConfig.error = undefined;
       }
 
       this._resetAbortController();
