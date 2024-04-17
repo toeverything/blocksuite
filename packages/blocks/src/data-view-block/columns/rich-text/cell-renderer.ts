@@ -348,7 +348,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   override render() {
     if (!this.service) return nothing;
-    console.log(this.inlineManager);
     return html`<rich-text
       .yText=${this.value}
       .inlineEventSource=${this.topContenteditableElement}
