@@ -38,6 +38,7 @@ import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/doc-re
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/edgeless-remote-selection/index.js';
 import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../root-block/widgets/edgeless-zoom-toolbar/index.js';
+import { EDGELESS_ELEMENT_TOOLBAR_WIDGET } from '../root-block/widgets/element-toolbar/index.js';
 import { EMBED_CARD_TOOLBAR } from '../root-block/widgets/embed-card-toolbar/embed-card-toolbar.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../root-block/widgets/format-bar/format-bar.js';
 import { AFFINE_INNER_MODAL_WIDGET } from '../root-block/widgets/inner-modal/inner-modal.js';
@@ -53,6 +54,8 @@ import {
   SurfaceRefBlockSchema,
   SurfaceRefBlockService,
 } from '../surface-ref-block/index.js';
+import { PreviewEditorBlockSpecs } from './preview-spec.js';
+import { SpecProvider } from './spec-provider.js';
 
 const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
   schema: RootBlockSchema,
@@ -120,6 +123,7 @@ const EdgelessPageSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
       [AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET]: literal`${unsafeStatic(
         AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
       )}`,
+      [EDGELESS_ELEMENT_TOOLBAR_WIDGET]: literal`${unsafeStatic(EDGELESS_ELEMENT_TOOLBAR_WIDGET)}`,
     },
   },
 };
@@ -253,3 +257,9 @@ export const EdgelessEditorBlockSpecs: BlockSpec[] = [
     },
   },
 ];
+
+export * from './preview-spec.js';
+
+SpecProvider.getInstance().addSpec('page', PageEditorBlockSpecs);
+SpecProvider.getInstance().addSpec('edgeless', EdgelessEditorBlockSpecs);
+SpecProvider.getInstance().addSpec('preview', PreviewEditorBlockSpecs);

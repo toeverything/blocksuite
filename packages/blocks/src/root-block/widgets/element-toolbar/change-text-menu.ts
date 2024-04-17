@@ -1,6 +1,6 @@
-import '../panel/font-family-panel.js';
-import '../panel/size-panel.js';
-import '../panel/font-weight-and-style-panel.js';
+import '../../edgeless/components/panel/font-family-panel.js';
+import '../../edgeless/components/panel/size-panel.js';
+import '../../edgeless/components/panel/font-weight-and-style-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
@@ -12,47 +12,47 @@ import {
   TextAlignCenterIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
-} from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
+} from '../../../_common/icons/index.js';
+import { ShapeArrowDownSmallIcon } from '../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import { createButtonPopper } from '../../../_common/utils/button-popper.js';
+import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import {
   isFontStyleSupported,
   isFontWeightSupported,
-} from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { CanvasTextFontStyle } from '../../../../surface-block/consts.js';
+} from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { normalizeTextBound } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { CanvasTextFontStyle } from '../../../surface-block/consts.js';
 import {
   FontFamily,
   FontWeight,
-} from '../../../../surface-block/element-model/common.js';
-import type { TextElementModel } from '../../../../surface-block/element-model/text.js';
-import { TextAlign } from '../../../../surface-block/elements/consts.js';
-import type { ShapeElementModel } from '../../../../surface-block/index.js';
+} from '../../../surface-block/element-model/common.js';
+import type { TextElementModel } from '../../../surface-block/element-model/text.js';
+import { TextAlign } from '../../../surface-block/elements/consts.js';
+import type { ShapeElementModel } from '../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
   normalizeShapeBound,
-} from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+} from '../../../surface-block/index.js';
 import {
   getFontFacesByFontFamily,
   wrapFontFamily,
-} from '../../../../surface-block/utils/font.js';
-import type { EdgelessAlignPanel } from '../panel/align-panel.js';
+} from '../../../surface-block/utils/font.js';
+import type { EdgelessAlignPanel } from '../../edgeless/components/panel/align-panel.js';
 import {
   type ColorEvent,
   ColorUnit,
   GET_DEFAULT_LINE_COLOR,
   LINE_COLORS,
-} from '../panel/color-panel.js';
-import type { EdgelessFontFamilyPanel } from '../panel/font-family-panel.js';
-import type { EdgelessSizePanel } from '../panel/size-panel.js';
+} from '../../edgeless/components/panel/color-panel.js';
+import type { EdgelessFontFamilyPanel } from '../../edgeless/components/panel/font-family-panel.js';
+import type { EdgelessSizePanel } from '../../edgeless/components/panel/size-panel.js';
 import {
   type EdgelessCanvasTextElement,
   type EdgelessCanvasTextElementType,
-} from '../text/types.js';
-import { ShapeArrowDownSmallIcon } from './../../../../_common/icons/index.js';
+} from '../../edgeless/components/text/types.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-change-text-menu')
 export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
@@ -152,7 +152,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   elementType!: EdgelessCanvasTextElementType;
 
   @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  edgeless!: EdgelessRootBlockComponent;
 
   @state()
   private _textColorPopperShow = false;
@@ -201,7 +201,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   > | null = null;
 
   get service() {
-    return this.surface.edgeless.service;
+    return this.edgeless.service;
   }
 
   private _getMostCommonFontFamily = (

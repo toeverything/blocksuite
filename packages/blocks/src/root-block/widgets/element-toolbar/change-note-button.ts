@@ -1,11 +1,10 @@
-import '../buttons/tool-icon-button.js';
-import '../toolbar/shape/shape-menu.js';
-import '../panel/color-panel.js';
 import './component-toolbar-menu-divider.js';
-import '../panel/note-shadow-panel.js';
-import '../panel/note-display-mode-panel.js';
-import '../panel/scale-panel.js';
-import '../panel/size-panel.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/panel/color-panel.js';
+import '../../edgeless/components/panel/note-shadow-panel.js';
+import '../../edgeless/components/panel/note-display-mode-panel.js';
+import '../../edgeless/components/panel/scale-panel.js';
+import '../../edgeless/components/panel/size-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -20,21 +19,24 @@ import {
   ScissorsIcon,
   ShrinkIcon,
   SmallArrowDownIcon,
-} from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { NoteDisplayMode } from '../../../../_common/types.js';
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import { matchFlavours } from '../../../../_common/utils/model.js';
-import { type NoteBlockModel } from '../../../../note-block/note-model.js';
-import { Bound, StrokeStyle } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import { type ColorEvent, ColorUnit } from '../panel/color-panel.js';
+} from '../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import { NoteDisplayMode } from '../../../_common/types.js';
+import { createButtonPopper } from '../../../_common/utils/button-popper.js';
+import { matchFlavours } from '../../../_common/utils/model.js';
+import { type NoteBlockModel } from '../../../note-block/note-model.js';
+import { Bound, StrokeStyle } from '../../../surface-block/index.js';
+import {
+  type ColorEvent,
+  ColorUnit,
+} from '../../edgeless/components/panel/color-panel.js';
 import {
   LineStylesPanel,
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
-} from '../panel/line-styles-panel.js';
-import { getTooltipWithShortcut } from '../utils.js';
+} from '../../edgeless/components/panel/line-styles-panel.js';
+import { getTooltipWithShortcut } from '../../edgeless/components/utils.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 const NOTE_BACKGROUND: CssVariableName[] = [
   '--affine-tag-red',
@@ -176,10 +178,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   notes: NoteBlockModel[] = [];
 
   @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  enableNoteSlicer!: boolean;
 
   @property({ attribute: false })
-  enableNoteSlicer!: boolean;
+  edgeless!: EdgelessRootBlockComponent;
 
   @state()
   private _queryCache = false;
@@ -228,7 +230,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _noteScalePopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private get doc() {
-    return this.surface.doc;
+    return this.edgeless.doc;
   }
 
   private _setBackground(color: CssVariableName) {
@@ -272,7 +274,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     // if change note to page only, should clear the selection
     if (newMode === NoteDisplayMode.DocOnly) {
-      this.surface.edgeless.service.selection.clear();
+      this.edgeless.service.selection.clear();
     }
 
     this._queryCache = !this._queryCache;
@@ -360,10 +362,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   }
 
   private _handleNoteSlicerButtonClick() {
-    const surfaceService = this.surface.service;
+    const surfaceService = this.edgeless.service;
     if (!surfaceService) return;
 
-    this.surface.edgeless.slots.toggleNoteSlicer.emit();
+    this.edgeless.slots.toggleNoteSlicer.emit();
   }
 
   private _getCurrentModeLabel(mode: NoteDisplayMode) {
@@ -620,4 +622,18 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-change-note-button': EdgelessChangeNoteButton;
   }
+}
+
+export function renderNoteButton(
+  edgeless: EdgelessRootBlockComponent,
+  notes?: NoteBlockModel[]
+) {
+  return notes && notes.length >= 0
+    ? html`<edgeless-change-note-button
+        .notes=${notes}
+        .edgeless=${edgeless}
+        .enableNoteSlicer=${false}
+      >
+      </edgeless-change-note-button>`
+    : nothing;
 }

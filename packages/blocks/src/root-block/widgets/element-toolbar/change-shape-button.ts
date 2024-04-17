@@ -1,12 +1,11 @@
-import '../buttons/tool-icon-button.js';
-import '../panel/color-panel.js';
-import '../panel/shape-style-panel.js';
-import '../panel/shape-panel.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/panel/color-panel.js';
+import '../../edgeless/components/panel/shape-style-panel.js';
+import '../../edgeless/components/panel/shape-panel.js';
 import './change-text-menu.js';
 import './component-toolbar-menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import type { Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -16,41 +15,44 @@ import {
   LineStyleIcon,
   ScribbledStyleIcon,
   ShapeArrowDownSmallIcon,
-} from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { LineWidth, type ShapeTool } from '../../../../_common/types.js';
-import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
-import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
+} from '../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
+import { LineWidth, type ShapeTool } from '../../../_common/types.js';
+import { createButtonPopper } from '../../../_common/utils/button-popper.js';
+import { countBy, maxBy } from '../../../_common/utils/iterable.js';
+import { CanvasTextFontFamily } from '../../../surface-block/consts.js';
 import {
   FILL_COLORS,
   ShapeType,
   STROKE_COLORS,
-} from '../../../../surface-block/elements/shape/consts.js';
+} from '../../../surface-block/elements/shape/consts.js';
 import {
   type ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
-} from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+} from '../../../surface-block/index.js';
+import { lineSizeButtonStyles } from '../../edgeless/components/buttons/line-size-button.js';
+import type { LineStyleButtonProps } from '../../edgeless/components/buttons/line-style-button.js';
+import type { EdgelessToolIconButton } from '../../edgeless/components/buttons/tool-icon-button.js';
+import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import { ColorUnit } from '../../edgeless/components/panel/color-panel.js';
 import {
-  SHAPE_FILL_COLOR_BLACK,
-  SHAPE_TEXT_COLOR_PURE_BLACK,
-  SHAPE_TEXT_COLOR_PURE_WHITE,
-} from '../../utils/consts.js';
-import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
-import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
-import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
-import type { ColorEvent } from '../panel/color-panel.js';
-import { GET_DEFAULT_LINE_COLOR, isTransparent } from '../panel/color-panel.js';
-import { ColorUnit } from '../panel/color-panel.js';
+  GET_DEFAULT_LINE_COLOR,
+  isTransparent,
+} from '../../edgeless/components/panel/color-panel.js';
 import {
   LineStylesPanel,
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
-} from '../panel/line-styles-panel.js';
-import type { EdgelessShapePanel } from '../panel/shape-panel.js';
-import type { EdgelessShapeStylePanel } from '../panel/shape-style-panel.js';
+} from '../../edgeless/components/panel/line-styles-panel.js';
+import type { EdgelessShapePanel } from '../../edgeless/components/panel/shape-panel.js';
+import type { EdgelessShapeStylePanel } from '../../edgeless/components/panel/shape-style-panel.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import {
+  SHAPE_FILL_COLOR_BLACK,
+  SHAPE_TEXT_COLOR_PURE_BLACK,
+  SHAPE_TEXT_COLOR_PURE_WHITE,
+} from '../../edgeless/utils/consts.js';
 
 const ICON_BUTTON_PADDING_TWO = 2;
 
@@ -234,25 +236,26 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   elements: ShapeElementModel[] = [];
 
   @property({ attribute: false })
-  doc!: Doc;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  edgeless!: EdgelessRootBlockComponent;
 
   @state()
   private _showPopper = false;
 
   @query('.change-shape-button')
   private _changeShapeButton!: EdgelessToolIconButton;
+
   @query('edgeless-shape-panel')
   private _shapePanel!: EdgelessShapePanel;
+
   private _shapePanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
   @query('.shape-style-button')
   private _shapeStyleButton!: EdgelessToolIconButton;
+
   @query('.shape-style-panel-container')
   private _shapeStyleMenu!: HTMLDivElement;
+
   private _shapeStyleMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
@@ -278,7 +281,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     null;
 
   get service() {
-    return this.surface.edgeless.service;
+    return this.edgeless.service;
   }
 
   private _getTextColor(fillColor: CssVariableName) {
@@ -382,7 +385,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
             ? ({ shapeType: ShapeType.Rect, radius: 0.1 } as const)
             : { shapeType, radius: 0 };
 
-        this.doc.captureSync();
+        this.edgeless.doc.captureSync();
         this.elements.forEach(element => {
           this.service.updateElement(element.id, updatedProps);
         });
@@ -557,7 +560,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
               <edgeless-change-text-menu
                 .elements=${this.elements}
                 .elementType=${'shape'}
-                .surface=${this.surface}
+                .edgeless=${this.edgeless}
               ></edgeless-change-text-menu>`
           : nothing}
       </div>
@@ -569,4 +572,21 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-change-shape-button': EdgelessChangeShapeButton;
   }
+}
+
+export function renderChangeShapeButton(
+  edgeless: EdgelessRootBlockComponent,
+  shapeElements?: ShapeElementModel[]
+) {
+  const shapeButton =
+    shapeElements?.length &&
+    shapeElements.every(el => !edgeless.service.surface.isInMindmap(el.id))
+      ? html`<edgeless-change-shape-button
+          .elements=${shapeElements}
+          .edgeless=${edgeless}
+        >
+        </edgeless-change-shape-button>`
+      : nothing;
+
+  return shapeButton;
 }
