@@ -17,6 +17,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     .chat-panel-input {
       margin-top: 12px;
       position: relative;
+      border-radius: 4px;
     }
 
     .chat-panel-input-actions {
@@ -34,11 +35,10 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
 
     .chat-panel-input textarea {
       resize: none;
-      border-radius: 4px;
       padding: 8px 12px;
       width: calc(100% - 32px);
       min-height: 100px;
-      border: 1px solid var(--affine-border-color);
+      border: none;
       font-size: 14px;
       font-weight: 400;
       color: var(--affine-text-primary-color);
@@ -52,7 +52,6 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     }
 
     textarea:focus {
-      border: 1px solid var(--affine-border-color);
       outline: none;
     }
 
@@ -125,6 +124,9 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   @state()
   isInputEmpty = true;
 
+  @state()
+  focused = false;
+
   send = async () => {
     const text = this.textarea.value;
     if (!text) {
@@ -132,7 +134,6 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     }
     this.textarea.value = '';
     this.isInputEmpty = true;
-    this.images = [];
     this.updateStatus('loading');
     this.addToItems([
       { role: 'user', content: text },
@@ -156,12 +157,18 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   protected override render() {
     return html`<style>
         .chat-panel-send svg rect {
-          fill: ${this.isInputEmpty
+          fill: ${this.isInputEmpty && this.images.length === 0
             ? 'var(--affine-text-disable-color)'
             : 'var(--affine-primary-color)'};
         }
         .chat-panel-images {
-          margin: ${this.images.length > 0 ? '8px 0' : '0'};
+          margin: ${this.images.length > 0 ? '8px' : '0'};
+        }
+        .chat-panel-input {
+          border: ${this.focused
+            ? '1px solid var(--affine-primary-color)'
+            : '1px solid var(--affine-border-color)'};
+          box-shadow: ${this.focused ? 'var(--affine-active-shadow)' : 'none'};
         }
       </style>
       <div class="chat-panel-input">
@@ -221,6 +228,12 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
               await this.send();
             }
           }}
+          @focus=${() => {
+            this.focused = true;
+          }}
+          @blur=${() => {
+            this.focused = false;
+          }}
         ></textarea>
         <div class="chat-panel-input-actions">
           <div
@@ -231,7 +244,10 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
                 multiple: true,
               });
               if (!images) return;
-              this.images = images.slice(0, MaximumImageCount);
+              this.images = [...this.images, ...images].slice(
+                0,
+                MaximumImageCount
+              );
             }}
           >
             ${ImageIcon}
