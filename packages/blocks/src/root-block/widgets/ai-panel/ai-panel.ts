@@ -6,8 +6,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
+  type ComputePositionConfig,
   type ReferenceElement,
-  shift,
 } from '@floating-ui/dom';
 import {
   css,
@@ -43,6 +43,8 @@ export interface AffineAIPanelWidgetConfig {
   finishStateConfig: AIPanelAnswerConfig;
   errorStateConfig: AIPanelErrorConfig;
   discardCallback?: () => void;
+
+  positionConfig?: Partial<ComputePositionConfig>;
 }
 
 export type AffineAIPanelState =
@@ -59,7 +61,6 @@ export class AffineAIPanelWidget extends WidgetElement {
   static override styles = css`
     :host {
       display: flex;
-
       outline: none;
       border-radius: var(--8, 8px);
       border: 1px solid var(--affine-border-color);
@@ -71,8 +72,8 @@ export class AffineAIPanelWidget extends WidgetElement {
         0px 6px 16px 0px rgba(0, 0, 0, 0.14)
       );
 
-      width: 630px;
       position: absolute;
+      width: max-content;
       top: 0;
       left: 0;
 
@@ -137,14 +138,7 @@ export class AffineAIPanelWidget extends WidgetElement {
 
     this._stopAutoUpdate?.();
     this._stopAutoUpdate = autoUpdate(reference, this, () => {
-      computePosition(reference, this, {
-        placement: 'bottom-start',
-        middleware: [
-          shift({
-            padding: 20,
-          }),
-        ],
-      })
+      computePosition(reference, this, this.config?.positionConfig)
         .then(({ x, y }) => {
           this.style.left = `${x}px`;
           this.style.top = `${y}px`;
