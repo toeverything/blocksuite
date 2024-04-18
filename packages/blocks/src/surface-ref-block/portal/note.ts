@@ -47,6 +47,8 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     }
     const addChildren = (model: BlockModel) => {
       model.children.forEach(child => {
+        if (ids.includes(child.id)) return;
+        if (child.flavour === 'affine:surface-ref') return;
         ids.push(child.id);
         addChildren(child);
       });
@@ -61,8 +63,14 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     this._disposables.add(
       doc.slots.blockUpdated.on(payload => {
         if (payload.type === 'update') return;
-
-        this.requestUpdate();
+        let parent: string | null = payload.id;
+        while (parent) {
+          if (model.id === parent) {
+            this.requestUpdate();
+            return;
+          }
+          parent = model.doc.blockCollection.crud.getParent(parent);
+        }
       })
     );
 
