@@ -92,7 +92,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       name: '',
       items: [
         {
-          name: 'Continue in chat',
+          name: 'Continue with AI',
           icon: ChatWithAIIcon,
           handler: () => {
             AIProvider.slots.requestContinueInChat.emit({

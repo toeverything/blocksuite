@@ -28,7 +28,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       box-sizing: border-box;
       flex-direction: column;
       gap: 8px;
-      padding: 12px 8px;
+      padding: 12px 0;
     }
 
     .answer {
@@ -39,7 +39,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       gap: 4px;
       align-self: stretch;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      padding: 0 8px;
+      padding: 0 12px;
     }
 
     .answer-head {
@@ -76,15 +76,14 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       height: 22px;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      padding: 0 8px;
+      padding: 0 12px;
+      gap: 4px;
 
       color: var(--affine-text-secondary-color);
 
       .text {
         display: flex;
         align-items: flex-start;
-        gap: 10px;
         flex: 1 0 0;
 
         /* light/xs */
@@ -97,6 +96,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       .right {
         display: flex;
         align-items: center;
+        padding-right: 8px;
 
         .copy,
         .copied {
@@ -124,9 +124,18 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       gap: 4px;
     }
 
-    .response-list-container ai-item-list {
-      /* set item style outside ai-item */
+    .response-list-container,
+    .action-list-container {
+      padding: 0 8px;
+    }
+
+    /* set item style outside ai-item */
+    .response-list-container ai-item-list,
+    .action-list-container ai-item-list {
       --item-padding: 4px;
+    }
+
+    .response-list-container ai-item-list {
       --item-icon-color: var(--affine-icon-secondary);
       --item-icon-hover-color: var(--affine-icon-color);
     }
@@ -172,16 +181,16 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
             ${this.config.responses.length > 0
               ? html`
                   <ai-panel-divider></ai-panel-divider>
-                  <div class="response-list-container">
-                    ${this.config.responses.map(
-                      (group, index) => html`
-                        ${index !== 0
-                          ? html`<ai-panel-divider></ai-panel-divider>`
-                          : nothing}
+                  ${this.config.responses.map(
+                    (group, index) => html`
+                      ${index !== 0
+                        ? html`<ai-panel-divider></ai-panel-divider>`
+                        : nothing}
+                      <div class="response-list-container">
                         <ai-item-list .groups=${[group]}></ai-item-list>
-                      `
-                    )}
-                  </div>
+                      </div>
+                    `
+                  )}
                 `
               : nothing}
             ${this.config.responses.length > 0 && this.config.actions.length > 0
