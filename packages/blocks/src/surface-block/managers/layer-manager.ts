@@ -74,7 +74,7 @@ export class LayerManager {
               model instanceof EdgelessBlockModel &&
               renderableInEdgeless(doc, surface, model)
           ) as EdgelessModel[]
-      ).concat(surface.elementModels ?? [])
+      ).concat(surface.elementModels)
     );
 
     layerManager.listen(doc, surface);
