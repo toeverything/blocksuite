@@ -14,7 +14,7 @@ import {
   ParagraphService,
 } from '@blocksuite/blocks';
 import { assertInstanceOf } from '@blocksuite/global/utils';
-import { flip, offset, shift } from '@floating-ui/dom';
+import { flip, offset, shift, size } from '@floating-ui/dom';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { buildAIPanelConfig } from './ai-panel.js';
@@ -147,6 +147,20 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
                   }),
                   flip({
                     crossAxis: true,
+                  }),
+                  size({
+                    apply: ({ elements }) => {
+                      const { height } = getEdgelessService(
+                        view.component.host
+                      ).viewport;
+                      const aiPanelAnswer =
+                        elements.floating.shadowRoot?.querySelector(
+                          'ai-panel-answer'
+                        );
+                      if (aiPanelAnswer) {
+                        aiPanelAnswer.style.maxHeight = `${height - 40}px`;
+                      }
+                    },
                   }),
                 ],
               });
