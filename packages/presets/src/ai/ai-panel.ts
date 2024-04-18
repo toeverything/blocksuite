@@ -99,6 +99,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
               host: panel.host,
               show: true,
             });
+            panel.hide();
           },
         },
         {
