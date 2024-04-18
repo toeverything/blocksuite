@@ -120,14 +120,16 @@ export class ListBlockComponent extends BlockElement<
         this._updateFollowingListSiblings();
       })
     );
-    this.host.std.doc.slots.blockUpdated.on(e => {
-      if (e.type !== 'delete') return;
-      const deletedBlock = this.std.view.getBlock(e.id);
-      if (!deletedBlock) return;
-      if (this !== deletedBlock.nextElementSibling) return;
-      this._updateFollowingListSiblings();
-      return;
-    });
+    this.disposables.add(
+      this.host.std.doc.slots.blockUpdated.on(e => {
+        if (e.type !== 'delete') return;
+        const deletedBlock = this.std.view.getBlock(e.id);
+        if (!deletedBlock) return;
+        if (this !== deletedBlock.nextElementSibling) return;
+        this._updateFollowingListSiblings();
+        return;
+      })
+    );
   }
 
   private _toggleChildren() {
