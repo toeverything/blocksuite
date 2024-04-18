@@ -16,23 +16,6 @@ import type { ParagraphBlockModel } from './paragraph-model.js';
 import type { ParagraphService } from './paragraph-service.js';
 import { paragraphBlockStyles } from './styles.js';
 
-const getPlaceholder = (model: ParagraphBlockModel) => {
-  if (model.type === 'text') {
-    return "Type '/' for commands";
-  }
-
-  const placeholders = {
-    h1: 'Heading 1',
-    h2: 'Heading 2',
-    h3: 'Heading 3',
-    h4: 'Heading 4',
-    h5: 'Heading 5',
-    h6: 'Heading 6',
-    quote: '',
-  };
-  return placeholders[model.type];
-};
-
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends BlockElement<
   ParagraphBlockModel,
@@ -168,7 +151,7 @@ export class ParagraphBlockComponent extends BlockElement<
             .enableUndoRedo=${false}
           ></rich-text>
           <div contenteditable="false" class="affine-paragraph-placeholder">
-            ${getPlaceholder(this.model)}
+            ${this.service.placeholderGenerator(this.model)}
           </div>
         </div>
 

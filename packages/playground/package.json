@@ -19,14 +19,14 @@
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/sync": "workspace:*",
-    "@shoelace-style/shoelace": "2.14.0",
+    "@shoelace-style/shoelace": "2.15.0",
     "@toeverything/y-indexeddb": "0.10.0-canary.9",
     "@types/katex": "^0.16.7",
     "browser-fs-access": "^0.35.0",
     "intl-segmenter-polyfill-rs": "^0.1.7",
     "jszip": "^3.10.1",
     "katex": "^0.16.10",
-    "lit": "^3.1.2",
+    "lit": "^3.1.3",
     "lz-string": "^1.5.0",
     "merge": "^2.1.1",
     "tweakpane": "^4.0.3",
@@ -39,10 +39,10 @@
   "devDependencies": {
     "@apollo/client": "^3.9.11",
     "@tweakpane/core": "^2.0.3",
-    "@types/micromatch": "^4.0.6",
+    "@types/micromatch": "^4.0.7",
     "graphql": "^16.8.1",
-    "magic-string": "^0.30.8",
-    "openai": "^4.29.2",
+    "magic-string": "^0.30.10",
+    "openai": "^4.37.1",
     "vite-plugin-wasm": "^3.3.0"
   }
 }

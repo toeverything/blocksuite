@@ -7,7 +7,7 @@ export const menuItemStyles = css`
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 4px 12px;
+    padding: 4px var(--item-padding, 12px);
     gap: 4px;
     align-self: stretch;
     border-radius: 4px;
@@ -26,7 +26,9 @@ export const menuItemStyles = css`
   }
   .menu-item.discard:hover {
     background: var(--affine-background-error-color);
-    .item-icon {
+    .item-name,
+    .item-icon,
+    .enter-icon {
       color: var(--affine-error-color);
     }
   }

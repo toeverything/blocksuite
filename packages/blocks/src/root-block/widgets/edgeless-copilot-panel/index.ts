@@ -20,7 +20,7 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
     .edgeless-copilot-panel {
       box-sizing: border-box;
       padding: 8px;
-      min-width: 294px;
+      min-width: 320px;
       max-height: 374px;
       overflow-y: auto;
       background: var(--affine-background-overlay-panel-color);
