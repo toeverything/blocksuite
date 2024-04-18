@@ -109,7 +109,11 @@ export async function getSelectedTextContent(editorHost: EditorHost) {
   const selectedModels = getSelectedModels(editorHost);
   assertExists(selectedModels);
 
-  const drafts = selectedModels.map(toDraftModel);
+  // Currently only filter out images
+  const selectedTextModels = selectedModels.filter(
+    model => !BlocksUtils.matchFlavours(model, ['affine:image'])
+  );
+  const drafts = selectedTextModels.map(toDraftModel);
   drafts.forEach(draft => traverse(draft, drafts));
   const slice = Slice.fromModels(editorHost.std.doc, drafts);
   return getMarkdownFromSlice(editorHost, slice);
