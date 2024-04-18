@@ -31,6 +31,10 @@ import { RootBlockSchema } from '../root-block/root-model.js';
 import { EMBED_CARD_TOOLBAR } from '../root-block/widgets/embed-card-toolbar/embed-card-toolbar.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfacePageService } from '../surface-block/surface-page-service.js';
+import {
+  SurfaceRefBlockSchema,
+  SurfaceRefBlockService,
+} from '../surface-ref-block/index.js';
 
 const PreviewPageSpec: BlockSpec = {
   schema: RootBlockSchema,
@@ -131,6 +135,13 @@ export const PreviewEditorBlockSpecs: BlockSpec[] = [
     service: SurfacePageService,
     view: {
       component: literal`affine-surface`,
+    },
+  },
+  {
+    schema: SurfaceRefBlockSchema,
+    service: SurfaceRefBlockService,
+    view: {
+      component: literal`affine-preview-surface-ref`,
     },
   },
 ];
