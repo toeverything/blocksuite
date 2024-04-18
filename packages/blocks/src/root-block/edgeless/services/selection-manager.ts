@@ -276,11 +276,14 @@ export class EdgelessSelectionManager {
       );
     }
 
-    if (this.cursor) {
-      instances.push(this.cursor);
-    }
+    this._selection.setGroup(
+      'edgeless',
+      this.cursor ? instances.concat([this.cursor]) : instances
+    );
 
-    this._selection.setGroup('edgeless', instances);
+    if (instances.length > 0) {
+      this._selection.setGroup('note', []);
+    }
 
     if (
       selection.elements.length === 1 &&
