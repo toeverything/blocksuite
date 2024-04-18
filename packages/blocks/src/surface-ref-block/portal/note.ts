@@ -58,6 +58,13 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     this._disposables.add(() => {
       model.doc.blockCollection.clearSelector(selector);
     });
+    this._disposables.add(
+      doc.slots.blockUpdated.on(payload => {
+        if (payload.type === 'update') return;
+
+        this.requestUpdate();
+      })
+    );
 
     const previewSpec = SpecProvider.getInstance().getSpec('preview');
     assertExists(previewSpec, 'Preview spec is not found');
