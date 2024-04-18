@@ -20,6 +20,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
+import { on, stopPropagation } from '../../../_common/utils/event.js';
 import type { AIPanelDiscardModal } from './components/discard-modal.js';
 import { toggleDiscardModal } from './components/discard-modal.js';
 import type {
@@ -240,6 +241,8 @@ export class AffineAIPanelWidget extends WidgetElement {
     super.connectedCallback();
 
     this.tabIndex = -1;
+    this.disposables.add(on(this, 'wheel', stopPropagation));
+    this.disposables.add(on(this, 'pointerdown', stopPropagation));
     this.disposables.addFromEvent(document, 'mousedown', this._onDocumentClick);
   }
 
