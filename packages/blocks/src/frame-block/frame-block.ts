@@ -58,7 +58,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
 
   override firstUpdated() {
     this._surface.edgeless.slots.edgelessToolUpdated.on(tool => {
-      this._isNavigator = tool.type === 'frameNavigator' ? true : false;
+      this._isNavigator = tool.type === 'frameNavigator';
     });
   }
 

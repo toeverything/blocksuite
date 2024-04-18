@@ -154,7 +154,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     if ('role' in item) {
       return createTextRenderer(this.host)(item.content);
     } else {
-      if (item.messages?.length !== 3) return nothing;
       switch (item.action) {
         case 'Create a presentation':
           return html`<action-slides
@@ -358,20 +357,25 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               ${AffineIcon}
               <div>What can I help you with?</div>
             </div>`
-          : repeat(items, (item, index) => {
-              return html`<div class="message">
-                ${this.renderAvatar(item)}
-                <div class="item-wrapper">${this.renderItem(item)}</div>
-                <div class="item-wrapper">
-                  ${this.status === 'loading' && index === items.length - 1
-                    ? this.renderLoading()
+          : repeat(
+              items.filter(item => {
+                return 'role' in item || item.messages?.length === 3;
+              }),
+              (item, index) => {
+                return html`<div class="message">
+                  ${this.renderAvatar(item)}
+                  <div class="item-wrapper">${this.renderItem(item)}</div>
+                  <div class="item-wrapper">
+                    ${this.status === 'loading' && index === items.length - 1
+                      ? this.renderLoading()
+                      : nothing}
+                  </div>
+                  ${index === items.length - 1
+                    ? this.renderEditorActions(item)
                     : nothing}
-                </div>
-                ${index === items.length - 1
-                  ? this.renderEditorActions(item)
-                  : nothing}
-              </div>`;
-            })}
+                </div>`;
+              }
+            )}
       </div>
       ${this.showDownIndicator
         ? html`<div class="down-indicator" @click=${() => this.scrollToDown()}>
