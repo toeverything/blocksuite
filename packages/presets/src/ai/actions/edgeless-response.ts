@@ -1,17 +1,21 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
-  AffineAIPanelWidget,
-  CopilotSelectionController,
   EdgelessCopilotWidget,
-  EdgelessModel,
-  EdgelessRootService,
-  MindmapElementModel,
-  ShapeElementModel,
-  SurfaceBlockModel,
+  EdgelessElementToolbarWidget,
+} from '@blocksuite/blocks';
+import {
+  type AffineAIPanelWidget,
+  type CopilotSelectionController,
+  type EdgelessModel,
+  type EdgelessRootService,
+  type MindmapElementModel,
+  type ShapeElementModel,
+  type SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import {
   AFFINE_EDGELESS_COPILOT_WIDGET,
   DeleteIcon,
+  EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EmbedHtmlBlockSpec,
   InsertBelowIcon,
   NoteDisplayMode,
@@ -55,11 +59,28 @@ export function getEdgelessCopilotWidget(
   return copilotWidget;
 }
 
+export function getElementToolbar(
+  host: EditorHost
+): EdgelessElementToolbarWidget {
+  const rootBlockId = host.doc.root?.id as string;
+  const elementToolbar = host.view.getWidget(
+    EDGELESS_ELEMENT_TOOLBAR_WIDGET,
+    rootBlockId
+  ) as EdgelessElementToolbarWidget;
+
+  return elementToolbar;
+}
+
 export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
   const service = getService(host);
+  const copilogWidget = getEdgelessCopilotWidget(host);
 
-  return (service.tool.controllers['copilot'] as CopilotSelectionController)
-    .selectedElements;
+  if (copilogWidget.visible) {
+    return (service.tool.controllers['copilot'] as CopilotSelectionController)
+      .selectedElements;
+  }
+
+  return service.selection.elements;
 }
 
 export function discard(

@@ -3,7 +3,6 @@ import './edgeless/edgeless.js';
 import './copilot-service/index.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { EdgelessComponentToolbar } from '@blocksuite/blocks';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -324,65 +323,3 @@ export const affineFormatBarItemConfig = {
     `;
   },
 };
-
-EdgelessComponentToolbar.registerCustomRenderer({
-  render(): TemplateResult | undefined {
-    const copilot = document.querySelector('copilot-panel');
-    if (!copilot) {
-      return;
-    }
-    const renderItem = (item: AllAction): TemplateResult => {
-      if (item.type === 'group') {
-        return html`
-          <sl-menu-item>
-            ${item.name}
-            <sl-menu slot="submenu">
-              ${repeat(item.children, renderItem)}
-            </sl-menu>
-          </sl-menu-item>
-        `;
-      }
-      if (item.hide?.() === true) {
-        return html``;
-      }
-      return html`
-        <sl-menu-item @click="${() => item.action()}"
-          >${item.name}</sl-menu-item
-        >
-      `;
-    };
-    return html`
-      <style>
-        .copilot-format-bar-item {
-          padding: 4px;
-          border-radius: 4px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--affine-icon-color);
-        }
-        .copilot-format-bar-item:hover {
-          background-color: var(--affine-hover-color);
-        }
-      </style>
-      <div class="copilot-format-bar-item">
-        <sl-dropdown>
-          <div
-            slot="trigger"
-            style="display:flex;align-items:center;gap: 4px;"
-            caret
-          >
-            ${StarIcon} Ask AI
-          </div>
-          <sl-menu>
-            ${repeat(
-              copilot.aiLogic?.chat.edgelessSelectionActionList ?? [],
-              renderItem
-            )}
-          </sl-menu>
-        </sl-dropdown>
-      </div>
-    `;
-  },
-});

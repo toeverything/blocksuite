@@ -1,16 +1,15 @@
-import '../buttons/tool-icon-button.js';
+import '../../edgeless/components/buttons/tool-icon-button.js';
 import './component-toolbar-menu-divider.js';
 
-import type { BlockStdScope } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { CaptionIcon } from '../../../../_common/icons/text.js';
-import type { ImageBlockComponent } from '../../../../image-block/image-block.js';
-import type { ImageBlockModel } from '../../../../image-block/image-model.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import { CaptionIcon } from '../../../_common/icons/text.js';
+import type { ImageBlockComponent } from '../../../image-block/image-block.js';
+import type { ImageBlockModel } from '../../../image-block/image-model.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-change-image-button')
 export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
@@ -39,25 +38,21 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
   model!: ImageBlockModel;
 
   @property({ attribute: false })
-  std!: BlockStdScope;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  edgeless!: EdgelessRootBlockComponent;
 
   private get _doc() {
     return this.model.doc;
   }
 
   private get _blockElement() {
-    const blockSelection =
-      this.surface.edgeless.service.selection.selections.filter(sel =>
-        sel.elements.includes(this.model.id)
-      );
+    const blockSelection = this.edgeless.service.selection.selections.filter(
+      sel => sel.elements.includes(this.model.id)
+    );
     if (blockSelection.length !== 1) {
       return;
     }
 
-    const blockElement = this.std.view.viewFromPath(
+    const blockElement = this.edgeless.std.view.viewFromPath(
       'block',
       blockSelection[0].path
     ) as ImageBlockComponent | null;
@@ -90,4 +85,18 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-change-image-button': EdgelessChangeImageButton;
   }
+}
+
+export function renderChangeImageButton(
+  edgeless: EdgelessRootBlockComponent,
+  images?: ImageBlockModel[]
+) {
+  if (images?.length !== 1) return nothing;
+
+  return html`
+    <edgeless-change-image-button
+      .model=${images[0]}
+      .edgeless=${edgeless}
+    ></edgeless-change-image-button>
+  `;
 }

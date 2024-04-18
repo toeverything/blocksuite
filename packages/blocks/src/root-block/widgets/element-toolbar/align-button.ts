@@ -1,5 +1,5 @@
-import '../buttons/menu-button.js';
-import '../../../../_common/components/menu-divider.js';
+import '../../edgeless/components/buttons/menu-button.js';
+import '../../../_common/components/menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
@@ -16,14 +16,14 @@ import {
   AlignTopIcon,
   AlignVerticallyIcon,
   SmallArrowDownIcon,
-} from '../../../../_common/icons/index.js';
-import type { EdgelessModel } from '../../../../_common/utils/index.js';
+} from '../../../_common/icons/index.js';
+import type { EdgelessModel } from '../../../_common/utils/index.js';
 import {
   Bound,
   ConnectorElementModel,
   GroupElementModel,
-} from '../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+} from '../../../surface-block/index.js';
+import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
@@ -260,4 +260,10 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-align-button': EdgelessAlignButton;
   }
+}
+
+export function renderAlignButton(edgeless: EdgelessRootBlockComponent) {
+  return html`<edgeless-align-button
+    .edgeless=${edgeless}
+  ></edgeless-align-button>`;
 }

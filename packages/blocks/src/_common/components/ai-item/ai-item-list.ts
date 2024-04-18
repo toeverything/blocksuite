@@ -41,6 +41,9 @@ export class AIItemList extends WithDisposable(LitElement) {
   @property({ attribute: false })
   groups!: AIItemGroupConfig[];
 
+  @property({ attribute: false })
+  onClick?: () => void;
+
   override render() {
     return html`${repeat(this.groups, group => {
       return html`
@@ -51,7 +54,14 @@ export class AIItemList extends WithDisposable(LitElement) {
           : nothing}
         ${repeat(
           group.items,
-          item => html`<ai-item .item=${item} .host=${this.host}></ai-item>`
+          item =>
+            html`<ai-item
+              .onClick=${() => {
+                this.onClick?.();
+              }}
+              .item=${item}
+              .host=${this.host}
+            ></ai-item>`
         )}
       `;
     })}`;

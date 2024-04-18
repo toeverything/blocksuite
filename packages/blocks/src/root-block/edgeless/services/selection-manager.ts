@@ -22,6 +22,11 @@ export interface EdgelessSelectionState {
    * Indicate whether the selected element is in editing mode
    */
   editing: boolean;
+
+  /**
+   *  Cannot be operated, only box is displayed
+   */
+  inoperable?: boolean;
 }
 
 export interface CursorSelectionState {
@@ -64,6 +69,10 @@ export class EdgelessSelectionManager {
 
   get editing() {
     return this.selections.some(sel => sel.editing);
+  }
+
+  get inoperable() {
+    return this.selections.some(sel => sel.inoperable);
   }
 
   /**
@@ -258,7 +267,8 @@ export class EdgelessSelectionManager {
           'surface',
           [this.service.doc.root!.id, this.surfaceModel.id],
           elements,
-          selection.editing
+          selection.editing,
+          selection.inoperable
         )
       );
     }
@@ -270,7 +280,8 @@ export class EdgelessSelectionManager {
             'surface',
             [this.service.doc.root!.id, blockId],
             [blockId],
-            selection.editing
+            selection.editing,
+            selection.inoperable
           )
         )
       );

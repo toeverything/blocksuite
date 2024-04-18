@@ -17,9 +17,10 @@ test.describe('auto-connect', () => {
   }
   test('navigator', async ({ page }) => {
     await init(page);
-    const id1 = await addNote(page, 'page1', 100, 100);
-    const id2 = await addNote(page, 'page2', 200, 300);
-    const id3 = await addNote(page, 'page3', 300, 500);
+    const id1 = await addNote(page, 'page1', 200, 300);
+    const id2 = await addNote(page, 'page2', 300, 500);
+    const id3 = await addNote(page, 'page3', 400, 700);
+
     await page.mouse.click(200, 50);
     // Notes added in edgeless mode only visible in edgeless mode
     // To use index label navigator, we need to change display mode to PageAndEdgeless
