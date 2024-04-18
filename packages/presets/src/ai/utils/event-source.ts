@@ -1,3 +1,5 @@
+import { GeneralNetworkError } from '@blocksuite/blocks';
+
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -15,20 +17,29 @@ export function toTextStream(
     [Symbol.asyncIterator]: async function* () {
       const messageQueue: string[] = [];
       let resolveMessagePromise: () => void;
-      let messagePromise = new Promise<void>(
-        resolve => (resolveMessagePromise = resolve)
-      );
+      let rejectMessagePromise: (err: Error) => void;
 
+      function resetMessagePromise() {
+        if (resolveMessagePromise) {
+          resolveMessagePromise();
+        }
+        return new Promise<void>((resolve, reject) => {
+          resolveMessagePromise = resolve;
+          rejectMessagePromise = reject;
+        });
+      }
+      let messagePromise = resetMessagePromise();
       eventSource.addEventListener(type, event => {
         messageQueue.push(event.data);
-        resolveMessagePromise();
-        messagePromise = new Promise(
-          resolve => (resolveMessagePromise = resolve)
-        );
+        messagePromise = resetMessagePromise();
       });
 
-      eventSource.onerror = () => {
-        resolveMessagePromise();
+      eventSource.onerror = err => {
+        if (err?.type === 'error') {
+          rejectMessagePromise(new GeneralNetworkError());
+        } else {
+          resolveMessagePromise();
+        }
         eventSource.close();
       };
 
