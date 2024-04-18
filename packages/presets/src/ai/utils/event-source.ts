@@ -34,14 +34,17 @@ export function toTextStream(
         messagePromise = resetMessagePromise();
       });
 
-      eventSource.onerror = err => {
-        if (err?.type === 'error') {
-          rejectMessagePromise(new GeneralNetworkError());
+      eventSource.addEventListener('error', err => {
+        const errorMessage = (err as unknown as { data: string }).data;
+        // if there is data in Error event, it means the server sent an error message
+        // otherwise, the stream is finished successfully
+        if (err?.type === 'error' && errorMessage) {
+          rejectMessagePromise(new GeneralNetworkError(errorMessage));
         } else {
           resolveMessagePromise();
         }
         eventSource.close();
-      };
+      });
 
       try {
         while (eventSource.readyState !== EventSource.CLOSED) {

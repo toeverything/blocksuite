@@ -46,8 +46,8 @@ export class PaymentRequiredError extends BaseAIError {
 // general 500x error
 export class GeneralNetworkError extends BaseAIError {
   readonly type = AIErrorType.GeneralNetworkError;
-  constructor() {
-    super('Network error');
+  constructor(message: string = 'Network error') {
+    super(message);
   }
 }
 
