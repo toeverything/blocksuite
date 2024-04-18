@@ -139,6 +139,11 @@ export function buildAIPanelConfig(
     errorStateConfig: {
       upgrade: () => {
         AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
+        panel.hide();
+      },
+      login: () => {
+        AIProvider.slots.requestLogin.emit({ host: panel.host });
+        panel.hide();
       },
       responses: [],
     },

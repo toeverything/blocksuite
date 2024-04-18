@@ -27,6 +27,7 @@ export class AIProvider {
     // use case: when user selects "continue in chat" in an ask ai result panel
     // do we need to pass the context to the chat panel?
     requestContinueInChat: new Slot<{ host: EditorHost; show: boolean }>(),
+    requestLogin: new Slot<{ host: EditorHost }>(),
     requestUpgradePlan: new Slot<{ host: EditorHost }>(),
     // add more if needed
   };

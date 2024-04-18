@@ -30,11 +30,18 @@ abstract class BaseAIError extends Error {
 }
 
 export enum AIErrorType {
+  Unauthorized = 'Unauthorized',
   PaymentRequired = 'PaymentRequired',
   GeneralNetworkError = 'GeneralNetworkError',
 }
 
-// todo: move to presets
+export class UnauthorizedError extends BaseAIError {
+  readonly type = AIErrorType.Unauthorized;
+  constructor() {
+    super('Unauthorized');
+  }
+}
+
 // user has used up the quota
 export class PaymentRequiredError extends BaseAIError {
   readonly type = AIErrorType.PaymentRequired;
@@ -51,4 +58,7 @@ export class GeneralNetworkError extends BaseAIError {
   }
 }
 
-export type AIError = PaymentRequiredError | GeneralNetworkError;
+export type AIError =
+  | UnauthorizedError
+  | PaymentRequiredError
+  | GeneralNetworkError;
