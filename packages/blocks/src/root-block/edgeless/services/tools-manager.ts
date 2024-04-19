@@ -336,6 +336,8 @@ export class EdgelessToolsManager {
         metaKeyPressed;
 
       const switchToPreMode = (_e: MouseEvent) => {
+        if (targetTool.type === 'copilot') return;
+
         if (targetButtonRelease(_e)) {
           this.setEdgelessTool(
             prevEdgelessTool,
@@ -414,6 +416,8 @@ export class EdgelessToolsManager {
       const isDefaultType = type === 'default';
       const isLassoType = type === 'lasso';
       const isLastTypeLasso = lastType === 'lasso';
+      const isCopilotType = type === 'copilot';
+      const isLastTypeCopilot = lastType === 'copilot';
       const isLastTypeDefault = lastType === 'default';
       const isEmptyState = Array.isArray(state)
         ? this.selection.isEmpty(state)
@@ -430,11 +434,15 @@ export class EdgelessToolsManager {
         (isDefaultType && isLastTypeDefault) ||
         (isLassoType && isLastTypeDefault) ||
         (isDefaultType && isLastTypeLasso) ||
-        (isLassoType && isLastTypeLasso)
+        (isLassoType && isLastTypeLasso) ||
+        (isCopilotType && isLastTypeDefault) ||
+        // (isDefaultType && isLastTypeCopilot) ||
+        (isCopilotType && isLastTypeCopilot)
       )
         state = this.selection.selections; // selection should remain same when switching between default and lasso tool
       else if (
         ((isDefaultType && !isLastTypeLasso) || isLassoType) &&
+        ((isDefaultType && !isLastTypeCopilot) || isCopilotType) &&
         isEmptyState &&
         hasLastState &&
         isNotSingleDocOnlyNote &&

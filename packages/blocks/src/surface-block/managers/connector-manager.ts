@@ -877,6 +877,7 @@ export class ConnectionOverlay extends Overlay {
     this.points = [];
     this.highlightPoint = null;
     this.bound = null;
+    this._renderer.refresh();
   }
 }
 

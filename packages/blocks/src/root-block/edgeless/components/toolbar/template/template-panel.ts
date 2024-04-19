@@ -2,7 +2,8 @@ import './template-loading.js';
 import './overlay-scrollbar.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -36,7 +37,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       position: absolute;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       z-index: 1;
     }
 
