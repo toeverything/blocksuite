@@ -9,7 +9,7 @@ export function buildEdgelessPanelConfig(
   panel: AffineAIPanelWidget
 ): AffineAIPanelWidgetConfig {
   return {
-    answerRenderer: createTextRenderer(panel.host),
+    answerRenderer: createTextRenderer(panel.host, 320),
     finishStateConfig: {
       responses: buildDefaultResponse(panel),
       actions: [],
@@ -23,6 +23,11 @@ export function buildEdgelessPanelConfig(
     errorStateConfig: {
       upgrade: () => {
         AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
+        panel.hide();
+      },
+      login: () => {
+        AIProvider.slots.requestLogin.emit({ host: panel.host });
+        panel.hide();
       },
       responses: [],
     },

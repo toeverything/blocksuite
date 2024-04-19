@@ -1,13 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
-import { openFileOrFiles } from '@blocksuite/blocks';
+import { type AIError, openFileOrFiles } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { ChatSendIcon, CloseIcon, ImageIcon } from '../_common/icons.js';
 import { AIProvider } from '../provider.js';
-import type { ChatItem, ChatStatus } from './index.js';
+import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
 
 const MaximumImageCount = 8;
 
@@ -61,11 +61,26 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       gap: 6px;
       flex-wrap: wrap;
       position: relative;
-    }
-    .chat-panel-images img {
-      border-radius: 4px;
-      border: 1px solid var(--affine-border-color);
-      cursor: pointer;
+
+      .image-container {
+        width: 58px;
+        height: 58px;
+        border-radius: 4px;
+        border: 1px solid var(--affine-border-color);
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        img {
+          max-width: 100%;
+          max-height: 100%;
+          width: auto;
+          height: auto;
+        }
+      }
     }
 
     .close-wrapper {
@@ -108,6 +123,12 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   items!: ChatItem[];
 
   @property({ attribute: false })
+  error?: Error;
+
+  @property({ attribute: false })
+  updateError!: (error: AIError) => void;
+
+  @property({ attribute: false })
   updateStatus!: (status: ChatStatus) => void;
 
   @query('textarea')
@@ -129,33 +150,50 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   focused = false;
 
   send = async () => {
+    if (this.status !== 'idle' && this.status !== 'success') return;
+
     const text = this.textarea.value;
     if (!text) {
       return;
     }
+    const { images } = this;
+    const { doc } = this.host;
     this.textarea.value = '';
     this.isInputEmpty = true;
+    this.images = [];
     this.updateStatus('loading');
     this.addToItems([
-      { role: 'user', content: text, createdAt: new Date().toISOString() },
+      {
+        role: 'user',
+        content: text,
+        createdAt: new Date().toISOString(),
+        blobs: images ? images : undefined,
+      },
       { role: 'assistant', content: '', createdAt: new Date().toISOString() },
     ]);
-    const res = await AIProvider.actions.chat?.({
-      input: text,
-      attachments: this.images,
-      docId: this.host.doc.id,
-      workspaceId: this.host.doc.collection.id,
-    });
+    try {
+      const stream = AIProvider.actions.chat?.({
+        input: text,
+        docId: doc.id,
+        attachments: images,
+        workspaceId: doc.collection.id,
+        stream: true,
+      });
 
-    if (res) {
-      const items = [...this.items];
-      items[items.length - 1] = {
-        role: 'assistant',
-        content: res,
-        createdAt: new Date().toISOString(),
-      };
-      this.updateStatus('success');
-      this.updateItems(items);
+      if (stream) {
+        for await (const text of stream) {
+          this.updateStatus('transmitting');
+          const items = [...this.items];
+          const last = items[items.length - 1] as ChatMessage;
+          last.content += text;
+          this.updateItems(items);
+        }
+
+        this.updateStatus('success');
+      }
+    } catch (error) {
+      this.updateStatus('error');
+      this.updateError(error as AIError);
     }
   };
 
@@ -188,7 +226,8 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             this.images,
             image => image.name,
             (image, index) =>
-              html`<img
+              html`<div
+                class="image-container"
                 @mouseenter=${(evt: MouseEvent) => {
                   const ele = evt.target as HTMLImageElement;
                   const rect = ele.getBoundingClientRect();
@@ -200,11 +239,9 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
                   this.closeWrapper.style.left = left + 'px';
                   this.closeWrapper.style.top = top + 'px';
                 }}
-                width="58"
-                height="58"
-                src="${URL.createObjectURL(image)}"
-                alt="${image.name}"
-              />`
+              >
+                <img src="${URL.createObjectURL(image)}" alt="${image.name}" />
+              </div>`
           )}
           <div
             class="close-wrapper"

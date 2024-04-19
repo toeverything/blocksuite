@@ -15,7 +15,6 @@ export class AISubItemList extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
-      position: absolute;
       padding: 8px;
       min-width: 240px;
       max-height: 320px;

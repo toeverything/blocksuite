@@ -6,10 +6,13 @@ import './actions/action-wrapper.js';
 import './actions/make-real.js';
 import './actions/slides.js';
 import './actions/mindmap.js';
+import './actions/chat-text.js';
 
 import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { type AIError, PaymentRequiredError } from '@blocksuite/blocks';
+import { BlocksUtils } from '@blocksuite/blocks';
 import { Text } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -21,13 +24,17 @@ import {
   CreateAsPageIcon,
   DownArrowIcon,
   InsertBelowIcon,
-  NewBlockIcon,
   ReplaceIcon,
 } from '../_common/icons.js';
-import { createTextRenderer } from '../messages/text.js';
+import {
+  GeneralErrorRenderer,
+  PaymentRequiredErrorRenderer,
+} from '../messages/error.js';
 import { AIProvider } from '../provider.js';
 import { insertBelow, replace } from '../utils/editor-actions.js';
 import type { ChatItem, ChatStatus } from './index.js';
+
+const { matchFlavours } = BlocksUtils;
 
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
@@ -132,6 +139,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   status!: ChatStatus;
 
+  @property({ attribute: false })
+  error?: AIError;
+
   @query('.chat-panel-messages')
   messagesContainer!: HTMLDivElement;
 
@@ -141,18 +151,35 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   public override async connectedCallback() {
     super.connectedCallback();
     this.host.selection.slots.changed.on(() => {
-      this._currentTextSelection =
-        this.host.selection.find('text') ?? this._currentTextSelection;
       this._currentBlockSelections = this.host.selection.filter('block');
+      const textSelection = this.host.selection.find('text');
+      if (this._currentBlockSelections?.length === 0) {
+        this._currentTextSelection =
+          textSelection ?? this._currentTextSelection;
+      } else {
+        this._currentTextSelection = textSelection ?? null;
+      }
     });
 
     const res = await AIProvider.userInfo;
     this.avatarUrl = res?.avatarUrl ?? '';
   }
 
-  renderItem(item: ChatItem) {
+  renderItem(item: ChatItem, isLast: boolean) {
+    if (isLast && this.status === 'error') {
+      if (this.error instanceof PaymentRequiredError) {
+        return PaymentRequiredErrorRenderer(this.host);
+      } else {
+        return GeneralErrorRenderer(this.error?.message);
+      }
+    }
+
     if ('role' in item) {
-      return createTextRenderer(this.host)(item.content);
+      return html`<chat-text
+        .host=${this.host}
+        .blobs=${item.blobs}
+        .text=${item.content}
+      ></chat-text>`;
     } else {
       switch (item.action) {
         case 'Create a presentation':
@@ -249,66 +276,64 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           ${ReplaceIcon}
           <div
             @click=${async () => {
-              if (!this._currentTextSelection) return;
               const [_, data] = this.host.command
                 .chain()
                 .getSelectedBlocks({
-                  currentTextSelection: this._currentTextSelection,
+                  currentTextSelection: this._currentTextSelection ?? undefined,
                   currentBlockSelections:
                     this._currentBlockSelections ?? undefined,
                 })
                 .run();
               if (!data.selectedBlocks) return;
 
+              if (this._currentTextSelection) {
+                const { doc } = this.host;
+                const block = doc.getBlock(this._currentTextSelection.blockId);
+                if (matchFlavours(block?.model ?? null, ['affine:paragraph'])) {
+                  block?.model.text?.replace(
+                    this._currentTextSelection.from.index,
+                    this._currentTextSelection.from.length,
+                    content
+                  );
+                  return;
+                }
+              }
+
               await replace(
                 this.host,
                 content,
                 data.selectedBlocks[0],
                 data.selectedBlocks.map(block => block.model),
-                this._currentTextSelection
+                this._currentTextSelection ?? undefined
               );
             }}
           >
             Replace selection
           </div>
         </div>
-        <div>
-          <div class="action">
-            ${InsertBelowIcon}
-            <div
-              @click=${async () => {
-                if (!this._currentTextSelection) return;
-                const [_, data] = this.host.command
-                  .chain()
-                  .getSelectedBlocks({
-                    currentTextSelection: this._currentTextSelection,
-                    currentBlockSelections:
-                      this._currentBlockSelections ?? undefined,
-                  })
-                  .run();
-                if (!data.selectedBlocks) return;
 
-                await insertBelow(
-                  this.host,
-                  content,
-                  data.selectedBlocks[data.selectedBlocks?.length - 1]
-                );
-              }}
-            >
-              Insert below
-            </div>
-          </div>
-          <div class="action">
-            ${NewBlockIcon}
-            <div
-              @click=${() => {
-                this.host.spec
-                  .getService('affine:page')
-                  .appendParagraph(content);
-              }}
-            >
-              New block
-            </div>
+        <div class="action">
+          ${InsertBelowIcon}
+          <div
+            @click=${async () => {
+              const [_, data] = this.host.command
+                .chain()
+                .getSelectedBlocks({
+                  currentTextSelection: this._currentTextSelection ?? undefined,
+                  currentBlockSelections:
+                    this._currentBlockSelections ?? undefined,
+                })
+                .run();
+              if (!data.selectedBlocks) return;
+
+              await insertBelow(
+                this.host,
+                content,
+                data.selectedBlocks[data.selectedBlocks?.length - 1]
+              );
+            }}
+          >
+            Insert below
           </div>
         </div>
         <div class="action">
@@ -364,7 +389,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               (item, index) => {
                 return html`<div class="message">
                   ${this.renderAvatar(item)}
-                  <div class="item-wrapper">${this.renderItem(item)}</div>
+                  <div class="item-wrapper">
+                    ${this.renderItem(item, index === items.length - 1)}
+                  </div>
                   <div class="item-wrapper">
                     ${this.status === 'loading' && index === items.length - 1
                       ? this.renderLoading()

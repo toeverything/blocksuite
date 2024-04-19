@@ -23,7 +23,7 @@ export class ActionMindmap extends WithDisposable(ShadowlessElement) {
   protected override render() {
     const answer = this.item.messages[2].content;
     return html`<action-wrapper .host=${this.host} .item=${this.item}>
-      <div style=${styleMap({ marginBottom: '12px' })}>
+      <div style=${styleMap({ marginBottom: '12px', height: '140px' })}>
         <mini-mindmap-preview
           .host=${this.host}
           .ctx=${{
@@ -32,6 +32,7 @@ export class ActionMindmap extends WithDisposable(ShadowlessElement) {
           }}
           .answer=${answer}
           .templateShow=${false}
+          .height=${140}
         ></mini-mindmap-preview>
       </div>
     </action-wrapper>`;

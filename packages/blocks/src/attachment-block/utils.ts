@@ -84,7 +84,12 @@ async function getAttachmentBlob(model: AttachmentBlockModel) {
   }
 
   const doc = model.doc;
-  const blob = await doc.blob.get(sourceId);
+  let blob = await doc.blob.get(sourceId);
+
+  if (blob) {
+    blob = new Blob([blob], { type: model.type });
+  }
+
   return blob;
 }
 
