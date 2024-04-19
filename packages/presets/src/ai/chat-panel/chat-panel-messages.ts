@@ -12,10 +12,15 @@ import './actions/copy-more.js';
 import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { type AIError, PaymentRequiredError } from '@blocksuite/blocks';
+import {
+  type AIError,
+  PaymentRequiredError,
+  UnauthorizedError,
+} from '@blocksuite/blocks';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   AffineAvatarIcon,
@@ -160,13 +165,34 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     this.avatarUrl = res?.avatarUrl ?? '';
   }
 
+  renderError() {
+    if (this.error instanceof PaymentRequiredError) {
+      return PaymentRequiredErrorRenderer(this.host);
+    } else if (this.error instanceof UnauthorizedError) {
+      return GeneralErrorRenderer(
+        'You need to login to AFFiNE Cloud to continue using AFFiNE AI.',
+        html`<div
+          style=${styleMap({
+            padding: '4px 12px',
+            borderRadius: '8px',
+            border: '1px solid var(--affine-border-color)',
+            cursor: 'pointer',
+            backgroundColor: 'var(--affine-hover-color)',
+          })}
+          @click=${() =>
+            AIProvider.slots.requestLogin.emit({ host: this.host })}
+        >
+          Login
+        </div>`
+      );
+    } else {
+      return GeneralErrorRenderer(this.error?.message);
+    }
+  }
+
   renderItem(item: ChatItem, isLast: boolean) {
     if (isLast && this.status === 'error') {
-      if (this.error instanceof PaymentRequiredError) {
-        return PaymentRequiredErrorRenderer(this.host);
-      } else {
-        return GeneralErrorRenderer(this.error?.message);
-      }
+      return this.renderError();
     }
 
     if ('role' in item) {
