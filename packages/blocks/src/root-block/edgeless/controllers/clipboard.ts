@@ -10,6 +10,7 @@ import {
   DocCollection,
   fromJSON,
   Job,
+  type SliceSnapshot,
 } from '@blocksuite/store';
 import DOMPurify from 'dompurify';
 
@@ -51,15 +52,11 @@ import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
 import { GroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
-import {
-  getTextRect,
-  normalizeText,
-} from '../../../surface-block/elements/text/utils.js';
+import { normalizeText } from '../../../surface-block/elements/text/utils.js';
 import {
   type CanvasElement,
   type Connection,
   getBoundsWithRotation,
-  TextElementModel,
 } from '../../../surface-block/index.js';
 import {
   ConnectorElementModel,
@@ -69,9 +66,11 @@ import { compare } from '../../../surface-block/managers/layer-utils.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
+import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isAttachmentBlock,
@@ -310,18 +309,24 @@ export class EdgelessClipboardController extends PageClipboard {
       await this.host.addImages([svg], point);
       return;
     }
-
     try {
+      // check for surface elements in clipboard
       const json = this.std.clipboard.readFromClipboard(data);
-      const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
-      this._pasteShapesAndBlocks(elementsRawData);
+      const mayBeSurfaceDataJson = json[BLOCKSUITE_SURFACE];
+      if (mayBeSurfaceDataJson !== undefined) {
+        const elementsRawData = JSON.parse(mayBeSurfaceDataJson);
+        this._pasteShapesAndBlocks(elementsRawData);
+        return;
+      }
+      // check for slice snapshot in clipboard
+      const mayBeSliceDataJson = json[ClipboardAdapter.MIME];
+      if (mayBeSliceDataJson === undefined) return;
+      const clipData = JSON.parse(mayBeSliceDataJson);
+      const sliceSnapShot = clipData?.snapshot as SliceSnapshot;
+      this._pasteTextContentAsNote(sliceSnapShot.content);
     } catch (_) {
-      const types = data.types;
-
-      if (types.length === 1 && types[0] !== 'text/plain') return;
-
-      const textContent = data.getData('text/plain');
-      if (textContent !== '') this._pasteAsPlainText(textContent);
+      // if it is not parsable
+      this._pasteTextContentAsNote(data.getData('text/plain'));
     }
   };
 
@@ -1028,35 +1033,38 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
-  private _pasteAsPlainText(textContent: string) {
-    textContent = normalizeText(textContent); // for y
+  private _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
     const { lastMousePos } = this.toolManager;
     const [x, y] = this.host.service.viewport.toModelCoord(
       lastMousePos.x,
       lastMousePos.y
     );
 
-    const id = this.host.service.addElement(CanvasElementType.TEXT, {
-      xywh: new Bound(x, y, 0, 0).serialize(),
-      text: new DocCollection.Y.Text(textContent),
-    });
+    const noteProps = {
+      xywh: new Bound(
+        x,
+        y,
+        DEFAULT_NOTE_WIDTH,
+        DEFAULT_NOTE_HEIGHT
+      ).serialize(),
+    };
 
-    const textElem = this.edgeless.service.getElementById(id);
-    assertExists(textElem);
+    const noteId = this.edgeless.service.addBlock(
+      'affine:note',
+      noteProps,
+      this.doc.root!.id
+    );
 
-    if (textElem instanceof TextElementModel) {
-      const { w, h } = getTextRect(
-        textContent,
-        textElem.fontFamily,
-        textElem.fontSize
+    if (typeof content === 'string') {
+      this.edgeless.service.addBlock(
+        'affine:paragraph',
+        { text: new DocCollection.Y.Text(normalizeText(content)) },
+        noteId
       );
-
-      this.edgeless.service.updateElement(id, {
-        xywh: new Bound(x, y, w, h).serialize(),
+    } else {
+      content.forEach((child, idx) => {
+        this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
       });
-
-      this.edgeless.tools.setEdgelessTool({ type: 'default' });
-      this.edgeless.service.selection.set({ elements: [id], editing: false });
     }
   }
 
