@@ -77,7 +77,7 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
       this._askAIPanel,
       () => {},
       10,
-      102
+      120
     );
     this.disposables.add(this._askAIPopper);
   }
