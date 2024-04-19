@@ -51,7 +51,10 @@ import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
 import { GroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
-import { getTextRect } from '../../../surface-block/elements/text/utils.js';
+import {
+  getTextRect,
+  normalizeText,
+} from '../../../surface-block/elements/text/utils.js';
 import {
   type CanvasElement,
   type Connection,
@@ -314,10 +317,11 @@ export class EdgelessClipboardController extends PageClipboard {
       this._pasteShapesAndBlocks(elementsRawData);
     } catch (_) {
       const types = data.types;
+
       if (types.length === 1 && types[0] !== 'text/plain') return;
 
       const textContent = data.getData('text/plain');
-      this._pasteAsPlainText(textContent);
+      if (textContent !== '') this._pasteAsPlainText(textContent);
     }
   };
 
@@ -1025,6 +1029,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _pasteAsPlainText(textContent: string) {
+    textContent = normalizeText(textContent); // for y
     const { lastMousePos } = this.toolManager;
     const [x, y] = this.host.service.viewport.toModelCoord(
       lastMousePos.x,
