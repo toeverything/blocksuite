@@ -180,6 +180,8 @@ export class AffineAIPanelWidget extends WidgetElement {
       this.requestUpdate();
     };
     const finish = (type: 'success' | 'error' | 'aborted', err?: AIError) => {
+      if (type === 'aborted') return;
+
       assertExists(this.config);
       if (type === 'error') {
         this.state = 'error';
