@@ -36,21 +36,4 @@ export type TableViewData = BasicViewDataType<
 export const tableViewModel = tableViewType.modelConfig<TableViewData>({
   defaultName: 'Table View',
   dataViewManager: DataViewTableManager,
-  init(_columnMetaMap, model, id, name) {
-    return {
-      id,
-      name,
-      mode: 'table',
-      columns: [],
-      filter: {
-        type: 'group',
-        op: 'and',
-        conditions: [],
-      },
-      header: {
-        titleColumn: model.columns.find(v => v.type === 'title')?.id,
-        iconColumn: 'type',
-      },
-    };
-  },
 });

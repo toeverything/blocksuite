@@ -6,8 +6,6 @@ import type {
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
-import type { DatabaseBlockModel } from '../../database-model.js';
-import type { ColumnMeta } from '../column/column-config.js';
 import type { DataSource } from '../common/data-source/base.js';
 import type { ViewSource } from '../common/index.js';
 import type { DataViewRenderer } from '../data-view.js';
@@ -87,12 +85,6 @@ export interface DataViewConfig<
 > {
   defaultName: string;
   dataViewManager: new () => DataViewManagerBase<Data>;
-  init(
-    columnMetaMap: Record<string, ColumnMeta>,
-    model: DatabaseBlockModel,
-    id: string,
-    name: string
-  ): Data;
 }
 
 export interface DataViewRendererConfig {
