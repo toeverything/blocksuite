@@ -52,7 +52,7 @@ import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
 import { GroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
-import { normalizeText } from '../../../surface-block/elements/text/utils.js';
+import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
 import {
   type CanvasElement,
   type Connection,
@@ -1056,11 +1056,14 @@ export class EdgelessClipboardController extends PageClipboard {
     );
 
     if (typeof content === 'string') {
-      this.edgeless.service.addBlock(
-        'affine:paragraph',
-        { text: new DocCollection.Y.Text(normalizeText(content)) },
-        noteId
-      );
+      splitIntoLines(content).forEach((line, idx) => {
+        this.edgeless.service.addBlock(
+          'affine:paragraph',
+          { text: new DocCollection.Y.Text(line) },
+          noteId,
+          idx
+        );
+      });
     } else {
       content.forEach((child, idx) => {
         this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
