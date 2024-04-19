@@ -153,6 +153,10 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   discard = (callback: () => void = this._discardCallback) => {
     if (this.state === 'hidden') return;
+    if (this.state === 'error') {
+      callback();
+      return;
+    }
     this._clearDiscardModal();
     this._discardModal = toggleDiscardModal(callback);
   };
