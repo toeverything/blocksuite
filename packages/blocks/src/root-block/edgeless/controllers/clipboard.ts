@@ -14,7 +14,7 @@ import {
 import DOMPurify from 'dompurify';
 
 import {
-  CANVAS_EXPROT_IGNORE_TAGS,
+  CANVAS_EXPORT_IGNORE_TAGS,
   DEFAULT_IMAGE_PROXY_ENDPOINT,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -51,10 +51,12 @@ import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
 import { GroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
+import { getTextRect } from '../../../surface-block/elements/text/utils.js';
 import {
   type CanvasElement,
   type Connection,
   getBoundsWithRotation,
+  TextElementModel,
 } from '../../../surface-block/index.js';
 import {
   ConnectorElementModel,
@@ -306,9 +308,14 @@ export class EdgelessClipboardController extends PageClipboard {
       return;
     }
 
-    const json = this.std.clipboard.readFromClipboard(data);
-    const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
-    this._pasteShapesAndBlocks(elementsRawData);
+    try {
+      const json = this.std.clipboard.readFromClipboard(data);
+      const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
+      this._pasteShapesAndBlocks(elementsRawData);
+    } catch (_error) {
+      const textContent = data.getData('text/plain');
+      this._pasteAsPlainText(textContent);
+    }
   };
 
   private _onCut = (_context: UIEventStateContext) => {
@@ -1014,6 +1021,37 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
+  private _pasteAsPlainText(textContent: string) {
+    const { lastMousePos } = this.toolManager;
+    const [x, y] = this.host.service.viewport.toModelCoord(
+      lastMousePos.x,
+      lastMousePos.y
+    );
+
+    const id = this.host.service.addElement(CanvasElementType.TEXT, {
+      xywh: new Bound(x, y, 0, 0).serialize(),
+      text: new DocCollection.Y.Text(textContent),
+    });
+
+    const textElem = this.edgeless.service.getElementById(id);
+    assertExists(textElem);
+
+    if (textElem instanceof TextElementModel) {
+      const { w, h } = getTextRect(
+        textContent,
+        textElem.fontFamily,
+        textElem.fontSize
+      );
+
+      this.edgeless.service.updateElement(id, {
+        xywh: new Bound(x, y, w, h).serialize(),
+      });
+
+      this.edgeless.tools.setEdgelessTool({ type: 'default' });
+      this.edgeless.service.selection.set({ elements: [id], editing: false });
+    }
+  }
+
   private _pasteShapesAndBlocks(elementsRawData: Record<string, unknown>[]) {
     const [elements, blocks] =
       this.createElementsFromClipboardData(elementsRawData);
@@ -1167,7 +1205,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
-          CANVAS_EXPROT_IGNORE_TAGS.includes(element.tagName) ||
+          CANVAS_EXPORT_IGNORE_TAGS.includes(element.tagName) ||
           element.classList.contains('dg')
         ) {
           return true;
