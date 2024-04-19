@@ -803,6 +803,8 @@ export class EdgelessRootBlockComponent extends BlockElement<
     }
 
     this.keyboardManager = null;
+    this.components.toolbar?.remove();
+    this.components.toolbar = null;
   }
 
   override renderBlock() {

@@ -18,12 +18,12 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@fal-ai/serverless-client": "^0.9.0",
+    "@dotlottie/player-component": "^2.7.12",
+    "@fal-ai/serverless-client": "^0.9.3",
     "@floating-ui/dom": "^1.6.3",
     "@toeverything/theme": "^0.7.29",
-    "@dotlottie/player-component": "^2.7.12",
-    "lit": "^3.1.2",
-    "openai": "^4.29.2"
+    "lit": "^3.1.3",
+    "openai": "^4.37.1"
   },
   "exports": {
     ".": "./src/index.ts",

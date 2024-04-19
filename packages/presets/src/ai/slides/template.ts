@@ -18,6 +18,23 @@ const replaceText = (text: Record<string, string>, template: any) => {
   }
 };
 
+function seededRNG(seed: string) {
+  const a = 1664525;
+  const c = 1013904223;
+  const m = 2 ** 32;
+  const seededNumber = stringToNumber(seed);
+  return ((a * seededNumber + c) % m) / m;
+
+  function stringToNumber(str: string) {
+    let res = 0;
+    for (let i = 0; i < str.length; i++) {
+      const character = str.charCodeAt(i);
+      res += character;
+    }
+    return res;
+  }
+}
+
 const getImageUrlByKeyword =
   (keyword: string) =>
   async (w: number, h: number): Promise<string> => {
@@ -31,7 +48,9 @@ const getImageUrlByKeyword =
       return ''; // fixme: give a default image
     }
 
-    return photos[Math.floor(Math.random() * photos.length)];
+    // use a stable random seed
+    const rng = seededRNG(`${w}.${h}.${keyword}`);
+    return photos[Math.floor(rng * photos.length)];
   };
 
 const getImages = async (

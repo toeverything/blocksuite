@@ -70,7 +70,10 @@ export class AffineAIPanelWidget extends WidgetElement {
       background: var(--affine-background-overlay-panel-color);
 
       /* light/toolbarShadow */
-      box-shadow: var(--affine-shadow-1);
+      box-shadow: var(
+        --affine-toolbar-shadow,
+        0px 6px 16px 0px rgba(0, 0, 0, 0.14)
+      );
 
       gap: 8px;
 
@@ -150,6 +153,10 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   discard = (callback: () => void = this._discardCallback) => {
     if (this.state === 'hidden') return;
+    if (this.state === 'error') {
+      callback();
+      return;
+    }
     this._clearDiscardModal();
     this._discardModal = toggleDiscardModal(callback);
   };

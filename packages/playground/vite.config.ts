@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import path, { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import type { Plugin } from 'vite';
 import { defineConfig, loadEnv } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
 import wasm from 'vite-plugin-wasm';
@@ -14,6 +15,21 @@ const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
 const chunkSizeReport = !!process.env.CHUNK_SIZE_REPORT;
 
 const cache = new Map();
+
+export function sourcemapExclude(): Plugin {
+  return {
+    name: 'sourcemap-exclude',
+    transform(code: string, id: string) {
+      if (id.includes('node_modules') && !id.includes('@blocksuite')) {
+        return {
+          code,
+          // https://github.com/rollup/rollup/blob/master/docs/plugin-development/index.md#source-code-transformations
+          map: { mappings: '' },
+        };
+      }
+    },
+  };
+}
 
 function isDepInclude(
   id: string,
@@ -63,6 +79,7 @@ const chunkGroups = {
   datefns: [path.dirname(require.resolve('date-fns'))],
   dompurify: [path.dirname(require.resolve('dompurify'))],
   shiki: [path.dirname(require.resolve('@shikijs/core'))],
+  dotLottie: [path.dirname(require.resolve('@dotlottie/player-component'))],
   unified: [
     path.dirname(require.resolve('unified')),
     path.dirname(require.resolve('rehype-parse')),
@@ -78,6 +95,10 @@ const chunkGroups = {
     path.dirname(require.resolve('micromark-extension-gfm-table')),
     path.dirname(require.resolve('micromark-extension-gfm-task-list-item')),
     path.dirname(require.resolve('micromark-util-combine-extensions')),
+  ],
+  ai: [
+    path.dirname(require.resolve('@fal-ai/serverless-client')),
+    path.dirname(require.resolve('openai')),
   ],
   blocks: [
     require.resolve('@blocksuite/blocks'),
@@ -102,6 +123,7 @@ export default ({ mode }) => {
     },
     plugins: [
       hmrPlugin,
+      sourcemapExclude(),
       enableIstanbul &&
         istanbul({
           cwd: fileURLToPath(new URL('../..', import.meta.url)),

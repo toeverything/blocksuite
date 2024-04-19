@@ -110,6 +110,7 @@ export class AIPanelDiscardModal extends LitElement {
     .modal-footer .discard:hover {
       color: var(--affine-error-color);
       border-color: var(--affine-error-color);
+      background: var(--affine-background-error-color);
     }
 
     .modal-footer .primary {

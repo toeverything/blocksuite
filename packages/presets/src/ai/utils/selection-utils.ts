@@ -109,7 +109,11 @@ export async function getSelectedTextContent(editorHost: EditorHost) {
   const selectedModels = getSelectedModels(editorHost);
   assertExists(selectedModels);
 
-  const drafts = selectedModels.map(toDraftModel);
+  // Currently only filter out images
+  const selectedTextModels = selectedModels.filter(
+    model => !BlocksUtils.matchFlavours(model, ['affine:image'])
+  );
+  const drafts = selectedTextModels.map(toDraftModel);
   drafts.forEach(draft => traverse(draft, drafts));
   const slice = Slice.fromModels(editorHost.std.doc, drafts);
   return getMarkdownFromSlice(editorHost, slice);
@@ -161,7 +165,7 @@ export const getSelections = (
   return data;
 };
 
-export const getSelectedImagesAsBlobs = (host: EditorHost) => {
+export const getSelectedImagesAsBlobs = async (host: EditorHost) => {
   const [_, data] = host.command
     .chain()
     .tryAll(chain => [
@@ -173,14 +177,16 @@ export const getSelectedImagesAsBlobs = (host: EditorHost) => {
       types: ['image'],
     })
     .run();
-  return Promise.all(
-    data.currentBlockSelections
-      ?.map(s => {
-        const sourceId = host.doc.getBlockById<ImageBlockModel>(
-          s.blockId
-        )?.sourceId;
-        return sourceId ? host.doc.blob.get(sourceId) : null;
-      })
-      .filter((b): b is Promise<Blob> | Blob => !!b) ?? []
+
+  const blobs = await Promise.all(
+    data.currentBlockSelections?.map(async s => {
+      const sourceId = (host.doc.getBlock(s.blockId)?.model as ImageBlockModel)
+        ?.sourceId;
+      if (!sourceId) return null;
+      const blob = await (sourceId ? host.doc.blob.get(sourceId) : null);
+      if (!blob) return null;
+      return new File([blob], sourceId);
+    }) ?? []
   );
+  return blobs.filter((blob): blob is File => !!blob);
 };

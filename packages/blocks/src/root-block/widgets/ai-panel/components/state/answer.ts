@@ -1,18 +1,22 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
-import type {
-  AIItemConfig,
-  AIItemGroupConfig,
-} from '../../../../../_common/components/ai-item/index.js';
+import type { AIItemGroupConfig } from '../../../../../_common/components/ai-item/index.js';
+import { AIDoneIcon } from '../../../../../_common/icons/ai.js';
 import { WarningIcon } from '../../../../../_common/icons/misc.js';
 import { CopyIcon } from '../../../../../_common/icons/text.js';
 
+export interface CopyConfig {
+  allowed: boolean;
+  onCopy: () => boolean | Promise<boolean>;
+}
+
 export type AIPanelAnswerConfig = {
-  responses: AIItemConfig[];
+  responses: AIItemGroupConfig[];
   actions: AIItemGroupConfig[];
+  copy?: CopyConfig;
 };
 
 @customElement('ai-panel-answer')
@@ -21,9 +25,10 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
     :host {
       width: 100%;
       display: flex;
+      box-sizing: border-box;
       flex-direction: column;
       gap: 8px;
-      padding: 12px 0px;
+      padding: 12px 0;
     }
 
     .answer {
@@ -70,15 +75,15 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       width: 100%;
       height: 22px;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
       padding: 0 12px;
+      gap: 4px;
 
       color: var(--affine-text-secondary-color);
 
       .text {
         display: flex;
         align-items: flex-start;
-        gap: 10px;
         flex: 1 0 0;
 
         /* light/xs */
@@ -89,48 +94,62 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       }
 
       .right {
-        /** TODO: need to implement answer copy action */
-        display: none;
+        display: flex;
         align-items: center;
-        gap: 16px;
+        padding-right: 8px;
 
-        .copy {
+        .copy,
+        .copied {
           display: flex;
           width: 20px;
           height: 20px;
           justify-content: center;
           align-items: center;
-
           border-radius: 8px;
-
-          &:hover {
-            background: var(--affine-hover-color);
-          }
+        }
+        .copy:hover {
+          color: var(--affine-icon-color);
+          background: var(--affine-hover-color);
+          cursor: pointer;
+        }
+        .copied {
+          color: var(--affine-brand-color);
         }
       }
     }
 
+    .response-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .response-list-container,
+    .action-list-container {
+      padding: 0 8px;
+    }
+
+    /* set item style outside ai-item */
+    .response-list-container ai-item-list,
+    .action-list-container ai-item-list {
+      --item-padding: 4px;
+    }
+
     .response-list-container ai-item-list {
-      /* set item icon color outside ai-item */
       --item-icon-color: var(--affine-icon-secondary);
       --item-icon-hover-color: var(--affine-icon-color);
     }
   `;
-
   @property({ attribute: false })
   config!: AIPanelAnswerConfig;
 
   @property({ attribute: false })
   finish = true;
 
-  override render() {
-    const responseGroups: AIItemGroupConfig[] = [
-      {
-        name: 'Response',
-        items: this.config.responses,
-      },
-    ];
+  @state()
+  copied = false;
 
+  override render() {
     return html`
       <div class="answer">
         <div class="answer-head">Answer</div>
@@ -143,16 +162,35 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
             <div class="finish-tip">
               ${WarningIcon}
               <div class="text">AI outputs can be misleading or wrong</div>
-              <div class="right">
-                <div class="copy">${CopyIcon}</div>
-              </div>
+              ${this.config.copy?.allowed
+                ? html`<div class="right">
+                    ${this.copied
+                      ? html`<div class="copied">${AIDoneIcon}</div>`
+                      : html`<div
+                          class="copy"
+                          @click=${async () => {
+                            this.copied = !!(await this.config.copy?.onCopy());
+                          }}
+                        >
+                          ${CopyIcon}
+                          <affine-tooltip>Copy</affine-tooltip>
+                        </div>`}
+                  </div>`
+                : nothing}
             </div>
             ${this.config.responses.length > 0
               ? html`
                   <ai-panel-divider></ai-panel-divider>
-                  <div class="response-list-container">
-                    <ai-item-list .groups=${responseGroups}></ai-item-list>
-                  </div>
+                  ${this.config.responses.map(
+                    (group, index) => html`
+                      ${index !== 0
+                        ? html`<ai-panel-divider></ai-panel-divider>`
+                        : nothing}
+                      <div class="response-list-container">
+                        <ai-item-list .groups=${[group]}></ai-item-list>
+                      </div>
+                    `
+                  )}
                 `
               : nothing}
             ${this.config.responses.length > 0 && this.config.actions.length > 0

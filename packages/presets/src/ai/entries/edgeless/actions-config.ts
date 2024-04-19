@@ -25,7 +25,7 @@ const translateSubItem = translateLangs.map(lang => {
 });
 
 export const docGroup: AIItemGroupConfig = {
-  name: 'doc',
+  name: 'doc with ai',
   items: [
     {
       name: 'Summary',
@@ -55,7 +55,7 @@ export const othersGroup: AIItemGroupConfig = {
 };
 
 export const editGroup: AIItemGroupConfig = {
-  name: 'edit',
+  name: 'edit with ai',
   items: [
     {
       name: 'Translate to',
@@ -97,7 +97,7 @@ export const editGroup: AIItemGroupConfig = {
 };
 
 export const draftGroup: AIItemGroupConfig = {
-  name: 'draft',
+  name: 'draft with ai',
   items: [
     {
       name: 'Write an article about this',
@@ -139,7 +139,7 @@ export const draftGroup: AIItemGroupConfig = {
 };
 
 export const mindmapGroup: AIItemGroupConfig = {
-  name: 'mindmap',
+  name: 'mindmap with ai',
   items: [
     {
       name: 'Expand from this mindmap node',
@@ -157,7 +157,7 @@ export const mindmapGroup: AIItemGroupConfig = {
 };
 
 export const presentationGroup: AIItemGroupConfig = {
-  name: 'presentation',
+  name: 'presentation with ai',
   items: [
     {
       name: 'Create a presentation',
@@ -169,7 +169,7 @@ export const presentationGroup: AIItemGroupConfig = {
 };
 
 export const createGroup: AIItemGroupConfig = {
-  name: 'create',
+  name: 'create with ai',
   items: [
     {
       name: 'Create an image',
