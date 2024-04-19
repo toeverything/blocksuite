@@ -113,7 +113,7 @@ export function getTextRect(
   );
   const font = `${fontSize}px "${fontFamily}"`;
   const w = getTextWidth(text, font);
-  const h = getTextHeight(text, fontSize, lineHeight);
+  const h = getTextHeight(text, lineHeight);
   return { w, h };
 }
 
@@ -126,11 +126,7 @@ export function getTextWidth(text: string, font: string): number {
   return width;
 }
 
-export const getTextHeight = (
-  text: string,
-  fontSize: number,
-  lineHeight: number
-) => {
+export const getTextHeight = (text: string, lineHeight: number) => {
   const lineCount = splitIntoLines(text).length;
   return lineHeight * lineCount;
 };
