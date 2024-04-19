@@ -1070,6 +1070,12 @@ export class EdgelessClipboardController extends PageClipboard {
         this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
       });
     }
+
+    edgeless.service.selection.set({
+      elements: [noteId],
+      editing: false,
+    });
+    edgeless.tools.setEdgelessTool({ type: 'default' });
   }
 
   private _pasteShapesAndBlocks(elementsRawData: Record<string, unknown>[]) {
