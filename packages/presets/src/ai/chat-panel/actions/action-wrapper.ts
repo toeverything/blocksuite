@@ -16,11 +16,17 @@ export class ActionWrapper extends WithDisposable(ShadowlessElement) {
       gap: 18px;
       height: 22px;
       margin-bottom: 12px;
-    }
 
-    .action-name div:last-child {
-      margin-left: auto;
-      cursor: pointer;
+      div:last-child {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        flex: 1;
+
+        div:last-child svg {
+          margin-left: auto;
+        }
+      }
     }
 
     .answer-prompt {
@@ -56,11 +62,14 @@ export class ActionWrapper extends WithDisposable(ShadowlessElement) {
     const originalText = item.messages[1].content;
     return html`<style></style>
       <slot></slot>
-      <div class="action-name">
+      <div
+        class="action-name"
+        @click=${() => (this.promptShow = !this.promptShow)}
+      >
         ${ActionIcon}
-        <div>${item.action}</div>
-        <div @click=${() => (this.promptShow = !this.promptShow)}>
-          ${this.promptShow ? ArrowUpIcon : ArrowDownIcon}
+        <div>
+          <div>${item.action}</div>
+          <div>${this.promptShow ? ArrowUpIcon : ArrowDownIcon}</div>
         </div>
       </div>
       ${this.promptShow

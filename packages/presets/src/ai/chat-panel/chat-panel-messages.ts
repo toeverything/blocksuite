@@ -6,10 +6,12 @@ import './actions/action-wrapper.js';
 import './actions/make-real.js';
 import './actions/slides.js';
 import './actions/mindmap.js';
+import './actions/chat-text.js';
 
 import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { type AIError, PaymentRequiredError } from '@blocksuite/blocks';
 import { Text } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -24,7 +26,10 @@ import {
   NewBlockIcon,
   ReplaceIcon,
 } from '../_common/icons.js';
-import { createTextRenderer } from '../messages/text.js';
+import {
+  GeneralErrorRenderer,
+  PaymentRequiredErrorRenderer,
+} from '../messages/error.js';
 import { AIProvider } from '../provider.js';
 import { insertBelow, replace } from '../utils/editor-actions.js';
 import type { ChatItem, ChatStatus } from './index.js';
@@ -132,6 +137,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   status!: ChatStatus;
 
+  @property({ attribute: false })
+  error?: AIError;
+
   @query('.chat-panel-messages')
   messagesContainer!: HTMLDivElement;
 
@@ -150,9 +158,21 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     this.avatarUrl = res?.avatarUrl ?? '';
   }
 
-  renderItem(item: ChatItem) {
+  renderItem(item: ChatItem, isLast: boolean) {
+    if (isLast && this.status === 'error') {
+      if (this.error instanceof PaymentRequiredError) {
+        return PaymentRequiredErrorRenderer(this.host);
+      } else {
+        return GeneralErrorRenderer(this.error?.message);
+      }
+    }
+
     if ('role' in item) {
-      return createTextRenderer(this.host)(item.content);
+      return html`<chat-text
+        .host=${this.host}
+        .blobs=${item.blobs}
+        .text=${item.content}
+      ></chat-text>`;
     } else {
       switch (item.action) {
         case 'Create a presentation':
@@ -364,7 +384,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               (item, index) => {
                 return html`<div class="message">
                   ${this.renderAvatar(item)}
-                  <div class="item-wrapper">${this.renderItem(item)}</div>
+                  <div class="item-wrapper">
+                    ${this.renderItem(item, index === items.length - 1)}
+                  </div>
                   <div class="item-wrapper">
                     ${this.status === 'loading' && index === items.length - 1
                       ? this.renderLoading()

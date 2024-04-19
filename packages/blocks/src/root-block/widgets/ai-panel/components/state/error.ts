@@ -12,6 +12,7 @@ import {
 } from '../../../../../_common/components/index.js';
 
 export interface AIPanelErrorConfig {
+  login: () => void;
   upgrade: () => void;
   responses: AIItemConfig[];
   error?: AIError;
@@ -70,7 +71,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
           }
         }
       }
-      .upgrade {
+      .action-button {
         display: flex;
         padding: 4px 12px;
         justify-content: center;
@@ -92,7 +93,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
           line-height: 20px; /* 166.667% */
         }
       }
-      .upgrade:hover {
+      .action-button:hover {
         background: var(--affine-hover-color, rgba(0, 0, 0, 0.04));
       }
     }
@@ -107,6 +108,19 @@ export class AIPanelError extends WithDisposable(LitElement) {
       this.config.error?.type,
       [
         [
+          AIErrorType.Unauthorized,
+          () =>
+            html`<div class="answer-tip">
+              <div class="top">Answer</div>
+              <div class="bottom">
+                You need to login to AFFiNE Cloud to continue using AFFiNE AI.
+              </div>
+              <div @click=${this.config.login} class="action-button">
+                <div class="content">Login</div>
+              </div>
+            </div>`,
+        ],
+        [
           AIErrorType.PaymentRequired,
           () => html`
             <div class="answer-tip">
@@ -115,7 +129,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
                 You’ve reached the current usage cap for GPT-4. You can
                 subscribe AFFiNE AI to continue AI experience!
               </div>
-              <div @click=${this.config.upgrade} class="upgrade">
+              <div @click=${this.config.upgrade} class="action-button">
                 <div class="content">Upgrade</div>
               </div>
             </div>
