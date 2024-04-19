@@ -29,6 +29,10 @@ export class AIAnswerTextPreview extends LitElement {
     .ai-answer-text-editor .affine-page-root-block-container {
       padding: 0;
     }
+
+    .affine-paragraph-block-container {
+      line-height: 22px;
+    }
   `;
 
   @property({ attribute: false })

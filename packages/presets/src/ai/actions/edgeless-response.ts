@@ -26,6 +26,7 @@ import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
+import { preprocessHtml } from '../utils/html.js';
 import { fetchImageToFile } from '../utils/image.js';
 import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
 import { EXCLUDING_COPY_ACTIONS } from './consts.js';
@@ -179,8 +180,9 @@ export const responses: {
   },
   makeItReal: host => {
     const aiPanel = getAIPanel(host);
-    const html = aiPanel.answer;
+    let html = aiPanel.answer;
     if (!html) return;
+    html = preprocessHtml(html);
 
     const edgelessCopilot = getEdgelessCopilotWidget(host);
     const [surface] = host.doc.getBlockByFlavour(

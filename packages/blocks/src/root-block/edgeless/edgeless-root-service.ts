@@ -183,6 +183,14 @@ export class EdgelessRootService extends RootService {
     return this.viewport.zoom;
   }
 
+  get locked() {
+    return this.viewport.locked;
+  }
+
+  set locked(locked: boolean) {
+    this.viewport.locked = locked;
+  }
+
   override get host() {
     return this.std.host as EditorHost;
   }
@@ -641,6 +649,8 @@ export class EdgelessRootService extends RootService {
   }
 
   setZoomByAction(action: ZoomAction) {
+    if (this.locked) return;
+
     switch (action) {
       case 'fit':
         this.zoomToFit();

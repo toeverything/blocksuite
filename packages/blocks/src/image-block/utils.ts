@@ -96,12 +96,17 @@ async function getImageBlob(model: ImageBlockModel) {
 
 export async function fetchImageBlob(block: ImageBlockComponent) {
   try {
-    block.loading = true;
-    block.error = false;
-    block.blob = undefined;
-    if (block.blobUrl) {
-      URL.revokeObjectURL(block.blobUrl);
-      block.blobUrl = undefined;
+    if (block.model.sourceId !== block.lastSourceId || !block.blobUrl) {
+      block.loading = true;
+      block.error = false;
+      block.blob = undefined;
+
+      if (block.blobUrl) {
+        URL.revokeObjectURL(block.blobUrl);
+        block.blobUrl = undefined;
+      }
+    } else if (block.blobUrl) {
+      return;
     }
 
     const { model } = block;
@@ -123,6 +128,7 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
     block.loading = false;
     block.blob = blob;
     block.blobUrl = URL.createObjectURL(blob);
+    block.lastSourceId = sourceId;
   } catch (error) {
     block.retryCount++;
     console.warn(`${error}, retrying`, block.retryCount);
