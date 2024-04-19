@@ -1034,8 +1034,9 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
+    const edgeless = this.host;
     const { lastMousePos } = this.toolManager;
-    const [x, y] = this.host.service.viewport.toModelCoord(
+    const [x, y] = edgeless.service.viewport.toModelCoord(
       lastMousePos.x,
       lastMousePos.y
     );
@@ -1049,7 +1050,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ).serialize(),
     };
 
-    const noteId = this.edgeless.service.addBlock(
+    const noteId = edgeless.service.addBlock(
       'affine:note',
       noteProps,
       this.doc.root!.id
@@ -1057,7 +1058,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     if (typeof content === 'string') {
       splitIntoLines(content).forEach((line, idx) => {
-        this.edgeless.service.addBlock(
+        edgeless.service.addBlock(
           'affine:paragraph',
           { text: new DocCollection.Y.Text(line) },
           noteId,
