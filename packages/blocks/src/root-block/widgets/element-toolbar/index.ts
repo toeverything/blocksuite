@@ -212,7 +212,11 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     _disposables.add(
       this.selection.slots.updated.on(() => {
-        if (this.selection.selectedIds.length === 0 || this.selection.editing) {
+        if (
+          this.selection.selectedIds.length === 0 ||
+          this.selection.editing ||
+          this.selection.inoperable
+        ) {
           this.toolbarVisible = false;
         } else {
           this.toolbarVisible = true;

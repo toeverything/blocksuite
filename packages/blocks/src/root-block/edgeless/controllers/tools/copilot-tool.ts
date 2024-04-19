@@ -3,6 +3,7 @@ import { Slot } from '@blocksuite/store';
 
 import type { CopilotSelectionTool } from '../../../../_common/utils/index.js';
 import { Bound } from '../../../../surface-block/index.js';
+import type { EdgelessSelectionState } from '../../services/selection-manager.js';
 import { EdgelessToolController } from './index.js';
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
@@ -16,15 +17,27 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
 
   draggingAreaUpdated = new Slot();
 
+  get selection() {
+    return this._edgeless.service.selection;
+  }
+
   get selectedElements() {
     const area = this.area;
     const bound = new Bound(area.x, area.y, area.width, area.height);
 
-    return area.width === 0 || area.height === 0
-      ? []
-      : this._service.pickElementsByBound(bound).filter(el => {
-          return bound.contains(el.elementBound);
-        });
+    if (!(area.width & area.height)) return [];
+
+    const elements = this._service.pickElementsByBound(bound);
+
+    const set = new Set(elements);
+
+    this.selection.set({
+      elements: Array.from(set).map(element => element.id),
+      editing: false,
+      inoperable: true,
+    } as EdgelessSelectionState);
+
+    return elements;
   }
 
   get area() {

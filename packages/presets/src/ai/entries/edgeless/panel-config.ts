@@ -3,6 +3,7 @@ import type { AffineAIPanelWidget } from '@blocksuite/blocks';
 
 import { createTextRenderer } from '../../messages/text.js';
 import { AIProvider } from '../../provider.js';
+import { copyTextAnswer } from '../../utils/editor-actions.js';
 
 export function buildEdgelessPanelConfig(
   panel: AffineAIPanelWidget
@@ -12,6 +13,12 @@ export function buildEdgelessPanelConfig(
     finishStateConfig: {
       responses: buildDefaultResponse(panel),
       actions: [],
+      copy: {
+        allowed: true,
+        onCopy: () => {
+          return copyTextAnswer(panel);
+        },
+      },
     },
     errorStateConfig: {
       upgrade: () => {

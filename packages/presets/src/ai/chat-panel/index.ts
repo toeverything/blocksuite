@@ -14,6 +14,7 @@ import type { ChatPanelMessages } from './chat-panel-messages.js';
 export type ChatMessage = {
   content: string;
   role: 'user' | 'assistant';
+  createdAt: string;
 };
 
 export type ChatAction = {
@@ -112,10 +113,16 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         editor.doc.id
       )) ?? [];
 
-    this.items = [...actions.reverse()];
+    const items: ChatItem[] = [...actions];
+
     if (histories[0]) {
-      this.items = [...this.items, ...histories[0].messages];
+      items.push(...histories[0].messages);
     }
+    this.items = items.sort((a, b) => {
+      const aDate = 'role' in a ? a.createdAt : a.messages[0].createdAt;
+      const bDate = 'role' in b ? b.createdAt : b.messages[0].createdAt;
+      return new Date(aDate).getTime() - new Date(bDate).getTime();
+    });
 
     this.scrollToDown();
   }

@@ -137,8 +137,8 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     this.isInputEmpty = true;
     this.updateStatus('loading');
     this.addToItems([
-      { role: 'user', content: text },
-      { role: 'assistant', content: '' },
+      { role: 'user', content: text, createdAt: new Date().toISOString() },
+      { role: 'assistant', content: '', createdAt: new Date().toISOString() },
     ]);
     const res = await AIProvider.actions.chat?.({
       input: text,
@@ -149,7 +149,11 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
 
     if (res) {
       const items = [...this.items];
-      items[items.length - 1] = { role: 'assistant', content: res };
+      items[items.length - 1] = {
+        role: 'assistant',
+        content: res,
+        createdAt: new Date().toISOString(),
+      };
       this.updateStatus('success');
       this.updateItems(items);
     }

@@ -22,7 +22,7 @@ export class AIItemList extends WithDisposable(LitElement) {
     }
     .group-name {
       display: flex;
-      padding: 8px 12px;
+      padding: 4px calc(var(--item-padding, 8px) + 4px);
       align-items: center;
       color: var(--affine-text-secondary-color);
       text-align: justify;

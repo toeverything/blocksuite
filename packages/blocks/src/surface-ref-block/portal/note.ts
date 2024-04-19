@@ -1,10 +1,12 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   RangeManager,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import type { BlockModel } from '@blocksuite/store';
-import { css, nothing, type TemplateResult } from 'lit';
+import { assertExists } from '@blocksuite/global/utils';
+import type { BlockModel, BlockSelector } from '@blocksuite/store';
+import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -15,6 +17,7 @@ import {
 } from '../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../../_common/types.js';
+import { SpecProvider } from '../../_specs/spec-provider.js';
 import { type NoteBlockModel } from '../../note-block/index.js';
 import { deserializeXYWH } from '../../surface-block/index.js';
 
@@ -33,7 +36,48 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   model!: NoteBlockModel;
 
   @property({ attribute: false })
-  renderModel!: (model: BlockModel) => TemplateResult;
+  host!: EditorHost;
+
+  renderPreview(model: BlockModel) {
+    const ids: string[] = [];
+    let parent: string | null = model.id;
+    while (parent && !ids.includes(parent)) {
+      ids.push(parent);
+      parent = model.doc.blockCollection.crud.getParent(parent);
+    }
+    const addChildren = (model: BlockModel) => {
+      model.children.forEach(child => {
+        if (ids.includes(child.id)) return;
+        if (child.flavour === 'affine:surface-ref') return;
+        ids.push(child.id);
+        addChildren(child);
+      });
+    };
+    addChildren(model);
+
+    const selector: BlockSelector = block => ids.includes(block.id);
+    const doc = model.doc.blockCollection.getDoc(selector);
+    this._disposables.add(() => {
+      model.doc.blockCollection.clearSelector(selector);
+    });
+    this._disposables.add(
+      doc.slots.blockUpdated.on(payload => {
+        if (payload.type === 'update') return;
+        let parent: string | null = payload.id;
+        while (parent) {
+          if (model.id === parent) {
+            this.requestUpdate();
+            return;
+          }
+          parent = model.doc.blockCollection.crud.getParent(parent);
+        }
+      })
+    );
+
+    const previewSpec = SpecProvider.getInstance().getSpec('preview');
+    assertExists(previewSpec, 'Preview spec is not found');
+    return this.host.renderSpecPortal(doc, previewSpec);
+  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -98,7 +142,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
         data-model-height="${modelH}"
         data-portal-reference-block-id="${model.id}"
       >
-        ${this.renderModel(model)}
+        ${this.renderPreview(model)}
       </div>
     `;
   }

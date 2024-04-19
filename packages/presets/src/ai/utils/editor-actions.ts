@@ -3,9 +3,14 @@ import type {
   EditorHost,
   TextSelection,
 } from '@blocksuite/block-std';
-import type { BlockModel } from '@blocksuite/store';
+import type { AffineAIPanelWidget } from '@blocksuite/blocks';
+import { type BlockModel, Slice } from '@blocksuite/store';
 
-import { insertFromMarkdown, markdownToSnapshot } from './markdown-utils.js';
+import {
+  insertFromMarkdown,
+  markDownToDoc,
+  markdownToSnapshot,
+} from './markdown-utils.js';
 
 const setBlockSelection = (
   host: EditorHost,
@@ -74,4 +79,19 @@ export const replace = async (
     await host.updateComplete;
     setBlockSelection(host, firstBlockParent, models);
   }
+};
+
+export const copyTextAnswer = async (panel: AffineAIPanelWidget) => {
+  const host = panel.host;
+  if (panel.state !== 'finished' || !panel.answer) {
+    return false;
+  }
+  const previewDoc = await markDownToDoc(host, panel.answer);
+  const models = previewDoc
+    .getBlocksByFlavour('affine:note')
+    .map(b => b.model)
+    .flatMap(model => model.children);
+  const slice = Slice.fromModels(previewDoc, models);
+  await host.std.clipboard.copySlice(slice);
+  return true;
 };
