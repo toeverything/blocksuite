@@ -13,8 +13,6 @@ import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { type AIError, PaymentRequiredError } from '@blocksuite/blocks';
-import { BlocksUtils } from '@blocksuite/blocks';
-import { Text } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -22,103 +20,15 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   AffineAvatarIcon,
   AffineIcon,
-  CreateAsPageIcon,
   DownArrowIcon,
-  InsertBelowIcon,
-  ReplaceIcon,
 } from '../_common/icons.js';
 import {
   GeneralErrorRenderer,
   PaymentRequiredErrorRenderer,
 } from '../messages/error.js';
 import { AIProvider } from '../provider.js';
-import { insertBelow, replace } from '../utils/editor-actions.js';
+import { EditorActions } from './actions/actions-handle.js';
 import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
-
-const { matchFlavours } = BlocksUtils;
-
-export const EditorActions = [
-  {
-    icon: ReplaceIcon,
-    title: 'Replace selection',
-    handler: async (
-      host: EditorHost,
-      content: string,
-      currentTextSelection?: TextSelection,
-      currentBlockSelections?: BlockSelection[]
-    ) => {
-      const [_, data] = host.command
-        .chain()
-        .getSelectedBlocks({
-          currentTextSelection,
-          currentBlockSelections,
-        })
-        .run();
-      if (!data.selectedBlocks) return;
-
-      if (currentTextSelection) {
-        const { doc } = host;
-        const block = doc.getBlock(currentTextSelection.blockId);
-        if (matchFlavours(block?.model ?? null, ['affine:paragraph'])) {
-          block?.model.text?.replace(
-            currentTextSelection.from.index,
-            currentTextSelection.from.length,
-            content
-          );
-          return;
-        }
-      }
-
-      await replace(
-        host,
-        content,
-        data.selectedBlocks[0],
-        data.selectedBlocks.map(block => block.model),
-        currentTextSelection
-      );
-    },
-  },
-  {
-    icon: InsertBelowIcon,
-    title: 'Insert below',
-    handler: async (
-      host: EditorHost,
-      content: string,
-      currentTextSelection?: TextSelection,
-      currentBlockSelections?: BlockSelection[]
-    ) => {
-      const [_, data] = host.command
-        .chain()
-        .getSelectedBlocks({
-          currentTextSelection,
-          currentBlockSelections,
-        })
-        .run();
-      if (!data.selectedBlocks) return;
-
-      await insertBelow(
-        host,
-        content,
-        data.selectedBlocks[data.selectedBlocks?.length - 1]
-      );
-    },
-  },
-  {
-    icon: CreateAsPageIcon,
-    title: 'Create as a page',
-    handler: (host: EditorHost, content: string) => {
-      const newDoc = host.doc.collection.createDoc();
-      newDoc.load();
-      const rootId = newDoc.addBlock('affine:page');
-      newDoc.addBlock('affine:surface', {}, rootId);
-      const noteId = newDoc.addBlock('affine:note', {}, rootId);
-      newDoc.addBlock('affine:paragraph', { text: new Text(content) }, noteId);
-      host.spec.getService('affine:page').slots.docLinkClicked.emit({
-        docId: newDoc.id,
-      });
-    },
-  },
-];
 
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {

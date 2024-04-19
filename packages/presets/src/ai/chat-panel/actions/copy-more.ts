@@ -11,7 +11,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { CopyIcon, MoreIcon } from '../../_common/icons.js';
 import { copyText } from '../../utils/editor-actions.js';
-import { EditorActions } from '../chat-panel-messages.js';
+import { EditorActions } from './actions-handle.js';
 
 @customElement('chat-copy-more')
 export class ChatCopyMore extends WithDisposable(LitElement) {
