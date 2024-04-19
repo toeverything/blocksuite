@@ -31,7 +31,7 @@ export function bindEventSource(
     for await (const data of stream) {
       if (signal?.aborted) {
         finish('aborted');
-        break;
+        return;
       }
       answer += data;
       update(answer);

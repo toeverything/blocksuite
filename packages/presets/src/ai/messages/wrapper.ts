@@ -2,6 +2,8 @@ import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import { preprocessHtml } from '../utils/html.js';
+
 @customElement('ai-answer-wrapper')
 export class AIAnswerWrapper extends LitElement {
   static override styles = css`
@@ -52,7 +54,7 @@ export const createIframeRenderer: AffineAIPanelWidgetConfig['answerRenderer'] =
       sandbox="allow-scripts"
       scrolling="no"
       allowfullscreen
-      .srcdoc=${answer}
+      .srcdoc=${preprocessHtml(answer)}
     >
     </iframe>`;
     return html`<ai-answer-wrapper>${template}</ai-answer-wrapper>`;
