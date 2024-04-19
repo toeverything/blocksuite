@@ -10,11 +10,12 @@ import {
   DocCollection,
   fromJSON,
   Job,
+  type SliceSnapshot,
 } from '@blocksuite/store';
 import DOMPurify from 'dompurify';
 
 import {
-  CANVAS_EXPROT_IGNORE_TAGS,
+  CANVAS_EXPORT_IGNORE_TAGS,
   DEFAULT_IMAGE_PROXY_ENDPOINT,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -51,6 +52,7 @@ import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
 import { GroupLikeModel } from '../../../surface-block/element-model/base.js';
 import { CanvasElementType } from '../../../surface-block/element-model/index.js';
+import { splitIntoLines } from '../../../surface-block/elements/text/utils.js';
 import {
   type CanvasElement,
   type Connection,
@@ -64,9 +66,11 @@ import { compare } from '../../../surface-block/managers/layer-utils.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
+import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isAttachmentBlock,
@@ -305,10 +309,25 @@ export class EdgelessClipboardController extends PageClipboard {
       await this.host.addImages([svg], point);
       return;
     }
-
-    const json = this.std.clipboard.readFromClipboard(data);
-    const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
-    this._pasteShapesAndBlocks(elementsRawData);
+    try {
+      // check for surface elements in clipboard
+      const json = this.std.clipboard.readFromClipboard(data);
+      const mayBeSurfaceDataJson = json[BLOCKSUITE_SURFACE];
+      if (mayBeSurfaceDataJson !== undefined) {
+        const elementsRawData = JSON.parse(mayBeSurfaceDataJson);
+        this._pasteShapesAndBlocks(elementsRawData);
+        return;
+      }
+      // check for slice snapshot in clipboard
+      const mayBeSliceDataJson = json[ClipboardAdapter.MIME];
+      if (mayBeSliceDataJson === undefined) return;
+      const clipData = JSON.parse(mayBeSliceDataJson);
+      const sliceSnapShot = clipData?.snapshot as SliceSnapshot;
+      this._pasteTextContentAsNote(sliceSnapShot.content);
+    } catch (_) {
+      // if it is not parsable
+      this._pasteTextContentAsNote(data.getData('text/plain'));
+    }
   };
 
   private _onCut = (_context: UIEventStateContext) => {
@@ -1014,6 +1033,51 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
+  private _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
+    const edgeless = this.host;
+    const { lastMousePos } = this.toolManager;
+    const [x, y] = edgeless.service.viewport.toModelCoord(
+      lastMousePos.x,
+      lastMousePos.y
+    );
+
+    const noteProps = {
+      xywh: new Bound(
+        x,
+        y,
+        DEFAULT_NOTE_WIDTH,
+        DEFAULT_NOTE_HEIGHT
+      ).serialize(),
+    };
+
+    const noteId = edgeless.service.addBlock(
+      'affine:note',
+      noteProps,
+      this.doc.root!.id
+    );
+
+    if (typeof content === 'string') {
+      splitIntoLines(content).forEach((line, idx) => {
+        edgeless.service.addBlock(
+          'affine:paragraph',
+          { text: new DocCollection.Y.Text(line) },
+          noteId,
+          idx
+        );
+      });
+    } else {
+      content.forEach((child, idx) => {
+        this.onBlockSnapshotPaste(child, this.doc, noteId, idx);
+      });
+    }
+
+    edgeless.service.selection.set({
+      elements: [noteId],
+      editing: false,
+    });
+    edgeless.tools.setEdgelessTool({ type: 'default' });
+  }
+
   private _pasteShapesAndBlocks(elementsRawData: Record<string, unknown>[]) {
     const [elements, blocks] =
       this.createElementsFromClipboardData(elementsRawData);
@@ -1167,7 +1231,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
-          CANVAS_EXPROT_IGNORE_TAGS.includes(element.tagName) ||
+          CANVAS_EXPORT_IGNORE_TAGS.includes(element.tagName) ||
           element.classList.contains('dg')
         ) {
           return true;
