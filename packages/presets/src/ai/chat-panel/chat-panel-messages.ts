@@ -300,6 +300,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
   protected override render() {
     const { items } = this;
+    const filteredItems = items.filter(item => {
+      return 'role' in item || item.messages?.length === 3;
+    });
 
     return html`
       <div
@@ -316,24 +319,18 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               ${AffineIcon}
               <div>What can I help you with?</div>
             </div>`
-          : repeat(
-              items.filter(item => {
-                return 'role' in item || item.messages?.length === 3;
-              }),
-              (item, index) => {
-                return html`<div class="message">
-                  ${this.renderAvatar(item)}
-                  <div class="item-wrapper">
-                    ${this.renderItem(item, index === items.length - 1)}
-                  </div>
-                  <div class="item-wrapper">
-                    ${this.status === 'loading' && index === items.length - 1
-                      ? this.renderLoading()
-                      : nothing}
-                  </div>
-                </div>`;
-              }
-            )}
+          : repeat(filteredItems, (item, index) => {
+              const isLast = index === filteredItems.length - 1;
+              return html`<div class="message">
+                ${this.renderAvatar(item)}
+                <div class="item-wrapper">${this.renderItem(item, isLast)}</div>
+                <div class="item-wrapper">
+                  ${this.status === 'loading' && isLast
+                    ? this.renderLoading()
+                    : nothing}
+                </div>
+              </div>`;
+            })}
       </div>
       ${this.showDownIndicator
         ? html`<div class="down-indicator" @click=${() => this.scrollToDown()}>
