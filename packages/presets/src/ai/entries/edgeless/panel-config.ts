@@ -9,7 +9,7 @@ export function buildEdgelessPanelConfig(
   panel: AffineAIPanelWidget
 ): AffineAIPanelWidgetConfig {
   return {
-    answerRenderer: createTextRenderer(panel.host),
+    answerRenderer: createTextRenderer(panel.host, 320),
     finishStateConfig: {
       responses: buildDefaultResponse(panel),
       actions: [],

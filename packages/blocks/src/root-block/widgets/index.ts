@@ -1,5 +1,6 @@
 export {
   AFFINE_AI_PANEL_WIDGET,
+  type AffineAIPanelState,
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
 } from './ai-panel/ai-panel.js';

@@ -125,7 +125,7 @@ export function buildAIPanelConfig(
   panel: AffineAIPanelWidget
 ): AffineAIPanelWidgetConfig {
   return {
-    answerRenderer: createTextRenderer(panel.host),
+    answerRenderer: createTextRenderer(panel.host, 320),
     finishStateConfig: {
       responses: buildTextResponseConfig(panel),
       actions: [], // ???

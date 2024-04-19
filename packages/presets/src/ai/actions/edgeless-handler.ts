@@ -54,7 +54,7 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
     return createImageRenderer;
   }
 
-  return createTextRenderer(host);
+  return createTextRenderer(host, 320);
 }
 
 async function getTextFromSelected(host: EditorHost) {

@@ -14,7 +14,7 @@ export class AIPanelDivider extends WithDisposable(LitElement) {
     }
     .divider {
       height: 0.5px;
-      background: #e3e2e4;
+      background: var(--affine-border-color);
       width: 100%;
     }
   `;
