@@ -312,7 +312,10 @@ export class EdgelessClipboardController extends PageClipboard {
       const json = this.std.clipboard.readFromClipboard(data);
       const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
       this._pasteShapesAndBlocks(elementsRawData);
-    } catch (_error) {
+    } catch (_) {
+      const types = data.types;
+      if (types.length === 1 && types[0] !== 'text/plain') return;
+
       const textContent = data.getData('text/plain');
       this._pasteAsPlainText(textContent);
     }
