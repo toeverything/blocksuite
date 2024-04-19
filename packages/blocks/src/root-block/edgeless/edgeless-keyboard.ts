@@ -2,8 +2,11 @@ import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool, LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
-import type { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
-import type { ShapeElementModel } from '../../surface-block/index.js';
+import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
+import type {
+  ElementModel,
+  ShapeElementModel,
+} from '../../surface-block/index.js';
 import {
   Bound,
   ConnectorElementModel,
@@ -455,6 +458,44 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     if (edgeless.service.selection.editing) return;
     const { elements } = edgeless.service.selection;
     const inc = shift ? 10 : 1;
+    const mindmapNodes = elements.filter(
+      el => el.group instanceof MindmapElementModel
+    );
+
+    if (mindmapNodes.length > 0) {
+      const node = mindmapNodes[0];
+      const mindmap = node.group as MindmapElementModel;
+      let targetNode: ElementModel | null = null;
+
+      switch (key) {
+        case 'ArrowUp':
+        case 'ArrowDown':
+          targetNode = mindmap.getSiblingNode(
+            node.id,
+            key === 'ArrowDown' ? 'next' : 'prev'
+          );
+          break;
+        case 'ArrowLeft':
+          targetNode = mindmap.getParentNode(node.id);
+          break;
+        case 'ArrowRight':
+          {
+            const children = mindmap.getChildNodes(node.id);
+
+            targetNode = children[0] ?? null;
+          }
+          break;
+      }
+
+      if (targetNode) {
+        edgeless.service.selection.set({
+          elements: [targetNode.id],
+          editing: false,
+        });
+      }
+
+      return;
+    }
 
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();

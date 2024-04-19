@@ -261,6 +261,18 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     return node?.parent ? this.surface.getElementById(node.parent) : null;
   }
 
+  /**
+   * Path is an array of indexes that represent the path from the root node to the target node.
+   * The first element of the array is always 0, which represents the root node.
+   * @param element
+   * @returns
+   *
+   * @example
+   * ```ts
+   * const path = mindmap.getPath('nodeId');
+   * // [0, 1, 2]
+   * ```
+   */
   getPath(element: string | MindmapNode) {
     let node = this._nodeMap.get(
       typeof element === 'string' ? element : element.id
@@ -562,5 +574,39 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
           `[${deserializedXYWH[0] + offsetX},${deserializedXYWH[1] + offsetY},${deserializedXYWH[2]},${deserializedXYWH[3]}]` as SerializedXYWH;
       });
     });
+  }
+
+  getSiblingNode(id: string, direction: 'prev' | 'next' = 'next') {
+    const node = this._nodeMap.get(id);
+
+    if (!node) {
+      return null;
+    }
+
+    const parent = this._nodeMap.get(node.detail.parent!);
+
+    if (!parent) {
+      return null;
+    }
+
+    const idx = parent.children.indexOf(node);
+    if (idx === -1) {
+      return null;
+    }
+
+    return (
+      parent?.children[direction === 'next' ? idx + 1 : idx - 1]?.element ??
+      null
+    );
+  }
+
+  getChildNodes(id: string) {
+    const node = this._nodeMap.get(id);
+
+    if (!node) {
+      return [];
+    }
+
+    return node.children.map(child => child.element);
   }
 }
