@@ -740,7 +740,10 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
         e.preventDefault();
 
-        const { viewport } = this.service;
+        const { viewport, locked } = this.service;
+
+        if (locked) return;
+
         // zoom
         if (isPinchEvent(e)) {
           const rect = this.getBoundingClientRect();
