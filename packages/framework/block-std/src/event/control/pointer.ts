@@ -22,20 +22,29 @@ export class PointerControl {
     this._dispatcher.disposables.addFromEvent(
       this._dispatcher.host,
       'pointerdown',
-      this._down
+      this.dismissTouchEvents(this._down)
     );
     this._dispatcher.disposables.addFromEvent(
       this._dispatcher.host,
       'pointermove',
-      this._moveOn
+      this.dismissTouchEvents(this._moveOn)
     );
     this._dispatcher.disposables.addFromEvent(
       this._dispatcher.host,
       'pointerout',
-      this._out
+      this.dismissTouchEvents(this._out)
     );
     this._initScaleObserver();
     this._initPanObserver();
+  }
+
+  dismissTouchEvents(next: (event: PointerEvent) => void) {
+    return (event: PointerEvent) => {
+      if (event.pointerType === 'touch') {
+        return;
+      }
+      next(event);
+    };
   }
 
   /**
