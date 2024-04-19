@@ -6,7 +6,7 @@ import '../_common/components/block-selection.js';
 
 import { BlockElement } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
@@ -47,7 +47,7 @@ export class ImageBlockComponent extends BlockElement<
   @property({ attribute: false })
   blobUrl?: string;
 
-  @property({ attribute: false })
+  @state()
   lastSourceId!: string;
 
   @query('affine-image-block-card')
