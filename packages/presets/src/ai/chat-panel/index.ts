@@ -3,7 +3,8 @@ import './chat-panel-messages.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { AIError } from '@blocksuite/blocks';
-import { css, html } from 'lit';
+import type { Doc } from '@blocksuite/store';
+import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
@@ -94,6 +95,9 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   editor!: AffineEditorContainer;
 
+  @property({ attribute: false })
+  doc!: Doc;
+
   @state()
   items: ChatItem[] = [];
 
@@ -108,26 +112,25 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
 
   public override async connectedCallback() {
     super.connectedCallback();
+    if (!this.doc) throw new Error('doc is required');
+    await this._resetItems();
+  }
 
-    const { editor } = this;
+  private async _resetItems() {
+    const { doc } = this;
 
     const histories =
-      (await AIProvider.histories?.chats(
-        editor.doc.collection.id,
-        editor.doc.id
-      )) ?? [];
+      (await AIProvider.histories?.chats(doc.collection.id, doc.id)) ?? [];
 
     const actions =
-      (await AIProvider.histories?.actions(
-        editor.doc.collection.id,
-        editor.doc.id
-      )) ?? [];
+      (await AIProvider.histories?.actions(doc.collection.id, doc.id)) ?? [];
 
     const items: ChatItem[] = [...actions];
 
     if (histories[0]) {
       items.push(...histories[0].messages);
     }
+
     this.items = items.sort((a, b) => {
       const aDate = 'role' in a ? a.createdAt : a.messages[0].createdAt;
       const bDate = 'role' in b ? b.createdAt : b.messages[0].createdAt;
@@ -135,6 +138,12 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     });
 
     this.scrollToDown();
+  }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('doc')) {
+      this._resetItems().catch(console.error);
+    }
   }
 
   get rootService() {

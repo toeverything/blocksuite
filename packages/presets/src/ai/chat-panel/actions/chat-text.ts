@@ -42,7 +42,7 @@ export class ChatText extends WithDisposable(ShadowlessElement) {
   text!: string;
 
   protected override render() {
-    const { blobs, text } = this;
+    const { blobs, text, host } = this;
     return html`${blobs
       ? html`<div class="images-container">
           ${repeat(
@@ -55,7 +55,7 @@ export class ChatText extends WithDisposable(ShadowlessElement) {
             }
           )}
         </div>`
-      : nothing}${createTextRenderer(this.host)(text)}`;
+      : nothing}${createTextRenderer(host)(text)} `;
   }
 }
 
