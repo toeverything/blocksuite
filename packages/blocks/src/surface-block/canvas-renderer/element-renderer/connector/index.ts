@@ -1,7 +1,7 @@
-import type {
+import {
   ConnectorElementModel,
-  LocalConnectorElementModel,
-  PointStyle,
+  type LocalConnectorElementModel,
+  type PointStyle,
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
 import type { ConnectorLabelElementModel } from '../../../element-model/connector-label.js';
@@ -18,6 +18,7 @@ import {
   wrapTextDeltas,
 } from '../text/utils.js';
 import {
+  DEFAULT_ARROW_SIZE,
   getArrowOptions,
   renderArrow,
   renderCircle,
@@ -70,6 +71,20 @@ function renderPoints(
   const { seed, stroke, strokeWidth, roughness, rough } = model;
   const rc = renderer.rc;
   const realStrokeColor = renderer.getVariableColor(stroke);
+
+  if (model instanceof ConnectorElementModel && model.label) {
+    const textModel = model.surface.getElementById(model.label);
+    const [cx, cy, cw, ch] = model.deserializedXYWH;
+    if (textModel) {
+      const [lx, ly, lw, lh] = textModel.deserializedXYWH;
+      const offset = DEFAULT_ARROW_SIZE * strokeWidth;
+
+      const path = new Path2D();
+      path.rect(0 - offset / 2, 0 - offset / 2, cw + offset, ch + offset);
+      path.rect(lx - cx - 3, ly - cy - 3, lw + 6, lh + 6);
+      ctx.clip(path, 'evenodd');
+    }
+  }
 
   if (rough) {
     const options = {

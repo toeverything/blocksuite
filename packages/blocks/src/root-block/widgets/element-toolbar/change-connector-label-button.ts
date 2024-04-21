@@ -6,8 +6,8 @@ import type { Doc } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { ConnectorLabelElementModel } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { ConnectorLabelElementModel } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 
 @customElement('edgeless-change-connector-label-button')
 export class EdgelessChangeConnectorLabelButton extends WithDisposable(

@@ -40,7 +40,7 @@ import {
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
   StrokeStyle,
-} from '../../../../surface-block/index.js';
+} from '../../../surface-block/index.js';
 import type { LineStyleButtonProps } from '../../edgeless/components/buttons/line-style-button.js';
 import {
   type ColorEvent,

@@ -1084,11 +1084,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       _updateCursor,
     } = this;
 
-    const hasResizeHandles = !selection.editing && !doc.readonly;
     const inoperable = selection.inoperable;
     const handlers = [];
 
     if (!inoperable) {
+      const hasResizeHandles =
+        !selection.editing &&
+        !doc.readonly &&
+        !elements.some(e => !e.resizeable);
       const resizeHandles = hasResizeHandles
         ? ResizeHandles(
             resizeMode,

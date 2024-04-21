@@ -27,12 +27,12 @@ import {
   FontFamily,
   FontWeight,
 } from '../../../surface-block/element-model/common.js';
-import type { TextElementModel } from '../../../surface-block/element-model/text.js';
 import { TextAlign } from '../../../surface-block/elements/consts.js';
-import type {
-  ConnectorElementModel,
+import {
+  type ConnectorElementModel,
   ConnectorLabelElementModel,
-  ShapeElementModel,
+  type ShapeElementModel,
+  type TextElementModel,
 } from '../../../surface-block/index.js';
 import {
   Bound,
