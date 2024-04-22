@@ -66,7 +66,8 @@ export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
           getSelectedImagesAsBlobs(panel.host),
         ]);
         // for now if there are more than one selected blocks, we will not omit the attachments
-        const sendAttachments = selections?.selectedBlocks?.length === 1;
+        const sendAttachments =
+          selections?.selectedBlocks?.length === 1 && attachments.length > 0;
         const options = {
           ...variants,
           attachments: sendAttachments ? attachments : undefined,
