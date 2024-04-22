@@ -10,6 +10,7 @@ import {
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
 import {
@@ -95,6 +96,9 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   templateShow = true;
+
+  @property({ attribute: false })
+  height = 400;
 
   @property({ attribute: false })
   ctx!: {
@@ -245,7 +249,11 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
 
     return html` <div>
       <div
-        style="height: 400px; border-radius: 4px; border: 1px solid var(--affine-border-color)"
+        style=${styleMap({
+          height: this.height + 'px',
+          border: '1px solid var(--affine-border-color)',
+          borderRadius: '4px',
+        })}
       >
         ${this.host.renderSpecPortal(this.doc, MiniMindmapSpecs)}
       </div>

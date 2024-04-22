@@ -62,6 +62,7 @@ export class AIItem extends WithDisposable(LitElement) {
 
     return html`<div
       class="menu-item ${className}"
+      @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
       @click=${() => {
         if (typeof item.handler === 'function') {
           item.handler(this.host);
