@@ -95,11 +95,15 @@ export function discard(
     handler: () => {
       const callback = () => {
         panel.hide();
-        copilot.visible = false;
-        copilot.edgeless.service.tool.switchToDefaultMode({
-          elements: [],
-          editing: false,
-        });
+        // @TODO: remove `async` wrapper when removing selected-rect
+        (async () => {
+          await panel.updateComplete;
+          copilot.edgeless.service.tool.switchToDefaultMode({
+            elements: [],
+            editing: false,
+          });
+          copilot.visible = false;
+        })().catch(console.error);
       };
       panel.discard(callback);
     },

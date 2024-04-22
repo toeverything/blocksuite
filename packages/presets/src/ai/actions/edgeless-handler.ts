@@ -212,6 +212,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     };
 
     edgelessCopilot.hideCopilotPanel();
+    edgelessCopilot.lockToolbar(true);
 
     assertExists(aiPanel.config);
 
@@ -224,11 +225,19 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
     aiPanel.config.discardCallback = () => {
-      edgelessCopilot.visible = false;
-      edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
-        elements: [],
-        editing: false,
-      });
+      aiPanel.hide();
+      // @TODO: remove `async` wrapper when removing selected-rect
+      (async () => {
+        await aiPanel.updateComplete;
+        edgelessCopilot.visible = false;
+        edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
+          elements: [],
+          editing: false,
+        });
+      })().catch(console.error);
+    };
+    aiPanel.config.hideCallback = () => {
+      edgelessCopilot.lockToolbar(false);
     };
 
     if (edgelessCopilot.visible) {

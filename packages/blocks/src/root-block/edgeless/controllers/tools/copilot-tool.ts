@@ -45,9 +45,10 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
 
   // AI processing
   get processing() {
-    const aiPanel = this._edgeless.widgetElements[
-      AFFINE_AI_PANEL_WIDGET
-    ] as AffineAIPanelWidget;
+    const aiPanel = this._edgeless.host.view.getWidget(
+      AFFINE_AI_PANEL_WIDGET,
+      this._edgeless.doc.root!.id
+    ) as AffineAIPanelWidget;
     return aiPanel && aiPanel.state !== 'hidden';
   }
 

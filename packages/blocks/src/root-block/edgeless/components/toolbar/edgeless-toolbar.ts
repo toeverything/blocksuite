@@ -41,7 +41,6 @@ import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getImageFilesFromLocal } from '../../../../_common/utils/filesys.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
-import { CopilotSelectionController } from '../../controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
@@ -57,6 +56,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       left: calc(50%);
       transform: translateX(-50%);
       bottom: 28px;
+    }
+
+    :host([disabled]) {
+      pointer-events: none;
     }
 
     .edgeless-toolbar-container-placeholder {
@@ -304,7 +307,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(
-      this.edgeless.slots.navigatorSettingUpdated.on(
+      edgeless.slots.navigatorSettingUpdated.on(
         ({ hideToolbar, fillScreen }) => {
           if (hideToolbar !== undefined && hideToolbar !== this._hideToolbar) {
             this._hideToolbar = hideToolbar;
@@ -315,6 +318,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           }
         }
       )
+    );
+    // The toolbar should be disabled while edgeless AI is in progress.
+    _disposables.add(
+      edgeless.slots.toolbarLocked.on(disabled => {
+        this.toggleAttribute('disabled', disabled);
+      })
     );
 
     this._tryLoadNavigatorStateLocalRecord();
@@ -347,16 +356,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         this._frames[this._currentFrameIndex]
       );
     }
-  }
-
-  // The toolbar should be disabled while edgeless AI is in progress.
-  private _shouldBeDisabled() {
-    return (
-      this.edgelessTool.type === 'copilot' &&
-      this.edgeless.tools.currentController instanceof
-        CopilotSelectionController &&
-      this.edgeless.tools.currentController.processing
-    );
   }
 
   protected override updated(changedProperties: PropertyValues) {
@@ -596,7 +595,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <style>
         .edgeless-toolbar-container {
           top: ${this._canHideToolbar() ? '100px' : '0px'};
-          pointer-events: ${this._shouldBeDisabled() ? 'none' : 'auto'};
         }
       </style>
       ${this.edgeless.edgelessTool.type === 'frameNavigator' &&

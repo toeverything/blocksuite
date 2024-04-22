@@ -43,6 +43,7 @@ export interface AffineAIPanelWidgetConfig {
 
   finishStateConfig: AIPanelAnswerConfig;
   errorStateConfig: AIPanelErrorConfig;
+  hideCallback?: () => void;
   discardCallback?: () => void;
 
   positionConfig?: Partial<ComputePositionConfig>;
@@ -155,6 +156,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._inputText = null;
     this._answer = null;
     this._stopAutoUpdate = undefined;
+    this.config?.hideCallback?.();
   };
 
   discard = (callback: () => void = this._discardCallback) => {

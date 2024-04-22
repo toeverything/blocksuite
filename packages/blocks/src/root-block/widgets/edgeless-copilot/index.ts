@@ -92,6 +92,10 @@ export class EdgelessCopilotWidget extends WidgetElement<
     this._clickOutsideOff = null;
   }
 
+  lockToolbar(disabled: boolean) {
+    this.edgeless.slots.toolbarLocked.emit(disabled);
+  }
+
   private _updateSelection(rect: DOMRect) {
     this._selectionModelRect = rect;
 
