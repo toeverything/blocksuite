@@ -1,6 +1,6 @@
 import '../../../_common/components/button.js';
 
-import type { BlockElement } from '@blocksuite/block-std';
+import type { BlockElement, CursorSelection } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import {
@@ -52,15 +52,19 @@ export class AffineFormatBarWidget extends WidgetElement {
     return this.host.selection;
   }
 
+  @state()
   private _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
   get displayType() {
     return this._displayType;
   }
 
+  @state()
   private _selectedBlockElements: BlockElement[] = [];
   get selectedBlockElements() {
     return this._selectedBlockElements;
   }
+
+  private _lastCursor: CursorSelection | null = null;
 
   get nativeRange() {
     const sl = document.getSelection();
@@ -219,6 +223,20 @@ export class AffineFormatBarWidget extends WidgetElement {
           const textSelection = rootElement.selection.find('text');
           const blockSelections = rootElement.selection.filter('block');
 
+          // Should not re-render format bar when only cursor selection changed in edgeless
+          const cursorSelection = rootElement.selection.find('cursor');
+          if (cursorSelection) {
+            if (!this._lastCursor) {
+              this._lastCursor = cursorSelection;
+              return;
+            }
+
+            if (this._lastCursor && !this._lastCursor.equals(cursorSelection)) {
+              this._lastCursor = cursorSelection;
+              return;
+            }
+          }
+
           if (textSelection) {
             const block = this.host.view.viewFromPath(
               'block',
@@ -241,6 +259,7 @@ export class AffineFormatBarWidget extends WidgetElement {
                 .inline(ctx => {
                   const { selectedBlocks } = ctx;
                   assertExists(selectedBlocks);
+
                   this._selectedBlockElements = selectedBlocks;
                 })
                 .run();
@@ -254,13 +273,14 @@ export class AffineFormatBarWidget extends WidgetElement {
 
           if (blockSelections.length > 0) {
             this._displayType = 'block';
-            this._selectedBlockElements = blockSelections
+            const selectedBlocks = blockSelections
               .map(selection => {
                 const path = selection.path;
                 return this.blockElement.host.view.viewFromPath('block', path);
               })
               .filter((el): el is BlockElement => !!el);
 
+            this._selectedBlockElements = selectedBlocks;
             return;
           }
 
@@ -268,7 +288,6 @@ export class AffineFormatBarWidget extends WidgetElement {
         };
 
         update();
-        this.requestUpdate();
       })
     );
     this.disposables.addFromEvent(document, 'selectionchange', () => {
@@ -441,6 +460,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     super.disconnectedCallback();
     this._abortController.abort();
     this._reset();
+    this._lastCursor = null;
   }
 
   addDivider() {

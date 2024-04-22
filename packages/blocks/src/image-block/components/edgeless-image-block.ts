@@ -2,8 +2,6 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { ImageBlockComponent } from '../image-block.js';
-
 @customElement('affine-edgeless-image')
 export class ImageBlockEdgelessComponent extends WithDisposable(
   ShadowlessElement
@@ -17,20 +15,20 @@ export class ImageBlockEdgelessComponent extends WithDisposable(
   `;
 
   @property({ attribute: false })
-  block!: ImageBlockComponent;
+  url?: string;
 
   @query('.resizable-img')
   public readonly resizeImg?: HTMLElement;
 
-  private _handleError() {
-    this.block.error = true;
+  private _handleError(error: Error) {
+    this.dispatchEvent(new CustomEvent('error', { detail: error }));
   }
 
   override render() {
     return html`<div class="resizable-img">
       <img
         class="drag-target"
-        src=${this.block.blobUrl ?? ''}
+        src=${this.url ?? ''}
         draggable="false"
         @error=${this._handleError}
       />

@@ -20,13 +20,28 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
     .edgeless-copilot-panel {
       box-sizing: border-box;
       padding: 8px;
-      min-width: 320px;
+      min-width: 330px;
       max-height: 374px;
       overflow-y: auto;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       z-index: var(--affine-z-index-popover);
+      scrollbar-width: none;
+    }
+
+    .edgeless-copilot-panel::-webkit-scrollbar {
+      width: 5px;
+      max-height: 100px;
+    }
+    .edgeless-copilot-panel::-webkit-scrollbar-thumb {
+      border-radius: 20px;
+    }
+    .edgeless-copilot-panel:hover::-webkit-scrollbar-thumb {
+      background-color: var(--affine-black-30);
+    }
+    .edgeless-copilot-panel::-webkit-scrollbar-corner {
+      display: none;
     }
   `;
 

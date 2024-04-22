@@ -7,34 +7,33 @@ import './actions/make-real.js';
 import './actions/slides.js';
 import './actions/mindmap.js';
 import './actions/chat-text.js';
+import './actions/copy-more.js';
 
 import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { type AIError, PaymentRequiredError } from '@blocksuite/blocks';
-import { BlocksUtils } from '@blocksuite/blocks';
-import { Text } from '@blocksuite/store';
+import {
+  type AIError,
+  PaymentRequiredError,
+  UnauthorizedError,
+} from '@blocksuite/blocks';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   AffineAvatarIcon,
   AffineIcon,
-  CreateAsPageIcon,
   DownArrowIcon,
-  InsertBelowIcon,
-  ReplaceIcon,
 } from '../_common/icons.js';
 import {
   GeneralErrorRenderer,
   PaymentRequiredErrorRenderer,
 } from '../messages/error.js';
 import { AIProvider } from '../provider.js';
-import { insertBelow, replace } from '../utils/editor-actions.js';
-import type { ChatItem, ChatStatus } from './index.js';
-
-const { matchFlavours } = BlocksUtils;
+import { EditorActions } from './actions/actions-handle.js';
+import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
@@ -159,27 +158,50 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       } else {
         this._currentTextSelection = textSelection ?? null;
       }
+      this.requestUpdate();
     });
 
     const res = await AIProvider.userInfo;
     this.avatarUrl = res?.avatarUrl ?? '';
   }
 
+  renderError() {
+    if (this.error instanceof PaymentRequiredError) {
+      return PaymentRequiredErrorRenderer(this.host);
+    } else if (this.error instanceof UnauthorizedError) {
+      return GeneralErrorRenderer(
+        'You need to login to AFFiNE Cloud to continue using AFFiNE AI.',
+        html`<div
+          style=${styleMap({
+            padding: '4px 12px',
+            borderRadius: '8px',
+            border: '1px solid var(--affine-border-color)',
+            cursor: 'pointer',
+            backgroundColor: 'var(--affine-hover-color)',
+          })}
+          @click=${() =>
+            AIProvider.slots.requestLogin.emit({ host: this.host })}
+        >
+          Login
+        </div>`
+      );
+    } else {
+      return GeneralErrorRenderer(this.error?.message);
+    }
+  }
+
   renderItem(item: ChatItem, isLast: boolean) {
     if (isLast && this.status === 'error') {
-      if (this.error instanceof PaymentRequiredError) {
-        return PaymentRequiredErrorRenderer(this.host);
-      } else {
-        return GeneralErrorRenderer(this.error?.message);
-      }
+      return this.renderError();
     }
 
     if ('role' in item) {
       return html`<chat-text
-        .host=${this.host}
-        .blobs=${item.blobs}
-        .text=${item.content}
-      ></chat-text>`;
+          .host=${this.host}
+          .blobs=${item.blobs}
+          .text=${item.content}
+        ></chat-text
+        >${this.renderEditorActions(item, isLast)}`;
     } else {
       switch (item.action) {
         case 'Create a presentation':
@@ -229,15 +251,12 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     this.messagesContainer.scrollTo(0, this.messagesContainer.scrollHeight);
   }
 
-  renderEditorActions(item: ChatItem) {
-    if (
-      !(
-        'role' in item &&
-        item.role === 'assistant' &&
-        this.status === 'success'
-      )
-    )
-      return nothing;
+  renderEditorActions(item: ChatMessage, isLast: boolean) {
+    if (item.role !== 'assistant') return nothing;
+
+    if (isLast && this.status !== 'success') return nothing;
+
+    const { host } = this;
     const { content } = item;
     return html`
       <style>
@@ -271,101 +290,45 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           cursor: pointer;
         }
       </style>
-      <div class="actions-container">
-        <div class="action">
-          ${ReplaceIcon}
-          <div
-            @click=${async () => {
-              const [_, data] = this.host.command
-                .chain()
-                .getSelectedBlocks({
-                  currentTextSelection: this._currentTextSelection ?? undefined,
-                  currentBlockSelections:
-                    this._currentBlockSelections ?? undefined,
-                })
-                .run();
-              if (!data.selectedBlocks) return;
-
-              if (this._currentTextSelection) {
-                const { doc } = this.host;
-                const block = doc.getBlock(this._currentTextSelection.blockId);
-                if (matchFlavours(block?.model ?? null, ['affine:paragraph'])) {
-                  block?.model.text?.replace(
-                    this._currentTextSelection.from.index,
-                    this._currentTextSelection.from.length,
-                    content
-                  );
-                  return;
-                }
+      <chat-copy-more
+        .host=${host}
+        .content=${content}
+        .isLast=${isLast}
+        .curTextSelection=${this._currentTextSelection ?? undefined}
+        .curBlockSelections=${this._currentBlockSelections ?? undefined}
+      ></chat-copy-more>
+      ${isLast
+        ? html`<div class="actions-container">
+            ${repeat(
+              EditorActions,
+              action => action.title,
+              action => {
+                return html`<div class="action">
+                  ${action.icon}
+                  <div
+                    @click=${() =>
+                      action.handler(
+                        host,
+                        content,
+                        this._currentTextSelection ?? undefined,
+                        this._currentBlockSelections ?? undefined
+                      )}
+                  >
+                    ${action.title}
+                  </div>
+                </div>`;
               }
-
-              await replace(
-                this.host,
-                content,
-                data.selectedBlocks[0],
-                data.selectedBlocks.map(block => block.model),
-                this._currentTextSelection ?? undefined
-              );
-            }}
-          >
-            Replace selection
-          </div>
-        </div>
-
-        <div class="action">
-          ${InsertBelowIcon}
-          <div
-            @click=${async () => {
-              const [_, data] = this.host.command
-                .chain()
-                .getSelectedBlocks({
-                  currentTextSelection: this._currentTextSelection ?? undefined,
-                  currentBlockSelections:
-                    this._currentBlockSelections ?? undefined,
-                })
-                .run();
-              if (!data.selectedBlocks) return;
-
-              await insertBelow(
-                this.host,
-                content,
-                data.selectedBlocks[data.selectedBlocks?.length - 1]
-              );
-            }}
-          >
-            Insert below
-          </div>
-        </div>
-        <div class="action">
-          ${CreateAsPageIcon}
-          <div
-            @click=${() => {
-              const newDoc = this.host.doc.collection.createDoc();
-              newDoc.load();
-              const rootId = newDoc.addBlock('affine:page');
-              newDoc.addBlock('affine:surface', {}, rootId);
-              const noteId = newDoc.addBlock('affine:note', {}, rootId);
-              newDoc.addBlock(
-                'affine:paragraph',
-                { text: new Text(content) },
-                noteId
-              );
-              this.host.spec
-                .getService('affine:page')
-                .slots.docLinkClicked.emit({
-                  docId: newDoc.id,
-                });
-            }}
-          >
-            Create as a page
-          </div>
-        </div>
-      </div>
+            )}
+          </div>`
+        : nothing}
     `;
   }
 
   protected override render() {
     const { items } = this;
+    const filteredItems = items.filter(item => {
+      return 'role' in item || item.messages?.length === 3;
+    });
 
     return html`
       <div
@@ -382,27 +345,18 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               ${AffineIcon}
               <div>What can I help you with?</div>
             </div>`
-          : repeat(
-              items.filter(item => {
-                return 'role' in item || item.messages?.length === 3;
-              }),
-              (item, index) => {
-                return html`<div class="message">
-                  ${this.renderAvatar(item)}
-                  <div class="item-wrapper">
-                    ${this.renderItem(item, index === items.length - 1)}
-                  </div>
-                  <div class="item-wrapper">
-                    ${this.status === 'loading' && index === items.length - 1
-                      ? this.renderLoading()
-                      : nothing}
-                  </div>
-                  ${index === items.length - 1
-                    ? this.renderEditorActions(item)
+          : repeat(filteredItems, (item, index) => {
+              const isLast = index === filteredItems.length - 1;
+              return html`<div class="message">
+                ${this.renderAvatar(item)}
+                <div class="item-wrapper">${this.renderItem(item, isLast)}</div>
+                <div class="item-wrapper">
+                  ${this.status === 'loading' && isLast
+                    ? this.renderLoading()
                     : nothing}
-                </div>`;
-              }
-            )}
+                </div>
+              </div>`;
+            })}
       </div>
       ${this.showDownIndicator
         ? html`<div class="down-indicator" @click=${() => this.scrollToDown()}>

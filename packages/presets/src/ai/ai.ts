@@ -115,6 +115,7 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
           slots.widgetConnected.on(view => {
             if (view.component instanceof AffineAIPanelWidget) {
               view.component.config = buildAIPanelConfig(view.component);
+              setupSpaceEntry(view.component);
             }
 
             if (view.component instanceof EdgelessCopilotWidget) {
@@ -123,6 +124,14 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
 
             if (view.component instanceof EdgelessElementToolbarWidget) {
               setupEdgelessElementToolbarEntry(view.component);
+            }
+
+            if (view.component instanceof AffineFormatBarWidget) {
+              setupFormatBarEntry(view.component);
+            }
+
+            if (view.component instanceof AffineSlashMenuWidget) {
+              setupSlashMenuEntry(view.component);
             }
           });
         },
