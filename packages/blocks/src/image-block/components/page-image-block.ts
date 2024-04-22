@@ -167,6 +167,12 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       })
     );
 
+    this._disposables.add(
+      this._model.propsUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
     this._disposables.addFromEvent(
       this.resizeImg,
       'click',

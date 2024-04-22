@@ -28,7 +28,7 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
       box-sizing: border-box;
       position: absolute;
       padding: 8px;
-      min-width: 294px;
+      min-width: 330px;
       max-height: 374px;
       overflow-y: auto;
       background: var(--affine-background-overlay-panel-color);
@@ -77,7 +77,7 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
       this._askAIPanel,
       () => {},
       10,
-      102
+      120
     );
     this.disposables.add(this._askAIPopper);
   }

@@ -13,7 +13,7 @@ export class ActionWrapper extends WithDisposable(ShadowlessElement) {
     .action-name {
       display: flex;
       align-items: center;
-      gap: 18px;
+      gap: 8px;
       height: 22px;
       margin-bottom: 12px;
 

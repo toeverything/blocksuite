@@ -31,7 +31,7 @@ export function bindEventSource(
     for await (const data of stream) {
       if (signal?.aborted) {
         finish('aborted');
-        break;
+        return;
       }
       answer += data;
       update(answer);
@@ -60,14 +60,17 @@ export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     return {
       async *[Symbol.asyncIterator]() {
         const panel = getAIPanel(host);
+        const selections = getSelections(host);
         const [markdown, attachments] = await Promise.all([
           getSelectedTextContent(panel.host),
           getSelectedImagesAsBlobs(panel.host),
         ]);
+        // for now if there are more than one selected blocks, we will not omit the attachments
+        const sendAttachments = selections?.selectedBlocks?.length === 1;
         const options = {
           ...variants,
-          attachments,
-          input: markdown,
+          attachments: sendAttachments ? attachments : undefined,
+          input: sendAttachments ? '' : markdown,
           stream: true,
           docId: host.doc.id,
           workspaceId: host.doc.collection.id,
