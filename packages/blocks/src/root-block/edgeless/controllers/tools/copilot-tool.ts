@@ -43,7 +43,8 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     return new DOMRect(minX, minY, maxX - minX, maxY - minY);
   }
 
-  get inAIProcessing() {
+  // AI processing
+  get processing() {
     const aiPanel = this._edgeless.widgetElements[
       AFFINE_AI_PANEL_WIDGET
     ] as AffineAIPanelWidget;
@@ -63,7 +64,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   override onContainerDragStart(e: PointerEventState): void {
-    if (this.inAIProcessing) return;
+    if (this.processing) return;
 
     this._initDragState(e);
     this._dragging = true;
@@ -101,7 +102,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   onContainerPointerDown(): void {
-    if (this.inAIProcessing) return;
+    if (this.processing) return;
 
     this._edgeless.tools.setEdgelessTool({ type: 'default' });
   }
