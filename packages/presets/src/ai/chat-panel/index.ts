@@ -24,6 +24,7 @@ export type ChatAction = {
   action: string;
   messages: ChatMessage[];
   sessionId: string;
+  createdAt: string;
 };
 
 export type ChatItem = ChatMessage | ChatAction;
@@ -132,9 +133,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     }
 
     this.items = items.sort((a, b) => {
-      const aDate = 'role' in a ? a.createdAt : a.messages[0].createdAt;
-      const bDate = 'role' in b ? b.createdAt : b.messages[0].createdAt;
-      return new Date(aDate).getTime() - new Date(bDate).getTime();
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
 
     this.scrollToDown();

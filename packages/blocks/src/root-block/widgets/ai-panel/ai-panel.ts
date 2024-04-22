@@ -1,6 +1,6 @@
 import './components/index.js';
 
-import type { TextSelection } from '@blocksuite/block-std';
+import type { BaseSelection } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -219,7 +219,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     return this._inputText;
   }
 
-  private _selection?: TextSelection;
+  private _selection?: BaseSelection[];
 
   private _answer: string | null = null;
   get answer() {
@@ -262,7 +262,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     const prevState = changed.get('state');
     if (prevState) {
       if (prevState === 'hidden') {
-        this._selection = this.host.selection.find('text');
+        this._selection = this.host.selection.value;
         requestAnimationFrame(() => {
           this.scrollIntoView({
             block: 'center',
@@ -271,7 +271,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       } else {
         // restore selection
         if (this._selection) {
-          this.host.selection.set([this._selection]);
+          this.host.selection.set([...this._selection]);
         }
       }
 
