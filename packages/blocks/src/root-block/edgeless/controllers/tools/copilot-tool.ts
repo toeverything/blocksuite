@@ -9,7 +9,7 @@ import { Bound } from '../../../../surface-block/index.js';
 import {
   AFFINE_AI_PANEL_WIDGET,
   type AffineAIPanelWidget,
-} from '../../../widgets/index.js';
+} from '../../../widgets/ai-panel/ai-panel.js';
 import { EdgelessToolController } from './index.js';
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {

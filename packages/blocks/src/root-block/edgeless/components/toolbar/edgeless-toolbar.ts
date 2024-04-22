@@ -39,11 +39,9 @@ import {
 import type { EdgelessTool } from '../../../../_common/types.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getImageFilesFromLocal } from '../../../../_common/utils/filesys.js';
-import {
-  CopilotSelectionController,
-  type FrameBlockModel,
-} from '../../../../index.js';
+import type { FrameBlockModel } from '../../../../index.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
+import { CopilotSelectionController } from '../../controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
