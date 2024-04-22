@@ -138,10 +138,10 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
                       padding: 20,
                       crossAxis: true,
                       boundary: {
-                        x: 0,
-                        y: 0,
-                        width,
-                        height: height - 40,
+                        x: 20,
+                        y: 50,
+                        width: width - 40,
+                        height: height - 120,
                       },
                     };
                   }),
@@ -158,7 +158,7 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
                           'ai-panel-answer'
                         );
                       if (aiPanelAnswer) {
-                        aiPanelAnswer.style.maxHeight = `${height - 40}px`;
+                        aiPanelAnswer.style.maxHeight = `${height - 120}px`;
                       }
                     },
                   }),
