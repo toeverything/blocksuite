@@ -39,7 +39,10 @@ import {
 import type { EdgelessTool } from '../../../../_common/types.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getImageFilesFromLocal } from '../../../../_common/utils/filesys.js';
-import type { FrameBlockModel } from '../../../../index.js';
+import {
+  CopilotSelectionController,
+  type FrameBlockModel,
+} from '../../../../index.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { isFrameBlock } from '../../utils/query.js';
@@ -348,6 +351,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   }
 
+  // The toolbar should be disabled while edgeless AI is in progress.
+  private _shouldBeDisabled() {
+    return (
+      this.edgelessTool.type === 'copilot' &&
+      this.edgeless.tools.currentController instanceof
+        CopilotSelectionController &&
+      this.edgeless.tools.currentController.processing
+    );
+  }
+
   protected override updated(changedProperties: PropertyValues) {
     const { type } = this.edgelessTool;
     if (
@@ -585,6 +598,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <style>
         .edgeless-toolbar-container {
           top: ${this._canHideToolbar() ? '100px' : '0px'};
+          pointer-events: ${this._shouldBeDisabled() ? 'none' : 'auto'};
         }
       </style>
       ${this.edgeless.edgelessTool.type === 'frameNavigator' &&

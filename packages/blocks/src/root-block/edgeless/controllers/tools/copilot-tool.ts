@@ -101,8 +101,11 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     this.draggingAreaUpdated.emit(true);
   }
 
-  onContainerPointerDown(): void {
-    if (this.processing) return;
+  onContainerPointerDown(e: PointerEventState): void {
+    if (this.processing) {
+      e.raw.stopPropagation();
+      return;
+    }
 
     this._edgeless.tools.setEdgelessTool({ type: 'default' });
   }

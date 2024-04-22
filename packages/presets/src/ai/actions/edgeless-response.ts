@@ -96,6 +96,10 @@ export function discard(
       const callback = () => {
         panel.hide();
         copilot.visible = false;
+        copilot.edgeless.service.tool.switchToDefaultMode({
+          elements: [],
+          editing: false,
+        });
       };
       panel.discard(callback);
     },

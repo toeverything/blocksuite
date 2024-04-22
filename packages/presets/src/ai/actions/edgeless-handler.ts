@@ -225,6 +225,10 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
     aiPanel.config.discardCallback = () => {
       edgelessCopilot.visible = false;
+      edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
+        elements: [],
+        editing: false,
+      });
     };
 
     if (edgelessCopilot.visible) {
