@@ -38,6 +38,7 @@ export function bindEventSource(
     }
     finish('success');
   })().catch(err => {
+    if (signal?.aborted) return;
     if (err.name === 'AbortError') {
       finish('aborted');
     } else {

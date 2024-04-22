@@ -34,8 +34,10 @@ import {
 } from '../root-block/index.js';
 import { PageRootService } from '../root-block/page/page-root-service.js';
 import { RootBlockSchema } from '../root-block/root-model.js';
+import { AFFINE_AI_PANEL_WIDGET } from '../root-block/widgets/ai-panel/ai-panel.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_EDGELESS_COPILOT_WIDGET } from '../root-block/widgets/edgeless-copilot/index.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/edgeless-remote-selection/index.js';
 import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../root-block/widgets/edgeless-zoom-toolbar/index.js';
 import { EDGELESS_ELEMENT_TOOLBAR_WIDGET } from '../root-block/widgets/element-toolbar/index.js';
@@ -66,6 +68,7 @@ const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
       // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
       //   AFFINE_BLOCK_HUB_WIDGET
       // )}`,
+      [AFFINE_AI_PANEL_WIDGET]: literal`${unsafeStatic(AFFINE_AI_PANEL_WIDGET)}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
@@ -99,6 +102,7 @@ const EdgelessPageSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
       // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
       //   AFFINE_BLOCK_HUB_WIDGET
       // )}`,
+      [AFFINE_AI_PANEL_WIDGET]: literal`${unsafeStatic(AFFINE_AI_PANEL_WIDGET)}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_INNER_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_INNER_MODAL_WIDGET)}`,
       [AFFINE_PIE_MENU_WIDGET]: literal`${unsafeStatic(AFFINE_PIE_MENU_WIDGET)}`,
@@ -124,6 +128,7 @@ const EdgelessPageSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
         AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
       )}`,
       [EDGELESS_ELEMENT_TOOLBAR_WIDGET]: literal`${unsafeStatic(EDGELESS_ELEMENT_TOOLBAR_WIDGET)}`,
+      [AFFINE_EDGELESS_COPILOT_WIDGET]: literal`${unsafeStatic(AFFINE_EDGELESS_COPILOT_WIDGET)}`,
     },
   },
 };
