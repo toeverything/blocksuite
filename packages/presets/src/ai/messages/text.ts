@@ -16,7 +16,6 @@ export class AIAnswerTextPreview extends LitElement {
     :host {
       width: 100%;
       display: flex;
-      user-select: none;
     }
 
     .ai-answer-text-editor.affine-page-viewport {

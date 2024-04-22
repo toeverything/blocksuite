@@ -4,6 +4,7 @@ import type {
   TextSelection,
 } from '@blocksuite/block-std';
 import type { AffineAIPanelWidget } from '@blocksuite/blocks';
+import { isInsideEdgelessEditor } from '@blocksuite/blocks';
 import { type BlockModel, Slice } from '@blocksuite/store';
 
 import {
@@ -11,6 +12,15 @@ import {
   markDownToDoc,
   markdownToSnapshot,
 } from './markdown-utils.js';
+
+const getNoteId = (blockElement: BlockElement) => {
+  let element = blockElement;
+  while (element && element.flavour !== 'affine:note') {
+    element = element.parentBlockElement;
+  }
+
+  return element.model.id;
+};
 
 const setBlockSelection = (
   host: EditorHost,
@@ -21,7 +31,21 @@ const setBlockSelection = (
   const selections = models
     .map(model => [...parentPath, model.id])
     .map(path => host.selection.create('block', { path }));
-  host.selection.setGroup('note', selections);
+
+  if (isInsideEdgelessEditor(host)) {
+    const surfaceElementId = getNoteId(parent);
+    const surfaceSelection = host.selection.create(
+      'surface',
+      selections[0].path,
+      [surfaceElementId],
+      true
+    );
+
+    selections.push(surfaceSelection);
+    host.selection.set(selections);
+  } else {
+    host.selection.setGroup('note', selections);
+  }
 };
 
 export const insertBelow = async (
@@ -41,7 +65,7 @@ export const insertBelow = async (
     index + 1
   );
   await host.updateComplete;
-  setBlockSelection(host, blockParent, models);
+  requestAnimationFrame(() => setBlockSelection(host, blockParent, models));
 };
 
 export const replace = async (
@@ -77,7 +101,9 @@ export const replace = async (
     );
 
     await host.updateComplete;
-    setBlockSelection(host, firstBlockParent, models);
+    requestAnimationFrame(() =>
+      setBlockSelection(host, firstBlockParent, models)
+    );
   }
 };
 
