@@ -148,6 +148,7 @@ declare global {
       sessionId: string;
       tokens: number;
       action: string;
+      createdAt: string;
       messages: {
         content: string;
         createdAt: string;

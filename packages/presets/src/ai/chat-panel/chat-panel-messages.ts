@@ -254,10 +254,12 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   renderEditorActions(item: ChatMessage, isLast: boolean) {
     if (item.role !== 'assistant') return nothing;
 
-    if (isLast && this.status !== 'success') return nothing;
+    if (isLast && this.status !== 'success' && this.status !== 'idle')
+      return nothing;
 
     const { host } = this;
     const { content } = item;
+
     return html`
       <style>
         .actions-container {
@@ -288,6 +290,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           font-weight: 500;
           color: var(--affine-text-primary-color);
           cursor: pointer;
+          user-select: none;
         }
       </style>
       <chat-copy-more
@@ -300,7 +303,17 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       ${isLast
         ? html`<div class="actions-container">
             ${repeat(
-              EditorActions,
+              EditorActions.filter(action => {
+                if (action.title === 'Replace selection') {
+                  if (
+                    this._currentTextSelection?.from.length === 0 &&
+                    this._currentBlockSelections?.length === 0
+                  ) {
+                    return false;
+                  }
+                }
+                return true;
+              }),
               action => action.title,
               action => {
                 return html`<div class="action">

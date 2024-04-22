@@ -35,7 +35,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
 
     .chat-panel-input textarea {
       resize: none;
-      padding: 8px 12px;
+      margin: 8px 12px;
       width: calc(100% - 32px);
       min-height: 100px;
       border: none;
