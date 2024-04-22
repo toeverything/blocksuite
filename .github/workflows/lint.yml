@@ -43,7 +43,7 @@ jobs:
       - name: Run type check
         run: pnpm build:packages && pnpm build:playground
         env:
-          NODE_OPTIONS: --max-old-space-size=6144
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Run ESLint
         # ESLint will save the cache files on cwd by default,
