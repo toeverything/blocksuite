@@ -26,7 +26,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding: 12px 0px;
+      padding: 0;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
