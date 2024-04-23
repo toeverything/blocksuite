@@ -128,6 +128,18 @@ export class AffineAIPanelWidget extends WidgetElement {
     this.config?.discardCallback?.();
   };
 
+  private _clickOutside = () => {
+    switch (this.state) {
+      case 'hidden':
+        return;
+      case 'error':
+        this.hide();
+        break;
+      default:
+        this.discard();
+    }
+  };
+
   toggle = (reference: ReferenceElement, input?: string) => {
     if (input) {
       this._inputText = input;
@@ -160,11 +172,6 @@ export class AffineAIPanelWidget extends WidgetElement {
   };
 
   discard = (callback: () => void = this._discardCallback) => {
-    if (this.state === 'hidden') return;
-    if (this.state === 'error') {
-      callback();
-      return;
-    }
     this._clearDiscardModal();
     this._discardModal = toggleDiscardModal(callback);
   };
@@ -261,10 +268,9 @@ export class AffineAIPanelWidget extends WidgetElement {
     if (
       e.target !== this._discardModal &&
       e.target !== this &&
-      !this.contains(e.target as Node) &&
-      this.state !== 'generating'
+      !this.contains(e.target as Node)
     ) {
-      this.discard();
+      this._clickOutside();
     }
   };
 
