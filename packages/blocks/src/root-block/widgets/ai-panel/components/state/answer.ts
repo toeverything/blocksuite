@@ -28,7 +28,8 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       box-sizing: border-box;
       flex-direction: column;
       gap: 8px;
-      padding: 12px 0;
+      padding: 0;
+      overflow-y: auto;
     }
 
     .answer {
@@ -106,6 +107,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
           justify-content: center;
           align-items: center;
           border-radius: 8px;
+          user-select: none;
         }
         .copy:hover {
           color: var(--affine-icon-color);
@@ -127,6 +129,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
     .response-list-container,
     .action-list-container {
       padding: 0 8px;
+      user-select: none;
     }
 
     /* set item style outside ai-item */

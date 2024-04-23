@@ -83,6 +83,8 @@ export class EdgelessRootService extends RootService {
     }>(),
     tagClicked: new Slot<{ tagId: string }>(),
     editorModeSwitch: new Slot<'edgeless' | 'page'>(),
+
+    toolbarLocked: new Slot<boolean>(),
   };
 
   private _surface!: SurfaceBlockModel;

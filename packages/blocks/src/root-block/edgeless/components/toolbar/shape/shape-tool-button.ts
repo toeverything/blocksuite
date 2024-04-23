@@ -75,10 +75,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
     }
 
     .container-clip {
-      padding: 10000px 10000px 0;
-      margin: -10000px -10000px 0;
-      overflow: hidden;
-      pointer-events: none;
+      overflow: clip;
     }
 
     .shapes {
@@ -89,7 +86,6 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
       justify-content: center;
       align-items: center;
       position: relative;
-      pointer-events: auto;
     }
   `;
 
