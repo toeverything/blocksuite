@@ -88,6 +88,7 @@ export class RecordDetailHeader extends WithDisposable(ShadowlessElement) {
     this.disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
       if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
         e.preventDefault();
+        e.stopPropagation();
         this.inlineEditor.selectAll();
       }
     });
