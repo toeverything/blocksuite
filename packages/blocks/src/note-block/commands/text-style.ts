@@ -16,6 +16,7 @@ export const toggleLink: Command = (_ctx, next) => {
   if (!selection || selection.rangeCount === 0) return false;
 
   const range = selection.getRangeAt(0);
+  if (range.collapsed) return false;
   const inlineRoot = range.startContainer.parentElement?.closest<
     InlineRootElement<AffineTextAttributes>
   >(`[${INLINE_ROOT_ATTR}]`);
