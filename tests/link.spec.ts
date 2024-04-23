@@ -357,7 +357,7 @@ test('link bar should not be appear when the range is collapsed', async ({
   await type(page, 'bbb');
   await dragBetweenIndices(page, [0, 1], [0, 5]);
   await pressCreateLinkShortCut(page);
-  await expect(linkPopoverLocator).not.toBeVisible();
+  await expect(linkPopoverLocator).toBeVisible();
 
   await focusRichTextEnd(page);
   await pressEnter(page);
