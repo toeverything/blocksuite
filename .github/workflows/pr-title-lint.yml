@@ -23,4 +23,9 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - run: echo "${{ github.event.pull_request.title }}" | npx commitlint -g ./.commitlintrc.json
+      - name: Check PR title
+        # Using an intermediate environment variable to prevent command injection
+        # See https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$TITLE" | npx commitlint -g ./.commitlintrc.json

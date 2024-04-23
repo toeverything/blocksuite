@@ -1,3 +1,5 @@
+import './_common/generating-placeholder.js';
+
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
@@ -7,7 +9,7 @@ import {
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import type { Doc } from '@blocksuite/store';
 import { DocCollection, Schema } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
@@ -25,7 +27,7 @@ export const createSlidesRenderer: (
 ) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, ctx) => {
   return (answer, state) => {
     if (state !== 'finished') {
-      return nothing;
+      return html`<ai-generating-placeholder></ai-generating-placeholder>`;
     }
 
     return html`<style>

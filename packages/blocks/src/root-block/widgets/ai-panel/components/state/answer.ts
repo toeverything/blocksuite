@@ -28,7 +28,8 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       box-sizing: border-box;
       flex-direction: column;
       gap: 8px;
-      padding: 12px 0;
+      padding: 0;
+      overflow-y: auto;
     }
 
     .answer {
