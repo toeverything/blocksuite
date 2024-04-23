@@ -2,10 +2,10 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { z } from 'zod';
 
 import { TransparentIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { createZodUnion } from '../../../../_common/utils/index.js';
 import { getThemeMode } from '../../../../_common/utils/query.js';
 export class ColorEvent extends Event {
   detail: CssVariableName;
@@ -38,20 +38,7 @@ export const LINE_COLORS = [
   '--affine-palette-line-white',
 ] as const;
 
-export const LineColorsSchema = z.union([
-  z.literal('--affine-palette-line-yellow'),
-  z.literal('--affine-palette-line-orange'),
-  z.literal('--affine-palette-line-tangerine'),
-  z.literal('--affine-palette-line-red'),
-  z.literal('--affine-palette-line-magenta'),
-  z.literal('--affine-palette-line-purple'),
-  z.literal('--affine-palette-line-green'),
-  z.literal('--affine-palette-line-blue'),
-  z.literal('--affine-palette-line-navy'),
-  z.literal('--affine-palette-line-black'),
-  z.literal('--affine-palette-line-grey'),
-  z.literal('--affine-palette-line-white'),
-]);
+export const LineColorsSchema = createZodUnion(LINE_COLORS);
 
 export const GET_DEFAULT_LINE_COLOR = () =>
   getThemeMode() === 'dark' ? LINE_COLORS[11] : LINE_COLORS[9];
