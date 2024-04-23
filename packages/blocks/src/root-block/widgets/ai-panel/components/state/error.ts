@@ -26,7 +26,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding: 12px 0px;
+      padding: 0;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
@@ -126,7 +126,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
             <div class="answer-tip">
               <div class="top">Answer</div>
               <div class="bottom">
-                You’ve reached the current usage cap for GPT-4. You can
+                You've reached the current usage cap for AFFiNE AI. You can
                 subscribe AFFiNE AI to continue AI experience!
               </div>
               <div @click=${this.config.upgrade} class="action-button">
@@ -141,7 +141,8 @@ export class AIPanelError extends WithDisposable(LitElement) {
         <div class="answer-tip">
           <div class="top">Answer</div>
           <div class="bottom">
-            An error occurred, If this issue persists please let us know
+            An error occurred. Please try again later. If this issue persists,
+            please let us know at
             <a href="mailto:contact@toeverything.info">
               contact@toeverything.info
             </a>

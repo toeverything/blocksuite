@@ -6,8 +6,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   computePosition,
+  type ComputePositionConfig,
   type ReferenceElement,
-  shift,
 } from '@floating-ui/dom';
 import {
   css,
@@ -20,6 +20,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
+import { on, stopPropagation } from '../../../_common/utils/event.js';
 import type { AIPanelDiscardModal } from './components/discard-modal.js';
 import { toggleDiscardModal } from './components/discard-modal.js';
 import type {
@@ -42,7 +43,10 @@ export interface AffineAIPanelWidgetConfig {
 
   finishStateConfig: AIPanelAnswerConfig;
   errorStateConfig: AIPanelErrorConfig;
+  hideCallback?: () => void;
   discardCallback?: () => void;
+
+  positionConfig?: Partial<ComputePositionConfig>;
 }
 
 export type AffineAIPanelState =
@@ -59,11 +63,6 @@ export class AffineAIPanelWidget extends WidgetElement {
   static override styles = css`
     :host {
       display: flex;
-      width: 100%;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-
       outline: none;
       border-radius: var(--8, 8px);
       border: 1px solid var(--affine-border-color);
@@ -75,15 +74,30 @@ export class AffineAIPanelWidget extends WidgetElement {
         0px 6px 16px 0px rgba(0, 0, 0, 0.14)
       );
 
-      gap: 8px;
-
-      width: 630px;
       position: absolute;
+      width: max-content;
       top: 0;
       left: 0;
 
       z-index: 1;
     }
+
+    .ai-panel-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+    .ai-panel-container:has(ai-panel-answer) {
+      padding: 12px 0;
+    }
+
     :host([data-hidden]) {
       display: none;
     }
@@ -126,14 +140,7 @@ export class AffineAIPanelWidget extends WidgetElement {
 
     this._stopAutoUpdate?.();
     this._stopAutoUpdate = autoUpdate(reference, this, () => {
-      computePosition(reference, this, {
-        placement: 'bottom-start',
-        middleware: [
-          shift({
-            padding: 20,
-          }),
-        ],
-      })
+      computePosition(reference, this, this.config?.positionConfig)
         .then(({ x, y }) => {
           this.style.left = `${x}px`;
           this.style.top = `${y}px`;
@@ -149,6 +156,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._inputText = null;
     this._answer = null;
     this._stopAutoUpdate = undefined;
+    this.config?.hideCallback?.();
   };
 
   discard = (callback: () => void = this._discardCallback) => {
@@ -235,6 +243,8 @@ export class AffineAIPanelWidget extends WidgetElement {
     super.connectedCallback();
 
     this.tabIndex = -1;
+    this.disposables.add(on(this, 'wheel', stopPropagation));
+    this.disposables.add(on(this, 'pointerdown', stopPropagation));
     this.disposables.addFromEvent(document, 'mousedown', this._onDocumentClick);
   }
 
@@ -348,6 +358,6 @@ export class AffineAIPanelWidget extends WidgetElement {
       ],
     ]);
 
-    return html`${mainTemplate}`;
+    return html`<div class="ai-panel-container">${mainTemplate}</div>`;
   }
 }

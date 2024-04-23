@@ -24,7 +24,7 @@ declare global {
       input: string;
       stream?: boolean;
       attachments?: (string | File | Blob)[]; // blob could only be strings for the moments (url or data urls)
-
+      signal?: AbortSignal;
       // the following seems not necessary?
       docId: string;
       workspaceId: string;

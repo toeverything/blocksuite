@@ -14,6 +14,7 @@ import {
   ParagraphService,
 } from '@blocksuite/blocks';
 import { assertInstanceOf } from '@blocksuite/global/utils';
+import { flip, offset, shift, size } from '@floating-ui/dom';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { buildAIPanelConfig } from './ai-panel.js';
@@ -24,6 +25,7 @@ import {
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
+import { getEdgelessService } from './utils/selection-utils.js';
 
 export function patchDocSpecs(specs: BlockSpec[]) {
   return specs.map(spec => {
@@ -43,7 +45,15 @@ export function patchDocSpecs(specs: BlockSpec[]) {
           disposableGroup.add(
             slots.widgetConnected.on(view => {
               if (view.component instanceof AffineAIPanelWidget) {
-                view.component.config = buildAIPanelConfig(view.component);
+                view.component.style.width = '630px';
+                view.component.config = buildAIPanelConfig(view.component, {
+                  placement: 'bottom-start',
+                  middleware: [
+                    shift({
+                      padding: 20,
+                    }),
+                  ],
+                });
                 setupSpaceEntry(view.component);
               }
 
@@ -114,7 +124,46 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
         setup(slots) {
           slots.widgetConnected.on(view => {
             if (view.component instanceof AffineAIPanelWidget) {
-              view.component.config = buildAIPanelConfig(view.component);
+              view.component.style.width = '430px';
+              view.component.config = buildAIPanelConfig(view.component, {
+                placement: 'right-start',
+                middleware: [
+                  offset({ mainAxis: 16 }),
+                  shift(() => {
+                    const { width, height } = getEdgelessService(
+                      view.component.host
+                    ).viewport;
+
+                    return {
+                      padding: 20,
+                      crossAxis: true,
+                      boundary: {
+                        x: 20,
+                        y: 50,
+                        width: width - 40,
+                        height: height - 120,
+                      },
+                    };
+                  }),
+                  flip({
+                    crossAxis: true,
+                  }),
+                  size({
+                    apply: ({ elements }) => {
+                      const { height } = getEdgelessService(
+                        view.component.host
+                      ).viewport;
+                      const aiPanelAnswer =
+                        elements.floating.shadowRoot?.querySelector(
+                          'ai-panel-answer'
+                        );
+                      if (aiPanelAnswer) {
+                        aiPanelAnswer.style.maxHeight = `${height - 120}px`;
+                      }
+                    },
+                  }),
+                ],
+              });
               setupSpaceEntry(view.component);
             }
 
