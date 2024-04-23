@@ -137,21 +137,29 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   }
 
   private renderHeader() {
+    const titleColumn = this.getTitleColumn();
+
+    if (!titleColumn) return nothing;
+    return html`<affine-data-view-record-detail-header
+      .titleColumn=${titleColumn}
+      .rowId=${this.rowId}
+      .readonly=${this.readonly}
+    ></affine-data-view-record-detail-header>`;
+  }
+
+  private getTitleColumn() {
     const view = this.view;
+
     if (
       view instanceof DataViewTableManager ||
       view instanceof DataViewKanbanManager
     ) {
       const titleColId = view.header.titleColumn;
-      if (!titleColId) return nothing;
+      if (!titleColId) return null;
 
-      const titleColumn = this.view.columnGet(titleColId);
-      return html`<affine-data-view-record-detail-header
-        .titleColumn=${titleColumn}
-        .rowId=${this.rowId}
-      ></affine-data-view-record-detail-header>`;
+      return this.view.columnGet(titleColId);
     }
-    return nothing;
+    return null;
   }
 }
 

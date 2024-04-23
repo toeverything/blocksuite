@@ -41,6 +41,9 @@ export class RecordDetailHeader extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   rowId!: string;
 
+  @property({ attribute: false })
+  readonly: boolean = false;
+
   override connectedCallback(): void {
     super.connectedCallback();
     this.disposables.add(
@@ -78,7 +81,7 @@ export class RecordDetailHeader extends WithDisposable(ShadowlessElement) {
 
     return html`<div class="detail-header-container">
       <div class="${`detail-header ${isEmpty ? 'empty-title' : ''}`}">
-        <rich-text .yText=${yText}></rich-text>
+        <rich-text .yText=${yText} .readonly=${this.readonly}></rich-text>
       </div>
     </div> `;
   }
