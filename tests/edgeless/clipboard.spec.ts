@@ -127,7 +127,7 @@ test.describe('connector clipboard', () => {
     await createConnectorElement(page, [50, 50], [250, 50]);
 
     await copyByKeyboard(page);
-    const move = await toViewCoord(page, [150, -49.5]);
+    const move = await toViewCoord(page, [150, -50]);
     await page.mouse.move(move[0], move[1]);
     await pasteByKeyboard(page, false);
     await waitNextFrame(page);

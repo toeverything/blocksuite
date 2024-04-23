@@ -1,5 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
@@ -12,6 +13,9 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 100%;
+      padding: 0 12px;
+      box-sizing: border-box;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
     .generating-tip {
@@ -30,8 +34,7 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
         flex: 1 0 0;
 
         /* light/smMedium */
-        font-family: Inter;
-        font-size: 14px;
+        font-size: var(--affine-font-sm);
         font-style: normal;
         font-weight: 500;
         line-height: 22px; /* 157.143% */

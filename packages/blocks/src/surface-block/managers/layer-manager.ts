@@ -125,7 +125,8 @@ export class LayerManager {
 
           if (
             block instanceof EdgelessBlockModel &&
-            renderableInEdgeless(doc, surface, block)
+            renderableInEdgeless(doc, surface, block) &&
+            this.blocks.indexOf(block) === -1
           ) {
             this.add(block as EdgelessBlockModel);
           }
@@ -145,7 +146,7 @@ export class LayerManager {
           }
         }
         if (payload.type === 'delete') {
-          const block = payload.model;
+          const block = doc.getBlockById(payload.id);
 
           if (block instanceof EdgelessBlockModel) {
             this.delete(block as EdgelessBlockModel);

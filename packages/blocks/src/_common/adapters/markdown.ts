@@ -886,7 +886,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               ) ??
                 (o.node.url.split('/').at(-1) ?? 'image') +
                   '.' +
-                  (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png')
+                  (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png'),
+              {
+                type: res.headers.get('Content-Type') ?? '',
+              }
             );
             blobId = await sha(await clonedRes.arrayBuffer());
             assets?.getAssets().set(blobId, file);

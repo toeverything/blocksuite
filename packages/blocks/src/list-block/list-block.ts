@@ -15,7 +15,7 @@ import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ListBlockModel } from './list-model.js';
 import type { ListService } from './list-service.js';
-import { styles } from './styles.js';
+import { listBlockStyles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
@@ -24,8 +24,6 @@ export class ListBlockComponent extends BlockElement<
   ListBlockModel,
   ListService
 > {
-  static override styles = styles;
-
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
     assertExists(inlineManager);
@@ -95,20 +93,13 @@ export class ListBlockComponent extends BlockElement<
     return result;
   }
 
-  override firstUpdated() {
-    this._updateFollowingListSiblings();
-    this.model.childrenUpdated.on(() => {
-      this._updateFollowingListSiblings();
-    });
-  }
-
   private _updateFollowingListSiblings() {
     this.updateComplete
       .then(() => {
         let current: BlockElement | null = this as BlockElement;
         while (current?.tagName == 'AFFINE-LIST') {
           current.requestUpdate();
-          const next = this.std.doc.getNextSibling(current.model);
+          const next = this.std.doc.getNext(current.model);
           const id = next?.id;
           current = id ? this.std.view.getBlock(id) : null;
         }
@@ -122,6 +113,23 @@ export class ListBlockComponent extends BlockElement<
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
+    this._updateFollowingListSiblings();
+    this.disposables.add(
+      this.model.childrenUpdated.on(() => {
+        this._updateFollowingListSiblings();
+      })
+    );
+    this.disposables.add(
+      this.host.std.doc.slots.blockUpdated.on(e => {
+        if (e.type !== 'delete') return;
+        const deletedBlock = this.std.view.getBlock(e.id);
+        if (!deletedBlock) return;
+        if (this !== deletedBlock.nextElementSibling) return;
+        this._updateFollowingListSiblings();
+        return;
+      })
+    );
   }
 
   private _toggleChildren() {
@@ -181,6 +189,9 @@ export class ListBlockComponent extends BlockElement<
 
     return html`
       <div class=${'affine-list-block-container'}>
+        <style>
+          ${listBlockStyles}
+        </style>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text

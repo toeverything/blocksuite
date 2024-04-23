@@ -65,7 +65,7 @@ export function getNextBlock(
   }
   let currentBlock: typeof model | null = model;
   while (currentBlock) {
-    const nextSibling = doc.getNextSibling(currentBlock);
+    const nextSibling = doc.getNext(currentBlock);
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
       if (matchFlavours(nextSibling, ['affine:note'])) {
@@ -630,7 +630,9 @@ export function findClosestBlockElement(
 ): BlockComponent | null {
   const children = (
     Array.from(container.querySelectorAll(selector)) as BlockComponent[]
-  ).filter(child => PathFinder.includes(child.path, container.path));
+  )
+    .filter(child => child.host === container.host)
+    .filter(child => PathFinder.includes(child.path, container.path));
 
   let lastDistance = Number.POSITIVE_INFINITY;
   let lastChild = null;

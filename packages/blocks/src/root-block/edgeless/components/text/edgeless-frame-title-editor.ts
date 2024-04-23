@@ -1,4 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import {
+  RangeManager,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -44,6 +48,11 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     ]) as FrameBlockComponent | null;
     assertExists(block);
     return block;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
   }
 
   override async getUpdateComplete(): Promise<boolean> {

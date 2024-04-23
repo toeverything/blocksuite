@@ -1,3 +1,4 @@
+import { assertType } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
@@ -5,6 +6,11 @@ import { z } from 'zod';
 import type { EdgelessModel } from '../../_common/types.js';
 import { last } from '../../_common/utils/iterable.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  type XYWH,
+} from '../utils/xywh.js';
 import { type BaseProps, GroupLikeModel } from './base.js';
 import { TextResizing } from './common.js';
 import { LocalConnectorElementModel } from './connector.js';
@@ -26,11 +32,19 @@ import {
   mindmapStyleGetters,
 } from './utils/mindmap/style.js';
 
-const nodeSchema = z.record(
-  z.object({
-    parent: z.string().optional(),
-  })
-);
+const baseNodeSchema = z.object({
+  text: z.string(),
+});
+
+type Node = z.infer<typeof baseNodeSchema> & {
+  children?: Node[];
+};
+
+const nodeSchema: z.ZodType<Node> = baseNodeSchema.extend({
+  children: z.lazy(() => nodeSchema.array()).optional(),
+});
+
+type NodeType = z.infer<typeof nodeSchema>;
 
 type MindmapElementProps = BaseProps & {
   nodes: Y.Map<NodeDetail>;
@@ -41,19 +55,51 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     return 'mindmap';
   }
 
+  override onCreated(): void {
+    this.buildTree();
+    this.layout();
+  }
+
   pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
     getElementById: (id: string) =>
       this.surface.getElementById(id) ??
       (this.surface.doc.getBlockById(id) as EdgelessModel),
   });
 
-  @convert(initalValue => {
+  @convert((initalValue, instance) => {
     if (!(initalValue instanceof DocCollection.Y.Map)) {
       nodeSchema.parse(initalValue);
-      const map = new DocCollection.Y.Map() as MindmapElementProps['nodes'];
 
-      Object.keys(initalValue).forEach(key => {
-        map.set(key, initalValue[key]);
+      assertType<NodeType>(initalValue);
+
+      const map = new DocCollection.Y.Map() as MindmapElementProps['nodes'];
+      const surface = instance.surface;
+      const doc = surface.doc;
+      const recursive = (
+        node: NodeType,
+        parent: string | null = null,
+        index: string = 'a0'
+      ) => {
+        const id = surface.addElement({
+          type: 'shape',
+          text: node.text,
+          xywh: `[0, 0, 100, 30]`,
+        });
+
+        map.set(id, {
+          index,
+          parent: parent ?? undefined,
+        });
+
+        let curIdx = 'a0';
+        node.children?.forEach(childNode => {
+          recursive(childNode, id, curIdx);
+          curIdx = generateKeyBetween(curIdx, null);
+        });
+      };
+
+      doc.transact(() => {
+        recursive(initalValue);
       });
 
       return map;
@@ -109,6 +155,10 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   private _tree!: MindmapRoot;
 
   private _nodeMap = new Map<string, MindmapNode>();
+
+  get tree() {
+    return this._tree;
+  }
 
   get nodeMap() {
     return this._nodeMap;
@@ -254,7 +304,9 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       throw new Error(`Parent node ${parent} not found`);
     }
 
-    props['text'] = new DocCollection.Y.Text((props['text'] as string) ?? '');
+    props['text'] = new DocCollection.Y.Text(
+      (props['text'] as string) ?? 'New node'
+    );
 
     let id: string;
     this.surface.doc.transact(() => {
@@ -329,6 +381,9 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
           index: 'a0',
         });
       }
+
+      this.buildTree();
+      this.layout();
     });
 
     return id!;
@@ -358,6 +413,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   }
 
   layout() {
+    if (!this.tree) return;
     this.connectors = new Map();
     this.surface.doc.transact(() => {
       layout(this._tree, this);
@@ -365,6 +421,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   }
 
   calcConnection() {
+    this.connectors = new Map();
     const walk = (
       node: MindmapNode,
       layoutDir: LayoutType.LEFT | LayoutType.RIGHT,
@@ -375,18 +432,13 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
         idx = node.children === children ? idx : node.children.indexOf(child);
 
         const currentPath = [...path, idx];
-        const id = `#${node.id}-${child.id}`;
 
-        if (!this.connectors.has(id)) {
-          this.addConnector(
-            node,
-            child,
-            layoutDir,
-            this.styleGetter.getNodeStyle(child, currentPath).connector
-          );
-        } else {
-          this.pathGenerator.updatePath(this.connectors.get(id)!);
-        }
+        this.addConnector(
+          node,
+          child,
+          layoutDir,
+          this.styleGetter.getNodeStyle(child, currentPath).connector
+        );
 
         walk(child, layoutDir, currentPath);
       });
@@ -451,7 +503,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       ? LayoutType.LEFT
       : root.right.includes(node)
         ? LayoutType.RIGHT
-        : null;
+        : this.layoutType;
   }
 
   private _queued = false;
@@ -492,6 +544,23 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       };
 
       walk(this._tree, [0]);
+    });
+  }
+
+  moveTo(targetXYWH: SerializedXYWH | XYWH) {
+    const { x, y } = this;
+    const targetPos =
+      typeof targetXYWH === 'string' ? deserializeXYWH(targetXYWH) : targetXYWH;
+    const offsetX = targetPos[0] - x;
+    const offsetY = targetPos[1] - y + targetPos[3];
+
+    this.surface.doc.transact(() => {
+      this.childElements.forEach(el => {
+        const deserializedXYWH = deserializeXYWH(el.xywh);
+
+        el.xywh =
+          `[${deserializedXYWH[0] + offsetX},${deserializedXYWH[1] + offsetY},${deserializedXYWH[2]},${deserializedXYWH[3]}]` as SerializedXYWH;
+      });
     });
   }
 }

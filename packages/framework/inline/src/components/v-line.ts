@@ -13,19 +13,35 @@ export class VLine extends LitElement {
   @property({ attribute: false })
   elements: [TemplateResult<1>, DeltaInsert][] = [];
 
+  get inlineEditor() {
+    const rootElement = this.closest(
+      `[${INLINE_ROOT_ATTR}]`
+    ) as InlineRootElement;
+    assertExists(rootElement, 'v-line must be inside a v-root');
+    const inlineEditor = rootElement.inlineEditor;
+    assertExists(
+      inlineEditor,
+      'v-line must be inside a v-root with inline-editor'
+    );
+
+    return inlineEditor;
+  }
+
   get vElements() {
     return Array.from(this.querySelectorAll('v-element'));
   }
 
+  // vTexts.length > 0 does not mean the line is not empty,
+  // you should use vElements.length or vTextLength because v-element corresponds to the actual delta
   get vTexts() {
     return Array.from(this.querySelectorAll('v-text'));
   }
 
-  get textLength() {
+  get vTextLength() {
     return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
   }
 
-  override get textContent() {
+  get vTextContent() {
     return this.vElements.reduce((acc, el) => acc + el.delta.insert, '');
   }
 
@@ -38,25 +54,30 @@ export class VLine extends LitElement {
 
   protected override firstUpdated(): void {
     this.style.display = 'block';
+
+    this.addEventListener('mousedown', e => {
+      if (e.detail >= 3) {
+        e.preventDefault();
+
+        const range = document.createRange();
+        range.selectNodeContents(this);
+        const selection = window.getSelection();
+        assertExists(selection);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    });
   }
 
   override render() {
     if (this.elements.length === 0) {
+      // don't use v-element because it not correspond to the actual delta
       return html`<div><v-text .str=${ZERO_WIDTH_SPACE}></v-text></div>`;
     }
 
     if (!this.isConnected) return;
 
-    const rootElement = this.closest(
-      `[${INLINE_ROOT_ATTR}]`
-    ) as InlineRootElement;
-    assertExists(rootElement, 'v-line must be inside a v-root');
-    const inlineEditor = rootElement.inlineEditor;
-    assertExists(
-      inlineEditor,
-      'v-line must be inside a v-root with inline-editor'
-    );
-
+    const inlineEditor = this.inlineEditor;
     const renderElements = this.elements.flatMap(([template, delta], index) => {
       if (inlineEditor.isEmbed(delta)) {
         if (delta.insert.length !== 1) {

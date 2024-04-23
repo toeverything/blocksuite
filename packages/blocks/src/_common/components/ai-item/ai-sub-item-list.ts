@@ -15,7 +15,6 @@ export class AISubItemList extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
-      position: absolute;
       padding: 8px;
       min-width: 240px;
       max-height: 320px;
@@ -48,13 +47,17 @@ export class AISubItemList extends WithDisposable(LitElement) {
   @property({ attribute: false })
   abortController!: AbortController;
 
+  @property({ attribute: false })
+  onClick?: () => void;
+
   private _handleClick = (subItem: AISubItemConfig) => {
     if (subItem.handler) {
       // TODO: add parameters to ai handler
-      subItem.handler();
+      subItem.handler(this.host);
     }
 
     this.abortController.abort();
+    this.onClick?.();
   };
 
   override render() {

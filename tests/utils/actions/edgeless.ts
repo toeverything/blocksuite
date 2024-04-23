@@ -224,7 +224,7 @@ export function locatorEdgelessComponentToolButton(
     more: 'More',
   }[type];
   const button = page
-    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
+    .locator('edgeless-element-toolbar-widget edgeless-tool-icon-button')
     .filter({
       hasText: text,
     });
@@ -654,7 +654,7 @@ export async function updateExistedBrushElementSize(
 
 export async function openComponentToolbarMoreMenu(page: Page) {
   const btn = page
-    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
+    .locator('edgeless-element-toolbar-widget edgeless-tool-icon-button')
     .filter({
       hasText: 'More',
     });
@@ -776,7 +776,7 @@ export async function deleteAllConnectors(page: Page) {
 }
 
 export function locatorComponentToolbar(page: Page) {
-  return page.locator('edgeless-component-toolbar');
+  return page.locator('edgeless-element-toolbar-widget');
 }
 
 function locatorComponentToolbarMoreButton(page: Page) {

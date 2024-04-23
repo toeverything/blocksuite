@@ -20,6 +20,7 @@ import { deserializeXYWH } from './surface-block/index.js';
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
 export type { SelectTag } from './_common/components/index.js';
+export { toast } from './_common/components/index.js';
 export {
   popTagSelect,
   RichText,
@@ -71,7 +72,11 @@ export {
   openFileOrFiles,
 } from './_common/utils/index.js';
 export { createDefaultDoc } from './_common/utils/init.js';
-export { getThemeMode, isInsidePageEditor } from './_common/utils/query.js';
+export {
+  getThemeMode,
+  isInsideEdgelessEditor,
+  isInsidePageEditor,
+} from './_common/utils/query.js';
 export * from './_specs/_specs.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
@@ -91,13 +96,14 @@ export * from './image-block/index.js';
 export * from './list-block/index.js';
 export * from './note-block/index.js';
 export * from './paragraph-block/index.js';
-export { EdgelessComponentToolbar } from './root-block/edgeless/components/component-toolbar/component-toolbar.js';
 export { EdgelessTemplatePanel } from './root-block/edgeless/components/toolbar/template/template-panel.js';
 export type {
   Template,
   TemplateCategory,
   TemplateManager,
 } from './root-block/edgeless/components/toolbar/template/template-type.js';
+export { CopilotSelectionController } from './root-block/edgeless/controllers/tools/copilot-tool.js';
+export type { EdgelessModel } from './root-block/edgeless/type.js';
 export * from './root-block/index.js';
 export * from './schemas.js';
 export {
@@ -110,6 +116,10 @@ export {
   ElementModel,
   generateKeyBetween,
   GroupElementModel,
+  MindmapElementModel,
+  MindmapRootBlock,
+  MindmapService,
+  MindmapSurfaceBlock,
   type PointStyle,
   type SerializedXYWH,
   ShapeElementModel,
@@ -117,7 +127,9 @@ export {
   StrokeStyle,
   SurfaceBlockModel,
   TextElementModel,
+  updateMindmapNodeRect,
 } from './surface-block/index.js';
+export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';

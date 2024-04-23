@@ -1,7 +1,7 @@
 import '../../../../_common/components/loader.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { type DocCollection, sha } from '@blocksuite/store';
+import { type DocCollection, extMimeMap, sha } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
@@ -30,7 +30,11 @@ export type OnFailHandler = (message: string) => void;
 
 const SHOW_LOADING_SIZE = 1024 * 200;
 
-export async function importMarkDown(collection: DocCollection, text: string) {
+export async function importMarkDown(
+  collection: DocCollection,
+  text: string,
+  fileName?: string
+) {
   const job = new Job({
     collection,
     middlewares: [defaultImageProxyMiddleware],
@@ -41,6 +45,17 @@ export async function importMarkDown(collection: DocCollection, text: string) {
     file: text,
     assets: job.assetsManager,
   });
+  if (fileName) {
+    snapshot.meta.title = fileName;
+    snapshot.blocks.props.title = {
+      '$blocksuite:internal:text$': true,
+      delta: [
+        {
+          insert: fileName,
+        },
+      ],
+    };
+  }
   const page = await job.snapshotToDoc(snapshot);
   return page.id;
 }
@@ -114,9 +129,11 @@ export async function importNotion(collection: DocCollection, file: File) {
         continue;
       }
       const blob = await zipFile.files[file].async('blob');
+      const ext = file.split('.').at(-1) ?? '';
+      const mime = extMimeMap.get(ext) ?? '';
       pendingAssets.set(
         await sha(await blob.arrayBuffer()),
-        new File([blob], fileName)
+        new File([blob], fileName, { type: mime })
       );
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
@@ -242,6 +259,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
     const pageIds: string[] = [];
     for (const file of files) {
       const text = await file.text();
+      const fileName = file.name.split('.').slice(0, -1).join('.');
       const needLoading = file.size > SHOW_LOADING_SIZE;
       if (needLoading) {
         this.hidden = false;
@@ -249,7 +267,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
       } else {
         this.abortController.abort();
       }
-      const pageId = await importMarkDown(this.collection, text);
+      const pageId = await importMarkDown(this.collection, text, fileName);
       needLoading && this.abortController.abort();
       pageIds.push(pageId);
     }

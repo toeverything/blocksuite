@@ -29,6 +29,10 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
     this._show = !this._show;
   }
 
+  public show() {
+    this._show = true;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
     const { editor } = this;
@@ -48,7 +52,10 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
     return html`
       ${this._show
         ? html`<div class="custom-chat-container blocksuite-overlay">
-            <chat-panel .editor=${this.editor}></chat-panel>
+            <chat-panel
+              .editor=${this.editor}
+              .doc=${this.editor.doc}
+            ></chat-panel>
           </div>`
         : nothing}
     `;

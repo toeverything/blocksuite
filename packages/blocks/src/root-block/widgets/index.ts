@@ -1,5 +1,6 @@
 export {
   AFFINE_AI_PANEL_WIDGET,
+  type AffineAIPanelState,
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
 } from './ai-panel/ai-panel.js';
@@ -10,8 +11,13 @@ export {
   AFFINE_EDGELESS_COPILOT_WIDGET,
   EdgelessCopilotWidget,
 } from './edgeless-copilot/index.js';
+export { EdgelessCopilotToolbarEntry } from './edgeless-copilot-panel/toolbar-entry.js';
 export { EdgelessRemoteSelectionWidget } from './edgeless-remote-selection/index.js';
 export { AffineEdgelessZoomToolbarWidget } from './edgeless-zoom-toolbar/index.js';
+export {
+  EDGELESS_ELEMENT_TOOLBAR_WIDGET,
+  EdgelessElementToolbarWidget,
+} from './element-toolbar/index.js';
 export { toolbarDefaultConfig } from './format-bar/config.js';
 export { AffineFormatBarWidget } from './format-bar/format-bar.js';
 export { AffineImageToolbarWidget } from './image-toolbar/image-toolbar.js';

@@ -1,8 +1,9 @@
 import { download, upload } from '../editor/utils';
 import { useEditor } from '../editor/context';
+import { CollectionProvider } from '../editor/provider/provider';
 
 const TopBar = () => {
-  const { provider, updateCollection } = useEditor()!;
+  const { provider, updateProvider, editor } = useEditor()!;
 
   return (
     <div className="top-bar">
@@ -16,10 +17,11 @@ const TopBar = () => {
       </button>
       <button
         onClick={async () => {
-          if (!provider) return;
-          const blob = await upload();
-          await provider.reset(blob);
-          updateCollection(provider.collection);
+          if (!editor) return;
+          const binary = await upload();
+          const provider = await CollectionProvider.init(binary);
+          updateProvider(provider);
+          editor.doc = [...provider.collection.docs.values()][0];
         }}
       >
         Import

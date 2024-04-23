@@ -1,6 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import {
   BlocksUtils,
+  EmbedHtmlBlockSpec,
   MarkdownAdapter,
   type ShapeElementModel,
   SurfaceBlockComponent,
@@ -28,6 +29,7 @@ import {
   runTranslateAction,
 } from '../doc/actions.js';
 import { getChatService } from '../doc/api.js';
+import { genHtml } from '../edgeless/gen-html.js';
 import type { AILogic } from '../logic.js';
 import { findLeaf, findTree, getConnectorPath } from '../utils/connector.js';
 import {
@@ -35,11 +37,13 @@ import {
   markdownToSnapshot,
 } from '../utils/markdown-utils.js';
 import {
+  getEdgelessRootFromEditor,
   getEdgelessService,
   getRootService,
   getSelectedTextContent,
   getSurfaceElementFromEditor,
   selectedToCanvas,
+  selectedToPng,
 } from '../utils/selection-utils.js';
 import { basicTheme, type PPTDoc, type PPTSection } from './template.js';
 
@@ -148,10 +152,23 @@ export class AIChatLogic {
   };
 
   syncWorkspace = async () => {
-    this.reactiveData.syncedDocs = await this.embeddingDocs([
-      ...this.host.doc.collection.docs.values(),
-    ]);
+    this.reactiveData.syncedDocs = await this.embeddingDocs(
+      [...this.host.doc.collection.docs.values()].map(v => v.getDoc())
+    );
   };
+
+  get docs() {
+    return [...this.host.doc.collection.docs.values()];
+  }
+
+  async docBackground(): Promise<ChatMessage[]> {
+    return [
+      {
+        role: 'system',
+        content: `the background is:\n${await Promise.all(this.docs.map(v => docToMarkdown(v.getDoc()))).then(list => list.join('\n'))}`,
+      },
+    ];
+  }
 
   genAnswer = async (text: string) => {
     if (this.loading) {
@@ -168,6 +185,7 @@ export class AIChatLogic {
     this.reactiveData.value = '';
     const r = await this.startRequest(async () => {
       const iter = getChatService().chat([
+        ...(await this.docBackground()),
         ...background.messages,
         ...this.reactiveData.history,
       ]);
@@ -300,7 +318,8 @@ export class AIChatLogic {
   createAction(
     name: string,
     action: (
-      input: string
+      input: string,
+      background: ChatMessage[]
     ) => Promise<AsyncIterable<string>> | AsyncIterable<string>
   ) {
     return async (text?: string): Promise<void> => {
@@ -320,7 +339,7 @@ export class AIChatLogic {
         },
       ];
       const result = await this.startRequest(async () => {
-        const strings = await action(input);
+        const strings = await action(input, await this.docBackground());
         let r = '';
         for await (const item of strings) {
           r += item;
@@ -420,13 +439,13 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Create mind-map',
-      action: this.createAction('Create mind-map', input => {
+      action: this.createAction('Create mind-map', (input, background) => {
         const service = getEdgelessService(this.host);
         const [x, y] = [service.viewport.centerX, service.viewport.centerY];
         const reactiveData = this.reactiveData;
         const build = mindMapBuilder(this.host, x, y);
         return (async function* () {
-          const strings = runAnalysisAction({ input });
+          const strings = runAnalysisAction({ input, background });
           let text = '';
           for await (const item of strings) {
             yield item;
@@ -442,11 +461,11 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Create presentation',
-      action: this.createAction('Create mind-map', input => {
+      action: this.createAction('Create mind-map', (input, background) => {
         const reactiveData = this.reactiveData;
         const build = pptBuilder(this.host);
         return (async function* () {
-          const strings = runPPTGenerateAction({ input });
+          const strings = runPPTGenerateAction({ input, background });
           let text = '';
           for await (const item of strings) {
             yield item;
@@ -521,9 +540,9 @@ export class AIChatLogic {
             return oldTree;
           }
         );
-        await this.createAction('Part analysis', input => {
+        await this.createAction('Part analysis', (input, background) => {
           return (async function* () {
-            const strings = runPartAnalysisAction({ input, path });
+            const strings = runPartAnalysisAction({ input, path, background });
             let text = '';
             for await (const item of strings) {
               yield item;
@@ -535,6 +554,29 @@ export class AIChatLogic {
             }
           })();
         })(text);
+      },
+    },
+    {
+      type: 'action',
+      name: 'Make it real',
+      hide: () => {
+        const service = getEdgelessService(this.host);
+        const elements = service.selection.elements;
+        return elements.length === 0;
+      },
+      action: async () => {
+        const img = await selectedToPng(this.host);
+        if (!img) return;
+
+        const html = await genHtml(img);
+        if (!html) return;
+
+        const edgelessRoot = getEdgelessRootFromEditor(this.host);
+        edgelessRoot.doc.addBlock(
+          EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
+          { html, design: img, xywh: '[0, 400, 400, 200]' },
+          edgelessRoot.surface.model.id
+        );
       },
     },
   ];

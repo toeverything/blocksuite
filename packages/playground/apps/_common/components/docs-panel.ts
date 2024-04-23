@@ -97,7 +97,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             justifyContent: 'space-between',
           });
           const click = () => {
-            this.editor.doc = doc;
+            this.editor.doc = doc.getDoc();
             this.editor.doc.load();
             this.editor.doc.resetHistory();
             this.requestUpdate();
@@ -109,7 +109,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
             collection.removeDoc(doc.id);
             // When delete the current doc, we need to set the editor doc to the first remaining doc
             if (isDeleteCurrent) {
-              this.editor.doc = this.docs[0];
+              this.editor.doc = this.docs[0].getDoc();
             }
           };
           return html`<div class="doc-item" @click="${click}" style="${style}">

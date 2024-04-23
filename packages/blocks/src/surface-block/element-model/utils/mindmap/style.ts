@@ -175,7 +175,7 @@ export class StyleThree extends MindmapStyleGetter {
     fontWeight: FontWeight.SemiBold,
     color: '--affine-palette-shape-magenta',
 
-    filled: false,
+    filled: true,
     fillColor: 'transparent',
   };
 
@@ -195,7 +195,7 @@ export class StyleThree extends MindmapStyleGetter {
         fontWeight: FontWeight.SemiBold,
         color: '--affine-palette-shape-magenta',
 
-        filled: false,
+        filled: true,
         fillColor: 'transparent',
       },
       connector: {
@@ -222,7 +222,7 @@ export class StyleFour extends MindmapStyleGetter {
     fontWeight: FontWeight.SemiBold,
     color: '--affine-text-primary-color',
 
-    filled: false,
+    filled: true,
     fillColor: 'transparent',
   };
 

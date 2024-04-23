@@ -28,6 +28,10 @@ export class Viewport {
   protected _el!: HTMLElement;
   private _syncFlag = false;
   protected _cumulativeParentScale = 1;
+  protected _locked = false;
+
+  ZOOM_MAX = ZOOM_MAX;
+  ZOOM_MIN = ZOOM_MIN;
 
   viewportUpdated = new Slot<{ zoom: number; center: IVec2 }>();
   sizeUpdated = new Slot<{
@@ -120,6 +124,15 @@ export class Viewport {
     return this._el.getBoundingClientRect();
   }
 
+  // Does not allow the user to move and zoom the canvas in copilot tool
+  get locked() {
+    return this._locked;
+  }
+
+  set locked(locked: boolean) {
+    this._locked = locked;
+  }
+
   onResize() {
     const oldWidth = this.width;
     const oldHeight = this.height;
@@ -176,7 +189,7 @@ export class Viewport {
   setZoom(zoom: number, focusPoint?: IPoint) {
     const prevZoom = this.zoom;
     focusPoint = (focusPoint ?? this._center) as IPoint;
-    this._zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+    this._zoom = clamp(zoom, this.ZOOM_MIN, this.ZOOM_MAX);
     const newZoom = this.zoom;
 
     const offset = Vec.sub(Vec.toVec(this.center), Vec.toVec(focusPoint));
@@ -240,7 +253,7 @@ export class Viewport {
     const [pt, pr, pb, pl] = padding;
     const zoom = clamp(
       (this.width - (pr + pl)) / bound.w,
-      ZOOM_MIN,
+      this.ZOOM_MIN,
       (this.height - (pt + pb)) / bound.h
     );
     const center = [

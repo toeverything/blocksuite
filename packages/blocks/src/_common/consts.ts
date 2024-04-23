@@ -53,3 +53,12 @@ export const DEFAULT_IMAGE_PROXY_ENDPOINT =
 // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
 export const DEFAULT_LINK_PREVIEW_ENDPOINT =
   'https://affine-worker.toeverything.workers.dev/api/worker/link-preview';
+
+// This constant is used to ignore tags when exporting using html2canvas
+export const CANVAS_EXPORT_IGNORE_TAGS = [
+  'AFFINE-BLOCK-HUB',
+  'EDGELESS-TOOLBAR',
+  'AFFINE-DRAG-HANDLE-WIDGET',
+  'AFFINE-FORMAT-BAR-WIDGET',
+  'AFFINE-BLOCK-SELECTION',
+];

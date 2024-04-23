@@ -2,11 +2,12 @@ import { css } from 'lit';
 
 export const menuItemStyles = css`
   .menu-item {
+    position: relative;
     width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 4px 12px;
+    padding: 4px var(--item-padding, 12px);
     gap: 4px;
     align-self: stretch;
     border-radius: 4px;
@@ -18,7 +19,18 @@ export const menuItemStyles = css`
   }
   .item-icon {
     display: flex;
-    color: var(--affine-brand-color);
+    color: var(--item-icon-color, var(--affine-brand-color));
+  }
+  .menu-item:hover .item-icon {
+    color: var(--item-icon-hover-color, var(--affine-brand-color));
+  }
+  .menu-item.discard:hover {
+    background: var(--affine-background-error-color);
+    .item-name,
+    .item-icon,
+    .enter-icon {
+      color: var(--affine-error-color);
+    }
   }
   .item-name {
     display: flex;
@@ -38,6 +50,10 @@ export const menuItemStyles = css`
   .enter-icon,
   .arrow-right-icon {
     color: var(--affine-icon-color);
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-40%);
   }
   .enter-icon {
     display: none;

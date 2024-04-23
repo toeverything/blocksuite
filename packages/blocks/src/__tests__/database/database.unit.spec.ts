@@ -1,17 +1,16 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-import '../../database-block/kanban/define.js';
-import '../../database-block/table/define.js';
-
 import type { BlockModel, Doc } from '@blocksuite/store';
 import { DocCollection, Generator, Schema } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { numberPureColumnConfig } from '../../database-block/common/columns/number/define.js';
-import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
-import { selectPureColumnConfig } from '../../database-block/common/columns/select/define.js';
+import { selectColumnModelConfig } from '../../database-block/data-view/column/presets/select/define.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../database-block/database-model.js';
-import type { Cell, Column } from '../../database-block/types.js';
+import {
+  type Cell,
+  type Column,
+  columnPresets,
+  richTextColumnConfig,
+} from '../../database-block/index.js';
 import { NoteBlockSchema } from '../../note-block/note-model.js';
 import { ParagraphBlockSchema } from '../../paragraph-block/paragraph-model.js';
 import { RootBlockSchema } from '../../root-block/root-model.js';
@@ -79,12 +78,15 @@ describe('DatabaseManager', () => {
     ) as DatabaseBlockModel;
     db = databaseModel;
 
-    col1 = db.addColumn('end', numberPureColumnConfig.create('Number'));
+    col1 = db.addColumn(
+      'end',
+      columnPresets.numberColumnConfig.model.create('Number')
+    );
     col2 = db.addColumn(
       'end',
-      selectPureColumnConfig.create('Single Select', { options: selection })
+      selectColumnModelConfig.create('Single Select', { options: selection })
     );
-    col3 = db.addColumn('end', richTextPureColumnConfig.create('Rich Text'));
+    col3 = db.addColumn('end', richTextColumnConfig.model.create('Rich Text'));
 
     doc.updateBlock(databaseModel, {
       columns: [col1, col2, col3],
@@ -117,7 +119,7 @@ describe('DatabaseManager', () => {
 
   test('getColumn', () => {
     const column = {
-      ...numberPureColumnConfig.create('testColumnId'),
+      ...columnPresets.numberColumnConfig.model.create('testColumnId'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -127,7 +129,7 @@ describe('DatabaseManager', () => {
   });
 
   test('addColumn', () => {
-    const column = numberPureColumnConfig.create('Test Column');
+    const column = columnPresets.numberColumnConfig.model.create('Test Column');
     const id = db.addColumn('end', column);
     const result = db.getColumn(id);
 
@@ -137,7 +139,7 @@ describe('DatabaseManager', () => {
 
   test('deleteColumn', () => {
     const column = {
-      ...numberPureColumnConfig.create('Test Column'),
+      ...columnPresets.numberColumnConfig.model.create('Test Column'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -156,7 +158,7 @@ describe('DatabaseManager', () => {
       noteBlockId
     );
     const column = {
-      ...numberPureColumnConfig.create('Test Column'),
+      ...columnPresets.numberColumnConfig.model.create('Test Column'),
       id: 'testColumnId',
     };
     const cell: Cell = {
@@ -200,7 +202,7 @@ describe('DatabaseManager', () => {
   test('copyCellsByColumn', () => {
     const newColId = db.addColumn(
       'end',
-      selectPureColumnConfig.create('Copied Select', { options: selection })
+      selectColumnModelConfig.create('Copied Select', { options: selection })
     );
 
     db.copyCellsByColumn(col2, newColId);

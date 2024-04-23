@@ -2,8 +2,9 @@ import {
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
-import { getAISpecs } from '@blocksuite/presets';
 
+import { setupAIProvider } from './ai/provider.js';
+import { getAISpecs } from './ai/spec.js';
 import { getCustomAttachmentSpecs } from './custom-attachment/custom-attachment.js';
 import { getLatexSpecs } from './latex/latex.js';
 
@@ -26,6 +27,7 @@ export function getExampleSpecs() {
     edgelessModeSpecs = specs.edgelessModeSpecs;
   }
   if (type === 'ai') {
+    setupAIProvider();
     const specs = getAISpecs();
     pageModeSpecs = specs.pageModeSpecs;
     edgelessModeSpecs = specs.edgelessModeSpecs;

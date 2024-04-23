@@ -24,6 +24,9 @@ export class AIItem extends WithDisposable(LitElement) {
   @property({ attribute: false })
   host!: EditorHost;
 
+  @property({ attribute: false })
+  onClick?: () => void;
+
   private _whenHover!: HoverController;
 
   constructor() {
@@ -33,6 +36,7 @@ export class AIItem extends WithDisposable(LitElement) {
         template: html`<ai-sub-item-list
           .item=${this.item}
           .host=${this.host}
+          .onClick=${this.onClick}
           .abortController=${abortController}
         ></ai-sub-item-list>`,
         computePosition: {
@@ -54,11 +58,17 @@ export class AIItem extends WithDisposable(LitElement) {
   override render() {
     const { item } = this;
     const hasSubConfig = !!item.subItem && item.subItem.length > 0;
+    const className = item.name.split(' ').join('-').toLocaleLowerCase();
 
     return html`<div
-      class="menu-item"
-      @click=${() =>
-        typeof item.handler === 'function' && item.handler(this.host)}
+      class="menu-item ${className}"
+      @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
+      @click=${() => {
+        if (typeof item.handler === 'function') {
+          item.handler(this.host);
+        }
+        this.onClick?.();
+      }}
       ${hasSubConfig ? ref(this._whenHover.setReference) : ''}
     >
       <span class="item-icon">${item.icon}</span>

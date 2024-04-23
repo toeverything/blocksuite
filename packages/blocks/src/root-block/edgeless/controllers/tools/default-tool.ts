@@ -128,13 +128,33 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _pick(x: number, y: number, options?: HitTestOptions) {
     const service = this._service;
     const modelPos = service.viewport.toModelCoord(x, y);
+    const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
 
-    return service.pickElementInGroup(modelPos[0], modelPos[1], options);
+    if (group instanceof MindmapElementModel) {
+      const picked = service.pickElement(modelPos[0], modelPos[1], {
+        ...((options ?? {}) as HitTestOptions),
+        all: true,
+      });
+
+      let pickedIdx = picked.length - 1;
+
+      while (pickedIdx >= 0) {
+        const element = picked[pickedIdx];
+        if (element === group) {
+          pickedIdx -= 1;
+          continue;
+        }
+
+        break;
+      }
+
+      return picked[pickedIdx] ?? null;
+    }
+
+    return group;
   }
 
   private _setNoneSelectionState() {
-    if (this.selection.empty) return;
-
     this.selection.clear();
     resetNativeSelection(null);
   }

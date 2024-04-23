@@ -1,7 +1,6 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { Doc, Schema } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
-import { createContext, useContext } from 'react';
 import { AffineSchemas } from '@blocksuite/blocks';
 import '@blocksuite/presets/themes/affine.css';
 
@@ -9,12 +8,6 @@ export interface EditorContextType {
   editor: AffineEditorContainer | null;
   collection: DocCollection | null;
   updateCollection: (newCollection: DocCollection) => void;
-}
-
-export const EditorContext = createContext<EditorContextType | null>(null);
-
-export function useEditor() {
-  return useContext(EditorContext);
 }
 
 export function initEditor() {

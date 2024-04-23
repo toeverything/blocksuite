@@ -14,6 +14,7 @@ import {
   roundedSvg,
   triangleSvg,
 } from '../../../../../_common/icons/index.js';
+import { isTransparent } from '../../../../../_common/theme/css-variables.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -21,7 +22,6 @@ import {
 } from '../../../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
-import { isTransparent } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
 import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
@@ -75,10 +75,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
     }
 
     .container-clip {
-      padding: 10000px 10000px 0;
-      margin: -10000px -10000px 0;
-      overflow: hidden;
-      pointer-events: none;
+      overflow: clip;
     }
 
     .shapes {
@@ -89,7 +86,6 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
       justify-content: center;
       align-items: center;
       position: relative;
-      pointer-events: auto;
     }
   `;
 

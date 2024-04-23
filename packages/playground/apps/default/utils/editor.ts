@@ -2,19 +2,23 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type { PageRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
-import type { Doc, DocCollection } from '@blocksuite/store';
+import type { BlockCollection } from '@blocksuite/store';
+import { type DocCollection } from '@blocksuite/store';
 
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
 import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
+import { attachChatPanel } from '../specs-examples/ai/chat-panel.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
 const params = new URLSearchParams(location.search);
 const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
 export async function mountDefaultDocEditor(collection: DocCollection) {
-  const doc = collection.docs.values().next().value as Doc;
-  assertExists(doc, 'Need to create a doc first');
+  const blockCollection = collection.docs.values().next()
+    .value as BlockCollection;
+  assertExists(blockCollection, 'Need to create a doc first');
+  const doc = blockCollection.getDoc();
 
   assertExists(doc.ready, 'Doc is not ready');
   assertExists(doc.root, 'Doc root is not ready');
@@ -22,9 +26,8 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const app = document.getElementById('app');
   if (!app) return;
 
-  const specs = getExampleSpecs();
-
   const editor = new AffineEditorContainer();
+  const specs = getExampleSpecs();
   editor.pageSpecs = [...specs.pageModeSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
       const setup = spec.setup;
@@ -87,6 +90,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.docsPanel = docsPanel;
+
+  if (params.get('exampleSpec') === 'ai') {
+    quickEdgelessMenu.chatPanel = attachChatPanel(editor);
+  }
 
   function switchQuickEdgelessMenu(mode: typeof defaultMode) {
     quickEdgelessMenu.mode = mode;

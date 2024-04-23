@@ -29,6 +29,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { notify } from '../../default/utils/notify.js';
 import { generateRoomId } from '../sync/websocket/utils.js';
+import type { CustomChatPanel } from './custom-chat-panel.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
 
@@ -39,7 +40,7 @@ ColorVariables.forEach((key: string) => {
 });
 
 const basePath = import.meta.env.DEV
-  ? 'node_modules/@shoelace-style/shoelace/dist'
+  ? '/node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist/';
 setBasePath(basePath);
 
@@ -72,6 +73,8 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
   docsPanel!: DocsPanel;
+  @property({ attribute: false })
+  chatPanel!: CustomChatPanel;
 
   @state()
   private _canUndo = false;
@@ -277,6 +280,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this._setThemeMode(!!e.matches);
   };
 
+  private _toggleChatPanel() {
+    this.chatPanel.toggleDisplay();
+  }
+
   private _startCollaboration = async () => {
     if (window.wsProvider) {
       notify('There is already a websocket provider exists', 'neutral').catch(
@@ -417,6 +424,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     <sl-menu-item @click=${this._shareUrl}>
                       Share URL</sl-menu-item
                     >
+                    ${this.chatPanel
+                      ? html`<sl-menu-item @click=${this._toggleChatPanel}>
+                          Toggle Chat Panel
+                        </sl-menu-item>`
+                      : nothing}
                   </sl-menu>
                 </sl-menu-item>
                 <sl-menu-item @click=${this._toggleDarkMode}>

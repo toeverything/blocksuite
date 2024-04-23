@@ -4,7 +4,11 @@ import * as Y from 'yjs';
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
 import { blob, DocCollectionAddonType, indexer, test } from './addon/index.js';
-import { Doc } from './doc.js';
+import {
+  BlockCollection,
+  defaultBlockSelector,
+} from './doc/block-collection.js';
+import type { BlockSelector, Doc } from './doc/index.js';
 import { DocCollectionMeta, type DocMeta } from './meta.js';
 import { Store, type StoreOptions } from './store.js';
 
@@ -66,7 +70,7 @@ export class DocCollection extends DocCollectionAddonType {
   }
 
   get docs() {
-    return this._store.spaces as Map<string, Doc>;
+    return this._store.spaces as Map<string, BlockCollection>;
   }
 
   get doc() {
@@ -93,15 +97,22 @@ export class DocCollection extends DocCollectionAddonType {
     return this.docs.has(docId);
   }
 
-  getDoc(docId: string): Doc | null {
-    const space = this.docs.get(docId) as Doc | undefined;
+  getDoc(
+    docId: string,
+    selector: BlockSelector = defaultBlockSelector
+  ): Doc | null {
+    const collection = this.getBlockCollection(docId);
+    return collection?.getDoc(selector) ?? null;
+  }
 
+  getBlockCollection(docId: string): BlockCollection | null {
+    const space = this.docs.get(docId) as BlockCollection | undefined;
     return space ?? null;
   }
 
   private _bindDocMetaEvents() {
     this.meta.docMetaAdded.on(docId => {
-      const doc = new Doc({
+      const doc = new BlockCollection({
         id: docId,
         collection: this,
         doc: this.doc,
@@ -115,9 +126,10 @@ export class DocCollection extends DocCollectionAddonType {
     this.meta.docMetaUpdated.on(() => this.slots.docUpdated.emit());
 
     this.meta.docMetaRemoved.on(id => {
-      const doc = this.getDoc(id) as Doc;
-      this._store.removeSpace(doc);
-      doc.remove();
+      const space = this.getBlockCollection(id);
+      if (!space) return;
+      this._store.removeSpace(space);
+      space.remove();
       this.slots.docRemoved.emit(id);
     });
   }
@@ -127,20 +139,10 @@ export class DocCollection extends DocCollectionAddonType {
    * If the `init` parameter is passed, a `surface`, `note`, and `paragraph` block
    * will be created in the doc simultaneously.
    */
-  createDoc(options: { id?: string } | string = {}) {
-    // Migration guide
-    if (typeof options === 'string') {
-      options = { id: options };
-      console.warn(
-        '`createDoc(docId)` is deprecated, use `createDoc()` directly or `createDoc({ id: docId })` instead'
-      );
-      console.warn(
-        'More details see https://github.com/toeverything/blocksuite/pull/2272'
-      );
-    }
+  createDoc(options: { id?: string; selector?: BlockSelector } = {}) {
     // End of migration guide. Remove this in the next major version
 
-    const { id: docId = this.idGenerator() } = options;
+    const { id: docId = this.idGenerator(), selector } = options;
     if (this._hasDoc(docId)) {
       throw new Error('dac already exists');
     }
@@ -151,7 +153,7 @@ export class DocCollection extends DocCollectionAddonType {
       createDate: Date.now(),
       tags: [],
     });
-    return this.getDoc(docId) as Doc;
+    return this.getDoc(docId, selector) as Doc;
   }
 
   /** Update doc meta state. Note that this intentionally does not mutate doc state. */
@@ -167,12 +169,12 @@ export class DocCollection extends DocCollectionAddonType {
     const docMeta = this.meta.getDocMeta(docId);
     assertExists(docMeta);
 
-    const doc = this.getDoc(docId);
-    if (!doc) return;
+    const blockCollection = this.getBlockCollection(docId);
+    if (!blockCollection) return;
 
-    doc.dispose();
+    blockCollection.dispose();
     this.meta.removeDocMeta(docId);
-    this._store.removeSpace(doc);
+    this._store.removeSpace(blockCollection);
   }
 
   /**

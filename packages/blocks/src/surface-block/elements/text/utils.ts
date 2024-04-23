@@ -1,6 +1,6 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
-import type { CanvasTextFontFamily } from '../../consts.js';
+import type { CanvasTextFontFamilyValueType } from '../../consts.js';
 import { wrapFontFamily } from '../../utils/font.js';
 
 const RS_LTR_CHARS =
@@ -33,7 +33,7 @@ const cachedFontFamily = new Map<
   }
 >();
 export function getLineHeight(
-  fontFamily: CanvasTextFontFamily,
+  fontFamily: CanvasTextFontFamilyValueType,
   fontSize: number
 ) {
   const ctx = getMeasureCtx();
@@ -46,9 +46,9 @@ export function getLineHeight(
 
   const font = `${fontSize}px ${wrapFontFamily(fontFamily)}`;
   ctx.font = `${fontSize}px ${wrapFontFamily(fontFamily)}`;
-  const textMetrcs = ctx.measureText('M');
+  const textMetrics = ctx.measureText('M');
   const lineHeight =
-    textMetrcs.fontBoundingBoxAscent + textMetrcs.fontBoundingBoxDescent;
+    textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent;
 
   // cached when font property does not fallback
   if (font === ctx.font) {
@@ -67,7 +67,7 @@ export function getFontString({
   fontStyle: string;
   fontWeight: string;
   fontSize: number;
-  fontFamily: CanvasTextFontFamily;
+  fontFamily: CanvasTextFontFamilyValueType;
 }): string {
   const lineHeight = getLineHeight(fontFamily, fontSize);
   return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight}px ${wrapFontFamily(
@@ -102,19 +102,19 @@ export function getTextRect(
   fontFamily: string,
   fontSize: number
 ): { w: number; h: number } {
-  const ctx = getMeasureCtx();
+  text = text
+    .split('\n')
+    .map(x => x || ' ')
+    .join('\n');
+
+  const lineHeight = getLineHeight(
+    fontFamily as CanvasTextFontFamilyValueType,
+    fontSize
+  );
   const font = `${fontSize}px "${fontFamily}"`;
-
-  if (font !== ctx.font) ctx.font = font;
-
-  const metrics = ctx.measureText(text);
-  const lineHeight =
-    metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-
-  return {
-    w: metrics.width,
-    h: lineHeight,
-  };
+  const w = getTextWidth(text, font);
+  const h = getTextHeight(text, lineHeight);
+  return { w, h };
 }
 
 export function getTextWidth(text: string, font: string): number {
@@ -125,6 +125,11 @@ export function getTextWidth(text: string, font: string): number {
   });
   return width;
 }
+
+export const getTextHeight = (text: string, lineHeight: number) => {
+  const lineCount = splitIntoLines(text).length;
+  return lineHeight * lineCount;
+};
 
 export function parseTokens(text: string): string[] {
   // Splitting words containing "-" as those are treated as separate words
@@ -140,7 +145,7 @@ export function parseTokens(text: string): string[] {
   }
   // Joining the words with space and splitting them again with space to get the
   // final list of tokens
-  // ['non-', 'profit org'] =>,'non- proft org' => ['non-','profit','org']
+  // ['non-', 'profit org'] =>,'non- profit org' => ['non-','profit','org']
   return words.join(' ').split(' ');
 }
 

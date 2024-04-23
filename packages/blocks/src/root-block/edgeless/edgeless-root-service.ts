@@ -83,6 +83,8 @@ export class EdgelessRootService extends RootService {
     }>(),
     tagClicked: new Slot<{ tagId: string }>(),
     editorModeSwitch: new Slot<'edgeless' | 'page'>(),
+
+    toolbarLocked: new Slot<boolean>(),
   };
 
   private _surface!: SurfaceBlockModel;
@@ -181,6 +183,14 @@ export class EdgelessRootService extends RootService {
 
   get zoom() {
     return this.viewport.zoom;
+  }
+
+  get locked() {
+    return this.viewport.locked;
+  }
+
+  set locked(locked: boolean) {
+    this.viewport.locked = locked;
   }
 
   override get host() {
@@ -425,6 +435,7 @@ export class EdgelessRootService extends RootService {
 
     if (activeGroup && picked && activeGroup.hasDescendant(picked.id)) {
       let index = results.length - 1;
+
       while (
         picked === activeGroup ||
         (picked instanceof GroupLikeModel && picked.hasDescendant(activeGroup))
@@ -433,6 +444,7 @@ export class EdgelessRootService extends RootService {
       }
     } else if (picked) {
       let index = results.length - 1;
+
       while (picked.group !== null) {
         if (--index < 0) {
           picked = null;
@@ -639,6 +651,8 @@ export class EdgelessRootService extends RootService {
   }
 
   setZoomByAction(action: ZoomAction) {
+    if (this.locked) return;
+
     switch (action) {
       case 'fit':
         this.zoomToFit();

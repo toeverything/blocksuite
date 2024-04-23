@@ -1,15 +1,20 @@
-import { defineBlockSchema } from '../schema/index.js';
+import { defineBlockSchema, type SchemaToModel } from '../schema/index.js';
 
 export const RootBlockSchema = defineBlockSchema({
   flavour: 'affine:page',
   props: internal => ({
     title: internal.Text(),
+    count: 0,
+    style: {} as Record<string, unknown>,
+    items: [] as unknown[],
   }),
   metadata: {
     version: 2,
     role: 'root',
   },
 });
+
+export type RootBlockModel = SchemaToModel<typeof RootBlockSchema>;
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',

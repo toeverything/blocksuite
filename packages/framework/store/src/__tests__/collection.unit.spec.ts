@@ -218,6 +218,9 @@ describe('basic', () => {
         'space:0': {
           blocks: {
             '0': {
+              'prop:count': 0,
+              'prop:items': [],
+              'prop:style': {},
               'prop:title': '',
               'sys:children': [],
               'sys:flavour': 'affine:page',
@@ -247,6 +250,9 @@ describe('addBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -262,6 +268,9 @@ describe('addBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -288,6 +297,9 @@ describe('addBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -335,7 +347,8 @@ describe('addBlock', () => {
         title: new doc.Text(),
       })
     );
-    const block = await waitOnce(doc.slots.rootAdded);
+    const blockId = await waitOnce(doc.slots.rootAdded);
+    const block = doc.getBlockById(blockId) as BlockModel;
     assert.equal(block.flavour, 'affine:page');
   });
 
@@ -467,6 +480,9 @@ describe('deleteBlock', () => {
     doc.addBlock('affine:paragraph', {}, noteId);
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -502,6 +518,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -522,6 +541,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -568,6 +590,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -612,6 +637,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -674,6 +702,9 @@ describe('deleteBlock', () => {
 
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -731,6 +762,9 @@ describe('deleteBlock', () => {
     // before delete
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -758,6 +792,9 @@ describe('deleteBlock', () => {
     // after delete
     assert.deepEqual(serializCollection(doc.rootDoc).spaces[spaceId].blocks, {
       '0': {
+        'prop:count': 0,
+        'prop:items': [],
+        'prop:style': {},
         'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -817,12 +854,10 @@ describe('getBlock', () => {
     doc.addBlock('affine:paragraph', {}, noteId);
     doc.addBlock('affine:paragraph', {}, noteId);
 
-    const result = doc.getPreviousSibling(
-      rootModel.children[0].children[1]
-    ) as BlockModel;
+    const result = doc.getPrev(rootModel.children[0].children[1]) as BlockModel;
     assert.equal(result, rootModel.children[0].children[0]);
 
-    const invalid = doc.getPreviousSibling(rootModel.children[0].children[0]);
+    const invalid = doc.getPrev(rootModel.children[0].children[0]);
     assert.equal(invalid, null);
   });
 });
@@ -838,6 +873,9 @@ describe('collection.exportJSX works', () => {
 
     expect(collection.exportJSX()).toMatchInlineSnapshot(`
       <affine:page
+        prop:count={0}
+        prop:items={[]}
+        prop:style={{}}
         prop:title="hello"
       />
     `);
@@ -865,7 +903,11 @@ describe('collection.exportJSX works', () => {
     });
 
     expect(collection.exportJSX()).toMatchInlineSnapshot(/* xml */ `
-      <affine:page>
+      <affine:page
+        prop:count={0}
+        prop:items={[]}
+        prop:style={{}}
+      >
         <affine:note>
           <affine:paragraph
             prop:type="text"

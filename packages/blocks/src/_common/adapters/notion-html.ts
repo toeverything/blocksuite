@@ -8,18 +8,21 @@ import type {
   FromSliceSnapshotPayload,
   FromSliceSnapshotResult,
 } from '@blocksuite/store';
-import { type AssetsManager, getAssetName, sha } from '@blocksuite/store';
-import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import {
+  type AssetsManager,
+  ASTWalker,
+  BaseAdapter,
   type BlockSnapshot,
   type DocSnapshot,
+  getAssetName,
+  nanoid,
+  sha,
   type SliceSnapshot,
 } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 
-import { getTagColor } from '../components/tags/colors.js';
+import { getTagColor } from '../../database-block/data-view/utils/tags/colors.js';
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
@@ -245,6 +248,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           if (!assets) {
             break;
           }
+          if (context.getGlobalContext('hast:disableimg')) {
+            break;
+          }
           const image = o.node;
           const imageURL =
             typeof image?.properties.src === 'string'
@@ -274,7 +280,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'image' +
                   '.' +
                   (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png');
-              const file = new File([await res.blob()], name);
+              const file = new File([await res.blob()], name, {
+                type: res.headers.get('Content-Type') ?? '',
+              });
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
               await assets?.writeToBlob(blobId);
@@ -596,7 +604,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 (imageURL.split('/').at(-1) ?? 'image') +
                   '.' +
                   (res.headers.get('Content-Type')?.split('/').at(-1) ?? 'png');
-              const file = new File([await res.blob()], name);
+              const file = new File([await res.blob()], name, {
+                type: res.headers.get('Content-Type') ?? '',
+              });
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
               await assets?.writeToBlob(blobId);
@@ -654,7 +664,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   '.' +
                   (res.headers.get('Content-Type')?.split('/').at(-1) ??
                     'blob');
-              const file = new File([await res.blob()], name);
+              const file = new File([await res.blob()], name, {
+                type: res.headers.get('Content-Type') ?? '',
+              });
               size = file.size;
               type = file.type;
               blobId = await sha(await resCloned.arrayBuffer());
@@ -699,6 +711,8 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               id: columnId,
             }
           );
+          // disable icon img in th
+          context.setGlobalContext('hast:disableimg', true);
           break;
         }
         case 'tr': {
@@ -708,8 +722,55 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'hast:table:column'
               );
             const row = Object.create(null);
+            let plainTable = false;
             hastGetElementChildren(o.node).forEach((child, index) => {
-              if (hastQuerySelector(child, '.cell-title')) {
+              if (plainTable || columns[index] === undefined) {
+                plainTable = true;
+                if (columns[index] === undefined) {
+                  columns.push({
+                    type: 'rich-text',
+                    name: '',
+                    data: Object.create(null),
+                    id: nanoid(),
+                  });
+                  context.pushGlobalContextStack<BlockSnapshot>(
+                    'hast:table:children',
+                    {
+                      type: 'block',
+                      id: nanoid(),
+                      flavour: 'affine:paragraph',
+                      props: {
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: this._hastToDelta(child),
+                        },
+                        type: 'text',
+                      },
+                      children: [],
+                    }
+                  );
+                }
+                context.pushGlobalContextStack<BlockSnapshot>(
+                  'hast:table:children',
+                  {
+                    type: 'block',
+                    id: nanoid(),
+                    flavour: 'affine:paragraph',
+                    props: {
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: this._hastToDelta(child),
+                      },
+                      type: 'text',
+                    },
+                    children: [],
+                  }
+                );
+                row[columns[index].id] = {
+                  columnId: columns[index].id,
+                  value: hastGetTextContent(child),
+                };
+              } else if (hastQuerySelector(child, '.cell-title')) {
                 context.pushGlobalContextStack<BlockSnapshot>(
                   'hast:table:children',
                   {
@@ -907,6 +968,10 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             context.openNode(child, 'children').closeNode();
           });
           context.closeNode();
+          break;
+        }
+        case 'th': {
+          context.setGlobalContext('hast:disableimg', false);
           break;
         }
       }

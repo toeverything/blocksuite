@@ -1,8 +1,11 @@
 import type { EdgelessModel } from '../../root-block/edgeless/type.js';
 import { MindmapElementModel } from '../element-model/mindmap.js';
-import type { SurfaceBlockModel } from '../surface-model.js';
+import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 
-export function mindmapMiddleware(surface: SurfaceBlockModel) {
+export const mindmapMiddleware: SurfaceMiddleware = (
+  surface: SurfaceBlockModel,
+  hooks
+) => {
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
     (surface.doc.getBlockById(id) as EdgelessModel);
@@ -31,7 +34,7 @@ export function mindmapMiddleware(surface: SurfaceBlockModel) {
   let connUpdPending = false;
   const connUpdList = new Set<MindmapElementModel>();
   const updateConnection = (mindmap: MindmapElementModel) => {
-    connUpdList.add(mindmap);
+    if (!layoutUpdList.has(mindmap)) connUpdList.add(mindmap);
 
     if (connUpdPending) {
       return;
@@ -66,28 +69,46 @@ export function mindmapMiddleware(surface: SurfaceBlockModel) {
           updateConnection(element);
         }
       }),
-    surface.elementUpdated.on(({ id, props, local }) => {
+    surface.elementUpdated.on(({ id, props }) => {
+      if (props['childIds'] || props['style']) {
+        const element = surface.getElementById(id);
+
+        if (element instanceof MindmapElementModel) {
+          updateConnection(element);
+        }
+      }
+
+      if (props['xywh']) {
+        const element = surface.getElementById(id);
+
+        if (element?.group instanceof MindmapElementModel) {
+          updateConnection(element.group);
+        }
+      }
+    }),
+    hooks.update.on(({ id, props }) => {
       // Recalculate mindmap connectors when child xywh is updated
       const mindmap = surface.getGroup(id);
       if (mindmap instanceof MindmapElementModel && props['xywh']) {
-        updateConnection(mindmap);
+        updateLayout(mindmap);
       }
+    }),
+    hooks.remove.on(({ id }) => {
+      const mindmap = surface.getGroup(id);
 
-      /**
-       * Rebuild tree when childIds is updated.
-       */
-      const element = getElementById(id);
-      if (
-        local &&
-        element instanceof MindmapElementModel &&
-        props['childIds']
-      ) {
-        updateLayout(element);
+      if (mindmap instanceof MindmapElementModel) {
+        updateLayout(mindmap);
       }
     }),
   ];
 
+  surface.elementModels.forEach(model => {
+    if (model instanceof MindmapElementModel) {
+      updateConnection(model);
+    }
+  });
+
   return () => {
     disposables.forEach(disposable => disposable.dispose());
   };
-}
+};

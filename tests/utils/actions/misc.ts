@@ -3,10 +3,10 @@ import '../declare-test-window.js';
 
 import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import type { RichText } from '@blocks/index.js';
 import {
   type DatabaseBlockModel,
   type ListType,
+  type RichText,
   type ThemeObserver,
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
@@ -72,7 +72,7 @@ async function initEmptyEditor({
 }) {
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
-      const { collection: collection } = window;
+      const { collection } = window;
 
       async function waitForMountPageEditor(
         doc: ReturnType<typeof collection.createDoc>
@@ -154,7 +154,7 @@ async function initEmptyEditor({
       }
 
       if (noInit) {
-        const firstDoc = collection.docs.values().next().value as
+        const firstDoc = collection.docs.values().next().value?.getDoc() as
           | ReturnType<typeof collection.createDoc>
           | undefined;
         if (firstDoc) {
@@ -461,7 +461,7 @@ export async function initEmptyEdgelessState(page: Page) {
 }
 
 export async function initEmptyDatabaseState(page: Page, rootId?: string) {
-  const ids = await page.evaluate(rootId => {
+  const ids = await page.evaluate(async rootId => {
     const { doc } = window;
     doc.captureSync();
     if (!rootId) {
@@ -478,7 +478,15 @@ export async function initEmptyDatabaseState(page: Page, rootId?: string) {
       noteId
     );
     const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    model.initEmpty('table');
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const databaseBlock = document.querySelector('affine-database');
+    const databaseService = databaseBlock?.service;
+    if (databaseService) {
+      databaseService.databaseViewInitEmpty(
+        model,
+        databaseService.viewPresets.tableViewConfig
+      );
+    }
     model.applyColumnUpdate();
 
     doc.captureSync();
@@ -496,7 +504,7 @@ export async function initKanbanViewState(
   rootId?: string
 ) {
   const ids = await page.evaluate(
-    ({ rootId, config }) => {
+    async ({ rootId, config }) => {
       const { doc } = window;
 
       doc.captureSync();
@@ -540,7 +548,15 @@ export async function initKanbanViewState(
           }
         });
       });
-      model.initEmpty('kanban');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const databaseBlock = document.querySelector('affine-database');
+      const databaseService = databaseBlock?.service;
+      if (databaseService) {
+        databaseService.databaseViewInitEmpty(
+          model,
+          databaseService.viewPresets.kanbanViewConfig
+        );
+      }
       model.applyColumnUpdate();
       doc.captureSync();
       return { rootId, noteId, databaseId };
@@ -554,9 +570,8 @@ export async function initEmptyDatabaseWithParagraphState(
   page: Page,
   rootId?: string
 ) {
-  const ids = await page.evaluate(rootId => {
+  const ids = await page.evaluate(async rootId => {
     const { doc } = window;
-
     doc.captureSync();
     if (!rootId) {
       rootId = doc.addBlock('affine:page', {
@@ -572,7 +587,15 @@ export async function initEmptyDatabaseWithParagraphState(
       noteId
     );
     const model = doc.getBlockById(databaseId) as DatabaseBlockModel;
-    model.initEmpty('table');
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const databaseBlock = document.querySelector('affine-database');
+    const databaseService = databaseBlock?.service;
+    if (databaseService) {
+      databaseService.databaseViewInitEmpty(
+        model,
+        databaseService.viewPresets.tableViewConfig
+      );
+    }
     model.applyColumnUpdate();
     doc.addBlock('affine:paragraph', {}, noteId);
 

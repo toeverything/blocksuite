@@ -7,7 +7,7 @@ import {
   LassoMode,
   type LassoTool,
 } from '../../../../_common/types.js';
-import type { Bound } from '../../../../surface-block/index.js';
+import { Bound } from '../../../../surface-block/index.js';
 import {
   getBoundFromPoints,
   getSvgPathFromStroke,
@@ -17,7 +17,9 @@ import {
 } from '../../../../surface-block/index.js';
 import {
   getPolygonPathFromPoints,
+  linePolygonIntersects,
   pointInPolygon,
+  rotatePoints,
 } from '../../../../surface-block/utils/math-utils.js';
 import { EdgelessToolController } from './index.js';
 
@@ -97,7 +99,9 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const lassoBounds = getBoundFromPoints(this._lassoPoints);
     return this._service
       .pickElementsByBound(lassoBounds)
-      .filter(e => this.isInsideLassoSelection(e.elementBound));
+      .filter(e =>
+        this.isInsideLassoSelection(Bound.deserialize(e.xywh), e.rotate)
+      );
   }
 
   private _reset() {
@@ -140,18 +144,22 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     }
   }
 
-  private isInsideLassoSelection(bound: Bound): boolean {
-    // Check if any corner of the bounding box is inside the lasso polygon
+  private isInsideLassoSelection(bound: Bound, rotate: number): boolean {
+    const { points, center } = bound;
+
     const firstPoint = this._lassoPoints[0];
     const lassoPoints = this._lassoPoints.concat(
       firstPoint ? [firstPoint] : []
     );
 
-    const elPoly = bound.points;
-    for (const point of elPoly) {
-      if (pointInPolygon(point, lassoPoints)) return true;
-    }
-    return false;
+    const elPoly = rotatePoints(points, center, rotate);
+    const lassoLen = lassoPoints.length;
+    return (
+      elPoly.some(point => pointInPolygon(point, lassoPoints)) ||
+      lassoPoints.some((point, i, points) => {
+        return linePolygonIntersects(point, points[(i + 1) % lassoLen], elPoly);
+      })
+    );
   }
 
   private _updateSelection(e: PointerEventState) {

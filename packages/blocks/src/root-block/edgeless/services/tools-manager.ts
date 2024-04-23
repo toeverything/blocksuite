@@ -15,6 +15,7 @@ import {
   NoteDisplayMode,
 } from '../../../_common/utils/index.js';
 import type { Bound } from '../../../surface-block/utils/bound.js';
+import { CopilotSelectionController } from '../controllers/tools/copilot-tool.js';
 import type { EdgelessToolController } from '../controllers/tools/index.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessRootService } from '../edgeless-root-service.js';
@@ -336,6 +337,8 @@ export class EdgelessToolsManager {
         metaKeyPressed;
 
       const switchToPreMode = (_e: MouseEvent) => {
+        if (targetTool.type === 'copilot') return;
+
         if (targetButtonRelease(_e)) {
           this.setEdgelessTool(
             prevEdgelessTool,
@@ -404,6 +407,14 @@ export class EdgelessToolsManager {
       return;
     }
     if (this.edgelessTool === edgelessTool) return;
+
+    if (
+      this.currentController instanceof CopilotSelectionController &&
+      this.currentController.processing
+    ) {
+      return;
+    }
+
     const lastType = this.edgelessTool.type;
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[type].beforeModeSwitch(edgelessTool);
@@ -414,6 +425,8 @@ export class EdgelessToolsManager {
       const isDefaultType = type === 'default';
       const isLassoType = type === 'lasso';
       const isLastTypeLasso = lastType === 'lasso';
+      const isCopilotType = type === 'copilot';
+      const isLastTypeCopilot = lastType === 'copilot';
       const isLastTypeDefault = lastType === 'default';
       const isEmptyState = Array.isArray(state)
         ? this.selection.isEmpty(state)
@@ -430,11 +443,15 @@ export class EdgelessToolsManager {
         (isDefaultType && isLastTypeDefault) ||
         (isLassoType && isLastTypeDefault) ||
         (isDefaultType && isLastTypeLasso) ||
-        (isLassoType && isLastTypeLasso)
-      )
+        (isLassoType && isLastTypeLasso) ||
+        (isCopilotType && isLastTypeDefault) ||
+        // (isDefaultType && isLastTypeCopilot) ||
+        (isCopilotType && isLastTypeCopilot)
+      ) {
         state = this.selection.selections; // selection should remain same when switching between default and lasso tool
-      else if (
+      } else if (
         ((isDefaultType && !isLastTypeLasso) || isLassoType) &&
+        ((isDefaultType && !isLastTypeCopilot) || isCopilotType) &&
         isEmptyState &&
         hasLastState &&
         isNotSingleDocOnlyNote &&
