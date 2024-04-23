@@ -1,4 +1,5 @@
 import './field.js';
+import './header.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -7,10 +8,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../utils/menu/index.js';
-import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import type { DataViewManager } from '../../view/data-view-manager.js';
+import { DataViewKanbanManager } from '../../view/presets/kanban/kanban-view-manager.js';
+import { DataViewTableManager } from '../../view/presets/table/table-view-manager.js';
 import { dataViewCommonStyle } from '../css-variable.js';
-import type { DetailSlotProps } from '../data-source/base.js';
 import { PlusIcon } from '../icons/index.js';
 import { DetailSelection } from './selection.js';
 
@@ -60,8 +61,10 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   view!: DataViewManager;
+
   @property({ attribute: false })
   rowId!: string;
+
   selection = new DetailSelection(this);
 
   private get readonly() {
@@ -134,15 +137,21 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   }
 
   private renderHeader() {
-    const header = this.view.detailSlots.header;
-    if (header) {
-      const props: DetailSlotProps = {
-        view: this.view,
-        rowId: this.rowId,
-      };
-      return renderUniLit(header, props);
+    const view = this.view;
+    if (
+      view instanceof DataViewTableManager ||
+      view instanceof DataViewKanbanManager
+    ) {
+      const titleColId = view.header.titleColumn;
+      if (!titleColId) return nothing;
+
+      const titleColumn = this.view.columnGet(titleColId);
+      return html`<affine-data-view-record-detail-header
+        .titleColumn=${titleColumn}
+        .rowId=${this.rowId}
+      ></affine-data-view-record-detail-header>`;
     }
-    return undefined;
+    return nothing;
   }
 }
 
