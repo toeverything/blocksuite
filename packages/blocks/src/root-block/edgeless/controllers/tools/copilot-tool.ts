@@ -6,6 +6,10 @@ import type {
   EdgelessTool,
 } from '../../../../_common/utils/index.js';
 import { Bound } from '../../../../surface-block/index.js';
+import {
+  AFFINE_AI_PANEL_WIDGET,
+  type AffineAIPanelWidget,
+} from '../../../widgets/ai-panel/ai-panel.js';
 import { EdgelessToolController } from './index.js';
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
@@ -13,10 +17,10 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     type: 'copilot',
   };
 
-  private _dragStartPoint: [number, number] = [0, 0];
-  private _dragLastPoint: [number, number] = [0, 0];
   private _dragging = false;
 
+  dragStartPoint: [number, number] = [0, 0];
+  dragLastPoint: [number, number] = [0, 0];
   draggingAreaUpdated = new Slot<boolean | void>();
 
   get selection() {
@@ -28,11 +32,8 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   get area() {
-    const start = new DOMPoint(
-      this._dragStartPoint[0],
-      this._dragStartPoint[1]
-    );
-    const end = new DOMPoint(this._dragLastPoint[0], this._dragLastPoint[1]);
+    const start = new DOMPoint(this.dragStartPoint[0], this.dragStartPoint[1]);
+    const end = new DOMPoint(this.dragLastPoint[0], this.dragLastPoint[1]);
 
     const minX = Math.min(start.x, end.x);
     const minY = Math.min(start.y, end.y);
@@ -42,19 +43,30 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     return new DOMRect(minX, minY, maxX - minX, maxY - minY);
   }
 
+  // AI processing
+  get processing() {
+    const aiPanel = this._edgeless.host.view.getWidget(
+      AFFINE_AI_PANEL_WIDGET,
+      this._edgeless.doc.root!.id
+    ) as AffineAIPanelWidget;
+    return aiPanel && aiPanel.state !== 'hidden';
+  }
+
   abort() {
     this._dragging = false;
-    this._dragStartPoint = [0, 0];
-    this._dragLastPoint = [0, 0];
+    this.dragStartPoint = [0, 0];
+    this.dragLastPoint = [0, 0];
     this._edgeless.tools.setEdgelessTool({ type: 'default' });
   }
 
   private _initDragState(e: PointerEventState) {
-    this._dragStartPoint = this._service.viewport.toModelCoord(e.x, e.y);
-    this._dragLastPoint = this._dragStartPoint;
+    this.dragStartPoint = this._service.viewport.toModelCoord(e.x, e.y);
+    this.dragLastPoint = this.dragStartPoint;
   }
 
   override onContainerDragStart(e: PointerEventState): void {
+    if (this.processing) return;
+
     this._initDragState(e);
     this._dragging = true;
     this.draggingAreaUpdated.emit();
@@ -63,7 +75,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   override onContainerDragMove(e: PointerEventState): void {
     if (!this._dragging) return;
 
-    this._dragLastPoint = this._service.viewport.toModelCoord(e.x, e.y);
+    this.dragLastPoint = this._service.viewport.toModelCoord(e.x, e.y);
 
     const area = this.area;
     const bound = new Bound(area.x, area.y, area.width, area.height);
@@ -84,11 +96,18 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   override onContainerDragEnd(): void {
+    if (!this._dragging) return;
+
     this._dragging = false;
     this.draggingAreaUpdated.emit(true);
   }
 
-  onContainerPointerDown(): void {
+  onContainerPointerDown(e: PointerEventState): void {
+    if (this.processing) {
+      e.raw.stopPropagation();
+      return;
+    }
+
     this._edgeless.tools.setEdgelessTool({ type: 'default' });
   }
 

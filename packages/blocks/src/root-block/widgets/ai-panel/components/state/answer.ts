@@ -29,6 +29,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       flex-direction: column;
       gap: 8px;
       padding: 0;
+      overflow-y: auto;
     }
 
     .answer {
