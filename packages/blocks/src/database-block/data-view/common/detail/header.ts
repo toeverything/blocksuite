@@ -1,8 +1,11 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
+import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection, type Y } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
+import type { RichText } from '../../../../_common/components/index.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewColumnManager } from '../../view/data-view-manager.js';
 
@@ -44,6 +47,36 @@ export class RecordDetailHeader extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   readonly: boolean = false;
 
+  get service() {
+    return this.closest('affine-database')?.service;
+  }
+
+  get inlineManager() {
+    return this.service?.inlineManager;
+  }
+
+  get attributesSchema() {
+    return this.inlineManager?.getSchema();
+  }
+
+  get attributeRenderer() {
+    return this.inlineManager?.getRenderer();
+  }
+
+  get topContenteditableElement() {
+    const databaseBlock = this.closest('affine-database');
+    return databaseBlock?.topContenteditableElement;
+  }
+
+  @query('rich-text')
+  richText!: RichText;
+
+  get inlineEditor() {
+    assertExists(this.richText);
+    const inlineEditor = this.richText.inlineEditor;
+    assertExists(inlineEditor);
+    return inlineEditor;
+  }
   override connectedCallback(): void {
     super.connectedCallback();
     this.disposables.add(
@@ -51,6 +84,13 @@ export class RecordDetailHeader extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
+
+    this.disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
+      if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
+        e.preventDefault();
+        this.inlineEditor.selectAll();
+      }
+    });
   }
 
   getYText(text?: string | Y.Text) {
@@ -81,7 +121,16 @@ export class RecordDetailHeader extends WithDisposable(ShadowlessElement) {
 
     return html`<div class="detail-header-container">
       <div class="${`detail-header ${isEmpty ? 'empty-title' : ''}`}">
-        <rich-text .yText=${yText} .readonly=${this.readonly}></rich-text>
+        <rich-text
+          .yText=${yText}
+          .inlineEventSource=${this.topContenteditableElement}
+          .attributesSchema=${this.attributesSchema}
+          .attributeRenderer=${this.attributeRenderer}
+          .embedChecker=${this.inlineManager?.embedChecker}
+          .markdownShortcutHandler=${this.inlineManager
+            ?.markdownShortcutHandler}
+          .readonly=${this.readonly}
+        ></rich-text>
       </div>
     </div> `;
   }
