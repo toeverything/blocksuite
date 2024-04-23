@@ -174,9 +174,10 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
       update: (text: string) => void;
       finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     }) => {
-      const selectedElements = getCopilotSelectedElems(host);
-
-      if (selectedElements.length === 0) return;
+      if (!extract) {
+        const selectedElements = getCopilotSelectedElems(host);
+        if (selectedElements.length === 0) return;
+      }
 
       const stream = actionToStream(id, variants, extract)?.(host);
 
@@ -226,22 +227,24 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
     aiPanel.config.discardCallback = () => {
       aiPanel.hide();
-      // @TODO: remove `async` wrapper when removing selected-rect
-      (async () => {
-        await aiPanel.updateComplete;
-        edgelessCopilot.visible = false;
-        edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
-          elements: [],
-          editing: false,
-        });
-      })().catch(console.error);
     };
     aiPanel.config.hideCallback = () => {
-      edgelessCopilot.lockToolbar(false);
+      aiPanel.updateComplete
+        .finally(() => {
+          edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
+            elements: [],
+            editing: false,
+          });
+          edgelessCopilot.lockToolbar(false);
+        })
+        .catch(console.error);
     };
 
     if (edgelessCopilot.visible) {
-      aiPanel.toggle(edgelessCopilot.selectionElem, 'placeholder');
+      aiPanel.toggle(
+        edgelessCopilot.selectionElem,
+        getCopilotSelectedElems(host).length ? 'placeholder' : undefined
+      );
     } else {
       aiPanel.toggle(getElementToolbar(host), 'placeholder');
     }
