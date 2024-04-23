@@ -39,9 +39,6 @@ class SideLayoutModal extends ShadowlessElement {
       padding: 12px;
       display: flex;
       align-items: center;
-      position: sticky;
-      top: 0;
-      width: 100%;
     }
 
     .header-ops {
