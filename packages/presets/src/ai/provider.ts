@@ -29,6 +29,12 @@ export class AIProvider {
     requestContinueInChat: new Slot<{ host: EditorHost; show: boolean }>(),
     requestLogin: new Slot<{ host: EditorHost }>(),
     requestUpgradePlan: new Slot<{ host: EditorHost }>(),
+    // stream of AI actions
+    actions: new Slot<{
+      action: keyof BlockSuitePresets.AIActions;
+      options: BlockSuitePresets.AITextActionOptions;
+      event: 'started' | 'finished' | 'error';
+    }>(),
     // add more if needed
   };
 
@@ -80,7 +86,64 @@ export class AIProvider {
       console.warn(`AI action ${id} is already provided`);
     }
     // @ts-expect-error todo: maybe fix this
-    this.actions[id] = action;
+    this.actions[id] = (
+      ...args: Parameters<BlockSuitePresets.AIActions[T]>
+    ) => {
+      const options = args[0];
+      const slots = this.slots;
+      slots.actions.emit({
+        action: id,
+        options,
+        event: 'started',
+      });
+      // wrap the action with slot actions
+      const result: BlockSuitePresets.TextStream | Promise<string> = action(
+        ...args
+      );
+      const isTextStream = (
+        m: BlockSuitePresets.TextStream | Promise<string>
+      ): m is BlockSuitePresets.TextStream =>
+        Reflect.has(m, Symbol.asyncIterator);
+      if (isTextStream(result)) {
+        return {
+          [Symbol.asyncIterator]: async function* () {
+            try {
+              yield* result;
+              slots.actions.emit({
+                action: id,
+                options,
+                event: 'finished',
+              });
+            } catch (err) {
+              slots.actions.emit({
+                action: id,
+                options,
+                event: 'error',
+              });
+              throw err;
+            }
+          },
+        };
+      } else {
+        return result
+          .then(result => {
+            slots.actions.emit({
+              action: id,
+              options,
+              event: 'finished',
+            });
+            return result;
+          })
+          .catch(err => {
+            slots.actions.emit({
+              action: id,
+              options,
+              event: 'error',
+            });
+            throw err;
+          });
+      }
+    };
   }
 
   static get slots() {
