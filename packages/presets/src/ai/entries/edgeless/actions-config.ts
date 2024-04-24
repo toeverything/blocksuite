@@ -1,8 +1,9 @@
-import type { AIItemGroupConfig } from '@blocksuite/blocks';
+import type { AIItemGroupConfig, ShapeElementModel } from '@blocksuite/blocks';
 import {
   AIPenIcon,
   BlocksUtils,
   LanguageIcon,
+  MindmapElementModel,
   TextElementModel,
 } from '@blocksuite/blocks';
 
@@ -10,12 +11,14 @@ import {
   actionToHandler,
   explainImageShowWhen,
   makeItRealShowWhen,
+  mindmapRootShowWhen,
   mindmapShowWhen,
-  noteBlockOrTextShowWen,
+  noteBlockOrTextShowWhen,
 } from '../../actions/edgeless-handler.js';
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
 import { translateLangs } from '../../actions/types.js';
 import { getAIPanel } from '../../ai-panel.js';
+import { mindMapToMarkdown } from '../../utils/edgeless.js';
 import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
@@ -31,7 +34,7 @@ export const docGroup: AIItemGroupConfig = {
     {
       name: 'Summary',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('summary'),
     },
   ],
@@ -43,7 +46,7 @@ export const othersGroup: AIItemGroupConfig = {
     {
       name: 'Find actions from it',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('findActions'),
     },
     {
@@ -61,37 +64,37 @@ export const editGroup: AIItemGroupConfig = {
     {
       name: 'Translate to',
       icon: LanguageIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       subItem: translateSubItem,
     },
     {
       name: 'Improve writing for it',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('improveWriting'),
     },
     {
       name: 'Improve grammar for it',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('improveGrammar'),
     },
     {
       name: 'Fix spelling ',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('fixSpelling'),
     },
     {
       name: 'Make longer',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeLonger'),
     },
     {
       name: 'Make shorter',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeShorter'),
     },
   ],
@@ -103,37 +106,37 @@ export const draftGroup: AIItemGroupConfig = {
     {
       name: 'Write an article about this',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writeArticle'),
     },
     {
       name: 'Write a tweet about this',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writeTwitterPost'),
     },
     {
       name: 'Write a poem about this',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writePoem'),
     },
     {
       name: 'Write a blog post about this',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writeBlogPost'),
     },
     {
       name: 'Write a outline from this',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('writeOutline'),
     },
     {
       name: 'Brainstorm ideas about this',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('brainstorm'),
     },
   ],
@@ -143,15 +146,34 @@ export const mindmapGroup: AIItemGroupConfig = {
   name: 'mindmap with ai',
   items: [
     {
-      name: 'Expand from this mindmap node',
+      name: 'Expand from this mind map node',
       icon: AIPenIcon,
       showWhen: mindmapShowWhen,
-      handler: actionToHandler('expandMindmap'),
+      handler: actionToHandler('expandMindmap', undefined, function (host) {
+        const selected = getCopilotSelectedElems(host);
+        const firstSelected = selected[0] as ShapeElementModel;
+        const mindmap = firstSelected?.group;
+
+        if (!(mindmap instanceof MindmapElementModel)) {
+          return Promise.resolve({});
+        }
+
+        return Promise.resolve({
+          input: firstSelected.text?.toString() ?? '',
+          content: mindMapToMarkdown(mindmap),
+        });
+      }),
     },
     {
-      name: 'Brainstorm ideas with Mindmap',
+      name: 'Brainstorm ideas with mind map',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('brainstormMindmap'),
+    },
+    {
+      name: 'Regenerate mind map',
+      icon: AIPenIcon,
+      showWhen: mindmapRootShowWhen,
       handler: actionToHandler('brainstormMindmap'),
     },
   ],
@@ -163,7 +185,7 @@ export const presentationGroup: AIItemGroupConfig = {
     {
       name: 'Create a presentation',
       icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWen,
+      showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('createSlides'),
     },
   ],

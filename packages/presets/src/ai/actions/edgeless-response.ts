@@ -16,18 +16,22 @@ import {
   DeleteIcon,
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EmbedHtmlBlockSpec,
+  fitContent,
   InsertBelowIcon,
   NoteDisplayMode,
   ResetIcon,
-  updateMindmapNodeRect,
 } from '@blocksuite/blocks';
 
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
+import { isMindMapRoot } from '../utils/edgeless.js';
 import { preprocessHtml } from '../utils/html.js';
 import { fetchImageToFile } from '../utils/image.js';
-import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
+import {
+  getEdgelessRootFromEditor,
+  getEdgelessService,
+} from '../utils/selection-utils.js';
 
 export type CtxRecord = {
   get(): Record<string, unknown>;
@@ -69,6 +73,12 @@ export function getElementToolbar(
   ) as EdgelessElementToolbarWidget;
 
   return elementToolbar;
+}
+
+export function getTriggerEntry(host: EditorHost) {
+  const copilotWidget = getEdgelessCopilotWidget(host);
+
+  return copilotWidget.visible ? 'selection' : 'toolbar';
 }
 
 export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
@@ -125,22 +135,82 @@ export function createInsertResp(
   };
 }
 
+type MindMapNode = {
+  text: string;
+  children: MindMapNode[];
+};
+
 export const responses: {
   [key in keyof Partial<BlockSuitePresets.AIActions>]: (
     host: EditorHost,
     ctx: CtxRecord
   ) => void;
 } = {
-  brainstormMindmap: (host, ctx) => {
+  expandMindmap: (host, ctx) => {
     const aiPanel = getAIPanel(host);
-    const edgelessCopilot = getEdgelessCopilotWidget(host);
     const [surface] = host.doc.getBlockByFlavour(
       'affine:surface'
     ) as SurfaceBlockModel[];
 
+    const elements = ctx.get()['selectedElements'] as EdgelessModel[];
+    const data = ctx.get() as {
+      node: MindMapNode;
+    };
+
+    aiPanel.hide();
+
+    const mindmap = elements[0].group as MindmapElementModel;
+
+    if (!data?.node) return;
+
+    if (data.node.children) {
+      data.node.children.forEach(childTree => {
+        mindmap.addTree(elements[0].id, childTree);
+      });
+
+      const subtree = mindmap.getNode(elements[0].id);
+
+      if (!subtree) return;
+
+      surface.doc.transact(() => {
+        const updateNodeSize = (node: typeof subtree) => {
+          fitContent(node.element as ShapeElementModel);
+
+          node.children.forEach(child => {
+            updateNodeSize(child);
+          });
+        };
+
+        updateNodeSize(subtree);
+      });
+    }
+  },
+  brainstormMindmap: (host, ctx) => {
+    const aiPanel = getAIPanel(host);
+    const edgelessService = getEdgelessService(host);
+    const edgelessCopilot = getEdgelessCopilotWidget(host);
+    const selectionRect = edgelessCopilot.selectionModelRect;
+    const [surface] = host.doc.getBlockByFlavour(
+      'affine:surface'
+    ) as SurfaceBlockModel[];
+    const elements = ctx.get()['selectedElements'] as EdgelessModel[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = ctx.get() as any;
-    const selectionRect = edgelessCopilot.selectionModelRect;
+    let needTomoveMindMap = true;
+    let focus = false;
+
+    if (isMindMapRoot(elements[0])) {
+      const mindmap = elements[0].group as MindmapElementModel;
+      const xywh = mindmap.tree.element.xywh;
+
+      surface.removeElement(mindmap.id);
+
+      if (data.node) {
+        data.node.xywh = xywh;
+        needTomoveMindMap = false;
+        focus = true;
+      }
+    }
 
     edgelessCopilot.hideCopilotPanel();
     aiPanel.hide();
@@ -155,15 +225,13 @@ export const responses: {
     host.doc.transact(() => {
       const rootElement = mindmap.tree.element;
 
-      if (selectionRect) {
-        rootElement.xywh = `[${selectionRect.x},${selectionRect.y},${rootElement.w},${rootElement.h}]`;
-      }
-
       mindmap.childElements.forEach(shape => {
-        updateMindmapNodeRect(shape as ShapeElementModel);
+        fitContent(shape as ShapeElementModel);
       });
 
-      if (selectionRect) {
+      if (selectionRect && needTomoveMindMap) {
+        rootElement.xywh = `[${selectionRect.x},${selectionRect.y},${rootElement.w},${rootElement.h}]`;
+
         queueMicrotask(() => {
           mindmap.moveTo([
             selectionRect.x,
@@ -171,6 +239,15 @@ export const responses: {
             selectionRect.width,
             selectionRect.height,
           ]);
+        });
+      }
+
+      if (focus) {
+        queueMicrotask(() => {
+          edgelessService.selection.set({
+            elements: [mindmap.tree.element.id],
+            editing: false,
+          });
         });
       }
     });
@@ -292,7 +369,7 @@ const defaultHandler = (host: EditorHost) => {
   });
 };
 
-export function getResponseHandler<T extends keyof BlockSuitePresets.AIActions>(
+export function getInsertHandler<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
   host: EditorHost,
   ctx: CtxRecord
@@ -312,7 +389,7 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
       {
         name: 'Response',
         items: [
-          getResponseHandler(id, host, ctx),
+          getInsertHandler(id, host, ctx),
           retry(getAIPanel(host)),
           discard(getAIPanel(host), getEdgelessCopilotWidget(host)),
         ],

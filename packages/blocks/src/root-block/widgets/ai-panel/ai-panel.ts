@@ -13,7 +13,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
-import { on, stopPropagation } from '../../../_common/utils/event.js';
+import { stopPropagation } from '../../../_common/utils/event.js';
 import type { AIPanelDiscardModal } from './components/discard-modal.js';
 import { toggleDiscardModal } from './components/discard-modal.js';
 import type { AffineAIPanelState, AffineAIPanelWidgetConfig } from './type.js';
@@ -118,15 +118,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       this.state = 'input';
     }
 
-    this._stopAutoUpdate?.();
-    this._stopAutoUpdate = autoUpdate(reference, this, () => {
-      computePosition(reference, this, this.config?.positionConfig)
-        .then(({ x, y }) => {
-          this.style.left = `${x}px`;
-          this.style.top = `${y}px`;
-        })
-        .catch(console.error);
-    });
+    this._autoUpdatePosition(reference);
   };
 
   hide = () => {
@@ -218,13 +210,42 @@ export class AffineAIPanelWidget extends WidgetElement {
     this.generate();
   };
 
+  private _autoUpdatePosition(reference: ReferenceElement) {
+    this._stopAutoUpdate?.();
+    this._stopAutoUpdate = autoUpdate(reference, this, () => {
+      computePosition(reference, this, this.config?.positionConfig)
+        .then(({ x, y }) => {
+          this.style.left = `${x}px`;
+          this.style.top = `${y}px`;
+        })
+        .catch(console.error);
+    });
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
     this.tabIndex = -1;
-    this.disposables.add(on(this, 'wheel', stopPropagation));
-    this.disposables.add(on(this, 'pointerdown', stopPropagation));
-    this.disposables.addFromEvent(document, 'mousedown', this._onDocumentClick);
+    this.disposables.addFromEvent(
+      document,
+      'pointerdown',
+      this._onDocumentClick
+    );
+    this.disposables.add(
+      this.blockElement.host.event.add('pointerDown', evtState =>
+        this._onDocumentClick(
+          evtState.get('pointerState').event as PointerEvent
+        )
+      )
+    );
+    this.disposables.add(
+      this.blockElement.host.event.add('click', () => {
+        return this.state !== 'hidden' ? true : false;
+      })
+    );
+    this.disposables.addFromEvent(this, 'wheel', stopPropagation);
+    this.disposables.addFromEvent(this, 'pointerdown', stopPropagation);
+    this.disposables.addFromEvent(this, 'pointerup', stopPropagation);
   }
 
   override disconnectedCallback() {
@@ -233,17 +254,17 @@ export class AffineAIPanelWidget extends WidgetElement {
   }
 
   private _onDocumentClick = (e: MouseEvent) => {
-    if (this.state !== 'hidden') {
-      e.preventDefault();
-    }
-
     if (
+      this.state !== 'hidden' &&
       e.target !== this._discardModal &&
       e.target !== this &&
       !this.contains(e.target as Node)
     ) {
       this._clickOutside();
+      return true;
     }
+
+    return false;
   };
 
   protected override willUpdate(changed: PropertyValues): void {

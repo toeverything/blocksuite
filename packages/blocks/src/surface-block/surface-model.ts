@@ -1,4 +1,4 @@
-import { Slot } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
   BlockModel,
@@ -180,7 +180,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     string,
     { mount: () => void; unmount: () => void; model: ElementModel }
   > = new Map();
-  private _disposables: Array<() => void> = [];
+  private _disposables: DisposableGroup = new DisposableGroup();
   private _groupToElements: Map<string, string[]> = new Map();
   private _elementToGroup: Map<string, string> = new Map();
   private _connectorToElements: Map<string, string[]> = new Map();
@@ -223,12 +223,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   }
 
   private _applyMiddlewares() {
-    this._disposables.push(
+    [
       connectorMiddleware(this, this.hooks),
       groupRelationMiddleware(this, this.hooks),
       groupSizeMiddleware(this, this.hooks),
-      mindmapMiddleware(this, this.hooks)
-    );
+      mindmapMiddleware(this, this.hooks),
+    ].forEach(disposable => this._disposables.add(disposable));
   }
 
   private _initElementModels() {
@@ -301,7 +301,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     });
     elementsYMap.observe(onElementsMapChange);
 
-    this._disposables.push(() => {
+    this._disposables.add(() => {
       elementsYMap.unobserve(onElementsMapChange);
     });
   }
@@ -380,6 +380,20 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
         children.forEach(childId => removeFromGroup(childId, id));
       }
     });
+
+    this._disposables.add(
+      this.doc.slots.blockUpdated.on(({ type, id }) => {
+        switch (type) {
+          case 'delete': {
+            const group = this.getGroup(id);
+
+            if (group) {
+              group.removeDescendant(id);
+            }
+          }
+        }
+      })
+    );
   }
 
   private _watchConnectorRelationChange() {
@@ -474,7 +488,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   override dispose(): void {
     super.dispose();
 
-    this._disposables.forEach(dispose => dispose());
+    this._disposables.dispose();
 
     this.elementAdded.dispose();
     this.elementRemoved.dispose();
@@ -565,7 +579,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       throw new Error('Cannot remove element in readonly mode');
     }
 
-    if (!this.getElementById(id)) {
+    if (!this.hasElementById(id)) {
       return;
     }
 

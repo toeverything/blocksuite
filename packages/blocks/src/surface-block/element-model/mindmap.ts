@@ -34,6 +34,7 @@ import {
 
 const baseNodeSchema = z.object({
   text: z.string(),
+  xywh: z.optional(z.string()),
 });
 
 type Node = z.infer<typeof baseNodeSchema> & {
@@ -83,7 +84,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
         const id = surface.addElement({
           type: 'shape',
           text: node.text,
-          xywh: `[0, 0, 100, 30]`,
+          xywh: node.xywh ? node.xywh : `[0, 0, 100, 30]`,
         });
 
         map.set(id, {
@@ -261,6 +262,10 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     return node?.parent ? this.surface.getElementById(node.parent) : null;
   }
 
+  getNode(id: string) {
+    return this._nodeMap.get(id) ?? null;
+  }
+
   /**
    * Path is an array of indexes that represent the path from the root node to the target node.
    * The first element of the array is always 0, which represents the root node.
@@ -273,7 +278,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
    * // [0, 1, 2]
    * ```
    */
-  getPath(element: string | MindmapNode) {
+  private _getPath(element: string | MindmapNode) {
     let node = this._nodeMap.get(
       typeof element === 'string' ? element : element.id
     );
@@ -330,8 +335,8 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
         sibling = sibling ?? last(parentNode.children)?.id;
         const siblingNode = sibling ? this._nodeMap.get(sibling) : undefined;
         const path = siblingNode
-          ? this.getPath(siblingNode)
-          : this.getPath(parentNode).concat([0]);
+          ? this._getPath(siblingNode)
+          : this._getPath(parentNode).concat([0]);
         const style = this.styleGetter.getNodeStyle(
           siblingNode ?? parentNode,
           path
@@ -401,27 +406,47 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     return id!;
   }
 
-  removeDescendant(id: string, transaction: boolean = true) {
+  addTree(parent: string | null, tree: NodeType, sibling?: string) {
+    const traverse = (
+      node: NodeType,
+      parent: string | null,
+      sibling?: string
+    ) => {
+      const nodeId = this.addNode(parent, 'shape', sibling, 'after', {
+        text: node.text,
+      });
+
+      node.children?.forEach(child => {
+        traverse(child, nodeId);
+      });
+
+      return nodeId;
+    };
+
+    return traverse(tree, parent, sibling);
+  }
+
+  removeDescendant(id: string) {
     if (!this._nodeMap.has(id)) {
       return;
     }
 
-    const node = this._nodeMap.get(id)!;
-    const remove = () => {
-      node.children.forEach(child => {
-        this.removeDescendant(child.id, false);
+    const surface = this.surface;
+    const removedDescendants: string[] = [];
+    const remove = (element: MindmapNode) => {
+      element.children?.forEach(child => {
+        remove(child);
       });
 
-      this.children.delete(id);
+      this.children.delete(element.id);
+      removedDescendants.push(element.id);
     };
 
-    if (transaction) {
-      this.surface.doc.transact(() => {
-        remove();
-      });
-    } else {
-      remove();
-    }
+    surface.doc.transact(() => {
+      remove(this._nodeMap.get(id)!);
+      this.setChildIds(Array.from(this.children.keys()), true);
+      removedDescendants.forEach(id => surface.removeElement(id));
+    });
   }
 
   layout() {

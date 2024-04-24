@@ -3,7 +3,7 @@ import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
-import { updateMindmapNodeRect } from '../canvas-renderer/element-renderer/shape/utils.js';
+import { fitContent } from '../canvas-renderer/element-renderer/shape/utils.js';
 import { Renderer } from '../canvas-renderer/renderer.js';
 import type { ShapeElementModel } from '../element-model/shape.js';
 import { LayerManager } from '../managers/layer-manager.js';
@@ -30,7 +30,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
     this.model.doc.transact(() => {
       this.model.elementModels.forEach(element => {
         if (element.type === 'shape') {
-          updateMindmapNodeRect(element as ShapeElementModel);
+          fitContent(element as ShapeElementModel);
         }
       });
     });

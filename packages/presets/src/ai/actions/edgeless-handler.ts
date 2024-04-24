@@ -4,6 +4,7 @@ import {
   ImageBlockModel,
   MindmapElementModel,
   NoteBlockModel,
+  ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -18,6 +19,7 @@ import {
   createImageRenderer,
 } from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
+import { isMindMapRoot } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
 import { EXCLUDING_COPY_ACTIONS } from './consts.js';
@@ -61,20 +63,23 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
 
 async function getTextFromSelected(host: EditorHost) {
   const selected = getCopilotSelectedElems(host);
-  const { notes, texts } = selected.reduce(
+  const { notes, texts, shapes } = selected.reduce<{
+    notes: NoteBlockModel[];
+    texts: TextElementModel[];
+    shapes: ShapeElementModel[];
+  }>(
     (pre, cur) => {
       if (cur instanceof NoteBlockModel) {
         pre.notes.push(cur);
       } else if (cur instanceof TextElementModel) {
         pre.texts.push(cur);
+      } else if (cur instanceof ShapeElementModel && cur.text) {
+        pre.shapes.push(cur);
       }
 
       return pre;
     },
-    { notes: [], texts: [] } as {
-      notes: NoteBlockModel[];
-      texts: TextElementModel[];
-    }
+    { notes: [], texts: [], shapes: [] }
   );
 
   const noteContent = await Promise.all(
@@ -86,7 +91,7 @@ async function getTextFromSelected(host: EditorHost) {
 
   return `${noteContent.join('\n')}
 
-${texts.map(text => text.text.toString()).join('\n')}`;
+${texts.map(text => text.text.toString()).join('\n')}\n${shapes.map(shape => shape.text!.toString())}`;
 }
 
 function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
@@ -196,7 +201,8 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  extract?: (host: EditorHost) => Promise<{
+  customInput?: (host: EditorHost) => Promise<{
+    input?: string;
     content?: string;
     attachments?: string[];
   } | void>
@@ -205,9 +211,13 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     const aiPanel = getAIPanel(host);
     const edgelessCopilot = getEdgelessCopilotWidget(host);
     let internal: Record<string, unknown> = {};
+    const selectedElements = getCopilotSelectedElems(host);
     const ctx = {
       get() {
-        return internal;
+        return {
+          ...internal,
+          selectedElements,
+        };
       },
       set(data: Record<string, unknown>) {
         internal = data;
@@ -223,7 +233,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.generateAnswer = actionToGeneration(
       id,
       variants,
-      extract
+      customInput
     )(host);
     aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
@@ -259,7 +269,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   };
 }
 
-export function noteBlockOrTextShowWen(
+export function noteBlockOrTextShowWhen(
   _: unknown,
   __: unknown,
   host: EditorHost
@@ -284,7 +294,11 @@ export function noteWithCodeBlockShowWen(
 export function mindmapShowWhen(_: unknown, __: unknown, host: EditorHost) {
   const selected = getCopilotSelectedElems(host);
 
-  return selected[0] instanceof MindmapElementModel;
+  return (
+    selected.length === 1 &&
+    selected[0]?.group instanceof MindmapElementModel &&
+    !isMindMapRoot(selected[0])
+  );
 }
 
 export function makeItRealShowWhen(_: unknown, __: unknown, host: EditorHost) {
@@ -300,4 +314,10 @@ export function explainImageShowWhen(
   const selected = getCopilotSelectedElems(host);
 
   return selected[0] instanceof ImageBlockModel;
+}
+
+export function mindmapRootShowWhen(_: unknown, __: unknown, host: EditorHost) {
+  const selected = getCopilotSelectedElems(host);
+
+  return selected.length === 1 && isMindMapRoot(selected[0]);
 }
