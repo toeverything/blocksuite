@@ -12,6 +12,7 @@ import {
   ImageIcon,
 } from '../_common/icons.js';
 import { AIProvider } from '../provider.js';
+import { readBlobAsURL } from '../utils/image.js';
 import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
 
 const MaximumImageCount = 8;
@@ -161,21 +162,25 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     if (this.status !== 'idle' && this.status !== 'success') return;
 
     const text = this.textarea.value;
-    if (!text) {
+    const { images } = this;
+    if (!text && images.length === 0) {
       return;
     }
-    const { images } = this;
     const { doc } = this.host;
     this.textarea.value = '';
     this.isInputEmpty = true;
     this.images = [];
     this.updateStatus('loading');
+
+    const attachments = await Promise.all(
+      images?.map(image => readBlobAsURL(image))
+    );
     this.addToItems([
       {
         role: 'user',
         content: text,
         createdAt: new Date().toISOString(),
-        blobs: images ? images : undefined,
+        attachments,
       },
       { role: 'assistant', content: '', createdAt: new Date().toISOString() },
     ]);
@@ -192,8 +197,9 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
 
       if (stream) {
         this.abortController = abortController;
-        this.updateStatus('transmitting');
+
         for await (const text of stream) {
+          this.updateStatus('transmitting');
           const items = [...this.items];
           const last = items[items.length - 1] as ChatMessage;
           last.content += text;
@@ -311,6 +317,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             ? html`<div
                 @click=${() => {
                   this.abortController?.abort();
+                  this.updateStatus('success');
                 }}
               >
                 ${ChatAbortIcon}

@@ -11,7 +11,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { CopyIcon, MoreIcon } from '../../_common/icons.js';
 import { copyText } from '../../utils/editor-actions.js';
-import { EditorActions } from './actions-handle.js';
+import { PageEditorActions } from './actions-handle.js';
 
 @customElement('chat-copy-more')
 export class ChatCopyMore extends WithDisposable(LitElement) {
@@ -109,7 +109,7 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
       <div class="more-menu">
         ${this._showMoreMenu
           ? repeat(
-              EditorActions,
+              PageEditorActions,
               action => action.title,
               action => {
                 return html`<div
