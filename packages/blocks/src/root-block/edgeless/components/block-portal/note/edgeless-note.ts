@@ -11,6 +11,7 @@ import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { almostEqual, clamp } from '../../../../../_common/utils/math.js';
+import { matchFlavours } from '../../../../../_common/utils/model.js';
 import { handleNativeRangeAtPoint } from '../../../../../_common/utils/selection.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
@@ -188,6 +189,49 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const x = clamp(e.x, rect.left + offsetX, rect.right - offsetX);
     const y = clamp(e.y, rect.top + offsetY, rect.bottom - offsetY);
     handleNativeRangeAtPoint(x, y);
+
+    // add an empty paragraph
+    const readonly = this.surface.doc.readonly;
+    const last = this.model.children.at(-1);
+    if (readonly) return;
+    if (
+      !last ||
+      !last.text ||
+      matchFlavours(last, [
+        'affine:code',
+        'affine:divider',
+        'affine:image',
+        'affine:database',
+        'affine:bookmark',
+        'affine:attachment',
+        'affine:surface-ref',
+      ]) ||
+      /affine:embed-*/.test(last.flavour)
+    ) {
+      this._addEmptyParagraph();
+    }
+  }
+
+  private _addEmptyParagraph() {
+    const paragraphId = this.surface.doc.addBlock(
+      'affine:paragraph',
+      {},
+      this.model.id
+    );
+    this.updateComplete
+      .then(() => {
+        this.surface.selection.setGroup('note', [
+          this.surface.selection.create('text', {
+            from: {
+              path: [this.surface.model.id, this.model.id, paragraphId],
+              index: 0,
+              length: 0,
+            },
+            to: null,
+          }),
+        ]);
+      })
+      .catch(console.error);
   }
 
   private _setCollapse(event: MouseEvent) {
