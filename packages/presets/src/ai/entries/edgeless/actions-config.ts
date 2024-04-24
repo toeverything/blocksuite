@@ -244,10 +244,11 @@ export const createGroup: AIItemGroupConfig = {
         }
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           [...notes, ...frames, ...images],
-          shapes
+          shapes,
+          1
         );
         if (!canvas) return;
-        const png = canvas.toDataURL('image/png');
+        const png = canvas.toDataURL('image/png', 0.843);
         if (!png) return;
         return {
           attachments: [png],
@@ -271,10 +272,11 @@ export const createGroup: AIItemGroupConfig = {
         }
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           [...notes, ...frames, ...images],
-          shapes
+          shapes,
+          1
         );
         if (!canvas) return;
-        const png = canvas.toDataURL('image/png');
+        const png = canvas.toDataURL('image/png', 0.843);
         if (!png) return;
         return {
           attachments: [png],
