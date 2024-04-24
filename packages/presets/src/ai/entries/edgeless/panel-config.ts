@@ -13,12 +13,6 @@ export function buildEdgelessPanelConfig(
     finishStateConfig: {
       responses: buildDefaultResponse(panel),
       actions: [],
-      copy: {
-        allowed: true,
-        onCopy: () => {
-          return copyTextAnswer(panel);
-        },
-      },
     },
     errorStateConfig: {
       upgrade: () => {
@@ -30,6 +24,12 @@ export function buildEdgelessPanelConfig(
         panel.hide();
       },
       responses: [],
+    },
+    copy: {
+      allowed: true,
+      onCopy: () => {
+        return copyTextAnswer(panel);
+      },
     },
   };
 }

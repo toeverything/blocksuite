@@ -13,6 +13,9 @@ export const fetchImage = async (
     if (url.startsWith('data:')) {
       return await fetch(url, init);
     }
+    if (url.startsWith(window.location.origin)) {
+      return await fetch(url, init);
+    }
     return await fetch(proxy + '?url=' + encodeURIComponent(url), init)
       .then(res => {
         if (!res.ok) {

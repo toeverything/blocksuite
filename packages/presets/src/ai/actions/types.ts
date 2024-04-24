@@ -50,6 +50,10 @@ declare global {
       tone: (typeof textTones)[number];
     }
 
+    interface ExpandMindMap extends AITextActionOptions {
+      mindmap: string;
+    }
+
     interface AIActions {
       // chat is a bit special because it's has a internally maintained session
       chat<T extends AITextActionOptions>(options: T): AIActionTextResponse<T>;
@@ -112,7 +116,7 @@ declare global {
       brainstormMindmap<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
-      expandMindmap<T extends AITextActionOptions>(
+      expandMindmap<T extends ExpandMindMap>(
         options: T
       ): AIActionTextResponse<T>;
 

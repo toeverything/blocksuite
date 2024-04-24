@@ -441,7 +441,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               {
                 type: 'image',
                 url: `assets/${blobName}`,
-                title: null,
+                title: (o.node.props.caption as string | undefined) ?? null,
                 alt: (blob as File).name ?? null,
               },
               'children'

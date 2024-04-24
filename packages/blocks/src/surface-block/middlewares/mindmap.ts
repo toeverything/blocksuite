@@ -43,8 +43,10 @@ export const mindmapMiddleware: SurfaceMiddleware = (
     connUpdPending = true;
     queueMicrotask(() => {
       connUpdList.forEach(mindmap => {
-        mindmap['buildTree']();
-        mindmap.calcConnection();
+        if (mindmap.isConnected) {
+          mindmap['buildTree']();
+          mindmap.calcConnection();
+        }
       });
       connUpdList.clear();
       connUpdPending = false;
@@ -52,23 +54,21 @@ export const mindmapMiddleware: SurfaceMiddleware = (
   };
 
   const disposables = [
-    surface.elementAdded
-      .filter(payload => payload.local)
-      .on(({ id }) => {
-        /**
-         * When loading an existing doc, the elements' loading order is not guaranteed
-         * So we need to update the mindmap when a new element is added
-         */
-        const group = surface.getGroup(id);
-        if (group instanceof MindmapElementModel) {
-          updateConnection(group);
-        }
+    surface.elementAdded.on(({ id }) => {
+      /**
+       * When loading an existing doc, the elements' loading order is not guaranteed
+       * So we need to update the mindmap when a new element is added
+       */
+      const group = surface.getGroup(id);
+      if (group instanceof MindmapElementModel) {
+        updateConnection(group);
+      }
 
-        const element = surface.getElementById(id);
-        if (element instanceof MindmapElementModel) {
-          updateConnection(element);
-        }
-      }),
+      const element = surface.getElementById(id);
+      if (element instanceof MindmapElementModel) {
+        updateConnection(element);
+      }
+    }),
     surface.elementUpdated.on(({ id, props }) => {
       if (props['childIds'] || props['style']) {
         const element = surface.getElementById(id);

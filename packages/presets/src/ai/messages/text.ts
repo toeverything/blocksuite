@@ -35,6 +35,23 @@ export class AIAnswerTextPreview extends WithDisposable(LitElement) {
     .affine-paragraph-block-container {
       line-height: 22px;
     }
+
+    .ai-answer-text-editor {
+      .affine-note-block-container {
+        > .affine-block-children-container {
+          > :first-child,
+          > :first-child * {
+            margin-top: 0;
+            padding-top: 0;
+          }
+          > :last-child,
+          > :last-child * {
+            margin-bottom: 0;
+            padding-bottom: 0;
+          }
+        }
+      }
+    }
   `;
 
   @property({ attribute: false })
