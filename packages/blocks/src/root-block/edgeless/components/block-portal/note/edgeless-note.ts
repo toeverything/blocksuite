@@ -190,23 +190,13 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const y = clamp(e.y, rect.top + offsetY, rect.bottom - offsetY);
     handleNativeRangeAtPoint(x, y);
 
-    // add an empty paragraph
-    const readonly = this.surface.doc.readonly;
+    if (this.surface.doc.readonly) return;
+
     const last = this.model.children.at(-1);
-    if (readonly) return;
     if (
       !last ||
       !last.text ||
-      matchFlavours(last, [
-        'affine:code',
-        'affine:divider',
-        'affine:image',
-        'affine:database',
-        'affine:bookmark',
-        'affine:attachment',
-        'affine:surface-ref',
-      ]) ||
-      /affine:embed-*/.test(last.flavour)
+      !matchFlavours(last, ['affine:paragraph', 'affine:list'])
     ) {
       this._addEmptyParagraph();
     }
