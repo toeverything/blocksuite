@@ -170,26 +170,28 @@ export class EdgelessCopilotWidget extends WidgetElement<
             offset({
               mainAxis: 16,
             }),
+            flip({
+              mainAxis: true,
+              crossAxis: true,
+              flipAlignment: true,
+            }),
             shift(() => {
-              const { width, height } = viewport;
+              const { left, top, width, height } = viewport;
               return {
                 padding: 20,
                 crossAxis: true,
-                boundary: {
-                  x: 20,
-                  y: 50,
-                  width: width - 40,
-                  height: height - 120,
+                rootBoundary: {
+                  x: left,
+                  y: top,
+                  width,
+                  height: height - 100,
                 },
               };
-            }),
-            flip({
-              crossAxis: true,
             }),
             size({
               apply: ({ elements }) => {
                 const { height } = viewport;
-                elements.floating.style.maxHeight = `${height - 120}px`;
+                elements.floating.style.maxHeight = `${height - 140}px`;
               },
             }),
           ],
