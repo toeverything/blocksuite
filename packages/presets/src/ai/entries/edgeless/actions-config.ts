@@ -15,6 +15,7 @@ import {
 } from '../../actions/edgeless-handler.js';
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
 import { translateLangs } from '../../actions/types.js';
+import { getAIPanel } from '../../ai-panel.js';
 import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
@@ -174,9 +175,20 @@ export const createGroup: AIItemGroupConfig = {
     {
       name: 'Create an image',
       icon: AIPenIcon,
-      showWhen: makeItRealShowWhen,
+      showWhen: () => true,
       handler: actionToHandler('createImage', undefined, async host => {
         const selectedElements = getCopilotSelectedElems(host);
+
+        // create an image from user input
+        if (selectedElements.length === 0) {
+          const aiPanel = getAIPanel(host);
+          const content = aiPanel.inputText?.trim();
+          if (!content) return;
+          return {
+            content,
+          };
+        }
+
         const edgelessRoot = getEdgelessRootFromEditor(host);
         const { notes, frames, shapes, images } =
           BlocksUtils.splitElements(selectedElements);

@@ -25,11 +25,9 @@ import {
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
-import { copyTextAnswer } from '../utils/editor-actions.js';
 import { preprocessHtml } from '../utils/html.js';
 import { fetchImageToFile } from '../utils/image.js';
 import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
-import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 
 export type CtxRecord = {
   get(): Record<string, unknown>;
@@ -87,7 +85,7 @@ export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
 
 export function discard(
   panel: AffineAIPanelWidget,
-  copilot: EdgelessCopilotWidget
+  _: EdgelessCopilotWidget
 ): AIItemConfig {
   return {
     name: 'Discard',
@@ -95,15 +93,6 @@ export function discard(
     handler: () => {
       const callback = () => {
         panel.hide();
-        // @TODO: remove `async` wrapper when removing selected-rect
-        (async () => {
-          await panel.updateComplete;
-          copilot.edgeless.service.tool.switchToDefaultMode({
-            elements: [],
-            editing: false,
-          });
-          copilot.visible = false;
-        })().catch(console.error);
       };
       panel.discard(callback);
     },
@@ -265,7 +254,7 @@ export const responses: {
         );
 
         host.doc.transact(() => {
-          edgelessRoot.addImages([img], { x, y }).catch(console.error);
+          edgelessRoot.addImages([img], { x, y }, true).catch(console.error);
         });
       })
       .catch(console.error);
@@ -330,11 +319,5 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
       },
     ],
     actions: [],
-    copy: {
-      allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
-      onCopy: () => {
-        return copyTextAnswer(getAIPanel(host));
-      },
-    },
   };
 }

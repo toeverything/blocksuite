@@ -122,6 +122,30 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   ];
 }
 
+export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
+  return [
+    {
+      name: 'Response',
+      items: [
+        {
+          name: 'Regenerate',
+          icon: ResetIcon,
+          handler: () => {
+            panel.generate();
+          },
+        },
+        {
+          name: 'Discard',
+          icon: DiscardIcon,
+          handler: () => {
+            panel.discard();
+          },
+        },
+      ],
+    },
+  ];
+}
+
 export function buildAIPanelConfig(
   panel: AffineAIPanelWidget,
   positionConfig?: Partial<ComputePositionConfig>
@@ -131,12 +155,6 @@ export function buildAIPanelConfig(
     finishStateConfig: {
       responses: buildTextResponseConfig(panel),
       actions: [], // ???
-      copy: {
-        allowed: true,
-        onCopy: () => {
-          return copyTextAnswer(panel);
-        },
-      },
     },
     errorStateConfig: {
       upgrade: () => {
@@ -147,9 +165,15 @@ export function buildAIPanelConfig(
         AIProvider.slots.requestLogin.emit({ host: panel.host });
         panel.hide();
       },
-      responses: [],
+      responses: buildErrorResponseConfig(panel),
     },
     positionConfig,
+    copy: {
+      allowed: true,
+      onCopy: () => {
+        return copyTextAnswer(panel);
+      },
+    },
   };
 }
 

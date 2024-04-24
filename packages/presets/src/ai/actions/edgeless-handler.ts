@@ -18,7 +18,9 @@ import {
   createImageRenderer,
 } from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
+import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
+import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
   actionToResponse,
@@ -174,9 +176,10 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
       update: (text: string) => void;
       finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     }) => {
-      const selectedElements = getCopilotSelectedElems(host);
-
-      if (selectedElements.length === 0) return;
+      if (!extract) {
+        const selectedElements = getCopilotSelectedElems(host);
+        if (selectedElements.length === 0) return;
+      }
 
       const stream = actionToStream(id, variants, extract)?.(host);
 
@@ -226,22 +229,30 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
     aiPanel.config.discardCallback = () => {
       aiPanel.hide();
-      // @TODO: remove `async` wrapper when removing selected-rect
-      (async () => {
-        await aiPanel.updateComplete;
-        edgelessCopilot.visible = false;
-        edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
-          elements: [],
-          editing: false,
-        });
-      })().catch(console.error);
+    };
+    aiPanel.config.copy = {
+      allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
+      onCopy: () => {
+        return copyTextAnswer(getAIPanel(host));
+      },
     };
     aiPanel.config.hideCallback = () => {
-      edgelessCopilot.lockToolbar(false);
+      aiPanel.updateComplete
+        .finally(() => {
+          edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
+            elements: [],
+            editing: false,
+          });
+          edgelessCopilot.lockToolbar(false);
+        })
+        .catch(console.error);
     };
 
     if (edgelessCopilot.visible) {
-      aiPanel.toggle(edgelessCopilot.selectionElem, 'placeholder');
+      aiPanel.toggle(
+        edgelessCopilot.selectionElem,
+        getCopilotSelectedElems(host).length ? 'placeholder' : undefined
+      );
     } else {
       aiPanel.toggle(getElementToolbar(host), 'placeholder');
     }

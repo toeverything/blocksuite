@@ -22,6 +22,7 @@ pnpm dev example-name
 - [react-basic-next](./react-basic-next/)
 - [react-indexeddb](./react-indexeddb/)
 - [react-sqlite](./react-sqlite/)
+- [react-websocket](./react-websocket/)
 - [vanilla-indexeddb](./vanilla-indexeddb/)
 - [vue-basic](./vue-basic/)
 - [angular-basic](./angular-basic/)
