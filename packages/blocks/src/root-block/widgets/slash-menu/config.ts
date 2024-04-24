@@ -300,7 +300,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertExists(attachmentService);
           const maxFileSize = attachmentService.maxFileSize;
 
-          addSiblingAttachmentBlocks(
+          await addSiblingAttachmentBlocks(
             rootElement.host,
             [file],
             maxFileSize,

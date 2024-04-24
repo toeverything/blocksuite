@@ -1087,7 +1087,11 @@ export class EdgelessClipboardController extends PageClipboard {
     );
   }
 
-  async toCanvas(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+  async toCanvas(
+    blocks: TopLevelBlockModel[],
+    shapes: CanvasElement[],
+    dpr?: number
+  ) {
     blocks.sort(compare);
     shapes.sort(compare);
 
@@ -1105,7 +1109,8 @@ export class EdgelessClipboardController extends PageClipboard {
       this.host,
       bound,
       blocks,
-      shapes
+      shapes,
+      dpr
     );
     return canvas;
   }
@@ -1186,7 +1191,8 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless: EdgelessRootBlockComponent,
     bound: IBound,
     nodes?: TopLevelBlockModel[],
-    canvasElements: CanvasElement[] = []
+    canvasElements: CanvasElement[] = [],
+    dpr = window.devicePixelRatio || 1
   ): Promise<HTMLCanvasElement | undefined> {
     const host = edgeless.host;
     const rootModel = this.doc.root;
@@ -1206,7 +1212,6 @@ export class EdgelessClipboardController extends PageClipboard {
     );
     if (!container) return;
 
-    const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
     canvas.width = (bound.w + IMAGE_PADDING) * dpr;
     canvas.height = (bound.h + IMAGE_PADDING) * dpr;

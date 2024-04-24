@@ -16,7 +16,7 @@ import type { ChatPanelMessages } from './chat-panel-messages.js';
 export type ChatMessage = {
   content: string;
   role: 'user' | 'assistant';
-  blobs?: Blob[];
+  attachments?: string[];
   createdAt: string;
 };
 
@@ -108,12 +108,26 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   @state()
   error?: AIError;
 
+  @state()
+  isLoading = true;
+
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
   public override async connectedCallback() {
     super.connectedCallback();
     if (!this.doc) throw new Error('doc is required');
+
+    AIProvider.slots.actions.on(async ({ action, event }) => {
+      if (
+        action !== 'chat' &&
+        event === 'finished' &&
+        (this.status === 'idle' || this.status === 'success')
+      ) {
+        await this._resetItems();
+      }
+    });
+
     await this._resetItems();
   }
 
@@ -136,6 +150,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
 
+    this.isLoading = false;
     this.scrollToDown();
   }
 
@@ -180,6 +195,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         .items=${this.items}
         .status=${this.status}
         .error=${this.error}
+        .isLoading=${this.isLoading}
       ></chat-panel-messages>
       <chat-panel-input
         .host=${this.editor.host}

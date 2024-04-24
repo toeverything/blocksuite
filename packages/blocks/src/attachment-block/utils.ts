@@ -176,10 +176,21 @@ export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
   block.downloading = false;
 }
 
+export async function getFileType(file: File) {
+  if (file.type) {
+    return file.type;
+  }
+  // If the file type is not available, try to get it from the buffer.
+  const buffer = await file.arrayBuffer();
+  const FileType = await import('@sgtpooki/file-type');
+  const fileType = await FileType.fileTypeFromBuffer(buffer);
+  return fileType ? fileType.mime : '';
+}
+
 /**
  * Add a new attachment block before / after the specified block.
  */
-export function addSiblingAttachmentBlocks(
+export async function addSiblingAttachmentBlocks(
   editorHost: EditorHost,
   files: File[],
   maxFileSize: number,
@@ -204,13 +215,16 @@ export function addSiblingAttachmentBlocks(
   }
 
   const doc = targetModel.doc;
+
+  // Get the types of all files
+  const types = await Promise.all(files.map(file => getFileType(file)));
   const attachmentBlockProps: (Partial<AttachmentBlockProps> & {
     flavour: 'affine:attachment';
-  })[] = files.map(file => ({
+  })[] = files.map((file, index) => ({
     flavour: 'affine:attachment',
     name: file.name,
     size: file.size,
-    type: file.type,
+    type: types[index],
   }));
 
   const blockIds = doc.addSiblingBlocks(
