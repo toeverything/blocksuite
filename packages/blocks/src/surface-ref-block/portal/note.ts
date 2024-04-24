@@ -60,19 +60,6 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     this._disposables.add(() => {
       model.doc.blockCollection.clearSelector(selector);
     });
-    this._disposables.add(
-      doc.slots.blockUpdated.on(payload => {
-        if (payload.type === 'update') return;
-        let parent: string | null = payload.id;
-        while (parent) {
-          if (model.id === parent) {
-            this.requestUpdate();
-            return;
-          }
-          parent = model.doc.blockCollection.crud.getParent(parent);
-        }
-      })
-    );
 
     const previewSpec = SpecProvider.getInstance().getSpec('preview');
     assertExists(previewSpec, 'Preview spec is not found');
@@ -81,6 +68,20 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+
+    this._disposables.add(
+      this.model.doc.blockCollection.slots.blockUpdated.on(payload => {
+        if (payload.type === 'update') return;
+        let parent: string | null = payload.id;
+        while (parent) {
+          if (this.model.id === parent) {
+            this.requestUpdate();
+            return;
+          }
+          parent = this.model.doc.blockCollection.crud.getParent(parent);
+        }
+      })
+    );
   }
 
   override firstUpdated() {
