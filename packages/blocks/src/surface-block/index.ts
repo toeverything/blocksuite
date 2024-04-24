@@ -2,7 +2,7 @@ import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceService } from './surface-service.js';
 
 export { normalizeShapeBound } from './canvas-renderer/element-renderer/index.js';
-export { updateMindmapNodeRect } from './canvas-renderer/element-renderer/shape/utils.js';
+export { fitContent } from './canvas-renderer/element-renderer/shape/utils.js';
 export { Overlay, Renderer } from './canvas-renderer/renderer.js';
 export {
   type IBound,

@@ -36,10 +36,6 @@ import {
   setAttachmentUploaded,
   setAttachmentUploading,
 } from '../../attachment-block/utils.js';
-import {
-  SURFACE_IMAGE_CARD_HEIGHT,
-  SURFACE_IMAGE_CARD_WIDTH,
-} from '../../image-block/components/image-card.js';
 import type {
   ImageBlockModel,
   ImageBlockProps,
@@ -63,7 +59,7 @@ import type { RootBlockModel } from '../root-model.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
 import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
-import { readImageSize } from './components/utils.js';
+import { calcBoundByOrigin, readImageSize } from './components/utils.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { BrushToolController } from './controllers/tools/brush-tool.js';
 import { ConnectorToolController } from './controllers/tools/connector-tool.js';
@@ -367,7 +363,8 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   async addImages(
     files: File[],
-    point?: Point | { x: number; y: number }
+    point?: Point | { x: number; y: number },
+    inTopLeft?: boolean
   ): Promise<string[]> {
     const imageFiles = [...files].filter(file =>
       file.type.startsWith('image/')
@@ -403,11 +400,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
         y + index * IMAGE_STACK_GAP
       );
       const center = Vec.toVec(point);
-      const bound = Bound.fromCenter(
-        center,
-        SURFACE_IMAGE_CARD_WIDTH,
-        SURFACE_IMAGE_CARD_HEIGHT
-      );
+      const bound = calcBoundByOrigin(center, inTopLeft);
       const blockId = this.service.addBlock(
         'affine:image',
         {
@@ -427,7 +420,12 @@ export class EdgelessRootBlockComponent extends BlockElement<
       const imageSize = await readImageSize(file);
 
       const center = Vec.toVec(point);
-      const bound = Bound.fromCenter(center, imageSize.width, imageSize.height);
+      const bound = calcBoundByOrigin(
+        center,
+        inTopLeft,
+        imageSize.width,
+        imageSize.height
+      );
 
       this.doc.withoutTransact(() => {
         this.service.updateElement(blockId, {

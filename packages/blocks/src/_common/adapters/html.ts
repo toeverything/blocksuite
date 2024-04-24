@@ -640,6 +640,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 properties: {
                   src: `assets/${blobName}`,
                   alt: blobName,
+                  title: (o.node.props.caption as string | undefined) ?? null,
                   ...widthStyle,
                 },
                 children: [],

@@ -109,7 +109,7 @@ export const replace = async (
 
 export const copyTextAnswer = async (panel: AffineAIPanelWidget) => {
   const host = panel.host;
-  if (panel.state !== 'finished' || !panel.answer) {
+  if (!panel.answer) {
     return false;
   }
   return copyText(host, panel.answer);

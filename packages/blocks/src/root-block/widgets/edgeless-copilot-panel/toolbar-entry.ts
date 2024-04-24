@@ -50,9 +50,12 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
     const selectedIds = selectedElements.map(e => e.id);
     this.edgeless.service.selection.clear();
 
-    const bounds = getElementsBound(selectedElements.map(e => e.elementBound));
-    currentController.dragStartPoint = [bounds.minX - 10, bounds.minY - 10];
-    currentController.dragLastPoint = [bounds.maxX + 10, bounds.maxY + 10];
+    const padding = 10 / this.edgeless.service.zoom;
+    const bounds = getElementsBound(
+      selectedElements.map(e => e.elementBound)
+    ).expand(padding);
+    currentController.dragStartPoint = bounds.tl as [number, number];
+    currentController.dragLastPoint = bounds.br as [number, number];
     this.edgeless.service.selection.set({
       elements: selectedIds,
       editing: false,

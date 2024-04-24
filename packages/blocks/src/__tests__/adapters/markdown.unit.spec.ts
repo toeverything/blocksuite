@@ -1110,7 +1110,7 @@ hhh
               flavour: 'affine:image',
               props: {
                 sourceId: 'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
-                caption: '',
+                caption: 'aaa',
                 width: 0,
                 height: 0,
                 index: 'a0',
@@ -1138,7 +1138,7 @@ hhh
     };
 
     const markdown =
-      '![](assets/YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob)\n\n';
+      '![](assets/YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob "aaa")\n\n';
 
     const mdAdapter = new MarkdownAdapter();
     const blobManager = new MemoryBlobManager();

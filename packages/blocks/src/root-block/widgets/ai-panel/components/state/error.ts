@@ -1,22 +1,13 @@
+import '../finish-tip.js';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import {
-  type AIError,
-  AIErrorType,
-  type AIItemConfig,
-  type AIItemGroupConfig,
-} from '../../../../../_common/components/index.js';
-
-export interface AIPanelErrorConfig {
-  login: () => void;
-  upgrade: () => void;
-  responses: AIItemConfig[];
-  error?: AIError;
-}
+import { AIErrorType } from '../../../../../_common/components/index.js';
+import type { AIPanelErrorConfig, CopyConfig } from '../../type.js';
 
 @customElement('ai-panel-error')
 export class AIPanelError extends WithDisposable(LitElement) {
@@ -35,7 +26,6 @@ export class AIPanelError extends WithDisposable(LitElement) {
       flex-direction: column;
       justify-content: center;
       align-items: flex-start;
-      gap: 8px;
       align-self: stretch;
       padding: 0px 12px;
       .answer-tip {
@@ -97,64 +87,99 @@ export class AIPanelError extends WithDisposable(LitElement) {
         background: var(--affine-hover-color, rgba(0, 0, 0, 0.04));
       }
     }
+
+    ai-panel-divider {
+      margin-top: 4px;
+    }
+
+    .response-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 8px;
+      user-select: none;
+    }
+
+    .response-list-container ai-item-list {
+      --item-padding: 4px;
+      --item-icon-color: var(--affine-icon-secondary);
+      --item-icon-hover-color: var(--affine-icon-color);
+    }
   `;
 
   @property({ attribute: false })
   config!: AIPanelErrorConfig;
 
+  @property({ attribute: false })
+  copy?: CopyConfig;
+
+  @property({ attribute: false })
+  showTip = false;
+
   override render() {
-    const groups: AIItemGroupConfig[] = [{ items: this.config.responses }];
     const errorTemplate = choose(
       this.config.error?.type,
       [
         [
           AIErrorType.Unauthorized,
           () =>
-            html`<div class="answer-tip">
-              <div class="top">Answer</div>
-              <div class="bottom">
+            html` <div class="bottom">
                 You need to login to AFFiNE Cloud to continue using AFFiNE AI.
               </div>
               <div @click=${this.config.login} class="action-button">
                 <div class="content">Login</div>
-              </div>
-            </div>`,
+              </div>`,
         ],
         [
           AIErrorType.PaymentRequired,
           () => html`
-            <div class="answer-tip">
-              <div class="top">Answer</div>
-              <div class="bottom">
-                You've reached the current usage cap for AFFiNE AI. You can
-                subscribe AFFiNE AI to continue AI experience!
-              </div>
-              <div @click=${this.config.upgrade} class="action-button">
-                <div class="content">Upgrade</div>
-              </div>
+            <div class="bottom">
+              You've reached the current usage cap for AFFiNE AI. You can
+              subscribe AFFiNE AI to continue AI experience!
+            </div>
+            <div @click=${this.config.upgrade} class="action-button">
+              <div class="content">Upgrade</div>
             </div>
           `,
         ],
       ],
       // default error handler
       () => html`
-        <div class="answer-tip">
-          <div class="top">Answer</div>
-          <div class="bottom">
-            An error occurred. Please try again later. If this issue persists,
-            please let us know at
-            <a href="mailto:contact@toeverything.info">
-              contact@toeverything.info
-            </a>
-          </div>
+        <div class="bottom">
+          An error occurred. Please try again later. If this issue persists,
+          please let us know at
+          <a href="mailto:contact@toeverything.info">
+            contact@toeverything.info
+          </a>
         </div>
       `
     );
 
     return html`
-      <div class="error">${errorTemplate}</div>
+      <div class="error">
+        <div class="answer-tip">
+          <div class="top">Answer</div>
+          <slot></slot>
+          ${errorTemplate}
+        </div>
+      </div>
+      ${this.showTip
+        ? html`<ai-finish-tip .copy=${this.copy}></ai-finish-tip>`
+        : nothing}
       ${this.config.responses.length > 0
-        ? html`<ai-item-list .groups=${groups}></ai-item-list>`
+        ? html`
+            <ai-panel-divider></ai-panel-divider>
+            ${this.config.responses.map(
+              (group, index) => html`
+                ${index !== 0
+                  ? html`<ai-panel-divider></ai-panel-divider>`
+                  : nothing}
+                <div class="response-list-container">
+                  <ai-item-list .groups=${[group]}></ai-item-list>
+                </div>
+              `
+            )}
+          `
         : nothing}
     `;
   }

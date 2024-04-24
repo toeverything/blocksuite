@@ -192,6 +192,10 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     return Bound.deserialize(this.xywh);
   }
 
+  get isConnected() {
+    return this.surface.hasElementById(this.id);
+  }
+
   stash(prop: keyof Props | string) {
     if (this._stashed.has(prop)) {
       return;
@@ -384,7 +388,7 @@ export abstract class GroupLikeModel<
   xywh: SerializedXYWH = '[0,0,0,0]';
 
   /**
-   * Check if the element has the descendant
+   * Check if the group has the given descendant.
    */
   hasDescendant(element: string | EdgelessModel) {
     const groups =

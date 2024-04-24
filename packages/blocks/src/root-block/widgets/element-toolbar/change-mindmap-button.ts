@@ -126,7 +126,7 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
     return html`<div class="edgeless-change-mindmap-button">
       <edgeless-tool-icon-button
         class="mindmap-style-button"
-        .tooltip=${this._showStylePopper ? '' : 'Mindmap Style'}
+        .tooltip=${this._showStylePopper ? '' : 'Style'}
         .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => {
@@ -153,7 +153,7 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="mindmap-layout-button"
-        .tooltip=${this._showLayoutPopper ? '' : 'Mindmap Layout'}
+        .tooltip=${this._showLayoutPopper ? '' : 'Layout'}
         .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => {
@@ -276,9 +276,9 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
   `;
 
   static mindmapLayouts = [
-    [LayoutType.LEFT, MindmapLeftLayoutIcon, 'Left layout'],
-    [LayoutType.RIGHT, MindmapRightLayoutIcon, 'Right layout'],
-    [LayoutType.BALANCE, MindmapBalanceLayoutIcon, 'Balance layout'],
+    [LayoutType.LEFT, MindmapLeftLayoutIcon, 'Left'],
+    [LayoutType.RIGHT, MindmapRightLayoutIcon, 'Right'],
+    [LayoutType.BALANCE, MindmapBalanceLayoutIcon, 'Radial'],
   ];
 
   @property({ attribute: false })

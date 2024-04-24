@@ -2,6 +2,11 @@ import { assertExists } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
 
 import {
+  SURFACE_IMAGE_CARD_HEIGHT,
+  SURFACE_IMAGE_CARD_WIDTH,
+} from '../../../image-block/components/image-card.js';
+import {
+  Bound,
   type IVec,
   normalizeDegAngle,
   Vec,
@@ -228,4 +233,15 @@ export function launchIntoFullscreen(element: Element) {
     // IE/Edge
     element.msRequestFullscreen();
   }
+}
+
+export function calcBoundByOrigin(
+  point: IVec,
+  inTopLeft = false,
+  width = SURFACE_IMAGE_CARD_WIDTH,
+  height = SURFACE_IMAGE_CARD_HEIGHT
+) {
+  return inTopLeft
+    ? new Bound(point[0], point[1], width, height)
+    : Bound.fromCenter(point, width, height);
 }

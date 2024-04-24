@@ -114,6 +114,7 @@ export {
   ConnectorElementModel,
   ConnectorMode,
   ElementModel,
+  fitContent,
   generateKeyBetween,
   GroupElementModel,
   MindmapElementModel,
@@ -127,7 +128,6 @@ export {
   StrokeStyle,
   SurfaceBlockModel,
   TextElementModel,
-  updateMindmapNodeRect,
 } from './surface-block/index.js';
 export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
