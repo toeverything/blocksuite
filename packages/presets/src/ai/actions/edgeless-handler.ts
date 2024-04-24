@@ -18,7 +18,9 @@ import {
   createImageRenderer,
 } from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
+import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
+import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
   actionToResponse,
@@ -227,6 +229,12 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
     aiPanel.config.discardCallback = () => {
       aiPanel.hide();
+    };
+    aiPanel.config.copy = {
+      allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
+      onCopy: () => {
+        return copyTextAnswer(getAIPanel(host));
+      },
     };
     aiPanel.config.hideCallback = () => {
       aiPanel.updateComplete

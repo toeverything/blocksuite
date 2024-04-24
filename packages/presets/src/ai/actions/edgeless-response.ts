@@ -25,11 +25,9 @@ import {
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
-import { copyTextAnswer } from '../utils/editor-actions.js';
 import { preprocessHtml } from '../utils/html.js';
 import { fetchImageToFile } from '../utils/image.js';
 import { getEdgelessRootFromEditor } from '../utils/selection-utils.js';
-import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 
 export type CtxRecord = {
   get(): Record<string, unknown>;
@@ -321,11 +319,5 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
       },
     ],
     actions: [],
-    copy: {
-      allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
-      onCopy: () => {
-        return copyTextAnswer(getAIPanel(host));
-      },
-    },
   };
 }
