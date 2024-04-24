@@ -256,7 +256,7 @@ export const responses: {
         );
 
         host.doc.transact(() => {
-          edgelessRoot.addImages([img], { x, y }).catch(console.error);
+          edgelessRoot.addImages([img], { x, y }, true).catch(console.error);
         });
       })
       .catch(console.error);
