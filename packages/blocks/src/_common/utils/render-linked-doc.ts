@@ -69,6 +69,27 @@ export const embedNoteContentStyles = css`
     font-size: var(--affine-font-xs);
     font-weight: 600;
   }
+
+  .affine-embed-linked-doc-block.horizontal {
+    affine-paragraph,
+    affine-list {
+      margin-top: 0;
+      margin-bottom: 0;
+      max-height: 40px;
+      overflow: hidden;
+      display: flex;
+    }
+    affine-paragraph .quote {
+      padding-top: 4px;
+      padding-bottom: 4px;
+      height: 28px;
+    }
+    affine-paragraph .quote::after {
+      height: 20px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+  }
 `;
 
 export function renderLinkedDocInCard(

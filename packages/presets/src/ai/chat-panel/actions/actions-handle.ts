@@ -3,19 +3,20 @@ import type {
   EditorHost,
   TextSelection,
 } from '@blocksuite/block-std';
-import { BlocksUtils } from '@blocksuite/blocks';
+import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
 import { Text } from '@blocksuite/store';
 
 import {
-  CreateAsPageIcon,
+  CreateIcon,
   InsertBelowIcon,
   ReplaceIcon,
 } from '../../_common/icons.js';
 import { insertBelow, replace } from '../../utils/editor-actions.js';
+import { insertFromMarkdown } from '../../utils/markdown-utils.js';
 
 const { matchFlavours } = BlocksUtils;
 
-export const EditorActions = [
+const CommonActions = [
   {
     icon: ReplaceIcon,
     title: 'Replace selection',
@@ -81,8 +82,12 @@ export const EditorActions = [
       );
     },
   },
+];
+
+export const PageEditorActions = [
+  ...CommonActions,
   {
-    icon: CreateAsPageIcon,
+    icon: CreateIcon,
     title: 'Create as a page',
     handler: (host: EditorHost, content: string) => {
       const newDoc = host.doc.collection.createDoc();
@@ -94,6 +99,24 @@ export const EditorActions = [
       host.spec.getService('affine:page').slots.docLinkClicked.emit({
         docId: newDoc.id,
       });
+    },
+  },
+];
+
+export const EdgelessEditorActions = [
+  ...CommonActions,
+  {
+    icon: CreateIcon,
+    title: 'Add to edgeless as note',
+    handler: async (host: EditorHost, content: string) => {
+      const { doc } = host;
+      const id = doc.addBlock(
+        'affine:note',
+        { displayMode: NoteDisplayMode.EdgelessOnly },
+        doc.root?.id
+      );
+
+      await insertFromMarkdown(host, content, id, 0);
     },
   },
 ];

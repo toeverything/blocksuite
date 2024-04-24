@@ -40,7 +40,8 @@ export class AffineAIPanelWidget extends WidgetElement {
       width: max-content;
       top: 0;
       left: 0;
-
+      overflow-y: auto;
+      scrollbar-width: none !important;
       z-index: 1;
     }
 

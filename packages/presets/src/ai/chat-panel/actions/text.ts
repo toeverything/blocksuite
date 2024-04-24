@@ -13,7 +13,7 @@ export class ActionText extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .original-text {
       width: 100%;
-      padding: 0px 16px;
+      padding: 10px 16px;
       border-radius: 4px;
       border: 1px solid var(--affine-border-color);
       margin-bottom: 12px;
