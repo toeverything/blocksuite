@@ -5,6 +5,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { ActionIcon, ArrowDownIcon, ArrowUpIcon } from '../../_common/icons.js';
 import { createTextRenderer } from '../../messages/text.js';
+import { renderImages } from '../components/images.js';
 import type { ChatAction } from '../index.js';
 
 @customElement('action-wrapper')
@@ -38,12 +39,19 @@ export class ActionWrapper extends WithDisposable(ShadowlessElement) {
       font-size: 14px;
       font-weight: 400;
       color: var(--affine-text-primary-color);
-    }
 
-    .answer-prompt .subtitle {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--affine-text-secondary-color);
+      .subtitle {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--affine-text-secondary-color);
+        height: 20px;
+        line-height: 20px;
+        margin-bottom: 4px;
+      }
+
+      div:nth-child(3) {
+        margin-top: 12px;
+      }
     }
   `;
 
@@ -60,6 +68,9 @@ export class ActionWrapper extends WithDisposable(ShadowlessElement) {
     const { item } = this;
 
     const originalText = item.messages[1].content;
+    const answer = item.messages[2]?.content;
+    const images = item.messages[1].attachments;
+
     return html`<style></style>
       <slot></slot>
       <div
@@ -76,11 +87,14 @@ export class ActionWrapper extends WithDisposable(ShadowlessElement) {
         ? html`
             <div class="answer-prompt">
               <div class="subtitle">Answer</div>
-              ${createTextRenderer(this.host)(item.messages[2].content)}
-              <div class="subtitle">Prompt</div>
-              ${createTextRenderer(this.host)(
-                item.messages[0].content + originalText
-              )}
+              ${item.action === 'image' && images && renderImages(images)}
+              ${answer && createTextRenderer(this.host)(answer)}
+              ${originalText
+                ? html`<div class="subtitle">Prompt</div>
+                    ${createTextRenderer(this.host)(
+                      item.messages[0].content + originalText
+                    )}`
+                : nothing}
             </div>
           `
         : nothing} `;

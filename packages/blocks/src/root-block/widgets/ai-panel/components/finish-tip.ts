@@ -37,7 +37,6 @@ export class AIFinishTip extends WithDisposable(LitElement) {
       .right {
         display: flex;
         align-items: center;
-        padding-right: 8px;
 
         .copy,
         .copied {

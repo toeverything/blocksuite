@@ -54,6 +54,9 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
       gap: 14px;
       fill: var(--affine-icon-color);
     }
+    .github-icon {
+      color: var(--affine-black);
+    }
   `;
 
   @property({ attribute: false })

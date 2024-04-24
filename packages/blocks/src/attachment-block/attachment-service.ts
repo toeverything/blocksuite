@@ -59,7 +59,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
       );
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
-        addSiblingAttachmentBlocks(
+        await addSiblingAttachmentBlocks(
           this.host as EditorHost,
           attachmentFiles,
           this.maxFileSize,
