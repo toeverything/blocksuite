@@ -32,6 +32,7 @@ export const styles = css`
 
   .affine-embed-github-content-title {
     display: flex;
+    min-height: 22px;
     flex-direction: row;
     gap: 8px;
     align-items: center;
@@ -54,7 +55,7 @@ export const styles = css`
   .affine-embed-github-content-title-icons svg {
     width: 16px;
     height: 16px;
-    fill: var(--affine-background-primary-color);
+    color: var(--affine-pure-white);
   }
 
   .affine-embed-github-content-title-site-icon {
@@ -63,6 +64,11 @@ export const styles = css`
     height: 16px;
     justify-content: center;
     align-items: center;
+
+    .github-icon {
+      fill: var(--affine-black);
+      color: var(--affine-black);
+    }
   }
 
   .affine-embed-github-content-title-status-icon {
@@ -126,7 +132,7 @@ export const styles = css`
     word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--affine-text-primary-color);
+    color: var(--affine-pure-white);
 
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
@@ -386,17 +392,17 @@ export const styles = css`
 `;
 
 export const GithubIcon = html`<svg
+  class="github-icon"
   width="20"
   height="20"
   viewBox="0 0 16 16"
-  fill="none"
+  fill="currentColor"
   xmlns="http://www.w3.org/2000/svg"
 >
   <path
     fill-rule="evenodd"
     clip-rule="evenodd"
     d="M8.00016 1.33334C4.31683 1.33334 1.3335 4.39214 1.3335 8.16864C1.3335 11.1933 3.24183 13.7479 5.89183 14.6536C6.22516 14.7134 6.35016 14.5084 6.35016 14.3289C6.35016 14.1666 6.34183 13.6283 6.34183 13.0559C4.66683 13.372 4.2335 12.6372 4.10016 12.2527C4.02516 12.0562 3.70016 11.4496 3.41683 11.2872C3.1835 11.1591 2.85016 10.8429 3.4085 10.8344C3.9335 10.8259 4.3085 11.33 4.4335 11.535C5.0335 12.5689 5.99183 12.2784 6.37516 12.0989C6.4335 11.6546 6.6085 11.3556 6.80016 11.1847C5.31683 11.0138 3.76683 10.4243 3.76683 7.80978C3.76683 7.06644 4.02516 6.45127 4.45016 5.9728C4.3835 5.80192 4.15016 5.1013 4.51683 4.16145C4.51683 4.16145 5.07516 3.98202 6.35016 4.86206C6.8835 4.70827 7.45016 4.63137 8.01683 4.63137C8.5835 4.63137 9.15016 4.70827 9.6835 4.86206C10.9585 3.97348 11.5168 4.16145 11.5168 4.16145C11.8835 5.1013 11.6502 5.80192 11.5835 5.9728C12.0085 6.45127 12.2668 7.0579 12.2668 7.80978C12.2668 10.4328 10.7085 11.0138 9.22516 11.1847C9.46683 11.3983 9.67516 11.8084 9.67516 12.4492C9.67516 13.3635 9.66683 14.0983 9.66683 14.3289C9.66683 14.5084 9.79183 14.722 10.1252 14.6536C11.4486 14.1955 12.5986 13.3234 13.4133 12.1601C14.228 10.9968 14.6664 9.60079 14.6668 8.16864C14.6668 4.39214 11.6835 1.33334 8.00016 1.33334Z"
-    fill="black"
   />
 </svg> `;
 
@@ -404,7 +410,7 @@ export const GithubIssueOpenIcon = html`<svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
-  fill="none"
+  fill="currentColor"
   xmlns="http://www.w3.org/2000/svg"
 >
   <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path>
@@ -412,11 +418,6 @@ export const GithubIssueOpenIcon = html`<svg
     d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"
   ></path>
 </svg>`;
-
-// <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-// <path fill-rule="evenodd" clip-rule="evenodd" d="M2.5 8C2.5 4.96243 4.96243 2.5 8 2.5C11.0376 2.5 13.5 4.96243 13.5 8C13.5 11.0376 11.0376 13.5 8 13.5C4.96243 13.5 2.5 11.0376 2.5 8ZM8 1.5C4.41015 1.5 1.5 4.41015 1.5 8C1.5 11.5899 4.41015 14.5 8 14.5C11.5899 14.5 14.5 11.5899 14.5 8C14.5 4.41015 11.5899 1.5 8 1.5Z" fill="white"/>
-// <circle cx="8.0001" cy="8.00001" r="1.4" fill="white"/>
-// </svg>
 
 export const GithubIssueClosedSuccessIcon = html`<svg
   aria-hidden="true"
@@ -426,6 +427,7 @@ export const GithubIssueClosedSuccessIcon = html`<svg
   width="16"
   data-view-component="true"
   class="octicon octicon-issue-closed flex-items-center mr-1"
+  fill="currentColor"
 >
   <path
     d="M11.28 6.78a.75.75 0 0 0-1.06-1.06L7.25 8.69 5.78 7.22a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l3.5-3.5Z"
@@ -443,6 +445,7 @@ export const GithubIssueClosedFailureIcon = html`<svg
   width="16"
   data-view-component="true"
   class="octicon octicon-skip flex-items-center mr-1"
+  fill="currentColor"
 >
   <path
     d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm9.78-2.22-5.5 5.5a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l5.5-5.5a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"
@@ -456,6 +459,7 @@ export const GithubPROpenIcon = html`<svg
   version="1.1"
   width="16"
   aria-hidden="true"
+  fill="currentColor"
 >
   <path
     d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"
@@ -469,6 +473,7 @@ export const GithubPRDraftIcon = html`<svg
   version="1.1"
   width="16"
   aria-hidden="true"
+  fill="currentColor"
 >
   <path
     d="M3.25 1A2.25 2.25 0 0 1 4 5.372v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.251 2.251 0 0 1 3.25 1Zm9.5 14a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5ZM2.5 3.25a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0ZM3.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm9.5 0a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM14 7.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Zm0-4.25a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"
@@ -482,6 +487,7 @@ export const GithubPRMergedIcon = html`<svg
   version="1.1"
   width="16"
   aria-hidden="true"
+  fill="currentColor"
 >
   <path
     d="M5.45 5.154A4.25 4.25 0 0 0 9.25 7.5h1.378a2.251 2.251 0 1 1 0 1.5H9.25A5.734 5.734 0 0 1 5 7.123v3.505a2.25 2.25 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.95-.218ZM4.25 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm8.5-4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM5 3.25a.75.75 0 1 0 0 .005V3.25Z"
@@ -495,6 +501,7 @@ export const GithubPRClosedIcon = html`<svg
   version="1.1"
   width="16"
   aria-hidden="true"
+  fill="currentColor"
 >
   <path
     d="M3.25 1A2.25 2.25 0 0 1 4 5.372v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.251 2.251 0 0 1 3.25 1Zm9.5 5.5a.75.75 0 0 1 .75.75v3.378a2.251 2.251 0 1 1-1.5 0V7.25a.75.75 0 0 1 .75-.75Zm-2.03-5.273a.75.75 0 0 1 1.06 0l.97.97.97-.97a.748.748 0 0 1 1.265.332.75.75 0 0 1-.205.729l-.97.97.97.97a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-.97-.97-.97.97a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l.97-.97-.97-.97a.75.75 0 0 1 0-1.06ZM2.5 3.25a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0ZM3.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm9.5 0a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"
