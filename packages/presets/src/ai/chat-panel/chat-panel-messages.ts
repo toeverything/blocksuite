@@ -8,12 +8,15 @@ import './actions/slides.js';
 import './actions/mindmap.js';
 import './actions/chat-text.js';
 import './actions/copy-more.js';
+import './actions/explain-image.js';
+import './actions/image.js';
 
 import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import {
   type AIError,
+  isInsidePageEditor,
   PaymentRequiredError,
   UnauthorizedError,
 } from '@blocksuite/blocks';
@@ -32,7 +35,10 @@ import {
   PaymentRequiredErrorRenderer,
 } from '../messages/error.js';
 import { AIProvider } from '../provider.js';
-import { EditorActions } from './actions/actions-handle.js';
+import {
+  EdgelessEditorActions,
+  PageEditorActions,
+} from './actions/actions-handle.js';
 import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
@@ -62,12 +68,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       flex-direction: column;
       align-items: center;
       gap: 12px;
-    }
-
-    .chat-panel-messages-placeholder div {
-      color: var(--affine-text-primary-color);
-      font-size: 18px;
-      font-weight: 600;
     }
 
     .item-wrapper {
@@ -141,6 +141,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   error?: AIError;
 
+  @property({ attribute: false })
+  isLoading!: boolean;
+
   @query('.chat-panel-messages')
   messagesContainer!: HTMLDivElement;
 
@@ -158,6 +161,10 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       } else {
         this._currentTextSelection = textSelection ?? null;
       }
+      this.requestUpdate();
+    });
+
+    this.host.spec.getService('affine:page').slots.editorModeSwitch.on(() => {
       this.requestUpdate();
     });
 
@@ -191,14 +198,14 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderItem(item: ChatItem, isLast: boolean) {
-    if (isLast && this.status === 'error') {
-      return this.renderError();
+    if (isLast && this.status === 'loading') {
+      return this.renderLoading();
     }
 
     if ('role' in item) {
       return html`<chat-text
           .host=${this.host}
-          .blobs=${item.blobs}
+          .attachments=${item.attachments}
           .text=${item.content}
         ></chat-text
         >${this.renderEditorActions(item, isLast)}`;
@@ -219,6 +226,16 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
             .host=${this.host}
             .item=${item}
           ></action-mindmap>`;
+        case 'Explain this image':
+          return html`<action-explain-image
+            .host=${this.host}
+            .item=${item}
+          ></action-explain-image>`;
+        case 'image':
+          return html`<action-image
+            .host=${this.host}
+            .item=${item}
+          ></action-image>`;
         default:
           return html`<action-text
             .item=${item}
@@ -259,6 +276,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
     const { host } = this;
     const { content } = item;
+    const actions = isInsidePageEditor(host)
+      ? PageEditorActions
+      : EdgelessEditorActions;
 
     return html`
       <style>
@@ -303,7 +323,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       ${isLast
         ? html`<div class="actions-container">
             ${repeat(
-              EditorActions.filter(action => {
+              actions.filter(action => {
                 if (action.title === 'Replace selection') {
                   if (
                     this._currentTextSelection?.from.length === 0 &&
@@ -338,12 +358,25 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   protected override render() {
-    const { items } = this;
+    const { items, isLoading } = this;
     const filteredItems = items.filter(item => {
-      return 'role' in item || item.messages?.length === 3;
+      return (
+        'role' in item ||
+        item.messages?.length === 3 ||
+        (item.action === 'image' && item.messages?.length === 2)
+      );
     });
 
-    return html`
+    return html`<style>
+        .chat-panel-messages-placeholder div {
+          color: ${isLoading
+            ? 'var(--affine-text-secondary-color)'
+            : 'var(--affine-text-primary-color)'};
+          font-size: ${isLoading ? 'var(--affine-font-sm)' : '18px'};
+          font-weight: 600;
+        }
+      </style>
+
       <div
         class="chat-panel-messages"
         @scroll=${(evt: Event) => {
@@ -355,8 +388,16 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       >
         ${items.length === 0
           ? html`<div class="chat-panel-messages-placeholder">
-              ${AffineIcon}
-              <div>What can I help you with?</div>
+              ${AffineIcon(
+                isLoading
+                  ? 'var(--affine-icon-secondary)'
+                  : 'var(--affine-primary-color)'
+              )}
+              <div>
+                ${this.isLoading
+                  ? 'AFFiNE AI is loading history...'
+                  : 'What can I help you with?'}
+              </div>
             </div>`
           : repeat(filteredItems, (item, index) => {
               const isLast = index === filteredItems.length - 1;
@@ -364,8 +405,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
                 ${this.renderAvatar(item)}
                 <div class="item-wrapper">${this.renderItem(item, isLast)}</div>
                 <div class="item-wrapper">
-                  ${this.status === 'loading' && isLast
-                    ? this.renderLoading()
+                  ${this.status === 'error' && isLast
+                    ? this.renderError()
                     : nothing}
                 </div>
               </div>`;
@@ -375,8 +416,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         ? html`<div class="down-indicator" @click=${() => this.scrollToDown()}>
             ${DownArrowIcon}
           </div>`
-        : nothing}
-    `;
+        : nothing} `;
   }
 }
 
