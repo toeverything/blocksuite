@@ -148,7 +148,7 @@ export function getBoundsFromPoints(points: IVec[], rotation = 0): TLBounds {
   let maxX = -Infinity;
   let maxY = -Infinity;
 
-  if (points.length < 2) {
+  if (points.length < 1) {
     minX = 0;
     minY = 0;
     maxX = 1;
