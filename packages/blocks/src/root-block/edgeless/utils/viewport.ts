@@ -270,10 +270,10 @@ export class Viewport {
     this._width = width;
     this._height = height;
     this.sizeUpdated.emit({
-      width: this.width,
-      height: this.height,
-      left: this.left,
-      top: this.top,
+      left,
+      top,
+      width,
+      height,
     });
   }
 
