@@ -79,6 +79,9 @@ declare global {
       makeShorter<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
+      continueWriting<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
       checkCodeErrors<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
@@ -101,6 +104,9 @@ declare global {
         options: T
       ): AIActionTextResponse<T>;
       writeOutline<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      writeStory<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
 
