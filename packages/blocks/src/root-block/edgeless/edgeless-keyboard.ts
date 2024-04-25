@@ -55,6 +55,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         l: () => {
+          if (!rootElement.doc.awarenessStore.getFlag('enable_lasso_tool')) {
+            return;
+          }
           // select the current lasso mode
           const edgeless = rootElement;
           const lassoController = edgeless.tools.controllers['lasso'];
@@ -69,6 +72,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._setEdgelessTool(edgeless, tool);
         },
         'Shift-l': () => {
+          if (!rootElement.doc.awarenessStore.getFlag('enable_lasso_tool')) {
+            return;
+          }
           // toggle between lasso modes
           const edgeless = rootElement;
           const cur = edgeless.edgelessTool;

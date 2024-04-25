@@ -535,11 +535,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-default-tool-button>
 
-        <edgeless-lasso-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-lasso-tool-button>
+        ${doc.awarenessStore.getFlag('enable_lasso_tool')
+          ? html`<edgeless-lasso-tool-button
+              .edgelessTool=${this.edgelessTool}
+              .edgeless=${this.edgeless}
+              .setEdgelessTool=${this.setEdgelessTool}
+            ></edgeless-lasso-tool-button>`
+          : nothing}
 
         <edgeless-connector-tool-button
           .edgeless=${this.edgeless}
