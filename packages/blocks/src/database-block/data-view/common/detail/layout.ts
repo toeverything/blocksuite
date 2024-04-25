@@ -18,7 +18,8 @@ import { RecordDetail } from './detail.js';
 class SideLayoutModal extends ShadowlessElement {
   static override styles = css`
     side-layout-modal {
-      display: block;
+      display: flex;
+      flex-direction: column;
       position: absolute;
       right: 0;
       top: 0;
@@ -29,12 +30,15 @@ class SideLayoutModal extends ShadowlessElement {
       box-shadow: -5px 0px 10px 0px rgba(0, 0, 0, 0.05);
     }
 
+    .side-modal-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
     .side-modal-header {
-      margin: 12px 0;
-      padding: 0 12px;
+      padding: 12px;
       display: flex;
       align-items: center;
-      justify-content: end;
     }
 
     .header-ops {
@@ -60,10 +64,6 @@ class SideLayoutModal extends ShadowlessElement {
     .header-op:hover {
       background-color: var(--affine-hover-color);
     }
-
-    .close-modal {
-      margin-left: 20px;
-    }
   `;
   @property({ attribute: false })
   content?: HTMLElement;
@@ -82,12 +82,12 @@ class SideLayoutModal extends ShadowlessElement {
   override render() {
     return html`
       <div class="side-modal-header">
-        <div class="header-ops">${this.renderOps()}</div>
         <div @click="${this.close}" class="close-modal header-op">
           ${CrossIcon}
         </div>
+        <div class="header-ops">${this.renderOps()}</div>
       </div>
-      ${this.content}
+      <div class="side-modal-content">${this.content}</div>
     `;
   }
 }

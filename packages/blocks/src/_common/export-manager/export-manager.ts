@@ -21,7 +21,7 @@ import { ElementModel } from '../../surface-block/element-model/index.js';
 import type { GroupElementModel, Renderer } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { fetchImage } from '../adapters/utils.js';
-import { CANVAS_EXPROT_IGNORE_TAGS } from '../consts.js';
+import { CANVAS_EXPORT_IGNORE_TAGS } from '../consts.js';
 import { FileExporter } from './file-exporter.js';
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
@@ -123,7 +123,7 @@ export class ExportManager {
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
-          CANVAS_EXPROT_IGNORE_TAGS.includes(element.tagName) ||
+          CANVAS_EXPORT_IGNORE_TAGS.includes(element.tagName) ||
           element.classList.contains('dg')
         ) {
           return true;
@@ -346,7 +346,7 @@ export class ExportManager {
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
-          CANVAS_EXPROT_IGNORE_TAGS.includes(element.tagName) ||
+          CANVAS_EXPORT_IGNORE_TAGS.includes(element.tagName) ||
           element.classList.contains('dg')
         ) {
           return true;

@@ -1,10 +1,11 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import { AIStarIcon } from '../../../_common/icons/ai.js';
-import { requestConnectedFrame } from '../../../_common/utils/event.js';
+import { getElementsBound } from '../../../surface-block/index.js';
+import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 @customElement('edgeless-copilot-toolbar-entry')
@@ -38,8 +39,30 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   @property({ attribute: false })
   groups!: AIItemGroupConfig[];
 
-  @state()
-  private _showPanel = false;
+  private _showCopilotPanel() {
+    this.edgeless.service.tool.setEdgelessTool({
+      type: 'copilot',
+    });
+    const currentController = this.edgeless.tools.controllers[
+      'copilot'
+    ] as CopilotSelectionController;
+    const selectedElements = this.edgeless.service.selection.elements;
+    const selectedIds = selectedElements.map(e => e.id);
+    this.edgeless.service.selection.clear();
+
+    const padding = 10 / this.edgeless.service.zoom;
+    const bounds = getElementsBound(
+      selectedElements.map(e => e.elementBound)
+    ).expand(padding);
+    currentController.dragStartPoint = bounds.tl as [number, number];
+    currentController.dragLastPoint = bounds.br as [number, number];
+    this.edgeless.service.selection.set({
+      elements: selectedIds,
+      editing: false,
+      inoperable: true,
+    });
+    currentController.draggingAreaUpdated.emit(true);
+  }
 
   override render() {
     return html`
@@ -48,24 +71,10 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
           class="copilot-icon-button"
           width="75px"
           height="32px"
-          @click=${() => (this._showPanel = !this._showPanel)}
+          @click=${this._showCopilotPanel}
         >
           ${AIStarIcon} <span>Ask AI</span>
         </icon-button>
-        <div class="copilot-panel">
-          ${this._showPanel
-            ? html`<edgeless-copilot-panel
-            .edgeless=${this.edgeless}
-            .host=${this.host}
-            .groups=${this.groups}
-            .entry=${'toolbar'}
-            .onClick=${() => {
-              requestConnectedFrame(() => (this._showPanel = false), this);
-            }}
-          ></edgeless-copilot-panel>
-        </div>`
-            : nothing}
-        </div>
       </div>
     `;
   }

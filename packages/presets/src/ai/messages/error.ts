@@ -1,5 +1,5 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
-import { html, LitElement } from 'lit';
+import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { ErrorTipIcon } from '../_common/icons.js';
@@ -24,6 +24,7 @@ class AIErrorWrapper extends WithDisposable(LitElement) {
           background-color: var(--affine-background-error-color);
 
           .bottom {
+            align-items: flex-start;
             display: flex;
             gap: 8px;
             align-self: stretch;
@@ -36,9 +37,15 @@ class AIErrorWrapper extends WithDisposable(LitElement) {
             font-style: normal;
             font-weight: 400;
             line-height: 22px; /* 157.143% */
+            margin-bottom: 4px;
 
             a {
               color: inherit;
+            }
+
+            div svg {
+              position: relative;
+              top: 3px;
             }
           }
         }
@@ -97,8 +104,9 @@ export const PaymentRequiredErrorRenderer = (host: EditorHost) => html`
 `;
 
 export const GeneralErrorRenderer = (
-  text: string = `An error occurred, If this issue persists please let us know. contact@toeverything.info`
-) => html` <ai-error-wrapper .text=${text}></ai-error-wrapper>`;
+  text: string = `An error occurred, If this issue persists please let us know. contact@toeverything.info`,
+  template: TemplateResult<1> = html`${nothing}`
+) => html` <ai-error-wrapper .text=${text}>${template}</ai-error-wrapper>`;
 
 declare global {
   interface HTMLElementTagNameMap {

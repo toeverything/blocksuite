@@ -39,12 +39,25 @@ export const groupSizeMiddleware: SurfaceMiddleware = (
   };
 
   const disposables = [
+    surface.doc.slots.blockUpdated.on(payload => {
+      if (payload.type === 'update') {
+        const group = surface.getGroup(payload.id);
+
+        if (group instanceof GroupLikeModel && payload.props.key === 'xywh') {
+          addGroupSizeUpdateList(group);
+        }
+      }
+    }),
     surface.elementUpdated.on(({ id, props }) => {
       // update the group's xywh when children's xywh updated
       const group = surface.getGroup(id);
-
       if (group instanceof GroupLikeModel && props['xywh']) {
         addGroupSizeUpdateList(group);
+      }
+
+      const element = surface.getElementById(id);
+      if (element instanceof GroupLikeModel && props['childIds']) {
+        addGroupSizeUpdateList(element);
       }
     }),
     surface.elementAdded.on(({ id }) => {

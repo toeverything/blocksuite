@@ -1,6 +1,10 @@
+import './_common/generating-placeholder.js';
+
 import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+
+import { preprocessHtml } from '../utils/html.js';
 
 @customElement('ai-answer-wrapper')
 export class AIAnswerWrapper extends LitElement {
@@ -44,7 +48,7 @@ declare global {
 export const createIframeRenderer: AffineAIPanelWidgetConfig['answerRenderer'] =
   (answer, state) => {
     if (state !== 'finished') {
-      return nothing;
+      return html`<ai-generating-placeholder></ai-generating-placeholder>`;
     }
 
     const template = html`<iframe
@@ -52,7 +56,7 @@ export const createIframeRenderer: AffineAIPanelWidgetConfig['answerRenderer'] =
       sandbox="allow-scripts"
       scrolling="no"
       allowfullscreen
-      .srcdoc=${answer}
+      .srcdoc=${preprocessHtml(answer)}
     >
     </iframe>`;
     return html`<ai-answer-wrapper>${template}</ai-answer-wrapper>`;
@@ -61,7 +65,7 @@ export const createIframeRenderer: AffineAIPanelWidgetConfig['answerRenderer'] =
 export const createImageRenderer: AffineAIPanelWidgetConfig['answerRenderer'] =
   (answer, state) => {
     if (state !== 'finished') {
-      return nothing;
+      return html`<ai-generating-placeholder></ai-generating-placeholder>`;
     }
 
     const template = html`<img class="ai-answer-image" src=${answer}></img>`;

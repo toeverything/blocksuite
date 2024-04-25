@@ -28,6 +28,7 @@ export class Viewport {
   protected _el!: HTMLElement;
   private _syncFlag = false;
   protected _cumulativeParentScale = 1;
+  protected _locked = false;
 
   ZOOM_MAX = ZOOM_MAX;
   ZOOM_MIN = ZOOM_MIN;
@@ -121,6 +122,15 @@ export class Viewport {
 
   get boundingClientRect() {
     return this._el.getBoundingClientRect();
+  }
+
+  // Does not allow the user to move and zoom the canvas in copilot tool
+  get locked() {
+    return this._locked;
+  }
+
+  set locked(locked: boolean) {
+    this._locked = locked;
   }
 
   onResize() {
@@ -260,10 +270,10 @@ export class Viewport {
     this._width = width;
     this._height = height;
     this.sizeUpdated.emit({
-      width: this.width,
-      height: this.height,
-      left: this.left,
-      top: this.top,
+      left,
+      top,
+      width,
+      height,
     });
   }
 

@@ -2,8 +2,11 @@ import { IS_MAC } from '@blocksuite/global/env';
 
 import { type EdgelessTool, LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
-import type { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
-import type { ShapeElementModel } from '../../surface-block/index.js';
+import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
+import type {
+  ElementModel,
+  ShapeElementModel,
+} from '../../surface-block/index.js';
 import {
   Bound,
   ConnectorElementModel,
@@ -13,6 +16,7 @@ import {
 } from '../../surface-block/index.js';
 import { EdgelessBlockModel } from '../edgeless/type.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
+import { CopilotSelectionController } from './controllers/tools/copilot-tool.js';
 import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
@@ -86,6 +90,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         m: () => {
+          if (this.rootElement.service.locked) return;
           if (this.rootElement.service.selection.editing) return;
           const edgelessService = this.rootElement.service;
           const lastMousePosition = edgelessService.tool.lastMousePos;
@@ -138,6 +143,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         k: () => {
+          if (this.rootElement.service.locked) return;
           const { selection } = rootElement.service;
 
           if (
@@ -151,6 +157,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
         },
         f: () => {
+          if (this.rootElement.service.locked) return;
           if (
             this.rootElement.service.selection.elements.length !== 0 &&
             !this.rootElement.service.selection.editing
@@ -162,6 +169,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
         },
         '-': () => {
+          if (this.rootElement.service.locked) return;
           const { elements } = rootElement.service.selection;
           if (
             !rootElement.service.selection.editing &&
@@ -172,6 +180,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
         },
         'Shift-s': () => {
+          if (this.rootElement.service.locked) return;
           if (
             this.rootElement.service.selection.editing ||
             !(
@@ -201,6 +210,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           controller.createOverlay();
         },
         'Mod-g': ctx => {
+          if (this.rootElement.service.locked) return;
           if (
             this.rootElement.service.selection.elements.length > 1 &&
             !this.rootElement.service.selection.editing
@@ -210,6 +220,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
         },
         'Shift-Mod-g': ctx => {
+          if (this.rootElement.service.locked) return;
           const { selection } = this.rootElement.service;
           if (
             selection.elements.length === 1 &&
@@ -220,6 +231,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
         },
         'Mod-a': ctx => {
+          if (this.rootElement.service.locked) return;
           if (this.rootElement.service.selection.editing) {
             return;
           }
@@ -270,6 +282,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             curController instanceof LassoToolController &&
             curController.isSelecting
           ) {
+            curController.abort();
+          }
+          if (curController instanceof CopilotSelectionController) {
             curController.abort();
           }
 
@@ -428,6 +443,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _delete() {
     const edgeless = this.rootElement;
 
+    if (edgeless.service.locked) return;
     if (edgeless.service.selection.editing) {
       return;
     }
@@ -452,9 +468,50 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _move(key: string, shift = false) {
     const edgeless = this.rootElement;
+
+    if (edgeless.service.locked) return;
     if (edgeless.service.selection.editing) return;
+
     const { elements } = edgeless.service.selection;
     const inc = shift ? 10 : 1;
+    const mindmapNodes = elements.filter(
+      el => el.group instanceof MindmapElementModel
+    );
+
+    if (mindmapNodes.length > 0) {
+      const node = mindmapNodes[0];
+      const mindmap = node.group as MindmapElementModel;
+      let targetNode: ElementModel | null = null;
+
+      switch (key) {
+        case 'ArrowUp':
+        case 'ArrowDown':
+          targetNode = mindmap.getSiblingNode(
+            node.id,
+            key === 'ArrowDown' ? 'next' : 'prev'
+          );
+          break;
+        case 'ArrowLeft':
+          targetNode = mindmap.getParentNode(node.id);
+          break;
+        case 'ArrowRight':
+          {
+            const children = mindmap.getChildNodes(node.id);
+
+            targetNode = children[0] ?? null;
+          }
+          break;
+      }
+
+      if (targetNode) {
+        edgeless.service.selection.set({
+          elements: [targetNode.id],
+          editing: false,
+        });
+      }
+
+      return;
+    }
 
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();

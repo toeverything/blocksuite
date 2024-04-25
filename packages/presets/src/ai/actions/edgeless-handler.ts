@@ -1,9 +1,14 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { AffineAIPanelWidget, AIError } from '@blocksuite/blocks';
+import type {
+  AffineAIPanelWidget,
+  AIError,
+  EdgelessModel,
+} from '@blocksuite/blocks';
 import {
   ImageBlockModel,
   MindmapElementModel,
   NoteBlockModel,
+  ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -18,7 +23,10 @@ import {
   createImageRenderer,
 } from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
+import { isMindMapRoot } from '../utils/edgeless.js';
+import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
+import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
   actionToResponse,
@@ -57,34 +65,48 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   return createTextRenderer(host, 320);
 }
 
-async function getTextFromSelected(host: EditorHost) {
-  const selected = getCopilotSelectedElems(host);
-  const { notes, texts } = selected.reduce(
+export async function getContentFromSelected(
+  host: EditorHost,
+  selected: EdgelessModel[]
+) {
+  const { notes, texts, shapes } = selected.reduce<{
+    notes: NoteBlockModel[];
+    texts: TextElementModel[];
+    shapes: ShapeElementModel[];
+  }>(
     (pre, cur) => {
       if (cur instanceof NoteBlockModel) {
         pre.notes.push(cur);
       } else if (cur instanceof TextElementModel) {
         pre.texts.push(cur);
+      } else if (cur instanceof ShapeElementModel && cur.text?.length) {
+        pre.shapes.push(cur);
       }
 
       return pre;
     },
-    { notes: [], texts: [] } as {
-      notes: NoteBlockModel[];
-      texts: TextElementModel[];
-    }
+    { notes: [], texts: [], shapes: [] }
   );
 
-  const noteContent = await Promise.all(
-    notes.map(note => {
-      const slice = Slice.fromModels(host.doc, note.children);
-      return getMarkdownFromSlice(host, slice);
-    })
-  );
+  const noteContent = (
+    await Promise.all(
+      notes.map(note => {
+        const slice = Slice.fromModels(host.doc, note.children);
+        return getMarkdownFromSlice(host, slice);
+      })
+    )
+  )
+    .map(content => content.trim())
+    .filter(content => content.length);
 
   return `${noteContent.join('\n')}
 
-${texts.map(text => text.text.toString()).join('\n')}`;
+${texts.map(text => text.text.toString()).join('\n')}\n${shapes.map(shape => shape.text!.toString())}`;
+}
+
+function getTextFromSelected(host: EditorHost) {
+  const selected = getCopilotSelectedElems(host);
+  return getContentFromSelected(host, selected);
 }
 
 function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
@@ -95,7 +117,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   >,
   extract?: (host: EditorHost) => Promise<{
     content?: string;
-    attachments?: string[];
+    attachments?: (string | Blob)[];
   } | void>
 ) {
   const action = AIProvider.actions[id];
@@ -160,7 +182,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
   >,
   extract?: (host: EditorHost) => Promise<{
     content?: string;
-    attachments?: string[];
+    attachments?: (string | Blob)[];
   } | void>
 ) {
   return (host: EditorHost) => {
@@ -174,9 +196,10 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
       update: (text: string) => void;
       finish: (state: 'success' | 'error' | 'aborted', err?: AIError) => void;
     }) => {
-      const selectedElements = getCopilotSelectedElems(host);
-
-      if (selectedElements.length === 0) return;
+      if (!extract) {
+        const selectedElements = getCopilotSelectedElems(host);
+        if (selectedElements.length === 0) return;
+      }
 
       const stream = actionToStream(id, variants, extract)?.(host);
 
@@ -193,18 +216,23 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  extract?: (host: EditorHost) => Promise<{
+  customInput?: (host: EditorHost) => Promise<{
+    input?: string;
     content?: string;
-    attachments?: string[];
+    attachments?: (string | Blob)[];
   } | void>
 ) {
   return (host: EditorHost) => {
     const aiPanel = getAIPanel(host);
     const edgelessCopilot = getEdgelessCopilotWidget(host);
     let internal: Record<string, unknown> = {};
+    const selectedElements = getCopilotSelectedElems(host);
     const ctx = {
       get() {
-        return internal;
+        return {
+          ...internal,
+          selectedElements,
+        };
       },
       set(data: Record<string, unknown>) {
         internal = data;
@@ -212,6 +240,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     };
 
     edgelessCopilot.hideCopilotPanel();
+    edgelessCopilot.lockToolbar(true);
 
     assertExists(aiPanel.config);
 
@@ -219,23 +248,43 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     aiPanel.config.generateAnswer = actionToGeneration(
       id,
       variants,
-      extract
+      customInput
     )(host);
     aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
     aiPanel.config.discardCallback = () => {
-      edgelessCopilot.visible = false;
+      aiPanel.hide();
+    };
+    aiPanel.config.copy = {
+      allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
+      onCopy: () => {
+        return copyTextAnswer(getAIPanel(host));
+      },
+    };
+    aiPanel.config.hideCallback = () => {
+      aiPanel.updateComplete
+        .finally(() => {
+          edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
+            elements: [],
+            editing: false,
+          });
+          edgelessCopilot.lockToolbar(false);
+        })
+        .catch(console.error);
     };
 
     if (edgelessCopilot.visible) {
-      aiPanel.toggle(edgelessCopilot.selectionElem, 'placeholder');
+      aiPanel.toggle(
+        edgelessCopilot.selectionElem,
+        getCopilotSelectedElems(host).length ? 'placeholder' : undefined
+      );
     } else {
       aiPanel.toggle(getElementToolbar(host), 'placeholder');
     }
   };
 }
 
-export function noteBlockOrTextShowWen(
+export function noteBlockOrTextShowWhen(
   _: unknown,
   __: unknown,
   host: EditorHost
@@ -260,7 +309,11 @@ export function noteWithCodeBlockShowWen(
 export function mindmapShowWhen(_: unknown, __: unknown, host: EditorHost) {
   const selected = getCopilotSelectedElems(host);
 
-  return selected[0] instanceof MindmapElementModel;
+  return (
+    selected.length === 1 &&
+    selected[0]?.group instanceof MindmapElementModel &&
+    !isMindMapRoot(selected[0])
+  );
 }
 
 export function makeItRealShowWhen(_: unknown, __: unknown, host: EditorHost) {
@@ -276,4 +329,10 @@ export function explainImageShowWhen(
   const selected = getCopilotSelectedElems(host);
 
   return selected[0] instanceof ImageBlockModel;
+}
+
+export function mindmapRootShowWhen(_: unknown, __: unknown, host: EditorHost) {
+  const selected = getCopilotSelectedElems(host);
+
+  return selected.length === 1 && isMindMapRoot(selected[0]);
 }

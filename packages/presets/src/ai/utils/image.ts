@@ -69,3 +69,28 @@ function convertToPng(blob: Blob): Promise<Blob | null> {
     reader.readAsDataURL(blob);
   });
 }
+
+export function readBlobAsURL(blob: Blob | File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (typeof e.target?.result === 'string') {
+        resolve(e.target.result);
+      } else {
+        reject();
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+export function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  type = 'image/png',
+  quality?: number
+) {
+  return new Promise<Blob | null>(resolve =>
+    canvas.toBlob(resolve, type, quality)
+  );
+}

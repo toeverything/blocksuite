@@ -3,7 +3,8 @@ import './chat-panel-messages.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { AIError } from '@blocksuite/blocks';
-import { css, html } from 'lit';
+import type { Doc } from '@blocksuite/store';
+import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
@@ -15,7 +16,7 @@ import type { ChatPanelMessages } from './chat-panel-messages.js';
 export type ChatMessage = {
   content: string;
   role: 'user' | 'assistant';
-  blobs?: Blob[];
+  attachments?: string[];
   createdAt: string;
 };
 
@@ -23,6 +24,7 @@ export type ChatAction = {
   action: string;
   messages: ChatMessage[];
   sessionId: string;
+  createdAt: string;
 };
 
 export type ChatItem = ChatMessage | ChatAction;
@@ -94,6 +96,9 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   editor!: AffineEditorContainer;
 
+  @property({ attribute: false })
+  doc!: Doc;
+
   @state()
   items: ChatItem[] = [];
 
@@ -103,38 +108,56 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   @state()
   error?: AIError;
 
+  @state()
+  isLoading = true;
+
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
   public override async connectedCallback() {
     super.connectedCallback();
+    if (!this.doc) throw new Error('doc is required');
 
-    const { editor } = this;
+    AIProvider.slots.actions.on(async ({ action, event }) => {
+      if (
+        action !== 'chat' &&
+        event === 'finished' &&
+        (this.status === 'idle' || this.status === 'success')
+      ) {
+        await this._resetItems();
+      }
+    });
+
+    await this._resetItems();
+  }
+
+  private async _resetItems() {
+    const { doc } = this;
 
     const histories =
-      (await AIProvider.histories?.chats(
-        editor.doc.collection.id,
-        editor.doc.id
-      )) ?? [];
+      (await AIProvider.histories?.chats(doc.collection.id, doc.id)) ?? [];
 
     const actions =
-      (await AIProvider.histories?.actions(
-        editor.doc.collection.id,
-        editor.doc.id
-      )) ?? [];
+      (await AIProvider.histories?.actions(doc.collection.id, doc.id)) ?? [];
 
     const items: ChatItem[] = [...actions];
 
     if (histories[0]) {
       items.push(...histories[0].messages);
     }
+
     this.items = items.sort((a, b) => {
-      const aDate = 'role' in a ? a.createdAt : a.messages[0].createdAt;
-      const bDate = 'role' in b ? b.createdAt : b.messages[0].createdAt;
-      return new Date(aDate).getTime() - new Date(bDate).getTime();
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
 
+    this.isLoading = false;
     this.scrollToDown();
+  }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('doc')) {
+      this._resetItems().catch(console.error);
+    }
   }
 
   get rootService() {
@@ -172,6 +195,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         .items=${this.items}
         .status=${this.status}
         .error=${this.error}
+        .isLoading=${this.isLoading}
       ></chat-panel-messages>
       <chat-panel-input
         .host=${this.editor.host}

@@ -188,7 +188,7 @@ export function normalizeShapeBound(
   return bound;
 }
 
-export function updateMindmapNodeRect(shape: ShapeElementModel) {
+export function fitContent(shape: ShapeElementModel) {
   const font = getFontString(shape);
 
   if (!shape.text) {

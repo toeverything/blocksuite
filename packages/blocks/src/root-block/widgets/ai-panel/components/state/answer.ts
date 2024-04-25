@@ -1,23 +1,11 @@
+import '../finish-tip.js';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
-import type { AIItemGroupConfig } from '../../../../../_common/components/ai-item/index.js';
-import { AIDoneIcon } from '../../../../../_common/icons/ai.js';
-import { WarningIcon } from '../../../../../_common/icons/misc.js';
-import { CopyIcon } from '../../../../../_common/icons/text.js';
-
-export interface CopyConfig {
-  allowed: boolean;
-  onCopy: () => boolean | Promise<boolean>;
-}
-
-export type AIPanelAnswerConfig = {
-  responses: AIItemGroupConfig[];
-  actions: AIItemGroupConfig[];
-  copy?: CopyConfig;
-};
+import type { AIPanelAnswerConfig, CopyConfig } from '../../type.js';
 
 @customElement('ai-panel-answer')
 export class AIPanelAnswer extends WithDisposable(LitElement) {
@@ -28,7 +16,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       box-sizing: border-box;
       flex-direction: column;
       gap: 8px;
-      padding: 12px 0;
+      padding: 0;
     }
 
     .answer {
@@ -69,55 +57,6 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       line-height: 22px; /* 157.143% */
     }
 
-    .finish-tip {
-      display: flex;
-      box-sizing: border-box;
-      width: 100%;
-      height: 22px;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px;
-      gap: 4px;
-
-      color: var(--affine-text-secondary-color);
-
-      .text {
-        display: flex;
-        align-items: flex-start;
-        flex: 1 0 0;
-
-        /* light/xs */
-        font-size: var(--affine-font-xs);
-        font-style: normal;
-        font-weight: 400;
-        line-height: 20px; /* 166.667% */
-      }
-
-      .right {
-        display: flex;
-        align-items: center;
-        padding-right: 8px;
-
-        .copy,
-        .copied {
-          display: flex;
-          width: 20px;
-          height: 20px;
-          justify-content: center;
-          align-items: center;
-          border-radius: 8px;
-        }
-        .copy:hover {
-          color: var(--affine-icon-color);
-          background: var(--affine-hover-color);
-          cursor: pointer;
-        }
-        .copied {
-          color: var(--affine-brand-color);
-        }
-      }
-    }
-
     .response-list-container {
       display: flex;
       flex-direction: column;
@@ -127,6 +66,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
     .response-list-container,
     .action-list-container {
       padding: 0 8px;
+      user-select: none;
     }
 
     /* set item style outside ai-item */
@@ -146,8 +86,8 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   finish = true;
 
-  @state()
-  copied = false;
+  @property({ attribute: false })
+  copy?: CopyConfig;
 
   override render() {
     return html`
@@ -159,25 +99,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       </div>
       ${this.finish
         ? html`
-            <div class="finish-tip">
-              ${WarningIcon}
-              <div class="text">AI outputs can be misleading or wrong</div>
-              ${this.config.copy?.allowed
-                ? html`<div class="right">
-                    ${this.copied
-                      ? html`<div class="copied">${AIDoneIcon}</div>`
-                      : html`<div
-                          class="copy"
-                          @click=${async () => {
-                            this.copied = !!(await this.config.copy?.onCopy());
-                          }}
-                        >
-                          ${CopyIcon}
-                          <affine-tooltip>Copy</affine-tooltip>
-                        </div>`}
-                  </div>`
-                : nothing}
-            </div>
+            <ai-finish-tip .copy=${this.copy}></ai-finish-tip>
             ${this.config.responses.length > 0
               ? html`
                   <ai-panel-divider></ai-panel-divider>

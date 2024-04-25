@@ -16,6 +16,7 @@ export const textTones = [
   'informal',
   'friendly',
   'critical',
+  'humorous',
 ] as const;
 
 declare global {
@@ -24,7 +25,7 @@ declare global {
       input: string;
       stream?: boolean;
       attachments?: (string | File | Blob)[]; // blob could only be strings for the moments (url or data urls)
-
+      signal?: AbortSignal;
       // the following seems not necessary?
       docId: string;
       workspaceId: string;
@@ -50,6 +51,10 @@ declare global {
       tone: (typeof textTones)[number];
     }
 
+    interface ExpandMindMap extends AITextActionOptions {
+      mindmap: string;
+    }
+
     interface AIActions {
       // chat is a bit special because it's has a internally maintained session
       chat<T extends AITextActionOptions>(options: T): AIActionTextResponse<T>;
@@ -73,6 +78,9 @@ declare global {
         options: T
       ): AIActionTextResponse<T>;
       makeShorter<T extends AITextActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      continueWriting<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
       checkCodeErrors<T extends AITextActionOptions>(
@@ -112,7 +120,7 @@ declare global {
       brainstormMindmap<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
-      expandMindmap<T extends AITextActionOptions>(
+      expandMindmap<T extends ExpandMindMap>(
         options: T
       ): AIActionTextResponse<T>;
 
@@ -148,6 +156,7 @@ declare global {
       sessionId: string;
       tokens: number;
       action: string;
+      createdAt: string;
       messages: {
         content: string;
         createdAt: string;

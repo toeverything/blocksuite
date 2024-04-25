@@ -10,30 +10,12 @@ import {
 import { noop } from '@blocksuite/global/utils';
 import { html } from 'lit';
 
-import {
-  createGroup,
-  docGroup,
-  draftGroup,
-  editGroup,
-  mindmapGroup,
-  othersGroup,
-  presentationGroup,
-} from './actions-config.js';
+import { edgelessActionGroups } from './actions-config.js';
 
 noop(EdgelessCopilotToolbarEntry);
 
-const groups = [
-  docGroup,
-  editGroup,
-  draftGroup,
-  mindmapGroup,
-  presentationGroup,
-  createGroup,
-  othersGroup,
-];
-
 export function setupEdgelessCopilot(widget: EdgelessCopilotWidget) {
-  widget.groups = groups;
+  widget.groups = edgelessActionGroups;
 }
 
 export function setupEdgelessElementToolbarEntry(
@@ -45,7 +27,7 @@ export function setupEdgelessElementToolbarEntry(
     },
     render: (edgeless: EdgelessRootBlockComponent) => {
       const chain = edgeless.service.std.command.chain();
-      const filteredGroups = groups.reduce((pre, group) => {
+      const filteredGroups = edgelessActionGroups.reduce((pre, group) => {
         const filtered = group.items.filter(item =>
           item.showWhen?.(chain, 'edgeless', edgeless.host)
         );
@@ -60,7 +42,7 @@ export function setupEdgelessElementToolbarEntry(
       return html`<edgeless-copilot-toolbar-entry
         .edgeless=${edgeless}
         .host=${edgeless.host}
-        .groups=${groups}
+        .groups=${edgelessActionGroups}
       ></edgeless-copilot-toolbar-entry>`;
     },
   });

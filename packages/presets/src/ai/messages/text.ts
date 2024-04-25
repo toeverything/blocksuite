@@ -1,7 +1,10 @@
-import { type EditorHost } from '@blocksuite/block-std';
+import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import type { AffineAIPanelState } from '@blocksuite/blocks';
-import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
-import type { Doc } from '@blocksuite/store';
+import {
+  type AffineAIPanelWidgetConfig,
+  BlocksUtils,
+} from '@blocksuite/blocks';
+import type { BlockSelector, Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -11,12 +14,11 @@ import { CustomPageEditorBlockSpecs } from '../utils/custom-specs.js';
 import { markDownToDoc } from '../utils/markdown-utils.js';
 
 @customElement('ai-answer-text-preview')
-export class AIAnswerTextPreview extends LitElement {
+export class AIAnswerTextPreview extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 100%;
       display: flex;
-      user-select: none;
     }
 
     .ai-answer-text-editor.affine-page-viewport {
@@ -29,6 +31,27 @@ export class AIAnswerTextPreview extends LitElement {
     .ai-answer-text-editor .affine-page-root-block-container {
       padding: 0;
     }
+
+    .affine-paragraph-block-container {
+      line-height: 22px;
+    }
+
+    .ai-answer-text-editor {
+      .affine-note-block-container {
+        > .affine-block-children-container {
+          > :first-child,
+          > :first-child * {
+            margin-top: 0;
+            padding-top: 0;
+          }
+          > :last-child,
+          > :last-child * {
+            margin-bottom: 0;
+            padding-bottom: 0;
+          }
+        }
+      }
+    }
   `;
 
   @property({ attribute: false })
@@ -39,12 +62,26 @@ export class AIAnswerTextPreview extends LitElement {
 
   private _previewDoc: Doc | null = null;
 
+  private _selector: BlockSelector = block =>
+    BlocksUtils.matchFlavours(block.model, [
+      'affine:page',
+      'affine:note',
+      'affine:surface',
+      'affine:paragraph',
+      'affine:code',
+      'affine:list',
+      'affine:divider',
+    ]);
+
   override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
     if (changedProperties.has('answer')) {
       markDownToDoc(this.host, this.answer)
         .then(doc => {
-          this._previewDoc = doc;
+          this._previewDoc = doc.blockCollection.getDoc(this._selector);
+          this.disposables.add(() => {
+            doc.blockCollection.clearSelector(this._selector);
+          });
           this._previewDoc.awarenessStore.setReadonly(
             this._previewDoc.blockCollection,
             true

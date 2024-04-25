@@ -5,6 +5,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { createTextRenderer } from '../../messages/text.js';
 import type { ChatAction } from '../index.js';
 
 @customElement('action-text')
@@ -31,8 +32,10 @@ export class ActionText extends WithDisposable(ShadowlessElement) {
     const originalText = this.item.messages[1].content;
 
     return html`<action-wrapper .host=${this.host} .item=${this.item}>
-      <div class="original-text">${originalText}</div></action-wrapper
-    >`;
+      <div class="original-text">
+        ${createTextRenderer(this.host)(originalText)}
+      </div>
+    </action-wrapper>`;
   }
 }
 

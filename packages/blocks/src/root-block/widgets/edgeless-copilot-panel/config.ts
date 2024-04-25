@@ -213,7 +213,7 @@ export const dragWithAI = {
 } as AIItemGroupConfig;
 
 const chatWithAI: AIItemConfig = {
-  name: 'Chat with ai',
+  name: 'Open AI Chat',
   icon: ChatWithAIIcon,
   showWhen: () => true,
 };

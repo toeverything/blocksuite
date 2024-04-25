@@ -10,6 +10,7 @@ import {
   ResetIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
+import type { ComputePositionConfig } from '@floating-ui/dom';
 
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
@@ -92,7 +93,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
       name: '',
       items: [
         {
-          name: 'Continue with AI',
+          name: 'Continue in chat',
           icon: ChatWithAIIcon,
           handler: () => {
             AIProvider.slots.requestContinueInChat.emit({
@@ -121,20 +122,39 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   ];
 }
 
+export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
+  return [
+    {
+      name: 'Response',
+      items: [
+        {
+          name: 'Regenerate',
+          icon: ResetIcon,
+          handler: () => {
+            panel.generate();
+          },
+        },
+        {
+          name: 'Discard',
+          icon: DiscardIcon,
+          handler: () => {
+            panel.discard();
+          },
+        },
+      ],
+    },
+  ];
+}
+
 export function buildAIPanelConfig(
-  panel: AffineAIPanelWidget
+  panel: AffineAIPanelWidget,
+  positionConfig?: Partial<ComputePositionConfig>
 ): AffineAIPanelWidgetConfig {
   return {
     answerRenderer: createTextRenderer(panel.host, 320),
     finishStateConfig: {
       responses: buildTextResponseConfig(panel),
       actions: [], // ???
-      copy: {
-        allowed: true,
-        onCopy: () => {
-          return copyTextAnswer(panel);
-        },
-      },
     },
     errorStateConfig: {
       upgrade: () => {
@@ -145,7 +165,14 @@ export function buildAIPanelConfig(
         AIProvider.slots.requestLogin.emit({ host: panel.host });
         panel.hide();
       },
-      responses: [],
+      responses: buildErrorResponseConfig(panel),
+    },
+    positionConfig,
+    copy: {
+      allowed: true,
+      onCopy: () => {
+        return copyTextAnswer(panel);
+      },
     },
   };
 }

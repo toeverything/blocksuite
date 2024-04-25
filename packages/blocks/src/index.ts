@@ -72,7 +72,11 @@ export {
   openFileOrFiles,
 } from './_common/utils/index.js';
 export { createDefaultDoc } from './_common/utils/init.js';
-export { getThemeMode, isInsidePageEditor } from './_common/utils/query.js';
+export {
+  getThemeMode,
+  isInsideEdgelessEditor,
+  isInsidePageEditor,
+} from './_common/utils/query.js';
 export * from './_specs/_specs.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
@@ -110,6 +114,7 @@ export {
   ConnectorElementModel,
   ConnectorMode,
   ElementModel,
+  fitContent,
   generateKeyBetween,
   GroupElementModel,
   MindmapElementModel,
@@ -123,7 +128,6 @@ export {
   StrokeStyle,
   SurfaceBlockModel,
   TextElementModel,
-  updateMindmapNodeRect,
 } from './surface-block/index.js';
 export { MiniMindmapPreview } from './surface-block/mini-mindmap/mindmap-preview.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';

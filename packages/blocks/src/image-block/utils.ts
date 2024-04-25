@@ -78,8 +78,11 @@ async function getImageBlob(model: ImageBlockModel) {
   if (!blob.type) {
     const buffer = await blob.arrayBuffer();
 
-    const FileType = await import('file-type/browser.js');
-    const fileType = await FileType.fromBuffer(buffer);
+    // Switch to the original file-type package after https://github.com/sindresorhus/file-type/issues/578 is fixed
+    // The [@sgtpooki/file-type](https://github.com/sgtpooki/file-type) is a fork of the original file-type package
+    // Please check the commit before updating the package
+    const FileType = await import('@sgtpooki/file-type');
+    const fileType = await FileType.fileTypeFromBuffer(buffer);
     if (!fileType?.mime.startsWith('image/')) {
       return null;
     }
@@ -96,12 +99,17 @@ async function getImageBlob(model: ImageBlockModel) {
 
 export async function fetchImageBlob(block: ImageBlockComponent) {
   try {
-    block.loading = true;
-    block.error = false;
-    block.blob = undefined;
-    if (block.blobUrl) {
-      URL.revokeObjectURL(block.blobUrl);
-      block.blobUrl = undefined;
+    if (block.model.sourceId !== block.lastSourceId || !block.blobUrl) {
+      block.loading = true;
+      block.error = false;
+      block.blob = undefined;
+
+      if (block.blobUrl) {
+        URL.revokeObjectURL(block.blobUrl);
+        block.blobUrl = undefined;
+      }
+    } else if (block.blobUrl) {
+      return;
     }
 
     const { model } = block;
@@ -123,6 +131,7 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
     block.loading = false;
     block.blob = blob;
     block.blobUrl = URL.createObjectURL(blob);
+    block.lastSourceId = sourceId;
   } catch (error) {
     block.retryCount++;
     console.warn(`${error}, retrying`, block.retryCount);
@@ -210,6 +219,7 @@ export async function copyImageBlob(blockElement: ImageBlockComponent) {
   const { host, model } = blockElement;
   let blob = await getImageBlob(model);
   if (!blob) {
+    console.error('Failed to get image blob');
     return;
   }
 
@@ -223,10 +233,20 @@ export async function copyImageBlob(blockElement: ImageBlockComponent) {
     } else {
       // DOMException: Type image/jpeg not supported on write.
       if (blob.type !== 'image/png') {
-        blob = await convertToPng(blob);
+        const pngBlob = await convertToPng(blob);
+        if (!pngBlob) {
+          console.error('Failed to convert blob to PNG');
+          return;
+        }
+        blob = pngBlob;
       }
 
-      if (!blob) {
+      if (!globalThis.isSecureContext) {
+        console.error(
+          'Clipboard API is not available in insecure context',
+          blob.type,
+          blob
+        );
         return;
       }
 
