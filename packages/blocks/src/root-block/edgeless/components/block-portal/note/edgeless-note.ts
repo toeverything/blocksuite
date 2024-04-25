@@ -1,6 +1,8 @@
 import '../../note-slicer/index.js';
 
+import type { BlockElement } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -11,6 +13,9 @@ import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { almostEqual, clamp } from '../../../../../_common/utils/math.js';
+import { matchFlavours } from '../../../../../_common/utils/model.js';
+import { getClosestBlockElementByPoint } from '../../../../../_common/utils/query.js';
+import { Point } from '../../../../../_common/utils/rect.js';
 import { handleNativeRangeAtPoint } from '../../../../../_common/utils/selection.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
@@ -188,6 +193,64 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const x = clamp(e.x, rect.left + offsetX, rect.right - offsetX);
     const y = clamp(e.y, rect.top + offsetY, rect.bottom - offsetY);
     handleNativeRangeAtPoint(x, y);
+
+    if (this.surface.doc.readonly) return;
+    this._tryAddParagraph(x, y);
+  }
+
+  private _tryAddParagraph(x: number, y: number) {
+    const nearest = getClosestBlockElementByPoint(
+      new Point(x, y)
+    ) as BlockElement | null;
+    if (!nearest) return;
+
+    const nearestBBox = nearest.getBoundingClientRect();
+    const yRel = y - nearestBBox.top;
+
+    const insertPos: 'before' | 'after' =
+      yRel < nearestBBox.height / 2 ? 'before' : 'after';
+
+    const nearestModel = nearest.model as BlockModel;
+    const nearestModelIdx = this.model.children.indexOf(nearestModel);
+
+    const children = this.model.children;
+    const siblingModel =
+      children[
+        clamp(
+          nearestModelIdx + (insertPos === 'before' ? -1 : 1),
+          0,
+          children.length
+        )
+      ];
+
+    if (
+      (!nearestModel.text ||
+        !matchFlavours(nearestModel, ['affine:paragraph', 'affine:list'])) &&
+      (!siblingModel ||
+        !siblingModel.text ||
+        !matchFlavours(siblingModel, ['affine:paragraph', 'affine:list']))
+    ) {
+      const [pId] = this.surface.doc.addSiblingBlocks(
+        nearestModel,
+        [{ flavour: 'affine:paragraph' }],
+        insertPos
+      );
+
+      this.updateComplete
+        .then(() => {
+          this.surface.selection.setGroup('note', [
+            this.surface.selection.create('text', {
+              from: {
+                path: [this.surface.model.id, this.model.id, pId],
+                index: 0,
+                length: 0,
+              },
+              to: null,
+            }),
+          ]);
+        })
+        .catch(console.error);
+    }
   }
 
   private _setCollapse(event: MouseEvent) {
