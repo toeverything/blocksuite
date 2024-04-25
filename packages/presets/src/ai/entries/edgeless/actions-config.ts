@@ -1,15 +1,17 @@
-import type { AIItemGroupConfig, ShapeElementModel } from '@blocksuite/blocks';
+import type { AIItemGroupConfig } from '@blocksuite/blocks';
 import {
   AIPenIcon,
   BlocksUtils,
   LanguageIcon,
   MindmapElementModel,
+  ShapeElementModel,
   TextElementModel,
 } from '@blocksuite/blocks';
 
 import {
   actionToHandler,
   explainImageShowWhen,
+  getContentFromSelected,
   makeItRealShowWhen,
   mindmapRootShowWhen,
   mindmapShowWhen,
@@ -201,9 +203,11 @@ export const createGroup: AIItemGroupConfig = {
       showWhen: () => true,
       handler: actionToHandler('createImage', undefined, async host => {
         const selectedElements = getCopilotSelectedElems(host);
+        const len = selectedElements.length;
 
+        // text to image
         // create an image from user input
-        if (selectedElements.length === 0) {
+        if (len === 0) {
           const aiPanel = getAIPanel(host);
           const content = aiPanel.inputText?.trim();
           if (!content) return;
@@ -212,47 +216,44 @@ export const createGroup: AIItemGroupConfig = {
           };
         }
 
-        const edgelessRoot = getEdgelessRootFromEditor(host);
-        const { notes, frames, shapes, images } =
-          BlocksUtils.splitElements(selectedElements);
+        const {
+          notes,
+          images,
+          shapes,
+          frames: _,
+        } = BlocksUtils.splitElements(selectedElements);
+
+        const content = (
+          await getContentFromSelected(host, [...notes, ...shapes])
+        ).trim();
+
+        const pureShapes = shapes.filter(
+          e =>
+            !(
+              e instanceof TextElementModel ||
+              (e instanceof ShapeElementModel && e.text?.length)
+            )
+        );
 
         // text to image
-        if (selectedElements.length === 1) {
-          let content;
-          if (notes.length === 1) {
-            const note = notes[0];
-            content = note.text?.length && note.text.toString();
-          } else if (shapes.length === 1) {
-            const shape = shapes[0];
-            content =
-              shape instanceof TextElementModel &&
-              shape.text.length &&
-              shape.text.toString();
-          }
-          if (content) {
-            return {
-              content,
-            };
-          }
+        if (content.length && images.length + pureShapes.length === 0) {
+          return {
+            content,
+          };
         }
 
         // image to image
-        if (
-          notes.length + frames.length + images.length + shapes.length ===
-          0
-        ) {
-          return;
-        }
+        const edgelessRoot = getEdgelessRootFromEditor(host);
         const canvas = await edgelessRoot.clipboardController.toCanvas(
-          [...notes, ...frames, ...images],
-          shapes,
+          images,
+          pureShapes,
           1
         );
         if (!canvas) return;
-        // const png = canvas.toDataURL('image/png');
         const png = await canvasToBlob(canvas);
         if (!png) return;
         return {
+          content,
           attachments: [png],
         };
       }),
@@ -263,7 +264,6 @@ export const createGroup: AIItemGroupConfig = {
       showWhen: makeItRealShowWhen,
       handler: actionToHandler('makeItReal', undefined, async host => {
         const selectedElements = getCopilotSelectedElems(host);
-        const edgelessRoot = getEdgelessRootFromEditor(host);
         const { notes, frames, shapes, images } =
           BlocksUtils.splitElements(selectedElements);
         if (
@@ -272,13 +272,13 @@ export const createGroup: AIItemGroupConfig = {
         ) {
           return;
         }
+        const edgelessRoot = getEdgelessRootFromEditor(host);
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           [...notes, ...frames, ...images],
           shapes,
           1
         );
         if (!canvas) return;
-        // const png = canvas.toDataURL('image/png');
         const png = await canvasToBlob(canvas);
         if (!png) return;
         return {
