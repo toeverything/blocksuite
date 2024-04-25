@@ -54,6 +54,17 @@ export class ListBlockComponent extends BlockElement<
     });
   }
 
+  private _isInDatabase = () => {
+    let parent = this.parentElement;
+    while (parent && parent !== document.body) {
+      if (parent.tagName.toLowerCase() === 'affine-database') {
+        return true;
+      }
+      parent = parent.parentElement;
+    }
+    return false;
+  };
+
   private _onClickIcon = (e: MouseEvent) => {
     e.stopPropagation();
 
@@ -112,7 +123,8 @@ export class ListBlockComponent extends BlockElement<
 
     bindContainerHotkey(this);
 
-    this._inlineRangeProvider = getInlineRangeProvider(this);
+    if (!this._isInDatabase)
+      this._inlineRangeProvider = getInlineRangeProvider(this);
 
     this._updateFollowingListSiblings();
     this.disposables.add(
@@ -169,6 +181,7 @@ export class ListBlockComponent extends BlockElement<
   }
 
   override renderBlock(): TemplateResult<1> {
+    const isInDatabase = this._isInDatabase();
     const { model, _onClickIcon } = this;
     const collapsed = this.doc.readonly
       ? this._isCollapsedWhenReadOnly
@@ -204,7 +217,7 @@ export class ListBlockComponent extends BlockElement<
             .embedChecker=${this.embedChecker}
             .readonly=${this.doc.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
-            .enableClipboard=${false}
+            .enableClipboard=${isInDatabase}
             .enableUndoRedo=${false}
           ></rich-text>
         </div>

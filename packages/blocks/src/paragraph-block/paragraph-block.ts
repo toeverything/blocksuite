@@ -68,8 +68,8 @@ export class ParagraphBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
     bindContainerHotkey(this);
-
-    this._inlineRangeProvider = getInlineRangeProvider(this);
+    if (!this._isInDatabase())
+      this._inlineRangeProvider = getInlineRangeProvider(this);
   }
 
   override firstUpdated() {
@@ -123,6 +123,7 @@ export class ParagraphBlockComponent extends BlockElement<
   };
 
   override renderBlock(): TemplateResult<1> {
+    const isInDatabase = this._isInDatabase();
     const { type } = this.model;
     const children = html`<div
       class="affine-block-children-container"
@@ -147,7 +148,7 @@ export class ParagraphBlockComponent extends BlockElement<
             .embedChecker=${this.embedChecker}
             .readonly=${this.doc.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
-            .enableClipboard=${false}
+            .enableClipboard=${isInDatabase}
             .enableUndoRedo=${false}
           ></rich-text>
           <div contenteditable="false" class="affine-paragraph-placeholder">

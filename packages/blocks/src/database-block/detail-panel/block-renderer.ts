@@ -1,8 +1,10 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
+import type { RichText } from '../../_common/components/index.js';
 import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
 import type { DataViewKanbanManager } from '../data-view/view/presets/kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../data-view/view/presets/table/table-view-manager.js';
@@ -48,6 +50,9 @@ export class BlockRenderer
   public rowId!: string;
   host?: EditorHost;
 
+  @query('rich-text')
+  private _richTextElem?: RichText;
+
   get model() {
     return this.host?.doc.getBlockById(this.rowId);
   }
@@ -60,11 +65,20 @@ export class BlockRenderer
 
   public override connectedCallback() {
     super.connectedCallback();
+
     this.host = this.closest('editor-host') ?? undefined;
     this._disposables.addFromEvent(
       this.topContenteditableElement ?? this,
       'keydown',
       e => {
+        if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
+          e.stopPropagation();
+          e.preventDefault();
+          const inlineEditor = this._richTextElem?.inlineEditor;
+          inlineEditor?.selectAll();
+          return;
+        }
+
         if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
           e.stopPropagation();
           e.preventDefault();
@@ -80,8 +94,7 @@ export class BlockRenderer
           e.preventDefault();
           return;
         }
-      },
-      true
+      }
     );
   }
 

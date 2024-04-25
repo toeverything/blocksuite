@@ -142,7 +142,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
       };
       return renderUniLit(header, props);
     }
-    return undefined;
+    return nothing;
   }
 }
 
