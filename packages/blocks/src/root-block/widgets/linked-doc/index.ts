@@ -102,7 +102,7 @@ export class AffineLinkedDocWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.handleEvent('keyDown', this._onKeyDown);
+    this.handleEvent('keyDown', this._onKeyDown, { global: true });
   }
 
   public showLinkedDoc = (
