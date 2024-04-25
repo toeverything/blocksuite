@@ -11,26 +11,16 @@ import { noop } from '@blocksuite/global/utils';
 import { html } from 'lit';
 
 import {
-  createGroup,
-  docGroup,
   draftGroup,
   editGroup,
-  mindmapGroup,
+  generateGroup,
   othersGroup,
-  presentationGroup,
+  reviewGroup as reviewGroup,
 } from './actions-config.js';
 
 noop(EdgelessCopilotToolbarEntry);
 
-const groups = [
-  docGroup,
-  editGroup,
-  draftGroup,
-  mindmapGroup,
-  presentationGroup,
-  createGroup,
-  othersGroup,
-];
+const groups = [editGroup, draftGroup, reviewGroup, generateGroup, othersGroup];
 
 export function setupEdgelessCopilot(widget: EdgelessCopilotWidget) {
   widget.groups = groups;

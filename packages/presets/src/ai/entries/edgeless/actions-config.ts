@@ -1,7 +1,8 @@
-import type { AIItemGroupConfig } from '@blocksuite/blocks';
 import {
+  type AIItemGroupConfig,
   AIPenIcon,
   BlocksUtils,
+  ChatWithAIIcon,
   LanguageIcon,
   MindmapElementModel,
   ShapeElementModel,
@@ -18,8 +19,9 @@ import {
   noteBlockOrTextShowWhen,
 } from '../../actions/edgeless-handler.js';
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
-import { translateLangs } from '../../actions/types.js';
+import { textTones, translateLangs } from '../../actions/types.js';
 import { getAIPanel } from '../../ai-panel.js';
+import { AIProvider } from '../../provider.js';
 import { mindMapToMarkdown } from '../../utils/edgeless.js';
 import { canvasToBlob } from '../../utils/image.js';
 import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
@@ -31,32 +33,28 @@ const translateSubItem = translateLangs.map(lang => {
   };
 });
 
-export const docGroup: AIItemGroupConfig = {
-  name: 'doc with ai',
-  items: [
-    {
-      name: 'Summary',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('summary'),
-    },
-  ],
-};
+export const toneSubItem = textTones.map(tone => {
+  return {
+    type: tone,
+    handler: actionToHandler('changeTone', { tone }),
+  };
+});
 
 export const othersGroup: AIItemGroupConfig = {
   name: 'others',
   items: [
     {
-      name: 'Find actions from it',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('findActions'),
-    },
-    {
-      name: 'Explain this',
-      icon: AIPenIcon,
-      showWhen: explainImageShowWhen,
-      handler: actionToHandler('explain'),
+      name: 'Chat with AI',
+      icon: ChatWithAIIcon,
+      showWhen: () => true,
+      handler: host => {
+        const panel = getAIPanel(host);
+        AIProvider.slots.requestContinueInChat.emit({
+          host: host,
+          show: true,
+        });
+        panel.hide();
+      },
     },
   ],
 };
@@ -71,23 +69,18 @@ export const editGroup: AIItemGroupConfig = {
       subItem: translateSubItem,
     },
     {
-      name: 'Improve writing for it',
+      name: 'Change tone to',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      subItem: toneSubItem,
+    },
+    {
+      name: 'Improve writing',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('improveWriting'),
     },
-    {
-      name: 'Improve grammar for it',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('improveGrammar'),
-    },
-    {
-      name: 'Fix spelling ',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('fixSpelling'),
-    },
+
     {
       name: 'Make longer',
       icon: AIPenIcon,
@@ -99,6 +92,12 @@ export const editGroup: AIItemGroupConfig = {
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeShorter'),
+    },
+    {
+      name: 'Continue writing',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('continueWriting'),
     },
   ],
 };
@@ -131,23 +130,65 @@ export const draftGroup: AIItemGroupConfig = {
       handler: actionToHandler('writeBlogPost'),
     },
     {
-      name: 'Write a outline from this',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('writeOutline'),
-    },
-    {
       name: 'Brainstorm ideas about this',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('brainstorm'),
     },
+    {
+      name: 'Write a story about this',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('writeStory'),
+    },
   ],
 };
 
-export const mindmapGroup: AIItemGroupConfig = {
-  name: 'mindmap with ai',
+export const reviewGroup: AIItemGroupConfig = {
+  name: 'review with ai',
   items: [
+    {
+      name: 'Improve grammar for this',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('improveGrammar'),
+    },
+    {
+      name: 'Fix spelling for this',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('fixSpelling'),
+    },
+    {
+      name: 'Explain this image',
+      icon: AIPenIcon,
+      showWhen: explainImageShowWhen,
+      handler: actionToHandler('explainImage'),
+    },
+    {
+      name: 'Explain selection',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('explain'),
+    },
+  ],
+};
+
+export const generateGroup: AIItemGroupConfig = {
+  name: 'generate with ai',
+  items: [
+    {
+      name: 'Summarize',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('summary'),
+    },
+    {
+      name: 'Find action items from it',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('findActions'),
+    },
     {
       name: 'Expand from this mind map node',
       icon: AIPenIcon,
@@ -174,31 +215,41 @@ export const mindmapGroup: AIItemGroupConfig = {
       handler: actionToHandler('brainstormMindmap'),
     },
     {
-      name: 'Regenerate mind map',
+      name: 'Make it real',
       icon: AIPenIcon,
-      showWhen: mindmapRootShowWhen,
-      handler: actionToHandler('brainstormMindmap'),
+      showWhen: makeItRealShowWhen,
+      handler: actionToHandler('makeItReal', undefined, async host => {
+        const selectedElements = getCopilotSelectedElems(host);
+        const { notes, frames, shapes, images } =
+          BlocksUtils.splitElements(selectedElements);
+        if (
+          notes.length + frames.length + images.length + shapes.length ===
+          0
+        ) {
+          return;
+        }
+        const edgelessRoot = getEdgelessRootFromEditor(host);
+        const canvas = await edgelessRoot.clipboardController.toCanvas(
+          [...notes, ...frames, ...images],
+          shapes,
+          1
+        );
+        if (!canvas) return;
+        const png = await canvasToBlob(canvas);
+        if (!png) return;
+        return {
+          attachments: [png],
+        };
+      }),
     },
-  ],
-};
-
-export const presentationGroup: AIItemGroupConfig = {
-  name: 'presentation with ai',
-  items: [
     {
-      name: 'Create a presentation',
+      name: 'Generate a presentation',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('createSlides'),
     },
-  ],
-};
-
-export const createGroup: AIItemGroupConfig = {
-  name: 'create with ai',
-  items: [
     {
-      name: 'Create an image',
+      name: 'Generate an image',
       icon: AIPenIcon,
       showWhen: () => true,
       handler: actionToHandler('createImage', undefined, async host => {
@@ -259,32 +310,16 @@ export const createGroup: AIItemGroupConfig = {
       }),
     },
     {
-      name: 'Make it real',
+      name: 'Write a outline from this',
       icon: AIPenIcon,
-      showWhen: makeItRealShowWhen,
-      handler: actionToHandler('makeItReal', undefined, async host => {
-        const selectedElements = getCopilotSelectedElems(host);
-        const { notes, frames, shapes, images } =
-          BlocksUtils.splitElements(selectedElements);
-        if (
-          notes.length + frames.length + images.length + shapes.length ===
-          0
-        ) {
-          return;
-        }
-        const edgelessRoot = getEdgelessRootFromEditor(host);
-        const canvas = await edgelessRoot.clipboardController.toCanvas(
-          [...notes, ...frames, ...images],
-          shapes,
-          1
-        );
-        if (!canvas) return;
-        const png = await canvasToBlob(canvas);
-        if (!png) return;
-        return {
-          attachments: [png],
-        };
-      }),
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('writeOutline'),
+    },
+    {
+      name: 'Regenerate mindmap from this',
+      icon: AIPenIcon,
+      showWhen: mindmapRootShowWhen,
+      handler: actionToHandler('brainstormMindmap'),
     },
   ],
 };

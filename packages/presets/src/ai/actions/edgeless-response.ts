@@ -13,6 +13,7 @@ import type {
 } from '@blocksuite/blocks';
 import {
   AFFINE_EDGELESS_COPILOT_WIDGET,
+  ChatWithAIIcon,
   DeleteIcon,
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EmbedHtmlBlockSpec,
@@ -25,6 +26,7 @@ import {
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
+import { AIProvider } from '../provider.js';
 import { isMindMapRoot } from '../utils/edgeless.js';
 import { preprocessHtml } from '../utils/html.js';
 import { fetchImageToFile } from '../utils/image.js';
@@ -389,6 +391,18 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
       {
         name: 'Response',
         items: [
+          {
+            name: 'Continue in chat',
+            icon: ChatWithAIIcon,
+            handler: () => {
+              const panel = getAIPanel(host);
+              AIProvider.slots.requestContinueInChat.emit({
+                host: host,
+                show: true,
+              });
+              panel.hide();
+            },
+          },
           getInsertHandler(id, host, ctx),
           retry(getAIPanel(host)),
           discard(getAIPanel(host), getEdgelessCopilotWidget(host)),
