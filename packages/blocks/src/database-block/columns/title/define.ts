@@ -1,3 +1,5 @@
+import type { Y } from '@blocksuite/store';
+
 import { columnType } from '../../data-view/column/column-config.js';
 import { tRichText } from '../../data-view/logical/data-type.js';
 
@@ -8,7 +10,7 @@ declare global {
     [titleColumnType.type]: typeof titlePureColumnConfig.model;
   }
 }
-export const titlePureColumnConfig = titleColumnType.modelConfig<string>({
+export const titlePureColumnConfig = titleColumnType.modelConfig<Y.Text>({
   name: 'Title',
   type: () => tRichText.create(),
   defaultData: () => ({}),

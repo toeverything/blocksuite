@@ -1,12 +1,20 @@
 import {
   type AIItemGroupConfig,
   AIPenIcon,
+  AISearchIcon,
   BlocksUtils,
   ChatWithAIIcon,
+  ExplainIcon,
+  ImproveWritingIcon,
   LanguageIcon,
+  LongerIcon,
+  MakeItRealIcon,
   MindmapElementModel,
+  SelectionIcon,
   ShapeElementModel,
+  ShorterIcon,
   TextElementModel,
+  ToneIcon,
 } from '@blocksuite/blocks';
 
 import {
@@ -70,26 +78,26 @@ const editGroup: AIItemGroupConfig = {
     },
     {
       name: 'Change tone to',
-      icon: AIPenIcon,
+      icon: ToneIcon,
       showWhen: noteBlockOrTextShowWhen,
       subItem: toneSubItem,
     },
     {
       name: 'Improve writing',
-      icon: AIPenIcon,
+      icon: ImproveWritingIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('improveWriting'),
     },
 
     {
-      name: 'Make longer',
-      icon: AIPenIcon,
+      name: 'Make it longer',
+      icon: LongerIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeLonger'),
     },
     {
-      name: 'Make shorter',
-      icon: AIPenIcon,
+      name: 'Make it shorter',
+      icon: ShorterIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeShorter'),
     },
@@ -159,21 +167,22 @@ const reviewGroup: AIItemGroupConfig = {
       showWhen: explainImageShowWhen,
       handler: actionToHandler('explainImage'),
     },
-    {
-      name: 'Explain this code',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('explainCode'),
-    },
+    // TODO: not supported yet
+    // {
+    //   name: 'Explain this code',
+    //   icon: AIPenIcon,
+    //   showWhen: textBlockShowWhen,
+    //   handler: actionToHandler('explainCode'),
+    // },
     {
       name: 'Check code error',
-      icon: AIPenIcon,
+      icon: ExplainIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('checkCodeErrors'),
     },
     {
       name: 'Explain selection',
-      icon: AIPenIcon,
+      icon: SelectionIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('explain'),
     },
@@ -194,18 +203,6 @@ const generateGroup: AIItemGroupConfig = {
       icon: AIPenIcon,
       handler: actionToHandler('createHeadings'),
       showWhen: noteBlockOrTextShowWhen,
-    },
-    {
-      name: 'Generate outline',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('writeOutline'),
-    },
-    {
-      name: 'Find actions',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('findActions'),
     },
     {
       name: 'Generate an image',
@@ -257,7 +254,11 @@ const generateGroup: AIItemGroupConfig = {
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           images,
           pureShapes,
-          1
+          {
+            dpr: 1,
+            padding: 0,
+            background: 'white',
+          }
         );
         if (!canvas) return;
         const png = await canvasToBlob(canvas);
@@ -267,6 +268,18 @@ const generateGroup: AIItemGroupConfig = {
           attachments: [png],
         };
       }),
+    },
+    {
+      name: 'Generate outline',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('writeOutline'),
+    },
+    {
+      name: 'Find actions',
+      icon: AISearchIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('findActions'),
     },
     {
       name: 'Expand from this mind map node',
@@ -309,7 +322,7 @@ const generateGroup: AIItemGroupConfig = {
 
     {
       name: 'Make it real',
-      icon: AIPenIcon,
+      icon: MakeItRealIcon,
       showWhen: makeItRealShowWhen,
       handler: actionToHandler('makeItReal', undefined, async host => {
         const selectedElements = getCopilotSelectedElems(host);
@@ -325,7 +338,10 @@ const generateGroup: AIItemGroupConfig = {
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           [...notes, ...frames, ...images],
           shapes,
-          1
+          {
+            dpr: 1,
+            padding: 0,
+          }
         );
         if (!canvas) return;
         const png = await canvasToBlob(canvas);

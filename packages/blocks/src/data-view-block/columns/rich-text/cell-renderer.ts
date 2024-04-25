@@ -11,10 +11,10 @@ import type {
   AffineInlineEditor,
   AffineTextAttributes,
 } from '../../../_common/inline/presets/affine-inline-specs.js';
-import { BaseCellRenderer } from '../../data-view/column/base-cell.js';
-import { createFromBaseCellRenderer } from '../../data-view/column/renderer.js';
-import { createIcon } from '../../data-view/utils/uni-icon.js';
-import type { DatabaseBlockComponent } from '../../database-block.js';
+import { BaseCellRenderer } from '../../../database-block/data-view/column/index.js';
+import { createFromBaseCellRenderer } from '../../../database-block/data-view/column/renderer.js';
+import { createIcon } from '../../../database-block/data-view/utils/uni-icon.js';
+import type { DatabaseBlockComponent } from '../../../database-block/index.js';
 import { richTextColumnModelConfig } from './define.js';
 
 function toggleStyle(
@@ -68,17 +68,17 @@ function toggleStyle(
   inlineEditor.syncInlineRange();
 }
 
-@customElement('affine-database-rich-text-cell')
+@customElement('affine-data-view-rich-text-cell')
 export class RichTextCell extends BaseCellRenderer<Y.Text> {
   static override styles = css`
-    affine-database-rich-text-cell {
+    affine-data-view-rich-text-cell {
       display: flex;
       align-items: center;
       width: 100%;
       user-select: none;
     }
 
-    .affine-database-rich-text {
+    .affine-data-view-rich-text {
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -90,20 +90,20 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       word-break: break-all;
     }
 
-    .affine-database-rich-text v-line {
+    .affine-data-view-rich-text v-line {
       display: flex !important;
       align-items: center;
       height: 100%;
       width: 100%;
     }
 
-    .affine-database-rich-text v-line > div {
+    .affine-data-view-rich-text v-line > div {
       flex-grow: 1;
     }
   `;
 
   get service() {
-    const database = this.closest<DatabaseBlockComponent>('affine-database');
+    const database = this.closest<DatabaseBlockComponent>('affine-data-view');
     return database?.service;
   }
 
@@ -129,7 +129,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   get topContenteditableElement() {
     const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-database');
+      this.closest<DatabaseBlockComponent>('affine-data-view');
     return databaseBlock?.topContenteditableElement;
   }
 
@@ -149,7 +149,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   override render() {
     if (!this.service) return nothing;
     if (!this.value) {
-      return html`<div class="affine-database-rich-text"></div>`;
+      return html`<div class="affine-data-view-rich-text"></div>`;
     }
     return html`<rich-text
       .yText=${this.value}
@@ -159,15 +159,15 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       .embedChecker=${this.inlineManager?.embedChecker}
       .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
       .readonly=${true}
-      class="affine-database-rich-text inline-editor"
+      class="affine-data-view-rich-text inline-editor"
     ></rich-text>`;
   }
 }
 
-@customElement('affine-database-rich-text-cell-editing')
+@customElement('affine-data-view-rich-text-cell-editing')
 export class RichTextCellEditing extends BaseCellRenderer<Text> {
   static override styles = css`
-    affine-database-rich-text-cell-editing {
+    affine-data-view-rich-text-cell-editing {
       display: flex;
       align-items: center;
       width: 100%;
@@ -175,7 +175,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       cursor: text;
     }
 
-    .affine-database-rich-text {
+    .affine-data-view-rich-text {
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -184,20 +184,20 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       outline: none;
     }
 
-    .affine-database-rich-text v-line {
+    .affine-data-view-rich-text v-line {
       display: flex !important;
       align-items: center;
       height: 100%;
       width: 100%;
     }
 
-    .affine-database-rich-text v-line > div {
+    .affine-data-view-rich-text v-line > div {
       flex-grow: 1;
     }
   `;
 
   get service() {
-    const database = this.closest<DatabaseBlockComponent>('affine-database');
+    const database = this.closest<DatabaseBlockComponent>('affine-data-view');
     return database?.service;
   }
 
@@ -223,7 +223,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   get topContenteditableElement() {
     const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-database');
+      this.closest<DatabaseBlockComponent>('affine-data-view');
     return databaseBlock?.topContenteditableElement;
   }
 
@@ -354,14 +354,14 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       .attributeRenderer=${this.attributeRenderer}
       .embedChecker=${this.inlineManager?.embedChecker}
       .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
-      class="affine-database-rich-text inline-editor"
+      class="affine-data-view-rich-text inline-editor"
     ></rich-text>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-rich-text-cell-editing': RichTextCellEditing;
+    'affine-data-view-rich-text-cell-editing': RichTextCellEditing;
   }
 }
 
