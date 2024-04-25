@@ -1,4 +1,5 @@
 import { PageEditorBlockSpecs, PageRootService } from '@blocksuite/blocks';
+import { literal } from 'lit/static-html.js';
 
 /**
  * Custom PageRootService that does not load fonts
@@ -12,6 +13,9 @@ export const CustomPageEditorBlockSpecs = PageEditorBlockSpecs.map(spec => {
     return {
       ...spec,
       service: CustomPageRootService,
+      view: {
+        component: literal`affine-page-root`,
+      },
     };
   }
   return spec;
