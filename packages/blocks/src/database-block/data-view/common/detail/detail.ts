@@ -18,10 +18,10 @@ const styles = css`
   ${unsafeCSS(dataViewCommonStyle('affine-data-view-record-detail'))}
   affine-data-view-record-detail {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    padding: 0 36px;
+    padding: 20px 36px;
     gap: 12px;
-    height: 100%;
   }
 
   .add-property {
