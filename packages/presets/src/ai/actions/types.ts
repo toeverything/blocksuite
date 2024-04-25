@@ -16,6 +16,7 @@ export const textTones = [
   'informal',
   'friendly',
   'critical',
+  'humorous',
 ] as const;
 
 declare global {
@@ -104,9 +105,6 @@ declare global {
         options: T
       ): AIActionTextResponse<T>;
       writeOutline<T extends AITextActionOptions>(
-        options: T
-      ): AIActionTextResponse<T>;
-      writeStory<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
 

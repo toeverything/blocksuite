@@ -148,12 +148,6 @@ const DraftAIGroup: AIItemGroupConfig = {
       showWhen: textBlockShowWhen,
       handler: actionToHandler('brainstorm'),
     },
-    {
-      name: 'Write a story about this',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
-      handler: actionToHandler('writeStory'),
-    },
   ],
 };
 
@@ -161,16 +155,16 @@ const ReviewWIthAIGroup: AIItemGroupConfig = {
   name: 'review with ai',
   items: [
     {
-      name: 'Improve grammar',
-      icon: AIDoneIcon,
-      showWhen: textBlockShowWhen,
-      handler: actionToHandler('improveGrammar'),
-    },
-    {
       name: 'Fix spelling',
       icon: AIDoneIcon,
       showWhen: textBlockShowWhen,
       handler: actionToHandler('fixSpelling'),
+    },
+    {
+      name: 'Fix grammar',
+      icon: AIDoneIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('improveGrammar'),
     },
     {
       name: 'Explain this image',
@@ -209,12 +203,6 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
       handler: actionToHandler('summary'),
     },
     {
-      name: 'Find action items from it',
-      icon: AIPenIcon,
-      showWhen: textBlockShowWhen,
-      handler: actionToHandler('findActions'),
-    },
-    {
       name: 'Generate headings',
       icon: AIPenIcon,
       handler: actionToHandler('createHeadings'),
@@ -234,11 +222,18 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
         );
       },
     },
+    // todo: missing "generate an image" action
     {
-      name: 'Write a outline from this',
+      name: 'Generate outline',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
       handler: actionToHandler('writeOutline'),
+    },
+    {
+      name: 'Find actions',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: actionToHandler('findActions'),
     },
   ],
 };
@@ -247,7 +242,7 @@ const OthersAIGroup: AIItemGroupConfig = {
   name: 'Others',
   items: [
     {
-      name: 'Chat with AI',
+      name: 'Open AI Chat',
       icon: ChatWithAIIcon,
       handler: host => {
         const panel = getAIPanel(host);
@@ -262,9 +257,9 @@ const OthersAIGroup: AIItemGroupConfig = {
 };
 
 export const AIItemGroups: AIItemGroupConfig[] = [
-  EditAIGroup,
-  DraftAIGroup,
   ReviewWIthAIGroup,
+  EditAIGroup,
   GenerateWithAIGroup,
+  DraftAIGroup,
   OthersAIGroup,
 ];
