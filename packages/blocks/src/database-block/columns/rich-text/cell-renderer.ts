@@ -336,7 +336,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       const inlineRange = this.inlineEditor.getInlineRange();
       assertExists(inlineRange);
 
-      this.column.captureSync();
       const text = new Text(this.inlineEditor.yText);
       text.replace(inlineRange.index, inlineRange.length, '\n');
       this.inlineEditor.setInlineRange({

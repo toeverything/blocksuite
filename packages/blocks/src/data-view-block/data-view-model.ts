@@ -8,10 +8,13 @@ import {
   arrayMove,
   insertPositionToIndex,
 } from '../database-block/data-view/utils/insert.js';
+import type { Column } from '../database-block/data-view/view/presets/table/types.js';
 
 type Props = {
   title: string;
   views: DataViewDataType[];
+  columns: Column[];
+  cells: Record<string, Record<string, unknown>>;
 };
 
 export class DataViewBlockModel extends BlockModel<Props> {
@@ -78,6 +81,8 @@ export const DataViewBlockSchema = defineBlockSchema({
   props: (): Props => ({
     views: [],
     title: '',
+    columns: [],
+    cells: {},
   }),
   metadata: {
     role: 'hub',

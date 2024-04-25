@@ -44,11 +44,6 @@ export interface DataSource {
   propertyDelete: (id: string) => void;
   propertyDuplicate: (columnId: string) => string;
 
-  /**
-   * @deprecated
-   */
-  captureSync(): void;
-
   slots: {
     update: Slot;
   };
@@ -144,10 +139,6 @@ export abstract class BaseDataSource implements DataSource {
   public abstract slots: {
     update: Slot;
   };
-
-  public captureSync(): void {
-    //
-  }
 
   public abstract addPropertyConfigList: ColumnConfig[];
   public abstract getPropertyMeta(type: string): ColumnMeta;

@@ -106,11 +106,6 @@ export interface DataViewManager {
 
   getIcon(type: string): UniComponent | undefined;
 
-  /**
-   * @deprecated
-   */
-  captureSync(): void;
-
   slots: {
     update: Slot;
   };
@@ -187,11 +182,6 @@ export interface DataViewColumnManager<
   get icon(): UniComponent | undefined;
 
   onCellUpdate(rowId: string, callback: () => void): Disposable;
-
-  /**
-   * @deprecated
-   */
-  captureSync(): void;
 }
 
 export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
@@ -431,10 +421,6 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     this.dataSource.rowDelete(ids);
   }
 
-  public captureSync(): void {
-    this.dataSource.captureSync();
-  }
-
   public abstract get id(): string;
 
   public abstract get type(): string;
@@ -593,10 +579,6 @@ export abstract class DataViewColumnManagerBase
       this.dataViewManager.readonly ||
       this.dataViewManager.columnGetReadonly(this.id)
     );
-  }
-
-  captureSync(): void {
-    this.dataViewManager.captureSync();
   }
 
   getJsonValue(rowId: string): unknown {
