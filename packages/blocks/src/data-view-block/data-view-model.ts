@@ -1,47 +1,25 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { FilterGroup } from '../database-block/data-view/common/ast.js';
-import type { DataSourceConfig } from '../database-block/data-view/common/data-source/base.js';
+import type {
+  DataViewDataType,
+  InsertToPosition,
+} from '../database-block/data-view/index.js';
+import {
+  arrayMove,
+  insertPositionToIndex,
+} from '../database-block/data-view/utils/insert.js';
+import type { Column } from '../database-block/data-view/view/presets/table/types.js';
 
-export type DataProperty = {
-  id: string;
-  width: number;
-};
-export type DataView = {
-  id: string;
-  mode: 'table';
-  name: string;
-  columns: DataProperty[];
-  filter: FilterGroup;
-  dataSource?: DataSourceConfig;
-};
 type Props = {
-  views: DataView[];
+  title: string;
+  views: DataViewDataType[];
+  columns: Column[];
+  cells: Record<string, Record<string, unknown>>;
 };
 
 export class DataViewBlockModel extends BlockModel<Props> {
   constructor() {
     super();
-    this.created.on(() => {
-      if (!this.views.length) {
-        this.addView('table');
-      }
-    });
-  }
-
-  addView(mode: DataView['mode']) {
-    this.doc.captureSync();
-    const id = this.doc.generateBlockId();
-    this.doc.transact(() => {
-      this.views.push({
-        id,
-        mode,
-        columns: [],
-        name: mode,
-        filter: { type: 'group', op: 'and', conditions: [] },
-      });
-    });
-    return id;
   }
 
   deleteView(id: string) {
@@ -51,13 +29,16 @@ export class DataViewBlockModel extends BlockModel<Props> {
     });
   }
 
-  updateView(id: string, update: (data: DataView) => Partial<DataView>) {
+  updateView(
+    id: string,
+    update: (data: DataViewDataType) => Partial<DataViewDataType>
+  ) {
     this.doc.transact(() => {
       this.views = this.views.map(v => {
         if (v.id !== id) {
           return v;
         }
-        return { ...v, ...update(v) };
+        return { ...v, ...(update(v) as DataViewDataType) };
       });
     });
     this.applyViewsUpdate();
@@ -68,12 +49,40 @@ export class DataViewBlockModel extends BlockModel<Props> {
       views: this.views,
     });
   }
+  duplicateView(id: string): string {
+    const newId = this.doc.generateBlockId();
+    this.doc.transact(() => {
+      const index = this.views.findIndex(v => v.id === id);
+      const view = this.views[index];
+      if (view) {
+        this.views.splice(
+          index + 1,
+          0,
+          JSON.parse(JSON.stringify({ ...view, id: newId }))
+        );
+      }
+    });
+    return newId;
+  }
+  moveViewTo(id: string, position: InsertToPosition) {
+    this.doc.transact(() => {
+      this.views = arrayMove(
+        this.views,
+        v => v.id === id,
+        arr => insertPositionToIndex(position, arr)
+      );
+    });
+    this.applyViewsUpdate();
+  }
 }
 
 export const DataViewBlockSchema = defineBlockSchema({
   flavour: 'affine:data-view',
   props: (): Props => ({
     views: [],
+    title: '',
+    columns: [],
+    cells: {},
   }),
   metadata: {
     role: 'hub',

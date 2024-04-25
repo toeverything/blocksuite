@@ -6,7 +6,6 @@ import type { InsertToPosition } from '../../types.js';
 import type { UniComponent } from '../../utils/uni-component/index.js';
 import type { DataViewManager } from '../../view/data-view-manager.js';
 import { DEFAULT_COLUMN_WIDTH } from '../../view/presets/table/consts.js';
-import type { StatCalcOpType } from '../../view/presets/table/types.js';
 
 export type DetailSlotProps = { view: DataViewManager; rowId: string };
 
@@ -15,7 +14,7 @@ export interface DetailSlots {
 }
 
 export interface DataSource {
-  allPropertyConfig: ColumnConfig[];
+  addPropertyConfigList: ColumnConfig[];
   getPropertyMeta(type: string): ColumnMeta;
   properties: string[];
   rows: string[];
@@ -33,24 +32,17 @@ export interface DataSource {
   propertyGetName: (propertyId: string) => string;
   propertyGetDefaultWidth: (propertyId: string) => number;
   propertyGetType: (propertyId: string) => string;
-  propertyGetStatCalcOp: (propertyId: string) => StatCalcOpType;
   propertyGetData: (propertyId: string) => Record<string, unknown>;
   propertyGetReadonly: (columnId: string) => boolean;
   propertyChangeName: (propertyId: string, name: string) => void;
-  propertyChangeStatCalcOp: (propertyId: string, op: StatCalcOpType) => void;
   propertyChangeType: (propertyId: string, type: string) => void;
   propertyChangeData: (
     propertyId: string,
     data: Record<string, unknown>
   ) => void;
-  propertyAdd: (InsertToPosition: InsertToPosition, type?: string) => string;
+  propertyAdd: (insertToPosition: InsertToPosition, type?: string) => string;
   propertyDelete: (id: string) => void;
   propertyDuplicate: (columnId: string) => string;
-
-  /**
-   * @deprecated
-   */
-  captureSync(): void;
 
   slots: {
     update: Slot;
@@ -94,7 +86,10 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract properties: string[];
 
-  public abstract propertyAdd(InsertToPosition: InsertToPosition): string;
+  public abstract propertyAdd(
+    insertToPosition: InsertToPosition,
+    type?: string
+  ): string;
 
   public abstract propertyChangeData(
     propertyId: string,
@@ -102,11 +97,6 @@ export abstract class BaseDataSource implements DataSource {
   ): void;
 
   public abstract propertyChangeName(propertyId: string, name: string): void;
-
-  public abstract propertyChangeStatCalcOp(
-    propertyId: string,
-    type: StatCalcOpType
-  ): void;
 
   public abstract propertyChangeType(propertyId: string, type: string): void;
 
@@ -140,8 +130,6 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract propertyGetType(propertyId: string): string;
 
-  public abstract propertyGetStatCalcOp(propertyId: string): StatCalcOpType;
-
   public abstract rowAdd(InsertToPosition: InsertToPosition | number): string;
 
   public abstract rowDelete(ids: string[]): void;
@@ -152,11 +140,7 @@ export abstract class BaseDataSource implements DataSource {
     update: Slot;
   };
 
-  public captureSync(): void {
-    //
-  }
-
-  public abstract allPropertyConfig: ColumnConfig[];
+  public abstract addPropertyConfigList: ColumnConfig[];
   public abstract getPropertyMeta(type: string): ColumnMeta;
   public get detailSlots(): DetailSlots {
     return {};
@@ -164,27 +148,3 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract rowMove(rowId: string, position: InsertToPosition): void;
 }
-
-export type DatabaseBlockDataSourceConfig = {
-  type: 'database-block';
-  pageId: string;
-  blockId: string;
-};
-export type AllDocDataSourceConfig = {
-  type: 'all-pages';
-};
-export type TagsDataSourceConfig = {
-  type: 'tags';
-};
-export type DataSourceConfig =
-  | DatabaseBlockDataSourceConfig
-  | AllDocDataSourceConfig
-  | TagsDataSourceConfig;
-export type GetConfig<
-  K extends DataSourceConfig['type'],
-  T = DataSourceConfig,
-> = T extends {
-  type: K;
-}
-  ? T
-  : never;

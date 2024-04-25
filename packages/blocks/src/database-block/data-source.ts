@@ -7,20 +7,23 @@ import {
   databaseBlockAllColumnMap,
   databaseBlockColumns,
 } from './columns/index.js';
-import type { StatCalcOpType } from './data-view/index.js';
 import {
   BaseDataSource,
   type ColumnConfig,
   type ColumnMeta,
   columnPresets,
   createUniComponentFromWebComponent,
-  type DatabaseBlockDataSourceConfig,
   type DetailSlots,
   insertPositionToIndex,
   type InsertToPosition,
 } from './data-view/index.js';
 import { type DatabaseBlockModel } from './database-model.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
+
+export type DatabaseBlockDataSourceConfig = {
+  pageId: string;
+  blockId: string;
+};
 
 export class DatabaseBlockDataSource extends BaseDataSource {
   private readonly _model: DatabaseBlockModel;
@@ -276,10 +279,6 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     this._model.deleteRows(ids);
   }
 
-  public override captureSync(): void {
-    this.doc.captureSync();
-  }
-
   public override propertyGetDefaultWidth(propertyId: string): number {
     if (this.propertyGetType(propertyId) === 'title') {
       return 260;
@@ -304,7 +303,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public get allPropertyConfig(): ColumnConfig<any, any, any>[] {
+  public get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
     return databaseBlockColumns.map(v => v.model);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -329,20 +328,5 @@ export class DatabaseBlockDataSource extends BaseDataSource {
       }
       this.doc.moveBlocks([model], this._model, target);
     }
-  }
-
-  public propertyChangeStatCalcOp(
-    propertyId: string,
-    type: StatCalcOpType
-  ): void {
-    this.doc.captureSync();
-    this._model.updateColumn(propertyId, () => ({ statCalcOp: type }));
-    this._model.applyColumnUpdate();
-  }
-
-  public propertyGetStatCalcOp(propertyId: string): StatCalcOpType {
-    return (
-      this._model.columns.find(v => v.id === propertyId)?.statCalcOp ?? 'none'
-    );
   }
 }

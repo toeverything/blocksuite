@@ -5,13 +5,11 @@ import type { ColumnConfig } from '../column/index.js';
 import { type CellRenderer } from '../column/index.js';
 import type { FilterGroup, Variable } from '../common/ast.js';
 import type { DataSource, DetailSlots } from '../common/data-source/base.js';
-import { ColumnDataStats } from '../common/data-stats.js';
 import type { SingleViewSource } from '../common/index.js';
 import type { TType } from '../logical/typesystem.js';
 import type { ColumnDataUpdater, InsertToPosition } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
 import type { DataViewDataType } from './data-view.js';
-import type { StatCalcOpType } from './presets/table/types.js';
 
 export interface DataViewManager {
   get id(): string;
@@ -82,8 +80,6 @@ export interface DataViewManager {
 
   columnGetName(columnId: string): string;
 
-  columnGetStatCalcOp(columnId: string): StatCalcOpType;
-
   columnGetType(columnId: string): string;
 
   columnGetHide(columnId: string): boolean;
@@ -100,8 +96,6 @@ export interface DataViewManager {
 
   columnUpdateName(columnId: string, name: string): void;
 
-  columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void;
-
   columnUpdateHide(columnId: string, hide: boolean): void;
 
   columnUpdateType(columnId: string, type: string): void;
@@ -111,11 +105,6 @@ export interface DataViewManager {
   get allColumnConfig(): ColumnConfig[];
 
   getIcon(type: string): UniComponent | undefined;
-
-  /**
-   * @deprecated
-   */
-  captureSync(): void;
 
   slots: {
     update: Slot;
@@ -184,8 +173,6 @@ export interface DataViewColumnManager<
 
   updateName(name: string): void;
 
-  updateStatCalcOp(op: StatCalcOpType): void;
-
   get updateType(): undefined | ((type: string) => void);
 
   get delete(): undefined | (() => void);
@@ -195,11 +182,6 @@ export interface DataViewColumnManager<
   get icon(): UniComponent | undefined;
 
   onCellUpdate(rowId: string, callback: () => void): Disposable;
-
-  /**
-   * @deprecated
-   */
-  captureSync(): void;
 }
 
 export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
@@ -390,10 +372,6 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     return this.dataSource.propertyGetName(columnId);
   }
 
-  public columnGetStatCalcOp(columnId: string): StatCalcOpType {
-    return this.dataSource.propertyGetStatCalcOp(columnId);
-  }
-
   public columnGetNextColumn(
     columnId: string
   ): DataViewColumnManager | undefined {
@@ -425,10 +403,6 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     this.dataSource.propertyChangeName(columnId, name);
   }
 
-  public columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void {
-    this.dataSource.propertyChangeStatCalcOp(columnId, op);
-  }
-
   public columnUpdateType(columnId: string, type: string): void {
     this.dataSource.propertyChangeType(columnId, type);
   }
@@ -447,16 +421,12 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
     this.dataSource.rowDelete(ids);
   }
 
-  public captureSync(): void {
-    this.dataSource.captureSync();
-  }
-
   public abstract get id(): string;
 
   public abstract get type(): string;
 
   public get allColumnConfig(): ColumnConfig[] {
-    return this.dataSource.allPropertyConfig;
+    return this.dataSource.addPropertyConfigList;
   }
 
   public getIcon(type: string): UniComponent | undefined {
@@ -509,8 +479,6 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
 export abstract class DataViewColumnManagerBase
   implements DataViewColumnManager
 {
-  public readonly stats = new ColumnDataStats(this);
-
   protected constructor(
     protected propertyId: string,
     public dataViewManager: DataViewManager
@@ -545,10 +513,6 @@ export abstract class DataViewColumnManagerBase
 
   get name(): string {
     return this.dataViewManager.columnGetName(this.id);
-  }
-
-  get statCalcOp(): StatCalcOpType {
-    return this.dataViewManager.columnGetStatCalcOp(this.id);
   }
 
   get renderer(): CellRenderer {
@@ -598,10 +562,6 @@ export abstract class DataViewColumnManagerBase
     this.dataViewManager.columnUpdateName(this.id, name);
   }
 
-  updateStatCalcOp(op: StatCalcOpType): void {
-    this.dataViewManager.columnUpdateStatCalcOp(this.id, op);
-  }
-
   get delete(): (() => void) | undefined {
     return () => this.dataViewManager.columnDelete(this.id);
   }
@@ -619,10 +579,6 @@ export abstract class DataViewColumnManagerBase
       this.dataViewManager.readonly ||
       this.dataViewManager.columnGetReadonly(this.id)
     );
-  }
-
-  captureSync(): void {
-    this.dataViewManager.captureSync();
   }
 
   getJsonValue(rowId: string): unknown {

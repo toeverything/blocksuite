@@ -2,11 +2,103 @@ import { nanoid } from '@blocksuite/store';
 
 import { databaseBlockAllColumnMap } from './columns/index.js';
 import { titlePureColumnConfig } from './columns/title/define.js';
-import type { ViewMeta } from './data-view/index.js';
+import { multiSelectColumnModelConfig } from './data-view/column/presets/multi-select/define.js';
+import { numberColumnModelConfig } from './data-view/column/presets/number/define.js';
+import { selectColumnModelConfig } from './data-view/column/presets/select/define.js';
+import { textColumnModelConfig } from './data-view/column/presets/text/define.js';
+import { groupByMatcher } from './data-view/common/group-by/matcher.js';
+import { defaultGroupBy } from './data-view/common/view-manager.js';
+import type {
+  ColumnMeta,
+  DataViewDataType,
+  ViewMeta,
+} from './data-view/index.js';
 import { columnPresets } from './data-view/index.js';
 import { getTagColor } from './data-view/utils/tags/colors.js';
+import type { DataViewTypes } from './data-view/view/data-view.js';
+import type { Column } from './data-view/view/presets/table/types.js';
 import type { DatabaseBlockModel } from './database-model.js';
 
+const initMap: Record<
+  DataViewTypes,
+  (
+    columnMetaMap: Record<string, ColumnMeta>,
+    model: DatabaseBlockModel,
+    id: string,
+    name: string
+  ) => DataViewDataType
+> = {
+  table(_columnMetaMap, model, id, name) {
+    return {
+      id,
+      name,
+      mode: 'table',
+      columns: [],
+      filter: {
+        type: 'group',
+        op: 'and',
+        conditions: [],
+      },
+      header: {
+        titleColumn: model.columns.find(v => v.type === 'title')?.id,
+        iconColumn: 'type',
+      },
+    };
+  },
+  kanban(columnMetaMap, model, id, name) {
+    const allowList = model.columns.filter(column => {
+      const type = columnMetaMap[column.type].model.dataType(column.data);
+      return !!groupByMatcher.match(type) && column.type !== 'title';
+    });
+    const getWeight = (column: Column) => {
+      if (
+        [
+          selectColumnModelConfig.type as string,
+          multiSelectColumnModelConfig.type,
+        ].includes(column.type)
+      ) {
+        return 3;
+      }
+      if (
+        [
+          numberColumnModelConfig.type as string,
+          textColumnModelConfig.type,
+        ].includes(column.type)
+      ) {
+        return 2;
+      }
+      return 1;
+    };
+    const column = allowList.sort((a, b) => getWeight(b) - getWeight(a))[0];
+    if (!column) {
+      throw new Error('not implement yet');
+    }
+    return {
+      id,
+      name,
+      mode: 'kanban',
+      columns: model.columns.map(v => ({
+        id: v.id,
+        hide: false,
+      })),
+      filter: {
+        type: 'group',
+        op: 'and',
+        conditions: [],
+      },
+      groupBy: defaultGroupBy(
+        columnMetaMap[column.type],
+        column.id,
+        column.data
+      ),
+      header: {
+        titleColumn: model.columns.find(v => v.type === 'title')?.id,
+        iconColumn: 'type',
+      },
+      groupProperties: [],
+    };
+  },
+};
 export const databaseViewInitEmpty = (
   model: DatabaseBlockModel,
   viewMeta: ViewMeta
@@ -77,7 +169,7 @@ export const databaseViewAddView = (
   viewMeta: ViewMeta
 ) => {
   const id = model.doc.generateBlockId();
-  const view = viewMeta.model.init(
+  const view = initMap[viewMeta.type](
     databaseBlockAllColumnMap,
     model,
     id,
