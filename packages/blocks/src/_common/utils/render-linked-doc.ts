@@ -7,8 +7,6 @@ import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
-import { deserializeXYWH } from '../../surface-block/utils/xywh.js';
-import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
 import { NoteDisplayMode } from '../types.js';
 import { matchFlavours } from './model.js';
@@ -139,6 +137,7 @@ async function renderNoteContent(
   if (!notes) {
     return;
   }
+  card.isNoteContentEmpty = false;
 
   const noteChildren = notes.flatMap(note =>
     note.children.filter(child => {
@@ -152,7 +151,6 @@ async function renderNoteContent(
     })
   );
 
-  card.isNoteContentEmpty = noteChildren.length === 0;
   if (!noteChildren.length) {
     return;
   }
@@ -289,18 +287,12 @@ async function renderPageAbstract(
   }
 
   const target = notes.flatMap(note =>
-    note.children.filter(child =>
-      matchFlavours(child, ['affine:image', 'affine:surface-ref'])
-    )
+    note.children.filter(child => matchFlavours(child, ['affine:image']))
   )[0];
 
-  switch (target?.flavour) {
-    case 'affine:image':
-      await renderImageAbstract(card, target);
-      return;
-    case 'affine:surface-ref':
-      await renderSurfaceRefAbstract(card, target);
-      return;
+  if (target) {
+    await renderImageAbstract(card, target);
+    return;
   }
 
   card.isBannerEmpty = true;
@@ -323,31 +315,6 @@ async function renderImageAbstract(
   const $img = document.createElement('img');
   $img.src = url;
   await addCover(card, $img);
-
-  card.isBannerEmpty = false;
-}
-
-async function renderSurfaceRefAbstract(
-  card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard,
-  surfaceRef: BlockModel
-) {
-  const referenceId = (surfaceRef as SurfaceRefBlockModel).reference;
-  if (!referenceId) return;
-
-  const surfaceRefRenderer = card.surfaceRefRenderer;
-  if (!surfaceRefRenderer) return;
-
-  const referencedModel = surfaceRefRenderer.getModel(referenceId);
-  if (!referencedModel) return;
-
-  const renderer = surfaceRefRenderer.surfaceRenderer;
-  const container = document.createElement('div');
-  await addCover(card, container);
-
-  renderer.attach(container);
-  renderer.onResize();
-  const bound = Bound.fromXYWH(deserializeXYWH(referencedModel.xywh));
-  renderer.setViewportByBound(bound);
 
   card.isBannerEmpty = false;
 }
