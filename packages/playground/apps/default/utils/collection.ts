@@ -68,6 +68,7 @@ export async function createDefaultDocCollection() {
     defaultFlags: {
       enable_synced_doc_block: true,
       enable_pie_menu: true,
+      enable_lasso_tool: true,
     },
   };
   const collection = new DocCollection(options);

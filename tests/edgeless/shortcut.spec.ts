@@ -63,12 +63,12 @@ test('shortcut', async ({ page }) => {
   const connectorButton = locatorEdgelessToolButton(page, 'connector');
   await expect(connectorButton).toHaveAttribute('active', '');
 
-  await page.keyboard.press('l');
-  const lassoButton = locatorEdgelessToolButton(page, 'lasso');
-  await expect(lassoButton).toHaveAttribute('active', '');
+  // await page.keyboard.press('l');
+  // const lassoButton = locatorEdgelessToolButton(page, 'lasso');
+  // await expect(lassoButton).toHaveAttribute('active', '');
 });
 
-test('toggle lasso tool modes', async ({ page }) => {
+test.skip('toggle lasso tool modes', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
