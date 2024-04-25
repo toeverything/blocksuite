@@ -1,5 +1,9 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { AffineAIPanelWidget, AIError } from '@blocksuite/blocks';
+import type {
+  AffineAIPanelWidget,
+  AIError,
+  EdgelessModel,
+} from '@blocksuite/blocks';
 import {
   ImageBlockModel,
   MindmapElementModel,
@@ -61,8 +65,10 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   return createTextRenderer(host, 320);
 }
 
-async function getTextFromSelected(host: EditorHost) {
-  const selected = getCopilotSelectedElems(host);
+export async function getContentFromSelected(
+  host: EditorHost,
+  selected: EdgelessModel[]
+) {
   const { notes, texts, shapes } = selected.reduce<{
     notes: NoteBlockModel[];
     texts: TextElementModel[];
@@ -73,7 +79,7 @@ async function getTextFromSelected(host: EditorHost) {
         pre.notes.push(cur);
       } else if (cur instanceof TextElementModel) {
         pre.texts.push(cur);
-      } else if (cur instanceof ShapeElementModel && cur.text) {
+      } else if (cur instanceof ShapeElementModel && cur.text?.length) {
         pre.shapes.push(cur);
       }
 
@@ -82,16 +88,25 @@ async function getTextFromSelected(host: EditorHost) {
     { notes: [], texts: [], shapes: [] }
   );
 
-  const noteContent = await Promise.all(
-    notes.map(note => {
-      const slice = Slice.fromModels(host.doc, note.children);
-      return getMarkdownFromSlice(host, slice);
-    })
-  );
+  const noteContent = (
+    await Promise.all(
+      notes.map(note => {
+        const slice = Slice.fromModels(host.doc, note.children);
+        return getMarkdownFromSlice(host, slice);
+      })
+    )
+  )
+    .map(content => content.trim())
+    .filter(content => content.length);
 
   return `${noteContent.join('\n')}
 
 ${texts.map(text => text.text.toString()).join('\n')}\n${shapes.map(shape => shape.text!.toString())}`;
+}
+
+function getTextFromSelected(host: EditorHost) {
+  const selected = getCopilotSelectedElems(host);
+  return getContentFromSelected(host, selected);
 }
 
 function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
@@ -102,7 +117,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   >,
   extract?: (host: EditorHost) => Promise<{
     content?: string;
-    attachments?: string[];
+    attachments?: (string | Blob)[];
   } | void>
 ) {
   const action = AIProvider.actions[id];
@@ -167,7 +182,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
   >,
   extract?: (host: EditorHost) => Promise<{
     content?: string;
-    attachments?: string[];
+    attachments?: (string | Blob)[];
   } | void>
 ) {
   return (host: EditorHost) => {
@@ -204,7 +219,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   customInput?: (host: EditorHost) => Promise<{
     input?: string;
     content?: string;
-    attachments?: string[];
+    attachments?: (string | Blob)[];
   } | void>
 ) {
   return (host: EditorHost) => {
