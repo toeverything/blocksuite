@@ -84,3 +84,13 @@ export function readBlobAsURL(blob: Blob | File) {
     reader.readAsDataURL(blob);
   });
 }
+
+export function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  type = 'image/png',
+  quality?: number
+) {
+  return new Promise<Blob | null>(resolve =>
+    canvas.toBlob(resolve, type, quality)
+  );
+}

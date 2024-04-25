@@ -19,6 +19,7 @@ import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
 import { translateLangs } from '../../actions/types.js';
 import { getAIPanel } from '../../ai-panel.js';
 import { mindMapToMarkdown } from '../../utils/edgeless.js';
+import { canvasToBlob } from '../../utils/image.js';
 import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
@@ -248,7 +249,8 @@ export const createGroup: AIItemGroupConfig = {
           1
         );
         if (!canvas) return;
-        const png = canvas.toDataURL('image/png', 0.843);
+        // const png = canvas.toDataURL('image/png');
+        const png = await canvasToBlob(canvas);
         if (!png) return;
         return {
           attachments: [png],
@@ -276,7 +278,8 @@ export const createGroup: AIItemGroupConfig = {
           1
         );
         if (!canvas) return;
-        const png = canvas.toDataURL('image/png', 0.843);
+        // const png = canvas.toDataURL('image/png');
+        const png = await canvasToBlob(canvas);
         if (!png) return;
         return {
           attachments: [png],
