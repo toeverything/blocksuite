@@ -94,7 +94,8 @@ export class BlockRenderer
           e.preventDefault();
           return;
         }
-      }
+      },
+      true
     );
   }
 
