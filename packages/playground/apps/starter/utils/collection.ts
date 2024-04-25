@@ -56,6 +56,7 @@ export function createStarterDocCollection() {
     defaultFlags: {
       enable_synced_doc_block: true,
       enable_pie_menu: true,
+      enable_lasso_tool: true,
     },
     awarenessSources: [new BroadcastChannelAwarenessSource()],
     docSources,

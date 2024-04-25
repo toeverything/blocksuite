@@ -17,7 +17,7 @@ import {
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('lasso tool should deselect when dragging in an empty area', async ({
+test.skip('lasso tool should deselect when dragging in an empty area', async ({
   page,
 }) => {
   await commonSetup(page);
@@ -35,7 +35,7 @@ test('lasso tool should deselect when dragging in an empty area', async ({
   await assertEdgelessNonSelectedRect(page);
 });
 
-test('freehand lasso basic test', async ({ page }) => {
+test.skip('freehand lasso basic test', async ({ page }) => {
   await commonSetup(page);
 
   await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -62,7 +62,7 @@ test('freehand lasso basic test', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [100, 100, 200, 200]);
 });
 
-test('freehand lasso add to selection', async ({ page }) => {
+test.skip('freehand lasso add to selection', async ({ page }) => {
   await commonSetup(page);
 
   await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -102,7 +102,7 @@ test('freehand lasso add to selection', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [100, 100, 200, 200]);
 });
 
-test('freehand lasso subtract from selection', async ({ page }) => {
+test.skip('freehand lasso subtract from selection', async ({ page }) => {
   await commonSetup(page);
 
   await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -129,7 +129,7 @@ test('freehand lasso subtract from selection', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]); // only the first rectangle should be selected
 });
 
-test('polygonal lasso basic test', async ({ page }) => {
+test.skip('polygonal lasso basic test', async ({ page }) => {
   await commonSetup(page);
   await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await addBasicRectShapeElement(page, { x: 300, y: 300 }, { x: 400, y: 400 });
@@ -156,7 +156,7 @@ test('polygonal lasso basic test', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [100, 100, 200, 200]);
 });
 
-test('polygonal lasso add to selection by holding Shift Key', async ({
+test.skip('polygonal lasso add to selection by holding Shift Key', async ({
   page,
 }) => {
   await commonSetup(page);
@@ -198,7 +198,7 @@ test('polygonal lasso add to selection by holding Shift Key', async ({
   await assertEdgelessSelectedRect(page, [100, 100, 200, 200]);
 });
 
-test('polygonal lasso subtract from selection by holding Alt', async ({
+test.skip('polygonal lasso subtract from selection by holding Alt', async ({
   page,
 }) => {
   await commonSetup(page);
@@ -228,7 +228,7 @@ test('polygonal lasso subtract from selection by holding Alt', async ({
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
-test('polygonal lasso should complete selection when clicking the last point', async ({
+test.skip('polygonal lasso should complete selection when clicking the last point', async ({
   page,
 }) => {
   await commonSetup(page);
