@@ -254,7 +254,11 @@ const generateGroup: AIItemGroupConfig = {
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           images,
           pureShapes,
-          1
+          {
+            dpr: 1,
+            padding: 0,
+            background: 'white',
+          }
         );
         if (!canvas) return;
         const png = await canvasToBlob(canvas);
@@ -334,7 +338,10 @@ const generateGroup: AIItemGroupConfig = {
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           [...notes, ...frames, ...images],
           shapes,
-          1
+          {
+            dpr: 1,
+            padding: 0,
+          }
         );
         if (!canvas) return;
         const png = await canvasToBlob(canvas);
