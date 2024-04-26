@@ -83,6 +83,7 @@ export class TableSelectionController implements ReactiveController {
               cell?.blurCell();
               container.isEditing = false;
             }
+            container.requestUpdate(); // TODO(golok): use state
           }
         }
 
@@ -112,9 +113,13 @@ export class TableSelectionController implements ReactiveController {
       this.host.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;
         const target = event.target;
-        if (target instanceof Element) {
+        if (target instanceof HTMLElement) {
           const cell = target.closest('affine-database-cell-container');
+
           if (cell) {
+            const isTargetDragFillHandle =
+              target.dataset.dragFillHandle !== undefined;
+
             const selection = this.selection;
             if (
               selection &&
@@ -124,7 +129,7 @@ export class TableSelectionController implements ReactiveController {
             ) {
               return false;
             }
-            this.startDrag(event, cell);
+            this.startDrag(event, cell, isTargetDragFillHandle);
             event.preventDefault();
             return true;
           }
@@ -234,7 +239,13 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
-  startDrag(evt: PointerEvent, cell: DatabaseCellContainer) {
+  // private fillSelection(startCell: DatabaseCellContainer) {}
+
+  startDrag(
+    evt: PointerEvent,
+    cell: DatabaseCellContainer,
+    fillValues?: boolean
+  ) {
     const groupKey = cell.closest('affine-data-view-table-group')?.group?.key;
     const table = this.tableContainer;
     const scrollContainer = table.parentElement;
@@ -284,6 +295,11 @@ export class TableSelectionController implements ReactiveController {
         const startX = tableRect.left + startOffsetX;
         const startY = tableRect.top + startOffsetY;
         const selection = offsetToSelection(startX, x, startY, y);
+        if (fillValues)
+          selection.column = {
+            start: cell.columnIndex,
+            end: cell.columnIndex,
+          };
         select(selection);
         return selection;
       },
@@ -292,6 +308,9 @@ export class TableSelectionController implements ReactiveController {
           return;
         }
         select(selection);
+        if (fillValues) {
+          console.log('Fill values');
+        }
       },
       onClear: () => {
         cancelScroll();
