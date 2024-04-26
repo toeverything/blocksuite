@@ -80,7 +80,6 @@ export function fillSelectionWithFocusCellData(
 
     const curCol = focusCell.column; // we are sure that we are always in the same column while iterating through rows
     const focusData = curCol.getValue(focusCell.rowId);
-    const focusDataStr = curCol.getStringValue(focusCell.rowId);
 
     const draggingColIdx = columnsSelection.start;
     const { start, end } = rowsSelection;
@@ -97,10 +96,6 @@ export function fillSelectionWithFocusCellData(
       if (!cellContainer) continue;
 
       const curRowId = cellContainer.rowId;
-
-      const curCellDataStr = curCol.getStringValue(curRowId);
-
-      if (focusDataStr === curCellDataStr) continue;
 
       if (tRichText.is(curCol.dataType)) {
         // title column gives Y.Text and text col gives Text
