@@ -1,11 +1,13 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertEquals, assertExists } from '@blocksuite/global/utils';
+import { DocCollection, type Text } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
+import { tRichText } from '../../../../logical/data-type.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
@@ -239,8 +241,6 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
-  // private fillSelection(startCell: DatabaseCellContainer) {}
-
   startDrag(
     evt: PointerEvent,
     cell: DatabaseCellContainer,
@@ -308,8 +308,8 @@ export class TableSelectionController implements ReactiveController {
           return;
         }
         select(selection);
-        if (fillValues) {
-          console.log('Fill values');
+        if (fillValues && this.selection) {
+          fillSelectionWithFocusCellData(this.host, this.selection);
         }
       },
       onClear: () => {
@@ -727,5 +727,65 @@ class SelectionElement extends ShadowlessElement {
       <div ${ref(this.selectionRef)} class="database-selection"></div>
       <div tabindex="0" ${ref(this.focusRef)} class="database-focus"></div>
     `;
+  }
+}
+
+function fillSelectionWithFocusCellData(
+  host: DataViewTable,
+  selection: TableViewSelection
+) {
+  const { groupKey, rowsSelection, columnsSelection, focus } = selection;
+
+  const focusCell = host.selectionController.getCellContainer(
+    groupKey,
+    focus.rowIndex,
+    focus.columnIndex
+  );
+
+  if (!focusCell) return;
+
+  if (rowsSelection && columnsSelection) {
+    assertEquals(
+      columnsSelection.start,
+      columnsSelection.end,
+      'expected selections on a single column'
+    );
+
+    const focusData = focusCell.column.getValue(focusCell.rowId);
+
+    const columnIdx = columnsSelection.start;
+    const { start, end } = rowsSelection;
+
+    for (let i = start; i <= end; i++) {
+      if (i === focus.rowIndex) continue;
+
+      const cellContainer = host.selectionController.getCellContainer(
+        groupKey,
+        i,
+        columnIdx
+      );
+
+      if (!cellContainer) continue;
+      const curRowId = cellContainer?.rowId;
+
+      if (tRichText.is(focusCell.column.dataType)) {
+        const focusCellText = focusData as Text;
+        const delta = focusCellText.toDelta();
+        const curCellText = cellContainer.column.getValue(curRowId) as Text;
+
+        if (curCellText) {
+          curCellText.clear();
+          curCellText.applyDelta(delta);
+        } else {
+          const newText = new DocCollection.Y.Text();
+          newText.applyDelta(delta);
+          cellContainer.column.setValue(curRowId, newText);
+        }
+
+        continue;
+      } else {
+        cellContainer.column.setValue(curRowId, focusData);
+      }
+    }
   }
 }
