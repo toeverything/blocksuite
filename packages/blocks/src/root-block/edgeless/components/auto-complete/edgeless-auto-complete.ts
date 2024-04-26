@@ -448,7 +448,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     this.edgeless.surface.renderer.removeOverlay(this._autoCompleteOverlay);
   }
 
-  private _getMindmapArrow() {
+  private _getMindmapArrow(): [Direction, string][] | null {
     const mindmap = this.current.group;
     const mindmapDirection =
       this.current instanceof ShapeElementModel &&
@@ -458,11 +458,14 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     switch (mindmapDirection) {
       case LayoutType.LEFT:
-        return [Direction.Left];
+        return [[Direction.Left, 'Add sub-node']];
       case LayoutType.RIGHT:
-        return [Direction.Right];
+        return [[Direction.Right, 'Add sub-node']];
       case LayoutType.BALANCE:
-        return [Direction.Right, Direction.Left];
+        return [
+          [Direction.Right, 'Add sub-node'],
+          [Direction.Left, 'Add sub-node'],
+        ];
       default:
         return null;
     }
@@ -491,6 +494,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const arrowMargin = isShape ? height / 2 : height * (2 / 3);
     const Arrows = arrowDirections.map(type => {
       let transform = '';
+
+      const title = Array.isArray(type) ? type[1] : '';
+      type = Array.isArray(type) ? type[0] : type;
 
       switch (type) {
         case Direction.Top:
@@ -560,6 +566,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         >
           ${isShape ? AutoCompleteArrowIcon : NoteAutoCompleteIcon}
         </div>
+        ${title
+          ? html`<affine-tooltip tip-position="top" .arrow=${true}
+              >${title}</affine-tooltip
+            >`
+          : nothing}
       </div>`;
     });
 

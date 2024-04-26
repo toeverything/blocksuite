@@ -22,8 +22,8 @@ import {
   explainImageShowWhen,
   getContentFromSelected,
   makeItRealShowWhen,
+  mindmapChildShowWhen,
   mindmapRootShowWhen,
-  mindmapShowWhen,
   noteBlockOrTextShowWhen,
   noteWithCodeBlockShowWen,
 } from '../../actions/edgeless-handler.js';
@@ -278,7 +278,7 @@ const generateGroup: AIItemGroupConfig = {
     {
       name: 'Expand from this mind map node',
       icon: AIPenIcon,
-      showWhen: mindmapShowWhen,
+      showWhen: mindmapChildShowWhen,
       handler: actionToHandler('expandMindmap', undefined, function (host) {
         const selected = getCopilotSelectedElems(host);
         const firstSelected = selected[0] as ShapeElementModel;

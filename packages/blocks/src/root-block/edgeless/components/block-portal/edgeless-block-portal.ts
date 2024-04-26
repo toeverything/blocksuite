@@ -370,6 +370,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           const reference = service.getElementById(
             model.reference
           ) as AutoConnectElement;
+
+          if (!reference) return;
+
           if (!pageVisibleBlocks.has(reference)) {
             pageVisibleBlocks.set(reference, 1);
           } else {

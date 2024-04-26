@@ -72,6 +72,9 @@ export class EdgelessToolIconButton extends LitElement {
   @property({ attribute: false })
   hover = true;
 
+  @property({ attribute: false })
+  hoverState = false;
+
   constructor() {
     super();
 
@@ -89,14 +92,15 @@ export class EdgelessToolIconButton extends LitElement {
 
   override render() {
     const tooltip = this.coming ? '(Coming soon)' : this.tooltip;
-    const classnames = `icon-container active-mode-${this.activeMode}`;
+    const classnames = `icon-container active-mode-${this.activeMode} ${this.hoverState ? 'hovered' : ''}`;
     const iconContainerStyles = styleMap({
       '--icon-container-padding': `${this.iconContainerPadding}px`,
     });
 
     return html`
       <style>
-        .icon-container:hover {
+        .icon-container:hover,
+        .icon-container.hovered {
           background: ${this.hover ? `var(--affine-hover-color)` : 'inherit'};
         }
       </style>
