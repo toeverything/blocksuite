@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { createButtonPopper } from '@blocksuite/blocks';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -40,8 +40,9 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
       gap: 4px;
       position: absolute;
       z-index: 1;
+      user-select: none;
 
-      div {
+      > div {
         height: 30px;
         display: flex;
         gap: 8px;
@@ -51,6 +52,10 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
         svg {
           margin-left: 12px;
         }
+      }
+
+      > div:hover {
+        background-color: var(--affine-hover-color);
       }
     }
   `;
@@ -79,12 +84,23 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
   private _moreMenu!: HTMLDivElement;
   private _morePopper: ReturnType<typeof createButtonPopper> | null = null;
 
-  protected override firstUpdated() {
-    this._morePopper = createButtonPopper(
-      this._moreButton,
-      this._moreMenu,
-      ({ display }) => (this._showMoreMenu = display === 'show')
-    );
+  private _toggle() {
+    this._morePopper?.toggle();
+  }
+
+  protected override updated(changed: PropertyValues): void {
+    if (changed.has('isLast')) {
+      if (this.isLast) {
+        this._morePopper?.dispose();
+        this._morePopper = null;
+      } else if (!this._morePopper) {
+        this._morePopper = createButtonPopper(
+          this._moreButton,
+          this._moreMenu,
+          ({ display }) => (this._showMoreMenu = display === 'show')
+        );
+      }
+    }
   }
 
   override render() {
@@ -98,10 +114,7 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
         <div @click=${() => copyText(host, content)}>${CopyIcon}</div>
         ${isLast
           ? nothing
-          : html`<div
-              class="more-button"
-              @click=${() => this._morePopper?.toggle()}
-            >
+          : html`<div class="more-button" @click=${this._toggle}>
               ${MoreIcon}
             </div> `}
       </div>
