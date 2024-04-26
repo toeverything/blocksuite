@@ -1,6 +1,6 @@
 import { type EditorHost } from '@blocksuite/block-std';
 import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
-import { type BlockModel, Text, type Y } from '@blocksuite/store';
+import { type BlockModel, Text } from '@blocksuite/store';
 
 import { getIcon } from './block-icons.js';
 import {
@@ -84,7 +84,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
       return;
     } else if (type === 'rich-text' && typeof value === 'string') {
       const cell = this._model.getCell(rowId, propertyId);
-      const yText = cell?.value as Y.Text | undefined;
+      const yText = (cell?.value as Text | undefined)?.yText;
       if (yText) {
         const text = new Text(yText);
         text.replace(0, text.length, value);
