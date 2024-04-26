@@ -58,6 +58,7 @@ export class PageRootBlockComponent extends BlockElement<
     affine-page-root {
       display: block;
       height: 100%;
+      outline: none;
     }
 
     .affine-page-root-block-container {
