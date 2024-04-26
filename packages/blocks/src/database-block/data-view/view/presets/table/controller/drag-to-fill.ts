@@ -78,9 +78,11 @@ export function fillSelectionWithFocusCellData(
       'expected selections on a single column'
     );
 
-    const focusData = focusCell.column.getValue(focusCell.rowId);
+    const curCol = focusCell.column; // we are sure that we are always in the same column while iterating through rows
+    const focusData = curCol.getValue(focusCell.rowId);
+    const focusDataStr = curCol.getStringValue(focusCell.rowId);
 
-    const columnIdx = columnsSelection.start;
+    const draggingColIdx = columnsSelection.start;
     const { start, end } = rowsSelection;
 
     for (let i = start; i <= end; i++) {
@@ -89,21 +91,26 @@ export function fillSelectionWithFocusCellData(
       const cellContainer = host.selectionController.getCellContainer(
         groupKey,
         i,
-        columnIdx
+        draggingColIdx
       );
 
       if (!cellContainer) continue;
-      const curRowId = cellContainer?.rowId;
 
-      if (tRichText.is(focusCell.column.dataType)) {
+      const curRowId = cellContainer.rowId;
+
+      const curCellDataStr = curCol.getStringValue(curRowId);
+
+      if (focusDataStr === curCellDataStr) continue;
+
+      if (tRichText.is(curCol.dataType)) {
         // title column gives Y.Text and text col gives Text
         const focusCellText = focusData as Y.Text | Text;
 
         const delta = focusCellText.toDelta();
-        const curCellText = cellContainer.column.getValue(curRowId);
+        const curCellText = curCol.getValue(curRowId);
         if (curCellText) {
           const text =
-            focusCell.column.type === 'title'
+            curCol.type === 'title'
               ? new Text(curCellText as Y.Text)
               : (curCellText as Text);
 
@@ -112,10 +119,10 @@ export function fillSelectionWithFocusCellData(
         } else {
           const newText = new DocCollection.Y.Text();
           newText.applyDelta(delta);
-          cellContainer.column.setValue(curRowId, newText);
+          curCol.setValue(curRowId, newText);
         }
       } else {
-        cellContainer.column.setValue(curRowId, focusData);
+        curCol.setValue(curRowId, focusData);
       }
     }
   }
