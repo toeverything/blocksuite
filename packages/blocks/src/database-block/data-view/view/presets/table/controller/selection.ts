@@ -1,13 +1,11 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
-import { assertEquals, assertExists } from '@blocksuite/global/utils';
-import { DocCollection, Text, type Y } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController } from 'lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { tRichText } from '../../../../logical/data-type.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
@@ -17,9 +15,18 @@ import type {
   MultiSelection,
   TableViewSelection,
 } from '../types.js';
+import {
+  DragToFillElement,
+  fillSelectionWithFocusCellData,
+} from './drag-to-fill.js';
 
 export class TableSelectionController implements ReactiveController {
   __selectionElement = new SelectionElement();
+  __dragToFillElement = new DragToFillElement();
+
+  private get dragToFillDraggable() {
+    return this.__dragToFillElement.dragToFillRef.value;
+  }
 
   private get focusSelectionElement() {
     return this.__selectionElement.focusRef.value;
@@ -50,12 +57,15 @@ export class TableSelectionController implements ReactiveController {
   public hostConnected() {
     requestAnimationFrame(() => {
       this.tableContainer.append(this.__selectionElement);
+      this.tableContainer.append(this.__dragToFillElement);
     });
     this.handleDragEvent();
     this.handleSelectionChange();
   }
 
   private handleSelectionChange() {
+    this.__dragToFillElement.onDragStart = this.handleDragToFillDragStart;
+
     this.host.disposables.add(
       this.host.selectionUpdated.on(tableSelection => {
         if (!this.isValidSelection(tableSelection)) {
@@ -85,7 +95,6 @@ export class TableSelectionController implements ReactiveController {
               cell?.blurCell();
               container.isEditing = false;
             }
-            container.requestUpdate(); // TODO(golok): use state
           }
         }
 
@@ -109,6 +118,21 @@ export class TableSelectionController implements ReactiveController {
       })
     );
   }
+
+  private handleDragToFillDragStart = (ev: PointerEvent) => {
+    if (!this._tableViewSelection) return;
+    ev.preventDefault();
+    const { groupKey, focus } = this._tableViewSelection;
+
+    const dragStartCell = this.getCellContainer(
+      groupKey,
+      focus.rowIndex,
+      focus.columnIndex
+    );
+    if (!dragStartCell) return;
+
+    this.startDrag(ev, dragStartCell, true);
+  };
 
   private handleDragEvent() {
     this.host.disposables.add(
@@ -289,17 +313,22 @@ export class TableSelectionController implements ReactiveController {
         x: evt.x,
         y: evt.y,
       }),
-      onDrag: () => undefined,
+      onDrag: () => {
+        if (fillValues) this.__dragToFillElement.startDrag();
+        return undefined;
+      },
       onMove: ({ x, y }) => {
         const tableRect = table.getBoundingClientRect();
         const startX = tableRect.left + startOffsetX;
         const startY = tableRect.top + startOffsetY;
         const selection = offsetToSelection(startX, x, startY, y);
+
         if (fillValues)
           selection.column = {
             start: cell.columnIndex,
             end: cell.columnIndex,
           };
+
         select(selection);
         return selection;
       },
@@ -309,6 +338,7 @@ export class TableSelectionController implements ReactiveController {
         }
         select(selection);
         if (fillValues && this.selection) {
+          this.__dragToFillElement.endDrag();
           fillSelectionWithFocusCellData(this.host, this.selection);
         }
       },
@@ -498,7 +528,9 @@ export class TableSelectionController implements ReactiveController {
     isEditing = false
   ) {
     const div = this.focusSelectionElement;
-    if (!div) return;
+    const dragToFill = this.dragToFillDraggable;
+
+    if (!div || !dragToFill) return;
     if (focus && !isRowSelection) {
       // Check if row is removed.
       const rows = this.rows(groupKey) ?? [];
@@ -512,17 +544,27 @@ export class TableSelectionController implements ReactiveController {
         focus.columnIndex
       );
       const tableRect = this.tableContainer.getBoundingClientRect();
-      div.style.left = `${left - tableRect.left / scale}px`;
-      div.style.top = `${top - 1 - tableRect.top / scale}px`;
-      div.style.width = `${width + 1}px`;
-      div.style.height = `${height + 1}px`;
+
+      const x = left - tableRect.left / scale;
+      const y = top - 1 - tableRect.top / scale;
+      const w = width + 1;
+      const h = height + 1;
+      div.style.left = `${x}px`;
+      div.style.top = `${y}px`;
+      div.style.width = `${w}px`;
+      div.style.height = `${h}px`;
       div.style.borderColor = 'var(--affine-primary-color)';
       div.style.boxShadow = isEditing
         ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
         : 'unset';
       div.style.display = 'block';
+
+      dragToFill.style.left = `${x + w}px`;
+      dragToFill.style.top = `${y + h}px`;
+      dragToFill.style.display = 'block';
     } else {
       div.style.display = 'none';
+      dragToFill.style.display = 'none';
     }
   }
 
@@ -727,69 +769,5 @@ class SelectionElement extends ShadowlessElement {
       <div ${ref(this.selectionRef)} class="database-selection"></div>
       <div tabindex="0" ${ref(this.focusRef)} class="database-focus"></div>
     `;
-  }
-}
-
-function fillSelectionWithFocusCellData(
-  host: DataViewTable,
-  selection: TableViewSelection
-) {
-  const { groupKey, rowsSelection, columnsSelection, focus } = selection;
-
-  const focusCell = host.selectionController.getCellContainer(
-    groupKey,
-    focus.rowIndex,
-    focus.columnIndex
-  );
-
-  if (!focusCell) return;
-
-  if (rowsSelection && columnsSelection) {
-    assertEquals(
-      columnsSelection.start,
-      columnsSelection.end,
-      'expected selections on a single column'
-    );
-
-    const focusData = focusCell.column.getValue(focusCell.rowId);
-
-    const columnIdx = columnsSelection.start;
-    const { start, end } = rowsSelection;
-
-    for (let i = start; i <= end; i++) {
-      if (i === focus.rowIndex) continue;
-
-      const cellContainer = host.selectionController.getCellContainer(
-        groupKey,
-        i,
-        columnIdx
-      );
-
-      if (!cellContainer) continue;
-      const curRowId = cellContainer?.rowId;
-
-      if (tRichText.is(focusCell.column.dataType)) {
-        // title column gives Y.Text and text col gives Text
-        const focusCellText = focusData as Y.Text | Text;
-
-        const delta = focusCellText.toDelta();
-        const curCellText = cellContainer.column.getValue(curRowId);
-        if (curCellText) {
-          const text =
-            focusCell.column.type === 'title'
-              ? new Text(curCellText as Y.Text)
-              : (curCellText as Text);
-
-          text.clear();
-          text.applyDelta(delta);
-        } else {
-          const newText = new DocCollection.Y.Text();
-          newText.applyDelta(delta);
-          cellContainer.column.setValue(curRowId, newText);
-        }
-      } else {
-        cellContainer.column.setValue(curRowId, focusData);
-      }
-    }
   }
 }

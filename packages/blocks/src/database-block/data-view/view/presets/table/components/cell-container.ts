@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html } from 'lit';
+import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
 
@@ -31,26 +31,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
     affine-database-cell-container uni-lit > *:first-child {
       padding: 8px;
-    }
-    .drag-and-fill-handle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      box-sizing: border-box;
-      border: 2px solid var(--affine-primary-color);
-      background-color: var(--affine-background-overlay-panel-color);
-      transform: translate(50%, 50%);
-      pointer-events: auto;
-      cursor: ns-resize;
-      right: 0;
-      bottom: 0;
-      z-index: 2;
-      user-select: none;
-      display: none;
-    }
-    .drag-and-fill-handle.active {
-      display: block;
     }
   `;
 
@@ -92,16 +72,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  public showDragToFillHandle = () => {
-    const selection = this.selectionView?.selection;
-    return (
-      selection &&
-      !selection.isEditing &&
-      selection.focus.columnIndex === this.columnIndex &&
-      selection.focus.rowIndex === this.rowIndex
-    );
-  };
-
   private get readonly() {
     return this.column.readonly;
   }
@@ -139,21 +109,13 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       isEditing: this.isEditing,
       selectCurrentCell: this.selectCurrentCell,
     };
-    return html`
-      ${renderUniLit(uni, props, {
-        ref: this._cell,
-        style: {
-          display: 'contents',
-        },
-      })}
 
-      <div
-        class="drag-and-fill-handle ${this.showDragToFillHandle()
-          ? 'active'
-          : ''}"
-        data-drag-fill-handle="true"
-      ></div>
-    `;
+    return renderUniLit(uni, props, {
+      ref: this._cell,
+      style: {
+        display: 'contents',
+      },
+    });
   }
 }
 
