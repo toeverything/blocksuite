@@ -5,6 +5,7 @@ import type {
   EdgelessModel,
 } from '@blocksuite/blocks';
 import {
+  BlocksUtils,
   ImageBlockModel,
   MindmapElementModel,
   NoteBlockModel,
@@ -296,14 +297,22 @@ export function noteBlockOrTextShowWhen(
   );
 }
 
+/**
+ * Checks if the selected element is a NoteBlockModel with a single child element of code block.
+ */
 export function noteWithCodeBlockShowWen(
   _: unknown,
   __: unknown,
   host: EditorHost
 ) {
   const selected = getCopilotSelectedElems(host);
+  if (!selected.length) return false;
 
-  return selected[0] instanceof NoteBlockModel;
+  return (
+    selected[0] instanceof NoteBlockModel &&
+    selected[0].children.length === 1 &&
+    BlocksUtils.matchFlavours(selected[0].children[0], ['affine:code'])
+  );
 }
 
 export function mindmapShowWhen(_: unknown, __: unknown, host: EditorHost) {

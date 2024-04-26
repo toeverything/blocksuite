@@ -25,6 +25,7 @@ import {
   mindmapRootShowWhen,
   mindmapShowWhen,
   noteBlockOrTextShowWhen,
+  noteWithCodeBlockShowWen,
 } from '../../actions/edgeless-handler.js';
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
 import { textTones, translateLangs } from '../../actions/types.js';
@@ -167,17 +168,16 @@ const reviewGroup: AIItemGroupConfig = {
       showWhen: explainImageShowWhen,
       handler: actionToHandler('explainImage'),
     },
-    // TODO: not supported yet
-    // {
-    //   name: 'Explain this code',
-    //   icon: AIPenIcon,
-    //   showWhen: textBlockShowWhen,
-    //   handler: actionToHandler('explainCode'),
-    // },
+    {
+      name: 'Explain this code',
+      icon: ExplainIcon,
+      showWhen: noteWithCodeBlockShowWen,
+      handler: actionToHandler('explainCode'),
+    },
     {
       name: 'Check code error',
       icon: ExplainIcon,
-      showWhen: noteBlockOrTextShowWhen,
+      showWhen: noteWithCodeBlockShowWen,
       handler: actionToHandler('checkCodeErrors'),
     },
     {

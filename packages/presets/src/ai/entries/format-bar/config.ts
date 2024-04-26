@@ -175,13 +175,12 @@ const ReviewWIthAIGroup: AIItemGroupConfig = {
       showWhen: imageBlockShowWhen,
       handler: actionToHandler('explainImage'),
     },
-    // TODO: not supported yet
-    // {
-    //   name: 'Explain this code',
-    //   icon: AIPenIcon,
-    //   showWhen: textBlockShowWhen,
-    //   handler: actionToHandler('explainCode'),
-    // },
+    {
+      name: 'Explain this code',
+      icon: ExplainIcon,
+      showWhen: codeBlockShowWhen,
+      handler: actionToHandler('explainCode'),
+    },
     {
       name: 'Check code error',
       icon: ExplainIcon,
