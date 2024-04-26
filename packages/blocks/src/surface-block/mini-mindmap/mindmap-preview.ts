@@ -106,6 +106,9 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     set(data: Record<string, unknown>): void;
   };
 
+  @property({ attribute: false })
+  mindmapStyle?: MindmapStyle;
+
   @query('editor-host')
   portalHost!: EditorHost;
 
@@ -233,6 +236,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
     this.mindmapId = this.surface.addElement({
       type: 'mindmap',
       children: mindmapNode,
+      style: this.mindmapStyle ?? MindmapStyle.FOUR,
     });
 
     const centerPosition = this._mindmap.tree.element.xywh;

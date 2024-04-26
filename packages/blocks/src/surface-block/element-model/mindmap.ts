@@ -32,6 +32,8 @@ import {
   mindmapStyleGetters,
 } from './utils/mindmap/style.js';
 
+export { MindmapStyle } from './utils/mindmap/style.js';
+
 const baseNodeSchema = z.object({
   text: z.string(),
   xywh: z.optional(z.string()),
