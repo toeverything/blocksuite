@@ -174,6 +174,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       this._resetAbortController();
     };
 
+    this.scrollTop = 0; // reset scroll top
     this.state = 'generating';
     this.config.generateAnswer({
       input: text,
