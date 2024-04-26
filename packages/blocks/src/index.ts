@@ -120,6 +120,7 @@ export {
   MindmapElementModel,
   MindmapRootBlock,
   MindmapService,
+  MindmapStyle,
   MindmapSurfaceBlock,
   type PointStyle,
   type SerializedXYWH,

@@ -32,3 +32,7 @@ export function isMindMapRoot(ele: EdgelessModel) {
 
   return group instanceof MindmapElementModel && group.tree.element === ele;
 }
+
+export function isMindmapChild(ele: EdgelessModel) {
+  return ele?.group instanceof MindmapElementModel && !isMindMapRoot(ele);
+}
