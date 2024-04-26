@@ -54,6 +54,18 @@ export class DragToFillElement extends ShadowlessElement {
       @dragstart=${this.onDragStart}
       class="drag-to-fill ${this.dragging ? 'dragging' : ''}"
     ></div>`;
+
+    // TODO add tooltip
+    // return html`<div
+    //   ${ref(this.dragToFillRef)}
+    //   draggable="true"
+    //   @dragstart=${this.onDragStart}
+    //   class="drag-to-fill ${this.dragging ? 'dragging' : ''}"
+    // >
+    //   <affine-tooltip .placement=${'right'} .arrow=${false} .offset=${8}>
+    //     Drag vertically to fill
+    //   </affine-tooltip>
+    // </div>`;
   }
 }
 

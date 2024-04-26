@@ -551,6 +551,9 @@ export class TableSelectionController implements ReactiveController {
       div.style.width = `${w}px`;
       div.style.height = `${h}px`;
       div.style.borderColor = 'var(--affine-primary-color)';
+      div.style.borderStyle = this.__dragToFillElement.dragging
+        ? 'dashed'
+        : 'solid';
       div.style.boxShadow = isEditing
         ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
         : 'unset';
