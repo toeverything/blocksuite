@@ -276,12 +276,6 @@ const generateGroup: AIItemGroupConfig = {
       handler: actionToHandler('writeOutline'),
     },
     {
-      name: 'Find actions',
-      icon: AISearchIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('findActions'),
-    },
-    {
       name: 'Expand from this mind map node',
       icon: AIPenIcon,
       showWhen: mindmapShowWhen,
@@ -306,7 +300,6 @@ const generateGroup: AIItemGroupConfig = {
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('brainstormMindmap'),
     },
-
     {
       name: 'Regenerate mind map',
       icon: AIPenIcon,
@@ -319,7 +312,6 @@ const generateGroup: AIItemGroupConfig = {
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('createSlides'),
     },
-
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
@@ -350,6 +342,12 @@ const generateGroup: AIItemGroupConfig = {
           attachments: [png],
         };
       }),
+    },
+    {
+      name: 'Find actions',
+      icon: AISearchIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('findActions'),
     },
   ],
 };
