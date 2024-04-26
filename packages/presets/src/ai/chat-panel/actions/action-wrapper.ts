@@ -1,6 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { css, html, nothing, type TemplateResult } from 'lit';
+import { WithDisposable } from '@blocksuite/block-std';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
@@ -46,7 +46,7 @@ const icons: Record<string, TemplateResult<1>> = {
 };
 
 @customElement('action-wrapper')
-export class ActionWrapper extends WithDisposable(ShadowlessElement) {
+export class ActionWrapper extends WithDisposable(LitElement) {
   static override styles = css`
     .action-name {
       display: flex;
