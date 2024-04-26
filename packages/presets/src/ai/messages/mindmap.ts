@@ -1,7 +1,10 @@
 import './_common/generating-placeholder.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
-import type { AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
+import type {
+  AffineAIPanelWidgetConfig,
+  MindmapStyle,
+} from '@blocksuite/blocks';
 import { MiniMindmapPreview } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { html } from 'lit';
@@ -16,8 +19,9 @@ export const createMindmapRenderer: (
   ctx: {
     get: () => Record<string, unknown>;
     set: (data: Record<string, unknown>) => void;
-  }
-) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, ctx) => {
+  },
+  style?: MindmapStyle
+) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, ctx, style) => {
   return (answer, state) => {
     if (state !== 'finished') {
       return html`<ai-generating-placeholder></ai-generating-placeholder>`;
@@ -27,6 +31,8 @@ export const createMindmapRenderer: (
       .ctx=${ctx}
       .host=${host}
       .answer=${answer}
+      .mindmapStyle=${style}
+      .templateShow=${style === undefined}
     ></mini-mindmap-preview>`;
   };
 };

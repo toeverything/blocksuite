@@ -182,8 +182,10 @@ export function createModelFromProps(
   yMap.set('id', id);
 
   Object.keys(rest).forEach(key => {
-    // @ts-ignore
-    elementModel.model[key] = props[key];
+    if (props[key] !== undefined) {
+      // @ts-ignore
+      elementModel.model[key] = props[key];
+    }
   });
 
   return elementModel;
