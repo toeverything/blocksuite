@@ -139,13 +139,10 @@ export class TableSelectionController implements ReactiveController {
       this.host.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;
         const target = event.target;
-        if (target instanceof HTMLElement) {
+        if (target instanceof Element) {
           const cell = target.closest('affine-database-cell-container');
 
           if (cell) {
-            const isTargetDragFillHandle =
-              target.dataset.dragFillHandle !== undefined;
-
             const selection = this.selection;
             if (
               selection &&
@@ -155,7 +152,7 @@ export class TableSelectionController implements ReactiveController {
             ) {
               return false;
             }
-            this.startDrag(event, cell, isTargetDragFillHandle);
+            this.startDrag(event, cell);
             event.preventDefault();
             return true;
           }
