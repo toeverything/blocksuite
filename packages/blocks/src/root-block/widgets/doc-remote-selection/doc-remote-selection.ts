@@ -312,9 +312,10 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
+                      display: selection.user ? 'block' : 'none',
                     })}"
                   >
-                    ${selection.user?.name ?? 'Unknown'}
+                    ${selection.user?.name}
                   </div>
                 </div>
               </div>
