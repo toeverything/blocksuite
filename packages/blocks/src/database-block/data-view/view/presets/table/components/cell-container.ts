@@ -16,7 +16,6 @@ import type { DataViewTableColumnManager } from '../table-view-manager.js';
 export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-database-cell-container {
-      position: relative;
       display: flex;
       align-items: start;
       width: 100%;
@@ -109,7 +108,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       isEditing: this.isEditing,
       selectCurrentCell: this.selectCurrentCell,
     };
-
     return renderUniLit(uni, props, {
       ref: this._cell,
       style: {

@@ -561,7 +561,7 @@ export class TableSelectionController implements ReactiveController {
 
       dragToFill.style.left = `${x + w}px`;
       dragToFill.style.top = `${y + h}px`;
-      dragToFill.style.display = 'block';
+      dragToFill.style.display = isEditing ? 'none' : 'block';
     } else {
       div.style.display = 'none';
       dragToFill.style.display = 'none';
