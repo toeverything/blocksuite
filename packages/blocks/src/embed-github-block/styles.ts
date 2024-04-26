@@ -132,7 +132,7 @@ export const styles = css`
     word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--affine-pure-white);
+    color: var(--affine-text-primary-color);
 
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
