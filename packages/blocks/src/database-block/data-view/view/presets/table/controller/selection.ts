@@ -1,6 +1,6 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertEquals, assertExists } from '@blocksuite/global/utils';
-import { DocCollection, type Text } from '@blocksuite/store';
+import { DocCollection, Text, type Y } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -769,20 +769,24 @@ function fillSelectionWithFocusCellData(
       const curRowId = cellContainer?.rowId;
 
       if (tRichText.is(focusCell.column.dataType)) {
-        const focusCellText = focusData as Text;
-        const delta = focusCellText.toDelta();
-        const curCellText = cellContainer.column.getValue(curRowId) as Text;
+        // title column gives Y.Text and text col gives Text
+        const focusCellText = focusData as Y.Text | Text;
 
+        const delta = focusCellText.toDelta();
+        const curCellText = cellContainer.column.getValue(curRowId);
         if (curCellText) {
-          curCellText.clear();
-          curCellText.applyDelta(delta);
+          const text =
+            focusCell.column.type === 'title'
+              ? new Text(curCellText as Y.Text)
+              : (curCellText as Text);
+
+          text.clear();
+          text.applyDelta(delta);
         } else {
           const newText = new DocCollection.Y.Text();
           newText.applyDelta(delta);
           cellContainer.column.setValue(curRowId, newText);
         }
-
-        continue;
       } else {
         cellContainer.column.setValue(curRowId, focusData);
       }
