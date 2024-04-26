@@ -603,7 +603,11 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     });
   }
 
-  getSiblingNode(id: string, direction: 'prev' | 'next' = 'next') {
+  getSiblingNode(
+    id: string,
+    direction: 'prev' | 'next' = 'next',
+    subtree?: 'left' | 'right'
+  ) {
     const node = this._nodeMap.get(id);
 
     if (!node) {
@@ -616,22 +620,29 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
       return null;
     }
 
-    const idx = parent.children.indexOf(node);
+    const childrenTree =
+      subtree && parent.id === this._tree.id
+        ? this._tree[subtree]
+        : parent.children;
+    const idx = childrenTree.indexOf(node);
     if (idx === -1) {
       return null;
     }
 
     return (
-      parent?.children[direction === 'next' ? idx + 1 : idx - 1]?.element ??
-      null
+      childrenTree[direction === 'next' ? idx + 1 : idx - 1]?.element ?? null
     );
   }
 
-  getChildNodes(id: string) {
+  getChildNodes(id: string, subtree?: 'left' | 'right') {
     const node = this._nodeMap.get(id);
 
     if (!node) {
       return [];
+    }
+
+    if (subtree && id === this._tree.id) {
+      return this._tree[subtree].map(child => child.element);
     }
 
     return node.children.map(child => child.element);

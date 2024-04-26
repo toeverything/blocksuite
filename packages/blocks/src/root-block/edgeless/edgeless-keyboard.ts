@@ -3,6 +3,7 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { type EdgelessTool, LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
+import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
 import type {
   ElementModel,
   ShapeElementModel,
@@ -96,6 +97,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         m: () => {
+          if (!rootElement.doc.awarenessStore.getFlag('enable_mindmap_entry')) {
+            return;
+          }
+
           if (this.rootElement.service.locked) return;
           if (this.rootElement.service.selection.editing) return;
           const edgelessService = this.rootElement.service;
@@ -487,6 +492,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     if (mindmapNodes.length > 0) {
       const node = mindmapNodes[0];
       const mindmap = node.group as MindmapElementModel;
+      const nodeDirection = mindmap.getLayoutDir(node.id);
       let targetNode: ElementModel | null = null;
 
       switch (key) {
@@ -494,18 +500,27 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         case 'ArrowDown':
           targetNode = mindmap.getSiblingNode(
             node.id,
-            key === 'ArrowDown' ? 'next' : 'prev'
+            key === 'ArrowDown' ? 'next' : 'prev',
+            nodeDirection === LayoutType.RIGHT
+              ? 'right'
+              : nodeDirection === LayoutType.LEFT
+                ? 'left'
+                : undefined
           );
           break;
         case 'ArrowLeft':
-          targetNode = mindmap.getParentNode(node.id);
+          targetNode =
+            nodeDirection === LayoutType.RIGHT
+              ? mindmap.getParentNode(node.id)
+              : mindmap.getChildNodes(node.id, 'left')[0] ?? null;
+
           break;
         case 'ArrowRight':
-          {
-            const children = mindmap.getChildNodes(node.id);
-
-            targetNode = children[0] ?? null;
-          }
+          targetNode =
+            nodeDirection === LayoutType.RIGHT ||
+            nodeDirection === LayoutType.BALANCE
+              ? mindmap.getChildNodes(node.id, 'right')[0] ?? null
+              : mindmap.getParentNode(node.id);
           break;
       }
 
