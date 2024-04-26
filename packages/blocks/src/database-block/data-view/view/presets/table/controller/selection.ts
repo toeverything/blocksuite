@@ -458,11 +458,21 @@ export class TableSelectionController implements ReactiveController {
 
       const isRowSelection =
         tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
+
+      const rowSel = tableSelection?.rowsSelection;
+
+      const isDragElemDragging = this.__dragToFillElement.dragging;
+      const isEditing = !!tableSelection?.isEditing;
+
+      const showDragToFillHandle =
+        !isEditing && ((rowSel && isDragElemDragging) || !rowSel);
+
       this.updateFocusSelectionStyle(
         tableSelection?.groupKey,
         tableSelection?.focus,
         isRowSelection,
-        tableSelection?.isEditing
+        isEditing,
+        showDragToFillHandle
       );
       return true;
     };
@@ -522,7 +532,8 @@ export class TableSelectionController implements ReactiveController {
     groupKey: string | undefined,
     focus?: CellFocus,
     isRowSelection?: boolean,
-    isEditing = false
+    isEditing = false,
+    showDragToFillHandle = false
   ) {
     const div = this.focusSelectionElement;
     const dragToFill = this.dragToFillDraggable;
@@ -561,7 +572,7 @@ export class TableSelectionController implements ReactiveController {
 
       dragToFill.style.left = `${x + w}px`;
       dragToFill.style.top = `${y + h}px`;
-      dragToFill.style.display = isEditing ? 'none' : 'block';
+      dragToFill.style.display = showDragToFillHandle ? 'block' : 'none';
     } else {
       div.style.display = 'none';
       dragToFill.style.display = 'none';
