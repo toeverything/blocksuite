@@ -194,16 +194,13 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           const element = this.element;
           const mindmap = this.element.group as MindmapElementModel;
           const parent = mindmap.getParentNode(element.id) ?? element;
+          const id = mindmap.addNode(parent.id, 'shape');
 
-          edgeless.doc.transact(() => {
-            const id = mindmap.addNode(parent.id, 'shape');
-
-            requestAnimationFrame(() => {
-              this.element = edgeless.service.getElementById(
-                id
-              ) as ShapeElementModel;
-              this.mounteEditor?.(this.element, edgeless);
-            });
+          requestAnimationFrame(() => {
+            this.element = edgeless.service.getElementById(
+              id
+            ) as ShapeElementModel;
+            this.mounteEditor?.(this.element, edgeless);
           });
 
           (this.ownerDocument.activeElement as HTMLElement).blur();
@@ -214,16 +211,13 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           const edgeless = this.edgeless;
           const element = this.element;
           const mindmap = this.element.group as MindmapElementModel;
+          const id = mindmap.addNode(element.id, 'shape');
 
-          edgeless.doc.transact(() => {
-            const id = mindmap.addNode(element.id, 'shape');
-
-            requestAnimationFrame(() => {
-              this.element = edgeless.service.getElementById(
-                id
-              ) as ShapeElementModel;
-              this.mounteEditor?.(this.element, edgeless);
-            });
+          requestAnimationFrame(() => {
+            this.element = edgeless.service.getElementById(
+              id
+            ) as ShapeElementModel;
+            this.mounteEditor?.(this.element, edgeless);
           });
 
           (this.ownerDocument.activeElement as HTMLElement).blur();
@@ -251,6 +245,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       leftTopX,
       leftTopY
     );
+    const autoWidth = textResizing === TextResizing.AUTO_WIDTH;
 
     const inlineEditorStyle = styleMap({
       position: 'absolute',
@@ -297,13 +292,20 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
     this._lastXYWH = this.element.xywh;
 
-    return html`<rich-text
-      .yText=${this.element.text}
-      .enableFormat=${false}
-      .enableAutoScrollHorizontally=${false}
-      .enableAutoScrollVertically=${false}
-      style=${inlineEditorStyle}
-    ></rich-text>`;
+    return html` <style>
+        edgeless-shape-text-editor v-text [data-v-text] {
+          overflow-wrap: ${autoWidth ? 'normal' : 'anywhere'};
+          word-break: ${autoWidth ? 'normal' : 'break-word'} !important;
+          white-space: ${autoWidth ? 'pre' : 'pre-wrap'} !important;
+        }
+      </style>
+      <rich-text
+        .yText=${this.element.text}
+        .enableFormat=${false}
+        .enableAutoScrollHorizontally=${false}
+        .enableAutoScrollVertically=${false}
+        style=${inlineEditorStyle}
+      ></rich-text>`;
   }
 }
 

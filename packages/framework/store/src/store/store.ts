@@ -71,6 +71,7 @@ const FLAGS_PRESET = {
   enable_expand_database_block: false,
   enable_block_query: false,
   enable_lasso_tool: false,
+  enable_mindmap_entry: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

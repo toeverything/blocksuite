@@ -177,7 +177,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       return PaymentRequiredErrorRenderer(this.host);
     } else if (this.error instanceof UnauthorizedError) {
       return GeneralErrorRenderer(
-        'You need to login to AFFiNE Cloud to continue using AFFiNE AI.',
+        html`You need to login to AFFiNE Cloud to continue using AFFiNE AI.`,
         html`<div
           style=${styleMap({
             padding: '4px 12px',
@@ -193,7 +193,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         </div>`
       );
     } else {
-      return GeneralErrorRenderer(this.error?.message);
+      return GeneralErrorRenderer();
     }
   }
 
@@ -240,6 +240,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           return html`<action-text
             .item=${item}
             .host=${this.host}
+            .isCode=${item.action === 'Explain this code' ||
+            item.action === 'Check code error'}
           ></action-text>`;
       }
     }

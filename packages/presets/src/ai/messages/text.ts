@@ -16,11 +16,6 @@ import { markDownToDoc } from '../utils/markdown-utils.js';
 @customElement('ai-answer-text-preview')
 export class AIAnswerTextPreview extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
-      width: 100%;
-      display: flex;
-    }
-
     .ai-answer-text-editor.affine-page-viewport {
       background: transparent;
       font-family: var(--affine-font-family);
@@ -42,12 +37,10 @@ export class AIAnswerTextPreview extends WithDisposable(LitElement) {
           > :first-child,
           > :first-child * {
             margin-top: 0;
-            padding-top: 0;
           }
           > :last-child,
           > :last-child * {
             margin-bottom: 0;
-            padding-bottom: 0;
           }
         }
       }
@@ -116,7 +109,6 @@ export class AIAnswerText extends LitElement {
     .ai-answer-text-container {
       overflow-y: auto;
       overflow-x: hidden;
-      display: flex;
       padding: 0;
     }
     .ai-answer-text-container.show-scrollbar::-webkit-scrollbar {
