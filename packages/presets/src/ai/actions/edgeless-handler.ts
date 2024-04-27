@@ -129,6 +129,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   extract?: (host: EditorHost) => Promise<{
     content?: string;
     attachments?: (string | Blob)[];
+    seed?: string;
   } | void>
 ) {
   const action = AIProvider.actions[id];
@@ -194,6 +195,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
   extract?: (host: EditorHost) => Promise<{
     content?: string;
     attachments?: (string | Blob)[];
+    seed?: string;
   } | void>
 ) {
   return (host: EditorHost) => {
@@ -231,6 +233,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     input?: string;
     content?: string;
     attachments?: (string | Blob)[];
+    seed?: string;
   } | void>
 ) {
   return (host: EditorHost) => {

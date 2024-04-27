@@ -94,3 +94,7 @@ export function canvasToBlob(
     canvas.toBlob(resolve, type, quality)
   );
 }
+
+export function randomSeed(min = 0, max = Date.now()) {
+  return Math.round(Math.random() * (max - min)) + min;
+}
