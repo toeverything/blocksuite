@@ -100,6 +100,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           .edgeless=${edgeless}
           style=${styleMap({
             zIndex,
+            display: 'block',
             position: 'relative',
           })}
         ></${tag}>`;
@@ -433,6 +434,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                       .edgeless=${edgeless}
                       style=${styleMap({
                         zIndex,
+                        display: 'block',
                         position: 'relative',
                       })}
                     ></${tag}>`;
