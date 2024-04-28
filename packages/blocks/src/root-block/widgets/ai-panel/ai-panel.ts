@@ -38,6 +38,7 @@ export class AffineAIPanelWidget extends WidgetElement {
 
       position: absolute;
       width: max-content;
+      height: auto;
       top: 0;
       left: 0;
       overflow-y: auto;
@@ -48,11 +49,9 @@ export class AffineAIPanelWidget extends WidgetElement {
     .ai-panel-container {
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
       box-sizing: border-box;
       width: 100%;
-      height: 100%;
+      height: fit-content;
       gap: 8px;
       padding: 8px 0;
     }
