@@ -15,7 +15,7 @@ export class DragToFillElement extends ShadowlessElement {
     .drag-to-fill {
       border-radius: 50%;
       box-sizing: border-box;
-      background-color: var(--affine-background-overlay-panel-color);
+      background-color: var(--affine-background-primary-color);
       border: 2px solid var(--affine-primary-color);
       position: absolute;
       cursor: ns-resize;
@@ -31,41 +31,20 @@ export class DragToFillElement extends ShadowlessElement {
       scale: 1.1;
     }
   `;
-  @state()
-  onDragStart!: (ev: PointerEvent) => void;
 
   @state()
   dragging = false;
 
   dragToFillRef = createRef<HTMLDivElement>();
 
-  startDrag() {
-    this.dragging = true;
-  }
-
-  endDrag() {
-    this.dragging = false;
-  }
-
   override render() {
+    // TODO add tooltip
     return html`<div
       ${ref(this.dragToFillRef)}
       draggable="true"
-      @dragstart=${this.onDragStart}
+      data-drag-to-fill="true"
       class="drag-to-fill ${this.dragging ? 'dragging' : ''}"
     ></div>`;
-
-    // TODO add tooltip
-    // return html`<div
-    //   ${ref(this.dragToFillRef)}
-    //   draggable="true"
-    //   @dragstart=${this.onDragStart}
-    //   class="drag-to-fill ${this.dragging ? 'dragging' : ''}"
-    // >
-    //   <affine-tooltip .placement=${'right'} .arrow=${false} .offset=${8}>
-    //     Drag vertically to fill
-    //   </affine-tooltip>
-    // </div>`;
   }
 }
 

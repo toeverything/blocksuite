@@ -64,8 +64,6 @@ export class TableSelectionController implements ReactiveController {
   }
 
   private handleSelectionChange() {
-    this.__dragToFillElement.onDragStart = this.handleDragToFillDragStart;
-
     this.host.disposables.add(
       this.host.selectionUpdated.on(tableSelection => {
         if (!this.isValidSelection(tableSelection)) {
@@ -119,9 +117,8 @@ export class TableSelectionController implements ReactiveController {
     );
   }
 
-  private handleDragToFillDragStart = (ev: PointerEvent) => {
-    if (!this._tableViewSelection) return;
-    ev.preventDefault();
+  private getFocusCellContainer = () => {
+    if (!this._tableViewSelection) return null;
     const { groupKey, focus } = this._tableViewSelection;
 
     const dragStartCell = this.getCellContainer(
@@ -129,18 +126,31 @@ export class TableSelectionController implements ReactiveController {
       focus.rowIndex,
       focus.columnIndex
     );
-    if (!dragStartCell) return;
-
-    this.startDrag(ev, dragStartCell, true);
+    return dragStartCell ?? null;
   };
+
+  private resolveDragStartTarget(
+    target: HTMLElement
+  ): [cell: DatabaseCellContainer | null, fillValues: boolean] {
+    let cell: DatabaseCellContainer | null;
+    const fillValues = !!target.dataset.dragToFill;
+    if (fillValues) {
+      const focusCellContainer = this.getFocusCellContainer();
+      assertExists(focusCellContainer);
+      cell = focusCellContainer;
+    } else {
+      cell = target.closest('affine-database-cell-container');
+    }
+    return [cell, fillValues];
+  }
 
   private handleDragEvent() {
     this.host.disposables.add(
       this.host.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;
         const target = event.target;
-        if (target instanceof Element) {
-          const cell = target.closest('affine-database-cell-container');
+        if (target instanceof HTMLElement) {
+          const [cell, fillValues] = this.resolveDragStartTarget(target);
 
           if (cell) {
             const selection = this.selection;
@@ -152,7 +162,7 @@ export class TableSelectionController implements ReactiveController {
             ) {
               return false;
             }
-            this.startDrag(event, cell);
+            this.startDrag(event, cell, fillValues);
             event.preventDefault();
             return true;
           }
@@ -311,7 +321,7 @@ export class TableSelectionController implements ReactiveController {
         y: evt.y,
       }),
       onDrag: () => {
-        if (fillValues) this.__dragToFillElement.startDrag();
+        if (fillValues) this.__dragToFillElement.dragging = true;
         return undefined;
       },
       onMove: ({ x, y }) => {
@@ -335,7 +345,7 @@ export class TableSelectionController implements ReactiveController {
         }
         select(selection);
         if (fillValues && this.selection) {
-          this.__dragToFillElement.endDrag();
+          this.__dragToFillElement.dragging = false;
           fillSelectionWithFocusCellData(this.host, this.selection);
         }
       },
