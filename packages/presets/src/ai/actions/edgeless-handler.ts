@@ -27,6 +27,7 @@ import { AIProvider } from '../provider.js';
 import { isMindmapChild, isMindMapRoot } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
+import { getSelectedNoteAnchor } from '../utils/selection-utils.js';
 import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
@@ -37,16 +38,15 @@ import {
 } from './edgeless-response.js';
 import { bindEventSource } from './handler.js';
 
-type AnwserRenderer = Exclude<
-  AffineAIPanelWidget['config'],
-  null
+type AnswerRenderer = NonNullable<
+  AffineAIPanelWidget['config']
 >['answerRenderer'];
 
 function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
   host: EditorHost,
   ctx: CtxRecord
-): AnwserRenderer {
+): AnswerRenderer {
   if (id === 'brainstormMindmap' || id === 'expandMindmap') {
     const selectedElements = ctx.get()['selectedElements'] as EdgelessModel[];
 
@@ -287,13 +287,23 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
         .catch(console.error);
     };
 
-    if (edgelessCopilot.visible) {
+    const elementToolbar = getElementToolbar(host);
+    if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
       aiPanel.toggle(
         edgelessCopilot.selectionElem,
         getCopilotSelectedElems(host).length ? 'placeholder' : undefined
       );
-    } else {
+    } else if (elementToolbar.toolbarVisible) {
       aiPanel.toggle(getElementToolbar(host), 'placeholder');
+    } else if (selectedElements.length > 0) {
+      const lastSelected = selectedElements.at(-1)!.id;
+      const selectedPortal = getSelectedNoteAnchor(host, lastSelected);
+      if (selectedPortal) {
+        aiPanel.toggle(
+          selectedPortal,
+          getCopilotSelectedElems(host).length ? 'placeholder' : undefined
+        );
+      }
     }
   };
 }
