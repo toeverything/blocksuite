@@ -578,9 +578,13 @@ function getNextGroupFocusElement(
     return group.group.key === selection.cards[0].groupKey;
   });
 
-  const nextGroupIndex = getNextGroupIndex(groupIndex);
+  let nextGroupIndex = getNextGroupIndex(groupIndex);
+  let nextGroup = groups[nextGroupIndex];
+  while (nextGroup.group.rows.length === 0) {
+    nextGroupIndex = getNextGroupIndex(nextGroupIndex);
+    nextGroup = groups[nextGroupIndex];
+  }
 
-  const nextGroup = groups[nextGroupIndex];
   const element =
     selection.selectionType === 'cell'
       ? getFocusCell(viewElement, selection)
