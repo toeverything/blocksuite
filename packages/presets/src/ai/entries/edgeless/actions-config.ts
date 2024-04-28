@@ -32,7 +32,7 @@ import { textTones, translateLangs } from '../../actions/types.js';
 import { getAIPanel } from '../../ai-panel.js';
 import { AIProvider } from '../../provider.js';
 import { mindMapToMarkdown } from '../../utils/edgeless.js';
-import { canvasToBlob } from '../../utils/image.js';
+import { canvasToBlob, randomSeed } from '../../utils/image.js';
 import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
@@ -266,6 +266,7 @@ const generateGroup: AIItemGroupConfig = {
         return {
           content,
           attachments: [png],
+          seed: `${randomSeed()}`,
         };
       }),
     },

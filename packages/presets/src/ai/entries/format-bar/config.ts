@@ -1,4 +1,8 @@
-import type { Chain, InitCommandCtx } from '@blocksuite/block-std';
+import type { Chain, EditorHost, InitCommandCtx } from '@blocksuite/block-std';
+import type {
+  CopilotSelectionController,
+  EdgelessElementToolbarWidget,
+} from '@blocksuite/blocks';
 import {
   AIDoneIcon,
   type AIItemGroupConfig,
@@ -6,7 +10,9 @@ import {
   AISearchIcon,
   type AISubItemConfig,
   ChatWithAIIcon,
+  EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   ExplainIcon,
+  getElementsBound,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
@@ -16,10 +22,16 @@ import {
   ToneIcon,
 } from '@blocksuite/blocks';
 
+import { actionToHandler as edgelessActionToHandler } from '../../actions/edgeless-handler.js';
 import { actionToHandler } from '../../actions/handler.js';
 import { textTones, translateLangs } from '../../actions/types.js';
 import { getAIPanel } from '../../ai-panel.js';
 import { AIProvider } from '../../provider.js';
+import {
+  getSelectedImagesAsBlobs,
+  getSelectedTextContent,
+  getSelections,
+} from '../../utils/selection-utils.js';
 
 export const translateSubItem: AISubItemConfig[] = translateLangs.map(lang => {
   return {
@@ -154,6 +166,61 @@ const DraftAIGroup: AIItemGroupConfig = {
   ],
 };
 
+// actions that initiated from a note in edgeless mode
+// 1. when running in doc mode, call requestRunInEdgeless (let affine to show toast)
+// 2. when running in edgeless mode
+//    a. get selected in the note and let the edgeless action to handle it
+//    b. insert the result using the note shape
+function edgelessHandler<T extends keyof BlockSuitePresets.AIActions>(
+  id: T,
+  variants?: Omit<
+    Parameters<BlockSuitePresets.AIActions[T]>[0],
+    keyof BlockSuitePresets.AITextActionOptions
+  >
+) {
+  return (host: EditorHost) => {
+    if (host.doc.root?.id === undefined) return;
+    const edgeless = (
+      host.view.getWidget(
+        EDGELESS_ELEMENT_TOOLBAR_WIDGET,
+        host.doc.root.id
+      ) as EdgelessElementToolbarWidget
+    )?.edgeless;
+
+    if (!edgeless) {
+      AIProvider.slots.requestRunInEdgeless.emit({ host });
+    } else {
+      edgeless.tools.setEdgelessTool({ type: 'copilot' });
+      const currentController = edgeless.tools.controllers[
+        'copilot'
+      ] as CopilotSelectionController;
+      const selectedElements = edgeless.service.selection.elements;
+      const padding = 10 / edgeless.service.zoom;
+      const bounds = getElementsBound(
+        selectedElements.map(e => e.elementBound)
+      ).expand(padding);
+      currentController.dragStartPoint = bounds.tl as [number, number];
+      currentController.dragLastPoint = bounds.br as [number, number];
+      currentController.draggingAreaUpdated.emit(false); // do not show edgeless panel
+
+      return edgelessActionToHandler(id, variants, async () => {
+        const selections = getSelections(host);
+        const [markdown, attachments] = await Promise.all([
+          getSelectedTextContent(host),
+          getSelectedImagesAsBlobs(host),
+        ]);
+        // for now if there are more than one selected blocks, we will not omit the attachments
+        const sendAttachments =
+          selections?.selectedBlocks?.length === 1 && attachments.length > 0;
+        return {
+          attachments: sendAttachments ? attachments : undefined,
+          content: sendAttachments ? '' : markdown,
+        };
+      })(host);
+    }
+  };
+}
+
 const ReviewWIthAIGroup: AIItemGroupConfig = {
   name: 'review with ai',
   items: [
@@ -225,12 +292,29 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
         );
       },
     },
-    // todo: missing "generate an image" action
+    {
+      name: 'Generate an image',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: edgelessHandler('createImage'),
+    },
     {
       name: 'Generate outline',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
       handler: actionToHandler('writeOutline'),
+    },
+    {
+      name: 'Brainstorm ideas with mind map',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: edgelessHandler('brainstormMindmap'),
+    },
+    {
+      name: 'Generate presentation',
+      icon: AIPenIcon,
+      showWhen: textBlockShowWhen,
+      handler: edgelessHandler('createSlides'),
     },
     {
       name: 'Find actions',

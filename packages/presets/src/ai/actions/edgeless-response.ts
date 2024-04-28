@@ -85,9 +85,9 @@ export function getTriggerEntry(host: EditorHost) {
 
 export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
   const service = getService(host);
-  const copilogWidget = getEdgelessCopilotWidget(host);
+  const copilotWidget = getEdgelessCopilotWidget(host);
 
-  if (copilogWidget.visible) {
+  if (copilotWidget.visible) {
     return (service.tool.controllers['copilot'] as CopilotSelectionController)
       .selectedElements;
   }

@@ -191,3 +191,7 @@ export const getSelectedImagesAsBlobs = async (host: EditorHost) => {
   );
   return blobs.filter((blob): blob is File => !!blob);
 };
+
+export const getSelectedNoteAnchor = (host: EditorHost, id: string) => {
+  return host.querySelector(`[data-portal-block-id="${id}"] .note-background`);
+};

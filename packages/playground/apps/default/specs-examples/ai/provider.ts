@@ -278,7 +278,6 @@ export function setupAIProvider() {
       workspaceId: options.workspaceId,
       prompt,
       attachments: options.attachments,
-      params: options.params,
     });
   });
 
