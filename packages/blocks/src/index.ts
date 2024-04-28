@@ -116,6 +116,7 @@ export {
   ElementModel,
   fitContent,
   generateKeyBetween,
+  getElementsBound,
   GroupElementModel,
   MindmapElementModel,
   MindmapRootBlock,

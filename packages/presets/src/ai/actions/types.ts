@@ -33,7 +33,7 @@ declare global {
 
     interface AIImageActionOptions extends AITextActionOptions {
       content?: string;
-      params?: Record<string, string>;
+      seed?: string;
     }
 
     type TextStream = {

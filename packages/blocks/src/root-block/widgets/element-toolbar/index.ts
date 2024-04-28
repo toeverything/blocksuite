@@ -321,9 +321,19 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       2
     );
 
+    const generalButtons =
+      elements.length !== connector?.length
+        ? [
+            renderAddFrameButton(edgeless, elements),
+            renderAddGroupButton(edgeless, elements),
+            renderAlignButton(edgeless, elements),
+          ]
+        : [];
+
     const buttons = selectedAtLeastTwoTypes
-      ? []
+      ? generalButtons
       : [
+          ...generalButtons,
           renderMindmapButton(edgeless, shape),
           renderChangeShapeButton(edgeless, shape),
           renderChangeBrushButton(edgeless, brush),
@@ -336,15 +346,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           renderAttachmentButton(edgeless, attachment),
           renderChangeImageButton(edgeless, image),
         ].filter(b => !!b && b !== nothing);
-
-    if (elements.length > 1 && elements.length !== connector?.length) {
-      buttons.unshift(renderMenuDivider());
-      buttons.unshift(renderAlignButton(this.edgeless));
-      buttons.unshift(renderMenuDivider());
-      buttons.unshift(renderAddGroupButton(this.edgeless));
-      buttons.unshift(renderMenuDivider());
-      buttons.unshift(renderAddFrameButton(this.edgeless));
-    }
 
     if (elements.length === 1) {
       if (selection.firstElement.group instanceof GroupElementModel) {
