@@ -1,13 +1,15 @@
 import '../../edgeless/components/buttons/tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { html, LitElement } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { FrameIcon } from '../../../_common/icons/index.js';
-import { Bound } from '../../../surface-block/index.js';
+import { Bound, MindmapElementModel } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessModel } from '../../edgeless/type.js';
+import { renderMenuDivider } from './component-toolbar-menu-divider.js';
 
 @customElement('edgeless-add-frame-button')
 export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
@@ -41,8 +43,15 @@ declare global {
   }
 }
 
-export function renderAddFrameButton(edgeless: EdgelessRootBlockComponent) {
-  return html`<edgeless-add-frame-button
-    .edgeless=${edgeless}
-  ></edgeless-add-frame-button>`;
+export function renderAddFrameButton(
+  edgeless: EdgelessRootBlockComponent,
+  elements: EdgelessModel[]
+) {
+  return elements.length > 1 &&
+    elements.every(e => !(e.group instanceof MindmapElementModel))
+    ? html`<edgeless-add-frame-button
+          .edgeless=${edgeless}
+        ></edgeless-add-frame-button>
+        ${renderMenuDivider()}`
+    : nothing;
 }
