@@ -34,6 +34,8 @@ function fetchImageFallback(
       c.height = img.height;
       const ctx = c.getContext('2d');
       assertExists(ctx);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0);
       c.toBlob(blob => {
         if (blob) {
@@ -59,6 +61,8 @@ function convertToPng(blob: Blob): Promise<Blob | null> {
         c.height = img.height;
         const ctx = c.getContext('2d');
         assertExists(ctx);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0);
         c.toBlob(resolve, 'image/png');
       };

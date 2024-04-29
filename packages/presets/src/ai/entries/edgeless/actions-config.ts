@@ -5,6 +5,7 @@ import {
   BlocksUtils,
   ChatWithAIIcon,
   ExplainIcon,
+  ImageBlockModel,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
@@ -166,7 +167,21 @@ const reviewGroup: AIItemGroupConfig = {
       name: 'Explain this image',
       icon: AIPenIcon,
       showWhen: explainImageShowWhen,
-      handler: actionToHandler('explainImage'),
+      handler: actionToHandler('explainImage', undefined, async host => {
+        const selectedElements = getCopilotSelectedElems(host);
+        if (selectedElements.length !== 1) return;
+
+        const imageBlock = selectedElements[0];
+        if (!(imageBlock instanceof ImageBlockModel)) return;
+        if (!imageBlock.sourceId) return;
+
+        const blob = await host.doc.blob.get(imageBlock.sourceId);
+        if (!blob) return;
+
+        return {
+          attachments: [blob],
+        };
+      }),
     },
     {
       name: 'Explain this code',
@@ -291,7 +306,7 @@ const generateGroup: AIItemGroupConfig = {
 
         return Promise.resolve({
           input: firstSelected.text?.toString() ?? '',
-          content: mindMapToMarkdown(mindmap),
+          mindmap: mindMapToMarkdown(mindmap),
         });
       }),
     },
@@ -317,28 +332,46 @@ const generateGroup: AIItemGroupConfig = {
       name: 'Make it real',
       icon: MakeItRealIcon,
       showWhen: makeItRealShowWhen,
-      handler: actionToHandler('makeItReal', undefined, async host => {
+      handler: actionToHandler('makeItReal', undefined, async (host, ctx) => {
         const selectedElements = getCopilotSelectedElems(host);
         const { notes, frames, shapes, images } =
           BlocksUtils.splitElements(selectedElements);
-        if (
-          notes.length + frames.length + images.length + shapes.length ===
-          0
-        ) {
+        const f = frames.length;
+        const i = images.length;
+        const n = notes.length;
+        const s = shapes.length;
+
+        if (f + i + n + s === 0) {
           return;
         }
+
+        // single note, text or shape(text)
+        if (f + i === 0 && n + s === 1) {
+          const content = (
+            await getContentFromSelected(host, [...notes, ...shapes])
+          ).trim();
+          if (!content) return;
+          return {
+            content,
+          };
+        }
+
         const edgelessRoot = getEdgelessRootFromEditor(host);
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           [...notes, ...frames, ...images],
           shapes,
           {
             dpr: 1,
-            padding: 0,
+            background: 'white',
           }
         );
         if (!canvas) return;
         const png = await canvasToBlob(canvas);
         if (!png) return;
+        ctx.set({
+          width: canvas.width,
+          height: canvas.height,
+        });
         return {
           attachments: [png],
         };
