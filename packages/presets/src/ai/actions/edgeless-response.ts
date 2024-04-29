@@ -254,7 +254,7 @@ export const responses: {
       }
     });
   },
-  makeItReal: host => {
+  makeItReal: (host, ctx) => {
     const aiPanel = getAIPanel(host);
     let html = aiPanel.answer;
     if (!html) return;
@@ -272,12 +272,20 @@ export const responses: {
     aiPanel.hide();
 
     const edgelessRoot = getEdgelessRootFromEditor(host);
-    const { left, top, height } = selectionRect;
+    const { left: x, top, height } = selectionRect;
+    const y = top + height + 20;
+    const data = ctx.get();
+    const w = (data['width'] as number) || 800;
+    const h = (data['height'] as number) || 600;
 
     host.doc.transact(() => {
       edgelessRoot.doc.addBlock(
         EmbedHtmlBlockSpec.schema.model.flavour as 'affine:embed-html',
-        { html, xywh: `[${left},${top + height + 20},400,200]` },
+        {
+          html,
+          design: 'ai:makeItReal', // as tag
+          xywh: `[${x},${y},${w},${h}]`,
+        },
         surface.id
       );
     });

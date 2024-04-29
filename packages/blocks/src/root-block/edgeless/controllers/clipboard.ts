@@ -96,8 +96,8 @@ const { GROUP, MINDMAP } = CanvasElementType;
 const IMAGE_PADDING = 5; // for rotated shapes some padding is needed
 
 interface CanvasExportOptions {
-  dpr: number;
-  padding: number;
+  dpr?: number;
+  padding?: number;
   background?: string;
 }
 
@@ -1198,10 +1198,11 @@ export class EdgelessClipboardController extends PageClipboard {
     bound: IBound,
     nodes?: TopLevelBlockModel[],
     canvasElements: CanvasElement[] = [],
-    { dpr, padding, background }: CanvasExportOptions = {
-      dpr: window.devicePixelRatio || 1,
-      padding: IMAGE_PADDING,
-    }
+    {
+      background,
+      padding = IMAGE_PADDING,
+      dpr = window.devicePixelRatio || 1,
+    }: CanvasExportOptions = {}
   ): Promise<HTMLCanvasElement | undefined> {
     const host = edgeless.host;
     const rootModel = this.doc.root;

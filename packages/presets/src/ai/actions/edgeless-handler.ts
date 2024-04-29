@@ -126,7 +126,10 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  extract?: (host: EditorHost) => Promise<{
+  extract?: (
+    host: EditorHost,
+    ctx: CtxRecord
+  ) => Promise<{
     content?: string;
     attachments?: (string | Blob)[];
     seed?: string;
@@ -137,7 +140,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   if (!action || typeof action !== 'function') return;
 
   if (extract && typeof extract === 'function') {
-    return (host: EditorHost): BlockSuitePresets.TextStream => {
+    return (host: EditorHost, ctx: CtxRecord): BlockSuitePresets.TextStream => {
       let stream: BlockSuitePresets.TextStream | undefined;
       return {
         async *[Symbol.asyncIterator]() {
@@ -148,7 +151,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
             workspaceId: host.doc.collection.id,
           } as Parameters<typeof action>[0];
 
-          const data = await extract(host);
+          const data = await extract(host, ctx);
           if (data) {
             Object.assign(options, data);
           }
@@ -192,13 +195,16 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  extract?: (host: EditorHost) => Promise<{
+  extract?: (
+    host: EditorHost,
+    ctx: CtxRecord
+  ) => Promise<{
     content?: string;
     attachments?: (string | Blob)[];
     seed?: string;
   } | void>
 ) {
-  return (host: EditorHost) => {
+  return (host: EditorHost, ctx: CtxRecord) => {
     return ({
       signal,
       update,
@@ -214,7 +220,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
         if (selectedElements.length === 0) return;
       }
 
-      const stream = actionToStream(id, variants, extract)?.(host);
+      const stream = actionToStream(id, variants, extract)?.(host, ctx);
 
       if (!stream) return;
 
@@ -229,7 +235,10 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  customInput?: (host: EditorHost) => Promise<{
+  customInput?: (
+    host: EditorHost,
+    ctx: CtxRecord
+  ) => Promise<{
     input?: string;
     content?: string;
     attachments?: (string | Blob)[];
@@ -263,7 +272,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
       id,
       variants,
       customInput
-    )(host);
+    )(host, ctx);
     aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
     aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
     aiPanel.config.discardCallback = () => {
