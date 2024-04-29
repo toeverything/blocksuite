@@ -1,14 +1,12 @@
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Y } from '@blocksuite/store';
-import { DocCollection } from '@blocksuite/store';
+import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { RichText } from '../../../_common/components/index.js';
 import { BaseCellRenderer } from '../../data-view/column/index.js';
-import { tRichText } from '../../data-view/logical/data-type.js';
 import type { DataViewKanbanManager } from '../../data-view/view/presets/kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../data-view/view/presets/table/table-view-manager.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
@@ -17,6 +15,11 @@ const styles = css`
   data-view-header-area-text {
     width: 100%;
     display: flex;
+  }
+
+  data-view-header-area-text rich-text {
+    pointer-events: none;
+    user-select: none;
   }
 
   data-view-header-area-text-editing {
@@ -67,7 +70,7 @@ const styles = css`
   }
 `;
 
-abstract class BaseTextCell extends BaseCellRenderer<unknown> {
+abstract class BaseTextCell extends BaseCellRenderer<Text> {
   override view!: DataViewTableManager | DataViewKanbanManager;
   static override styles = styles;
   @property({ attribute: false })
@@ -107,38 +110,6 @@ abstract class BaseTextCell extends BaseCellRenderer<unknown> {
     return inlineEditor;
   }
 
-  override onExitEditMode() {
-    if (!this._isRichText) {
-      this.view.cellUpdateValue(
-        this.rowId,
-        this.titleColumn.id,
-        this._isRichText
-          ? this.inlineEditor?.yText
-          : this.inlineEditor?.yText.toString()
-      );
-    }
-  }
-
-  getYText(text?: string | Y.Text) {
-    if (
-      this._isRichText &&
-      (text instanceof DocCollection.Y.Text || text == null)
-    ) {
-      let yText = text;
-      if (!yText) {
-        yText = new DocCollection.Y.Text();
-        this.titleColumn?.setValue(this.rowId, yText);
-      }
-      return yText;
-    }
-    const yText = new DocCollection.Y.Doc().getText('title');
-    if (text instanceof DocCollection.Y.Text) {
-      return text;
-    }
-    yText.insert(0, text ?? '');
-    return yText;
-  }
-
   renderIcon() {
     if (!this.showIcon) {
       return;
@@ -152,21 +123,14 @@ abstract class BaseTextCell extends BaseCellRenderer<unknown> {
 
     return html`<div class="data-view-header-area-icon">${icon}</div>`;
   }
-
-  private get _isRichText() {
-    return tRichText.is(this.titleColumn.dataType);
-  }
 }
 
 @customElement('data-view-header-area-text')
 export class HeaderAreaTextCell extends BaseTextCell {
   override render() {
-    const yText = this.getYText(
-      this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
-    );
     return html`${this.renderIcon()}
       <rich-text
-        .yText=${yText}
+        .yText=${this.value}
         .inlineEventSource=${this.topContenteditableElement}
         .attributesSchema=${this.attributesSchema}
         .attributeRenderer=${this.attributeRenderer}
@@ -220,12 +184,9 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
   }
 
   override render() {
-    const yText = this.getYText(
-      this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
-    );
     return html`${this.renderIcon()}
       <rich-text
-        .yText=${yText}
+        .yText=${this.value}
         .inlineEventSource=${this.topContenteditableElement}
         .attributesSchema=${this.attributesSchema}
         .attributeRenderer=${this.attributeRenderer}

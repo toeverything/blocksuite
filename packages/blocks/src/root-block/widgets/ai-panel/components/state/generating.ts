@@ -25,7 +25,7 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
       align-items: center;
       gap: 8px;
 
-      color: var(--light-brandColor, #1e96eb);
+      color: var(--affine-brand-color);
 
       .text {
         display: flex;
@@ -43,10 +43,27 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
       .left,
       .right {
         display: flex;
-        width: 20px;
         height: 20px;
         justify-content: center;
         align-items: center;
+      }
+      .left {
+        width: 20px;
+      }
+      .right {
+        gap: 6px;
+      }
+      .right:hover {
+        cursor: pointer;
+      }
+      .stop-icon {
+        height: 20px;
+        width: 20px;
+      }
+      .esc-label {
+        font-size: var(--affine-font-xs);
+        font-weight: 500;
+        line-height: 20px;
       }
     }
   `;
@@ -59,7 +76,10 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
       <div class="generating-tip">
         <div class="left">${AIStarIconWithAnimation}</div>
         <div class="text">AI is generating...</div>
-        <div @click=${this.stopGenerating} class="right">${AIStopIcon}</div>
+        <div @click=${this.stopGenerating} class="right">
+          <span class="stop-icon">${AIStopIcon}</span>
+          <span class="esc-label">ESC</span>
+        </div>
       </div>
     `;
   }
