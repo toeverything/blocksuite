@@ -106,7 +106,6 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   };
 
   private _onKeyDown = (e: KeyboardEvent) => {
-    e.stopPropagation();
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       this._sendToAI();
