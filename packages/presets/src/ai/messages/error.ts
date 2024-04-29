@@ -20,7 +20,7 @@ class AIErrorWrapper extends WithDisposable(LitElement) {
           gap: 4px;
           align-self: stretch;
           border-radius: 4px;
-          padding: 8px 8px 12px 8px;
+          padding: 8px;
           background-color: var(--affine-background-error-color);
 
           .bottom {
