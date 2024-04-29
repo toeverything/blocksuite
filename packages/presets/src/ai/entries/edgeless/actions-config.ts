@@ -5,6 +5,7 @@ import {
   BlocksUtils,
   ChatWithAIIcon,
   ExplainIcon,
+  ImageBlockModel,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
@@ -166,7 +167,21 @@ const reviewGroup: AIItemGroupConfig = {
       name: 'Explain this image',
       icon: AIPenIcon,
       showWhen: explainImageShowWhen,
-      handler: actionToHandler('explainImage'),
+      handler: actionToHandler('explainImage', undefined, async host => {
+        const selectedElements = getCopilotSelectedElems(host);
+        if (selectedElements.length !== 1) return;
+
+        const imageBlock = selectedElements[0];
+        if (!(imageBlock instanceof ImageBlockModel)) return;
+        if (!imageBlock.sourceId) return;
+
+        const blob = await host.doc.blob.get(imageBlock.sourceId);
+        if (!blob) return;
+
+        return {
+          attachments: [blob],
+        };
+      }),
     },
     {
       name: 'Explain this code',

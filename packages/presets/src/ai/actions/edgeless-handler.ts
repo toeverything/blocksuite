@@ -360,7 +360,7 @@ export function explainImageShowWhen(
 ) {
   const selected = getCopilotSelectedElems(host);
 
-  return selected[0] instanceof ImageBlockModel;
+  return selected.length === 1 && selected[0] instanceof ImageBlockModel;
 }
 
 export function mindmapRootShowWhen(_: unknown, __: unknown, host: EditorHost) {
