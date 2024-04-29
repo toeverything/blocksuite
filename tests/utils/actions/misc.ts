@@ -543,7 +543,10 @@ export async function initKanbanViewState(
           if (value !== undefined) {
             model.updateCell(rowId, {
               columnId,
-              value,
+              value:
+                column.type === 'rich-text'
+                  ? new doc.Text(value as string)
+                  : value,
             });
           }
         });
