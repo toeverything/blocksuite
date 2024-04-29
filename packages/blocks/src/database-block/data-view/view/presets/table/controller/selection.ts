@@ -60,6 +60,7 @@ export class TableSelectionController implements ReactiveController {
           this.selection = undefined;
           return;
         }
+        if (!this.isSelectedRowOnly()) this.rowSelectionDirection = 'forwards';
 
         const old = this._tableViewSelection;
         if (
@@ -299,7 +300,99 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
-  focusTo(position: 'left' | 'right' | 'up' | 'down') {
+  private rowSelectionDirection: 'forwards' | 'backwards' = 'forwards';
+  navigateRowSelection(position: 'up' | 'down', append = false) {
+    if (!this.selection) return;
+    if (!this.isSelectedRowOnly()) return;
+
+    const focusCell = this.getCellContainer(
+      this.selection.groupKey,
+      this.selection.focus.rowIndex,
+      this.selection.focus.columnIndex
+    );
+    if (!focusCell) return;
+    const rows = Array.from(this.rows(this.selection.groupKey));
+
+    const { start: rowSelStart, end: rowSelEnd } =
+      this.selection.rowsSelection!;
+
+    switch (position) {
+      case 'up': {
+        const { columnIndex, rowIndex } = this.selection.focus;
+        if (rowSelStart === 0) break;
+
+        let newStart = rowSelStart - 1;
+        let newEnd = rowSelEnd - 1;
+
+        if (append) {
+          if (rowSelStart === rowSelEnd) {
+            this.rowSelectionDirection = 'forwards';
+            newStart = rowSelStart - 1;
+            newEnd = rowSelEnd;
+          } else {
+            const dir = this.rowSelectionDirection;
+            if (dir === 'forwards') {
+              newStart = rowSelStart - 1;
+              newEnd = rowSelEnd;
+            } else {
+              newStart = rowSelStart;
+              newEnd = rowSelEnd - 1;
+            }
+          }
+        }
+
+        this.selection = {
+          ...this.selection,
+          rowsSelection: {
+            start: newStart,
+            end: newEnd,
+          },
+          focus: { columnIndex, rowIndex: rowIndex - 1 },
+        };
+        break;
+      }
+      case 'down': {
+        const { start, end } = this.selection.rowsSelection!;
+        const { columnIndex, rowIndex } = this.selection.focus;
+
+        if (end === rows.length - 1) break;
+
+        let newStart = start + 1;
+        let newEnd = end + 1;
+
+        if (append) {
+          if (start === end) {
+            this.rowSelectionDirection = 'backwards';
+            newStart = start;
+            newEnd = end + 1;
+          } else {
+            const dir = this.rowSelectionDirection;
+            if (dir === 'forwards') {
+              newStart = start + 1;
+              newEnd = end;
+            } else {
+              newStart = start;
+              newEnd = end + 1;
+            }
+          }
+        }
+
+        this.selection = {
+          ...this.selection,
+          rowsSelection: {
+            start: newStart,
+            end: newEnd,
+          },
+          focus: { columnIndex, rowIndex: rowIndex + 1 },
+        };
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  focusToCell(position: 'left' | 'right' | 'up' | 'down') {
     if (!this.selection) {
       return;
     }
@@ -637,7 +730,7 @@ export class TableSelectionController implements ReactiveController {
 
   public deleteRow(rowId: string) {
     this.view.rowDelete([rowId]);
-    this.focusTo('up');
+    this.focusToCell('up');
   }
 
   private checkSelection() {
@@ -656,7 +749,14 @@ export class TableSelectionController implements ReactiveController {
     return true;
   }
 
-  isRowSelection(groupKey: string | undefined, rowIndex: number) {
+  isSelectedRowOnly() {
+    const selection = this.selection;
+    return (
+      !!selection && !!selection.rowsSelection && !selection.columnsSelection
+    );
+  }
+
+  isRowSelected(groupKey: string | undefined, rowIndex: number) {
     const selection = this.selection;
     if (!selection || selection.groupKey != groupKey) {
       return false;

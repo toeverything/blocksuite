@@ -147,7 +147,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     const selectionController = this.selectionController;
     if (selectionController) {
       if (
-        selectionController.isRowSelection(this.groupKey, this.rowIndex) &&
+        selectionController.isRowSelected(this.groupKey, this.rowIndex) &&
         selectionController.selection
       ) {
         selectionController.selection = {
