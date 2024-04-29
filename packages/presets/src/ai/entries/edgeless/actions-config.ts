@@ -291,7 +291,7 @@ const generateGroup: AIItemGroupConfig = {
 
         return Promise.resolve({
           input: firstSelected.text?.toString() ?? '',
-          content: mindMapToMarkdown(mindmap),
+          mindmap: mindMapToMarkdown(mindmap),
         });
       }),
     },
