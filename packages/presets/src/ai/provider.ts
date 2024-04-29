@@ -29,6 +29,8 @@ export class AIProvider {
     requestContinueInChat: new Slot<{ host: EditorHost; show: boolean }>(),
     requestLogin: new Slot<{ host: EditorHost }>(),
     requestUpgradePlan: new Slot<{ host: EditorHost }>(),
+    // when an action is requested to run in edgeless mode (show a toast in affine)
+    requestRunInEdgeless: new Slot<{ host: EditorHost }>(),
     // stream of AI actions
     actions: new Slot<{
       action: keyof BlockSuitePresets.AIActions;

@@ -1,3 +1,4 @@
+import { IS_MAC } from '@blocksuite/global/env';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -19,6 +20,7 @@ export class NumberCell extends BaseCellRenderer<number> {
     .affine-database-number {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       width: 100%;
       padding: 0;
       border: none;
@@ -59,6 +61,7 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
+      text-align: right;
     }
 
     .affine-database-number:focus {
@@ -94,6 +97,13 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   };
 
   private _keydown = (e: KeyboardEvent) => {
+    const ctrlKey = IS_MAC ? e.metaKey : e.ctrlKey;
+
+    if (e.key.toLowerCase() === 'z' && ctrlKey) {
+      e.stopPropagation();
+      return;
+    }
+
     if (e.key === 'Enter' && !e.isComposing) {
       requestAnimationFrame(() => {
         this.selectCurrentCell(false);
@@ -119,6 +129,8 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   override render() {
     const value = `${this.value ?? ''}`;
     return html`<input
+      type="text"
+      autocomplete="off"
       .value="${value}"
       @keydown="${this._keydown}"
       @blur="${this._blur}"

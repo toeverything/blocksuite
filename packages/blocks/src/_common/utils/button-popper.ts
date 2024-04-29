@@ -43,6 +43,8 @@ export function createButtonPopper(
   mainAxis?: number,
   crossAxis?: number
 ) {
+  let state = 'hidden';
+
   function compute() {
     computePosition(reference, popperElement, {
       placement: 'top',
@@ -73,6 +75,7 @@ export function createButtonPopper(
   const show = () => {
     popperElement.setAttribute(ATTR_SHOW, '');
     compute();
+    state = 'show';
     stateUpdated({ display: 'show' });
   };
 
@@ -81,6 +84,7 @@ export function createButtonPopper(
     popperElement.removeAttribute(ATTR_SHOW);
 
     compute();
+    state = 'hidden';
     stateUpdated({ display: 'hidden' });
   };
 
@@ -95,6 +99,9 @@ export function createButtonPopper(
   const clickAway = listenClickAway(reference, () => hide());
 
   return {
+    get state() {
+      return state;
+    },
     show,
     hide,
     toggle,

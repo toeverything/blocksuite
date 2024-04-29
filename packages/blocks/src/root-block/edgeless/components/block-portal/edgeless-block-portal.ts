@@ -100,6 +100,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           .edgeless=${edgeless}
           style=${styleMap({
             zIndex,
+            display: 'block',
             position: 'relative',
           })}
         ></${tag}>`;
@@ -370,6 +371,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           const reference = service.getElementById(
             model.reference
           ) as AutoConnectElement;
+
+          if (!reference) return;
+
           if (!pageVisibleBlocks.has(reference)) {
             pageVisibleBlocks.set(reference, 1);
           } else {
@@ -430,6 +434,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                       .edgeless=${edgeless}
                       style=${styleMap({
                         zIndex,
+                        display: 'block',
                         position: 'relative',
                       })}
                     ></${tag}>`;

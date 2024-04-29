@@ -1,12 +1,20 @@
 import {
   type AIItemGroupConfig,
   AIPenIcon,
+  AISearchIcon,
   BlocksUtils,
   ChatWithAIIcon,
+  ExplainIcon,
+  ImproveWritingIcon,
   LanguageIcon,
+  LongerIcon,
+  MakeItRealIcon,
   MindmapElementModel,
+  SelectionIcon,
   ShapeElementModel,
+  ShorterIcon,
   TextElementModel,
+  ToneIcon,
 } from '@blocksuite/blocks';
 
 import {
@@ -14,16 +22,17 @@ import {
   explainImageShowWhen,
   getContentFromSelected,
   makeItRealShowWhen,
+  mindmapChildShowWhen,
   mindmapRootShowWhen,
-  mindmapShowWhen,
   noteBlockOrTextShowWhen,
+  noteWithCodeBlockShowWen,
 } from '../../actions/edgeless-handler.js';
 import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
 import { textTones, translateLangs } from '../../actions/types.js';
 import { getAIPanel } from '../../ai-panel.js';
 import { AIProvider } from '../../provider.js';
 import { mindMapToMarkdown } from '../../utils/edgeless.js';
-import { canvasToBlob } from '../../utils/image.js';
+import { canvasToBlob, randomSeed } from '../../utils/image.js';
 import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
@@ -70,26 +79,26 @@ const editGroup: AIItemGroupConfig = {
     },
     {
       name: 'Change tone to',
-      icon: AIPenIcon,
+      icon: ToneIcon,
       showWhen: noteBlockOrTextShowWhen,
       subItem: toneSubItem,
     },
     {
       name: 'Improve writing',
-      icon: AIPenIcon,
+      icon: ImproveWritingIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('improveWriting'),
     },
 
     {
-      name: 'Make longer',
-      icon: AIPenIcon,
+      name: 'Make it longer',
+      icon: LongerIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeLonger'),
     },
     {
-      name: 'Make shorter',
-      icon: AIPenIcon,
+      name: 'Make it shorter',
+      icon: ShorterIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('makeShorter'),
     },
@@ -161,19 +170,19 @@ const reviewGroup: AIItemGroupConfig = {
     },
     {
       name: 'Explain this code',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
+      icon: ExplainIcon,
+      showWhen: noteWithCodeBlockShowWen,
       handler: actionToHandler('explainCode'),
     },
     {
       name: 'Check code error',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
+      icon: ExplainIcon,
+      showWhen: noteWithCodeBlockShowWen,
       handler: actionToHandler('checkCodeErrors'),
     },
     {
       name: 'Explain selection',
-      icon: AIPenIcon,
+      icon: SelectionIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('explain'),
     },
@@ -194,18 +203,6 @@ const generateGroup: AIItemGroupConfig = {
       icon: AIPenIcon,
       handler: actionToHandler('createHeadings'),
       showWhen: noteBlockOrTextShowWhen,
-    },
-    {
-      name: 'Generate outline',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('writeOutline'),
-    },
-    {
-      name: 'Find actions',
-      icon: AIPenIcon,
-      showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('findActions'),
     },
     {
       name: 'Generate an image',
@@ -257,7 +254,11 @@ const generateGroup: AIItemGroupConfig = {
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           images,
           pureShapes,
-          1
+          {
+            dpr: 1,
+            padding: 0,
+            background: 'white',
+          }
         );
         if (!canvas) return;
         const png = await canvasToBlob(canvas);
@@ -265,13 +266,20 @@ const generateGroup: AIItemGroupConfig = {
         return {
           content,
           attachments: [png],
+          seed: `${randomSeed()}`,
         };
       }),
     },
     {
+      name: 'Generate outline',
+      icon: AIPenIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('writeOutline'),
+    },
+    {
       name: 'Expand from this mind map node',
       icon: AIPenIcon,
-      showWhen: mindmapShowWhen,
+      showWhen: mindmapChildShowWhen,
       handler: actionToHandler('expandMindmap', undefined, function (host) {
         const selected = getCopilotSelectedElems(host);
         const firstSelected = selected[0] as ShapeElementModel;
@@ -293,7 +301,6 @@ const generateGroup: AIItemGroupConfig = {
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('brainstormMindmap'),
     },
-
     {
       name: 'Regenerate mind map',
       icon: AIPenIcon,
@@ -306,10 +313,9 @@ const generateGroup: AIItemGroupConfig = {
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('createSlides'),
     },
-
     {
       name: 'Make it real',
-      icon: AIPenIcon,
+      icon: MakeItRealIcon,
       showWhen: makeItRealShowWhen,
       handler: actionToHandler('makeItReal', undefined, async host => {
         const selectedElements = getCopilotSelectedElems(host);
@@ -325,7 +331,10 @@ const generateGroup: AIItemGroupConfig = {
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           [...notes, ...frames, ...images],
           shapes,
-          1
+          {
+            dpr: 1,
+            padding: 0,
+          }
         );
         if (!canvas) return;
         const png = await canvasToBlob(canvas);
@@ -334,6 +343,12 @@ const generateGroup: AIItemGroupConfig = {
           attachments: [png],
         };
       }),
+    },
+    {
+      name: 'Find actions',
+      icon: AISearchIcon,
+      showWhen: noteBlockOrTextShowWhen,
+      handler: actionToHandler('findActions'),
     },
   ],
 };

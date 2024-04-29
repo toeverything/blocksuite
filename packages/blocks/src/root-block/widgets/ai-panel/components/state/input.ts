@@ -105,6 +105,26 @@ export class AIPanelInput extends WithDisposable(LitElement) {
     this.remove();
   };
 
+  private _onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      this._sendToAI();
+    }
+  };
+
+  private _onInput = () => {
+    this._textarea.style.height = 'auto';
+    this._textarea.style.height = this._textarea.scrollHeight + 'px';
+
+    if (this._textarea.value.length > 0) {
+      this._arrow.dataset.active = '';
+      this._hasContent = true;
+    } else {
+      delete this._arrow.dataset.active;
+      this._hasContent = false;
+    }
+  };
+
   override updated(_changedProperties: Map<PropertyKey, unknown>): void {
     const result = super.updated(_changedProperties);
     this._textarea.style.height = this._textarea.scrollHeight + 'px';
@@ -126,25 +146,15 @@ export class AIPanelInput extends WithDisposable(LitElement) {
         <textarea
           placeholder="Ask AI to edit or generate..."
           rows="1"
-          @keydown=${(e: KeyboardEvent) => {
-            if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-              e.preventDefault();
-              e.stopPropagation();
-              this._sendToAI();
-            }
-          }}
-          @input=${() => {
-            this._textarea.style.height = 'auto';
-            this._textarea.style.height = this._textarea.scrollHeight + 'px';
-
-            if (this._textarea.value.length > 0) {
-              this._arrow.dataset.active = '';
-              this._hasContent = true;
-            } else {
-              delete this._arrow.dataset.active;
-              this._hasContent = false;
-            }
-          }}
+          @keydown=${this._onKeyDown}
+          @input=${this._onInput}
+          @pointerdown=${stopPropagation}
+          @click=${stopPropagation}
+          @dblclick=${stopPropagation}
+          @cut=${stopPropagation}
+          @copy=${stopPropagation}
+          @paste=${stopPropagation}
+          @keyup=${stopPropagation}
         ></textarea>
         <div
           class="arrow"

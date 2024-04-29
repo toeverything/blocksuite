@@ -129,10 +129,12 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
         .tooltip=${this._showStylePopper ? '' : 'Style'}
         .tipPosition=${'bottom'}
         .active=${false}
+        .hoverState=${this._stylePopper?.state === 'show'}
         @click=${() => {
           this._showStylePopper
             ? this._stylePopper?.hide()
             : this._stylePopper?.show();
+          this.requestUpdate();
         }}
       >
         ${MindmapStyleIcon}
@@ -140,10 +142,8 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
       <edgeless-mindmap-style-panel
         .mindmapStyle=${this._getCommonStyle()}
         .onSelect=${(style: MindmapStyle) => {
-          this.edgeless.doc.transact(() => {
-            this.elements.forEach(element => {
-              element.style = style;
-            });
+          this.elements.forEach(element => {
+            element.style = style;
           });
         }}
       >
@@ -156,10 +156,13 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
         .tooltip=${this._showLayoutPopper ? '' : 'Layout'}
         .tipPosition=${'bottom'}
         .active=${false}
+        .hoverState=${this._layoutPopper?.state === 'show'}
         @click=${() => {
           this._showLayoutPopper
             ? this._layoutPopper?.hide()
             : this._layoutPopper?.show();
+
+          this.requestUpdate();
         }}
       >
         ${this._layoutIcon(commonLayout)}
@@ -167,10 +170,8 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
       <edgeless-mindmap-layout-panel
         .mindmapLayout=${commonLayout}
         .onSelect=${(layoutType: LayoutType) => {
-          this.edgeless.doc.transact(() => {
-            this.elements.forEach(element => {
-              element.layoutType = layoutType;
-            });
+          this.elements.forEach(element => {
+            element.layoutType = layoutType;
           });
         }}
       >
@@ -277,8 +278,8 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
 
   static mindmapLayouts = [
     [LayoutType.LEFT, MindmapLeftLayoutIcon, 'Left'],
-    [LayoutType.RIGHT, MindmapRightLayoutIcon, 'Right'],
     [LayoutType.BALANCE, MindmapBalanceLayoutIcon, 'Radial'],
+    [LayoutType.RIGHT, MindmapRightLayoutIcon, 'Right'],
   ];
 
   @property({ attribute: false })
@@ -290,9 +291,7 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
   override render() {
     return html`<div class="layout-panel-container">
       ${repeat(
-        EdgelessChangeMindmapLayoutPanel.mindmapLayouts.filter(
-          ([type]) => type !== this.mindmapLayout
-        ),
+        EdgelessChangeMindmapLayoutPanel.mindmapLayouts,
         ([type]) => type,
         ([type, preview, tooltip]) => html`
           <edgeless-tool-icon-button
@@ -301,6 +300,7 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
             .tipPosition=${'top'}
             .iconContainerPadding=${2}
             .active=${false}
+            .hoverState=${this.mindmapLayout === type}
             @click=${() => {
               this.onSelect(type as LayoutType);
             }}

@@ -38,7 +38,7 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
     }
 
     .ask-ai-panel[data-show] {
-      display: flex;
+      display: block;
     }
 
     .ask-ai-icon-button svg {

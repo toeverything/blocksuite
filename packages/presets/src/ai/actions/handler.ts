@@ -60,11 +60,10 @@ export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     let stream: BlockSuitePresets.TextStream | undefined;
     return {
       async *[Symbol.asyncIterator]() {
-        const panel = getAIPanel(host);
         const selections = getSelections(host);
         const [markdown, attachments] = await Promise.all([
-          getSelectedTextContent(panel.host),
-          getSelectedImagesAsBlobs(panel.host),
+          getSelectedTextContent(host),
+          getSelectedImagesAsBlobs(host),
         ]);
         // for now if there are more than one selected blocks, we will not omit the attachments
         const sendAttachments =

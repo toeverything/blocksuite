@@ -34,6 +34,7 @@ export class Viewport {
   ZOOM_MIN = ZOOM_MIN;
 
   viewportUpdated = new Slot<{ zoom: number; center: IVec2 }>();
+  viewportMoved = new Slot<IVec2>();
   sizeUpdated = new Slot<{
     width: number;
     height: number;
@@ -359,6 +360,7 @@ export class Viewport {
 
   dispose() {
     this.sizeUpdated.dispose();
+    this.viewportMoved.dispose();
     this.viewportUpdated.dispose();
   }
 }

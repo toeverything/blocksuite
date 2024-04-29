@@ -1,4 +1,5 @@
 import type { FilterGroup } from '../../../common/ast.js';
+import { ColumnDataStats } from '../../../common/data-stats.js';
 import {
   GroupHelper,
   sortByManually,
@@ -14,6 +15,7 @@ import {
   DataViewColumnManagerBase,
   DataViewManagerBase,
 } from '../../data-view-manager.js';
+import type { StatCalcOpType } from './types.js';
 
 type TableViewData = _DataViewDataTypeMap['table'];
 
@@ -84,6 +86,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
             id: column.id,
             hide: column.hide,
             width: column.width,
+            statCalcType: column.statCalcOp,
           };
         }),
       };
@@ -339,6 +342,26 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
       },
     });
   }
+
+  public columnGetStatCalcOp(columnId: string): StatCalcOpType {
+    return (
+      this.view.columns.find(v => v.id === columnId)?.statCalcType ?? 'none'
+    );
+  }
+  public columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void {
+    this.updateView(view => {
+      return {
+        columns: view.columns.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                statCalcType: op,
+              }
+            : v
+        ),
+      };
+    });
+  }
 }
 
 export class DataViewTableColumnManager extends DataViewColumnManagerBase {
@@ -348,7 +371,13 @@ export class DataViewTableColumnManager extends DataViewColumnManagerBase {
   ) {
     super(propertyId, dataViewManager);
   }
-
+  public readonly stats = new ColumnDataStats(this);
+  get statCalcOp(): StatCalcOpType {
+    return this.dataViewManager.columnGetStatCalcOp(this.id);
+  }
+  updateStatCalcOp(type: StatCalcOpType): void {
+    return this.dataViewManager.columnUpdateStatCalcOp(this.id, type);
+  }
   get width(): number {
     return this.dataViewManager.columnGetWidth(this.id);
   }

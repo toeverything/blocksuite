@@ -3,10 +3,11 @@ import type {
   AffineAIPanelWidget,
   AIError,
   EdgelessModel,
+  MindmapElementModel,
 } from '@blocksuite/blocks';
 import {
+  BlocksUtils,
   ImageBlockModel,
-  MindmapElementModel,
   NoteBlockModel,
   ShapeElementModel,
   TextElementModel,
@@ -23,9 +24,10 @@ import {
   createImageRenderer,
 } from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
-import { isMindMapRoot } from '../utils/edgeless.js';
+import { isMindmapChild, isMindMapRoot } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
+import { getSelectedNoteAnchor } from '../utils/selection-utils.js';
 import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
@@ -36,17 +38,26 @@ import {
 } from './edgeless-response.js';
 import { bindEventSource } from './handler.js';
 
-type AnwserRenderer = Exclude<
-  AffineAIPanelWidget['config'],
-  null
+type AnswerRenderer = NonNullable<
+  AffineAIPanelWidget['config']
 >['answerRenderer'];
 
 function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
   host: EditorHost,
   ctx: CtxRecord
-): AnwserRenderer {
+): AnswerRenderer {
   if (id === 'brainstormMindmap' || id === 'expandMindmap') {
+    const selectedElements = ctx.get()['selectedElements'] as EdgelessModel[];
+
+    if (
+      isMindMapRoot(selectedElements[0] || isMindmapChild(selectedElements[0]))
+    ) {
+      const mindmap = selectedElements[0].group as MindmapElementModel;
+
+      return createMindmapRenderer(host, ctx, mindmap.style);
+    }
+
     return createMindmapRenderer(host, ctx);
   }
 
@@ -118,6 +129,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   extract?: (host: EditorHost) => Promise<{
     content?: string;
     attachments?: (string | Blob)[];
+    seed?: string;
   } | void>
 ) {
   const action = AIProvider.actions[id];
@@ -183,6 +195,7 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
   extract?: (host: EditorHost) => Promise<{
     content?: string;
     attachments?: (string | Blob)[];
+    seed?: string;
   } | void>
 ) {
   return (host: EditorHost) => {
@@ -220,6 +233,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     input?: string;
     content?: string;
     attachments?: (string | Blob)[];
+    seed?: string;
   } | void>
 ) {
   return (host: EditorHost) => {
@@ -273,13 +287,23 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
         .catch(console.error);
     };
 
-    if (edgelessCopilot.visible) {
+    const elementToolbar = getElementToolbar(host);
+    if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
       aiPanel.toggle(
         edgelessCopilot.selectionElem,
         getCopilotSelectedElems(host).length ? 'placeholder' : undefined
       );
-    } else {
+    } else if (elementToolbar.toolbarVisible) {
       aiPanel.toggle(getElementToolbar(host), 'placeholder');
+    } else if (selectedElements.length > 0) {
+      const lastSelected = selectedElements.at(-1)!.id;
+      const selectedPortal = getSelectedNoteAnchor(host, lastSelected);
+      if (selectedPortal) {
+        aiPanel.toggle(
+          selectedPortal,
+          getCopilotSelectedElems(host).length ? 'placeholder' : undefined
+        );
+      }
     }
   };
 }
@@ -296,24 +320,32 @@ export function noteBlockOrTextShowWhen(
   );
 }
 
+/**
+ * Checks if the selected element is a NoteBlockModel with a single child element of code block.
+ */
 export function noteWithCodeBlockShowWen(
   _: unknown,
   __: unknown,
   host: EditorHost
 ) {
   const selected = getCopilotSelectedElems(host);
-
-  return selected[0] instanceof NoteBlockModel;
-}
-
-export function mindmapShowWhen(_: unknown, __: unknown, host: EditorHost) {
-  const selected = getCopilotSelectedElems(host);
+  if (!selected.length) return false;
 
   return (
-    selected.length === 1 &&
-    selected[0]?.group instanceof MindmapElementModel &&
-    !isMindMapRoot(selected[0])
+    selected[0] instanceof NoteBlockModel &&
+    selected[0].children.length === 1 &&
+    BlocksUtils.matchFlavours(selected[0].children[0], ['affine:code'])
   );
+}
+
+export function mindmapChildShowWhen(
+  _: unknown,
+  __: unknown,
+  host: EditorHost
+) {
+  const selected = getCopilotSelectedElems(host);
+
+  return selected.length === 1 && isMindmapChild(selected[0]);
 }
 
 export function makeItRealShowWhen(_: unknown, __: unknown, host: EditorHost) {

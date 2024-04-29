@@ -5,7 +5,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel, BlockSelector } from '@blocksuite/store';
+import type { Block, BlockModel, Doc } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -38,56 +38,50 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   host!: EditorHost;
 
-  renderPreview(model: BlockModel) {
-    const ids: string[] = [];
-    let parent: string | null = model.id;
-    while (parent && !ids.includes(parent)) {
-      ids.push(parent);
-      parent = model.doc.blockCollection.crud.getParent(parent);
+  ancestors: Set<string> = new Set();
+
+  selector = (block: Block, doc: Doc) => {
+    let parent: BlockModel | Block | null = block;
+
+    if (this.ancestors.has(block.id)) {
+      return true;
     }
-    const addChildren = (model: BlockModel) => {
-      model.children.forEach(child => {
-        if (ids.includes(child.id)) return;
-        if (child.flavour === 'affine:surface-ref') return;
-        ids.push(child.id);
-        addChildren(child);
-      });
-    };
-    addChildren(model);
 
-    const selector: BlockSelector = block => ids.includes(block.id);
-    const doc = model.doc.blockCollection.getDoc(selector);
-    this._disposables.add(() => {
-      model.doc.blockCollection.clearSelector(selector);
-    });
+    while (parent) {
+      if (parent.id === this.model.id) {
+        return true;
+      }
 
+      parent = doc.getParent(parent.id);
+    }
+
+    return false;
+  };
+
+  renderPreview(model: BlockModel) {
+    const doc = model.doc.blockCollection.getDoc(this.selector);
     const previewSpec = SpecProvider.getInstance().getSpec('preview');
     assertExists(previewSpec, 'Preview spec is not found');
     return this.host.renderSpecPortal(doc, previewSpec);
   }
 
-  override connectedCallback(): void {
+  override connectedCallback() {
     super.connectedCallback();
 
-    this._disposables.add(
-      this.model.doc.blockCollection.slots.blockUpdated.on(payload => {
-        if (payload.type === 'update') return;
-        let parent: string | null = payload.id;
-        while (parent) {
-          if (this.model.id === parent) {
-            this.requestUpdate();
-            return;
-          }
-          parent = this.model.doc.blockCollection.crud.getParent(parent);
-        }
-      })
-    );
+    let parent: BlockModel | null = this.model;
+    while (parent) {
+      this.ancestors.add(parent.id);
+      parent = this.model.doc.getParent(parent.id);
+    }
   }
 
   override firstUpdated() {
     this.disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
+    this._disposables.add(() => {
+      this.model.doc.blockCollection.clearSelector(this.selector);
+    });
   }
 
   override updated() {
@@ -112,7 +106,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { model, index } = this;
-    const { displayMode } = model;
+    const { displayMode, edgeless } = model;
     if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
       return nothing;
 
@@ -121,7 +115,10 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     const style = {
       zIndex: `${index}`,
       width: modelW + 'px',
-      height: modelH + 'px',
+      height:
+        edgeless.collapse && edgeless.collapsedHeight
+          ? edgeless.collapsedHeight + 'px'
+          : undefined,
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px ${'solid'} var(--affine-black-10)`,

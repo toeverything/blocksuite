@@ -219,9 +219,9 @@ export function renderFrameButton(
   frames?: FrameBlockModel[]
 ) {
   return frames?.length
-    ? html`
-        <edgeless-change-frame-button .edgeless=${edgeless} .frames=${frames}>
-        </edgeless-change-frame-button>
-      `
+    ? html`<edgeless-change-frame-button
+        .edgeless=${edgeless}
+        .frames=${frames}
+      ></edgeless-change-frame-button>`
     : nothing;
 }

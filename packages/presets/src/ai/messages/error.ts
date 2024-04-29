@@ -8,7 +8,7 @@ import { AIProvider } from '../provider.js';
 @customElement('ai-error-wrapper')
 class AIErrorWrapper extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  text!: string;
+  text!: TemplateResult<1>;
 
   protected override render() {
     return html` <style>
@@ -72,13 +72,13 @@ export const PaymentRequiredErrorRenderer = (host: EditorHost) => html`
       border-radius: 8px;
       margin-left: auto;
       border: 1px solid var(--affine-border-color, #e3e2e4);
-      background: var(--affine-white, #fff);
+      background: var(--affine-primary-color);
       .content {
         display: flex;
         padding: 0px 4px;
         justify-content: center;
         align-items: center;
-        color: var(--affine-text-primary-color, #121212);
+        color: var(--affine-pure-white);
         /* light/xsMedium */
         font-size: var(--affine-font-xs);
         font-style: normal;
@@ -86,13 +86,10 @@ export const PaymentRequiredErrorRenderer = (host: EditorHost) => html`
         line-height: 20px; /* 166.667% */
       }
     }
-    .upgrade:hover {
-      background: var(--affine-hover-color, rgba(0, 0, 0, 0.04));
-    }
   </style>
   <ai-error-wrapper
-    .text=${`You’ve reached the current usage cap for GPT-4. You can subscribe AFFiNE
-        AI to continue AI experience!`}
+    .text=${html`You’ve reached the current usage cap for GPT-4. You can
+    subscribe AFFiNE AI to continue AI experience!`}
   >
     <div
       @click=${() => AIProvider.slots.requestUpgradePlan.emit({ host: host })}
@@ -104,7 +101,9 @@ export const PaymentRequiredErrorRenderer = (host: EditorHost) => html`
 `;
 
 export const GeneralErrorRenderer = (
-  text: string = `An error occurred, If this issue persists please let us know. contact@toeverything.info`,
+  text: TemplateResult<1> = html`An error occurred, If this issue persists
+    please let us know.
+    <a href="mailto:contact@toeverything.info"> contact@toeverything.info </a>`,
   template: TemplateResult<1> = html`${nothing}`
 ) => html` <ai-error-wrapper .text=${text}>${template}</ai-error-wrapper>`;
 
