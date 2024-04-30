@@ -19,6 +19,12 @@ import {
 } from '@blocksuite/blocks';
 
 import {
+  AIExpandMindMapIcon,
+  AIImageIcon,
+  AIMindMapIcon,
+  AIPresentationIcon,
+} from '../../_common/icons.js';
+import {
   actionToHandler,
   explainImageShowWhen,
   getContentFromSelected,
@@ -221,7 +227,7 @@ const generateGroup: AIItemGroupConfig = {
     },
     {
       name: 'Generate an image',
-      icon: AIPenIcon,
+      icon: AIImageIcon,
       showWhen: () => true,
       handler: actionToHandler('createImage', undefined, async host => {
         const selectedElements = getCopilotSelectedElems(host);
@@ -293,7 +299,7 @@ const generateGroup: AIItemGroupConfig = {
     },
     {
       name: 'Expand from this mind map node',
-      icon: AIPenIcon,
+      icon: AIExpandMindMapIcon,
       showWhen: mindmapChildShowWhen,
       handler: actionToHandler('expandMindmap', undefined, function (host) {
         const selected = getCopilotSelectedElems(host);
@@ -312,19 +318,19 @@ const generateGroup: AIItemGroupConfig = {
     },
     {
       name: 'Brainstorm ideas with mind map',
-      icon: AIPenIcon,
+      icon: AIMindMapIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('brainstormMindmap'),
     },
     {
       name: 'Regenerate mind map',
-      icon: AIPenIcon,
+      icon: AIMindMapIcon,
       showWhen: mindmapRootShowWhen,
       handler: actionToHandler('brainstormMindmap'),
     },
     {
       name: 'Generate presentation',
-      icon: AIPenIcon,
+      icon: AIPresentationIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('createSlides'),
     },
