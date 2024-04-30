@@ -145,6 +145,26 @@
                 },
                 "fontFamily": "blocksuite:surface:Inter",
                 "fontSize": 40
+              },
+              "TJhFxmm-4S": {
+                "index": "Zz",
+                "seed": 1730805220,
+                "xywh": "[-2101.800074986049,1.1999424525670292,1933.7142508370534,1095.9999738420759]",
+                "rotate": 0,
+                "shapeType": "rect",
+                "radius": 0,
+                "filled": true,
+                "fillColor": "--affine-palette-shape-white",
+                "strokeWidth": 2,
+                "strokeColor": "--affine-palette-line-white",
+                "strokeStyle": "solid",
+                "shapeStyle": "General",
+                "roughness": 1.4,
+                "textResizing": 1,
+                "maxWidth": false,
+                "type": "shape",
+                "id": "TJhFxmm-4S",
+                "color": "--affine-palette-line-black"
               }
             }
           },
@@ -596,7 +616,28 @@
           "flavour": "affine:surface",
           "version": 5,
           "props": {
-            "elements": {}
+            "elements": {
+              "TJhFxmm-4S": {
+                "index": "a1",
+                "seed": 1730805220,
+                "xywh": "[-1509.6661094585195,-2898.612292265666,1960.6362584319918,1087.2819474283258]",
+                "rotate": 0,
+                "shapeType": "rect",
+                "radius": 0,
+                "filled": true,
+                "fillColor": "--affine-palette-shape-white",
+                "strokeWidth": 2,
+                "strokeColor": "--affine-palette-line-white",
+                "strokeStyle": "solid",
+                "shapeStyle": "General",
+                "roughness": 1.4,
+                "textResizing": 1,
+                "maxWidth": false,
+                "type": "shape",
+                "id": "TJhFxmm-4S",
+                "color": "--affine-palette-line-black"
+              }
+            }
           },
           "children": [
             {
