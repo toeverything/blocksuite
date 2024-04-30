@@ -5,8 +5,8 @@ import type { BlobSource } from '../source.js';
 export class IndexedDBBlobSource implements BlobSource {
   readonly = false;
 
-  store = createStore(`${this.name}_blob`, 'blob');
-  mimeTypeStore = createStore(`${this.name}_blob_mime`, 'blob_mime');
+  readonly store = createStore(`${this.name}_blob`, 'blob');
+  readonly mimeTypeStore = createStore(`${this.name}_blob_mime`, 'blob_mime');
 
   constructor(readonly name: string) {}
 
