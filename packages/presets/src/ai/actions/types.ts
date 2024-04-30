@@ -12,11 +12,11 @@ export const translateLangs = [
 ] as const;
 
 export const textTones = [
-  'professional',
-  'informal',
-  'friendly',
-  'critical',
-  'humorous',
+  'Professional',
+  'Informal',
+  'Friendly',
+  'Critical',
+  'Humorous',
 ] as const;
 
 declare global {

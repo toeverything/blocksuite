@@ -88,8 +88,8 @@ export const PaymentRequiredErrorRenderer = (host: EditorHost) => html`
     }
   </style>
   <ai-error-wrapper
-    .text=${html`You’ve reached the current usage cap for GPT-4. You can
-    subscribe AFFiNE AI to continue AI experience!`}
+    .text=${html`You've reached the current usage cap for AFFiNE AI. You can
+    subscribe to AFFiNE AI to continue the AI experience!`}
   >
     <div
       @click=${() => AIProvider.slots.requestUpgradePlan.emit({ host: host })}
