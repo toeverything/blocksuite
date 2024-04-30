@@ -81,10 +81,11 @@ export async function getContentFromSelected(
   host: EditorHost,
   selected: EdgelessModel[]
 ) {
-  const { notes, texts, shapes } = selected.reduce<{
+  const { notes, texts, shapes, images } = selected.reduce<{
     notes: NoteBlockModel[];
     texts: TextElementModel[];
     shapes: ShapeElementModel[];
+    images: ImageBlockModel[];
   }>(
     (pre, cur) => {
       if (cur instanceof NoteBlockModel) {
@@ -93,11 +94,13 @@ export async function getContentFromSelected(
         pre.texts.push(cur);
       } else if (cur instanceof ShapeElementModel && cur.text?.length) {
         pre.shapes.push(cur);
+      } else if (cur instanceof ImageBlockModel && cur.caption?.length) {
+        pre.images.push(cur);
       }
 
       return pre;
     },
-    { notes: [], texts: [], shapes: [] }
+    { notes: [], texts: [], shapes: [], images: [] }
   );
 
   const noteContent = (
@@ -113,7 +116,10 @@ export async function getContentFromSelected(
 
   return `${noteContent.join('\n')}
 
-${texts.map(text => text.text.toString()).join('\n')}\n${shapes.map(shape => shape.text!.toString())}`;
+${texts.map(text => text.text.toString()).join('\n')}
+${shapes.map(shape => shape.text!.toString()).join('\n')}
+${images.map(image => image.caption!.toString()).join('\n')}
+`;
 }
 
 function getTextFromSelected(host: EditorHost) {
@@ -330,23 +336,47 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     );
 
     const elementToolbar = getElementToolbar(host);
+    const isEmpty = selectedElements.length === 0;
+    const isCreateImageAction = id === 'createImage';
+    let referenceElement = null;
+    let togglePanel = () => Promise.resolve(isEmpty);
+
     if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
-      aiPanel.toggle(
-        edgelessCopilot.selectionElem,
-        getCopilotSelectedElems(host).length ? 'placeholder' : undefined
-      );
+      referenceElement = edgelessCopilot.selectionElem;
     } else if (elementToolbar.toolbarVisible) {
-      aiPanel.toggle(getElementToolbar(host), 'placeholder');
-    } else if (selectedElements.length > 0) {
+      referenceElement = getElementToolbar(host);
+    } else if (!isEmpty) {
       const lastSelected = selectedElements.at(-1)!.id;
-      const selectedPortal = getSelectedNoteAnchor(host, lastSelected);
-      if (selectedPortal) {
-        aiPanel.toggle(
-          selectedPortal,
-          getCopilotSelectedElems(host).length ? 'placeholder' : undefined
-        );
-      }
+      referenceElement = getSelectedNoteAnchor(host, lastSelected);
     }
+
+    if (!referenceElement) return;
+
+    if (isCreateImageAction) {
+      // @TODO(fundon): remove async
+      togglePanel = async () => {
+        if (isEmpty) return true;
+        const {
+          notes,
+          shapes,
+          images,
+          frames: _,
+        } = BlocksUtils.splitElements(selectedElements);
+        const blocks = [...notes, ...shapes, ...images];
+        if (blocks.length === 0) return true;
+        const content = (await getContentFromSelected(host, blocks)).trim();
+        ctx.set({
+          content,
+        });
+        return content.length === 0;
+      };
+    }
+
+    togglePanel()
+      .then(isEmpty => {
+        aiPanel.toggle(referenceElement, isEmpty ? undefined : 'placeholder');
+      })
+      .catch(console.error);
   };
 }
 
