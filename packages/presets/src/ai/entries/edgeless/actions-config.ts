@@ -230,7 +230,7 @@ const generateGroup: AIItemGroupConfig = {
       name: 'Generate an image',
       icon: AIImageIcon,
       showWhen: () => true,
-      handler: actionToHandler('createImage', undefined, async host => {
+      handler: actionToHandler('createImage', undefined, async (host, ctx) => {
         const selectedElements = getCopilotSelectedElems(host);
         const len = selectedElements.length;
 
@@ -245,16 +245,20 @@ const generateGroup: AIItemGroupConfig = {
           };
         }
 
+        let content = (ctx.get()['content'] as string) || '';
+
+        // get user input
+        if (content.length === 0) {
+          const aiPanel = getAIPanel(host);
+          content = aiPanel.inputText?.trim() || '';
+        }
+
         const {
-          notes,
           images,
           shapes,
-          frames: _,
+          notes: _,
+          frames: __,
         } = BlocksUtils.splitElements(selectedElements);
-
-        const content = (
-          await getContentFromSelected(host, [...notes, ...shapes])
-        ).trim();
 
         const pureShapes = shapes.filter(
           e =>
@@ -355,10 +359,10 @@ const generateGroup: AIItemGroupConfig = {
           return;
         }
 
-        // single note, text or shape(text)
-        if (f + i === 0 && n + s === 1) {
+        // single note, text, shape(text) or image(caption)
+        if (f === 0 && n + s + i === 1) {
           const content = (
-            await getContentFromSelected(host, [...notes, ...shapes])
+            await getContentFromSelected(host, [...notes, ...shapes, ...images])
           ).trim();
           if (!content) return;
           return {

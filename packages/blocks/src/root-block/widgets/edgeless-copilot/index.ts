@@ -229,18 +229,20 @@ export class EdgelessCopilotWidget extends WidgetElement<
 
     this._disposables.add(
       this.edgeless.service.viewport.viewportUpdated.on(() => {
+        if (!this._visible) return;
+
         this._updateSelection(CopilotSelectionTool.area);
       })
     );
 
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(({ type }) => {
-        if (type !== 'copilot') {
-          this._visible = false;
-          this._clickOutsideOff = null;
-          this._copilotPanel?.remove();
-          this._copilotPanel = null;
-        }
+        if (!this._visible || type === 'copilot') return;
+
+        this._visible = false;
+        this._clickOutsideOff = null;
+        this._copilotPanel?.remove();
+        this._copilotPanel = null;
       })
     );
   }
