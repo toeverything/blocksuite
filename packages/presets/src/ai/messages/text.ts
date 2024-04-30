@@ -25,6 +25,9 @@ export class AIAnswerTextPreview extends WithDisposable(LitElement) {
 
     .ai-answer-text-editor .affine-page-root-block-container {
       padding: 0;
+      line-height: var(--affine-line-height);
+      color: var(--affine-text-primary-color);
+      font-weight: 400;
     }
 
     .affine-paragraph-block-container {
