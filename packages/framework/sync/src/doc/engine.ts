@@ -10,7 +10,7 @@ import { type DocSource } from './source.js';
 export interface DocEngineStatus {
   step: DocEngineStep;
   main: DocPeerStatus | null;
-  shadow: (DocPeerStatus | null)[];
+  shadows: (DocPeerStatus | null)[];
   retrying: boolean;
 }
 
@@ -41,7 +41,7 @@ export interface DocEngineStatus {
  * 1. start main sync
  * 2. wait for main sync complete
  * 3. start shadow sync
- * 4. continuously sync main and shadow
+ * 4. continuously sync main and shadows
  */
 export class DocEngine {
   get rootDocId() {
@@ -66,13 +66,13 @@ export class DocEngine {
   constructor(
     readonly rootDoc: Doc,
     readonly main: DocSource,
-    readonly shadow: DocSource[],
+    readonly shadows: DocSource[],
     readonly logger: Logger
   ) {
     this._status = {
       step: DocEngineStep.Stopped,
       main: null,
-      shadow: shadow.map(() => null),
+      shadows: shadows.map(() => null),
       retrying: false,
     };
     this.logger.debug(`syne-engine:${this.rootDocId} status init`, this.status);
@@ -121,7 +121,7 @@ export class DocEngine {
     this.setStatus({
       step: DocEngineStep.Stopped,
       main: null,
-      shadow: this.shadow.map(() => null),
+      shadows: this.shadows.map(() => null),
       retrying: false,
     });
   }
@@ -133,7 +133,7 @@ export class DocEngine {
       shadowPeers: (SyncPeer | null)[];
     } = {
       mainPeer: null,
-      shadowPeers: this.shadow.map(() => null),
+      shadowPeers: this.shadows.map(() => null),
     };
 
     const cleanUp: (() => void)[] = [];
@@ -159,7 +159,7 @@ export class DocEngine {
       await state.mainPeer.waitForLoaded(signal);
 
       // Step 3: start shadow sync peer
-      state.shadowPeers = this.shadow.map(shadow => {
+      state.shadowPeers = this.shadows.map(shadow => {
         const peer = new SyncPeer(
           this.rootDoc,
           shadow,
@@ -217,7 +217,7 @@ export class DocEngine {
     this.setStatus({
       step,
       main: local?.status ?? null,
-      shadow: shadow.map(peer => peer?.status ?? null),
+      shadows: shadow.map(peer => peer?.status ?? null),
       retrying: allPeer.some(
         peer => peer?.status.step === DocPeerStep.Retrying
       ),
@@ -250,7 +250,7 @@ export class DocEngine {
 
   async waitForLoadedRootDoc(abort?: AbortSignal) {
     function isLoadedRootDoc(status: DocEngineStatus) {
-      return ![status.main, ...status.shadow].some(
+      return ![status.main, ...status.shadows].some(
         peer => !peer || peer.step <= DocPeerStep.LoadingRootDoc
       );
     }
