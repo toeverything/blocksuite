@@ -1,6 +1,6 @@
 import { ShadowlessElement } from '@blocksuite/block-std';
 import { assertEquals } from '@blocksuite/global/utils';
-import { DocCollection, Text, type Y } from '@blocksuite/store';
+import { DocCollection, type Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -89,19 +89,14 @@ export function fillSelectionWithFocusCellData(
       const curRowId = cellContainer.rowId;
 
       if (tRichText.is(curCol.dataType)) {
-        // title column gives Y.Text and text col gives Text
-        const focusCellText = focusData as Y.Text | Text;
+        const focusCellText = focusData as Text;
 
         const delta = focusCellText.toDelta();
-        const curCellText = curCol.getValue(curRowId);
-        if (curCellText) {
-          const text =
-            curCol.type === 'title'
-              ? new Text(curCellText as Y.Text)
-              : (curCellText as Text);
+        const curCellText = curCol.getValue(curRowId) as Text | undefined;
 
-          text.clear();
-          text.applyDelta(delta);
+        if (curCellText) {
+          curCellText.clear();
+          curCellText.applyDelta(delta);
         } else {
           const newText = new DocCollection.Y.Text();
           newText.applyDelta(delta);
