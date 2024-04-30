@@ -35,7 +35,7 @@ export const menuItemStyles = css`
   .item-name {
     display: flex;
     padding: 0px 4px;
-    align-items: center;
+    align-items: baseline;
     flex: 1 0 0;
     color: var(--affine-text-primary-color);
     text-align: justify;
@@ -47,6 +47,14 @@ export const menuItemStyles = css`
     font-weight: 400;
     line-height: 22px;
   }
+
+  .item-beta {
+    color: var(--affine-text-secondary-color);
+    font-size: var(--affine-font-xs);
+    font-weight: 500;
+    margin-left: 0.5em;
+  }
+
   .enter-icon,
   .arrow-right-icon {
     color: var(--affine-icon-color);

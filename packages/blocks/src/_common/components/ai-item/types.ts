@@ -18,6 +18,7 @@ export interface AIItemConfig {
   ) => boolean;
   subItem?: AISubItemConfig[];
   handler?: (host: EditorHost) => void;
+  beta?: boolean;
 }
 
 export interface AISubItemConfig {

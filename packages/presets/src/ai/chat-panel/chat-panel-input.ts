@@ -129,10 +129,10 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   items!: ChatItem[];
 
   @property({ attribute: false })
-  error?: Error;
+  error!: Error | null;
 
   @property({ attribute: false })
-  updateError!: (error: AIError) => void;
+  updateError!: (error: AIError | null) => void;
 
   @property({ attribute: false })
   updateStatus!: (status: ChatStatus) => void;
@@ -159,7 +159,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   abortController?: AbortController;
 
   send = async () => {
-    if (this.status !== 'idle' && this.status !== 'success') return;
+    if (this.status === 'loading' || this.status === 'transmitting') return;
 
     const text = this.textarea.value;
     const { images } = this;
@@ -171,6 +171,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     this.isInputEmpty = true;
     this.images = [];
     this.updateStatus('loading');
+    this.updateError(null);
 
     const attachments = await Promise.all(
       images?.map(image => readBlobAsURL(image))

@@ -3,7 +3,13 @@ import type {
   EditorHost,
   TextSelection,
 } from '@blocksuite/block-std';
-import { BlocksUtils, NoteDisplayMode } from '@blocksuite/blocks';
+import type { EdgelessRootService, SerializedXYWH } from '@blocksuite/blocks';
+import {
+  BlocksUtils,
+  Bound,
+  getElementsBound,
+  NoteDisplayMode,
+} from '@blocksuite/blocks';
 import { Text } from '@blocksuite/store';
 
 import {
@@ -110,13 +116,29 @@ export const EdgelessEditorActions = [
     title: 'Add to edgeless as note',
     handler: async (host: EditorHost, content: string) => {
       const { doc } = host;
-      const id = doc.addBlock(
-        'affine:note',
-        { displayMode: NoteDisplayMode.EdgelessOnly },
-        doc.root?.id
-      );
+      const service = host.spec.getService<EdgelessRootService>('affine:page');
+      const elements = service.selection.elements;
+
+      const props: { displayMode: NoteDisplayMode; xywh?: SerializedXYWH } = {
+        displayMode: NoteDisplayMode.EdgelessOnly,
+      };
+
+      if (elements.length > 0) {
+        const bound = getElementsBound(
+          elements.map(e => Bound.deserialize(e.xywh))
+        );
+        const newBound = new Bound(bound.x, bound.maxY + 10, bound.w);
+        props.xywh = newBound.serialize();
+      }
+
+      const id = doc.addBlock('affine:note', props, doc.root?.id);
 
       await insertFromMarkdown(host, content, id, 0);
+
+      service.selection.set({
+        elements: [id],
+        editing: false,
+      });
     },
   },
 ];

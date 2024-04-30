@@ -135,7 +135,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
           () => html`
             <div class="bottom">
               You've reached the current usage cap for AFFiNE AI. You can
-              subscribe AFFiNE AI to continue AI experience!
+              subscribe to AFFiNE AI to continue the AI experience!
             </div>
             <div @click=${this.config.upgrade} class="action-button">
               <div class="content">Upgrade</div>

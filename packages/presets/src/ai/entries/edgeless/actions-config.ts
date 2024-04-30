@@ -5,6 +5,7 @@ import {
   BlocksUtils,
   ChatWithAIIcon,
   ExplainIcon,
+  ImageBlockModel,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
@@ -17,6 +18,12 @@ import {
   ToneIcon,
 } from '@blocksuite/blocks';
 
+import {
+  AIExpandMindMapIcon,
+  AIImageIcon,
+  AIMindMapIcon,
+  AIPresentationIcon,
+} from '../../_common/icons.js';
 import {
   actionToHandler,
   explainImageShowWhen,
@@ -166,7 +173,21 @@ const reviewGroup: AIItemGroupConfig = {
       name: 'Explain this image',
       icon: AIPenIcon,
       showWhen: explainImageShowWhen,
-      handler: actionToHandler('explainImage'),
+      handler: actionToHandler('explainImage', undefined, async host => {
+        const selectedElements = getCopilotSelectedElems(host);
+        if (selectedElements.length !== 1) return;
+
+        const imageBlock = selectedElements[0];
+        if (!(imageBlock instanceof ImageBlockModel)) return;
+        if (!imageBlock.sourceId) return;
+
+        const blob = await host.doc.blob.get(imageBlock.sourceId);
+        if (!blob) return;
+
+        return {
+          attachments: [blob],
+        };
+      }),
     },
     {
       name: 'Explain this code',
@@ -203,10 +224,11 @@ const generateGroup: AIItemGroupConfig = {
       icon: AIPenIcon,
       handler: actionToHandler('createHeadings'),
       showWhen: noteBlockOrTextShowWhen,
+      beta: true,
     },
     {
       name: 'Generate an image',
-      icon: AIPenIcon,
+      icon: AIImageIcon,
       showWhen: () => true,
       handler: actionToHandler('createImage', undefined, async host => {
         const selectedElements = getCopilotSelectedElems(host);
@@ -278,7 +300,7 @@ const generateGroup: AIItemGroupConfig = {
     },
     {
       name: 'Expand from this mind map node',
-      icon: AIPenIcon,
+      icon: AIExpandMindMapIcon,
       showWhen: mindmapChildShowWhen,
       handler: actionToHandler('expandMindmap', undefined, function (host) {
         const selected = getCopilotSelectedElems(host);
@@ -291,54 +313,75 @@ const generateGroup: AIItemGroupConfig = {
 
         return Promise.resolve({
           input: firstSelected.text?.toString() ?? '',
-          content: mindMapToMarkdown(mindmap),
+          mindmap: mindMapToMarkdown(mindmap),
         });
       }),
+      beta: true,
     },
     {
       name: 'Brainstorm ideas with mind map',
-      icon: AIPenIcon,
+      icon: AIMindMapIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('brainstormMindmap'),
     },
     {
       name: 'Regenerate mind map',
-      icon: AIPenIcon,
+      icon: AIMindMapIcon,
       showWhen: mindmapRootShowWhen,
       handler: actionToHandler('brainstormMindmap'),
     },
     {
       name: 'Generate presentation',
-      icon: AIPenIcon,
+      icon: AIPresentationIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('createSlides'),
+      beta: true,
     },
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
+      beta: true,
       showWhen: makeItRealShowWhen,
-      handler: actionToHandler('makeItReal', undefined, async host => {
+      handler: actionToHandler('makeItReal', undefined, async (host, ctx) => {
         const selectedElements = getCopilotSelectedElems(host);
         const { notes, frames, shapes, images } =
           BlocksUtils.splitElements(selectedElements);
-        if (
-          notes.length + frames.length + images.length + shapes.length ===
-          0
-        ) {
+        const f = frames.length;
+        const i = images.length;
+        const n = notes.length;
+        const s = shapes.length;
+
+        if (f + i + n + s === 0) {
           return;
         }
+
+        // single note, text or shape(text)
+        if (f + i === 0 && n + s === 1) {
+          const content = (
+            await getContentFromSelected(host, [...notes, ...shapes])
+          ).trim();
+          if (!content) return;
+          return {
+            content,
+          };
+        }
+
         const edgelessRoot = getEdgelessRootFromEditor(host);
         const canvas = await edgelessRoot.clipboardController.toCanvas(
           [...notes, ...frames, ...images],
           shapes,
           {
             dpr: 1,
-            padding: 0,
+            background: 'white',
           }
         );
         if (!canvas) return;
         const png = await canvasToBlob(canvas);
         if (!png) return;
+        ctx.set({
+          width: canvas.width,
+          height: canvas.height,
+        });
         return {
           attachments: [png],
         };
@@ -349,6 +392,7 @@ const generateGroup: AIItemGroupConfig = {
       icon: AISearchIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('findActions'),
+      beta: true,
     },
   ],
 };

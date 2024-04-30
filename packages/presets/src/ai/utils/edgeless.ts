@@ -11,14 +11,12 @@ export function mindMapToMarkdown(mindmap: MindmapElementModel) {
     node: MindmapElementModel['tree']['children'][number],
     indent: number = 0
   ) => {
-    markdownStr += `${node.element as ShapeElementModel}\n`;
-
     const text = (node.element as ShapeElementModel).text?.toString() ?? '';
 
-    markdownStr += `${'  '.repeat(indent)}${text}\n`;
+    markdownStr += `${'  '.repeat(indent)}- ${text}\n`;
 
     if (node.children) {
-      node.children.forEach(traverse, indent + 1);
+      node.children.forEach(node => traverse(node, indent + 2));
     }
   };
 

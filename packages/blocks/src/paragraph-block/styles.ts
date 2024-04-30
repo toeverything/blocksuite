@@ -110,4 +110,9 @@ export const paragraphBlockStyles = css`
   .affine-paragraph-placeholder.visible {
     display: block;
   }
+  @media print {
+    .affine-paragraph-placeholder.visible {
+      display: none;
+    }
+  }
 `;
