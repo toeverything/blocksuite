@@ -218,6 +218,7 @@ const generateGroup: AIItemGroupConfig = {
       icon: AIPenIcon,
       handler: actionToHandler('createHeadings'),
       showWhen: noteBlockOrTextShowWhen,
+      beta: true,
     },
     {
       name: 'Generate an image',
@@ -309,6 +310,7 @@ const generateGroup: AIItemGroupConfig = {
           mindmap: mindMapToMarkdown(mindmap),
         });
       }),
+      beta: true,
     },
     {
       name: 'Brainstorm ideas with mind map',
@@ -327,10 +329,12 @@ const generateGroup: AIItemGroupConfig = {
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('createSlides'),
+      beta: true,
     },
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
+      beta: true,
       showWhen: makeItRealShowWhen,
       handler: actionToHandler('makeItReal', undefined, async (host, ctx) => {
         const selectedElements = getCopilotSelectedElems(host);
@@ -382,6 +386,7 @@ const generateGroup: AIItemGroupConfig = {
       icon: AISearchIcon,
       showWhen: noteBlockOrTextShowWhen,
       handler: actionToHandler('findActions'),
+      beta: true,
     },
   ],
 };

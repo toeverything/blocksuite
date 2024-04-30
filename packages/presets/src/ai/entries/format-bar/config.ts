@@ -275,6 +275,7 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
     {
       name: 'Generate headings',
       icon: AIPenIcon,
+      beta: true,
       handler: actionToHandler('createHeadings'),
       showWhen: chain => {
         const [_, ctx] = chain
@@ -315,12 +316,14 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
       handler: edgelessHandler('createSlides'),
+      beta: true,
     },
     {
       name: 'Find actions',
       icon: AISearchIcon,
       showWhen: textBlockShowWhen,
       handler: actionToHandler('findActions'),
+      beta: true,
     },
   ],
 };
