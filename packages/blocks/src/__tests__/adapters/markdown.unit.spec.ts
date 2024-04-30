@@ -1,5 +1,5 @@
 import type { BlockSnapshot } from '@blocksuite/store';
-import { MemoryBlobManager } from '@blocksuite/store';
+import { MemoryBlobCRUD } from '@blocksuite/store';
 import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
@@ -1141,12 +1141,12 @@ hhh
       '![](assets/YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob "aaa")\n\n';
 
     const mdAdapter = new MarkdownAdapter();
-    const blobManager = new MemoryBlobManager();
-    await blobManager.set(
-      new Blob(),
-      'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs='
+    const blobCRUD = new MemoryBlobCRUD();
+    await blobCRUD.set(
+      'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
+      new Blob()
     );
-    const assets = new AssetsManager({ blob: blobManager });
+    const assets = new AssetsManager({ blob: blobCRUD });
 
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,

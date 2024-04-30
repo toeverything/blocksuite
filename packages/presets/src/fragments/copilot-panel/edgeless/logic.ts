@@ -215,7 +215,7 @@ export class AIEdgelessLogic {
             const surface = getSurfaceElementFromEditor(this.host);
             let image = getFirstImageInFrame(model, this.host);
             const imgFile = jpegBase64ToFile(b64, 'img');
-            const sourceId = await this.host.doc.collection.blob.set(imgFile);
+            const sourceId = await this.host.doc.blobSync.set(imgFile);
             if (!image) {
               image = surface.edgeless.service.addBlock(
                 'affine:image',

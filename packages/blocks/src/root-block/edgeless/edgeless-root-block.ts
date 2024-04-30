@@ -416,7 +416,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     const uploadPromises = imageFiles.map(async (file, index) => {
       const { point, blockId } = dropInfos[index];
 
-      const sourceId = await this.doc.blob.set(file);
+      const sourceId = await this.doc.blobSync.set(file);
       const imageSize = await readImageSize(file);
 
       const center = Vec.toVec(point);
@@ -501,7 +501,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       let sourceId: string | undefined;
       try {
         setAttachmentUploading(blockId);
-        sourceId = await this.doc.blob.set(file);
+        sourceId = await this.doc.blobSync.set(file);
       } catch (error) {
         console.error(error);
         if (error instanceof Error) {

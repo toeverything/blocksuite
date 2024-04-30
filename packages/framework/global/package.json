@@ -49,6 +49,7 @@
     "!dist/__tests__"
   ],
   "dependencies": {
+    "lib0": "^0.2.93",
     "zod": "^3.22.4"
   }
 }

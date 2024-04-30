@@ -1,5 +1,3 @@
-import type { BlobManager } from '@blocksuite/store';
-
 // Polyfill for `showOpenFilePicker` API
 // See https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wicg-file-system-access/index.d.ts
 // See also https://caniuse.com/?search=showOpenFilePicker
@@ -217,29 +215,6 @@ export async function getImageFilesFromLocal() {
   });
   if (!imageFiles) return [];
   return imageFiles;
-}
-
-export async function uploadImageFromLocal(storage: BlobManager) {
-  const imageFiles = await openFileOrFiles({
-    acceptType: 'Images',
-    multiple: true,
-  });
-  if (!imageFiles) return [];
-  return loadImages(imageFiles, storage);
-}
-
-export async function loadImages(images: File[], storage: BlobManager) {
-  const res: { file: File; sourceId: string }[] = [];
-  for (let i = 0; i < images.length; i++) {
-    const file = images[i];
-    const sourceId = await storage.set(file);
-    res.push({ file, sourceId });
-  }
-  const { saveAttachmentData } = withTempBlobData();
-  res.forEach(({ file, sourceId }) => {
-    saveAttachmentData(sourceId, { name: file.name });
-  });
-  return res;
 }
 
 export function downloadBlob(blob: Blob, name: string) {

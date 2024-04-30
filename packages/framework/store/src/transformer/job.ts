@@ -48,7 +48,7 @@ export class Job {
 
   constructor({ collection, middlewares = [] }: JobConfig) {
     this._collection = collection;
-    this._assetsManager = new AssetsManager({ blob: collection.blob });
+    this._assetsManager = new AssetsManager({ blob: collection.blobSync });
 
     middlewares.forEach(middleware => {
       middleware({

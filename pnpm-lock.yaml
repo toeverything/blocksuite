@@ -354,6 +354,9 @@ importers:
 
   packages/framework/global:
     dependencies:
+      lib0:
+        specifier: ^0.2.93
+        version: 0.2.93
       zod:
         specifier: ^3.22.4
         version: 3.22.4

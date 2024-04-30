@@ -2,10 +2,6 @@ import { AffineSchemas, TestUtils } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockCollection } from '@blocksuite/store';
 import {
-  type BlobStorage,
-  createIndexeddbStorage,
-  createMemoryStorage,
-  createSimpleServerStorage,
   DocCollection,
   type DocCollectionOptions,
   Generator,
@@ -22,21 +18,9 @@ import type { InitFn } from '../data/utils.js';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room');
-const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const isE2E = room?.startsWith('playwright');
 
 export function createStarterDocCollection() {
-  const blobStorages: ((id: string) => BlobStorage)[] = [];
-  if (blobStorageArgs.includes('memory')) {
-    blobStorages.push(createMemoryStorage);
-  }
-  if (blobStorageArgs.includes('idb')) {
-    blobStorages.push(createIndexeddbStorage);
-  }
-  if (blobStorageArgs.includes('mock')) {
-    blobStorages.push(createSimpleServerStorage);
-  }
-
   const schema = new Schema();
   schema.register(AffineSchemas);
   const idGenerator = isE2E ? Generator.AutoIncrement : Generator.NanoID;
@@ -52,7 +36,6 @@ export function createStarterDocCollection() {
     id: room ?? 'starter',
     schema,
     idGenerator,
-    blobStorages,
     defaultFlags: {
       enable_synced_doc_block: true,
       enable_pie_menu: true,

@@ -1,4 +1,4 @@
-import { type Logger } from '@blocksuite/global/utils';
+import { type Logger, sha } from '@blocksuite/global/utils';
 
 import type { BlobSource } from './source.js';
 
@@ -121,9 +121,21 @@ export class BlobEngine {
     return null;
   }
 
-  async set(key: string, value: Blob) {
+  async set(value: Blob): Promise<string>;
+  async set(key: string, value: Blob): Promise<string>;
+  async set(valueOrKey: string | Blob, _value?: Blob) {
     if (this.main.readonly) {
       throw new Error('main peer is readonly');
+    }
+
+    const key =
+      typeof valueOrKey === 'string'
+        ? valueOrKey
+        : await sha(await valueOrKey.arrayBuffer());
+    const value = typeof valueOrKey === 'string' ? _value : valueOrKey;
+
+    if (!value) {
+      throw new Error('value is empty');
     }
 
     // await upload to the main peer

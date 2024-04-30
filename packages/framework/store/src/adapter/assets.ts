@@ -1,19 +1,30 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, sha } from '@blocksuite/global/utils';
 
-import { sha } from '../persistence/blob/utils.js';
-
-export class MemoryBlobManager {
+/**
+ * @internal just for test
+ */
+export class MemoryBlobCRUD {
   private readonly _map = new Map<string, Blob>();
-  private readonly _blobsRef = new Map<string, number>();
 
   get(key: string) {
     return this._map.get(key) ?? null;
   }
 
-  async set(value: Blob, key?: string) {
-    const _key = key || (await sha(await value.arrayBuffer()));
-    this._map.set(_key, value);
-    return _key;
+  async set(value: Blob): Promise<string>;
+  async set(key: string, value: Blob): Promise<string>;
+  async set(valueOrKey: string | Blob, _value?: Blob) {
+    const key =
+      typeof valueOrKey === 'string'
+        ? valueOrKey
+        : await sha(await valueOrKey.arrayBuffer());
+    const value = typeof valueOrKey === 'string' ? _value : valueOrKey;
+
+    if (!value) {
+      throw new Error('value is required');
+    }
+
+    this._map.set(key, value);
+    return key;
   }
 
   delete(key: string) {
@@ -22,27 +33,6 @@ export class MemoryBlobManager {
 
   list() {
     return Array.from(this._map.keys());
-  }
-
-  gc() {
-    const blobs = this.list();
-    blobs.forEach(blobId => {
-      const ref = this._blobsRef.get(blobId);
-      if (!ref || ref <= 0) {
-        this.delete(blobId);
-        this._blobsRef.delete(blobId);
-      }
-    });
-  }
-
-  increaseRef(blobId: string) {
-    const ref = this._blobsRef.get(blobId) ?? 0;
-    this._blobsRef.set(blobId, ref + 1);
-  }
-
-  decreaseRef(blobId: string) {
-    const ref = this._blobsRef.get(blobId) ?? 0;
-    this._blobsRef.set(blobId, Math.max(ref - 1, 0));
   }
 }
 

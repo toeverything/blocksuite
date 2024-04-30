@@ -205,9 +205,9 @@ export class DocEngine {
     }
   }
 
-  updateSyncingState(local: SyncPeer | null, shadow: (SyncPeer | null)[]) {
+  updateSyncingState(local: SyncPeer | null, shadows: (SyncPeer | null)[]) {
     let step = DocEngineStep.Synced;
-    const allPeer = [local, ...shadow];
+    const allPeer = [local, ...shadows];
     for (const peer of allPeer) {
       if (!peer || peer.status.step !== DocPeerStep.Synced) {
         step = DocEngineStep.Syncing;
@@ -217,7 +217,7 @@ export class DocEngine {
     this.setStatus({
       step,
       main: local?.status ?? null,
-      shadows: shadow.map(peer => peer?.status ?? null),
+      shadows: shadows.map(peer => peer?.status ?? null),
       retrying: allPeer.some(
         peer => peer?.status.step === DocPeerStep.Retrying
       ),
