@@ -87,7 +87,8 @@ type WalkerFn<ONode extends object, TNode extends object> = (
 
 type NodeProps<Node extends object> = {
   node: Node;
-  parent: Node | null;
+  next?: Node | null;
+  parent: NodeProps<Node> | null;
   prop: Keyof<Node> | null;
   index: number | null;
 };
@@ -156,9 +157,11 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
               typeof item === 'object' &&
               this._isONode(item)
             ) {
+              const nextItem = value[i + 1] ?? null;
               await this._visit({
                 node: item,
-                parent: o.node,
+                next: nextItem,
+                parent: o,
                 prop: key as unknown as Keyof<ONode>,
                 index: i,
               });
@@ -170,7 +173,8 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
         ) {
           await this._visit({
             node: value,
-            parent: o.node,
+            next: null,
+            parent: o,
             prop: key as unknown as Keyof<ONode>,
             index: null,
           });
