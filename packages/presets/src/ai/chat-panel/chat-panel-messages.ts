@@ -170,6 +170,19 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
     const res = await AIProvider.userInfo;
     this.avatarUrl = res?.avatarUrl ?? '';
+    this.disposables.add(
+      AIProvider.slots.userInfo.on(userInfo => {
+        this.avatarUrl = userInfo?.avatarUrl ?? '';
+        if (
+          this.status === 'error' &&
+          this.error instanceof UnauthorizedError &&
+          userInfo
+        ) {
+          this.status = 'idle';
+          this.error = null;
+        }
+      })
+    );
   }
 
   renderError() {

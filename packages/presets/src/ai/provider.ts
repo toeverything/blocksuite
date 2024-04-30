@@ -37,6 +37,8 @@ export class AIProvider {
       options: BlockSuitePresets.AITextActionOptions;
       event: 'started' | 'finished' | 'error';
     }>(),
+    // downstream can emit this slot to notify ai presets that user info has been updated
+    userInfo: new Slot<AIUserInfo | null>(),
     // add more if needed
   };
 
