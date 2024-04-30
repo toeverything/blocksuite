@@ -51,7 +51,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     .chat-panel-messages {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 24px;
       height: 100%;
       position: relative;
       overflow-y: auto;
@@ -139,7 +139,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   status!: ChatStatus;
 
   @property({ attribute: false })
-  error?: AIError;
+  error!: AIError | null;
 
   @property({ attribute: false })
   isLoading!: boolean;

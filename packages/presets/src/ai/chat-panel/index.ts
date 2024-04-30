@@ -106,7 +106,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   status: ChatStatus = 'idle';
 
   @state()
-  error?: AIError;
+  error: AIError | null = null;
 
   @state()
   isLoading = true;
@@ -178,7 +178,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     this.scrollToDown();
   };
 
-  updateError = (error: AIError) => {
+  updateError = (error: AIError | null) => {
     this.error = error;
   };
 
