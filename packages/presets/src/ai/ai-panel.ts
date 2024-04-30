@@ -146,34 +146,46 @@ export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
   ];
 }
 
+export function buildFinishConfig(panel: AffineAIPanelWidget) {
+  return {
+    responses: buildTextResponseConfig(panel),
+    actions: [],
+  };
+}
+
+export function buildErrorConfig(panel: AffineAIPanelWidget) {
+  return {
+    upgrade: () => {
+      AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
+      panel.hide();
+    },
+    login: () => {
+      AIProvider.slots.requestLogin.emit({ host: panel.host });
+      panel.hide();
+    },
+    responses: buildErrorResponseConfig(panel),
+  };
+}
+
+export function buildCopyConfig(panel: AffineAIPanelWidget) {
+  return {
+    allowed: true,
+    onCopy: () => {
+      return copyTextAnswer(panel);
+    },
+  };
+}
+
 export function buildAIPanelConfig(
   panel: AffineAIPanelWidget,
   positionConfig?: Partial<ComputePositionConfig>
 ): AffineAIPanelWidgetConfig {
   return {
     answerRenderer: createTextRenderer(panel.host, 320),
-    finishStateConfig: {
-      responses: buildTextResponseConfig(panel),
-      actions: [], // ???
-    },
-    errorStateConfig: {
-      upgrade: () => {
-        AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
-        panel.hide();
-      },
-      login: () => {
-        AIProvider.slots.requestLogin.emit({ host: panel.host });
-        panel.hide();
-      },
-      responses: buildErrorResponseConfig(panel),
-    },
+    finishStateConfig: buildFinishConfig(panel),
+    errorStateConfig: buildErrorConfig(panel),
     positionConfig,
-    copy: {
-      allowed: true,
-      onCopy: () => {
-        return copyTextAnswer(panel);
-      },
-    },
+    copy: buildCopyConfig(panel),
   };
 }
 

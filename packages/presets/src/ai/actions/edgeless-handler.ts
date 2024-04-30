@@ -2,6 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type {
   AffineAIPanelWidget,
   AIError,
+  EdgelessCopilotWidget,
   EdgelessModel,
   MindmapElementModel,
 } from '@blocksuite/blocks';
@@ -229,6 +230,59 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
   };
 }
 
+function updateEdgelessAIPanelConfig<
+  T extends keyof BlockSuitePresets.AIActions,
+>(
+  aiPanel: AffineAIPanelWidget,
+  edgelessCopilot: EdgelessCopilotWidget,
+  id: T,
+  ctx: CtxRecord,
+  variants?: Omit<
+    Parameters<BlockSuitePresets.AIActions[T]>[0],
+    keyof BlockSuitePresets.AITextActionOptions
+  >,
+  customInput?: (
+    host: EditorHost,
+    ctx: CtxRecord
+  ) => Promise<{
+    input?: string;
+    content?: string;
+    attachments?: (string | Blob)[];
+    seed?: string;
+  } | void>
+) {
+  const host = aiPanel.host;
+  const { config } = aiPanel;
+  assertExists(config);
+  config.answerRenderer = actionToRenderer(id, host, ctx);
+  config.generateAnswer = actionToGeneration(
+    id,
+    variants,
+    customInput
+  )(host, ctx);
+  config.finishStateConfig = actionToResponse(id, host, ctx);
+  config.copy = {
+    allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
+    onCopy: () => {
+      return copyTextAnswer(aiPanel);
+    },
+  };
+  config.discardCallback = () => {
+    aiPanel.hide();
+  };
+  config.hideCallback = () => {
+    aiPanel.updateComplete
+      .finally(() => {
+        edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
+          elements: [],
+          editing: false,
+        });
+        edgelessCopilot.lockToolbar(false);
+      })
+      .catch(console.error);
+  };
+}
+
 export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
   variants?: Omit<
@@ -265,36 +319,15 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     edgelessCopilot.hideCopilotPanel();
     edgelessCopilot.lockToolbar(true);
 
-    assertExists(aiPanel.config);
-
     aiPanel.host = host;
-    aiPanel.config.generateAnswer = actionToGeneration(
+    updateEdgelessAIPanelConfig(
+      aiPanel,
+      edgelessCopilot,
       id,
+      ctx,
       variants,
       customInput
-    )(host, ctx);
-    aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
-    aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
-    aiPanel.config.discardCallback = () => {
-      aiPanel.hide();
-    };
-    aiPanel.config.copy = {
-      allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
-      onCopy: () => {
-        return copyTextAnswer(getAIPanel(host));
-      },
-    };
-    aiPanel.config.hideCallback = () => {
-      aiPanel.updateComplete
-        .finally(() => {
-          edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
-            elements: [],
-            editing: false,
-          });
-          edgelessCopilot.lockToolbar(false);
-        })
-        .catch(console.error);
-    };
+    );
 
     const elementToolbar = getElementToolbar(host);
     if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
