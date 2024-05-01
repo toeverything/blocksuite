@@ -17,6 +17,7 @@ export class DragToFillElement extends ShadowlessElement {
       box-sizing: border-box;
       background-color: var(--affine-background-primary-color);
       border: 2px solid var(--affine-primary-color);
+      display: none;
       position: absolute;
       cursor: ns-resize;
       width: 10px;
