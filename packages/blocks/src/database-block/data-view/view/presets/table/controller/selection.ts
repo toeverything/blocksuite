@@ -367,7 +367,7 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
-  navigateRowSelection(position: 'up' | 'down', append = false) {
+  navigateRowSelection(direction: 'up' | 'down', append = false) {
     if (!this.selection || !this.isSelectedRowOnly()) return;
 
     const focusCell = this.getCellContainer(
@@ -387,12 +387,13 @@ export class TableSelectionController implements ReactiveController {
     const isMultiRowSelection = rowSelEnd - rowSelStart > 0;
     const focus = this.selection.focus;
 
+    const isGoingUp = direction === 'up';
     let newStart = rowSelStart;
     let newEnd = rowSelEnd;
     let newFocusRowIdx = focus.rowIndex;
 
-    if (position === 'up') {
-      if (append) {
+    if (append) {
+      if (isGoingUp) {
         if (rowSelEnd > focus.rowIndex) {
           newStart = focus.rowIndex; // use focus as an anchor
           newEnd = rowSelEnd - 1;
@@ -401,12 +402,6 @@ export class TableSelectionController implements ReactiveController {
           newEnd = focus.rowIndex; // use focus as an anchor
         }
       } else {
-        // if multiple rows are selected collapse the selection to selection start row else to the prev row
-        const newIndex = isMultiRowSelection ? rowSelStart : rowSelStart - 1;
-        newStart = newEnd = newFocusRowIdx = newIndex;
-      }
-    } else {
-      if (append) {
         if (rowSelStart < focus.rowIndex) {
           newStart = rowSelStart + 1;
           newEnd = focus.rowIndex; // use focus as an anchor
@@ -414,11 +409,17 @@ export class TableSelectionController implements ReactiveController {
           newStart = focus.rowIndex; // use focus as an anchor
           newEnd = rowSelEnd + 1;
         }
-      } else {
-        // if multiple rows are selected collapse the selection to selection end row else to the next row
-        const newIndex = isMultiRowSelection ? rowSelEnd : rowSelEnd + 1;
-        newStart = newEnd = newFocusRowIdx = newIndex;
       }
+    } else {
+      // if it is a multi row selection then collapse to the selection start row or to the selection corresponding to the direction end row else select the row corresponding to the direction
+      const dir = isGoingUp ? -1 : 1;
+      const newIndex = isMultiRowSelection
+        ? isGoingUp
+          ? rowSelStart
+          : rowSelEnd
+        : rowSelStart + dir;
+
+      newStart = newEnd = newFocusRowIdx = newIndex;
     }
 
     // clamp ranges
