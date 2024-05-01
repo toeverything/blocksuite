@@ -124,3 +124,4 @@ Example:
 - RhonJoe, @JunIce, 2024/03/04
 - Lebedev Konstantin, @RubaXa, 2024/04/04
 - GambleMeow, @GambleMeow, 2024/04/10
+- Shcherbakov Sergey, @F4lkr4m, 2024/04/24
