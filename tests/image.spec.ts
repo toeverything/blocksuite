@@ -267,7 +267,11 @@ async function initMockImage(page: Page) {
 }
 
 test('image loading but failed', async ({ page }) => {
-  expectConsoleMessage(page, 'Error: Failed to fetch blob _e2e_test_image_id_');
+  expectConsoleMessage(
+    page,
+    'Error: Failed to fetch blob _e2e_test_image_id_',
+    'warning'
+  );
   expectConsoleMessage(
     page,
     'Failed to load resource: the server responded with a status of 404 (Not Found)'
