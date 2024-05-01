@@ -391,46 +391,34 @@ export class TableSelectionController implements ReactiveController {
     let newEnd = rowSelEnd;
     let newFocusRowIdx = focus.rowIndex;
 
-    switch (position) {
-      case 'up': {
-        if (append) {
-          if (rowSelEnd > focus.rowIndex) {
-            newStart = focus.rowIndex;
-            newEnd = rowSelEnd - 1;
-          } else {
-            newStart = rowSelStart - 1;
-            newEnd = focus.rowIndex; // use focus as an anchor
-          }
-          break;
+    if (position === 'up') {
+      if (append) {
+        if (rowSelEnd > focus.rowIndex) {
+          newStart = focus.rowIndex; // use focus as an anchor
+          newEnd = rowSelEnd - 1;
+        } else {
+          newStart = rowSelStart - 1;
+          newEnd = focus.rowIndex; // use focus as an anchor
         }
-
+      } else {
         // if multiple rows are selected collapse the selection to selection start row else to the prev row
         const newIndex = isMultiRowSelection ? rowSelStart : rowSelStart - 1;
         newStart = newEnd = newFocusRowIdx = newIndex;
-
-        break;
       }
-      case 'down': {
-        if (append) {
-          if (rowSelStart < focus.rowIndex) {
-            newStart = rowSelStart + 1;
-            newEnd = focus.rowIndex; // use focus as an anchor
-          } else {
-            newStart = focus.rowIndex; // use focus as an anchor
-            newEnd = rowSelEnd + 1;
-          }
-          break;
+    } else {
+      if (append) {
+        if (rowSelStart < focus.rowIndex) {
+          newStart = rowSelStart + 1;
+          newEnd = focus.rowIndex; // use focus as an anchor
+        } else {
+          newStart = focus.rowIndex; // use focus as an anchor
+          newEnd = rowSelEnd + 1;
         }
-
+      } else {
         // if multiple rows are selected collapse the selection to selection end row else to the next row
         const newIndex = isMultiRowSelection ? rowSelEnd : rowSelStart + 1;
         newStart = newEnd = newFocusRowIdx = newIndex;
-
-        break;
       }
-
-      default:
-        break;
     }
 
     // clamp ranges
