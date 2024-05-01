@@ -6,6 +6,7 @@ import { customElement } from 'lit/decorators.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
+import { clamp } from '../../../../../../_common/utils/math.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
@@ -80,6 +81,17 @@ export class TableSelectionController implements ReactiveController {
             this.scrollToFocus();
           });
         }
+
+        if (
+          this.isSelectedRowOnly() &&
+          (old?.rowsSelection?.start !== tableSelection?.rowsSelection?.start ||
+            old?.rowsSelection?.end !== tableSelection?.rowsSelection?.end)
+        ) {
+          requestAnimationFrame(() => {
+            this.scrollToAreaSelection();
+          });
+        }
+
         if (old) {
           const container = this.getCellContainer(
             old.groupKey,
@@ -412,9 +424,9 @@ export class TableSelectionController implements ReactiveController {
         if (append) {
           if (rowSelStart < focus.rowIndex) {
             newStart = rowSelStart + 1;
-            newEnd = focus.rowIndex;
+            newEnd = focus.rowIndex; // use focus as an anchor
           } else {
-            newStart = focus.rowIndex;
+            newStart = focus.rowIndex; // use focus as an anchor
             newEnd = rowSelEnd + 1;
           }
         } else {
@@ -429,10 +441,10 @@ export class TableSelectionController implements ReactiveController {
         break;
     }
 
-    // clamp selections
-    newStart = Math.max(0, newStart);
-    newEnd = Math.min(rowsLen - 1, newEnd);
-    newFocusRowIdx = Math.max(0, Math.min(rowsLen - 1, newFocusRowIdx));
+    // clamp ranges
+    newStart = clamp(newStart, 0, rowsLen - 1);
+    newEnd = clamp(newEnd, 0, rowsLen - 1);
+    newFocusRowIdx = clamp(newFocusRowIdx, 0, rowsLen - 1);
 
     this.selection = {
       ...this.selection,
@@ -758,6 +770,13 @@ export class TableSelectionController implements ReactiveController {
 
   private scrollToFocus() {
     this.focusSelectionElement?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+    });
+  }
+
+  private scrollToAreaSelection() {
+    this.areaSelectionElement?.scrollIntoView({
       block: 'nearest',
       inline: 'nearest',
     });
