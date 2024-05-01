@@ -278,7 +278,7 @@ test('image loading but failed', async ({ page }) => {
     'warning'
   );
 
-  const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
+  const room = await enterPlaygroundRoom(page, { blobSource: ['mock'] });
   const timeout = 2000;
 
   // block image data request, force wait 100ms for loading test,
@@ -320,7 +320,7 @@ test('image loading but success', async ({ page }) => {
     'warning'
   );
 
-  const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
+  const room = await enterPlaygroundRoom(page, { blobSource: ['mock'] });
   const imageBuffer = await readFile(
     fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))
   );
@@ -364,7 +364,7 @@ test('image loading but success', async ({ page }) => {
 });
 
 test('image loaded successfully', async ({ page }) => {
-  const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
+  const room = await enterPlaygroundRoom(page, { blobSource: ['mock'] });
   const imageBuffer = await readFile(
     fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))
   );

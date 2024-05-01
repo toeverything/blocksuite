@@ -10,17 +10,23 @@ import {
   type StoreOptions,
 } from '@blocksuite/store';
 import {
+  type BlobSource,
   BroadcastChannelAwarenessSource,
   BroadcastChannelDocSource,
+  IndexedDBBlobSource,
+  MemoryBlobSource,
 } from '@blocksuite/sync';
 
+import { MockServerBlobSource } from '../../_common/sync/blob/mock-server.js';
 import type { InitFn } from '../data/utils.js';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room');
 const isE2E = room?.startsWith('playwright');
+const blobSourceArgs = (params.get('blobSource') ?? '').split(',');
 
 export function createStarterDocCollection() {
+  const collectionId = room ?? 'starter';
   const schema = new Schema();
   schema.register(AffineSchemas);
   const idGenerator = isE2E ? Generator.AutoIncrement : Generator.NanoID;
@@ -32,8 +38,19 @@ export function createStarterDocCollection() {
     };
   }
 
+  const blobSources = {
+    main: new MemoryBlobSource(),
+    shadows: [] as BlobSource[],
+  } satisfies StoreOptions['blobSources'];
+  if (blobSourceArgs.includes('mock')) {
+    blobSources.shadows.push(new MockServerBlobSource(collectionId));
+  }
+  if (blobSourceArgs.includes('idb')) {
+    blobSources.shadows.push(new IndexedDBBlobSource(collectionId));
+  }
+
   const options: DocCollectionOptions = {
-    id: room ?? 'starter',
+    id: collectionId,
     schema,
     idGenerator,
     defaultFlags: {
@@ -44,6 +61,7 @@ export function createStarterDocCollection() {
     },
     awarenessSources: [new BroadcastChannelAwarenessSource()],
     docSources,
+    blobSources,
   };
   const collection = new DocCollection(options);
 

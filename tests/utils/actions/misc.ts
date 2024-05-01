@@ -264,18 +264,18 @@ export async function enterPlaygroundRoom(
   ops?: {
     flags?: Partial<BlockSuiteFlags>;
     room?: string;
-    blobStorage?: ('memory' | 'idb' | 'mock')[];
+    blobSource?: ('idb' | 'mock')[];
     noInit?: boolean;
   }
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
   let room = ops?.room;
-  const blobStorage = ops?.blobStorage;
+  const blobSource = ops?.blobSource;
   if (!room) {
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
-  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
+  url.searchParams.set('blobSource', blobSource?.join(',') || 'idb');
   await page.goto(url.toString());
   // const readyPromise = waitForPageReady(page);
 
@@ -1299,7 +1299,7 @@ export async function initImageState(page: Page) {
     const imageBlob = await fetch(`${location.origin}/test-card-1.png`).then(
       response => response.blob()
     );
-    const storage = pageRoot.doc.blob;
+    const storage = pageRoot.doc.blobSync;
     const sourceId = await storage.set(imageBlob);
     const imageId = doc.addBlock(
       'affine:image',
