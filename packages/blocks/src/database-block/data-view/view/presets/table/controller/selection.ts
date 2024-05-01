@@ -416,7 +416,7 @@ export class TableSelectionController implements ReactiveController {
         }
       } else {
         // if multiple rows are selected collapse the selection to selection end row else to the next row
-        const newIndex = isMultiRowSelection ? rowSelEnd : rowSelStart + 1;
+        const newIndex = isMultiRowSelection ? rowSelEnd : rowSelEnd + 1;
         newStart = newEnd = newFocusRowIdx = newIndex;
       }
     }

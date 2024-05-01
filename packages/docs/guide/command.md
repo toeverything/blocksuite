@@ -92,7 +92,7 @@ export const myCommand: Command<never, 'myCommandData'> = (ctx, next) => {
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       myCommandData: string;
     }
 
@@ -180,7 +180,7 @@ const command2 = (ctx, next) => {
   return next({ data: 1 });
 };
 
-const [sucess, ctx] = std.command.chain().command1().command2().run();
+const [success, ctx] = std.command.chain().command1().command2().run();
 
 // This will pass
 expect(ctx.data).toBe(1);
