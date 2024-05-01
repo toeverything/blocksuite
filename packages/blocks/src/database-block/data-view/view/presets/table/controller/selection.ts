@@ -70,7 +70,6 @@ export class TableSelectionController implements ReactiveController {
           this.selection = undefined;
           return;
         }
-        if (!this.isSelectedRowOnly()) this.rowSelectionDirection = 'forwards';
 
         const old = this._tableViewSelection;
         if (
@@ -356,94 +355,93 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
-  private rowSelectionDirection: 'forwards' | 'backwards' = 'forwards';
   navigateRowSelection(position: 'up' | 'down', append = false) {
-    if (!this.selection) return;
-    if (!this.isSelectedRowOnly()) return;
+    if (!this.selection || !this.isSelectedRowOnly()) return;
 
     const focusCell = this.getCellContainer(
       this.selection.groupKey,
       this.selection.focus.rowIndex,
       this.selection.focus.columnIndex
     );
+
     if (!focusCell) return;
+
     const rows = Array.from(this.rows(this.selection.groupKey));
+    const rowsLen = rows.length;
 
     const { start: rowSelStart, end: rowSelEnd } =
       this.selection.rowsSelection!;
-    const { columnIndex, rowIndex } = this.selection.focus;
+
+    const isMultiRowSelection = rowSelEnd - rowSelStart > 0;
+    const focus = this.selection.focus;
+
+    let newStart = rowSelStart;
+    let newEnd = rowSelEnd;
+    let newFocusRowIdx = focus.rowIndex;
 
     switch (position) {
       case 'up': {
-        const { columnIndex, rowIndex } = this.selection.focus;
-        if (rowSelStart === 0) break;
-
-        let newStart = rowSelStart - 1;
-        let newEnd = rowSelEnd - 1;
-
-        if (append) {
-          if (rowSelStart === rowSelEnd) {
-            this.rowSelectionDirection = 'forwards';
-            newStart = rowSelStart - 1;
-            newEnd = rowSelEnd;
-          } else {
-            const dir = this.rowSelectionDirection;
-            if (dir === 'forwards') {
-              newStart = rowSelStart - 1;
-              newEnd = rowSelEnd;
-            } else {
-              newStart = rowSelStart;
-              newEnd = rowSelEnd - 1;
-            }
-          }
+        if (isMultiRowSelection && !append) {
+          // collapse the selection to start
+          newStart = newEnd = newFocusRowIdx = rowSelStart;
+          break;
         }
 
-        this.selection = {
-          ...this.selection,
-          rowsSelection: {
-            start: newStart,
-            end: newEnd,
-          },
-          focus: { columnIndex, rowIndex: rowIndex - 1 },
-        };
+        if (append) {
+          if (rowSelEnd > focus.rowIndex) {
+            newStart = focus.rowIndex;
+            newEnd = rowSelEnd - 1;
+          } else {
+            newStart = rowSelStart - 1;
+            newEnd = focus.rowIndex; // use focus as an anchor
+          }
+        } else {
+          const newIndex = rowSelStart - 1; // we are sure that start === end
+          newStart = newEnd = newFocusRowIdx = newIndex;
+        }
+
         break;
       }
       case 'down': {
-        if (rowSelEnd === rows.length - 1) break;
-
-        let newStart = rowSelStart + 1;
-        let newEnd = rowSelEnd + 1;
-
-        if (append) {
-          if (rowSelStart === rowSelEnd) {
-            this.rowSelectionDirection = 'backwards';
-            newStart = rowSelStart;
-            newEnd = rowSelEnd + 1;
-          } else {
-            const dir = this.rowSelectionDirection;
-            if (dir === 'forwards') {
-              newStart = rowSelStart + 1;
-              newEnd = rowSelEnd;
-            } else {
-              newStart = rowSelStart;
-              newEnd = rowSelEnd + 1;
-            }
-          }
+        if (isMultiRowSelection && !append) {
+          // collapse the selection to end
+          newStart = newEnd = newFocusRowIdx = rowSelEnd;
+          break;
         }
 
-        this.selection = {
-          ...this.selection,
-          rowsSelection: {
-            start: newStart,
-            end: newEnd,
-          },
-          focus: { columnIndex, rowIndex: rowIndex + 1 },
-        };
+        if (append) {
+          if (rowSelStart < focus.rowIndex) {
+            newStart = rowSelStart + 1;
+            newEnd = focus.rowIndex;
+          } else {
+            newStart = focus.rowIndex;
+            newEnd = rowSelEnd + 1;
+          }
+        } else {
+          const newIndex = rowSelStart + 1; // we are sure that start === end
+          newStart = newEnd = newFocusRowIdx = newIndex;
+        }
+
         break;
       }
+
       default:
         break;
     }
+
+    // clamp selections
+    newStart = Math.max(0, newStart);
+    newEnd = Math.min(rowsLen - 1, newEnd);
+    newFocusRowIdx = Math.max(0, Math.min(rowsLen - 1, newFocusRowIdx));
+
+    this.selection = {
+      ...this.selection,
+      rowsSelection: {
+        start: newStart,
+        end: newEnd,
+      },
+      focus: { ...focus, rowIndex: newFocusRowIdx },
+    };
   }
 
   focusToCell(position: 'left' | 'right' | 'up' | 'down') {
