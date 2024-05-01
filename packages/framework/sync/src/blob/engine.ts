@@ -167,8 +167,11 @@ export class BlobEngine {
     return key;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async delete(_key: string) {
-    // not supported, wait for indexer finished
+    console.error(
+      'You are trying to delete a blob. We do not support this feature yet. We need to wait until we implement the indexer, which will inform us which doc is using a particular blob so that we can safely delete it.'
+    );
   }
 
   async list() {
