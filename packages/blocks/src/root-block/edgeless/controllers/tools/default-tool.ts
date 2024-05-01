@@ -721,10 +721,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           return;
         }
 
-        this._dragLastPos = [e.x, e.y];
         if (this._wheeling) {
           this._wheeling = false;
           this._dragStartPos = [...this._dragLastPos];
+        } else {
+          this._dragLastPos = [e.x, e.y];
         }
 
         const dx = (e.x - this._dragStartPos[0]) / zoom;

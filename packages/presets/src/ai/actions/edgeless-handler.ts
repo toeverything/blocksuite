@@ -119,7 +119,7 @@ export async function getContentFromSelected(
 ${texts.map(text => text.text.toString()).join('\n')}
 ${shapes.map(shape => shape.text!.toString()).join('\n')}
 ${images.map(image => image.caption!.toString()).join('\n')}
-`;
+`.trim();
 }
 
 function getTextFromSelected(host: EditorHost) {
@@ -364,7 +364,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
         } = BlocksUtils.splitElements(selectedElements);
         const blocks = [...notes, ...shapes, ...images];
         if (blocks.length === 0) return true;
-        const content = (await getContentFromSelected(host, blocks)).trim();
+        const content = await getContentFromSelected(host, blocks);
         ctx.set({
           content,
         });
