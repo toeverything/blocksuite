@@ -74,6 +74,18 @@ export async function pressArrowUp(page: Page, count = 1) {
   }
 }
 
+export async function pressArrowDownWithShiftKey(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press(`${SHIFT_KEY}+ArrowDown`, { delay: 20 });
+  }
+}
+
+export async function pressArrowUpWithShiftKey(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press(`${SHIFT_KEY}+ArrowUp`, { delay: 20 });
+  }
+}
+
 export async function pressEnter(page: Page, count = 1) {
   // avoid flaky test by simulate real user input
   for (let i = 0; i < count; i++) {
