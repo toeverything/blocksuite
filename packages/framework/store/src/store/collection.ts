@@ -144,7 +144,7 @@ export class DocCollection extends DocCollectionAddonType {
 
     const { id: docId = this.idGenerator(), selector } = options;
     if (this._hasDoc(docId)) {
-      throw new Error('dac already exists');
+      throw new Error('doc already exists');
     }
 
     this.meta.addDocMeta({
