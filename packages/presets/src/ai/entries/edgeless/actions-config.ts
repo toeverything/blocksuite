@@ -292,7 +292,7 @@ const generateGroup: AIItemGroupConfig = {
         return {
           content,
           attachments: [png],
-          seed: `${randomSeed()}`,
+          seed: String(randomSeed()),
         };
       }),
     },
@@ -361,9 +361,11 @@ const generateGroup: AIItemGroupConfig = {
 
         // single note, text, shape(text) or image(caption)
         if (f === 0 && n + s + i === 1) {
-          const content = (
-            await getContentFromSelected(host, [...notes, ...shapes, ...images])
-          ).trim();
+          const content = await getContentFromSelected(host, [
+            ...notes,
+            ...shapes,
+            ...images,
+          ]);
           if (!content) return;
           return {
             content,
