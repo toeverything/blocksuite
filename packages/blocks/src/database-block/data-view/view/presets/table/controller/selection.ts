@@ -393,12 +393,6 @@ export class TableSelectionController implements ReactiveController {
 
     switch (position) {
       case 'up': {
-        if (isMultiRowSelection && !append) {
-          // collapse the selection to start
-          newStart = newEnd = newFocusRowIdx = rowSelStart;
-          break;
-        }
-
         if (append) {
           if (rowSelEnd > focus.rowIndex) {
             newStart = focus.rowIndex;
@@ -407,20 +401,16 @@ export class TableSelectionController implements ReactiveController {
             newStart = rowSelStart - 1;
             newEnd = focus.rowIndex; // use focus as an anchor
           }
-        } else {
-          const newIndex = rowSelStart - 1; // we are sure that start === end
-          newStart = newEnd = newFocusRowIdx = newIndex;
+          break;
         }
+
+        // if multiple rows are selected collapse the selection to selection start row else to the prev row
+        const newIndex = isMultiRowSelection ? rowSelStart : rowSelStart - 1;
+        newStart = newEnd = newFocusRowIdx = newIndex;
 
         break;
       }
       case 'down': {
-        if (isMultiRowSelection && !append) {
-          // collapse the selection to end
-          newStart = newEnd = newFocusRowIdx = rowSelEnd;
-          break;
-        }
-
         if (append) {
           if (rowSelStart < focus.rowIndex) {
             newStart = rowSelStart + 1;
@@ -429,10 +419,12 @@ export class TableSelectionController implements ReactiveController {
             newStart = focus.rowIndex; // use focus as an anchor
             newEnd = rowSelEnd + 1;
           }
-        } else {
-          const newIndex = rowSelStart + 1; // we are sure that start === end
-          newStart = newEnd = newFocusRowIdx = newIndex;
+          break;
         }
+
+        // if multiple rows are selected collapse the selection to selection end row else to the next row
+        const newIndex = isMultiRowSelection ? rowSelEnd : rowSelStart + 1;
+        newStart = newEnd = newFocusRowIdx = newIndex;
 
         break;
       }
