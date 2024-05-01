@@ -831,8 +831,8 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         case 'div': {
           if (
             // Check if it is a paragraph like div
-            o.parent?.type === 'element' &&
-            o.parent.tagName !== 'li' &&
+            o.parent?.node.type === 'element' &&
+            o.parent.node.tagName !== 'li' &&
             (hastGetElementChildren(o.node).every(child =>
               [
                 'span',
@@ -1030,8 +1030,8 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       switch (o.node.tagName) {
         case 'div': {
           if (
-            o.parent?.type === 'element' &&
-            o.parent.tagName !== 'li' &&
+            o.parent?.node.type === 'element' &&
+            o.parent.node.tagName !== 'li' &&
             Array.isArray(o.node.properties?.className)
           ) {
             if (
@@ -1051,23 +1051,16 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         }
         case 'p': {
           if (
-            o.parent &&
-            o.parent.type === 'element' &&
-            o.parent.children.length > o.index! + 1
+            o.next?.type === 'element' &&
+            o.next.tagName === 'div' &&
+            Array.isArray(o.next.properties?.className) &&
+            (o.next.properties.className.includes(
+              'affine-block-children-container'
+            ) ||
+              o.next.properties.className.includes('indented'))
           ) {
-            const next = o.parent.children[o.index! + 1];
-            if (
-              next.type === 'element' &&
-              next.tagName === 'div' &&
-              Array.isArray(next.properties?.className) &&
-              (next.properties.className.includes(
-                'affine-block-children-container'
-              ) ||
-                next.properties.className.includes('indented'))
-            ) {
-              // Close the node when leaving div indented
-              break;
-            }
+            // Close the node when leaving div indented
+            break;
           }
           context.closeNode();
           break;

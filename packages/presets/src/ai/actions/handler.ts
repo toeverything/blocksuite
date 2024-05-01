@@ -1,12 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type {
-  AffineAIPanelWidget,
-  AffineAIPanelWidgetConfig,
-} from '@blocksuite/blocks';
 import type { AIError } from '@blocksuite/blocks';
+import {
+  type AffineAIPanelWidget,
+  type AffineAIPanelWidgetConfig,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { getAIPanel } from '../ai-panel.js';
+import { buildCopyConfig, buildFinishConfig, getAIPanel } from '../ai-panel.js';
+import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
 import {
   getSelectedImagesAsBlobs,
@@ -114,6 +115,27 @@ export function actionToGenerateAnswer<
   };
 }
 
+/**
+ * TODO: Should update config according to the action type
+ * When support mind-map. generate image, generate slides on doc mode or in edgeless note block
+ * Currently, only support text action
+ */
+function updateAIPanelConfig<T extends keyof BlockSuitePresets.AIActions>(
+  aiPanel: AffineAIPanelWidget,
+  id: T,
+  variants?: Omit<
+    Parameters<BlockSuitePresets.AIActions[T]>[0],
+    keyof BlockSuitePresets.AITextActionOptions
+  >
+) {
+  const { config, host } = aiPanel;
+  assertExists(config);
+  config.generateAnswer = actionToGenerateAnswer(id, variants)(host);
+  config.answerRenderer = createTextRenderer(host, 320);
+  config.finishStateConfig = buildFinishConfig(aiPanel);
+  config.copy = buildCopyConfig(aiPanel);
+}
+
 export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
   variants?: Omit<
@@ -123,8 +145,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
 ) {
   return (host: EditorHost) => {
     const aiPanel = getAIPanel(host);
-    assertExists(aiPanel.config);
-    aiPanel.config.generateAnswer = actionToGenerateAnswer(id, variants)(host);
+    updateAIPanelConfig(aiPanel, id, variants);
     const { selectedBlocks: blocks } = getSelections(aiPanel.host);
     if (!blocks || blocks.length === 0) return;
     aiPanel.toggle(blocks.at(-1)!, 'placeholder');

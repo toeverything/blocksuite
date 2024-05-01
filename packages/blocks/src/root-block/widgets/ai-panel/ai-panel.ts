@@ -80,15 +80,21 @@ export class AffineAIPanelWidget extends WidgetElement {
   private _stopAutoUpdate?: undefined | (() => void);
 
   private _discardModal: AIPanelDiscardModal | null = null;
+
   private _clearDiscardModal = () => {
     if (this._discardModal) {
       this._discardModal.remove();
       this._discardModal = null;
     }
   };
+
   private _discardCallback = () => {
     this.hide();
     this.config?.discardCallback?.();
+  };
+
+  private _cancelCallback = () => {
+    this.focus();
   };
 
   private _clickOutside = () => {
@@ -131,13 +137,16 @@ export class AffineAIPanelWidget extends WidgetElement {
     this.config?.hideCallback?.();
   };
 
-  discard = (callback: () => void = this._discardCallback) => {
+  discard = (
+    discardCallback: () => void = this._discardCallback,
+    cancelCallback: () => void = this._cancelCallback
+  ) => {
     if ((this.state === 'finished' || this.state === 'error') && !this.answer) {
-      callback();
+      discardCallback();
       return;
     }
     this._clearDiscardModal();
-    this._discardModal = toggleDiscardModal(callback);
+    this._discardModal = toggleDiscardModal(discardCallback, cancelCallback);
   };
 
   /**
@@ -223,6 +232,23 @@ export class AffineAIPanelWidget extends WidgetElement {
     });
   }
 
+  private _onKeyDown = (event: KeyboardEvent) => {
+    event.stopPropagation();
+    const { state } = this;
+    if (
+      (state !== 'generating' && state !== 'input') ||
+      event.key !== 'Escape'
+    ) {
+      return;
+    }
+
+    if (state === 'generating') {
+      this.stopGenerating();
+    } else {
+      this.hide();
+    }
+  };
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -247,6 +273,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     this.disposables.addFromEvent(this, 'wheel', stopPropagation);
     this.disposables.addFromEvent(this, 'pointerdown', stopPropagation);
     this.disposables.addFromEvent(this, 'pointerup', stopPropagation);
+    this.disposables.addFromEvent(this, 'keydown', this._onKeyDown);
   }
 
   override disconnectedCallback() {
@@ -282,6 +309,13 @@ export class AffineAIPanelWidget extends WidgetElement {
         // restore selection
         if (this._selection) {
           this.host.selection.set([...this._selection]);
+          this.host.updateComplete
+            .then(() => {
+              if (this.state !== 'hidden') {
+                this.focus();
+              }
+            })
+            .catch(console.error);
         }
       }
 

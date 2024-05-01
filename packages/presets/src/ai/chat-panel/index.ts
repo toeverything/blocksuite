@@ -3,6 +3,7 @@ import './chat-panel-messages.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { AIError } from '@blocksuite/blocks';
+import { debounce } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -106,57 +107,72 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   status: ChatStatus = 'idle';
 
   @state()
-  error?: AIError;
+  error: AIError | null = null;
 
   @state()
-  isLoading = true;
+  isLoading = false;
 
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
-  public override async connectedCallback() {
+  public override connectedCallback() {
     super.connectedCallback();
     if (!this.doc) throw new Error('doc is required');
 
-    AIProvider.slots.actions.on(async ({ action, event }) => {
+    AIProvider.slots.actions.on(({ action, event }) => {
       if (
         action !== 'chat' &&
         event === 'finished' &&
         (this.status === 'idle' || this.status === 'success')
       ) {
-        await this._resetItems();
+        this._resetItems();
       }
     });
 
-    await this._resetItems();
-  }
-
-  private async _resetItems() {
-    const { doc } = this;
-
-    const histories =
-      (await AIProvider.histories?.chats(doc.collection.id, doc.id)) ?? [];
-
-    const actions =
-      (await AIProvider.histories?.actions(doc.collection.id, doc.id)) ?? [];
-
-    const items: ChatItem[] = [...actions];
-
-    if (histories[0]) {
-      items.push(...histories[0].messages);
-    }
-
-    this.items = items.sort((a, b) => {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    AIProvider.slots.userInfo.on(userInfo => {
+      if (userInfo) {
+        this._resetItems();
+      }
     });
 
-    this.isLoading = false;
-    this.scrollToDown();
+    this._resetItems();
   }
+
+  private _resettingCounter = 0;
+
+  private _resetItems = debounce(() => {
+    const counter = ++this._resettingCounter;
+    this.isLoading = true;
+    (async () => {
+      const { doc } = this;
+
+      const [histories, actions] = await Promise.all([
+        AIProvider.histories?.chats(doc.collection.id, doc.id),
+        AIProvider.histories?.actions(doc.collection.id, doc.id),
+      ]);
+
+      if (counter !== this._resettingCounter) return;
+
+      const items: ChatItem[] = actions ? [...actions] : [];
+
+      if (histories?.[0]) {
+        items.push(...histories[0].messages);
+      }
+
+      this.items = items.sort((a, b) => {
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      });
+
+      this.isLoading = false;
+      this.scrollToDown();
+    })().catch(console.error);
+  }, 200);
 
   protected override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('doc')) {
-      this._resetItems().catch(console.error);
+      this._resetItems();
     }
   }
 
@@ -178,7 +194,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     this.scrollToDown();
   };
 
-  updateError = (error: AIError) => {
+  updateError = (error: AIError | null) => {
     this.error = error;
   };
 

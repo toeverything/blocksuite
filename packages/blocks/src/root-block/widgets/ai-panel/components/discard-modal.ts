@@ -122,8 +122,10 @@ export class AIPanelDiscardModal extends LitElement {
   `;
 
   private _discardCallback: () => void;
+  private _cancelCallback: () => void;
 
   private _close() {
+    this._cancelCallback();
     this.remove();
   }
 
@@ -132,9 +134,10 @@ export class AIPanelDiscardModal extends LitElement {
     this.remove();
   }
 
-  constructor(callback: () => void) {
+  constructor(discardCallback: () => void, cancelCallback: () => void) {
     super();
-    this._discardCallback = callback;
+    this._discardCallback = discardCallback;
+    this._cancelCallback = cancelCallback;
   }
 
   override render() {
@@ -158,8 +161,11 @@ export class AIPanelDiscardModal extends LitElement {
   }
 }
 
-export function toggleDiscardModal(callback: () => void) {
-  const discardModal = new AIPanelDiscardModal(callback);
+export function toggleDiscardModal(
+  discardCallback: () => void,
+  cancelCallback: () => void
+) {
+  const discardModal = new AIPanelDiscardModal(discardCallback, cancelCallback);
   document.body.append(discardModal);
   return discardModal;
 }

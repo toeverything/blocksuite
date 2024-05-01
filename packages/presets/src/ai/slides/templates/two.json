@@ -25,7 +25,28 @@
           "flavour": "affine:surface",
           "version": 5,
           "props": {
-            "elements": {}
+            "elements": {
+              "TJhFxmm-4S": {
+                "index": "Zz",
+                "seed": 1730805220,
+                "xywh": "[-509.7051213118268,-469.55707155770506,1924.0508676236536,1089.1141431154101]",
+                "rotate": 0,
+                "shapeType": "rect",
+                "radius": 0,
+                "filled": true,
+                "fillColor": "--affine-palette-shape-white",
+                "strokeWidth": 2,
+                "strokeColor": "--affine-palette-line-white",
+                "strokeStyle": "solid",
+                "shapeStyle": "General",
+                "roughness": 1.4,
+                "textResizing": 1,
+                "maxWidth": false,
+                "type": "shape",
+                "id": "TJhFxmm-4S",
+                "color": "--affine-palette-line-black"
+              }
+            }
           },
           "children": [
             {

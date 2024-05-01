@@ -22,6 +22,11 @@ import {
   ToneIcon,
 } from '@blocksuite/blocks';
 
+import {
+  AIImageIcon,
+  AIMindMapIcon,
+  AIPresentationIcon,
+} from '../../_common/icons.js';
 import { actionToHandler as edgelessActionToHandler } from '../../actions/edgeless-handler.js';
 import { actionToHandler } from '../../actions/handler.js';
 import { textTones, translateLangs } from '../../actions/types.js';
@@ -275,6 +280,7 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
     {
       name: 'Generate headings',
       icon: AIPenIcon,
+      beta: true,
       handler: actionToHandler('createHeadings'),
       showWhen: chain => {
         const [_, ctx] = chain
@@ -294,7 +300,7 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
     },
     {
       name: 'Generate an image',
-      icon: AIPenIcon,
+      icon: AIImageIcon,
       showWhen: textBlockShowWhen,
       handler: edgelessHandler('createImage'),
     },
@@ -306,21 +312,23 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
     },
     {
       name: 'Brainstorm ideas with mind map',
-      icon: AIPenIcon,
+      icon: AIMindMapIcon,
       showWhen: textBlockShowWhen,
       handler: edgelessHandler('brainstormMindmap'),
     },
     {
       name: 'Generate presentation',
-      icon: AIPenIcon,
+      icon: AIPresentationIcon,
       showWhen: textBlockShowWhen,
       handler: edgelessHandler('createSlides'),
+      beta: true,
     },
     {
       name: 'Find actions',
       icon: AISearchIcon,
       showWhen: textBlockShowWhen,
       handler: actionToHandler('findActions'),
+      beta: true,
     },
   ],
 };

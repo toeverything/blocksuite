@@ -1,3 +1,5 @@
+import { type Disposable } from '@blocksuite/global/utils';
+
 import type { TType } from '../logical/typesystem.js';
 import type { StatCalcOpType } from '../view/presets/table/types.js';
 import type {
@@ -34,6 +36,8 @@ type ColumnOps<
   };
   cellToJson: (data: Value, colData: Data) => JSON;
   addGroup?: (text: string, oldData: Data) => Data;
+  onUpdate?: (value: Value, Data: Data, callback: () => void) => Disposable;
+  valueUpdate?: (value: Value, Data: Data, newValue: Value) => Value;
 };
 
 export class ColumnConfig<
@@ -133,6 +137,7 @@ export class ColumnConfig<
     return this.ops.name;
   }
 }
+
 export type ColumnMeta<
   Type extends string = keyof ColumnConfigMap,
   CellData = unknown,

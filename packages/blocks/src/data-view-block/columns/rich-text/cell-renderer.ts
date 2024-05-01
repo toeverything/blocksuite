@@ -241,7 +241,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
         this.inlineEditor.selectAll();
       }
     };
-    this.addEventListener('keydown', selectAll);
     this.disposables.addFromEvent(this, 'keydown', selectAll);
   }
 

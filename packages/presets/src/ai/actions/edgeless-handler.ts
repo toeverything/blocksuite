@@ -2,6 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type {
   AffineAIPanelWidget,
   AIError,
+  EdgelessCopilotWidget,
   EdgelessModel,
   MindmapElementModel,
 } from '@blocksuite/blocks';
@@ -80,10 +81,11 @@ export async function getContentFromSelected(
   host: EditorHost,
   selected: EdgelessModel[]
 ) {
-  const { notes, texts, shapes } = selected.reduce<{
+  const { notes, texts, shapes, images } = selected.reduce<{
     notes: NoteBlockModel[];
     texts: TextElementModel[];
     shapes: ShapeElementModel[];
+    images: ImageBlockModel[];
   }>(
     (pre, cur) => {
       if (cur instanceof NoteBlockModel) {
@@ -92,11 +94,13 @@ export async function getContentFromSelected(
         pre.texts.push(cur);
       } else if (cur instanceof ShapeElementModel && cur.text?.length) {
         pre.shapes.push(cur);
+      } else if (cur instanceof ImageBlockModel && cur.caption?.length) {
+        pre.images.push(cur);
       }
 
       return pre;
     },
-    { notes: [], texts: [], shapes: [] }
+    { notes: [], texts: [], shapes: [], images: [] }
   );
 
   const noteContent = (
@@ -112,7 +116,10 @@ export async function getContentFromSelected(
 
   return `${noteContent.join('\n')}
 
-${texts.map(text => text.text.toString()).join('\n')}\n${shapes.map(shape => shape.text!.toString())}`;
+${texts.map(text => text.text.toString()).join('\n')}
+${shapes.map(shape => shape.text!.toString()).join('\n')}
+${images.map(image => image.caption!.toString()).join('\n')}
+`;
 }
 
 function getTextFromSelected(host: EditorHost) {
@@ -126,7 +133,10 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  extract?: (host: EditorHost) => Promise<{
+  extract?: (
+    host: EditorHost,
+    ctx: CtxRecord
+  ) => Promise<{
     content?: string;
     attachments?: (string | Blob)[];
     seed?: string;
@@ -137,7 +147,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   if (!action || typeof action !== 'function') return;
 
   if (extract && typeof extract === 'function') {
-    return (host: EditorHost): BlockSuitePresets.TextStream => {
+    return (host: EditorHost, ctx: CtxRecord): BlockSuitePresets.TextStream => {
       let stream: BlockSuitePresets.TextStream | undefined;
       return {
         async *[Symbol.asyncIterator]() {
@@ -148,7 +158,7 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
             workspaceId: host.doc.collection.id,
           } as Parameters<typeof action>[0];
 
-          const data = await extract(host);
+          const data = await extract(host, ctx);
           if (data) {
             Object.assign(options, data);
           }
@@ -192,13 +202,16 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  extract?: (host: EditorHost) => Promise<{
+  extract?: (
+    host: EditorHost,
+    ctx: CtxRecord
+  ) => Promise<{
     content?: string;
     attachments?: (string | Blob)[];
     seed?: string;
   } | void>
 ) {
-  return (host: EditorHost) => {
+  return (host: EditorHost, ctx: CtxRecord) => {
     return ({
       signal,
       update,
@@ -214,12 +227,65 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
         if (selectedElements.length === 0) return;
       }
 
-      const stream = actionToStream(id, variants, extract)?.(host);
+      const stream = actionToStream(id, variants, extract)?.(host, ctx);
 
       if (!stream) return;
 
       bindEventSource(stream, { update, finish, signal });
     };
+  };
+}
+
+function updateEdgelessAIPanelConfig<
+  T extends keyof BlockSuitePresets.AIActions,
+>(
+  aiPanel: AffineAIPanelWidget,
+  edgelessCopilot: EdgelessCopilotWidget,
+  id: T,
+  ctx: CtxRecord,
+  variants?: Omit<
+    Parameters<BlockSuitePresets.AIActions[T]>[0],
+    keyof BlockSuitePresets.AITextActionOptions
+  >,
+  customInput?: (
+    host: EditorHost,
+    ctx: CtxRecord
+  ) => Promise<{
+    input?: string;
+    content?: string;
+    attachments?: (string | Blob)[];
+    seed?: string;
+  } | void>
+) {
+  const host = aiPanel.host;
+  const { config } = aiPanel;
+  assertExists(config);
+  config.answerRenderer = actionToRenderer(id, host, ctx);
+  config.generateAnswer = actionToGeneration(
+    id,
+    variants,
+    customInput
+  )(host, ctx);
+  config.finishStateConfig = actionToResponse(id, host, ctx);
+  config.copy = {
+    allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
+    onCopy: () => {
+      return copyTextAnswer(aiPanel);
+    },
+  };
+  config.discardCallback = () => {
+    aiPanel.hide();
+  };
+  config.hideCallback = () => {
+    aiPanel.updateComplete
+      .finally(() => {
+        edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
+          elements: [],
+          editing: false,
+        });
+        edgelessCopilot.lockToolbar(false);
+      })
+      .catch(console.error);
   };
 }
 
@@ -229,7 +295,10 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
   >,
-  customInput?: (host: EditorHost) => Promise<{
+  customInput?: (
+    host: EditorHost,
+    ctx: CtxRecord
+  ) => Promise<{
     input?: string;
     content?: string;
     attachments?: (string | Blob)[];
@@ -256,55 +325,58 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     edgelessCopilot.hideCopilotPanel();
     edgelessCopilot.lockToolbar(true);
 
-    assertExists(aiPanel.config);
-
     aiPanel.host = host;
-    aiPanel.config.generateAnswer = actionToGeneration(
+    updateEdgelessAIPanelConfig(
+      aiPanel,
+      edgelessCopilot,
       id,
+      ctx,
       variants,
       customInput
-    )(host);
-    aiPanel.config.answerRenderer = actionToRenderer(id, host, ctx);
-    aiPanel.config.finishStateConfig = actionToResponse(id, host, ctx);
-    aiPanel.config.discardCallback = () => {
-      aiPanel.hide();
-    };
-    aiPanel.config.copy = {
-      allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
-      onCopy: () => {
-        return copyTextAnswer(getAIPanel(host));
-      },
-    };
-    aiPanel.config.hideCallback = () => {
-      aiPanel.updateComplete
-        .finally(() => {
-          edgelessCopilot.edgeless.service.tool.switchToDefaultMode({
-            elements: [],
-            editing: false,
-          });
-          edgelessCopilot.lockToolbar(false);
-        })
-        .catch(console.error);
-    };
+    );
 
     const elementToolbar = getElementToolbar(host);
+    const isEmpty = selectedElements.length === 0;
+    const isCreateImageAction = id === 'createImage';
+    let referenceElement = null;
+    let togglePanel = () => Promise.resolve(isEmpty);
+
     if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
-      aiPanel.toggle(
-        edgelessCopilot.selectionElem,
-        getCopilotSelectedElems(host).length ? 'placeholder' : undefined
-      );
+      referenceElement = edgelessCopilot.selectionElem;
     } else if (elementToolbar.toolbarVisible) {
-      aiPanel.toggle(getElementToolbar(host), 'placeholder');
-    } else if (selectedElements.length > 0) {
+      referenceElement = getElementToolbar(host);
+    } else if (!isEmpty) {
       const lastSelected = selectedElements.at(-1)!.id;
-      const selectedPortal = getSelectedNoteAnchor(host, lastSelected);
-      if (selectedPortal) {
-        aiPanel.toggle(
-          selectedPortal,
-          getCopilotSelectedElems(host).length ? 'placeholder' : undefined
-        );
-      }
+      referenceElement = getSelectedNoteAnchor(host, lastSelected);
     }
+
+    if (!referenceElement) return;
+
+    if (isCreateImageAction) {
+      // @TODO(fundon): remove async
+      togglePanel = async () => {
+        if (isEmpty) return true;
+        const {
+          notes,
+          shapes,
+          images,
+          frames: _,
+        } = BlocksUtils.splitElements(selectedElements);
+        const blocks = [...notes, ...shapes, ...images];
+        if (blocks.length === 0) return true;
+        const content = (await getContentFromSelected(host, blocks)).trim();
+        ctx.set({
+          content,
+        });
+        return content.length === 0;
+      };
+    }
+
+    togglePanel()
+      .then(isEmpty => {
+        aiPanel.toggle(referenceElement, isEmpty ? undefined : 'placeholder');
+      })
+      .catch(console.error);
   };
 }
 
@@ -360,7 +432,7 @@ export function explainImageShowWhen(
 ) {
   const selected = getCopilotSelectedElems(host);
 
-  return selected[0] instanceof ImageBlockModel;
+  return selected.length === 1 && selected[0] instanceof ImageBlockModel;
 }
 
 export function mindmapRootShowWhen(_: unknown, __: unknown, host: EditorHost) {

@@ -716,7 +716,10 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           break;
         }
         case 'tr': {
-          if (o.parent?.type === 'element' && o.parent.tagName === 'tbody') {
+          if (
+            o.parent?.node.type === 'element' &&
+            o.parent.node.tagName === 'tbody'
+          ) {
             const columns =
               context.getGlobalContextStack<BlocksuiteTableColumn>(
                 'hast:table:column'
@@ -862,8 +865,8 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       switch (o.node.tagName) {
         case 'div': {
           if (
-            o.parent?.type === 'element' &&
-            o.parent.tagName !== 'li' &&
+            o.parent?.node.type === 'element' &&
+            o.parent.node.tagName !== 'li' &&
             Array.isArray(o.node.properties?.className)
           ) {
             if (o.node.properties.className.includes('indented')) {
@@ -881,20 +884,13 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             break;
           }
           if (
-            o.parent &&
-            o.parent.type === 'element' &&
-            o.parent.children.length > o.index! + 1
+            o.next?.type === 'element' &&
+            o.next.tagName === 'div' &&
+            Array.isArray(o.next.properties?.className) &&
+            o.next.properties.className.includes('indented')
           ) {
-            const next = o.parent.children[o.index! + 1];
-            if (
-              next.type === 'element' &&
-              next.tagName === 'div' &&
-              Array.isArray(next.properties?.className) &&
-              next.properties.className.includes('indented')
-            ) {
-              // Close the node when leaving div indented
-              break;
-            }
+            // Close the node when leaving div indented
+            break;
           }
           context.closeNode();
           break;
