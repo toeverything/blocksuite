@@ -371,6 +371,7 @@ export class TableSelectionController implements ReactiveController {
 
     const { start: rowSelStart, end: rowSelEnd } =
       this.selection.rowsSelection!;
+    const { columnIndex, rowIndex } = this.selection.focus;
 
     switch (position) {
       case 'up': {
@@ -408,27 +409,24 @@ export class TableSelectionController implements ReactiveController {
         break;
       }
       case 'down': {
-        const { start, end } = this.selection.rowsSelection!;
-        const { columnIndex, rowIndex } = this.selection.focus;
+        if (rowSelEnd === rows.length - 1) break;
 
-        if (end === rows.length - 1) break;
-
-        let newStart = start + 1;
-        let newEnd = end + 1;
+        let newStart = rowSelStart + 1;
+        let newEnd = rowSelEnd + 1;
 
         if (append) {
-          if (start === end) {
+          if (rowSelStart === rowSelEnd) {
             this.rowSelectionDirection = 'backwards';
-            newStart = start;
-            newEnd = end + 1;
+            newStart = rowSelStart;
+            newEnd = rowSelEnd + 1;
           } else {
             const dir = this.rowSelectionDirection;
             if (dir === 'forwards') {
-              newStart = start + 1;
-              newEnd = end;
+              newStart = rowSelStart + 1;
+              newEnd = rowSelEnd;
             } else {
-              newStart = start;
-              newEnd = end + 1;
+              newStart = rowSelStart;
+              newEnd = rowSelEnd + 1;
             }
           }
         }
