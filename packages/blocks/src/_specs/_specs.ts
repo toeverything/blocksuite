@@ -37,6 +37,7 @@ import { PageRootService } from '../root-block/page/page-root-service.js';
 import { RootBlockSchema } from '../root-block/root-model.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../root-block/widgets/drag-handle/drag-handle.js';
+import { AFFINE_EDGELESS_MINIMAP_WIDGET } from '../root-block/widgets/edgeless-minimap/index.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../root-block/widgets/edgeless-remote-selection/index.js';
 import { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from '../root-block/widgets/edgeless-zoom-toolbar/index.js';
 import { EDGELESS_ELEMENT_TOOLBAR_WIDGET } from '../root-block/widgets/element-toolbar/index.js';
@@ -125,6 +126,7 @@ const EdgelessPageSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
         AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
       )}`,
       [EDGELESS_ELEMENT_TOOLBAR_WIDGET]: literal`${unsafeStatic(EDGELESS_ELEMENT_TOOLBAR_WIDGET)}`,
+      [AFFINE_EDGELESS_MINIMAP_WIDGET]: literal`${unsafeStatic(AFFINE_EDGELESS_MINIMAP_WIDGET)}`,
     },
   },
 };

@@ -4,6 +4,7 @@ import type { EdgelessRootBlockComponent } from './edgeless/edgeless-root-block.
 import type { PageRootBlockComponent } from './page/page-root-block.js';
 import type { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from './widgets/doc-remote-selection/doc-remote-selection.js';
 import type { AFFINE_DRAG_HANDLE_WIDGET } from './widgets/drag-handle/drag-handle.js';
+import type { AFFINE_EDGELESS_MINIMAP_WIDGET } from './widgets/edgeless-minimap/index.js';
 import type { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from './widgets/edgeless-remote-selection/index.js';
 import type { AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET } from './widgets/edgeless-zoom-toolbar/index.js';
 import type { EDGELESS_ELEMENT_TOOLBAR_WIDGET } from './widgets/element-toolbar/index.js';
@@ -39,7 +40,8 @@ export type EdgelessRootBlockWidgetName =
   | typeof AFFINE_DOC_REMOTE_SELECTION_WIDGET
   | typeof AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET
   | typeof AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
-  | typeof EDGELESS_ELEMENT_TOOLBAR_WIDGET;
+  | typeof EDGELESS_ELEMENT_TOOLBAR_WIDGET
+  | typeof AFFINE_EDGELESS_MINIMAP_WIDGET;
 
 export type RootBlockComponent =
   | PageRootBlockComponent

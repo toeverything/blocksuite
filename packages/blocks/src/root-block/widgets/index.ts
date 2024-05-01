@@ -14,6 +14,7 @@ export {
   EdgelessCopilotWidget,
 } from './edgeless-copilot/index.js';
 export { EdgelessCopilotToolbarEntry } from './edgeless-copilot-panel/toolbar-entry.js';
+export { AffineEdgelessMinimapWidget } from './edgeless-minimap/index.js';
 export { EdgelessRemoteSelectionWidget } from './edgeless-remote-selection/index.js';
 export { AffineEdgelessZoomToolbarWidget } from './edgeless-zoom-toolbar/index.js';
 export {

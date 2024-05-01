@@ -1,0 +1,1 @@
+## Edgeless Minimap Widget
