@@ -80,6 +80,10 @@ export class BlobEngine {
             const data = await this.main.get(key);
             if (data) {
               await shadow.set(key, data);
+            } else {
+              this.logger.error(
+                'data not found when trying upload from main to shadow'
+              );
             }
           } catch (err) {
             this.logger.error(
@@ -91,12 +95,15 @@ export class BlobEngine {
       }
 
       const needDownload = shadowList.filter(key => !mainList.includes(key));
-
       for (const key of needDownload) {
         try {
           const data = await shadow.get(key);
           if (data) {
             await this.main.set(key, data);
+          } else {
+            this.logger.error(
+              'data not found when trying download from shadow to main'
+            );
           }
         } catch (err) {
           this.logger.error(
