@@ -146,8 +146,6 @@ pie.command({
     }
 
     return FrameNavigatorIcon;
-
-    return FrameNavigatorIcon;
   },
   action: ({ rootElement }) => {
     const { type } = rootElement.edgelessTool;
