@@ -10,6 +10,7 @@ export class TableHotkeysController implements ReactiveController {
   get selectionController() {
     return this.host.selectionController;
   }
+
   public hostConnected() {
     this.host.disposables.add(
       this.host.bindHotkey({
@@ -33,7 +34,7 @@ export class TableHotkeysController implements ReactiveController {
                 (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
               )
               .map(v => v.rowId);
-            this.selectionController.focusTo('up');
+            this.selectionController.focusToCell('up');
             this.host.view.rowDelete(rows);
           } else if (focus && !isEditing) {
             const data = this.host.view;
@@ -140,7 +141,7 @@ export class TableHotkeysController implements ReactiveController {
             return false;
           }
           ctx.get('keyboardState').raw.preventDefault();
-          this.selectionController.focusTo('right');
+          this.selectionController.focusToCell('right');
           return true;
         },
         'Shift-Tab': ctx => {
@@ -149,7 +150,7 @@ export class TableHotkeysController implements ReactiveController {
             return false;
           }
           ctx.get('keyboardState').raw.preventDefault();
-          this.selectionController.focusTo('left');
+          this.selectionController.focusToCell('left');
           return true;
         },
         ArrowLeft: context => {
@@ -157,7 +158,7 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-          this.selectionController.focusTo('left');
+          this.selectionController.focusToCell('left');
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
@@ -166,7 +167,7 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-          this.selectionController.focusTo('right');
+          this.selectionController.focusToCell('right');
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
@@ -175,7 +176,11 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-          this.selectionController.focusTo('up');
+
+          if (this.selectionController.isSelectedRowOnly())
+            this.selectionController.navigateRowSelection('up', false);
+          else this.selectionController.focusToCell('up');
+
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
@@ -184,10 +189,49 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-          this.selectionController.focusTo('down');
+
+          if (this.selectionController.isSelectedRowOnly())
+            this.selectionController.navigateRowSelection('down', false);
+          else this.selectionController.focusToCell('down');
+
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
+
+        'Shift-ArrowUp': context => {
+          const selection = this.selectionController.selection;
+          if (
+            !selection ||
+            selection.isEditing ||
+            !this.selectionController.isSelectedRowOnly()
+          ) {
+            return false;
+          }
+
+          if (this.selectionController.isSelectedRowOnly())
+            this.selectionController.navigateRowSelection('up', true);
+
+          context.get('keyboardState').raw.preventDefault();
+          return true;
+        },
+
+        'Shift-ArrowDown': context => {
+          const selection = this.selectionController.selection;
+          if (
+            !selection ||
+            selection.isEditing ||
+            !this.selectionController.isSelectedRowOnly()
+          ) {
+            return false;
+          }
+
+          if (this.selectionController.isSelectedRowOnly())
+            this.selectionController.navigateRowSelection('down', true);
+
+          context.get('keyboardState').raw.preventDefault();
+          return true;
+        },
+
         'Mod-a': context => {
           const selection = this.selectionController.selection;
           if (selection?.isEditing) {
