@@ -14,6 +14,7 @@ import type { ComputePositionConfig } from '@floating-ui/dom';
 
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
+import { reportResponse } from './utils/action-reporter.js';
 import {
   copyTextAnswer,
   insertBelow,
@@ -77,6 +78,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Insert below',
           icon: InsertBelowIcon,
           handler: () => {
+            reportResponse('result:insert');
             _insertBelow().catch(console.error);
           },
         },
@@ -84,6 +86,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Replace selection',
           icon: ReplaceIcon,
           handler: () => {
+            reportResponse('result:replace');
             _replace().catch(console.error);
           },
         },
@@ -96,6 +99,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Continue in chat',
           icon: ChatWithAIIcon,
           handler: () => {
+            reportResponse('result:continue-in-chat');
             AIProvider.slots.requestContinueInChat.emit({
               host: panel.host,
               show: true,
@@ -107,6 +111,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Regenerate',
           icon: ResetIcon,
           handler: () => {
+            reportResponse('result:retry');
             panel.generate();
           },
         },
@@ -114,6 +119,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Discard',
           icon: DiscardIcon,
           handler: () => {
+            reportResponse('result:discard');
             panel.discard();
           },
         },
@@ -131,6 +137,7 @@ export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Regenerate',
           icon: ResetIcon,
           handler: () => {
+            reportResponse('result:retry');
             panel.generate();
           },
         },
@@ -138,6 +145,7 @@ export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Discard',
           icon: DiscardIcon,
           handler: () => {
+            reportResponse('result:discard');
             panel.discard();
           },
         },

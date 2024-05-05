@@ -154,6 +154,8 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
           const options = {
             ...variants,
             stream: true,
+            where: 'ai-panel',
+            host,
             docId: host.doc.id,
             workspaceId: host.doc.collection.id,
           } as Parameters<typeof action>[0];
@@ -183,6 +185,8 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
           ...variants,
           input: markdown,
           stream: true,
+          where: 'ai-panel',
+          host,
           docId: host.doc.id,
           workspaceId: host.doc.collection.id,
         } as Parameters<typeof action>[0];

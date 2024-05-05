@@ -27,6 +27,7 @@ import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
 import { AIProvider } from '../provider.js';
+import { reportResponse } from '../utils/action-reporter.js';
 import { isMindMapRoot } from '../utils/edgeless.js';
 import { preprocessHtml } from '../utils/html.js';
 import { fetchImageToFile } from '../utils/image.js';
@@ -103,6 +104,7 @@ export function discard(
     name: 'Discard',
     icon: DeleteIcon,
     handler: () => {
+      reportResponse('result:discard');
       const callback = () => {
         panel.hide();
       };
@@ -116,6 +118,7 @@ export function retry(panel: AffineAIPanelWidget): AIItemConfig {
     name: 'Retry',
     icon: ResetIcon,
     handler: () => {
+      reportResponse('result:retry');
       panel.generate();
     },
   };
@@ -130,6 +133,7 @@ export function createInsertResp(
     name: 'Insert below',
     icon: InsertBelowIcon,
     handler: () => {
+      reportResponse('result:insert');
       handler(host, ctx);
       const panel = getAIPanel(host);
       panel.hide();
@@ -403,6 +407,7 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
             name: 'Continue in chat',
             icon: ChatWithAIIcon,
             handler: () => {
+              reportResponse('result:continue-in-chat');
               const panel = getAIPanel(host);
               AIProvider.slots.requestContinueInChat.emit({
                 host: host,
