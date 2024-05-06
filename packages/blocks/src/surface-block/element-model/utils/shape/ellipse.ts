@@ -5,6 +5,7 @@ import {
   getPointsFromBoundsWithRotation,
   lineEllipseIntersects,
   pointInEllipse,
+  pointInPolygon,
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
 import type { IVec2 } from '../../../utils/vec.js';
@@ -64,7 +65,12 @@ export const ellipse = {
           const centralRy = ry * DEFAULT_CENTRAL_AREA_RATIO;
           hit = pointInEllipse(point, center, centralRx, centralRy, rad);
         } else {
-          hit = this.externalBound?.isPointInBound([x, y]) ?? false;
+          hit = this.textBound
+            ? pointInPolygon(
+                [x, y],
+                getPointsFromBoundsWithRotation(this.textBound)
+              )
+            : false;
         }
       }
     }
