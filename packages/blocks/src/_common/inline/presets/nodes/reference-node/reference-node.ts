@@ -144,7 +144,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     }
 
     const doc = this.doc;
-    this._updateRefMeta(doc);
     this._disposables.add(
       doc.collection.slots.docUpdated.on(() => this._updateRefMeta(doc))
     );
@@ -157,6 +156,13 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         );
       })
       .catch(console.error);
+  }
+
+  override willUpdate(_changedProperties: Map<PropertyKey, unknown>) {
+    super.willUpdate(_changedProperties);
+
+    const doc = this.doc;
+    this._updateRefMeta(doc);
   }
 
   private _updateRefMeta = (doc: Doc) => {
