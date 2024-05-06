@@ -26,8 +26,8 @@ import {
   AIMindMapIcon,
   AIPresentationIcon,
 } from '../../_common/icons.js';
+import { actionToHandler } from '../../actions/doc-handler.js';
 import { actionToHandler as edgelessActionToHandler } from '../../actions/edgeless-handler.js';
-import { actionToHandler } from '../../actions/handler.js';
 import { textTones, translateLangs } from '../../actions/types.js';
 import { getAIPanel } from '../../ai-panel.js';
 import { AIProvider } from '../../provider.js';

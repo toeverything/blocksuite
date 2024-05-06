@@ -197,6 +197,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
         stream: true,
         signal: abortController.signal,
         where: 'chat-panel',
+        control: 'chat-send',
       });
 
       if (stream) {

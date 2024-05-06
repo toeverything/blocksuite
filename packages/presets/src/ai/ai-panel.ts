@@ -119,7 +119,6 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Discard',
           icon: DiscardIcon,
           handler: () => {
-            reportResponse('result:discard');
             panel.discard();
           },
         },
@@ -145,7 +144,6 @@ export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
           name: 'Discard',
           icon: DiscardIcon,
           handler: () => {
-            reportResponse('result:discard');
             panel.discard();
           },
         },

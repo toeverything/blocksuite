@@ -25,11 +25,13 @@ import {
   createImageRenderer,
 } from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
+import { reportResponse } from '../utils/action-reporter.js';
 import { isMindmapChild, isMindMapRoot } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
 import { getSelectedNoteAnchor } from '../utils/selection-utils.js';
 import { EXCLUDING_COPY_ACTIONS } from './consts.js';
+import { bindTextStream } from './doc-handler.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
   actionToResponse,
@@ -37,7 +39,6 @@ import {
   getEdgelessCopilotWidget,
   getElementToolbar,
 } from './edgeless-response.js';
-import { bindEventSource } from './handler.js';
 
 type AnswerRenderer = NonNullable<
   AffineAIPanelWidget['config']
@@ -129,6 +130,7 @@ function getTextFromSelected(host: EditorHost) {
 
 function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
+  signal?: AbortSignal,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
@@ -151,10 +153,15 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
       let stream: BlockSuitePresets.TextStream | undefined;
       return {
         async *[Symbol.asyncIterator]() {
+          const models = getCopilotSelectedElems(host);
           const options = {
             ...variants,
+            signal,
+            input: '',
             stream: true,
             where: 'ai-panel',
+            control: 'format-bar',
+            models,
             host,
             docId: host.doc.id,
             workspaceId: host.doc.collection.id,
@@ -179,13 +186,17 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     return {
       async *[Symbol.asyncIterator]() {
         const panel = getAIPanel(host);
+        const models = getCopilotSelectedElems(host);
         const markdown = await getTextFromSelected(panel.host);
 
         const options = {
           ...variants,
+          signal,
           input: markdown,
           stream: true,
           where: 'ai-panel',
+          models,
+          control: 'format-bar',
           host,
           docId: host.doc.id,
           workspaceId: host.doc.collection.id,
@@ -231,11 +242,11 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
         if (selectedElements.length === 0) return;
       }
 
-      const stream = actionToStream(id, variants, extract)?.(host, ctx);
+      const stream = actionToStream(id, signal, variants, extract)?.(host, ctx);
 
       if (!stream) return;
 
-      bindEventSource(stream, { update, finish, signal });
+      bindTextStream(stream, { update, finish, signal });
     };
   };
 }
@@ -279,6 +290,7 @@ function updateEdgelessAIPanelConfig<
   };
   config.discardCallback = () => {
     aiPanel.hide();
+    reportResponse('result:discard');
   };
   config.hideCallback = () => {
     aiPanel.updateComplete

@@ -104,11 +104,7 @@ export function discard(
     name: 'Discard',
     icon: DeleteIcon,
     handler: () => {
-      reportResponse('result:discard');
-      const callback = () => {
-        panel.hide();
-      };
-      panel.discard(callback);
+      panel.discard();
     },
   };
 }
