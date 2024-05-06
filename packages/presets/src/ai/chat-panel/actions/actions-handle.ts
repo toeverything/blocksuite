@@ -3,7 +3,11 @@ import type {
   EditorHost,
   TextSelection,
 } from '@blocksuite/block-std';
-import type { EdgelessRootService, SerializedXYWH } from '@blocksuite/blocks';
+import type {
+  EdgelessRootService,
+  ImageSelection,
+  SerializedXYWH,
+} from '@blocksuite/blocks';
 import {
   BlocksUtils,
   Bound,
@@ -73,13 +77,15 @@ const CommonActions = [
       host: EditorHost,
       content: string,
       currentTextSelection?: TextSelection,
-      currentBlockSelections?: BlockSelection[]
+      currentBlockSelections?: BlockSelection[],
+      currentImageSelections?: ImageSelection[]
     ) => {
       const [_, data] = host.command
         .chain()
         .getSelectedBlocks({
           currentTextSelection,
           currentBlockSelections,
+          currentImageSelections,
         })
         .run();
       if (!data.selectedBlocks) return;
