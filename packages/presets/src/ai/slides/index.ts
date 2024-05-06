@@ -55,14 +55,19 @@ export const PPTBuilder = (host: EditorHost) => {
 
   return {
     process: async (text: string) => {
-      const snapshot = await markdownToSnapshot(text, host);
+      try {
+        const snapshot = await markdownToSnapshot(text, host);
 
-      const block = snapshot.snapshot.content[0];
-      for (let i = 0; i < block.children.length; i++) {
-        await addDoc(block.children[i]);
-        const { centerX, centerY, zoom } = service.getFitToScreenData();
-        service.viewport.setViewport(zoom, [centerX, centerY]);
+        const block = snapshot.snapshot.content[0];
+        for (let i = 0; i < block.children.length; i++) {
+          await addDoc(block.children[i]);
+          const { centerX, centerY, zoom } = service.getFitToScreenData();
+          service.viewport.setViewport(zoom, [centerX, centerY]);
+        }
+      } catch (e) {
+        console.error(e);
       }
+
       return { contents, images: allImages };
     },
     done: async (text: string) => {
