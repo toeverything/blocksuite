@@ -297,6 +297,7 @@ export const responses: {
   createSlides: (host, ctx) => {
     const data = ctx.get();
     const contents = data.contents as unknown[];
+    if (!contents) return;
     const images = data.images as { url: string; id: string }[][];
     const service = host.spec.getService<EdgelessRootService>('affine:page');
 
