@@ -17,6 +17,7 @@ import {
   InsertBelowIcon,
   ReplaceIcon,
 } from '../../_common/icons.js';
+import { reportResponse } from '../../utils/action-reporter.js';
 import { insertBelow, replace } from '../../utils/editor-actions.js';
 import { insertFromMarkdown } from '../../utils/markdown-utils.js';
 
@@ -40,6 +41,8 @@ const CommonActions = [
         })
         .run();
       if (!data.selectedBlocks) return;
+
+      reportResponse('result:replace');
 
       if (currentTextSelection) {
         const { doc } = host;
@@ -80,7 +83,7 @@ const CommonActions = [
         })
         .run();
       if (!data.selectedBlocks) return;
-
+      reportResponse('result:insert');
       await insertBelow(
         host,
         content,
@@ -96,6 +99,7 @@ export const PageEditorActions = [
     icon: CreateIcon,
     title: 'Create as a page',
     handler: (host: EditorHost, content: string) => {
+      reportResponse('result:add-page');
       const newDoc = host.doc.collection.createDoc();
       newDoc.load();
       const rootId = newDoc.addBlock('affine:page');
@@ -115,6 +119,7 @@ export const EdgelessEditorActions = [
     icon: CreateIcon,
     title: 'Add to edgeless as note',
     handler: async (host: EditorHost, content: string) => {
+      reportResponse('result:add-note');
       const { doc } = host;
       const service = host.spec.getService<EdgelessRootService>('affine:page');
       const elements = service.selection.elements;

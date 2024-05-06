@@ -74,6 +74,7 @@ export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
           attachments: sendAttachments ? attachments : undefined,
           input: sendAttachments ? '' : markdown,
           stream: true,
+          host,
           docId: host.doc.id,
           workspaceId: host.doc.collection.id,
         } as Parameters<typeof action>[0];
@@ -169,6 +170,8 @@ export function handleAskAIAction(panel: AffineAIPanelWidget) {
     const stream = AIProvider.actions.chat({
       input,
       stream: true,
+      host,
+      where: 'ai-panel',
       docId: host.doc.id,
       workspaceId: host.doc.collection.id,
     });
