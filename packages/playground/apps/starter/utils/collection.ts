@@ -47,9 +47,10 @@ export function createStarterDocCollection() {
       main: new BroadcastChannelDocSource(),
     };
   }
+  const id = room ?? `starter-${Math.random().toString(16).slice(2, 8)}`;
 
   const options: DocCollectionOptions = {
-    id: room ?? 'starter',
+    id,
     schema,
     idGenerator,
     blobStorages,
@@ -59,7 +60,7 @@ export function createStarterDocCollection() {
       enable_lasso_tool: true,
       enable_mindmap_entry: true,
     },
-    awarenessSources: [new BroadcastChannelAwarenessSource()],
+    awarenessSources: [new BroadcastChannelAwarenessSource(id)],
     docSources,
   };
   const collection = new DocCollection(options);

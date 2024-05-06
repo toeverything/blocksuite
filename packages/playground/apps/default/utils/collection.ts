@@ -54,7 +54,9 @@ export async function createDefaultDocCollection() {
           main: new IndexedDBDocSource(),
           shadow: [new BroadcastChannelDocSource()],
         };
-        awarenessSources = [new BroadcastChannelAwarenessSource()];
+        awarenessSources = [
+          new BroadcastChannelAwarenessSource('quickEdgeless'),
+        ];
       });
   }
 
