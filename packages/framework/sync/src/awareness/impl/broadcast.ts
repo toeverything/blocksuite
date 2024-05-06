@@ -16,7 +16,7 @@ export class BroadcastChannelAwarenessSource implements AwarenessSource {
   channel: BroadcastChannel | null = null;
   awareness: Awareness | null = null;
 
-  constructor(readonly channelName: string = 'blocksuite:awareness') {}
+  constructor(readonly channelName: string) {}
 
   connect(awareness: Awareness): void {
     this.channel = new BroadcastChannel(this.channelName);
