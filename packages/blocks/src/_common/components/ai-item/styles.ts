@@ -38,7 +38,8 @@ export const menuItemStyles = css`
     align-items: baseline;
     flex: 1 0 0;
     color: var(--affine-text-primary-color);
-    text-align: justify;
+    text-align: start;
+    white-space: nowrap;
     font-feature-settings:
       'clig' off,
       'liga' off;
