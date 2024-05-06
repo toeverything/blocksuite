@@ -148,8 +148,8 @@ export class AIPanelError extends WithDisposable(LitElement) {
         <div class="bottom">
           An error occurred. Please try again later. If this issue persists,
           please let us know at
-          <a href="mailto:contact@toeverything.info">
-            contact@toeverything.info
+          <a href="mailto:support@toeverything.info">
+            support@toeverything.info
           </a>
         </div>
       `
