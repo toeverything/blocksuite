@@ -269,18 +269,16 @@ export const responses: {
       'affine:surface'
     ) as SurfaceBlockModel[];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const selectionRect = edgelessCopilot.selectionModelRect;
+    const data = ctx.get();
+    const bounds = edgelessCopilot.determineInsertionBounds(
+      (data['width'] as number) || 800,
+      (data['height'] as number) || 600
+    );
 
     edgelessCopilot.hideCopilotPanel();
     aiPanel.hide();
 
     const edgelessRoot = getEdgelessRootFromEditor(host);
-    const { left: x, top, height } = selectionRect;
-    const y = top + height + 20;
-    const data = ctx.get();
-    const w = (data['width'] as number) || 800;
-    const h = (data['height'] as number) || 600;
 
     host.doc.transact(() => {
       edgelessRoot.doc.addBlock(
@@ -288,7 +286,7 @@ export const responses: {
         {
           html,
           design: 'ai:makeItReal', // as tag
-          xywh: `[${x},${y},${w},${h}]`,
+          xywh: bounds.serialize(),
         },
         surface.id
       );
@@ -325,8 +323,7 @@ export const responses: {
     if (!data) return;
 
     const edgelessCopilot = getEdgelessCopilotWidget(host);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const selectionRect = edgelessCopilot.selectionModelRect;
+    const bounds = edgelessCopilot.determineInsertionBounds();
 
     edgelessCopilot.hideCopilotPanel();
     aiPanel.hide();
@@ -339,11 +336,8 @@ export const responses: {
         if (!img) return;
 
         const edgelessRoot = getEdgelessRootFromEditor(host);
-        const { left, top, height } = selectionRect;
-        const [x, y] = edgelessRoot.service.viewport.toViewCoord(
-          left,
-          top + height + 20
-        );
+        const { minX, minY } = bounds;
+        const [x, y] = edgelessRoot.service.viewport.toViewCoord(minX, minY);
 
         host.doc.transact(() => {
           edgelessRoot.addImages([img], { x, y }, true).catch(console.error);
@@ -354,16 +348,16 @@ export const responses: {
 };
 
 const defaultHandler = (host: EditorHost) => {
-  const edgelessCopilot = getEdgelessCopilotWidget(host);
   const doc = host.doc;
-  const currentRect = edgelessCopilot.selectionModelRect;
   const panel = getAIPanel(host);
+  const edgelessCopilot = getEdgelessCopilotWidget(host);
+  const bounds = edgelessCopilot.determineInsertionBounds(800, 95);
 
   doc.transact(() => {
     const noteBlockId = doc.addBlock(
       'affine:note',
       {
-        xywh: `[${currentRect.x},${currentRect.y + currentRect.height + 20},800,95]`,
+        xywh: bounds.serialize(),
         displayMode: NoteDisplayMode.EdgelessOnly,
       },
       doc.root!.id

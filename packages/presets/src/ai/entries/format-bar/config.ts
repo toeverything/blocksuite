@@ -12,7 +12,6 @@ import {
   ChatWithAIIcon,
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   ExplainIcon,
-  getElementsBound,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
@@ -200,12 +199,7 @@ function edgelessHandler<T extends keyof BlockSuitePresets.AIActions>(
         'copilot'
       ] as CopilotSelectionController;
       const selectedElements = edgeless.service.selection.elements;
-      const padding = 10 / edgeless.service.zoom;
-      const bounds = getElementsBound(
-        selectedElements.map(e => e.elementBound)
-      ).expand(padding);
-      currentController.dragStartPoint = bounds.tl as [number, number];
-      currentController.dragLastPoint = bounds.br as [number, number];
+      currentController.updateDragPointsWith(selectedElements, 10);
       currentController.draggingAreaUpdated.emit(false); // do not show edgeless panel
 
       return edgelessActionToHandler(id, variants, async () => {

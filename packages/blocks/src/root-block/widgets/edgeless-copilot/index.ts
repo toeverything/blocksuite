@@ -16,6 +16,7 @@ import {
   MOUSE_BUTTON,
   requestConnectedFrame,
 } from '../../../_common/utils/event.js';
+import { Bound, getElementsBound } from '../../../surface-block/index.js';
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { type RootBlockModel } from '../../root-model.js';
@@ -76,6 +77,24 @@ export class EdgelessCopilotWidget extends WidgetElement<
 
   get selectionModelRect() {
     return this._selectionModelRect;
+  }
+
+  determineInsertionBounds(width = 800, height = 95) {
+    const elements = this.edgeless.service.selection.elements;
+    const offsetY = 20 / this.edgeless.service.viewport.zoom;
+    const bounds = new Bound(0, 0, width, height);
+    if (elements.length) {
+      const { x, y, h } = getElementsBound(
+        elements.map(ele => ele.elementBound)
+      );
+      bounds.x = x;
+      bounds.y = y + h + offsetY;
+    } else {
+      const { x, y, height: h } = this.selectionModelRect;
+      bounds.x = x;
+      bounds.y = y + h + offsetY;
+    }
+    return bounds;
   }
 
   get edgeless() {
