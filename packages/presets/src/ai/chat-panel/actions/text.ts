@@ -13,7 +13,6 @@ import type { ChatAction } from '../index.js';
 export class ActionText extends WithDisposable(LitElement) {
   static override styles = css`
     .original-text {
-      width: 100%;
       border-radius: 4px;
       margin-bottom: 12px;
       font-size: var(--affine-font-sm);

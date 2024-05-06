@@ -4,6 +4,8 @@ import { beforeEach, expect, test } from 'vitest';
 import { wait } from '../utils/common.js';
 import { setupEditor } from '../utils/setup.js';
 
+const excludes = new Map([['shape-textBound', true]]);
+
 beforeEach(async () => {
   const cleanup = await setupEditor('page');
 
@@ -44,6 +46,10 @@ test('snapshot 1 importing', async () => {
   surfaceElements.forEach(element => {
     for (const field in element) {
       const value = element[field as keyof typeof element];
+
+      if (excludes.has(`${element.type}-${field}`)) {
+        return;
+      }
 
       if (field === 'xywh') {
         expect(value).toMatch(xywhPattern);
@@ -88,6 +94,10 @@ test('snapshot 2 importing', async () => {
   surfaceElements.forEach(element => {
     for (const field in element) {
       const value = element[field as keyof typeof element];
+
+      if (excludes.has(`${element.type}-${field}`)) {
+        return;
+      }
 
       if (field === 'xywh') {
         expect(value).toMatch(xywhPattern);

@@ -23,12 +23,15 @@ import type { SerializedXYWH } from '../../surface-block/utils/xywh.js';
 
 export interface HitTestOptions {
   expand?: number;
-  ignoreTransparent?: boolean;
+
   /**
-   * we will select a shape without fill color by selecting its content area if
-   * we set `pierce` to true, shape element used this options in `hitTest` method
+   * If true, the transparent area of the element will be ignored during hit test.
+   * Otherwise, the transparent area will be considered as filled area.
+   *
+   * Default is true.
    */
-  pierce?: boolean;
+  ignoreTransparent?: boolean;
+
   all?: boolean;
   zoom?: number;
 }

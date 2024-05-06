@@ -66,7 +66,12 @@ export const rect = {
           // Check if the point is in the center area
           hit = pointInPolygon([x, y], centralPoints);
         } else {
-          hit = this.externalBound?.isPointInBound([x, y]) ?? false;
+          hit = this.textBound
+            ? pointInPolygon(
+                [x, y],
+                getPointsFromBoundsWithRotation(this.textBound)
+              )
+            : false;
         }
       }
     }

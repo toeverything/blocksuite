@@ -33,7 +33,7 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetElement<
       }
     }
 
-    @container viewport (width >= 1200px) {
+    @container viewport (width > 1200px) {
       zoom-bar-toggle-button {
         display: none;
       }
