@@ -113,6 +113,7 @@ export class AIAnswerText extends LitElement {
       overflow-y: auto;
       overflow-x: hidden;
       padding: 0;
+      overscroll-behavior-y: none;
     }
     .ai-answer-text-container.show-scrollbar::-webkit-scrollbar {
       width: 5px;
