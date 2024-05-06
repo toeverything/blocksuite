@@ -49,7 +49,7 @@ export function createStarterDocCollection() {
   }
 
   const options: DocCollectionOptions = {
-    id: room ?? 'starter',
+    id: room ?? `starter-${Math.random().toString(16).slice(2, 8)}`,
     schema,
     idGenerator,
     blobStorages,
