@@ -108,6 +108,75 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
     }
   }
 
+  private _fullscreenchange() {
+    const iframe = this._iframe;
+    if (!iframe) return;
+
+    const show =
+      document.fullscreenEnabled && document.fullscreenElement === iframe;
+
+    iframe.contentWindow?.postMessage({ show }, '*');
+  }
+
+  private _tipHtml() {
+    const computed = getComputedStyle(this);
+    const fontFamily = computed.getPropertyValue('--affine-font-sans-family');
+    const fontSize = computed.getPropertyValue('--affine-font-sm');
+    const borderColor = computed.getPropertyValue('--affine-black-10');
+    const backgroundColor = computed.getPropertyValue('--affine-primary-color');
+    const tipColor = computed.getPropertyValue('--affine-white');
+    const color = computed.getPropertyValue('--affine-text-secondary-color');
+
+    return `<style>
+      #affine-tip {
+        display: none;
+        align-items: center;
+        gap: 4px;
+        height: 28px;
+        position: absolute;
+        left: 50%;
+        bottom: 30px;
+        z-index: 10000;
+        transform: translate3d(-50%, 0, 0);
+
+        font-family: ${fontFamily};
+        color: ${color};
+        font-feature-settings:
+          'clig' off,
+          'liga' off;
+        font-size:  ${fontSize};
+        font-style: normal;
+        font-weight: 500;
+        line-height: 22px; /* 157.143% */
+      }
+      #affine-tip > .key {
+        display: inline-flex;
+        padding: 4px 8px;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        border-radius: 8px;
+        color: ${tipColor};
+        border: 1px solid ${borderColor};
+        background: ${backgroundColor};
+      }
+
+      #affine-tip[data-show] {
+        display: flex;
+      }
+      </style>
+      <div id="affine-tip">
+        Press&nbsp;<span class="key">ESC</span>&nbsp;to&nbsp;close
+      </div>
+      <script>
+      const tip = document.getElementById('affine-tip');
+      window.onmessage = function(event){
+        tip.toggleAttribute('data-show', event.data && event.data.show);
+      };
+      </script>
+      `;
+  }
+
   override renderBlock(): unknown {
     const { style, xywh } = this.model;
 
@@ -121,11 +190,12 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
 
     const htmlSrc = `
       <style>
-        body { 
+        body {
           margin: 0;
-        } 
+        }
       </style>
       ${this.model.html}
+      ${this._tipHtml()}
     `;
 
     return this.renderEmbed(() => {
@@ -152,6 +222,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
                 sandbox="allow-scripts"
                 scrolling="no"
                 allowfullscreen
+                @fullscreenchange=${this._fullscreenchange}
                 .srcdoc=${htmlSrc}
               ></iframe>
 
