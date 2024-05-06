@@ -11,9 +11,14 @@ import './actions/copy-more.js';
 import './actions/explain-image.js';
 import './actions/image.js';
 
-import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
+import type {
+  BaseSelection,
+  BlockSelection,
+  TextSelection,
+} from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import type { ImageSelection } from '@blocksuite/blocks';
 import {
   type AIError,
   isInsidePageEditor,
@@ -35,6 +40,7 @@ import {
   PaymentRequiredErrorRenderer,
 } from '../messages/error.js';
 import { AIProvider } from '../provider.js';
+import { insertBelow } from '../utils/editor-actions.js';
 import {
   EdgelessEditorActions,
   PageEditorActions,
@@ -147,19 +153,22 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   @query('.chat-panel-messages')
   messagesContainer!: HTMLDivElement;
 
-  private _currentTextSelection: TextSelection | null = null;
-  private _currentBlockSelections: BlockSelection[] | null = null;
+  private _selectionValue: BaseSelection[] = [];
+  private get _currentTextSelection(): TextSelection | undefined {
+    return this._selectionValue.find(v => v.type === 'text') as TextSelection;
+  }
+  private get _currentBlockSelections(): BlockSelection[] | undefined {
+    return this._selectionValue.filter(v => v.type === 'block');
+  }
+  private get _currentImageSelections(): ImageSelection[] | undefined {
+    return this._selectionValue.filter(v => v.type === 'image');
+  }
 
   public override async connectedCallback() {
     super.connectedCallback();
     this.host.selection.slots.changed.on(() => {
-      this._currentBlockSelections = this.host.selection.filter('block');
-      const textSelection = this.host.selection.find('text');
-      if (this._currentBlockSelections?.length === 0) {
-        this._currentTextSelection =
-          textSelection ?? this._currentTextSelection;
-      } else {
-        this._currentTextSelection = textSelection ?? null;
+      if (this.host.selection.value.length > 0) {
+        this._selectionValue = this.host.selection.value;
       }
       this.requestUpdate();
     });
@@ -332,8 +341,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         .host=${host}
         .content=${content}
         .isLast=${isLast}
-        .curTextSelection=${this._currentTextSelection ?? undefined}
-        .curBlockSelections=${this._currentBlockSelections ?? undefined}
+        .curTextSelection=${this._currentTextSelection}
+        .curBlockSelections=${this._currentBlockSelections}
       ></chat-copy-more>
       ${isLast
         ? html`<div class="actions-container">
@@ -354,13 +363,30 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
                 return html`<div class="action">
                   ${action.icon}
                   <div
-                    @click=${() =>
-                      action.handler(
+                    @click=${async () => {
+                      if (action.title === 'Insert below') {
+                        if (
+                          this._selectionValue.length === 1 &&
+                          this._selectionValue[0].type === 'database'
+                        ) {
+                          const element = this.host.view.viewFromPath(
+                            'block',
+                            this._selectionValue[0].path
+                          );
+                          if (!element) return;
+                          await insertBelow(host, content, element);
+                          return;
+                        }
+                      }
+
+                      await action.handler(
                         host,
                         content,
-                        this._currentTextSelection ?? undefined,
-                        this._currentBlockSelections ?? undefined
-                      )}
+                        this._currentTextSelection,
+                        this._currentBlockSelections,
+                        this._currentImageSelections
+                      );
+                    }}
                   >
                     ${action.title}
                   </div>

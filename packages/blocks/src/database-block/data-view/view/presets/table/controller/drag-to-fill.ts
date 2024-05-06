@@ -17,6 +17,7 @@ export class DragToFillElement extends ShadowlessElement {
       box-sizing: border-box;
       background-color: var(--affine-background-primary-color);
       border: 2px solid var(--affine-primary-color);
+      display: none;
       position: absolute;
       cursor: ns-resize;
       width: 10px;
@@ -89,9 +90,9 @@ export function fillSelectionWithFocusCellData(
       const curRowId = cellContainer.rowId;
 
       if (tRichText.is(curCol.dataType)) {
-        const focusCellText = focusData as Text;
+        const focusCellText = focusData as Text | undefined;
 
-        const delta = focusCellText.toDelta();
+        const delta = focusCellText?.toDelta() ?? [{ insert: '' }];
         const curCellText = curCol.getValue(curRowId) as Text | undefined;
 
         if (curCellText) {

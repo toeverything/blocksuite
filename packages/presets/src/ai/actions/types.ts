@@ -1,3 +1,5 @@
+import type { EditorHost } from '@blocksuite/block-std';
+
 export const translateLangs = [
   'English',
   'Spanish',
@@ -26,9 +28,12 @@ declare global {
       stream?: boolean;
       attachments?: (string | File | Blob)[]; // blob could only be strings for the moments (url or data urls)
       signal?: AbortSignal;
-      // the following seems not necessary?
+
+      // action's context
       docId: string;
       workspaceId: string;
+      host: EditorHost;
+      where: 'chat-panel' | 'ai-panel';
     }
 
     interface AIImageActionOptions extends AITextActionOptions {

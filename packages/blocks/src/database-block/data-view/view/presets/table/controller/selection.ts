@@ -6,6 +6,7 @@ import { customElement } from 'lit/decorators.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
+import { clamp } from '../../../../../../_common/utils/math.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../utils/frame-loop.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
@@ -80,6 +81,17 @@ export class TableSelectionController implements ReactiveController {
             this.scrollToFocus();
           });
         }
+
+        if (
+          this.isSelectedRowOnly() &&
+          (old?.rowsSelection?.start !== tableSelection?.rowsSelection?.start ||
+            old?.rowsSelection?.end !== tableSelection?.rowsSelection?.end)
+        ) {
+          requestAnimationFrame(() => {
+            this.scrollToAreaSelection();
+          });
+        }
+
         if (old) {
           const container = this.getCellContainer(
             old.groupKey,
@@ -355,7 +367,77 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
-  focusTo(position: 'left' | 'right' | 'up' | 'down') {
+  navigateRowSelection(direction: 'up' | 'down', append = false) {
+    if (!this.selection || !this.isSelectedRowOnly()) return;
+
+    const focusCell = this.getCellContainer(
+      this.selection.groupKey,
+      this.selection.focus.rowIndex,
+      this.selection.focus.columnIndex
+    );
+
+    if (!focusCell) return;
+
+    const rows = Array.from(this.rows(this.selection.groupKey));
+    const rowsLen = rows.length;
+
+    const { start: rowSelStart, end: rowSelEnd } =
+      this.selection.rowsSelection!;
+
+    const isMultiRowSelection = rowSelEnd - rowSelStart > 0;
+    const focus = this.selection.focus;
+
+    const isGoingUp = direction === 'up';
+    let newStart = rowSelStart;
+    let newEnd = rowSelEnd;
+    let newFocusRowIdx = focus.rowIndex;
+
+    if (append) {
+      if (isGoingUp) {
+        if (rowSelEnd > focus.rowIndex) {
+          newStart = focus.rowIndex; // use focus as an anchor
+          newEnd = rowSelEnd - 1;
+        } else {
+          newStart = rowSelStart - 1;
+          newEnd = focus.rowIndex; // use focus as an anchor
+        }
+      } else {
+        if (rowSelStart < focus.rowIndex) {
+          newStart = rowSelStart + 1;
+          newEnd = focus.rowIndex; // use focus as an anchor
+        } else {
+          newStart = focus.rowIndex; // use focus as an anchor
+          newEnd = rowSelEnd + 1;
+        }
+      }
+    } else {
+      // if it is a multi row selection then collapse to the selection start row or to the selection corresponding to the direction end row else select the row corresponding to the direction
+      const dir = isGoingUp ? -1 : 1;
+      const newIndex = isMultiRowSelection
+        ? isGoingUp
+          ? rowSelStart
+          : rowSelEnd
+        : rowSelStart + dir;
+
+      newStart = newEnd = newFocusRowIdx = newIndex;
+    }
+
+    // clamp ranges
+    newStart = clamp(newStart, 0, rowsLen - 1);
+    newEnd = clamp(newEnd, 0, rowsLen - 1);
+    newFocusRowIdx = clamp(newFocusRowIdx, 0, rowsLen - 1);
+
+    this.selection = {
+      ...this.selection,
+      rowsSelection: {
+        start: newStart,
+        end: newEnd,
+      },
+      focus: { ...focus, rowIndex: newFocusRowIdx },
+    };
+  }
+
+  focusToCell(position: 'left' | 'right' | 'up' | 'down') {
     if (!this.selection) {
       return;
     }
@@ -674,6 +756,13 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
+  private scrollToAreaSelection() {
+    this.areaSelectionElement?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+    });
+  }
+
   public insertRowBefore(groupKey: string | undefined, rowId: string) {
     this.insertTo(groupKey, rowId, true);
   }
@@ -719,7 +808,7 @@ export class TableSelectionController implements ReactiveController {
 
   public deleteRow(rowId: string) {
     this.view.rowDelete([rowId]);
-    this.focusTo('up');
+    this.focusToCell('up');
   }
 
   private checkSelection() {
@@ -738,7 +827,14 @@ export class TableSelectionController implements ReactiveController {
     return true;
   }
 
-  isRowSelection(groupKey: string | undefined, rowIndex: number) {
+  isSelectedRowOnly() {
+    const selection = this.selection;
+    return (
+      !!selection && !!selection.rowsSelection && !selection.columnsSelection
+    );
+  }
+
+  isRowSelected(groupKey: string | undefined, rowIndex: number) {
     const selection = this.selection;
     if (!selection || selection.groupKey != groupKey) {
       return false;

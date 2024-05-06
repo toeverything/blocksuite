@@ -4,9 +4,11 @@ import { dragBetweenCoords } from '../utils/actions/drag.js';
 import { shiftClick } from '../utils/actions/edgeless.js';
 import {
   pressArrowDown,
+  pressArrowDownWithShiftKey,
   pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
+  pressArrowUpWithShiftKey,
   pressBackspace,
   pressEnter,
   pressEscape,
@@ -167,6 +169,70 @@ test.describe('row-level selection', () => {
     await pressEscape(page);
 
     await pressEscape(page);
+    await assertRowsSelection(page, [0, 0]);
+  });
+
+  test('move row selection with (up | down)', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+
+    // add two rows
+    await initDatabaseDynamicRowWithData(page, '123123', true);
+    await pressEscape(page);
+
+    await initDatabaseDynamicRowWithData(page, '123123', true);
+    await pressEscape(page);
+
+    await pressEscape(page); // switch to row selection
+
+    await assertRowsSelection(page, [1, 1]);
+
+    await pressArrowUp(page);
+    await assertRowsSelection(page, [0, 0]);
+
+    // should not allow under selection
+    await pressArrowUp(page);
+    await assertRowsSelection(page, [0, 0]);
+
+    await pressArrowDown(page);
+    await assertRowsSelection(page, [1, 1]);
+
+    // should not allow over selection
+    await pressArrowDown(page);
+    await assertRowsSelection(page, [1, 1]);
+  });
+
+  test('increment decrement row selection with shift+(up | down)', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+
+    // add two rows
+    await initDatabaseDynamicRowWithData(page, '123123', true);
+    await pressEscape(page);
+
+    await initDatabaseDynamicRowWithData(page, '123123', true);
+    await pressEscape(page);
+
+    await pressEscape(page); // switch to row selection
+
+    await pressArrowUpWithShiftKey(page);
+    await assertRowsSelection(page, [0, 1]);
+
+    await pressArrowDownWithShiftKey(page);
+    await assertRowsSelection(page, [1, 1]); // should decrement back
+
+    await pressArrowUp(page); // go to first row
+
+    await pressArrowDownWithShiftKey(page);
+    await assertRowsSelection(page, [0, 1]);
+
+    await pressArrowUpWithShiftKey(page);
     await assertRowsSelection(page, [0, 0]);
   });
 });

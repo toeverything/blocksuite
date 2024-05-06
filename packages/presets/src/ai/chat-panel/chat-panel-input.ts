@@ -12,6 +12,7 @@ import {
   ImageIcon,
 } from '../_common/icons.js';
 import { AIProvider } from '../provider.js';
+import { reportResponse } from '../utils/action-reporter.js';
 import { readBlobAsURL } from '../utils/image.js';
 import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
 
@@ -192,8 +193,10 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
         docId: doc.id,
         attachments: images,
         workspaceId: doc.collection.id,
+        host: this.host,
         stream: true,
         signal: abortController.signal,
+        where: 'chat-panel',
       });
 
       if (stream) {
@@ -319,6 +322,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
                 @click=${() => {
                   this.abortController?.abort();
                   this.updateStatus('success');
+                  reportResponse('aborted:stop');
                 }}
               >
                 ${ChatAbortIcon}

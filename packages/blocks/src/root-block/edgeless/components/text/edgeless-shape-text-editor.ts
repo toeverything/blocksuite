@@ -298,6 +298,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           word-break: ${autoWidth ? 'normal' : 'break-word'} !important;
           white-space: ${autoWidth ? 'pre' : 'pre-wrap'} !important;
         }
+
+        edgeless-shape-text-editor .inline-editor {
+          min-width: 1px;
+        }
       </style>
       <rich-text
         .yText=${this.element.text}

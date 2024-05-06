@@ -1,4 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import { PaymentRequiredError } from '@blocksuite/blocks';
 import { Slot } from '@blocksuite/store';
 
 export interface AIUserInfo {
@@ -7,6 +8,20 @@ export interface AIUserInfo {
   name: string;
   avatarUrl: string | null;
 }
+
+export type ActionEventType =
+  | 'started'
+  | 'finished'
+  | 'error'
+  | 'aborted:paywall'
+  | 'aborted:stop'
+  | 'result:insert'
+  | 'result:replace'
+  | 'result:add-page'
+  | 'result:add-note'
+  | 'result:continue-in-chat'
+  | 'result:discard'
+  | 'result:retry';
 
 /**
  * AI provider for the block suite
@@ -31,16 +46,23 @@ export class AIProvider {
     requestUpgradePlan: new Slot<{ host: EditorHost }>(),
     // when an action is requested to run in edgeless mode (show a toast in affine)
     requestRunInEdgeless: new Slot<{ host: EditorHost }>(),
-    // stream of AI actions
+    // stream of AI actions triggered by users
     actions: new Slot<{
       action: keyof BlockSuitePresets.AIActions;
       options: BlockSuitePresets.AITextActionOptions;
-      event: 'started' | 'finished' | 'error';
+      event: ActionEventType;
     }>(),
     // downstream can emit this slot to notify ai presets that user info has been updated
     userInfo: new Slot<AIUserInfo | null>(),
     // add more if needed
   };
+
+  static MAX_LOCAL_HISTORY = 10;
+  // track the history of triggered actions (in memory only)
+  private readonly actionHistory: {
+    action: keyof BlockSuitePresets.AIActions;
+    options: BlockSuitePresets.AITextActionOptions;
+  }[] = [];
 
   static provide(
     id: 'userInfo',
@@ -100,6 +122,10 @@ export class AIProvider {
         options,
         event: 'started',
       });
+      this.actionHistory.push({ action: id, options });
+      if (this.actionHistory.length > AIProvider.MAX_LOCAL_HISTORY) {
+        this.actionHistory.shift();
+      }
       // wrap the action with slot actions
       const result: BlockSuitePresets.TextStream | Promise<string> = action(
         ...args
@@ -124,6 +150,13 @@ export class AIProvider {
                 options,
                 event: 'error',
               });
+              if (err instanceof PaymentRequiredError) {
+                slots.actions.emit({
+                  action: id,
+                  options,
+                  event: 'aborted:paywall',
+                });
+              }
               throw err;
             }
           },
@@ -144,6 +177,13 @@ export class AIProvider {
               options,
               event: 'error',
             });
+            if (err instanceof PaymentRequiredError) {
+              slots.actions.emit({
+                action: id,
+                options,
+                event: 'aborted:paywall',
+              });
+            }
             throw err;
           });
       }
@@ -168,5 +208,9 @@ export class AIProvider {
 
   static get histories() {
     return AIProvider.instance.histories;
+  }
+
+  static get actionHistory() {
+    return AIProvider.instance.actionHistory;
   }
 }
