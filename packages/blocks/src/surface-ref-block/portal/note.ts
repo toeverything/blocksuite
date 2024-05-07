@@ -4,7 +4,6 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { Block, BlockModel, Doc } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -61,8 +60,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   renderPreview(model: BlockModel) {
     const doc = model.doc.blockCollection.getDoc(this.selector);
     const previewSpec = SpecProvider.getInstance().getSpec('preview');
-    assertExists(previewSpec, 'Preview spec is not found');
-    return this.host.renderSpecPortal(doc, previewSpec);
+    return this.host.renderSpecPortal(doc, previewSpec.value);
   }
 
   override connectedCallback() {
