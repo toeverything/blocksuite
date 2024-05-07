@@ -66,6 +66,10 @@ declare global {
       mindmap: string;
     }
 
+    interface BrainstormMindMap extends AITextActionOptions {
+      regenerate?: boolean;
+    }
+
     interface AIActions {
       // chat is a bit special because it's has a internally maintained session
       chat<T extends AITextActionOptions>(options: T): AIActionTextResponse<T>;
@@ -128,7 +132,7 @@ declare global {
       ): AIActionTextResponse<T>;
 
       // mindmap
-      brainstormMindmap<T extends AITextActionOptions>(
+      brainstormMindmap<T extends BrainstormMindMap>(
         options: T
       ): AIActionTextResponse<T>;
       expandMindmap<T extends ExpandMindMap>(

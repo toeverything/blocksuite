@@ -1,7 +1,7 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { AIStarIcon } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 @customElement('ai-generating-placeholder')
 class AIGeneratingPlaceholder extends WithDisposable(LitElement) {
@@ -12,7 +12,6 @@ class AIGeneratingPlaceholder extends WithDisposable(LitElement) {
       justify-content: center;
       box-sizing: border-box;
       width: 100%;
-      height: 300px;
       border-radius: 4px;
       border: 2px solid var(--affine-primary-color, #1e96eb);
       background: var(--affine-blue-50, #effaff);
@@ -28,8 +27,16 @@ class AIGeneratingPlaceholder extends WithDisposable(LitElement) {
     }
   `;
 
+  @property({ attribute: false })
+  height: number = 300;
+
   protected override render() {
-    return html`<div class="center">${AIStarIcon}</div>`;
+    return html` <style>
+        :host {
+          height: ${this.height}px;
+        }
+      </style>
+      <div class="center">${AIStarIcon}</div>`;
   }
 }
 

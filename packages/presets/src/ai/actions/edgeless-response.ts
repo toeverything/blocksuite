@@ -123,10 +123,11 @@ export function retry(panel: AffineAIPanelWidget): AIItemConfig {
 export function createInsertResp(
   handler: (host: EditorHost, ctx: CtxRecord) => void,
   host: EditorHost,
-  ctx: CtxRecord
+  ctx: CtxRecord,
+  buttonText: string = 'Insert below'
 ): AIItemConfig {
   return {
-    name: 'Insert below',
+    name: buttonText,
     icon: InsertBelowIcon,
     handler: () => {
       reportResponse('result:insert');
@@ -149,7 +150,6 @@ export const responses: {
   ) => void;
 } = {
   expandMindmap: (host, ctx) => {
-    const aiPanel = getAIPanel(host);
     const [surface] = host.doc.getBlockByFlavour(
       'affine:surface'
     ) as SurfaceBlockModel[];
@@ -159,7 +159,9 @@ export const responses: {
       node: MindMapNode;
     };
 
-    aiPanel.hide();
+    queueMicrotask(() => {
+      getAIPanel(host).hide();
+    });
 
     const mindmap = elements[0].group as MindmapElementModel;
 
@@ -185,6 +187,15 @@ export const responses: {
 
         updateNodeSize(subtree);
       });
+
+      setTimeout(() => {
+        const edgelessService = getEdgelessService(host);
+
+        edgelessService.selection.set({
+          elements: [subtree.element.id],
+          editing: false,
+        });
+      });
     }
   },
   brainstormMindmap: (host, ctx) => {
@@ -198,9 +209,9 @@ export const responses: {
     const elements = ctx.get()['selectedElements'] as EdgelessModel[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = ctx.get() as any;
-    let needTomoveMindMap = true;
-    let focus = false;
+    let newGenerated = true;
 
+    // This means regenerate
     if (isMindMapRoot(elements[0])) {
       const mindmap = elements[0].group as MindmapElementModel;
       const xywh = mindmap.tree.element.xywh;
@@ -209,8 +220,7 @@ export const responses: {
 
       if (data.node) {
         data.node.xywh = xywh;
-        needTomoveMindMap = false;
-        focus = true;
+        newGenerated = false;
       }
     }
 
@@ -225,33 +235,34 @@ export const responses: {
     const mindmap = surface.getElementById(mindmapId) as MindmapElementModel;
 
     host.doc.transact(() => {
-      const rootElement = mindmap.tree.element;
-
       mindmap.childElements.forEach(shape => {
         fitContent(shape as ShapeElementModel);
       });
+    });
 
-      if (selectionRect && needTomoveMindMap) {
-        rootElement.xywh = `[${selectionRect.x},${selectionRect.y},${rootElement.w},${rootElement.h}]`;
-
-        queueMicrotask(() => {
-          mindmap.moveTo([
-            selectionRect.x,
-            selectionRect.y,
-            selectionRect.width,
-            selectionRect.height,
-          ]);
-        });
+    queueMicrotask(() => {
+      if (newGenerated && selectionRect) {
+        mindmap.moveTo([
+          selectionRect.x,
+          selectionRect.y,
+          selectionRect.width,
+          selectionRect.height,
+        ]);
       }
+    });
 
-      if (focus) {
-        queueMicrotask(() => {
-          edgelessService.selection.set({
-            elements: [mindmap.tree.element.id],
-            editing: false,
-          });
-        });
-      }
+    // This is a workaround to make sure mindmap and other microtask are done
+    setTimeout(() => {
+      edgelessService.viewport.setViewportByBound(
+        mindmap.elementBound,
+        [20, 20, 20, 20],
+        true
+      );
+
+      edgelessService.selection.set({
+        elements: [mindmap.tree.element.id],
+        editing: false,
+      });
     });
   },
   makeItReal: (host, ctx) => {
@@ -374,20 +385,44 @@ const defaultHandler = (host: EditorHost) => {
   });
 };
 
-export function getInsertHandler<T extends keyof BlockSuitePresets.AIActions>(
+const getButtonText: {
+  [key in keyof Partial<BlockSuitePresets.AIActions>]: (
+    variants?: Omit<
+      Parameters<BlockSuitePresets.AIActions[key]>[0],
+      keyof BlockSuitePresets.AITextActionOptions
+    >
+  ) => string | undefined;
+} = {
+  brainstormMindmap: variants => {
+    return variants?.regenerate ? 'Replace' : undefined;
+  },
+};
+
+export function getInsertAndReplaceHandler<
+  T extends keyof BlockSuitePresets.AIActions,
+>(
   id: T,
   host: EditorHost,
-  ctx: CtxRecord
+  ctx: CtxRecord,
+  variants?: Omit<
+    Parameters<BlockSuitePresets.AIActions[T]>[0],
+    keyof BlockSuitePresets.AITextActionOptions
+  >
 ) {
   const handler = responses[id] ?? defaultHandler;
+  const buttonText = getButtonText[id]?.(variants) ?? undefined;
 
-  return createInsertResp(handler, host, ctx);
+  return createInsertResp(handler, host, ctx, buttonText);
 }
 
 export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
   host: EditorHost,
-  ctx: CtxRecord
+  ctx: CtxRecord,
+  variants?: Omit<
+    Parameters<BlockSuitePresets.AIActions[T]>[0],
+    keyof BlockSuitePresets.AITextActionOptions
+  >
 ): FinishConfig {
   return {
     responses: [
@@ -407,7 +442,7 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
               panel.hide();
             },
           },
-          getInsertHandler(id, host, ctx),
+          getInsertAndReplaceHandler(id, host, ctx, variants),
           retry(getAIPanel(host)),
           discard(getAIPanel(host), getEdgelessCopilotWidget(host)),
         ],

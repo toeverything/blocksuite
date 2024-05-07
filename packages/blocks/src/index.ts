@@ -118,6 +118,7 @@ export {
   generateKeyBetween,
   getElementsBound,
   GroupElementModel,
+  markdownToMindmap,
   MindmapElementModel,
   MindmapRootBlock,
   MindmapService,
