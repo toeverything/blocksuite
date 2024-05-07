@@ -1,14 +1,10 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import type { AffineAIPanelState } from '@blocksuite/blocks';
-import {
-  type AffineAIPanelWidgetConfig,
-  BlocksUtils,
-} from '@blocksuite/blocks';
-import type { BlockSelector, Doc } from '@blocksuite/store';
+import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
+import { type Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { keyed } from 'lit/directives/keyed.js';
 
 import { CustomPageEditorBlockSpecs } from '../utils/custom-specs.js';
 import { markDownToDoc } from '../utils/markdown-utils.js';
@@ -56,51 +52,58 @@ export class AIAnswerTextPreview extends WithDisposable(LitElement) {
   @property({ attribute: false })
   answer!: string;
 
-  private _previewDoc: Doc | null = null;
+  private _doc!: Doc;
+  private _answers: string[] = [];
+  private _timer?: ReturnType<typeof setInterval> | null = null;
 
-  private _selector: BlockSelector = block =>
-    BlocksUtils.matchFlavours(block.model, [
-      'affine:page',
-      'affine:note',
-      'affine:surface',
-      'affine:paragraph',
-      'affine:code',
-      'affine:list',
-      'affine:divider',
-    ]);
-
-  override updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
+  override shouldUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('answer')) {
-      markDownToDoc(this.host, this.answer)
-        .then(doc => {
-          this._previewDoc = doc.blockCollection.getDoc(this._selector);
-          this.disposables.add(() => {
-            doc.blockCollection.clearSelector(this._selector);
-          });
-          this._previewDoc.awarenessStore.setReadonly(
-            this._previewDoc.blockCollection,
-            true
-          );
-          this.requestUpdate();
-        })
-        .catch(console.error);
+      this._answers.push(this.answer);
+      return false;
     }
+
+    return true;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._answers.push(this.answer);
+    const updateDoc = () => {
+      if (this._answers.length > 0) {
+        const latestAnswer = this._answers.pop();
+        this._answers = [];
+        if (latestAnswer) {
+          markDownToDoc(this.host, latestAnswer)
+            .then(doc => {
+              this._doc = doc;
+              this._doc.awarenessStore.setReadonly(
+                this._doc.blockCollection,
+                true
+              );
+              this.requestUpdate();
+            })
+            .catch(console.error);
+        }
+      }
+    };
+
+    updateDoc();
+
+    this._timer = setInterval(updateDoc, 1000);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._previewDoc = null;
+    if (this._timer) {
+      clearInterval(this._timer);
+      this._timer = null;
+    }
   }
 
   override render() {
-    if (!this._previewDoc) return nothing;
     return html`
       <div class="ai-answer-text-editor affine-page-viewport">
-        ${this.host.renderSpecPortal(
-          this._previewDoc,
-          CustomPageEditorBlockSpecs
-        )}
+        ${this.host.renderSpecPortal(this._doc, CustomPageEditorBlockSpecs)}
       </div>
     `;
   }
@@ -177,13 +180,10 @@ export class AIAnswerText extends LitElement {
         }
       </style>
       <div class=${classes} @wheel=${this._onWheel}>
-        ${keyed(
-          this.answer,
-          html`<ai-answer-text-preview
-            .host=${this.host}
-            .answer=${this.answer}
-          ></ai-answer-text-preview>`
-        )}
+        <ai-answer-text-preview
+          .host=${this.host}
+          .answer=${this.answer}
+        ></ai-answer-text-preview>
       </div>
     `;
   }
