@@ -37,6 +37,7 @@ import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 import { bindTextStream } from './doc-handler.js';
 import type { CtxRecord } from './edgeless-response.js';
 import {
+  actionToErrorResponse,
   actionToResponse,
   getCopilotSelectedElems,
   getEdgelessCopilotWidget,
@@ -292,6 +293,13 @@ function updateEdgelessAIPanelConfig<
     customInput
   )(host, ctx);
   config.finishStateConfig = actionToResponse(id, host, ctx, variants);
+  config.errorStateConfig = actionToErrorResponse(
+    aiPanel,
+    id,
+    host,
+    ctx,
+    variants
+  );
   config.copy = {
     allowed: !EXCLUDING_COPY_ACTIONS.includes(id),
     onCopy: () => {

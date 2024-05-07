@@ -9,7 +9,7 @@ import {
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import type { Doc } from '@blocksuite/store';
 import { DocCollection, Schema } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
@@ -23,8 +23,12 @@ export const createSlidesRenderer: (
   }
 ) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, ctx) => {
   return (answer, state) => {
-    if (state !== 'finished') {
+    if (state === 'generating') {
       return html`<ai-generating-placeholder></ai-generating-placeholder>`;
+    }
+
+    if (state !== 'finished' && state !== 'error') {
+      return nothing;
     }
 
     return html`<style>

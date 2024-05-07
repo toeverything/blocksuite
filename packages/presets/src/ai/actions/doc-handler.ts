@@ -6,7 +6,12 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { buildCopyConfig, buildFinishConfig, getAIPanel } from '../ai-panel.js';
+import {
+  buildCopyConfig,
+  buildErrorConfig,
+  buildFinishConfig,
+  getAIPanel,
+} from '../ai-panel.js';
 import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
 import { reportResponse } from '../utils/action-reporter.js';
@@ -144,6 +149,7 @@ function updateAIPanelConfig<T extends keyof BlockSuitePresets.AIActions>(
   config.generateAnswer = actionToGenerateAnswer(id, variants)(host);
   config.answerRenderer = createTextRenderer(host, 320);
   config.finishStateConfig = buildFinishConfig(aiPanel);
+  config.errorStateConfig = buildErrorConfig(aiPanel);
   config.copy = buildCopyConfig(aiPanel);
   config.discardCallback = () => {
     aiPanel.hide();

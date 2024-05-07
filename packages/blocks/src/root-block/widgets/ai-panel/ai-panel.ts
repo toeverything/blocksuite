@@ -402,7 +402,8 @@ export class AffineAIPanelWidget extends WidgetElement {
           <ai-panel-error
             .config=${config.errorStateConfig}
             .copy=${config.copy}
-            .showTip=${!!this.answer}
+            .withAnswer=${!!this.answer}
+            .host=${this.host}
           >
             ${this.answer && config.answerRenderer(this.answer, this.state)}
           </ai-panel-error>

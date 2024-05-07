@@ -23,8 +23,12 @@ export const createMindmapRenderer: (
   style?: MindmapStyle
 ) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, ctx, style) => {
   return (answer, state) => {
-    if (state !== 'finished') {
+    if (state === 'generating') {
       return html`<ai-generating-placeholder></ai-generating-placeholder>`;
+    }
+
+    if (state !== 'finished' && state !== 'error') {
+      return nothing;
     }
 
     return html`<mini-mindmap-preview
