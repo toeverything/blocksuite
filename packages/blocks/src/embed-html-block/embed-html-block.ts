@@ -30,8 +30,8 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   @state()
   private _showOverlay = true;
 
-  @query('iframe')
-  private _iframe!: HTMLIFrameElement;
+  @query('.embed-html-block-iframe-wrapper')
+  private _iframeWrapper!: HTMLDivElement;
 
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
@@ -61,7 +61,11 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   }
 
   open = () => {
-    this._iframe.requestFullscreen().catch(console.error);
+    this._iframeWrapper?.requestFullscreen().catch(console.error);
+  };
+
+  close = () => {
+    document.exitFullscreen().catch(console.error);
   };
 
   refreshData = () => {};
@@ -121,9 +125,9 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
 
     const htmlSrc = `
       <style>
-        body { 
+        body {
           margin: 0;
-        } 
+        }
       </style>
       ${this.model.html}
     `;
@@ -147,13 +151,19 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
         >
           <div class="affine-embed-html">
             <div class="affine-embed-html-iframe-container">
-              <iframe
-                class="embed-html-block-iframe"
-                sandbox="allow-scripts"
-                scrolling="no"
-                allowfullscreen
-                .srcdoc=${htmlSrc}
-              ></iframe>
+              <div class="embed-html-block-iframe-wrapper" allowfullscreen>
+                <iframe
+                  class="embed-html-block-iframe"
+                  sandbox="allow-scripts"
+                  scrolling="no"
+                  .srcdoc=${htmlSrc}
+                ></iframe>
+                <div class="iframe-tip">
+                  Press&nbsp;
+                  <button class="key" @click=${this.close}>ESC</button>
+                  &nbsp;to&nbsp;close
+                </div>
+              </div>
 
               <div
                 class=${classMap({

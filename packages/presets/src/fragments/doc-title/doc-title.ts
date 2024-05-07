@@ -144,9 +144,13 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       () => (this._isComposing = false)
     );
 
-    this._rootModel.title.yText.observe(() => {
+    const updateMetaTitle = () => {
       this._updateTitleInMeta();
       this.requestUpdate();
+    };
+    this._rootModel.title.yText.observe(updateMetaTitle);
+    this._disposables.add(() => {
+      this._rootModel.title.yText.unobserve(updateMetaTitle);
     });
   }
 

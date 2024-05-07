@@ -128,25 +128,29 @@ export class AffineAIPanelWidget extends WidgetElement {
   };
 
   hide = () => {
+    this.state = 'hidden';
     this._resetAbortController();
     this._stopAutoUpdate?.();
-    this.state = 'hidden';
     this._inputText = null;
     this._answer = null;
     this._stopAutoUpdate = undefined;
     this.config?.hideCallback?.();
   };
 
-  discard = (
-    discardCallback: () => void = this._discardCallback,
-    cancelCallback: () => void = this._cancelCallback
-  ) => {
+  discard = () => {
     if ((this.state === 'finished' || this.state === 'error') && !this.answer) {
-      discardCallback();
+      this._discardCallback();
+      return;
+    }
+    if (this.state === 'input') {
+      this.hide();
       return;
     }
     this._clearDiscardModal();
-    this._discardModal = toggleDiscardModal(discardCallback, cancelCallback);
+    this._discardModal = toggleDiscardModal(
+      this._discardCallback,
+      this._cancelCallback
+    );
   };
 
   /**
@@ -195,11 +199,16 @@ export class AffineAIPanelWidget extends WidgetElement {
   stopGenerating = () => {
     this._abortController.abort();
     this.state = 'finished';
+    if (!this.answer) {
+      this.hide();
+    }
   };
 
   private _abortController = new AbortController();
   private _resetAbortController = () => {
-    this._abortController.abort();
+    if (this.state === 'generating') {
+      this._abortController.abort();
+    }
     this._abortController = new AbortController();
   };
 
@@ -393,7 +402,8 @@ export class AffineAIPanelWidget extends WidgetElement {
           <ai-panel-error
             .config=${config.errorStateConfig}
             .copy=${config.copy}
-            .showTip=${!!this.answer}
+            .withAnswer=${!!this.answer}
+            .host=${this.host}
           >
             ${this.answer && config.answerRenderer(this.answer, this.state)}
           </ai-panel-error>

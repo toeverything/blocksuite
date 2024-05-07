@@ -47,10 +47,42 @@ export const styles = css`
     overflow: hidden;
   }
 
-  .affine-embed-html-iframe-container > iframe {
+  .embed-html-block-iframe-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .embed-html-block-iframe-wrapper > iframe {
     width: 100%;
     height: 100%;
     border: none;
+  }
+
+  .embed-html-block-iframe-wrapper > .iframe-tip {
+    display: none;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    bottom: 30px;
+    transform: translate3d(-50%, 0, 0);
+    font-weight: 500;
+    font-style: normal;
+    font-size: var(--affine-font-sm);
+    color: var(--affine-text-secondary-color);
+  }
+  .embed-html-block-iframe-wrapper > .iframe-tip > .key {
+    width: 48px;
+    height: 28px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--affine-white);
+    border: 1px solid var(--affine-black-10);
+    background: var(--affine-primary-color);
+  }
+  .embed-html-block-iframe-wrapper:fullscreen > .iframe-tip {
+    display: flex;
   }
 
   .affine-embed-html-iframe-overlay {

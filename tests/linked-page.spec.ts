@@ -6,6 +6,7 @@ import { dragBetweenIndices } from './utils/actions/drag.js';
 import {
   copyByKeyboard,
   pasteByKeyboard,
+  pressArrowLeft,
   pressArrowRight,
   pressBackspace,
   pressEnter,
@@ -840,4 +841,34 @@ test('should [[Selected text]] converted to linked page', async ({ page }) => {
   );
   await switchToPage(page, '3');
   await assertTitle(page, '2');
+});
+
+test('add reference node before the other reference node', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+
+  const firstRefNode = page.locator('affine-reference').nth(0);
+
+  await type(page, '@bbb');
+  await pressEnter(page);
+
+  expect(await firstRefNode.textContent()).toEqual(
+    expect.stringContaining('bbb')
+  );
+  expect(await firstRefNode.textContent()).not.toEqual(
+    expect.stringContaining('ccc')
+  );
+
+  await pressArrowLeft(page, 3);
+  await type(page, '@ccc');
+  await pressEnter(page);
+
+  expect(await firstRefNode.textContent()).not.toEqual(
+    expect.stringContaining('bbb')
+  );
+  expect(await firstRefNode.textContent()).toEqual(
+    expect.stringContaining('ccc')
+  );
 });

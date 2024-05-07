@@ -117,6 +117,7 @@ export class RootService extends BlockService<RootBlockModel> {
 
   override unmounted() {
     this.editSession.dispose();
+    this.fontLoader.clear();
   }
 
   override mounted() {

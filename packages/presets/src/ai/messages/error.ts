@@ -103,7 +103,7 @@ export const PaymentRequiredErrorRenderer = (host: EditorHost) => html`
 export const GeneralErrorRenderer = (
   text: TemplateResult<1> = html`An error occurred, If this issue persists
     please let us know.
-    <a href="mailto:contact@toeverything.info"> contact@toeverything.info </a>`,
+    <a href="mailto:support@toeverything.info"> support@toeverything.info </a>`,
   template: TemplateResult<1> = html`${nothing}`
 ) => html` <ai-error-wrapper .text=${text}>${template}</ai-error-wrapper>`;
 

@@ -1,7 +1,7 @@
 import './_common/generating-placeholder.js';
 
 import { type AffineAIPanelWidgetConfig } from '@blocksuite/blocks';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { preprocessHtml } from '../utils/html.js';
@@ -47,8 +47,12 @@ declare global {
 
 export const createIframeRenderer: AffineAIPanelWidgetConfig['answerRenderer'] =
   (answer, state) => {
-    if (state !== 'finished') {
+    if (state === 'generating') {
       return html`<ai-generating-placeholder></ai-generating-placeholder>`;
+    }
+
+    if (state !== 'finished' && state !== 'error') {
+      return nothing;
     }
 
     const template = html`<iframe
@@ -64,8 +68,12 @@ export const createIframeRenderer: AffineAIPanelWidgetConfig['answerRenderer'] =
 
 export const createImageRenderer: AffineAIPanelWidgetConfig['answerRenderer'] =
   (answer, state) => {
-    if (state !== 'finished') {
+    if (state === 'generating') {
       return html`<ai-generating-placeholder></ai-generating-placeholder>`;
+    }
+
+    if (state !== 'finished' && state !== 'error') {
+      return nothing;
     }
 
     const template = html`<img class="ai-answer-image" src=${answer}></img>`;

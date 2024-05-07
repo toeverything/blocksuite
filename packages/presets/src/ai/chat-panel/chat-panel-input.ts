@@ -197,6 +197,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
         stream: true,
         signal: abortController.signal,
         where: 'chat-panel',
+        control: 'chat-send',
       });
 
       if (stream) {
@@ -219,6 +220,10 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       this.abortController = undefined;
     }
   };
+
+  private _addImages(images: File[]) {
+    this.images = [...this.images, ...images].slice(0, MaximumImageCount);
+  }
 
   protected override render() {
     return html`<style>
@@ -299,6 +304,19 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
           @blur=${() => {
             this.focused = false;
           }}
+          @paste=${(event: ClipboardEvent) => {
+            const items = event.clipboardData?.items;
+            if (!items) return;
+
+            for (const index in items) {
+              const item = items[index];
+              if (item.kind === 'file' && item.type.indexOf('image') >= 0) {
+                const blob = item.getAsFile();
+                if (!blob) continue;
+                this._addImages([blob]);
+              }
+            }
+          }}
         ></textarea>
         <div class="chat-panel-input-actions">
           <div
@@ -309,10 +327,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
                 multiple: true,
               });
               if (!images) return;
-              this.images = [...this.images, ...images].slice(
-                0,
-                MaximumImageCount
-              );
+              this._addImages(images);
             }}
           >
             ${ImageIcon}

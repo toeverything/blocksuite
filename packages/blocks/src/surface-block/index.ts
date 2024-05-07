@@ -34,6 +34,7 @@ export { TextElementModel } from './element-model/text.js';
 export * from './elements/index.js';
 export { ShapeType } from './elements/shape/consts.js';
 export {
+  markdownToMindmap,
   MindmapRootBlock,
   MindmapService,
   MindmapSurfaceBlock,

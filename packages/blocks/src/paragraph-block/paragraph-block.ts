@@ -73,8 +73,10 @@ export class ParagraphBlockComponent extends BlockElement<
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(this._updatePlaceholder);
-    this.host.selection.slots.changed.on(this._updatePlaceholder);
+    this._disposables.add(this.model.propsUpdated.on(this._updatePlaceholder));
+    this._disposables.add(
+      this.host.selection.slots.changed.on(this._updatePlaceholder)
+    );
 
     this.updateComplete
       .then(() => {

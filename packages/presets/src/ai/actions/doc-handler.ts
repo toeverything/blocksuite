@@ -6,16 +6,22 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { buildCopyConfig, buildFinishConfig, getAIPanel } from '../ai-panel.js';
+import {
+  buildCopyConfig,
+  buildErrorConfig,
+  buildFinishConfig,
+  getAIPanel,
+} from '../ai-panel.js';
 import { createTextRenderer } from '../messages/text.js';
 import { AIProvider } from '../provider.js';
+import { reportResponse } from '../utils/action-reporter.js';
 import {
   getSelectedImagesAsBlobs,
   getSelectedTextContent,
   getSelections,
 } from '../utils/selection-utils.js';
 
-export function bindEventSource(
+export function bindTextStream(
   stream: BlockSuitePresets.TextStream,
   {
     update,
@@ -29,9 +35,12 @@ export function bindEventSource(
 ) {
   (async () => {
     let answer = '';
+    signal?.addEventListener('abort', () => {
+      finish('aborted');
+      reportResponse('aborted:stop');
+    });
     for await (const data of stream) {
       if (signal?.aborted) {
-        finish('aborted');
         return;
       }
       answer += data;
@@ -50,6 +59,7 @@ export function bindEventSource(
 
 export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
+  signal?: AbortSignal,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
@@ -69,12 +79,17 @@ export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
         // for now if there are more than one selected blocks, we will not omit the attachments
         const sendAttachments =
           selections?.selectedBlocks?.length === 1 && attachments.length > 0;
+        const models = selections?.selectedBlocks?.map(block => block.model);
         const options = {
           ...variants,
           attachments: sendAttachments ? attachments : undefined,
           input: sendAttachments ? '' : markdown,
           stream: true,
           host,
+          models,
+          signal,
+          control: 'format-bar',
+          where: 'ai-panel',
           docId: host.doc.id,
           workspaceId: host.doc.collection.id,
         } as Parameters<typeof action>[0];
@@ -109,9 +124,9 @@ export function actionToGenerateAnswer<
     }) => {
       const { selectedBlocks: blocks } = getSelections(host);
       if (!blocks || blocks.length === 0) return;
-      const stream = actionToStream(id, variants)?.(host);
+      const stream = actionToStream(id, signal, variants)?.(host);
       if (!stream) return;
-      bindEventSource(stream, { update, finish, signal });
+      bindTextStream(stream, { update, finish, signal });
     };
   };
 }
@@ -134,7 +149,12 @@ function updateAIPanelConfig<T extends keyof BlockSuitePresets.AIActions>(
   config.generateAnswer = actionToGenerateAnswer(id, variants)(host);
   config.answerRenderer = createTextRenderer(host, 320);
   config.finishStateConfig = buildFinishConfig(aiPanel);
+  config.errorStateConfig = buildErrorConfig(aiPanel);
   config.copy = buildCopyConfig(aiPanel);
+  config.discardCallback = () => {
+    aiPanel.hide();
+    reportResponse('result:discard');
+  };
 }
 
 export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
@@ -153,8 +173,8 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   };
 }
 
-export function handleAskAIAction(panel: AffineAIPanelWidget) {
-  const host = panel.host;
+export function handleInlineAskAIAction(host: EditorHost) {
+  const panel = getAIPanel(host);
   const selection = host.selection.find('text');
   const lastBlockPath = selection ? selection.to?.path ?? selection.path : null;
   if (!lastBlockPath) return;
@@ -171,11 +191,12 @@ export function handleAskAIAction(panel: AffineAIPanelWidget) {
       input,
       stream: true,
       host,
-      where: 'ai-panel',
+      where: 'inline-chat-panel',
+      control: 'chat-send',
       docId: host.doc.id,
       workspaceId: host.doc.collection.id,
     });
-    bindEventSource(stream, { update, finish, signal });
+    bindTextStream(stream, { update, finish, signal });
   };
   assertExists(panel.config);
   panel.config.generateAnswer = generateAnswer;

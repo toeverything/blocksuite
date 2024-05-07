@@ -1,6 +1,5 @@
-import { toTextStream } from '@blocksuite/presets';
-
 import { CopilotClient } from './copilot-client';
+import { toTextStream } from './event-source';
 
 const TIMEOUT = 5000;
 

@@ -8,7 +8,7 @@ type RootBlockProps = {
 export class RootBlockModel extends BlockModel<RootBlockProps> {
   constructor() {
     super();
-    this.created.on(() => {
+    this.created.once(() => {
       this.doc.slots.rootAdded.on(id => {
         const model = this.doc.getBlockById(id);
         if (model instanceof RootBlockModel) {

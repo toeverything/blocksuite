@@ -34,6 +34,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       top: 0;
       z-index: 10;
       transform-origin: left top;
+      font-kerning: none;
       border: ${EdgelessTextEditor.BORDER_WIDTH}px solid
         var(--affine-primary-color, #1e96eb);
       border-radius: 4px;

@@ -19,6 +19,7 @@ export type AIPanelAnswerConfig = {
 export interface AIPanelErrorConfig {
   login: () => void;
   upgrade: () => void;
+  cancel: () => void;
   responses: AIItemGroupConfig[];
   error?: AIError;
 }

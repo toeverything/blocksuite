@@ -23,6 +23,9 @@ export function buildEdgelessPanelConfig(
         AIProvider.slots.requestLogin.emit({ host: panel.host });
         panel.hide();
       },
+      cancel: () => {
+        panel.hide();
+      },
       responses: [],
     },
     copy: {

@@ -332,7 +332,9 @@ const generateGroup: AIItemGroupConfig = {
       name: 'Regenerate mind map',
       icon: AIMindMapIcon,
       showWhen: mindmapRootShowWhen,
-      handler: actionToHandler('brainstormMindmap'),
+      handler: actionToHandler('brainstormMindmap', {
+        regenerate: true,
+      }),
     },
     {
       name: 'Generate presentation',

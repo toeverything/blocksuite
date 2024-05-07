@@ -283,7 +283,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
     left = clamp(x, 10, width - 10);
-    top = clamp(top, 10, height - 100);
+    top = clamp(top, 10, height - 150);
 
     this.left = left;
     this.top = top;

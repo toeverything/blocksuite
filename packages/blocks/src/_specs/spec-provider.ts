@@ -1,4 +1,7 @@
 import type { BlockSpec } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
+
+import { SpecBuilder } from './spec-builder.js';
 
 export class SpecProvider {
   static instance: SpecProvider;
@@ -25,7 +28,9 @@ export class SpecProvider {
   }
 
   getSpec(id: string) {
-    return this.specMap.get(id);
+    const spec = this.specMap.get(id);
+    assertExists(spec, `Spec not found for ${id}`);
+    return new SpecBuilder(spec);
   }
 
   clearSpec(id: string) {

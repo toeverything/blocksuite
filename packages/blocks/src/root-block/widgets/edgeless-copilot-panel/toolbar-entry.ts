@@ -5,7 +5,6 @@ import { customElement, property } from 'lit/decorators.js';
 import type { AIItemGroupConfig } from '../../../_common/components/ai-item/types.js';
 import { AIStarIcon } from '../../../_common/icons/ai.js';
 import { GroupLikeModel } from '../../../surface-block/element-model/base.js';
-import { getElementsBound } from '../../../surface-block/index.js';
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { isFrameBlock } from '../../edgeless/utils/query.js';
@@ -42,7 +41,7 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   groups!: AIItemGroupConfig[];
 
   private _showCopilotPanel() {
-    let selectedElements = this.edgeless.service.selection.elements;
+    const selectedElements = this.edgeless.service.selection.elements;
     const toBeSelected = new Set(selectedElements);
     selectedElements.forEach(element => {
       if (isFrameBlock(element)) {
@@ -54,27 +53,12 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
       }
     });
 
-    selectedElements = Array.from(toBeSelected);
     this.edgeless.service.tool.setEdgelessTool({
       type: 'copilot',
     });
-
-    const currentController = this.edgeless.tools.controllers[
-      'copilot'
-    ] as CopilotSelectionController;
-    this.edgeless.service.selection.clear();
-    const padding = 10 / this.edgeless.service.zoom;
-    const bounds = getElementsBound(
-      selectedElements.map(e => e.elementBound)
-    ).expand(padding);
-    currentController.dragStartPoint = bounds.tl as [number, number];
-    currentController.dragLastPoint = bounds.br as [number, number];
-    this.edgeless.service.selection.set({
-      elements: selectedElements.map(e => e.id),
-      editing: false,
-      inoperable: true,
-    });
-    currentController.draggingAreaUpdated.emit(true);
+    (
+      this.edgeless.tools.controllers['copilot'] as CopilotSelectionController
+    ).updateSelectionWith(Array.from(toBeSelected), 10);
   }
 
   override render() {

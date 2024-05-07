@@ -220,6 +220,8 @@ export class BlockElement<
     this.service = this.host.std.spec.getService(this.model.flavour);
     this.path = this.host.view.calculatePath(this);
 
+    this._disposables.add(disposable);
+
     this._disposables.add(
       this.model.propsUpdated.on(() => {
         this.requestUpdate();
