@@ -876,7 +876,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             angle = calcAngleWithRotation(
               target,
               point,
-              new DOMRect(left, top, width, height),
+              new DOMRect(
+                left + this.edgeless.viewport.left,
+                top + this.edgeless.viewport.top,
+                width,
+                height
+              ),
               this._selectedRect.rotate
             );
           }

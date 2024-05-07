@@ -10,7 +10,10 @@ import {
   initEmptyEdgelessState,
   resizeElementByHandle,
 } from '../utils/actions/index.js';
-import { assertEdgelessSelectedRect } from '../utils/asserts.js';
+import {
+  assertEdgelessSelectedReactCursor,
+  assertEdgelessSelectedRect,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test.describe('resizing shapes and aspect ratio will be maintained', () => {
@@ -74,5 +77,123 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
 
     await page.mouse.move(320, 220);
     await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
+  });
+});
+
+test.describe('cursor style', () => {
+  test('editor is aligned at the start of viewport', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 200, y: 200 },
+      { x: 300, y: 300 }
+    );
+    await page.mouse.click(250, 250);
+    await assertEdgelessSelectedRect(page, [200, 200, 100, 100]);
+
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'top',
+      cursor: 'ns-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'right',
+      cursor: 'ew-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'bottom',
+      cursor: 'ns-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'left',
+      cursor: 'ew-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'top-left',
+      cursor: 'nwse-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'top-right',
+      cursor: 'nesw-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'bottom-left',
+      cursor: 'nesw-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'bottom-right',
+      cursor: 'nwse-resize',
+    });
+  });
+
+  test('editor is not aligned at the start of viewport', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
+
+    await page.addStyleTag({
+      content: 'body { padding: 100px 150px; }',
+    });
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 200, y: 200 },
+      { x: 300, y: 300 }
+    );
+    await page.mouse.click(250, 250);
+    await assertEdgelessSelectedRect(page, [200, 200, 100, 100]);
+
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'top',
+      cursor: 'ns-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'right',
+      cursor: 'ew-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'bottom',
+      cursor: 'ns-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'left',
+      cursor: 'ew-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'top-left',
+      cursor: 'nwse-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'top-right',
+      cursor: 'nesw-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'bottom-left',
+      cursor: 'nesw-resize',
+    });
+    await assertEdgelessSelectedReactCursor(page, {
+      mode: 'resize',
+      handle: 'bottom-right',
+      cursor: 'nwse-resize',
+    });
   });
 });
