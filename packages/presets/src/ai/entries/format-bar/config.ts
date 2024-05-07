@@ -15,6 +15,7 @@ import {
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
+  MakeItRealIcon,
   matchFlavours,
   SelectionIcon,
   ShorterIcon,
@@ -316,6 +317,13 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
       showWhen: textBlockShowWhen,
       handler: edgelessHandler('createSlides'),
       beta: true,
+    },
+    {
+      name: 'Make it real',
+      icon: MakeItRealIcon,
+      beta: true,
+      showWhen: textBlockShowWhen,
+      handler: edgelessHandler('makeItReal'),
     },
     {
       name: 'Find actions',
