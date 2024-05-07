@@ -588,6 +588,10 @@ export class EdgelessRootBlockComponent extends BlockElement<
     };
 
     onPixelRatioChange();
+
+    this._disposables.add(() => {
+      media?.removeEventListener('change', onPixelRatioChange);
+    });
   }
 
   private _initFontloader() {

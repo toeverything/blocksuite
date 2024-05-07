@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
 
@@ -67,18 +67,27 @@ export function isFrameInner(
 
 export class EdgelessFrameManager {
   private _innerMap = new Map<string, boolean>();
+  private _disposable = new DisposableGroup();
 
   constructor(private _rootService: EdgelessRootService) {
-    this._rootService.doc.slots.blockUpdated.on(e => {
-      const { id, type } = e;
-      const element = this._rootService.getElementById(id);
-      if (!isFrameBlock(element)) return;
-      if (type === 'add') {
-        this._innerMap.set(id, isFrameInner(element, this._rootService.frames));
-      } else if (type === 'update' && e.props.key === 'xywh') {
-        this._innerMap.set(id, isFrameInner(element, this._rootService.frames));
-      }
-    });
+    this._disposable.add(
+      this._rootService.doc.slots.blockUpdated.on(e => {
+        const { id, type } = e;
+        const element = this._rootService.getElementById(id);
+        if (!isFrameBlock(element)) return;
+        if (type === 'add') {
+          this._innerMap.set(
+            id,
+            isFrameInner(element, this._rootService.frames)
+          );
+        } else if (type === 'update' && e.props.key === 'xywh') {
+          this._innerMap.set(
+            id,
+            isFrameInner(element, this._rootService.frames)
+          );
+        }
+      })
+    );
   }
 
   getFrameInner(frame: FrameBlockModel) {
@@ -150,6 +159,10 @@ export class EdgelessFrameManager {
     });
 
     return this._rootService.getElementById(id);
+  }
+
+  dispose() {
+    this._disposable.dispose();
   }
 }
 
