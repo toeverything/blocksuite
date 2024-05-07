@@ -292,6 +292,19 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     this.messagesContainer.scrollTo(0, this.messagesContainer.scrollHeight);
   }
 
+  protected override firstUpdated(): void {
+    //FIXME: now text-renderer renders every one second, so better wait 1.2s to scroll down
+    const observer = new MutationObserver(() => {
+      setTimeout(() => this.scrollToDown(), 1200);
+    });
+
+    observer.observe(this.messagesContainer, {
+      childList: true,
+      subtree: true,
+    });
+    this.disposables.add(() => observer.disconnect());
+  }
+
   renderEditorActions(item: ChatMessage, isLast: boolean) {
     if (item.role !== 'assistant') return nothing;
 
