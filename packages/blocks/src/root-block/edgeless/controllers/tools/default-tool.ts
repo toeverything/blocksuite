@@ -299,7 +299,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerClick(e: PointerEventState) {
-    const selected = this._pick(e.x, e.y);
+    const selected = this._pick(e.x, e.y, {
+      ignoreTransparent: true,
+    });
 
     if (selected) {
       this._handleClickOnSelected(selected, e);
@@ -332,7 +334,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     const selected = this._pick(e.x, e.y, {
-      pierce: true,
       expand: 10,
     });
     if (!selected) {

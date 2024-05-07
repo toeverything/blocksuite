@@ -14,6 +14,7 @@ export type ActionEventType =
   | 'finished'
   | 'error'
   | 'aborted:paywall'
+  | 'aborted:server-error'
   | 'aborted:stop'
   | 'result:insert'
   | 'result:replace'
@@ -155,6 +156,12 @@ export class AIProvider {
                   action: id,
                   options,
                   event: 'aborted:paywall',
+                });
+              } else {
+                slots.actions.emit({
+                  action: id,
+                  options,
+                  event: 'aborted:server-error',
                 });
               }
               throw err;

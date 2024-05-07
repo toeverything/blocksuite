@@ -1,4 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
+import type { ElementModel } from '@blocksuite/blocks';
+import type { BlockModel } from '@blocksuite/store';
 
 export const translateLangs = [
   'English',
@@ -32,8 +34,12 @@ declare global {
       // action's context
       docId: string;
       workspaceId: string;
+
+      // internal context
       host: EditorHost;
-      where: 'chat-panel' | 'ai-panel';
+      models?: (BlockModel | ElementModel)[];
+      control: 'format-bar' | 'slash-menu' | 'chat-send';
+      where: 'chat-panel' | 'inline-chat-panel' | 'ai-panel';
     }
 
     interface AIImageActionOptions extends AITextActionOptions {

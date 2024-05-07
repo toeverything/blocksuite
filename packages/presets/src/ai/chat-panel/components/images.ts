@@ -6,11 +6,11 @@ export const renderImages = (images: string[]) => {
       .images-container {
         display: flex;
         gap: 12px;
+        flex-direction: column;
+        margin-bottom: 8px;
       }
       .image-container {
         border-radius: 4px;
-        width: 155px;
-        height: 129px;
         overflow: hidden;
         position: relative;
         display: flex;

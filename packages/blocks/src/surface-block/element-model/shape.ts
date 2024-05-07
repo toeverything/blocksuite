@@ -2,9 +2,8 @@ import { DocCollection, type Y } from '@blocksuite/store';
 
 import type { HitTestOptions } from '../../root-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
-import type { SerializedXYWH } from '../index.js';
+import type { IBound, SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
-import { isPointIn } from '../utils/math-utils.js';
 import type { PointLocation } from '../utils/point-location.js';
 import { type IVec2 } from '../utils/vec.js';
 import { type BaseProps, ElementModel } from './base.js';
@@ -147,15 +146,13 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   @yfield(false)
   maxWidth: false | number = false;
 
-  override hitTest(x: number, y: number, options: HitTestOptions) {
-    // If pierce is false, only check if the point is in the bounding box
-    const pierce = options.pierce ?? true;
-    if (!pierce) {
-      return isPointIn(this, x, y);
-    }
+  textBound: IBound | null = null;
 
-    options.ignoreTransparent = options.ignoreTransparent ?? true;
-    return shapeMethods[this.shapeType].hitTest.call(this, x, y, options);
+  override hitTest(x: number, y: number, options: HitTestOptions) {
+    return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
+      ...options,
+      ignoreTransparent: options.ignoreTransparent ?? true,
+    });
   }
 
   override containedByBounds(bounds: Bound) {

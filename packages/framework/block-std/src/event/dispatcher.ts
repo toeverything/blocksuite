@@ -293,7 +293,12 @@ export class UIEventDispatcher {
               })
             )
           );
-        }
+        },
+        eventName === 'wheel'
+          ? {
+              passive: false,
+            }
+          : undefined
       );
     });
 

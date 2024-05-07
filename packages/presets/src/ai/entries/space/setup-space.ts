@@ -1,6 +1,6 @@
 import { type AffineAIPanelWidget } from '@blocksuite/blocks';
 
-import { handleAskAIAction } from '../../actions/handler.js';
+import { handleInlineAskAIAction } from '../../actions/doc-handler.js';
 import { AIProvider } from '../../provider.js';
 
 export function setupSpaceEntry(panel: AffineAIPanelWidget) {
@@ -18,7 +18,7 @@ export function setupSpaceEntry(panel: AffineAIPanelWidget) {
         if (!block?.model?.text || block.model.text?.length > 0) return;
 
         keyboardState.raw.preventDefault();
-        handleAskAIAction(panel);
+        handleInlineAskAIAction(host);
       }
     }
   });

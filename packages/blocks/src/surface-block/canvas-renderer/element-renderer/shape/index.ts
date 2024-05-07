@@ -1,7 +1,9 @@
+import type { IBound } from '../../../consts.js';
 import type {
   ShapeElementModel,
   ShapeType,
 } from '../../../element-model/shape.js';
+import { Bound } from '../../../utils/bound.js';
 import type { Renderer } from '../../renderer.js';
 import {
   deltaInsertsToChunks,
@@ -54,6 +56,8 @@ function renderText(
   renderer: Renderer
 ) {
   const {
+    x,
+    y,
     text,
     color,
     fontSize,
@@ -114,4 +118,14 @@ function renderText(
       ctx.restore();
     }
   }
+
+  const bound = new Bound(
+    x + (w - maxLineWidth) / 2,
+    y + vertOffset - 2,
+    maxLineWidth,
+    lineHeight * lines.length
+  ) as IBound;
+
+  bound.rotate = model.rotate ?? 0;
+  model.textBound = bound;
 }

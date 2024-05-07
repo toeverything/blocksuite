@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { handleAskAIAction } from '../../actions/handler.js';
+import { handleInlineAskAIAction } from '../../actions/doc-handler.js';
 import { AIProvider } from '../../provider.js';
 
 export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
@@ -32,7 +32,8 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
           ) as AffineAIPanelWidget;
           assertExists(affineAIPanelWidget);
           assertExists(AIProvider.actions.chat);
-          handleAskAIAction(affineAIPanelWidget);
+          assertExists(affineAIPanelWidget.host);
+          handleInlineAskAIAction(affineAIPanelWidget.host);
         },
       },
     ],
