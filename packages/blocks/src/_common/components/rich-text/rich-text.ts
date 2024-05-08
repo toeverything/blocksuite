@@ -112,8 +112,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   enableUndoRedo = true;
   @property({ attribute: false })
-  enableAutoScrollVertically = true;
-  @property({ attribute: false })
   enableAutoScrollHorizontally = true;
   @property({ attribute: false })
   wrapText = true;
@@ -121,6 +119,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
   @property({ attribute: false })
   enableFormat = true;
+
+  @property({ attribute: false })
+  verticalScrollContainer?: HTMLElement;
 
   private _inlineEditor: AffineInlineEditor | null = null;
   get inlineEditor() {
@@ -183,13 +184,14 @@ export class RichText extends WithDisposable(ShadowlessElement) {
             const range = inlineEditor.toDomRange(inlineRange);
             if (!range) return;
 
-            // scroll container is window
-            if (this.enableAutoScrollVertically) {
+            if (this.verticalScrollContainer) {
+              const containerRect =
+                this.verticalScrollContainer.getBoundingClientRect();
               const rangeRect = range.getBoundingClientRect();
 
-              if (rangeRect.top < 0) {
+              if (rangeRect.top < containerRect.top) {
                 this.scrollIntoView({ block: 'start' });
-              } else if (rangeRect.bottom > window.innerHeight) {
+              } else if (rangeRect.bottom > containerRect.bottom) {
                 this.scrollIntoView({ block: 'end' });
               }
             }

@@ -130,7 +130,6 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
       .yText=${this.group.title}
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
-      .enableAutoScrollVertically=${false}
       style=${inlineEditorStyle}
     ></rich-text>`;
   }

@@ -1,11 +1,12 @@
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
-import { css } from 'lit';
+import { css, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { RichText } from '../../../_common/components/index.js';
+import { getViewportElement } from '../../../_common/utils/query.js';
 import { BaseCellRenderer } from '../../data-view/column/index.js';
 import type { DataViewKanbanManager } from '../../data-view/view/presets/kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../data-view/view/presets/table/table-view-manager.js';
@@ -193,6 +194,9 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         .embedChecker=${this.inlineManager?.embedChecker}
         .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
         .readonly=${this.readonly}
+        .verticalScrollContainer=${this.topContenteditableElement?.host
+          ? getViewportElement(this.topContenteditableElement.host)
+          : nothing}
         class="data-view-header-area-rich-text"
       ></rich-text>`;
   }

@@ -149,7 +149,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       .yText=${this.frameModel.title.yText}
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
-      .enableAutoScrollVertically=${false}
       style=${inlineEditorStyle}
     ></rich-text>`;
   }
