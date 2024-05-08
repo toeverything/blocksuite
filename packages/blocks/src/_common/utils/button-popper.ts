@@ -1,5 +1,12 @@
 import { type Disposable } from '@blocksuite/global/utils';
-import { computePosition, flip, offset, shift } from '@floating-ui/dom';
+import {
+  autoPlacement,
+  computePosition,
+  offset,
+  type Rect,
+  shift,
+  size,
+} from '@floating-ui/dom';
 
 export function listenClickAway(
   element: HTMLElement,
@@ -41,23 +48,41 @@ export function createButtonPopper(
     /** DEFAULT EMPTY FUNCTION */
   },
   mainAxis?: number,
-  crossAxis?: number
+  crossAxis?: number,
+  rootBoundary?: Rect | (() => Rect | undefined)
 ) {
   let state = 'hidden';
 
+  const originMaxHeight = popperElement
+    .computedStyleMap()
+    .get('max-height')
+    ?.toString();
+
   function compute() {
+    const overflowOption = {
+      padding: 10,
+      rootBoundary:
+        typeof rootBoundary === 'function' ? rootBoundary() : rootBoundary,
+    };
+
     computePosition(reference, popperElement, {
-      placement: 'top',
       middleware: [
         offset({
           mainAxis: mainAxis ?? 14,
           crossAxis: crossAxis ?? 0,
         }),
-        flip({
-          fallbackPlacements: ['bottom'],
+        autoPlacement({
+          allowedPlacements: ['top', 'bottom'],
+          ...overflowOption,
         }),
-        shift({
-          padding: 10,
+        shift(overflowOption),
+        size({
+          ...overflowOption,
+          apply({ availableHeight }) {
+            popperElement.style.maxHeight = originMaxHeight
+              ? `min(${originMaxHeight}, ${availableHeight}px)`
+              : `${availableHeight}px`;
+          },
         }),
       ],
     })
