@@ -372,6 +372,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     const elementToolbar = getElementToolbar(host);
     const isEmpty = selectedElements.length === 0;
     const isCreateImageAction = id === 'createImage';
+    const isMakeItRealAction = !isCreateImageAction && id === 'makeItReal';
     let referenceElement = null;
     let togglePanel = () => Promise.resolve(isEmpty);
 
@@ -386,8 +387,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
 
     if (!referenceElement) return;
 
-    if (isCreateImageAction) {
-      // @TODO(fundon): remove async
+    if (isCreateImageAction || isMakeItRealAction) {
       togglePanel = async () => {
         if (isEmpty) return true;
         const {

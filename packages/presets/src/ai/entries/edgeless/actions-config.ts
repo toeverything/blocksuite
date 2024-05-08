@@ -27,7 +27,6 @@ import {
 import {
   actionToHandler,
   explainImageShowWhen,
-  getContentFromSelected,
   makeItRealShowWhen,
   mindmapChildShowWhen,
   mindmapRootShowWhen,
@@ -361,17 +360,21 @@ const generateGroup: AIItemGroupConfig = {
           return;
         }
 
-        // single note, text, shape(text) or image(caption)
-        if (f === 0 && n + s + i === 1) {
-          const content = await getContentFromSelected(host, [
-            ...notes,
-            ...shapes,
-            ...images,
-          ]);
-          if (!content) return;
-          return {
-            content,
-          };
+        let content = (ctx.get()['content'] as string) || '';
+
+        // single note, text
+        if (i === 0 && n + s === 1) {
+          if (n === 1 || (s === 1 && shapes[0] instanceof TextElementModel)) {
+            return {
+              content,
+            };
+          }
+        }
+
+        // get user input
+        if (content.length === 0) {
+          const aiPanel = getAIPanel(host);
+          content = aiPanel.inputText?.trim() || '';
         }
 
         const edgelessRoot = getEdgelessRootFromEditor(host);
@@ -390,7 +393,9 @@ const generateGroup: AIItemGroupConfig = {
           width: canvas.width,
           height: canvas.height,
         });
+
         return {
+          content,
           attachments: [png],
         };
       }),
