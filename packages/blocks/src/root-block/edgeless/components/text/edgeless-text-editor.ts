@@ -371,6 +371,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         color: isCssVariable(color) ? `var(${color})` : color,
         textAlign,
         lineHeight: `${lineHeight}px`,
+        boxSizing: 'content-box',
       })}
       class="edgeless-text-editor"
     >

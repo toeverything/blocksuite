@@ -98,7 +98,6 @@ const LastPropsSchema = z.object({
     fontWeight: CanvasTextFontWeightSchema,
     fontStyle: CanvasTextFontStyleSchema,
     fontSize: z.number(),
-    hasMaxWidth: z.boolean(),
   }),
   'affine:note': z.object({
     background: NoteColorsSchema,
@@ -178,7 +177,6 @@ export class EditSessionStorage {
       fontWeight: CanvasTextFontWeight.Regular,
       fontStyle: CanvasTextFontStyle.Normal,
       fontSize: 24,
-      hasMaxWidth: false,
     },
     'affine:note': {
       background: DEFAULT_NOTE_COLOR,
