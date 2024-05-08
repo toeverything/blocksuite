@@ -140,7 +140,6 @@ export function addText(
     const id = edgeless.service.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
       text: new DocCollection.Y.Text(),
-      hasMaxWidth: false,
     });
     edgeless.doc.captureSync();
     const textElement = edgeless.service.getElementById(id);

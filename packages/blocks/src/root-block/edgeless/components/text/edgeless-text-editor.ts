@@ -28,7 +28,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
   static override styles = css`
     .edgeless-text-editor {
-      box-sizing: content-box;
       position: absolute;
       left: 0;
       top: 0;
@@ -371,6 +370,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         color: isCssVariable(color) ? `var(${color})` : color,
         textAlign,
         lineHeight: `${lineHeight}px`,
+        boxSizing: 'content-box',
       })}
       class="edgeless-text-editor"
     >
