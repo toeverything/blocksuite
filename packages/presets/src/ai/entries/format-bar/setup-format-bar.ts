@@ -1,3 +1,5 @@
+import './format-bar-ai-button.js';
+
 import {
   type AffineFormatBarWidget,
   toolbarDefaultConfig,
@@ -5,7 +7,6 @@ import {
 import { html, type TemplateResult } from 'lit';
 
 import { AIItemGroups } from './config.js';
-import { FormatBarAIButton } from './format-bar-ai-button.js';
 
 export function setupFormatBarEntry(formatBar: AffineFormatBarWidget) {
   toolbarDefaultConfig(formatBar);
@@ -14,10 +15,10 @@ export function setupFormatBarEntry(formatBar: AffineFormatBarWidget) {
       {
         type: 'custom' as const,
         render(formatBar: AffineFormatBarWidget): TemplateResult | null {
-          const askAIButton = new FormatBarAIButton();
-          askAIButton.host = formatBar.host;
-          askAIButton.actionGroups = AIItemGroups;
-          return html`${askAIButton}`;
+          return html` <format-bar-ai-button
+            .host=${formatBar.host}
+            .actionGroups=${AIItemGroups}
+          ></format-bar-ai-button>`;
         },
       },
       { type: 'divider' },
