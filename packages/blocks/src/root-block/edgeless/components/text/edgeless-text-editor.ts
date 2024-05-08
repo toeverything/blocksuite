@@ -28,7 +28,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
   static override styles = css`
     .edgeless-text-editor {
-      box-sizing: content-box;
       position: absolute;
       left: 0;
       top: 0;
