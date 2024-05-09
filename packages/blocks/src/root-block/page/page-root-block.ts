@@ -173,6 +173,10 @@ export class PageRootBlockComponent extends BlockElement<
       }
     );
     resizeObserver.observe(this.viewportElement);
+    this.disposables.add(() => {
+      resizeObserver.unobserve(this.viewportElement);
+      resizeObserver.disconnect();
+    });
   }
 
   prependParagraphWithText = (text: Text) => {
