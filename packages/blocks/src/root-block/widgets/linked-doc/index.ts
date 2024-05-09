@@ -110,6 +110,7 @@ export class AffineLinkedDocWidget extends WidgetElement {
     triggerKey: string
   ) => {
     const curRange = getCurrentNativeRange();
+    if (!curRange) return;
     showLinkedDocPopover({
       editorHost: this.host,
       inlineEditor,
