@@ -25,7 +25,7 @@ import {
   PaymentRequiredError,
   UnauthorizedError,
 } from '@blocksuite/blocks';
-import { css, html, nothing } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -166,16 +166,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
   public override async connectedCallback() {
     super.connectedCallback();
-    this.host.selection.slots.changed.on(() => {
-      if (this.host.selection.value.length > 0) {
-        this._selectionValue = this.host.selection.value;
-      }
-      this.requestUpdate();
-    });
-
-    this.host.spec.getService('affine:page').slots.editorModeSwitch.on(() => {
-      this.requestUpdate();
-    });
 
     const res = await AIProvider.userInfo;
     this.avatarUrl = res?.avatarUrl ?? '';
@@ -192,6 +182,26 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         }
       })
     );
+  }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('host')) {
+      const { disposables } = this;
+
+      disposables.add(
+        this.host.selection.slots.changed.on(() => {
+          this._selectionValue = this.host.selection.value;
+          this.requestUpdate();
+        })
+      );
+      disposables.add(
+        this.host.spec
+          .getService('affine:page')
+          .slots.editorModeSwitch.on(() => {
+            this.requestUpdate();
+          })
+      );
+    }
   }
 
   renderError() {
