@@ -27,7 +27,6 @@ import {
 import {
   actionToHandler,
   explainImageShowWhen,
-  makeItRealShowWhen,
   mindmapChildShowWhen,
   mindmapRootShowWhen,
   noteBlockOrTextShowWhen,
@@ -234,7 +233,7 @@ const generateGroup: AIItemGroupConfig = {
         const len = selectedElements.length;
 
         // text to image
-        // create an image from user input
+        // from user input
         if (len === 0) {
           const aiPanel = getAIPanel(host);
           const content = aiPanel.inputText?.trim();
@@ -246,7 +245,7 @@ const generateGroup: AIItemGroupConfig = {
 
         let content = (ctx.get()['content'] as string) || '';
 
-        // get user input
+        // from user input
         if (content.length === 0) {
           const aiPanel = getAIPanel(host);
           content = aiPanel.inputText?.trim() || '';
@@ -346,9 +345,20 @@ const generateGroup: AIItemGroupConfig = {
       name: 'Make it real',
       icon: MakeItRealIcon,
       beta: true,
-      showWhen: makeItRealShowWhen,
+      showWhen: () => true,
       handler: actionToHandler('makeItReal', undefined, async (host, ctx) => {
         const selectedElements = getCopilotSelectedElems(host);
+
+        // from user input
+        if (selectedElements.length === 0) {
+          const aiPanel = getAIPanel(host);
+          const content = aiPanel.inputText?.trim();
+          if (!content) return;
+          return {
+            content,
+          };
+        }
+
         const { notes, frames, shapes, images } =
           BlocksUtils.splitElements(selectedElements);
         const f = frames.length;
@@ -371,7 +381,7 @@ const generateGroup: AIItemGroupConfig = {
           }
         }
 
-        // get user input
+        // from user input
         if (content.length === 0) {
           const aiPanel = getAIPanel(host);
           content = aiPanel.inputText?.trim() || '';

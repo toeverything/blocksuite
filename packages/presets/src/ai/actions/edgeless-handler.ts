@@ -454,11 +454,6 @@ export function mindmapChildShowWhen(
   return selected.length === 1 && isMindmapChild(selected[0]);
 }
 
-export function makeItRealShowWhen(_: unknown, __: unknown, host: EditorHost) {
-  const selected = getCopilotSelectedElems(host);
-  return selected.length > 0;
-}
-
 export function explainImageShowWhen(
   _: unknown,
   __: unknown,
