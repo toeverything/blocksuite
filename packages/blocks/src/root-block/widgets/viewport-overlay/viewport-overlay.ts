@@ -2,6 +2,7 @@ import { WidgetElement } from '@blocksuite/block-std';
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { PageRootBlockComponent, RootBlockModel } from '../../index.js';
 
@@ -17,8 +18,6 @@ export class AffineViewportOverlayWidget extends WidgetElement<
       position: absolute;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100%;
       background: transparent;
       pointer-events: none;
       z-index: calc(var(--affine-z-index-popover) - 1);
@@ -74,7 +73,11 @@ export class AffineViewportOverlayWidget extends WidgetElement<
       'affine-viewport-overlay-widget': true,
       lock: this._lockViewport,
     });
-    return html` <div class=${classes}></div> `;
+    const style = styleMap({
+      width: `${this._lockViewport ? '100vw' : '0'}`,
+      height: `${this._lockViewport ? '100%' : '0'}`,
+    });
+    return html` <div class=${classes} style=${style}></div> `;
   }
 }
 
