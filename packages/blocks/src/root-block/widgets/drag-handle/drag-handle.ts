@@ -729,6 +729,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     // When current selection is TextSelection, should cover all the blocks in native range
     if (selections.length > 0 && includeTextSelection(selections)) {
       const range = getCurrentNativeRange();
+      if (!range) return [];
       blockElements = this._rangeManager.getSelectedBlockElementsByRange(
         range,
         {

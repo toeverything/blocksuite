@@ -146,6 +146,7 @@ export class AffineSlashMenuWidget extends WidgetElement {
       // Wait for dom update, see this case https://github.com/toeverything/blocksuite/issues/2611
       requestAnimationFrame(() => {
         const curRange = getCurrentNativeRange();
+        if (!curRange) return;
         showSlashMenu({
           rootElement,
           model,

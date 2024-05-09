@@ -35,6 +35,10 @@ export const createKeydownObserver = ({
     // Wait for text update
     await sleep(0);
     const range = getCurrentNativeRange();
+    if (!range) {
+      abortController.abort();
+      return;
+    }
     if (range.startContainer !== range.endContainer) {
       console.warn(
         'Failed to parse query! Current range is not collapsed.',
