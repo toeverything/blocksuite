@@ -18,11 +18,14 @@ export class ChatText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   text!: string;
 
+  @property({ attribute: false })
+  state: 'finished' | 'generating' = 'finished';
+
   protected override render() {
     const { attachments, text, host } = this;
     return html`${attachments
       ? renderImages(attachments)
-      : nothing}${createTextRenderer(host)(text)} `;
+      : nothing}${createTextRenderer(host)(text, this.state)} `;
   }
 }
 

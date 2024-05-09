@@ -225,10 +225,16 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     }
 
     if ('role' in item) {
+      const state = isLast
+        ? this.status !== 'loading' && this.status !== 'transmitting'
+          ? 'finished'
+          : 'generating'
+        : 'finished';
       return html`<chat-text
           .host=${this.host}
           .attachments=${item.attachments}
           .text=${item.content}
+          .state=${state}
         ></chat-text
         >${this.renderEditorActions(item, isLast)}`;
     } else {
