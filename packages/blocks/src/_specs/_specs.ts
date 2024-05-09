@@ -48,6 +48,7 @@ import { AFFINE_MODAL_WIDGET } from '../root-block/widgets/modal/modal.js';
 import { AFFINE_PAGE_DRAGGING_AREA_WIDGET } from '../root-block/widgets/page-dragging-area/page-dragging-area.js';
 import { AFFINE_PIE_MENU_WIDGET } from '../root-block/widgets/pie-menu/index.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../root-block/widgets/slash-menu/index.js';
+import { AFFINE_VIEWPORT_OVERLAY_WIDGET } from '../root-block/widgets/viewport-overlay/viewport-overlay.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
@@ -87,6 +88,9 @@ const DocPageSpec: BlockSpec<PageRootBlockWidgetName> = {
       [AFFINE_PAGE_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(
         AFFINE_PAGE_DRAGGING_AREA_WIDGET
       )}`,
+      [AFFINE_VIEWPORT_OVERLAY_WIDGET]: literal`${unsafeStatic(
+        AFFINE_VIEWPORT_OVERLAY_WIDGET
+      )}`,
     },
   },
 };
@@ -125,6 +129,9 @@ const EdgelessPageSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
         AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET
       )}`,
       [EDGELESS_ELEMENT_TOOLBAR_WIDGET]: literal`${unsafeStatic(EDGELESS_ELEMENT_TOOLBAR_WIDGET)}`,
+      [AFFINE_VIEWPORT_OVERLAY_WIDGET]: literal`${unsafeStatic(
+        AFFINE_VIEWPORT_OVERLAY_WIDGET
+      )}`,
     },
   },
 };

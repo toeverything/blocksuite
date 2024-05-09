@@ -14,6 +14,7 @@ import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
+import type { AffineViewportOverlayWidget } from '../viewport-overlay/viewport-overlay.js';
 import type { AIPanelDiscardModal } from './components/discard-modal.js';
 import { toggleDiscardModal } from './components/discard-modal.js';
 import type { AffineAIPanelState, AffineAIPanelWidgetConfig } from './type.js';
@@ -43,7 +44,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       left: 0;
       overflow-y: auto;
       scrollbar-width: none !important;
-      z-index: 1;
+      z-index: var(--affine-z-index-popover);
     }
 
     .ai-panel-container {
@@ -76,6 +77,16 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   @query('.mock-selection-container')
   mockSelectionContainer!: HTMLDivElement;
+
+  get viewportOverlayWidget() {
+    const rootId = this.host.doc.root?.id;
+    return rootId
+      ? (this.host.view.getWidget(
+          'affine-viewport-overlay-widget',
+          rootId
+        ) as AffineViewportOverlayWidget)
+      : null;
+  }
 
   private _stopAutoUpdate?: undefined | (() => void);
 
@@ -135,6 +146,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._answer = null;
     this._stopAutoUpdate = undefined;
     this.config?.hideCallback?.();
+    this.viewportOverlayWidget?.unlock();
   };
 
   discard = () => {
@@ -325,6 +337,9 @@ export class AffineAIPanelWidget extends WidgetElement {
               }
             })
             .catch(console.error);
+          if (this.state === 'hidden') {
+            this._selection = undefined;
+          }
         }
       }
 
@@ -337,6 +352,12 @@ export class AffineAIPanelWidget extends WidgetElement {
       if (formatBar) {
         formatBar.requestUpdate();
       }
+    }
+
+    if (this.state !== 'hidden') {
+      this.viewportOverlayWidget?.lock();
+    } else {
+      this.viewportOverlayWidget?.unlock();
     }
   }
 
