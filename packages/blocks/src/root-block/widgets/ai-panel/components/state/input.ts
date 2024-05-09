@@ -99,9 +99,10 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   private _hasContent = false;
 
   private _sendToAI = () => {
-    if (this._textarea.value.length === 0) return;
+    const value = this._textarea.value.trim();
+    if (value.length === 0) return;
 
-    this.onFinish?.(this._textarea.value);
+    this.onFinish?.(value);
     this.remove();
   };
 
@@ -116,7 +117,8 @@ export class AIPanelInput extends WithDisposable(LitElement) {
     this._textarea.style.height = 'auto';
     this._textarea.style.height = this._textarea.scrollHeight + 'px';
 
-    if (this._textarea.value.length > 0) {
+    const value = this._textarea.value.trim();
+    if (value.length > 0) {
       this._arrow.dataset.active = '';
       this._hasContent = true;
     } else {
