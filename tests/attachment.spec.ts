@@ -60,8 +60,10 @@ function getAttachment(page: Page) {
     await type(page, 'file', 100);
     await expect(slashMenu).toBeVisible();
 
+    const fileChooser = page.waitForEvent('filechooser');
     await pressEnter(page);
-    await page.setInputFiles("input[type='file']", FILE_PATH);
+    await (await fileChooser).setFiles(FILE_PATH);
+
     // Try to break the undo redo test
     await captureHistory(page);
 
