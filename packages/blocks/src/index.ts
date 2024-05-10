@@ -20,7 +20,7 @@ import { deserializeXYWH } from './surface-block/index.js';
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
 export type { SelectTag } from './_common/components/index.js';
-export { toast } from './_common/components/index.js';
+export { toast, Tooltip } from './_common/components/index.js';
 export {
   popTagSelect,
   RichText,
