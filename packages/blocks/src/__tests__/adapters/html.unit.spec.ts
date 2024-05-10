@@ -114,6 +114,138 @@ describe('snapshot to html', () => {
     expect(target.file).toBe(html);
   });
 
+  test('code upper case', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:vu6SK6WJpW',
+      flavour: 'affine:page',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:Tk4gSPocAt',
+          flavour: 'affine:surface',
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:WfnS5ZDCJT',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:8hOLxad5Fv',
+              flavour: 'affine:code',
+              props: {
+                language: 'PYTHON',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'import this',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const html = template(
+      `<pre><code class="code-python"><span style="word-wrap: break-word; color: #AF00DB;">import</span><span style="word-wrap: break-word; color: #000000;"> this</span></code></pre>`
+    );
+
+    const htmlAdapter = new HtmlAdapter();
+    const target = await htmlAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toBe(html);
+  });
+
+  test('code unknown', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:vu6SK6WJpW',
+      flavour: 'affine:page',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:Tk4gSPocAt',
+          flavour: 'affine:surface',
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:WfnS5ZDCJT',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:8hOLxad5Fv',
+              flavour: 'affine:code',
+              props: {
+                language: 'unknown',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'import this',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const html = template(
+      `<pre><code class="code-unknown">import this</code></pre>`
+    );
+
+    const htmlAdapter = new HtmlAdapter();
+    const target = await htmlAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toBe(html);
+  });
+
   test('paragraph', async () => {
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
