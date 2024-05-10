@@ -26,7 +26,11 @@ import {
 import type { ElementContent, Root, Text } from 'hast';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
-import { type BundledLanguage, type ThemedToken } from 'shiki';
+import {
+  type BundledLanguage,
+  bundledLanguagesInfo,
+  type ThemedToken,
+} from 'shiki';
 import { unified } from 'unified';
 
 import { isPlaintext } from '../../code-block/utils/code-languages.js';
@@ -354,6 +358,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           break;
         }
         case 'affine:code': {
+          if (typeof o.node.props.language == 'string') {
+            o.node.props.language = o.node.props.language.toLowerCase();
+          }
           context
             .openNode(
               {
@@ -371,7 +378,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 properties: {
                   className: [`code-${o.node.props.language}`],
                 },
-                children: await this._deltaToHigglightHasts(
+                children: await this._deltaToHighlightHasts(
                   text.delta,
                   o.node.props.language
                 ),
@@ -1074,7 +1081,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     return walker.walk(html, snapshot);
   };
 
-  private _deltaToHigglightHasts = async (
+  private _deltaToHighlightHasts = async (
     deltas: DeltaInsert[],
     rawLang: unknown
   ) => {
@@ -1083,12 +1090,16 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     }, [] as DeltaInsert<object>[]);
     assertEquals(deltas.length, 1, 'Delta length should be 1 in code block');
     const delta = deltas[0];
+    if (typeof rawLang == 'string') {
+      rawLang = rawLang.toLowerCase();
+    }
     if (
       !rawLang ||
       typeof rawLang !== 'string' ||
       isPlaintext(rawLang) ||
       // The rawLang should not be 'Text' here
-      rawLang === 'Text'
+      rawLang === 'Text' ||
+      !bundledLanguagesInfo.map(({ id }) => id).includes(rawLang as string)
     ) {
       return [
         {
