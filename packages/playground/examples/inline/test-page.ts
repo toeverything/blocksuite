@@ -46,8 +46,6 @@ function inlineTextStyles(
   }
 
   return styleMap({
-    'word-wrap': 'break-word',
-    'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
@@ -73,10 +71,7 @@ const attributeRenderer: AttributeRenderer = (
 
   const style = delta.attributes
     ? inlineTextStyles(delta.attributes)
-    : styleMap({
-        'white-space': 'break-spaces',
-        'word-wrap': 'break-word',
-      });
+    : styleMap({});
 
   return html`<span style=${style}
     ><v-text .str=${delta.insert}></v-text
@@ -204,8 +199,6 @@ export class TestRichText extends ShadowlessElement {
 
         .rich-text-container {
           outline: none;
-          word-break: break-word;
-          white-space: break-spaces;
         }
 
         code {

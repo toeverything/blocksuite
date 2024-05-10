@@ -62,21 +62,8 @@ export class AffineLink extends ShadowlessElement {
   }
 
   static override styles = css`
-    affine-link > a {
-      white-space: nowrap;
-      word-break: break-word;
-      color: var(--affine-link-color);
-      fill: var(--affine-link-color);
-      text-decoration: none;
-      cursor: pointer;
-    }
-
     affine-link > a:hover [data-v-text='true'] {
       text-decoration: underline;
-    }
-
-    affine-link > a > v-text {
-      white-space: break-spaces;
     }
   `;
 
@@ -129,7 +116,12 @@ export class AffineLink extends ShadowlessElement {
 
   override render() {
     const style = this.delta.attributes
-      ? affineTextStyles(this.delta.attributes)
+      ? affineTextStyles(this.delta.attributes, {
+          color: 'var(--affine-link-color)',
+          fill: 'var(--affine-link-color)',
+          'text-decoration': 'none',
+          cursor: 'pointer',
+        })
       : styleMap({});
 
     return html`<a

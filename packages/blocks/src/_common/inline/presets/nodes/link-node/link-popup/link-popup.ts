@@ -217,14 +217,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const link = normalizeUrl(linkInputValue);
 
     if (this.type === 'create') {
-      this.inlineEditor.formatText(
-        this.targetInlineRange,
-        {
-          link: link,
-          reference: null,
-        },
-        { mode: 'replace' }
-      );
+      this.inlineEditor.formatText(this.targetInlineRange, {
+        link: link,
+        reference: null,
+      });
       this.inlineEditor.setInlineRange(this.targetInlineRange);
       const textSelection = this.host.selection.find('text');
       assertExists(textSelection);
