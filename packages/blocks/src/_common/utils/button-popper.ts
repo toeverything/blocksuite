@@ -59,8 +59,7 @@ export function createButtonPopper(
     ?.toString();
 
   function compute() {
-    const overflowOption = {
-      padding: 10,
+    const overflowOptions = {
       rootBoundary:
         typeof rootBoundary === 'function' ? rootBoundary() : rootBoundary,
     };
@@ -73,11 +72,11 @@ export function createButtonPopper(
         }),
         autoPlacement({
           allowedPlacements: ['top', 'bottom'],
-          ...overflowOption,
+          ...overflowOptions,
         }),
-        shift(overflowOption),
+        shift(overflowOptions),
         size({
-          ...overflowOption,
+          ...overflowOptions,
           apply({ availableHeight }) {
             popperElement.style.maxHeight = originMaxHeight
               ? `min(${originMaxHeight}, ${availableHeight}px)`

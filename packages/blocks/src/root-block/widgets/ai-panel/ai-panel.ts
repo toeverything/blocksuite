@@ -4,9 +4,15 @@ import type { BaseSelection } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
+  autoPlacement,
   autoUpdate,
   computePosition,
-  type ReferenceElement,
+  type ComputePositionConfig,
+  flip,
+  offset,
+  type Rect,
+  shift,
+  size,
 } from '@floating-ui/dom';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -14,6 +20,8 @@ import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
+import { getPageRootByElement } from '../../../_common/utils/query.js';
+import { PageRootService } from '../../page/page-root-service.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../format-bar/format-bar.js';
 import {
   AFFINE_VIEWPORT_OVERLAY_WIDGET,
@@ -126,7 +134,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     }
   };
 
-  toggle = (reference: ReferenceElement, input?: string) => {
+  toggle = (reference: Element, input?: string) => {
     if (input) {
       this._inputText = input;
       this.generate();
@@ -242,10 +250,83 @@ export class AffineAIPanelWidget extends WidgetElement {
     this.generate();
   };
 
-  private _autoUpdatePosition(reference: ReferenceElement) {
+  private _calcPositionOptions(
+    reference: Element
+  ): Partial<ComputePositionConfig> {
+    let rootBoundary: Rect | undefined;
+    {
+      const rootService = this.host.std.spec.getService('affine:page');
+      if (rootService instanceof PageRootService) {
+        rootBoundary = undefined;
+      } else {
+        const viewport = rootService.viewport;
+        rootBoundary = {
+          x: viewport.left,
+          y: viewport.top,
+          width: viewport.width,
+          height: viewport.height - 100, // 100 for edgeless toolbar
+        };
+      }
+    }
+
+    const overflowOptions = {
+      padding: 20,
+      rootBoundary: rootBoundary,
+    };
+
+    const sizeMiddlewareInEdgeless = size({
+      ...overflowOptions,
+      apply: ({ elements, availableHeight }) => {
+        elements.floating.style.maxHeight = `${availableHeight}px`;
+      },
+    });
+
+    // block element in page editor
+    if (getPageRootByElement(reference)) {
+      return {
+        placement: 'bottom-start',
+        middleware: [shift(overflowOptions)],
+      };
+    }
+    // block element in doc in edgeless editor
+    else if (reference.closest('edgeless-block-portal-note')) {
+      return {
+        middleware: [
+          shift(overflowOptions),
+          autoPlacement({
+            ...overflowOptions,
+            allowedPlacements: ['top-start', 'bottom-start'],
+          }),
+          sizeMiddlewareInEdgeless,
+        ],
+      };
+    }
+    // edgeless element
+    else {
+      return {
+        placement: 'right-start',
+        middleware: [
+          offset({ mainAxis: 16 }),
+          flip({
+            mainAxis: true,
+            crossAxis: true,
+            flipAlignment: true,
+            ...overflowOptions,
+          }),
+          shift({
+            crossAxis: true,
+            ...overflowOptions,
+          }),
+          sizeMiddlewareInEdgeless,
+        ],
+      };
+    }
+  }
+
+  private _autoUpdatePosition(reference: Element) {
     this._stopAutoUpdate?.();
     this._stopAutoUpdate = autoUpdate(reference, this, () => {
-      computePosition(reference, this, this.config?.positionConfig)
+      computePosition(reference, this, this._calcPositionOptions(reference))
         .then(({ x, y }) => {
           this.style.left = `${x}px`;
           this.style.top = `${y}px`;

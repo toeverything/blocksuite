@@ -10,7 +10,6 @@ import {
   ResetIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { ComputePositionConfig } from '@floating-ui/dom';
 
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
@@ -238,14 +237,12 @@ export function buildCopyConfig(panel: AffineAIPanelWidget) {
 }
 
 export function buildAIPanelConfig(
-  panel: AffineAIPanelWidget,
-  positionConfig?: Partial<ComputePositionConfig>
+  panel: AffineAIPanelWidget
 ): AffineAIPanelWidgetConfig {
   return {
     answerRenderer: createTextRenderer(panel.host, 320),
     finishStateConfig: buildFinishConfig(panel),
     errorStateConfig: buildErrorConfig(panel),
-    positionConfig,
     copy: buildCopyConfig(panel),
   };
 }

@@ -1,4 +1,3 @@
-import type { ComputePositionConfig } from '@floating-ui/dom';
 import type { nothing, TemplateResult } from 'lit';
 
 import type {
@@ -42,7 +41,6 @@ export interface AffineAIPanelWidgetConfig {
   hideCallback?: () => void;
   discardCallback?: () => void;
 
-  positionConfig?: Partial<ComputePositionConfig>;
   copy?: CopyConfig;
 }
 

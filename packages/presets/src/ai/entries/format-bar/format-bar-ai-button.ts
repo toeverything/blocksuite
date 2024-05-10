@@ -78,15 +78,15 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
       this._askAIButton,
       this._askAIPanel,
       ({ display }) => {
-        if (this._edgeless) {
-          this._edgeless.viewport.locked = display === 'show';
-        }
+        this._edgeless?.tool.setEdgelessTool({
+          type: display === 'show' ? 'copilot' : 'default',
+        });
       },
       10,
       120,
       () => {
         if (this._edgeless) {
-          const { top: x, left: y, width, height } = this._edgeless.viewport;
+          const { left: x, top: y, width, height } = this._edgeless.viewport;
           return { x, y, width, height: height - 50 };
         }
         return;
@@ -94,9 +94,7 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
     );
     this.disposables.add(this._askAIPopper);
     this.disposables.add(() => {
-      if (this._edgeless) {
-        this._edgeless.viewport.locked = false;
-      }
+      this._edgeless?.tool.setEdgelessTool({ type: 'default' });
     });
   }
 

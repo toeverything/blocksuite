@@ -14,7 +14,6 @@ import {
   ParagraphService,
 } from '@blocksuite/blocks';
 import { assertInstanceOf } from '@blocksuite/global/utils';
-import { flip, offset, shift, size } from '@floating-ui/dom';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { buildAIPanelConfig } from './ai-panel.js';
@@ -25,7 +24,6 @@ import {
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
-import { getEdgelessService } from './utils/selection-utils.js';
 
 export function patchDocSpecs(specs: BlockSpec[]) {
   return specs.map(spec => {
@@ -46,14 +44,7 @@ export function patchDocSpecs(specs: BlockSpec[]) {
             slots.widgetConnected.on(view => {
               if (view.component instanceof AffineAIPanelWidget) {
                 view.component.style.width = '630px';
-                view.component.config = buildAIPanelConfig(view.component, {
-                  placement: 'bottom-start',
-                  middleware: [
-                    shift({
-                      padding: 20,
-                    }),
-                  ],
-                });
+                view.component.config = buildAIPanelConfig(view.component);
                 setupSpaceEntry(view.component);
               }
 
@@ -125,41 +116,7 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
           slots.widgetConnected.on(view => {
             if (view.component instanceof AffineAIPanelWidget) {
               view.component.style.width = '430px';
-              view.component.config = buildAIPanelConfig(view.component, {
-                placement: 'right-start',
-                middleware: [
-                  offset({ mainAxis: 16 }),
-                  flip({
-                    mainAxis: true,
-                    crossAxis: true,
-                    flipAlignment: true,
-                  }),
-                  shift(() => {
-                    const { left, top, width, height } = getEdgelessService(
-                      view.component.host
-                    ).viewport;
-                    return {
-                      padding: 20,
-                      crossAxis: true,
-                      rootBoundary: {
-                        x: left,
-                        y: top,
-                        width,
-                        height: height - 100,
-                      },
-                    };
-                  }),
-                  size({
-                    apply: ({ elements }) => {
-                      const { height } = getEdgelessService(
-                        view.component.host
-                      ).viewport;
-                      elements.floating.style.maxHeight = `${height - 140}px`;
-                    },
-                  }),
-                ],
-              });
-              setupSpaceEntry(view.component);
+              view.component.config = buildAIPanelConfig(view.component);
             }
 
             if (view.component instanceof EdgelessCopilotWidget) {
