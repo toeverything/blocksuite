@@ -87,7 +87,7 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
       () => {
         if (this._edgeless) {
           const { left: x, top: y, width, height } = this._edgeless.viewport;
-          return { x, y, width, height: height - 50 };
+          return { x, y, width, height: height - 100 };
         }
         return;
       }
