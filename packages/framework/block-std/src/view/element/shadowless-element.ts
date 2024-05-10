@@ -17,6 +17,7 @@ export class ShadowlessElement extends LitElement {
           const style = document.createElement('style');
           style.textContent = s.cssText;
           styleRoot.append(style);
+          console.log(this[Symbol]);
         } else {
           console.error('unreachable');
         }

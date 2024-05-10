@@ -443,7 +443,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const lastModelState = this._lastDroppingTarget;
     const lastType = this._lastDroppingType;
     const dataTransfer = e.dataTransfer;
-    assertExists(dataTransfer);
 
     const data = dataTransfer.getData('affine/block-hub');
     const models = [];
