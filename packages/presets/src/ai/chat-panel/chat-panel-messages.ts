@@ -366,7 +366,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               actions.filter(action => {
                 if (action.title === 'Replace selection') {
                   if (
-                    this._currentTextSelection?.from.length === 0 &&
+                    (!this._currentTextSelection ||
+                      this._currentTextSelection.from.length === 0) &&
                     this._currentBlockSelections?.length === 0
                   ) {
                     return false;

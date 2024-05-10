@@ -134,8 +134,6 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         this._resetItems();
       }
     });
-
-    this._resetItems();
   }
 
   private _resettingCounter = 0;

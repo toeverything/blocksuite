@@ -112,6 +112,10 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     .close-wrapper:hover svg path {
       fill: var(--affine-error-color);
     }
+
+    .image-upload {
+      background-color: var(--affine-white);
+    }
   `;
 
   @property({ attribute: false })
