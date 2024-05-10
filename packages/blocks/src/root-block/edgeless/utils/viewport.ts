@@ -154,6 +154,14 @@ export class Viewport {
     this.setRect(rect.left, rect.top, rect.width, rect.height);
   }
 
+  toViewPointFromClientPoint({ x, y }: IPoint): IPoint {
+    const { left, top } = this;
+    return {
+      x: x - left,
+      y: y - top,
+    };
+  }
+
   toModelCoord(viewX: number, viewY: number): [number, number] {
     const { viewportX, viewportY, zoom } = this;
     return [viewportX + viewX / zoom, viewportY + viewY / zoom];

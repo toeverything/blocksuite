@@ -8,6 +8,7 @@ import {
   type DropResult,
   getClosestBlockElementByPoint,
   getModelByBlockComponent,
+  type IPoint,
   isInsidePageEditor,
   matchFlavours,
   Point,
@@ -18,7 +19,7 @@ export type onDropProps = {
   files: File[];
   targetModel: BlockModel | null;
   place: 'before' | 'after';
-  point: Point;
+  point: IPoint;
 };
 
 export type FileDropOptions = {
@@ -169,10 +170,15 @@ export class FileDropManager {
     const place = this.type;
 
     const { clientX, clientY } = event;
-    const point = new Point(clientX, clientY);
 
-    onDrop({ files: [...droppedFiles], targetModel, place, point })?.catch(
-      console.error
-    );
+    onDrop({
+      files: [...droppedFiles],
+      targetModel,
+      place,
+      point: {
+        x: clientX,
+        y: clientY,
+      },
+    })?.catch(console.error);
   };
 }
