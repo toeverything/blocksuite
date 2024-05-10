@@ -32,7 +32,10 @@ import { reportResponse } from '../utils/action-reporter.js';
 import { isMindmapChild, isMindMapRoot } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
-import { getSelectedNoteAnchor } from '../utils/selection-utils.js';
+import {
+  getSelectedNoteAnchor,
+  getSelections,
+} from '../utils/selection-utils.js';
 import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 import { bindTextStream } from './doc-handler.js';
 import type { CtxRecord } from './edgeless-response.js';
@@ -344,6 +347,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     const edgelessCopilot = getEdgelessCopilotWidget(host);
     let internal: Record<string, unknown> = {};
     const selectedElements = getCopilotSelectedElems(host);
+    const { selectedBlocks } = getSelections(host);
     const ctx = {
       get() {
         return {
@@ -376,7 +380,9 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     let referenceElement = null;
     let togglePanel = () => Promise.resolve(isEmpty);
 
-    if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
+    if (selectedBlocks && selectedBlocks.length !== 0) {
+      referenceElement = selectedBlocks.at(-1);
+    } else if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
       referenceElement = edgelessCopilot.selectionElem;
     } else if (elementToolbar.toolbarVisible) {
       referenceElement = getElementToolbar(host);
