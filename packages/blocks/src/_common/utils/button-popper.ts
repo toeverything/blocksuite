@@ -55,10 +55,7 @@ export function createButtonPopper(
 ) {
   let display: Display = 'hidden';
 
-  const originMaxHeight = popperElement
-    .computedStyleMap()
-    .get('max-height')
-    ?.toString();
+  const originMaxHeight = window.getComputedStyle(popperElement).maxHeight;
 
   function compute() {
     const overflowOptions = {
