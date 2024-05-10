@@ -4,28 +4,33 @@ import type {
   EdgelessElementToolbarWidget,
 } from '@blocksuite/blocks';
 import {
-  AIDoneIcon,
   type AIItemGroupConfig,
-  AIPenIcon,
-  AISearchIcon,
   type AISubItemConfig,
-  ChatWithAIIcon,
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
+  matchFlavours,
+} from '@blocksuite/blocks';
+import type { TemplateResult } from 'lit';
+
+import {
+  AIDoneIcon,
+  AIImageIcon,
+  AIImageIconWithAnimation,
+  AIMindMapIcon,
+  AIPenIcon,
+  AIPenIconWithAnimation,
+  AIPresentationIcon,
+  AIPresentationIconWithAnimation,
+  AISearchIcon,
+  AIStarIconWithAnimation,
+  ChatWithAIIcon,
   ExplainIcon,
   ImproveWritingIcon,
   LanguageIcon,
   LongerIcon,
   MakeItRealIcon,
-  matchFlavours,
   SelectionIcon,
   ShorterIcon,
   ToneIcon,
-} from '@blocksuite/blocks';
-
-import {
-  AIImageIcon,
-  AIMindMapIcon,
-  AIPresentationIcon,
 } from '../../_common/icons.js';
 import { actionToHandler } from '../../actions/doc-handler.js';
 import { actionToHandler as edgelessActionToHandler } from '../../actions/edgeless-handler.js';
@@ -41,14 +46,14 @@ import {
 export const translateSubItem: AISubItemConfig[] = translateLangs.map(lang => {
   return {
     type: lang,
-    handler: actionToHandler('translate', { lang }),
+    handler: actionToHandler('translate', AIStarIconWithAnimation, { lang }),
   };
 });
 
 export const toneSubItem: AISubItemConfig[] = textTones.map(tone => {
   return {
     type: tone,
-    handler: actionToHandler('changeTone', { tone }),
+    handler: actionToHandler('changeTone', AIStarIconWithAnimation, { tone }),
   };
 });
 
@@ -112,25 +117,25 @@ const EditAIGroup: AIItemGroupConfig = {
       name: 'Improve writing',
       icon: ImproveWritingIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('improveWriting'),
+      handler: actionToHandler('improveWriting', AIStarIconWithAnimation),
     },
     {
       name: 'Make it longer',
       icon: LongerIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('makeLonger'),
+      handler: actionToHandler('makeLonger', AIStarIconWithAnimation),
     },
     {
       name: 'Make it shorter',
       icon: ShorterIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('makeShorter'),
+      handler: actionToHandler('makeShorter', AIStarIconWithAnimation),
     },
     {
       name: 'Continue writing',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('continueWriting'),
+      handler: actionToHandler('continueWriting', AIPenIconWithAnimation),
     },
   ],
 };
@@ -142,31 +147,31 @@ const DraftAIGroup: AIItemGroupConfig = {
       name: 'Write an article about this',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('writeArticle'),
+      handler: actionToHandler('writeArticle', AIPenIconWithAnimation),
     },
     {
       name: 'Write a tweet about this',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('writeTwitterPost'),
+      handler: actionToHandler('writeTwitterPost', AIPenIconWithAnimation),
     },
     {
       name: 'Write a poem about this',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('writePoem'),
+      handler: actionToHandler('writePoem', AIPenIconWithAnimation),
     },
     {
       name: 'Write a blog post about this',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('writeBlogPost'),
+      handler: actionToHandler('writeBlogPost', AIPenIconWithAnimation),
     },
     {
       name: 'Brainstorm ideas about this',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('brainstorm'),
+      handler: actionToHandler('brainstorm', AIPenIconWithAnimation),
     },
   ],
 };
@@ -178,6 +183,7 @@ const DraftAIGroup: AIItemGroupConfig = {
 //    b. insert the result using the note shape
 function edgelessHandler<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
+  generatingIcon: TemplateResult<1>,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
@@ -203,7 +209,7 @@ function edgelessHandler<T extends keyof BlockSuitePresets.AIActions>(
       currentController.updateDragPointsWith(selectedElements, 10);
       currentController.draggingAreaUpdated.emit(false); // do not show edgeless panel
 
-      return edgelessActionToHandler(id, variants, async () => {
+      return edgelessActionToHandler(id, generatingIcon, variants, async () => {
         const selections = getSelections(host);
         const [markdown, attachments] = await Promise.all([
           getSelectedTextContent(host),
@@ -228,37 +234,37 @@ const ReviewWIthAIGroup: AIItemGroupConfig = {
       name: 'Fix spelling',
       icon: AIDoneIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('fixSpelling'),
+      handler: actionToHandler('fixSpelling', AIStarIconWithAnimation),
     },
     {
       name: 'Fix grammar',
       icon: AIDoneIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('improveGrammar'),
+      handler: actionToHandler('improveGrammar', AIStarIconWithAnimation),
     },
     {
       name: 'Explain this image',
       icon: AIPenIcon,
       showWhen: imageBlockShowWhen,
-      handler: actionToHandler('explainImage'),
+      handler: actionToHandler('explainImage', AIStarIconWithAnimation),
     },
     {
       name: 'Explain this code',
       icon: ExplainIcon,
       showWhen: codeBlockShowWhen,
-      handler: actionToHandler('explainCode'),
+      handler: actionToHandler('explainCode', AIStarIconWithAnimation),
     },
     {
       name: 'Check code error',
       icon: ExplainIcon,
       showWhen: codeBlockShowWhen,
-      handler: actionToHandler('checkCodeErrors'),
+      handler: actionToHandler('checkCodeErrors', AIStarIconWithAnimation),
     },
     {
       name: 'Explain selection',
       icon: SelectionIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('explain'),
+      handler: actionToHandler('explain', AIStarIconWithAnimation),
     },
   ],
 };
@@ -270,13 +276,13 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
       name: 'Summarize',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('summary'),
+      handler: actionToHandler('summary', AIPenIconWithAnimation),
     },
     {
       name: 'Generate headings',
       icon: AIPenIcon,
       beta: true,
-      handler: actionToHandler('createHeadings'),
+      handler: actionToHandler('createHeadings', AIPenIconWithAnimation),
       showWhen: chain => {
         const [_, ctx] = chain
           .getSelectedModels({
@@ -297,25 +303,25 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
       name: 'Generate an image',
       icon: AIImageIcon,
       showWhen: textBlockShowWhen,
-      handler: edgelessHandler('createImage'),
+      handler: edgelessHandler('createImage', AIImageIconWithAnimation),
     },
     {
       name: 'Generate outline',
       icon: AIPenIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('writeOutline'),
+      handler: actionToHandler('writeOutline', AIPenIconWithAnimation),
     },
     {
       name: 'Brainstorm ideas with mind map',
       icon: AIMindMapIcon,
       showWhen: textBlockShowWhen,
-      handler: edgelessHandler('brainstormMindmap'),
+      handler: edgelessHandler('brainstormMindmap', AIPenIconWithAnimation),
     },
     {
       name: 'Generate presentation',
       icon: AIPresentationIcon,
       showWhen: textBlockShowWhen,
-      handler: edgelessHandler('createSlides'),
+      handler: edgelessHandler('createSlides', AIPresentationIconWithAnimation),
       beta: true,
     },
     {
@@ -323,13 +329,13 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
       icon: MakeItRealIcon,
       beta: true,
       showWhen: textBlockShowWhen,
-      handler: edgelessHandler('makeItReal'),
+      handler: edgelessHandler('makeItReal', AIStarIconWithAnimation),
     },
     {
       name: 'Find actions',
       icon: AISearchIcon,
       showWhen: textBlockShowWhen,
-      handler: actionToHandler('findActions'),
+      handler: actionToHandler('findActions', AIStarIconWithAnimation),
       beta: true,
     },
   ],
