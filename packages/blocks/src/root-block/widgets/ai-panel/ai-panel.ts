@@ -9,11 +9,16 @@ import {
   type ReferenceElement,
 } from '@floating-ui/dom';
 import { css, html, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
+import { AFFINE_FORMAT_BAR_WIDGET } from '../format-bar/format-bar.js';
+import {
+  AFFINE_VIEWPORT_OVERLAY_WIDGET,
+  type AffineViewportOverlayWidget,
+} from '../viewport-overlay/viewport-overlay.js';
 import type { AIPanelDiscardModal } from './components/discard-modal.js';
 import { toggleDiscardModal } from './components/discard-modal.js';
 import type { AffineAIPanelState, AffineAIPanelWidgetConfig } from './type.js';
@@ -43,7 +48,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       left: 0;
       overflow-y: auto;
       scrollbar-width: none !important;
-      z-index: 1;
+      z-index: var(--affine-z-index-popover);
     }
 
     .ai-panel-container {
@@ -74,8 +79,15 @@ export class AffineAIPanelWidget extends WidgetElement {
   @property()
   state: AffineAIPanelState = 'hidden';
 
-  @query('.mock-selection-container')
-  mockSelectionContainer!: HTMLDivElement;
+  get viewportOverlayWidget() {
+    const rootId = this.host.doc.root?.id;
+    return rootId
+      ? (this.host.view.getWidget(
+          AFFINE_VIEWPORT_OVERLAY_WIDGET,
+          rootId
+        ) as AffineViewportOverlayWidget)
+      : null;
+  }
 
   private _stopAutoUpdate?: undefined | (() => void);
 
@@ -135,6 +147,7 @@ export class AffineAIPanelWidget extends WidgetElement {
     this._answer = null;
     this._stopAutoUpdate = undefined;
     this.config?.hideCallback?.();
+    this.viewportOverlayWidget?.unlock();
   };
 
   discard = () => {
@@ -325,18 +338,27 @@ export class AffineAIPanelWidget extends WidgetElement {
               }
             })
             .catch(console.error);
+          if (this.state === 'hidden') {
+            this._selection = undefined;
+          }
         }
       }
 
       // tell format bar to show or hide
       const rootBlockId = this.host.doc.root?.id;
       const formatBar = rootBlockId
-        ? this.host.view.getWidget('affine-format-bar-widget', rootBlockId)
+        ? this.host.view.getWidget(AFFINE_FORMAT_BAR_WIDGET, rootBlockId)
         : null;
 
       if (formatBar) {
         formatBar.requestUpdate();
       }
+    }
+
+    if (this.state !== 'hidden') {
+      this.viewportOverlayWidget?.lock();
+    } else {
+      this.viewportOverlayWidget?.unlock();
     }
   }
 
