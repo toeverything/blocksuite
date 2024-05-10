@@ -32,10 +32,10 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
   private _blackBackground = false;
 
   private _tryLoadBlackBackground() {
-    const value = this.edgeless.service.editSession.getItem(
+    const value = this.edgeless.service.editPropsStore.getItem(
       'presentBlackBackground'
     );
-    this._blackBackground = value ? value : true;
+    this._blackBackground = value ?? true;
   }
 
   override firstUpdated() {
@@ -49,7 +49,7 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     _disposables.add(
       edgeless.slots.navigatorSettingUpdated.on(({ blackBackground }) => {
         if (blackBackground !== undefined) {
-          this.edgeless.service.editSession.setItem(
+          this.edgeless.service.editPropsStore.setItem(
             'presentBlackBackground',
             blackBackground
           );

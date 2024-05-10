@@ -72,7 +72,7 @@ export class EdgelessBrushToolButton extends EdgelessToolButton<
       this._menu.element.edgeless = this.edgeless;
       this.updateMenu();
       this._menu.element.onChange = (props: Record<string, unknown>) => {
-        this.edgeless.service.editSession.record(this._type, props);
+        this.edgeless.service.editPropsStore.record(this._type, props);
       };
     }
   }

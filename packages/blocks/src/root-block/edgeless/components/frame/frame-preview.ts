@@ -207,7 +207,8 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     if (!this.edgeless) return;
 
     this.fillScreen =
-      this.edgeless.service.editSession.getItem('presentFillScreen') ?? false;
+      this.edgeless.service.editPropsStore.getItem('presentFillScreen') ??
+      false;
   }
 
   private _getViewportWH = (referencedModel: RefElement) => {

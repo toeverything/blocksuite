@@ -123,7 +123,7 @@ export class EdgelessRootService extends RootService {
   override unmounted() {
     super.unmounted();
 
-    this.editSession.setItem('viewport', {
+    this.editPropsStore.setItem('viewport', {
       centerX: this.viewport.centerX,
       centerY: this.viewport.centerY,
       zoom: this.viewport.zoom,
@@ -249,7 +249,7 @@ export class EdgelessRootService extends RootService {
     // @ts-ignore
     props['type'] = type;
 
-    this.editSession.apply(
+    this.editPropsStore.apply(
       type as CanvasElementType,
       props as Record<string, unknown>
     );
@@ -265,7 +265,7 @@ export class EdgelessRootService extends RootService {
   ) {
     props['index'] = this.generateIndex(flavour);
 
-    this.editSession.apply(flavour as EdgelessElementType, props);
+    this.editPropsStore.apply(flavour as EdgelessElementType, props);
 
     return this.doc.addBlock(flavour as never, props, parent, parentIndex);
   }
@@ -279,14 +279,14 @@ export class EdgelessRootService extends RootService {
   updateElement(id: string, props: Record<string, unknown>) {
     const element = this._surface.getElementById(id);
     if (element) {
-      this.editSession.record(element.type as EdgelessElementType, props);
+      this.editPropsStore.record(element.type as EdgelessElementType, props);
       this._surface.updateElement(id, props);
       return;
     }
 
     const block = this.doc.getBlockById(id);
     if (block) {
-      this.editSession.record(block.flavour as EdgelessElementType, props);
+      this.editPropsStore.record(block.flavour as EdgelessElementType, props);
       this.doc.updateBlock(block, props);
     }
   }

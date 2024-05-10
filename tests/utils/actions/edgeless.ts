@@ -303,7 +303,7 @@ export async function assertEdgelessShapeType(page: Page, type: ShapeName) {
     const shapeType = container.edgelessTool.shapeType;
     if (
       shapeType === 'rect' &&
-      container.service.editSession.getLastProps('shape').radius > 0
+      container.service.editPropsStore.getLastProps('shape').radius > 0
     )
       return 'roundedRect';
 

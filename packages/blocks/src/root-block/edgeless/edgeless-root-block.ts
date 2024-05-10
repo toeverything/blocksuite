@@ -693,7 +693,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
     const run = () => {
       const viewport =
-        this.service.editSession.getItem('viewport') ??
+        this.service.editPropsStore.getItem('viewport') ??
         this.service.getFitToScreenData();
 
       if ('xywh' in viewport) {

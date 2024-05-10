@@ -46,7 +46,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     height: number
   ): string {
     const { viewport } = this._service;
-    const attributes = this._edgeless.service.editSession.getLastProps('shape');
+    const attributes =
+      this._edgeless.service.editPropsStore.getLastProps('shape');
     const { shapeType } = this.tool;
     if (shapeType === 'rect' && attributes.radius > 0) {
       width += 40;
@@ -306,7 +307,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   createOverlay() {
     this.clearOverlay();
     const options = SHAPE_OVERLAY_OPTIONS;
-    const attributes = this._edgeless.service.editSession.getLastProps('shape');
+    const attributes =
+      this._edgeless.service.editPropsStore.getLastProps('shape');
     options.stroke = attributes.strokeColor;
     options.fill = attributes.fillColor;
 

@@ -495,7 +495,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     };
     const pageService = this.std.spec.getService('affine:page');
 
-    pageService.editSession.setItem('viewport', viewport);
+    pageService.editPropsStore.setItem('viewport', viewport);
     pageService.slots.editorModeSwitch.emit('edgeless');
   }
 

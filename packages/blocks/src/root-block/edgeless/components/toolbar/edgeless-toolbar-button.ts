@@ -44,7 +44,7 @@ export class EdgelessToolButton<
     super.connectedCallback();
     const { _disposables, edgeless } = this;
 
-    const attributes = edgeless.service.editSession.getLastProps(this._type);
+    const attributes = edgeless.service.editPropsStore.getLastProps(this._type);
 
     this._states.forEach(key => {
       const value = attributes[key];
@@ -75,7 +75,7 @@ export class EdgelessToolButton<
 
   protected initLastPropsSlot() {
     this._disposables.add(
-      this.edgeless.service.editSession.slots.lastPropsUpdated.on(
+      this.edgeless.service.editPropsStore.slots.lastPropsUpdated.on(
         ({ type, props }) => {
           if (type === this._type) {
             this._states.forEach(_key => {

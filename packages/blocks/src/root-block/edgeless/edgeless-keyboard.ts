@@ -47,7 +47,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         c: () => {
-          rootElement.service.editSession.record('connector', {
+          rootElement.service.editPropsStore.record('connector', {
             mode: ConnectorMode.Straight,
           });
           this._setEdgelessTool(rootElement, {
@@ -147,7 +147,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         s: () => {
           const attributes =
-            rootElement.service.editSession.getLastProps('shape');
+            rootElement.service.editPropsStore.getLastProps('shape');
           this._setEdgelessTool(rootElement, {
             type: 'shape',
             shapeType: attributes.shapeType,
@@ -201,7 +201,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             return;
           }
 
-          const attr = rootElement.service.editSession.getLastProps('shape');
+          const attr = rootElement.service.editPropsStore.getLastProps('shape');
 
           const nextShapeType = getNextShapeType(
             attr.radius > 0 && attr.shapeType === ShapeType.Rect

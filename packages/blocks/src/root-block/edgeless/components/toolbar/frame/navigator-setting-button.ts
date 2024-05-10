@@ -73,10 +73,10 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   > | null = null;
 
   private _tryRestoreSettings() {
-    const blackBackground = this.edgeless.service.editSession.getItem(
+    const blackBackground = this.edgeless.service.editPropsStore.getItem(
       'presentBlackBackground'
     );
-    this.blackBackground = blackBackground ? blackBackground : true;
+    this.blackBackground = blackBackground ?? true;
   }
 
   private _onBlackBackgroundChange = (checked: boolean) => {

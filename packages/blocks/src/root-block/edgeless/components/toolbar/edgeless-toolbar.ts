@@ -245,7 +245,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode =
-      this.edgeless.service.editSession.getItem('presentFillScreen') === true
+      this.edgeless.service.editPropsStore.getItem('presentFillScreen') === true
         ? 'fill'
         : 'fit';
   }
@@ -255,7 +255,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { slots } = edgeless;
 
     this._hideToolbar =
-      !!this.edgeless.service.editSession.getItem('presentHideToolbar');
+      !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
 
     edgeless.bindHotKey(
       {
@@ -370,7 +370,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this.edgeless.slots.navigatorSettingUpdated.emit({
         hideToolbar: this._hideToolbar,
       });
-      this.edgeless.service.editSession.setItem(
+      this.edgeless.service.editPropsStore.setItem(
         'presentHideToolbar',
         this._hideToolbar
       );

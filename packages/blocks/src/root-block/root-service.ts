@@ -19,7 +19,7 @@ import { matchFlavours } from '../_common/utils/model.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
 import { CanvasTextFonts } from '../surface-block/consts.js';
-import { EditSessionStorage } from '../surface-block/managers/edit-session.js';
+import { EditPropsStore } from '../surface-block/managers/edit-session.js';
 import {
   copySelectedModelsCommand,
   deleteSelectedModelsCommand,
@@ -49,7 +49,7 @@ export type EmbedOptions = {
 
 export class RootService extends BlockService<RootBlockModel> {
   readonly fontLoader = new FontLoader();
-  readonly editSession: EditSessionStorage = new EditSessionStorage(this);
+  readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
   public readonly copilot = new Copilot();
 
   fileDropManager!: FileDropManager;
@@ -116,7 +116,7 @@ export class RootService extends BlockService<RootBlockModel> {
   };
 
   override unmounted() {
-    this.editSession.dispose();
+    this.editPropsStore.dispose();
     this.fontLoader.clear();
   }
 
