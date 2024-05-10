@@ -148,22 +148,27 @@ export class FileDropManager {
     this._indicator.rect = null;
 
     const { onDrop } = this._fileDropOptions;
-    if (!onDrop) {
-      return;
-    }
+    if (!onDrop) return;
+
+    const dataTransfer = event.dataTransfer;
+    if (!dataTransfer) return;
+
+    // allow only external drag-and-drop files
+    const effectAllowed = dataTransfer.effectAllowed;
+    if (effectAllowed === 'none') return;
+
+    const types = dataTransfer.types;
+    if (!types.length) return;
 
     event.preventDefault();
 
-    // allow only external drag-and-drop files
-    const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
-    if (effectAllowed !== 'all') {
-      return;
-    }
+    const { files, items } = dataTransfer;
 
-    const droppedFiles = event.dataTransfer?.files;
-    if (!droppedFiles || !droppedFiles.length) {
-      return;
-    }
+    const hasFiles = files.length > 0;
+    const hasItems = items.length > 0;
+
+    console.log(hasFiles, hasItems, types);
+    console.log(files, items, types);
 
     const targetModel = this.targetModel;
     const place = this.type;
@@ -171,7 +176,11 @@ export class FileDropManager {
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
 
-    onDrop({ files: [...droppedFiles], targetModel, place, point })?.catch(
+    console.log([...items]);
+    for (const t of types) {
+      console.log(t, dataTransfer.getData(t));
+    }
+    onDrop({ files: [...files], targetModel, place, point })?.catch(
       console.error
     );
   };
