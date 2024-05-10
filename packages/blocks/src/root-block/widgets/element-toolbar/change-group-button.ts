@@ -85,7 +85,6 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
       ${groups.length === 1
         ? html` <edgeless-tool-icon-button
               .tooltip=${'Insert into Page'}
-              .tipPosition=${'bottom'}
               @click=${this._insertIntoPage}
             >
               ${NoteIcon}
@@ -96,7 +95,6 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
               class=${'edgeless-component-toolbar-group-rename-button'}
               @click=${() => mountGroupTitleEditor(groups[0], this.edgeless)}
               .tooltip=${'Rename'}
-              .tipPosition=${'bottom'}
             >
               ${RenameIcon}
             </edgeless-tool-icon-button>
@@ -111,7 +109,6 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
           groups.forEach(group => this.edgeless.service.ungroup(group));
         }}
         .tooltip=${'Ungroup'}
-        .tipPosition=${'bottom'}
       >
         ${UngroupButtonIcon}
       </edgeless-tool-icon-button>

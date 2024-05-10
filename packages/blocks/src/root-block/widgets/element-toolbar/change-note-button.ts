@@ -187,14 +187,15 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _queryCache = false;
 
   @state()
-  private _showPopper = false;
-
+  private _showFillColorPopper = false;
   @query('.fill-color-button')
   private _fillColorButton!: HTMLDivElement;
   @query('edgeless-color-panel')
   private _fillColorMenu!: HTMLDivElement;
   private _fillColorPopper: ReturnType<typeof createButtonPopper> | null = null;
 
+  @state()
+  private _showBorderStylePopper = false;
   @query('.border-style-button')
   private _borderStyleButton!: HTMLDivElement;
   @query('.line-style-panel')
@@ -202,6 +203,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _borderStylePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showBorderRadiusPopper = false;
   @query('.border-radius-button')
   private _borderRadiusButton!: HTMLDivElement;
   @query('edgeless-size-panel')
@@ -209,6 +212,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _borderRadiusPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showShadowTypePopper = false;
   @query('.shadow-style-button')
   private _shadowTypeButton!: HTMLDivElement;
   @query('edgeless-note-shadow-panel')
@@ -216,6 +221,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _shadowTypePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showDisplayModePopper = false;
   @query('.display-mode-button-group')
   private _displayModeButtonGroup!: HTMLDivElement;
   @query('note-display-mode-panel')
@@ -223,6 +230,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showNoteScalePopper = false;
   @query('.note-scale-button')
   private _noteScaleButton!: HTMLDivElement;
   @query('edgeless-scale-panel')
@@ -392,7 +401,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._displayModeButtonGroup,
         this._displayModePanel,
         ({ display }) => {
-          this._showPopper = display === 'show';
+          this._showDisplayModePopper = display === 'show';
         },
         -154,
         90
@@ -402,16 +411,17 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       this._fillColorPopper = createButtonPopper(
         this._fillColorButton,
         this._fillColorMenu,
-        ({ display }) => (this._showPopper = display === 'show')
+        ({ display }) => {
+          this._showFillColorPopper = display === 'show';
+        }
       );
-
       this._disposables.add(this._fillColorPopper);
 
       this._shadowTypePopper = createButtonPopper(
         this._shadowTypeButton,
         this._shadowTypesPanel,
         ({ display }) => {
-          this._showPopper = display === 'show';
+          this._showShadowTypePopper = display === 'show';
         }
       );
       _disposables.add(this._shadowTypePopper);
@@ -420,7 +430,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._borderStyleButton,
         this._borderStylesPanel,
         ({ display }) => {
-          this._showPopper = display === 'show';
+          this._showBorderStylePopper = display === 'show';
         }
       );
       _disposables.add(this._borderStylePopper);
@@ -429,7 +439,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._borderRadiusButton,
         this._boderRadiusPanel,
         ({ display }) => {
-          this._showPopper = display === 'show';
+          this._showBorderRadiusPopper = display === 'show';
         }
       );
       _disposables.add(this._borderRadiusPopper);
@@ -438,7 +448,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._noteScaleButton,
         this._noteScalePanel,
         ({ display }) => {
-          this._showPopper = display === 'show';
+          this._showNoteScalePopper = display === 'show';
         }
       );
       _disposables.add(this._noteScalePopper);
@@ -461,7 +471,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         ? html`<div class="display-mode-button-group">
               <span class="display-mode-button-label">Show in</span>
               <edgeless-tool-icon-button
-                .tooltip=${this._showPopper ? '' : 'Display Mode'}
+                .tooltip=${this._showDisplayModePopper
+                  ? nothing
+                  : 'Display Mode'}
                 .iconContainerPadding=${0}
                 @click=${() => this._displayModePopper?.toggle()}
               >
@@ -489,7 +501,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         : html`
             <edgeless-tool-icon-button
               class="fill-color-button"
-              .tooltip=${this._showPopper ? '' : 'Background'}
+              .tooltip=${this._showFillColorPopper ? nothing : 'Background'}
               .iconContainerPadding=${2}
               @click=${() => this._fillColorPopper?.toggle()}
             >
@@ -509,7 +521,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
             <div class="item shadow-style-button">
               <edgeless-tool-icon-button
-                .tooltip=${'Shadow Style'}
+                .tooltip=${this._showShadowTypePopper
+                  ? nothing
+                  : 'Shadow Style'}
                 .iconContainerPadding=${0}
                 .hover=${false}
                 @click=${() => this._shadowTypePopper?.toggle()}
@@ -527,7 +541,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
             <div class="item border-style-button">
               <edgeless-tool-icon-button
-                .tooltip=${this._showPopper ? '' : 'Border Style'}
+                .tooltip=${this._showBorderStylePopper
+                  ? nothing
+                  : 'Border Style'}
                 .iconContainerPadding=${0}
                 .hover=${false}
                 @click=${() => this._borderStylePopper?.toggle()}
@@ -545,7 +561,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
             <div class="item border-radius-button">
               <edgeless-tool-icon-button
-                .tooltip=${'Corners'}
+                .tooltip=${this._showBorderRadiusPopper ? nothing : 'Corners'}
                 .iconContainerPadding=${0}
                 .hover=${false}
                 @click=${() => this._borderRadiusPopper?.toggle()}
@@ -580,7 +596,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
 
       <edgeless-tool-icon-button
-        .tooltip=${this._showPopper ? '' : 'Scale'}
+        .tooltip=${this._showNoteScalePopper ? nothing : 'Scale'}
         .iconContainerPadding=${0}
         @click=${() => this._noteScalePopper?.toggle()}
       >

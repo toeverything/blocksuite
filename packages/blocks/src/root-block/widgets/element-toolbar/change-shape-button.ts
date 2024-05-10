@@ -239,26 +239,25 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   edgeless!: EdgelessRootBlockComponent;
 
   @state()
-  private _showPopper = false;
-
+  private _showTypePanelPopper = false;
   @query('.change-shape-button')
   private _changeShapeButton!: EdgelessToolIconButton;
-
   @query('edgeless-shape-panel')
   private _shapePanel!: EdgelessShapePanel;
-
   private _shapePanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showStylelPanelPopper = false;
   @query('.shape-style-button')
   private _shapeStyleButton!: EdgelessToolIconButton;
-
   @query('.shape-style-panel-container')
   private _shapeStyleMenu!: HTMLDivElement;
-
   private _shapeStyleMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showFillColorPanelPopper = false;
   @query('.fill-color-button')
   private _fillColorButton!: EdgelessToolIconButton;
   @query('.color-panel-container.fill-color')
@@ -266,6 +265,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _fillColorMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showStrokeColorPanelPopper = false;
   @query('.stroke-color-button')
   private _strokeColorButton!: EdgelessToolIconButton;
   @query('.color-panel-container.stroke-color')
@@ -273,6 +274,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _strokeColorMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showLineStylePanelPopper = false;
   @query('.line-styles-button')
   private _lineStylesButton!: EdgelessToolIconButton;
   @query('.line-style-panel')
@@ -374,7 +377,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._changeShapeButton,
       this._shapePanel,
       ({ display }) => {
-        this._showPopper = display === 'show';
+        this._showTypePanelPopper = display === 'show';
       }
     );
     _disposables.add(this._shapePanelPopper);
@@ -396,7 +399,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._fillColorButton,
       this._fillColorMenu,
       ({ display }) => {
-        this._showPopper = display === 'show';
+        this._showFillColorPanelPopper = display === 'show';
       }
     );
     _disposables.add(this._fillColorMenuPopper);
@@ -405,7 +408,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._strokeColorButton,
       this._strokeColorMenu,
       ({ display }) => {
-        this._showPopper = display === 'show';
+        this._showStrokeColorPanelPopper = display === 'show';
       }
     );
     _disposables.add(this._strokeColorMenuPopper);
@@ -414,7 +417,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._lineStylesButton,
       this._lineStylesPanel,
       ({ display }) => {
-        this._showPopper = display === 'show';
+        this._showLineStylePanelPopper = display === 'show';
       }
     );
     _disposables.add(this._lineStylesPanelPopper);
@@ -423,7 +426,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._shapeStyleButton,
       this._shapeStyleMenu,
       ({ display }) => {
-        this._showPopper = display === 'show';
+        this._showStylelPanelPopper = display === 'show';
       }
     );
     _disposables.add(this._shapeStyleMenuPopper);
@@ -447,8 +450,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return html`
       <div class="change-shape-toolbar-container">
         <edgeless-tool-icon-button
-          .tooltip=${this._showPopper ? '' : 'Switch Type'}
-          .tipPosition=${'bottom'}
+          .tooltip=${this._showTypePanelPopper ? nothing : 'Switch Type'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
           @click=${() => this._shapePanelPopper?.toggle()}
@@ -466,8 +468,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
-          .tooltip=${this._showPopper ? '' : 'Style'}
-          .tipPosition=${'bottom'}
+          .tooltip=${this._showStylelPanelPopper ? nothing : 'Style'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
           @click=${() => this._shapeStyleMenuPopper?.toggle()}
@@ -493,8 +494,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           class="fill-color-button"
-          .tooltip=${this._showPopper ? '' : 'Fill color'}
-          .tipPosition=${'bottom'}
+          .tooltip=${this._showFillColorPanelPopper ? nothing : 'Fill color'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
           @click=${() => this._fillColorMenuPopper?.toggle()}
@@ -516,8 +516,9 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           class="stroke-color-button"
-          .tooltip=${this._showPopper ? '' : 'Border color'}
-          .tipPosition=${'bottom'}
+          .tooltip=${this._showStrokeColorPanelPopper
+            ? nothing
+            : 'Border color'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
           @click=${() => this._strokeColorMenuPopper?.toggle()}
@@ -538,8 +539,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           class="border-styles-button"
-          .tooltip=${this._showPopper ? '' : 'Border style'}
-          .tipPosition=${'bottom'}
+          .tooltip=${this._showLineStylePanelPopper ? nothing : 'Border style'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
           @click=${() => this._lineStylesPanelPopper?.toggle()}

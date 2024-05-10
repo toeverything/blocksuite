@@ -155,16 +155,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   edgeless!: EdgelessRootBlockComponent;
 
   @state()
-  private _textColorPopperShow = false;
-  @state()
-  private _fontSizePopperShow = false;
-  @state()
-  private _fontWeightPopperShow = false;
-  @state()
-  private _fontFamilyPopperShow = false;
-  @state()
-  private _textAlignPopperShow = false;
-
+  private _showTextColorPopper = false;
   @query('.text-color-button')
   private _textColorButton!: HTMLButtonElement;
   @query('.color-panel-container.text-color')
@@ -172,12 +163,16 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _colorSelectorPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showTextAlignPopper = false;
   @query('.text-align-button')
   private _textAlignButton!: HTMLButtonElement;
   @query('.align-panel-container.text-align')
   private _textAlignMenu!: HTMLDivElement;
   private _textAlignPopper: ReturnType<typeof createButtonPopper> | null = null;
 
+  @state()
+  private _showFontFamilyPopper = false;
   @query('.text-font-family-button')
   private _textFontFamilyButton!: HTMLButtonElement;
   @query('.font-family-panel-container')
@@ -185,6 +180,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _textFontFamilyPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showFontSizePopper = false;
   @query('.text-font-size-button')
   private _textFontSizeButton!: HTMLButtonElement;
   @query('.font-size-panel-container')
@@ -192,6 +189,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _textFontSizePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @state()
+  private _showFontWeightPopper = false;
   @query('.text-font-weight-and-style-button')
   private _textFontWeightAndStyleButton!: HTMLButtonElement;
   @query('.font-weight-and-style-panel-container')
@@ -372,7 +371,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this._textColorButton,
       this._textColorMenu,
       ({ display }) => {
-        this._textColorPopperShow = display === 'show';
+        this._showTextColorPopper = display === 'show';
       }
     );
     _disposables.add(this._colorSelectorPopper);
@@ -381,7 +380,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this._textFontFamilyButton,
       this._textFontFamilyMenu,
       ({ display }) => {
-        this._fontFamilyPopperShow = display === 'show';
+        this._showFontFamilyPopper = display === 'show';
       }
     );
     _disposables.add(this._textFontFamilyPopper);
@@ -390,7 +389,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this._textAlignButton,
       this._textAlignMenu,
       ({ display }) => {
-        this._textAlignPopperShow = display === 'show';
+        this._showTextAlignPopper = display === 'show';
       }
     );
     _disposables.add(this._textAlignPopper);
@@ -399,7 +398,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this._textFontSizeButton,
       this._textFontSizeMenu,
       ({ display }) => {
-        this._fontSizePopperShow = display === 'show';
+        this._showFontSizePopper = display === 'show';
       }
     );
     _disposables.add(this._textFontSizePopper);
@@ -408,7 +407,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this._textFontWeightAndStyleButton,
       this._textFontWeightAndStyleMenu,
       ({ display }) => {
-        this._fontWeightPopperShow = display === 'show';
+        this._showFontWeightPopper = display === 'show';
       }
     );
     _disposables.add(this._textFontWeightAndStylePopper);
@@ -433,8 +432,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         ? nothing
         : html`<edgeless-tool-icon-button
               class="text-color-button"
-              .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
-              .tipPosition=${'bottom'}
+              .tooltip=${this._showTextColorPopper ? nothing : 'Text Color'}
               .active=${false}
               .activeMode=${'background'}
               .iconContainerPadding=${2}
@@ -457,8 +455,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="text-font-family-button"
-        .tooltip=${this._fontSizePopperShow ? '' : 'Font'}
-        .tipPosition=${'bottom'}
+        .tooltip=${this._showFontFamilyPopper ? nothing : 'Font'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._textFontFamilyPopper?.toggle()}
@@ -480,8 +477,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       ${this.elementType === 'shape'
         ? html`<edgeless-tool-icon-button
               class="text-color-button shape"
-              .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
-              .tipPosition=${'bottom'}
+              .tooltip=${this._showTextColorPopper ? nothing : 'Text Color'}
               .active=${false}
               .activeMode=${'background'}
               .iconContainerPadding=${2}
@@ -506,8 +502,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="text-font-size-button"
-        .tooltip=${this._fontFamilyPopperShow ? '' : 'Font Size'}
-        .tipPosition=${'bottom'}
+        .tooltip=${this._showFontSizePopper ? nothing : 'Font Size'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._textFontSizePopper?.toggle()}
@@ -536,8 +531,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         .disabled=${matchFontFaces.length === 1 &&
         matchFontFaces[0].style === selectedFontStyle &&
         matchFontFaces[0].weight === selectedFontWeight}
-        .tooltip=${this._fontWeightPopperShow ? '' : 'Font Style'}
-        .tipPosition=${'bottom'}
+        .tooltip=${this._showFontWeightPopper ? nothing : 'Font Style'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._textFontWeightAndStylePopper?.toggle()}
@@ -572,8 +566,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="text-align-button"
-        .tooltip=${this._textAlignPopperShow ? '' : 'Alignment'}
-        .tipPosition=${'bottom'}
+        .tooltip=${this._showTextAlignPopper ? nothing : 'Alignment'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._textAlignPopper?.toggle()}

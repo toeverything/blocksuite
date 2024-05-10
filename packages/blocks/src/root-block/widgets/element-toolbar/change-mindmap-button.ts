@@ -126,14 +126,11 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
     return html`<div class="edgeless-change-mindmap-button">
       <edgeless-tool-icon-button
         class="mindmap-style-button"
-        .tooltip=${this._showStylePopper ? '' : 'Style'}
-        .tipPosition=${'bottom'}
+        .tooltip=${this._showStylePopper ? nothing : 'Style'}
         .active=${false}
         .hoverState=${this._stylePopper?.state === 'show'}
         @click=${() => {
-          this._showStylePopper
-            ? this._stylePopper?.hide()
-            : this._stylePopper?.show();
+          this._stylePopper?.toggle();
           this.requestUpdate();
         }}
       >
@@ -153,15 +150,11 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="mindmap-layout-button"
-        .tooltip=${this._showLayoutPopper ? '' : 'Layout'}
-        .tipPosition=${'bottom'}
+        .tooltip=${this._showLayoutPopper ? nothing : 'Layout'}
         .active=${false}
         .hoverState=${this._layoutPopper?.state === 'show'}
         @click=${() => {
-          this._showLayoutPopper
-            ? this._layoutPopper?.hide()
-            : this._layoutPopper?.show();
-
+          this._layoutPopper?.toggle();
           this.requestUpdate();
         }}
       >

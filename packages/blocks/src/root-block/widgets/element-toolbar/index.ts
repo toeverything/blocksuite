@@ -354,15 +354,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       }
     }
 
-    const last = buttons.at(-1);
-    if (
-      buttons.length > 0 &&
-      (typeof last === 'symbol' ||
-        !last?.strings[0].includes('component-toolbar-menu-divider'))
-    ) {
-      buttons.push(renderMenuDivider());
-    }
-
     const registeredEntries = this._registeredEntries
       .filter(entry => entry.when(elements))
       .map(entry => entry.render(this.edgeless));

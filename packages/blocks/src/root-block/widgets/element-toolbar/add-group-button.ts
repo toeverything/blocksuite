@@ -23,7 +23,6 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
         this.edgeless.service.createGroupFromSelected();
       }}
       .tooltip=${'Group'}
-      .tipPosition=${'bottom'}
     >
       ${GroupIcon}<span
         style=${styleMap({
