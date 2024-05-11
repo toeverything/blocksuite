@@ -22,6 +22,7 @@ const styles = css`
     flex-direction: column;
     padding: 20px 36px;
     gap: 12px;
+    min-height: 100%;
   }
 
   .add-property {
