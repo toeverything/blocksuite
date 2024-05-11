@@ -70,11 +70,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
+
     this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
       this.selection.selection = undefined;
@@ -97,6 +93,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
           ></uni-lit>`,
           select: () => {
             this.view.columnAdd('end', config.type);
+            this.requestUpdate();
           },
         };
       })

@@ -130,9 +130,6 @@ export const popSideDetail = (ops: {
   const sideContainer = new SideLayoutModal();
   sideContainer.content = detail;
   sideContainer.close = close;
-  sideContainer.onclick = e => {
-    e.stopPropagation();
-  };
-  modal.onclick = close;
+  modal.onclick = e => e.target === modal && close();
   modal.append(sideContainer);
 };
