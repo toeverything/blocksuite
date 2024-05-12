@@ -11,7 +11,7 @@ type EmbedConfig = {
   /**
    * Check if the attachment can be turned into embed view.
    */
-  check: (model: AttachmentBlockModel) => boolean;
+  check: (model: AttachmentBlockModel, maxFileSize: number) => boolean;
   /**
    * The action will be executed when the 「Turn into embed view」 button is clicked.
    */
@@ -38,8 +38,8 @@ const embedConfig: EmbedConfig[] = [
   },
   {
     name: 'pdf',
-    check: model =>
-      model.type === 'application/pdf' && model.size <= MAX_EMBED_SIZE,
+    check: (model, maxFileSize) =>
+      model.type === 'application/pdf' && model.size <= maxFileSize,
     template: (_, blobUrl) => {
       // More options: https://tinytip.co/tips/html-pdf-params/
       // https://chromium.googlesource.com/chromium/src/+/refs/tags/121.0.6153.1/chrome/browser/resources/pdf/open_pdf_params_parser.ts
@@ -59,26 +59,32 @@ const embedConfig: EmbedConfig[] = [
   },
   {
     name: 'video',
-    check: model =>
-      model.type.startsWith('video/') && model.size <= MAX_EMBED_SIZE,
+    check: (model, maxFileSize) =>
+      model.type.startsWith('video/') && model.size <= maxFileSize,
     template: (_, blobUrl) =>
       html`<video width="100%;" height="480" controls src=${blobUrl}></video>`,
   },
   {
     name: 'audio',
-    check: model =>
-      model.type.startsWith('audio/') && model.size <= MAX_EMBED_SIZE,
+    check: (model, maxFileSize) =>
+      model.type.startsWith('audio/') && model.size <= maxFileSize,
     template: (_, blobUrl) =>
       html`<audio controls src=${blobUrl} style="margin: 4px;"></audio>`,
   },
 ];
 
-export function allowEmbed(model: AttachmentBlockModel) {
-  return embedConfig.some(config => config.check(model));
+export function allowEmbed(
+  model: AttachmentBlockModel,
+  maxFileSize: number = MAX_EMBED_SIZE
+) {
+  return embedConfig.some(config => config.check(model, maxFileSize));
 }
 
-export function convertToEmbed(model: AttachmentBlockModel) {
-  const config = embedConfig.find(config => config.check(model));
+export function convertToEmbed(
+  model: AttachmentBlockModel,
+  maxFileSize: number = MAX_EMBED_SIZE
+) {
+  const config = embedConfig.find(config => config.check(model, maxFileSize));
   if (!config || !config.action) {
     model.doc.updateBlock<Partial<AttachmentBlockModel>>(model, {
       embed: true,
@@ -88,8 +94,12 @@ export function convertToEmbed(model: AttachmentBlockModel) {
   config.action(model)?.catch(console.error);
 }
 
-export function renderEmbedView(model: AttachmentBlockModel, blobUrl: string) {
-  const config = embedConfig.find(config => config.check(model));
+export function renderEmbedView(
+  model: AttachmentBlockModel,
+  blobUrl: string,
+  maxFileSize: number = MAX_EMBED_SIZE
+) {
+  const config = embedConfig.find(config => config.check(model, maxFileSize));
   if (!config || !config.template) {
     console.error('No embed view template found!', model, embedConfig);
     return null;
