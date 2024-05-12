@@ -1,12 +1,9 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import {
-  AIStarIconWithAnimation,
-  AIStopIcon,
-} from '../../../../../_common/icons/ai.js';
+import { AIStopIcon } from '../../../../../_common/icons/ai.js';
 
 @customElement('ai-panel-generating')
 export class AIPanelGenerating extends WithDisposable(LitElement) {
@@ -69,12 +66,15 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
+  icon!: TemplateResult<1>;
+
+  @property({ attribute: false })
   stopGenerating!: () => void;
 
   override render() {
     return html`
       <div class="generating-tip">
-        <div class="left">${AIStarIconWithAnimation}</div>
+        <div class="left">${this.icon}</div>
         <div class="text">AI is generating...</div>
         <div @click=${this.stopGenerating} class="right">
           <span class="stop-icon">${AIStopIcon}</span>
