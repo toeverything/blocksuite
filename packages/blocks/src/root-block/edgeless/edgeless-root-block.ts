@@ -20,6 +20,7 @@ import {
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
   type EdgelessTool,
+  type IPoint,
   isPinchEvent,
   NoteDisplayMode,
   Point,
@@ -44,7 +45,6 @@ import type { AttachmentBlockProps } from '../../index.js';
 import {
   Bound,
   type IBound,
-  type IVec,
   normalizeWheelDeltaY,
   serializeXYWH,
   Vec,
@@ -265,7 +265,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
    * @returns: The id of new note
    */
   addNoteWithPoint(
-    point: Point,
+    point: IPoint,
     options: {
       width?: number;
       height?: number;
@@ -309,7 +309,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
    */
   addNewNote(
     blocks: Array<Partial<BlockModel>>,
-    point: Point,
+    point: IPoint,
     options?: {
       width?: number;
       height?: number;
@@ -343,7 +343,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     };
   }
 
-  addImage(model: Partial<ImageBlockModel>, point: IVec) {
+  addImage(model: Partial<ImageBlockModel>, point: IPoint) {
     const options = {
       width: model.width ?? 0,
       height: model.height ?? 0,
@@ -352,8 +352,8 @@ export class EdgelessRootBlockComponent extends BlockElement<
       delete model.width;
       delete model.height;
     }
-    point = this.service.viewport.toModelCoord(point[0], point[1]);
-    const bound = new Bound(point[0], point[1], options.width, options.height);
+    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
+    const bound = new Bound(x, y, options.width, options.height);
     return this.service.addBlock(
       'affine:image',
       { ...model, xywh: bound.serialize() },
@@ -363,7 +363,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   async addImages(
     files: File[],
-    point?: Point | { x: number; y: number },
+    point?: IPoint,
     inTopLeft?: boolean
   ): Promise<string[]> {
     const imageFiles = [...files].filter(file =>
@@ -445,7 +445,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     return blockIds;
   }
 
-  async addAttachments(files: File[], point?: Point): Promise<string[]> {
+  async addAttachments(files: File[], point?: IPoint): Promise<string[]> {
     if (!files.length) return [];
 
     const attachmentService = this.host.spec.getService('affine:attachment');
