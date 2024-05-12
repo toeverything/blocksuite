@@ -52,7 +52,7 @@ export function AttachmentOptionsTemplate({
         ).value = el);
   };
 
-  const disableEmbed = !allowEmbed(model);
+  const disableEmbed = !allowEmbed(model, anchor.service.maxFileSize);
   const readonly = model.doc.readonly;
   let moreMenuAbortController: AbortController | null = null;
   return html`<style>
@@ -93,7 +93,7 @@ export function AttachmentOptionsTemplate({
         ?hidden=${model.embed}
         ?disabled=${readonly || disableEmbed}
         @click="${() => {
-          convertToEmbed(model);
+          convertToEmbed(model, anchor.service.maxFileSize);
           abortController.abort();
         }}"
       >
