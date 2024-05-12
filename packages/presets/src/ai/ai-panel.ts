@@ -3,14 +3,14 @@ import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
-  ChatWithAIIcon,
-  DiscardIcon,
+  AIStarIconWithAnimation,
   InsertBelowIcon,
   ReplaceIcon,
   ResetIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
+import { ChatWithAIIcon, DiscardIcon } from './_common/icons.js';
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
 import { reportResponse } from './utils/action-reporter.js';
@@ -244,6 +244,7 @@ export function buildAIPanelConfig(
     finishStateConfig: buildFinishConfig(panel),
     errorStateConfig: buildErrorConfig(panel),
     copy: buildCopyConfig(panel),
+    generatingIcon: AIStarIconWithAnimation,
   };
 }
 

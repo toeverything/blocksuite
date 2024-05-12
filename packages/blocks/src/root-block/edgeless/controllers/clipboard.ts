@@ -244,7 +244,6 @@ export class EdgelessClipboardController extends PageClipboard {
       if (files.length === 0) return;
 
       const { lastMousePos } = this.toolManager;
-      const point = new Point(lastMousePos.x, lastMousePos.y);
 
       const imageFiles: File[] = [],
         attachmentFiles: File[] = [];
@@ -259,9 +258,9 @@ export class EdgelessClipboardController extends PageClipboard {
 
       // when only images in clipboard, add image-blocks else add all files as attachments
       if (attachmentFiles.length === 0) {
-        await this.host.addImages(imageFiles, point);
+        await this.host.addImages(imageFiles, lastMousePos);
       } else {
-        await this.host.addAttachments([...files], point);
+        await this.host.addAttachments([...files], lastMousePos);
       }
 
       return;
@@ -514,10 +513,11 @@ export class EdgelessClipboardController extends PageClipboard {
     oldToNewIdMap: Map<string, string>
   ) {
     const imageIds = images.map(({ props, id }) => {
-      const { xywh, rotate, sourceId, size, width, height } = props;
+      const { xywh, rotate, sourceId, size, width, height, caption } = props;
       const imageId = this.host.service.addBlock(
         'affine:image',
         {
+          caption,
           sourceId,
           xywh,
           rotate,
@@ -836,12 +836,10 @@ export class EdgelessClipboardController extends PageClipboard {
       loomEmbeds?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
+    const { lastMousePos } = this.toolManager;
     pasteCenter =
       pasteCenter ??
-      this.host.service.viewport.toModelCoord(
-        this.toolManager.lastMousePos.x,
-        this.toolManager.lastMousePos.y
-      );
+      this.host.service.viewport.toModelCoord(lastMousePos.x, lastMousePos.y);
     // map old id to new id to rebuild connector's source and target
     const oldIdToNewIdMap = new Map<string, string>();
 
