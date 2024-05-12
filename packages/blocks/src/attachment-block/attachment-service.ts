@@ -68,6 +68,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
         );
       } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
         const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+        point = edgelessRoot.service.viewport.toViewPointFromClientPoint(point);
         await edgelessRoot.addAttachments(attachmentFiles, point);
       }
 

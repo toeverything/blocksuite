@@ -42,6 +42,8 @@ export interface AffineAIPanelWidgetConfig {
   discardCallback?: () => void;
 
   copy?: CopyConfig;
+
+  generatingIcon: TemplateResult<1>;
 }
 
 export type AffineAIPanelState =

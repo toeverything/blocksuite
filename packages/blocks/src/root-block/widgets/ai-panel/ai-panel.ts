@@ -19,6 +19,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
+import { AIStarIconWithAnimation } from '../../../_common/icons/ai.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { getPageRootByElement } from '../../../_common/utils/query.js';
 import { PageRootService } from '../../page/page-root-service.js';
@@ -484,6 +485,7 @@ export class AffineAIPanelWidget extends WidgetElement {
               `
             : nothing}
           <ai-panel-generating
+            .icon=${config.generatingIcon ?? AIStarIconWithAnimation}
             .stopGenerating=${this.stopGenerating}
           ></ai-panel-generating>
         `,
