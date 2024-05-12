@@ -513,10 +513,11 @@ export class EdgelessClipboardController extends PageClipboard {
     oldToNewIdMap: Map<string, string>
   ) {
     const imageIds = images.map(({ props, id }) => {
-      const { xywh, rotate, sourceId, size, width, height } = props;
+      const { xywh, rotate, sourceId, size, width, height, caption } = props;
       const imageId = this.host.service.addBlock(
         'affine:image',
         {
+          caption,
           sourceId,
           xywh,
           rotate,
