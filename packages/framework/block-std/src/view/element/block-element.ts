@@ -221,7 +221,7 @@ export class BlockElement<
     });
 
     this.service = this.host.std.spec.getService(this.model.flavour);
-    this.path = this.host.view.calculatePath(this);
+    this.path = this.host.view.calculatePath(this.model);
 
     this._disposables.add(disposable);
 

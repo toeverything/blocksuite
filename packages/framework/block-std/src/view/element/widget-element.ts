@@ -69,7 +69,7 @@ export class WidgetElement<
     // TODO(mirone/#6534): find a better way to get block element from a node
     this.blockElement = parentElement.closest('[data-block-id]') as B;
     this.service = this.blockElement.service;
-    this.path = this.host.view.calculatePath(this).concat(id);
+    this.path = this.host.view.calculatePath(this.model).concat(id);
     this.service.specSlots.widgetConnected.emit({
       service: this.blockElement.service,
       component: this,

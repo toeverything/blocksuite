@@ -53,7 +53,10 @@ export class RangeBinding {
   }
 
   isComposing = false;
-  private _prevTextSelection: TextSelection | null = null;
+  private _prevTextSelection: {
+    selection: TextSelection;
+    path: string[];
+  } | null = null;
   private _onStdSelectionChanged = (selections: BaseSelection[]) => {
     // wait for lit updated
     this.host.updateComplete
@@ -63,15 +66,25 @@ export class RangeBinding {
             selection.is('text')
           ) ?? null;
 
+        const model = text && this.host.doc.getBlockById(text.path);
+        const path = model && this.host.view.calculatePath(model);
+
         const eq =
-          text && this._prevTextSelection
-            ? text.equals(this._prevTextSelection)
+          text && this._prevTextSelection && path
+            ? text.equals(this._prevTextSelection.selection) &&
+              path.join('') === this._prevTextSelection.path.join('')
             : text === this._prevTextSelection;
         if (eq) {
           return;
         }
 
-        this._prevTextSelection = text;
+        this._prevTextSelection =
+          text && path
+            ? {
+                selection: text,
+                path: path,
+              }
+            : null;
         if (text) {
           this.rangeManager.syncTextSelectionToRange(text);
         } else {
@@ -115,10 +128,19 @@ export class RangeBinding {
       );
       if (inlineEditor?.isComposing) return;
 
-      this._prevTextSelection = this.rangeManager.rangeToTextSelection(
+      const selection = this.rangeManager.rangeToTextSelection(
         range,
         isRangeReversed
       );
+      const model = selection && this.host.doc.getBlockById(selection.path);
+      const path = model && this.host.view.calculatePath(model);
+      this._prevTextSelection =
+        selection && path
+          ? {
+              selection,
+              path,
+            }
+          : null;
       this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
     } else {
       this._prevTextSelection = null;

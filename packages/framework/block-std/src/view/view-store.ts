@@ -41,9 +41,9 @@ export class ViewStore {
 
   constructor(public std: BlockSuite.Std) {}
 
-  calculatePath = (node: BlockElement | WidgetElement): string[] => {
+  calculatePath = (model: BlockModel): string[] => {
     const path: string[] = [];
-    let current: BlockModel | null = node.model;
+    let current: BlockModel | null = model;
     while (current) {
       path.push(current.id);
       current = this.std.doc.getParent(current);
