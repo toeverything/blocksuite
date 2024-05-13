@@ -134,13 +134,12 @@ export class RangeBinding {
       );
       const model = selection && this.host.doc.getBlockById(selection.path);
       const path = model && this.host.view.calculatePath(model);
-      this._prevTextSelection =
-        selection && path
-          ? {
-              selection,
-              path,
-            }
-          : null;
+      if (!model || !path) return;
+
+      this._prevTextSelection = {
+        selection,
+        path,
+      };
       this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
     } else {
       this._prevTextSelection = null;
