@@ -117,7 +117,7 @@ export class BlockElement<
   }
 
   get blockId() {
-    return this.model.id;
+    return this.dataset.blockId as string;
   }
 
   get isVersionMismatch() {

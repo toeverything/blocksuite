@@ -111,8 +111,6 @@ export class PageKeyboardManager {
     assertExists(first, `Cannot find block ${current.blockId}`);
     assertExists(firstElement, `Cannot find block view ${current.path}`);
 
-    const parentPath = firstElement.parentPath;
-
     const parent = this._doc.getParent(first);
     const index = parent?.children.indexOf(first);
 
@@ -128,7 +126,7 @@ export class PageKeyboardManager {
 
     return {
       blockId,
-      path: parentPath.concat(blockId),
+      path: blockId,
     };
   }
 

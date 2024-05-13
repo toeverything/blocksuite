@@ -119,13 +119,13 @@ export const updateBlockType: Command<
     }
     const newTextSelection = selectionManager.create('text', {
       from: {
-        path: textSelection.from.path.slice(0, -1).concat(firstNewModel.id),
+        path: firstNewModel.id,
         index: textSelection.from.index,
         length: textSelection.from.length,
       },
       to: textSelection.to
         ? {
-            path: textSelection.to.path.slice(0, -1).concat(lastNewModel.id),
+            path: lastNewModel.id,
             index: textSelection.to.index,
             length: textSelection.to.length,
           }

@@ -201,9 +201,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const textModels = context.selectedModels;
         if (textModels && textModels.length === 1) {
           const inlineEditor = _getInlineEditor();
-          const inilneRange = inlineEditor.getInlineRange();
-          assertExists(inilneRange);
-          handleIndent(blockElement.host, model, inilneRange.index);
+          const inlineRange = inlineEditor.getInlineRange();
+          assertExists(inlineRange);
+          handleIndent(blockElement.host, model, inlineRange.index);
           _preventDefault(ctx);
 
           return true;
