@@ -38,10 +38,7 @@ export class NoteService extends BlockService<NoteBlockModel> {
         return false;
       }
 
-      const anchorComponent = editorHost.std.view.viewFromPath(
-        'block',
-        anchorBlockPath
-      );
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [NoteBlockSchema.model.flavour])

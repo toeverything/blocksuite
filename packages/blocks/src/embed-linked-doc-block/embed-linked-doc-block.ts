@@ -152,7 +152,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.path,
+      path: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }

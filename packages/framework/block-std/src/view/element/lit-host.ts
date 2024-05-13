@@ -116,7 +116,6 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
     this.std = new BlockStdScope({
       host: this,
-      collection: this.doc.collection,
       doc: this.doc,
     });
 

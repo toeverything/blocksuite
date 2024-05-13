@@ -1,7 +1,6 @@
 import { assertExists, throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../../selection/index.js';
-import { PathFinder } from '../../utils/index.js';
 import { BlockElement } from '../element/block-element.js';
 import { RangeManager } from './range-manager.js';
 
@@ -134,7 +133,7 @@ export class RangeBinding {
     if (event.isComposing) return;
 
     const { from, to } = selection;
-    if (!to || PathFinder.equals(from.path, to.path)) return;
+    if (!to || from.path === to.path) return;
 
     const range = this.rangeManager.value;
     if (!range) return;
@@ -186,6 +185,7 @@ export class RangeBinding {
   private _compositionStartCallback:
     | ((event: CompositionEvent) => Promise<void>)
     | null = null;
+
   private _onCompositionStart = () => {
     const selection = this.selectionManager.find('text');
     if (!selection) return;
@@ -222,7 +222,9 @@ export class RangeBinding {
 
       const parents: BlockElement[] = [];
       for (const highestBlock of highestBlocks) {
-        const parent = this.host.view.getParent(highestBlock.path);
+        const parentModel = this.host.doc.getParent(highestBlock.blockId);
+        if (!parentModel) continue;
+        const parent = this.host.view.getBlock(parentModel.id);
         if (!(parent instanceof BlockElement) || parents.includes(parent))
           continue;
 
@@ -264,6 +266,7 @@ export class RangeBinding {
       this.rangeManager.syncTextSelectionToRange(selection);
     };
   };
+
   private _onCompositionEnd = (event: CompositionEvent) => {
     if (this._compositionStartCallback) {
       event.preventDefault();

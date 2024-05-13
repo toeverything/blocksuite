@@ -182,7 +182,7 @@ export function handleInlineAskAIAction(host: EditorHost) {
   const selection = host.selection.find('text');
   const lastBlockPath = selection ? selection.to?.path ?? selection.path : null;
   if (!lastBlockPath) return;
-  const block = host.view.viewFromPath('block', lastBlockPath);
+  const block = host.view.getBlock(lastBlockPath);
   if (!block) return;
   const generateAnswer: AffineAIPanelWidgetConfig['generateAnswer'] = ({
     finish,

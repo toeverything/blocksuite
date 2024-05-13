@@ -1,10 +1,9 @@
 import z from 'zod';
 
-import { PathFinder } from '../../utils/path-finder.js';
 import { BaseSelection } from '../base.js';
 
 export type TextRangePoint = {
-  path: string[];
+  path: string;
   index: number;
   length: number;
 };
@@ -17,13 +16,13 @@ export type TextSelectionProps = {
 
 const TextSelectionSchema = z.object({
   from: z.object({
-    path: z.array(z.string()),
+    path: z.string(),
     index: z.number(),
     length: z.number(),
   }),
   to: z
     .object({
-      path: z.array(z.string()),
+      path: z.string(),
       index: z.number(),
       length: z.number(),
     })
@@ -71,11 +70,7 @@ export class TextSelection extends BaseSelection {
     b: TextRangePoint | null
   ): boolean {
     if (a && b) {
-      return (
-        PathFinder.equals(a.path, b.path) &&
-        a.index === b.index &&
-        a.length === b.length
-      );
+      return a.path === b.path && a.index === b.index && a.length === b.length;
     }
 
     return a === b;
@@ -84,7 +79,7 @@ export class TextSelection extends BaseSelection {
   override equals(other: BaseSelection): boolean {
     if (other instanceof TextSelection) {
       return (
-        PathFinder.equals(this.path, other.path) &&
+        this.path === other.path &&
         this._equalPoint(other.from, this.from) &&
         this._equalPoint(other.to, this.to)
       );
@@ -114,7 +109,7 @@ export class TextSelection extends BaseSelection {
   }
 
   isInSameBlock(): boolean {
-    return this.to === null || PathFinder.equals(this.from.path, this.to.path);
+    return this.to === null || this.from.path === this.to.path;
   }
 }
 

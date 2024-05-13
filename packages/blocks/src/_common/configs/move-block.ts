@@ -17,8 +17,8 @@ function getTextSelection(blockElement: BlockElement) {
   return selection.find('text');
 }
 
-const pathToBlock = (blockElement: BlockElement, path: string[]) =>
-  blockElement.host.view.viewFromPath('block', path);
+const pathToBlock = (blockElement: BlockElement, path: string) =>
+  blockElement.host.view.getBlock(path);
 
 interface MoveBlockConfig {
   name: string;

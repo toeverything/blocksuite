@@ -1,8 +1,8 @@
-import { BaseSelection, PathFinder } from '@blocksuite/block-std';
+import { BaseSelection } from '@blocksuite/block-std';
 import z from 'zod';
 
 const ImageSelectionSchema = z.object({
-  path: z.array(z.string()),
+  path: z.string(),
 });
 
 export class ImageSelection extends BaseSelection {
@@ -11,7 +11,7 @@ export class ImageSelection extends BaseSelection {
 
   override equals(other: BaseSelection): boolean {
     if (other instanceof ImageSelection) {
-      return PathFinder.equals(this.path, other.path);
+      return this.path === other.path;
     }
     return false;
   }
@@ -26,7 +26,7 @@ export class ImageSelection extends BaseSelection {
   static override fromJSON(json: Record<string, unknown>): ImageSelection {
     ImageSelectionSchema.parse(json);
     return new ImageSelection({
-      path: json.path as string[],
+      path: json.path as string,
     });
   }
 }

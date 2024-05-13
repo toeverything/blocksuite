@@ -386,8 +386,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
                           this._selectionValue.length === 1 &&
                           this._selectionValue[0].type === 'database'
                         ) {
-                          const element = this.host.view.viewFromPath(
-                            'block',
+                          const element = this.host.view.getBlock(
                             this._selectionValue[0].path
                           );
                           if (!element) return;

@@ -7,7 +7,11 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { focusTitle, type Viewport } from '../../_common/utils/index.js';
+import {
+  buildPath,
+  focusTitle,
+  type Viewport,
+} from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   getDocTitleInlineEditor,
@@ -245,7 +249,7 @@ export class PageRootBlockComponent extends BlockElement<
           .flatMap(model => {
             return model.children.map(child => {
               return this.std.selection.create('block', {
-                path: [this.model.id, model.id, child.id],
+                path: child.id,
               });
             });
           });
@@ -259,7 +263,7 @@ export class PageRootBlockComponent extends BlockElement<
         );
         if (!sel) return;
         let model: BlockModel | null = null;
-        let path: string[] = sel.path;
+        let path: string[] = buildPath(this.doc.getBlockById(sel.path));
         while (path.length > 0 && !model) {
           const m = this.doc.getBlockById(path[path.length - 1]);
           if (m && m.flavour === 'affine:note') {
@@ -380,7 +384,7 @@ export class PageRootBlockComponent extends BlockElement<
           this.host.selection.setGroup('note', [
             this.host.selection.create('text', {
               from: {
-                path: newTextSelectionPath,
+                path: newTextSelectionPath[newTextSelectionPath.length - 1],
                 index: 0,
                 length: 0,
               },
