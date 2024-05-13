@@ -81,7 +81,7 @@ export class AttachmentBlockComponent extends BlockElement<
 
   private get _embedView() {
     if (this.isInSurface || !this.model.embed || !this.blobUrl) return;
-    return renderEmbedView(this.model, this.blobUrl);
+    return renderEmbedView(this.model, this.blobUrl, this.service.maxFileSize);
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {

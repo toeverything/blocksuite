@@ -120,7 +120,7 @@ export async function checkAttachmentBlob(block: AttachmentBlockComponent) {
 
     block.loading = false;
     block.error = false;
-    block.allowEmbed = allowEmbed(model);
+    block.allowEmbed = allowEmbed(model, block.service.maxFileSize);
     if (block.blobUrl) {
       URL.revokeObjectURL(block.blobUrl);
     }
