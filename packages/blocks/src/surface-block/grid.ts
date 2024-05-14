@@ -184,10 +184,13 @@ export class GridManager<T extends EdgelessModel> {
     return results;
   }
 
-  search(bound: IBound, strict = false): T[] {
+  search(bound: IBound, strict?: boolean, getSet?: false): T[];
+  search(bound: IBound, strict: boolean | undefined, getSet: true): Set<T>;
+  search(bound: IBound, strict = false, getSet: boolean = false): T[] | Set<T> {
     const results: Set<T> = this._searchExternal(bound, strict);
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
+
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         const gridElements = this._getGrid(i, j);
@@ -203,6 +206,8 @@ export class GridManager<T extends EdgelessModel> {
         }
       }
     }
+
+    if (getSet) return results;
 
     // sort elements in set based on index
     const sorted = Array.from(results).sort(compare);

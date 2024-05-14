@@ -84,7 +84,7 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.block.blockId,
+      blockId: this.block.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }

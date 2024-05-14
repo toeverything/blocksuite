@@ -32,7 +32,7 @@ export class Doc {
 
     this._yBlocks.forEach((_, id) => {
       if (!this._blocks.has(id)) {
-        this._onBlockAdded(id);
+        this._onBlockAdded(id, true);
       }
     });
 
@@ -288,7 +288,7 @@ export class Doc {
     return fn(parent, index);
   }
 
-  private _onBlockAdded(id: string) {
+  private _onBlockAdded(id: string, init = false) {
     try {
       if (this._blocks.has(id)) {
         return;
@@ -329,6 +329,7 @@ export class Doc {
       this.slots.blockUpdated.emit({
         type: 'add',
         id,
+        init,
         flavour: block.model.flavour,
         model: block.model,
       });

@@ -2,7 +2,7 @@ import { noop } from '@blocksuite/global/utils';
 
 import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block.js';
 import type { EmbedLinkedDocModel } from './embed-linked-doc-model.js';
-import type { EmbedLinkedDocService } from './embed-linked-doc-service.js';
+import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 noop(EmbedLinkedDocBlockComponent);
 
 export * from './embed-linked-doc-block.js';
@@ -16,7 +16,7 @@ declare global {
       'affine:embed-linked-doc': EmbedLinkedDocModel;
     }
     interface BlockServices {
-      'affine:embed-linked-doc': EmbedLinkedDocService;
+      'affine:embed-linked-doc': EmbedLinkedDocBlockService;
     }
   }
 }

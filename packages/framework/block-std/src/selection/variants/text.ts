@@ -3,7 +3,7 @@ import z from 'zod';
 import { BaseSelection } from '../base.js';
 
 export type TextRangePoint = {
-  path: string;
+  blockId: string;
   index: number;
   length: number;
 };
@@ -16,13 +16,13 @@ export type TextSelectionProps = {
 
 const TextSelectionSchema = z.object({
   from: z.object({
-    path: z.string(),
+    blockId: z.string(),
     index: z.number(),
     length: z.number(),
   }),
   to: z
     .object({
-      path: z.string(),
+      blockId: z.string(),
       index: z.number(),
       length: z.number(),
     })
@@ -44,7 +44,7 @@ export class TextSelection extends BaseSelection {
 
   constructor({ from, to, reverse }: TextSelectionProps) {
     super({
-      path: from.path,
+      blockId: from.blockId,
     });
     this.from = from;
 
@@ -70,7 +70,9 @@ export class TextSelection extends BaseSelection {
     b: TextRangePoint | null
   ): boolean {
     if (a && b) {
-      return a.path === b.path && a.index === b.index && a.length === b.length;
+      return (
+        a.blockId === b.blockId && a.index === b.index && a.length === b.length
+      );
     }
 
     return a === b;
@@ -79,7 +81,7 @@ export class TextSelection extends BaseSelection {
   override equals(other: BaseSelection): boolean {
     if (other instanceof TextSelection) {
       return (
-        this.path === other.path &&
+        this.blockId === other.blockId &&
         this._equalPoint(other.from, this.from) &&
         this._equalPoint(other.to, this.to)
       );
@@ -109,7 +111,7 @@ export class TextSelection extends BaseSelection {
   }
 
   isInSameBlock(): boolean {
-    return this.to === null || this.from.path === this.to.path;
+    return this.to === null || this.from.blockId === this.to.blockId;
   }
 }
 

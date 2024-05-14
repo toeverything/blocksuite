@@ -5,6 +5,7 @@ import {
   MarkdownAdapter,
   MixTextAdapter,
   pasteMiddleware,
+  titleMiddleware,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type {
@@ -38,10 +39,10 @@ function processSnapshot(
   assertExists(model);
 
   const modelId = model.id;
-  if (text.from.path === modelId) {
+  if (text.from.blockId === modelId) {
     updateSnapshotText(text.from, snapshot, model);
   }
-  if (text.to && text.to.path === modelId) {
+  if (text.to && text.to.blockId === modelId) {
     updateSnapshotText(text.to, snapshot, model);
   }
 
@@ -64,15 +65,18 @@ function processTextInSnapshot(snapshot: SliceSnapshot, host: EditorHost) {
 }
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
-  const job = new Job({ collection: host.std.doc.collection });
+  const job = new Job({
+    collection: host.std.doc.collection,
+    middlewares: [titleMiddleware],
+  });
   const snapshot = await job.sliceToSnapshot(slice);
   processTextInSnapshot(snapshot, host);
   const markdownAdapter = new MarkdownAdapter();
+  markdownAdapter.applyConfigs(job.adapterConfigs);
   const markdown = await markdownAdapter.fromSliceSnapshot({
     snapshot,
     assets: job.assetsManager,
   });
-
   return markdown.file;
 }
 

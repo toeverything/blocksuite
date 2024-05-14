@@ -53,12 +53,12 @@ export const getSelectedBlocksCommand: Command<
     const viewStore = ctx.std.view;
     const doc = ctx.std.doc;
     const selectedBlockElements = blockSelections.flatMap(selection => {
-      const el = viewStore.getBlock(selection.path);
+      const el = viewStore.getBlock(selection.blockId);
       if (!el) {
         return [];
       }
       const blockElements: BlockElement[] = [el];
-      let selectionPath = selection.path;
+      let selectionPath = selection.blockId;
       if (mode === 'all') {
         let parent = null;
         do {
@@ -102,7 +102,7 @@ export const getSelectedBlocksCommand: Command<
     const viewStore = ctx.std.view;
     const selectedBlockElements = imageSelections
       .map(selection => {
-        const el = viewStore.getBlock(selection.path);
+        const el = viewStore.getBlock(selection.blockId);
         return el;
       })
       .filter((el): el is BlockElement => Boolean(el));

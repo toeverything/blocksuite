@@ -5,5 +5,6 @@ export {
   defaultImageProxyMiddleware,
   replaceIdMiddleware,
   setImageProxyMiddlewareURL,
+  titleMiddleware,
 } from './middlewares.js';
 export { ZipTransformer } from './zip.js';

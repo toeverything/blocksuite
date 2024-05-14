@@ -30,7 +30,7 @@ import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 import { addSiblingImageBlock } from './utils.js';
 
-export class ImageService extends BlockService<ImageBlockModel> {
+export class ImageBlockService extends BlockService<ImageBlockModel> {
   get rootElement(): RootBlockComponent {
     const rootModel = this.doc.root;
     assertExists(rootModel);
@@ -96,7 +96,7 @@ export class ImageService extends BlockService<ImageBlockModel> {
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.std.selection.setGroup('note', [
           editorHost.std.selection.create('block', {
-            path: blockComponent.blockId,
+            blockId: blockComponent.blockId,
           }),
         ]);
         startDragging([blockComponent], state);

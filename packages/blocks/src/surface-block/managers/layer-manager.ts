@@ -18,13 +18,13 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 import {
   compare,
   getElementIndex,
-  getLayerZIndex,
+  getLayerEndZIndex,
   insertToOrderedArray,
   isInRange,
   removeFromOrderedArray,
   renderableInEdgeless,
   ungroupIndex,
-  updateLayersIndex,
+  updateLayersZIndex,
 } from './layer-utils.js';
 
 export type ReorderingDirection = 'front' | 'forward' | 'backward' | 'back';
@@ -42,22 +42,26 @@ type BaseLayer<T> = {
 
 export type BlockLayer = BaseLayer<EdgelessBlockModel> & {
   type: 'block';
+
   /**
-   * The computed DOM z-index used for rendering blocks.
-   * One layer contains multiple blocks,
-   * so we need the array to mark the start and end of the z-index range.
+   * The z-index of the first block in this layer.
+   *
+   * A block layer may contains multiple blocks,
+   * the block should be rendered with this `zIndex` + "its index in the layer" as the z-index property.
    */
-  zIndexes: [number, number];
+  zIndex: number;
 };
 
 export type CanvasLayer = BaseLayer<ElementModel> & {
   type: 'canvas';
+
   /**
-   * The computed DOM z-index used for rendering this canvas layer.
-   * The canvas layer only contains one DOM element of the canvas,
-   * so we only need one number to mark the z-index.
+   * The z-index of canvas layer.
+   *
+   * A canvas layer renders all the elements in a single canvas,
+   *  this property is used to render the canvas with correct z-index.
    */
-  zIndexes: number;
+  zIndex: number;
 };
 
 export type Layer = BlockLayer | CanvasLayer;
@@ -103,7 +107,7 @@ export class LayerManager {
     /**
      * z-index, used for actual rendering
      */
-    zIndexes: number;
+    zIndex: number;
     elements: Array<ElementModel>;
   }[];
 
@@ -215,14 +219,11 @@ export class LayerManager {
           getElementIndex(curLayer.elements[0]),
           getElementIndex(last(curLayer.elements)!),
         ];
-        curLayer.zIndexes =
-          curLayer.type === 'block'
-            ? [currentCSSZindex, currentCSSZindex + curLayer.elements.length]
-            : currentCSSZindex;
+        curLayer.zIndex = currentCSSZindex;
         layers.push(curLayer as LayerManager['layers'][number]);
 
         currentCSSZindex +=
-          curLayer.type === 'block' ? curLayer.elements.length + 1 : 1;
+          curLayer.type === 'block' ? curLayer.elements.length : 1;
       }
     };
     const addLayer = (type: 'canvas' | 'block') => {
@@ -232,7 +233,7 @@ export class LayerManager {
           ? ({
               type,
               indexes: [LayerManager.INITAL_INDEX, LayerManager.INITAL_INDEX],
-              zIndexes: 0,
+              zIndex: 0,
               set: new Set(),
               elements: [],
               bound: new Bound(),
@@ -240,7 +241,7 @@ export class LayerManager {
           : ({
               type,
               indexes: [LayerManager.INITAL_INDEX, LayerManager.INITAL_INDEX],
-              zIndexes: [0, 0],
+              zIndex: 0,
               set: new Set(),
               elements: [],
             } as BlockLayer);
@@ -390,14 +391,11 @@ export class LayerManager {
           getElementIndex(targets[0]),
           getElementIndex(last(targets)!),
         ] as [string, string],
-        zIndexes:
-          type === 'block'
-            ? [curZIndex + 1, curZIndex + targets.length]
-            : curZIndex + 1,
+        zIndex: curZIndex + 1,
         elements: targets,
-      };
+      } as BlockLayer;
 
-      return newLayer as unknown as Layer;
+      return newLayer as Layer;
     };
 
     if (compare(target, last(last(this.layers)!.elements)!) > 0) {
@@ -405,10 +403,14 @@ export class LayerManager {
 
       if (layer?.type === type) {
         addToLayer(layer, target, 'tail');
-        updateLayersIndex(layers, cur);
+        updateLayersZIndex(layers, cur);
       } else {
         this.layers.push(
-          createLayer(type, [target], getLayerZIndex(layers, layers.length - 1))
+          createLayer(
+            type,
+            [target],
+            getLayerEndZIndex(layers, layers.length - 1)
+          )
         );
       }
     } else {
@@ -427,7 +429,7 @@ export class LayerManager {
 
           if (layer.type === type) {
             addToLayer(layer, target, insertIdx);
-            updateLayersIndex(layers, cur);
+            updateLayersZIndex(layers, cur);
           } else {
             const splicedElements = layer.elements.splice(insertIdx);
             layer.set = new Set(layer.elements as ElementModel[]);
@@ -438,7 +440,7 @@ export class LayerManager {
               createLayer(layer.type, splicedElements, 1)
             );
             layers.splice(cur + 1, 0, createLayer(type, [target], 1));
-            updateLayersIndex(layers, cur);
+            updateLayersZIndex(layers, cur);
           }
           break;
         } else {
@@ -447,14 +449,14 @@ export class LayerManager {
           if (!nextLayer || compare(target, last(nextLayer.elements)!) >= 0) {
             if (layer.type === type) {
               addToLayer(layer, target, 0);
-              updateLayersIndex(layers, cur);
+              updateLayersZIndex(layers, cur);
             } else {
               if (nextLayer) {
                 addToLayer(nextLayer, target, 'tail');
-                updateLayersIndex(layers, cur - 1);
+                updateLayersZIndex(layers, cur - 1);
               } else {
                 layers.unshift(createLayer(type, [target], 1));
-                updateLayersIndex(layers, 0);
+                updateLayersZIndex(layers, 0);
               }
             }
 
@@ -504,7 +506,7 @@ export class LayerManager {
         layers.splice(index, 1);
 
         if (layers[index]) {
-          updateLayersIndex(layers, index);
+          updateLayersZIndex(layers, index);
         }
       } else {
         const lastLayer = layers[index - 1] as CanvasLayer;
@@ -514,12 +516,12 @@ export class LayerManager {
         lastLayer.set = new Set(lastLayer.elements);
 
         layers.splice(index, 2);
-        updateLayersIndex(layers, index - 1);
+        updateLayersZIndex(layers, index - 1);
       }
       return;
     }
 
-    updateLayersIndex(layers, index);
+    updateLayersZIndex(layers, index);
   }
 
   private _buildCanvasLayers() {
@@ -531,7 +533,7 @@ export class LayerManager {
         return {
           set: layer.set,
           elements: layer.elements,
-          zIndexes: layer.zIndexes,
+          zIndex: layer.zIndex,
           indexes: layer.indexes,
         };
       }) as LayerManager['canvasLayers'];
@@ -540,7 +542,7 @@ export class LayerManager {
       canvasLayers.push({
         set: new Set(),
         elements: [],
-        zIndexes: 0,
+        zIndex: 0,
         indexes: [LayerManager.INITAL_INDEX, LayerManager.INITAL_INDEX],
       });
     }

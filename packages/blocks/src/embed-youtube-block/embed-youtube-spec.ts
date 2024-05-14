@@ -7,7 +7,7 @@ import {
   EmbedYoutubeModel,
   EmbedYoutubeStyles,
 } from './embed-youtube-model.js';
-import { EmbedYoutubeService } from './embed-youtube-service.js';
+import { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 
 const defaultEmbedYoutubeProps: EmbedYoutubeBlockProps = {
   style: EmbedYoutubeStyles[0],
@@ -36,5 +36,5 @@ export const EmbedYoutubeBlockSpec = createEmbedBlock({
       [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
     },
   },
-  service: EmbedYoutubeService,
+  service: EmbedYoutubeBlockService,
 });

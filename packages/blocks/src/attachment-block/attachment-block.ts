@@ -24,7 +24,7 @@ import {
   type AttachmentBlockModel,
   AttachmentBlockStyles,
 } from './attachment-model.js';
-import type { AttachmentService } from './attachment-service.js';
+import type { AttachmentBlockService } from './attachment-service.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
 import { renderEmbedView } from './embed.js';
 import { styles } from './styles.js';
@@ -33,7 +33,7 @@ import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<
   AttachmentBlockModel,
-  AttachmentService
+  AttachmentBlockService
 > {
   static override styles = styles;
 
@@ -97,7 +97,8 @@ export class AttachmentBlockComponent extends BlockElement<
     const blockSelections = selection.filter('block');
     if (
       blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.blockId)
+      (blockSelections.length === 1 &&
+        blockSelections[0].blockId !== this.blockId)
     ) {
       return null;
     }
@@ -122,7 +123,7 @@ export class AttachmentBlockComponent extends BlockElement<
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.blockId,
+      blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }

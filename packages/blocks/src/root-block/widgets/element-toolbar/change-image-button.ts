@@ -53,7 +53,7 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
     }
 
     const blockElement = this.edgeless.std.view.getBlock(
-      blockSelection[0].path
+      blockSelection[0].blockId
     ) as ImageBlockComponent | null;
     assertExists(blockElement);
 

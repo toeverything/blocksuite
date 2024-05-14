@@ -115,7 +115,7 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
       userRect
     ).map(blockPath => {
       return this.host.selection.create('block', {
-        path: blockPath,
+        blockId: blockPath,
       });
     });
 

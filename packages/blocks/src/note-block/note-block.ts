@@ -5,12 +5,12 @@ import { customElement } from 'lit/decorators.js';
 
 import { KeymapController } from './keymap-controller.js';
 import { type NoteBlockModel } from './note-model.js';
-import type { NoteService } from './note-service.js';
+import type { NoteBlockService } from './note-service.js';
 
 @customElement('affine-note')
 export class NoteBlockComponent extends BlockElement<
   NoteBlockModel,
-  NoteService
+  NoteBlockService
 > {
   static override styles = css`
     .affine-note-block-container {

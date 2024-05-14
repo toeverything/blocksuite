@@ -70,6 +70,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
       | {
           type: 'add';
           id: string;
+          init: boolean;
           flavour: string;
           model: BlockModel;
         }

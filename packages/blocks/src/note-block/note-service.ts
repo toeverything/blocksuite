@@ -23,7 +23,7 @@ import {
 import type { NoteBlockComponent } from './note-block.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
 
-export class NoteService extends BlockService<NoteBlockModel> {
+export class NoteBlockService extends BlockService<NoteBlockModel> {
   private _dragHandleOption: DragHandleOption = {
     flavour: NoteBlockSchema.model.flavour,
     edgeless: true,

@@ -77,7 +77,6 @@ export {
   isInsideEdgelessEditor,
   isInsidePageEditor,
 } from './_common/utils/query.js';
-export * from './_specs/_specs.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
@@ -106,11 +105,13 @@ export { CopilotSelectionController } from './root-block/edgeless/controllers/to
 export type { EdgelessModel } from './root-block/edgeless/type.js';
 export * from './root-block/index.js';
 export * from './schemas.js';
+export * from './specs/index.js';
 export {
+  AffineCanvasTextFonts,
   Bound,
   BrushElementModel,
   CanvasElementType,
-  CanvasTextFonts,
+  CommunityCanvasTextFonts,
   ConnectorElementModel,
   ConnectorMode,
   ElementModel,

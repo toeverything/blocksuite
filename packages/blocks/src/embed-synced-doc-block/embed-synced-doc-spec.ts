@@ -7,7 +7,7 @@ import {
   EmbedSyncedDocModel,
   EmbedSyncedDocStyles,
 } from './embed-synced-doc-model.js';
-import { EmbedSyncedDocService } from './embed-synced-doc-service.js';
+import { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
 export const defaultEmbedSyncedDocBlockProps: EmbedSyncedDocBlockProps = {
   pageId: '',
@@ -29,5 +29,5 @@ export const EmbedSyncedDocBlockSpec = createEmbedBlock({
       [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
     },
   },
-  service: EmbedSyncedDocService,
+  service: EmbedSyncedDocBlockService,
 });

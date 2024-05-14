@@ -29,13 +29,13 @@ const setBlockSelection = (
 ) => {
   const selections = models
     .map(model => model.id)
-    .map(path => host.selection.create('block', { path }));
+    .map(blockId => host.selection.create('block', { blockId }));
 
   if (isInsideEdgelessEditor(host)) {
     const surfaceElementId = getNoteId(parent);
     const surfaceSelection = host.selection.create(
       'surface',
-      selections[0].path,
+      selections[0].blockId,
       [surfaceElementId],
       true
     );

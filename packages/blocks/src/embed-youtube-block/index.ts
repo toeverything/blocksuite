@@ -2,7 +2,7 @@ import { noop } from '@blocksuite/global/utils';
 
 import { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 import type { EmbedYoutubeModel } from './embed-youtube-model.js';
-import type { EmbedYoutubeService } from './embed-youtube-service.js';
+import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 noop(EmbedYoutubeBlockComponent);
 
 export * from './embed-youtube-block.js';
@@ -16,7 +16,7 @@ declare global {
       'affine:embed-youtube': EmbedYoutubeModel;
     }
     interface BlockServices {
-      'affine:embed-youtube': EmbedYoutubeService;
+      'affine:embed-youtube': EmbedYoutubeBlockService;
     }
   }
 }

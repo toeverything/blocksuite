@@ -66,7 +66,7 @@ export class RangeBinding {
             selection.is('text')
           ) ?? null;
 
-        const model = text && this.host.doc.getBlockById(text.path);
+        const model = text && this.host.doc.getBlockById(text.blockId);
         const path = model && this.host.view.calculatePath(model);
 
         const eq =
@@ -143,7 +143,7 @@ export class RangeBinding {
       return;
     }
 
-    const model = this.host.doc.getBlockById(textSelection.path);
+    const model = this.host.doc.getBlockById(textSelection.blockId);
     // If the model is not found, the selection maybe in another editor
     if (!model) return;
 
@@ -162,7 +162,7 @@ export class RangeBinding {
     if (event.isComposing) return;
 
     const { from, to } = selection;
-    if (!to || from.path === to.path) return;
+    if (!to || from.blockId === to.blockId) return;
 
     const range = this.rangeManager.value;
     if (!range) return;
@@ -202,7 +202,7 @@ export class RangeBinding {
 
     const newSelection = this.selectionManager.create('text', {
       from: {
-        path: from.path,
+        blockId: from.blockId,
         index: from.index + (event.data?.length ?? 0),
         length: 0,
       },
@@ -285,7 +285,7 @@ export class RangeBinding {
 
       const selection = this.selectionManager.create('text', {
         from: {
-          path: from.path,
+          blockId: from.blockId,
           index: from.index + (event.data?.length ?? 0),
           length: 0,
         },

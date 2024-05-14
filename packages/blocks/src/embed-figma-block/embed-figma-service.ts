@@ -6,7 +6,7 @@ import {
   figmaUrlRegex,
 } from './embed-figma-model.js';
 
-export class EmbedFigmaService extends BlockService<EmbedFigmaModel> {
+export class EmbedFigmaBlockService extends BlockService<EmbedFigmaModel> {
   override mounted() {
     super.mounted();
 

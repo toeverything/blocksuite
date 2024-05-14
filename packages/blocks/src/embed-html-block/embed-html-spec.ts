@@ -6,7 +6,7 @@ import {
   EmbedHtmlModel,
   EmbedHtmlStyles,
 } from './embed-html-model.js';
-import { EmbedHtmlService } from './embed-html-service.js';
+import { EmbedHtmlBlockService } from './embed-html-service.js';
 
 const defaultEmbedHtmlProps: EmbedHtmlBlockProps = {
   style: EmbedHtmlStyles[0],
@@ -25,5 +25,5 @@ export const EmbedHtmlBlockSpec = createEmbedBlock({
   view: {
     component: literal`affine-embed-html-block`,
   },
-  service: EmbedHtmlService,
+  service: EmbedHtmlBlockService,
 });

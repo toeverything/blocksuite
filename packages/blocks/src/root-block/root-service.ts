@@ -7,7 +7,6 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
-import { Copilot } from '../_common/copilot/schema/index.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
 import {
   HtmlTransformer,
@@ -18,7 +17,7 @@ import { type EmbedCardStyle, NoteDisplayMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import { CanvasTextFonts } from '../surface-block/consts.js';
+import { CommunityCanvasTextFonts } from '../surface-block/consts.js';
 import { EditPropsStore } from '../surface-block/managers/edit-session.js';
 import {
   copySelectedModelsCommand,
@@ -50,7 +49,6 @@ export type EmbedOptions = {
 export class RootService extends BlockService<RootBlockModel> {
   readonly fontLoader = new FontLoader();
   readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
-  public readonly copilot = new Copilot();
 
   fileDropManager!: FileDropManager;
   exportManager!: ExportManager;
@@ -187,7 +185,7 @@ export class RootService extends BlockService<RootBlockModel> {
   }
 
   loadFonts() {
-    this.fontLoader.load(CanvasTextFonts);
+    this.fontLoader.load(CommunityCanvasTextFonts);
   }
 
   private _getLastNoteBlock() {

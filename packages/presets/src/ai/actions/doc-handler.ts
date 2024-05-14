@@ -180,7 +180,9 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
 export function handleInlineAskAIAction(host: EditorHost) {
   const panel = getAIPanel(host);
   const selection = host.selection.find('text');
-  const lastBlockPath = selection ? selection.to?.path ?? selection.path : null;
+  const lastBlockPath = selection
+    ? selection.to?.blockId ?? selection.blockId
+    : null;
   if (!lastBlockPath) return;
   const block = host.view.getBlock(lastBlockPath);
   if (!block) return;
