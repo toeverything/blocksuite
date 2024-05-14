@@ -68,6 +68,13 @@ export class AIAnswerText extends WithDisposable(LitElement) {
     .ai-answer-text-container.show-scrollbar::-webkit-scrollbar-corner {
       display: none;
     }
+
+    .ai-answer-text-container {
+      rich-text .nowrap-lines v-text span,
+      rich-text .nowrap-lines v-element span {
+        white-space: pre;
+      }
+    }
   `;
 
   @property({ attribute: false })
