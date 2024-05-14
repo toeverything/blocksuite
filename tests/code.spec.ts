@@ -631,7 +631,7 @@ test('press backspace after code block can select code block', async ({
   await assertRichTextInlineRange(page, 1, 0);
   await assertBlockCount(page, 'paragraph', 1);
   await pressBackspace(page);
-  await assertBlockSelections(page, [['0', '1', '2']]);
+  await assertBlockSelections(page, ['2']);
   await assertBlockCount(page, 'paragraph', 0);
 });
 

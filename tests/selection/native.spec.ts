@@ -945,13 +945,13 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await assertRichTexts(page, ['', '']);
 
   await pressArrowUp(page);
-  await assertBlockSelections(page, [['0', '1', '5']]);
+  await assertBlockSelections(page, ['5']);
   await pressArrowUp(page);
   await assertBlockSelections(page, []);
   await assertRichTextInlineRange(page, 0, 0);
   await pressBackspace(page);
   await assertRichTexts(page, ['']);
-  await assertBlockSelections(page, [['0', '1', '3']]);
+  await assertBlockSelections(page, ['3']);
   await assertDivider(page, 2);
 });
 
@@ -1942,16 +1942,16 @@ test('Use arrow up and down to select two types of block', async ({ page }) => {
   await assertRichTextInlineRange(page, 2, 3);
   await pressArrowUp(page);
   await assertNativeSelectionRangeCount(page, 0);
-  await assertBlockSelections(page, [['0', '1', '7']]);
+  await assertBlockSelections(page, ['7']);
   await pressArrowUp(page);
   await assertNativeSelectionRangeCount(page, 1);
   await assertRichTextInlineRange(page, 1, 3);
   await pressArrowUp(page);
   await assertNativeSelectionRangeCount(page, 0);
-  await assertBlockSelections(page, [['0', '1', '5']]);
+  await assertBlockSelections(page, ['5']);
   await pressArrowUp(page);
   await assertNativeSelectionRangeCount(page, 0);
-  await assertBlockSelections(page, [['0', '1', '4']]);
+  await assertBlockSelections(page, ['4']);
   await pressArrowUp(page);
   await assertNativeSelectionRangeCount(page, 1);
   await assertRichTextInlineRange(page, 0, 3);
@@ -1959,16 +1959,16 @@ test('Use arrow up and down to select two types of block', async ({ page }) => {
   // from top to bottom
   await pressArrowDown(page);
   await assertNativeSelectionRangeCount(page, 0);
-  await assertBlockSelections(page, [['0', '1', '4']]);
+  await assertBlockSelections(page, ['4']);
   await pressArrowDown(page);
   await assertNativeSelectionRangeCount(page, 0);
-  await assertBlockSelections(page, [['0', '1', '5']]);
+  await assertBlockSelections(page, ['5']);
   await pressArrowDown(page);
   await assertNativeSelectionRangeCount(page, 1);
   await assertRichTextInlineRange(page, 1, 0);
   await pressArrowDown(page);
   await assertNativeSelectionRangeCount(page, 0);
-  await assertBlockSelections(page, [['0', '1', '7']]);
+  await assertBlockSelections(page, ['7']);
   await pressArrowDown(page);
   await assertNativeSelectionRangeCount(page, 1);
   await assertRichTextInlineRange(page, 2, 0);

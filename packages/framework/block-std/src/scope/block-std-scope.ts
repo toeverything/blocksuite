@@ -9,7 +9,6 @@ import { ViewStore } from '../view/index.js';
 
 export interface BlockStdOptions {
   host: HTMLElement;
-  collection: DocCollection;
   doc: Doc;
 }
 
@@ -26,7 +25,7 @@ export class BlockStdScope {
 
   constructor(options: BlockStdOptions) {
     this.host = options.host;
-    this.collection = options.collection;
+    this.collection = options.doc.collection;
     this.doc = options.doc;
     this.event = new UIEventDispatcher(this);
     this.selection = new SelectionManager(this);

@@ -8,7 +8,7 @@ declare global {
     // if we use `with` or `inline` to add command data either then use a command we
     // need to update this interface
     interface CommandContext {
-      currentSelectionPath?: string[];
+      currentSelectionPath?: string;
     }
   }
 }

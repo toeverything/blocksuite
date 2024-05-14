@@ -9,7 +9,7 @@ export const selectBlock: Command<'focusBlock'> = (ctx, next) => {
   const { selection } = std;
 
   selection.setGroup('note', [
-    selection.create('block', { path: focusBlock.path }),
+    selection.create('block', { path: focusBlock.blockId }),
   ]);
 
   return next();

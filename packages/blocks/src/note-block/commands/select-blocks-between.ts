@@ -1,5 +1,4 @@
 import type { Command } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 
 export const selectBlocksBetween: Command<
   'focusBlock' | 'anchorBlock',
@@ -13,28 +12,27 @@ export const selectBlocksBetween: Command<
   const selection = ctx.std.selection;
 
   // In same block
-  if (PathFinder.equals(anchorBlock.path, focusBlock.path)) {
-    const path = focusBlock.path;
+  if (anchorBlock.blockId === focusBlock.blockId) {
+    const path = focusBlock.blockId;
     selection.setGroup('note', [selection.create('block', { path })]);
     return next();
   }
 
   // In different blocks
   const selections = [...selection.value];
-  if (selections.every(sel => !PathFinder.equals(sel.path, focusBlock.path))) {
+  if (selections.every(sel => sel.path !== focusBlock.blockId)) {
     if (tail) {
-      selections.push(selection.create('block', { path: focusBlock.path }));
+      selections.push(selection.create('block', { path: focusBlock.blockId }));
     } else {
-      selections.unshift(selection.create('block', { path: focusBlock.path }));
+      selections.unshift(
+        selection.create('block', { path: focusBlock.blockId })
+      );
     }
   }
 
   let start = false;
   const sel = selections.filter(sel => {
-    if (
-      PathFinder.equals(sel.path, anchorBlock.path) ||
-      PathFinder.equals(sel.path, focusBlock.path)
-    ) {
+    if (sel.path === anchorBlock.blockId || sel.path === focusBlock.blockId) {
       start = !start;
       return true;
     }

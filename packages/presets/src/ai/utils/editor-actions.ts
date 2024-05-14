@@ -27,9 +27,8 @@ const setBlockSelection = (
   parent: BlockElement,
   models: BlockModel[]
 ) => {
-  const parentPath = parent.path;
   const selections = models
-    .map(model => [...parentPath, model.id])
+    .map(model => model.id)
     .map(path => host.selection.create('block', { path }));
 
   if (isInsideEdgelessEditor(host)) {

@@ -265,7 +265,7 @@ export class EdgelessSelectionManager {
       instances.push(
         this._selection.create(
           'surface',
-          [this.service.doc.root!.id, this.surfaceModel.id],
+          this.surfaceModel.id,
           elements,
           selection.editing,
           selection.inoperable
@@ -278,7 +278,7 @@ export class EdgelessSelectionManager {
         blocks.map(blockId =>
           this._selection.create(
             'surface',
-            [this.service.doc.root!.id, blockId],
+            blockId,
             [blockId],
             selection.editing,
             selection.inoperable

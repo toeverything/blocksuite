@@ -658,7 +658,7 @@ function handleParagraphDeleteActions(
     );
     assertExists(previousSiblingElement);
     const selection = editorHost.selection.create('block', {
-      path: previousSiblingElement.path,
+      path: previousSiblingElement.blockId,
     });
     editorHost.selection.setGroup('note', [selection]);
 
@@ -846,7 +846,7 @@ function handleParagraphBlockForwardDelete(
         assertExists(nextSiblingComponent);
         editorHost.selection.setGroup('note', [
           editorHost.selection.create('block', {
-            path: nextSiblingComponent.path,
+            path: nextSiblingComponent.blockId,
           }),
         ]);
         return true;

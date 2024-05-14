@@ -112,13 +112,13 @@ export const includeTextSelection = (selections: BaseSelection[]) => {
  * Check if the path of two blocks are equal
  */
 export const isBlockPathEqual = (
-  path1: string[] | null | undefined,
-  path2: string[] | null | undefined
+  path1: string | null | undefined,
+  path2: string | null | undefined
 ) => {
   if (!path1 || !path2) {
     return false;
   }
-  return PathFinder.equals(path1, path2);
+  return path1 === path2;
 };
 
 export const getContainerOffsetPoint = (state: PointerEventState) => {

@@ -17,7 +17,7 @@ export class SurfaceSelection extends BaseSelection {
   readonly inoperable: boolean;
 
   constructor(
-    path: string[],
+    path: string,
     elements: string[],
     editing: boolean,
     inoperable = false
@@ -69,7 +69,7 @@ export class SurfaceSelection extends BaseSelection {
   ): SurfaceSelection {
     SurfaceSelectionSchema.parse(json);
     return new SurfaceSelection(
-      json.path as string[],
+      json.path as string,
       json.elements as string[],
       json.editing as boolean,
       (json.inoperable as boolean) || false
