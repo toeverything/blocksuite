@@ -239,9 +239,20 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         this._dragging = true;
       })
     );
-
     _disposables.add(
       edgeless.dispatcher.add('dragEnd', () => {
+        this._dragging = false;
+        this._recalculatePosition();
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => {
+        this._dragging = true;
+      })
+    );
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => {
         this._dragging = false;
         this._recalculatePosition();
       })

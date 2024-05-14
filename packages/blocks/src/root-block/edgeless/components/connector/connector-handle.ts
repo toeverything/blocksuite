@@ -89,6 +89,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
       _disposables.dispose();
       this._disposables = new DisposableGroup();
       this._bindEvent();
+      edgeless.slots.elementResizeEnd.emit();
     });
   }
 
@@ -96,9 +97,11 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     const edgeless = this.edgeless;
 
     this._disposables.addFromEvent(this._startHandler, 'pointerdown', e => {
+      edgeless.slots.elementResizeStart.emit();
       this._capPointerDown(e, 'source');
     });
     this._disposables.addFromEvent(this._endHandler, 'pointerdown', e => {
+      edgeless.slots.elementResizeStart.emit();
       this._capPointerDown(e, 'target');
     });
     this._disposables.add(() => {

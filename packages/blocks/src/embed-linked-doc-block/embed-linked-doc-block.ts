@@ -291,7 +291,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-
     this._load().catch(e => {
       console.error(e);
       this.isError = true;
@@ -315,6 +314,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           ) {
             return;
           }
+
+          if (payload.type === 'add' && payload.init) {
+            return;
+          }
+
           this._load().catch(e => {
             console.error(e);
             this.isError = true;

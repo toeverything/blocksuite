@@ -13,7 +13,12 @@ export {
   ZOOM_MIN,
   ZOOM_STEP,
 } from './consts.js';
-export { CanvasTextFonts, GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
+export {
+  AffineCanvasTextFonts,
+  CommunityCanvasTextFonts,
+  GRID_GAP_MAX,
+  GRID_GAP_MIN,
+} from './consts.js';
 export { type EdgelessBlockType } from './edgeless-types.js';
 export { ElementModel } from './element-model/base.js';
 export { BrushElementModel } from './element-model/brush.js';
