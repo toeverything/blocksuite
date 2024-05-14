@@ -251,7 +251,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     if (this._isDragging && this.resizeImg) {
       return {
         width: this.resizeImg.style.width,
-        height: this.resizeImg.style.height,
       };
     }
 
@@ -265,7 +264,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
     return {
       width: `${width}px`,
-      height: `${height}px`,
     };
   }
 
