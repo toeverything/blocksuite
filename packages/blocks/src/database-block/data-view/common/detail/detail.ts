@@ -116,7 +116,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
       ${this.renderHeader()}
       ${repeat(
         columns,
-        v => v,
+        v => v.id,
         column => {
           return html` <affine-data-view-record-field
             .view="${this.view}"
