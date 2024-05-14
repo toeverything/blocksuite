@@ -1,5 +1,9 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { AIStarIcon } from '@blocksuite/blocks';
+import {
+  DarkLoadingIcon,
+  getThemeMode,
+  LightLoadingIcon,
+} from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -31,12 +35,16 @@ class AIGeneratingPlaceholder extends WithDisposable(LitElement) {
   height: number = 300;
 
   protected override render() {
+    const theme = getThemeMode();
+
     return html` <style>
         :host {
           height: ${this.height}px;
         }
       </style>
-      <div class="center">${AIStarIcon}</div>`;
+      <div class="center">
+        ${theme === 'light' ? LightLoadingIcon : DarkLoadingIcon}
+      </div>`;
   }
 }
 

@@ -1,5 +1,4 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -110,7 +109,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
           .concat(
             selection.create('text', {
               from: {
-                path: this.block.parentPath.concat(blockId),
+                path: blockId,
                 index: 0,
                 length: 0,
               },
@@ -124,10 +123,9 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       Escape: () => {
         selection.update(selList => {
           return selList.map(sel => {
-            const current =
-              sel.is('image') && PathFinder.equals(sel.path, this.block.path);
+            const current = sel.is('image') && sel.path === this.block.blockId;
             if (current) {
-              return selection.create('block', { path: this.block.path });
+              return selection.create('block', { path: this.block.blockId });
             }
             return sel;
           });
@@ -162,7 +160,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     this._disposables.add(
       selection.slots.changed.on(selList => {
         this._isSelected = selList.some(
-          sel => PathFinder.equals(sel.path, this.block.path) && sel.is('image')
+          sel => sel.path === this.block.blockId && sel.is('image')
         );
       })
     );
@@ -181,7 +179,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         selection.update(selList => {
           return selList
             .filter(sel => !['text', 'block', 'image'].includes(sel.type))
-            .concat(selection.create('image', { path: this.block.path }));
+            .concat(selection.create('image', { path: this.block.blockId }));
         });
         return true;
       }
@@ -194,8 +192,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
         selection.update(selList =>
           selList.filter(
-            sel =>
-              !(sel.is('image') && PathFinder.equals(sel.path, this.block.path))
+            sel => !(sel.is('image') && sel.path === this.block.blockId)
           )
         );
       },

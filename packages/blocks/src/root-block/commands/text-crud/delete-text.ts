@@ -1,6 +1,5 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 
@@ -33,9 +32,7 @@ export const deleteTextCommand: Command<
 
   const { from, to } = textSelection;
 
-  const fromElement = selectedElements.find(el =>
-    PathFinder.equals(from.path, el.path)
-  );
+  const fromElement = selectedElements.find(el => from.path === el.blockId);
   assertExists(fromElement);
 
   let fromText: Text | undefined;
@@ -60,9 +57,7 @@ export const deleteTextCommand: Command<
     return next();
   }
 
-  const toElement = selectedElements.find(el =>
-    PathFinder.equals(to.path, el.path)
-  );
+  const toElement = selectedElements.find(el => to.path === el.blockId);
   assertExists(toElement);
 
   const toText = toElement.model.text;

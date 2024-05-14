@@ -78,10 +78,7 @@ export class ImageService extends BlockService<ImageBlockModel> {
       if (element?.classList.contains('resize')) return false;
 
       if (!anchorBlockPath) return false;
-      const anchorComponent = editorHost.std.view.viewFromPath(
-        'block',
-        anchorBlockPath
-      );
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [ImageBlockSchema.model.flavour])
@@ -99,7 +96,7 @@ export class ImageService extends BlockService<ImageBlockModel> {
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.std.selection.setGroup('note', [
           editorHost.std.selection.create('block', {
-            path: blockComponent.path,
+            path: blockComponent.blockId,
           }),
         ]);
         startDragging([blockComponent], state);

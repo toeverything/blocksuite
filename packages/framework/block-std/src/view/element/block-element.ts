@@ -9,7 +9,6 @@ import { html } from 'lit/static-html.js';
 import type { EventName, UIEventHandler } from '../../event/index.js';
 import type { BaseSelection } from '../../selection/index.js';
 import type { BlockService } from '../../service/index.js';
-import { PathFinder } from '../../utils/index.js';
 import { WithDisposable } from '../utils/with-disposable.js';
 import type { EditorHost } from './lit-host.js';
 import { ShadowlessElement } from './shadowless-element.js';
@@ -117,6 +116,10 @@ export class BlockElement<
     return this.host.std;
   }
 
+  get blockId() {
+    return this.dataset.blockId as string;
+  }
+
   get isVersionMismatch() {
     const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
     assertExists(
@@ -218,7 +221,7 @@ export class BlockElement<
     });
 
     this.service = this.host.std.spec.getService(this.model.flavour);
-    this.path = this.host.view.calculatePath(this);
+    this.path = this.host.view.calculatePath(this.model);
 
     this._disposables.add(disposable);
 
@@ -237,7 +240,7 @@ export class BlockElement<
     this._disposables.add(
       this.host.selection.slots.changed.on(selections => {
         const selection = selections.find(selection => {
-          return PathFinder.equals(selection.path, this.path);
+          return selection.path === this.blockId;
         });
 
         if (!selection) {

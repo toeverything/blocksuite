@@ -1108,7 +1108,7 @@ export async function assertNoteSequence(page: Page, expected: string) {
   expect(expected).toBe(actual);
 }
 
-export async function assertBlockSelections(page: Page, paths: string[][]) {
+export async function assertBlockSelections(page: Page, paths: string[]) {
   const selections = await page.evaluate(() => {
     const host = document.querySelector<EditorHost>('editor-host');
     if (!host) {

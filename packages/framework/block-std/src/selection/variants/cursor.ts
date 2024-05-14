@@ -15,7 +15,7 @@ export class CursorSelection extends BaseSelection {
   readonly y: number;
 
   constructor(x: number, y: number) {
-    super({ path: [] });
+    super({ path: '[edgeless-cursor]' });
     this.x = x;
     this.y = y;
   }

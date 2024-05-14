@@ -277,9 +277,8 @@ export class AIChatLogic {
       firstIndex
     );
     setTimeout(() => {
-      const parentPath = firstBlock.parentPath;
       const selections = models
-        .map(model => [...parentPath, model.id])
+        .map(model => model.id)
         .map(path => this.host.selection.create('block', { path }));
       this.host.selection.setGroup('note', selections);
     }, 0);
@@ -307,9 +306,8 @@ export class AIChatLogic {
     );
 
     setTimeout(() => {
-      const parentPath = lastBlock.parentPath;
       const selections = models
-        .map(model => [...parentPath, model.id])
+        .map(model => model.id)
         .map(path => this.host.selection.create('block', { path }));
       this.host.selection.setGroup('note', selections);
     }, 0);
