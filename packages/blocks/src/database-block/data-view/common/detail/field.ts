@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -115,6 +116,24 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
 
   public get cell(): DataViewCellLifeCycle | undefined {
     return this._cell.value;
+  }
+
+  public get detail() {
+    const detail = this.closest('affine-data-view-record-detail');
+    assertExists(detail);
+    return detail;
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    requestAnimationFrame(() => {
+      const selection = this.detail.selection.selection;
+      this.editing =
+        !!selection &&
+        selection.propertyId === this.column.id &&
+        selection.isEditing;
+    });
   }
 
   public changeEditing = (editing: boolean) => {
