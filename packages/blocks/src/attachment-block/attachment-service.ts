@@ -105,7 +105,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
           editorHost.selection.create('block', {
-            path: blockComponent.blockId,
+            blockId: blockComponent.blockId,
           }),
         ]);
         startDragging([blockComponent], state);

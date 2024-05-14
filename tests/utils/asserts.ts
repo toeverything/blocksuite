@@ -1116,7 +1116,7 @@ export async function assertBlockSelections(page: Page, paths: string[]) {
     }
     return host.selection.filter('block');
   });
-  const actualPaths = selections.map(selection => selection.path);
+  const actualPaths = selections.map(selection => selection.blockId);
   expect(actualPaths).toEqual(paths);
 }
 

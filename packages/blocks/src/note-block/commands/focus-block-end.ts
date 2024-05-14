@@ -9,7 +9,7 @@ export const focusBlockEnd: Command<'focusBlock'> = (ctx, next) => {
   selection.setGroup('note', [
     selection.create('text', {
       from: {
-        path: focusBlock.blockId,
+        blockId: focusBlock.blockId,
         index: focusBlock.model.text.length,
         length: 0,
       },

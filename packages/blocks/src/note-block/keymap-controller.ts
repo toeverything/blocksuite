@@ -85,7 +85,7 @@ export class KeymapController implements ReactiveController {
           .inline<'currentSelectionPath'>((ctx, next) => {
             const currentTextSelection = ctx.currentTextSelection;
             assertExists(currentTextSelection);
-            return next({ currentSelectionPath: currentTextSelection.path });
+            return next({ currentSelectionPath: currentTextSelection.blockId });
           })
           .getNextBlock()
           .inline((ctx, next) => {
@@ -126,7 +126,7 @@ export class KeymapController implements ReactiveController {
             if (!blockSelection) {
               return;
             }
-            return next({ currentSelectionPath: blockSelection.path });
+            return next({ currentSelectionPath: blockSelection.blockId });
           })
           .getNextBlock()
           .inline<'focusBlock'>((ctx, next) => {
@@ -179,7 +179,7 @@ export class KeymapController implements ReactiveController {
           .inline<'currentSelectionPath'>((ctx, next) => {
             const currentTextSelection = ctx.currentTextSelection;
             assertExists(currentTextSelection);
-            return next({ currentSelectionPath: currentTextSelection.path });
+            return next({ currentSelectionPath: currentTextSelection.blockId });
           })
           .getPrevBlock()
           .inline((ctx, next) => {
@@ -219,7 +219,7 @@ export class KeymapController implements ReactiveController {
             if (!blockSelection) {
               return;
             }
-            return next({ currentSelectionPath: blockSelection.path });
+            return next({ currentSelectionPath: blockSelection.blockId });
           })
           .getPrevBlock()
           .inline<'focusBlock'>((ctx, next) => {
@@ -279,7 +279,7 @@ export class KeymapController implements ReactiveController {
           return;
         }
 
-        const anchorBlock = ctx.std.view.getBlock(this._anchorSel.path);
+        const anchorBlock = ctx.std.view.getBlock(this._anchorSel.blockId);
         if (!anchorBlock) {
           return;
         }
@@ -327,7 +327,7 @@ export class KeymapController implements ReactiveController {
         if (!this._anchorSel) {
           return;
         }
-        const anchorBlock = ctx.std.view.getBlock(this._anchorSel.path);
+        const anchorBlock = ctx.std.view.getBlock(this._anchorSel.blockId);
         if (!anchorBlock) {
           return;
         }
@@ -385,7 +385,7 @@ export class KeymapController implements ReactiveController {
 
         const { view, doc, selection } = ctx.std;
 
-        const element = view.getBlock(blockSelection.path);
+        const element = view.getBlock(blockSelection.blockId);
         if (!element) {
           return;
         }
@@ -402,7 +402,7 @@ export class KeymapController implements ReactiveController {
 
         const sel = selection.create('text', {
           from: {
-            path: blockId,
+            blockId,
             index: 0,
             length: 0,
           },
@@ -432,7 +432,7 @@ export class KeymapController implements ReactiveController {
       if (
         // Remove children blocks, only select the most top level blocks.
         !blocks
-          .map(block => this._std.doc.getBlockById(block.path))
+          .map(block => this._std.doc.getBlockById(block.blockId))
           .filter(b => !!b)
           .map(b => buildPath(b))
           .reduce(
@@ -444,7 +444,7 @@ export class KeymapController implements ReactiveController {
       ) {
         blocks.push(
           selection.create('block', {
-            path: nodeView.blockId,
+            blockId: nodeView.blockId,
           })
         );
       }
@@ -506,7 +506,7 @@ export class KeymapController implements ReactiveController {
                   this._std.selection.setGroup('note', [
                     this._std.selection.create('text', {
                       from: {
-                        path: codeElement.blockId,
+                        blockId: codeElement.blockId,
                         index: 0,
                         length: codeModel.text?.length ?? 0,
                       },
