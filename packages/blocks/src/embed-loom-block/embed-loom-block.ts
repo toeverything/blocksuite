@@ -13,14 +13,14 @@ import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import type { EmbedLoomStyles } from './embed-loom-model.js';
 import { type EmbedLoomModel, loomUrlRegex } from './embed-loom-model.js';
-import type { EmbedLoomService } from './embed-loom-service.js';
+import type { EmbedLoomBlockService } from './embed-loom-service.js';
 import { LoomIcon, styles } from './styles.js';
 import { refreshEmbedLoomUrlData } from './utils.js';
 
 @customElement('affine-embed-loom-block')
 export class EmbedLoomBlockComponent extends EmbedBlockElement<
   EmbedLoomModel,
-  EmbedLoomService
+  EmbedLoomBlockService
 > {
   static override styles = styles;
 

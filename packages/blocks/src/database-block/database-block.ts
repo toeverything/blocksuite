@@ -43,13 +43,13 @@ import {
 } from './data-view/index.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
-import type { DatabaseService } from './database-service.js';
+import type { DatabaseBlockService } from './database-service.js';
 import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<
   DatabaseBlockModel,
-  DatabaseService
+  DatabaseBlockService
 > {
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}

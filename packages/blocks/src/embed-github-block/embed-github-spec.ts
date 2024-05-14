@@ -7,7 +7,7 @@ import {
   EmbedGithubModel,
   EmbedGithubStyles,
 } from './embed-github-model.js';
-import { EmbedGithubService } from './embed-github-service.js';
+import { EmbedGithubBlockService } from './embed-github-service.js';
 
 const defaultEmbedGithubProps: EmbedGithubBlockProps = {
   style: EmbedGithubStyles[1],
@@ -40,5 +40,5 @@ export const EmbedGithubBlockSpec = createEmbedBlock({
       [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
     },
   },
-  service: EmbedGithubService,
+  service: EmbedGithubBlockService,
 });

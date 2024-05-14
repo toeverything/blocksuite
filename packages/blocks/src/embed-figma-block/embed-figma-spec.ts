@@ -7,7 +7,7 @@ import {
   EmbedFigmaModel,
   EmbedFigmaStyles,
 } from './embed-figma-model.js';
-import { EmbedFigmaService } from './embed-figma-service.js';
+import { EmbedFigmaBlockService } from './embed-figma-service.js';
 
 const defaultEmbedFigmaProps: EmbedFigmaBlockProps = {
   style: EmbedFigmaStyles[0],
@@ -31,5 +31,5 @@ export const EmbedFigmaBlockSpec = createEmbedBlock({
       [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
     },
   },
-  service: EmbedFigmaService,
+  service: EmbedFigmaBlockService,
 });

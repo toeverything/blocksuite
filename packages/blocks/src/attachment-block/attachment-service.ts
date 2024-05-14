@@ -30,7 +30,7 @@ import {
 } from './attachment-model.js';
 import { addSiblingAttachmentBlocks } from './utils.js';
 
-export class AttachmentService extends BlockService<AttachmentBlockModel> {
+export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
   get rootElement(): RootBlockComponent {
     const rootModel = this.doc.root;
     assertExists(rootModel);

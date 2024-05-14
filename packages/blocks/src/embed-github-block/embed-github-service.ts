@@ -8,13 +8,13 @@ import {
 } from './embed-github-model.js';
 import { queryEmbedGithubApiData, queryEmbedGithubData } from './utils.js';
 
-export class EmbedGithubService extends BlockService<EmbedGithubModel> {
+export class EmbedGithubBlockService extends BlockService<EmbedGithubModel> {
   private static readonly linkPreviewer = new LinkPreviewer();
 
   queryUrlData = (embedGithubModel: EmbedGithubModel) => {
     return queryEmbedGithubData(
       embedGithubModel,
-      EmbedGithubService.linkPreviewer
+      EmbedGithubBlockService.linkPreviewer
     );
   };
 
@@ -34,5 +34,6 @@ export class EmbedGithubService extends BlockService<EmbedGithubModel> {
     });
   }
 
-  static setLinkPreviewEndpoint = EmbedGithubService.linkPreviewer.setEndpoint;
+  static setLinkPreviewEndpoint =
+    EmbedGithubBlockService.linkPreviewer.setEndpoint;
 }

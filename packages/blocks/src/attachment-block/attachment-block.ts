@@ -24,7 +24,7 @@ import {
   type AttachmentBlockModel,
   AttachmentBlockStyles,
 } from './attachment-model.js';
-import type { AttachmentService } from './attachment-service.js';
+import type { AttachmentBlockService } from './attachment-service.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
 import { renderEmbedView } from './embed.js';
 import { styles } from './styles.js';
@@ -33,7 +33,7 @@ import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<
   AttachmentBlockModel,
-  AttachmentService
+  AttachmentBlockService
 > {
   static override styles = styles;
 

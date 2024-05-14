@@ -1,5 +1,5 @@
 import type { NoteBlockModel } from './note-model.js';
-import type { NoteService } from './note-service.js';
+import type { NoteBlockService } from './note-service.js';
 
 export * from './commands/index.js';
 export * from './note-block.js';
@@ -12,7 +12,7 @@ declare global {
       'affine:note': NoteBlockModel;
     }
     interface BlockServices {
-      'affine:note': NoteService;
+      'affine:note': NoteBlockService;
     }
   }
 }

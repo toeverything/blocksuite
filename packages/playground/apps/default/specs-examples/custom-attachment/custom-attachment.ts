@@ -1,10 +1,10 @@
 import {
-  AttachmentService,
+  AttachmentBlockService,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 
-class CustomAttachmentService extends AttachmentService {
+class CustomAttachmentBlockService extends AttachmentBlockService {
   override mounted(): void {
     super.mounted();
     this.maxFileSize = 100 * 1000 * 1000; // 100MB
@@ -16,7 +16,7 @@ export function getCustomAttachmentSpecs() {
     if (spec.schema.model.flavour === 'affine:attachment') {
       return {
         ...spec,
-        service: CustomAttachmentService,
+        service: CustomAttachmentBlockService,
       };
     }
     return spec;
@@ -25,7 +25,7 @@ export function getCustomAttachmentSpecs() {
     if (spec.schema.model.flavour === 'affine:attachment') {
       return {
         ...spec,
-        service: CustomAttachmentService,
+        service: CustomAttachmentBlockService,
       };
     }
     return spec;

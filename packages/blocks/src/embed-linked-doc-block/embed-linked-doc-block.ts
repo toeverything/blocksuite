@@ -26,14 +26,14 @@ import type {
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
 } from './embed-linked-doc-model.js';
-import type { EmbedLinkedDocService } from './embed-linked-doc-service.js';
+import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
 
 @customElement('affine-embed-linked-doc-block')
 export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   EmbedLinkedDocModel,
-  EmbedLinkedDocService
+  EmbedLinkedDocBlockService
 > {
   static override styles = styles;
 

@@ -12,13 +12,13 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedHtmlModel, EmbedHtmlStyles } from './embed-html-model.js';
-import type { EmbedHtmlService } from './embed-html-service.js';
+import type { EmbedHtmlBlockService } from './embed-html-service.js';
 import { HtmlIcon, styles } from './styles.js';
 
 @customElement('affine-embed-html-block')
 export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   EmbedHtmlModel,
-  EmbedHtmlService
+  EmbedHtmlBlockService
 > {
   static override styles = styles;
 

@@ -21,14 +21,15 @@ import {
   BookmarkBlockSchema,
 } from './bookmark-model.js';
 
-export class BookmarkService extends BlockService<BookmarkBlockModel> {
+export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
   private static readonly linkPreviewer = new LinkPreviewer();
 
   queryUrlData = (url: string) => {
-    return BookmarkService.linkPreviewer.query(url);
+    return BookmarkBlockService.linkPreviewer.query(url);
   };
 
-  static setLinkPreviewEndpoint = BookmarkService.linkPreviewer.setEndpoint;
+  static setLinkPreviewEndpoint =
+    BookmarkBlockService.linkPreviewer.setEndpoint;
 
   private _dragHandleOption: DragHandleOption = {
     flavour: BookmarkBlockSchema.model.flavour,

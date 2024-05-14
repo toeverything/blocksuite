@@ -1,5 +1,5 @@
 import type { AttachmentBlockModel } from './attachment-model.js';
-import type { AttachmentService } from './attachment-service.js';
+import type { AttachmentBlockService } from './attachment-service.js';
 
 export * from './attachment-block.js';
 export {
@@ -12,7 +12,7 @@ export * from './attachment-service.js';
 declare global {
   namespace BlockSuite {
     interface BlockServices {
-      'affine:attachment': AttachmentService;
+      'affine:attachment': AttachmentBlockService;
     }
 
     interface BlockModels {

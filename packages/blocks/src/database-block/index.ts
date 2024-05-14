@@ -1,6 +1,6 @@
 export { richTextColumnConfig } from './columns/rich-text/cell-renderer.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import type { DatabaseService } from './database-service.js';
+import type { DatabaseBlockService } from './database-service.js';
 
 export {
   columnPresets,
@@ -16,7 +16,7 @@ export * from './utils.js';
 declare global {
   namespace BlockSuite {
     interface BlockServices {
-      'affine:database': DatabaseService;
+      'affine:database': DatabaseBlockService;
     }
     interface BlockModels {
       'affine:database': DatabaseBlockModel;

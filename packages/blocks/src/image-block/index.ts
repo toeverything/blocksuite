@@ -1,5 +1,5 @@
 import type { ImageBlockModel } from './image-model.js';
-import type { ImageService } from './image-service.js';
+import type { ImageBlockService } from './image-service.js';
 
 export * from './image-block.js';
 export * from './image-model.js';
@@ -12,7 +12,7 @@ declare global {
       'affine:image': ImageBlockModel;
     }
     interface BlockServices {
-      'affine:image': ImageService;
+      'affine:image': ImageBlockService;
     }
   }
 }

@@ -16,14 +16,14 @@ import {
   type EmbedYoutubeModel,
   youtubeUrlRegex,
 } from './embed-youtube-model.js';
-import type { EmbedYoutubeService } from './embed-youtube-service.js';
+import type { EmbedYoutubeBlockService } from './embed-youtube-service.js';
 import { styles, YoutubeIcon } from './styles.js';
 import { refreshEmbedYoutubeUrlData } from './utils.js';
 
 @customElement('affine-embed-youtube-block')
 export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   EmbedYoutubeModel,
-  EmbedYoutubeService
+  EmbedYoutubeBlockService
 > {
   static override styles = styles;
 

@@ -26,7 +26,6 @@ import {
   Point,
   Rect,
 } from '../../../_common/utils/index.js';
-import { SpecProvider } from '../../../_specs/spec-provider.js';
 import type {
   NoteBlockComponent,
   NoteBlockModel,
@@ -39,6 +38,7 @@ import {
 import { PageRootBlockComponent } from '../../../root-block/page/page-root-block.js';
 import type { RootBlockModel } from '../../../root-block/root-model.js';
 import { autoScroll } from '../../../root-block/text-selection/utils.js';
+import { SpecProvider } from '../../../specs/utils/spec-provider.js';
 import { Bound, type IVec } from '../../../surface-block/index.js';
 import type { EdgelessBlockModel } from '../../edgeless/type.js';
 import { DragPreview } from './components/drag-preview.js';

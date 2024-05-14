@@ -30,7 +30,7 @@ import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 import { addSiblingImageBlock } from './utils.js';
 
-export class ImageService extends BlockService<ImageBlockModel> {
+export class ImageBlockService extends BlockService<ImageBlockModel> {
   get rootElement(): RootBlockComponent {
     const rootModel = this.doc.root;
     assertExists(rootModel);
