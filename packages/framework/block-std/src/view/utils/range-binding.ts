@@ -113,38 +113,46 @@ export class RangeBinding {
         : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
           Node.DOCUMENT_POSITION_PRECEDING);
 
-    if (range) {
-      const el =
-        range.commonAncestorContainer instanceof Element
-          ? range.commonAncestorContainer
-          : range.commonAncestorContainer.parentElement;
-      if (!el) return;
-      const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
-      if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
-        return;
-
-      const inlineEditor = this.rangeManager.getClosestInlineEditor(
-        range.commonAncestorContainer
-      );
-      if (inlineEditor?.isComposing) return;
-
-      const selection = this.rangeManager.rangeToTextSelection(
-        range,
-        isRangeReversed
-      );
-      const model = selection && this.host.doc.getBlockById(selection.path);
-      const path = model && this.host.view.calculatePath(model);
-      if (!model || !path) return;
-
-      this._prevTextSelection = {
-        selection,
-        path,
-      };
-      this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
-    } else {
+    if (!range) {
       this._prevTextSelection = null;
       this.selectionManager.clear(['text']);
+      return;
     }
+
+    const el =
+      range.commonAncestorContainer instanceof Element
+        ? range.commonAncestorContainer
+        : range.commonAncestorContainer.parentElement;
+    if (!el) return;
+    const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+    if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
+      return;
+
+    const inlineEditor = this.rangeManager.getClosestInlineEditor(
+      range.commonAncestorContainer
+    );
+    if (inlineEditor?.isComposing) return;
+
+    const textSelection = this.rangeManager.rangeToTextSelection(
+      range,
+      isRangeReversed
+    );
+    if (!textSelection) {
+      this._prevTextSelection = null;
+      this.selectionManager.clear(['text']);
+      return;
+    }
+
+    const model = this.host.doc.getBlockById(textSelection.path);
+    // If the model is not found, the selection maybe in another editor
+    if (!model) return;
+
+    const path = this.host.view.calculatePath(model);
+    this._prevTextSelection = {
+      selection: textSelection,
+      path,
+    };
+    this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
   };
 
   private _onBeforeInput = (event: InputEvent) => {
