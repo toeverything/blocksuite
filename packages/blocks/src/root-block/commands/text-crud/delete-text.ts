@@ -32,7 +32,7 @@ export const deleteTextCommand: Command<
 
   const { from, to } = textSelection;
 
-  const fromElement = selectedElements.find(el => from.path === el.blockId);
+  const fromElement = selectedElements.find(el => from.blockId === el.blockId);
   assertExists(fromElement);
 
   let fromText: Text | undefined;
@@ -47,7 +47,7 @@ export const deleteTextCommand: Command<
     ctx.std.selection.setGroup('note', [
       ctx.std.selection.create('text', {
         from: {
-          path: from.path,
+          blockId: from.blockId,
           index: from.index,
           length: 0,
         },
@@ -57,7 +57,7 @@ export const deleteTextCommand: Command<
     return next();
   }
 
-  const toElement = selectedElements.find(el => to.path === el.blockId);
+  const toElement = selectedElements.find(el => to.blockId === el.blockId);
   assertExists(toElement);
 
   const toText = toElement.model.text;
@@ -79,7 +79,7 @@ export const deleteTextCommand: Command<
   ctx.std.selection.setGroup('note', [
     ctx.std.selection.create('text', {
       from: {
-        path: to.path,
+        blockId: to.blockId,
         index: to.index,
         length: 0,
       },

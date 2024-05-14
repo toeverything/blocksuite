@@ -2,7 +2,7 @@ import { noop } from '@blocksuite/global/utils';
 
 import { EmbedSyncedDocBlockComponent } from './embed-synced-doc-block.js';
 import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
-import type { EmbedSyncedDocService } from './embed-synced-doc-service.js';
+import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 
 noop(EmbedSyncedDocBlockComponent);
 
@@ -16,7 +16,7 @@ declare global {
       'affine:embed-synced-doc': EmbedSyncedDocModel;
     }
     interface BlockServices {
-      'affine:embed-synced-doc': EmbedSyncedDocService;
+      'affine:embed-synced-doc': EmbedSyncedDocBlockService;
     }
   }
 }

@@ -30,7 +30,7 @@ import {
 } from './attachment-model.js';
 import { addSiblingAttachmentBlocks } from './utils.js';
 
-export class AttachmentService extends BlockService<AttachmentBlockModel> {
+export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
   get rootElement(): RootBlockComponent {
     const rootModel = this.doc.root;
     assertExists(rootModel);
@@ -105,7 +105,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
           editorHost.selection.create('block', {
-            path: blockComponent.blockId,
+            blockId: blockComponent.blockId,
           }),
         ]);
         startDragging([blockComponent], state);

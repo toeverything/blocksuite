@@ -1,13 +1,18 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { MarkdownAdapter } from '@blocksuite/blocks';
+import { titleMiddleware } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
-  const job = new Job({ collection: host.std.doc.collection });
+  const job = new Job({
+    collection: host.std.doc.collection,
+    middlewares: [titleMiddleware],
+  });
   const snapshot = await job.sliceToSnapshot(slice);
   const markdownAdapter = new MarkdownAdapter();
+  markdownAdapter.applyConfigs(job.adapterConfigs);
   const markdown = await markdownAdapter.fromSliceSnapshot({
     snapshot,
     assets: job.assetsManager,

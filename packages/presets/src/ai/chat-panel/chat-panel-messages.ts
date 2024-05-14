@@ -387,7 +387,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
                           this._selectionValue[0].type === 'database'
                         ) {
                           const element = this.host.view.getBlock(
-                            this._selectionValue[0].path
+                            this._selectionValue[0].blockId
                           );
                           if (!element) return;
                           await insertBelow(host, content, element);

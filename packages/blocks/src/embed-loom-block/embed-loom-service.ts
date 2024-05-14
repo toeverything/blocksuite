@@ -8,7 +8,7 @@ import {
 } from './embed-loom-model.js';
 import { queryEmbedLoomData } from './utils.js';
 
-export class EmbedLoomService extends BlockService<EmbedLoomModel> {
+export class EmbedLoomBlockService extends BlockService<EmbedLoomModel> {
   private static readonly linkPreviewer = new LinkPreviewer();
 
   queryUrlData = (embedLoomModel: EmbedLoomModel) => {
@@ -27,5 +27,6 @@ export class EmbedLoomService extends BlockService<EmbedLoomModel> {
     });
   }
 
-  static setLinkPreviewEndpoint = EmbedLoomService.linkPreviewer.setEndpoint;
+  static setLinkPreviewEndpoint =
+    EmbedLoomBlockService.linkPreviewer.setEndpoint;
 }

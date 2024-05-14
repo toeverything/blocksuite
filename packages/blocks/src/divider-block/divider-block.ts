@@ -19,7 +19,7 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     this.handleEvent('click', () => {
       this.host.selection.set([
         this.host.selection.create('block', {
-          path: this.blockId,
+          blockId: this.blockId,
         }),
       ]);
     });

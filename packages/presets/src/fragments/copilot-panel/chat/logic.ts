@@ -279,7 +279,7 @@ export class AIChatLogic {
     setTimeout(() => {
       const selections = models
         .map(model => model.id)
-        .map(path => this.host.selection.create('block', { path }));
+        .map(blockId => this.host.selection.create('block', { blockId }));
       this.host.selection.setGroup('note', selections);
     }, 0);
   }
@@ -308,7 +308,7 @@ export class AIChatLogic {
     setTimeout(() => {
       const selections = models
         .map(model => model.id)
-        .map(path => this.host.selection.create('block', { path }));
+        .map(blockId => this.host.selection.create('block', { blockId }));
       this.host.selection.setGroup('note', selections);
     }, 0);
   }

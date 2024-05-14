@@ -27,6 +27,7 @@ import { unified } from 'unified';
 
 import type { SerializedCells } from '../../database-block/database-model.js';
 import type { Column } from '../../database-block/types.js';
+import type { AffineTextAttributes } from '../inline/presets/affine-inline-specs.js';
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
@@ -201,10 +202,42 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async toSliceSnapshot(
     payload: MarkdownToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
+    let codeFence = '';
     payload.file = payload.file
       .split('\n')
       .map(line => {
         if (line.trimStart().startsWith('-')) {
+          return line;
+        }
+        const trimmedLine = line.trimStart();
+        if (!codeFence && trimmedLine.startsWith('```')) {
+          codeFence = trimmedLine.substring(
+            0,
+            trimmedLine.lastIndexOf('```') + 3
+          );
+          if (codeFence.split('').every(c => c === '`')) {
+            return line;
+          }
+          codeFence = '';
+        }
+        if (!codeFence && trimmedLine.startsWith('~~~')) {
+          codeFence = trimmedLine.substring(
+            0,
+            trimmedLine.lastIndexOf('~~~') + 3
+          );
+          if (codeFence.split('').every(c => c === '~')) {
+            return line;
+          }
+          codeFence = '';
+        }
+        if (
+          !!codeFence &&
+          trimmedLine.startsWith(codeFence) &&
+          trimmedLine.lastIndexOf(codeFence) === 0
+        ) {
+          codeFence = '';
+        }
+        if (codeFence) {
           return line;
         }
         return line.replace(/^ /, '&#x20;');
@@ -1029,7 +1062,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return unified().use(remarkParse).use(remarkGfm).parse(markdown);
   }
 
-  private _deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
+  private _deltaToMdAST(
+    deltas: DeltaInsert<AffineTextAttributes>[],
+    depth = 0
+  ) {
     if (depth > 0) {
       deltas.unshift({ insert: ' '.repeat(4).repeat(depth) });
     }
@@ -1040,6 +1076,17 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           ? `<u>${delta.insert}</u>`
           : delta.insert,
       };
+      if (delta.attributes?.reference) {
+        const title = this.configs.get(
+          'title:' + delta.attributes.reference.pageId
+        );
+        if (typeof title === 'string') {
+          mdast = {
+            type: 'text',
+            value: title,
+          };
+        }
+      }
       if (delta.attributes?.code) {
         mdast = {
           type: 'inlineCode',

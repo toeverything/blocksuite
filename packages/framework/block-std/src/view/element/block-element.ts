@@ -240,7 +240,7 @@ export class BlockElement<
     this._disposables.add(
       this.host.selection.slots.changed.on(selections => {
         const selection = selections.find(selection => {
-          return selection.path === this.blockId;
+          return selection.blockId === this.blockId;
         });
 
         if (!selection) {

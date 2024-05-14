@@ -11,13 +11,13 @@ import type { EmbedCardCaption } from '../_common/components/embed-card/embed-ca
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { type BookmarkBlockModel } from './bookmark-model.js';
-import type { BookmarkService } from './bookmark-service.js';
+import type { BookmarkBlockService } from './bookmark-service.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
 export class BookmarkBlockComponent extends BlockElement<
   BookmarkBlockModel,
-  BookmarkService
+  BookmarkBlockService
 > {
   @property({ attribute: false })
   loading = false;

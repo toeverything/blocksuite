@@ -120,7 +120,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
           currentIdxOffset = 0;
         }
 
-        const zIndex = currentLayer.zIndexes[0] + currentIdxOffset++;
+        const zIndex = currentLayer.zIndex + currentIdxOffset++;
 
         return staticHtml`<${tag}
           .index=${index}

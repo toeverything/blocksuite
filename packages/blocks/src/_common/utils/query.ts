@@ -292,8 +292,11 @@ export function getBlockComponentByModel(
   return getBlockComponentByPath(editorHost, model.id);
 }
 
-export function getBlockComponentByPath(editorHost: EditorHost, path: string) {
-  return editorHost.view.getBlock(path);
+export function getBlockComponentByPath(
+  editorHost: EditorHost,
+  blockId: string
+) {
+  return editorHost.view.getBlock(blockId);
 }
 
 /**

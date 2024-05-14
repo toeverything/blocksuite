@@ -86,7 +86,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     }
 
     const blockElement = this.std.view.getBlock(
-      blockSelection[0].path
+      blockSelection[0].blockId
     ) as AttachmentBlockComponent | null;
     assertExists(blockElement);
 

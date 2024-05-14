@@ -49,14 +49,14 @@ export const getInlineRangeProvider: (
 
     const { from, to } = textSelection;
 
-    if (from.path === element.blockId) {
+    if (from.blockId === element.blockId) {
       return {
         index: from.index,
         length: from.length,
       };
     }
 
-    if (to && to.path === element.blockId) {
+    if (to && to.blockId === element.blockId) {
       return {
         index: to.index,
         length: to.length,
@@ -80,7 +80,7 @@ export const getInlineRangeProvider: (
     } else {
       const textSelection = selectionManager.create('text', {
         from: {
-          path: element.blockId,
+          blockId: element.blockId,
           index: inlineRange.index,
           length: inlineRange.length,
         },

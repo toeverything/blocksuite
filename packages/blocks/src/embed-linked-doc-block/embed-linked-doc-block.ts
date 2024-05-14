@@ -26,14 +26,14 @@ import type {
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
 } from './embed-linked-doc-model.js';
-import type { EmbedLinkedDocService } from './embed-linked-doc-service.js';
+import type { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
 
 @customElement('affine-embed-linked-doc-block')
 export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   EmbedLinkedDocModel,
-  EmbedLinkedDocService
+  EmbedLinkedDocBlockService
 > {
   static override styles = styles;
 
@@ -152,7 +152,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.blockId,
+      blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }

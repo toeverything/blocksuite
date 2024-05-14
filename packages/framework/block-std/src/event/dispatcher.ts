@@ -269,7 +269,7 @@ export class UIEventDispatcher {
     const seen: Record<string, boolean> = {};
 
     const paths = selections
-      .map(selection => selection.path)
+      .map(selection => selection.blockId)
       .map(id => this.std.doc.getBlockById(id))
       .filter((block): block is BlockModel => !!block)
       .map(block => this._calculatePath(block));
