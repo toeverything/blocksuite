@@ -17,7 +17,7 @@ import { type EmbedCardStyle, NoteDisplayMode } from '../_common/types.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import { CanvasTextFonts } from '../surface-block/consts.js';
+import { CommunityCanvasTextFonts } from '../surface-block/consts.js';
 import { EditPropsStore } from '../surface-block/managers/edit-session.js';
 import {
   copySelectedModelsCommand,
@@ -185,7 +185,7 @@ export class RootService extends BlockService<RootBlockModel> {
   }
 
   loadFonts() {
-    this.fontLoader.load(CanvasTextFonts);
+    this.fontLoader.load(CommunityCanvasTextFonts);
   }
 
   private _getLastNoteBlock() {
