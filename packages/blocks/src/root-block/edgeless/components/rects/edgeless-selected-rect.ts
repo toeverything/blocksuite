@@ -15,7 +15,7 @@ import type {
   Selectable,
 } from '../../../../_common/types.js';
 import {
-  batchToAnimationFrame,
+  requestThrottledConnectFrame,
   stopPropagation,
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
@@ -451,9 +451,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   autoCompleteOff = false;
-
-  @property({ attribute: false })
-  toolbarVisible = false;
 
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;
@@ -895,7 +892,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.slots.cursorUpdated.emit(cursor);
   };
 
-  private _updateSelectedRect = batchToAnimationFrame(() => {
+  private _updateSelectedRect = requestThrottledConnectFrame(() => {
     const { zoom, selection, edgeless } = this;
 
     const elements = selection.elements;

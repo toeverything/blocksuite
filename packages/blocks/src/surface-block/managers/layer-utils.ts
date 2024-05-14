@@ -8,30 +8,24 @@ import { GroupLikeModel } from '../element-model/base.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Layer } from './layer-manager.js';
 
-export function getLayerZIndex(layers: Layer[], layerIndex: number) {
+export function getLayerEndZIndex(layers: Layer[], layerIndex: number) {
   const layer = layers[layerIndex];
   return layer
     ? layer.type === 'block'
-      ? layer.zIndexes[1]
-      : layer.zIndexes
+      ? layer.zIndex + layer.elements.length - 1
+      : layer.zIndex
     : 1;
 }
 
-export function updateLayersIndex(layers: Layer[], startIdx: number) {
+export function updateLayersZIndex(layers: Layer[], startIdx: number) {
   const startLayer = layers[startIdx];
-  let curIndex =
-    startLayer.type === 'block' ? startLayer.zIndexes[1] : startLayer.zIndexes;
+  let curIndex = startLayer.zIndex;
 
   for (let i = startIdx; i < layers.length; ++i) {
     const curLayer = layers[i];
 
-    if (curLayer.type === 'block') {
-      curLayer.zIndexes = [curIndex, curIndex + curLayer.elements.length];
-      curIndex += curLayer.elements.length;
-    } else {
-      curLayer.zIndexes = curIndex;
-      curIndex += 1;
-    }
+    curLayer.zIndex = curIndex;
+    curIndex += curLayer.type === 'block' ? curLayer.elements.length : 1;
   }
 }
 
