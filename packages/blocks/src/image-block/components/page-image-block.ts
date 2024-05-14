@@ -109,7 +109,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
           .concat(
             selection.create('text', {
               from: {
-                path: blockId,
+                blockId,
                 index: 0,
                 length: 0,
               },
@@ -123,9 +123,10 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       Escape: () => {
         selection.update(selList => {
           return selList.map(sel => {
-            const current = sel.is('image') && sel.path === this.block.blockId;
+            const current =
+              sel.is('image') && sel.blockId === this.block.blockId;
             if (current) {
-              return selection.create('block', { path: this.block.blockId });
+              return selection.create('block', { blockId: this.block.blockId });
             }
             return sel;
           });
@@ -160,7 +161,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     this._disposables.add(
       selection.slots.changed.on(selList => {
         this._isSelected = selList.some(
-          sel => sel.path === this.block.blockId && sel.is('image')
+          sel => sel.blockId === this.block.blockId && sel.is('image')
         );
       })
     );
@@ -179,7 +180,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         selection.update(selList => {
           return selList
             .filter(sel => !['text', 'block', 'image'].includes(sel.type))
-            .concat(selection.create('image', { path: this.block.blockId }));
+            .concat(selection.create('image', { blockId: this.block.blockId }));
         });
         return true;
       }
@@ -192,7 +193,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
         selection.update(selList =>
           selList.filter(
-            sel => !(sel.is('image') && sel.path === this.block.blockId)
+            sel => !(sel.is('image') && sel.blockId === this.block.blockId)
           )
         );
       },

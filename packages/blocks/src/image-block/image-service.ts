@@ -96,7 +96,7 @@ export class ImageService extends BlockService<ImageBlockModel> {
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.std.selection.setGroup('note', [
           editorHost.std.selection.create('block', {
-            path: blockComponent.blockId,
+            blockId: blockComponent.blockId,
           }),
         ]);
         startDragging([blockComponent], state);

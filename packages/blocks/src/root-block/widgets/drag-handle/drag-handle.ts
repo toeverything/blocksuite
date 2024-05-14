@@ -738,7 +738,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       );
     } else {
       blockElements = this.selectedBlocks
-        .map(block => this._getBlockElementFromViewStore(block.path))
+        .map(block => this._getBlockElementFromViewStore(block.blockId))
         .filter((block): block is BlockElement => !!block);
     }
 
@@ -838,7 +838,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const { selection } = this.host;
     const selections = blockElements.map(blockElement =>
       selection.create('block', {
-        path: blockElement.blockId,
+        blockId: blockElement.blockId,
       })
     );
 
@@ -911,7 +911,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const selections = edgelessRoot.service.selection.selections;
 
     this._anchorBlockId = selectedElement.id;
-    this._anchorBlockPath = selections[0].path;
+    this._anchorBlockPath = selections[0].blockId;
 
     this._showDragHandleOnTopLevelBlocks().catch(console.error);
   };
@@ -1110,7 +1110,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const blockElements = this.selectedBlocks
       .map(selection => {
-        return this._getBlockElementFromViewStore(selection.path);
+        return this._getBlockElementFromViewStore(selection.blockId);
       })
       .filter((element): element is BlockElement<BlockModel> => !!element);
 

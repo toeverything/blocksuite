@@ -35,8 +35,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _selectBlock = () => {
     selection.update(selList => {
       return selList.map(sel => {
-        if (sel.path === blockElement.blockId) {
-          return selection.create('block', { path: blockElement.blockId });
+        if (sel.blockId === blockElement.blockId) {
+          return selection.create('block', { blockId: blockElement.blockId });
         }
         return sel;
       });
@@ -47,10 +47,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _selectText = (start: boolean) => {
     selection.update(selList => {
       return selList.map(sel => {
-        if (sel.path === blockElement.blockId) {
+        if (sel.blockId === blockElement.blockId) {
           return selection.create('text', {
             from: {
-              path: blockElement.blockId,
+              blockId: blockElement.blockId,
               index: start ? 0 : blockElement.model.text?.length ?? 0,
               length: 0,
             },
@@ -96,12 +96,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _selectAllText = () => {
     selection.update(selList => {
       return selList.map(sel => {
-        if (sel.path !== blockElement.blockId) {
+        if (sel.blockId !== blockElement.blockId) {
           return sel;
         }
         return selection.create('text', {
           from: {
-            path: blockElement.blockId,
+            blockId: blockElement.blockId,
             index: 0,
             length: blockElement.model.text?.length ?? 0,
           },

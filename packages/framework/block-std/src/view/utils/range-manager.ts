@@ -142,7 +142,7 @@ export class RangeManager {
   textSelectionToRange(selection: TextSelection): Range | null {
     const { from, to } = selection;
 
-    const fromInlineEditor = this.queryInlineEditorByPath(from.path);
+    const fromInlineEditor = this.queryInlineEditorByPath(from.blockId);
     if (!fromInlineEditor) return null;
 
     if (selection.isInSameBlock()) {
@@ -152,7 +152,7 @@ export class RangeManager {
       });
     } else {
       assertExists(to);
-      const toInlineEditor = this.queryInlineEditorByPath(to.path);
+      const toInlineEditor = this.queryInlineEditorByPath(to.blockId);
       if (!toInlineEditor) return null;
 
       const fromRange = fromInlineEditor.toDomRange({
@@ -201,7 +201,7 @@ export class RangeManager {
 
     return this.host.selection.create('text', {
       from: {
-        path: startBlock.blockId,
+        blockId: startBlock.blockId,
         index: startInlineRange.index,
         length: startInlineRange.length,
       },
@@ -209,7 +209,7 @@ export class RangeManager {
         startBlock === endBlock
           ? null
           : {
-              path: endBlock.blockId,
+              blockId: endBlock.blockId,
               index: endInlineRange.index,
               length: endInlineRange.length,
             },

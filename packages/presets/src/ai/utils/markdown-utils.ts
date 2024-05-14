@@ -38,10 +38,10 @@ function processSnapshot(
   assertExists(model);
 
   const modelId = model.id;
-  if (text.from.path === modelId) {
+  if (text.from.blockId === modelId) {
     updateSnapshotText(text.from, snapshot, model);
   }
-  if (text.to && text.to.path === modelId) {
+  if (text.to && text.to.blockId === modelId) {
     updateSnapshotText(text.to, snapshot, model);
   }
 

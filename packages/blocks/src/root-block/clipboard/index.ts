@@ -140,7 +140,7 @@ export class PageClipboard {
           const textSelection = ctx.currentTextSelection;
           assertExists(textSelection);
           const end = textSelection.to ?? textSelection.from;
-          next({ currentSelectionPath: end.path });
+          next({ currentSelectionPath: end.blockId });
         }),
         cmd.getBlockSelections().inline<'currentSelectionPath'>((ctx, next) => {
           const currentBlockSelections = ctx.currentBlockSelections;
@@ -149,7 +149,7 @@ export class PageClipboard {
           if (!blockSelection) {
             return;
           }
-          next({ currentSelectionPath: blockSelection.path });
+          next({ currentSelectionPath: blockSelection.blockId });
         }),
       ])
       .getBlockIndex()

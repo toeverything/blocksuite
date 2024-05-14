@@ -119,13 +119,13 @@ export const updateBlockType: Command<
     }
     const newTextSelection = selectionManager.create('text', {
       from: {
-        path: firstNewModel.id,
+        blockId: firstNewModel.id,
         index: textSelection.from.index,
         length: textSelection.from.length,
       },
       to: textSelection.to
         ? {
-            path: lastNewModel.id,
+            blockId: lastNewModel.id,
             index: textSelection.to.index,
             length: textSelection.to.length,
           }
@@ -155,7 +155,7 @@ export const updateBlockType: Command<
     requestAnimationFrame(() => {
       const selections = updatedBlocks.map(model => {
         return selectionManager.create('block', {
-          path: blockSelections[0].path.slice(0, -1).concat(model.id),
+          blockId: model.id,
         });
       });
 

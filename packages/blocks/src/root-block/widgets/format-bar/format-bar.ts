@@ -238,7 +238,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           }
 
           if (textSelection) {
-            const block = this.host.view.getBlock(textSelection.path);
+            const block = this.host.view.getBlock(textSelection.blockId);
             if (
               !textSelection.isCollapsed() &&
               block &&
@@ -272,7 +272,7 @@ export class AffineFormatBarWidget extends WidgetElement {
             this._displayType = 'block';
             const selectedBlocks = blockSelections
               .map(selection => {
-                const path = selection.path;
+                const path = selection.blockId;
                 return this.blockElement.host.view.getBlock(path);
               })
               .filter((el): el is BlockElement => !!el);

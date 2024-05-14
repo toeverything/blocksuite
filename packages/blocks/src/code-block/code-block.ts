@@ -163,7 +163,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     const blockSelections = selection.filter('block');
     if (
       blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.blockId)
+      (blockSelections.length === 1 &&
+        blockSelections[0].blockId !== this.blockId)
     ) {
       return null;
     }
@@ -275,7 +276,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         if (from.index === 0 && from.length === 0) {
           state.raw.preventDefault();
           selectionManager.setGroup('note', [
-            selectionManager.create('block', { path: this.blockId }),
+            selectionManager.create('block', { blockId: this.blockId }),
           ]);
           return true;
         }

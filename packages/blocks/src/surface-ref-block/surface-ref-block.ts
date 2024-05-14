@@ -367,7 +367,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
             .concat(
               selection.create('text', {
                 from: {
-                  path: model.id,
+                  blockId: model.id,
                   index: 0,
                   length: 0,
                 },
@@ -447,7 +447,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this._disposables.add(
       selection.slots.changed.on(selList => {
         this._focused = selList.some(
-          sel => sel.path === this.blockId && sel.is('block')
+          sel => sel.blockId === this.blockId && sel.is('block')
         );
       })
     );
@@ -482,7 +482,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   private _focusBlock() {
     this.selection.update(() => {
-      return [this.selection.create('block', { path: this.blockId })];
+      return [this.selection.create('block', { blockId: this.blockId })];
     });
   }
 

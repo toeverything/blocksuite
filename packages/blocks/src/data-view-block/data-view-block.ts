@@ -145,7 +145,7 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       this.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(
           (selection): selection is DatabaseSelection => {
-            if (selection.path !== this.blockId) {
+            if (selection.blockId !== this.blockId) {
               return false;
             }
             return selection instanceof DatabaseSelection;
@@ -229,7 +229,7 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       selection
         ? [
             new DatabaseSelection({
-              path: this.blockId,
+              blockId: this.blockId,
               viewSelection: selection,
             }),
           ]

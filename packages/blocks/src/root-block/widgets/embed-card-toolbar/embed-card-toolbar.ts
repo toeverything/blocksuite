@@ -416,7 +416,7 @@ export class EmbedCardToolbar extends WidgetElement<
         if (
           !blockSelections ||
           blockSelections.length !== 1 ||
-          blockSelections[0].path !== this.blockElement.blockId
+          blockSelections[0].blockId !== this.blockElement.blockId
         ) {
           this._hide();
           return;
