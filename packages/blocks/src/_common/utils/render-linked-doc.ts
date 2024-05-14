@@ -3,10 +3,10 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel, BlockSelector, Doc } from '@blocksuite/store';
 import { css, render, type TemplateResult } from 'lit';
 
-import { SpecProvider } from '../../_specs/spec-provider.js';
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
+import { SpecProvider } from '../../specs/utils/spec-provider.js';
 import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
 import { NoteDisplayMode } from '../types.js';
