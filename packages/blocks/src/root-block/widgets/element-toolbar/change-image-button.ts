@@ -92,10 +92,8 @@ export function renderChangeImageButton(
 ) {
   if (images?.length !== 1) return nothing;
 
-  return html`
-    <edgeless-change-image-button
-      .model=${images[0]}
-      .edgeless=${edgeless}
-    ></edgeless-change-image-button>
-  `;
+  return html`<edgeless-change-image-button
+    .model=${images[0]}
+    .edgeless=${edgeless}
+  ></edgeless-change-image-button>`;
 }

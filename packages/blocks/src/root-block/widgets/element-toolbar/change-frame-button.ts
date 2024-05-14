@@ -215,10 +215,10 @@ export function renderFrameButton(
   edgeless: EdgelessRootBlockComponent,
   frames?: FrameBlockModel[]
 ) {
-  return frames?.length
-    ? html`<edgeless-change-frame-button
-        .edgeless=${edgeless}
-        .frames=${frames}
-      ></edgeless-change-frame-button>`
-    : nothing;
+  if (!frames?.length) return nothing;
+
+  return html`<edgeless-change-frame-button
+    .edgeless=${edgeless}
+    .frames=${frames}
+  ></edgeless-change-frame-button>`;
 }

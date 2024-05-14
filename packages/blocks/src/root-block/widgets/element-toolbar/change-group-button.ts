@@ -137,11 +137,11 @@ export function renderGroupButton(
   edgeless: EdgelessRootBlockComponent,
   groups?: GroupElementModel[]
 ) {
-  return groups?.length
-    ? html`<edgeless-change-group-button
-        .edgeless=${edgeless}
-        .groups=${groups}
-      >
-      </edgeless-change-group-button>`
-    : nothing;
+  if (!groups?.length) return nothing;
+
+  return html`<edgeless-change-group-button
+    .edgeless=${edgeless}
+    .groups=${groups}
+  >
+  </edgeless-change-group-button>`;
 }

@@ -191,10 +191,8 @@ export function renderAttachmentButton(
 ) {
   if (attachments?.length !== 1) return nothing;
 
-  return html`
-    <edgeless-change-attachment-button
-      .model=${attachments[0]}
-      .edgeless=${edgeless}
-    ></edgeless-change-attachment-button>
-  `;
+  return html`<edgeless-change-attachment-button
+    .model=${attachments[0]}
+    .edgeless=${edgeless}
+  ></edgeless-change-attachment-button>`;
 }

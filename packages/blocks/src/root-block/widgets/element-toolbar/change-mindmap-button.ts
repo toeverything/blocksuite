@@ -307,22 +307,22 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
 
 export function renderMindmapButton(
   edgeless: EdgelessRootBlockComponent,
-  shapeElements?: ShapeElementModel[]
+  elements?: ShapeElementModel[]
 ) {
-  return shapeElements?.length &&
-    shapeElements.every(shapeElement => {
-      const mindmap = edgeless.service.surface.getGroup(
-        shapeElement.id
-      ) as MindmapElementModel;
-
-      return (
-        mindmap?.type === 'mindmap' && mindmap.tree.element === shapeElement
-      );
+  if (!elements?.length) return nothing;
+  if (
+    elements.some(e => {
+      const group = edgeless.service.surface.getGroup(e.id);
+      if (!group) return true;
+      if (group.type !== 'mindmap') return true;
+      return (group as MindmapElementModel).tree.element !== e;
     })
-    ? html`<edgeless-change-mindmap-button
-        .elements=${shapeElements.map(el => el.group)}
-        .edgeless=${edgeless}
-      >
-      </edgeless-change-mindmap-button>`
-    : nothing;
+  )
+    return nothing;
+
+  return html`<edgeless-change-mindmap-button
+    .elements=${elements.map(e => e.group)}
+    .edgeless=${edgeless}
+  >
+  </edgeless-change-mindmap-button>`;
 }

@@ -207,13 +207,13 @@ declare global {
 
 export function renderChangeBrushButton(
   edgeless: EdgelessRootBlockComponent,
-  brushElements?: BrushElementModel[]
+  elements?: BrushElementModel[]
 ) {
-  return brushElements?.length
-    ? html`<edgeless-change-brush-button
-        .elements=${brushElements}
-        .edgeless=${edgeless}
-      >
-      </edgeless-change-brush-button>`
-    : nothing;
+  if (!elements?.length) return nothing;
+
+  return html`<edgeless-change-brush-button
+    .elements=${elements}
+    .edgeless=${edgeless}
+  >
+  </edgeless-change-brush-button>`;
 }

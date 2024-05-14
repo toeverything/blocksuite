@@ -25,7 +25,6 @@ import {
   MindmapElementModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import { renderMenuDivider } from './component-toolbar-menu-divider.js';
 
 @customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
@@ -268,9 +267,11 @@ export function renderAlignButton(
   edgeless: EdgelessRootBlockComponent,
   elements: EdgelessModel[]
 ) {
-  return elements.length > 1 &&
-    elements.every(e => !(e.group instanceof MindmapElementModel))
-    ? html`<edgeless-align-button .edgeless=${edgeless}></edgeless-align-button>
-        ${renderMenuDivider()}`
-    : nothing;
+  if (elements.length < 2) return nothing;
+  if (elements.some(e => e.group instanceof MindmapElementModel))
+    return nothing;
+
+  return html`<edgeless-align-button
+    .edgeless=${edgeless}
+  ></edgeless-align-button>`;
 }

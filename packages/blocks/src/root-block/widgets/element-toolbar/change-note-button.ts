@@ -644,12 +644,12 @@ export function renderNoteButton(
   edgeless: EdgelessRootBlockComponent,
   notes?: NoteBlockModel[]
 ) {
-  return notes && notes.length >= 0
-    ? html`<edgeless-change-note-button
-        .notes=${notes}
-        .edgeless=${edgeless}
-        .enableNoteSlicer=${false}
-      >
-      </edgeless-change-note-button>`
-    : nothing;
+  if (!notes?.length) return nothing;
+
+  return html`<edgeless-change-note-button
+    .notes=${notes}
+    .edgeless=${edgeless}
+    .enableNoteSlicer=${false}
+  >
+  </edgeless-change-note-button>`;
 }
