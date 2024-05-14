@@ -27,12 +27,11 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       z-index: var(--affine-z-index-popover);
-      scrollbar-width: none;
     }
 
     .edgeless-copilot-panel::-webkit-scrollbar {
       width: 5px;
-      max-height: 100px;
+      max-height: 40px;
     }
     .edgeless-copilot-panel::-webkit-scrollbar-thumb {
       border-radius: 20px;

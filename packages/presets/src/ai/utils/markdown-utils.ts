@@ -1,9 +1,5 @@
 import type { TextSelection } from '@blocksuite/block-std';
-import {
-  type EditorHost,
-  PathFinder,
-  type TextRangePoint,
-} from '@blocksuite/block-std';
+import { type EditorHost, type TextRangePoint } from '@blocksuite/block-std';
 import {
   defaultImageProxyMiddleware,
   MarkdownAdapter,
@@ -42,10 +38,10 @@ function processSnapshot(
   assertExists(model);
 
   const modelId = model.id;
-  if (PathFinder.id(text.from.path) === modelId) {
+  if (text.from.path === modelId) {
     updateSnapshotText(text.from, snapshot, model);
   }
-  if (text.to && PathFinder.id(text.to.path) === modelId) {
+  if (text.to && text.to.path === modelId) {
     updateSnapshotText(text.to, snapshot, model);
   }
 

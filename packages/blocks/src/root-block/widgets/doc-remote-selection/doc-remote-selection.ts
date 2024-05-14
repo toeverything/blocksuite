@@ -137,10 +137,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
       }
     } else if (blockSelections.length > 0) {
       return blockSelections.flatMap(blockSelection => {
-        const blockElement = this.host.view.viewFromPath(
-          'block',
-          blockSelection.path
-        );
+        const blockElement = this.host.view.getBlock(blockSelection.path);
         if (blockElement) {
           const rect = blockElement.getBoundingClientRect();
           return {
@@ -219,10 +216,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     } else if (blockSelections.length > 0) {
       const lastBlockSelection = blockSelections[blockSelections.length - 1];
 
-      const blockElement = this.host.view.viewFromPath(
-        'block',
-        lastBlockSelection.path
-      );
+      const blockElement = this.host.view.getBlock(lastBlockSelection.path);
       if (blockElement) {
         const rect = blockElement.getBoundingClientRect();
         return {

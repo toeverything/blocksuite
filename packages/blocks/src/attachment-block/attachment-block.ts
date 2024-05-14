@@ -97,7 +97,7 @@ export class AttachmentBlockComponent extends BlockElement<
     const blockSelections = selection.filter('block');
     if (
       blockSelections.length > 1 ||
-      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+      (blockSelections.length === 1 && blockSelections[0].path !== this.blockId)
     ) {
       return null;
     }
@@ -122,7 +122,7 @@ export class AttachmentBlockComponent extends BlockElement<
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.path,
+      path: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }

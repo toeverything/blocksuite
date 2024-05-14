@@ -35,10 +35,7 @@ export class BookmarkService extends BlockService<BookmarkBlockModel> {
     edgeless: true,
     onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
       if (!anchorBlockPath) return false;
-      const anchorComponent = editorHost.std.view.viewFromPath(
-        'block',
-        anchorBlockPath
-      );
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [
@@ -59,7 +56,7 @@ export class BookmarkService extends BlockService<BookmarkBlockModel> {
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
           editorHost.selection.create('block', {
-            path: blockComponent.path,
+            path: blockComponent.blockId,
           }),
         ]);
         startDragging([blockComponent], state);

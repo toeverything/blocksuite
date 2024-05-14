@@ -1,5 +1,4 @@
 import type { BlockElement, UIEventStateContext } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -36,8 +35,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _selectBlock = () => {
     selection.update(selList => {
       return selList.map(sel => {
-        if (PathFinder.equals(sel.path, blockElement.path)) {
-          return selection.create('block', { path: blockElement.path });
+        if (sel.path === blockElement.blockId) {
+          return selection.create('block', { path: blockElement.blockId });
         }
         return sel;
       });
@@ -48,10 +47,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _selectText = (start: boolean) => {
     selection.update(selList => {
       return selList.map(sel => {
-        if (PathFinder.equals(sel.path, blockElement.path)) {
+        if (sel.path === blockElement.blockId) {
           return selection.create('text', {
             from: {
-              path: blockElement.path,
+              path: blockElement.blockId,
               index: start ? 0 : blockElement.model.text?.length ?? 0,
               length: 0,
             },
@@ -97,12 +96,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _selectAllText = () => {
     selection.update(selList => {
       return selList.map(sel => {
-        if (!PathFinder.equals(sel.path, blockElement.path)) {
+        if (sel.path !== blockElement.blockId) {
           return sel;
         }
         return selection.create('text', {
           from: {
-            path: blockElement.path,
+            path: blockElement.blockId,
             index: 0,
             length: blockElement.model.text?.length ?? 0,
           },
@@ -202,9 +201,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const textModels = context.selectedModels;
         if (textModels && textModels.length === 1) {
           const inlineEditor = _getInlineEditor();
-          const inilneRange = inlineEditor.getInlineRange();
-          assertExists(inilneRange);
-          handleIndent(blockElement.host, model, inilneRange.index);
+          const inlineRange = inlineEditor.getInlineRange();
+          assertExists(inlineRange);
+          handleIndent(blockElement.host, model, inlineRange.index);
           _preventDefault(ctx);
 
           return true;

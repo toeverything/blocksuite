@@ -1,18 +1,17 @@
 import type { Command } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-function getPrevSibling(std: BlockSuite.Std, path: string[]) {
+function getPrevSibling(std: BlockSuite.Std, path: string) {
   const view = std.view;
-  const blockElement = view.fromPath(path);
+  const blockElement = view.getBlock(path);
   if (!blockElement) return null;
   const prev = std.doc.getPrev(blockElement.model);
   if (!prev) return null;
   return view.getBlock(prev.id);
 }
 
-function getPrevBlock(std: BlockSuite.Std, path: string[]) {
+function getPrevBlock(std: BlockSuite.Std, path: string) {
   const view = std.view;
 
   const prev: BlockElement | null = getPrevSibling(std, path);
@@ -21,10 +20,10 @@ function getPrevBlock(std: BlockSuite.Std, path: string[]) {
     return null;
   }
 
-  const block = view.viewFromPath('block', path);
+  const block = view.getBlock(path);
   if (!block) return null;
 
-  if (prev && !PathFinder.equals(prev.path, path)) {
+  if (prev && prev.blockId !== path) {
     return prev;
   }
 
@@ -35,7 +34,7 @@ export const getPrevBlockCommand: Command<
   'currentSelectionPath',
   'prevBlock',
   {
-    path?: string[];
+    path?: string;
   }
 > = (ctx, next) => {
   const path = ctx.path ?? ctx.currentSelectionPath;
