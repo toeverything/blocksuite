@@ -134,7 +134,7 @@ export class Renderer extends Viewport {
         }
 
         canvas.dataset.layerId = `[${layer.indexes[0]}--${layer.indexes[1]}]`;
-        canvas.style.setProperty('z-index', layer.zIndexes.toString());
+        canvas.style.setProperty('z-index', layer.zIndex.toString());
         canvases.push(canvas);
       }
 

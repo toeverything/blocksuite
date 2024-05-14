@@ -101,7 +101,7 @@ test('change element should update layer automatically', async () => {
   );
 });
 
-test('new added notes should be placed under the topmost canvas layer', async () => {
+test('new added block should be placed under the topmost canvas layer', async () => {
   service.addElement('shape', {
     shapeType: 'rect',
   });
@@ -142,7 +142,7 @@ test("there should be at lease one layer in canvasLayers property even there's n
   expect(service.layer.canvasLayers.length).toBe(1);
 });
 
-test('if the topmost layer is canvas layer, the number of layers in the canvasLayers prop should has the same with the number of canvas layer in the layers prop', () => {
+test('if the topmost layer is canvas layer, the length of canvasLayers array should equal to the counts of canvas layers', () => {
   addNote(doc);
   service.addElement('shape', {
     shapeType: 'rect',
@@ -175,6 +175,71 @@ test('a new layer should be created in canvasLayers prop when the topmost layer 
   });
 
   expect(service.layer.canvasLayers.length).toBe(3);
+});
+
+test('layer zindex should update correctly when elements changed', async () => {
+  addNote(doc, {
+    index: service.layer.generateIndex('affine:note'),
+  });
+  const noteId = addNote(doc, {
+    index: service.layer.generateIndex('affine:note'),
+  });
+  const note = service.getElementById(noteId);
+  addNote(doc, {
+    index: service.layer.generateIndex('affine:note'),
+  });
+  service.addElement('shape', {
+    shapeType: 'rect',
+  });
+  const topShapeId = service.addElement('shape', {
+    shapeType: 'rect',
+  });
+  const topShape = service.getElementById(topShapeId);
+
+  await wait();
+
+  const assertInitialState = () => {
+    expect(service.layer.layers[0].type).toBe('block');
+    expect(service.layer.layers[0].zIndex).toBe(1);
+
+    expect(service.layer.layers[1].type).toBe('canvas');
+    expect(service.layer.layers[1].zIndex).toBe(4);
+  };
+  assertInitialState();
+
+  service.doc.captureSync();
+
+  service.updateElement(noteId, {
+    index: service.layer.getReorderedIndex(note, 'front'),
+  });
+  await wait();
+  service.doc.captureSync();
+
+  const assert2StepState = () => {
+    expect(service.layer.layers[1].type).toBe('canvas');
+    expect(service.layer.layers[1].zIndex).toBe(3);
+
+    expect(service.layer.layers[2].type).toBe('block');
+    expect(service.layer.layers[2].zIndex).toBe(4);
+  };
+  assert2StepState();
+
+  service.updateElement(topShapeId, {
+    index: service.layer.getReorderedIndex(topShape, 'front'),
+  });
+  await wait();
+  service.doc.captureSync();
+
+  expect(service.layer.layers[3].type).toBe('canvas');
+  expect(service.layer.layers[3].zIndex).toBe(5);
+
+  service.doc.undo();
+  await wait();
+  assert2StepState();
+
+  service.doc.undo();
+  await wait();
+  assertInitialState();
 });
 
 describe('layer reorder functionality', () => {
@@ -409,7 +474,7 @@ test('the actual rendering order of blocks should satisfy the logic order of the
   await wait();
 
   editor.mode = 'edgeless';
-  await wait();
+  await wait(500);
 
   const edgeless = getDocRootBlock(doc, editor, 'edgeless');
   const blocks = Array.from(
