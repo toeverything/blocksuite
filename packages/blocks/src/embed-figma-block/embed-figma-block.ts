@@ -12,13 +12,13 @@ import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-ele
 import { OpenIcon } from '../_common/icons/text.js';
 import type { EmbedFigmaStyles } from './embed-figma-model.js';
 import { type EmbedFigmaModel } from './embed-figma-model.js';
-import type { EmbedFigmaService } from './embed-figma-service.js';
+import type { EmbedFigmaBlockService } from './embed-figma-service.js';
 import { FigmaIcon, styles } from './styles.js';
 
 @customElement('affine-embed-figma-block')
 export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   EmbedFigmaModel,
-  EmbedFigmaService
+  EmbedFigmaBlockService
 > {
   static override styles = styles;
 
@@ -40,7 +40,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.path,
+      blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }

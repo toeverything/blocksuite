@@ -302,7 +302,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _reload = (selections: SurfaceSelection[]) => {
     selections.forEach(sel => {
-      const blockElement = this.view.viewFromPath('block', sel.path);
+      const blockElement = this.view.getBlock(sel.blockId);
       if (!!blockElement && this._refreshable(blockElement.model)) {
         (blockElement as RefreshableBlockComponent).refreshData();
       }

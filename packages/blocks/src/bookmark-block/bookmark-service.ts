@@ -21,24 +21,22 @@ import {
   BookmarkBlockSchema,
 } from './bookmark-model.js';
 
-export class BookmarkService extends BlockService<BookmarkBlockModel> {
+export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
   private static readonly linkPreviewer = new LinkPreviewer();
 
   queryUrlData = (url: string) => {
-    return BookmarkService.linkPreviewer.query(url);
+    return BookmarkBlockService.linkPreviewer.query(url);
   };
 
-  static setLinkPreviewEndpoint = BookmarkService.linkPreviewer.setEndpoint;
+  static setLinkPreviewEndpoint =
+    BookmarkBlockService.linkPreviewer.setEndpoint;
 
   private _dragHandleOption: DragHandleOption = {
     flavour: BookmarkBlockSchema.model.flavour,
     edgeless: true,
     onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
       if (!anchorBlockPath) return false;
-      const anchorComponent = editorHost.std.view.viewFromPath(
-        'block',
-        anchorBlockPath
-      );
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [
@@ -59,7 +57,7 @@ export class BookmarkService extends BlockService<BookmarkBlockModel> {
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
           editorHost.selection.create('block', {
-            path: blockComponent.path,
+            blockId: blockComponent.blockId,
           }),
         ]);
         startDragging([blockComponent], state);

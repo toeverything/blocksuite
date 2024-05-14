@@ -1,5 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { PathFinder, WidgetElement } from '@blocksuite/block-std';
+import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, DocCollection } from '@blocksuite/store';
 import {
@@ -416,7 +416,7 @@ export class EmbedCardToolbar extends WidgetElement<
         if (
           !blockSelections ||
           blockSelections.length !== 1 ||
-          !PathFinder.equals(blockSelections[0].path, this.blockElement.path)
+          blockSelections[0].blockId !== this.blockElement.blockId
         ) {
           this._hide();
           return;

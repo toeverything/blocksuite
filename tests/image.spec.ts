@@ -400,6 +400,6 @@ test('press backspace after image block can select image block', async ({
   await assertRichTextInlineRange(page, 0, 0);
   await assertBlockCount(page, 'paragraph', 1);
   await pressBackspace(page);
-  await assertBlockSelections(page, [['0', '1', '2']]);
+  await assertBlockSelections(page, ['2']);
   await assertBlockCount(page, 'paragraph', 0);
 });

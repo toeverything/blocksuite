@@ -11,7 +11,7 @@ import {
   EdgelessEditorBlockSpecs,
   EdgelessElementToolbarWidget,
   PageEditorBlockSpecs,
-  ParagraphService,
+  ParagraphBlockService,
 } from '@blocksuite/blocks';
 import { assertInstanceOf } from '@blocksuite/global/utils';
 import { literal, unsafeStatic } from 'lit/static-html.js';
@@ -68,7 +68,7 @@ export function patchDocSpecs(specs: BlockSpec[]) {
         setup(slots, disposableGroup) {
           spec.setup?.(slots, disposableGroup);
           slots.mounted.on(({ service }) => {
-            assertInstanceOf(service, ParagraphService);
+            assertInstanceOf(service, ParagraphBlockService);
             service.placeholderGenerator = model => {
               if (model.type === 'text') {
                 return "Type '/' for commands, 'space' for AI";

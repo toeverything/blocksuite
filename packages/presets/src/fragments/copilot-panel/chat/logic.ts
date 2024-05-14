@@ -277,10 +277,9 @@ export class AIChatLogic {
       firstIndex
     );
     setTimeout(() => {
-      const parentPath = firstBlock.parentPath;
       const selections = models
-        .map(model => [...parentPath, model.id])
-        .map(path => this.host.selection.create('block', { path }));
+        .map(model => model.id)
+        .map(blockId => this.host.selection.create('block', { blockId }));
       this.host.selection.setGroup('note', selections);
     }, 0);
   }
@@ -307,10 +306,9 @@ export class AIChatLogic {
     );
 
     setTimeout(() => {
-      const parentPath = lastBlock.parentPath;
       const selections = models
-        .map(model => [...parentPath, model.id])
-        .map(path => this.host.selection.create('block', { path }));
+        .map(model => model.id)
+        .map(blockId => this.host.selection.create('block', { blockId }));
       this.host.selection.setGroup('note', selections);
     }, 0);
   }

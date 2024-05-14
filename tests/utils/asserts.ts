@@ -1108,7 +1108,7 @@ export async function assertNoteSequence(page: Page, expected: string) {
   expect(expected).toBe(actual);
 }
 
-export async function assertBlockSelections(page: Page, paths: string[][]) {
+export async function assertBlockSelections(page: Page, paths: string[]) {
   const selections = await page.evaluate(() => {
     const host = document.querySelector<EditorHost>('editor-host');
     if (!host) {
@@ -1116,7 +1116,7 @@ export async function assertBlockSelections(page: Page, paths: string[][]) {
     }
     return host.selection.filter('block');
   });
-  const actualPaths = selections.map(selection => selection.path);
+  const actualPaths = selections.map(selection => selection.blockId);
   expect(actualPaths).toEqual(paths);
 }
 

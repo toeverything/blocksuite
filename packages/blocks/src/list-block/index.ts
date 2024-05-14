@@ -1,5 +1,5 @@
 import type { ListBlockModel } from './list-model.js';
-import type { ListService } from './list-service.js';
+import type { ListBlockService } from './list-service.js';
 
 export * from './list-block.js';
 export * from './list-model.js';
@@ -11,7 +11,7 @@ declare global {
       'affine:list': ListBlockModel;
     }
     interface BlockServices {
-      'affine:list': ListService;
+      'affine:list': ListBlockService;
     }
   }
 }

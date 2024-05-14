@@ -26,7 +26,6 @@ import {
 } from '../../../_common/icons/index.js';
 import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import {
-  buildPath,
   createDefaultDoc,
   getBlockComponentByPath,
   getImageFilesFromLocal,
@@ -493,7 +492,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           Promise.resolve().then(() => {
             const dataView = getBlockComponentByPath(
               rootElement.host,
-              buildPath(dataViewModel.model)
+              dataViewModel.model.id
             ) as DataViewBlockComponent;
             dataView.viewSource.viewAdd('table');
           });

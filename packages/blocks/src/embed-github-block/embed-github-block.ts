@@ -15,7 +15,7 @@ import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
 import type { EmbedGithubStyles } from './embed-github-model.js';
 import { type EmbedGithubModel, githubUrlRegex } from './embed-github-model.js';
-import type { EmbedGithubService } from './embed-github-service.js';
+import type { EmbedGithubBlockService } from './embed-github-service.js';
 import { GithubIcon, styles } from './styles.js';
 import {
   getGithubStatusIcon,
@@ -26,7 +26,7 @@ import {
 @customElement('affine-embed-github-block')
 export class EmbedGithubBlockComponent extends EmbedBlockElement<
   EmbedGithubModel,
-  EmbedGithubService
+  EmbedGithubBlockService
 > {
   static override styles = styles;
 
@@ -44,7 +44,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.path,
+      blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }

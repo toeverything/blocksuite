@@ -43,7 +43,7 @@ export type OnDragStartProps = {
     dragPreviewOffset?: Point
   ) => void;
   anchorBlockId: string;
-  anchorBlockPath: string[] | null;
+  anchorBlockPath: string | null;
   editorHost: EditorHost;
 };
 

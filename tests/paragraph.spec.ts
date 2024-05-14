@@ -1892,13 +1892,13 @@ test('select divider using delete keyboard from prev/next paragraph', async ({
 
   await focusRichText(page, 0);
   await pressForwardDelete(page);
-  await assertBlockSelections(page, [['0', '1', '4']]);
+  await assertBlockSelections(page, ['4']);
   await assertDivider(page, 3);
 
   await focusRichText(page, 1);
   await pressArrowLeft(page, 3);
   await pressBackspace(page);
-  await assertBlockSelections(page, [['0', '1', '6']]);
+  await assertBlockSelections(page, ['6']);
   await assertDivider(page, 3);
 
   await assertRichTexts(page, ['123', '123']);

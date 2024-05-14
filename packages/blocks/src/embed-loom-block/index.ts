@@ -2,7 +2,7 @@ import { noop } from '@blocksuite/global/utils';
 
 import { EmbedLoomBlockComponent } from './embed-loom-block.js';
 import type { EmbedLoomModel } from './embed-loom-model.js';
-import type { EmbedLoomService } from './embed-loom-service.js';
+import type { EmbedLoomBlockService } from './embed-loom-service.js';
 noop(EmbedLoomBlockComponent);
 
 export * from './embed-loom-block.js';
@@ -16,7 +16,7 @@ declare global {
       'affine:embed-loom': EmbedLoomModel;
     }
     interface BlockServices {
-      'affine:embed-loom': EmbedLoomService;
+      'affine:embed-loom': EmbedLoomBlockService;
     }
   }
 }

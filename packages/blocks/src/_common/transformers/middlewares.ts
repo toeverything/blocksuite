@@ -153,6 +153,18 @@ export const customImageProxyMiddleware = (
   };
 };
 
+export const titleMiddleware: JobMiddleware = ({
+  slots,
+  collection,
+  adapterConfigs,
+}) => {
+  slots.beforeExport.on(() => {
+    for (const meta of collection.meta.docMetas) {
+      adapterConfigs.set('title:' + meta.id, meta.title);
+    }
+  });
+};
+
 const imageProxyMiddlewareBuilder = () => {
   let middleware = customImageProxyMiddleware(DEFAULT_IMAGE_PROXY_ENDPOINT);
   return {

@@ -15,7 +15,7 @@ import { getViewportElement } from '../_common/utils/query.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ListBlockModel } from './list-model.js';
-import type { ListService } from './list-service.js';
+import type { ListBlockService } from './list-service.js';
 import { listBlockStyles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
@@ -23,7 +23,7 @@ import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 @customElement('affine-list')
 export class ListBlockComponent extends BlockElement<
   ListBlockModel,
-  ListService
+  ListBlockService
 > {
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
@@ -51,7 +51,7 @@ export class ListBlockComponent extends BlockElement<
     selection.update(selList => {
       return selList
         .filter(sel => !sel.is('text') && !sel.is('block'))
-        .concat(selection.create('block', { path: this.path }));
+        .concat(selection.create('block', { blockId: this.blockId }));
     });
   }
 

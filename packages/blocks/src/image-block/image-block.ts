@@ -15,7 +15,7 @@ import type { ImageBlockEdgelessComponent } from './components/edgeless-image-bl
 import type { AffineImageCard } from './components/image-card.js';
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import { type ImageBlockModel } from './image-model.js';
-import type { ImageService } from './image-service.js';
+import type { ImageBlockService } from './image-service.js';
 import {
   copyImageBlob,
   downloadImageBlob,
@@ -27,7 +27,7 @@ import {
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<
   ImageBlockModel,
-  ImageService
+  ImageBlockService
 > {
   @property({ attribute: false })
   loading = false;
@@ -93,7 +93,7 @@ export class ImageBlockComponent extends BlockElement<
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.path,
+      blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }

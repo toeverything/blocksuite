@@ -47,7 +47,7 @@ export class AffineSurfaceRefToolbar extends WidgetElement<
       if (
         blockSelections.length > 1 ||
         (blockSelections.length === 1 &&
-          blockSelections[0].path !== surfaceRefBlock.path)
+          blockSelections[0].blockId !== surfaceRefBlock.blockId)
       ) {
         return null;
       }

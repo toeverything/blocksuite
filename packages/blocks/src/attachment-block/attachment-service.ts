@@ -30,7 +30,7 @@ import {
 } from './attachment-model.js';
 import { addSiblingAttachmentBlocks } from './utils.js';
 
-export class AttachmentService extends BlockService<AttachmentBlockModel> {
+export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
   get rootElement(): RootBlockComponent {
     const rootModel = this.doc.root;
     assertExists(rootModel);
@@ -68,6 +68,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
         );
       } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
         const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
+        point = edgelessRoot.service.viewport.toViewPointFromClientPoint(point);
         await edgelessRoot.addAttachments(attachmentFiles, point);
       }
 
@@ -83,10 +84,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
     edgeless: true,
     onDragStart: ({ state, startDragging, anchorBlockPath, editorHost }) => {
       if (!anchorBlockPath) return false;
-      const anchorComponent = editorHost.std.view.viewFromPath(
-        'block',
-        anchorBlockPath
-      );
+      const anchorComponent = editorHost.std.view.getBlock(anchorBlockPath);
       if (
         !anchorComponent ||
         !matchFlavours(anchorComponent.model, [
@@ -107,7 +105,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
       if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         editorHost.selection.setGroup('note', [
           editorHost.selection.create('block', {
-            path: blockComponent.path,
+            blockId: blockComponent.blockId,
           }),
         ]);
         startDragging([blockComponent], state);

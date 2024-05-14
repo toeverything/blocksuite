@@ -1,5 +1,3 @@
-import { PathFinder } from '../utils/index.js';
-
 type SelectionConstructor<T = unknown> = {
   new (...args: unknown[]): T;
   type: string;
@@ -7,20 +5,16 @@ type SelectionConstructor<T = unknown> = {
 };
 
 export type BaseSelectionOptions = {
-  path: string[];
+  blockId: string;
 };
 
 export abstract class BaseSelection {
   static readonly type: string;
   static readonly group: string;
-  readonly path: string[];
+  readonly blockId: string;
 
-  constructor({ path }: BaseSelectionOptions) {
-    this.path = path;
-  }
-
-  get blockId(): string {
-    return PathFinder.id(this.path);
+  constructor({ blockId }: BaseSelectionOptions) {
+    this.blockId = blockId;
   }
 
   is<T extends BlockSuite.SelectionType>(

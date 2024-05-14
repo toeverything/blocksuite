@@ -15,6 +15,7 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
 
 import { getAIPanel } from '../ai-panel.js';
 import {
@@ -271,6 +272,7 @@ function updateEdgelessAIPanelConfig<
   aiPanel: AffineAIPanelWidget,
   edgelessCopilot: EdgelessCopilotWidget,
   id: T,
+  generatingIcon: TemplateResult<1>,
   ctx: CtxRecord,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
@@ -324,10 +326,12 @@ function updateEdgelessAIPanelConfig<
       })
       .catch(console.error);
   };
+  config.generatingIcon = generatingIcon;
 }
 
 export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
+  generatingIcon: TemplateResult<1>,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
@@ -368,6 +372,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
       aiPanel,
       edgelessCopilot,
       id,
+      generatingIcon,
       ctx,
       variants,
       customInput

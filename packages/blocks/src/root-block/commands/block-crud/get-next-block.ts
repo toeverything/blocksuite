@@ -9,9 +9,9 @@ function getNext(std: BlockSuite.Std, blockElement: BlockElement) {
   return view.getBlock(next.id);
 }
 
-function getNextBlock(std: BlockSuite.Std, path: string[]) {
+function getNextBlock(std: BlockSuite.Std, path: string) {
   const view = std.view;
-  const focusBlock = view.viewFromPath('block', path);
+  const focusBlock = view.getBlock(path);
   if (!focusBlock) return null;
 
   let next: BlockElement | null = null;
@@ -34,7 +34,7 @@ export const getNextBlockCommand: Command<
   'currentSelectionPath',
   'nextBlock',
   {
-    path?: string[];
+    path?: string;
   }
 > = (ctx, next) => {
   const path = ctx.path ?? ctx.currentSelectionPath;

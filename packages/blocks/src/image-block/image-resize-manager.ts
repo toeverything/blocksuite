@@ -71,7 +71,6 @@ export class ImageResizeManager {
 
     requestAnimationFrame(() => {
       activeImgContainer.style.width = (width / this._zoom).toFixed(2) + 'px';
-      activeImgContainer.style.height = (height / this._zoom).toFixed(2) + 'px';
     });
   }
 

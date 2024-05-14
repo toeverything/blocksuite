@@ -11,7 +11,7 @@ import type { ListBlockModel } from './list-model.js';
 import { listPrefix, toggleStyles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 
-export class ListService<
+export class ListBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
 > extends BlockService<ListBlockModel> {
   readonly inlineManager = new InlineManager<TextAttributes>();

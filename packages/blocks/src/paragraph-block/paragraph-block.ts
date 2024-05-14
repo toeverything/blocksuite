@@ -14,13 +14,13 @@ import { getViewportElement } from '../_common/utils/query.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
-import type { ParagraphService } from './paragraph-service.js';
+import type { ParagraphBlockService } from './paragraph-service.js';
 import { paragraphBlockStyles } from './styles.js';
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends BlockElement<
   ParagraphBlockModel,
-  ParagraphService
+  ParagraphBlockService
 > {
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;

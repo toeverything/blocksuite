@@ -40,6 +40,7 @@ import {
   highlightCache,
   type highlightCacheKey,
 } from '../../code-block/utils/highlight-cache.js';
+import type { AffineTextAttributes } from '../inline/presets/affine-inline-specs.js';
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
@@ -1151,12 +1152,23 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     });
   };
 
-  private _deltaToHast = (deltas: DeltaInsert[]) => {
+  private _deltaToHast = (deltas: DeltaInsert<AffineTextAttributes>[]) => {
     return deltas.map(delta => {
       let hast: HtmlAST = {
         type: 'text',
         value: delta.insert,
       };
+      if (delta.attributes?.reference) {
+        const title = this.configs.get(
+          'title:' + delta.attributes.reference.pageId
+        );
+        if (typeof title === 'string') {
+          hast = {
+            type: 'text',
+            value: title,
+          };
+        }
+      }
       if (delta.attributes) {
         if (delta.attributes.bold) {
           hast = {

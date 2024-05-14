@@ -7,7 +7,7 @@ import {
   EmbedLoomModel,
   EmbedLoomStyles,
 } from './embed-loom-model.js';
-import { EmbedLoomService } from './embed-loom-service.js';
+import { EmbedLoomBlockService } from './embed-loom-service.js';
 
 const defaultEmbedLoomProps: EmbedLoomBlockProps = {
   style: EmbedLoomStyles[0],
@@ -33,5 +33,5 @@ export const EmbedLoomBlockSpec = createEmbedBlock({
       [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
     },
   },
-  service: EmbedLoomService,
+  service: EmbedLoomBlockService,
 });

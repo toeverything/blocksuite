@@ -51,17 +51,18 @@ export const getSelectedBlocksCommand: Command<
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
   if (types.includes('block') && blockSelections) {
     const viewStore = ctx.std.view;
+    const doc = ctx.std.doc;
     const selectedBlockElements = blockSelections.flatMap(selection => {
-      const el = viewStore.viewFromPath('block', selection.path);
+      const el = viewStore.getBlock(selection.blockId);
       if (!el) {
         return [];
       }
       const blockElements: BlockElement[] = [el];
-      let selectionPath = selection.path;
+      let selectionPath = selection.blockId;
       if (mode === 'all') {
         let parent = null;
         do {
-          parent = viewStore.getParent(selectionPath);
+          parent = doc.getParent(selectionPath);
           if (!parent) {
             break;
           }
@@ -72,9 +73,9 @@ export const getSelectedBlocksCommand: Command<
           ) {
             break;
           }
-          selectionPath = parent.path;
+          selectionPath = parent.id;
         } while (parent);
-        parent = viewStore.viewFromPath('block', selectionPath);
+        parent = viewStore.getBlock(selectionPath);
         if (parent) {
           blockElements.push(parent);
         }
@@ -99,10 +100,12 @@ export const getSelectedBlocksCommand: Command<
   const imageSelections = ctx.imageSelections ?? ctx.currentImageSelections;
   if (types.includes('image') && imageSelections) {
     const viewStore = ctx.std.view;
-    const selectedBlockElements = imageSelections.flatMap(selection => {
-      const el = viewStore.viewFromPath('block', selection.path);
-      return el ?? [];
-    });
+    const selectedBlockElements = imageSelections
+      .map(selection => {
+        const el = viewStore.getBlock(selection.blockId);
+        return el;
+      })
+      .filter((el): el is BlockElement => Boolean(el));
     dirtyResult.push(...selectedBlockElements);
   }
 
