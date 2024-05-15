@@ -1,18 +1,6 @@
 {
   "name": "blocksuite",
   "version": "0.14.0",
-  "//": "ALL_PACKAGES",
-  "workspaces": [
-    "packages/framework/block-std",
-    "packages/framework/global",
-    "packages/framework/inline",
-    "packages/framework/store",
-    "packages/framework/sync",
-    "packages/blocks",
-    "packages/docs",
-    "packages/playground",
-    "packages/presets"
-  ],
   "private": true,
   "type": "module",
   "engines": {
