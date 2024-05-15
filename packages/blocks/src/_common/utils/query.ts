@@ -374,6 +374,14 @@ export async function asyncGetInlineEditorByModel(
   return richText.inlineEditor;
 }
 
+export function getCurrentInlineEditor(host: EditorHost) {
+  const selection = host.selection.find('text');
+  if (!selection) return null;
+  const block = host.doc.getBlock(selection.blockId);
+  assertExists(block);
+  return getInlineEditorByModel(host, block.model);
+}
+
 export function getModelByElement(element: Element): BlockModel {
   const closestBlock = element.closest(ATTR_SELECTOR);
   assertExists(closestBlock, 'Cannot find block element by element');

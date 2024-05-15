@@ -1,17 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, sleep } from '@blocksuite/global/utils';
-import type { InlineEditor } from '@blocksuite/inline';
-import { BlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
 import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
-import { getInlineEditorByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
-import type { AffineInlineEditor } from '../inline/presets/affine-inline-specs.js';
+import { getCurrentInlineEditor } from '../utils/query.js';
 
 export const createKeydownObserver = ({
-  target,
-  inlineEditor,
+  host,
   onUpdateQuery,
   onMove,
   onConfirm,
@@ -19,8 +15,7 @@ export const createKeydownObserver = ({
   interceptor = (_, next) => next(),
   abortController,
 }: {
-  target: HTMLElement;
-  inlineEditor: InlineEditor;
+  host: EditorHost;
   onUpdateQuery: (val: string) => void;
   onMove: (step: 1 | -1) => void;
   onConfirm: () => void;
@@ -29,7 +24,7 @@ export const createKeydownObserver = ({
   abortController: AbortController;
 }) => {
   let query = '';
-  const startIndex = inlineEditor?.getInlineRange()?.index ?? 0;
+  const startIndex = getCurrentInlineEditor(host)!.getInlineRange()?.index ?? 0;
 
   const updateQuery = async () => {
     // Wait for text update
@@ -56,8 +51,8 @@ export const createKeydownObserver = ({
       abortController.abort();
       return;
     }
-    const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
-    const text = inlineEditor.yText.toString();
+    const curIndex = getCurrentInlineEditor(host)!.getInlineRange()?.index ?? 0;
+    const text = getCurrentInlineEditor(host)!.yText.toString();
     const previousQuery = query;
     query = text.slice(startIndex, curIndex);
 
@@ -91,6 +86,11 @@ export const createKeydownObserver = ({
             return;
           }
         }
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
+        updateQuery().catch(console.error);
+        return;
       }
 
       // Pressing **only** modifier key is allowed and will be ignored
@@ -174,6 +174,8 @@ export const createKeydownObserver = ({
     }
   };
 
+  const target = getCurrentInlineEditor(host)!.eventSource;
+
   target.addEventListener(
     'keydown',
     (e: KeyboardEvent) => interceptor(e, () => keyDownListener(e)),
@@ -210,19 +212,12 @@ export const createKeydownObserver = ({
 /**
  * Remove specified text from the current range.
  */
-export function cleanSpecifiedTail(
-  editorHost: EditorHost,
-  inlineEditorOrModel: AffineInlineEditor | BlockModel,
-  str: string
-) {
+export function cleanSpecifiedTail(editorHost: EditorHost, str: string) {
   if (!str) {
     console.warn('Failed to clean text! Unexpected empty string');
     return;
   }
-  const inlineEditor =
-    inlineEditorOrModel instanceof BlockModel
-      ? getInlineEditorByModel(editorHost, inlineEditorOrModel)
-      : inlineEditorOrModel;
+  const inlineEditor = getCurrentInlineEditor(editorHost);
   assertExists(inlineEditor, 'Inline editor not found');
 
   const inlineRange = inlineEditor.getInlineRange();

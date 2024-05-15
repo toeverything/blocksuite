@@ -5,6 +5,7 @@ import { addNewPage, switchToPage } from './utils/actions/click.js';
 import { dragBetweenIndices } from './utils/actions/drag.js';
 import {
   copyByKeyboard,
+  cutByKeyboard,
   pasteByKeyboard,
   pressArrowLeft,
   pressArrowRight,
@@ -561,8 +562,10 @@ test.describe('reference node', () => {
   });
 });
 
-test.describe('linked page popover', () => {
-  test('should show linked page popover show and hide', async ({ page }) => {
+test.describe('linked page popover should show and hide correctly', () => {
+  test('linked page popover should show and hide by triggering keys', async ({
+    page,
+  }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await focusRichText(page);
@@ -589,61 +592,93 @@ test.describe('linked page popover', () => {
     await expect(linkedDocPopover).toBeHidden();
   });
 
-  test('should fuzzy search works', async ({ page }) => {
+  test('linked page should keep showing when pasting text', async ({
+    page,
+  }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
-    const {
-      linkedDocPopover,
-      pageBtn,
-      assertExistRefText,
-      assertActivePageIdx,
-    } = getLinkedDocPopover(page);
-
-    await focusTitle(page);
-    await type(page, 'page0');
-
-    const page1 = await addNewPage(page);
-    await switchToPage(page, page1.id);
-    await focusTitle(page);
-    await type(page, 'page1');
-
-    const page2 = await addNewPage(page);
-    await switchToPage(page, page2.id);
-    await focusTitle(page);
-    await type(page, 'page2');
-
-    await switchToPage(page);
     await focusRichText(page);
+    const { linkedDocPopover } = getLinkedDocPopover(page);
+
+    await type(page, 'test');
+    await dragBetweenIndices(page, [0, 0], [0, 4]);
+    await cutByKeyboard(page);
+
     await type(page, '@');
     await expect(linkedDocPopover).toBeVisible();
-    await expect(pageBtn).toHaveCount(4);
-
-    await assertActivePageIdx(0);
-    await page.keyboard.press('ArrowDown');
-    await assertActivePageIdx(1);
-
-    await page.keyboard.press('ArrowUp');
-    await assertActivePageIdx(0);
-    await page.keyboard.press('Tab');
-    await assertActivePageIdx(1);
-    await page.keyboard.press('Shift+Tab');
-    await assertActivePageIdx(0);
-
-    await expect(pageBtn).toHaveText([
-      'page1',
-      'page2',
-      'Create "Untitled" doc',
-      'Import',
-    ]);
-    // page2
-    //  ^  ^
-    await type(page, 'a2');
-    await expect(pageBtn).toHaveCount(3);
-    await expect(pageBtn).toHaveText(['page2', 'Create "a2" doc', 'Import']);
-    await pressEnter(page);
-    await expect(linkedDocPopover).toBeHidden();
-    await assertExistRefText('page2');
+    await pasteByKeyboard(page);
+    await expect(linkedDocPopover).toBeVisible();
   });
+
+  test('Linked pages should hide when pasting text that contains wrap characters.', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    const { linkedDocPopover } = getLinkedDocPopover(page);
+
+    await type(page, 'te\nst');
+    await dragBetweenIndices(page, [1, 2], [0, 0]);
+    await cutByKeyboard(page);
+
+    await type(page, '@');
+    await expect(linkedDocPopover).toBeVisible();
+    await pasteByKeyboard(page);
+    await expect(linkedDocPopover).not.toBeVisible();
+  });
+});
+
+test('should fuzzy search works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const { linkedDocPopover, pageBtn, assertExistRefText, assertActivePageIdx } =
+    getLinkedDocPopover(page);
+
+  await focusTitle(page);
+  await type(page, 'page0');
+
+  const page1 = await addNewPage(page);
+  await switchToPage(page, page1.id);
+  await focusTitle(page);
+  await type(page, 'page1');
+
+  const page2 = await addNewPage(page);
+  await switchToPage(page, page2.id);
+  await focusTitle(page);
+  await type(page, 'page2');
+
+  await switchToPage(page);
+  await focusRichText(page);
+  await type(page, '@');
+  await expect(linkedDocPopover).toBeVisible();
+  await expect(pageBtn).toHaveCount(4);
+
+  await assertActivePageIdx(0);
+  await page.keyboard.press('ArrowDown');
+  await assertActivePageIdx(1);
+
+  await page.keyboard.press('ArrowUp');
+  await assertActivePageIdx(0);
+  await page.keyboard.press('Tab');
+  await assertActivePageIdx(1);
+  await page.keyboard.press('Shift+Tab');
+  await assertActivePageIdx(0);
+
+  await expect(pageBtn).toHaveText([
+    'page1',
+    'page2',
+    'Create "Untitled" doc',
+    'Import',
+  ]);
+  // page2
+  //  ^  ^
+  await type(page, 'a2');
+  await expect(pageBtn).toHaveCount(3);
+  await expect(pageBtn).toHaveText(['page2', 'Create "a2" doc', 'Import']);
+  await pressEnter(page);
+  await expect(linkedDocPopover).toBeHidden();
+  await assertExistRefText('page2');
 });
 
 test.describe.skip('linked page with clipboard', () => {

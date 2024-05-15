@@ -22,7 +22,6 @@ import { LinkedDocPopover } from './linked-doc-popover.js';
 
 export function showLinkedDocPopover({
   editorHost,
-  inlineEditor,
   range,
   container = document.body,
   abortController = new AbortController(),
@@ -30,7 +29,6 @@ export function showLinkedDocPopover({
   triggerKey,
 }: {
   editorHost: EditorHost;
-  inlineEditor: AffineInlineEditor;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
@@ -40,11 +38,7 @@ export function showLinkedDocPopover({
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
-  const linkedDoc = new LinkedDocPopover(
-    editorHost,
-    inlineEditor,
-    abortController
-  );
+  const linkedDoc = new LinkedDocPopover(editorHost, abortController);
   linkedDoc.options = options;
   linkedDoc.triggerKey = triggerKey;
   // Mount
@@ -105,15 +99,11 @@ export class AffineLinkedDocWidget extends WidgetElement {
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedDoc = (
-    inlineEditor: AffineInlineEditor,
-    triggerKey: string
-  ) => {
+  public showLinkedDoc = (triggerKey: string) => {
     const curRange = getCurrentNativeRange();
     if (!curRange) return;
     showLinkedDocPopover({
       editorHost: this.host,
-      inlineEditor,
       range: curRange,
       options: this.options,
       triggerKey,
@@ -192,11 +182,11 @@ export class AffineLinkedDocWidget extends WidgetElement {
           length: 0,
         });
         inlineEditor.slots.inlineRangeApply.once(() => {
-          this.showLinkedDoc(inlineEditor, primaryTriggerKey);
+          this.showLinkedDoc(primaryTriggerKey);
         });
         return;
       }
-      this.showLinkedDoc(inlineEditor, matchedKey);
+      this.showLinkedDoc(matchedKey);
     });
   };
 }

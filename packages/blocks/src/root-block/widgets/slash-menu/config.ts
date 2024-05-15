@@ -213,12 +213,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
           // Wait for range to be updated
           setTimeout(() => {
-            const inlineEditor = getInlineEditorByModel(
-              rootElement.host,
-              model
-            );
-            assertExists(inlineEditor);
-            linkedDocWidget.showLinkedDoc(inlineEditor, triggerKey);
+            linkedDocWidget.showLinkedDoc(triggerKey);
           });
         },
       },

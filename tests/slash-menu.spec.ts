@@ -1,7 +1,10 @@
 import { expect } from '@playwright/test';
+import { dragBetweenIndices } from 'utils/actions/drag.js';
 
 import { addNote, switchEditorMode } from './utils/actions/edgeless.js';
 import {
+  cutByKeyboard,
+  pasteByKeyboard,
   pressBackspace,
   pressEnter,
   redoByKeyboard,
@@ -299,6 +302,54 @@ test.describe('slash menu should show and hide correctly', () => {
     await page.mouse.click(x + 10, y + height - 10);
     await type(page, 'a');
     await assertRichTexts(page, ['/a']);
+  });
+
+  test('paste slash menu related text should keep showing menu', async ({
+    page,
+  }) => {
+    await initEmptyParagraphState(page);
+    const slashMenu = page.locator(`.slash-menu`);
+    await focusRichText(page);
+
+    await type(page, 'head');
+    await dragBetweenIndices(page, [0, 0], [0, 4]);
+    await cutByKeyboard(page);
+
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    await pasteByKeyboard(page);
+    await expect(slashMenu).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(slashMenu).not.toBeVisible();
+    await page.keyboard.press('Enter');
+  });
+
+  test('paste unrelated text should close menu', async ({ page }) => {
+    await initEmptyParagraphState(page);
+    const slashMenu = page.locator(`.slash-menu`);
+    await focusRichText(page);
+
+    await type(page, 'abcdefg');
+    await dragBetweenIndices(page, [0, 0], [0, 7]);
+    await cutByKeyboard(page);
+
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    await pasteByKeyboard(page);
+    await expect(slashMenu).not.toBeVisible();
+
+    // 'head \n'
+    await page.keyboard.press('Enter');
+    await type(page, 'head');
+    await page.keyboard.press('Enter');
+    await dragBetweenIndices(page, [2, 0], [1, 0]);
+    await cutByKeyboard(page);
+
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    await pasteByKeyboard(page);
+    await expect(slashMenu).not.toBeVisible();
   });
 });
 
