@@ -9,17 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
-    "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
-    "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
+    "@blocksuite/blocks": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/presets": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/store": "0.14.0-canary-202405100201-e591bb8",
     "sql.js": "^1.10.3",
-    "vue": "^3.4.23"
+    "vue": "^3.4.27"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
     "typescript": "^5.4.5",
-    "vite": "^5.2.9",
-    "vue-tsc": "^2.0.13"
+    "vite": "^5.2.11",
+    "vue-tsc": "^2.0.17"
   },
   "stackblitz": {
     "installDependencies": false,

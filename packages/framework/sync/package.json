@@ -19,7 +19,7 @@
   },
   "devDependencies": {},
   "peerDependencies": {
-    "yjs": "^13"
+    "yjs": "^13.6.15"
   },
   "exports": {
     ".": "./src/index.ts",

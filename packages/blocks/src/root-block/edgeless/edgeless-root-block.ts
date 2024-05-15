@@ -304,7 +304,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   /**
    * Adds a new note with the given blocks and point.
-   * @param blocks Array<Partial<BlockModel>>
+   * @param blocks Array\<Partial\<BlockModel\>\>
    * @param point Point
    */
   addNewNote(
