@@ -149,7 +149,7 @@ function updateAIPanelConfig<T extends keyof BlockSuitePresets.AIActions>(
   const { config, host } = aiPanel;
   assertExists(config);
   config.generateAnswer = actionToGenerateAnswer(id, variants)(host);
-  config.answerRenderer = createTextRenderer(host, 320);
+  config.answerRenderer = createTextRenderer(host, { maxHeight: 320 });
   config.finishStateConfig = buildFinishConfig(aiPanel);
   config.errorStateConfig = buildErrorConfig(aiPanel);
   config.copy = buildCopyConfig(aiPanel);

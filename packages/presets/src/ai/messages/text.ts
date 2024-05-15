@@ -24,6 +24,52 @@ const textBlockStyles = css`
   ${CodeBlockComponent.styles}
 `;
 
+const customHeadingStyles = css`
+  .custom-heading {
+    .h1 {
+      font-size: calc(var(--affine-font-h-1) - 2px);
+      code {
+        font-size: calc(var(--affine-font-base) + 6px);
+      }
+    }
+    .h2 {
+      font-size: calc(var(--affine-font-h-2) - 2px);
+      code {
+        font-size: calc(var(--affine-font-base) + 4px);
+      }
+    }
+    .h3 {
+      font-size: calc(var(--affine-font-h-3) - 2px);
+      code {
+        font-size: calc(var(--affine-font-base) + 2px);
+      }
+    }
+    .h4 {
+      font-size: calc(var(--affine-font-h-4) - 2px);
+      code {
+        font-size: var(--affine-font-base);
+      }
+    }
+    .h5 {
+      font-size: calc(var(--affine-font-h-5) - 2px);
+      code {
+        font-size: calc(var(--affine-font-base) - 2px);
+      }
+    }
+    .h6 {
+      font-size: calc(var(--affine-font-h-6) - 2px);
+      code {
+        font-size: calc(var(--affine-font-base) - 4px);
+      }
+    }
+  }
+`;
+
+type TextRendererOptions = {
+  maxHeight?: number;
+  customHeading?: boolean;
+};
+
 @customElement('ai-answer-text')
 export class AIAnswerText extends WithDisposable(LitElement) {
   static override styles = css`
@@ -88,6 +134,7 @@ export class AIAnswerText extends WithDisposable(LitElement) {
     }
 
     ${textBlockStyles}
+    ${customHeadingStyles}
   `;
 
   @property({ attribute: false })
@@ -97,10 +144,10 @@ export class AIAnswerText extends WithDisposable(LitElement) {
   answer!: string;
 
   @property({ attribute: false })
-  state?: AffineAIPanelState;
+  options!: TextRendererOptions;
 
   @property({ attribute: false })
-  maxHeight?: number;
+  state?: AffineAIPanelState;
 
   @query('.ai-answer-text-container')
   private _container!: HTMLDivElement;
@@ -192,16 +239,16 @@ export class AIAnswerText extends WithDisposable(LitElement) {
   }
 
   override render() {
+    const { maxHeight, customHeading } = this.options;
     const classes = classMap({
       'ai-answer-text-container': true,
-      'show-scrollbar': !!this.maxHeight,
+      'show-scrollbar': !!maxHeight,
+      'custom-heading': !!customHeading,
     });
     return html`
       <style>
         .ai-answer-text-container {
-          max-height: ${this.maxHeight
-            ? Math.max(this.maxHeight, 200) + 'px'
-            : ''};
+          max-height: ${maxHeight ? Math.max(maxHeight, 200) + 'px' : ''};
         }
       </style>
       <div class=${classes} @wheel=${this._onWheel}>
@@ -224,14 +271,14 @@ declare global {
 
 export const createTextRenderer: (
   host: EditorHost,
-  maxHeight?: number
-) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, maxHeight) => {
+  options: TextRendererOptions
+) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, options) => {
   return (answer, state) => {
     return html`<ai-answer-text
       .host=${host}
       .answer=${answer}
       .state=${state}
-      .maxHeight=${maxHeight}
+      .options=${options}
     ></ai-answer-text>`;
   };
 };

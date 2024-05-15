@@ -90,7 +90,7 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
     return createImageRenderer;
   }
 
-  return createTextRenderer(host, 320);
+  return createTextRenderer(host, { maxHeight: 320 });
 }
 
 export async function getContentFromSelected(
