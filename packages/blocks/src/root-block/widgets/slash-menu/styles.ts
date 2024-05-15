@@ -35,8 +35,7 @@ export const styles = css`
   }
 
   .slash-category {
-    position: relative;
-    overflow: hidden;
+    overflow: auto;
     box-sizing: border-box;
     width: 150px;
     max-width: 150px;
@@ -47,15 +46,8 @@ export const styles = css`
     margin-bottom: 20px;
     /* transition: max-width 0.2s ease-in-out; */
   }
-  .slash-category::before {
-    content: '';
-    position: absolute;
-    top: 10px;
-    right: 0;
-    height: 100%;
-    width: 1px;
-    background-color: var(--affine-border-color);
-  }
+
+  ${scrollbarStyle('.slash-category')}
 
   .slash-category-hide {
     max-width: 0;
@@ -92,6 +84,13 @@ export const styles = css`
       var(--affine-palette-purple) 100%
     );
     border-radius: 1px;
+  }
+
+  .slash-vertical-divider {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    width: 1px;
+    background-color: var(--affine-border-color);
   }
 
   .slash-item-container {
