@@ -117,6 +117,7 @@ export function patchEdgelessSpecs(specs: BlockSpec[]) {
             if (view.component instanceof AffineAIPanelWidget) {
               view.component.style.width = '430px';
               view.component.config = buildAIPanelConfig(view.component);
+              setupSpaceEntry(view.component);
             }
 
             if (view.component instanceof EdgelessCopilotWidget) {
