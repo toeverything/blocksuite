@@ -16,7 +16,8 @@ import type { EmbedToolbarBlockElement } from './type.js';
 export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-embed-card-caption {
-      display: inline-block;
+      display: inline-table;
+      resize: none;
       width: 100%;
       outline: none;
       border: 0;
@@ -134,7 +135,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
       return nothing;
     }
 
-    return html`<input
+    return html`<textarea
       .disabled=${this.block.doc.readonly}
       placeholder="Write a caption"
       class="affine-embed-card-caption"
@@ -150,7 +151,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
       @paste=${stopPropagation}
       @keydown=${this._onCaptionKeydown}
       @keyup=${stopPropagation}
-    />`;
+    ></textarea>`;
   }
 }
 
