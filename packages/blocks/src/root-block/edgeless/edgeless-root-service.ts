@@ -1,4 +1,4 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import { CommandManager, type EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Slot } from '@blocksuite/store';
 
@@ -97,6 +97,8 @@ export class EdgelessRootService extends RootService {
   private _selection!: EdgelessSelectionManager;
   private _viewport!: Viewport;
   private _tool!: EdgelessToolsManager;
+
+  readonly command = new CommandManager<BlockSuite.EdgelessCommands>(this.std);
 
   override mounted() {
     super.mounted();

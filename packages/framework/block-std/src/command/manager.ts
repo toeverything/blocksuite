@@ -1,7 +1,7 @@
 import { cmdSymbol } from './consts.js';
 import type { Chain, Command, InitCommandCtx } from './types.js';
 
-export class CommandManager {
+export class CommandManager<N = BlockSuite.Commands> {
   private _commands = new Map<string, Command>();
 
   constructor(public std: BlockSuite.Std) {}
@@ -121,11 +121,8 @@ export class CommandManager {
     } as Chain;
   };
 
-  add<N extends BlockSuite.CommandName>(
-    name: N,
-    command: BlockSuite.Commands[N]
-  ): CommandManager;
-  add(name: string, command: Command) {
+  add<T extends keyof N>(name: T, command: N[T] | Command): CommandManager<N>;
+  add(name: string, command: Command): CommandManager<N> {
     this._commands.set(name, command);
     return this;
   }
