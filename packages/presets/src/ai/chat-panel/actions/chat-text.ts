@@ -25,7 +25,10 @@ export class ChatText extends WithDisposable(ShadowlessElement) {
     const { attachments, text, host } = this;
     return html`${attachments
       ? renderImages(attachments)
-      : nothing}${createTextRenderer(host)(text, this.state)} `;
+      : nothing}${createTextRenderer(host, { customHeading: true })(
+      text,
+      this.state
+    )} `;
   }
 }
 
