@@ -3,6 +3,10 @@ import type { AffineAIPanelState } from '@blocksuite/blocks';
 import {
   type AffineAIPanelWidgetConfig,
   BlocksUtils,
+  CodeBlockComponent,
+  DividerBlockComponent,
+  ListBlockComponent,
+  ParagraphBlockComponent,
 } from '@blocksuite/blocks';
 import { type BlockSelector, type Doc } from '@blocksuite/store';
 import { css, html, LitElement, type PropertyValues } from 'lit';
@@ -12,6 +16,13 @@ import { keyed } from 'lit/directives/keyed.js';
 
 import { CustomPageEditorBlockSpecs } from '../utils/custom-specs.js';
 import { markDownToDoc } from '../utils/markdown-utils.js';
+
+const textBlockStyles = css`
+  ${ParagraphBlockComponent.styles}
+  ${ListBlockComponent.styles}
+  ${DividerBlockComponent.styles}
+  ${CodeBlockComponent.styles}
+`;
 
 @customElement('ai-answer-text')
 export class AIAnswerText extends WithDisposable(LitElement) {
@@ -75,6 +86,8 @@ export class AIAnswerText extends WithDisposable(LitElement) {
         white-space: pre;
       }
     }
+
+    ${textBlockStyles}
   `;
 
   @property({ attribute: false })

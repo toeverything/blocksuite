@@ -388,7 +388,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       readonly: this.readonly,
     });
 
-    return html`<div class=${classes}></div>`;
+    return html`<div
+      contenteditable=${this.readonly ? 'false' : 'true'}
+      class=${classes}
+    ></div>`;
   }
 }
 

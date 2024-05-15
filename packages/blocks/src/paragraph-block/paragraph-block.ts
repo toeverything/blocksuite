@@ -22,6 +22,8 @@ export class ParagraphBlockComponent extends BlockElement<
   ParagraphBlockModel,
   ParagraphBlockService
 > {
+  static override styles = paragraphBlockStyles;
+
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
     assertExists(inlineManager);
@@ -136,9 +138,6 @@ export class ParagraphBlockComponent extends BlockElement<
 
     return html`
       <div class="affine-paragraph-block-container">
-        <style>
-          ${paragraphBlockStyles}
-        </style>
         <div class="affine-paragraph-rich-text-wrapper ${type}">
           <rich-text
             .yText=${this.model.text.yText}

@@ -46,6 +46,8 @@ import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
+  static override styles = codeBlockStyles;
+
   @state()
   private _wrap = false;
 
@@ -492,9 +494,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           wrap: this._wrap,
         })}
       >
-        <style>
-          ${codeBlockStyles}
-        </style>
         ${this._curLanguageButtonTemplate()}
         <div class="rich-text-container">
           <div contenteditable="false" id="line-numbers"></div>

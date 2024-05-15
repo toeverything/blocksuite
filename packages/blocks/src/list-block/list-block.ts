@@ -25,6 +25,7 @@ export class ListBlockComponent extends BlockElement<
   ListBlockModel,
   ListBlockService
 > {
+  static override styles = listBlockStyles;
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
     assertExists(inlineManager);
@@ -190,9 +191,6 @@ export class ListBlockComponent extends BlockElement<
 
     return html`
       <div class=${'affine-list-block-container'}>
-        <style>
-          ${listBlockStyles}
-        </style>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text
