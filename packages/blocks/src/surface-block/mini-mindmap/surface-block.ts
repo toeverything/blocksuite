@@ -14,7 +14,7 @@ import type { MindmapService } from './service.js';
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
   private _theme = new ThemeObserver();
-  private _layer!: LayerManager;
+  private readonly _layer: LayerManager = new LayerManager();
   private _renderer!: Renderer;
 
   @query('.affine-mini-mindmap-surface')
@@ -80,7 +80,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this._layer = LayerManager.create(this.model.doc, this.model);
+    this._layer.mount(this.model.doc, this.model);
     this._renderer = new Renderer({
       layerManager: this._layer,
       enableStackingCanvas: true,

@@ -4,7 +4,7 @@ import { LayerManager } from './managers/layer-manager.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 
 export class SurfaceBlockService extends BlockService<SurfaceBlockModel> {
-  layer!: LayerManager;
+  readonly layer: LayerManager = new LayerManager();
   surface!: SurfaceBlockModel;
 
   override mounted(): void {
@@ -22,11 +22,11 @@ export class SurfaceBlockService extends BlockService<SurfaceBlockModel> {
           ) as SurfaceBlockModel | null;
           if (!surface) return;
           this.surface = surface;
-          this.layer = LayerManager.create(this.doc, surface);
+          this.layer.mount(this.doc, this.surface);
         }
       });
     } else {
-      this.layer = LayerManager.create(this.doc, this.surface);
+      this.layer.mount(this.doc, this.surface);
     }
   }
 
