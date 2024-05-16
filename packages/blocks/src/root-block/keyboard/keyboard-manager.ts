@@ -81,7 +81,7 @@ export class PageKeyboardManager {
             from: {
               index: 0,
               length: 0,
-              path: selection.path,
+              blockId: selection.blockId,
             },
             to: null,
           }),
@@ -106,18 +106,10 @@ export class PageKeyboardManager {
   ) {
     const current = selections[0];
     const first = this._doc.getBlockById(current.blockId);
-    const firstElement = this.rootElement.host.view.viewFromPath(
-      'block',
-      current.path
-    );
+    const firstElement = this.rootElement.host.view.getBlock(current.blockId);
 
     assertExists(first, `Cannot find block ${current.blockId}`);
-    assertExists(
-      firstElement,
-      `Cannot find block view ${current.path.join(' -> ')}`
-    );
-
-    const parentPath = firstElement.parentPath;
+    assertExists(firstElement, `Cannot find block view ${current.blockId}`);
 
     const parent = this._doc.getParent(first);
     const index = parent?.children.indexOf(first);
@@ -134,7 +126,7 @@ export class PageKeyboardManager {
 
     return {
       blockId,
-      path: parentPath.concat(blockId),
+      path: blockId,
     };
   }
 

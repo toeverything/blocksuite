@@ -142,7 +142,7 @@ export class RangeManager {
   textSelectionToRange(selection: TextSelection): Range | null {
     const { from, to } = selection;
 
-    const fromInlineEditor = this.queryInlineEditorByPath(from.path);
+    const fromInlineEditor = this.queryInlineEditorByPath(from.blockId);
     if (!fromInlineEditor) return null;
 
     if (selection.isInSameBlock()) {
@@ -152,7 +152,7 @@ export class RangeManager {
       });
     } else {
       assertExists(to);
-      const toInlineEditor = this.queryInlineEditorByPath(to.path);
+      const toInlineEditor = this.queryInlineEditorByPath(to.blockId);
       if (!toInlineEditor) return null;
 
       const fromRange = fromInlineEditor.toDomRange({
@@ -201,7 +201,7 @@ export class RangeManager {
 
     return this.host.selection.create('text', {
       from: {
-        path: startBlock.path,
+        blockId: startBlock.blockId,
         index: startInlineRange.index,
         length: startInlineRange.length,
       },
@@ -209,7 +209,7 @@ export class RangeManager {
         startBlock === endBlock
           ? null
           : {
-              path: endBlock.path,
+              blockId: endBlock.blockId,
               index: endInlineRange.index,
               length: endInlineRange.length,
             },
@@ -225,6 +225,7 @@ export class RangeManager {
     if (this._isRangeSyncExcluded(block)) return null;
     return block;
   }
+
   getClosestInlineEditor(node: Node) {
     const el = node instanceof Element ? node : node.parentElement;
     if (!el) return null;
@@ -236,8 +237,8 @@ export class RangeManager {
     return inlineRoot.inlineEditor;
   }
 
-  queryInlineEditorByPath(path: string[]) {
-    const block = this.host.view.viewFromPath('block', path);
+  queryInlineEditorByPath(path: string) {
+    const block = this.host.view.getBlock(path);
     if (!block) return null;
 
     const inlineRoot = block.querySelector<InlineRootElement>(

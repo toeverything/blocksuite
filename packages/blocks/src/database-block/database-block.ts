@@ -1,6 +1,6 @@
 import './components/title/index.js';
 
-import { BlockElement, PathFinder, RangeManager } from '@blocksuite/block-std';
+import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -43,13 +43,13 @@ import {
 } from './data-view/index.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
-import type { DatabaseService } from './database-service.js';
+import type { DatabaseBlockService } from './database-service.js';
 import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<
   DatabaseBlockModel,
-  DatabaseService
+  DatabaseBlockService
 > {
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}
@@ -197,7 +197,7 @@ export class DatabaseBlockComponent extends BlockElement<
       this.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(
           (selection): selection is DatabaseSelection => {
-            if (!PathFinder.equals(selection.path, this.path)) {
+            if (selection.blockId !== this.blockId) {
               return false;
             }
             return selection instanceof DatabaseSelection;
@@ -332,7 +332,12 @@ export class DatabaseBlockComponent extends BlockElement<
     this.selection.setGroup(
       'note',
       selection
-        ? [new DatabaseSelection({ path: this.path, viewSelection: selection })]
+        ? [
+            new DatabaseSelection({
+              blockId: this.blockId,
+              viewSelection: selection,
+            }),
+          ]
         : []
     );
   };

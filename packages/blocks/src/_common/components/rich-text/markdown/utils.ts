@@ -13,7 +13,7 @@ function addSpace(element: BlockElement, index: number) {
   element.selection.setGroup('note', [
     element.selection.create('text', {
       from: {
-        path: element.path,
+        blockId: element.blockId,
         index: (currentText?.from.index ?? 0) + 1,
         length: 0,
       },

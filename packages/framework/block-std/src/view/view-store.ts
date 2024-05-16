@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
-import { PathFinder } from '../utils/index.js';
 import type { BlockElement, WidgetElement } from './element/index.js';
 
 export class ViewStore {
@@ -42,9 +41,9 @@ export class ViewStore {
 
   constructor(public std: BlockSuite.Std) {}
 
-  calculatePath = (node: BlockElement | WidgetElement): string[] => {
+  calculatePath = (model: BlockModel): string[] => {
     const path: string[] = [];
-    let current: BlockModel | null = node.model;
+    let current: BlockModel | null = model;
     while (current) {
       path.push(current.id);
       current = this.std.doc.getParent(current);
@@ -52,8 +51,8 @@ export class ViewStore {
     return path.reverse();
   };
 
-  fromPath = (path: string[]): BlockElement | null => {
-    const id = path[path.length - 1] ?? this.std.doc.root?.id;
+  fromPath = (path: string | undefined | null): BlockElement | null => {
+    const id = path ?? this.std.doc.root?.id;
     if (!id) {
       return null;
     }
@@ -67,7 +66,7 @@ export class ViewStore {
     path: string[]
   ): null | BlockElement | WidgetElement {
     if (type === 'block') {
-      return this.fromPath(path);
+      return this.fromPath(path[path.length - 1]);
     }
     const temp = path.slice(-2) as [string, string];
     const widgetId = temp.join('|');
@@ -80,7 +79,7 @@ export class ViewStore {
       index: number,
       parent: BlockElement
     ) => undefined | null | true,
-    path: string[] = []
+    path?: string | undefined | null
   ) => {
     const tree = this.fromPath(path);
     assertExists(tree, `Invalid path to get node in view: ${path}`);
@@ -106,13 +105,6 @@ export class ViewStore {
         iterate(childNode)(childNode, tree.model.children.indexOf(child));
       }
     });
-  };
-
-  getParent = (path: string[]) => {
-    if (path.length === 0) {
-      return null;
-    }
-    return this.fromPath(PathFinder.parent(path));
   };
 
   mount() {}

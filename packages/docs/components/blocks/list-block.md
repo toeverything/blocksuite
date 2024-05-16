@@ -9,4 +9,4 @@ This is a block used to model list content with nesting support.
 ## Reference
 
 - [`ListBlockSchema`](/api/@blocksuite/blocks/variables/ListBlockSchema.html)
-- [`ListService`](/api/@blocksuite/blocks/classes/ListService.html)
+- [`ListBlockService`](/api/@blocksuite/blocks/classes/ListBlockService.html)

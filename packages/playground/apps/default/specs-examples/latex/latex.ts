@@ -4,9 +4,9 @@ import {
   EdgelessEditorBlockSpecs,
   type InlineMarkdownMatch,
   type InlineSpecs,
-  ListService,
+  ListBlockService,
   PageEditorBlockSpecs,
-  ParagraphService,
+  ParagraphBlockService,
 } from '@blocksuite/blocks';
 import {
   KEYBOARD_ALLOW_DEFAULT,
@@ -99,7 +99,7 @@ const latexMarkdownMatch: InlineMarkdownMatch<TextAttributesWithLatex> = {
   },
 };
 
-class CustomParagraphService extends ParagraphService<TextAttributesWithLatex> {
+class CustomParagraphService extends ParagraphBlockService<TextAttributesWithLatex> {
   override mounted(): void {
     super.mounted();
     this.inlineManager.registerSpecs([...this.inlineManager.specs, latexSpec]);
@@ -109,7 +109,7 @@ class CustomParagraphService extends ParagraphService<TextAttributesWithLatex> {
     ]);
   }
 }
-class CustomListService extends ListService<TextAttributesWithLatex> {
+class CustomListService extends ListBlockService<TextAttributesWithLatex> {
   override mounted(): void {
     super.mounted();
     this.inlineManager.registerSpecs([...this.inlineManager.specs, latexSpec]);

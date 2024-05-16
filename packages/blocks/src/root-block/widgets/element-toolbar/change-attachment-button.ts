@@ -85,9 +85,8 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const blockElement = this.std.view.viewFromPath(
-      'block',
-      blockSelection[0].path
+    const blockElement = this.std.view.getBlock(
+      blockSelection[0].blockId
     ) as AttachmentBlockComponent | null;
     assertExists(blockElement);
 
@@ -192,10 +191,8 @@ export function renderAttachmentButton(
 ) {
   if (attachments?.length !== 1) return nothing;
 
-  return html`
-    <edgeless-change-attachment-button
-      .model=${attachments[0]}
-      .edgeless=${edgeless}
-    ></edgeless-change-attachment-button>
-  `;
+  return html`<edgeless-change-attachment-button
+    .model=${attachments[0]}
+    .edgeless=${edgeless}
+  ></edgeless-change-attachment-button>`;
 }

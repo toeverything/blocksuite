@@ -226,7 +226,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   @query('.display-mode-button-group')
   private _displayModeButtonGroup!: HTMLDivElement;
   @query('note-display-mode-panel')
-  private _displayModePanel!: HTMLDivElement;
+  private _displayModePanel!: HTMLDivElement | null;
   private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
@@ -397,16 +397,18 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   override updated(_changedProperties: PropertyValues) {
     const { _disposables } = this;
     if (_changedProperties.has('_queryCache')) {
-      this._displayModePopper = createButtonPopper(
-        this._displayModeButtonGroup,
-        this._displayModePanel,
-        ({ display }) => {
-          this._showDisplayModePopper = display === 'show';
-        },
-        -154,
-        90
-      );
-      _disposables.add(this._displayModePopper);
+      if (this._displayModePanel) {
+        this._displayModePopper = createButtonPopper(
+          this._displayModeButtonGroup,
+          this._displayModePanel,
+          ({ display }) => {
+            this._showDisplayModePopper = display === 'show';
+          },
+          -154,
+          90
+        );
+        _disposables.add(this._displayModePopper);
+      }
 
       this._fillColorPopper = createButtonPopper(
         this._fillColorButton,
@@ -644,12 +646,12 @@ export function renderNoteButton(
   edgeless: EdgelessRootBlockComponent,
   notes?: NoteBlockModel[]
 ) {
-  return notes && notes.length >= 0
-    ? html`<edgeless-change-note-button
-        .notes=${notes}
-        .edgeless=${edgeless}
-        .enableNoteSlicer=${false}
-      >
-      </edgeless-change-note-button>`
-    : nothing;
+  if (!notes?.length) return nothing;
+
+  return html`<edgeless-change-note-button
+    .notes=${notes}
+    .edgeless=${edgeless}
+    .enableNoteSlicer=${false}
+  >
+  </edgeless-change-note-button>`;
 }

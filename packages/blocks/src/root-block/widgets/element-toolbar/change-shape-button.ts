@@ -576,17 +576,15 @@ declare global {
 
 export function renderChangeShapeButton(
   edgeless: EdgelessRootBlockComponent,
-  shapeElements?: ShapeElementModel[]
+  elements?: ShapeElementModel[]
 ) {
-  const shapeButton =
-    shapeElements?.length &&
-    shapeElements.every(el => !edgeless.service.surface.isInMindmap(el.id))
-      ? html`<edgeless-change-shape-button
-          .elements=${shapeElements}
-          .edgeless=${edgeless}
-        >
-        </edgeless-change-shape-button>`
-      : nothing;
+  if (!elements?.length) return nothing;
+  if (elements.some(e => edgeless.service.surface.isInMindmap(e.id)))
+    return nothing;
 
-  return shapeButton;
+  return html`<edgeless-change-shape-button
+    .elements=${elements}
+    .edgeless=${edgeless}
+  >
+  </edgeless-change-shape-button>`;
 }

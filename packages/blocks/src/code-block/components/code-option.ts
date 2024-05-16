@@ -15,7 +15,7 @@ export function CodeOptionTemplate({
   ref: containerRef,
   model,
   wrap,
-  onClickWrap,
+  toggleWrap,
   anchor,
 }: {
   ref?: RefOrCallback;
@@ -23,7 +23,7 @@ export function CodeOptionTemplate({
   model: BlockModel;
   wrap: boolean;
   abortController: AbortController;
-  onClickWrap: () => void;
+  toggleWrap: () => void;
 }) {
   const page = model.doc;
   const readonly = page.readonly;
@@ -71,17 +71,19 @@ export function CodeOptionTemplate({
           >Copy to Clipboard</affine-tooltip
         >
       </icon-button>
-      <icon-button
-        size="32px"
-        data-testid="wrap-button"
-        ?active=${wrap}
-        @click=${onClickWrap}
-      >
-        ${wrap ? CancelWrapIcon : WrapIcon}
-        <affine-tooltip tip-position="right" .offset=${12}
-          >${wrap ? 'Cancel wrap' : 'Wrap code'}</affine-tooltip
-        >
-      </icon-button>
+      ${readonly
+        ? nothing
+        : html`<icon-button
+            size="32px"
+            data-testid="wrap-button"
+            ?active=${wrap}
+            @click=${toggleWrap}
+          >
+            ${wrap ? CancelWrapIcon : WrapIcon}
+            <affine-tooltip tip-position="right" .offset=${12}
+              >${wrap ? 'Cancel wrap' : 'Wrap code'}</affine-tooltip
+            >
+          </icon-button>`}
       ${readonly
         ? nothing
         : html`<icon-button

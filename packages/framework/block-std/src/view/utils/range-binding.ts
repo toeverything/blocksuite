@@ -1,7 +1,6 @@
 import { assertExists, throttle } from '@blocksuite/global/utils';
 
 import type { BaseSelection, TextSelection } from '../../selection/index.js';
-import { PathFinder } from '../../utils/index.js';
 import { BlockElement } from '../element/block-element.js';
 import { RangeManager } from './range-manager.js';
 
@@ -54,7 +53,10 @@ export class RangeBinding {
   }
 
   isComposing = false;
-  private _prevTextSelection: TextSelection | null = null;
+  private _prevTextSelection: {
+    selection: TextSelection;
+    path: string[];
+  } | null = null;
   private _onStdSelectionChanged = (selections: BaseSelection[]) => {
     // wait for lit updated
     this.host.updateComplete
@@ -64,15 +66,25 @@ export class RangeBinding {
             selection.is('text')
           ) ?? null;
 
+        const model = text && this.host.doc.getBlockById(text.blockId);
+        const path = model && this.host.view.calculatePath(model);
+
         const eq =
-          text && this._prevTextSelection
-            ? text.equals(this._prevTextSelection)
+          text && this._prevTextSelection && path
+            ? text.equals(this._prevTextSelection.selection) &&
+              path.join('') === this._prevTextSelection.path.join('')
             : text === this._prevTextSelection;
         if (eq) {
           return;
         }
 
-        this._prevTextSelection = text;
+        this._prevTextSelection =
+          text && path
+            ? {
+                selection: text,
+                path: path,
+              }
+            : null;
         if (text) {
           this.rangeManager.syncTextSelectionToRange(text);
         } else {
@@ -101,30 +113,46 @@ export class RangeBinding {
         : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
           Node.DOCUMENT_POSITION_PRECEDING);
 
-    if (range) {
-      const el =
-        range.commonAncestorContainer instanceof Element
-          ? range.commonAncestorContainer
-          : range.commonAncestorContainer.parentElement;
-      if (!el) return;
-      const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
-      if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
-        return;
-
-      const inlineEditor = this.rangeManager.getClosestInlineEditor(
-        range.commonAncestorContainer
-      );
-      if (inlineEditor?.isComposing) return;
-
-      this._prevTextSelection = this.rangeManager.rangeToTextSelection(
-        range,
-        isRangeReversed
-      );
-      this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
-    } else {
+    if (!range) {
       this._prevTextSelection = null;
       this.selectionManager.clear(['text']);
+      return;
     }
+
+    const el =
+      range.commonAncestorContainer instanceof Element
+        ? range.commonAncestorContainer
+        : range.commonAncestorContainer.parentElement;
+    if (!el) return;
+    const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+    if (block?.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
+      return;
+
+    const inlineEditor = this.rangeManager.getClosestInlineEditor(
+      range.commonAncestorContainer
+    );
+    if (inlineEditor?.isComposing) return;
+
+    const textSelection = this.rangeManager.rangeToTextSelection(
+      range,
+      isRangeReversed
+    );
+    if (!textSelection) {
+      this._prevTextSelection = null;
+      this.selectionManager.clear(['text']);
+      return;
+    }
+
+    const model = this.host.doc.getBlockById(textSelection.blockId);
+    // If the model is not found, the selection maybe in another editor
+    if (!model) return;
+
+    const path = this.host.view.calculatePath(model);
+    this._prevTextSelection = {
+      selection: textSelection,
+      path,
+    };
+    this.rangeManager.syncRangeToTextSelection(range, isRangeReversed);
   };
 
   private _onBeforeInput = (event: InputEvent) => {
@@ -134,7 +162,7 @@ export class RangeBinding {
     if (event.isComposing) return;
 
     const { from, to } = selection;
-    if (!to || PathFinder.equals(from.path, to.path)) return;
+    if (!to || from.blockId === to.blockId) return;
 
     const range = this.rangeManager.value;
     if (!range) return;
@@ -174,7 +202,7 @@ export class RangeBinding {
 
     const newSelection = this.selectionManager.create('text', {
       from: {
-        path: from.path,
+        blockId: from.blockId,
         index: from.index + (event.data?.length ?? 0),
         length: 0,
       },
@@ -186,6 +214,7 @@ export class RangeBinding {
   private _compositionStartCallback:
     | ((event: CompositionEvent) => Promise<void>)
     | null = null;
+
   private _onCompositionStart = () => {
     const selection = this.selectionManager.find('text');
     if (!selection) return;
@@ -222,7 +251,9 @@ export class RangeBinding {
 
       const parents: BlockElement[] = [];
       for (const highestBlock of highestBlocks) {
-        const parent = this.host.view.getParent(highestBlock.path);
+        const parentModel = this.host.doc.getParent(highestBlock.blockId);
+        if (!parentModel) continue;
+        const parent = this.host.view.getBlock(parentModel.id);
         if (!(parent instanceof BlockElement) || parents.includes(parent))
           continue;
 
@@ -254,7 +285,7 @@ export class RangeBinding {
 
       const selection = this.selectionManager.create('text', {
         from: {
-          path: from.path,
+          blockId: from.blockId,
           index: from.index + (event.data?.length ?? 0),
           length: 0,
         },
@@ -264,6 +295,7 @@ export class RangeBinding {
       this.rangeManager.syncTextSelectionToRange(selection);
     };
   };
+
   private _onCompositionEnd = (event: CompositionEvent) => {
     if (this._compositionStartCallback) {
       event.preventDefault();

@@ -1,4 +1,4 @@
-import type { BlockSnapshot } from '@blocksuite/store';
+import type { BlockSnapshot, SliceSnapshot } from '@blocksuite/store';
 import { MemoryBlobManager } from '@blocksuite/store';
 import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
@@ -1371,6 +1371,215 @@ hhh
     });
     expect(target.file).toBe(md);
   });
+
+  test('reference', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:vu6SK6WJpW',
+      flavour: 'affine:page',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:Tk4gSPocAt',
+          flavour: 'affine:surface',
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:WfnS5ZDCJT',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:Bdn8Yvqcny',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'block:72SMa5mdLy',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'bbb',
+                        },
+                      ],
+                    },
+                  },
+                  children: [],
+                },
+                {
+                  type: 'block',
+                  id: 'block:f-Z6nRrGK_',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                  },
+                  children: [
+                    {
+                      type: 'block',
+                      id: 'block:sP3bU52el7',
+                      flavour: 'affine:paragraph',
+                      props: {
+                        type: 'text',
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: [
+                            {
+                              insert: 'ddd',
+                            },
+                          ],
+                        },
+                      },
+                      children: [],
+                    },
+                    {
+                      type: 'block',
+                      id: 'block:X_HMxP4wxC',
+                      flavour: 'affine:paragraph',
+                      props: {
+                        type: 'text',
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: [
+                            {
+                              insert: 'eee',
+                            },
+                            {
+                              insert: '',
+                              attributes: {
+                                reference: {
+                                  type: 'LinkedPage',
+                                  pageId: 'deadbeef',
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      children: [],
+                    },
+                    {
+                      type: 'block',
+                      id: 'block:iA34Rb-RvV',
+                      flavour: 'affine:paragraph',
+                      props: {
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: [
+                            {
+                              insert: 'fff',
+                            },
+                          ],
+                        },
+                        type: 'text',
+                      },
+                      children: [],
+                    },
+                  ],
+                },
+                {
+                  type: 'block',
+                  id: 'block:I0Fmz5Nv02',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ggg',
+                        },
+                      ],
+                    },
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: 'block',
+              id: 'block:12lDwMD7ec',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'hhh',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+    const markdown = `aaa
+
+&#x20;   bbb
+
+&#x20;   ccc
+
+&#x20;       ddd
+
+&#x20;       eeetest
+
+&#x20;       fff
+
+&#x20;   ggg
+
+hhh
+`;
+
+    const mdAdapter = new MarkdownAdapter();
+    mdAdapter.applyConfigs(new Map([['title:deadbeef', 'test']]));
+    const target = await mdAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toBe(markdown);
+  });
 });
 
 describe('markdown to snapshot', () => {
@@ -1414,6 +1623,171 @@ describe('markdown to snapshot', () => {
       file: markdown,
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('code with indentation 1 - slice', async () => {
+    const markdown = '```python\n    import this\n```';
+
+    const sliceSnapshot: SliceSnapshot = {
+      type: 'slice',
+      content: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[0]',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+            displayMode: 'both',
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[1]',
+              flavour: 'affine:code',
+              props: {
+                language: 'python',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: '    import this',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+      pageVersion: 0,
+      workspaceVersion: 0,
+      workspaceId: '',
+      pageId: '',
+    };
+
+    const mdAdapter = new MarkdownAdapter();
+    const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
+      file: markdown,
+      pageVersion: 0,
+      workspaceVersion: 0,
+      workspaceId: '',
+      pageId: '',
+    });
+    expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
+  });
+
+  test('code with indentation 2 - slice', async () => {
+    const markdown = '````python\n```python\n    import this\n```\n````';
+
+    const sliceSnapshot: SliceSnapshot = {
+      type: 'slice',
+      content: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[0]',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+            displayMode: 'both',
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[1]',
+              flavour: 'affine:code',
+              props: {
+                language: 'python',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: '```python\n    import this\n```',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+      pageVersion: 0,
+      workspaceVersion: 0,
+      workspaceId: '',
+      pageId: '',
+    };
+
+    const mdAdapter = new MarkdownAdapter();
+    const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
+      file: markdown,
+      pageVersion: 0,
+      workspaceVersion: 0,
+      workspaceId: '',
+      pageId: '',
+    });
+    expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
+  });
+
+  test('code with indentation 3 - slice', async () => {
+    const markdown = '~~~~python\n````python\n    import this\n````\n~~~~';
+
+    const sliceSnapshot: SliceSnapshot = {
+      type: 'slice',
+      content: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[0]',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+            displayMode: 'both',
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[1]',
+              flavour: 'affine:code',
+              props: {
+                language: 'python',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: '````python\n    import this\n````',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+      pageVersion: 0,
+      workspaceVersion: 0,
+      workspaceId: '',
+      pageId: '',
+    };
+
+    const mdAdapter = new MarkdownAdapter();
+    const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
+      file: markdown,
+      pageVersion: 0,
+      workspaceVersion: 0,
+      workspaceId: '',
+      pageId: '',
+    });
+    expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
   });
 
   test('paragraph', async () => {
@@ -1902,6 +2276,67 @@ hhh
       file: markdown,
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('code inline - slice', async () => {
+    const markdown = '``` ```\n    aaa';
+
+    const sliceSnapshot: SliceSnapshot = {
+      type: 'slice',
+      content: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[0]',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+            displayMode: 'both',
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[1]',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: ' ',
+                      attributes: {
+                        code: true,
+                      },
+                    },
+                    {
+                      insert: '\n    aaa',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+      pageVersion: 0,
+      workspaceVersion: 0,
+      workspaceId: '',
+      pageId: '',
+    };
+
+    const mdAdapter = new MarkdownAdapter();
+    const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
+      file: markdown,
+      pageVersion: 0,
+      workspaceVersion: 0,
+      workspaceId: '',
+      pageId: '',
+    });
+    expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
   });
 
   test('link', async () => {

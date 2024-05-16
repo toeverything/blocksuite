@@ -1,9 +1,5 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
-import {
-  PathFinder,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/block-std';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { PropertyValues } from 'lit';
@@ -123,7 +119,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
       overflow: hidden;
     }
   `;
-  path = ['modal', 'preview'];
+  blockId = 'database-modal-preview';
   @property({ attribute: false })
   database!: DatabaseBlockComponent;
 
@@ -131,7 +127,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
     super.connectedCallback();
     this.database.selection.slots.changed.on(selections => {
       const selection = selections.find(v => {
-        return PathFinder.equals(v.path, this.path);
+        return v.blockId === this.blockId;
       });
       if (selection && selection instanceof DatabaseSelection) {
         this.selectionUpdated.emit(selection.viewSelection);
@@ -152,7 +148,12 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   setSelection: (selection?: DataViewSelection) => void = selection => {
     this.database.host.selection.set(
       selection
-        ? [new DatabaseSelection({ path: this.path, viewSelection: selection })]
+        ? [
+            new DatabaseSelection({
+              blockId: this.blockId,
+              viewSelection: selection,
+            }),
+          ]
         : []
     );
   };

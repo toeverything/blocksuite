@@ -137,10 +137,12 @@ export class ActionWrapper extends WithDisposable(LitElement) {
               ${item.action === 'image'
                 ? images && renderImages(images)
                 : nothing}
-              ${answer ? createTextRenderer(this.host)(answer) : nothing}
+              ${answer
+                ? createTextRenderer(this.host, { customHeading: true })(answer)
+                : nothing}
               ${originalText
                 ? html`<div class="subtitle">Prompt</div>
-                    ${createTextRenderer(this.host)(
+                    ${createTextRenderer(this.host, { customHeading: true })(
                       item.messages[0].content + originalText
                     )}`
                 : nothing}

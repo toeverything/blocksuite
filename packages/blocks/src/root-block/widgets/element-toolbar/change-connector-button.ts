@@ -589,13 +589,13 @@ declare global {
 
 export function renderConnectorButton(
   edgeless: EdgelessRootBlockComponent,
-  connectorElements?: ConnectorElementModel[]
+  elements?: ConnectorElementModel[]
 ) {
-  return connectorElements?.length
-    ? html` <edgeless-change-connector-button
-        .elements=${connectorElements}
-        .edgeless=${edgeless}
-      >
-      </edgeless-change-connector-button>`
-    : nothing;
+  if (!elements?.length) return nothing;
+
+  return html`<edgeless-change-connector-button
+    .elements=${elements}
+    .edgeless=${edgeless}
+  >
+  </edgeless-change-connector-button>`;
 }

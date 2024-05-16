@@ -9,14 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
-    "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
-    "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
-    "solid-js": "^1.8.16"
+    "@blocksuite/blocks": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/presets": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/store": "0.14.0-canary-202405100201-e591bb8",
+    "solid-js": "^1.8.17"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
-    "vite": "^5.2.9",
+    "vite": "^5.2.11",
     "vite-plugin-solid": "^2.10.2"
   },
   "stackblitz": {

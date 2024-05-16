@@ -149,7 +149,7 @@ function updateAIPanelConfig<T extends keyof BlockSuitePresets.AIActions>(
   const { config, host } = aiPanel;
   assertExists(config);
   config.generateAnswer = actionToGenerateAnswer(id, variants)(host);
-  config.answerRenderer = createTextRenderer(host, 320);
+  config.answerRenderer = createTextRenderer(host, { maxHeight: 320 });
   config.finishStateConfig = buildFinishConfig(aiPanel);
   config.errorStateConfig = buildErrorConfig(aiPanel);
   config.copy = buildCopyConfig(aiPanel);
@@ -180,9 +180,11 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
 export function handleInlineAskAIAction(host: EditorHost) {
   const panel = getAIPanel(host);
   const selection = host.selection.find('text');
-  const lastBlockPath = selection ? selection.to?.path ?? selection.path : null;
+  const lastBlockPath = selection
+    ? selection.to?.blockId ?? selection.blockId
+    : null;
   if (!lastBlockPath) return;
-  const block = host.view.viewFromPath('block', lastBlockPath);
+  const block = host.view.getBlock(lastBlockPath);
   if (!block) return;
   const generateAnswer: AffineAIPanelWidgetConfig['generateAnswer'] = ({
     finish,

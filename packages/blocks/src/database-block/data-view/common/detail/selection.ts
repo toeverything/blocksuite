@@ -56,8 +56,9 @@ export class DetailSelection {
     if (!container) {
       return;
     }
+
     container.isFocus = false;
-    const cell = container?.cell;
+    const cell = container.cell;
 
     if (selection.isEditing) {
       cell?.onExitEditMode();
@@ -76,7 +77,7 @@ export class DetailSelection {
       return;
     }
     container.isFocus = true;
-    const cell = container?.cell;
+    const cell = container.cell;
     if (selection.isEditing) {
       cell?.onEnterEditMode();
       if (cell?.focusCell()) {

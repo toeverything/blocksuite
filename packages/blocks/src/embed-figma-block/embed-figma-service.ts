@@ -6,16 +6,18 @@ import {
   figmaUrlRegex,
 } from './embed-figma-model.js';
 
-export class EmbedFigmaService extends BlockService<EmbedFigmaModel> {
+export class EmbedFigmaBlockService extends BlockService<EmbedFigmaModel> {
   override mounted() {
     super.mounted();
 
-    const rootService = this.std.spec.getService('affine:page');
-    rootService.registerEmbedBlockOptions({
-      flavour: this.flavour,
-      urlRegex: figmaUrlRegex,
-      styles: EmbedFigmaStyles,
-      viewType: 'embed',
+    this.std.spec.slots.afterApply.once(() => {
+      const rootService = this.std.spec.getService('affine:page');
+      rootService.registerEmbedBlockOptions({
+        flavour: this.flavour,
+        urlRegex: figmaUrlRegex,
+        styles: EmbedFigmaStyles,
+        viewType: 'embed',
+      });
     });
   }
 }

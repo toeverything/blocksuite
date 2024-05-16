@@ -1,9 +1,12 @@
 import { expect } from '@playwright/test';
 
 import {
+  addBasicRectShapeElement,
   locatorComponentToolbar,
+  resizeElementByHandle,
   selectNoteInEdgeless,
   switchEditorMode,
+  zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
   enterPlaygroundRoom,
@@ -60,4 +63,28 @@ test('tooltip should be hidden after clicking on button', async ({ page }) => {
   await expect(page.locator('.blocksuite-portal')).toBeHidden();
   await expect(page.locator('note-display-mode-panel')).toBeHidden();
   await expect(page.locator('edgeless-color-panel')).toBeVisible();
+});
+
+test('should be hidden when resizing element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+
+  await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
+  await page.mouse.click(220, 120);
+
+  const toolbar = locatorComponentToolbar(page);
+  await expect(toolbar).toBeVisible();
+
+  await resizeElementByHandle(page, { x: 400, y: 300 }, 'top-left', 30);
+
+  await page.mouse.move(450, 300);
+  await expect(toolbar).toBeEmpty();
+
+  await page.mouse.move(320, 220);
+  await expect(toolbar).toBeEmpty();
+
+  await page.mouse.up();
+  await expect(toolbar).toBeVisible();
 });

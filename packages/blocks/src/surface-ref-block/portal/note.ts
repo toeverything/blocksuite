@@ -16,8 +16,8 @@ import {
 } from '../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../../_common/types.js';
-import { SpecProvider } from '../../_specs/spec-provider.js';
 import { type NoteBlockModel } from '../../note-block/index.js';
+import { SpecProvider } from '../../specs/utils/spec-provider.js';
 import { deserializeXYWH } from '../../surface-block/index.js';
 
 @customElement('surface-ref-note-portal')

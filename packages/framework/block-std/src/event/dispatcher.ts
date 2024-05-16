@@ -1,4 +1,5 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import type { BlockModel } from '@blocksuite/store';
 
 import { PathFinder } from '../utils/index.js';
 import type { BlockElement } from '../view/index.js';
@@ -250,6 +251,16 @@ export class UIEventDispatcher {
     return this.buildEventScope(name, flavours, [path]);
   }
 
+  private _calculatePath = (model: BlockModel): string[] => {
+    const path: string[] = [];
+    let current: BlockModel | null = model;
+    while (current) {
+      path.push(current.id);
+      current = this.std.doc.getParent(current);
+    }
+    return path.reverse();
+  };
+
   private _buildEventScopeBySelection(name: EventName) {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
@@ -257,13 +268,16 @@ export class UIEventDispatcher {
     const selections = this._currentSelections;
     const seen: Record<string, boolean> = {};
 
-    const flavours = selections
-      .map(selection => selection.path)
-      .flatMap(path => {
-        return path.map(blockId => {
-          return this.std.doc.getBlockById(blockId)?.flavour;
-        });
-      })
+    const paths = selections
+      .map(selection => selection.blockId)
+      .map(id => this.std.doc.getBlockById(id))
+      .filter((block): block is BlockModel => !!block)
+      .map(block => this._calculatePath(block));
+
+    const flavours = paths
+      .flatMap(path =>
+        path.map(blockId => this.std.doc.getBlockById(blockId)?.flavour)
+      )
       .filter((flavour): flavour is string => {
         if (!flavour) return false;
         if (seen[flavour]) return false;
@@ -271,8 +285,6 @@ export class UIEventDispatcher {
         return true;
       })
       .reverse();
-
-    const paths = selections.map(selection => selection.path);
 
     return this.buildEventScope(name, flavours, paths);
   }

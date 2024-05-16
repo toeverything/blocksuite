@@ -17,12 +17,12 @@ export class SurfaceSelection extends BaseSelection {
   readonly inoperable: boolean;
 
   constructor(
-    path: string[],
+    blockId: string,
     elements: string[],
     editing: boolean,
     inoperable = false
   ) {
-    super({ path });
+    super({ blockId });
 
     this.elements = elements;
     this.editing = editing;
@@ -50,7 +50,7 @@ export class SurfaceSelection extends BaseSelection {
   override toJSON(): Record<string, unknown> {
     return {
       type: 'surface',
-      path: this.path,
+      blockId: this.blockId,
       elements: this.elements,
       editing: this.editing,
       inoperable: this.inoperable,
@@ -61,7 +61,7 @@ export class SurfaceSelection extends BaseSelection {
     json:
       | Record<string, unknown>
       | {
-          path: string[];
+          blockId: string[];
           elements: string[];
           editing: boolean;
           inoperable?: boolean;
@@ -69,7 +69,7 @@ export class SurfaceSelection extends BaseSelection {
   ): SurfaceSelection {
     SurfaceSelectionSchema.parse(json);
     return new SurfaceSelection(
-      json.path as string[],
+      json.blockId as string,
       json.elements as string[],
       json.editing as boolean,
       (json.inoperable as boolean) || false

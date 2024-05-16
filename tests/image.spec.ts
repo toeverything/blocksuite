@@ -138,7 +138,7 @@ test('enter shortcut on focusing embed block and its caption', async ({
   await moveToImage(page);
   await assertImageOption(page);
 
-  const caption = page.locator('affine-image embed-card-caption input');
+  const caption = page.locator('affine-image embed-card-caption textarea');
   await focusCaption(page);
   await type(page, '123');
 
@@ -162,7 +162,7 @@ test('should support the enter key of image caption', async ({ page }) => {
   await moveToImage(page);
   await assertImageOption(page);
 
-  const caption = page.locator('affine-image embed-card-caption input');
+  const caption = page.locator('affine-image embed-card-caption textarea');
   await focusCaption(page);
   await type(page, 'abc123');
   await pressArrowLeft(page, 3);
@@ -400,6 +400,6 @@ test('press backspace after image block can select image block', async ({
   await assertRichTextInlineRange(page, 0, 0);
   await assertBlockCount(page, 'paragraph', 1);
   await pressBackspace(page);
-  await assertBlockSelections(page, [['0', '1', '2']]);
+  await assertBlockSelections(page, ['2']);
   await assertBlockCount(page, 'paragraph', 0);
 });

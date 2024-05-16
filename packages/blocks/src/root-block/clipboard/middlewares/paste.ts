@@ -35,15 +35,15 @@ class PointState {
     readonly std: EditorHost['std'],
     readonly point: TextRangePoint
   ) {
-    this.block = this._blockFromPath(point.path);
+    this.block = this._blockFromPath(point.blockId);
     this.model = this.block.model;
     const text = this.model.text;
     assertExists(text);
     this.text = text;
   }
 
-  private _blockFromPath = (path: string[]) => {
-    const block = this.std.view.viewFromPath('block', path);
+  private _blockFromPath = (path: string) => {
+    const block = this.std.view.getBlock(path);
     assertExists(block);
     return block;
   };
@@ -254,20 +254,20 @@ class PasteTr {
         if (!lastModel.text) {
           if (matchFlavours(lastModel, ['affine:image'])) {
             const selection = this.std.selection.create('image', {
-              path: target.path,
+              blockId: target.blockId,
             });
             this.std.selection.setGroup('note', [selection]);
             return;
           }
           const selection = this.std.selection.create('block', {
-            path: target.path,
+            blockId: target.blockId,
           });
           this.std.selection.setGroup('note', [selection]);
           return;
         }
         const selection = this.std.selection.create('text', {
           from: {
-            path: target.path,
+            blockId: target.blockId,
             index:
               this.firstSnapshot === this.lastSnapshot
                 ? lastModel.text

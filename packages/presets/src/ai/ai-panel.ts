@@ -240,7 +240,7 @@ export function buildAIPanelConfig(
   panel: AffineAIPanelWidget
 ): AffineAIPanelWidgetConfig {
   return {
-    answerRenderer: createTextRenderer(panel.host, 320),
+    answerRenderer: createTextRenderer(panel.host, { maxHeight: 320 }),
     finishStateConfig: buildFinishConfig(panel),
     errorStateConfig: buildErrorConfig(panel),
     copy: buildCopyConfig(panel),

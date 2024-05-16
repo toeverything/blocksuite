@@ -486,7 +486,7 @@ test('press backspace after bookmark block can select bookmark block', async ({
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTextInlineRange(page, 0, 0);
   await pressBackspace(page);
-  await assertBlockSelections(page, [['0', '1', '4']]);
+  await assertBlockSelections(page, ['4']);
   await assertBlockCount(page, 'paragraph', 0);
 });
 

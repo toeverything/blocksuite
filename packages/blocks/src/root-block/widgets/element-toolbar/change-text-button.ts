@@ -49,13 +49,13 @@ declare global {
 
 export function renderChangeTextButton(
   edgeless: EdgelessRootBlockComponent,
-  textElements?: TextElementModel[]
+  elements?: TextElementModel[]
 ) {
-  return textElements?.length
-    ? html`<edgeless-change-text-button
-        .texts=${textElements}
-        .edgeless=${edgeless}
-      >
-      </edgeless-change-text-button>`
-    : nothing;
+  if (!elements?.length) return nothing;
+
+  return html`<edgeless-change-text-button
+    .texts=${elements}
+    .edgeless=${edgeless}
+  >
+  </edgeless-change-text-button>`;
 }

@@ -22,6 +22,7 @@ const styles = css`
     flex-direction: column;
     padding: 20px 36px;
     gap: 12px;
+    min-height: 100%;
   }
 
   .add-property {
@@ -70,11 +71,13 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+
     this.disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
       })
     );
+
     this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
       this.selection.selection = undefined;
@@ -114,7 +117,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
       ${this.renderHeader()}
       ${repeat(
         columns,
-        v => v,
+        v => v.id,
         column => {
           return html` <affine-data-view-record-field
             .view="${this.view}"

@@ -168,20 +168,20 @@ export function requestConnectedFrame(
 /**
  * A wrapper around `requestConnectedFrame` that only calls at most once in one frame
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function batchToAnimationFrame<T extends (...args: any[]) => any>(
-  func: T,
-  element?: HTMLElement
-): T {
+export function requestThrottledConnectFrame<
+  T extends (...args: unknown[]) => void,
+>(func: T, element?: HTMLElement): T {
   let raqId: number | undefined = undefined;
-  return new Proxy(func, {
-    apply(target, thisArg, args) {
-      if (raqId === undefined) {
-        raqId = requestConnectedFrame(() => {
-          target.apply(thisArg, args);
-          raqId = undefined;
-        }, element);
-      }
-    },
-  });
+  let latestArgs: unknown[] = [];
+
+  return ((...args: unknown[]) => {
+    latestArgs = args;
+
+    if (raqId === undefined) {
+      raqId = requestConnectedFrame(() => {
+        raqId = undefined;
+        func(...latestArgs);
+      }, element);
+    }
+  }) as T;
 }

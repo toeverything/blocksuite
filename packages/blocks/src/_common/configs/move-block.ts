@@ -17,8 +17,8 @@ function getTextSelection(blockElement: BlockElement) {
   return selection.find('text');
 }
 
-const pathToBlock = (blockElement: BlockElement, path: string[]) =>
-  blockElement.host.view.viewFromPath('block', path);
+const pathToBlock = (blockElement: BlockElement, blockId: string) =>
+  blockElement.host.view.getBlock(blockId);
 
 interface MoveBlockConfig {
   name: string;
@@ -36,7 +36,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       if (textSelection) {
         const currentModel = pathToBlock(
           blockElement,
-          textSelection.from.path
+          textSelection.from.blockId
         )?.model;
         if (!currentModel) return;
 
@@ -65,7 +65,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       if (blockSelection) {
         const currentModel = pathToBlock(
           blockElement,
-          blockSelection.path
+          blockSelection.blockId
         )?.model;
         if (!currentModel) return;
 
@@ -95,7 +95,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       if (textSelection) {
         const currentModel = pathToBlock(
           blockElement,
-          textSelection.from.path
+          textSelection.from.blockId
         )?.model;
         if (!currentModel) return;
 
@@ -120,7 +120,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       if (blockSelection) {
         const currentModel = pathToBlock(
           blockElement,
-          blockSelection.path
+          blockSelection.blockId
         )?.model;
         if (!currentModel) return;
 
