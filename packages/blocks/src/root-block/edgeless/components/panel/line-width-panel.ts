@@ -3,6 +3,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 import { LineWidth } from '../../../../_common/types.js';
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 
 type DragConfig = {
   stepWidth: number;
@@ -169,9 +170,10 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   private _updateIconsColor = () => {
     if (!this._dragHandle.offsetParent) {
-      requestAnimationFrame(() => this._updateIconsColor());
+      requestConnectedFrame(() => this._updateIconsColor(), this);
       return;
     }
+
     const dragHandleRect = this._dragHandle.getBoundingClientRect();
     const dragHandleCenterX = dragHandleRect.left + dragHandleRect.width / 2;
     // All the icons located at the left of the drag handle should be filled with the icon color.
