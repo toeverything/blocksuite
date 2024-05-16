@@ -18,12 +18,14 @@ export class EmbedLoomBlockService extends BlockService<EmbedLoomModel> {
   override mounted() {
     super.mounted();
 
-    const rootService = this.std.spec.getService('affine:page');
-    rootService.registerEmbedBlockOptions({
-      flavour: this.flavour,
-      urlRegex: loomUrlRegex,
-      styles: EmbedLoomStyles,
-      viewType: 'embed',
+    this.std.spec.slots.afterApply.once(() => {
+      const rootService = this.std.spec.getService('affine:page');
+      rootService.registerEmbedBlockOptions({
+        flavour: this.flavour,
+        urlRegex: loomUrlRegex,
+        styles: EmbedLoomStyles,
+        viewType: 'embed',
+      });
     });
   }
 
