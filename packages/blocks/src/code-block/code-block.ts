@@ -48,9 +48,6 @@ import { getHighLighter } from './utils/high-lighter.js';
 export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   static override styles = codeBlockStyles;
 
-  @state()
-  private _wrap = false;
-
   @query('.lang-button')
   private _langButton!: HTMLButtonElement;
 
@@ -176,9 +173,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         CodeOptionTemplate({
           anchor: this,
           model: this.model,
-          wrap: this._wrap,
-          onClickWrap: () => {
-            this._wrap = !this._wrap;
+          wrap: this.model.wrap,
+          toggleWrap: () => {
+            this.setWrap(!this.model.wrap);
             updatePortal();
           },
           abortController,
@@ -429,6 +426,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     });
   }
 
+  setWrap(wrap: boolean) {
+    this.doc.updateBlock(this.model, { wrap });
+  }
+
   private _onClickLangBtn() {
     if (this.readonly) return;
     if (this._langListAbortController) return;
@@ -477,7 +478,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       this.querySelector<HTMLElement>('#line-numbers');
     assertExists(lineNumbersContainer);
 
-    const next = this._wrap ? generateLineNumberRender() : lineNumberRender;
+    const next = this.model.wrap
+      ? generateLineNumberRender()
+      : lineNumberRender;
 
     render(
       repeat(Array.from(this.querySelectorAll('v-line')), next),
@@ -491,7 +494,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         ${ref(this._whenHover.setReference)}
         class=${classMap({
           'affine-code-block-container': true,
-          wrap: this._wrap,
+          wrap: this.model.wrap,
         })}
       >
         ${this._curLanguageButtonTemplate()}
@@ -507,7 +510,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
-            .wrapText=${this._wrap}
+            .wrapText=${this.model.wrap}
             .verticalScrollContainer=${getViewportElement(this.host)}
           >
           </rich-text>
