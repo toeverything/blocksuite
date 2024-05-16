@@ -66,6 +66,12 @@ export type CanvasLayer = BaseLayer<ElementModel> & {
 
 export type Layer = BlockLayer | CanvasLayer;
 
+/**
+ * LayerManager used to manage the elements' index and the layer information.
+ *
+ * Every element belongs to a layer, and the layer determines the rendering order of the element in edgeless.
+ * The layer manager will automatically update the layer information when the elements are added, updated or deleted.
+ */
 export class LayerManager {
   static INITAL_INDEX = 'a0';
 

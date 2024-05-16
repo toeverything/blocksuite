@@ -23,6 +23,7 @@ import {
   type ElementModelMap,
   propsToY,
 } from './element-model/index.js';
+import { LayerManager } from './managers/layer-manager.js';
 import { connectorMiddleware } from './middlewares/connector.js';
 import {
   groupRelationMiddleware,
@@ -176,6 +177,8 @@ export type SurfaceMiddleware = (
 ) => () => void;
 
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
+  readonly layer = new LayerManager();
+
   private _elementModels: Map<
     string,
     { mount: () => void; unmount: () => void; model: ElementModel }
@@ -216,6 +219,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   }
 
   private _init() {
+    this.layer.mount(this.doc, this);
+
     this._initElementModels();
     this._watchGroupRelationChange();
     this._watchConnectorRelationChange();
@@ -499,6 +504,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.hooks.update.dispose();
     this.hooks.remove.dispose();
+    this.layer.dispose();
   }
 
   isInMindmap(id: string) {

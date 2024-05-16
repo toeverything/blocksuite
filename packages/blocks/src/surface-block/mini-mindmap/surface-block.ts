@@ -6,7 +6,6 @@ import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import { fitContent } from '../canvas-renderer/element-renderer/shape/utils.js';
 import { Renderer } from '../canvas-renderer/renderer.js';
 import type { ShapeElementModel } from '../element-model/shape.js';
-import { LayerManager } from '../managers/layer-manager.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { Bound } from '../utils/bound.js';
 import type { MindmapService } from './service.js';
@@ -14,7 +13,6 @@ import type { MindmapService } from './service.js';
 @customElement('mini-mindmap-surface-block')
 export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
   private _theme = new ThemeObserver();
-  private readonly _layer: LayerManager = new LayerManager();
   private _renderer!: Renderer;
 
   @query('.affine-mini-mindmap-surface')
@@ -80,9 +78,8 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this._layer.mount(this.model.doc, this.model);
     this._renderer = new Renderer({
-      layerManager: this._layer,
+      layerManager: this.model.layer,
       enableStackingCanvas: true,
       provider: {
         selectedElements: () => [],

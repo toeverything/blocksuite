@@ -23,7 +23,6 @@ import {
   MindmapElementModel,
 } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
-import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { RootService } from '../root-service.js';
@@ -93,7 +92,6 @@ export class EdgelessRootService extends RootService {
   readonly snap = new EdgelessSnapManager(this);
   readonly viewport = new Viewport();
   readonly selection = new EdgelessSelectionManager(this);
-  readonly layer = new LayerManager();
   readonly tool: EdgelessToolsManager = new EdgelessToolsManager(this);
   readonly frame = new EdgelessFrameManager(this);
   readonly surface!: SurfaceBlockModel;
@@ -109,8 +107,6 @@ export class EdgelessRootService extends RootService {
     if (!this.surface) {
       throw new Error('surface block not found');
     }
-
-    this.layer.mount(this.doc, this.surface);
 
     this._initSlotEffects();
     this._initReadonlyListener();
@@ -132,6 +128,10 @@ export class EdgelessRootService extends RootService {
     this.tool.dispose();
     this.disposables.dispose();
     this.frame.dispose();
+  }
+
+  get layer() {
+    return this.surface.layer;
   }
 
   /**
