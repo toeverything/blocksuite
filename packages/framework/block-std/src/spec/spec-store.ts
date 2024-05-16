@@ -12,12 +12,17 @@ export class SpecStore {
   constructor(public std: BlockSuite.Std) {}
 
   readonly slots = {
+    beforeApply: new Slot(),
+    beforeMount: new Slot(),
+    beforeUnmount: new Slot(),
     afterApply: new Slot(),
     afterMount: new Slot(),
     afterUnmount: new Slot(),
   };
 
   mount() {
+    this.slots.beforeMount.emit();
+
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
@@ -26,6 +31,8 @@ export class SpecStore {
   }
 
   unmount() {
+    this.slots.beforeUnmount.emit();
+
     this._services.forEach(service => {
       service.dispose();
       service.unmounted();
@@ -37,6 +44,8 @@ export class SpecStore {
   }
 
   applySpecs(specs: BlockSpec[]) {
+    this.slots.beforeApply.emit();
+
     const oldSpecs = this._specs;
     const newSpecs = this._buildSpecMap(specs);
     this._diffServices(oldSpecs, newSpecs);
