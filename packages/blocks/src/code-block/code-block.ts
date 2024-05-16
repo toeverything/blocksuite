@@ -24,7 +24,7 @@ import { bindContainerHotkey } from '../_common/components/rich-text/keymap/inde
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { PAGE_HEADER_HEIGHT } from '../_common/consts.js';
 import { ArrowDownIcon } from '../_common/icons/index.js';
-import { listenToThemeChange } from '../_common/theme/utils.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
@@ -53,6 +53,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   @state()
   private _langListAbortController?: AbortController;
+
+  private readonly _themeObserver = new ThemeObserver();
 
   clipboardController = new CodeClipboardController(this);
 
@@ -220,21 +222,18 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       };
     });
 
-    const themeDisposable = listenToThemeChange(this, () => {
+    this._themeObserver.observe(document.documentElement);
+    this._themeObserver.on(() => {
       if (!this._highlighter) return;
       const richText = this.querySelector('rich-text');
       const inlineEditor = richText?.inlineEditor;
       if (!inlineEditor) return;
-
       // update code-line theme
       setTimeout(() => {
         inlineEditor.requestUpdate();
       });
     });
-
-    if (themeDisposable) {
-      this._disposables.add(themeDisposable);
-    }
+    this.disposables.add(() => this._themeObserver.dispose());
 
     bindContainerHotkey(this);
 

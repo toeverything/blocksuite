@@ -17,7 +17,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../_common/consts.js';
-import { listenToThemeChange } from '../../_common/theme/utils.js';
+import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import {
   type EdgelessTool,
   type IPoint,
@@ -33,6 +33,7 @@ import {
   on,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
+import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
 import {
   setAttachmentUploaded,
   setAttachmentUploading,
@@ -41,7 +42,6 @@ import type {
   ImageBlockModel,
   ImageBlockProps,
 } from '../../image-block/image-model.js';
-import type { AttachmentBlockProps } from '../../index.js';
 import {
   Bound,
   type IBound,
@@ -169,6 +169,8 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   private _viewportElement: HTMLElement | null = null;
 
+  private readonly _themeObserver = new ThemeObserver();
+
   get viewportElement(): HTMLElement {
     if (this._viewportElement) return this._viewportElement;
     this._viewportElement = this.host.closest(
@@ -224,10 +226,9 @@ export class EdgelessRootBlockComponent extends BlockElement<
   private _initSlotEffects() {
     const { disposables, slots } = this;
 
-    const disposable = listenToThemeChange(this, () => this.surface.refresh());
-    if (disposable) {
-      disposables.add(disposable);
-    }
+    this._themeObserver.observe(document.documentElement);
+    this._themeObserver.on(() => this.surface.refresh());
+    this.disposables.add(() => this._themeObserver.dispose());
 
     disposables.add(this.service.selection);
     disposables.add(
