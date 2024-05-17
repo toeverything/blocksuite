@@ -9,6 +9,6 @@ These are blocks used to display link content in various ways.
 ## Reference
 
 - [`BookmarkBlockSchema`](/api/@blocksuite/blocks/variables/BookmarkBlockSchema.html)
-- [`BookmarkService`](/api/@blocksuite/blocks/classes/BookmarkService.html)
+- [`BookmarkBlockService`](/api/@blocksuite/blocks/classes/BookmarkBlockService.html)
 - [`EmbedLinkedDocBlockProps`](/api/@blocksuite/blocks/type-aliases/EmbedLinkedDocBlockProps.html)
 - [`EmbedSyncedDocBlockProps`](/api/@blocksuite/blocks/type-aliases/EmbedSyncedDocBlockProps.html)

@@ -4,14 +4,16 @@ import type {
   TextSelection,
 } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
-import { createButtonPopper, Tooltip } from '@blocksuite/blocks';
+import { type AIError, createButtonPopper, Tooltip } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { CopyIcon, MoreIcon } from '../../_common/icons.js';
+import { CopyIcon, MoreIcon, RetryIcon } from '../../_common/icons.js';
+import { AIProvider } from '../../provider.js';
 import { copyText } from '../../utils/editor-actions.js';
+import type { ChatItem, ChatMessage, ChatStatus } from '../index.js';
 import { PageEditorActions } from './actions-handle.js';
 
 noop(Tooltip);
@@ -83,6 +85,24 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
   @property({ attribute: false })
   curBlockSelections?: BlockSelection[];
 
+  @property({ attribute: false })
+  items!: ChatItem[];
+
+  @property({ attribute: false })
+  updateItems!: (items: ChatItem[]) => void;
+
+  @property({ attribute: false })
+  updateStatus!: (status: ChatStatus) => void;
+
+  @property({ attribute: false })
+  updateError!: (error: AIError | null) => void;
+
+  @property({ attribute: false })
+  abortController!: AbortController | null;
+
+  @property({ attribute: false })
+  updateAbortController!: (abortController: AbortController | null) => void;
+
   @state()
   private _showMoreMenu = false;
 
@@ -111,6 +131,52 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
     }
   }
 
+  private async _retry() {
+    const { doc } = this.host;
+    try {
+      const abortController = new AbortController();
+      const items = [...this.items];
+      const last = items[items.length - 1];
+      if ('content' in last) {
+        last.content = '';
+        last.createdAt = new Date().toISOString();
+      }
+
+      this.updateItems(items);
+      this.updateStatus('loading');
+      this.updateError(null);
+
+      const stream = AIProvider.actions.chat?.({
+        retry: true,
+        docId: doc.id,
+        workspaceId: doc.collection.id,
+        host: this.host,
+        stream: true,
+        signal: abortController.signal,
+        where: 'chat-panel',
+        control: 'chat-send',
+      });
+
+      if (stream) {
+        this.updateAbortController(abortController);
+        for await (const text of stream) {
+          this.updateStatus('transmitting');
+          const items = [...this.items];
+          const last = items[items.length - 1] as ChatMessage;
+          last.content += text;
+          this.updateItems(items);
+        }
+
+        this.updateStatus('success');
+      }
+    } catch (error) {
+      this.updateStatus('error');
+      this.updateError(error as AIError);
+    } finally {
+      this.updateAbortController(null);
+    }
+  }
+
   override render() {
     const { host, content, isLast } = this;
     return html`<style>
@@ -123,6 +189,12 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
           ${CopyIcon}
           <affine-tooltip>Copy</affine-tooltip>
         </div>
+        ${isLast
+          ? html`<div @click=${() => this._retry()}>
+              ${RetryIcon}
+              <affine-tooltip>Retry</affine-tooltip>
+            </div>`
+          : nothing}
         ${isLast
           ? nothing
           : html`<div class="more-button" @click=${this._toggle}>

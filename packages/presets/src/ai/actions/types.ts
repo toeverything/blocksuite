@@ -26,10 +26,11 @@ export const textTones = [
 declare global {
   namespace BlockSuitePresets {
     interface AITextActionOptions {
-      input: string;
+      input?: string;
       stream?: boolean;
       attachments?: (string | File | Blob)[]; // blob could only be strings for the moments (url or data urls)
       signal?: AbortSignal;
+      retry?: boolean;
 
       // action's context
       docId: string;

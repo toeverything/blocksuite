@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { BlockService } from '../service/index.js';
 import type { BlockSpec } from './index.js';
@@ -11,26 +11,47 @@ export class SpecStore {
 
   constructor(public std: BlockSuite.Std) {}
 
+  readonly slots = {
+    beforeApply: new Slot(),
+    beforeMount: new Slot(),
+    beforeUnmount: new Slot(),
+    afterApply: new Slot(),
+    afterMount: new Slot(),
+    afterUnmount: new Slot(),
+  };
+
   mount() {
+    this.slots.beforeMount.emit();
+
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
+
+    this.slots.afterMount.emit();
   }
 
   unmount() {
+    this.slots.beforeUnmount.emit();
+
     this._services.forEach(service => {
       service.dispose();
       service.unmounted();
     });
     this._services.clear();
     this._disposables.dispose();
+
+    this.slots.afterUnmount.emit();
   }
 
   applySpecs(specs: BlockSpec[]) {
+    this.slots.beforeApply.emit();
+
     const oldSpecs = this._specs;
     const newSpecs = this._buildSpecMap(specs);
     this._diffServices(oldSpecs, newSpecs);
     this._specs = newSpecs;
+
+    this.slots.afterApply.emit();
   }
 
   getView(flavour: string) {

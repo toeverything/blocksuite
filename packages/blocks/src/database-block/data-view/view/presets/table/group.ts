@@ -1,5 +1,5 @@
-import './components/column-stats';
-import './components/column-stats-cell';
+import './components/column-stats.js';
+import './components/column-stats-cell.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { PropertyValues } from 'lit';

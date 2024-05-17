@@ -8,7 +8,6 @@ import { type DocCollection } from '@blocksuite/store';
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
 import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
-import { attachChatPanel } from '../specs-examples/ai/chat-panel.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
 const params = new URLSearchParams(location.search);
@@ -90,10 +89,6 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   quickEdgelessMenu.mode = defaultMode;
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.docsPanel = docsPanel;
-
-  if (params.get('exampleSpec') === 'ai') {
-    quickEdgelessMenu.chatPanel = attachChatPanel(editor);
-  }
 
   function switchQuickEdgelessMenu(mode: typeof defaultMode) {
     quickEdgelessMenu.mode = mode;

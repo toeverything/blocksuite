@@ -9,19 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
-    "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
-    "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
-    "next": "14.2.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "@blocksuite/blocks": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/presets": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/store": "0.14.0-canary-202405100201-e591bb8",
+    "next": "14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7",
-    "@types/react": "^18.2.79",
-    "@types/react-dom": "^18.2.25",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.2",
+    "@types/react-dom": "^18.3.0",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.2",
+    "eslint-config-next": "14.2.3",
     "typescript": "^5.4.5"
   }
 }

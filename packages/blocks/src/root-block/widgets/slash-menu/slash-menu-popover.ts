@@ -372,6 +372,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
         ${this._categoryTemplate()}
+        <div class="slash-vertical-divider"></div>
         <div class="slash-item-container">${btnItems}</div>
       </div>
     </div>`;
