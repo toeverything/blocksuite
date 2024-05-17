@@ -9,16 +9,19 @@ import type {
   ToBlockSnapshotPayload,
   ToDocSnapshotPayload,
 } from '@blocksuite/store';
-import { type AssetsManager, getAssetName } from '@blocksuite/store';
 import {
+  type AssetsManager,
+  ASTWalker,
+  BaseAdapter,
   type BlockSnapshot,
   BlockSnapshotSchema,
   type DocSnapshot,
+  getAssetName,
+  nanoid,
+  sha,
   type SliceSnapshot,
+  Text,
 } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
-import { ASTWalker, BaseAdapter } from '@blocksuite/store';
-import { sha } from '@blocksuite/store';
 import { format } from 'date-fns/format';
 import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 import remarkParse from 'remark-parse';
@@ -955,9 +958,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             row.children.slice(1).forEach((cell, index) => {
               cells[rowId][viewsColumns[index + 1].id] = {
                 columnId: viewsColumns[index + 1].id,
-                value: cell.children
-                  .map(child => ('value' in child ? child.value : ''))
-                  .join(''),
+                value: new Text(
+                  cell.children
+                    .map(child => ('value' in child ? child.value : ''))
+                    .join('')
+                ),
               };
             });
           });
