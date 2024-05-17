@@ -18,7 +18,6 @@ import {
   nanoid,
   sha,
   type SliceSnapshot,
-  Text,
 } from '@blocksuite/store';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
@@ -33,7 +32,7 @@ import {
   hastQuerySelector,
   type HtmlAST,
 } from './hast.js';
-import { fetchable, fetchImage } from './utils.js';
+import { createText, fetchable, fetchImage, isText } from './utils.js';
 
 export type NotionHtml = string;
 
@@ -852,7 +851,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   }
                   row[columns[index].id] = {
                     columnId: columns[index].id,
-                    value: new Text(text),
+                    value: createText(text),
                   };
                 } else {
                   row[columns[index].id] = {
@@ -868,11 +867,11 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               }
               if (
                 columns[index].type === 'rich-text' &&
-                !(row[columns[index].id] instanceof Text)
+                !isText(row[columns[index].id].value)
               ) {
                 row[columns[index].id] = {
                   columnId: columns[index].id,
-                  value: new Text(row[columns[index].id].value),
+                  value: createText(row[columns[index].id].value),
                 };
               }
             });
