@@ -150,6 +150,21 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   isLoading!: boolean;
 
+  @property({ attribute: false })
+  updateItems!: (items: ChatItem[]) => void;
+
+  @property({ attribute: false })
+  updateStatus!: (status: ChatStatus) => void;
+
+  @property({ attribute: false })
+  updateError!: (error: AIError | null) => void;
+
+  @property({ attribute: false })
+  abortController!: AbortController | null;
+
+  @property({ attribute: false })
+  updateAbortController!: (abortController: AbortController | null) => void;
+
   @query('.chat-panel-messages')
   messagesContainer!: HTMLDivElement;
 
@@ -359,6 +374,12 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         .isLast=${isLast}
         .curTextSelection=${this._currentTextSelection}
         .curBlockSelections=${this._currentBlockSelections}
+        .items=${this.items}
+        .abortController=${this.abortController}
+        .updateItems=${this.updateItems}
+        .updateStatus=${this.updateStatus}
+        .updateError=${this.updateError}
+        .updateAbortController=${this.updateAbortController}
       ></chat-copy-more>
       ${isLast
         ? html`<div class="actions-container">
