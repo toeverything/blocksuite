@@ -1190,6 +1190,9 @@ hhh
                 delta: [
                   {
                     insert: 'test2',
+                    attributes: {
+                      link: 'https://google.com',
+                    },
                   },
                 ],
               },
@@ -1364,7 +1367,12 @@ hhh
       ],
     };
 
-    const md = `| Title  | Status      | Date       | Number | Progress | MultiSelect | RichText | Link               | Checkbox |\n| ------ | ----------- | ---------- | ------ | -------- | ----------- | -------- | ------------------ | -------- |\n| Task 1 | TODO        | 2023-12-15 | 1      | 65       | test1,test2 | test2    | https://google.com | true     |\n| Task 2 | In Progress | 2023-12-20 |        |          |             | test1    |                    |          |\n`;
+    const md = `\
+| Title  | Status      | Date       | Number | Progress | MultiSelect | RichText                    | Link               | Checkbox |
+| ------ | ----------- | ---------- | ------ | -------- | ----------- | --------------------------- | ------------------ | -------- |
+| Task 1 | TODO        | 2023-12-15 | 1      | 65       | test1,test2 | [test2](https://google.com) | https://google.com | true     |
+| Task 2 | In Progress | 2023-12-20 |        |          |             | test1                       |                    |          |
+`;
     const mdAdapter = new MarkdownAdapter();
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
