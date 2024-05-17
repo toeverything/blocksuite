@@ -313,7 +313,7 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
       ({ display }) => {
         this._showPopper = display === 'show';
       },
-      -144,
+      8,
       -60
     );
 

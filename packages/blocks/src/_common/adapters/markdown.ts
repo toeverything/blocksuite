@@ -505,9 +505,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           const columns = o.node.props.columns as Array<Column>;
           const children = o.node.children;
           const cells = o.node.props.cells as SerializedCells;
-          const createAstCell = (
-            children: Record<string, string | undefined | unknown>[]
-          ) => ({
+          const createAstCell = (children: MarkdownAST[]) => ({
             type: 'tableCell',
             children,
           });
@@ -516,84 +514,70 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             (v: BlockSnapshot) =>
               Array.prototype.map.call(columns, col => {
                 const cell = cells[v.id]?.[col.id];
-                let r;
-                if (cell || col.type === 'title') {
-                  switch (col.type) {
-                    case 'link':
-                    case 'progress':
-                    case 'number':
-                      r = createAstCell([
-                        {
-                          type: 'text',
-                          value: cell.value,
-                        },
-                      ]);
-                      break;
-                    case 'rich-text':
-                      r = createAstCell([
-                        {
-                          type: 'text',
-                          value: (cell.value as { delta: DeltaInsert[] }).delta
-                            .map(v => v.insert)
-                            .join(),
-                        },
-                      ]);
-                      break;
-                    case 'title':
-                      r = createAstCell([
-                        {
-                          type: 'text',
-                          value: (
-                            v.props.text as { delta: DeltaInsert[] }
-                          ).delta
-                            .map(v => v.insert)
-                            .join(''),
-                        },
-                      ]);
-                      break;
-                    case 'date':
-                      r = createAstCell([
-                        {
-                          type: 'text',
-                          value: format(
-                            new Date(cell.value as number),
-                            'yyyy-MM-dd'
-                          ),
-                        },
-                      ]);
-                      break;
-                    case 'select': {
-                      const value = col.data.options.find(
-                        (opt: Record<string, string>) => opt.id === cell.value
-                      )?.value;
-                      r = createAstCell([{ type: 'text', value }]);
-                      break;
-                    }
-                    case 'multi-select': {
-                      const value = Array.prototype.map
-                        .call(
-                          cell.value,
-                          val =>
-                            col.data.options.find(
-                              (opt: Record<string, string>) => val === opt.id
-                            ).value
-                        )
-                        .filter(Boolean)
-                        .join(',');
-                      r = createAstCell([{ type: 'text', value }]);
-                      break;
-                    }
-                    case 'checkbox': {
-                      r = createAstCell([{ type: 'text', value: cell.value }]);
-                      break;
-                    }
-                    default:
-                      r = createAstCell([{ type: 'text', value: '' }]);
-                  }
-                } else {
-                  r = createAstCell([{ type: 'text', value: '' }]);
+                if (!cell && col.type !== 'title') {
+                  return createAstCell([{ type: 'text', value: '' }]);
                 }
-                return r;
+                switch (col.type) {
+                  case 'link':
+                  case 'progress':
+                  case 'number':
+                    return createAstCell([
+                      {
+                        type: 'text',
+                        value: cell.value as string,
+                      },
+                    ]);
+                  case 'rich-text':
+                    return createAstCell(
+                      this._deltaToMdAST(
+                        (cell.value as { delta: DeltaInsert[] }).delta
+                      )
+                    );
+                  case 'title':
+                    return createAstCell(
+                      this._deltaToMdAST(
+                        (v.props.text as { delta: DeltaInsert[] }).delta
+                      )
+                    );
+                  case 'date':
+                    return createAstCell([
+                      {
+                        type: 'text',
+                        value: format(
+                          new Date(cell.value as number),
+                          'yyyy-MM-dd'
+                        ),
+                      },
+                    ]);
+                  case 'select': {
+                    const value = col.data.options.find(
+                      (opt: Record<string, string>) => opt.id === cell.value
+                    )?.value;
+                    return createAstCell([{ type: 'text', value }]);
+                  }
+                  case 'multi-select': {
+                    const value = Array.prototype.map
+                      .call(
+                        cell.value,
+                        val =>
+                          col.data.options.find(
+                            (opt: Record<string, string>) => val === opt.id
+                          ).value
+                      )
+                      .filter(Boolean)
+                      .join(',');
+                    return createAstCell([{ type: 'text', value }]);
+                  }
+                  case 'checkbox': {
+                    return createAstCell([
+                      { type: 'text', value: cell.value as string },
+                    ]);
+                  }
+                  default:
+                    return createAstCell([
+                      { type: 'text', value: cell.value as string },
+                    ]);
+                }
               })
           );
 

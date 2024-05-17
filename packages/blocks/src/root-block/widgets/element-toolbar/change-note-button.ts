@@ -404,7 +404,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           ({ display }) => {
             this._showDisplayModePopper = display === 'show';
           },
-          -154,
+          8,
           90
         );
         _disposables.add(this._displayModePopper);
