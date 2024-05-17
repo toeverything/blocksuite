@@ -6,11 +6,13 @@ type DocCollectionConstructor<Keys extends string> = {
 };
 
 export type AddOn<Keys extends string> = (
-  originalClass: DocCollectionConstructor<Keys>
+  originalClass: DocCollectionConstructor<Keys>,
+  context: ClassDecoratorContext
 ) => { new (storeOptions: DocCollectionOptions): unknown };
 
 export type AddOnReturn<Keys extends string> = (
-  originalClass: DocCollectionConstructor<Keys>
+  originalClass: DocCollectionConstructor<Keys>,
+  context: ClassDecoratorContext
 ) => typeof DocCollection;
 
 export function addOnFactory<Keys extends string>(fn: AddOn<Keys>) {

@@ -34,16 +34,16 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  specs!: BlockSpec[];
+  accessor specs!: BlockSpec[];
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  blockIdAttr = 'data-block-id';
+  accessor blockIdAttr = 'data-block-id';
 
   @property({ attribute: false })
-  widgetIdAttr = 'data-widget-id';
+  accessor widgetIdAttr = 'data-widget-id';
 
   std!: BlockSuite.Std;
 
