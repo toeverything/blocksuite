@@ -17,6 +17,7 @@ import type {
 } from '@blocksuite/store';
 import { BaseAdapter } from '@blocksuite/store';
 
+import { toast } from '../../_common/components/toast.js';
 import { decode, encode } from './utils.js';
 
 type FileSnapshot = {
@@ -59,8 +60,33 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     assertExists(assets);
     const map = assets.getAssets();
     const blobs: Record<string, FileSnapshot> = {};
+    let sumSize = 0;
     await Promise.all(
       Array.from(map.entries()).map(async ([id, blob]) => {
+        if (blob.size > 5 * 1024 * 1024) {
+          const host = document.querySelector('editor-host');
+          if (!host) {
+            return;
+          }
+          toast(
+            host,
+            (blob as File).name ?? 'File' + ' is too large to be copied'
+          );
+          return;
+        }
+        sumSize += blob.size;
+        if (sumSize > 10 * 1024 * 1024) {
+          const host = document.querySelector('editor-host');
+          if (!host) {
+            return;
+          }
+          toast(
+            host,
+            (blob as File).name ??
+              'File' + ' cannot be copied due to the clipboard size limit'
+          );
+          return;
+        }
         const content = encode(await blob.arrayBuffer());
         const file: FileSnapshot = {
           name: (blob as File).name,
