@@ -3,6 +3,10 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import {
+  eventToVRect,
+  popMenu,
+} from '../../../../../../_common/components/index.js';
+import {
   ArrowRightSmallIcon,
   DeleteIcon,
   DuplicateIcon,
@@ -18,7 +22,6 @@ import {
   InfoIcon,
 } from '../../../../common/icons/index.js';
 import { popPropertiesSetting } from '../../../../common/properties.js';
-import { eventToVRect, popMenu } from '../../../../utils/menu/index.js';
 import type { DataViewKanbanManager } from '../../../../view/presets/kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../../../view/presets/table/table-view-manager.js';
 import { popFilterModal } from '../../../filter/filter-modal.js';

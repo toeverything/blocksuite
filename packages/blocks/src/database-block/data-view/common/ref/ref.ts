@@ -3,11 +3,11 @@ import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { AddCursorIcon } from '../../../../_common/icons/index.js';
 import {
   eventToVRect,
   popFilterableSimpleMenu,
-} from '../../utils/menu/index.js';
+} from '../../../../_common/components/index.js';
+import { AddCursorIcon } from '../../../../_common/icons/index.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import type { Filter, Variable, VariableOrProperty } from '../ast.js';
 import { firstFilterByRef, firstFilterInGroup } from '../ast.js';
