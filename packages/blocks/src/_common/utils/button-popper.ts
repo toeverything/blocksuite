@@ -19,7 +19,7 @@ export function listenClickAway(
     }
   };
 
-  document.addEventListener('click', callback);
+  document.addEventListener('click', callback, true);
 
   return {
     dispose: () => {
