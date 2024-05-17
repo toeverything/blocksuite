@@ -11,4 +11,4 @@ This is a block used to place text content. It's generally placed inside a note 
 ## Reference
 
 - [`ParagraphBlockSchema`](/api/@blocksuite/blocks/variables/ParagraphBlockSchema.html)
-- [`ParagraphService`](/api/@blocksuite/blocks/classes/ParagraphService.html)
+- [`ParagraphBlockService`](/api/@blocksuite/blocks/classes/ParagraphBlockService.html)

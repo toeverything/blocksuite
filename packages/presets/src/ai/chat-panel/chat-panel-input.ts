@@ -160,8 +160,11 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   @state()
   focused = false;
 
-  @state()
-  abortController?: AbortController;
+  @property({ attribute: false })
+  abortController!: AbortController | null;
+
+  @property({ attribute: false })
+  updateAbortController!: (abortController: AbortController | null) => void;
 
   send = async () => {
     if (this.status === 'loading' || this.status === 'transmitting') return;
@@ -205,7 +208,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       });
 
       if (stream) {
-        this.abortController = abortController;
+        this.updateAbortController(abortController);
 
         for await (const text of stream) {
           this.updateStatus('transmitting');
@@ -221,7 +224,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       this.updateStatus('error');
       this.updateError(error as AIError);
     } finally {
-      this.abortController = undefined;
+      this.updateAbortController(null);
     }
   };
 

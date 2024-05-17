@@ -59,6 +59,8 @@ export class AIProvider {
     // add more if needed
   };
 
+  static LAST_ACTION_SESSIONID = '';
+
   static MAX_LOCAL_HISTORY = 10;
   // track the history of triggered actions (in memory only)
   private readonly actionHistory: {

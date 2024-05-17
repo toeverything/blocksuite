@@ -7,4 +7,4 @@ In a database block, each row is a standard paragraph block or list block. It su
 ## Reference
 
 - [`DatabaseBlockSchema`](/api/@blocksuite/blocks/variables/DatabaseBlockSchema.html)
-- [`DatabaseService`](/api/@blocksuite/blocks/classes/DatabaseService.html)
+- [`DatabaseBlockService`](/api/@blocksuite/blocks/classes/DatabaseBlockService.html)

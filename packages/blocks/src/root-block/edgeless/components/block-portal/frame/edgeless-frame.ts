@@ -212,6 +212,10 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
                   .model=${frame}
                   .surface=${this.surface}
                   .edgeless=${this.edgeless}
+                  .updatingSet=${this.edgeless.rootElementContainer
+                    .renderingSet}
+                  .concurrentUpdatingCount=${this.edgeless.rootElementContainer
+                    .concurrentRendering}
                 >
                 </edgeless-block-portal-frame>
               `
