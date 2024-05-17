@@ -18,6 +18,7 @@ import {
   nanoid,
   sha,
   type SliceSnapshot,
+  Text,
 } from '@blocksuite/store';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
@@ -161,6 +162,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       },
     };
   }
+
   override toBlockSnapshot(
     payload: NotionHtmlToBlockSnapshotPayload
   ): Promise<BlockSnapshot> {
@@ -185,6 +187,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       payload.pageMap
     );
   }
+
   override async toSliceSnapshot(
     payload: NotionHtmlToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
@@ -841,14 +844,35 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                     : false,
                 };
               } else if (columns[index].type === 'number') {
-                row[columns[index].id] = {
-                  columnId: columns[index].id,
-                  value: Number(hastGetTextContent(child)),
-                };
+                const text = hastGetTextContent(child);
+                const number = Number(text);
+                if (Number.isNaN(number)) {
+                  if (columns[index].type !== 'rich-text') {
+                    columns[index].type = 'rich-text';
+                  }
+                  row[columns[index].id] = {
+                    columnId: columns[index].id,
+                    value: new Text(text),
+                  };
+                } else {
+                  row[columns[index].id] = {
+                    columnId: columns[index].id,
+                    value: number,
+                  };
+                }
               } else {
                 row[columns[index].id] = {
                   columnId: columns[index].id,
                   value: hastGetTextContent(child),
+                };
+              }
+              if (
+                columns[index].type === 'rich-text' &&
+                !(row[columns[index].id] instanceof Text)
+              ) {
+                row[columns[index].id] = {
+                  columnId: columns[index].id,
+                  value: new Text(row[columns[index].id].value),
                 };
               }
             });
