@@ -52,11 +52,6 @@ const portalMap = new Map<EdgelessBlockType | RegExp, string>([
 export class EdgelessBlockPortalContainer extends WithDisposable(
   ShadowlessElement
 ) {
-  /**
-   * The increased number of blocks to render in each frame.
-   */
-  static RENDER_STEP = 5;
-
   static override styles = css`
     .affine-block-children-container.edgeless {
       user-select: none;
@@ -133,7 +128,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _clearWillChangeId: null | ReturnType<typeof setTimeout> = null;
 
-  private _renderCounts = 10;
+  concurrentRendering: number = 2;
+
+  renderingSet = new Set<string>();
 
   get isDragging() {
     return this.selectedRect.dragging;
@@ -258,18 +255,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
   }
 
-  override updated() {
-    if (this._renderCounts < this.edgeless.service.layer.blocks.length) {
-      this._renderCounts += EdgelessBlockPortalContainer.RENDER_STEP;
-
-      setTimeout(() => {
-        this.isConnected && this.requestUpdate();
-      }, 16);
-    } else {
-      this._renderCounts = Number.MAX_SAFE_INTEGER;
-    }
-  }
-
   override render() {
     const { edgeless } = this;
     const { surface, doc, service } = edgeless;
@@ -279,7 +264,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     if (!surface) return nothing;
 
     const layers = service.layer.layers;
-    let count = 0;
 
     return html`
       <div class="affine-block-children-container edgeless">
@@ -298,20 +282,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           ${layers
             .filter(layer => layer.type === 'block')
             .map(layer => {
-              if (count >= this._renderCounts) {
-                return nothing;
-              }
-
-              const remains = Math.min(
-                this._renderCounts - count,
-                layer.elements.length
-              );
-              const elements = layer.elements.slice(
-                0,
-                remains
-              ) as TopLevelBlockModel[];
-
-              count += remains;
+              const elements = layer.elements as TopLevelBlockModel[];
 
               return repeat(
                 elements,
@@ -342,6 +313,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                       .model=${block}
                       .surface=${surface}
                       .edgeless=${edgeless}
+                      .updatingSet=${this.renderingSet}
+                      .concurrentUpdatingCount=${this.concurrentRendering}
                       style=${styleMap({
                         display: 'block',
                         zIndex,
