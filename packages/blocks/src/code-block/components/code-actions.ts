@@ -6,10 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { type Menu, popMenu } from '../../_common/components/index.js';
 import { toast } from '../../_common/components/toast.js';
 import {
-  AIStarIcon,
   CancelWrapIcon,
-  CaptionIcon,
-  CommentIcon,
   CopyIcon,
   DeleteIcon,
   DuplicateIcon,
@@ -35,6 +32,10 @@ export class CodeBlockActions extends LitElement {
       justify-content: flex-start;
       gap: 3px;
       padding: 8px;
+    }
+
+    .code-action-button.hidden {
+      display: none;
     }
 
     .code-action-button.ai {
@@ -82,23 +83,21 @@ export class CodeBlockActions extends LitElement {
   };
 
   private _popMoreActions = (e: MouseEvent) => {
+    if (this.anchor.readonly) return;
+
     this.style.visibility = 'visible';
     const el = e.currentTarget as HTMLElement;
-    const readonly = this.anchor.readonly;
 
     const items: Menu[] = [
-      ...((!readonly
-        ? [
-            {
-              type: 'action',
-              name: this.model.wrap ? 'Cancel Wrap' : 'Wrap',
-              icon: this.model.wrap ? CancelWrapIcon : WrapIcon,
-              select: () => {
-                this.anchor.setWrap(!this.model.wrap);
-              },
-            },
-          ]
-        : []) as Menu[]),
+      {
+        type: 'action',
+        name: this.model.wrap ? 'Cancel Wrap' : 'Wrap',
+        icon: this.model.wrap ? CancelWrapIcon : WrapIcon,
+        select: () => {
+          this.anchor.setWrap(!this.model.wrap);
+        },
+      },
+
       {
         type: 'action',
         name: 'Duplicate',
@@ -107,25 +106,22 @@ export class CodeBlockActions extends LitElement {
         },
         icon: DuplicateIcon,
       },
-      ...((!readonly
-        ? [
-            {
-              type: 'group',
-              name: '',
-              children: () => [
-                {
-                  type: 'action',
-                  class: 'delete-item',
-                  name: 'Delete',
-                  select: () => {
-                    this.model.doc.deleteBlock(this.model);
-                  },
-                  icon: DeleteIcon,
-                },
-              ],
+
+      {
+        type: 'group',
+        name: '',
+        children: () => [
+          {
+            type: 'action',
+            class: 'delete-item',
+            name: 'Delete',
+            select: () => {
+              this.model.doc.deleteBlock(this.model);
             },
-          ]
-        : []) as Menu[]),
+            icon: DeleteIcon,
+          },
+        ],
+      },
     ];
 
     popMenu(el, {
@@ -146,18 +142,7 @@ export class CodeBlockActions extends LitElement {
   };
 
   override render() {
-    const readonly = this.anchor.readonly;
     return html` <div contenteditable="false" class="code-actions">
-      <icon-button
-        class="code-action-button ai"
-        data-testid="ask-ai-button"
-        width="auto"
-        height="24px"
-        ?disabled=${readonly}
-      >
-        ${AIStarIcon} Ask AI
-      </icon-button>
-
       <icon-button
         class="code-action-button"
         data-testid="copy-button"
@@ -174,31 +159,10 @@ export class CodeBlockActions extends LitElement {
 
       <icon-button
         class="code-action-button"
-        data-testid="comment-button"
-        width="auto"
-        height="24px"
-      >
-        ${CommentIcon}
-
-        <affine-tooltip tip-position="top" .offset=${5}>Comment</affine-tooltip>
-      </icon-button>
-
-      <icon-button
-        class="code-action-button"
-        data-testid="caption-button"
-        width="auto"
-        height="24px"
-      >
-        ${CaptionIcon}
-
-        <affine-tooltip tip-position="top" .offset=${5}>Caption</affine-tooltip>
-      </icon-button>
-
-      <icon-button
-        class="code-action-button"
         data-testid="more-button"
         width="auto"
         height="24px"
+        ?disabled=${this.anchor.readonly}
         @click=${this._popMoreActions}
       >
         ${MoreVerticalIcon}
