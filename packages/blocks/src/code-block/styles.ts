@@ -26,21 +26,36 @@ export const codeBlockStyles = css`
     position: absolute;
     font-size: var(--affine-font-sm);
     line-height: var(--affine-line-height);
-    top: 12px;
-    left: 12px;
+    top: 5px;
+    left: 5px;
   }
 
-  .affine-code-block-container > .lang-list-wrapper {
+  affine-code-block-actions {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+  }
+
+  .affine-code-block-container > .lang-list-wrapper,
+  .affine-code-block-container > affine-code-block-actions {
     visibility: hidden;
   }
-  .affine-code-block-container:hover > .lang-list-wrapper {
+
+  .affine-code-block-container:hover > .lang-list-wrapper,
+  .affine-code-block-container:hover > affine-code-block-actions {
     visibility: visible;
   }
 
   .affine-code-block-container > .lang-list-wrapper > .lang-button {
+    background-color: var(--affine-background-primary-color);
     display: flex;
     justify-content: flex-start;
-    padding: 0 8px;
+    padding: 8px;
+    box-shadow: var(--affine-shadow-1);
+  }
+
+  .affine-code-block-container > .lang-list-wrapper > .lang-button:hover {
+    background-color: var(--affine-hover-color);
   }
 
   .affine-code-block-container rich-text {
