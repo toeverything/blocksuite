@@ -59,16 +59,13 @@ export const menuItemStyles = css`
   .enter-icon,
   .arrow-right-icon {
     color: var(--affine-icon-color);
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-40%);
+    display: flex;
   }
   .enter-icon {
-    display: none;
+    opacity: 0;
   }
   .arrow-right-icon,
   .menu-item:hover .enter-icon {
-    display: flex;
+    opacity: 1;
   }
 `;

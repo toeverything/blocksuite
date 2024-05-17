@@ -1,5 +1,5 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import { PaymentRequiredError } from '@blocksuite/blocks';
+import { PaymentRequiredError, UnauthorizedError } from '@blocksuite/blocks';
 import { Slot } from '@blocksuite/store';
 
 export interface AIUserInfo {
@@ -14,6 +14,7 @@ export type ActionEventType =
   | 'finished'
   | 'error'
   | 'aborted:paywall'
+  | 'aborted:login-required'
   | 'aborted:server-error'
   | 'aborted:stop'
   | 'result:insert'
@@ -156,6 +157,12 @@ export class AIProvider {
                   action: id,
                   options,
                   event: 'aborted:paywall',
+                });
+              } else if (err instanceof UnauthorizedError) {
+                slots.actions.emit({
+                  action: id,
+                  options,
+                  event: 'aborted:login-required',
                 });
               } else {
                 slots.actions.emit({

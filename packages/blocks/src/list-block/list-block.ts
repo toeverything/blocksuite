@@ -11,10 +11,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
+import { getViewportElement } from '../_common/utils/query.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ListBlockModel } from './list-model.js';
-import type { ListService } from './list-service.js';
+import type { ListBlockService } from './list-service.js';
 import { listBlockStyles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
@@ -22,8 +23,9 @@ import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 @customElement('affine-list')
 export class ListBlockComponent extends BlockElement<
   ListBlockModel,
-  ListService
+  ListBlockService
 > {
+  static override styles = listBlockStyles;
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
     assertExists(inlineManager);
@@ -50,7 +52,7 @@ export class ListBlockComponent extends BlockElement<
     selection.update(selList => {
       return selList
         .filter(sel => !sel.is('text') && !sel.is('block'))
-        .concat(selection.create('block', { path: this.path }));
+        .concat(selection.create('block', { blockId: this.blockId }));
     });
   }
 
@@ -189,9 +191,6 @@ export class ListBlockComponent extends BlockElement<
 
     return html`
       <div class=${'affine-list-block-container'}>
-        <style>
-          ${listBlockStyles}
-        </style>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text
@@ -206,6 +205,7 @@ export class ListBlockComponent extends BlockElement<
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
+            .verticalScrollContainer=${getViewportElement(this.host)}
           ></rich-text>
         </div>
 

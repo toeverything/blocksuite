@@ -1,34 +1,37 @@
 import {
   type AIItemGroupConfig,
-  AIPenIcon,
-  AISearchIcon,
+  AIStarIconWithAnimation,
   BlocksUtils,
-  ChatWithAIIcon,
-  ExplainIcon,
   ImageBlockModel,
-  ImproveWritingIcon,
-  LanguageIcon,
-  LongerIcon,
-  MakeItRealIcon,
   MindmapElementModel,
-  SelectionIcon,
   ShapeElementModel,
-  ShorterIcon,
   TextElementModel,
-  ToneIcon,
 } from '@blocksuite/blocks';
 
 import {
   AIExpandMindMapIcon,
   AIImageIcon,
+  AIImageIconWithAnimation,
   AIMindMapIcon,
+  AIMindMapIconWithAnimation,
+  AIPenIcon,
+  AIPenIconWithAnimation,
   AIPresentationIcon,
+  AIPresentationIconWithAnimation,
+  AISearchIcon,
+  ChatWithAIIcon,
+  ExplainIcon,
+  ImproveWritingIcon,
+  LanguageIcon,
+  LongerIcon,
+  MakeItRealIcon,
+  SelectionIcon,
+  ShorterIcon,
+  ToneIcon,
 } from '../../_common/icons.js';
 import {
   actionToHandler,
   explainImageShowWhen,
-  getContentFromSelected,
-  makeItRealShowWhen,
   mindmapChildShowWhen,
   mindmapRootShowWhen,
   noteBlockOrTextShowWhen,
@@ -45,14 +48,14 @@ import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
 const translateSubItem = translateLangs.map(lang => {
   return {
     type: lang,
-    handler: actionToHandler('translate', { lang }),
+    handler: actionToHandler('translate', AIStarIconWithAnimation, { lang }),
   };
 });
 
 const toneSubItem = textTones.map(tone => {
   return {
     type: tone,
-    handler: actionToHandler('changeTone', { tone }),
+    handler: actionToHandler('changeTone', AIStarIconWithAnimation, { tone }),
   };
 });
 
@@ -94,26 +97,26 @@ const editGroup: AIItemGroupConfig = {
       name: 'Improve writing',
       icon: ImproveWritingIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('improveWriting'),
+      handler: actionToHandler('improveWriting', AIStarIconWithAnimation),
     },
 
     {
       name: 'Make it longer',
       icon: LongerIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('makeLonger'),
+      handler: actionToHandler('makeLonger', AIStarIconWithAnimation),
     },
     {
       name: 'Make it shorter',
       icon: ShorterIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('makeShorter'),
+      handler: actionToHandler('makeShorter', AIStarIconWithAnimation),
     },
     {
       name: 'Continue writing',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('continueWriting'),
+      handler: actionToHandler('continueWriting', AIPenIconWithAnimation),
     },
   ],
 };
@@ -125,31 +128,31 @@ const draftGroup: AIItemGroupConfig = {
       name: 'Write an article about this',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('writeArticle'),
+      handler: actionToHandler('writeArticle', AIPenIconWithAnimation),
     },
     {
       name: 'Write a tweet about this',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('writeTwitterPost'),
+      handler: actionToHandler('writeTwitterPost', AIPenIconWithAnimation),
     },
     {
       name: 'Write a poem about this',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('writePoem'),
+      handler: actionToHandler('writePoem', AIPenIconWithAnimation),
     },
     {
       name: 'Write a blog post about this',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('writeBlogPost'),
+      handler: actionToHandler('writeBlogPost', AIPenIconWithAnimation),
     },
     {
       name: 'Brainstorm ideas about this',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('brainstorm'),
+      handler: actionToHandler('brainstorm', AIPenIconWithAnimation),
     },
   ],
 };
@@ -161,51 +164,56 @@ const reviewGroup: AIItemGroupConfig = {
       name: 'Fix spelling',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('fixSpelling'),
+      handler: actionToHandler('fixSpelling', AIStarIconWithAnimation),
     },
     {
       name: 'Fix grammar',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('improveGrammar'),
+      handler: actionToHandler('improveGrammar', AIStarIconWithAnimation),
     },
     {
       name: 'Explain this image',
       icon: AIPenIcon,
       showWhen: explainImageShowWhen,
-      handler: actionToHandler('explainImage', undefined, async host => {
-        const selectedElements = getCopilotSelectedElems(host);
-        if (selectedElements.length !== 1) return;
+      handler: actionToHandler(
+        'explainImage',
+        AIStarIconWithAnimation,
+        undefined,
+        async host => {
+          const selectedElements = getCopilotSelectedElems(host);
+          if (selectedElements.length !== 1) return;
 
-        const imageBlock = selectedElements[0];
-        if (!(imageBlock instanceof ImageBlockModel)) return;
-        if (!imageBlock.sourceId) return;
+          const imageBlock = selectedElements[0];
+          if (!(imageBlock instanceof ImageBlockModel)) return;
+          if (!imageBlock.sourceId) return;
 
-        const blob = await host.doc.blobSync.get(imageBlock.sourceId);
-        if (!blob) return;
+          const blob = await host.doc.blobSync.get(imageBlock.sourceId);
+          if (!blob) return;
 
-        return {
-          attachments: [blob],
-        };
-      }),
+          return {
+            attachments: [blob],
+          };
+        }
+      ),
     },
     {
       name: 'Explain this code',
       icon: ExplainIcon,
       showWhen: noteWithCodeBlockShowWen,
-      handler: actionToHandler('explainCode'),
+      handler: actionToHandler('explainCode', AIStarIconWithAnimation),
     },
     {
       name: 'Check code error',
       icon: ExplainIcon,
       showWhen: noteWithCodeBlockShowWen,
-      handler: actionToHandler('checkCodeErrors'),
+      handler: actionToHandler('checkCodeErrors', AIStarIconWithAnimation),
     },
     {
       name: 'Explain selection',
       icon: SelectionIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('explain'),
+      handler: actionToHandler('explain', AIStarIconWithAnimation),
     },
   ],
 };
@@ -217,12 +225,12 @@ const generateGroup: AIItemGroupConfig = {
       name: 'Summarize',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('summary'),
+      handler: actionToHandler('summary', AIPenIconWithAnimation),
     },
     {
       name: 'Generate headings',
       icon: AIPenIcon,
-      handler: actionToHandler('createHeadings'),
+      handler: actionToHandler('createHeadings', AIPenIconWithAnimation),
       showWhen: noteBlockOrTextShowWhen,
       beta: true,
     },
@@ -230,176 +238,212 @@ const generateGroup: AIItemGroupConfig = {
       name: 'Generate an image',
       icon: AIImageIcon,
       showWhen: () => true,
-      handler: actionToHandler('createImage', undefined, async (host, ctx) => {
-        const selectedElements = getCopilotSelectedElems(host);
-        const len = selectedElements.length;
+      handler: actionToHandler(
+        'createImage',
+        AIImageIconWithAnimation,
+        undefined,
+        async (host, ctx) => {
+          const selectedElements = getCopilotSelectedElems(host);
+          const len = selectedElements.length;
 
-        // text to image
-        // create an image from user input
-        if (len === 0) {
-          const aiPanel = getAIPanel(host);
-          const content = aiPanel.inputText?.trim();
-          if (!content) return;
-          return {
-            content,
-          };
-        }
-
-        let content = (ctx.get()['content'] as string) || '';
-
-        // get user input
-        if (content.length === 0) {
-          const aiPanel = getAIPanel(host);
-          content = aiPanel.inputText?.trim() || '';
-        }
-
-        const {
-          images,
-          shapes,
-          notes: _,
-          frames: __,
-        } = BlocksUtils.splitElements(selectedElements);
-
-        const pureShapes = shapes.filter(
-          e =>
-            !(
-              e instanceof TextElementModel ||
-              (e instanceof ShapeElementModel && e.text?.length)
-            )
-        );
-
-        // text to image
-        if (content.length && images.length + pureShapes.length === 0) {
-          return {
-            content,
-          };
-        }
-
-        // image to image
-        const edgelessRoot = getEdgelessRootFromEditor(host);
-        const canvas = await edgelessRoot.clipboardController.toCanvas(
-          images,
-          pureShapes,
-          {
-            dpr: 1,
-            padding: 0,
-            background: 'white',
+          // text to image
+          // from user input
+          if (len === 0) {
+            const aiPanel = getAIPanel(host);
+            const content = aiPanel.inputText?.trim();
+            if (!content) return;
+            return {
+              content,
+            };
           }
-        );
-        if (!canvas) return;
-        const png = await canvasToBlob(canvas);
-        if (!png) return;
-        return {
-          content,
-          attachments: [png],
-          seed: String(randomSeed()),
-        };
-      }),
+
+          let content = (ctx.get()['content'] as string) || '';
+
+          // from user input
+          if (content.length === 0) {
+            const aiPanel = getAIPanel(host);
+            content = aiPanel.inputText?.trim() || '';
+          }
+
+          const {
+            images,
+            shapes,
+            notes: _,
+            frames: __,
+          } = BlocksUtils.splitElements(selectedElements);
+
+          const pureShapes = shapes.filter(
+            e =>
+              !(
+                e instanceof TextElementModel ||
+                (e instanceof ShapeElementModel && e.text?.length)
+              )
+          );
+
+          // text to image
+          if (content.length && images.length + pureShapes.length === 0) {
+            return {
+              content,
+            };
+          }
+
+          // image to image
+          const edgelessRoot = getEdgelessRootFromEditor(host);
+          const canvas = await edgelessRoot.clipboardController.toCanvas(
+            images,
+            pureShapes,
+            {
+              dpr: 1,
+              padding: 0,
+              background: 'white',
+            }
+          );
+          if (!canvas) return;
+          const png = await canvasToBlob(canvas);
+          if (!png) return;
+          return {
+            content,
+            attachments: [png],
+            seed: String(randomSeed()),
+          };
+        }
+      ),
     },
     {
       name: 'Generate outline',
       icon: AIPenIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('writeOutline'),
+      handler: actionToHandler('writeOutline', AIPenIconWithAnimation),
     },
     {
       name: 'Expand from this mind map node',
       icon: AIExpandMindMapIcon,
       showWhen: mindmapChildShowWhen,
-      handler: actionToHandler('expandMindmap', undefined, function (host) {
-        const selected = getCopilotSelectedElems(host);
-        const firstSelected = selected[0] as ShapeElementModel;
-        const mindmap = firstSelected?.group;
+      handler: actionToHandler(
+        'expandMindmap',
+        AIMindMapIconWithAnimation,
+        undefined,
+        function (host) {
+          const selected = getCopilotSelectedElems(host);
+          const firstSelected = selected[0] as ShapeElementModel;
+          const mindmap = firstSelected?.group;
 
-        if (!(mindmap instanceof MindmapElementModel)) {
-          return Promise.resolve({});
+          if (!(mindmap instanceof MindmapElementModel)) {
+            return Promise.resolve({});
+          }
+
+          return Promise.resolve({
+            input: firstSelected.text?.toString() ?? '',
+            mindmap: mindMapToMarkdown(mindmap),
+          });
         }
-
-        return Promise.resolve({
-          input: firstSelected.text?.toString() ?? '',
-          mindmap: mindMapToMarkdown(mindmap),
-        });
-      }),
+      ),
       beta: true,
     },
     {
       name: 'Brainstorm ideas with mind map',
       icon: AIMindMapIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('brainstormMindmap'),
+      handler: actionToHandler('brainstormMindmap', AIMindMapIconWithAnimation),
     },
     {
       name: 'Regenerate mind map',
       icon: AIMindMapIcon,
       showWhen: mindmapRootShowWhen,
-      handler: actionToHandler('brainstormMindmap', {
-        regenerate: true,
-      }),
+      handler: actionToHandler(
+        'brainstormMindmap',
+        AIMindMapIconWithAnimation,
+        {
+          regenerate: true,
+        }
+      ),
     },
     {
       name: 'Generate presentation',
       icon: AIPresentationIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('createSlides'),
+      handler: actionToHandler('createSlides', AIPresentationIconWithAnimation),
       beta: true,
     },
     {
       name: 'Make it real',
       icon: MakeItRealIcon,
       beta: true,
-      showWhen: makeItRealShowWhen,
-      handler: actionToHandler('makeItReal', undefined, async (host, ctx) => {
-        const selectedElements = getCopilotSelectedElems(host);
-        const { notes, frames, shapes, images } =
-          BlocksUtils.splitElements(selectedElements);
-        const f = frames.length;
-        const i = images.length;
-        const n = notes.length;
-        const s = shapes.length;
+      showWhen: () => true,
+      handler: actionToHandler(
+        'makeItReal',
+        AIStarIconWithAnimation,
+        undefined,
+        async (host, ctx) => {
+          const selectedElements = getCopilotSelectedElems(host);
 
-        if (f + i + n + s === 0) {
-          return;
-        }
+          // from user input
+          if (selectedElements.length === 0) {
+            const aiPanel = getAIPanel(host);
+            const content = aiPanel.inputText?.trim();
+            if (!content) return;
+            return {
+              content,
+            };
+          }
 
-        // single note, text, shape(text) or image(caption)
-        if (f === 0 && n + s + i === 1) {
-          const content = await getContentFromSelected(host, [
-            ...notes,
-            ...shapes,
-            ...images,
-          ]);
-          if (!content) return;
+          const { notes, frames, shapes, images } =
+            BlocksUtils.splitElements(selectedElements);
+          const f = frames.length;
+          const i = images.length;
+          const n = notes.length;
+          const s = shapes.length;
+
+          if (f + i + n + s === 0) {
+            return;
+          }
+
+          let content = (ctx.get()['content'] as string) || '';
+
+          // single note, text
+          if (i === 0 && n + s === 1) {
+            if (n === 1 || (s === 1 && shapes[0] instanceof TextElementModel)) {
+              return {
+                content,
+              };
+            }
+          }
+
+          // from user input
+          if (content.length === 0) {
+            const aiPanel = getAIPanel(host);
+            content = aiPanel.inputText?.trim() || '';
+          }
+
+          const edgelessRoot = getEdgelessRootFromEditor(host);
+          const canvas = await edgelessRoot.clipboardController.toCanvas(
+            [...notes, ...frames, ...images],
+            shapes,
+            {
+              dpr: 1,
+              background: 'white',
+            }
+          );
+          if (!canvas) return;
+          const png = await canvasToBlob(canvas);
+          if (!png) return;
+          ctx.set({
+            width: canvas.width,
+            height: canvas.height,
+          });
+
           return {
             content,
+            attachments: [png],
           };
         }
-
-        const edgelessRoot = getEdgelessRootFromEditor(host);
-        const canvas = await edgelessRoot.clipboardController.toCanvas(
-          [...notes, ...frames, ...images],
-          shapes,
-          {
-            dpr: 1,
-            background: 'white',
-          }
-        );
-        if (!canvas) return;
-        const png = await canvasToBlob(canvas);
-        if (!png) return;
-        ctx.set({
-          width: canvas.width,
-          height: canvas.height,
-        });
-        return {
-          attachments: [png],
-        };
-      }),
+      ),
     },
     {
       name: 'Find actions',
       icon: AISearchIcon,
       showWhen: noteBlockOrTextShowWhen,
-      handler: actionToHandler('findActions'),
+      handler: actionToHandler('findActions', AIStarIconWithAnimation),
       beta: true,
     },
   ],

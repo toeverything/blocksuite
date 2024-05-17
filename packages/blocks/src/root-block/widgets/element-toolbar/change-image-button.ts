@@ -52,9 +52,8 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const blockElement = this.edgeless.std.view.viewFromPath(
-      'block',
-      blockSelection[0].path
+    const blockElement = this.edgeless.std.view.getBlock(
+      blockSelection[0].blockId
     ) as ImageBlockComponent | null;
     assertExists(blockElement);
 
@@ -93,10 +92,8 @@ export function renderChangeImageButton(
 ) {
   if (images?.length !== 1) return nothing;
 
-  return html`
-    <edgeless-change-image-button
-      .model=${images[0]}
-      .edgeless=${edgeless}
-    ></edgeless-change-image-button>
-  `;
+  return html`<edgeless-change-image-button
+    .model=${images[0]}
+    .edgeless=${edgeless}
+  ></edgeless-change-image-button>`;
 }

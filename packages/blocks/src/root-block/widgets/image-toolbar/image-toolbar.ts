@@ -33,7 +33,7 @@ export class AffineImageToolbarWidget extends WidgetElement<
       if (
         blockSelections.length > 1 ||
         (blockSelections.length === 1 &&
-          blockSelections[0].path !== imageBlock.path)
+          blockSelections[0].blockId !== imageBlock.blockId)
       ) {
         return null;
       }

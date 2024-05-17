@@ -141,14 +141,14 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
           props.shapeType = 'rect';
           props.radius = 0.1;
         }
-        this.edgeless.service.editSession.record(this._type, props);
+        this.edgeless.service.editPropsStore.record(this._type, props);
       };
     }
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.edgeless.service.editSession.slots.lastPropsUpdated.on(
+    this.edgeless.service.editPropsStore.slots.lastPropsUpdated.on(
       ({ type, props }) => {
         if (type === 'shape' && props.shapeType) {
           let { shapeType } = props;
@@ -163,7 +163,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
 
   protected override initLastPropsSlot(): void {
     this._disposables.add(
-      this.edgeless.service.editSession.slots.lastPropsUpdated.on(
+      this.edgeless.service.editPropsStore.slots.lastPropsUpdated.on(
         ({ type, props }) => {
           if (type === this._type) {
             this._states.forEach(_key => {

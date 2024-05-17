@@ -241,7 +241,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
           this.surface.selection.setGroup('note', [
             this.surface.selection.create('text', {
               from: {
-                path: [this.surface.model.id, this.model.id, pId],
+                blockId: pId,
                 index: 0,
                 length: 0,
               },

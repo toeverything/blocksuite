@@ -323,7 +323,7 @@ export function createShapeElement(
 
   const props = isShape(current)
     ? current.serialize()
-    : edgeless.service.editSession.getLastProps('shape');
+    : edgeless.service.editPropsStore.getLastProps('shape');
 
   const id = service.addElement('shape', {
     ...props,

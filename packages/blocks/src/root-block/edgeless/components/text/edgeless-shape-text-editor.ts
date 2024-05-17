@@ -307,7 +307,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         .yText=${this.element.text}
         .enableFormat=${false}
         .enableAutoScrollHorizontally=${false}
-        .enableAutoScrollVertically=${false}
         style=${inlineEditorStyle}
       ></rich-text>`;
   }

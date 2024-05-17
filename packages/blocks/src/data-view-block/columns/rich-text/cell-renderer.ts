@@ -11,6 +11,7 @@ import type {
   AffineInlineEditor,
   AffineTextAttributes,
 } from '../../../_common/inline/presets/affine-inline-specs.js';
+import { getViewportElement } from '../../../_common/utils/query.js';
 import { BaseCellRenderer } from '../../../database-block/data-view/column/index.js';
 import { createFromBaseCellRenderer } from '../../../database-block/data-view/column/renderer.js';
 import { createIcon } from '../../../database-block/data-view/utils/uni-icon.js';
@@ -346,6 +347,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   override render() {
     if (!this.service) return nothing;
+
     return html`<rich-text
       .yText=${this.value}
       .inlineEventSource=${this.topContenteditableElement}
@@ -353,6 +355,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       .attributeRenderer=${this.attributeRenderer}
       .embedChecker=${this.inlineManager?.embedChecker}
       .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
+      .verticalScrollContainer=${this.topContenteditableElement?.host
+        ? getViewportElement(this.topContenteditableElement.host)
+        : nothing}
       class="affine-data-view-rich-text inline-editor"
     ></rich-text>`;
   }

@@ -7,7 +7,6 @@ import {
 } from '@blocksuite/inline';
 
 import type { TextSelection } from '../../selection/index.js';
-import { PathFinder } from '../../utils/index.js';
 import type { BlockElement } from '../element/block-element.js';
 
 export const getInlineRangeProvider: (
@@ -50,14 +49,14 @@ export const getInlineRangeProvider: (
 
     const { from, to } = textSelection;
 
-    if (PathFinder.equals(from.path, element.path)) {
+    if (from.blockId === element.blockId) {
       return {
         index: from.index,
         length: from.length,
       };
     }
 
-    if (to && PathFinder.equals(to.path, element.path)) {
+    if (to && to.blockId === element.blockId) {
       return {
         index: to.index,
         length: to.length,
@@ -81,7 +80,7 @@ export const getInlineRangeProvider: (
     } else {
       const textSelection = selectionManager.create('text', {
         from: {
-          path: element.path,
+          blockId: element.blockId,
           index: inlineRange.index,
           length: inlineRange.length,
         },

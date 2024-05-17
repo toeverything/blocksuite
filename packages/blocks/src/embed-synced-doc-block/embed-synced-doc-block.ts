@@ -17,22 +17,19 @@ import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-ele
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import { getThemeMode } from '../_common/utils/query.js';
-import {
-  EdgelessEditorBlockSpecs,
-  PageEditorBlockSpecs,
-} from '../_specs/_specs.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
 import type { RootBlockComponent } from '../root-block/index.js';
+import { SpecProvider } from '../specs/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedSyncedDocCard } from './components/embed-synced-doc-card.js';
 import type { EmbedSyncedDocModel } from './embed-synced-doc-model.js';
-import type { EmbedSyncedDocService } from './embed-synced-doc-service.js';
+import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 import { blockStyles } from './styles.js';
 
 @customElement('affine-embed-synced-doc-block')
 export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   EmbedSyncedDocModel,
-  EmbedSyncedDocService
+  EmbedSyncedDocBlockService
 > {
   static override styles = blockStyles;
 
@@ -332,7 +329,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
-      path: this.path,
+      blockId: this.blockId,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }
@@ -465,8 +462,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
     const isSelected = !!this.selected?.is('block');
     const theme = getThemeMode();
-    const EditorBlockSpec =
-      editorMode === 'page' ? PageEditorBlockSpecs : EdgelessEditorBlockSpecs;
+    const pageSpec = SpecProvider.getInstance().getSpec('page').value;
+    const edgelessSpec = SpecProvider.getInstance().getSpec('edgeless').value;
+    const EditorBlockSpec = editorMode === 'page' ? pageSpec : edgelessSpec;
 
     this.dataset.nestedEditor = 'true';
     const scale = isInSurface ? this.model.scale ?? 1 : undefined;

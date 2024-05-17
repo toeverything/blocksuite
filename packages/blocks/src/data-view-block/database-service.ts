@@ -10,7 +10,7 @@ import { ReferenceNodeConfig } from '../_common/inline/presets/nodes/reference-n
 import { DatabaseSelection } from '../database-block/data-view/index.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 
-export class DataViewService<
+export class DataViewBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
 > extends BlockService<DataViewBlockModel> {
   readonly inlineManager = new InlineManager<TextAttributes>();

@@ -4,7 +4,8 @@ import type {
   TextSelection,
 } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
-import { createButtonPopper } from '@blocksuite/blocks';
+import { createButtonPopper, Tooltip } from '@blocksuite/blocks';
+import { noop } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -12,6 +13,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { CopyIcon, MoreIcon } from '../../_common/icons.js';
 import { copyText } from '../../utils/editor-actions.js';
 import { PageEditorActions } from './actions-handle.js';
+
+noop(Tooltip);
 
 @customElement('chat-copy-more')
 export class ChatCopyMore extends WithDisposable(LitElement) {
@@ -27,6 +30,11 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
 
       div {
         cursor: pointer;
+        border-radius: 4px;
+      }
+
+      div:hover {
+        background-color: var(--affine-hover-color);
       }
     }
 
@@ -111,7 +119,10 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
         }
       </style>
       <div class="copy-more">
-        <div @click=${() => copyText(host, content)}>${CopyIcon}</div>
+        <div @click=${() => copyText(host, content)}>
+          ${CopyIcon}
+          <affine-tooltip>Copy</affine-tooltip>
+        </div>
         ${isLast
           ? nothing
           : html`<div class="more-button" @click=${this._toggle}>

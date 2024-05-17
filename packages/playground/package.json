@@ -1,7 +1,7 @@
 {
   "name": "@blocksuite/playground",
   "private": true,
-  "version": "0.13.0",
+  "version": "0.14.0",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -32,17 +32,17 @@
     "tweakpane": "^4.0.3",
     "y-indexeddb": "^9.0.12",
     "y-protocols": "^1.0.6",
-    "yjs": "^13.6.14",
-    "zod": "^3.22.4"
+    "yjs": "^13.6.15",
+    "zod": "^3.23.8"
   },
   "license": "MPL-2.0",
   "devDependencies": {
-    "@apollo/client": "^3.9.11",
+    "@apollo/client": "^3.10.4",
     "@tweakpane/core": "^2.0.3",
     "@types/micromatch": "^4.0.7",
     "graphql": "^16.8.1",
     "magic-string": "^0.30.10",
-    "openai": "^4.37.1",
+    "openai": "^4.47.1",
     "vite-plugin-wasm": "^3.3.0"
   }
 }

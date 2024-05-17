@@ -11,4 +11,4 @@ In the page editor, the display order of notes is determined by the arrangement 
 ## Reference
 
 - [`NoteBlockSchema`](/api/@blocksuite/blocks/variables/NoteBlockSchema.html)
-- [`NoteService`](/api/@blocksuite/blocks/classes/NoteService.html)
+- [`NoteBlockService`](/api/@blocksuite/blocks/classes/NoteBlockService.html)

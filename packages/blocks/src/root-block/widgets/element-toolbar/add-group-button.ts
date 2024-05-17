@@ -9,7 +9,6 @@ import { GroupIcon } from '../../../_common/icons/index.js';
 import { MindmapElementModel } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessModel } from '../../edgeless/type.js';
-import { renderMenuDivider } from './component-toolbar-menu-divider.js';
 
 @customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
@@ -23,7 +22,6 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
         this.edgeless.service.createGroupFromSelected();
       }}
       .tooltip=${'Group'}
-      .tipPosition=${'bottom'}
     >
       ${GroupIcon}<span
         style=${styleMap({
@@ -48,11 +46,11 @@ export function renderAddGroupButton(
   edgeless: EdgelessRootBlockComponent,
   elements: EdgelessModel[]
 ) {
-  return elements.length > 1 &&
-    elements.every(e => !(e.group instanceof MindmapElementModel))
-    ? html`<edgeless-add-group-button
-          .edgeless=${edgeless}
-        ></edgeless-add-group-button>
-        ${renderMenuDivider()} `
-    : nothing;
+  if (elements.length < 2) return nothing;
+  if (elements.some(e => e.group instanceof MindmapElementModel))
+    return nothing;
+
+  return html`<edgeless-add-group-button
+    .edgeless=${edgeless}
+  ></edgeless-add-group-button>`;
 }

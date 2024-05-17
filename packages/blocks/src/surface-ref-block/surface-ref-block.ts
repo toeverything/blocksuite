@@ -15,7 +15,6 @@ import {
   MoreDeleteIcon,
 } from '../_common/icons/index.js';
 import { requestConnectedFrame } from '../_common/utils/event.js';
-import { buildPath } from '../_common/utils/query.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import { getBackgroundGrid } from '../root-block/edgeless/utils/query.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
@@ -358,7 +357,8 @@ export class SurfaceRefBlockComponent extends BlockElement<
           flavour: 'affine:paragraph',
         },
       ]);
-      const path = buildPath(this.doc.getBlockById(paragraphId));
+      const model = this.doc.getBlockById(paragraphId);
+      assertExists(model, `Failed to add paragraph block.`);
 
       requestConnectedFrame(() => {
         selection.update(selList => {
@@ -367,7 +367,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
             .concat(
               selection.create('text', {
                 from: {
-                  path,
+                  blockId: model.id,
                   index: 0,
                   length: 0,
                 },
@@ -447,7 +447,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this._disposables.add(
       selection.slots.changed.on(selList => {
         this._focused = selList.some(
-          sel => PathFinder.equals(sel.path, this.path) && sel.is('block')
+          sel => sel.blockId === this.blockId && sel.is('block')
         );
       })
     );
@@ -482,7 +482,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   private _focusBlock() {
     this.selection.update(() => {
-      return [this.selection.create('block', { path: this.path })];
+      return [this.selection.create('block', { blockId: this.blockId })];
     });
   }
 
@@ -495,7 +495,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     };
     const pageService = this.std.spec.getService('affine:page');
 
-    pageService.editSession.setItem('viewport', viewport);
+    pageService.editPropsStore.setItem('viewport', viewport);
     pageService.slots.editorModeSwitch.emit('edgeless');
   }
 

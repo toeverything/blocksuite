@@ -245,13 +245,13 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     );
 
     const rootService = this._host.spec.getService('affine:page');
-    this._show = !!rootService.editSession.getItem('showBidirectional');
+    this._show = !!rootService.editPropsStore.getItem('showBidirectional');
   }
 
   private _toggleShow() {
     this._show = !this._show;
     const rootService = this._host.spec.getService('affine:page');
-    rootService.editSession.setItem('showBidirectional', this._show);
+    rootService.editPropsStore.setItem('showBidirectional', this._show);
   }
 
   private get _host() {

@@ -10,17 +10,20 @@ import { customElement, query } from 'lit/decorators.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
+import { getViewportElement } from '../_common/utils/query.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
-import type { ParagraphService } from './paragraph-service.js';
+import type { ParagraphBlockService } from './paragraph-service.js';
 import { paragraphBlockStyles } from './styles.js';
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends BlockElement<
   ParagraphBlockModel,
-  ParagraphService
+  ParagraphBlockService
 > {
+  static override styles = paragraphBlockStyles;
+
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
     assertExists(inlineManager);
@@ -135,9 +138,6 @@ export class ParagraphBlockComponent extends BlockElement<
 
     return html`
       <div class="affine-paragraph-block-container">
-        <style>
-          ${paragraphBlockStyles}
-        </style>
         <div class="affine-paragraph-rich-text-wrapper ${type}">
           <rich-text
             .yText=${this.model.text.yText}
@@ -151,6 +151,7 @@ export class ParagraphBlockComponent extends BlockElement<
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
+            .verticalScrollContainer=${getViewportElement(this.host)}
           ></rich-text>
           <div contenteditable="false" class="affine-paragraph-placeholder">
             ${this.service.placeholderGenerator(this.model)}

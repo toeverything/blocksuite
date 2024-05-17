@@ -168,7 +168,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
         ? html`
             <edgeless-tool-icon-button
               .tooltip=${'Insert into doc'}
-              .tipPosition=${'bottom'}
               @click=${this._insertIntoPage}
             >
               ${NoteIcon}
@@ -180,7 +179,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
 
             <edgeless-tool-icon-button
               .tooltip=${'Rename'}
-              .tipPosition=${'bottom'}
               .iconContainerPadding=${0}
               @click=${() =>
                 mountFrameTitleEditor(this.frames[0], this.edgeless)}
@@ -194,8 +192,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="fill-color-button"
-        .tooltip=${this._showPopper ? '' : 'Background'}
-        .tipPosition=${'bottom'}
+        .tooltip=${this._showPopper ? nothing : 'Background'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._frameBackground?.toggle()}
@@ -218,10 +215,10 @@ export function renderFrameButton(
   edgeless: EdgelessRootBlockComponent,
   frames?: FrameBlockModel[]
 ) {
-  return frames?.length
-    ? html`<edgeless-change-frame-button
-        .edgeless=${edgeless}
-        .frames=${frames}
-      ></edgeless-change-frame-button>`
-    : nothing;
+  if (!frames?.length) return nothing;
+
+  return html`<edgeless-change-frame-button
+    .edgeless=${edgeless}
+    .frames=${frames}
+  ></edgeless-change-frame-button>`;
 }

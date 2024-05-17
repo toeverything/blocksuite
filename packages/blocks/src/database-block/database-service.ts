@@ -15,7 +15,7 @@ import type { ViewMeta } from './data-view/view/data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { databaseViewInitEmpty, databaseViewInitTemplate } from './utils.js';
 
-export class DatabaseService<
+export class DatabaseBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
 > extends BlockService<DatabaseBlockModel> {
   readonly inlineManager = new InlineManager<TextAttributes>();

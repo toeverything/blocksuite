@@ -11,6 +11,8 @@ import { dividerBlockStyles } from './styles.js';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
+  static override styles = dividerBlockStyles;
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -19,7 +21,7 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     this.handleEvent('click', () => {
       this.host.selection.set([
         this.host.selection.create('block', {
-          path: this.path,
+          blockId: this.blockId,
         }),
       ]);
     });
@@ -35,9 +37,6 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
 
     return html`
       <div class="affine-divider-block-container">
-        <style>
-          ${dividerBlockStyles}
-        </style>
         <hr />
 
         ${children}

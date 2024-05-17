@@ -1,5 +1,5 @@
 import type { BlockElement, EditorHost } from '@blocksuite/block-std';
-import { PathFinder, type ViewStore } from '@blocksuite/block-std';
+import { type ViewStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
@@ -288,14 +288,15 @@ export function getBlockComponentByModel(
   editorHost: EditorHost,
   model: BlockModel | null
 ) {
-  return getBlockComponentByPath(editorHost, buildPath(model));
+  if (!model) return null;
+  return getBlockComponentByPath(editorHost, model.id);
 }
 
 export function getBlockComponentByPath(
   editorHost: EditorHost,
-  path: string[]
+  blockId: string
 ) {
-  return editorHost.view.viewFromPath('block', path);
+  return editorHost.view.getBlock(blockId);
 }
 
 /**
@@ -318,11 +319,7 @@ export async function asyncGetBlockComponentByModel(
     return rootElement;
   }
 
-  const blockComponent = editorHost.view.viewFromPath(
-    'block',
-    buildPath(model)
-  );
-  return blockComponent;
+  return editorHost.view.getBlock(model.id);
 }
 
 /**
@@ -632,7 +629,7 @@ export function findClosestBlockElement(
     Array.from(container.querySelectorAll(selector)) as BlockComponent[]
   )
     .filter(child => child.host === container.host)
-    .filter(child => PathFinder.includes(child.path, container.path));
+    .filter(child => child !== container);
 
   let lastDistance = Number.POSITIVE_INFINITY;
   let lastChild = null;

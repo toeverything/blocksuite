@@ -15,6 +15,7 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
 
 import { getAIPanel } from '../ai-panel.js';
 import {
@@ -32,7 +33,10 @@ import { reportResponse } from '../utils/action-reporter.js';
 import { isMindmapChild, isMindMapRoot } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
-import { getSelectedNoteAnchor } from '../utils/selection-utils.js';
+import {
+  getSelectedNoteAnchor,
+  getSelections,
+} from '../utils/selection-utils.js';
 import { EXCLUDING_COPY_ACTIONS } from './consts.js';
 import { bindTextStream } from './doc-handler.js';
 import type { CtxRecord } from './edgeless-response.js';
@@ -86,7 +90,7 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
     return createImageRenderer;
   }
 
-  return createTextRenderer(host, 320);
+  return createTextRenderer(host, { maxHeight: 320 });
 }
 
 export async function getContentFromSelected(
@@ -268,6 +272,7 @@ function updateEdgelessAIPanelConfig<
   aiPanel: AffineAIPanelWidget,
   edgelessCopilot: EdgelessCopilotWidget,
   id: T,
+  generatingIcon: TemplateResult<1>,
   ctx: CtxRecord,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
@@ -321,10 +326,12 @@ function updateEdgelessAIPanelConfig<
       })
       .catch(console.error);
   };
+  config.generatingIcon = generatingIcon;
 }
 
 export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
   id: T,
+  generatingIcon: TemplateResult<1>,
   variants?: Omit<
     Parameters<BlockSuitePresets.AIActions[T]>[0],
     keyof BlockSuitePresets.AITextActionOptions
@@ -344,6 +351,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     const edgelessCopilot = getEdgelessCopilotWidget(host);
     let internal: Record<string, unknown> = {};
     const selectedElements = getCopilotSelectedElems(host);
+    const { selectedBlocks } = getSelections(host);
     const ctx = {
       get() {
         return {
@@ -364,6 +372,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
       aiPanel,
       edgelessCopilot,
       id,
+      generatingIcon,
       ctx,
       variants,
       customInput
@@ -372,10 +381,13 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     const elementToolbar = getElementToolbar(host);
     const isEmpty = selectedElements.length === 0;
     const isCreateImageAction = id === 'createImage';
+    const isMakeItRealAction = !isCreateImageAction && id === 'makeItReal';
     let referenceElement = null;
     let togglePanel = () => Promise.resolve(isEmpty);
 
-    if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
+    if (selectedBlocks && selectedBlocks.length !== 0) {
+      referenceElement = selectedBlocks.at(-1);
+    } else if (edgelessCopilot.visible && edgelessCopilot.selectionElem) {
       referenceElement = edgelessCopilot.selectionElem;
     } else if (elementToolbar.toolbarVisible) {
       referenceElement = getElementToolbar(host);
@@ -386,8 +398,7 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
 
     if (!referenceElement) return;
 
-    if (isCreateImageAction) {
-      // @TODO(fundon): remove async
+    if (isCreateImageAction || isMakeItRealAction) {
       togglePanel = async () => {
         if (isEmpty) return true;
         const {
@@ -452,11 +463,6 @@ export function mindmapChildShowWhen(
   const selected = getCopilotSelectedElems(host);
 
   return selected.length === 1 && isMindmapChild(selected[0]);
-}
-
-export function makeItRealShowWhen(_: unknown, __: unknown, host: EditorHost) {
-  const selected = getCopilotSelectedElems(host);
-  return selected.length > 0;
 }
 
 export function explainImageShowWhen(

@@ -239,9 +239,20 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         this._dragging = true;
       })
     );
-
     _disposables.add(
       edgeless.dispatcher.add('dragEnd', () => {
+        this._dragging = false;
+        this._recalculatePosition();
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => {
+        this._dragging = true;
+      })
+    );
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => {
         this._dragging = false;
         this._recalculatePosition();
       })
@@ -349,18 +360,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     if (elements.length === 1) {
       if (selection.firstElement.group instanceof GroupElementModel) {
-        buttons.unshift(renderMenuDivider());
         buttons.unshift(renderReleaseFromGroupButton(this.edgeless));
       }
-    }
-
-    const last = buttons.at(-1);
-    if (
-      buttons.length > 0 &&
-      (typeof last === 'symbol' ||
-        !last?.strings[0].includes('component-toolbar-menu-divider'))
-    ) {
-      buttons.push(renderMenuDivider());
     }
 
     const registeredEntries = this._registeredEntries
@@ -368,9 +369,10 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       .map(entry => entry.render(this.edgeless));
 
     if (registeredEntries.length) {
-      buttons.unshift(renderMenuDivider());
       registeredEntries.forEach(entry => entry && buttons.unshift(entry));
     }
+
+    const realButtons = buttons.filter(b => b !== nothing);
 
     return html` <style>
         :host {
@@ -382,7 +384,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         class="edgeless-component-toolbar-container"
         @pointerdown=${stopPropagation}
       >
-        ${join(buttons, () => '')}
+        ${join(realButtons, renderMenuDivider)}
+        ${realButtons.length ? renderMenuDivider() : nothing}
         <edgeless-more-button
           .edgeless=${edgeless}
           .vertical=${true}

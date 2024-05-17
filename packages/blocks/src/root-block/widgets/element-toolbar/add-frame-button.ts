@@ -9,7 +9,6 @@ import { FrameIcon } from '../../../_common/icons/index.js';
 import { Bound, MindmapElementModel } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessModel } from '../../edgeless/type.js';
-import { renderMenuDivider } from './component-toolbar-menu-divider.js';
 
 @customElement('edgeless-add-frame-button')
 export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
@@ -47,11 +46,11 @@ export function renderAddFrameButton(
   edgeless: EdgelessRootBlockComponent,
   elements: EdgelessModel[]
 ) {
-  return elements.length > 1 &&
-    elements.every(e => !(e.group instanceof MindmapElementModel))
-    ? html`<edgeless-add-frame-button
-          .edgeless=${edgeless}
-        ></edgeless-add-frame-button>
-        ${renderMenuDivider()}`
-    : nothing;
+  if (elements.length < 2) return nothing;
+  if (elements.some(e => e.group instanceof MindmapElementModel))
+    return nothing;
+
+  return html`<edgeless-add-frame-button
+    .edgeless=${edgeless}
+  ></edgeless-add-frame-button>`;
 }

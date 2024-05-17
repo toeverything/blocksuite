@@ -72,6 +72,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
 
   override onExitEditMode() {
     this._setValue();
+    this._prevPortalAbortController?.abort();
   }
 
   private _setValue = (str: string = this._inputEle.value) => {

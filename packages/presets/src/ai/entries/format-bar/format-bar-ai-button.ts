@@ -3,10 +3,12 @@ import {
   type AIItemGroupConfig,
   AIStarIcon,
   createButtonPopper,
-  isInsidePageEditor,
+  EdgelessRootService,
 } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+
+import { getRootService } from '../../utils/selection-utils.js';
 
 @customElement('format-bar-ai-button')
 export class FormatBarAIButton extends WithDisposable(LitElement) {
@@ -75,15 +77,33 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
     this._askAIPopper = createButtonPopper(
       this._askAIButton,
       this._askAIPanel,
-      () => {},
+      ({ display }) => {
+        this._edgeless?.tool.setEdgelessTool({
+          type: display === 'show' ? 'copilot' : 'default',
+        });
+      },
       10,
-      120
+      120,
+      () => {
+        if (this._edgeless) {
+          const { left: x, top: y, width, height } = this._edgeless.viewport;
+          return { x, y, width, height: height - 100 };
+        }
+        return;
+      }
     );
     this.disposables.add(this._askAIPopper);
+    this.disposables.add(() => {
+      this._edgeless?.tool.setEdgelessTool({ type: 'default' });
+    });
   }
 
-  get _editorMode() {
-    return isInsidePageEditor(this.host) ? 'page' : 'edgeless';
+  get _edgeless() {
+    const rootService = getRootService(this.host);
+    if (rootService instanceof EdgelessRootService) {
+      return rootService;
+    }
+    return null;
   }
 
   get _actionGroups() {
@@ -94,7 +114,7 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
           item.showWhen
             ? item.showWhen(
                 this.host.command.chain(),
-                this._editorMode,
+                this._edgeless ? 'edgeless' : 'page',
                 this.host
               )
             : true

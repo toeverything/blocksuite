@@ -7,7 +7,11 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { focusTitle, type Viewport } from '../../_common/utils/index.js';
+import {
+  buildPath,
+  focusTitle,
+  type Viewport,
+} from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   getDocTitleInlineEditor,
@@ -173,6 +177,10 @@ export class PageRootBlockComponent extends BlockElement<
       }
     );
     resizeObserver.observe(this.viewportElement);
+    this.disposables.add(() => {
+      resizeObserver.unobserve(this.viewportElement);
+      resizeObserver.disconnect();
+    });
   }
 
   prependParagraphWithText = (text: Text) => {
@@ -241,7 +249,7 @@ export class PageRootBlockComponent extends BlockElement<
           .flatMap(model => {
             return model.children.map(child => {
               return this.std.selection.create('block', {
-                path: [this.model.id, model.id, child.id],
+                blockId: child.id,
               });
             });
           });
@@ -255,7 +263,7 @@ export class PageRootBlockComponent extends BlockElement<
         );
         if (!sel) return;
         let model: BlockModel | null = null;
-        let path: string[] = sel.path;
+        let path: string[] = buildPath(this.doc.getBlockById(sel.blockId));
         while (path.length > 0 && !model) {
           const m = this.doc.getBlockById(path[path.length - 1]);
           if (m && m.flavour === 'affine:note') {
@@ -325,7 +333,7 @@ export class PageRootBlockComponent extends BlockElement<
         return;
       }
 
-      let newTextSelectionPath: string[] | null = null;
+      let newTextSelectionId: string | null = null;
       const readonly = this.doc.readonly;
       const lastNote = this.model.children
         .slice()
@@ -343,7 +351,7 @@ export class PageRootBlockComponent extends BlockElement<
         if (readonly) return;
         const noteId = this.doc.addBlock('affine:note', {}, this.model.id);
         const paragraphId = this.doc.addBlock('affine:paragraph', {}, noteId);
-        newTextSelectionPath = [this.model.id, noteId, paragraphId];
+        newTextSelectionId = paragraphId;
       } else {
         const last = lastNote.children.at(-1);
         if (
@@ -366,17 +374,17 @@ export class PageRootBlockComponent extends BlockElement<
             {},
             lastNote.id
           );
-          newTextSelectionPath = [this.model.id, lastNote.id, paragraphId];
+          newTextSelectionId = paragraphId;
         }
       }
 
       this.updateComplete
         .then(() => {
-          if (!newTextSelectionPath) return;
+          if (!newTextSelectionId) return;
           this.host.selection.setGroup('note', [
             this.host.selection.create('text', {
               from: {
-                path: newTextSelectionPath,
+                blockId: newTextSelectionId,
                 index: 0,
                 length: 0,
               },

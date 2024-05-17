@@ -1,6 +1,5 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import {
   type BlockSnapshot,
   type DraftModel,
@@ -38,11 +37,11 @@ const sliceText = (slots: JobSlots, std: EditorHost['std']) => {
 
       const model = payload.model;
       const text = std.selection.find('text');
-      if (text && PathFinder.id(text.from.path) === model.id) {
+      if (text && text.from.blockId === model.id) {
         handlePoint(text.from, snapshot, model);
         return;
       }
-      if (text && text.to && PathFinder.id(text.to.path) === model.id) {
+      if (text && text.to && text.to.blockId === model.id) {
         handlePoint(text.to, snapshot, model);
         return;
       }

@@ -129,7 +129,6 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       .yText=${this.frameModel.title.yText}
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${true}
-      .enableAutoScrollVertically=${false}
       .enableUndoRedo=${false}
       .wrapText=${false}
       style=${inlineEditorStyle}

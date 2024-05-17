@@ -32,7 +32,7 @@ export class Doc {
 
     this._yBlocks.forEach((_, id) => {
       if (!this._blocks.has(id)) {
-        this._onBlockAdded(id);
+        this._onBlockAdded(id, true);
       }
     });
 
@@ -296,70 +296,81 @@ export class Doc {
     return fn(parent, index);
   }
 
-  private _onBlockAdded(id: string) {
-    if (this._blocks.has(id)) {
-      return;
+  private _onBlockAdded(id: string, init = false) {
+    try {
+      if (this._blocks.has(id)) {
+        return;
+      }
+      const yBlock = this._yBlocks.get(id);
+      if (!yBlock) {
+        console.warn(`Could not find block with id ${id}`);
+        return;
+      }
+
+      const options: BlockOptions = {
+        onChange: (block, key) => {
+          if (key) {
+            block.model.propsUpdated.emit({ key });
+          }
+
+          this._blockCollection.slots.blockUpdated.emit({
+            type: 'update',
+            id,
+            flavour: block.flavour,
+            props: { key },
+          });
+        },
+      };
+      const block = new Block(this._schema, yBlock, this, options);
+
+      const shouldAdd = this._selector(block, this);
+
+      if (!shouldAdd) return;
+
+      this._blocks.set(id, block);
+      block.model.created.emit();
+
+      if (block.model.role === 'root') {
+        this._blockCollection.slots.rootAdded.emit(id);
+      }
+
+      this.slots.blockUpdated.emit({
+        type: 'add',
+        id,
+        init,
+        flavour: block.model.flavour,
+        model: block.model,
+      });
+    } catch (e) {
+      console.error('An error occurred while adding block:');
+      console.error(e);
     }
-    const yBlock = this._yBlocks.get(id);
-    if (!yBlock) {
-      console.warn(`Could not find block with id ${id}`);
-      return;
-    }
-
-    const options: BlockOptions = {
-      onChange: (block, key) => {
-        if (key) {
-          block.model.propsUpdated.emit({ key });
-        }
-
-        this._blockCollection.slots.blockUpdated.emit({
-          type: 'update',
-          id,
-          flavour: block.flavour,
-          props: { key },
-        });
-      },
-    };
-    const block = new Block(this._schema, yBlock, this, options);
-
-    const shouldAdd = this._selector(block, this);
-
-    if (!shouldAdd) return;
-
-    this._blocks.set(id, block);
-    block.model.created.emit();
-
-    if (block.model.role === 'root') {
-      this._blockCollection.slots.rootAdded.emit(id);
-    }
-
-    this.slots.blockUpdated.emit({
-      type: 'add',
-      id,
-      flavour: block.model.flavour,
-      model: block.model,
-    });
   }
 
   private _onBlockRemoved(id: string) {
-    const block = this.getBlock(id);
-    if (!block) return;
+    try {
+      const block = this.getBlock(id);
+      if (!block) return;
 
-    if (block.model.role === 'root') {
-      this._blockCollection.slots.rootDeleted.emit(id);
+      if (block.model.role === 'root') {
+        this._blockCollection.slots.rootDeleted.emit(id);
+      }
+
+      this.slots.blockUpdated.emit({
+        type: 'delete',
+        id,
+        flavour: block.model.flavour,
+        parent: this.getParent(block.model)?.id ?? '',
+        model: block.model,
+      });
+
+      block.model.dispose();
+      this._blocks.delete(id);
+      block.model.deleted.emit();
+    } catch (e) {
+      console.error('An error occurred while removing block:');
+      console.error(e);
     }
-
-    this.slots.blockUpdated.emit({
-      type: 'delete',
-      id,
-      flavour: block.model.flavour,
-      parent: this.getParent(block.model)?.id ?? '',
-      model: block.model,
-    });
-
-    block.model.dispose();
-    this._blocks.delete(id);
-    block.model.deleted.emit();
   }
 
   addBlocks(

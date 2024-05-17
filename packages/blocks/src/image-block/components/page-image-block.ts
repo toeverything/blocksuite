@@ -1,5 +1,4 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -110,7 +109,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
           .concat(
             selection.create('text', {
               from: {
-                path: this.block.parentPath.concat(blockId),
+                blockId,
                 index: 0,
                 length: 0,
               },
@@ -125,9 +124,9 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         selection.update(selList => {
           return selList.map(sel => {
             const current =
-              sel.is('image') && PathFinder.equals(sel.path, this.block.path);
+              sel.is('image') && sel.blockId === this.block.blockId;
             if (current) {
-              return selection.create('block', { path: this.block.path });
+              return selection.create('block', { blockId: this.block.blockId });
             }
             return sel;
           });
@@ -162,7 +161,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     this._disposables.add(
       selection.slots.changed.on(selList => {
         this._isSelected = selList.some(
-          sel => PathFinder.equals(sel.path, this.block.path) && sel.is('image')
+          sel => sel.blockId === this.block.blockId && sel.is('image')
         );
       })
     );
@@ -181,7 +180,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         selection.update(selList => {
           return selList
             .filter(sel => !['text', 'block', 'image'].includes(sel.type))
-            .concat(selection.create('image', { path: this.block.path }));
+            .concat(selection.create('image', { blockId: this.block.blockId }));
         });
         return true;
       }
@@ -194,8 +193,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
         selection.update(selList =>
           selList.filter(
-            sel =>
-              !(sel.is('image') && PathFinder.equals(sel.path, this.block.path))
+            sel => !(sel.is('image') && sel.blockId === this.block.blockId)
           )
         );
       },
@@ -253,7 +251,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     if (this._isDragging && this.resizeImg) {
       return {
         width: this.resizeImg.style.width,
-        height: this.resizeImg.style.height,
       };
     }
 
@@ -267,7 +264,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
     return {
       width: `${width}px`,
-      height: `${height}px`,
     };
   }
 

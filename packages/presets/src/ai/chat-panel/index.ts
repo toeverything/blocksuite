@@ -1,6 +1,7 @@
 import './chat-panel-input.js';
 import './chat-panel-messages.js';
 
+import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { AIError } from '@blocksuite/blocks';
 import { debounce } from '@blocksuite/global/utils';
@@ -9,7 +10,6 @@ import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
-import type { AffineEditorContainer } from '../../editors/index.js';
 import { SmallHintIcon } from '../_common/icons.js';
 import { AIProvider } from '../provider.js';
 import type { ChatPanelMessages } from './chat-panel-messages.js';
@@ -95,7 +95,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  host!: EditorHost;
 
   @property({ attribute: false })
   doc!: Doc;
@@ -134,8 +134,6 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         this._resetItems();
       }
     });
-
-    this._resetItems();
   }
 
   private _resettingCounter = 0;
@@ -176,10 +174,6 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  get rootService() {
-    return this.editor.host.std.spec.getService('affine:page');
-  }
-
   updateStatus = (status: ChatStatus) => {
     this.status = status;
   };
@@ -207,14 +201,14 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       <div class="chat-panel-title">AFFINE AI</div>
       <chat-panel-messages
         ${ref(this._chatMessages)}
-        .host=${this.editor.host}
+        .host=${this.host}
         .items=${this.items}
         .status=${this.status}
         .error=${this.error}
         .isLoading=${this.isLoading}
       ></chat-panel-messages>
       <chat-panel-input
-        .host=${this.editor.host}
+        .host=${this.host}
         .items=${this.items}
         .updateItems=${this.updateItems}
         .addToItems=${this.addToItems}

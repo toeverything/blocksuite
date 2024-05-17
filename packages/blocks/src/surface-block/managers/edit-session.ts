@@ -98,7 +98,6 @@ const LastPropsSchema = z.object({
     fontWeight: CanvasTextFontWeightSchema,
     fontStyle: CanvasTextFontStyleSchema,
     fontSize: z.number(),
-    hasMaxWidth: z.boolean(),
   }),
   'affine:note': z.object({
     background: NoteColorsSchema,
@@ -132,21 +131,34 @@ const SessionPropsSchema = z.object({
         .optional(),
     }),
   ]),
-  presentBlackBackground: z.boolean(),
-  presentFillScreen: z.boolean(),
-  presentHideToolbar: z.boolean(),
   templateCache: z.string(),
   remoteColor: z.string(),
   showBidirectional: z.boolean(),
 });
 
+const LocalPropsSchema = z.object({
+  presentBlackBackground: z.boolean(),
+  presentFillScreen: z.boolean(),
+  presentHideToolbar: z.boolean(),
+});
+
 type SessionProps = z.infer<typeof SessionPropsSchema>;
+type LocalProps = z.infer<typeof LocalPropsSchema>;
+type StorageProps = SessionProps & LocalProps;
+
+function isLocalProp(key: string): key is keyof LocalProps {
+  return key in LocalPropsSchema.shape;
+}
+
+function isSessionProp(key: string): key is keyof SessionProps {
+  return key in SessionPropsSchema.shape;
+}
 
 export type SerializedViewport = z.infer<
   typeof SessionPropsSchema.shape.viewport
 >;
 
-export class EditSessionStorage {
+export class EditPropsStore {
   private _lastProps: LastProps = {
     connector: {
       frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
@@ -178,7 +190,6 @@ export class EditSessionStorage {
       fontWeight: CanvasTextFontWeight.Regular,
       fontStyle: CanvasTextFontStyle.Normal,
       fontSize: 24,
-      hasMaxWidth: false,
     },
     'affine:note': {
       background: DEFAULT_NOTE_COLOR,
@@ -241,7 +252,7 @@ export class EditSessionStorage {
     deepAssign(props, lastProps);
   }
 
-  private _getKey<T extends keyof SessionProps>(key: T) {
+  private _getKey<T extends keyof StorageProps>(key: T) {
     const id = this._service.doc.id;
     switch (key) {
       case 'viewport':
@@ -263,20 +274,33 @@ export class EditSessionStorage {
     }
   }
 
-  setItem<T extends keyof SessionProps>(key: T, value: SessionProps[T]) {
-    sessionStorage.setItem(this._getKey(key), JSON.stringify(value));
+  setItem<T extends keyof StorageProps>(key: T, value: StorageProps[T]) {
+    this._getStorage(key).setItem(this._getKey(key), JSON.stringify(value));
   }
 
-  getItem<T extends keyof SessionProps>(key: T) {
+  getItem<T extends keyof StorageProps>(key: T) {
     try {
-      const value = sessionStorage.getItem(this._getKey(key));
+      const storage = this._getStorage(key);
+      const value = storage.getItem(this._getKey(key));
       if (!value) return null;
-      return SessionPropsSchema.shape[key].parse(
-        JSON.parse(value)
-      ) as SessionProps[T];
+      if (isLocalProp(key)) {
+        return LocalPropsSchema.shape[key].parse(
+          JSON.parse(value)
+        ) as StorageProps[T];
+      } else if (isSessionProp(key)) {
+        return SessionPropsSchema.shape[key].parse(
+          JSON.parse(value)
+        ) as StorageProps[T];
+      } else {
+        return null;
+      }
     } catch {
       return null;
     }
+  }
+
+  private _getStorage<T extends keyof StorageProps>(key: T) {
+    return isSessionProp(key) ? sessionStorage : localStorage;
   }
 
   dispose() {

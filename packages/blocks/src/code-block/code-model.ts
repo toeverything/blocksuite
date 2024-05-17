@@ -8,6 +8,7 @@ export const CodeBlockSchema = defineBlockSchema({
   props: internal => ({
     text: internal.Text(),
     language: FALLBACK_LANG,
+    wrap: false,
   }),
   metadata: {
     version: 1,

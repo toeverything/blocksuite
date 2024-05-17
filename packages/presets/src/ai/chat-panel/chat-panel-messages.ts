@@ -25,7 +25,7 @@ import {
   PaymentRequiredError,
   UnauthorizedError,
 } from '@blocksuite/blocks';
-import { css, html, nothing } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -166,16 +166,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
   public override async connectedCallback() {
     super.connectedCallback();
-    this.host.selection.slots.changed.on(() => {
-      if (this.host.selection.value.length > 0) {
-        this._selectionValue = this.host.selection.value;
-      }
-      this.requestUpdate();
-    });
-
-    this.host.spec.getService('affine:page').slots.editorModeSwitch.on(() => {
-      this.requestUpdate();
-    });
 
     const res = await AIProvider.userInfo;
     this.avatarUrl = res?.avatarUrl ?? '';
@@ -192,6 +182,26 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         }
       })
     );
+  }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('host')) {
+      const { disposables } = this;
+
+      disposables.add(
+        this.host.selection.slots.changed.on(() => {
+          this._selectionValue = this.host.selection.value;
+          this.requestUpdate();
+        })
+      );
+      disposables.add(
+        this.host.spec
+          .getService('affine:page')
+          .slots.editorModeSwitch.on(() => {
+            this.requestUpdate();
+          })
+      );
+    }
   }
 
   renderError() {
@@ -225,10 +235,16 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     }
 
     if ('role' in item) {
+      const state = isLast
+        ? this.status !== 'loading' && this.status !== 'transmitting'
+          ? 'finished'
+          : 'generating'
+        : 'finished';
       return html`<chat-text
           .host=${this.host}
           .attachments=${item.attachments}
           .text=${item.content}
+          .state=${state}
         ></chat-text
         >${this.renderEditorActions(item, isLast)}`;
     } else {
@@ -350,7 +366,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               actions.filter(action => {
                 if (action.title === 'Replace selection') {
                   if (
-                    this._currentTextSelection?.from.length === 0 &&
+                    (!this._currentTextSelection ||
+                      this._currentTextSelection.from.length === 0) &&
                     this._currentBlockSelections?.length === 0
                   ) {
                     return false;
@@ -369,9 +386,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
                           this._selectionValue.length === 1 &&
                           this._selectionValue[0].type === 'database'
                         ) {
-                          const element = this.host.view.viewFromPath(
-                            'block',
-                            this._selectionValue[0].path
+                          const element = this.host.view.getBlock(
+                            this._selectionValue[0].blockId
                           );
                           if (!element) return;
                           await insertBelow(host, content, element);

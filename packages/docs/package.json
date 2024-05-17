@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/docs",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "BlockSuite documentation",
   "private": true,
   "keywords": [],
@@ -10,10 +10,10 @@
   "type": "module",
   "devDependencies": {
     "typedoc": "^0.25.13",
-    "typedoc-plugin-markdown": "4.0.0-next.55",
+    "typedoc-plugin-markdown": "4.0.1",
     "vite-plugin-wasm": "^3.3.0",
-    "vitepress": "1.1.0",
-    "vue": "^3.4.23"
+    "vitepress": "1.1.4",
+    "vue": "^3.4.27"
   },
   "scripts": {
     "typedoc": "pnpm -C ../.. build:packages && typedoc --options ../../typedoc.json",

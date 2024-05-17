@@ -1,4 +1,4 @@
-import { assertEquals, sha } from '@blocksuite/global/utils';
+import { sha } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
@@ -25,7 +25,11 @@ import {
 import type { ElementContent, Root, Text } from 'hast';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
-import { type BundledLanguage, type ThemedToken } from 'shiki';
+import {
+  type BundledLanguage,
+  bundledLanguagesInfo,
+  type ThemedToken,
+} from 'shiki';
 import { unified } from 'unified';
 
 import { isPlaintext } from '../../code-block/utils/code-languages.js';
@@ -35,6 +39,7 @@ import {
   highlightCache,
   type highlightCacheKey,
 } from '../../code-block/utils/highlight-cache.js';
+import type { AffineTextAttributes } from '../inline/presets/affine-inline-specs.js';
 import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
@@ -353,6 +358,9 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           break;
         }
         case 'affine:code': {
+          if (typeof o.node.props.language == 'string') {
+            o.node.props.language = o.node.props.language.toLowerCase();
+          }
           context
             .openNode(
               {
@@ -370,7 +378,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 properties: {
                   className: [`code-${o.node.props.language}`],
                 },
-                children: await this._deltaToHigglightHasts(
+                children: await this._deltaToHighlightHasts(
                   text.delta,
                   o.node.props.language
                 ),
@@ -1073,21 +1081,39 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     return walker.walk(html, snapshot);
   };
 
-  private _deltaToHigglightHasts = async (
+  private _deltaToHighlightHasts = async (
     deltas: DeltaInsert[],
     rawLang: unknown
   ) => {
     deltas = deltas.reduce((acc, cur) => {
       return mergeDeltas(acc, cur, { force: true });
     }, [] as DeltaInsert<object>[]);
-    assertEquals(deltas.length, 1, 'Delta length should be 1 in code block');
+    if (!deltas.length) {
+      return [
+        {
+          type: 'element',
+          tagName: 'span',
+          children: [
+            {
+              type: 'text',
+              value: '',
+            },
+          ],
+        },
+      ] as ElementContent[];
+    }
+
     const delta = deltas[0];
+    if (typeof rawLang == 'string') {
+      rawLang = rawLang.toLowerCase();
+    }
     if (
       !rawLang ||
       typeof rawLang !== 'string' ||
       isPlaintext(rawLang) ||
       // The rawLang should not be 'Text' here
-      rawLang === 'Text'
+      rawLang === 'Text' ||
+      !bundledLanguagesInfo.map(({ id }) => id).includes(rawLang as string)
     ) {
       return [
         {
@@ -1139,12 +1165,23 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     });
   };
 
-  private _deltaToHast = (deltas: DeltaInsert[]) => {
+  private _deltaToHast = (deltas: DeltaInsert<AffineTextAttributes>[]) => {
     return deltas.map(delta => {
       let hast: HtmlAST = {
         type: 'text',
         value: delta.insert,
       };
+      if (delta.attributes?.reference) {
+        const title = this.configs.get(
+          'title:' + delta.attributes.reference.pageId
+        );
+        if (typeof title === 'string') {
+          hast = {
+            type: 'text',
+            value: title,
+          };
+        }
+      }
       if (delta.attributes) {
         if (delta.attributes.bold) {
           hast = {

@@ -9,13 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/blocks": "0.14.0-canary-202403201020-e0ac77d",
-    "@blocksuite/presets": "0.14.0-canary-202403201020-e0ac77d",
-    "@blocksuite/store": "0.14.0-canary-202403201020-e0ac77d",
+    "@blocksuite/blocks": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/presets": "0.14.0-canary-202405100201-e591bb8",
+    "@blocksuite/store": "0.14.0-canary-202405100201-e591bb8",
     "y-indexeddb": "^9.0.12"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
-    "vite": "^5.2.9"
+    "vite": "^5.2.11"
   }
 }

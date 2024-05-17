@@ -49,6 +49,6 @@ To integrate and customize this editor, you can:
 - [`EdgelessEditor`](/api/@blocksuite/presets/classes/EdgelessEditor.html)
 - [`EdgelessRootService`](/api/@blocksuite/blocks/classes/EdgelessRootService.html)
 - [`SurfaceBlockModel`](/api/@blocksuite/blocks/classes/SurfaceBlockModel.html)
-- [`SurfaceService`](/api/@blocksuite/blocks/classes/SurfaceService.html)
+- [`SurfaceBlockService`](/api/@blocksuite/blocks/classes/SurfaceBlockService.html)
 
 Since `EdgelessEditor` is a native web component, all DOM-related properties are inherited.

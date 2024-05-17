@@ -107,6 +107,18 @@ export class Space<
    * If `shouldTransact` is `false`, the transaction will not be push to the history stack.
    */
   transact(fn: () => void, shouldTransact = true) {
-    this._ySpaceDoc.transact(fn, shouldTransact ? this.rootDoc.clientID : null);
+    this._ySpaceDoc.transact(
+      () => {
+        try {
+          fn();
+        } catch (e) {
+          console.error(
+            `An error occurred while Y.doc ${this._ySpaceDoc.guid} transacting:`
+          );
+          console.error(e);
+        }
+      },
+      shouldTransact ? this.rootDoc.clientID : null
+    );
   }
 }

@@ -36,11 +36,8 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
   protected override render() {
     return html`<edgeless-tool-icon-button
       .iconContainerPadding=${2}
-      @click=${() => {
-        this._releaseFromGroup();
-      }}
+      @click=${() => this._releaseFromGroup()}
       .tooltip=${'Release From Group'}
-      .tipPosition=${'bottom'}
     >
       ${ReleaseFromGroupButtonIcon}
     </edgeless-tool-icon-button> `;

@@ -3,7 +3,7 @@ import { BlockService } from '@blocksuite/block-std';
 import { LayerManager } from './managers/layer-manager.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 
-export class SurfaceService extends BlockService<SurfaceBlockModel> {
+export class SurfaceBlockService extends BlockService<SurfaceBlockModel> {
   layer!: LayerManager;
   surface!: SurfaceBlockModel;
 

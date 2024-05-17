@@ -30,8 +30,6 @@ function inlineTextStyles(
   }
 
   return styleMap({
-    'word-wrap': 'break-word',
-    'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',

@@ -30,5 +30,5 @@ export function updateShapeProps(
           radius: 0,
         };
 
-  edgeless.service.editSession.record('shape', props);
+  edgeless.service.editPropsStore.record('shape', props);
 }

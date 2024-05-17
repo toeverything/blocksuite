@@ -15,7 +15,7 @@ import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
 import type { SurfaceBlockModel } from './surface-model.js';
-import type { SurfaceService } from './surface-service.js';
+import type { SurfaceBlockService } from './surface-service.js';
 import { Bound } from './utils/bound.js';
 import { normalizeWheelDeltaY } from './utils/index.js';
 
@@ -26,7 +26,7 @@ export type IndexedCanvasUpdateEvent = CustomEvent<{
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<
   SurfaceBlockModel,
-  SurfaceService
+  SurfaceBlockService
 > {
   static override styles = css`
     .affine-edgeless-surface-block-container {

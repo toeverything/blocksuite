@@ -9,7 +9,7 @@ import type {
 import { extMimeMap, getAssetName, Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 
-import { replaceIdMiddleware } from './middlewares.js';
+import { replaceIdMiddleware, titleMiddleware } from './middlewares.js';
 
 async function exportDocs(collection: DocCollection, docs: Doc[]) {
   const zip = new JSZip();
@@ -87,7 +87,7 @@ async function importDocs(collection: DocCollection, imported: Blob) {
   };
   const job = new Job({
     collection,
-    middlewares: [replaceIdMiddleware, migrationMiddleware],
+    middlewares: [replaceIdMiddleware, migrationMiddleware, titleMiddleware],
   });
   const assetsMap = job.assets;
 

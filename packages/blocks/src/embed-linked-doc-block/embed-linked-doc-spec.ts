@@ -7,7 +7,7 @@ import {
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
 } from './embed-linked-doc-model.js';
-import { EmbedLinkedDocService } from './embed-linked-doc-service.js';
+import { EmbedLinkedDocBlockService } from './embed-linked-doc-service.js';
 
 const defaultEmbedLinkedDocBlockProps: EmbedLinkedDocBlockProps = {
   pageId: '',
@@ -28,5 +28,5 @@ export const EmbedLinkedDocBlockSpec = createEmbedBlock({
       [EMBED_CARD_TOOLBAR]: literal`${unsafeStatic(EMBED_CARD_TOOLBAR)}`,
     },
   },
-  service: EmbedLinkedDocService,
+  service: EmbedLinkedDocBlockService,
 });

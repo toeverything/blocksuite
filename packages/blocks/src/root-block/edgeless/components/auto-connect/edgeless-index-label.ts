@@ -10,10 +10,16 @@ import {
   HiddenIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { SmallDocIcon } from '../../../../_common/icons/text.js';
-import { requestConnectedFrame } from '../../../../_common/utils/event.js';
+import { NoteDisplayMode } from '../../../../_common/types.js';
+import {
+  requestConnectedFrame,
+  requestThrottledConnectFrame,
+} from '../../../../_common/utils/event.js';
+import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { SurfaceRefBlockModel } from '../../../../surface-ref-block/surface-ref-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { isNoteBlock } from '../../utils/query.js';
 import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
@@ -149,14 +155,14 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   edgeless!: EdgelessRootBlockComponent;
 
-  @property({ attribute: false })
-  show = false;
+  @state()
+  private _show = false;
 
-  @property({ attribute: false })
-  pageVisibleElementsMap!: Map<AutoConnectElement, number>;
+  @state()
+  private _pageVisibleElementsMap: Map<AutoConnectElement, number> = new Map();
 
-  @property({ attribute: false })
-  edgelessOnlyNotesSet!: Set<NoteBlockModel>;
+  @state()
+  private _edgelessOnlyNotesSet = new Set<NoteBlockModel>();
 
   @state()
   private _index = -1;
@@ -167,32 +173,6 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     _disposables.add(
       edgeless.service.viewport.viewportUpdated.on(() => {
         this.requestUpdate();
-      })
-    );
-
-    const requestUpdate = (payload: { id: string }) => {
-      if (!this.isConnected) return;
-
-      const element = edgeless.service.getElementById(
-        payload.id
-      ) as AutoConnectElement;
-      if (element && this.pageVisibleElementsMap.has(element)) {
-        this.requestUpdate();
-      }
-
-      if (isNoteBlock(element) && this.edgelessOnlyNotesSet.has(element)) {
-        this.requestUpdate();
-      }
-    };
-
-    _disposables.add(
-      edgeless.surfaceBlockModel.elementUpdated.on(requestUpdate)
-    );
-    _disposables.add(
-      edgeless.doc.slots.blockUpdated.on(payload => {
-        if (payload.type === 'update') {
-          requestUpdate(payload);
-        }
       })
     );
 
@@ -232,19 +212,141 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+
+    this._setHostStyle();
+    this._initLabels();
+  }
+
+  private _setHostStyle() {
     this.style.position = 'absolute';
     this.style.top = '0';
     this.style.left = '0';
     this.style.zIndex = '1';
   }
 
+  private _initLabels() {
+    const { service } = this.edgeless;
+    const surfaceRefs = service.doc
+      .getBlocksByFlavour('affine:surface-ref')
+      .map(block => block.model) as SurfaceRefBlockModel[];
+
+    const getVisibility = () => {
+      const { elements } = service.selection;
+
+      if (
+        elements.length === 1 &&
+        !service.selection.editing &&
+        (isNoteBlock(elements[0]) ||
+          surfaceRefs.some(ref => ref.reference === elements[0].id))
+      ) {
+        this._show = true;
+      } else {
+        this._show = false;
+      }
+
+      return this._show;
+    };
+    const updateLabels = requestThrottledConnectFrame(() => {
+      const pageVisibleBlocks = new Map<AutoConnectElement, number>();
+      const notes = service.doc.root?.children.filter(child =>
+        matchFlavours(child, ['affine:note'])
+      ) as NoteBlockModel[];
+      const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
+
+      notes.forEach(note => {
+        if (isNoteBlock(note)) {
+          if (note.displayMode === NoteDisplayMode.EdgelessOnly) {
+            edgelessOnlyNotesSet.add(note);
+          } else if (note.displayMode === NoteDisplayMode.DocAndEdgeless) {
+            pageVisibleBlocks.set(note, 1);
+          }
+        }
+
+        note.children.forEach(model => {
+          if (matchFlavours(model, ['affine:surface-ref'])) {
+            const reference = service.getElementById(
+              model.reference
+            ) as AutoConnectElement;
+
+            if (!reference) return;
+
+            if (!pageVisibleBlocks.has(reference)) {
+              pageVisibleBlocks.set(reference, 1);
+            } else {
+              pageVisibleBlocks.set(
+                reference,
+                pageVisibleBlocks.get(reference)! + 1
+              );
+            }
+          }
+        });
+      });
+
+      this._edgelessOnlyNotesSet = edgelessOnlyNotesSet;
+      this._pageVisibleElementsMap = pageVisibleBlocks;
+    }, this.edgeless);
+
+    this._disposables.add(
+      service.selection.slots.updated.on(() => {
+        getVisibility();
+      })
+    );
+    this._disposables.add(
+      this.edgeless.doc.slots.blockUpdated.on(payload => {
+        if (payload.flavour === 'affine:note') {
+          if (!('props' in payload) || payload.props.key === 'displayMode') {
+            updateLabels();
+          } else if (payload.props.key === 'xywh') {
+            this.requestUpdate();
+          }
+        } else if (payload.flavour === 'affine:surface-ref') {
+          switch (payload.type) {
+            case 'add':
+              surfaceRefs.push(payload.model as SurfaceRefBlockModel);
+              break;
+            case 'delete':
+              {
+                const idx = surfaceRefs.indexOf(
+                  payload.model as SurfaceRefBlockModel
+                );
+                if (idx >= 0) {
+                  surfaceRefs.splice(idx, 1);
+                }
+              }
+              break;
+            case 'update':
+              if (payload.props.key !== 'reference') {
+                return;
+              }
+          }
+
+          updateLabels();
+        }
+      })
+    );
+    this._disposables.add(
+      service.surface.elementUpdated.on(payload => {
+        if (
+          payload.props['xywh'] &&
+          surfaceRefs.some(ref => ref.reference === payload.id)
+        ) {
+          this.requestUpdate();
+        }
+      })
+    );
+
+    updateLabels();
+  }
+
   private _getElementsAndCounts() {
     const elements: AutoConnectElement[] = [];
     const counts: number[] = [];
-    for (const [key, value] of this.pageVisibleElementsMap.entries()) {
+
+    for (const [key, value] of this._pageVisibleElementsMap.entries()) {
       elements.push(key);
       counts.push(value);
     }
+
     return { elements, counts };
   }
 
@@ -399,11 +501,12 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   }
 
   private _EdgelessOnlyLabels() {
-    const { edgelessOnlyNotesSet } = this;
-    if (!edgelessOnlyNotesSet.size) return nothing;
+    const { _edgelessOnlyNotesSet } = this;
+
+    if (!_edgelessOnlyNotesSet.size) return nothing;
 
     return html`${repeat(
-      edgelessOnlyNotesSet,
+      _edgelessOnlyNotesSet,
       note => note.id,
       note => {
         const { viewport } = this.edgeless.service;
@@ -438,7 +541,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   }
 
   protected override render() {
-    if (!this.show) return nothing;
+    if (!this._show) return nothing;
 
     const { elements, counts } = this._getElementsAndCounts();
 

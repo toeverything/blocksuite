@@ -1,9 +1,9 @@
 import './tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
@@ -41,21 +41,28 @@ export class EdgelessMenuButton extends WithDisposable(LitElement) {
   @query('.edgeless-component-panel-wrapper')
   private _panelWrapper!: HTMLDivElement;
 
+  @state()
+  private _showMenuPopper = false;
   private _menuPopper!: ReturnType<typeof createButtonPopper>;
   override firstUpdated() {
-    this._menuPopper = createButtonPopper(this, this._panelWrapper);
+    this._menuPopper = createButtonPopper(
+      this,
+      this._panelWrapper,
+      ({ display }) => {
+        this._showMenuPopper = display === 'show';
+      }
+    );
     this._disposables.add(this._menuPopper);
   }
 
   override render() {
-    const { iconInfo } = this;
+    const { iconInfo, _showMenuPopper } = this;
     const componentPanelStyles = styleMap({
       '--edgeless-component-panel-padding': `${this.padding}px`,
       '--edgeless-component-panel-gap': `${this.gap}px`,
     });
     return html`<edgeless-tool-icon-button
-        .tooltip=${iconInfo.tooltip}
-        .tipPosition=${'bottom'}
+        .tooltip=${_showMenuPopper ? nothing : iconInfo.tooltip}
         .iconContainerPadding=${2}
         @click=${() => this._menuPopper.toggle()}
       >

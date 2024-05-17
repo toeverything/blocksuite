@@ -6,7 +6,14 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type TemplateResult,
+  unsafeCSS,
+} from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -295,7 +302,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _reload = (selections: SurfaceSelection[]) => {
     selections.forEach(sel => {
-      const blockElement = this.view.viewFromPath('block', sel.path);
+      const blockElement = this.view.getBlock(sel.blockId);
       if (!!blockElement && this._refreshable(blockElement.model)) {
         (blockElement as RefreshableBlockComponent).refreshData();
       }
@@ -378,7 +385,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     );
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._showPopper ? '' : 'More'}
+        .tooltip=${this._showPopper ? nothing : 'More'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._actionsMenuPopper?.toggle()}

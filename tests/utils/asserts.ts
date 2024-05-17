@@ -843,6 +843,42 @@ export async function assertEdgelessSelectedRectRotation(page: Page, deg = 0) {
   expect(transform).toMatch(r);
 }
 
+export async function assertEdgelessSelectedReactCursor(
+  page: Page,
+  expected: (
+    | {
+        mode: 'resize';
+        handle:
+          | 'top'
+          | 'right'
+          | 'bottom'
+          | 'left'
+          | 'top-left'
+          | 'top-right'
+          | 'bottom-right'
+          | 'bottom-left';
+      }
+    | {
+        mode: 'rotate';
+        handle: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+      }
+  ) & {
+    cursor: string;
+  }
+) {
+  const editor = getEditorLocator(page);
+  const selectedRect = editor
+    .locator('edgeless-selected-rect')
+    .locator('.affine-edgeless-selected-rect');
+
+  const handle = selectedRect
+    .getByLabel(expected.handle, { exact: true })
+    .locator(`.${expected.mode}`);
+
+  await handle.hover();
+  await expect(handle).toHaveCSS('cursor', expected.cursor);
+}
+
 export async function assertEdgelessNonSelectedRect(page: Page) {
   const rect = page.locator('edgeless-selected-rect');
   await expect(rect).toBeHidden();
@@ -1072,7 +1108,7 @@ export async function assertNoteSequence(page: Page, expected: string) {
   expect(expected).toBe(actual);
 }
 
-export async function assertBlockSelections(page: Page, paths: string[][]) {
+export async function assertBlockSelections(page: Page, paths: string[]) {
   const selections = await page.evaluate(() => {
     const host = document.querySelector<EditorHost>('editor-host');
     if (!host) {
@@ -1080,7 +1116,7 @@ export async function assertBlockSelections(page: Page, paths: string[][]) {
     }
     return host.selection.filter('block');
   });
-  const actualPaths = selections.map(selection => selection.path);
+  const actualPaths = selections.map(selection => selection.blockId);
   expect(actualPaths).toEqual(paths);
 }
 

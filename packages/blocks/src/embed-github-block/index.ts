@@ -2,7 +2,7 @@ import { noop } from '@blocksuite/global/utils';
 
 import { EmbedGithubBlockComponent } from './embed-github-block.js';
 import type { EmbedGithubModel } from './embed-github-model.js';
-import type { EmbedGithubService } from './embed-github-service.js';
+import type { EmbedGithubBlockService } from './embed-github-service.js';
 noop(EmbedGithubBlockComponent);
 
 export * from './embed-github-block.js';
@@ -16,7 +16,7 @@ declare global {
       'affine:embed-github': EmbedGithubModel;
     }
     interface BlockServices {
-      'affine:embed-github': EmbedGithubService;
+      'affine:embed-github': EmbedGithubBlockService;
     }
   }
 }

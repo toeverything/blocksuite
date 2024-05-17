@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/block-std",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Std for blocksuite blocks",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -23,7 +23,7 @@
     "lit": "^3.1.3",
     "lz-string": "^1.5.0",
     "w3c-keyname": "^2.2.8",
-    "zod": "^3.22.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@blocksuite/inline": "workspace:*",

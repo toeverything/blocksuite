@@ -8,7 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { RemoteCursor } from '../../../_common/icons/edgeless.js';
 import type { Selectable } from '../../../_common/types.js';
-import { batchToAnimationFrame } from '../../../_common/utils/event.js';
+import { requestThrottledConnectFrame } from '../../../_common/utils/event.js';
 import { pickValues } from '../../../_common/utils/iterable.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
 import {
@@ -182,7 +182,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
       this._updateRemoteRects();
   };
 
-  private _updateTransform = batchToAnimationFrame(() => {
+  private _updateTransform = requestThrottledConnectFrame(() => {
     const { translateX, translateY } = this.edgeless.service.viewport;
 
     this.style.setProperty(

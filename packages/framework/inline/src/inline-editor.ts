@@ -272,8 +272,15 @@ export class InlineEditor<
 
   setReadonly(isReadonly: boolean): void {
     const value = isReadonly ? 'false' : 'true';
-    this.rootElement.contentEditable = value;
-    this.eventSource.contentEditable = value;
+
+    if (this.rootElement.contentEditable !== value) {
+      this.rootElement.contentEditable = value;
+    }
+
+    if (this.eventSource.contentEditable !== value) {
+      this.eventSource.contentEditable = value;
+    }
+
     this._isReadonly = isReadonly;
   }
 

@@ -115,7 +115,7 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
       userRect
     ).map(blockPath => {
       return this.host.selection.create('block', {
-        path: blockPath,
+        blockId: blockPath,
       });
     });
 
@@ -371,7 +371,7 @@ function filterBlockInfosByParent(
 function getSelectingBlockPaths(blockInfos: BlockInfo[], userRect: Rect) {
   const filteredBlockInfos = filterBlockInfos(blockInfos, userRect);
   const len = filteredBlockInfos.length;
-  const blockPaths: string[][] = [];
+  const blockPaths: string[] = [];
   let singleTargetParentBlock: BlockInfo | null = null;
   let blocks: BlockInfo[] = [];
   if (len === 0) return blockPaths;
@@ -406,12 +406,16 @@ function getSelectingBlockPaths(blockInfos: BlockInfo[], userRect: Rect) {
 
   // Filter out the blocks which parent is in the blocks
   for (let i = 0; i < blocks.length; i++) {
-    const parent = blocks[i].element.parentPath.join('|');
-    const isParentInBlocks = blocks.some(
-      block => block.element.path.join('|') === parent
-    );
-    if (!isParentInBlocks) {
-      blockPaths.push(blocks[i].element.path);
+    const block = blocks[i];
+    const parent = blocks[i].element.doc.getParent(block.element.model);
+    const parentId = parent?.id;
+    if (parentId) {
+      const isParentInBlocks = blocks.some(
+        block => block.element.model.id === parentId
+      );
+      if (!isParentInBlocks) {
+        blockPaths.push(blocks[i].element.blockId);
+      }
     }
   }
 

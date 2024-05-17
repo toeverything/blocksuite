@@ -1,5 +1,12 @@
 import { type Disposable } from '@blocksuite/global/utils';
-import { computePosition, flip, offset, shift } from '@floating-ui/dom';
+import {
+  autoPlacement,
+  computePosition,
+  offset,
+  type Rect,
+  shift,
+  size,
+} from '@floating-ui/dom';
 
 export function listenClickAway(
   element: HTMLElement,
@@ -21,6 +28,8 @@ export function listenClickAway(
   };
 }
 
+type Display = 'show' | 'hidden';
+
 const ATTR_SHOW = 'data-show';
 /**
  * Using attribute 'data-show' to control popper visibility.
@@ -37,27 +46,41 @@ const ATTR_SHOW = 'data-show';
 export function createButtonPopper(
   reference: HTMLElement,
   popperElement: HTMLElement,
-  stateUpdated: (state: { display: 'show' | 'hidden' }) => void = () => {
+  stateUpdated: (state: { display: Display }) => void = () => {
     /** DEFAULT EMPTY FUNCTION */
   },
   mainAxis?: number,
-  crossAxis?: number
+  crossAxis?: number,
+  rootBoundary?: Rect | (() => Rect | undefined)
 ) {
-  let state = 'hidden';
+  let display: Display = 'hidden';
+
+  const originMaxHeight = window.getComputedStyle(popperElement).maxHeight;
 
   function compute() {
+    const overflowOptions = {
+      rootBoundary:
+        typeof rootBoundary === 'function' ? rootBoundary() : rootBoundary,
+    };
+
     computePosition(reference, popperElement, {
-      placement: 'top',
       middleware: [
         offset({
           mainAxis: mainAxis ?? 14,
           crossAxis: crossAxis ?? 0,
         }),
-        flip({
-          fallbackPlacements: ['bottom'],
+        autoPlacement({
+          allowedPlacements: ['top', 'bottom'],
+          ...overflowOptions,
         }),
-        shift({
-          padding: 10,
+        shift(overflowOptions),
+        size({
+          ...overflowOptions,
+          apply({ availableHeight }) {
+            popperElement.style.maxHeight = originMaxHeight
+              ? `min(${originMaxHeight}, ${availableHeight}px)`
+              : `${availableHeight}px`;
+          },
         }),
       ],
     })
@@ -74,18 +97,16 @@ export function createButtonPopper(
 
   const show = () => {
     popperElement.setAttribute(ATTR_SHOW, '');
+    display = 'show';
+    stateUpdated({ display });
     compute();
-    state = 'show';
-    stateUpdated({ display: 'show' });
   };
 
   const hide = () => {
-    if (!popperElement) return;
     popperElement.removeAttribute(ATTR_SHOW);
-
+    display = 'hidden';
+    stateUpdated({ display });
     compute();
-    state = 'hidden';
-    stateUpdated({ display: 'hidden' });
   };
 
   const toggle = () => {
@@ -100,7 +121,7 @@ export function createButtonPopper(
 
   return {
     get state() {
-      return state;
+      return display;
     },
     show,
     hide,

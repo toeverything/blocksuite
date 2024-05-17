@@ -1,11 +1,12 @@
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel, Doc } from '@blocksuite/store';
+import type { BlockModel, BlockSelector, Doc } from '@blocksuite/store';
 import { css, render, type TemplateResult } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
+import { SpecProvider } from '../../specs/utils/spec-provider.js';
 import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
 import { NoteDisplayMode } from '../types.js';
@@ -99,12 +100,12 @@ export function renderLinkedDocInCard(
     `Trying to load page ${card.model.pageId} in linked page block, but the page is not found.`
   );
 
+  renderSurfaceRef(card);
+
   renderNoteContent(card).catch(e => {
     console.error(e);
     card.isError = true;
   });
-
-  renderSurfaceRef(card);
 }
 
 function getNotesFromDoc(linkedDoc: Doc) {
@@ -120,6 +121,16 @@ function getNotesFromDoc(linkedDoc: Doc) {
   }
 
   return note;
+}
+
+function filterTextModel(model: BlockModel) {
+  if (matchFlavours(model, ['affine:divider'])) {
+    return true;
+  }
+  if (!matchFlavours(model, ['affine:paragraph', 'affine:list'])) {
+    return false;
+  }
+  return !!model.text?.toString().length;
 }
 
 async function renderNoteContent(
@@ -140,15 +151,7 @@ async function renderNoteContent(
   card.isNoteContentEmpty = false;
 
   const noteChildren = notes.flatMap(note =>
-    note.children.filter(child => {
-      if (matchFlavours(child, ['affine:divider'])) {
-        return true;
-      }
-      if (!matchFlavours(child, ['affine:paragraph', 'affine:list'])) {
-        return false;
-      }
-      return !!child.text?.toString().length;
-    })
+    note.children.filter(filterTextModel)
   );
 
   if (!noteChildren.length) {
@@ -167,23 +170,38 @@ async function renderNoteContent(
   noteBlocksContainer.contentEditable = 'false';
   noteContainer.append(noteBlocksContainer);
 
-  const cardHeight = EMBED_CARD_HEIGHT[cardStyle];
-
   if (cardStyle === 'horizontal') {
+    // When the card is horizontal, we only render the first block
     noteChildren.splice(1);
-  }
-
-  for (const block of noteChildren) {
-    const fragment = document.createDocumentFragment();
-    render(card.host.renderModel(block), fragment);
-    noteBlocksContainer.append(fragment);
-
-    await card.updateComplete;
-    const renderHeight = noteBlocksContainer.getBoundingClientRect().height;
-    if (renderHeight >= cardHeight) {
-      break;
+  } else {
+    // Before rendering, we can not know the height of each block
+    // But we can limit the number of blocks to render simply by the height of the card
+    const cardHeight = EMBED_CARD_HEIGHT[cardStyle];
+    const minSingleBlockHeight = 20;
+    const maxBlockCount = Math.floor(cardHeight / minSingleBlockHeight);
+    if (noteChildren.length > maxBlockCount) {
+      noteChildren.splice(maxBlockCount);
     }
   }
+  const childIds = noteChildren.map(child => child.id);
+  const ids: string[] = [];
+  childIds.map(block => {
+    let parent: string | null = block;
+    while (parent && !ids.includes(parent)) {
+      ids.push(parent);
+      parent = doc.blockCollection.crud.getParent(parent);
+    }
+  });
+  const selector: BlockSelector = block => ids.includes(block.id);
+  const previewDoc = doc.blockCollection.getDoc(selector);
+  const previewSpec = SpecProvider.getInstance().getSpec('preview');
+  const previewTemplate = card.host.renderSpecPortal(
+    previewDoc,
+    previewSpec.value
+  );
+  const fragment = document.createDocumentFragment();
+  render(previewTemplate, fragment);
+  noteBlocksContainer.append(fragment);
   const contentEditableElements = noteBlocksContainer.querySelectorAll(
     '[contenteditable="true"]'
   );

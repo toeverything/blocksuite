@@ -1,4 +1,4 @@
-import { BlockElement, PathFinder, RangeManager } from '@blocksuite/block-std';
+import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { Slice, Slot } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -145,7 +145,7 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       this.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(
           (selection): selection is DatabaseSelection => {
-            if (!PathFinder.equals(selection.path, this.path)) {
+            if (selection.blockId !== this.blockId) {
               return false;
             }
             return selection instanceof DatabaseSelection;
@@ -227,7 +227,12 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
     this.selection.setGroup(
       'note',
       selection
-        ? [new DatabaseSelection({ path: this.path, viewSelection: selection })]
+        ? [
+            new DatabaseSelection({
+              blockId: this.blockId,
+              viewSelection: selection,
+            }),
+          ]
         : []
     );
   };

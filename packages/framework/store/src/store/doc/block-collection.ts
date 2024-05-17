@@ -70,6 +70,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
       | {
           type: 'add';
           id: string;
+          init: boolean;
           flavour: string;
           model: BlockModel;
         }
@@ -292,13 +293,18 @@ export class BlockCollection extends Space<FlatBlockMap> {
       return;
     }
     event.keys.forEach((value, id) => {
-      if (value.action === 'add') {
-        this._handleYBlockAdd(id);
-        return;
-      }
-      if (value.action === 'delete') {
-        this._handleYBlockDelete(id);
-        return;
+      try {
+        if (value.action === 'add') {
+          this._handleYBlockAdd(id);
+          return;
+        }
+        if (value.action === 'delete') {
+          this._handleYBlockDelete(id);
+          return;
+        }
+      } catch (e) {
+        console.error('An error occurred while handling Yjs event:');
+        console.error(e);
       }
     });
   }

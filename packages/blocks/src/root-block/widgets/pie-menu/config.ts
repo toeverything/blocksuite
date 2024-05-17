@@ -77,7 +77,7 @@ pie.expandableCommand({
       label: 'Pen Color',
       active: getActiveConnectorStrokeColor,
       onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-        rootElement.service.editSession.record('brush', {
+        rootElement.service.editPropsStore.record('brush', {
           color: color as LastProps['brush']['color'],
         });
       },
@@ -216,7 +216,7 @@ pie.colorPicker({
   label: 'Line Color',
   active: getActiveConnectorStrokeColor,
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    rootElement.service.editSession.record('connector', {
+    rootElement.service.editPropsStore.record('connector', {
       stroke: color as LastProps['connector']['stroke'],
     });
   },
@@ -262,7 +262,8 @@ shapes.forEach(shape => {
   pie.command({
     label: shape.label,
     icon: ({ rootElement }) => {
-      const attributes = rootElement.service.editSession.getLastProps('shape');
+      const attributes =
+        rootElement.service.editPropsStore.getLastProps('shape');
       return shape.icon(attributes.shapeStyle);
     },
 
@@ -271,7 +272,7 @@ shapes.forEach(shape => {
         type: 'shape',
         shapeType: shape.type,
       });
-      rootElement.service.editSession.record('shape', {
+      rootElement.service.editPropsStore.record('shape', {
         shapeType: shape.type,
       });
       updateShapeOverlay(rootElement);
@@ -283,7 +284,7 @@ pie.command({
   label: 'Toggle Style',
   icon: ({ rootElement }) => {
     const { shapeStyle } =
-      rootElement.service.editSession.getLastProps('shape');
+      rootElement.service.editPropsStore.getLastProps('shape');
     return shapeStyle === ShapeStyle.General
       ? ScribbledStyleIcon
       : GeneralStyleIcon;
@@ -291,13 +292,13 @@ pie.command({
 
   action: ({ rootElement }) => {
     const { shapeStyle } =
-      rootElement.service.editSession.getLastProps('shape');
+      rootElement.service.editPropsStore.getLastProps('shape');
     const toggleType =
       shapeStyle === ShapeStyle.General
         ? ShapeStyle.Scribbled
         : ShapeStyle.General;
 
-    rootElement.service.editSession.record('shape', {
+    rootElement.service.editPropsStore.record('shape', {
       shapeStyle: toggleType,
     });
 
@@ -309,7 +310,7 @@ pie.colorPicker({
   label: 'Fill',
   active: getActiveShapeColor('fill'),
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    rootElement.service.editSession.record('shape', {
+    rootElement.service.editPropsStore.record('shape', {
       fillColor: color as LastProps['shape']['fillColor'],
     });
     updateShapeOverlay(rootElement);
@@ -322,7 +323,7 @@ pie.colorPicker({
   hollow: true,
   active: getActiveShapeColor('stroke'),
   onChange: (color: CssVariableName, { rootElement }: PieMenuContext) => {
-    rootElement.service.editSession.record('shape', {
+    rootElement.service.editPropsStore.record('shape', {
       strokeColor: color as LastProps['shape']['strokeColor'],
     });
     updateShapeOverlay(rootElement);

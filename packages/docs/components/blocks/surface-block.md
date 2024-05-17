@@ -10,4 +10,4 @@ This is a container used to render graphical content.
 ## Reference
 
 - [`SurfaceBlockSchema`](/api/@blocksuite/blocks/variables/SurfaceBlockSchema.html)
-- [`SurfaceService`](/api/@blocksuite/blocks/classes/SurfaceService.html)
+- [`SurfaceBlockService`](/api/@blocksuite/blocks/classes/SurfaceBlockService.html)

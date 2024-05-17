@@ -162,6 +162,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
 >
   <affine:code
     prop:language="Plain Text"
+    prop:wrap={false}
   />
   <affine:paragraph
     prop:text="aaa"
@@ -277,6 +278,7 @@ test('change code language can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:language="rust"
+  prop:wrap={false}
 />`,
     codeBlockId
   );
@@ -286,6 +288,7 @@ test('change code language can work', async ({ page }) => {
     /*xml*/ `
 <affine:code
   prop:language="Plain Text"
+  prop:wrap={false}
 />`,
     codeBlockId
   );
@@ -418,41 +421,37 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
     <affine:code
       prop:language="Plain Text"
       prop:text="use"
+      prop:wrap={false}
     />
     <affine:code
       prop:language="Plain Text"
       prop:text="use"
+      prop:wrap={false}
     />
   </affine:note>
 </affine:page>`
   );
 });
 
-test.fixme(
-  'use code block copy menu of code block copy whole code block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyCodeBlockState(page, { language: 'javascript' });
-    await focusRichText(page);
+test('code block has content, click code block copy menu, copy whole code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page, { language: 'javascript' });
+  await focusRichText(page);
+  await page.keyboard.type('use');
+  await pressEnterWithShortkey(page);
 
-    await page.keyboard.type('use');
-    await pressEnterWithShortkey(page);
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+  await expect(codeBlockController.copyButton).toBeVisible();
+  await codeBlockController.copyButton.click();
 
-    const codeBlockPosition = await getCenterPosition(page, 'affine-code');
-    await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
-
-    const position = await getCenterPosition(
-      page,
-      '.affine-codeblock-option > icon-button:nth-child(1)'
-    );
-
-    await page.mouse.click(position.x, position.y);
-
-    await focusRichText(page, 1);
-    await pasteByKeyboard(page);
-    await assertStoreMatchJSX(
-      page,
-      /*xml*/ `
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
@@ -473,16 +472,66 @@ test.fixme(
     <affine:code
       prop:language="javascript"
       prop:text="use"
+      prop:wrap={false}
     />
     <affine:code
       prop:language="javascript"
       prop:text="use"
+      prop:wrap={false}
     />
   </affine:note>
 </affine:page>`
-    );
-  }
-);
+  );
+});
+
+test('code block is empty, click code block copy menu, copy the empty code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page, { language: 'javascript' });
+  await focusRichText(page);
+
+  await pressEnterWithShortkey(page);
+
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+  await expect(codeBlockController.copyButton).toBeVisible();
+  await codeBlockController.copyButton.click();
+
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:code
+      prop:language="javascript"
+      prop:wrap={false}
+    />
+    <affine:code
+      prop:language="javascript"
+      prop:wrap={false}
+    />
+  </affine:note>
+</affine:page>`
+  );
+});
 
 test('code block copy button can work', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -631,7 +680,7 @@ test('press backspace after code block can select code block', async ({
   await assertRichTextInlineRange(page, 1, 0);
   await assertBlockCount(page, 'paragraph', 1);
   await pressBackspace(page);
-  await assertBlockSelections(page, [['0', '1', '2']]);
+  await assertBlockSelections(page, ['2']);
   await assertBlockCount(page, 'paragraph', 0);
 });
 
@@ -711,6 +760,89 @@ test('should tab works in code block', async ({ page }) => {
   await assertRichTexts(page, ['const a = 10;\n  \nconst b = "NothingToSay"']);
 });
 
+test('toggle code block wrap can work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { codeBlockId } = await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const codeBlockController = getCodeBlock(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:code
+  prop:language="Plain Text"
+  prop:wrap={false}
+/>`,
+    codeBlockId
+  );
+
+  await codeBlockController.codeBlock.hover();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await codeBlockController.wrapButton.click();
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:code
+  prop:language="Plain Text"
+  prop:wrap={true}
+/>`,
+    codeBlockId
+  );
+
+  await codeBlockController.wrapButton.click();
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:code
+  prop:language="Plain Text"
+  prop:wrap={false}
+/>`,
+    codeBlockId
+  );
+});
+
+test('undo code block wrap can work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { codeBlockId } = await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const codeBlockController = getCodeBlock(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:code
+  prop:language="Plain Text"
+  prop:wrap={false}
+/>`,
+    codeBlockId
+  );
+
+  await codeBlockController.codeBlock.hover();
+  await expect(codeBlockController.wrapButton).toBeVisible();
+  await codeBlockController.wrapButton.click();
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:code
+  prop:language="Plain Text"
+  prop:wrap={true}
+/>`,
+    codeBlockId
+  );
+
+  await focusRichText(page);
+  await undoByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:code
+  prop:language="Plain Text"
+  prop:wrap={false}
+/>`,
+    codeBlockId
+  );
+});
+
 test('should code block wrap active after click', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
@@ -748,9 +880,9 @@ test('should code block works in read only mode', async ({ page }) => {
   await codeBlockController.clickLanguageButton();
   await expect(codeBlockController.langList).toBeHidden();
   await expect(codeBlockController.codeOption).toBeVisible();
-  await expect(
-    codeBlockController.codeOption.locator('icon-button')
-  ).toHaveCount(2);
+  await expect(codeBlockController.copyButton).toBeVisible();
+  await expect(codeBlockController.wrapButton).toBeHidden();
+  await expect(codeBlockController.deleteButton).toBeHidden();
 });
 
 test('should code block lang input supports alias', async ({ page }) => {
