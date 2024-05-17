@@ -99,6 +99,7 @@ export const popSideDetail = (ops: {
   rowId: string;
   onClose?: () => void;
 }) => {
+  console.log(ops.attachTo);
   const rootElement = ops.attachTo;
   assertExists(rootElement);
   const modal = createModal(rootElement);
