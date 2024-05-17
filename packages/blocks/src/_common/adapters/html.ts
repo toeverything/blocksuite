@@ -1,4 +1,3 @@
-import { assertEquals } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
@@ -1089,7 +1088,21 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     deltas = deltas.reduce((acc, cur) => {
       return mergeDeltas(acc, cur, { force: true });
     }, [] as DeltaInsert<object>[]);
-    assertEquals(deltas.length, 1, 'Delta length should be 1 in code block');
+    if (!deltas.length) {
+      return [
+        {
+          type: 'element',
+          tagName: 'span',
+          children: [
+            {
+              type: 'text',
+              value: '',
+            },
+          ],
+        },
+      ] as ElementContent[];
+    }
+
     const delta = deltas[0];
     if (typeof rawLang == 'string') {
       rawLang = rawLang.toLowerCase();

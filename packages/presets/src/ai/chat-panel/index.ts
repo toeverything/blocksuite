@@ -112,6 +112,9 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   @state()
   isLoading = false;
 
+  @state()
+  abortController: AbortController | null = null;
+
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
@@ -192,6 +195,10 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     this.error = error;
   };
 
+  updateAbortController = (abortController: AbortController | null) => {
+    this.abortController = abortController;
+  };
+
   scrollToDown() {
     requestAnimationFrame(() => this._chatMessages.value?.scrollToDown());
   }
@@ -206,14 +213,21 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         .status=${this.status}
         .error=${this.error}
         .isLoading=${this.isLoading}
+        .updateItems=${this.updateItems}
+        .updateStatus=${this.updateStatus}
+        .updateError=${this.updateError}
+        .abortController=${this.abortController}
+        .updateAbortController=${this.updateAbortController}
       ></chat-panel-messages>
       <chat-panel-input
         .host=${this.host}
         .items=${this.items}
         .updateItems=${this.updateItems}
+        .updateStatus=${this.updateStatus}
+        .abortController=${this.abortController}
+        .updateAbortController=${this.updateAbortController}
         .addToItems=${this.addToItems}
         .status=${this.status}
-        .updateStatus=${this.updateStatus}
         .error=${this.error}
         .updateError=${this.updateError}
       ></chat-panel-input>

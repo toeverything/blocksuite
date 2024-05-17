@@ -433,31 +433,25 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
   );
 });
 
-test.fixme(
-  'use code block copy menu of code block copy whole code block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyCodeBlockState(page, { language: 'javascript' });
-    await focusRichText(page);
+test('code block has content, click code block copy menu, copy whole code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page, { language: 'javascript' });
+  await focusRichText(page);
+  await page.keyboard.type('use');
+  await pressEnterWithShortkey(page);
 
-    await page.keyboard.type('use');
-    await pressEnterWithShortkey(page);
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+  await expect(codeBlockController.copyButton).toBeVisible();
+  await codeBlockController.copyButton.click();
 
-    const codeBlockPosition = await getCenterPosition(page, 'affine-code');
-    await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
-
-    const position = await getCenterPosition(
-      page,
-      '.affine-codeblock-option > icon-button:nth-child(1)'
-    );
-
-    await page.mouse.click(position.x, position.y);
-
-    await focusRichText(page, 1);
-    await pasteByKeyboard(page);
-    await assertStoreMatchJSX(
-      page,
-      /*xml*/ `
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
@@ -487,9 +481,57 @@ test.fixme(
     />
   </affine:note>
 </affine:page>`
-    );
-  }
-);
+  );
+});
+
+test('code block is empty, click code block copy menu, copy the empty code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page, { language: 'javascript' });
+  await focusRichText(page);
+
+  await pressEnterWithShortkey(page);
+
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+  await expect(codeBlockController.copyButton).toBeVisible();
+  await codeBlockController.copyButton.click();
+
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:code
+      prop:language="javascript"
+      prop:wrap={false}
+    />
+    <affine:code
+      prop:language="javascript"
+      prop:wrap={false}
+    />
+  </affine:note>
+</affine:page>`
+  );
+});
 
 test('code block copy button can work', async ({ page }) => {
   await enterPlaygroundRoom(page);
