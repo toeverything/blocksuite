@@ -121,10 +121,10 @@ function getMostCommonEndpointStyle(
 @customElement('edgeless-change-connector-button')
 export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  elements: ConnectorElementModel[] = [];
+  accessor elements: ConnectorElementModel[] = [];
 
   get doc() {
     return this.edgeless.doc;

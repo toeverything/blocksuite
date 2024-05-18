@@ -11,10 +11,10 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 @customElement('edgeless-change-text-button')
 export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  texts: TextElementModel[] = [];
+  accessor texts: TextElementModel[] = [];
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   get doc() {
     return this.edgeless.doc;

@@ -9,8 +9,15 @@ import { getDeriveProperties, updateDerivedProp } from './derive.js';
  * The local property act like it is a yfield property, but it's not synced to the Y map.
  * Updating local property will also trigger the `elementUpdated` slot of the surface model
  */
-export function local(): PropertyDecorator {
-  return function localDecorator(prototype: unknown, prop: string | symbol) {
+export function local<This>() {
+  return function localDecorator(
+    this: This,
+    _: unknown,
+    context: ClassFieldDecoratorContext
+  ) {
+    const prop = context.name;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const prototype = this;
     // @ts-ignore
     const localProps = prototype['_localProps'] ?? new Set();
     // @ts-ignore

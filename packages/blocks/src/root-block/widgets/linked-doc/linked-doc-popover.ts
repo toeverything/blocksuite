@@ -21,23 +21,23 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  options!: LinkedDocOptions;
+  accessor options!: LinkedDocOptions;
 
   @property({ attribute: false })
-  triggerKey!: string;
+  accessor triggerKey!: string;
 
   @state()
-  private _position: {
+  private accessor _position: {
     height: number;
     x: string;
     y: string;
   } | null = null;
 
   @state()
-  private _query = '';
+  private accessor _query = '';
 
   @state()
-  private _activatedItemIndex = 0;
+  private accessor _activatedItemIndex = 0;
 
   private _actionGroup: LinkedDocGroup[] = [];
 
@@ -59,7 +59,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   }
 
   @query('.linked-doc-popover')
-  linkedDocElement?: Element;
+  accessor linkedDocElement: Element | null = null;
 
   private get _doc() {
     return this.editorHost.doc;

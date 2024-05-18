@@ -255,16 +255,16 @@ export class EdgelessColorPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value: CssVariableName | null = null;
+  accessor value: CssVariableName | null = null;
 
   @property({ attribute: false })
-  options = LINE_COLORS;
+  accessor options = LINE_COLORS;
 
   @property({ attribute: false })
-  showLetterMark = false;
+  accessor showLetterMark = false;
 
   @property({ attribute: false })
-  hollowCircle = false;
+  accessor hollowCircle = false;
 
   onSelect(value: CssVariableName) {
     this.dispatchEvent(

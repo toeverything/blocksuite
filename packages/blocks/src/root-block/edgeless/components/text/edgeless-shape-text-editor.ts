@@ -27,19 +27,21 @@ import { getSelectedRect } from '../../utils/query.js';
 @customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   @query('rich-text')
-  richText!: RichText;
+  accessor richText!: RichText;
 
   @property({ attribute: false })
-  element!: ShapeElementModel;
+  accessor element!: ShapeElementModel;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  mounteEditor?: (
-    element: ShapeElementModel,
-    edgeless: EdgelessRootBlockComponent
-  ) => void;
+  accessor mounteEditor:
+    | ((
+        element: ShapeElementModel,
+        edgeless: EdgelessRootBlockComponent
+      ) => void)
+    | undefined = undefined;
 
   get inlineEditor() {
     assertExists(this.richText.inlineEditor);

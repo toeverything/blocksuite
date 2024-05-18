@@ -21,7 +21,7 @@ import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
 @customElement('affine-link')
 export class AffineLink extends ShadowlessElement {
   @property({ type: Object })
-  delta: DeltaInsert<AffineTextAttributes> = {
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
     insert: ZERO_WIDTH_SPACE,
   };
 

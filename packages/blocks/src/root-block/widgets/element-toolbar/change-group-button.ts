@@ -25,10 +25,10 @@ import { mountGroupTitleEditor } from '../../edgeless/utils/text.js';
 @customElement('edgeless-change-group-button')
 export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  groups!: GroupElementModel[];
+  accessor groups!: GroupElementModel[];
 
   private _insertIntoPage() {
     if (!this.edgeless.doc.root) return;

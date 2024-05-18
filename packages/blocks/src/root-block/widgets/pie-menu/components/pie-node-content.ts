@@ -25,16 +25,16 @@ export class PieNodeContent extends LitElement {
   static override styles = styles;
 
   @property({ attribute: false })
-  node!: PieNode;
+  accessor node!: PieNode;
 
   @property({ attribute: false })
-  isActive!: boolean;
+  accessor isActive!: boolean;
 
   @property({ attribute: false })
-  hoveredNode!: PieNode | null;
+  accessor hoveredNode!: PieNode | null;
 
   @query('.node-content')
-  private _nodeContentElement!: HTMLDivElement;
+  private accessor _nodeContentElement!: HTMLDivElement;
 
   protected override updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);

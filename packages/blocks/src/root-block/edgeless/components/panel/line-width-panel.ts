@@ -108,28 +108,28 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  selectedSize: LineWidth = LineWidth.Two;
+  accessor selectedSize: LineWidth = LineWidth.Two;
 
   @property({ attribute: false })
-  hasTooltip = true;
+  accessor hasTooltip = true;
 
   @property({ attribute: false })
-  disable = false;
+  accessor disable = false;
 
   @query('.line-width-panel')
-  private _lineWidthPanel!: HTMLElement;
+  private accessor _lineWidthPanel!: HTMLElement;
 
   @query('.line-width-overlay')
-  private _lineWidthOverlay!: HTMLElement;
+  private accessor _lineWidthOverlay!: HTMLElement;
 
   @queryAll('.line-width-icon')
-  private _lineWidthIcons!: NodeListOf<HTMLElement>;
+  private accessor _lineWidthIcons!: NodeListOf<HTMLElement>;
 
   @query('.bottom-line')
-  private _bottomLine!: HTMLElement;
+  private accessor _bottomLine!: HTMLElement;
 
   @query('.drag-handle')
-  private _dragHandle!: HTMLElement;
+  private accessor _dragHandle!: HTMLElement;
 
   private _dragConfig: DragConfig | null = null;
 

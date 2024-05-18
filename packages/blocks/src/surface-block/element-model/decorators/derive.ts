@@ -73,20 +73,25 @@ export function updateDerivedProp(
  * @param fn
  * @returns
  */
-export function derive<T extends ElementModel>(
+export function derive<This, T extends ElementModel>(
   fn: (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     propValue: any,
     instance: T
   ) => Record<string, unknown>
-): PropertyDecorator {
-  return function deriveDecorator(target: unknown, prop: string | symbol) {
-    const derived = getDerivedMeta(target, prop as string);
+) {
+  return function deriveDecorator(
+    this: This,
+    _: unknown,
+    context: ClassFieldDecoratorContext
+  ) {
+    const prop = String(context.name);
+    const derived = getDerivedMeta(this, prop);
 
     if (Array.isArray(derived)) {
       derived.push(fn as (typeof derived)[0]);
     } else {
-      setObjectMeta(deriveSymbol, target, prop as string, [fn]);
+      setObjectMeta(deriveSymbol, this, prop as string, [fn]);
     }
   };
 }

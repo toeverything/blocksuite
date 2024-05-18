@@ -29,13 +29,13 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  index!: number;
+  accessor index!: number;
 
   @property({ attribute: false })
-  model!: NoteBlockModel;
+  accessor model!: NoteBlockModel;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   ancestors: Set<string> = new Set();
 

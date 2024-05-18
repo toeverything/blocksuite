@@ -54,25 +54,26 @@ export class EdgelessSizePanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  size!: number;
+  accessor size!: number;
 
   @property({ attribute: false })
-  sizes!: number[];
+  accessor sizes!: number[];
 
   @property({ attribute: false })
-  labels = ['Small', 'Medium', 'Large', 'Huge'];
+  accessor labels = ['Small', 'Medium', 'Large', 'Huge'];
 
   @property({ attribute: false })
-  onSelect?: (size: EdgelessSizePanel['size']) => void;
+  accessor onSelect: ((size: EdgelessSizePanel['size']) => void) | undefined =
+    undefined;
 
   @property({ attribute: false })
-  onPopperCose?: () => void;
+  accessor onPopperCose: (() => void) | undefined = undefined;
 
   @property({ attribute: false })
-  minSize: number = MIN_SIZE;
+  accessor minSize: number = MIN_SIZE;
 
   @property({ attribute: false })
-  maxSize: number = MAX_SIZE;
+  accessor maxSize: number = MAX_SIZE;
 
   @property({ attribute: 'data-type' })
   type: 'normal' | 'check' = 'normal';

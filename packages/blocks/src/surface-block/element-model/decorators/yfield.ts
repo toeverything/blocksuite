@@ -17,8 +17,16 @@ export function getYFieldPropsSet(prototype: unknown): Set<string | symbol> {
   return prototype[yPropsSetSymbol] as Set<string | symbol>;
 }
 
-export function yfield(fallback?: unknown): PropertyDecorator {
-  return function yDecorator(prototype: unknown, prop: string | symbol) {
+export function yfield<This>(fallback?: unknown) {
+  // return function yDecorator(prototype: unknown, prop: string | symbol) {
+  return function yDecorator(
+    this: This,
+    _: unknown,
+    context: ClassFieldDecoratorContext
+  ) {
+    const prop = context.name;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const prototype = this;
     const yProps = getYFieldPropsSet(prototype);
 
     yProps.add(prop);

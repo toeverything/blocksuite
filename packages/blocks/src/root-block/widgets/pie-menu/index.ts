@@ -25,7 +25,7 @@ export const AFFINE_PIE_MENU_WIDGET = 'affine-pie-menu-widget';
 @customElement(AFFINE_PIE_MENU_WIDGET)
 export class AffinePieMenuWidget extends WidgetElement {
   @state()
-  currentMenu: PieMenu | null = null;
+  accessor currentMenu: PieMenu | null = null;
 
   mouse: IVec = [innerWidth / 2, innerHeight / 2];
 

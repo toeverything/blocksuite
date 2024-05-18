@@ -44,22 +44,23 @@ export class EdgelessScalePanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  scale!: number;
+  accessor scale!: number;
 
   @property({ attribute: false })
-  scales!: number[];
+  accessor scales!: number[];
 
   @property({ attribute: false })
-  onSelect?: (size: EdgelessScalePanel['scale']) => void;
+  accessor onSelect: ((size: EdgelessScalePanel['scale']) => void) | undefined =
+    undefined;
 
   @property({ attribute: false })
-  onPopperCose?: () => void;
+  accessor onPopperCose: (() => void) | undefined = undefined;
 
   @property({ attribute: false })
-  minScale: number = MIN_SCALE;
+  accessor minScale: number = MIN_SCALE;
 
   @property({ attribute: false })
-  maxScale: number = MAX_SCALE;
+  accessor maxScale: number = MAX_SCALE;
 
   private _onSelect(scale: EdgelessScalePanel['scale']) {
     if (this.onSelect) this.onSelect(scale / 100);

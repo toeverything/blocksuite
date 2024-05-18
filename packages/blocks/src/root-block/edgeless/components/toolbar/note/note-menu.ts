@@ -60,19 +60,19 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  childFlavour!: NoteChildrenFlavour;
+  accessor childFlavour!: NoteChildrenFlavour;
 
   @property({ attribute: false })
-  childType!: string | null;
+  accessor childType!: string | null;
 
   @property({ attribute: false })
-  tip!: string;
+  accessor tip!: string;
 
   @property({ attribute: false })
-  onChange!: (
+  accessor onChange!: (
     props: Partial<{
       childFlavour: NoteTool['childFlavour'];
       childType: string | null;

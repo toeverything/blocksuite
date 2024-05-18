@@ -129,13 +129,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   static override styles = [lineSizeButtonStyles];
 
   @property({ attribute: false })
-  elements: ShapeElementModel[] = [];
+  accessor elements: ShapeElementModel[] = [];
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @query('edgeless-shape-panel')
-  private _shapePanel!: EdgelessShapePanel;
+  private accessor _shapePanel!: EdgelessShapePanel;
 
   get service() {
     return this.edgeless.service;

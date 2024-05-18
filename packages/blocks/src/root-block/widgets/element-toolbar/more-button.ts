@@ -181,13 +181,13 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  elements: string[] = [];
+  accessor elements: string[] = [];
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  vertical = false;
+  accessor vertical = false;
 
   get doc() {
     return this.edgeless.doc;

@@ -45,7 +45,7 @@ export class ListBlockComponent extends BlockElement<
   }
 
   @state()
-  private _isCollapsedWhenReadOnly = !!this.model?.collapsed;
+  private accessor _isCollapsedWhenReadOnly = !!this.model?.collapsed;
 
   private _select() {
     const selection = this.host.selection;
@@ -77,7 +77,7 @@ export class ListBlockComponent extends BlockElement<
   };
 
   @query('rich-text')
-  private _richTextElement?: RichText;
+  private accessor _richTextElement: RichText | null = null;
 
   private _inlineRangeProvider: InlineRangeProvider | null = null;
 

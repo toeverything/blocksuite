@@ -111,7 +111,7 @@ export class PageRootBlockComponent extends BlockElement<
   clipboardController = new PageClipboard(this);
 
   @query('.affine-page-root-block-container')
-  rootElementContainer!: HTMLDivElement;
+  accessor rootElementContainer!: HTMLDivElement;
 
   private _viewportElement: HTMLDivElement | null = null;
 

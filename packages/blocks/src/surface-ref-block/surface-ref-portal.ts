@@ -53,22 +53,22 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  refModel!: GroupElementModel | FrameBlockModel;
+  accessor refModel!: GroupElementModel | FrameBlockModel;
 
   @property({ attribute: false })
-  renderModel!: (model: BlockModel) => TemplateResult;
+  accessor renderModel!: (model: BlockModel) => TemplateResult;
 
   @query('.surface-blocks-portal')
-  portal!: HTMLDivElement;
+  accessor portal!: HTMLDivElement;
 
   @query('.stacking-canvas')
-  canvasSlot!: HTMLDivElement;
+  accessor canvasSlot!: HTMLDivElement;
 
   get surfaceService() {
     return this.host.std.spec.getService('affine:surface');
