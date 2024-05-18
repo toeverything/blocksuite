@@ -39,16 +39,16 @@ export class AISubItemList extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  item!: AIItemConfig;
+  accessor item!: AIItemConfig;
 
   @property({ attribute: false })
-  abortController!: AbortController;
+  accessor abortController!: AbortController;
 
   @property({ attribute: false })
-  onClick?: () => void;
+  accessor onClick: (() => void) | undefined;
 
   private _handleClick = (subItem: AISubItemConfig) => {
     if (subItem.handler) {

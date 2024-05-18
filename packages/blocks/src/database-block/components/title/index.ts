@@ -53,19 +53,19 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  titleText!: Text;
+  accessor titleText!: Text;
 
   @property({ attribute: false })
-  readonly!: boolean;
+  accessor readonly!: boolean;
 
   @property({ attribute: false })
-  onPressEnterKey?: () => void;
+  accessor onPressEnterKey: (() => void) | undefined = undefined;
 
   @state()
-  isComposing = false;
+  accessor isComposing = false;
 
   @query('rich-text')
-  private richText!: RichText;
+  private accessor richText!: RichText;
   get inlineEditor() {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
@@ -133,7 +133,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   };
 
   @state()
-  private isActive = false;
+  private accessor isActive = false;
 
   override render() {
     const isEmpty =

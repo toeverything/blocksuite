@@ -46,9 +46,9 @@ const styles = css`
 export class DataViewHeaderTools extends WidgetBase {
   static override styles = styles;
   @property({ attribute: false })
-  toolsMap!: Record<string, DataViewWidget[]>;
+  accessor toolsMap!: Record<string, DataViewWidget[]>;
   @state()
-  public showToolBar = false;
+  accessor showToolBar = false;
 
   override render() {
     if (this.view.isDeleted) {

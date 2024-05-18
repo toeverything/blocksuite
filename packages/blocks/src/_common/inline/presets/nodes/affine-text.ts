@@ -45,7 +45,7 @@ export function affineTextStyles(
 @customElement('affine-text')
 export class AffineText extends ShadowlessElement {
   @property({ type: Object })
-  delta: DeltaInsert<AffineTextAttributes> = {
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
     insert: ZERO_WIDTH_SPACE,
   };
 

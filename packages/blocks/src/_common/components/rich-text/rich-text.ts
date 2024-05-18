@@ -62,66 +62,66 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   `;
 
   @query('.inline-editor')
-  private _inlineEditorContainer!: HTMLDivElement;
+  private accessor _inlineEditorContainer!: HTMLDivElement;
   get inlineEditorContainer() {
     assertExists(this._inlineEditorContainer);
     return this._inlineEditorContainer;
   }
 
   @property({ attribute: false })
-  yText!: Y.Text | Text;
+  accessor yText!: Y.Text | Text;
 
   @property({ attribute: false })
-  attributesSchema?: z.ZodSchema;
+  accessor attributesSchema: z.ZodSchema | undefined = undefined;
   @property({ attribute: false })
-  attributeRenderer?: AttributeRenderer;
+  accessor attributeRenderer: AttributeRenderer | undefined = undefined;
 
   @property({ attribute: false })
-  inlineEventSource?: HTMLElement;
+  accessor inlineEventSource: HTMLElement | undefined = undefined;
 
   @property({ attribute: false })
-  markdownShortcutHandler?: <
-    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
-  >(
-    context: KeyboardBindingContext<TextAttributes>,
-    undoManager: Y.UndoManager
-  ) => boolean;
+  accessor markdownShortcutHandler:
+    | (<TextAttributes extends AffineTextAttributes = AffineTextAttributes>(
+        context: KeyboardBindingContext<TextAttributes>,
+        undoManager: Y.UndoManager
+      ) => boolean)
+    | undefined = undefined;
 
   @property({ attribute: false })
-  embedChecker: <
+  accessor embedChecker: <
     TextAttributes extends AffineTextAttributes = AffineTextAttributes,
   >(
     delta: DeltaInsert<TextAttributes>
   ) => boolean = () => false;
 
   @property({ attribute: false })
-  readonly = false;
+  accessor readonly = false;
 
   @property({ attribute: false })
-  inlineRangeProvider?: InlineRangeProvider;
+  accessor inlineRangeProvider: InlineRangeProvider | undefined = undefined;
   // rich-text will create a undoManager if it is not provided.
   @property({ attribute: false })
-  undoManager!: Y.UndoManager;
+  accessor undoManager!: Y.UndoManager;
 
   // If it is true rich-text will prevent events related to clipboard bubbling up and handle them by itself.
   @property({ attribute: false })
-  enableClipboard = true;
+  accessor enableClipboard = true;
   // If it is true rich-text will handle undo/redo by itself. (including v-range restore)
   // It will listen ctrl+z/ctrl+shift+z and call undoManager.undo/redo, keydown event will not
   // bubble up if pressed ctrl+z/ctrl+shift+z.
   @property({ attribute: false })
-  enableUndoRedo = true;
+  accessor enableUndoRedo = true;
   @property({ attribute: false })
-  enableAutoScrollHorizontally = true;
+  accessor enableAutoScrollHorizontally = true;
   @property({ attribute: false })
-  wrapText = true;
+  accessor wrapText = true;
 
   // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
   @property({ attribute: false })
-  enableFormat = true;
+  accessor enableFormat = true;
 
   @property({ attribute: false })
-  verticalScrollContainer?: HTMLElement;
+  accessor verticalScrollContainer: HTMLElement | undefined = undefined;
 
   private _inlineEditor: AffineInlineEditor | null = null;
   get inlineEditor() {

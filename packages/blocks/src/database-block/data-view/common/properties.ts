@@ -160,9 +160,9 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     }
   `;
   @property({ attribute: false })
-  view!: DataViewManager;
+  accessor view!: DataViewManager;
   @property({ attribute: false })
-  onBack?: () => void;
+  accessor onBack: (() => void) | undefined = undefined;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -177,7 +177,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   }
 
   @query('.properties-group')
-  groupContainer!: HTMLElement;
+  accessor groupContainer!: HTMLElement;
 
   override firstUpdated() {
     const sortable = new Sortable(this.groupContainer, {

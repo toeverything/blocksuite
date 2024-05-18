@@ -15,10 +15,10 @@ export class ImageBlockEdgelessComponent extends WithDisposable(
   `;
 
   @property({ attribute: false })
-  url?: string;
+  accessor url: string | undefined = undefined;
 
   @query('.resizable-img')
-  public readonly resizeImg?: HTMLElement;
+  public accessor resizeImg: HTMLElement | null = null;
 
   private _handleError(error: Error) {
     this.dispatchEvent(new CustomEvent('error', { detail: error }));

@@ -77,55 +77,55 @@ export class EdgelessToolIconButton extends LitElement {
   `;
 
   @property({ attribute: false })
-  disabled = false;
+  accessor disabled = false;
 
   @property({ attribute: false })
-  coming = false;
+  accessor coming = false;
 
   @property({ type: Boolean })
-  showTooltip = true;
+  accessor showTooltip = true;
 
   @property({ attribute: false })
-  tooltip!: string | TemplateResult<1>;
+  accessor tooltip!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  tipPosition: Placement = 'top';
+  accessor tipPosition: Placement = 'top';
 
   @property({ attribute: false })
-  arrow = true;
+  accessor arrow = true;
 
   @property({ attribute: false })
-  tooltipOffset = 8;
+  accessor tooltipOffset = 8;
 
   @property({ attribute: false })
-  active = false;
+  accessor active = false;
 
   @property({ attribute: false })
-  activeMode: 'color' | 'background' = 'color';
+  accessor activeMode: 'color' | 'background' = 'color';
 
   @property({ attribute: false })
-  iconContainerWidth?: string;
+  accessor iconContainerWidth: string | undefined = undefined;
 
   @property({ attribute: false })
-  iconContainerPadding: number | number[] = 2;
+  accessor iconContainerPadding: number | number[] = 2;
 
   @property({ attribute: false })
-  iconSize?: string;
+  accessor iconSize: string | undefined = undefined;
 
   @property({ attribute: false })
-  labelHeight?: string;
+  accessor labelHeight: string | undefined = undefined;
 
   @property({ attribute: false })
-  withHover?: boolean;
+  accessor withHover: boolean | undefined = undefined;
 
   @property({ attribute: false })
-  justify?: string;
+  accessor justify: string | undefined = undefined;
 
   @property({ attribute: false })
-  hover = true;
+  accessor hover = true;
 
   @property({ attribute: false })
-  hoverState = false;
+  accessor hoverState = false;
 
   override connectedCallback() {
     super.connectedCallback();

@@ -36,16 +36,16 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  connector!: ConnectorElementModel;
+  accessor connector!: ConnectorElementModel;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @query('.line-start')
-  private _startHandler!: HTMLDivElement;
+  private accessor _startHandler!: HTMLDivElement;
 
   @query('.line-end')
-  private _endHandler!: HTMLDivElement;
+  private accessor _endHandler!: HTMLDivElement;
 
   private _lastZoom = 1;
 

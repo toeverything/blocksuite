@@ -66,10 +66,10 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  icon!: TemplateResult<1>;
+  accessor icon!: TemplateResult<1>;
 
   @property({ attribute: false })
-  stopGenerating!: () => void;
+  accessor stopGenerating!: () => void;
 
   override render() {
     return html`

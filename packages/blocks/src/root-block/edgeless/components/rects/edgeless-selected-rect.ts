@@ -415,10 +415,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @state()
-  private _selectedRect: SelectedRect = {
+  private accessor _selectedRect: SelectedRect = {
     width: 0,
     height: 0,
     left: 0,
@@ -429,28 +429,28 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   @state()
-  private _isResizing = false;
+  private accessor _isResizing = false;
 
   @state()
-  private _mode: 'resize' | 'scale' | 'rotate' = 'resize';
+  private accessor _mode: 'resize' | 'scale' | 'rotate' = 'resize';
 
   @state()
-  private _scalePercent?: string;
+  private accessor _scalePercent: string | undefined = undefined;
 
   @state()
-  private _scaleDirection?: HandleDirection;
+  private accessor _scaleDirection: HandleDirection | undefined = undefined;
 
   @state()
-  private _isWidthLimit = false;
+  private accessor _isWidthLimit = false;
 
   @state()
-  private _isHeightLimit = false;
+  private accessor _isHeightLimit = false;
 
   @state()
-  private _shiftKey = false;
+  private accessor _shiftKey = false;
 
   @property({ attribute: false })
-  autoCompleteOff = false;
+  accessor autoCompleteOff = false;
 
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;

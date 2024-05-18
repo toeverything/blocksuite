@@ -87,15 +87,16 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  data!: SingleFilter;
+  accessor data!: SingleFilter;
 
   @property({ attribute: false })
-  setData!: (filter: SingleFilter) => void;
+  accessor setData!: (filter: SingleFilter) => void;
 
   @property({ attribute: false })
-  vars!: Variable[];
+  accessor vars!: Variable[];
+
   @property({ attribute: false })
-  onDelete?: () => void;
+  accessor onDelete: (() => void) | undefined = undefined;
 
   private _setRef = (ref: VariableOrProperty) => {
     this.setData(firstFilterByRef(this.vars, ref));

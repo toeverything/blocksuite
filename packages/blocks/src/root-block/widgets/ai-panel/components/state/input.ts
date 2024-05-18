@@ -87,16 +87,16 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  onFinish?: (input: string) => void;
+  accessor onFinish: ((input: string) => void) | undefined = undefined;
 
   @query('.arrow')
-  private _arrow!: HTMLDivElement;
+  private accessor _arrow!: HTMLDivElement;
 
   @query('textarea')
-  private _textarea!: HTMLTextAreaElement;
+  private accessor _textarea!: HTMLTextAreaElement;
 
   @state()
-  private _hasContent = false;
+  private accessor _hasContent = false;
 
   private _sendToAI = () => {
     const value = this._textarea.value.trim();

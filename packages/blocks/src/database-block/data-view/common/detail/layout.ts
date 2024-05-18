@@ -66,9 +66,9 @@ class SideLayoutModal extends ShadowlessElement {
     }
   `;
   @property({ attribute: false })
-  content?: HTMLElement;
+  accessor content: HTMLElement | undefined = undefined;
   @property({ attribute: false })
-  close?: () => void;
+  accessor close: (() => void) | undefined = undefined;
 
   renderOps() {
     return html``;

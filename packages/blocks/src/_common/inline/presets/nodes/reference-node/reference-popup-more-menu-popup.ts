@@ -57,13 +57,13 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  inlineEditor!: AffineInlineEditor;
+  accessor inlineEditor!: AffineInlineEditor;
 
   @property({ attribute: false })
-  targetInlineRange!: InlineRange;
+  accessor targetInlineRange!: InlineRange;
 
   @property({ attribute: false })
-  abortController!: AbortController;
+  accessor abortController!: AbortController;
 
   get referenceDocId() {
     const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference

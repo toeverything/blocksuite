@@ -61,13 +61,13 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   `;
 
   @query('rich-text')
-  richText!: RichText;
+  accessor richText!: RichText;
 
   @property({ attribute: false })
-  element!: TextElementModel;
+  accessor element!: TextElementModel;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   get inlineEditor() {
     assertExists(this.richText.inlineEditor);

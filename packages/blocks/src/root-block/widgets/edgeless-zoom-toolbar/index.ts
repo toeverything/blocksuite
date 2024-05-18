@@ -41,7 +41,7 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetElement<
   `;
 
   @state()
-  private _hide = false;
+  private accessor _hide = false;
 
   get edgeless() {
     return this.blockElement;

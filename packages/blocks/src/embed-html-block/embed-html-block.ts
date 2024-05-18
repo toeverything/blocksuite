@@ -25,16 +25,16 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';
 
   @state()
-  private _isSelected = false;
+  private accessor _isSelected = false;
 
   @state()
-  private _showOverlay = true;
+  private accessor _showOverlay = true;
 
   @query('.embed-html-block-iframe-wrapper')
-  private _iframeWrapper!: HTMLDivElement;
+  private accessor _iframeWrapper!: HTMLDivElement;
 
   @query('embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   private _isDragging = false;
 

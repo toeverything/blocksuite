@@ -60,9 +60,9 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  view!: DataViewManager;
+  accessor view!: DataViewManager;
   @property({ attribute: false })
-  rowId!: string;
+  accessor rowId!: string;
   selection = new DetailSelection(this);
 
   private get readonly() {
@@ -87,7 +87,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   }
 
   @query('.add-property')
-  addPropertyButton!: HTMLElement;
+  accessor addPropertyButton!: HTMLElement;
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
       this.addPropertyButton,

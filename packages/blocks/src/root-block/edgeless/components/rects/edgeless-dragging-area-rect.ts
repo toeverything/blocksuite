@@ -17,7 +17,7 @@ export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   protected override firstUpdated() {
     this._disposables.add(

@@ -12,11 +12,11 @@ export class WidgetBase
   implements DataViewWidgetProps
 {
   @property({ attribute: false })
-  public view!: DataViewManager;
+  accessor view!: DataViewManager;
   @property({ attribute: false })
-  public viewMethods!: DataViewExpose;
+  accessor viewMethods!: DataViewExpose;
   @property({ attribute: false })
-  public viewSource!: ViewSource;
+  accessor viewSource!: ViewSource;
   @property({ attribute: false })
-  public dataSource!: DataSource;
+  accessor dataSource!: DataSource;
 }

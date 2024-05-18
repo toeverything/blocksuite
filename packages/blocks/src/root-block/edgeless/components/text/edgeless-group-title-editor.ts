@@ -18,12 +18,12 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {
   @query('rich-text')
-  richText!: RichText;
+  accessor richText!: RichText;
 
   @property({ attribute: false })
-  group!: GroupElementModel;
+  accessor group!: GroupElementModel;
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   get inlineEditor() {
     assertExists(this.richText.inlineEditor);

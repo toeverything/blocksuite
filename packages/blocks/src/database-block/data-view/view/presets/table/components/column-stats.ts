@@ -17,7 +17,7 @@ const styles = css`
 export class DataBaseColumnStats extends WithDisposable(LitElement) {
   static override styles = styles;
   @property({ attribute: false })
-  view!: DataViewTableManager;
+  accessor view!: DataViewTableManager;
 
   override connectedCallback(): void {
     super.connectedCallback();

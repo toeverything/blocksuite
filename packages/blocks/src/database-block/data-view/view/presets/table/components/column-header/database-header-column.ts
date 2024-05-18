@@ -51,13 +51,13 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  tableViewManager!: DataViewTableManager;
+  accessor tableViewManager!: DataViewTableManager;
 
   @property({ attribute: false })
-  column!: DataViewTableColumnManager;
+  accessor column!: DataViewTableColumnManager;
 
   @property({ attribute: false })
-  grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
+  accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
 
   private widthDragBar = createRef();
 

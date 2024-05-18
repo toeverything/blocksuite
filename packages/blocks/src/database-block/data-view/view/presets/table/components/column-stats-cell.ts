@@ -56,13 +56,13 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  column!: DataViewTableColumnManager;
+  accessor column!: DataViewTableColumnManager;
 
   @state()
-  private operation: StatCalcOp | null = null;
+  private accessor operation: StatCalcOp | null = null;
 
   @state()
-  private result: StatOpResult | null = null;
+  private accessor result: StatOpResult | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();

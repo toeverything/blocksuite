@@ -59,20 +59,20 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  contentOnly = false;
+  accessor contentOnly = false;
   @property({ attribute: false })
-  view!: DataViewKanbanManager;
+  accessor view!: DataViewKanbanManager;
   @property({ attribute: false })
-  groupKey!: string;
+  accessor groupKey!: string;
   @property({ attribute: false })
-  cardId!: string;
+  accessor cardId!: string;
   @property({ attribute: false })
-  column!: DataViewKanbanColumnManager;
+  accessor column!: DataViewKanbanColumnManager;
   @state()
-  isFocus = false;
+  accessor isFocus = false;
 
   @state()
-  editing = false;
+  accessor editing = false;
 
   private _cell = createRef<DataViewCellLifeCycle>();
 
