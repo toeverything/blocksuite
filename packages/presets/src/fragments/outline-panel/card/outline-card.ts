@@ -211,39 +211,41 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  editorMode: 'page' | 'edgeless' = 'page';
+  accessor editorMode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  note!: NoteBlockModel;
+  accessor note!: NoteBlockModel;
 
   @property({ attribute: false })
-  index!: number;
+  accessor index!: number;
 
   @property({ attribute: false })
-  number!: number;
+  accessor number!: number;
 
   @property({ attribute: false })
-  showPreviewIcon!: boolean;
+  accessor showPreviewIcon!: boolean;
 
   @property({ attribute: false })
-  enableNotesSorting!: boolean;
+  accessor enableNotesSorting!: boolean;
 
   @property({ attribute: false })
-  status?: 'selected' | 'placeholder';
+  accessor status: 'selected' | 'placeholder' | undefined = undefined;
 
   @property({ attribute: false })
-  invisible = false;
+  accessor invisible = false;
 
   @state()
-  private _showPopper = false;
+  private accessor _showPopper = false;
 
   @query('.display-mode-button-group')
-  private _displayModeButtonGroup!: HTMLDivElement;
+  private accessor _displayModeButtonGroup!: HTMLDivElement;
+
   @query('note-display-mode-panel')
-  private _displayModePanel!: HTMLDivElement;
+  private accessor _displayModePanel!: HTMLDivElement;
+
   private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 

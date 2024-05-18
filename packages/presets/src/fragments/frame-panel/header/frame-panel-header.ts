@@ -103,19 +103,19 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  editorHost!: EditorHost;
+  accessor editorHost!: EditorHost;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent | null;
+  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   @state()
-  private _settingPopperShow = false;
+  private accessor _settingPopperShow = false;
 
   @query('.all-frames-setting-button')
-  private _frameSettingButton!: HTMLDivElement;
+  private accessor _frameSettingButton!: HTMLDivElement;
 
   @query('.frames-setting-container')
-  private _frameSettingMenu!: HTMLDivElement;
+  private accessor _frameSettingMenu!: HTMLDivElement;
 
   private _framesSettingMenuPopper: ReturnType<
     typeof createButtonPopper

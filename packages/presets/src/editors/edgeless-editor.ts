@@ -41,10 +41,10 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  specs = EdgelessEditorBlockSpecs;
+  accessor specs = EdgelessEditorBlockSpecs;
 
   private _host: Ref<EditorHost> = createRef<EditorHost>();
 

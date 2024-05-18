@@ -84,32 +84,32 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless: EdgelessRootBlockComponent | null = null;
+  accessor edgeless: EdgelessRootBlockComponent | null = null;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  editorHost!: EditorHost;
+  accessor editorHost!: EditorHost;
 
   // Store the ids of the selected frames
   @state()
-  private _selected: string[] = [];
+  private accessor _selected: string[] = [];
 
   @state()
-  private _dragging = false;
+  private accessor _dragging = false;
 
   @property({ attribute: false })
-  insertIndex?: number;
+  accessor insertIndex: number | undefined = undefined;
 
   @property({ attribute: false })
-  fitPadding!: number[];
+  accessor fitPadding!: number[];
 
   @property({ attribute: false })
-  domHost!: Document | HTMLElement;
+  accessor domHost!: Document | HTMLElement;
 
   @query('.frame-list-container')
-  frameListContainer!: HTMLElement;
+  accessor frameListContainer!: HTMLElement;
 
   private _frameItems: FrameListItem[] = [];
   private _frameElementHeight = 0;

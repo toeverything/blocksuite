@@ -58,19 +58,19 @@ export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  frame!: FrameBlockModel;
+  accessor frame!: FrameBlockModel;
 
   @property({ attribute: false })
-  cardIndex!: number;
+  accessor cardIndex!: number;
 
   @query('.frame-card-title-container')
-  titleContainer!: HTMLElement;
+  accessor titleContainer!: HTMLElement;
 
   @query('.frame-card-title-container .card-index')
-  titleIndexElement!: HTMLElement;
+  accessor titleIndexElement!: HTMLElement;
 
   @query('.frame-card-title-container .card-title')
-  titleContentElement!: HTMLElement;
+  accessor titleContentElement!: HTMLElement;
 
   private _titleDisposables: DisposableGroup | null = null;
 

@@ -202,16 +202,16 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   `;
 
   @state()
-  private _show = false;
+  private accessor _show = false;
 
   @state()
-  private _backLinkShow: boolean[] = [];
+  private accessor _backLinkShow: boolean[] = [];
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  pageRoot!: PageRootBlockComponent;
+  accessor pageRoot!: PageRootBlockComponent;
 
   private _inlineManager = new InlineManager();
 

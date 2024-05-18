@@ -52,22 +52,24 @@ export class AISlidesRenderer extends WithDisposable(LitElement) {
   static override styles = css``;
 
   @property({ attribute: false })
-  text!: string;
+  accessor text!: string;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  ctx?: {
-    get(): Record<string, unknown>;
-    set(data: Record<string, unknown>): void;
-  };
+  accessor ctx:
+    | {
+        get(): Record<string, unknown>;
+        set(data: Record<string, unknown>): void;
+      }
+    | undefined = undefined;
 
   private _editorContainer: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
   private _doc!: Doc;
 
   @query('editor-host')
-  private _editorHost!: EditorHost;
+  private accessor _editorHost!: EditorHost;
 
   override connectedCallback(): void {
     super.connectedCallback();

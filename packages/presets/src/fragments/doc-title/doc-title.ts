@@ -61,16 +61,16 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @state()
-  private _isReadonly = false;
+  private accessor _isReadonly = false;
 
   @state()
-  private _isComposing = false;
+  private accessor _isComposing = false;
 
   @query('rich-text')
-  private _richTextElement!: RichText;
+  private accessor _richTextElement!: RichText;
 
   private get _rootModel() {
     return this.doc.root as RootBlockModel;
