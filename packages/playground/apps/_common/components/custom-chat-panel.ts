@@ -20,10 +20,10 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
     }
   `;
   @state()
-  private _show = false;
+  private accessor _show = false;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
 
   public toggleDisplay() {
     this._show = !this._show;

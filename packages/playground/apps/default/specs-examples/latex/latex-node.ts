@@ -38,12 +38,12 @@ export class latexNode extends ShadowlessElement {
   `;
 
   @property({ type: Object })
-  delta: DeltaInsert<TextAttributesWithLatex> = {
+  accessor delta: DeltaInsert<TextAttributesWithLatex> = {
     insert: ZERO_WIDTH_SPACE,
   };
 
   @property({ type: Boolean })
-  selected = false;
+  accessor selected = false;
 
   override updated() {
     const latexContainer = this.querySelector<HTMLElement>('.latex-container');

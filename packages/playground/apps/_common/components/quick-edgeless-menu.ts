@@ -65,31 +65,31 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  collection!: DocCollection;
+  accessor collection!: DocCollection;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
   @property({ attribute: false })
-  leftSidePanel!: LeftSidePanel;
+  accessor leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
-  docsPanel!: DocsPanel;
+  accessor docsPanel!: DocsPanel;
   @property({ attribute: false })
-  chatPanel!: CustomChatPanel;
-
-  @state()
-  private _canUndo = false;
+  accessor chatPanel!: CustomChatPanel;
 
   @state()
-  private _canRedo = false;
-
-  @property({ attribute: false })
-  mode: 'page' | 'edgeless' = 'page';
-
-  @property({ attribute: false })
-  readonly = false;
+  private accessor _canUndo = false;
 
   @state()
-  private _dark = localStorage.getItem('blocksuite:dark') === 'true';
+  private accessor _canRedo = false;
+
+  @property({ attribute: false })
+  accessor mode: 'page' | 'edgeless' = 'page';
+
+  @property({ attribute: false })
+  accessor readonly = false;
+
+  @state()
+  private accessor _dark = localStorage.getItem('blocksuite:dark') === 'true';
 
   get doc() {
     return this.editor.doc;
