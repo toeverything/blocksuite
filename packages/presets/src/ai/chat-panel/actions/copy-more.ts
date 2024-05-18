@@ -86,22 +86,24 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
   accessor curBlockSelections: BlockSelection[] | undefined = undefined;
 
   @property({ attribute: false })
-  items!: ChatItem[];
+  accessor items!: ChatItem[];
 
   @property({ attribute: false })
-  updateItems!: (items: ChatItem[]) => void;
+  accessor updateItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
-  updateStatus!: (status: ChatStatus) => void;
+  accessor updateStatus!: (status: ChatStatus) => void;
 
   @property({ attribute: false })
-  updateError!: (error: AIError | null) => void;
+  accessor updateError!: (error: AIError | null) => void;
 
   @property({ attribute: false })
-  abortController!: AbortController | null;
+  accessor abortController!: AbortController | null;
 
   @property({ attribute: false })
-  updateAbortController!: (abortController: AbortController | null) => void;
+  accessor updateAbortController!: (
+    abortController: AbortController | null
+  ) => void;
 
   @state()
   private accessor _showMoreMenu = false;

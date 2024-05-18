@@ -151,19 +151,21 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   accessor isLoading!: boolean;
 
   @property({ attribute: false })
-  updateItems!: (items: ChatItem[]) => void;
+  accessor updateItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
-  updateStatus!: (status: ChatStatus) => void;
+  accessor updateStatus!: (status: ChatStatus) => void;
 
   @property({ attribute: false })
-  updateError!: (error: AIError | null) => void;
+  accessor updateError!: (error: AIError | null) => void;
 
   @property({ attribute: false })
-  abortController!: AbortController | null;
+  accessor abortController!: AbortController | null;
 
   @property({ attribute: false })
-  updateAbortController!: (abortController: AbortController | null) => void;
+  accessor updateAbortController!: (
+    abortController: AbortController | null
+  ) => void;
 
   @query('.chat-panel-messages')
   accessor messagesContainer!: HTMLDivElement;

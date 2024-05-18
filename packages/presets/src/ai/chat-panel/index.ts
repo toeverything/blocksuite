@@ -113,7 +113,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   accessor isLoading = false;
 
   @state()
-  abortController: AbortController | null = null;
+  accessor abortController: AbortController | null = null;
 
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
