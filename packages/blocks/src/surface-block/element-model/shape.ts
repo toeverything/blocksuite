@@ -107,7 +107,7 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   @yfield()
   accessor strokeStyle: StrokeStyle = 'solid';
 
-  @yfield('General')
+  @yfield('General' as ShapeStyle)
   accessor shapeStyle: ShapeStyle = 'General';
 
   @yfield(DEFAULT_ROUGHNESS)
@@ -122,28 +122,28 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   @yfield(ShapeTextFontSize.MEDIUM)
   accessor fontSize!: number;
 
-  @yfield(FontFamily.Inter)
+  @yfield(FontFamily.Inter as string)
   accessor fontFamily!: string;
 
-  @yfield(FontWeight.Regular)
+  @yfield(FontWeight.Regular as FontWeight)
   accessor fontWeight!: FontWeight;
 
-  @yfield('normal')
+  @yfield('normal' as FontStyle)
   accessor fontStyle!: FontStyle;
 
-  @yfield('center')
+  @yfield('center' as TextAlign)
   accessor textAlign!: TextAlign;
 
-  @yfield('center')
+  @yfield('center' as TextAlign)
   accessor textHorizontalAlign!: TextAlign;
 
-  @yfield('center')
+  @yfield('center' as VerticalAlign)
   accessor textVerticalAlign!: VerticalAlign;
 
-  @yfield(TextResizing.AUTO_HEIGHT)
+  @yfield(TextResizing.AUTO_HEIGHT as TextResizing)
   accessor textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
 
-  @yfield(false)
+  @yfield(false as false | number)
   accessor maxWidth: false | number = false;
 
   textBound: IBound | null = null;
