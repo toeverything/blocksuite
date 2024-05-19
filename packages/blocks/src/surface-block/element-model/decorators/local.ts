@@ -9,37 +9,38 @@ import { getDeriveProperties, updateDerivedProp } from './derive.js';
  * The local property act like it is a yfield property, but it's not synced to the Y map.
  * Updating local property will also trigger the `elementUpdated` slot of the surface model
  */
-export function local<This>() {
+export function local<V, T extends ElementModel>() {
   return function localDecorator(
-    this: This,
     _: unknown,
-    context: ClassFieldDecoratorContext
+    context: ClassAccessorDecoratorContext
   ) {
     const prop = context.name;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const prototype = this;
-    // @ts-ignore
-    const localProps = prototype['_localProps'] ?? new Set();
-    // @ts-ignore
-    prototype['_localProps'] = localProps;
 
-    localProps.add(prop);
+    return {
+      init(this: T, v: V) {
+        // @ts-ignore
+        const localProps = this['_localProps'] ?? new Set();
+        // @ts-ignore
+        this['_localProps'] = localProps;
 
-    Object.defineProperty(prototype, prop, {
-      get(this: ElementModel) {
+        localProps.add(prop);
+
+        return v;
+      },
+      get(this: T) {
         return this._local.get(prop);
       },
-      set(this: ElementModel, originalValue: unknown) {
+      set(this: T, originalValue: unknown) {
         const isCreating = getDecoratorState()?.creating;
         const oldValue = this._local.get(prop);
         // When state is creating, the value is considered as default value
         // hence there's no need to convert it
         const newVal = isCreating
           ? originalValue
-          : convertProps(prototype, prop, originalValue, this);
+          : convertProps(this, prop, originalValue, this);
 
         const derivedProps = getDeriveProperties(
-          prototype,
+          this,
           prop,
           originalValue,
           this
@@ -72,6 +73,6 @@ export function local<This>() {
           });
         }
       },
-    });
+    } as ClassAccessorDecoratorResult<T, V>;
   };
 }

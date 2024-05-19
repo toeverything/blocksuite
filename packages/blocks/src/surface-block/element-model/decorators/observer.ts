@@ -32,17 +32,21 @@ type ObserveFn<
  * @returns
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function observe<This, E extends Y.YEvent<any>, T extends ElementModel>(
+export function observe<V, E extends Y.YEvent<any>, T extends ElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: ObserveFn<E, T>
 ) {
   return function observeDecorator(
-    this: This,
     _: unknown,
-    context: ClassFieldDecoratorContext
+    context: ClassAccessorDecoratorContext
   ) {
     const prop = context.name;
-    setObjectMeta(observeSymbol, this, prop, fn);
+    return {
+      init(this: T, v: V) {
+        setObjectMeta(observeSymbol, this, prop, fn);
+        return v;
+      },
+    } as ClassAccessorDecoratorResult<ElementModel, V>;
   };
 }
 

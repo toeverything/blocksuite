@@ -13,17 +13,21 @@ const watchSymbol = Symbol('watch');
  * The watch decorator is used to watch the property change of the element.
  * You can thinks of it as a decorator version of `elementUpdated` slot of the surface model.
  */
-export function watch<This, T extends ElementModel>(
+export function watch<V, T extends ElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: WatchFn<T>
 ) {
   return function watchDecorator(
-    this: This,
     _: unknown,
-    context: ClassFieldDecoratorContext
+    context: ClassAccessorDecoratorContext
   ) {
     const prop = context.name;
-    setObjectMeta(watchSymbol, this, prop, fn);
+    return {
+      init(this: ElementModel, v: V) {
+        setObjectMeta(watchSymbol, this, prop, fn);
+        return v;
+      },
+    } as ClassAccessorDecoratorResult<ElementModel, V>;
   };
 }
 

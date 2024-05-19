@@ -39,34 +39,34 @@ export class TextElementModel extends ElementModel<TextElementProps> {
   }
 
   @yfield()
-  xywh: SerializedXYWH = '[0,0,16,16]';
+  accessor xywh: SerializedXYWH = '[0,0,16,16]';
 
   @yfield(0)
-  rotate: number = 0;
+  accessor rotate: number = 0;
 
   @yfield()
-  text: Y.Text = new DocCollection.Y.Text();
+  accessor text: Y.Text = new DocCollection.Y.Text();
 
   @yfield()
-  color: string = '#000000';
+  accessor color: string = '#000000';
 
   @yfield()
-  fontSize: number = 16;
+  accessor fontSize: number = 16;
 
   @yfield()
-  fontFamily: FontFamily = FontFamily.Inter;
+  accessor fontFamily: FontFamily = FontFamily.Inter;
 
   @yfield()
-  fontWeight: FontWeight = FontWeight.Regular;
+  accessor fontWeight: FontWeight = FontWeight.Regular;
 
   @yfield()
-  fontStyle: FontStyle = 'normal';
+  accessor fontStyle: FontStyle = 'normal';
 
   @yfield()
-  textAlign: TextAlign = 'center';
+  accessor textAlign: TextAlign = 'center';
 
   @yfield()
-  hasMaxWidth?: boolean;
+  accessor hasMaxWidth: boolean | undefined = undefined;
 
   get type() {
     return 'text';

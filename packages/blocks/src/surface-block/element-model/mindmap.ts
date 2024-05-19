@@ -119,7 +119,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     }
   )
   @yfield()
-  children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
+  accessor children: Y.Map<NodeDetail> = new DocCollection.Y.Map();
 
   @watch((_, instance: MindmapElementModel, local) => {
     if (!local) {
@@ -143,7 +143,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     });
   })
   @yfield()
-  layoutType: LayoutType = LayoutType.BALANCE;
+  accessor layoutType: LayoutType = LayoutType.BALANCE;
 
   @watch((_, instance: MindmapElementModel, local) => {
     if (local) {
@@ -151,7 +151,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     }
   })
   @yfield()
-  style: MindmapStyle = MindmapStyle.FOUR;
+  accessor style: MindmapStyle = MindmapStyle.FOUR;
 
   connectors: Map<string, LocalConnectorElementModel> = new Map();
 

@@ -12,17 +12,20 @@ const convertSymbol = Symbol('convert');
  * @param fn
  * @returns
  */
-export function convert<This, T extends ElementModel>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (propValue: any, instance: T) => unknown
+export function convert<V, T extends ElementModel>(
+  fn: (propValue: V, instance: T) => unknown
 ) {
   return function convertDecorator(
-    this: This,
     _: unknown,
-    context: ClassFieldDecoratorContext
+    context: ClassAccessorDecoratorContext
   ) {
     const prop = String(context.name);
-    setObjectMeta(convertSymbol, this, prop, fn);
+    return {
+      init(this: T, v: V) {
+        setObjectMeta(convertSymbol, this, prop, fn);
+        return v;
+      },
+    } as ClassAccessorDecoratorResult<T, V>;
   };
 }
 

@@ -17,21 +17,21 @@ export function getYFieldPropsSet(prototype: unknown): Set<string | symbol> {
   return prototype[yPropsSetSymbol] as Set<string | symbol>;
 }
 
-export function yfield<This>(fallback?: unknown) {
+export function yfield<V>(fallback?: unknown) {
   // return function yDecorator(prototype: unknown, prop: string | symbol) {
   return function yDecorator(
-    this: This,
     _: unknown,
-    context: ClassFieldDecoratorContext
+    context: ClassAccessorDecoratorContext
   ) {
     const prop = context.name;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const prototype = this;
-    const yProps = getYFieldPropsSet(prototype);
 
-    yProps.add(prop);
+    return {
+      init(this: ElementModel, v: V) {
+        const yProps = getYFieldPropsSet(this);
 
-    Object.defineProperty(prototype, prop, {
+        yProps.add(prop);
+        return v;
+      },
       get(this: ElementModel) {
         return (
           this.yMap.get(prop as string) ??
@@ -39,22 +39,17 @@ export function yfield<This>(fallback?: unknown) {
           fallback
         );
       },
-      set(this: ElementModel, originalVal) {
+      set(this: ElementModel, originalVal: V) {
         const isCreating = getDecoratorState()?.creating;
 
         if (getDecoratorState()?.skipYfield) {
           return;
         }
 
-        const derivedProps = getDeriveProperties(
-          prototype,
-          prop,
-          originalVal,
-          this
-        );
+        const derivedProps = getDeriveProperties(this, prop, originalVal, this);
         const val = isCreating
           ? originalVal
-          : convertProps(prototype, prop, originalVal, this);
+          : convertProps(this, prop, originalVal, this);
         // @ts-ignore
         const oldValue = this[prop];
 
@@ -67,7 +62,7 @@ export function yfield<This>(fallback?: unknown) {
           this._preserved.set(prop as string, val);
         }
 
-        startObserve(prototype, prop as string, this);
+        startObserve(this, prop as string, this);
 
         if (!isCreating) {
           updateDerivedProp(derivedProps, this);
@@ -83,6 +78,6 @@ export function yfield<This>(fallback?: unknown) {
           });
         }
       },
-    });
+    } as ClassAccessorDecoratorResult<ElementModel, V>;
   };
 }
