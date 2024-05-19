@@ -16,6 +16,7 @@ export default defineConfig(_configEnv =>
     },
     test: {
       include: ['src/__tests__/**/*.spec.ts'],
+      silent: !!process.env.CI,
       browser: {
         enabled: true,
         headless: false,
