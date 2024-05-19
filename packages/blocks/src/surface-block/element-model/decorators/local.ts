@@ -11,7 +11,7 @@ import { getDeriveProperties, updateDerivedProp } from './derive.js';
  */
 export function local<V, T extends ElementModel>() {
   return function localDecorator(
-    _: unknown,
+    _target: ClassAccessorDecoratorTarget<T, V>,
     context: ClassAccessorDecoratorContext
   ) {
     const prop = context.name;
@@ -24,6 +24,7 @@ export function local<V, T extends ElementModel>() {
         this['_localProps'] = localProps;
 
         localProps.add(prop);
+        this._local.set(prop, v);
 
         return v;
       },

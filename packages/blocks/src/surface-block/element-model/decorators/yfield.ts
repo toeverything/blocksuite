@@ -17,10 +17,10 @@ export function getYFieldPropsSet(prototype: unknown): Set<string | symbol> {
   return prototype[yPropsSetSymbol] as Set<string | symbol>;
 }
 
-export function yfield<V>(fallback?: unknown) {
+export function yfield<V, T extends ElementModel>(fallback?: V) {
   // return function yDecorator(prototype: unknown, prop: string | symbol) {
   return function yDecorator(
-    _: unknown,
+    target: ClassAccessorDecoratorTarget<T, V>,
     context: ClassAccessorDecoratorContext
   ) {
     const prop = context.name;
@@ -30,6 +30,16 @@ export function yfield<V>(fallback?: unknown) {
         const yProps = getYFieldPropsSet(this);
 
         yProps.add(prop);
+        if (this.yMap) {
+          if (this.yMap.doc) {
+            this.surface.doc.transact(() => {
+              this.yMap.set(prop as string, v);
+            });
+          } else {
+            this.yMap.set(prop as string, v);
+            this._preserved.set(prop as string, v);
+          }
+        }
         return v;
       },
       get(this: ElementModel) {
@@ -39,7 +49,7 @@ export function yfield<V>(fallback?: unknown) {
           fallback
         );
       },
-      set(this: ElementModel, originalVal: V) {
+      set(this: T, originalVal: V) {
         const isCreating = getDecoratorState()?.creating;
 
         if (getDecoratorState()?.skipYfield) {
@@ -50,8 +60,7 @@ export function yfield<V>(fallback?: unknown) {
         const val = isCreating
           ? originalVal
           : convertProps(this, prop, originalVal, this);
-        // @ts-ignore
-        const oldValue = this[prop];
+        const oldValue = target.get.call(this);
 
         if (this.yMap.doc) {
           this.surface.doc.transact(() => {
@@ -78,6 +87,6 @@ export function yfield<V>(fallback?: unknown) {
           });
         }
       },
-    } as ClassAccessorDecoratorResult<ElementModel, V>;
+    } as ClassAccessorDecoratorResult<T, V>;
   };
 }

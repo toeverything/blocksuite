@@ -110,10 +110,10 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     position: [0, 0],
   };
 
-  @yfield('None')
+  @yfield('None' as PointStyle)
   accessor frontEndpointStyle!: PointStyle;
 
-  @yfield('Arrow')
+  @yfield('Arrow' as PointStyle)
   accessor rearEndpointStyle!: PointStyle;
 
   moveTo(bound: Bound) {
