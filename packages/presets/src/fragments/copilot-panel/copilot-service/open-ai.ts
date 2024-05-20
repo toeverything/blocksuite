@@ -55,6 +55,7 @@ const askGPT = async (
     | 'gpt-4'
     | 'gpt-3.5-turbo-1106'
     | 'gpt-4-vision-preview'
+    | 'gpt-4-turbo-2024-04-09'
     | 'gpt-4-turbo',
   messages: Array<ChatMessage>
 ) => {
@@ -76,7 +77,8 @@ const askGPTStream = async function* (
     | 'gpt-4'
     | 'gpt-3.5-turbo-1106'
     | 'gpt-4-vision-preview'
-    | 'gpt-4-turbo',
+    | 'gpt-4-turbo'
+    | 'gpt-4-turbo-2024-04-09',
   messages: Array<ChatMessage>
 ): AsyncIterable<string> {
   const openai = new OpenAI({
@@ -109,7 +111,11 @@ TextServiceKind.implService({
   name: 'GPT4',
   method: data => ({
     generateText: async messages => {
-      const result = await askGPT(data.apiKey, 'gpt-4', messages);
+      const result = await askGPT(
+        data.apiKey,
+        'gpt-4-turbo-2024-04-09',
+        messages
+      );
       return result.content ?? '';
     },
   }),
@@ -129,7 +135,8 @@ ChatServiceKind.implService({
 ChatServiceKind.implService({
   name: 'GPT4',
   method: data => ({
-    chat: messages => askGPTStream(data.apiKey, 'gpt-4', messages),
+    chat: messages =>
+      askGPTStream(data.apiKey, 'gpt-4-turbo-2024-04-09', messages),
   }),
   vendor: openaiVendor,
 });
