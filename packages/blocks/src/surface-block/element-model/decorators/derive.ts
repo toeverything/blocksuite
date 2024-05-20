@@ -1,6 +1,10 @@
 import { keys } from '../../../_common/utils/iterable.js';
 import type { ElementModel } from '../base.js';
-import { getDecoratorState, setObjectMeta } from './common.js';
+import {
+  getDecoratorState,
+  getObjectPropMeta,
+  setObjectPropMeta,
+} from './common.js';
 
 const deriveSymbol = Symbol('derive');
 
@@ -10,8 +14,7 @@ function getDerivedMeta(
 ):
   | null
   | ((propValue: unknown, instance: unknown) => Record<string, unknown>)[] {
-  // @ts-ignore
-  return target[deriveSymbol]?.[prop] ?? null;
+  return getObjectPropMeta(target, deriveSymbol, prop);
 }
 
 export function getDeriveProperties(
@@ -92,7 +95,12 @@ export function derive<V, T extends ElementModel>(
         if (Array.isArray(derived)) {
           derived.push(fn as (typeof derived)[0]);
         } else {
-          setObjectMeta(deriveSymbol, this, prop as string, [fn]);
+          setObjectPropMeta(
+            deriveSymbol,
+            Object.getPrototypeOf(this),
+            prop as string,
+            [fn]
+          );
         }
 
         return v;

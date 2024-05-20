@@ -1,5 +1,5 @@
 import type { ElementModel } from '../base.js';
-import { setObjectMeta } from './common.js';
+import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const convertSymbol = Symbol('convert');
 
@@ -22,7 +22,7 @@ export function convert<V, T extends ElementModel>(
     const prop = String(context.name);
     return {
       init(this: T, v: V) {
-        setObjectMeta(convertSymbol, this, prop, fn);
+        setObjectPropMeta(convertSymbol, Object.getPrototypeOf(this), prop, fn);
         return v;
       },
     } as ClassAccessorDecoratorResult<T, V>;
@@ -33,8 +33,7 @@ export function getConvertMeta(
   target: unknown,
   prop: string | symbol
 ): null | ((propValue: unknown, instance: unknown) => unknown) {
-  // @ts-ignore
-  return target[convertSymbol]?.[prop] ?? null;
+  return getObjectPropMeta(target, convertSymbol, prop);
 }
 
 export function convertProps(

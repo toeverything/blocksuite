@@ -1,5 +1,5 @@
 import type { ElementModel } from '../base.js';
-import { setObjectMeta } from './common.js';
+import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 type WatchFn<T extends ElementModel = ElementModel> = (
   oldValue: unknown,
@@ -24,7 +24,7 @@ export function watch<V, T extends ElementModel>(
     const prop = context.name;
     return {
       init(this: ElementModel, v: V) {
-        setObjectMeta(watchSymbol, this, prop, fn);
+        setObjectPropMeta(watchSymbol, Object.getPrototypeOf(this), prop, fn);
         return v;
       },
     } as ClassAccessorDecoratorResult<ElementModel, V>;
@@ -33,7 +33,7 @@ export function watch<V, T extends ElementModel>(
 
 function getWatchMeta(target: unknown, prop: string | symbol): null | WatchFn {
   // @ts-ignore
-  return target[watchSymbol]?.[prop] ?? null;
+  return getObjectPropMeta(target, watchSymbol, prop);
 }
 
 function startWatch(

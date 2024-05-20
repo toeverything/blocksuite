@@ -1,7 +1,7 @@
 import type { Y } from '@blocksuite/store';
 
 import type { ElementModel } from '../base.js';
-import { setObjectMeta } from './common.js';
+import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const observeSymbol = Symbol('observe');
 const observerDisposableSymbol = Symbol('observerDisposable');
@@ -43,7 +43,7 @@ export function observe<V, E extends Y.YEvent<any>, T extends ElementModel>(
     const prop = context.name;
     return {
       init(this: T, v: V) {
-        setObjectMeta(observeSymbol, this, prop, fn);
+        setObjectPropMeta(observeSymbol, Object.getPrototypeOf(this), prop, fn);
         return v;
       },
     } as ClassAccessorDecoratorResult<ElementModel, V>;
@@ -55,7 +55,7 @@ function getObserveMeta(
   prop: string | symbol
 ): null | ObserveFn {
   // @ts-ignore
-  return target[observeSymbol]?.[prop] ?? null;
+  return getObjectPropMeta(target, observeSymbol, prop);
 }
 
 export function startObserve(
@@ -111,7 +111,7 @@ export function initializedObservers(
   receiver: ElementModel
 ) {
   // @ts-ignore
-  const observers = prototype[observeSymbol] ?? {};
+  const observers = getObjectPropMeta(prototype, observeSymbol) ?? {};
 
   Object.keys(observers).forEach(prop => {
     startObserve(prototype, prop, receiver);
