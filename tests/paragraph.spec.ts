@@ -6,6 +6,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getIndexCoordinate,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeDividers,
@@ -1409,6 +1410,26 @@ test('should placeholder works', async ({ page }) => {
 
   await pressEnter(page);
   await expect(placeholder).toHaveCount(1);
+});
+
+test('should placeholder not show when multiple blocks are selected', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await pressEnter(page);
+  await assertRichTexts(page, ['', '']);
+  const coord = await getIndexCoordinate(page, [0, 0]);
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
+  await page.mouse.up();
+  const placeholder = page.locator('.affine-paragraph-placeholder.visible');
+  await expect(placeholder).toBeHidden();
 });
 
 test('should placeholder not show at readonly mode', async ({ page }) => {
