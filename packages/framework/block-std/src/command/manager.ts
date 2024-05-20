@@ -162,9 +162,19 @@ export class CommandManager {
   exec<K extends keyof BlockSuite.Commands>(
     command: K,
     ...args: IfAllKeysOptional<
-      InDataOfCommand<BlockSuite.Commands[K]>,
-      [inData: void],
-      [inData: InDataOfCommand<BlockSuite.Commands[K]>]
+      Omit<InDataOfCommand<BlockSuite.Commands[K]>, keyof InitCommandCtx>,
+      [
+        inData: void | Omit<
+          InDataOfCommand<BlockSuite.Commands[K]>,
+          keyof InitCommandCtx
+        >,
+      ],
+      [
+        inData: Omit<
+          InDataOfCommand<BlockSuite.Commands[K]>,
+          keyof InitCommandCtx
+        >,
+      ]
     >
   ): ExecCommandResult<K> {
     const cmdFunc = this._commands.get(command);
@@ -183,7 +193,7 @@ export class CommandManager {
 
     cmdFunc(ctx, result => {
       // @ts-ignore
-      execResult = result;
+      execResult = result ?? {};
     });
 
     return execResult;
