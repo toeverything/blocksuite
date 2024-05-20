@@ -78,7 +78,7 @@ export function yfield<V, T extends ElementModel>(fallback?: V) {
           this._preserved.set(prop as string, val);
         }
 
-        startObserve(this, prop as string, this);
+        startObserve(prototype, prop as string, this);
 
         if (!isCreating) {
           updateDerivedProp(derivedProps, this);
