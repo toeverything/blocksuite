@@ -201,9 +201,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
-    const prototype = Object.getPrototypeOf(this);
-
-    if (!getYFieldPropsSet(prototype).has(prop as string)) {
+    if (!getYFieldPropsSet(this).has(prop as string)) {
       return;
     }
 
@@ -216,10 +214,10 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       enumerable: true,
       get: () => this._stashed.get(prop),
       set: (original: unknown) => {
-        const value = convertProps(prototype, prop as string, original, this);
+        const value = convertProps(this, prop as string, original, this);
         const oldValue = this._stashed.get(prop);
         const derivedProps = getDeriveProperties(
-          prototype,
+          this,
           prop as string,
           original,
           this as unknown as ElementModel
@@ -256,13 +254,12 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
-    const prototype = Object.getPrototypeOf(this);
     const value = this._stashed.get(prop);
     this._stashed.delete(prop);
     // @ts-ignore
     delete this[prop];
 
-    if (getYFieldPropsSet(prototype).has(prop as string)) {
+    if (getYFieldPropsSet(this).has(prop as string)) {
       this.surface.doc.transact(() => {
         // directly set the value to the ymap to avoid
         // executing derive and convert decorators again
