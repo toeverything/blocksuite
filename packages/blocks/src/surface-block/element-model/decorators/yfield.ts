@@ -27,7 +27,8 @@ export function yfield<V, T extends ElementModel>(fallback?: V) {
 
     return {
       init(this: ElementModel, v: V) {
-        const yProps = getYFieldPropsSet(this);
+        const prototype = Object.getPrototypeOf(this);
+        const yProps = getYFieldPropsSet(prototype);
 
         yProps.add(prop);
         if (this.yMap) {
@@ -50,16 +51,22 @@ export function yfield<V, T extends ElementModel>(fallback?: V) {
         );
       },
       set(this: T, originalVal: V) {
+        const prototype = Object.getPrototypeOf(this);
         const isCreating = getDecoratorState()?.creating;
 
         if (getDecoratorState()?.skipYfield) {
           return;
         }
 
-        const derivedProps = getDeriveProperties(this, prop, originalVal, this);
+        const derivedProps = getDeriveProperties(
+          prototype,
+          prop,
+          originalVal,
+          this
+        );
         const val = isCreating
           ? originalVal
-          : convertProps(this, prop, originalVal, this);
+          : convertProps(prototype, prop, originalVal, this);
         const oldValue = target.get.call(this);
 
         if (this.yMap.doc) {
