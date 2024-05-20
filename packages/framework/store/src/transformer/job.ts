@@ -7,7 +7,7 @@ import type { Doc } from '../store/index.js';
 import type { DocsPropertiesMeta } from '../store/meta.js';
 import { AssetsManager } from './assets.js';
 import { BaseBlockTransformer } from './base.js';
-import { type DraftModel } from './draft.js';
+import { type DraftModel, toDraftModel } from './draft.js';
 import type {
   BeforeExportPayload,
   BeforeImportPayload,
@@ -386,14 +386,14 @@ export class Job {
     SliceSnapshotSchema.parse(snapshot);
     const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
       snapshot;
-    const contentBlocks = [];
+    const contentBlocks: BlockModel[] = [];
     for (const [i, block] of content.entries()) {
       contentBlocks.push(
         await this._snapshotToBlock(block, doc, parent, (index ?? 0) + i)
       );
     }
     const slice = new Slice({
-      content: contentBlocks,
+      content: contentBlocks.map(block => toDraftModel(block)),
       pageVersion,
       workspaceVersion,
       workspaceId,

@@ -60,8 +60,10 @@ function getAttachment(page: Page) {
     await type(page, 'file', 100);
     await expect(slashMenu).toBeVisible();
 
+    const fileChooser = page.waitForEvent('filechooser');
     await pressEnter(page);
-    await page.setInputFiles("input[type='file']", FILE_PATH);
+    await (await fileChooser).setFiles(FILE_PATH);
+
     // Try to break the undo redo test
     await captureHistory(page);
 
@@ -623,4 +625,38 @@ test('press backspace after bookmark block can select bookmark block', async ({
   await pressBackspace(page);
   await assertBlockSelections(page, ['4']);
   await assertBlockCount(page, 'paragraph', 0);
+});
+
+test('cancel file picker with input element resolves', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  const { attachment } = getAttachment(page);
+
+  await focusRichText(page);
+  await pressEnter(page);
+  await pressArrowUp(page);
+
+  await page.evaluate(() => {
+    // Force fallback to input[type=file]
+    window.showOpenFilePicker = undefined;
+  });
+
+  const slashMenu = page.locator(`.slash-menu`);
+  await waitNextFrame(page);
+  await type(page, '/file', 100);
+  await expect(slashMenu).toBeVisible();
+
+  const fileChooser = page.waitForEvent('filechooser');
+  await pressEnter(page);
+  const inputFile = page.locator("input[type='file']");
+  await expect(inputFile).toHaveCount(1);
+
+  // This does not trigger `cancel` event and,
+  // therefore, the test isn't representative.
+  // Waiting for https://github.com/microsoft/playwright/issues/27524
+  await (await fileChooser).setFiles([]);
+
+  await expect(attachment).toHaveCount(0);
+  await expect(inputFile).toHaveCount(0);
 });

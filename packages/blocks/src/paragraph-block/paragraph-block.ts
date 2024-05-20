@@ -103,11 +103,14 @@ export class ParagraphBlockComponent extends BlockElement<
     )
       return;
 
+    const selection = this.host.selection.find('text');
+    const isCollapsed = selection?.isCollapsed() ?? false;
     if (
       this.doc.readonly ||
       this.inlineEditor.yTextLength > 0 ||
       this.inlineEditor.isComposing ||
       !this.selected ||
+      !isCollapsed ||
       this._isInDatabase()
     ) {
       this._placeholderContainer.classList.remove('visible');
