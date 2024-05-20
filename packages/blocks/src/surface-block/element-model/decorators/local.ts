@@ -32,16 +32,17 @@ export function local<V, T extends ElementModel>() {
         return this._local.get(prop);
       },
       set(this: T, originalValue: unknown) {
+        const prototype = Object.getPrototypeOf(this);
         const isCreating = getDecoratorState()?.creating;
         const oldValue = this._local.get(prop);
         // When state is creating, the value is considered as default value
         // hence there's no need to convert it
         const newVal = isCreating
           ? originalValue
-          : convertProps(this, prop, originalValue, this);
+          : convertProps(prototype, prop, originalValue, this);
 
         const derivedProps = getDeriveProperties(
-          this,
+          prototype,
           prop,
           originalValue,
           this
