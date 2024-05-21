@@ -1,9 +1,13 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
-import { createDefaultDoc } from '../../_common/utils/index.js';
+import {
+  asyncFocusRichText,
+  createDefaultDoc,
+  matchFlavours,
+} from '../../_common/utils/index.js';
 import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
 import type { DataViewManager } from '../data-view/view/data-view-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
@@ -27,6 +31,8 @@ export class NoteRenderer
   model!: DatabaseBlockModel;
   @property({ attribute: false })
   host?: EditorHost;
+  @query('editor-host')
+  subHost?: EditorHost;
 
   get databaseBlock(): DatabaseBlockModel {
     return this.model;
@@ -53,6 +59,20 @@ export class NoteRenderer
     if (note) {
       this.databaseBlock.notes[this.rowId] = note.id;
       this.requestUpdate();
+      requestAnimationFrame(() => {
+        const block = note.root?.children
+          .find(child => child.flavour === 'affine:note')
+          ?.children.find(block =>
+            matchFlavours(block, [
+              'affine:paragraph',
+              'affine:list',
+              'affine:code',
+            ])
+          );
+        if (this.subHost && block) {
+          asyncFocusRichText(this.subHost, block.id)?.catch(console.error);
+        }
+      });
     }
   }
 
