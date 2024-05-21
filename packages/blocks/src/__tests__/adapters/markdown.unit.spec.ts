@@ -1,6 +1,5 @@
 import type { BlockSnapshot, SliceSnapshot } from '@blocksuite/store';
-import { MemoryBlobManager } from '@blocksuite/store';
-import { AssetsManager } from '@blocksuite/store';
+import { AssetsManager, MemoryBlobManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
@@ -2597,11 +2596,25 @@ hhh
               'matchesReplaceMap[12]': {
                 'matchesReplaceMap[10]': {
                   columnId: 'matchesReplaceMap[10]',
-                  value: 'eee',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'eee',
+                      },
+                    ],
+                  },
                 },
                 'matchesReplaceMap[11]': {
                   columnId: 'matchesReplaceMap[11]',
-                  value: 'fff',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'fff',
+                      },
+                    ],
+                  },
                 },
               },
             },
