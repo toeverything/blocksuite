@@ -24,15 +24,15 @@ export class NoteRenderer
     }
   `;
   @property({ attribute: false })
-  public view!: DataViewManager;
+  accessor view!: DataViewManager;
   @property({ attribute: false })
-  public rowId!: string;
+  accessor rowId!: string;
   @property({ attribute: false })
-  model!: DatabaseBlockModel;
+  accessor model!: DatabaseBlockModel;
   @property({ attribute: false })
-  host?: EditorHost;
+  accessor host!: EditorHost;
   @query('editor-host')
-  subHost?: EditorHost;
+  accessor subHost!: EditorHost;
 
   get databaseBlock(): DatabaseBlockModel {
     return this.model;
