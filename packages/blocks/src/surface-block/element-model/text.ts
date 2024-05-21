@@ -56,17 +56,17 @@ export class TextElementModel extends ElementModel<TextElementProps> {
   @yfield()
   accessor fontFamily: FontFamily = FontFamily.Inter;
 
-  @yfield()
+  @yfield<FontWeight, TextElementModel>(FontWeight.Regular)
   accessor fontWeight: FontWeight = FontWeight.Regular;
 
-  @yfield()
+  @yfield<FontStyle, TextElementModel>('normal')
   accessor fontStyle: FontStyle = 'normal';
 
   @yfield()
   accessor textAlign: TextAlign = 'center';
 
-  @yfield()
-  accessor hasMaxWidth: boolean | undefined = undefined;
+  @yfield(false)
+  accessor hasMaxWidth: boolean = false;
 
   get type() {
     return 'text';
