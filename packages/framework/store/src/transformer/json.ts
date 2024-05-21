@@ -33,7 +33,7 @@ export function fromJSON(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(fromJSON);
   }
-  if (value instanceof Object) {
+  if (typeof value === 'object' && value != null) {
     if (Reflect.has(value, NATIVE_UNIQ_IDENTIFIER)) {
       return new Boxed(Reflect.get(value, 'value'));
     }

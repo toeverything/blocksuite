@@ -32,7 +32,7 @@ import {
   hastQuerySelector,
   type HtmlAST,
 } from './hast.js';
-import { fetchable, fetchImage } from './utils.js';
+import { createText, fetchable, fetchImage, isText } from './utils.js';
 
 export type NotionHtml = string;
 
@@ -161,6 +161,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       },
     };
   }
+
   override toBlockSnapshot(
     payload: NotionHtmlToBlockSnapshotPayload
   ): Promise<BlockSnapshot> {
@@ -185,6 +186,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       payload.pageMap
     );
   }
+
   override async toSliceSnapshot(
     payload: NotionHtmlToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
@@ -841,14 +843,35 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                     : false,
                 };
               } else if (columns[index].type === 'number') {
-                row[columns[index].id] = {
-                  columnId: columns[index].id,
-                  value: Number(hastGetTextContent(child)),
-                };
+                const text = hastGetTextContent(child);
+                const number = Number(text);
+                if (Number.isNaN(number)) {
+                  if (columns[index].type !== 'rich-text') {
+                    columns[index].type = 'rich-text';
+                  }
+                  row[columns[index].id] = {
+                    columnId: columns[index].id,
+                    value: createText(text),
+                  };
+                } else {
+                  row[columns[index].id] = {
+                    columnId: columns[index].id,
+                    value: number,
+                  };
+                }
               } else {
                 row[columns[index].id] = {
                   columnId: columns[index].id,
                   value: hastGetTextContent(child),
+                };
+              }
+              if (
+                columns[index].type === 'rich-text' &&
+                !isText(row[columns[index].id].value)
+              ) {
+                row[columns[index].id] = {
+                  columnId: columns[index].id,
+                  value: createText(row[columns[index].id].value),
                 };
               }
             });

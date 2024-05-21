@@ -3,7 +3,7 @@ import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { popMenu } from '../../../utils/menu/index.js';
+import { popMenu } from '../../../../../_common/components/index.js';
 import { selectOptionColors } from '../../../utils/tags/colors.js';
 import type { SelectTag } from '../../../utils/tags/multi-tag-select.js';
 import { BaseGroup } from './base.js';

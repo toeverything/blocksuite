@@ -30,6 +30,7 @@ export class LangList extends LitElement {
         flex-direction: column;
         background: var(--affine-background-overlay-panel-color);
         color: var(--affine-text-primary-color);
+        box-shadow: var(--affine-menu-shadow);
         border-radius: 12px;
         z-index: var(--affine-z-index-popover);
         pointer-events: auto;
@@ -41,7 +42,6 @@ export class LangList extends LitElement {
         height: 100%;
         overflow: hidden;
         flex-direction: column;
-        box-shadow: var(--affine-menu-shadow);
         border-radius: 8px;
         padding: 8px;
       }

@@ -7,6 +7,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import type {
   FilterGroup,
   SingleFilter,
@@ -23,7 +24,6 @@ import { CrossIcon } from '../../common/icons/index.js';
 import { popLiteralEdit, renderLiteral } from '../../common/literal/matcher.js';
 import { tBoolean } from '../../logical/data-type.js';
 import { typesystem } from '../../logical/typesystem.js';
-import { popFilterableSimpleMenu } from '../../utils/menu/index.js';
 import { filterMatcher } from './matcher/matcher.js';
 
 @customElement('filter-condition-view')

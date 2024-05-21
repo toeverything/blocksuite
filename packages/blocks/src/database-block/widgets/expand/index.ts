@@ -6,11 +6,11 @@ import type { PropertyValues } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { createModal } from '../../../_common/components/index.js';
 import { CrossIcon, ExpandWideIcon } from '../../../_common/icons/index.js';
 import { DatabaseSelection } from '../../data-view/common/selection.js';
 import type { DataViewRendererConfig } from '../../data-view/data-view.js';
 import type { DataViewSelection } from '../../data-view/types.js';
-import { createModal } from '../../data-view/utils/menu/index.js';
 import { renderTemplate } from '../../data-view/utils/uni-component/render-template.js';
 import { WidgetBase } from '../../data-view/widget/widget-base.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
