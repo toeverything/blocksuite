@@ -9,20 +9,20 @@ import {
 const deriveSymbol = Symbol('derive');
 
 function getDerivedMeta(
-  target: unknown,
+  proto: unknown,
   prop: string | symbol
 ):
   | null
   | ((propValue: unknown, instance: unknown) => Record<string, unknown>)[] {
-  return getObjectPropMeta(target, deriveSymbol, prop);
+  return getObjectPropMeta(proto, deriveSymbol, prop);
 }
 
 export function getDeriveProperties(
-  prototype: unknown,
   prop: string | symbol,
   propValue: unknown,
   receiver: ElementModel
 ) {
+  const prototype = Object.getPrototypeOf(receiver);
   const decoratorState = getDecoratorState();
 
   if (decoratorState.deriving || decoratorState.creating) {
@@ -90,17 +90,13 @@ export function derive<V, T extends ElementModel>(
     const prop = String(context.name);
     return {
       init(this: ElementModel, v: V) {
-        const derived = getDerivedMeta(this, prop);
+        const proto = Object.getPrototypeOf(this);
+        const derived = getDerivedMeta(proto, prop);
 
         if (Array.isArray(derived)) {
           derived.push(fn as (typeof derived)[0]);
         } else {
-          setObjectPropMeta(
-            deriveSymbol,
-            Object.getPrototypeOf(this),
-            prop as string,
-            [fn]
-          );
+          setObjectPropMeta(deriveSymbol, proto, prop as string, [fn]);
         }
 
         return v;

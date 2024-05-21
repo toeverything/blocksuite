@@ -51,19 +51,16 @@ export function observe<V, E extends Y.YEvent<any>, T extends ElementModel>(
 }
 
 function getObserveMeta(
-  target: unknown,
+  proto: unknown,
   prop: string | symbol
 ): null | ObserveFn {
   // @ts-ignore
-  return getObjectPropMeta(target, observeSymbol, prop);
+  return getObjectPropMeta(proto, observeSymbol, prop);
 }
 
-export function startObserve(
-  prototype: unknown,
-  prop: string | symbol,
-  receiver: ElementModel
-) {
-  const observeFn = getObserveMeta(prototype, prop as string)!;
+export function startObserve(prop: string | symbol, receiver: ElementModel) {
+  const proto = Object.getPrototypeOf(receiver);
+  const observeFn = getObserveMeta(proto, prop as string)!;
   // @ts-ignore
   const observerDisposable = receiver[observerDisposableSymbol] ?? {};
 
@@ -106,15 +103,11 @@ export function startObserve(
   }
 }
 
-export function initializedObservers(
-  prototype: unknown,
-  receiver: ElementModel
-) {
-  // @ts-ignore
-  const observers = getObjectPropMeta(prototype, observeSymbol) ?? {};
+export function initializedObservers(proto: unknown, receiver: ElementModel) {
+  const observers = getObjectPropMeta(proto, observeSymbol);
 
   Object.keys(observers).forEach(prop => {
-    startObserve(prototype, prop, receiver);
+    startObserve(prop, receiver);
   });
 
   receiver['_disposable'].add(() => {

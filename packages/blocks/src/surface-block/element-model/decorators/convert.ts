@@ -22,27 +22,28 @@ export function convert<V, T extends ElementModel>(
     const prop = String(context.name);
     return {
       init(this: T, v: V) {
-        setObjectPropMeta(convertSymbol, Object.getPrototypeOf(this), prop, fn);
+        const proto = Object.getPrototypeOf(this);
+        setObjectPropMeta(convertSymbol, proto, prop, fn);
         return v;
       },
     } as ClassAccessorDecoratorResult<T, V>;
   };
 }
 
-export function getConvertMeta(
-  target: unknown,
+function getConvertMeta(
+  proto: unknown,
   prop: string | symbol
 ): null | ((propValue: unknown, instance: unknown) => unknown) {
-  return getObjectPropMeta(target, convertSymbol, prop);
+  return getObjectPropMeta(proto, convertSymbol, prop);
 }
 
 export function convertProps(
-  target: unknown,
-  propKey: string | symbol,
-  newProp: unknown,
+  propName: string | symbol,
+  propValue: unknown,
   receiver: unknown
 ) {
-  const convertFn = getConvertMeta(target, propKey as string)!;
+  const proto = Object.getPrototypeOf(receiver);
+  const convertFn = getConvertMeta(proto, propName as string)!;
 
-  return convertFn ? convertFn(newProp, receiver) : newProp;
+  return convertFn ? convertFn(propValue, receiver) : propValue;
 }

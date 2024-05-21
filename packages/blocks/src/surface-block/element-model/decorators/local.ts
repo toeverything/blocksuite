@@ -18,12 +18,6 @@ export function local<V, T extends ElementModel>() {
 
     return {
       init(this: T, v: V) {
-        // @ts-ignore
-        const localProps = this['_localProps'] ?? new Set();
-        // @ts-ignore
-        this['_localProps'] = localProps;
-
-        localProps.add(prop);
         this._local.set(prop, v);
 
         return v;
@@ -38,14 +32,9 @@ export function local<V, T extends ElementModel>() {
         // hence there's no need to convert it
         const newVal = isCreating
           ? originalValue
-          : convertProps(this, prop, originalValue, this);
+          : convertProps(prop, originalValue, this);
 
-        const derivedProps = getDeriveProperties(
-          this,
-          prop,
-          originalValue,
-          this
-        );
+        const derivedProps = getDeriveProperties(prop, originalValue, this);
 
         this._local.set(prop, newVal);
 

@@ -31,17 +31,13 @@ export function watch<V, T extends ElementModel>(
   };
 }
 
-function getWatchMeta(target: unknown, prop: string | symbol): null | WatchFn {
-  // @ts-ignore
-  return getObjectPropMeta(target, watchSymbol, prop);
+function getWatchMeta(proto: unknown, prop: string | symbol): null | WatchFn {
+  return getObjectPropMeta(proto, watchSymbol, prop);
 }
 
-function startWatch(
-  prototype: unknown,
-  prop: string | symbol,
-  receiver: ElementModel
-) {
-  const watchFn = getWatchMeta(prototype, prop as string)!;
+function startWatch(prop: string | symbol, receiver: ElementModel) {
+  const proto = Object.getPrototypeOf(receiver);
+  const watchFn = getWatchMeta(proto, prop as string)!;
 
   if (!watchFn) return;
 
@@ -55,10 +51,9 @@ function startWatch(
 }
 
 export function initializeWatchers(prototype: unknown, receiver: ElementModel) {
-  // @ts-ignore
-  const watchers = prototype[watchSymbol] ?? {};
+  const watchers = getObjectPropMeta(prototype, watchSymbol);
 
   Object.keys(watchers).forEach(prop => {
-    startWatch(prototype, prop, receiver);
+    startWatch(prop, receiver);
   });
 }

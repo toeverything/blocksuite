@@ -214,10 +214,9 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       enumerable: true,
       get: () => this._stashed.get(prop),
       set: (original: unknown) => {
-        const value = convertProps(this, prop as string, original, this);
+        const value = convertProps(prop as string, original, this);
         const oldValue = this._stashed.get(prop);
         const derivedProps = getDeriveProperties(
-          this,
           prop as string,
           original,
           this as unknown as ElementModel
