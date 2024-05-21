@@ -87,7 +87,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   }
 
   @state()
-  private _remoteRects: Map<
+  private accessor _remoteRects: Map<
     number,
     {
       width: number;
@@ -100,7 +100,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   > = new Map();
 
   @state()
-  private _remoteCursors: Map<
+  private accessor _remoteCursors: Map<
     number,
     {
       x: number;

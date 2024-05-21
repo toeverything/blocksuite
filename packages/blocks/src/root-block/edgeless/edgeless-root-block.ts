@@ -138,20 +138,20 @@ export class EdgelessRootBlockComponent extends BlockElement<
   mouseRoot!: HTMLElement;
 
   @state()
-  edgelessTool: EdgelessTool = {
+  accessor edgelessTool: EdgelessTool = {
     type: localStorage.defaultTool ?? 'default',
   };
 
   @query('edgeless-block-portal-container')
-  rootElementContainer!: EdgelessBlockPortalContainer;
+  accessor rootElementContainer!: EdgelessBlockPortalContainer;
 
   @query('.affine-edgeless-layer')
-  edgelessLayer!: HTMLDivElement;
+  accessor edgelessLayer!: HTMLDivElement;
 
   clipboardController = new EdgelessClipboardController(this);
 
   @query('affine-surface')
-  surface!: SurfaceBlockComponent;
+  accessor surface!: SurfaceBlockComponent;
 
   fontLoader!: FontLoader;
 

@@ -28,34 +28,34 @@ export class SlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  rootElement!: RootBlockComponent;
+  accessor rootElement!: RootBlockComponent;
 
   @property({ attribute: false })
-  model!: BlockModel;
+  accessor model!: BlockModel;
 
   @property({ attribute: false })
-  options!: SlashMenuOptions;
+  accessor options!: SlashMenuOptions;
 
   @property({ attribute: false })
-  triggerKey!: string;
+  accessor triggerKey!: string;
 
   @query('.slash-menu')
-  slashMenuElement?: HTMLElement;
+  accessor slashMenuElement: HTMLElement | null = null;
 
   @state()
-  private _leftPanelActivated = false;
+  private accessor _leftPanelActivated = false;
 
   @state()
-  private _activatedItemIndex = 0;
+  private accessor _activatedItemIndex = 0;
 
   @state()
-  private _filterItems: InternalSlashItem[] = [];
+  private accessor _filterItems: InternalSlashItem[] = [];
 
   @state()
-  private _hide = false;
+  private accessor _hide = false;
 
   @state()
-  private _position: {
+  private accessor _position: {
     x: string;
     y: string;
     height: number;

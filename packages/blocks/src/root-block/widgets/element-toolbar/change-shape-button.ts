@@ -129,13 +129,60 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   static override styles = [lineSizeButtonStyles];
 
   @property({ attribute: false })
-  elements: ShapeElementModel[] = [];
+  accessor elements: ShapeElementModel[] = [];
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
+<<<<<<< HEAD
   @query('edgeless-shape-panel')
   private _shapePanel!: EdgelessShapePanel;
+=======
+  @state()
+  private accessor _showTypePanelPopper = false;
+  @query('.change-shape-button')
+  private accessor _changeShapeButton!: EdgelessToolIconButton;
+  @query('edgeless-shape-panel')
+  private accessor _shapePanel!: EdgelessShapePanel;
+  private _shapePanelPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+
+  @state()
+  private accessor _showStylelPanelPopper = false;
+  @query('.shape-style-button')
+  private accessor _shapeStyleButton!: EdgelessToolIconButton;
+  @query('.shape-style-panel-container')
+  private accessor _shapeStyleMenu!: HTMLDivElement;
+  private _shapeStyleMenuPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+
+  @state()
+  private accessor _showFillColorPanelPopper = false;
+  @query('.fill-color-button')
+  private accessor _fillColorButton!: EdgelessToolIconButton;
+  @query('.color-panel-container.fill-color')
+  private accessor _fillColorMenu!: HTMLDivElement;
+  private _fillColorMenuPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+
+  @state()
+  private accessor _showStrokeColorPanelPopper = false;
+  @query('.stroke-color-button')
+  private accessor _strokeColorButton!: EdgelessToolIconButton;
+  @query('.color-panel-container.stroke-color')
+  private accessor _strokeColorMenu!: HTMLDivElement;
+  private _strokeColorMenuPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+
+  @state()
+  private accessor _showLineStylePanelPopper = false;
+  @query('.line-styles-button')
+  private accessor _lineStylesButton!: EdgelessToolIconButton;
+  @query('.line-style-panel')
+  private accessor _lineStylesPanel!: HTMLDivElement;
+  private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+>>>>>>> 46c40c3b3 (refactor: migrate decorators from v2 to v3)
 
   get service() {
     return this.edgeless.service;

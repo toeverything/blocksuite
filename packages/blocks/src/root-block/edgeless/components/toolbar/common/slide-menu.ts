@@ -85,22 +85,22 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
     }
   `;
   @property({ attribute: false })
-  menuWidth = DEFAULT_MENU_WIDTH;
+  accessor menuWidth = DEFAULT_MENU_WIDTH;
 
   @property({ attribute: false })
-  showNext = true;
+  accessor showNext = true;
 
   @query('.menu-container')
-  private _menuContainer!: HTMLDivElement;
+  private accessor _menuContainer!: HTMLDivElement;
 
   @query('.next-slide-button')
-  private _nextSlideButton!: HTMLDivElement;
+  private accessor _nextSlideButton!: HTMLDivElement;
 
   @query('.previous-slide-button')
-  private _previousSlideButton!: HTMLDivElement;
+  private accessor _previousSlideButton!: HTMLDivElement;
 
   @query('.slide-menu-content')
-  private _slideMenuContent!: HTMLDivElement;
+  private accessor _slideMenuContent!: HTMLDivElement;
 
   private _toggleSlideButton(scrollLeft: number) {
     this._previousSlideButton.style.opacity = '1';

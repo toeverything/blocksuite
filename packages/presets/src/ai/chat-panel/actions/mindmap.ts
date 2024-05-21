@@ -15,10 +15,10 @@ noop(MiniMindmapPreview);
 @customElement('action-mindmap')
 export class ActionMindmap extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  item!: ChatAction;
+  accessor item!: ChatAction;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   protected override render() {
     const answer = this.item.messages[2].content;

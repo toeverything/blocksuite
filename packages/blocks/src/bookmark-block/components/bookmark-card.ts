@@ -14,16 +14,16 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  bookmark!: BookmarkBlockComponent;
+  accessor bookmark!: BookmarkBlockComponent;
 
   @property({ attribute: false })
-  loading!: boolean;
+  accessor loading!: boolean;
 
   @property({ attribute: false })
-  error!: boolean;
+  accessor error!: boolean;
 
   @state()
-  private _isSelected = false;
+  private accessor _isSelected = false;
 
   private readonly _themeObserver = new ThemeObserver();
 

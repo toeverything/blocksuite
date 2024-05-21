@@ -41,10 +41,10 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel | EmbedGithubModel | EmbedLinkedDocModel;
+  accessor model!: BookmarkBlockModel | EmbedGithubModel | EmbedLinkedDocModel;
 
   @property({ attribute: false })
-  abortController!: AbortController;
+  accessor abortController!: AbortController;
 
   private _setEmbedCardStyle(style: EmbedCardStyle) {
     this.model.doc.updateBlock(this.model, { style });

@@ -19,7 +19,7 @@ export class LinkNode extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  link!: string;
+  accessor link!: string;
 
   protected override render() {
     if (!isValidUrl(this.link)) {

@@ -29,7 +29,7 @@ export class AffineViewportOverlayWidget extends WidgetElement<
   `;
 
   @state()
-  private _lockViewport = false;
+  private accessor _lockViewport = false;
 
   lock() {
     this._lockViewport = true;

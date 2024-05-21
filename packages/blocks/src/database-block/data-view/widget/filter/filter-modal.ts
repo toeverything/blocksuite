@@ -67,19 +67,19 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  isRoot = false;
+  accessor isRoot = false;
   @property({ attribute: false })
-  data!: FilterGroup;
+  accessor data!: FilterGroup;
 
   @property({ attribute: false })
-  vars!: Variable[];
+  accessor vars!: Variable[];
 
   @property({ attribute: false })
-  setData!: (filter: FilterGroup) => void;
+  accessor setData!: (filter: FilterGroup) => void;
   @property({ attribute: false })
-  onDelete!: () => void;
+  accessor onDelete!: () => void;
   @property({ attribute: false })
-  onBack!: () => void;
+  accessor onBack!: () => void;
 
   override connectedCallback() {
     super.connectedCallback();

@@ -21,10 +21,10 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
     }
   `;
   @state()
-  private _show = false;
+  private accessor _show = false;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
 
   private _renderPanel() {
     return html`<frame-panel .editor=${this.editor}></frame-panel>`;

@@ -13,10 +13,10 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 @customElement('edgeless-change-image-button')
 export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  model!: ImageBlockModel;
+  accessor model!: ImageBlockModel;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private get _doc() {
     return this.model.doc;

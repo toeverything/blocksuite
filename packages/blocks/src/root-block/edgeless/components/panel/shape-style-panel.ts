@@ -31,10 +31,12 @@ export class EdgelessShapeStylePanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value!: ShapeStyle;
+  accessor value!: ShapeStyle;
 
   @property({ attribute: false })
-  onSelect?: (value: ShapeStyle) => void;
+  accessor onSelect:
+    | ((value: EdgelessShapeStylePanel['value']) => void)
+    | undefined = undefined;
 
   private _onSelect(value: ShapeStyle) {
     this.value = value;

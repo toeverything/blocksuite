@@ -83,10 +83,10 @@ export class AffineAIPanelWidget extends WidgetElement {
   ctx: unknown = null;
 
   @property({ attribute: false })
-  config: AffineAIPanelWidgetConfig | null = null;
+  accessor config: AffineAIPanelWidgetConfig | null = null;
 
   @property()
-  state: AffineAIPanelState = 'hidden';
+  accessor state: AffineAIPanelState = 'hidden';
 
   get viewportOverlayWidget() {
     const rootId = this.host.doc.root?.id;

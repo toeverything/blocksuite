@@ -123,13 +123,13 @@ export class Tooltip extends LitElement {
   `;
 
   @property({ attribute: 'tip-position' })
-  placement: Placement = 'top';
+  accessor placement: Placement = 'top';
 
   @property({ attribute: false })
-  zIndex: number | string = 'var(--affine-z-index-popover)';
+  accessor zIndex: number | string = 'var(--affine-z-index-popover)';
 
   @property({ attribute: false })
-  tooltipStyle: CSSResult = css``;
+  accessor tooltipStyle: CSSResult = css``;
 
   /**
    * changes the placement of the floating element in order to keep it in view,
@@ -138,13 +138,13 @@ export class Tooltip extends LitElement {
    * See https://floating-ui.com/docs/flip
    */
   @property({ attribute: false })
-  autoFlip = true;
+  accessor autoFlip = true;
 
   /**
    * Show a triangle arrow pointing to the reference element.
    */
   @property({ attribute: false })
-  arrow = true;
+  accessor arrow = true;
 
   /**
    * Default is `4px`
@@ -152,14 +152,14 @@ export class Tooltip extends LitElement {
    * See https://floating-ui.com/docs/offset
    */
   @property({ attribute: false })
-  offset = 4;
+  accessor offset = 4;
 
   /**
    * Allow the tooltip to be interactive.
    * eg. allow the user to select text in the tooltip.
    */
   @property({ attribute: false })
-  allowInteractive = false;
+  accessor allowInteractive = false;
 
   private _hoverController = new HoverController(
     this,

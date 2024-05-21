@@ -103,13 +103,13 @@ export class ActionWrapper extends WithDisposable(LitElement) {
   `;
 
   @state()
-  promptShow = false;
+  accessor promptShow = false;
 
   @property({ attribute: false })
-  item!: ChatAction;
+  accessor item!: ChatAction;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   protected override render() {
     const { item } = this;

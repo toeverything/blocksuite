@@ -46,13 +46,13 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  specs = PageEditorBlockSpecs;
+  accessor specs = PageEditorBlockSpecs;
 
   @property({ type: Boolean })
-  hasViewport = true;
+  accessor hasViewport = true;
 
   private _host: Ref<EditorHost> = createRef<EditorHost>();
 

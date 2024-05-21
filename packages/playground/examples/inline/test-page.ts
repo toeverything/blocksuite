@@ -129,13 +129,13 @@ function toggleStyle(
 @customElement('test-rich-text')
 export class TestRichText extends ShadowlessElement {
   @query('.rich-text-container')
-  private _container!: HTMLDivElement;
+  private accessor _container!: HTMLDivElement;
 
   @property({ attribute: false })
-  inlineEditor!: InlineEditor;
+  accessor inlineEditor!: InlineEditor;
 
   @property({ attribute: false })
-  undoManager!: Y.UndoManager;
+  accessor undoManager!: Y.UndoManager;
 
   override firstUpdated() {
     this.contentEditable = 'true';
@@ -255,10 +255,10 @@ export class CustomToolbar extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  inlineEditor!: InlineEditor;
+  accessor inlineEditor!: InlineEditor;
 
   @property({ attribute: false })
-  undoManager!: Y.UndoManager;
+  accessor undoManager!: Y.UndoManager;
 
   override firstUpdated() {
     const boldButton = this.querySelector('.bold');

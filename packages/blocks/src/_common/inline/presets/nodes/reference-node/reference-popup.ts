@@ -23,19 +23,19 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  inlineEditor!: AffineInlineEditor;
+  accessor inlineEditor!: AffineInlineEditor;
 
   @property({ attribute: false })
-  targetInlineRange!: InlineRange;
+  accessor targetInlineRange!: InlineRange;
 
   @property({ attribute: false })
-  docTitle!: string;
+  accessor docTitle!: string;
 
   @property({ attribute: false })
-  abortController!: AbortController;
+  accessor abortController!: AbortController;
 
   @query('.affine-reference-popover-container')
-  popupContainer!: HTMLDivElement;
+  accessor popupContainer!: HTMLDivElement;
 
   get referenceDocId() {
     const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference

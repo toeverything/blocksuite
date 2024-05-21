@@ -127,25 +127,27 @@ export class LangList extends LitElement {
   }
 
   @property({ attribute: false })
-  currentLanguageId!: BundledLanguage | PlainTextLanguage;
+  accessor currentLanguageId!: BundledLanguage | PlainTextLanguage;
 
   @property({ attribute: false })
-  onClose?: () => void;
+  accessor onClose: (() => void) | undefined = undefined;
 
   @property({ attribute: false })
-  onSelectLanguage?: (lang: StrictLanguageInfo | null) => void;
+  accessor onSelectLanguage:
+    | ((lang: StrictLanguageInfo | null) => void)
+    | undefined;
 
   @property({ attribute: false })
-  placement?: Placement;
+  accessor placement: Placement | undefined = undefined;
 
   @state()
-  private _filterText = '';
+  private accessor _filterText = '';
 
   @state()
-  private _currentSelectedIndex = 0;
+  private accessor _currentSelectedIndex = 0;
 
   @query('#filter-input')
-  filterInput!: HTMLInputElement;
+  accessor filterInput!: HTMLInputElement;
 
   override connectedCallback() {
     super.connectedCallback();

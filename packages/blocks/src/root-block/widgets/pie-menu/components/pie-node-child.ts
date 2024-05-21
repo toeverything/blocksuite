@@ -50,16 +50,16 @@ export class PieNodeChild extends LitElement {
   static override styles = [PieNode.styles, styles];
 
   @property({ attribute: false })
-  visible!: boolean;
+  accessor visible!: boolean;
 
   @property({ attribute: false })
-  hovering!: boolean;
+  accessor hovering!: boolean;
 
   @property({ attribute: false })
-  node!: PieNode;
+  accessor node!: PieNode;
 
   @property({ attribute: false })
-  onClick!: (ev: MouseEvent) => void;
+  accessor onClick!: (ev: MouseEvent) => void;
 
   protected override render() {
     const { model, position } = this.node;

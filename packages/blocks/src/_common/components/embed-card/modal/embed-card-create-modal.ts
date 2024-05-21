@@ -22,16 +22,16 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  titleText!: string;
+  accessor titleText!: string;
 
   @property({ attribute: false })
-  descriptionText!: string;
+  accessor descriptionText!: string;
 
   @property({ attribute: false })
-  createOptions!:
+  accessor createOptions!:
     | {
         mode: 'page';
         parentModel: BlockModel | string;
@@ -42,13 +42,13 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       };
 
   @property({ attribute: false })
-  onConfirm!: () => void;
+  accessor onConfirm!: () => void;
 
   @query('input')
-  input!: HTMLInputElement;
+  accessor input!: HTMLInputElement;
 
   @state()
-  private _linkInputValue = '';
+  private accessor _linkInputValue = '';
 
   override connectedCallback() {
     super.connectedCallback();

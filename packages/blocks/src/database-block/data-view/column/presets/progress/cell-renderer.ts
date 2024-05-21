@@ -125,7 +125,7 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
   static override styles = styles;
 
   @state()
-  private tempValue?: number;
+  private accessor tempValue: number | undefined = undefined;
 
   override onExitEditMode() {
     this.onChange(this._value);
@@ -140,7 +140,7 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
   }
 
   @query('.affine-database-progress-bg')
-  private _progressBg!: HTMLElement;
+  private accessor _progressBg!: HTMLElement;
 
   override firstUpdated() {
     const disposables = this._disposables;

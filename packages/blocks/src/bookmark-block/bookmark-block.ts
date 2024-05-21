@@ -20,16 +20,16 @@ export class BookmarkBlockComponent extends BlockElement<
   BookmarkBlockService
 > {
   @property({ attribute: false })
-  loading = false;
+  accessor loading = false;
 
   @property({ attribute: false })
-  error = false;
+  accessor error = false;
 
   @query('bookmark-card')
-  bookmarkCard!: HTMLElement;
+  accessor bookmarkCard!: HTMLElement;
 
   @query('embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   private _isInSurface = false;
 

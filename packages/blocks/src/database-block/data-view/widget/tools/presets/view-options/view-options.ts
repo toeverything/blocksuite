@@ -54,7 +54,7 @@ const styles = css`
 @customElement('data-view-header-tools-view-options')
 export class DataViewHeaderToolsViewOptions extends WidgetBase {
   static override styles = styles;
-  public override view!: DataViewTableManager | DataViewKanbanManager;
+  override accessor view!: DataViewTableManager | DataViewKanbanManager;
   showToolBar(show: boolean) {
     const tools = this.closest('data-view-header-tools');
     if (tools) {

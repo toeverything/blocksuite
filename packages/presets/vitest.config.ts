@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig(_configEnv =>
   defineConfig({
-    esbuild: { target: 'es2022' },
+    esbuild: { target: 'es2018' },
     optimizeDeps: {
       force: true,
       esbuildOptions: {

@@ -157,7 +157,7 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   get doc() {
     return this.host.doc;

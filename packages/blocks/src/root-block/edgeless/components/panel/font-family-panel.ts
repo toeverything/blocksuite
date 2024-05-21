@@ -27,10 +27,12 @@ export class EdgelessFontFamilyPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value: CanvasTextFontFamilyValueType = CanvasTextFontFamily.Inter;
+  accessor value: CanvasTextFontFamilyValueType = CanvasTextFontFamily.Inter;
 
   @property({ attribute: false })
-  onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
+  accessor onSelect:
+    | ((value: EdgelessFontFamilyPanel['value']) => void)
+    | undefined = undefined;
 
   private _onSelect(value: EdgelessFontFamilyPanel['value']) {
     this.value = value;

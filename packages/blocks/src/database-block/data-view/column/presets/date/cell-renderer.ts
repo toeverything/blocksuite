@@ -65,7 +65,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
   `;
 
   @query('input')
-  private _inputEle!: HTMLInputElement;
+  private accessor _inputEle!: HTMLInputElement;
 
   private _prevPortalAbortController: AbortController | null = null;
   private _datePicker: DatePicker | null = null;

@@ -101,16 +101,16 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless: EdgelessRootBlockComponent;
+  accessor edgeless: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  position: [number, number];
+  accessor position: [number, number];
 
   @property({ attribute: false })
-  currentSource: ShapeElementModel | NoteBlockModel;
+  accessor currentSource: ShapeElementModel | NoteBlockModel;
 
   @property({ attribute: false })
-  connector: ConnectorElementModel;
+  accessor connector: ConnectorElementModel;
 
   private _overlay:
     | AutoCompleteShapeOverlay

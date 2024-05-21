@@ -14,7 +14,7 @@ export class DatabaseTableViewFullScreen extends BlockElement<DatabaseBlockModel
   static override styles = fullScreenStyles;
 
   @property({ attribute: false })
-  abortController!: AbortController;
+  accessor abortController!: AbortController;
 
   close = () => {
     this.abortController.abort();

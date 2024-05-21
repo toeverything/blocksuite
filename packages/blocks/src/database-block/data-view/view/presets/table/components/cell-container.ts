@@ -34,21 +34,21 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   `;
 
   @state()
-  public isEditing = false;
+  accessor isEditing = false;
 
   @property({ attribute: false })
-  public readonly view!: DataViewManager;
+  accessor view!: DataViewManager;
   @property({ attribute: false })
-  public readonly rowId!: string;
+  accessor rowId!: string;
   @property({ attribute: false })
-  public readonly rowIndex!: number;
+  accessor rowIndex!: number;
   @property({ attribute: false })
-  public readonly columnId!: string;
+  accessor columnId!: string;
   @property({ attribute: false })
-  public readonly columnIndex!: number;
+  accessor columnIndex!: number;
 
   @property({ attribute: false })
-  column!: DataViewTableColumnManager;
+  accessor column!: DataViewTableColumnManager;
 
   private get selectionView() {
     return this.closest('affine-database-table')?.selectionController;

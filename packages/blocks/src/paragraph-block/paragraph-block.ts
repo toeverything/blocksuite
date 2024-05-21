@@ -45,10 +45,10 @@ export class ParagraphBlockComponent extends BlockElement<
   private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   @query('rich-text')
-  private _richTextElement?: RichText;
+  private accessor _richTextElement: RichText | null = null;
 
   @query('.affine-paragraph-placeholder')
-  private _placeholderContainer?: HTMLElement;
+  private accessor _placeholderContainer: HTMLElement | null = null;
 
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {

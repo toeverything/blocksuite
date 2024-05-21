@@ -39,7 +39,7 @@ export class EdgelessAlignPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value: TextAlign = TextAlign.Left;
+  accessor value: TextAlign = TextAlign.Left;
 
   private _onSelect(value: TextAlign) {
     this.value = value;
@@ -48,7 +48,9 @@ export class EdgelessAlignPanel extends LitElement {
     }
   }
   @property({ attribute: false })
-  onSelect?: (value: TextAlign) => void;
+  accessor onSelect:
+    | ((value: EdgelessAlignPanel['value']) => void)
+    | undefined = undefined;
 
   override render() {
     return repeat(

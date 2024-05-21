@@ -33,13 +33,13 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
 
   @state()
-  private _isSelected = false;
+  private accessor _isSelected = false;
 
   @property({ attribute: false })
-  loading = false;
+  accessor loading = false;
 
   @query('embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   private _selectBlock() {
     const selectionManager = this.host.selection;

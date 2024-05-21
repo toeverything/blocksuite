@@ -35,19 +35,19 @@ export class PieNodeCenter extends LitElement {
   static override styles = [PieNode.styles, styles];
 
   @property({ attribute: false })
-  isActive!: boolean;
+  accessor isActive!: boolean;
 
   @property({ attribute: false })
-  hoveredNode!: PieNode | null;
+  accessor hoveredNode!: PieNode | null;
 
   @property({ attribute: false })
-  node!: PieNode;
+  accessor node!: PieNode;
 
   @property({ attribute: false })
-  onMouseEnter!: (ev: MouseEvent) => void;
+  accessor onMouseEnter!: (ev: MouseEvent) => void;
 
   @property({ attribute: false })
-  rotatorAngle: number | null = null;
+  accessor rotatorAngle: number | null = null;
 
   protected override render() {
     const [x, y] = this.node.position;

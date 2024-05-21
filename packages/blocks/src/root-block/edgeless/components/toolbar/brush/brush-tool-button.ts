@@ -50,10 +50,10 @@ export class EdgelessBrushToolButton extends EdgelessToolButton<
     }
   `;
   @state()
-  color: string = DEFAULT_BRUSH_COLOR;
+  accessor color: string = DEFAULT_BRUSH_COLOR;
 
   @state()
-  lineWidth = LineWidth.Four;
+  accessor lineWidth = LineWidth.Four;
 
   protected override _type = 'brush' as const;
   protected override readonly _states = ['color', 'lineWidth'] as const;

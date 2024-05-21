@@ -81,13 +81,13 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
     }
   `;
   @property({ attribute: false })
-  config!: AIPanelAnswerConfig;
+  accessor config!: AIPanelAnswerConfig;
 
   @property({ attribute: false })
-  finish = true;
+  accessor finish = true;
 
   @property({ attribute: false })
-  copy?: CopyConfig;
+  accessor copy: CopyConfig | undefined = undefined;
 
   override render() {
     return html`

@@ -54,10 +54,10 @@ class EdgelessChangeMindmapStylePanel extends LitElement {
   ];
 
   @property({ attribute: false })
-  mindmapStyle!: MindmapStyle | null;
+  accessor mindmapStyle!: MindmapStyle | null;
 
   @property({ attribute: false })
-  onSelect!: (style: MindmapStyle) => void;
+  accessor onSelect!: (style: MindmapStyle) => void;
 
   override render() {
     return repeat(
@@ -94,10 +94,10 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
   ];
 
   @property({ attribute: false })
-  mindmapLayout!: LayoutType | null;
+  accessor mindmapLayout!: LayoutType | null;
 
   @property({ attribute: false })
-  onSelect!: (style: LayoutType) => void;
+  accessor onSelect!: (style: LayoutType) => void;
 
   override render() {
     return repeat(
@@ -121,10 +121,10 @@ class EdgelessChangeMindmapLayoutPanel extends LitElement {
 @customElement('edgeless-change-mindmap-button')
 export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  elements!: MindmapElementModel[];
+  accessor elements!: MindmapElementModel[];
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _getCommonStyle() {
     const style = this.elements[0].style;

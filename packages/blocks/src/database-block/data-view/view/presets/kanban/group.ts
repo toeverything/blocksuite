@@ -98,11 +98,11 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  dataViewEle!: DataViewRenderer;
+  accessor dataViewEle!: DataViewRenderer;
   @property({ attribute: false })
-  view!: DataViewKanbanManager;
+  accessor view!: DataViewKanbanManager;
   @property({ attribute: false })
-  group!: GroupData;
+  accessor group!: GroupData;
   private clickAddCard = () => {
     const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {

@@ -29,22 +29,34 @@ export class EdgelessMenuButton extends WithDisposable(LitElement) {
   `;
 
   @query('edgeless-tool-icon-button')
-  private _trigger!: EdgelessToolIconButton;
+  private accessor _trigger!: EdgelessToolIconButton;
 
   @query('edgeless-menu-content')
-  private _content!: EdgelessMenuContent;
+  private accessor _content!: EdgelessMenuContent;
 
   private _popper!: ReturnType<typeof createButtonPopper>;
 
   @property({ attribute: false })
-  button!: string | TemplateResult<1>;
+  accessor button!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  contentPadding?: string;
+  accessor contentPadding: string | undefined = undefined;
 
   close() {
     this._popper?.hide();
   }
+
+  @property({ attribute: false })
+  accessor iconInfo!: { icon: TemplateResult<1>; tooltip: string };
+
+  @property({ attribute: false })
+  accessor menuChildren!: TemplateResult<1>;
+
+  @property({ attribute: false })
+  accessor padding = 4;
+
+  @property({ attribute: false })
+  accessor gap = 0;
 
   override firstUpdated() {
     this._popper = createButtonPopper(

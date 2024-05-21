@@ -17,7 +17,7 @@ export class AffineLitIcon extends ShadowlessElement {
     }
   `;
   @property({ attribute: false })
-  name!: keyof typeof icons;
+  accessor name!: keyof typeof icons;
 
   protected override render(): unknown {
     return html`${icons[this.name]}`;

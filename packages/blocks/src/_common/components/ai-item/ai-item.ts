@@ -19,13 +19,13 @@ export class AIItem extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  item!: AIItemConfig;
+  accessor item!: AIItemConfig;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  onClick?: () => void;
+  accessor onClick: (() => void) | undefined;
 
   private _whenHover!: HoverController;
 

@@ -24,41 +24,45 @@ export abstract class DataViewBase<
   implements DataViewProps<T, Selection>, DataViewExpose
 {
   @property({ attribute: false })
-  std!: BlockStdScope;
+  accessor std!: BlockStdScope;
 
   @property({ attribute: false })
-  headerWidget!: DataViewWidget;
+  accessor headerWidget!: DataViewWidget;
 
   @property({ attribute: false })
-  dataViewEle!: DataViewRenderer;
+  accessor dataViewEle!: DataViewRenderer;
 
   @property({ attribute: false })
-  view!: T;
+  accessor view!: T;
   @property({ attribute: false })
-  viewSource!: ViewSource;
+  accessor viewSource!: ViewSource;
   @property({ attribute: false })
-  dataSource!: DataSource;
+  accessor dataSource!: DataSource;
 
   @property({ attribute: false })
-  bindHotkey!: (hotkeys: Record<string, UIEventHandler>) => Disposable;
+  accessor bindHotkey!: (hotkeys: Record<string, UIEventHandler>) => Disposable;
 
   @property({ attribute: false })
-  handleEvent!: (name: EventName, handler: UIEventHandler) => Disposable;
+  accessor handleEvent!: (
+    name: EventName,
+    handler: UIEventHandler
+  ) => Disposable;
 
   @property({ attribute: false })
-  modalMode?: boolean;
+  accessor modalMode: boolean | undefined = undefined;
 
   @property({ attribute: false })
-  setSelection!: (selection?: Selection) => void;
+  accessor setSelection!: (selection?: Selection) => void;
 
   @property({ attribute: false })
-  selectionUpdated!: Slot<Selection | undefined>;
+  accessor selectionUpdated!: Slot<Selection | undefined>;
 
   @property({ attribute: false })
-  onDrag?: (evt: MouseEvent, id: string) => () => void;
+  accessor onDrag: ((evt: MouseEvent, id: string) => () => void) | undefined =
+    undefined;
 
   @property({ attribute: false })
-  getFlag!: Doc['awarenessStore']['getFlag'];
+  accessor getFlag!: Doc['awarenessStore']['getFlag'];
 
   addRow?(position: InsertToPosition): void;
 

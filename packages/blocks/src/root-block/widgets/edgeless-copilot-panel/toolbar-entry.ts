@@ -18,13 +18,13 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  groups!: AIItemGroupConfig[];
+  accessor groups!: AIItemGroupConfig[];
 
   private _showCopilotPanel() {
     const selectedElements = this.edgeless.service.selection.elements;

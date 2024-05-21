@@ -13,7 +13,6 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
-    "experimentalDecorators": true,
     "composite": false
   },
   "include": ["./apps", "./examples", "./scripts"],

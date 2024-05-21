@@ -24,10 +24,10 @@ import { Bound } from '../../../surface-block/index.js';
 @customElement('edgeless-change-attachment-button')
 export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  model!: AttachmentBlockModel;
+  accessor model!: AttachmentBlockModel;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private get _doc() {
     return this.model.doc;

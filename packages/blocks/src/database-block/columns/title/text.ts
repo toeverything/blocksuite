@@ -72,10 +72,10 @@ const styles = css`
 `;
 
 abstract class BaseTextCell extends BaseCellRenderer<Text> {
-  override view!: DataViewTableManager | DataViewKanbanManager;
+  override accessor view!: DataViewTableManager | DataViewKanbanManager;
   static override styles = styles;
   @property({ attribute: false })
-  showIcon = false;
+  accessor showIcon = false;
   get service() {
     const database = this.closest<DatabaseBlockComponent>('affine-database');
     return database?.service;
@@ -103,7 +103,7 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
   }
 
   @query('rich-text')
-  richText!: RichText;
+  accessor richText!: RichText;
   get inlineEditor() {
     assertExists(this.richText);
     const inlineEditor = this.richText.inlineEditor;

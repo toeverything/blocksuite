@@ -112,7 +112,8 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
+
   editorWithAI?: AIEdgelessLogic;
   aiLogic?: AILogic;
 
@@ -209,8 +210,9 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       render: this.config,
     },
   };
+
   @state()
-  currentPanel: keyof typeof this.panels = 'Chat';
+  accessor currentPanel: keyof typeof this.panels = 'Chat';
 
   override render() {
     const panel = this.panels[this.currentPanel];

@@ -187,47 +187,47 @@ export class DebugMenu extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  collection!: DocCollection;
+  accessor collection!: DocCollection;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
 
   @property({ attribute: false })
-  outlinePanel!: CustomOutlinePanel;
+  accessor outlinePanel!: CustomOutlinePanel;
 
   @property({ attribute: false })
-  framePanel!: CustomFramePanel;
+  accessor framePanel!: CustomFramePanel;
 
   @property({ attribute: false })
-  chatPanel!: CustomChatPanel;
+  accessor chatPanel!: CustomChatPanel;
 
   @property({ attribute: false })
-  copilotPanel!: CopilotPanel;
+  accessor copilotPanel!: CopilotPanel;
 
   @property({ attribute: false })
-  commentPanel!: CommentPanel;
+  accessor commentPanel!: CommentPanel;
 
   @property({ attribute: false })
-  sidePanel!: SidePanel;
+  accessor sidePanel!: SidePanel;
   @property({ attribute: false })
-  leftSidePanel!: LeftSidePanel;
+  accessor leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
-  docsPanel!: DocsPanel;
+  accessor docsPanel!: DocsPanel;
 
   @state()
-  private _canUndo = false;
+  private accessor _canUndo = false;
 
   @state()
-  private _canRedo = false;
+  private accessor _canRedo = false;
 
   @property({ attribute: false })
-  readonly = false;
+  accessor readonly = false;
 
   @state()
-  private _hasOffset = false;
+  private accessor _hasOffset = false;
 
   @query('#block-type-dropdown')
-  blockTypeDropdown!: SlDropdown;
+  accessor blockTypeDropdown!: SlDropdown;
 
   private _styleMenu!: Pane;
   private _showStyleDebugMenu = false;
@@ -241,7 +241,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   @state()
-  private _dark = getDarkModeConfig();
+  private accessor _dark = getDarkModeConfig();
 
   get host() {
     return this.editor.host;

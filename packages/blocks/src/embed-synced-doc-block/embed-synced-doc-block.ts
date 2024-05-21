@@ -34,39 +34,39 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   static override styles = blockStyles;
 
   @state()
-  private _editorMode: 'page' | 'edgeless' = 'page';
+  private accessor _editorMode: 'page' | 'edgeless' = 'page';
 
   @state()
-  private _docUpdatedAt: Date = new Date();
+  private accessor _docUpdatedAt: Date = new Date();
 
   @state()
-  private _loading = false;
+  private accessor _loading = false;
 
   @state()
-  private _error = false;
+  private accessor _error = false;
 
   @state()
-  private _deleted = false;
+  private accessor _deleted = false;
 
   @state()
-  private _cycle = false;
+  private accessor _cycle = false;
 
   @state()
-  private _editing = false;
+  private accessor _editing = false;
 
   @state()
-  private _empty = false;
+  private accessor _empty = false;
 
   @query(':scope > .embed-block-container > affine-embed-synced-doc-card')
-  syncedDocCard?: EmbedSyncedDocCard;
+  accessor syncedDocCard: EmbedSyncedDocCard | null = null;
 
   @query(':scope > .embed-block-container > embed-card-caption')
-  captionElement?: EmbedCardCaption;
+  accessor captionElement: EmbedCardCaption | null = null;
 
   @query(
     ':scope > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
   )
-  syncedDocEditorHost?: EditorHost;
+  accessor syncedDocEditorHost: EditorHost | null = null;
 
   get syncedDoc() {
     const doc = this.std.collection.getDoc(this.model.pageId);

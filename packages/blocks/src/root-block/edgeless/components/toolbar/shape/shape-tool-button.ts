@@ -90,22 +90,22 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
   `;
 
   @state()
-  shapeStyle: ShapeStyle = ShapeStyle.Scribbled;
+  accessor shapeStyle: ShapeStyle = ShapeStyle.Scribbled;
 
   @state()
-  shapeType: ShapeName = Rect;
+  accessor shapeType: ShapeName = Rect;
 
   @state()
-  fillColor: string = DEFAULT_SHAPE_FILL_COLOR;
+  accessor fillColor: string = DEFAULT_SHAPE_FILL_COLOR;
 
   @state()
-  strokeColor: string = DEFAULT_SHAPE_STROKE_COLOR;
+  accessor strokeColor: string = DEFAULT_SHAPE_STROKE_COLOR;
 
   @state()
-  radius = 0;
+  accessor radius = 0;
 
   @state()
-  private order = shapes.map((_, i) => i + 1);
+  private accessor order = shapes.map((_, i) => i + 1);
 
   protected override _type = 'shape' as const;
   protected override _states = [

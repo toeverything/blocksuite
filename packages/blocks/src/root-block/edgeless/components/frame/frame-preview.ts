@@ -70,28 +70,28 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless: EdgelessRootBlockComponent | null = null;
+  accessor edgeless: EdgelessRootBlockComponent | null = null;
 
   @property({ attribute: false })
-  frame!: FrameBlockModel;
+  accessor frame!: FrameBlockModel;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  surfaceWidth: number = DEFAULT_PREVIEW_CONTAINER_WIDTH;
+  accessor surfaceWidth: number = DEFAULT_PREVIEW_CONTAINER_WIDTH;
 
   @property({ attribute: false })
-  surfaceHeight: number = DEFAULT_PREVIEW_CONTAINER_HEIGHT;
+  accessor surfaceHeight: number = DEFAULT_PREVIEW_CONTAINER_HEIGHT;
 
   @state()
-  fillScreen = false;
+  accessor fillScreen = false;
 
   @state()
-  private _surfaceModel: SurfaceBlockModel | null = null;
+  private accessor _surfaceModel: SurfaceBlockModel | null = null;
 
   private _surfaceRefRendererId: string = nanoid();
   private _surfaceRefRenderer!: SurfaceRefRenderer;
@@ -101,10 +101,10 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   private _frameDisposables: DisposableGroup | null = null;
 
   @query('.frame-preview-surface-canvas-container')
-  container!: HTMLDivElement;
+  accessor container!: HTMLDivElement;
 
   @query('.frame-preview-surface-container surface-ref-portal')
-  blocksPortal!: SurfaceRefPortal;
+  accessor blocksPortal!: SurfaceRefPortal;
 
   get surfaceRenderer() {
     return this._surfaceRefRenderer.surfaceRenderer;

@@ -45,12 +45,12 @@ export class UniLit<
     }
   `;
   @property({ attribute: false })
-  uni?: UniComponent<Props, Expose>;
+  accessor uni: UniComponent<Props, Expose> | undefined = undefined;
 
   @property({ attribute: false })
-  props!: Props;
+  accessor props!: Props;
   @property({ attribute: false })
-  ref?: Ref<Expose>;
+  accessor ref: Ref<Expose> | undefined = undefined;
 
   uniReturn?: UniComponentReturn<Props, Expose>;
 
@@ -123,11 +123,11 @@ class UniAnyRender<
   Expose extends NonNullable<unknown>,
 > extends ShadowlessElement {
   @property({ attribute: false })
-  props!: T;
+  accessor props!: T;
   @property({ attribute: false })
-  expose!: Expose;
+  accessor expose!: Expose;
   @property({ attribute: false })
-  renderTemplate!: (props: T, expose: Expose) => TemplateResult;
+  accessor renderTemplate!: (props: T, expose: Expose) => TemplateResult;
 
   override render() {
     return this.renderTemplate(this.props, this.expose);

@@ -39,13 +39,13 @@ export class EdgelessEraserToolButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
+  accessor edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
+  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   override firstUpdated() {
     this.edgeless.bindHotKey(

@@ -156,16 +156,22 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   `;
 
   @property({ attribute: false })
-  enableNoteSlicer!: boolean;
+  accessor enableNoteSlicer!: boolean;
 
   @state()
-  toolbarVisible = false;
+  accessor left = 0;
 
   @state()
-  private _dragging = false;
+  accessor top = 0;
 
   @state()
-  private _registeredEntries: {
+  accessor toolbarVisible = false;
+
+  @state()
+  private accessor _dragging = false;
+
+  @state()
+  private accessor _registeredEntries: {
     render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
     when: (model: EdgelessModel[]) => boolean;
   }[] = [];
@@ -179,7 +185,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       return value.some((id, index) => id !== oldValue[index]);
     },
   })
-  selectedIds: string[] = [];
+  accessor selectedIds: string[] = [];
 
   get edgeless() {
     return this.blockElement as EdgelessRootBlockComponent;

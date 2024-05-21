@@ -114,40 +114,40 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless: EdgelessRootBlockComponent | null = null;
+  accessor edgeless: EdgelessRootBlockComponent | null = null;
 
   @property({ attribute: false })
-  frame!: FrameBlockModel;
+  accessor frame!: FrameBlockModel;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  cardIndex!: number;
+  accessor cardIndex!: number;
 
   @property({ attribute: false })
-  frameIndex!: string;
+  accessor frameIndex!: string;
 
   @property({ attribute: false })
-  status: 'selected' | 'dragging' | 'placeholder' | 'none' = 'none';
+  accessor status: 'selected' | 'dragging' | 'placeholder' | 'none' = 'none';
 
   @property({ attribute: false })
-  stackOrder!: number;
+  accessor stackOrder!: number;
 
   @property({ attribute: false })
-  pos!: { x: number; y: number };
+  accessor pos!: { x: number; y: number };
 
   @property({ attribute: false })
-  width?: number;
+  accessor width: number | undefined = undefined;
 
   @property({ attribute: false })
-  draggingCardNumber?: number;
+  accessor draggingCardNumber: number | undefined = undefined;
 
   @query('.frame-card-container')
-  containerElement!: HTMLElement;
+  accessor containerElement!: HTMLElement;
 
   private _frameDisposables: DisposableGroup | null = null;
 

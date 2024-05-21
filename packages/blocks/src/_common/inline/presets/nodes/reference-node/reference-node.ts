@@ -65,20 +65,20 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ type: Object })
-  delta: DeltaInsert<AffineTextAttributes> = {
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
     insert: ZERO_WIDTH_SPACE,
     attributes: {},
   };
 
   @property({ type: Boolean })
-  selected = false;
+  accessor selected = false;
 
   @property({ attribute: false })
-  config!: ReferenceNodeConfig;
+  accessor config!: ReferenceNodeConfig;
 
   // Since the linked doc may be deleted, the `_refMeta` could be undefined.
   @state()
-  private _refMeta?: DocMeta;
+  private accessor _refMeta: DocMeta | undefined = undefined;
 
   private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
     type: 'LinkedPage',
