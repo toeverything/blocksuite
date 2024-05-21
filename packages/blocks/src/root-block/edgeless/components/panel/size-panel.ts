@@ -76,7 +76,7 @@ export class EdgelessSizePanel extends LitElement {
   accessor maxSize: number = MAX_SIZE;
 
   @property({ attribute: 'data-type' })
-  type: 'normal' | 'check' = 'normal';
+  accessor type: 'normal' | 'check' = 'normal';
 
   private _onSelect(size: EdgelessSizePanel['size']) {
     if (this.onSelect) this.onSelect(size);

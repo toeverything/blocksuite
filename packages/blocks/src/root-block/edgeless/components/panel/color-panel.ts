@@ -179,13 +179,13 @@ export class EdgelessColorButton extends LitElement {
   `;
 
   @property({ attribute: false })
-  color!: CssVariableName;
+  accessor color!: CssVariableName;
 
   @property({ attribute: false })
-  hollowCircle?: boolean;
+  accessor hollowCircle: boolean | undefined = undefined;
 
   @property({ attribute: false })
-  letter?: boolean;
+  accessor letter: boolean | undefined = undefined;
 
   override render() {
     const { color, hollowCircle, letter } = this;
@@ -312,7 +312,7 @@ export class EdgelessTextColorIcon extends LitElement {
   `;
 
   @property({ attribute: false })
-  color!: CssVariableName;
+  accessor color!: CssVariableName;
 
   override render() {
     return html`<svg
