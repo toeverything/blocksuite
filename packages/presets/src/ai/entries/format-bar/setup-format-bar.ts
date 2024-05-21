@@ -1,4 +1,4 @@
-import './format-bar-ai-button.js';
+import '../../_common/components/ask-ai-button.js';
 
 import {
   type AffineFormatBarWidget,
@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/blocks';
 import { html, type TemplateResult } from 'lit';
 
-import { AIItemGroups } from './config.js';
+import { AIItemGroups } from '../../_common/config.js';
 
 export function setupFormatBarEntry(formatBar: AffineFormatBarWidget) {
   toolbarDefaultConfig(formatBar);
@@ -15,10 +15,10 @@ export function setupFormatBarEntry(formatBar: AffineFormatBarWidget) {
       {
         type: 'custom' as const,
         render(formatBar: AffineFormatBarWidget): TemplateResult | null {
-          return html` <format-bar-ai-button
+          return html` <ask-ai-button
             .host=${formatBar.host}
             .actionGroups=${AIItemGroups}
-          ></format-bar-ai-button>`;
+          ></ask-ai-button>`;
         },
       },
       { type: 'divider' },

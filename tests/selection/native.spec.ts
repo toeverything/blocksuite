@@ -1636,9 +1636,7 @@ test('should not show option menu of image on native selection', async ({
   await initImageState(page);
   await activeEmbed(page);
 
-  await expect(
-    page.locator('.affine-embed-editing-state-container')
-  ).toHaveCount(1);
+  await expect(page.locator('.affine-image-toolbar-container')).toHaveCount(1);
 
   await pressEscape(page);
   await pressEnter(page);
@@ -1674,9 +1672,7 @@ test('should not show option menu of image on native selection', async ({
   await copyByKeyboard(page);
   assertClipItems(page, 'text/plain', '123');
 
-  await expect(
-    page.locator('.affine-embed-editing-state-container')
-  ).toHaveCount(0);
+  await expect(page.locator('.affine-image-toolbar-container')).toHaveCount(0);
 });
 
 test.skip('should be cleared when dragging block card from BlockHub', async ({

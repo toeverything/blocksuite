@@ -40,7 +40,9 @@ import {
 import { test } from './utils/playwright.js';
 
 async function focusCaption(page: Page) {
-  await page.click('.embed-editing-state>icon-button:nth-child(2)');
+  await page.click(
+    '.affine-image-toolbar-container .image-toolbar-button.caption'
+  );
 }
 
 test('can drag resize image by left menu', async ({ page }) => {
@@ -195,7 +197,7 @@ test('popup menu should follow position of image when scrolling', async ({
 
   await page.waitForTimeout(150);
 
-  const menu = page.locator('.affine-embed-editing-state-container');
+  const menu = page.locator('.affine-image-toolbar-container');
 
   await expect(menu).toBeVisible();
 
@@ -218,7 +220,7 @@ test('popup menu should follow position of image when scrolling', async ({
   if (!imageRect) throw new Error('image not found');
   if (!menuRect) throw new Error('menu not found');
   expect(imageRect.y).toBeCloseTo(16, -0.325);
-  expect(menuRect.y).toBeCloseTo(65, -0.325);
+  expect(menuRect.y).toBeCloseTo(16, -0.325);
 });
 
 test('select image should not show format bar', async ({ page }) => {
