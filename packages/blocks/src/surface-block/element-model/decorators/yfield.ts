@@ -32,6 +32,10 @@ export function yfield<V, T extends ElementModel>(fallback?: V) {
 
         yProps.add(prop);
 
+        if (getDecoratorState()?.skipYfield) {
+          return;
+        }
+
         if (this.yMap) {
           if (this.yMap.doc) {
             this.surface.doc.transact(() => {
