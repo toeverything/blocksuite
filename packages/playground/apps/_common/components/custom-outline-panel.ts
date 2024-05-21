@@ -22,10 +22,10 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
     }
   `;
   @state()
-  private _show = false;
+  private accessor _show = false;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
 
   private _renderPanel() {
     return html`<outline-panel

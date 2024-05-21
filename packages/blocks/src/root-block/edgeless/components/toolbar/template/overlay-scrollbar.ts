@@ -52,7 +52,7 @@ export class OverlayScrollbar extends LitElement {
   `;
 
   @query('.overlay-handle')
-  private _handle!: HTMLDivElement;
+  private accessor _handle!: HTMLDivElement;
 
   private _disposable = new DisposableGroup();
 

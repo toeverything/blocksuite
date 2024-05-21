@@ -71,50 +71,50 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     };
   })
   @local()
-  path: PointLocation[] = [];
+  accessor path: PointLocation[] = [];
 
   @local()
-  absolutePath: PointLocation[] = [];
+  accessor absolutePath: PointLocation[] = [];
 
   @local()
-  xywh: SerializedXYWH = '[0,0,0,0]';
+  accessor xywh: SerializedXYWH = '[0,0,0,0]';
 
   @local()
-  rotate: number = 0;
+  accessor rotate: number = 0;
 
   @yfield()
-  mode: ConnectorMode = ConnectorMode.Orthogonal;
+  accessor mode: ConnectorMode = ConnectorMode.Orthogonal;
 
   @yfield()
-  strokeWidth: number = 4;
+  accessor strokeWidth: number = 4;
 
   @yfield()
-  stroke: string = '#000000';
+  accessor stroke: string = '#000000';
 
   @yfield()
-  strokeStyle: StrokeStyle = 'solid';
+  accessor strokeStyle: StrokeStyle = 'solid';
 
   @yfield()
-  roughness: number = DEFAULT_ROUGHNESS;
+  accessor roughness: number = DEFAULT_ROUGHNESS;
 
   @yfield()
-  rough?: boolean;
+  accessor rough: boolean | undefined = undefined;
 
   @yfield()
-  source: Connection = {
+  accessor source: Connection = {
     position: [0, 0],
   };
 
   @yfield()
-  target: Connection = {
+  accessor target: Connection = {
     position: [0, 0],
   };
 
-  @yfield('None')
-  frontEndpointStyle!: PointStyle;
+  @yfield('None' as PointStyle)
+  accessor frontEndpointStyle!: PointStyle;
 
-  @yfield('Arrow')
-  rearEndpointStyle!: PointStyle;
+  @yfield('Arrow' as PointStyle)
+  accessor rearEndpointStyle!: PointStyle;
 
   moveTo(bound: Bound) {
     const oldBound = Bound.deserialize(this.xywh);

@@ -41,24 +41,24 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property()
-  mode: 'multi' | 'single' = 'multi';
+  accessor mode: 'multi' | 'single' = 'multi';
 
   @property({ attribute: false })
-  options: SelectTag[] = [];
+  accessor options: SelectTag[] = [];
 
   @property({ attribute: false })
-  onOptionsChange!: (options: SelectTag[]) => void;
+  accessor onOptionsChange!: (options: SelectTag[]) => void;
 
   private filteredOptions: Array<RenderOption> = [];
 
   @property({ attribute: false })
-  value: string[] = [];
+  accessor value: string[] = [];
 
   @property({ attribute: false })
-  onChange!: (value: string[]) => void;
+  accessor onChange!: (value: string[]) => void;
 
   @property({ attribute: false })
-  editComplete!: () => void;
+  accessor editComplete!: () => void;
 
   newTags = (tags: SelectTag[]) => {
     this.onOptionsChange([...tags, ...this.options]);
@@ -78,13 +78,13 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   };
 
   @query('.select-input')
-  private _selectInput!: HTMLInputElement;
+  private accessor _selectInput!: HTMLInputElement;
 
   @state()
-  private text = '';
+  private accessor text = '';
 
   @state()
-  private selectedIndex = 0;
+  private accessor selectedIndex = 0;
 
   private _currentColor: string | undefined = undefined;
 

@@ -32,7 +32,7 @@ class AIGeneratingPlaceholder extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  height: number = 300;
+  accessor height: number = 300;
 
   protected override render() {
     const theme = getThemeMode();

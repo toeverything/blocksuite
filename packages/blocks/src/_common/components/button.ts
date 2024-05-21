@@ -87,26 +87,26 @@ export class IconButton extends LitElement {
   `;
 
   @property()
-  size: string | number | null = null;
+  accessor size: string | number | null = null;
 
   @property()
-  width: string | number | null = null;
+  accessor width: string | number | null = null;
 
   @property()
-  height: string | number | null = null;
+  accessor height: string | number | null = null;
 
   @property()
-  text: string | null = null;
+  accessor text: string | null = null;
 
   @property({ attribute: true, type: Boolean })
-  active?: boolean = false;
+  accessor active: boolean = false;
 
   @property({ attribute: true, type: Boolean })
-  hover?: boolean = undefined;
+  accessor hover: boolean | undefined = undefined;
 
   // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
   @property({ attribute: true, type: Boolean })
-  disabled?: boolean = undefined;
+  accessor disabled: boolean | undefined = undefined;
 
   constructor() {
     super();

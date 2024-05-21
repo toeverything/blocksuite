@@ -1,5 +1,5 @@
 import type { ElementModel } from '../base.js';
-import { setObjectMeta } from './common.js';
+import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const convertSymbol = Symbol('convert');
 
@@ -12,30 +12,38 @@ const convertSymbol = Symbol('convert');
  * @param fn
  * @returns
  */
-export function convert<T extends ElementModel>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (propValue: any, instance: T) => unknown
+export function convert<V, T extends ElementModel>(
+  fn: (propValue: V, instance: T) => unknown
 ) {
-  return function convertDecorator(target: unknown, prop: string | symbol) {
-    setObjectMeta(convertSymbol, target, prop as string, fn);
+  return function convertDecorator(
+    _: unknown,
+    context: ClassAccessorDecoratorContext
+  ) {
+    const prop = String(context.name);
+    return {
+      init(this: T, v: V) {
+        const proto = Object.getPrototypeOf(this);
+        setObjectPropMeta(convertSymbol, proto, prop, fn);
+        return v;
+      },
+    } as ClassAccessorDecoratorResult<T, V>;
   };
 }
 
-export function getConvertMeta(
-  target: unknown,
+function getConvertMeta(
+  proto: unknown,
   prop: string | symbol
 ): null | ((propValue: unknown, instance: unknown) => unknown) {
-  // @ts-ignore
-  return target[convertSymbol]?.[prop] ?? null;
+  return getObjectPropMeta(proto, convertSymbol, prop);
 }
 
 export function convertProps(
-  target: unknown,
-  propKey: string | symbol,
-  newProp: unknown,
+  propName: string | symbol,
+  propValue: unknown,
   receiver: unknown
 ) {
-  const convertFn = getConvertMeta(target, propKey as string)!;
+  const proto = Object.getPrototypeOf(receiver);
+  const convertFn = getConvertMeta(proto, propName as string)!;
 
-  return convertFn ? convertFn(newProp, receiver) : newProp;
+  return convertFn ? convertFn(propValue, receiver) : propValue;
 }

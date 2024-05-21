@@ -59,10 +59,10 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @state()
-  private _showPopper = false;
+  private accessor _showPopper = false;
 
   private _zoomBar: ZoomBarPopper | null = null;
 

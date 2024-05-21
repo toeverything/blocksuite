@@ -38,16 +38,16 @@ function getMostCommonSize(elements: BrushElementModel[]): LineWidth {
 @customElement('edgeless-change-brush-button')
 export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  elements: BrushElementModel[] = [];
+  accessor elements: BrushElementModel[] = [];
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @state()
-  private _selectedColor: string | null = null;
+  private accessor _selectedColor: string | null = null;
 
   @state()
-  private _selectedSize: LineWidth | null = LineWidth.Four;
+  private accessor _selectedSize: LineWidth | null = LineWidth.Four;
 
   get surface() {
     return this.edgeless.surface;

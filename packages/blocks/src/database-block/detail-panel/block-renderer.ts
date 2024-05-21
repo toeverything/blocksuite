@@ -43,9 +43,9 @@ export class BlockRenderer
     }
   `;
   @property({ attribute: false })
-  public view!: DataViewTableManager | DataViewKanbanManager;
+  accessor view!: DataViewTableManager | DataViewKanbanManager;
   @property({ attribute: false })
-  public rowId!: string;
+  accessor rowId!: string;
   host?: EditorHost;
 
   get model() {

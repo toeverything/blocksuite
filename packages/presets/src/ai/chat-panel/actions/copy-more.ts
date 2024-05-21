@@ -71,45 +71,49 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  content!: string;
+  accessor content!: string;
 
   @property({ attribute: false })
-  isLast!: boolean;
+  accessor isLast!: boolean;
 
   @property({ attribute: false })
-  curTextSelection?: TextSelection;
+  accessor curTextSelection: TextSelection | undefined = undefined;
 
   @property({ attribute: false })
-  curBlockSelections?: BlockSelection[];
+  accessor curBlockSelections: BlockSelection[] | undefined = undefined;
 
   @property({ attribute: false })
-  items!: ChatItem[];
+  accessor items!: ChatItem[];
 
   @property({ attribute: false })
-  updateItems!: (items: ChatItem[]) => void;
+  accessor updateItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
-  updateStatus!: (status: ChatStatus) => void;
+  accessor updateStatus!: (status: ChatStatus) => void;
 
   @property({ attribute: false })
-  updateError!: (error: AIError | null) => void;
+  accessor updateError!: (error: AIError | null) => void;
 
   @property({ attribute: false })
-  abortController!: AbortController | null;
+  accessor abortController!: AbortController | null;
 
   @property({ attribute: false })
-  updateAbortController!: (abortController: AbortController | null) => void;
+  accessor updateAbortController!: (
+    abortController: AbortController | null
+  ) => void;
 
   @state()
-  private _showMoreMenu = false;
+  private accessor _showMoreMenu = false;
 
   @query('.more-button')
-  private _moreButton!: HTMLDivElement;
+  private accessor _moreButton!: HTMLDivElement;
+
   @query('.more-menu')
-  private _moreMenu!: HTMLDivElement;
+  private accessor _moreMenu!: HTMLDivElement;
+
   private _morePopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private _toggle() {

@@ -64,13 +64,13 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  elements!: EdgelessCanvasTextElement[];
+  accessor elements!: EdgelessCanvasTextElement[];
 
   @property({ attribute: false })
-  elementType!: EdgelessCanvasTextElementType;
+  accessor elementType!: EdgelessCanvasTextElementType;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   get service() {
     return this.edgeless.service;

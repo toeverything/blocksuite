@@ -207,7 +207,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!:
+  accessor model!:
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
@@ -218,10 +218,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedLoomModel;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @state()
-  private _embedScale = 1;
+  private accessor _embedScale = 1;
 
   private get _doc() {
     return this.model.doc;

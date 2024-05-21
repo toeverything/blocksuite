@@ -38,13 +38,13 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  data?: VariableOrProperty;
+  accessor data: VariableOrProperty | undefined = undefined;
 
   @property({ attribute: false })
-  setData!: (filter: VariableOrProperty) => void;
+  accessor setData!: (filter: VariableOrProperty) => void;
 
   @property({ attribute: false })
-  vars!: Variable[];
+  accessor vars!: Variable[];
 
   override connectedCallback() {
     super.connectedCallback();

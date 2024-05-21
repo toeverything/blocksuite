@@ -238,11 +238,11 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  options!: MenuOptions;
+  accessor options!: MenuOptions;
   @state()
-  private _text?: string;
+  private accessor _text: string | undefined = undefined;
   @state()
-  private _selectedIndex?: number;
+  private accessor _selectedIndex: number | undefined = undefined;
   private subMenu?: HTMLElement;
   private inputRef = createRef<HTMLInputElement>();
   private allItems: Array<Item & { index?: number }> = [];

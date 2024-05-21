@@ -60,19 +60,19 @@ export class OutlinePanel extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
 
   @property({ attribute: false })
-  fitPadding!: number[];
+  accessor fitPadding!: number[];
 
   @state()
-  _showPreviewIcon = false;
+  private accessor _showPreviewIcon = false;
 
   @state()
-  _enableNotesSorting = false;
+  private accessor _enableNotesSorting = false;
 
   @state()
-  _noticeVisible = false;
+  private accessor _noticeVisible = false;
 
   private _settings: OutlineSettingsDataType = {
     showIcons: false,

@@ -17,11 +17,11 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  tableViewManager!: DataViewTableManager;
+  accessor tableViewManager!: DataViewTableManager;
   @property({ attribute: false })
-  column!: DataViewColumnManager;
+  accessor column!: DataViewColumnManager;
   @property({ attribute: false })
-  table!: HTMLElement;
+  accessor table!: HTMLElement;
   private renderGroup(rows: string[]) {
     const columnIndex = this.tableViewManager.columnGetIndex(this.column.id);
     return html`

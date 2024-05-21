@@ -123,15 +123,15 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  dataViewEle!: DataViewRenderer;
+  accessor dataViewEle!: DataViewRenderer;
   @property({ attribute: false })
-  view!: DataViewKanbanManager;
+  accessor view!: DataViewKanbanManager;
   @property({ attribute: false })
-  groupKey!: string;
+  accessor groupKey!: string;
   @property({ attribute: false })
-  cardId!: string;
+  accessor cardId!: string;
   @state()
-  isFocus = false;
+  accessor isFocus = false;
 
   override connectedCallback() {
     super.connectedCallback();

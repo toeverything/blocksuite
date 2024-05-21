@@ -127,19 +127,19 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   `;
 
   @state()
-  private _isHover = true;
+  private accessor _isHover = true;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  selectedRect!: SelectedRect;
+  accessor selectedRect!: SelectedRect;
 
   @property({ attribute: false })
-  current!: ShapeElementModel | NoteBlockModel;
+  accessor current!: ShapeElementModel | NoteBlockModel;
 
   @state()
-  private _isMoving = false;
+  private accessor _isMoving = false;
   private _timer: ReturnType<typeof setTimeout> | null = null;
   private _autoCompleteOverlay: AutoCompleteOverlay = new AutoCompleteOverlay();
   private _pathGenerator!: ConnectorPathGenerator;

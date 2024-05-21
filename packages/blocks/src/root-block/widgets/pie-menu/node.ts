@@ -19,31 +19,31 @@ import {
 export class PieNode extends WithDisposable(LitElement) {
   static override styles = pieNodeStyles;
   @property({ attribute: false })
-  model!: PieNodeModel;
+  accessor model!: PieNodeModel;
 
   @property({ attribute: false })
-  angle!: number;
+  accessor angle!: number;
 
   @property({ attribute: false })
-  index!: number; // for selecting with keyboard
+  accessor index!: number; // for selecting with keyboard
 
   @property({ attribute: false })
-  startAngle!: number;
+  accessor startAngle!: number;
 
   @property({ attribute: false })
-  endAngle!: number;
+  accessor endAngle!: number;
 
   @property({ attribute: false })
-  position!: IVec;
+  accessor position!: IVec;
 
   @property({ attribute: false })
-  containerNode: PieNode | null = null;
+  accessor containerNode: PieNode | null = null;
 
   @property({ attribute: false })
-  menu!: PieMenu;
+  accessor menu!: PieMenu;
 
   @state()
-  private _isHovering = false;
+  private accessor _isHovering = false;
 
   private _rotatorAngle: number | null = null;
 

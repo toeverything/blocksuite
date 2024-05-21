@@ -31,17 +31,19 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  fontFamily = CanvasTextFontFamily.Inter;
+  accessor fontFamily = CanvasTextFontFamily.Inter;
   @property({ attribute: false })
-  fontWeight = CanvasTextFontWeight.Regular;
+  accessor fontWeight = CanvasTextFontWeight.Regular;
   @property({ attribute: false })
-  fontStyle = CanvasTextFontStyle.Normal;
+  accessor fontStyle = CanvasTextFontStyle.Normal;
 
   @property({ attribute: false })
-  onSelect?: (
-    fontWeight: CanvasTextFontWeight,
-    fontStyle: CanvasTextFontStyle
-  ) => void;
+  accessor onSelect:
+    | ((
+        fontWeight: CanvasTextFontWeight,
+        fontStyle: CanvasTextFontStyle
+      ) => void)
+    | undefined;
 
   private _onSelect(
     fontWeight: CanvasTextFontWeight,

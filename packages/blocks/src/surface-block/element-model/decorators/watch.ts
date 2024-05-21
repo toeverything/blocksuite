@@ -1,5 +1,5 @@
 import type { ElementModel } from '../base.js';
-import { setObjectMeta } from './common.js';
+import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 type WatchFn<T extends ElementModel = ElementModel> = (
   oldValue: unknown,
@@ -13,26 +13,31 @@ const watchSymbol = Symbol('watch');
  * The watch decorator is used to watch the property change of the element.
  * You can thinks of it as a decorator version of `elementUpdated` slot of the surface model.
  */
-export function watch<T extends ElementModel>(
+export function watch<V, T extends ElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: WatchFn<T>
 ) {
-  return function watchDecorator(target: unknown, prop: string | symbol) {
-    setObjectMeta(watchSymbol, target, prop, fn);
+  return function watchDecorator(
+    _: unknown,
+    context: ClassAccessorDecoratorContext
+  ) {
+    const prop = context.name;
+    return {
+      init(this: ElementModel, v: V) {
+        setObjectPropMeta(watchSymbol, Object.getPrototypeOf(this), prop, fn);
+        return v;
+      },
+    } as ClassAccessorDecoratorResult<ElementModel, V>;
   };
 }
 
-function getWatchMeta(target: unknown, prop: string | symbol): null | WatchFn {
-  // @ts-ignore
-  return target[watchSymbol]?.[prop] ?? null;
+function getWatchMeta(proto: unknown, prop: string | symbol): null | WatchFn {
+  return getObjectPropMeta(proto, watchSymbol, prop);
 }
 
-function startWatch(
-  prototype: unknown,
-  prop: string | symbol,
-  receiver: ElementModel
-) {
-  const watchFn = getWatchMeta(prototype, prop as string)!;
+function startWatch(prop: string | symbol, receiver: ElementModel) {
+  const proto = Object.getPrototypeOf(receiver);
+  const watchFn = getWatchMeta(proto, prop as string)!;
 
   if (!watchFn) return;
 
@@ -46,10 +51,9 @@ function startWatch(
 }
 
 export function initializeWatchers(prototype: unknown, receiver: ElementModel) {
-  // @ts-ignore
-  const watchers = prototype[watchSymbol] ?? {};
+  const watchers = getObjectPropMeta(prototype, watchSymbol);
 
   Object.keys(watchers).forEach(prop => {
-    startWatch(prototype, prop, receiver);
+    startWatch(prop, receiver);
   });
 }

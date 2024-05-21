@@ -26,19 +26,19 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
     }
   `;
   @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
+  accessor edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
+  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   @query('.current-icon')
-  currentIcon!: HTMLInputElement;
+  accessor currentIcon!: HTMLInputElement;
 
   @state()
-  curMode: LassoMode = LassoMode.FreeHand;
+  accessor curMode: LassoMode = LassoMode.FreeHand;
 
   private _fadeOut() {
     this.currentIcon.style.opacity = '0';

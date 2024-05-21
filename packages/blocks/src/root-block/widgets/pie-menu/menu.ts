@@ -36,16 +36,16 @@ export class PieMenu extends WithDisposable(LitElement) {
   };
 
   @property({ attribute: false })
-  rootElement!: EdgelessRootBlockComponent;
+  accessor rootElement!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  widgetElement!: AffinePieMenuWidget;
+  accessor widgetElement!: AffinePieMenuWidget;
 
   @property({ attribute: false })
-  schema!: PieMenuSchema;
+  accessor schema!: PieMenuSchema;
 
   @property({ attribute: false })
-  position!: IVec;
+  accessor position!: IVec;
 
   selectionChain: PieNode[] = [];
 

@@ -17,12 +17,12 @@ import {
 @customElement('affine-code-line')
 export class AffineCodeLine extends ShadowlessElement {
   @property({ type: Object })
-  delta: DeltaInsert<AffineTextAttributes> = {
+  accessor delta: DeltaInsert<AffineTextAttributes> = {
     insert: ZERO_WIDTH_SPACE,
   };
 
   @property({ attribute: false })
-  highlightOptionsGetter: HighlightOptionsGetter | null = null;
+  accessor highlightOptionsGetter: HighlightOptionsGetter | null = null;
 
   override render() {
     assertExists(

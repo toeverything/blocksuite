@@ -24,22 +24,22 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  frames!: FrameBlockModel[];
+  accessor frames!: FrameBlockModel[];
 
   @query('.edgeless-frame-order-button')
-  private _edgelessFrameOrderButton!: HTMLElement;
+  private accessor _edgelessFrameOrderButton!: HTMLElement;
 
   @query('edgeless-frame-order-menu')
-  private _edgelessFrameOrderMenu!: EdgelessFrameOrderMenu;
+  private accessor _edgelessFrameOrderMenu!: EdgelessFrameOrderMenu;
   private _edgelessFrameOrderPopper: ReturnType<
     typeof createButtonPopper
   > | null = null;
 
   @state()
-  private _popperShow = false;
+  private accessor _popperShow = false;
 
   override firstUpdated() {
     this._edgelessFrameOrderPopper = createButtonPopper(

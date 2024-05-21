@@ -29,19 +29,19 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  active = false;
+  accessor active = false;
 
   @state()
-  childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
+  accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
 
   @state()
-  childType = 'text';
+  accessor childType = 'text';
 
   @state()
-  tip = 'Text';
+  accessor tip = 'Text';
 
   private _noteMenu: MenuPopper<EdgelessNoteMenu> | null = null;
   private _states = ['childFlavour', 'childType', 'tip'] as const;

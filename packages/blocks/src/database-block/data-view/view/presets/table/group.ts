@@ -57,13 +57,13 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  dataViewEle!: DataViewRenderer;
+  accessor dataViewEle!: DataViewRenderer;
   @property({ attribute: false })
-  view!: DataViewTableManager;
+  accessor view!: DataViewTableManager;
   @property({ attribute: false })
-  viewEle!: DataViewTable;
+  accessor viewEle!: DataViewTable;
   @property({ attribute: false })
-  group?: GroupData;
+  accessor group: GroupData | undefined = undefined;
   get rows() {
     return this.group?.rows ?? this.view.rows;
   }

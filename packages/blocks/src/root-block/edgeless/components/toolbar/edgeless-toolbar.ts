@@ -161,23 +161,23 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   edgeless: EdgelessRootBlockComponent;
 
   @state()
-  private _navigatorMode: NavigatorMode = 'fit';
+  private accessor _navigatorMode: NavigatorMode = 'fit';
 
   @state()
-  private _hideToolbar = false;
+  private accessor _hideToolbar = false;
 
   @state()
-  private _mouseOnToolbar = true;
+  private accessor _mouseOnToolbar = true;
 
   @state()
-  settingMenuShow = false;
+  accessor settingMenuShow = false;
 
   @state({
     hasChanged() {
       return true;
     },
   })
-  private _currentFrameIndex = 0;
+  private accessor _currentFrameIndex = 0;
   private _timer?: ReturnType<typeof setTimeout>;
   private _cachedIndex = -1;
 

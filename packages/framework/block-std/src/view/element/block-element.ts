@@ -20,13 +20,13 @@ export class BlockElement<
   WidgetName extends string = string,
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  model!: Model;
+  accessor model!: Model;
 
   @property({ attribute: false })
-  content: TemplateResult | null = null;
+  accessor content: TemplateResult | null = null;
 
   @property({
     attribute: false,
@@ -41,13 +41,13 @@ export class BlockElement<
       return value !== oldValue;
     },
   })
-  widgets!: Record<WidgetName, TemplateResult>;
+  accessor widgets!: Record<WidgetName, TemplateResult>;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  dirty = false;
+  accessor dirty = false;
 
   @state({
     hasChanged(value: BaseSelection | null, oldValue: BaseSelection | null) {
@@ -58,7 +58,8 @@ export class BlockElement<
       return !value?.equals(oldValue);
     },
   })
-  selected: BaseSelection | null = null;
+  accessor selected: BaseSelection | null = null;
+
   service!: Service;
 
   path!: string[];

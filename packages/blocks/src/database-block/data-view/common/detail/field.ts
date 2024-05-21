@@ -98,15 +98,15 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  view!: DataViewManager;
+  accessor view!: DataViewManager;
   @property({ attribute: false })
-  column!: DataViewColumnManager;
+  accessor column!: DataViewColumnManager;
   @property({ attribute: false })
-  rowId!: string;
+  accessor rowId!: string;
   @state()
-  isFocus = false;
+  accessor isFocus = false;
   @state()
-  editing = false;
+  accessor editing = false;
   private _cell = createRef<DataViewCellLifeCycle>();
 
   private get readonly() {

@@ -86,22 +86,22 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   abstract get type(): string;
 
   @yfield()
-  index!: string;
+  accessor index!: string;
 
   @yfield()
-  seed!: number;
+  accessor seed!: number;
 
   @local()
-  display: boolean = true;
+  accessor display: boolean = true;
 
   @local()
-  opacity: number = 1;
+  accessor opacity: number = 1;
 
   @watch((_, instance) => {
     instance['_local'].delete('externalBound');
   })
   @local()
-  externalXYWH: SerializedXYWH | undefined = undefined;
+  accessor externalXYWH: SerializedXYWH | undefined = undefined;
 
   get externalBound(): Bound | null {
     if (!this._local.has('externalBound')) {
@@ -201,9 +201,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
-    const prototype = Object.getPrototypeOf(this);
-
-    if (!getYFieldPropsSet(prototype).has(prop as string)) {
+    if (!getYFieldPropsSet(this).has(prop as string)) {
       return;
     }
 
@@ -216,10 +214,9 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       enumerable: true,
       get: () => this._stashed.get(prop),
       set: (original: unknown) => {
-        const value = convertProps(prototype, prop as string, original, this);
+        const value = convertProps(prop as string, original, this);
         const oldValue = this._stashed.get(prop);
         const derivedProps = getDeriveProperties(
-          prototype,
           prop as string,
           original,
           this as unknown as ElementModel
@@ -256,13 +253,12 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
-    const prototype = Object.getPrototypeOf(this);
     const value = this._stashed.get(prop);
     this._stashed.delete(prop);
     // @ts-ignore
     delete this[prop];
 
-    if (getYFieldPropsSet(prototype).has(prop as string)) {
+    if (getYFieldPropsSet(this).has(prop as string)) {
       this.surface.doc.transact(() => {
         // directly set the value to the ymap to avoid
         // executing derive and convert decorators again
@@ -384,8 +380,8 @@ export abstract class GroupLikeModel<
     return elements;
   }
 
-  @local()
-  xywh: SerializedXYWH = '[0,0,0,0]';
+  @local<SerializedXYWH, GroupLikeModel>()
+  accessor xywh: SerializedXYWH = '[0,0,0,0]';
 
   /**
    * Check if the group has the given descendant.

@@ -35,7 +35,7 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
   static override styles = styles;
 
   @state()
-  public showToolBar = false;
+  accessor showToolBar = false;
 
   private get readonly() {
     return this.view.readonly;

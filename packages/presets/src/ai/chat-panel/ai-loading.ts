@@ -46,7 +46,7 @@ export class AILoading extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  stopGenerating!: () => void;
+  accessor stopGenerating!: () => void;
 
   override render() {
     return html`

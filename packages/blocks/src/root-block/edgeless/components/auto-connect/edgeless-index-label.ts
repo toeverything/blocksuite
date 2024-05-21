@@ -150,22 +150,23 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  accessor surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @state()
-  private _show = false;
+  private accessor _show = false;
 
   @state()
-  private _pageVisibleElementsMap: Map<AutoConnectElement, number> = new Map();
+  private accessor _pageVisibleElementsMap: Map<AutoConnectElement, number> =
+    new Map();
 
   @state()
-  private _edgelessOnlyNotesSet = new Set<NoteBlockModel>();
+  private accessor _edgelessOnlyNotesSet = new Set<NoteBlockModel>();
 
   @state()
-  private _index = -1;
+  private accessor _index = -1;
 
   protected override firstUpdated(): void {
     const { _disposables, edgeless } = this;

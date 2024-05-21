@@ -34,13 +34,13 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  accessor surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
-  model!: NoteBlockModel;
+  accessor model!: NoteBlockModel;
 
   @property({ attribute: false })
-  display!: boolean;
+  accessor display!: boolean;
 
   get edgeless() {
     return this.surface.edgeless;
@@ -146,22 +146,22 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   `;
 
   @state()
-  private _isSelected = false;
+  private accessor _isSelected = false;
 
   @state()
-  private _editing = false;
+  private accessor _editing = false;
 
   @state()
-  private _isResizing = false;
+  private accessor _isResizing = false;
 
   @state()
-  private _isHover = false;
+  private accessor _isHover = false;
 
   @state()
-  private _noteFullHeight = 0;
+  private accessor _noteFullHeight = 0;
 
   @query('affine-note')
-  private _affineNote!: HTMLDivElement;
+  private accessor _affineNote!: HTMLDivElement;
 
   get _zoom() {
     return this.edgeless.service.viewport.zoom;

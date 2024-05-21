@@ -21,13 +21,13 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
   `;
 
   @state()
-  private frame?: FrameBlockModel;
+  private accessor frame: FrameBlockModel | undefined = undefined;
 
   @state()
-  private show = false;
+  private accessor show = false;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _blackBackground = false;
 

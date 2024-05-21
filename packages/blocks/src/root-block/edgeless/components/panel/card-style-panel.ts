@@ -29,17 +29,17 @@ export class CardStylePanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  value!: string;
+  accessor value!: string;
 
   @property({ attribute: false })
-  options!: {
+  accessor options!: {
     style: EmbedCardStyle;
     Icon: TemplateResult<1>;
     tooltip: string;
   }[];
 
   @property({ attribute: false })
-  onSelect!: (value: EmbedCardStyle) => void;
+  accessor onSelect!: (value: EmbedCardStyle) => void;
 
   override render() {
     const options = this.options;

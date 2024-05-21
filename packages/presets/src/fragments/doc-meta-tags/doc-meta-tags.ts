@@ -264,16 +264,16 @@ export class DocMetaTags extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @state()
-  backlinkList!: BacklinkData[];
+  accessor backlinkList!: BacklinkData[];
 
   @state()
-  showSelect = false;
+  accessor showSelect = false;
 
   @state()
-  expanded = false;
+  accessor expanded = false;
 
   get pageRoot() {
     const pageViewport = this.closest('.affine-page-viewport');

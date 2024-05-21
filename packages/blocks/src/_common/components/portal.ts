@@ -35,13 +35,13 @@ import { customElement, property } from 'lit/decorators.js';
 @customElement('blocksuite-portal')
 export class Portal extends LitElement {
   @property({ attribute: false })
-  public container = document.body;
+  accessor container = document.body;
 
   @property({ attribute: false })
-  public template = html``;
+  accessor template = html``;
 
   @property({ attribute: false })
-  public shadowDom: boolean | ShadowRootInit = true;
+  accessor shadowDom: boolean | ShadowRootInit = true;
 
   private _portalRoot: HTMLElement | null = null;
 

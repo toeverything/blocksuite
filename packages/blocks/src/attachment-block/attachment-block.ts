@@ -38,25 +38,25 @@ export class AttachmentBlockComponent extends BlockElement<
   static override styles = styles;
 
   @property({ attribute: false })
-  loading = false;
+  accessor loading = false;
 
   @property({ attribute: false })
-  error = false;
+  accessor error = false;
 
   @property({ attribute: false })
-  downloading = false;
+  accessor downloading = false;
 
   @property({ attribute: false })
-  blobUrl?: string;
+  accessor blobUrl: string | undefined = undefined;
 
   @property({ attribute: false })
-  allowEmbed = false;
+  accessor allowEmbed = false;
 
   @query('embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   @state()
-  private _showOverlay = true;
+  private accessor _showOverlay = true;
 
   private _isSelected = false;
 

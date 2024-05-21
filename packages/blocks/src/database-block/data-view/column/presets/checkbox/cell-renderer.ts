@@ -38,7 +38,7 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
   `;
 
   @query('.affine-database-checkbox')
-  private _checkbox!: HTMLDivElement;
+  private accessor _checkbox!: HTMLDivElement;
 
   override beforeEnterEditMode() {
     const checked = !this.value;

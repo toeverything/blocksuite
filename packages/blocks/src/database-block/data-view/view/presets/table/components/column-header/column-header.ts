@@ -19,7 +19,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  tableViewManager!: DataViewTableManager;
+  accessor tableViewManager!: DataViewTableManager;
 
   private get readonly() {
     return this.tableViewManager.readonly;

@@ -54,9 +54,9 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  view!: DataViewTableManager | DataViewKanbanManager;
+  accessor view!: DataViewTableManager | DataViewKanbanManager;
   @query('.group-sort-setting')
-  groupContainer!: HTMLElement;
+  accessor groupContainer!: HTMLElement;
 
   override connectedCallback() {
     super.connectedCallback();

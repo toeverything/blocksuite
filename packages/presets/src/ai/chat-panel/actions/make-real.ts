@@ -12,10 +12,10 @@ import type { ChatAction } from '../index.js';
 @customElement('action-make-real')
 export class ActionMakeReal extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  item!: ChatAction;
+  accessor item!: ChatAction;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   protected override render() {
     const answer = this.item.messages[2].content;

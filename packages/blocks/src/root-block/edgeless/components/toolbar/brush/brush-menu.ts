@@ -31,16 +31,16 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  color!: string;
+  accessor color!: string;
 
   @property({ attribute: false })
-  lineWidth!: number;
+  accessor lineWidth!: number;
 
   @property({ attribute: false })
-  onChange!: (props: Record<string, unknown>) => void;
+  accessor onChange!: (props: Record<string, unknown>) => void;
 
   override render() {
     if (this.edgeless.edgelessTool.type !== 'brush') return nothing;

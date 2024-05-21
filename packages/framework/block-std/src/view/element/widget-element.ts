@@ -14,13 +14,13 @@ export class WidgetElement<
   B extends BlockElement = BlockElement,
 > extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  model!: Model;
+  accessor model!: Model;
 
   path!: string[];
 

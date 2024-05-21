@@ -61,7 +61,7 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     return relativePoints;
   })
   @yfield()
-  points: number[][] = [];
+  accessor points: number[][] = [];
 
   @derive((xywh: SerializedXYWH, instance: BrushElementModel) => {
     const bound = Bound.deserialize(xywh);
@@ -86,13 +86,13 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     };
   })
   @yfield()
-  xywh: SerializedXYWH = '[0,0,0,0]';
+  accessor xywh: SerializedXYWH = '[0,0,0,0]';
 
   @yfield(0)
-  rotate: number = 0;
+  accessor rotate: number = 0;
 
   @yfield()
-  color: string = '#000000';
+  accessor color: string = '#000000';
 
   /**
    * The SVG path commands for the brush.
@@ -134,7 +134,7 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     };
   })
   @yfield()
-  lineWidth: number = 4;
+  accessor lineWidth: number = 4;
 
   override get connectable() {
     return false;

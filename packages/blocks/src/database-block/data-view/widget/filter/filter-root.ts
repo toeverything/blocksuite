@@ -160,20 +160,22 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  data!: FilterGroup;
+  accessor data!: FilterGroup;
 
   @property({ attribute: false })
-  vars!: Variable[];
+  accessor vars!: Variable[];
 
   @property({ attribute: false })
-  setData!: (filter: FilterGroup) => void;
+  accessor setData!: (filter: FilterGroup) => void;
   @property({ attribute: false })
-  onBack!: () => void;
+  accessor onBack!: () => void;
   @state()
-  containerClass?: {
-    index: number;
-    class: string;
-  };
+  accessor containerClass:
+    | {
+        index: number;
+        class: string;
+      }
+    | undefined = undefined;
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,

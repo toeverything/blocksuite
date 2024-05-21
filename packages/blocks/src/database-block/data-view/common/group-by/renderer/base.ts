@@ -8,13 +8,13 @@ export class BaseGroup<Data extends NonNullable<unknown>, Value>
   implements GroupRenderProps<Data, Value>
 {
   @property({ attribute: false })
-  data!: Data;
+  accessor data!: Data;
   @property({ attribute: false })
-  updateData?: (data: Data) => void;
+  accessor updateData: ((data: Data) => void) | undefined = undefined;
   @property({ attribute: false })
-  value!: Value;
+  accessor value!: Value;
   @property({ attribute: false })
-  updateValue?: (value: Value) => void;
+  accessor updateValue: ((value: Value) => void) | undefined = undefined;
   @property({ attribute: false })
-  readonly!: boolean;
+  accessor readonly!: boolean;
 }

@@ -119,7 +119,7 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   }
 
   @query('rich-text')
-  private _richTextElement?: RichText;
+  private accessor _richTextElement: RichText | null = null;
 
   get inlineEditor() {
     assertExists(this._richTextElement);
@@ -203,7 +203,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   @query('rich-text')
-  private _richTextElement?: RichText;
+  private accessor _richTextElement: RichText | null = null;
 
   get inlineEditor() {
     assertExists(this._richTextElement);

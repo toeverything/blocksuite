@@ -53,15 +53,15 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  top!: number;
+  accessor top!: number;
   @property({ attribute: false })
-  left!: number;
+  accessor left!: number;
   @property({ attribute: false })
-  width!: number;
+  accessor width!: number;
   @property({ attribute: false })
-  lines!: GroupRectList;
+  accessor lines!: GroupRectList;
   @property({ attribute: false })
-  shadow = false;
+  accessor shadow = false;
 
   protected override render(): unknown {
     const containerStyle = styleMap({

@@ -96,7 +96,8 @@ export class CopilotChatPanel
   `;
 
   @property({ attribute: false })
-  logic!: AILogic;
+  accessor logic!: AILogic;
+
   get chat() {
     return this.logic.chat;
   }
@@ -104,7 +105,7 @@ export class CopilotChatPanel
     return this.logic.getHost();
   }
   @query('.chat-messages-container')
-  chatMessagesContainer!: HTMLDivElement;
+  accessor chatMessagesContainer!: HTMLDivElement;
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
     if (
@@ -117,24 +118,24 @@ export class CopilotChatPanel
   }
 
   @state()
-  tempMessage?: string;
+  accessor tempMessage: string | undefined = undefined;
   @state()
-  history: ChatMessage[] = [];
+  accessor history: ChatMessage[] = [];
   @state()
-  currentRequest?: number;
+  accessor currentRequest: number | undefined = undefined;
 
   get loading(): boolean {
     return this.currentRequest != null;
   }
 
   @state()
-  value = '';
+  accessor value = '';
   @state()
-  syncedDocs: EmbeddedDoc[] = [];
+  accessor syncedDocs: EmbeddedDoc[] = [];
   @state()
-  surfaceSelection = false;
+  accessor surfaceSelection = false;
   @state()
-  docSelection = false;
+  accessor docSelection = false;
 
   public override connectedCallback() {
     super.connectedCallback();
@@ -285,7 +286,8 @@ export class CopilotChatPanel
     // </div>`;
   }
   @query('.copilot-chat-panel-chat-input')
-  input!: HTMLInputElement;
+  accessor input!: HTMLInputElement;
+
   protected override render(): unknown {
     const getAnswer = async () => {
       this.input.focus();

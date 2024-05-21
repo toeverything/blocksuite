@@ -46,13 +46,13 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  displayMode!: NoteDisplayMode;
+  accessor displayMode!: NoteDisplayMode;
 
   @property({ attribute: false })
-  onSelect!: (displayMode: NoteDisplayMode) => void;
+  accessor onSelect!: (displayMode: NoteDisplayMode) => void;
 
   @property({ attribute: false })
-  panelWidth = 240;
+  accessor panelWidth = 240;
 
   private _DisplayModeIcon(mode: NoteDisplayMode) {
     switch (mode) {

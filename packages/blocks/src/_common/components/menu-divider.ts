@@ -28,10 +28,10 @@ export class MenuDivider extends LitElement {
   `;
 
   @property({ attribute: false })
-  vertical = false;
+  accessor vertical = false;
 
   @property({ attribute: false })
-  dividerMargin = 7;
+  accessor dividerMargin = 7;
 
   override render() {
     const dividerStyles = styleMap({

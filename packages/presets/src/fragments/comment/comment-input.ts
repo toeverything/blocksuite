@@ -42,13 +42,13 @@ export class CommentInput extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  manager!: CommentManager;
+  accessor manager!: CommentManager;
 
   @property({ attribute: false })
-  onSubmit?: (comment: Comment) => void;
+  accessor onSubmit: undefined | ((comment: Comment) => void) = undefined;
 
   @query('rich-text')
-  private _editor!: RichText;
+  private accessor _editor!: RichText;
 
   get host() {
     return this.manager.host;

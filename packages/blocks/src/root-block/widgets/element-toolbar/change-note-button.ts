@@ -51,16 +51,16 @@ const NOTE_BACKGROUND: CssVariableName[] = [
 @customElement('edgeless-change-note-button')
 export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  notes: NoteBlockModel[] = [];
+  accessor notes: NoteBlockModel[] = [];
 
   @property({ attribute: false })
-  enableNoteSlicer!: boolean;
+  accessor enableNoteSlicer!: boolean;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
-  private _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
-  private _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
+  private accessor _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
+  private accessor _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
 
   private get doc() {
     return this.edgeless.doc;

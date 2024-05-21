@@ -21,7 +21,7 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   protected override render() {
     return html`<edgeless-tool-icon-button

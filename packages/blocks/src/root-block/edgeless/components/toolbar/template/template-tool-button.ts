@@ -38,10 +38,10 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
+  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   private _openedPanel: EdgelessTemplatePanel | null = null;
   private _cleanup: (() => void) | null = null;

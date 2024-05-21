@@ -71,13 +71,13 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  value!: string;
+  accessor value!: string;
 
   @property({ attribute: false })
-  background!: string;
+  accessor background!: string;
 
   @property({ attribute: false })
-  onSelect!: (value: string) => void;
+  accessor onSelect!: (value: string) => void;
 
   override render() {
     const mode = getThemeMode();

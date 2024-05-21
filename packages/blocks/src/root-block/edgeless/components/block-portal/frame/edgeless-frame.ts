@@ -16,16 +16,16 @@ const FRAME_OFFSET = 8;
 @customElement('edgeless-frame-title')
 export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  frame!: FrameBlockModel;
+  accessor frame!: FrameBlockModel;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @state()
-  private _editing = false;
+  private accessor _editing = false;
 
   @state()
-  private _isNavigator = false;
+  private accessor _isNavigator = false;
 
   private _updateElement = () => {
     this.requestUpdate();
@@ -169,16 +169,16 @@ class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
 @customElement('edgeless-frames-container')
 export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  accessor surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  frames!: FrameBlockModel[];
+  accessor frames!: FrameBlockModel[];
 
   @property({ attribute: false })
-  onlyTitle = false;
+  accessor onlyTitle = false;
 
   protected override firstUpdated() {
     const { _disposables } = this;

@@ -37,10 +37,10 @@ const FRAME_BACKGROUND: CssVariableName[] = [
 @customElement('edgeless-change-frame-button')
 export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  frames: FrameBlockModel[] = [];
+  accessor frames: FrameBlockModel[] = [];
 
   get service() {
     return this.edgeless.service;

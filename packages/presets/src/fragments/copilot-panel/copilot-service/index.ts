@@ -27,15 +27,15 @@ export const allVendor: Vendor<any>[] = [openaiVendor, falVendor, llama2Vendor];
 @customElement('create-new-service')
 export class CreateNewService extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  type!: string;
+  accessor type!: string;
   @property({ attribute: false })
-  onSave!: (config: VendorConfig) => void;
+  accessor onSave!: (config: VendorConfig) => void;
   @state()
-  key = '';
+  accessor key = '';
   @state()
-  name = '';
+  accessor name = '';
   @state()
-  data?: unknown;
+  accessor data: unknown | undefined = undefined;
 
   changeKeyByEvent(e: Event) {
     const select = e.target as HTMLSelectElement;
@@ -156,9 +156,9 @@ export class VendorServiceSelect extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  featureKey!: string;
+  accessor featureKey!: string;
   @property({ attribute: false })
-  service!: AllServiceKind;
+  accessor service!: AllServiceKind;
 
   changeService(e: Event) {
     const options = new VendorServiceOptions();
@@ -226,11 +226,11 @@ export class VendorServiceOptions extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  featureKey!: string;
+  accessor featureKey!: string;
   @property({ attribute: false })
-  service!: AllServiceKind;
+  accessor service!: AllServiceKind;
   @property({ attribute: false })
-  close!: () => void;
+  accessor close!: () => void;
 
   select(vendor: VendorConfig, impl: ServiceImpl<unknown, unknown>) {
     copilotConfig.changeService(

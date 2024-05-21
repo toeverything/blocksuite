@@ -1,4 +1,4 @@
-export { convert, convertProps, getConvertMeta } from './decorators/convert.js';
+export { convert, convertProps } from './decorators/convert.js';
 export {
   derive,
   getDeriveProperties,
