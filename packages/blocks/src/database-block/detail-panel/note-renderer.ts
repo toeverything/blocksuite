@@ -25,6 +25,7 @@ export class NoteRenderer
   public rowId!: string;
   @property({ attribute: false })
   model!: DatabaseBlockModel;
+  @property({ attribute: false })
   host?: EditorHost;
 
   get databaseBlock(): DatabaseBlockModel {
@@ -33,20 +34,10 @@ export class NoteRenderer
 
   public override connectedCallback() {
     super.connectedCallback();
-    this.host = this.closest('editor-host') ?? undefined;
     this.databaseBlock.propsUpdated.on(({ key }) => {
       if (key === 'notes') {
         this.requestUpdate();
       }
-    });
-    this.disposables.addFromEvent(this, 'selectionchange', e => {
-      e.stopPropagation();
-    });
-    this.disposables.addFromEvent(this, 'beforeinput', e => {
-      e.stopPropagation();
-    });
-    this.disposables.addFromEvent(this, 'keydown', e => {
-      e.stopPropagation();
     });
   }
 

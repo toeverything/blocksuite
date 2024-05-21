@@ -138,7 +138,6 @@ export class UIEventDispatcher {
         return;
       }
     }
-
     for (const runner of scope.runners) {
       const { fn } = runner;
       const result = fn(context);

@@ -141,7 +141,7 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     onClose?: () => void;
   }) => {
     popSideDetail({
-      attachTo: this.closest('editor-host') ?? document.body,
+      attachTo: this.closest('editor-host')?.parentElement as HTMLElement,
       target: this.config.detailPanelConfig?.target?.() ?? document.body,
       view: ops.view,
       rowId: ops.rowId,

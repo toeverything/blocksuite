@@ -332,6 +332,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
       note: map(createUniComponentFromWebComponent(NoteRenderer), props => ({
         ...props,
         model: this._model,
+        host: this.host,
       })),
     };
   }
