@@ -6,6 +6,11 @@ import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import {
+  eventToVRect,
+  popFilterableSimpleMenu,
+  popMenu,
+} from '../../../../_common/components/index.js';
+import {
   AddCursorIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
@@ -14,11 +19,6 @@ import {
 } from '../../../../_common/icons/index.js';
 import { DeleteIcon } from '../../common/icons/index.js';
 import type { SingleViewSource } from '../../common/index.js';
-import {
-  eventToVRect,
-  popFilterableSimpleMenu,
-  popMenu,
-} from '../../utils/index.js';
 import { renderUniLit } from '../../utils/uni-component/index.js';
 import { WidgetBase } from '../widget-base.js';
 

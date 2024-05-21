@@ -8,6 +8,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import { createPopup, popMenu } from '../../../../_common/components/index.js';
 import { rangeWrap } from '../../../../_common/utils/math.js';
 import {
   DatabaseSearchClose,
@@ -16,7 +17,6 @@ import {
   PlusIcon,
 } from '../../common/icons/index.js';
 import { stopPropagation } from '../event.js';
-import { createPopup, popMenu } from '../menu/menu.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
 

@@ -4,6 +4,7 @@ import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import { popMenu } from '../_common/components/index.js';
 import {
   CopyIcon,
   DeleteIcon,
@@ -19,7 +20,6 @@ import {
   type DataViewWidget,
   type DataViewWidgetProps,
   defineUniComponent,
-  popMenu,
   renderUniLit,
   type ViewSource,
   widgetPresets,

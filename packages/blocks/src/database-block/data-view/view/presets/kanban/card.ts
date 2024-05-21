@@ -7,10 +7,10 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import { positionToVRect } from '../../../../../_common/components/index.js';
 import { NewEditIcon } from '../../../../../_common/icons/index.js';
 import { MoreHorizontalIcon } from '../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../data-view.js';
-import { positionToVRect } from '../../../utils/menu/index.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,

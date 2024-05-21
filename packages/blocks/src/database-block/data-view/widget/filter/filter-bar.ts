@@ -4,11 +4,14 @@ import { css, html, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import {
+  createPopup,
+  eventToVRect,
+} from '../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../_common/icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
 import { CrossIcon, FilterIcon } from '../../common/icons/index.js';
 import { popCreateFilter } from '../../common/ref/ref.js';
-import { createPopup, eventToVRect } from '../../utils/menu/index.js';
 import { renderTemplate } from '../../utils/uni-component/render-template.js';
 import { popFilterModal } from './filter-modal.js';
 
