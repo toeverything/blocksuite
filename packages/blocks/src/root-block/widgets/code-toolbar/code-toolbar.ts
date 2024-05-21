@@ -56,16 +56,16 @@ export class AffineCodeToolbarWidget extends WidgetElement<
   `;
 
   @state()
-  private items: CodeToolbarItem[] = [];
+  private accessor items: CodeToolbarItem[] = [];
 
   @state()
-  private moreItems: CodeToolbarMoreItem[] = [];
+  private accessor moreItems: CodeToolbarMoreItem[] = [];
 
   @state()
-  private _show = false;
+  private accessor _show = false;
 
   @state()
-  private _popperVisible = false;
+  private accessor _popperVisible = false;
 
   override connectedCallback(): void {
     super.connectedCallback();

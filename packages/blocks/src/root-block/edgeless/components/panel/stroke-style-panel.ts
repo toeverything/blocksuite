@@ -30,22 +30,22 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  strokeWidth!: number;
+  accessor strokeWidth!: number;
 
   @property({ attribute: false })
-  strokeColor!: CssVariableName;
+  accessor strokeColor!: CssVariableName;
 
   @property({ attribute: false })
-  strokeStyle!: 'solid' | 'dash' | 'none';
+  accessor strokeStyle!: 'solid' | 'dash' | 'none';
 
   @property({ attribute: false })
-  setStrokeStyle!: (e: LineStyleEvent) => void;
+  accessor setStrokeStyle!: (e: LineStyleEvent) => void;
 
   @property({ attribute: false })
-  setStrokeColor!: (e: ColorEvent) => void;
+  accessor setStrokeColor!: (e: ColorEvent) => void;
 
   @property({ attribute: false })
-  hollowCircle?: boolean;
+  accessor hollowCircle: boolean | undefined;
 
   override render() {
     return html`

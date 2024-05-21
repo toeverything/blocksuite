@@ -72,54 +72,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
-<<<<<<< HEAD
-=======
-  @state()
-  private accessor _showTextColorPopper = false;
-  @query('.text-color-button')
-  private accessor _textColorButton!: HTMLButtonElement;
-  @query('.color-panel-container.text-color')
-  private accessor _textColorMenu!: HTMLDivElement;
-  private _colorSelectorPopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  @state()
-  private accessor _showTextAlignPopper = false;
-  @query('.text-align-button')
-  private accessor _textAlignButton!: HTMLButtonElement;
-  @query('.align-panel-container.text-align')
-  private accessor _textAlignMenu!: HTMLDivElement;
-  private _textAlignPopper: ReturnType<typeof createButtonPopper> | null = null;
-
-  @state()
-  private accessor _showFontFamilyPopper = false;
-  @query('.text-font-family-button')
-  private accessor _textFontFamilyButton!: HTMLButtonElement;
-  @query('.font-family-panel-container')
-  private accessor _textFontFamilyMenu!: HTMLDivElement;
-  private _textFontFamilyPopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  @state()
-  private accessor _showFontSizePopper = false;
-  @query('.text-font-size-button')
-  private accessor _textFontSizeButton!: HTMLButtonElement;
-  @query('.font-size-panel-container')
-  private accessor _textFontSizeMenu!: HTMLDivElement;
-  private _textFontSizePopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  @state()
-  private accessor _showFontWeightPopper = false;
-  @query('.text-font-weight-and-style-button')
-  private accessor _textFontWeightAndStyleButton!: HTMLButtonElement;
-  @query('.font-weight-and-style-panel-container')
-  private accessor _textFontWeightAndStyleMenu!: HTMLDivElement;
-  private _textFontWeightAndStylePopper: ReturnType<
-    typeof createButtonPopper
-  > | null = null;
-
->>>>>>> 46c40c3b3 (refactor: migrate decorators from v2 to v3)
   get service() {
     return this.edgeless.service;
   }

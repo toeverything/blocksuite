@@ -59,65 +59,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
-<<<<<<< HEAD
   private _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
   private _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
-=======
-  @state()
-  private accessor _queryCache = false;
-
-  @state()
-  private accessor _showFillColorPopper = false;
-  @query('.fill-color-button')
-  private accessor _fillColorButton!: HTMLDivElement;
-  @query('edgeless-color-panel')
-  private accessor _fillColorMenu!: HTMLDivElement;
-  private _fillColorPopper: ReturnType<typeof createButtonPopper> | null = null;
-
-  @state()
-  private accessor _showBorderStylePopper = false;
-  @query('.border-style-button')
-  private accessor _borderStyleButton!: HTMLDivElement;
-  @query('.line-style-panel')
-  private accessor _borderStylesPanel!: HTMLDivElement;
-  private _borderStylePopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  @state()
-  private accessor _showBorderRadiusPopper = false;
-  @query('.border-radius-button')
-  private accessor _borderRadiusButton!: HTMLDivElement;
-  @query('edgeless-size-panel')
-  private accessor _boderRadiusPanel!: HTMLDivElement;
-  private _borderRadiusPopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  @state()
-  private accessor _showShadowTypePopper = false;
-  @query('.shadow-style-button')
-  private accessor _shadowTypeButton!: HTMLDivElement;
-  @query('edgeless-note-shadow-panel')
-  private accessor _shadowTypesPanel!: HTMLDivElement;
-  private _shadowTypePopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  @state()
-  private accessor _showDisplayModePopper = false;
-  @query('.display-mode-button-group')
-  private accessor _displayModeButtonGroup!: HTMLDivElement;
-  @query('note-display-mode-panel')
-  private accessor _displayModePanel!: HTMLDivElement | null;
-  private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  @state()
-  private accessor _showNoteScalePopper = false;
-  @query('.note-scale-button')
-  private accessor _noteScaleButton!: HTMLDivElement;
-  @query('edgeless-scale-panel')
-  private accessor _noteScalePanel!: HTMLDivElement;
-  private _noteScalePopper: ReturnType<typeof createButtonPopper> | null = null;
->>>>>>> 46c40c3b3 (refactor: migrate decorators from v2 to v3)
 
   private get doc() {
     return this.edgeless.doc;
