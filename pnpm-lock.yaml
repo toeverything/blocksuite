@@ -184,8 +184,8 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@toeverything/theme':
-        specifier: ^0.7.29
-        version: 0.7.29
+        specifier: ^0.7.30
+        version: 0.7.30
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -547,8 +547,8 @@ importers:
         specifier: ^1.6.5
         version: 1.6.5
       '@toeverything/theme':
-        specifier: ^0.7.29
-        version: 0.7.29
+        specifier: ^0.7.30
+        version: 0.7.30
       lit:
         specifier: ^3.1.3
         version: 3.1.3
@@ -577,9 +577,6 @@ packages:
     peerDependencies:
       '@algolia/client-search': '>= 4.9.1 < 6'
       algoliasearch: '>= 4.9.1 < 6'
-    peerDependenciesMeta:
-      '@algolia/client-search':
-        optional: true
 
   '@algolia/cache-browser-local-storage@4.23.3':
     resolution: {integrity: sha512-vRHXYCpPlTDE7i6UOy2xE03zHF2C8MEFjPN2v7fRbqVpcOvAUQK81x3Kc21xyb5aSIpYCjWCZbYZuz8Glyzyyg==}
@@ -1496,8 +1493,8 @@ packages:
   '@stitches/core@1.2.8':
     resolution: {integrity: sha512-Gfkvwk9o9kE9r9XNBmJRfV8zONvXThnm1tcuojL04Uy5uRyqg93DC83lDebl0rocZCfKSjUv+fWYtMQmEDJldg==}
 
-  '@toeverything/theme@0.7.29':
-    resolution: {integrity: sha512-tZrdrYm6v7tPWWOZG3PO3gJW+vardeeSk8ijhYnh2RB+AFd/yaqGkdCNc8nJj+OdGligFXDeBY/6YIY/k0aNWg==}
+  '@toeverything/theme@0.7.30':
+    resolution: {integrity: sha512-2qYUNQ5KvHdmZcHhd1nO+XdKy3NHhHx7fFtj5s8fmgdiBRKyNXhQ3nfiO4pWUB5oYr1jD/IYy/uuxzeby47OpQ==}
 
   '@toeverything/y-indexeddb@0.10.0-canary.9':
     resolution: {integrity: sha512-3hzktNuOaXut/RgRjKNeqQura1zeYF+tSLSlWDc0rDBOrEpwD/1EOpKVCbgtl8ke7f4oinLfgBNk4HcwqaQUYQ==}
@@ -5009,9 +5006,8 @@ snapshots:
 
   '@algolia/autocomplete-shared@1.9.3(@algolia/client-search@4.23.3)(algoliasearch@4.23.3)':
     dependencies:
-      algoliasearch: 4.23.3
-    optionalDependencies:
       '@algolia/client-search': 4.23.3
+      algoliasearch: 4.23.3
 
   '@algolia/cache-browser-local-storage@4.23.3':
     dependencies:
@@ -5994,7 +5990,7 @@ snapshots:
 
   '@stitches/core@1.2.8': {}
 
-  '@toeverything/theme@0.7.29': {}
+  '@toeverything/theme@0.7.30': {}
 
   '@toeverything/y-indexeddb@0.10.0-canary.9(yjs@13.6.15)':
     dependencies:
