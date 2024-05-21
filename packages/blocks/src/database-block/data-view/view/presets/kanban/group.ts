@@ -6,11 +6,11 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../../_common/icons/index.js';
 import { GroupTitle } from '../../../common/group-by/group-title.js';
 import type { GroupData } from '../../../common/group-by/helper.js';
 import type { DataViewRenderer } from '../../../data-view.js';
-import { popFilterableSimpleMenu } from '../../../utils/menu/index.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
 const styles = css`

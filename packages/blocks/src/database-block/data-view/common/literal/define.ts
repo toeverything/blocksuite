@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { createPopup, popMenu } from '../../../../_common/components/index.js';
 import {
   tBoolean,
   tDate,
@@ -9,7 +10,6 @@ import {
   tTag,
 } from '../../logical/data-type.js';
 import { isTArray, tArray } from '../../logical/typesystem.js';
-import { createPopup, popMenu } from '../../utils/menu/index.js';
 import { createUniComponentFromWebComponent } from '../../utils/uni-component/uni-component.js';
 import { literalMatcher } from './matcher.js';
 import { DateLiteral } from './renderer/date-literal.js';

@@ -7,5 +7,8 @@ export const CodeBlockSpec: BlockSpec = {
   schema: CodeBlockSchema,
   view: {
     component: literal`affine-code`,
+    widgets: {
+      codeToolbar: literal`affine-code-toolbar-widget`,
+    },
   },
 };

@@ -5,10 +5,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import { eventToVRect } from '../../../../../../_common/components/index.js';
 import { NewEditIcon } from '../../../../../../_common/icons/index.js';
 import { MoreHorizontalIcon } from '../../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
-import { eventToVRect } from '../../../../utils/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import type { TableViewSelection } from '../types.js';

@@ -19,13 +19,8 @@ import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
-export type { SelectTag } from './_common/components/index.js';
 export { toast, Tooltip } from './_common/components/index.js';
-export {
-  popTagSelect,
-  RichText,
-  scrollbarStyle,
-} from './_common/components/index.js';
+export { RichText, scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
   createEmbedBlock,
@@ -81,6 +76,10 @@ export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
 export * from './data-view-block/index.js';
+export {
+  popTagSelect,
+  type SelectTag,
+} from './database-block/data-view/utils/tags/multi-tag-select.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
 export * from './embed-figma-block/index.js';
