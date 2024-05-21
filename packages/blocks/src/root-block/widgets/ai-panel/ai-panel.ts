@@ -28,8 +28,6 @@ import {
   AFFINE_VIEWPORT_OVERLAY_WIDGET,
   type AffineViewportOverlayWidget,
 } from '../viewport-overlay/viewport-overlay.js';
-import type { AIPanelDiscardModal } from './components/discard-modal.js';
-import { toggleDiscardModal } from './components/discard-modal.js';
 import type { AffineAIPanelState, AffineAIPanelWidgetConfig } from './type.js';
 
 export const AFFINE_AI_PANEL_WIDGET = 'affine-ai-panel-widget';
@@ -100,12 +98,12 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   private _stopAutoUpdate?: undefined | (() => void);
 
-  private _discardModal: AIPanelDiscardModal | null = null;
+  private _discardModalAbort: AbortController | null = null;
 
   private _clearDiscardModal = () => {
-    if (this._discardModal) {
-      this._discardModal.remove();
-      this._discardModal = null;
+    if (this._discardModalAbort) {
+      this._discardModalAbort.abort();
+      this._discardModalAbort = null;
     }
   };
 
@@ -168,11 +166,35 @@ export class AffineAIPanelWidget extends WidgetElement {
       this.hide();
       return;
     }
+    this.showDiscardModal()
+      .then(discard => {
+        if (discard) {
+          this._discardCallback();
+        } else {
+          this._cancelCallback();
+        }
+        this._restoreSelection();
+      })
+      .catch(console.error);
+  };
+
+  showDiscardModal = () => {
+    const notification =
+      this.host.std.spec.getService('affine:page').notificationService;
+    if (!notification) {
+      return Promise.resolve(true);
+    }
     this._clearDiscardModal();
-    this._discardModal = toggleDiscardModal(
-      this._discardCallback,
-      this._cancelCallback
-    );
+    this._discardModalAbort = new AbortController();
+    return notification
+      .confirm({
+        title: 'Discard the AI result',
+        message: 'Do you want to discard the results the AI just generated?',
+        cancelText: 'Cancel',
+        confirmText: 'Discard',
+        abort: this._abortController.signal,
+      })
+      .finally(() => (this._discardModalAbort = null));
   };
 
   /**
@@ -388,7 +410,6 @@ export class AffineAIPanelWidget extends WidgetElement {
   private _onDocumentClick = (e: MouseEvent) => {
     if (
       this.state !== 'hidden' &&
-      e.target !== this._discardModal &&
       e.target !== this &&
       !this.contains(e.target as Node)
     ) {
@@ -398,6 +419,15 @@ export class AffineAIPanelWidget extends WidgetElement {
 
     return false;
   };
+
+  private _restoreSelection() {
+    if (this._selection) {
+      this.host.selection.set([...this._selection]);
+      if (this.state === 'hidden') {
+        this._selection = undefined;
+      }
+    }
+  }
 
   protected override willUpdate(changed: PropertyValues): void {
     const prevState = changed.get('state');
@@ -410,20 +440,14 @@ export class AffineAIPanelWidget extends WidgetElement {
           });
         });
       } else {
-        // restore selection
-        if (this._selection) {
-          this.host.selection.set([...this._selection]);
-          this.host.updateComplete
-            .then(() => {
-              if (this.state !== 'hidden') {
-                this.focus();
-              }
-            })
-            .catch(console.error);
-          if (this.state === 'hidden') {
-            this._selection = undefined;
-          }
-        }
+        this.host.updateComplete
+          .then(() => {
+            if (this.state !== 'hidden') {
+              this.focus();
+            }
+          })
+          .catch(console.error);
+        this._restoreSelection();
       }
 
       // tell format bar to show or hide
