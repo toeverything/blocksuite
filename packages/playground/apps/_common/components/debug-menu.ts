@@ -18,21 +18,22 @@ import './left-side-panel.js';
 import './side-panel.js';
 
 import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
-import type {
-  AffineTextAttributes,
-  SerializedXYWH,
-  TreeNode,
-} from '@blocksuite/blocks';
 import {
+  type AffineTextAttributes,
   BlocksUtils,
   ColorVariables,
+  defaultImageProxyMiddleware,
   extractCssVariables,
   FontFamilyVariables,
   HtmlTransformer,
   MarkdownTransformer,
+  NotionHtmlAdapter,
+  openFileOrFiles,
+  type SerializedXYWH,
   SizeVariables,
   StyleVariables,
   type SurfaceBlockComponent,
+  type TreeNode,
   ZipTransformer,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -42,8 +43,13 @@ import type {
   CommentPanel,
   CopilotPanel,
 } from '@blocksuite/presets';
-import type { BlockModel } from '@blocksuite/store';
-import { type DocCollection, Text, Utils } from '@blocksuite/store';
+import {
+  type BlockModel,
+  type DocCollection,
+  Job,
+  Text,
+  Utils,
+} from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
@@ -459,6 +465,23 @@ export class DebugMenu extends ShadowlessElement {
     input.click();
   }
 
+  private async _importNotionHTML() {
+    const file = await openFileOrFiles({ acceptType: 'Html', multiple: false });
+    if (!file) return;
+    const job = new Job({
+      collection: this.collection,
+      middlewares: [defaultImageProxyMiddleware],
+    });
+    const htmlAdapter = new NotionHtmlAdapter();
+    htmlAdapter.applyConfigs(job.adapterConfigs);
+    const snapshot = await htmlAdapter.toDocSnapshot({
+      file: await file.text(),
+      pageId: this.collection.idGenerator(),
+      assets: job.assetsManager,
+    });
+    await job.snapshotToDoc(snapshot);
+  }
+
   private _shareUrl() {
     const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
     const url = new URL(window.location.toString());
@@ -671,6 +694,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click="${this._importSnapshot}">
                 Import Snapshot
+              </sl-menu-item>
+              <sl-menu-item @click="${this._importNotionHTML}">
+                Import Notion HTML
               </sl-menu-item>
               <sl-menu-item @click="${this._shareUrl}">
                 Share URL
