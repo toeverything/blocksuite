@@ -1,78 +1,159 @@
 import './tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
-import { type TemplateResult } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { css, html, LitElement, type TemplateResult } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
 import { createButtonPopper } from '../../../../_common/utils/button-popper.js';
+import type { EdgelessToolIconButton } from './tool-icon-button.js';
 
 @customElement('edgeless-menu-button')
 export class EdgelessMenuButton extends WithDisposable(LitElement) {
   static override styles = css`
-    .edgeless-component-panel-wrapper {
-      display: none;
-      padding: var(--edgeless-component-panel-padding);
-      gap: var(--edgeless-component-panel-gap);
-      justify-content: center;
+    :host {
+      display: flex;
       align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
+      justify-content: center;
+      gap: 8px;
     }
 
-    .edgeless-component-panel-wrapper[data-show] {
+    ::slotted([slot]) {
       display: flex;
     }
+
+    ::slotted([slot][data-orientation='horizontal']) {
+      align-items: center;
+      align-self: stretch;
+      gap: 8px;
+    }
   `;
-  @property({ attribute: false })
-  iconInfo!: { icon: TemplateResult<1>; tooltip: string };
+
+  @query('edgeless-tool-icon-button')
+  private _trigger!: EdgelessToolIconButton;
+
+  @query('edgeless-menu-content')
+  private _content!: EdgelessMenuContent;
+
+  private _popper!: ReturnType<typeof createButtonPopper>;
 
   @property({ attribute: false })
-  menuChildren!: TemplateResult<1>;
+  button!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  padding = 4;
+  contentPadding?: string;
 
-  @property({ attribute: false })
-  gap = 0;
+  close() {
+    this._popper?.hide();
+  }
 
-  @query('.edgeless-component-panel-wrapper')
-  private _panelWrapper!: HTMLDivElement;
-
-  @state()
-  private _showMenuPopper = false;
-  private _menuPopper!: ReturnType<typeof createButtonPopper>;
   override firstUpdated() {
-    this._menuPopper = createButtonPopper(
-      this,
-      this._panelWrapper,
+    this._popper = createButtonPopper(
+      this._trigger,
+      this._content,
       ({ display }) => {
-        this._showMenuPopper = display === 'show';
-      }
+        this._trigger.showTooltip = display === 'hidden';
+      },
+      12
     );
-    this._disposables.add(this._menuPopper);
+    this._disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
+      e.stopPropagation();
+      if (e.key === 'Escape') {
+        this._popper.hide();
+      }
+    });
+    this._disposables.addFromEvent(this._trigger, 'click', (_: MouseEvent) => {
+      this._popper.toggle();
+      if (this._popper.state === 'show') {
+        this._content.focus({ preventScroll: true });
+      }
+    });
+    this._disposables.add(this._popper);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.tabIndex = 0;
+    if (this.contentPadding) {
+      this.style.setProperty('--content-padding', this.contentPadding);
+    }
   }
 
   override render() {
-    const { iconInfo, _showMenuPopper } = this;
-    const componentPanelStyles = styleMap({
-      '--edgeless-component-panel-padding': `${this.padding}px`,
-      '--edgeless-component-panel-gap': `${this.gap}px`,
-    });
-    return html`<edgeless-tool-icon-button
-        .tooltip=${_showMenuPopper ? nothing : iconInfo.tooltip}
-        .iconContainerPadding=${2}
-        @click=${() => this._menuPopper.toggle()}
-      >
-        ${iconInfo.icon}
-      </edgeless-tool-icon-button>
-      <div
-        class="edgeless-component-panel-wrapper"
-        style=${componentPanelStyles}
-      >
-        ${this.menuChildren}
-      </div> `;
+    return html`${this.button}
+      <edgeless-menu-content role="menu" tabindex="-1">
+        <slot></slot>
+      </edgeless-menu-content>`;
+  }
+}
+
+@customElement('edgeless-menu-content')
+export class EdgelessMenuContent extends LitElement {
+  static override styles = css`
+    :host {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: var(--content-padding, 0 6px);
+
+      border: 0.5px solid var(--affine-border-color);
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.14);
+      border-radius: 4px;
+      min-height: 36px;
+      outline: none;
+    }
+
+    :host([data-show]) {
+      display: flex;
+    }
+  `;
+
+  override render() {
+    return html`<slot></slot>`;
+  }
+}
+
+@customElement('edgeless-menu-divider')
+export class EdgelessMenuDivider extends LitElement {
+  static override styles = css`
+    :host {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+
+      width: 4px;
+    }
+
+    :host::after {
+      content: '';
+      display: flex;
+      width: 0.5px;
+      height: 100%;
+      background-color: var(--affine-border-color);
+    }
+
+    :host([data-orientation='horizontal']) {
+      height: var(--height, 4px);
+      width: unset;
+    }
+
+    :host([data-orientation='horizontal'])::after {
+      height: 0.5px;
+      width: 100%;
+    }
+  `;
+}
+
+export function renderMenuDivider() {
+  return html`<edgeless-menu-divider></edgeless-menu-divider>`;
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edgeless-menu-button': EdgelessMenuButton;
+    'edgeless-menu-content': EdgelessMenuContent;
+    'edgeless-menu-divider': EdgelessMenuDivider;
   }
 }

@@ -13,21 +13,7 @@ import { isFrameBlock } from '../../edgeless/utils/query.js';
 export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   static override styles = css`
     .copilot-icon-button {
-      color: var(--affine-brand-color);
-      font-weight: 500;
-      font-size: var(--affine-font-sm);
-      position: relative;
-    }
-
-    .copilot-icon-button span {
-      line-height: 22px;
-      padding-left: 4px;
-    }
-
-    edgeless-copilot-panel {
-      top: 44px;
-      left: 0px;
-      position: absolute;
+      line-height: 20px;
     }
   `;
 
@@ -62,17 +48,12 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`
-      <div class="copilot-button">
-        <icon-button
-          class="copilot-icon-button"
-          width="75px"
-          height="32px"
-          @click=${this._showCopilotPanel}
-        >
-          ${AIStarIcon} <span>Ask AI</span>
-        </icon-button>
-      </div>
-    `;
+    return html`<edgeless-tool-icon-button
+      aria-label="Ask AI"
+      class="copilot-icon-button"
+      @click=${this._showCopilotPanel}
+    >
+      ${AIStarIcon} <span class="label medium">Ask AI</span>
+    </edgeless-tool-icon-button>`;
   }
 }

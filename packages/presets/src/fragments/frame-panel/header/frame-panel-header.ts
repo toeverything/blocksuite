@@ -216,7 +216,6 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
             : ''}"
           .tooltip=${this._settingPopperShow ? '' : 'All Frames Settings'}
           .tipPosition=${'top'}
-          .iconContainerPadding=${2}
           .active=${this._settingPopperShow}
           .activeMode=${'background'}
           @click=${() => this._framesSettingMenuPopper?.toggle()}

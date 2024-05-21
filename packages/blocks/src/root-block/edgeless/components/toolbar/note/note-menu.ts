@@ -113,7 +113,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                 <edgeless-tool-icon-button
                   .active=${childType === item.childType}
                   .activeMode=${'background'}
-                  .iconContainerPadding=${2}
                   .tooltip=${item.tooltip}
                   @click=${() =>
                     this.onChange({
@@ -129,7 +128,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
 
             <edgeless-tool-icon-button
               .activeMode=${'background'}
-              .iconContainerPadding=${2}
               .tooltip=${'Links'}
               @click=${() =>
                 toggleEmbedCardCreateModal(
@@ -146,7 +144,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
 
             <edgeless-tool-icon-button
               .activeMode=${'background'}
-              .iconContainerPadding=${2}
               .tooltip=${'File'}
               @click=${async () => {
                 const file = await openFileOrFiles();
@@ -159,7 +156,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
 
             <edgeless-tool-icon-button
               .activeMode=${'background'}
-              .iconContainerPadding=${2}
               .tooltip=${'YouTube'}
               @click=${() =>
                 toggleEmbedCardCreateModal(
@@ -176,7 +172,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
 
             <edgeless-tool-icon-button
               .activeMode=${'background'}
-              .iconContainerPadding=${2}
               .tooltip=${'Figma'}
               @click=${() =>
                 toggleEmbedCardCreateModal(
@@ -193,7 +188,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
 
             <edgeless-tool-icon-button
               .activeMode=${'background'}
-              .iconContainerPadding=${2}
               .tooltip=${'GitHub'}
               @click=${() =>
                 toggleEmbedCardCreateModal(
@@ -210,7 +204,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
 
             <edgeless-tool-icon-button
               .activeMode=${'background'}
-              .iconContainerPadding=${2}
               .tooltip=${'Loom'}
               @click=${() =>
                 toggleEmbedCardCreateModal(

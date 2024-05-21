@@ -13,14 +13,10 @@ import type { EmbedCardStyle } from '../../../../_common/types.js';
 export class CardStylePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      border-radius: 8px;
-      padding: 8px;
-      gap: 8px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
+      justify-content: conter;
+      gap: 8px;
     }
 
     icon-button {

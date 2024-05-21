@@ -35,12 +35,13 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
 
   protected override render() {
     return html`<edgeless-tool-icon-button
-      .iconContainerPadding=${2}
+      aria-label="Release from group"
+      .tooltip=${'Release from group'}
+      .iconSize=${'20px'}
       @click=${() => this._releaseFromGroup()}
-      .tooltip=${'Release From Group'}
     >
       ${ReleaseFromGroupButtonIcon}
-    </edgeless-tool-icon-button> `;
+    </edgeless-tool-icon-button>`;
   }
 }
 

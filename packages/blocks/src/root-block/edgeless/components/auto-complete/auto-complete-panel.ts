@@ -552,7 +552,6 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       ({ name, generalIcon, scribbledIcon, tooltip }) => html`
         <edgeless-tool-icon-button
           .tooltip=${tooltip}
-          .iconContainerPadding=${2}
           @pointerenter=${() => this._showOverlay(name)}
           @pointerleave=${() => this._removeOverlay()}
           @click=${() => this._autoComplete(name)}
@@ -567,7 +566,6 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         .tooltip=${'Text'}
-        .iconContainerPadding=${2}
         @pointerenter=${() => this._showOverlay('text')}
         @pointerleave=${() => this._removeOverlay()}
         @click=${() => this._autoComplete('text')}
@@ -576,7 +574,6 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .tooltip=${'Note'}
-        .iconContainerPadding=${2}
         @pointerenter=${() => this._showOverlay('note')}
         @pointerleave=${() => this._removeOverlay()}
         @click=${() => this._autoComplete('note')}
@@ -585,7 +582,6 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .tooltip=${'Frame'}
-        .iconContainerPadding=${2}
         @pointerenter=${() => this._showOverlay('frame')}
         @pointerleave=${() => this._removeOverlay()}
         @click=${() => this._autoComplete('frame')}

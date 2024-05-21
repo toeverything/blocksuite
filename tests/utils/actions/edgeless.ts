@@ -653,11 +653,9 @@ export async function updateExistedBrushElementSize(
 }
 
 export async function openComponentToolbarMoreMenu(page: Page) {
-  const btn = page
-    .locator('edgeless-element-toolbar-widget edgeless-tool-icon-button')
-    .filter({
-      hasText: 'More',
-    });
+  const btn = page.locator(
+    'edgeless-element-toolbar-widget edgeless-more-button edgeless-menu-button'
+  );
 
   await btn.click();
 }
@@ -898,52 +896,45 @@ export async function triggerComponentToolbarAction(
       await actionButton.click();
       break;
     }
-    case 'changeNoteColor': {
-      const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-note-button .fill-color-button'
-      );
-      await button.click();
-      break;
-    }
     case 'changeShapeFillColor': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-shape-button')
-        .locator('.fill-color-button');
+        .getByRole('button', { name: 'Fill color' });
       await button.click();
       break;
     }
     case 'changeShapeStrokeColor': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-shape-button')
-        .locator('.stroke-color-button');
+        .getByRole('button', { name: 'Border style' });
       await button.click();
       break;
     }
     case 'changeShapeStrokeStyles': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-shape-button')
-        .locator('.line-styles-button');
+        .getByRole('button', { name: 'Border style' });
       await button.click();
       break;
     }
     case 'changeShapeStyle': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-shape-button')
-        .locator('.shape-style-button');
+        .getByRole('button', { name: /^Style$/ });
       await button.click();
       break;
     }
     case 'changeConnectorStrokeColor': {
-      const button = locatorComponentToolbar(page)
+      const button = page
         .locator('edgeless-change-connector-button')
-        .locator('.connector-color-button');
+        .getByRole('button', { name: 'Stroke style' });
       await button.click();
       break;
     }
     case 'changeConnectorStrokeStyles': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-connector-button')
-        .locator('.line-styles-button');
+        .getByRole('button', { name: 'Stroke style' });
       await button.click();
       break;
     }
@@ -982,24 +973,31 @@ export async function triggerComponentToolbarAction(
       await button.click();
       break;
     }
-    case 'autoSize': {
-      const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-note-button .edgeless-auto-height-button'
-      );
+    case 'changeNoteColor': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-note-button')
+        .getByRole('button', { name: 'Background' });
       await button.click();
       break;
     }
     case 'changeNoteDisplayMode': {
-      const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-note-button .display-mode-button'
-      );
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-note-button')
+        .getByRole('button', { name: 'Mode' });
       await button.click();
       break;
     }
     case 'changeNoteSlicerSetting': {
-      const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-note-button .edgeless-note-slicer-button'
-      );
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-note-button')
+        .getByRole('button', { name: 'Slicer' });
+      await button.click();
+      break;
+    }
+    case 'autoSize': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-note-button')
+        .getByRole('button', { name: 'Size' });
       await button.click();
       break;
     }
@@ -1010,16 +1008,16 @@ export async function changeEdgelessNoteBackground(
   page: Page,
   color: CssVariableName
 ) {
-  const colorButton = page.locator(
-    `edgeless-change-note-button .color-unit[aria-label="${color}"]`
-  );
+  const colorButton = page
+    .locator('edgeless-change-note-button')
+    .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }
 
 export async function changeShapeFillColor(page: Page, color: CssVariableName) {
   const colorButton = page
     .locator('edgeless-change-shape-button')
-    .locator('.color-panel-container.fill-color')
+    .getByRole('listbox', { name: 'Fill colors' })
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }
@@ -1030,7 +1028,7 @@ export async function changeShapeStrokeColor(
 ) {
   const colorButton = page
     .locator('edgeless-change-shape-button')
-    .locator('.color-panel-container.stroke-color')
+    .getByRole('listbox', { name: 'Border colors' })
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }
@@ -1059,8 +1057,8 @@ export async function resizeConnectorByStartCapitalHandler(
 export function getEdgelessLineWidthPanel(page: Page) {
   return page
     .locator('edgeless-change-shape-button')
-    .locator('.line-style-panel')
-    .locator(`edgeless-line-width-panel`);
+    .locator('edgeless-line-width-panel')
+    .locator('.line-width-panel');
 }
 export async function changeShapeStrokeWidth(page: Page) {
   const lineWidthPanel = getEdgelessLineWidthPanel(page);
@@ -1078,8 +1076,7 @@ export function locatorShapeStrokeStyleButton(
 ) {
   return page
     .locator('edgeless-change-shape-button')
-    .locator('.line-style-panel')
-    .locator(`.edgeless-component-line-style-button.mode-${mode}`);
+    .locator(`.line-style-button.mode-${mode}`);
 }
 
 export async function changeShapeStrokeStyle(
@@ -1097,7 +1094,7 @@ export function locatorShapeStyleButton(
   return page
     .locator('edgeless-change-shape-button')
     .locator('edgeless-shape-style-panel')
-    .locator(`edgeless-tool-icon-button.${style}-shape-button`);
+    .getByRole('button', { name: style });
 }
 
 export async function changeShapeStyle(
@@ -1115,7 +1112,7 @@ export async function changeConnectorStrokeColor(
   const colorButton = page
     .locator('edgeless-change-connector-button')
     .locator('edgeless-color-panel')
-    .locator(`.color-unit[aria-label="${color}"]`);
+    .getByLabel(color);
   await colorButton.click();
 }
 
@@ -1142,7 +1139,7 @@ export function locatorConnectorStrokeStyleButton(
 ) {
   return page
     .locator('edgeless-change-connector-button')
-    .locator(`.edgeless-component-line-style-button-${mode}`);
+    .locator(`.line-style-button.mode-${mode}`);
 }
 export async function changeConnectorStrokeStyle(
   page: Page,

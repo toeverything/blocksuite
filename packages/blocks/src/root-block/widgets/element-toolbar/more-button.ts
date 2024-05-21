@@ -1,20 +1,12 @@
 import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/buttons/menu-button.js';
 import '../../edgeless/components/toolbar/shape/shape-menu.js';
-import '../../../_common/components/menu-divider.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import type { BlockModel } from '@blocksuite/store';
-import { baseTheme } from '@toeverything/theme';
-import {
-  css,
-  html,
-  LitElement,
-  nothing,
-  type TemplateResult,
-  unsafeCSS,
-} from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { css, html, LitElement, type TemplateResult } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
@@ -32,10 +24,7 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../_common/icons/index.js';
-import {
-  createButtonPopper,
-  type ReorderingType,
-} from '../../../_common/utils/index.js';
+import { type ReorderingType } from '../../../_common/utils/index.js';
 import type {
   AttachmentBlockComponent,
   BookmarkBlockComponent,
@@ -113,13 +102,13 @@ const DELETE_ACTION: Action = {
 
 const FRAME_ACTION: Action = {
   icon: FrameIcon,
-  name: 'Frame Section',
+  name: 'Frame section',
   type: 'create-frame',
 };
 
 const GROUP_ACTION: Action = {
   icon: GroupIcon,
-  name: 'Group Section',
+  name: 'Group section',
   type: 'create-group',
 };
 
@@ -140,8 +129,12 @@ function Actions(
     action => action.type,
     action => {
       return action.type === 'divider'
-        ? html`<menu-divider></menu-divider>`
+        ? html`<edgeless-menu-divider
+            data-orientation="horizontal"
+            style="--height: 8px"
+          ></edgeless-menu-divider>`
         : html`<div
+            aria-label=${action.name}
             class="action-item ${action.type}"
             @click=${() => onClick(action)}
             ?data-disabled=${action.disabled}
@@ -155,50 +148,23 @@ function Actions(
 @customElement('edgeless-more-button')
 export class EdgelessMoreButton extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
-      display: block;
-      color: var(--affine-text-primary-color);
-      fill: currentColor;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    }
-
     .more-actions-container {
-      display: none;
-      position: absolute;
-      width: 164px;
-      padding: 8px;
-      justify-content: center;
-      align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
-      font-size: 16px;
-      line-height: 22px;
-    }
-
-    .more-actions-container[data-show] {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      min-width: 176px;
     }
 
     .action-item {
       display: flex;
+      align-items: center;
       white-space: nowrap;
-      height: 32px;
       box-sizing: border-box;
-      font-size: 14px;
       padding: 4px 8px;
       border-radius: 4px;
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
-      align-items: center;
       gap: 8px;
-    }
-
-    menu-divider {
-      width: 88%;
-      position: relative;
-      left: 8px;
     }
 
     .action-item:hover {
@@ -222,15 +188,6 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   vertical = false;
-
-  @state()
-  private _showPopper = false;
-
-  @query('.more-actions-container')
-  private _actionsMenu!: HTMLDivElement;
-
-  private _actionsMenuPopper: ReturnType<typeof createButtonPopper> | null =
-    null;
 
   get doc() {
     return this.edgeless.doc;
@@ -357,22 +314,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         this._reload(this.selection.selections);
         break;
     }
-    this._actionsMenuPopper?.hide();
   };
-
-  override firstUpdated(changedProperties: Map<string, unknown>) {
-    const _disposables = this._disposables;
-
-    this._actionsMenuPopper = createButtonPopper(
-      this,
-      this._actionsMenu,
-      ({ display }) => {
-        this._showPopper = display === 'show';
-      }
-    );
-    _disposables.add(this._actionsMenuPopper);
-    super.firstUpdated(changedProperties);
-  }
 
   override render() {
     const selection = this.edgeless.service.selection;
@@ -383,17 +325,17 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         : this._Actions,
       this._runAction
     );
-    return html`
-      <edgeless-tool-icon-button
-        .tooltip=${this._showPopper ? nothing : 'More'}
-        .active=${false}
-        .iconContainerPadding=${2}
-        @click=${() => this._actionsMenuPopper?.toggle()}
+    return html`<edgeless-menu-button
+      .contentPadding=${'8px'}
+      .button=${html`<edgeless-tool-icon-button
+        aria-label="More"
+        .tooltip=${'More'}
       >
         ${this.vertical ? MoreVerticalIcon : MoreHorizontalIcon}
-      </edgeless-tool-icon-button>
-      <div class="more-actions-container">${actions}</div>
-    `;
+      </edgeless-tool-icon-button>`}
+    >
+      <div slot class="more-actions-container">${actions}</div>
+    </edgeless-menu-button>`;
   }
 }
 

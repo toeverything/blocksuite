@@ -129,7 +129,6 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
               : ''}"
             .tooltip=${this._settingPopperShow ? '' : 'Preview Settings'}
             .tipPosition=${'bottom'}
-            .iconContainerPadding=${2}
             .active=${this._settingPopperShow}
             .activeMode=${'background'}
             @click=${() => this._notePreviewSettingMenuPopper?.toggle()}

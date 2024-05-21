@@ -1,8 +1,8 @@
 import '../../edgeless/components/buttons/tool-icon-button.js';
-import './component-toolbar-menu-divider.js';
+import '../../edgeless/components/buttons/menu-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { toast } from '../../../_common/components/toast.js';
@@ -24,12 +24,6 @@ import { mountGroupTitleEditor } from '../../edgeless/utils/text.js';
 
 @customElement('edgeless-change-group-button')
 export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
-  static override styles = css`
-    component-toolbar-menu-divider {
-      height: 24px;
-    }
-  `;
-
   @property({ attribute: false })
   edgeless!: EdgelessRootBlockComponent;
 
@@ -83,43 +77,40 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
     const { groups } = this;
     return html`
       ${groups.length === 1
-        ? html` <edgeless-tool-icon-button
+        ? html`<edgeless-tool-icon-button
+              aria-label="Insert into Page"
               .tooltip=${'Insert into Page'}
+              .iconSize=${'20px'}
+              .labelHeight=${'20px'}
               @click=${this._insertIntoPage}
             >
               ${NoteIcon}
-              <span style="margin-left: 2px;">Insert into Page</span>
+              <span class="label">Insert into Page</span>
             </edgeless-tool-icon-button>
-            <component-toolbar-menu-divider></component-toolbar-menu-divider>
+            <edgeless-menu-divider></edgeless-menu-divider>
             <edgeless-tool-icon-button
               class=${'edgeless-component-toolbar-group-rename-button'}
-              @click=${() => mountGroupTitleEditor(groups[0], this.edgeless)}
+              aria-label="Rename"
               .tooltip=${'Rename'}
+              .iconSize=${'20px'}
+              @click=${() => mountGroupTitleEditor(groups[0], this.edgeless)}
             >
               ${RenameIcon}
             </edgeless-tool-icon-button>
 
-            <component-toolbar-menu-divider
-              style=${'margin: 0 8px'}
-            ></component-toolbar-menu-divider>`
+            <edgeless-menu-divider></edgeless-menu-divider>`
         : nothing}
       <edgeless-tool-icon-button
         class=${'edgeless-component-toolbar-ungroup-button'}
-        @click=${() => {
-          groups.forEach(group => this.edgeless.service.ungroup(group));
-        }}
+        aria-label="Ungroup"
         .tooltip=${'Ungroup'}
+        .iconSize=${'20px'}
+        @click=${() =>
+          groups.forEach(group => this.edgeless.service.ungroup(group))}
       >
         ${UngroupButtonIcon}
       </edgeless-tool-icon-button>
     `;
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this.style.display = 'flex';
-    this.style.alignItems = 'center';
-    this.style.justifyContent = 'center';
   }
 
   protected override createRenderRoot() {

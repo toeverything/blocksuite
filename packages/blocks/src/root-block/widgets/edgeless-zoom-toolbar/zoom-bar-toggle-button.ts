@@ -122,6 +122,7 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
           .active=${this._showPopper}
           .arrow=${false}
           .activeMode=${'background'}
+          .iconContainerPadding=${6}
           @click=${() => this._toggleNoteMenu()}
         >
           ${MoreIcon}

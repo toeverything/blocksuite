@@ -110,7 +110,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
             <div class="shape-style-container">
               <edgeless-tool-icon-button
                 .tooltip=${'General'}
-                .iconContainerPadding=${2}
                 .active=${shapeStyle === ShapeStyle.General}
                 .activeMode=${'background'}
                 @click=${() => {
@@ -121,7 +120,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
               </edgeless-tool-icon-button>
               <edgeless-tool-icon-button
                 .tooltip=${'Scribbled'}
-                .iconContainerPadding=${2}
                 .active=${shapeStyle === ShapeStyle.Scribbled}
                 .activeMode=${'background'}
                 @click=${() => {
@@ -140,7 +138,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                       .tooltip=${tooltip}
                       .active=${shapeType === name}
                       .activeMode=${'background'}
-                      .iconContainerPadding=${2}
                       @click=${() => {
                         this.onChange({ shapeType: name });
                       }}

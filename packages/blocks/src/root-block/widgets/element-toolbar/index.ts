@@ -1,4 +1,5 @@
 import '../../edgeless/components/buttons/tool-icon-button.js';
+import '../../edgeless/components/buttons/menu-button.js';
 import './more-button.js';
 
 import { WidgetElement } from '@blocksuite/block-std';
@@ -37,6 +38,7 @@ import {
   type ShapeElementModel,
   type TextElementModel,
 } from '../../../surface-block/index.js';
+import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessModel } from '../../edgeless/type.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
@@ -63,7 +65,6 @@ import { renderMindmapButton } from './change-mindmap-button.js';
 import { renderNoteButton } from './change-note-button.js';
 import { renderChangeShapeButton } from './change-shape-button.js';
 import { renderChangeTextButton } from './change-text-button.js';
-import { renderMenuDivider } from './component-toolbar-menu-divider.js';
 import { renderReleaseFromGroupButton } from './release-from-group-button.js';
 
 type CategorizedElements = {
@@ -104,35 +105,58 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     :host {
       position: absolute;
       z-index: 3;
+      transform: translateZ(0);
+      will-change: transform;
     }
 
     .edgeless-component-toolbar-container {
       display: flex;
+      height: 36px;
+      width: max-content;
+      padding: 0 6px;
       align-items: center;
-      height: 40px;
+      gap: 8px;
       background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-menu-shadow);
-      border-radius: 8px;
-      padding: 0 8px;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      border: 0.5px solid var(--affine-border-color);
+      // box-shadow: var(--affine-menu-shadow);
+      box-shadow: 0px 6px 16px 0px rgba(0, 0, 0, 0.14);
+      border-radius: 4px;
+      // box-sizing: border-box;
+      box-sizing: content-box;
       user-select: none;
+
+      text-align: justify;
+      font-feature-settings:
+        'clig' off,
+        'liga' off;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      font-size: var(--affine-font-sm);
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px; /* 157.143% */
     }
 
-    component-toolbar-menu-divider {
-      width: 4px;
-      margin: 0 12px;
-      height: 24px;
+    .edgeless-component-toolbar-container > * {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      color: var(--affine-text-primary-color);
+      fill: currentColor;
+    }
+
+    .color-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 20px;
+      height: 20px;
     }
   `;
 
   @property({ attribute: false })
   enableNoteSlicer!: boolean;
-
-  @state()
-  left = 0;
-
-  @state()
-  top = 0;
 
   @state()
   toolbarVisible = false;
@@ -264,8 +288,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     const elements = selection.elements;
 
     if (elements.length === 0) {
-      this.left = 0;
-      this.top = 0;
+      this.style.transform = 'translate3d(0, 0, 0)';
       return;
     }
 
@@ -280,8 +303,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       left = x;
       top = y;
 
-      this.left = left;
-      this.top = top;
+      this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
       return;
     }
 
@@ -296,9 +318,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     left = clamp(x, 10, width - 10);
     top = clamp(top, 10, height - 150);
 
-    this.left = left;
-    this.top = top;
-
+    this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
     this.selectedIds = this.selection.selectedIds;
   }
 
@@ -356,7 +376,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           renderEmbedButton(edgeless, embedCard),
           renderAttachmentButton(edgeless, attachment),
           renderChangeImageButton(edgeless, image),
-        ].filter(b => !!b && b !== nothing);
+        ];
 
     if (elements.length === 1) {
       if (selection.firstElement.group instanceof GroupElementModel) {
@@ -374,23 +394,17 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     const realButtons = buttons.filter(b => b !== nothing);
 
-    return html` <style>
-        :host {
-          left: ${this.left}px;
-          top: ${this.top}px;
-        }
-      </style>
-      <div
-        class="edgeless-component-toolbar-container"
-        @pointerdown=${stopPropagation}
-      >
-        ${join(realButtons, renderMenuDivider)}
-        ${realButtons.length ? renderMenuDivider() : nothing}
-        <edgeless-more-button
-          .edgeless=${edgeless}
-          .vertical=${true}
-        ></edgeless-more-button>
-      </div>`;
+    return html`<div
+      class="edgeless-component-toolbar-container"
+      @pointerdown=${stopPropagation}
+    >
+      ${join(realButtons, renderMenuDivider)}
+      ${realButtons.length ? renderMenuDivider() : nothing}
+      <edgeless-more-button
+        .edgeless=${edgeless}
+        .vertical=${true}
+      ></edgeless-more-button>
+    </div>`;
   }
 }
 

@@ -33,18 +33,19 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
-      box-sizing: border-box;
-      background: var(--affine-background-overlay-panel-color);
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
     }
 
     .line-width-panel {
+      width: 108px;
+      height: 24px;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
       position: relative;
-      width: 108px;
-      margin: 4px 0;
       cursor: default;
     }
 
@@ -350,7 +351,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
         <div class="bottom-line"></div>
         <div class="line-width-overlay"></div>
         ${this.hasTooltip
-          ? html`<affine-tooltip>Thickness</affine-tooltip>`
+          ? html`<affine-tooltip .offset=${8}>Thickness</affine-tooltip>`
           : nothing}
       </div>`;
   }

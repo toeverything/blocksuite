@@ -361,11 +361,11 @@ test('change shape stroke style', async ({ page }) => {
   await changeShapeStrokeColor(page, '--affine-palette-line-navy');
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  await changeShapeStrokeStyle(page, 'none');
+  await changeShapeStrokeStyle(page, 'dash');
   await waitNextFrame(page);
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  const activeButton = locatorShapeStrokeStyleButton(page, 'none');
+  const activeButton = locatorShapeStrokeStyleButton(page, 'dash');
   const className = await activeButton.evaluate(ele => ele.className);
   expect(className.includes(' active')).toBeTruthy();
 

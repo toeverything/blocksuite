@@ -33,9 +33,7 @@ test('tooltip should be hidden after clicking on button', async ({ page }) => {
   await selectNoteInEdgeless(page, noteId);
 
   const toolbar = locatorComponentToolbar(page);
-  const modeBtn = toolbar.locator(
-    '.display-mode-button-group edgeless-tool-icon-button'
-  );
+  const modeBtn = toolbar.getByRole('button', { name: 'Mode' });
 
   await modeBtn.hover();
   await expect(page.locator('.blocksuite-portal')).toBeVisible();
@@ -52,9 +50,9 @@ test('tooltip should be hidden after clicking on button', async ({ page }) => {
   await expect(page.locator('.blocksuite-portal')).toBeHidden();
   await expect(page.locator('note-display-mode-panel')).toBeVisible();
 
-  const colorBtn = toolbar.locator(
-    'edgeless-tool-icon-button.fill-color-button'
-  );
+  const colorBtn = toolbar.getByRole('button', {
+    name: 'Background',
+  });
 
   await colorBtn.hover();
   await expect(page.locator('.blocksuite-portal')).toBeVisible();

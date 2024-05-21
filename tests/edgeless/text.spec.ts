@@ -18,7 +18,9 @@ import { assertEdgelessCanvasText } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 async function assertTextFont(page: Page, font: string) {
-  const fontButton = page.locator('.text-font-family-button');
+  const fontButton = page.getByRole('button', {
+    name: /^Font$/,
+  });
   const fontPanel = page.locator('edgeless-font-family-panel');
   const isFontPanelShow = await fontPanel.isVisible();
   if (!isFontPanelShow) {
@@ -29,7 +31,7 @@ async function assertTextFont(page: Page, font: string) {
   }
 
   const button = fontPanel.locator(`.${font.toLowerCase()}`);
-  await expect(button.locator('.active-mode-background[active]')).toBeVisible();
+  await expect(button.locator('.active-mode-color[active]')).toBeVisible();
 }
 
 test('add text element in default mode', async ({ page }) => {
@@ -150,7 +152,7 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await waitNextFrame(page);
   let { width: lastWidth, height: lastHeight } =
     await getEdgelessSelectedRect(page);
-  const fontButton = page.locator('.text-font-family-button');
+  const fontButton = page.getByRole('button', { name: /^Font$/ });
   await fontButton.click();
 
   // Default is Inter

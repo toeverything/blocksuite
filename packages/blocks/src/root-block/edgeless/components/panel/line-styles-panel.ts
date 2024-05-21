@@ -5,14 +5,10 @@ import type { LineWidth } from '../../../../_common/types.js';
 import {
   LineStyleButton,
   type LineStyleButtonProps,
-  lineStyleButtonStyles,
 } from '../buttons/line-style-button.js';
 import type { LineWidthEvent } from './line-width-panel.js';
-import { PanelWrapper, panelWrapperStyle } from './panel-wrapper.js';
 
-export const lineStylesPanelStyles = [panelWrapperStyle, lineStyleButtonStyles];
-
-export type LineStylesPanelClickedButton =
+export type LineStyleEvent =
   | {
       type: 'size';
       value: LineWidth;
@@ -23,7 +19,7 @@ export type LineStylesPanelClickedButton =
     };
 
 interface LineStylesPanelProps {
-  onClick?: (clickedButton: LineStylesPanelClickedButton) => void;
+  onClick?: (e: LineStyleEvent) => void;
   selectedLineSize?: LineWidth;
   selectedLineStyle?: LineStyleButtonProps['mode'];
   lineStyle?: LineStyleButtonProps['mode'][];
@@ -66,12 +62,9 @@ export function LineStylesPanel({
     }
   );
 
-  return PanelWrapper({
-    className: 'line-style-panel',
-    children: html`
-      ${lineSizePanel}
-      <component-toolbar-menu-divider></component-toolbar-menu-divider>
-      ${lineStyleButtons}
-    `,
-  });
+  return html`
+    ${lineSizePanel}
+    <edgeless-menu-divider></edgeless-menu-divider>
+    ${lineStyleButtons}
+  `;
 }

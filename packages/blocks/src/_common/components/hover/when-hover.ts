@@ -40,7 +40,7 @@ export const whenHover = (
   whenHoverChange: (isHover: boolean, event?: Event) => void,
   {
     enterDelay = 0,
-    leaveDelay = 300,
+    leaveDelay = 250,
     alwayRunWhenNoFloating = true,
     safeTriangle: triangleOptions = false,
     safeBridge: bridgeOptions = true,
