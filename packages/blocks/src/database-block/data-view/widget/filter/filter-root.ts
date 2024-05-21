@@ -8,6 +8,11 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  eventToVRect,
+  popFilterableSimpleMenu,
+  positionToVRect,
+} from '../../../../_common/components/index.js';
+import {
   ArrowDownSmallIcon,
   DuplicateIcon,
 } from '../../../../_common/icons/index.js';
@@ -18,12 +23,7 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '../../common/icons/index.js';
-import {
-  eventToVRect,
-  popFilterableSimpleMenu,
-  positionToVRect,
-} from '../../utils/menu/index.js';
-import { menuTitle } from '../../utils/menu/title.js';
+import { menuTitle } from '../../utils/menu-title.js';
 import { popAddNewFilter } from './condition.js';
 import type { FilterGroupView } from './filter-group.js';
 import { getDepth } from './filter-group.js';

@@ -6,13 +6,13 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
-import { ArrowRightSmallIcon } from '../../../../_common/icons/index.js';
 import {
   type Menu,
   type MenuOptions,
   popMenu,
-} from '../../utils/menu/index.js';
-import { menuTitleItem } from '../../utils/menu/title.js';
+} from '../../../../_common/components/index.js';
+import { ArrowRightSmallIcon } from '../../../../_common/icons/index.js';
+import { menuTitleItem } from '../../utils/menu-title.js';
 import { renderUniLit } from '../../utils/uni-component/uni-component.js';
 import { DataViewKanbanManager } from '../../view/presets/kanban/kanban-view-manager.js';
 import { DataViewTableManager } from '../../view/presets/table/table-view-manager.js';
