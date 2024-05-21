@@ -23,7 +23,7 @@
     "@fal-ai/serverless-client": "^0.10.0",
     "@floating-ui/dom": "^1.6.5",
     "@sgtpooki/file-type": "1.0.1",
-    "@toeverything/theme": "^0.7.29",
+    "@toeverything/theme": "^0.7.30",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/sortablejs": "^1.15.8",
