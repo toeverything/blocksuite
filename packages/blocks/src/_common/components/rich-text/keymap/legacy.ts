@@ -61,7 +61,6 @@ export function hardEnter(
     matchFlavours(model, ['affine:list']) && model.text.length === 0;
 
   assertExists(model.text, 'Failed to hardEnter! model.text not exists!');
-
   if (
     isEmptyList &&
     parent &&
@@ -92,7 +91,6 @@ export function hardEnter(
     handleUnindent(editorHost, model, range.index);
     return KEYBOARD_PREVENT_DEFAULT;
   }
-
   const isEnd = model.text.length === range.index;
   const softEnterable = isSoftEnterable(model);
   if (isEnd && softEnterable) {
@@ -129,18 +127,15 @@ export function hardEnter(
     handleBlockEndEnter(editorHost, model);
     return KEYBOARD_PREVENT_DEFAULT;
   }
-
   if (isEnd || shortKey) {
     handleBlockEndEnter(editorHost, model);
     return KEYBOARD_PREVENT_DEFAULT;
   }
-
   const isSoftEnterBlock = isSoftEnterable(model);
   if (isSoftEnterBlock) {
     onSoftEnter(range, inlineEditor);
     return KEYBOARD_PREVENT_DEFAULT;
   }
-
   handleBlockSplit(editorHost, model, range.index, range.length)?.catch(
     console.error
   );

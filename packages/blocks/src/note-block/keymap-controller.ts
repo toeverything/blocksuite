@@ -1,13 +1,12 @@
 import type {
   BlockSelection,
+  EditorHost,
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
-import type { EditorHost } from '@blocksuite/block-std';
 import { type BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { ReactiveController } from 'lit';
-import type { ReactiveControllerHost } from 'lit';
+import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
