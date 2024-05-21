@@ -40,26 +40,26 @@ export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
 
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
-  formatBarElement?: HTMLElement;
+  accessor formatBarElement: HTMLElement | null = null;
 
   @state()
-  configItems: FormatBarConfigItem[] = [];
+  accessor configItems: FormatBarConfigItem[] = [];
 
   @state()
-  private _dragging = false;
+  private accessor _dragging = false;
 
   private get _selectionManager() {
     return this.host.selection;
   }
 
   @state()
-  private _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
+  private accessor _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
   get displayType() {
     return this._displayType;
   }
 
   @state()
-  private _selectedBlockElements: BlockElement[] = [];
+  private accessor _selectedBlockElements: BlockElement[] = [];
   get selectedBlockElements() {
     return this._selectedBlockElements;
   }

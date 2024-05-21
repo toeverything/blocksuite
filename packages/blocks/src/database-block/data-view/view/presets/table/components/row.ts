@@ -96,13 +96,13 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     return this.closest('affine-database-table')?.selectionController;
   }
   @property({ attribute: false })
-  dataViewEle!: DataViewRenderer;
+  accessor dataViewEle!: DataViewRenderer;
   @property({ attribute: false })
-  view!: DataViewTableManager;
+  accessor view!: DataViewTableManager;
   @property({ attribute: false })
-  rowIndex!: number;
+  accessor rowIndex!: number;
   @property({ attribute: false })
-  rowId!: string;
+  accessor rowId!: string;
 
   public get groupKey() {
     return this.closest('affine-data-view-table-group')?.group?.key;

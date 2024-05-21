@@ -28,10 +28,10 @@ export class SurfaceRefGenericBlockPortal extends WithDisposable(
   `;
 
   @property({ attribute: false })
-  index!: number;
+  accessor index!: number;
 
   @property({ attribute: false })
-  model!:
+  accessor model!:
     | ImageBlockModel
     | AttachmentBlockModel
     | BookmarkBlockModel
@@ -44,7 +44,7 @@ export class SurfaceRefGenericBlockPortal extends WithDisposable(
     | EmbedLoomModel;
 
   @property({ attribute: false })
-  renderModel!: (model: BlockModel) => TemplateResult;
+  accessor renderModel!: (model: BlockModel) => TemplateResult;
 
   override firstUpdated() {
     this.disposables.add(

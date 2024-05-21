@@ -21,12 +21,12 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {
   @query('rich-text')
-  richText!: RichText;
+  accessor richText!: RichText;
 
   @property({ attribute: false })
-  frameModel!: FrameBlockModel;
+  accessor frameModel!: FrameBlockModel;
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   get editorHost() {
     return this.edgeless.host;

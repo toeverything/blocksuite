@@ -19,7 +19,7 @@ import {
 export class CopilotEdgelessPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css``;
   @property({ attribute: false })
-  logic!: AILogic;
+  accessor logic!: AILogic;
 
   get host() {
     return this.logic.getHost();

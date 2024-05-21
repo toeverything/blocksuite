@@ -12,7 +12,7 @@ import type { FrameBlockModel } from './frame-model.js';
 @customElement('affine-frame')
 export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   @state()
-  private _isNavigator = false;
+  private accessor _isNavigator = false;
 
   get titleElement(): EdgelessFrameTitle | null {
     return (

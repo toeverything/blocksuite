@@ -45,19 +45,19 @@ export class EdgelessCopilotPanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  groups!: AIItemGroupConfig[];
+  accessor groups!: AIItemGroupConfig[];
 
   @property({ attribute: false })
-  entry?: 'toolbar' | 'selection';
+  accessor entry: 'toolbar' | 'selection' | undefined = undefined;
 
   @property({ attribute: false })
-  onClick?: () => void;
+  accessor onClick: (() => void) | undefined = undefined;
 
   private _getChain() {
     return this.edgeless.service.std.command.chain();

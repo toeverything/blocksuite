@@ -43,10 +43,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   static override styles = codeBlockStyles;
 
   @query('.lang-button')
-  private _langButton!: HTMLButtonElement;
+  private accessor _langButton!: HTMLButtonElement;
 
   @state()
-  private _langListAbortController?: AbortController;
+  private accessor _langListAbortController: AbortController | undefined =
+    undefined;
 
   private readonly _themeObserver = new ThemeObserver();
 
@@ -143,7 +144,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   @query('rich-text')
-  private _richTextElement?: RichText;
+  private accessor _richTextElement: RichText | null = null;
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();

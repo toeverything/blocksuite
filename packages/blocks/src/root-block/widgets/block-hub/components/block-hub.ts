@@ -53,37 +53,37 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
    * A function that returns all blocks that are allowed to be moved to
    */
   @state()
-  private _expanded = false;
+  private accessor _expanded = false;
 
   @state()
-  private _isGrabbing = false;
+  private accessor _isGrabbing = false;
 
   @state()
-  private _visibleCardType: CardListType | null = null;
+  private accessor _visibleCardType: CardListType | null = null;
 
   @state()
-  private _showTooltip = true;
+  private accessor _showTooltip = true;
 
   @state()
-  private _maxHeight = 2000;
+  private accessor _maxHeight = 2000;
 
   @queryAll('.card-container')
-  private _blockHubCards!: HTMLElement[];
+  private accessor _blockHubCards!: NodeList & HTMLElement[];
 
   @queryAll('.block-hub-icon-container[type]')
-  private _blockHubMenus!: HTMLElement[];
+  private accessor _blockHubMenus!: NodeList & HTMLElement[];
 
   @query('.new-icon')
-  private _blockHubButton!: HTMLElement;
+  private accessor _blockHubButton!: HTMLElement;
 
   @query('.block-hub-icons-container')
-  private _blockHubIconsContainer!: HTMLElement;
+  private accessor _blockHubIconsContainer!: HTMLElement;
 
   @query('.block-hub-menu-container')
-  private _blockHubMenuContainer!: HTMLElement;
+  private accessor _blockHubMenuContainer!: HTMLElement;
 
   @query('[role="menuitem"]')
-  private _blockHubMenuEntry!: HTMLElement;
+  private accessor _blockHubMenuEntry!: HTMLElement;
 
   private _currentClientX = 0;
   private _currentClientY = 0;
@@ -129,7 +129,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     const disposables = this._disposables;
-    this._blockHubCards.forEach(card => {
+    this._blockHubCards.forEach((card: HTMLElement) => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
       disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
       disposables.addFromEvent(card, 'click', e => {

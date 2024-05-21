@@ -1,5 +1,12 @@
 import { cmdSymbol } from './consts.js';
-import type { Chain, Command, InitCommandCtx } from './types.js';
+import type {
+  Chain,
+  Command,
+  ExecCommandResult,
+  IfAllKeysOptional,
+  InDataOfCommand,
+  InitCommandCtx,
+} from './types.js';
 
 export class CommandManager {
   private _commands = new Map<string, Command>();
@@ -151,6 +158,46 @@ export class CommandManager {
 
     return createChain(methods, []) as never;
   };
+
+  exec<K extends keyof BlockSuite.Commands>(
+    command: K,
+    ...args: IfAllKeysOptional<
+      Omit<InDataOfCommand<BlockSuite.Commands[K]>, keyof InitCommandCtx>,
+      [
+        inData: void | Omit<
+          InDataOfCommand<BlockSuite.Commands[K]>,
+          keyof InitCommandCtx
+        >,
+      ],
+      [
+        inData: Omit<
+          InDataOfCommand<BlockSuite.Commands[K]>,
+          keyof InitCommandCtx
+        >,
+      ]
+    >
+  ): ExecCommandResult<K> {
+    const cmdFunc = this._commands.get(command);
+
+    if (!cmdFunc) {
+      throw new Error(`The command "${command}" not found`);
+    }
+
+    const inData = args[0];
+    const ctx = {
+      ...this._getCommandCtx(),
+      ...inData,
+    };
+
+    let execResult: ExecCommandResult<K> = {} as ExecCommandResult<K>;
+
+    cmdFunc(ctx, result => {
+      // @ts-ignore
+      execResult = result ?? {};
+    });
+
+    return execResult;
+  }
 }
 
 function runCmds(ctx: BlockSuite.CommandContext, [cmd, ...rest]: Command[]) {

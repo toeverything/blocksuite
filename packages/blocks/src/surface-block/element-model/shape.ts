@@ -78,73 +78,73 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   }
 
   @local()
-  textDisplay: boolean = true;
+  accessor textDisplay: boolean = true;
 
   @yfield()
-  xywh: SerializedXYWH = '[0,0,100,100]';
+  accessor xywh: SerializedXYWH = '[0,0,100,100]';
 
   @yfield(0)
-  rotate: number = 0;
+  accessor rotate: number = 0;
 
   @yfield()
-  shapeType: ShapeType = 'rect';
+  accessor shapeType: ShapeType = 'rect';
 
   @yfield()
-  radius: number = 0;
+  accessor radius: number = 0;
 
   @yfield()
-  filled: boolean = false;
+  accessor filled: boolean = false;
 
   @yfield()
-  fillColor: string = '--affine-palette-shape-yellow';
+  accessor fillColor: string = '--affine-palette-shape-yellow';
 
   @yfield()
-  strokeWidth: number = 4;
+  accessor strokeWidth: number = 4;
 
   @yfield()
-  strokeColor: string = '--affine-palette-line-yellow';
+  accessor strokeColor: string = '--affine-palette-line-yellow';
 
   @yfield()
-  strokeStyle: StrokeStyle = 'solid';
+  accessor strokeStyle: StrokeStyle = 'solid';
 
-  @yfield('General')
-  shapeStyle: ShapeStyle = 'General';
+  @yfield('General' as ShapeStyle)
+  accessor shapeStyle: ShapeStyle = 'General';
 
   @yfield(DEFAULT_ROUGHNESS)
-  roughness: number = DEFAULT_ROUGHNESS;
+  accessor roughness: number = DEFAULT_ROUGHNESS;
 
   @yfield()
-  text?: Y.Text;
+  accessor text: Y.Text | undefined = undefined;
 
   @yfield('#000000')
-  color!: string;
+  accessor color!: string;
 
   @yfield(ShapeTextFontSize.MEDIUM)
-  fontSize!: number;
+  accessor fontSize!: number;
 
-  @yfield(FontFamily.Inter)
-  fontFamily!: string;
+  @yfield(FontFamily.Inter as string)
+  accessor fontFamily!: string;
 
-  @yfield(FontWeight.Regular)
-  fontWeight!: FontWeight;
+  @yfield(FontWeight.Regular as FontWeight)
+  accessor fontWeight!: FontWeight;
 
-  @yfield('normal')
-  fontStyle!: FontStyle;
+  @yfield('normal' as FontStyle)
+  accessor fontStyle!: FontStyle;
 
-  @yfield('center')
-  textAlign!: TextAlign;
+  @yfield('center' as TextAlign)
+  accessor textAlign!: TextAlign;
 
-  @yfield('center')
-  textHorizontalAlign!: TextAlign;
+  @yfield('center' as TextAlign)
+  accessor textHorizontalAlign!: TextAlign;
 
-  @yfield('center')
-  textVerticalAlign!: VerticalAlign;
+  @yfield('center' as VerticalAlign)
+  accessor textVerticalAlign!: VerticalAlign;
 
-  @yfield(TextResizing.AUTO_HEIGHT)
-  textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
+  @yfield(TextResizing.AUTO_HEIGHT as TextResizing)
+  accessor textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
 
-  @yfield(false)
-  maxWidth: false | number = false;
+  @yfield(false as false | number)
+  accessor maxWidth: false | number = false;
 
   textBound: IBound | null = null;
 

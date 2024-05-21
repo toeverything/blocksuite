@@ -100,13 +100,13 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  anchorNote: NoteBlockModel | null = null;
+  accessor anchorNote: NoteBlockModel | null = null;
 
   @state()
-  private _activeSlicerIndex = 0;
+  private accessor _activeSlicerIndex = 0;
 
   private _hidden = false;
   private _divingLinePositions: Point[] = [];

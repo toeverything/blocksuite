@@ -103,28 +103,28 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   }
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @query('.affine-block-children-container.edgeless')
-  container!: HTMLDivElement;
+  accessor container!: HTMLDivElement;
 
   @query('edgeless-selected-rect')
-  selectedRect!: EdgelessSelectedRect;
+  accessor selectedRect!: EdgelessSelectedRect;
 
   @query('.affine-edgeless-layer')
-  layer!: HTMLDivElement;
+  accessor layer!: HTMLDivElement;
 
   @query('.canvas-slot')
-  canvasSlot!: HTMLDivElement;
+  accessor canvasSlot!: HTMLDivElement;
 
   @state()
-  private _isResizing = false;
+  private accessor _isResizing = false;
 
   @state()
-  private _enableNoteSlicer = false;
+  private accessor _enableNoteSlicer = false;
 
   @state()
-  private _slicerAnchorNote: NoteBlockModel | null = null;
+  private accessor _slicerAnchorNote: NoteBlockModel | null = null;
 
   private _clearWillChangeId: null | ReturnType<typeof setTimeout> = null;
 

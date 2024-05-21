@@ -11,7 +11,7 @@ import { EmbedGap } from './embed-gap.js';
 @customElement('v-line')
 export class VLine extends LitElement {
   @property({ attribute: false })
-  elements: [TemplateResult<1>, DeltaInsert][] = [];
+  accessor elements: [TemplateResult<1>, DeltaInsert][] = [];
 
   get inlineEditor() {
     const rootElement = this.closest(

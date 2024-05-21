@@ -31,7 +31,6 @@ function ConnectorModeButtonGroup(
       <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Straight}
         .activeMode=${'background'}
-        .iconContainerPadding=${2}
         .tooltip=${'Straight'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Straight })}
       >
@@ -40,7 +39,6 @@ function ConnectorModeButtonGroup(
       <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Curve}
         .activeMode=${'background'}
-        .iconContainerPadding=${2}
         .tooltip=${'Curve'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Curve })}
       >
@@ -49,7 +47,6 @@ function ConnectorModeButtonGroup(
       <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Orthogonal}
         .activeMode=${'background'}
-        .iconContainerPadding=${2}
         .tooltip=${'Elbowed'}
         @click=${() => setConnectorMode({ mode: ConnectorMode.Orthogonal })}
       >
@@ -96,19 +93,19 @@ export class EdgelessConnectorMenu extends LitElement {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  mode!: ConnectorMode;
+  accessor mode!: ConnectorMode;
 
   @property({ attribute: false })
-  stroke!: string;
+  accessor stroke!: string;
 
   @property({ attribute: false })
-  strokeWidth!: number;
+  accessor strokeWidth!: number;
 
   @property({ attribute: false })
-  onChange!: (props: Record<string, unknown>) => void;
+  accessor onChange!: (props: Record<string, unknown>) => void;
 
   private get edgelessTool(): EdgelessTool {
     return this.edgeless.edgelessTool;

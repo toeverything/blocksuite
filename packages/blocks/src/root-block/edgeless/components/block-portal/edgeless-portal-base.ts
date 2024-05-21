@@ -10,22 +10,22 @@ export class EdgelessPortalBase<T extends BlockModel> extends WithDisposable(
   ShadowlessElement
 ) {
   @property({ attribute: false })
-  index!: number;
+  accessor index!: number;
 
   @property({ attribute: false })
-  model!: T;
+  accessor model!: T;
 
   @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
+  accessor surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  updatingSet!: Set<string>;
+  accessor updatingSet!: Set<string>;
 
   @property({ attribute: false })
-  concurrentUpdatingCount!: number;
+  accessor concurrentUpdatingCount!: number;
 
   protected renderModel(model: T) {
     return this.surface.host.renderModel(model);

@@ -95,25 +95,25 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @state()
-  items: ChatItem[] = [];
+  accessor items: ChatItem[] = [];
 
   @state()
-  status: ChatStatus = 'idle';
+  accessor status: ChatStatus = 'idle';
 
   @state()
-  error: AIError | null = null;
+  accessor error: AIError | null = null;
 
   @state()
-  isLoading = false;
+  accessor isLoading = false;
 
   @state()
-  abortController: AbortController | null = null;
+  accessor abortController: AbortController | null = null;
 
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();

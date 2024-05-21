@@ -12,16 +12,11 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
-      width: var(--panel-width);
-      min-width: 180px;
-      padding: 8px;
       flex-direction: column;
       align-items: flex-start;
+      min-width: 180px;
+      width: var(--panel-width);
       gap: 4px;
-      border-radius: 8px;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      box-sizing: border-box;
     }
     .item {
       display: flex;
@@ -36,17 +31,12 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
     }
     .item-label {
       flex: 1 1 0;
-      font-size: var(--affine-font-sm);
-      color: var(--affine-text-primary-color);
-      line-height: 22px;
-      font-weight: 400;
     }
     .item-icon {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 4px;
-      fill: var(--affine-icon-color);
       color: var(--affine-icon-color);
     }
     .item:hover,
@@ -56,13 +46,13 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  displayMode!: NoteDisplayMode;
+  accessor displayMode!: NoteDisplayMode;
 
   @property({ attribute: false })
-  onSelect!: (displayMode: NoteDisplayMode) => void;
+  accessor onSelect!: (displayMode: NoteDisplayMode) => void;
 
   @property({ attribute: false })
-  panelWidth = 296;
+  accessor panelWidth = 240;
 
   private _DisplayModeIcon(mode: NoteDisplayMode) {
     switch (mode) {
@@ -87,11 +77,10 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const displayModes = Object.keys(NoteDisplayMode);
-
     this.style.setProperty('--panel-width', `${this.panelWidth}px`);
-    return html`${repeat(
-      displayModes,
+
+    return repeat(
+      Object.keys(NoteDisplayMode),
       mode => mode,
       mode => {
         const displayMode =
@@ -99,10 +88,7 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
         const isSelected = displayMode === this.displayMode;
         return html`<div
           class="item ${isSelected ? 'selected' : ''} ${displayMode}"
-          @click=${(e: MouseEvent) => {
-            e.stopPropagation();
-            this.onSelect(displayMode);
-          }}
+          @click=${() => this.onSelect(displayMode)}
           @dblclick=${stopPropagation}
           @pointerdown=${stopPropagation}
         >
@@ -110,7 +96,7 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
           <div class="item-icon">${this._DisplayModeIcon(displayMode)}</div>
         </div>`;
       }
-    )}`;
+    );
   }
 }
 

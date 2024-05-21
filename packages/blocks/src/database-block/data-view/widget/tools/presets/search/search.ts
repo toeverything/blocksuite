@@ -95,7 +95,7 @@ const styles = css`
 
 @customElement('data-view-header-tools-search')
 export class DataViewHeaderToolsSearch extends WidgetBase {
-  public override view!: DataViewTableManager | DataViewKanbanManager;
+  public override accessor view!: DataViewTableManager | DataViewKanbanManager;
 
   get showSearch(): boolean {
     return this._showSearch;
@@ -112,10 +112,10 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
   static override styles = styles;
 
   @query('.affine-database-search-input')
-  private _searchInput!: HTMLInputElement;
+  private accessor _searchInput!: HTMLInputElement;
 
   @state()
-  private _showSearch = false;
+  private accessor _showSearch = false;
 
   private _onSearch = (event: InputEvent) => {
     const el = event.target as HTMLInputElement;

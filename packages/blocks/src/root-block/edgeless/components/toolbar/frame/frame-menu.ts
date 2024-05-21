@@ -83,10 +83,10 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
+  accessor edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   override render() {
     if (this.edgelessTool.type !== 'frame') return nothing;

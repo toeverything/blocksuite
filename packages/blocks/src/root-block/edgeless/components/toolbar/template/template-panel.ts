@@ -199,27 +199,27 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   `;
 
   @state()
-  private _currentCategory = '';
+  private accessor _currentCategory = '';
 
   @state()
-  private _loadingTemplate: Template | null = null;
+  private accessor _loadingTemplate: Template | null = null;
 
   @state()
-  private _searchKeyword = '';
+  private accessor _searchKeyword = '';
 
   @state()
-  private _loading = false;
+  private accessor _loading = false;
 
   @state()
-  private _categories: string[] = [];
+  private accessor _categories: string[] = [];
 
   @state()
-  private _templates: Template[] = [];
+  private accessor _templates: Template[] = [];
 
   private _fetchJob: null | { cancel: () => void } = null;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   override connectedCallback(): void {
     super.connectedCallback();

@@ -138,19 +138,19 @@ export class AIAnswerText extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  answer!: string;
+  accessor answer!: string;
 
   @property({ attribute: false })
-  options!: TextRendererOptions;
+  accessor options!: TextRendererOptions;
 
   @property({ attribute: false })
-  state?: AffineAIPanelState;
+  accessor state: AffineAIPanelState | undefined = undefined;
 
   @query('.ai-answer-text-container')
-  private _container!: HTMLDivElement;
+  private accessor _container!: HTMLDivElement;
 
   private _onWheel(e: MouseEvent) {
     e.stopPropagation();

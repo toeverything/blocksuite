@@ -34,13 +34,13 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  block!: ImageBlockComponent;
+  accessor block!: ImageBlockComponent;
 
   @state()
-  _isSelected = false;
+  accessor _isSelected = false;
 
   @query('.resizable-img')
-  public readonly resizeImg!: HTMLElement;
+  accessor resizeImg!: HTMLElement;
 
   private _isDragging = false;
 

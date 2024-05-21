@@ -58,6 +58,7 @@
     "@vitest/coverage-istanbul": "1.6.0",
     "@vitest/ui": "1.6.0",
     "es-module-lexer": "^1.5.2",
+    "esbuild": "^0.21.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-lit": "^1.13.0",
@@ -96,6 +97,7 @@
       ]
     },
     "overrides": {
+      "esbuild": "npm:esbuild@latest",
       "array-includes": "npm:@nolyfill/array-includes@latest",
       "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
       "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@latest",

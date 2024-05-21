@@ -104,7 +104,7 @@ export class DataViewKanban extends DataViewBase<
   hotkeysController = new KanbanHotkeysController(this);
   clipboardController = new KanbanClipboardController(this);
   @query('.affine-data-view-kanban-groups')
-  groups!: HTMLElement;
+  accessor groups!: HTMLElement;
   groupHelper?: GroupHelper;
 
   override connectedCallback() {

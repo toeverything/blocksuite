@@ -33,7 +33,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  block!:
+  accessor block!:
     | EmbedToolbarBlockElement
     | AttachmentBlockComponent
     | ImageBlockComponent
@@ -42,13 +42,13 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     | EmbedSyncedDocBlockComponent;
 
   @state()
-  display = false;
+  accessor display = false;
 
   @state()
-  caption?: string | null;
+  accessor caption: string | null | undefined = undefined;
 
   @query('.affine-embed-card-caption')
-  input!: HTMLInputElement;
+  accessor input!: HTMLInputElement;
 
   private _focus = false;
 

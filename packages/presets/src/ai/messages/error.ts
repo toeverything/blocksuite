@@ -8,7 +8,7 @@ import { AIProvider } from '../provider.js';
 @customElement('ai-error-wrapper')
 class AIErrorWrapper extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  text!: TemplateResult<1>;
+  accessor text!: TemplateResult<1>;
 
   protected override render() {
     return html` <style>

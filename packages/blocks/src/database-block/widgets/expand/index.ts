@@ -121,7 +121,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   `;
   blockId = 'database-modal-preview';
   @property({ attribute: false })
-  database!: DatabaseBlockComponent;
+  accessor database!: DatabaseBlockComponent;
 
   public override connectedCallback() {
     super.connectedCallback();

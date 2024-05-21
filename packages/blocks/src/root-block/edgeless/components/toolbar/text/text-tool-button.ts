@@ -31,7 +31,7 @@ export class EdgelessTextToolButton extends EdgelessToolButton<
   `;
 
   @state()
-  color = GET_DEFAULT_TEXT_COLOR();
+  accessor color = GET_DEFAULT_TEXT_COLOR();
 
   protected override _type = 'text' as const;
   protected override _states = ['color'] as const;

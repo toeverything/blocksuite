@@ -71,40 +71,40 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  shape!: Shape;
+  accessor shape!: Shape;
 
   @property({ attribute: false })
-  order!: number;
+  accessor order!: number;
 
   @property({ attribute: false })
-  getContainerRect!: () => DOMRect;
+  accessor getContainerRect!: () => DOMRect;
 
   @property({ attribute: false })
-  handleClick!: () => void;
+  accessor handleClick!: () => void;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @query('#shape-tool-element')
-  private _shapeElement!: HTMLElement;
+  private accessor _shapeElement!: HTMLElement;
 
   @query('#backup-shape-element')
-  private _backupShapeElement!: HTMLElement;
+  private accessor _backupShapeElement!: HTMLElement;
 
   @property({ attribute: false })
-  shapeType!: ShapeName;
+  accessor shapeType!: ShapeName;
 
   @property({ attribute: false })
-  fillColor!: CssVariableName;
+  accessor fillColor!: CssVariableName;
 
   @property({ attribute: false })
-  shapeStyle!: ShapeStyle;
+  accessor shapeStyle!: ShapeStyle;
 
   @property({ attribute: false })
-  strokeColor!: CssVariableName;
+  accessor strokeColor!: CssVariableName;
 
   @property({ attribute: false })
-  radius!: number;
+  accessor radius!: number;
 
   private _transformMap: TransformMap = {
     z1: { x: 0, y: 5, scale: 1.1, origin: '50% 100%' },
@@ -114,13 +114,13 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   };
 
   @state()
-  private _startCoord: Coord = { x: -1, y: -1 };
+  private accessor _startCoord: Coord = { x: -1, y: -1 };
 
   @state()
-  private _dragging: boolean = false;
+  private accessor _dragging: boolean = false;
 
   @state()
-  private _isOutside: boolean = false;
+  private accessor _isOutside: boolean = false;
 
   private _onDragStart = (coord: Coord) => {
     this._startCoord = { x: coord.x, y: coord.y };

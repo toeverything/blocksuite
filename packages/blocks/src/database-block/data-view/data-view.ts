@@ -56,7 +56,7 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  config!: DataViewRendererConfig;
+  accessor config!: DataViewRendererConfig;
 
   public get expose() {
     return this._view.value;
@@ -86,7 +86,7 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
   }
 
   @state()
-  currentView?: string;
+  accessor currentView: string | undefined = undefined;
 
   private _view = createRef<DataViewExpose>();
 

@@ -218,23 +218,23 @@ export class SurfaceRefBlockComponent extends BlockElement<
     }
   `;
   @state()
-  private _surfaceModel: SurfaceBlockModel | null = null;
+  private accessor _surfaceModel: SurfaceBlockModel | null = null;
 
   @state()
-  private _focused: boolean = false;
+  private accessor _focused: boolean = false;
 
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
   private _referencedModel: RefElement | null = null;
 
   @query('.ref-canvas-container')
-  container!: HTMLDivElement;
+  accessor container!: HTMLDivElement;
 
   @query('surface-ref-portal')
-  portal!: SurfaceRefPortal;
+  accessor portal!: SurfaceRefPortal;
 
   @query('affine-surface-ref > embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   private _isInSurface = false;
 

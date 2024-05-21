@@ -52,25 +52,25 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  shapeType!: ShapeName;
+  accessor shapeType!: ShapeName;
 
   @property({ attribute: false })
-  fillColor!: CssVariableName;
+  accessor fillColor!: CssVariableName;
 
   @property({ attribute: false })
-  shapeStyle!: ShapeStyle;
+  accessor shapeStyle!: ShapeStyle;
 
   @property({ attribute: false })
-  strokeColor!: CssVariableName;
+  accessor strokeColor!: CssVariableName;
 
   @property({ attribute: false })
-  radius!: number;
+  accessor radius!: number;
 
   @property({ attribute: false })
-  onChange!: (props: Record<string, unknown>) => void;
+  accessor onChange!: (props: Record<string, unknown>) => void;
 
   private _setStrokeColor = (strokeColor: CssVariableName) => {
     if (this.edgeless.edgelessTool.type !== 'shape') return;
@@ -110,7 +110,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
             <div class="shape-style-container">
               <edgeless-tool-icon-button
                 .tooltip=${'General'}
-                .iconContainerPadding=${2}
                 .active=${shapeStyle === ShapeStyle.General}
                 .activeMode=${'background'}
                 @click=${() => {
@@ -121,7 +120,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
               </edgeless-tool-icon-button>
               <edgeless-tool-icon-button
                 .tooltip=${'Scribbled'}
-                .iconContainerPadding=${2}
                 .active=${shapeStyle === ShapeStyle.Scribbled}
                 .activeMode=${'background'}
                 @click=${() => {
@@ -140,7 +138,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                       .tooltip=${tooltip}
                       .active=${shapeType === name}
                       .activeMode=${'background'}
-                      .iconContainerPadding=${2}
                       @click=${() => {
                         this.onChange({ shapeType: name });
                       }}

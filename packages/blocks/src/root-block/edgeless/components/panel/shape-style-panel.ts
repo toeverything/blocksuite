@@ -1,5 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import {
   GeneralStyleIcon,
@@ -7,31 +8,35 @@ import {
 } from '../../../../_common/icons/index.js';
 import { ShapeStyle } from '../../../../surface-block/index.js';
 
+const SHAPE_STYLE_LIST = [
+  {
+    value: ShapeStyle.General,
+    icon: GeneralStyleIcon,
+  },
+  {
+    value: ShapeStyle.Scribbled,
+    icon: ScribbledStyleIcon,
+  },
+];
+
 @customElement('edgeless-shape-style-panel')
 export class EdgelessShapeStylePanel extends LitElement {
   static override styles = css`
-    .shape-style-container {
+    :host {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--affine-background-overlay-panel-color);
-      z-index: 2;
       gap: 8px;
-      padding: 0;
-    }
-
-    edgeless-tool-icon-button svg {
-      fill: var(--affine-icon-color);
     }
   `;
 
   @property({ attribute: false })
-  value!: ShapeStyle;
+  accessor value!: ShapeStyle;
 
   @property({ attribute: false })
-  onSelect?: (value: EdgelessShapeStylePanel['value']) => void;
+  accessor onSelect: undefined | ((value: ShapeStyle) => void) = undefined;
 
-  private _onSelect(value: EdgelessShapeStylePanel['value']) {
+  private _onSelect(value: ShapeStyle) {
     this.value = value;
     if (this.onSelect) {
       this.onSelect(value);
@@ -39,36 +44,21 @@ export class EdgelessShapeStylePanel extends LitElement {
   }
 
   override render() {
-    return html`
-      <div class="shape-style-container">
-        <edgeless-tool-icon-button
-          class="general-shape-button"
-          .tooltip=${'General'}
+    return repeat(
+      SHAPE_STYLE_LIST,
+      item => item.value,
+      ({ value, icon }) =>
+        html`<edgeless-tool-icon-button
           .tipPosition=${'top'}
-          .active=${this.value === ShapeStyle.General}
           .activeMode=${'background'}
-          .iconContainerPadding=${2}
-          @click=${() => {
-            this._onSelect(ShapeStyle.General);
-          }}
+          aria-label=${value}
+          .tooltip=${value}
+          .active=${this.value === value}
+          @click=${() => this._onSelect(value)}
         >
-          ${GeneralStyleIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          class="scribbled-shape-button"
-          .tooltip=${'Scribbled'}
-          .tipPosition=${'top'}
-          .active=${this.value === ShapeStyle.Scribbled}
-          .activeMode=${'background'}
-          .iconContainerPadding=${2}
-          @click=${() => {
-            this._onSelect(ShapeStyle.Scribbled);
-          }}
-        >
-          ${ScribbledStyleIcon}
-        </edgeless-tool-icon-button>
-      </div>
-    `;
+          ${icon}
+        </edgeless-tool-icon-button>`
+    );
   }
 }
 

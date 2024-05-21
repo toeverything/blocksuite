@@ -29,18 +29,18 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  renderItem!: Array<() => TemplateResult>;
+  accessor renderItem!: Array<() => TemplateResult>;
 
   @property({ attribute: false })
-  renderMore!: (count: number) => TemplateResult;
+  accessor renderMore!: (count: number) => TemplateResult;
 
   @state()
-  renderCount = 0;
+  accessor renderCount = 0;
 
   @queryAll(':scope > .component-overflow-item')
-  items!: HTMLDivElement[];
+  accessor items!: HTMLDivElement[] & NodeList;
   @query(':scope > .component-overflow-more')
-  more!: HTMLDivElement;
+  accessor more!: HTMLDivElement;
 
   public override connectedCallback() {
     super.connectedCallback();

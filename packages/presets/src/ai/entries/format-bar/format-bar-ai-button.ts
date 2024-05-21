@@ -62,15 +62,15 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  actionGroups!: AIItemGroupConfig[];
+  accessor actionGroups!: AIItemGroupConfig[];
 
   @query('.ask-ai-button')
-  private _askAIButton!: HTMLDivElement;
+  private accessor _askAIButton!: HTMLDivElement;
   @query('.ask-ai-panel')
-  private _askAIPanel!: HTMLDivElement;
+  private accessor _askAIPanel!: HTMLDivElement;
   private _askAIPopper: ReturnType<typeof createButtonPopper> | null = null;
 
   override firstUpdated() {

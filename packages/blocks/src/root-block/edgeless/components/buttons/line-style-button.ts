@@ -1,28 +1,13 @@
 import './tool-icon-button.js';
 
-import { css, html } from 'lit';
+import { html } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
 
 import {
   BanIcon,
   DashLineIcon,
   StraightLineIcon,
 } from '../../../../_common/icons/index.js';
-
-export const lineStyleButtonStyles = [
-  css`
-    .edgeless-component-line-style-button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: var(--affine-icon-color);
-    }
-
-    .line-style-button:nth-of-type(2),
-    .line-style-button:nth-of-type(3) {
-      margin-left: 8px;
-    }
-  `,
-];
 
 export interface LineStyleButtonProps {
   className?: string;
@@ -61,21 +46,21 @@ export function LineStyleButton({
   tooltip: tooltipFromProps,
   onClick,
 }: LineStyleButtonProps) {
-  const classnames = `edgeless-component-line-style-button mode-${mode} ${
-    active ? 'active' : ''
-  }`;
+  const classes: Record<string, boolean> = {};
+  classes[`mode-${mode}`] = true;
+  if (className) classes[className] = true;
+  if (active) classes['active'] = true;
   const icon = getModeIcon(mode);
   const tooltip =
     tooltipFromProps !== undefined ? tooltipFromProps : getModeTooltip(mode);
 
   return html`<edgeless-tool-icon-button
-    class=${className ?? ''}
+    class=${classMap(classes)}
     .active=${active ?? false}
     .activeMode=${'background'}
     .tooltip=${tooltip}
-    .iconContainerPadding=${2}
     @click=${onClick}
   >
-    <div class=${classnames}>${icon}</div>
+    ${icon}
   </edgeless-tool-icon-button>`;
 }

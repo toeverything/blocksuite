@@ -1,6 +1,8 @@
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
+import { CheckIcon } from '../../../../_common/icons/edgeless.js';
 import {
   CanvasTextFontFamily,
   CanvasTextFontFamilyKey,
@@ -14,29 +16,23 @@ export class EdgelessFontFamilyPanel extends LitElement {
   static override styles = css`
     :host {
       display: flex;
-    }
-
-    .font-family-container {
-      display: flex;
-      flex-direction: column;
       align-items: start;
-      justify-content: center;
-      background: var(--affine-background-overlay-panel-color);
-      gap: 8px;
-      padding: 8px;
-      border-radius: 8px;
+      flex-direction: column;
+      min-width: 136px;
     }
 
-    .font-family-container edgeless-tool-icon-button {
+    edgeless-tool-icon-button {
       width: 100%;
     }
   `;
 
   @property({ attribute: false })
-  value: CanvasTextFontFamilyValueType = CanvasTextFontFamily.Inter;
+  accessor value: CanvasTextFontFamilyValueType = CanvasTextFontFamily.Inter;
 
   @property({ attribute: false })
-  onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
+  accessor onSelect:
+    | ((value: EdgelessFontFamilyPanel['value']) => void)
+    | undefined = undefined;
 
   private _onSelect(value: EdgelessFontFamilyPanel['value']) {
     this.value = value;
@@ -46,30 +42,27 @@ export class EdgelessFontFamilyPanel extends LitElement {
   }
 
   override render() {
-    return html`
-      <div class="font-family-container">
-        ${CanvasTextFontFamilyKey.map(key => {
-          const font = CanvasTextFontFamily[key];
+    return repeat(
+      CanvasTextFontFamilyKey,
+      key => key,
+      key => {
+        const font = CanvasTextFontFamily[key];
+        const active = this.value === font;
 
-          return html`
-            <edgeless-tool-icon-button
-              class="${key.toLowerCase()}"
-              style="font-family: ${wrapFontFamily(font)}"
-              .active=${this.value === font}
-              .activeMode=${'background'}
-              .iconContainerPadding=${2}
-              @click=${() => {
-                this._onSelect(font);
-              }}
-            >
-              <div class="font-family-button">
-                ${CanvasTextFontFamilyName[key]}
-              </div>
-            </edgeless-tool-icon-button>
-          `;
-        })}
-      </div>
-    `;
+        return html`
+          <edgeless-tool-icon-button
+            class="${key.toLowerCase()}"
+            style="font-family: ${wrapFontFamily(font)}"
+            .iconContainerPadding=${[4, 8]}
+            .justify=${'space-between'}
+            .active=${active}
+            @click=${() => this._onSelect(font)}
+          >
+            ${CanvasTextFontFamilyName[key]} ${active ? CheckIcon : nothing}
+          </edgeless-tool-icon-button>
+        `;
+      }
+    );
   }
 }
 

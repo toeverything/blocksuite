@@ -1,7 +1,7 @@
 import type { Y } from '@blocksuite/store';
 
 import type { ElementModel } from '../base.js';
-import { setObjectMeta } from './common.js';
+import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const observeSymbol = Symbol('observe');
 const observerDisposableSymbol = Symbol('observerDisposable');
@@ -32,29 +32,35 @@ type ObserveFn<
  * @returns
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function observe<E extends Y.YEvent<any>, T extends ElementModel>(
+export function observe<V, E extends Y.YEvent<any>, T extends ElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: ObserveFn<E, T>
 ) {
-  return function observeDecorator(prototype: unknown, prop: string | symbol) {
-    setObjectMeta(observeSymbol, prototype, prop, fn);
+  return function observeDecorator(
+    _: unknown,
+    context: ClassAccessorDecoratorContext
+  ) {
+    const prop = context.name;
+    return {
+      init(this: T, v: V) {
+        setObjectPropMeta(observeSymbol, Object.getPrototypeOf(this), prop, fn);
+        return v;
+      },
+    } as ClassAccessorDecoratorResult<ElementModel, V>;
   };
 }
 
 function getObserveMeta(
-  target: unknown,
+  proto: unknown,
   prop: string | symbol
 ): null | ObserveFn {
   // @ts-ignore
-  return target[observeSymbol]?.[prop] ?? null;
+  return getObjectPropMeta(proto, observeSymbol, prop);
 }
 
-export function startObserve(
-  prototype: unknown,
-  prop: string | symbol,
-  receiver: ElementModel
-) {
-  const observeFn = getObserveMeta(prototype, prop as string)!;
+export function startObserve(prop: string | symbol, receiver: ElementModel) {
+  const proto = Object.getPrototypeOf(receiver);
+  const observeFn = getObserveMeta(proto, prop as string)!;
   // @ts-ignore
   const observerDisposable = receiver[observerDisposableSymbol] ?? {};
 
@@ -97,15 +103,11 @@ export function startObserve(
   }
 }
 
-export function initializedObservers(
-  prototype: unknown,
-  receiver: ElementModel
-) {
-  // @ts-ignore
-  const observers = prototype[observeSymbol] ?? {};
+export function initializedObservers(proto: unknown, receiver: ElementModel) {
+  const observers = getObjectPropMeta(proto, observeSymbol);
 
   Object.keys(observers).forEach(prop => {
-    startObserve(prototype, prop, receiver);
+    startObserve(prop, receiver);
   });
 
   receiver['_disposable'].add(() => {

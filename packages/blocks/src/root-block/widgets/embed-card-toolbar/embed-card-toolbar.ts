@@ -66,16 +66,16 @@ export class EmbedCardToolbar extends WidgetElement<
   static override styles = embedCardToolbarStyle;
 
   @query('.embed-card-toolbar')
-  embedCardToolbarElement!: HTMLElement;
+  accessor embedCardToolbarElement!: HTMLElement;
 
   @query('.embed-card-toolbar-button.card-style')
-  cardStyleButton?: HTMLElement;
+  accessor cardStyleButton: HTMLElement | null = null;
 
   @query('.embed-card-toolbar-button.more-button')
-  moreButton?: HTMLElement;
+  accessor moreButton: HTMLElement | null = null;
 
   @state()
-  hide: boolean = true;
+  accessor hide: boolean = true;
 
   private _abortController = new AbortController();
   private _resetAbortController = () => {

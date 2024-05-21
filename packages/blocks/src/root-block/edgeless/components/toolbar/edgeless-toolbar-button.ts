@@ -13,10 +13,10 @@ export class EdgelessToolButton<
   States extends readonly (keyof LastProps[Type])[] = [],
 > extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  active = false;
+  accessor active = false;
 
   protected _type!: Type;
   protected _states!: States;

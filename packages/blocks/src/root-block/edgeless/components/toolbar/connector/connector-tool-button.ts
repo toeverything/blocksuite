@@ -40,13 +40,13 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
   `;
 
   @state()
-  mode: ConnectorMode = ConnectorMode.Curve;
+  accessor mode: ConnectorMode = ConnectorMode.Curve;
 
   @state()
-  stroke = DEFAULT_CONNECTOR_COLOR;
+  accessor stroke = DEFAULT_CONNECTOR_COLOR;
 
   @state()
-  strokeWidth = LineWidth.Two;
+  accessor strokeWidth = LineWidth.Two;
 
   protected override _type = 'connector' as const;
   protected override readonly _states = [

@@ -119,52 +119,54 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  updateItems!: (items: ChatItem[]) => void;
+  accessor updateItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
-  addToItems!: (items: ChatItem[]) => void;
+  accessor addToItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
-  status!: ChatStatus;
+  accessor status!: ChatStatus;
 
   @property({ attribute: false })
-  items!: ChatItem[];
+  accessor items!: ChatItem[];
 
   @property({ attribute: false })
-  error!: Error | null;
+  accessor error!: Error | null;
 
   @property({ attribute: false })
-  updateError!: (error: AIError | null) => void;
+  accessor updateError!: (error: AIError | null) => void;
 
   @property({ attribute: false })
-  updateStatus!: (status: ChatStatus) => void;
+  accessor updateStatus!: (status: ChatStatus) => void;
 
   @query('textarea')
-  textarea!: HTMLTextAreaElement;
+  accessor textarea!: HTMLTextAreaElement;
 
   @query('.close-wrapper')
-  closeWrapper!: HTMLDivElement;
+  accessor closeWrapper!: HTMLDivElement;
 
   @state()
-  images: File[] = [];
+  accessor images: File[] = [];
 
   @state()
-  curIndex = -1;
+  accessor curIndex = -1;
 
   @state()
-  isInputEmpty = true;
+  accessor isInputEmpty = true;
 
   @state()
-  focused = false;
+  accessor focused = false;
 
   @property({ attribute: false })
-  abortController!: AbortController | null;
+  accessor abortController!: AbortController | null;
 
   @property({ attribute: false })
-  updateAbortController!: (abortController: AbortController | null) => void;
+  accessor updateAbortController!: (
+    abortController: AbortController | null
+  ) => void;
 
   send = async () => {
     if (this.status === 'loading' || this.status === 'transmitting') return;

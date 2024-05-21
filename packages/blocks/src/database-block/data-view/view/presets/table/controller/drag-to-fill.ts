@@ -34,7 +34,7 @@ export class DragToFillElement extends ShadowlessElement {
   `;
 
   @state()
-  dragging = false;
+  accessor dragging = false;
 
   dragToFillRef = createRef<HTMLDivElement>();
 

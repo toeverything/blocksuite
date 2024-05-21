@@ -83,13 +83,13 @@ export class OutlineNotice extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  noticeVisible!: boolean;
+  accessor noticeVisible!: boolean;
 
   @property({ attribute: false })
-  toggleNotesSorting!: () => void;
+  accessor toggleNotesSorting!: () => void;
 
   @property({ attribute: false })
-  setNoticeVisibility!: (visibility: boolean) => void;
+  accessor setNoticeVisibility!: (visibility: boolean) => void;
 
   private _handleNoticeButtonClick() {
     this.toggleNotesSorting();

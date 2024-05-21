@@ -61,16 +61,16 @@ export class LinkPopupMoreMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  inlineEditor!: AffineInlineEditor;
+  accessor inlineEditor!: AffineInlineEditor;
 
   @property({ attribute: false })
-  targetInlineRange!: InlineRange;
+  accessor targetInlineRange!: InlineRange;
 
   @property({ attribute: false })
-  abortController!: AbortController;
+  accessor abortController!: AbortController;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   get currentLink() {
     const link = this.inlineEditor.getFormat(this.targetInlineRange).link;

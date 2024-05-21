@@ -72,10 +72,10 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
 
   @property({ attribute: false })
-  fitPadding: number[] = [50, 380, 50, 50];
+  accessor fitPadding: number[] = [50, 380, 50, 50];
 
   get doc() {
     return this.editor.doc;

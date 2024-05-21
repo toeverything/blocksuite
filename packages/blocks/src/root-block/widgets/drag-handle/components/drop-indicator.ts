@@ -23,7 +23,7 @@ export class DropIndicator extends LitElement {
   `;
 
   @property({ attribute: false })
-  rect: Rect | null = null;
+  accessor rect: Rect | null = null;
 
   override render() {
     if (!this.rect) {

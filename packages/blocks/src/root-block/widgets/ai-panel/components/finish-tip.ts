@@ -61,10 +61,10 @@ export class AIFinishTip extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  copy?: CopyConfig;
+  accessor copy: CopyConfig | undefined = undefined;
 
   @state()
-  copied = false;
+  accessor copied = false;
 
   override render() {
     return html`<div class="finish-tip">

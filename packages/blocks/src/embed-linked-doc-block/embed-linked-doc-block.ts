@@ -42,37 +42,37 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
   @property({ attribute: false })
-  isNoteContentEmpty = false;
+  accessor isNoteContentEmpty = false;
 
   @property({ attribute: false })
-  isBannerEmpty = false;
+  accessor isBannerEmpty = false;
 
   @property({ attribute: false })
-  surfaceRefService!: SurfaceRefBlockService;
+  accessor surfaceRefService!: SurfaceRefBlockService;
 
   @property({ attribute: false })
-  isError = false;
+  accessor isError = false;
 
   @property({ attribute: false })
-  surfaceRefRenderer?: SurfaceRefRenderer;
+  accessor surfaceRefRenderer: SurfaceRefRenderer | undefined = undefined;
 
   @state()
-  private _editorMode: 'page' | 'edgeless' = 'page';
+  private accessor _editorMode: 'page' | 'edgeless' = 'page';
 
   @state()
-  private _docUpdatedAt: Date = new Date();
+  private accessor _docUpdatedAt: Date = new Date();
 
   @state()
-  private _loading = false;
+  private accessor _loading = false;
 
   @query('embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   @queryAsync('.affine-embed-linked-doc-banner.render')
-  bannerContainer!: Promise<HTMLDivElement>;
+  accessor bannerContainer!: Promise<HTMLDivElement>;
 
   @queryAsync('.affine-embed-linked-doc-content-note.render')
-  noteContainer!: Promise<HTMLDivElement>;
+  accessor noteContainer!: Promise<HTMLDivElement>;
 
   get editorMode() {
     return this._editorMode;

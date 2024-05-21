@@ -33,31 +33,31 @@ export class LinkPopup extends WithDisposable(LitElement) {
   static override styles = linkPopupStyle;
 
   @property()
-  type: 'create' | 'edit' | 'view' = 'create';
+  accessor type: 'create' | 'edit' | 'view' = 'create';
 
   @property({ attribute: false })
-  inlineEditor!: AffineInlineEditor;
+  accessor inlineEditor!: AffineInlineEditor;
 
   @property({ attribute: false })
-  targetInlineRange!: InlineRange;
+  accessor targetInlineRange!: InlineRange;
 
   @property({ attribute: false })
-  abortController!: AbortController;
+  accessor abortController!: AbortController;
 
   @query('#text-input')
-  textInput?: HTMLInputElement;
+  accessor textInput: HTMLInputElement | null = null;
 
   @query('#link-input')
-  linkInput?: HTMLInputElement;
+  accessor linkInput: HTMLInputElement | null = null;
 
   @query('.affine-link-popover-container')
-  popupContainer!: HTMLDivElement;
+  accessor popupContainer!: HTMLDivElement;
 
   @query('.mock-selection-container')
-  mockSelectionContainer!: HTMLDivElement;
+  accessor mockSelectionContainer!: HTMLDivElement;
 
   @query('.affine-confirm-button')
-  confirmButton?: IconButton;
+  accessor confirmButton: IconButton | null = null;
 
   private _bodyOverflowStyle = '';
 

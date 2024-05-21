@@ -25,13 +25,13 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
 
   @state()
-  private _isSelected = false;
+  private accessor _isSelected = false;
 
   @state()
-  private _showOverlay = true;
+  private accessor _showOverlay = true;
 
   @query('embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   private _isDragging = false;
 

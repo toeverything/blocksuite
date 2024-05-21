@@ -137,6 +137,9 @@ export default ({ mode }) => {
         }),
       wasm(),
     ],
+    esbuild: {
+      target: 'es2018',
+    },
     build: {
       target: 'ES2022',
       sourcemap: true,
