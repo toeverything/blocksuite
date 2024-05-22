@@ -29,8 +29,8 @@ import type {
 } from '../../../../index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { GroupElementModel } from '../../../../surface-block/index.js';
-import { type EdgelessBlockType } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessBlockType } from '../../edgeless-types.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
 import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
 

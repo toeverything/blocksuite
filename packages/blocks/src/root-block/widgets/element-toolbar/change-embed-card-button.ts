@@ -70,8 +70,9 @@ import type {
   EmbedYoutubeBlockComponent,
   EmbedYoutubeModel,
 } from '../../../embed-youtube-block/index.js';
-import { Bound, type EdgelessBlockType } from '../../../surface-block/index.js';
+import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessBlockType } from '../../edgeless/edgeless-types.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,

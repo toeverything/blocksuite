@@ -595,7 +595,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     });
   }
 
-  private _initFontloader() {
+  private _initFontLoader() {
     const fontLoader = this.service?.fontLoader;
     assertExists(fontLoader);
 
@@ -669,7 +669,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     this._initSlotEffects();
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
-    this._initFontloader();
+    this._initFontLoader();
     this._initRemoteCursor();
     this._initSurface();
 

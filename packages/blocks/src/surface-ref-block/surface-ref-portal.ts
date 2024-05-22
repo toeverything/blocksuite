@@ -13,8 +13,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { FrameBlockModel } from '../frame-block/index.js';
+import { type EdgelessBlockType } from '../root-block/edgeless/edgeless-types.js';
 import type { EdgelessBlockModel } from '../root-block/edgeless/type.js';
-import { type EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
 

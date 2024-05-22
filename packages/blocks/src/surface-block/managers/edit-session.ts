@@ -16,6 +16,7 @@ import {
   GET_DEFAULT_TEXT_COLOR,
   LineColorsSchema,
 } from '../../root-block/edgeless/components/panel/color-panel.js';
+import type { EdgelessElementType } from '../../root-block/edgeless/edgeless-types.js';
 import {
   CanvasTextFontFamily,
   CanvasTextFontStyle,
@@ -23,7 +24,6 @@ import {
   ShapeStyle,
   StrokeStyle,
 } from '../consts.js';
-import type { EdgelessElementType } from '../edgeless-types.js';
 import {
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
