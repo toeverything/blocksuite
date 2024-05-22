@@ -1385,7 +1385,8 @@ export function getCopyElements(
         set.add(ele)
       );
       set.add(element);
-    } else {
+    } else if (!isImageBlock(element)) {
+      // TODO: add support for image block
       set.add(element);
     }
   });
