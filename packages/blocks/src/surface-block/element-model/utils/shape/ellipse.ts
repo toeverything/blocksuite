@@ -6,10 +6,11 @@ import {
   lineEllipseIntersects,
   pointInEllipse,
   pointInPolygon,
+  polygonGetPointTangent,
+  rotatePoints,
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
 import type { IVec2 } from '../../../utils/vec.js';
-import { Vec } from '../../../utils/vec.js';
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../common.js';
 import type { ShapeElementModel } from '../../shape.js';
 
@@ -130,13 +131,12 @@ export const ellipse = {
   getRelativePointLocation(position: IVec2, element: ShapeElementModel) {
     const bound = Bound.deserialize(element.xywh);
     const point = bound.getRelativePoint(position);
+    let points = ellipse.points(bound);
+    points.push(point);
 
-    const rx = bound.w / 2;
-    const ry = bound.h / 2;
-
-    const normalVector = Vec.uni(
-      Vec.divV(Vec.sub(point, bound.center), [rx * rx, ry * ry])
-    );
-    return new PointLocation(point, [-normalVector[1], normalVector[0]]);
+    points = rotatePoints(points, bound.center, element.rotate);
+    const rotatePoint = points.pop() as IVec2;
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
   },
 };
