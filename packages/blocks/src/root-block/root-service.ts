@@ -6,6 +6,7 @@ import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
+import type { NotificationService } from '../_common/components/notification-service.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
 import { ExportManager } from '../_common/export-manager/export-manager.js';
 import {
@@ -52,6 +53,9 @@ export class RootService extends BlockService<RootBlockModel> {
 
   fileDropManager!: FileDropManager;
   exportManager!: ExportManager;
+
+  // impl provided by the user
+  notificationService: NotificationService | null = null;
 
   transformers = {
     markdown: MarkdownTransformer,
