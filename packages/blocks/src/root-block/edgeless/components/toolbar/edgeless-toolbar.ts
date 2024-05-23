@@ -163,8 +163,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   @state()
   private accessor _navigatorMode: NavigatorMode = 'fit';
 
-  @state()
-  private accessor _hideToolbar = false;
+  get _hideToolbar() {
+    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
+  }
+  set _hideToolbar(value) {
+    this.edgeless.service.editPropsStore.setItem('presentHideToolbar', !!value);
+  }
 
   @state()
   private accessor _mouseOnToolbar = true;
@@ -254,9 +258,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { _disposables, edgeless } = this;
     const { slots } = edgeless;
 
-    this._hideToolbar =
-      !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
-
     edgeless.bindHotKey(
       {
         ArrowLeft: () => {
@@ -307,17 +308,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(
-      edgeless.slots.navigatorSettingUpdated.on(
-        ({ hideToolbar, fillScreen }) => {
-          if (hideToolbar !== undefined && hideToolbar !== this._hideToolbar) {
-            this._hideToolbar = hideToolbar;
-          }
-
-          if (fillScreen !== undefined) {
-            this._navigatorMode = fillScreen ? 'fill' : 'fit';
-          }
+      edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
+        if (fillScreen !== undefined) {
+          this._navigatorMode = fillScreen ? 'fill' : 'fit';
         }
-      )
+      })
     );
     // The toolbar should be disabled while edgeless AI is in progress.
     _disposables.add(
@@ -365,15 +360,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       type === 'frameNavigator'
     ) {
       this._moveToCurrentFrame();
-    }
-    if (changedProperties.has('_hideToolbar')) {
-      this.edgeless.slots.navigatorSettingUpdated.emit({
-        hideToolbar: this._hideToolbar,
-      });
-      this.edgeless.service.editPropsStore.setItem(
-        'presentHideToolbar',
-        this._hideToolbar
-      );
     }
   }
 
