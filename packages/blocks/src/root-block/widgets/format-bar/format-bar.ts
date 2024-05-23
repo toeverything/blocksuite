@@ -84,10 +84,6 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   private _shouldDisplay() {
-    //TODO: adapt detail panel
-    const layout = document.querySelector('side-layout-modal');
-    if (layout) return false;
-
     const readonly = this.doc.awarenessStore.isReadonly(
       this.doc.blockCollection
     );

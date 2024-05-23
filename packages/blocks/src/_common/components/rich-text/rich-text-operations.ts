@@ -1,8 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
-import { type BlockModel } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+import { type BlockModel, Text } from '@blocksuite/store';
 
 import {
   isInsideBlockByFlavour,

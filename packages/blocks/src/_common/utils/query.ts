@@ -199,15 +199,10 @@ export function getRootByElement(element: Element): RootBlockComponent | null {
 export function getRootByEditorHost(
   editorHost: EditorHost
 ): RootBlockComponent | null {
-  if (isInsidePageEditor(editorHost)) {
-    return getPageRootByEditorHost(editorHost);
-  }
-
-  if (isInsideEdgelessEditor(editorHost)) {
-    return getEdgelessRootByEditorHost(editorHost);
-  }
-
-  return null;
+  return (
+    getPageRootByEditorHost(editorHost) ??
+    getEdgelessRootByEditorHost(editorHost)
+  );
 }
 
 /** If it's not in the page mode, it will return `null` directly */

@@ -17,8 +17,10 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from './data-view/index.js';
+import { map } from './data-view/utils/uni-component/operation.js';
 import { type DatabaseBlockModel } from './database-model.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
+import { NoteRenderer } from './detail-panel/note-renderer.js';
 
 export type DatabaseBlockDataSourceConfig = {
   pageId: string;
@@ -327,6 +329,11 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     return {
       ...super.detailSlots,
       header: createUniComponentFromWebComponent(BlockRenderer),
+      note: map(createUniComponentFromWebComponent(NoteRenderer), props => ({
+        ...props,
+        model: this._model,
+        host: this.host,
+      })),
     };
   }
 
