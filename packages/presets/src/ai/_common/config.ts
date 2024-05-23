@@ -38,6 +38,7 @@ import {
   LanguageIcon,
   LongerIcon,
   MakeItRealIcon,
+  MakeItRealIconWithAnimation,
   SelectionIcon,
   ShorterIcon,
   ToneIcon,
@@ -329,7 +330,7 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
       icon: MakeItRealIcon,
       beta: true,
       showWhen: textBlockShowWhen,
-      handler: edgelessHandler('makeItReal', AIStarIconWithAnimation),
+      handler: edgelessHandler('makeItReal', MakeItRealIconWithAnimation),
     },
     {
       name: 'Find actions',
