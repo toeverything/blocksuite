@@ -24,9 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
+        with:
+          version: 9
       - name: Use Node.js LTS
         uses: actions/setup-node@v3
         with:
@@ -63,9 +65,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
+        with:
+          version: 9
       - name: Use Node.js LTS
         uses: actions/setup-node@v3
         with:
@@ -133,7 +137,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
@@ -163,7 +169,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
@@ -183,9 +191,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
+        with:
+          version: 9
       - name: Use Node.js LTS
         uses: actions/setup-node@v3
         with:
