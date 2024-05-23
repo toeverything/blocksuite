@@ -142,8 +142,15 @@ export default ({ mode }) => {
     },
     build: {
       target: 'ES2022',
-      sourcemap: true,
+      sourcemap: false,
       rollupOptions: {
+        onwarn(warning, defaultHandler) {
+          if (['SOURCEMAP_ERROR', 'EVAL'].includes(warning.code)) {
+            return;
+          }
+
+          defaultHandler(warning);
+        },
         input: {
           main: resolve(__dirname, 'index.html'),
           'starter/': resolve(__dirname, 'starter/index.html'),
