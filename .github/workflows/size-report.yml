@@ -24,7 +24,7 @@ jobs:
         name: Install pnpm
         id: pnpm-install
         with:
-          version: latest
+          version: 9
       - name: Use Node.js LTS
         uses: actions/setup-node@v3
         with:
@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
         with:
-          version: latest
+          version: 9
 
       - name: Download Previous Size Data
         uses: dawidd6/action-download-artifact@v2
