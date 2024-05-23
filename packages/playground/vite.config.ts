@@ -144,6 +144,8 @@ export default ({ mode }) => {
       target: 'ES2022',
       sourcemap: false,
       rollupOptions: {
+        cache: false,
+        maxParallelFileOps: 2,
         onwarn(warning, defaultHandler) {
           if (['SOURCEMAP_ERROR', 'EVAL'].includes(warning.code)) {
             return;
