@@ -31,11 +31,6 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       gap: 12px;
     }
 
-    .affine-database-number {
-      text-align: left;
-      justify-content: start;
-    }
-
     .field-left {
       padding: 4px 6px 4px 4px;
       display: flex;
@@ -82,6 +77,11 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
       border: 1px solid transparent;
+    }
+
+    .field-content .affine-database-number {
+      text-align: left;
+      justify-content: start;
     }
 
     .field-content:hover {
