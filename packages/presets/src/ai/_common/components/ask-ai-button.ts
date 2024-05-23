@@ -1,3 +1,5 @@
+import './ask-ai-panel.js';
+
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
   type AIItemGroupConfig,
@@ -7,57 +9,64 @@ import {
 } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRootService } from '../../utils/selection-utils.js';
 
-@customElement('format-bar-ai-button')
-export class FormatBarAIButton extends WithDisposable(LitElement) {
+type buttonSize = 'small' | 'middle' | 'large';
+
+const buttonWidthMap: Record<buttonSize, string> = {
+  small: '70px',
+  middle: '76px',
+  large: '82px',
+};
+
+@customElement('ask-ai-button')
+export class AskAIButton extends WithDisposable(LitElement) {
   static override styles = css`
+    .ask-ai-button {
+      border-radius: 4px;
+    }
+
     .ask-ai-icon-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: var(--affine-brand-color);
-      font-weight: 500;
       font-size: var(--affine-font-sm);
+      font-weight: 500;
       position: relative;
+      gap: 4px;
+    }
+
+    .ask-ai-icon-button.small {
+      font-size: var(--affine-font-xs);
+      svg {
+        scale: 0.8;
+      }
+    }
+
+    .ask-ai-icon-button.large {
+      font-size: var(--affine-font-md);
+      svg {
+        scale: 1.2;
+      }
     }
 
     .ask-ai-icon-button span {
       line-height: 22px;
-      padding-left: 4px;
     }
 
-    .ask-ai-panel {
+    ask-ai-panel {
       display: none;
-      box-sizing: border-box;
-      position: absolute;
-      padding: 8px;
-      min-width: 330px;
-      max-height: 374px;
-      overflow-y: auto;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
-      z-index: var(--affine-z-index-popover);
     }
 
-    .ask-ai-panel[data-show] {
+    ask-ai-panel[data-show] {
       display: block;
     }
 
     .ask-ai-icon-button svg {
       color: var(--affine-brand-color);
-    }
-    .ask-ai-panel::-webkit-scrollbar {
-      width: 5px;
-      max-height: 100px;
-    }
-    .ask-ai-panel::-webkit-scrollbar-thumb {
-      border-radius: 20px;
-    }
-    .ask-ai-panel:hover::-webkit-scrollbar-thumb {
-      background-color: var(--affine-black-30);
-    }
-    .ask-ai-panel::-webkit-scrollbar-corner {
-      display: none;
     }
   `;
 
@@ -67,11 +76,28 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor actionGroups!: AIItemGroupConfig[];
 
+  @property({ attribute: false })
+  accessor size: buttonSize = 'middle';
+
+  @property({ attribute: false })
+  accessor backgroundColor: string | undefined = undefined;
+
+  @property({ attribute: false })
+  accessor boxShadow: string | undefined = undefined;
+
   @query('.ask-ai-button')
   private accessor _askAIButton!: HTMLDivElement;
-  @query('.ask-ai-panel')
+  @query('ask-ai-panel')
   private accessor _askAIPanel!: HTMLDivElement;
   private _askAIPopper: ReturnType<typeof createButtonPopper> | null = null;
+
+  get _edgeless() {
+    const rootService = getRootService(this.host);
+    if (rootService instanceof EdgelessRootService) {
+      return rootService;
+    }
+    return null;
+  }
 
   override firstUpdated() {
     this._askAIPopper = createButtonPopper(
@@ -98,54 +124,30 @@ export class FormatBarAIButton extends WithDisposable(LitElement) {
     });
   }
 
-  get _edgeless() {
-    const rootService = getRootService(this.host);
-    if (rootService instanceof EdgelessRootService) {
-      return rootService;
-    }
-    return null;
-  }
-
-  get _actionGroups() {
-    const filteredConfig = this.actionGroups
-      .map(group => ({
-        ...group,
-        items: group.items.filter(item =>
-          item.showWhen
-            ? item.showWhen(
-                this.host.command.chain(),
-                this._edgeless ? 'edgeless' : 'page',
-                this.host
-              )
-            : true
-        ),
-      }))
-      .filter(group => group.items.length > 0);
-    return filteredConfig;
-  }
-
   override render() {
-    return html`<div class="ask-ai-button">
+    const buttonStyles = styleMap({
+      backgroundColor: this.backgroundColor || 'transparent',
+      boxShadow: this.boxShadow || 'none',
+    });
+    return html`<div class="ask-ai-button" style=${buttonStyles}>
       <icon-button
-        class="ask-ai-icon-button"
-        width="75px"
-        height="32px"
+        class="ask-ai-icon-button ${this.size}"
+        width=${buttonWidthMap[this.size]}
+        height="24px"
         @click=${() => this._askAIPopper?.toggle()}
       >
         ${AIStarIcon} <span>Ask AI</span></icon-button
       >
-      <div class="ask-ai-panel">
-        <ai-item-list
-          .host=${this.host}
-          .groups=${this._actionGroups}
-        ></ai-item-list>
-      </div>
+      <ask-ai-panel
+        .host=${this.host}
+        .actionGroups=${this.actionGroups}
+      ></ask-ai-panel>
     </div>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'format-bar-ai-button': FormatBarAIButton;
+    'ask-ai-button': AskAIButton;
   }
 }

@@ -113,11 +113,11 @@ export class FileDropManager {
   onDragOver = (event: DragEvent) => {
     event.preventDefault();
 
-    // allow only external drag-and-drop files
-    const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
-    if (effectAllowed !== 'all') {
-      return;
-    }
+    const dataTransfer = event.dataTransfer;
+    if (!dataTransfer) return;
+
+    const effectAllowed = dataTransfer.effectAllowed;
+    if (effectAllowed === 'none') return;
 
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
@@ -149,26 +149,20 @@ export class FileDropManager {
     this._indicator.rect = null;
 
     const { onDrop } = this._fileDropOptions;
-    if (!onDrop) {
-      return;
-    }
+    if (!onDrop) return;
+
+    const dataTransfer = event.dataTransfer;
+    if (!dataTransfer) return;
+
+    const effectAllowed = dataTransfer.effectAllowed;
+    if (effectAllowed === 'none') return;
+
+    const droppedFiles = dataTransfer.files;
+    if (!droppedFiles || !droppedFiles.length) return;
 
     event.preventDefault();
 
-    // allow only external drag-and-drop files
-    const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
-    if (effectAllowed !== 'all') {
-      return;
-    }
-
-    const droppedFiles = event.dataTransfer?.files;
-    if (!droppedFiles || !droppedFiles.length) {
-      return;
-    }
-
-    const targetModel = this.targetModel;
-    const place = this.type;
-
+    const { targetModel, type: place } = this;
     const { clientX, clientY } = event;
 
     onDrop({

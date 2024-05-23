@@ -4,6 +4,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { DocCollection } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -171,6 +172,17 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   private _unmount() {
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
+
+    if (this.element.text) {
+      const text = this.element.text.toString();
+      const trimed = text.trim();
+      const len = trimed.length;
+      if (len === 0) {
+        this.element.text = undefined;
+      } else if (len < text.length) {
+        this.element.text = new DocCollection.Y.Text(trimed);
+      }
+    }
 
     this.element.textDisplay = true;
     this.element.group instanceof MindmapElementModel &&

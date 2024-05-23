@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 
-import { moveToImage } from './utils/actions/drag.js';
+import { popImageMoreMenu } from './utils/actions/drag.js';
 import {
   pressArrowUp,
   pressBackspace,
@@ -21,7 +21,6 @@ import {
 import {
   assertBlockCount,
   assertBlockSelections,
-  assertImageOption,
   assertKeyboardWorkInInput,
   assertRichImage,
   assertRichTextInlineRange,
@@ -109,13 +108,8 @@ function getAttachment(page: Page) {
 
     // external
     turnImageToCard: async () => {
-      await moveToImage(page);
-      await assertImageOption(page);
-      const btn = page
-        .locator('icon-button')
-        .filter({ hasText: 'Turn into Card view' });
-      await expect(btn).toBeVisible();
-      await btn.click();
+      const { turnIntoCardButton } = await popImageMoreMenu(page);
+      await turnIntoCardButton.click();
       await expect(attachment).toBeVisible();
     },
   };

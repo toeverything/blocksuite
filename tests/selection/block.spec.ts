@@ -1276,9 +1276,7 @@ test('should not show option menu of image on block selection', async ({
   await initImageState(page);
   await activeEmbed(page);
 
-  await expect(
-    page.locator('.affine-embed-editing-state-container')
-  ).toHaveCount(1);
+  await expect(page.locator('.affine-image-toolbar-container')).toHaveCount(1);
 
   await pressEnter(page);
 
@@ -1301,9 +1299,7 @@ test('should not show option menu of image on block selection', async ({
 
   await page.waitForTimeout(50);
 
-  await expect(
-    page.locator('.affine-embed-editing-state-container')
-  ).toHaveCount(0);
+  await expect(page.locator('.affine-image-toolbar-container')).toHaveCount(0);
   await expect(
     page.locator('affine-block-selection').locator('visible=true')
   ).toHaveCount(1);

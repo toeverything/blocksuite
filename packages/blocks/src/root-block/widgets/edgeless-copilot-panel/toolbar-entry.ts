@@ -14,6 +14,10 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   static override styles = css`
     .copilot-icon-button {
       line-height: 20px;
+
+      .label.medium {
+        color: var(--affine-brand-color);
+      }
     }
   `;
 

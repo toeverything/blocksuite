@@ -11,6 +11,16 @@ import {
 } from '@blocksuite/blocks';
 import type { TemplateResult } from 'lit';
 
+import { actionToHandler } from '../actions/doc-handler.js';
+import { actionToHandler as edgelessActionToHandler } from '../actions/edgeless-handler.js';
+import { textTones, translateLangs } from '../actions/types.js';
+import { getAIPanel } from '../ai-panel.js';
+import { AIProvider } from '../provider.js';
+import {
+  getSelectedImagesAsBlobs,
+  getSelectedTextContent,
+  getSelections,
+} from '../utils/selection-utils.js';
 import {
   AIDoneIcon,
   AIImageIcon,
@@ -28,20 +38,11 @@ import {
   LanguageIcon,
   LongerIcon,
   MakeItRealIcon,
+  MakeItRealIconWithAnimation,
   SelectionIcon,
   ShorterIcon,
   ToneIcon,
-} from '../../_common/icons.js';
-import { actionToHandler } from '../../actions/doc-handler.js';
-import { actionToHandler as edgelessActionToHandler } from '../../actions/edgeless-handler.js';
-import { textTones, translateLangs } from '../../actions/types.js';
-import { getAIPanel } from '../../ai-panel.js';
-import { AIProvider } from '../../provider.js';
-import {
-  getSelectedImagesAsBlobs,
-  getSelectedTextContent,
-  getSelections,
-} from '../../utils/selection-utils.js';
+} from './icons.js';
 
 export const translateSubItem: AISubItemConfig[] = translateLangs.map(lang => {
   return {
@@ -329,7 +330,7 @@ const GenerateWithAIGroup: AIItemGroupConfig = {
       icon: MakeItRealIcon,
       beta: true,
       showWhen: textBlockShowWhen,
-      handler: edgelessHandler('makeItReal', AIStarIconWithAnimation),
+      handler: edgelessHandler('makeItReal', MakeItRealIconWithAnimation),
     },
     {
       name: 'Find actions',
@@ -364,5 +365,29 @@ export const AIItemGroups: AIItemGroupConfig[] = [
   EditAIGroup,
   GenerateWithAIGroup,
   DraftAIGroup,
+  OthersAIGroup,
+];
+
+export const AIImageItemGroups: AIItemGroupConfig[] = [
+  {
+    name: 'edit with ai',
+    items: [
+      {
+        name: 'Explain this image',
+        icon: ExplainIcon,
+        handler: actionToHandler('explainImage', AIStarIconWithAnimation),
+      },
+    ],
+  },
+  {
+    name: 'generate with ai',
+    items: [
+      {
+        name: 'Generate an image',
+        icon: AIImageIcon,
+        handler: edgelessHandler('createImage', AIImageIconWithAnimation),
+      },
+    ],
+  },
   OthersAIGroup,
 ];

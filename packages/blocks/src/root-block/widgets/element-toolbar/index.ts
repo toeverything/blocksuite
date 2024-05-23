@@ -219,7 +219,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   private _updateOnSelectedChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this.isConnected && this.selection.has(id)) {
+    if (this.isConnected && !this._dragging && this.selection.has(id)) {
       this._recalculatePosition();
       this.requestUpdate();
     }

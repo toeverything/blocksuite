@@ -805,7 +805,8 @@ type Action =
   | 'renameGroup'
   | 'autoSize'
   | 'changeNoteDisplayMode'
-  | 'changeNoteSlicerSetting';
+  | 'changeNoteSlicerSetting'
+  | 'addText';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -998,6 +999,13 @@ export async function triggerComponentToolbarAction(
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-note-button')
         .getByRole('button', { name: 'Size' });
+      await button.click();
+      break;
+    }
+    case 'addText': {
+      const button = locatorComponentToolbar(page).getByRole('button', {
+        name: 'Add text',
+      });
       await button.click();
       break;
     }

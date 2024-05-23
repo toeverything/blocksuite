@@ -223,7 +223,7 @@ export class Block {
     // Set default props if not exists
     if (defaultProps) {
       Object.entries(defaultProps).forEach(([key, value]) => {
-        if (props[key] !== undefined) return;
+        if (key in props) return;
 
         const yValue = native2Y(value);
         this.yBlock.set(`prop:${key}`, yValue);

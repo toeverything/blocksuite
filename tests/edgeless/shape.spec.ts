@@ -9,6 +9,7 @@ import {
   changeShapeStyle,
   clickComponentToolbarMoreMenuButton,
   getEdgelessSelectedRect,
+  locatorComponentToolbar,
   locatorEdgelessToolButton,
   locatorShapeStrokeStyleButton,
   openComponentToolbarMoreMenu,
@@ -468,7 +469,7 @@ test('auto wrap text in shape', async ({ page }) => {
   await page.mouse.dblclick(250, 200);
   await waitNextFrame(page);
   // type long text
-  await type(page, 'cccccccc');
+  await type(page, '\ncccccccc');
   await assertEdgelessCanvasText(page, 'aaaa\nbbbb\ncccccccc');
 
   // blur to finish typing
@@ -527,6 +528,61 @@ test('change shape style', async ({ page }) => {
   const [picked] = await pickColorAtPoints(page, [[start.x + 1, start.y + 1]]);
 
   await assertEdgelessColorSameWithHexColor(page, color, picked);
+});
+
+test('shape adds text by button', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+
+  await setEdgelessTool(page, 'shape');
+  await waitNextFrame(page, 500);
+
+  await page.mouse.click(200, 150);
+  await waitNextFrame(page);
+
+  await triggerComponentToolbarAction(page, 'addText');
+  await type(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
+});
+
+test('should reset shape text when text is empty', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+
+  await setEdgelessTool(page, 'shape');
+  await waitNextFrame(page, 500);
+
+  await page.mouse.click(200, 150);
+  await waitNextFrame(page);
+
+  await triggerComponentToolbarAction(page, 'addText');
+  await type(page, ' a ');
+  await assertEdgelessCanvasText(page, ' a ');
+
+  await page.mouse.click(0, 0);
+  await waitNextFrame(page);
+  await page.mouse.click(200, 150);
+
+  const addTextBtn = locatorComponentToolbar(page).getByRole('button', {
+    name: 'Add text',
+  });
+  await expect(addTextBtn).toBeHidden();
+
+  await page.mouse.dblclick(250, 200);
+  await assertEdgelessCanvasText(page, 'a');
+
+  await page.keyboard.press('Backspace');
+  await assertEdgelessCanvasText(page, '');
+
+  await page.mouse.click(0, 0);
+  await waitNextFrame(page);
+  await page.mouse.click(200, 150);
+
+  await expect(addTextBtn).toBeVisible();
 });
 
 test.describe('shape hit test', () => {

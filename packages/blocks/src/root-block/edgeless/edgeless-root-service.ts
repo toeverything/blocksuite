@@ -7,7 +7,6 @@ import { last } from '../../_common/utils/iterable.js';
 import { clamp } from '../../_common/utils/math.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { IBound } from '../../surface-block/consts.js';
-import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
 import { GroupLikeModel } from '../../surface-block/element-model/base.js';
 import {
   type CanvasElement,
@@ -27,6 +26,7 @@ import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { RootService } from '../root-service.js';
+import type { EdgelessElementType } from './edgeless-types.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
