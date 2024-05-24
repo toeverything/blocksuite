@@ -328,7 +328,10 @@ export class DatabaseBlockDataSource extends BaseDataSource {
   public override get detailSlots(): DetailSlots {
     return {
       ...super.detailSlots,
-      header: createUniComponentFromWebComponent(BlockRenderer),
+      header: map(createUniComponentFromWebComponent(BlockRenderer), props => ({
+        ...props,
+        host: this.host,
+      })),
       note: map(createUniComponentFromWebComponent(NoteRenderer), props => ({
         ...props,
         model: this._model,
