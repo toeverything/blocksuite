@@ -1,3 +1,4 @@
+import { REQUEST_IDLE_CALLBACK_ENABLED } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
@@ -73,9 +74,17 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
       // range change may happen before the editor is prepared
       await this.editor.waitForUpdate();
       // improve performance
-      requestIdleCallback(() => {
-        this.editor.requestUpdate(false);
-      });
+      if (REQUEST_IDLE_CALLBACK_ENABLED) {
+        requestIdleCallback(() => {
+          this.editor.requestUpdate(false);
+        });
+      } else {
+        Promise.resolve()
+          .then(() => {
+            this.editor.requestUpdate(false);
+          })
+          .catch(console.error);
+      }
     }
 
     if (!sync) {

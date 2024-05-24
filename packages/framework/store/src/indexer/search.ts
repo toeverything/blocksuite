@@ -1,4 +1,8 @@
-import { IS_NODE, IS_WEB } from '@blocksuite/global/env';
+import {
+  IS_NODE,
+  IS_WEB,
+  REQUEST_IDLE_CALLBACK_ENABLED,
+} from '@blocksuite/global/env';
 import type { DocumentSearchOptions } from 'flexsearch';
 import FlexSearch from 'flexsearch';
 import type { Doc } from 'yjs';
@@ -119,7 +123,7 @@ export class SearchIndexer {
 
     setTimeout(() => {
       if (!this._reindexMap) return;
-      if (globalThis.requestIdleCallback !== undefined) {
+      if (REQUEST_IDLE_CALLBACK_ENABLED) {
         requestIdleCallback(this._reindex, { timeout: 1000 });
       } else {
         setTimeout(this._reindex, 1000);

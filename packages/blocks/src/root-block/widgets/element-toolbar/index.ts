@@ -107,6 +107,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       z-index: 3;
       transform: translateZ(0);
       will-change: transform;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .edgeless-component-toolbar-container {
@@ -123,7 +125,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       border-radius: 4px;
       // box-sizing: border-box;
       box-sizing: content-box;
-      user-select: none;
 
       text-align: justify;
       font-feature-settings:

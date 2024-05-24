@@ -49,13 +49,14 @@ import { launchIntoFullscreen } from '../utils.js';
 export class EdgelessToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      user-select: none;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       position: absolute;
       z-index: 1;
       left: calc(50%);
       transform: translateX(-50%);
       bottom: 0;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     :host([disabled]) {
