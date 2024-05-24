@@ -67,6 +67,10 @@ import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
+import {
+  decodeClipboardBlobs,
+  encodeClipboardBlobs,
+} from '../../clipboard/utils.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessElementType } from '../edgeless-types.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
@@ -320,7 +324,14 @@ export class EdgelessClipboardController extends PageClipboard {
       const mayBeSurfaceDataJson = json[BLOCKSUITE_SURFACE];
       if (mayBeSurfaceDataJson !== undefined) {
         const elementsRawData = JSON.parse(mayBeSurfaceDataJson);
-        this._pasteShapesAndBlocks(elementsRawData);
+        const { snapshot, blobs } = elementsRawData;
+        const job = new Job({ collection: this.std.collection });
+        const map = job.assetsManager.getAssets();
+        decodeClipboardBlobs(blobs, map);
+        for (const blobId of map.keys()) {
+          await job.assetsManager.writeToBlob(blobId);
+        }
+        await this._pasteShapesAndBlocks(snapshot);
         return;
       }
       // check for slice snapshot in clipboard
@@ -509,12 +520,16 @@ export class EdgelessClipboardController extends PageClipboard {
     return frameIds;
   }
 
-  private _createImageBlocks(
+  private async _createImageBlocks(
     images: BlockSnapshot[],
     oldToNewIdMap: Map<string, string>
   ) {
-    const imageIds = images.map(({ props, id }) => {
+    const imageIds = [];
+    for (const { props, id } of images) {
       const { xywh, rotate, sourceId, size, width, height, caption } = props;
+      if (!(await this.host.std.collection.blobSync.get(sourceId as string))) {
+        continue;
+      }
       const imageId = this.host.service.addBlock(
         'affine:image',
         {
@@ -529,14 +544,18 @@ export class EdgelessClipboardController extends PageClipboard {
         this.surface.model.id
       );
       if (id) oldToNewIdMap.set(id, imageId);
-      return imageId;
-    });
+      imageIds.push(imageId);
+    }
     return imageIds;
   }
 
-  private _createAttachmentBlocks(attachments: BlockSnapshot[]) {
-    const attachmentIds = attachments.map(({ props }) => {
+  private async _createAttachmentBlocks(attachments: BlockSnapshot[]) {
+    const attachmentIds = [];
+    for (const { props } of attachments) {
       const { xywh, rotate, sourceId, name, size, type, embed, style } = props;
+      if (!(await this.host.std.collection.blobSync.get(sourceId as string))) {
+        continue;
+      }
       const attachmentId = this.host.service.addBlock(
         'affine:attachment',
         {
@@ -551,8 +570,8 @@ export class EdgelessClipboardController extends PageClipboard {
         },
         this.surface.model.id
       );
-      return attachmentId;
-    });
+      attachmentIds.push(attachmentId);
+    }
     return attachmentIds;
   }
 
@@ -782,7 +801,7 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
-  createElementsFromClipboardData(
+  async createElementsFromClipboardData(
     elementsRawData: Record<string, unknown>[],
     pasteCenter?: IVec
   ) {
@@ -850,11 +869,11 @@ export class EdgelessClipboardController extends PageClipboard {
       oldIdToNewIdMap
     );
     const frameIds = this._createFrameBlocks(groupedByType.frames ?? []);
-    const imageIds = this._createImageBlocks(
+    const imageIds = await this._createImageBlocks(
       groupedByType.images ?? [],
       oldIdToNewIdMap
     );
-    const attachmentIds = this._createAttachmentBlocks(
+    const attachmentIds = await this._createAttachmentBlocks(
       groupedByType.attachments ?? []
     );
     const bookmarkIds = this._createBookmarkBlocks(
@@ -1083,9 +1102,11 @@ export class EdgelessClipboardController extends PageClipboard {
     edgeless.tools.setEdgelessTool({ type: 'default' });
   }
 
-  private _pasteShapesAndBlocks(elementsRawData: Record<string, unknown>[]) {
+  private async _pasteShapesAndBlocks(
+    elementsRawData: Record<string, unknown>[]
+  ) {
     const [elements, blocks] =
-      this.createElementsFromClipboardData(elementsRawData);
+      await this.createElementsFromClipboardData(elementsRawData);
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),
       blocks.map(block => block.id)
@@ -1385,8 +1406,7 @@ export function getCopyElements(
         set.add(ele)
       );
       set.add(element);
-    } else if (!isImageBlock(element)) {
-      // TODO: add support for image block
+    } else {
       set.add(element);
     }
   });
@@ -1415,12 +1435,11 @@ export async function prepareClipboardData(
   selectedAll: Selectable[],
   std: BlockStdScope
 ) {
+  const job = new Job({
+    collection: std.collection,
+  });
   const selected = await Promise.all(
     selectedAll.map(async selected => {
-      const job = new Job({
-        collection: std.collection,
-      });
-
       if (isNoteBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
@@ -1429,9 +1448,11 @@ export async function prepareClipboardData(
         return { ...snapshot };
       } else if (isImageBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
+        await job.assetsManager.readFromBlob(snapshot.props.sourceId as string);
         return { ...snapshot };
       } else if (isAttachmentBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
+        await job.assetsManager.readFromBlob(snapshot.props.sourceId as string);
         return { ...snapshot };
       } else if (isBookmarkBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
@@ -1464,7 +1485,11 @@ export async function prepareClipboardData(
       }
     })
   );
-  return selected.filter(d => !!d);
+  const blobs = await encodeClipboardBlobs(job.assetsManager.getAssets());
+  return {
+    snapshot: selected.filter(d => !!d),
+    blobs,
+  };
 }
 
 function isPureFileInClipboard(clipboardData: DataTransfer) {

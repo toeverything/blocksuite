@@ -17,10 +17,9 @@ import type {
 } from '@blocksuite/store';
 import { BaseAdapter } from '@blocksuite/store';
 
-import { toast } from '../../_common/components/toast.js';
-import { decode, encode } from './utils.js';
+import { decodeClipboardBlobs, encodeClipboardBlobs } from './utils.js';
 
-type FileSnapshot = {
+export type FileSnapshot = {
   name: string;
   type: string;
   content: string;
@@ -59,43 +58,7 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     const assets = payload.assets;
     assertExists(assets);
     const map = assets.getAssets();
-    const blobs: Record<string, FileSnapshot> = {};
-    let sumSize = 0;
-    await Promise.all(
-      Array.from(map.entries()).map(async ([id, blob]) => {
-        if (blob.size > 4 * 1024 * 1024) {
-          const host = document.querySelector('editor-host');
-          if (!host) {
-            return;
-          }
-          toast(
-            host,
-            (blob as File).name ?? 'File' + ' is too large to be copied'
-          );
-          return;
-        }
-        sumSize += blob.size;
-        if (sumSize > 6 * 1024 * 1024) {
-          const host = document.querySelector('editor-host');
-          if (!host) {
-            return;
-          }
-          toast(
-            host,
-            (blob as File).name ??
-              'File' + ' cannot be copied due to the clipboard size limit'
-          );
-          return;
-        }
-        const content = encode(await blob.arrayBuffer());
-        const file: FileSnapshot = {
-          name: (blob as File).name,
-          type: blob.type,
-          content,
-        };
-        blobs[id] = file;
-      })
-    );
+    const blobs: Record<string, FileSnapshot> = await encodeClipboardBlobs(map);
     return {
       file: JSON.stringify({
         snapshot,
@@ -111,14 +74,7 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     const json = JSON.parse(payload.file);
     const { blobs, snapshot } = json;
     const map = payload.assets?.getAssets();
-    Object.entries<FileSnapshot>(blobs).forEach(([sourceId, file]) => {
-      const blob = new Blob([decode(file.content)]);
-      const f = new File([blob], file.name, {
-        type: file.type,
-      });
-      assertExists(map);
-      map.set(sourceId, f);
-    });
+    decodeClipboardBlobs(blobs, map);
     return Promise.resolve(snapshot);
   }
 }
