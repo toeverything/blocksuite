@@ -19,7 +19,6 @@ import {
   type DocSnapshot,
   getAssetName,
   nanoid,
-  sha,
   type SliceSnapshot,
 } from '@blocksuite/store';
 import { format } from 'date-fns/format';
