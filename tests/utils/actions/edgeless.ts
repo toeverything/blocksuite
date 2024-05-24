@@ -1165,7 +1165,7 @@ export async function initThreeOverlapFilledShapes(page: Page) {
   await addBasicRectShapeElement(page, rect0.start, rect0.end);
   await page.mouse.click(rect0.start.x + 5, rect0.start.y + 5);
   await triggerComponentToolbarAction(page, 'changeShapeFillColor');
-  await changeShapeFillColor(page, '--affine-palette-shape-navy');
+  await changeShapeFillColor(page, '--affine-palette-shape-teal');
 
   const rect1 = {
     start: { x: 130, y: 130 },
