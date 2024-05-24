@@ -17,6 +17,7 @@ export interface AIItemConfig {
     host: EditorHost
   ) => boolean;
   subItem?: AISubItemConfig[];
+  subItemOffset?: [number, number];
   handler?: (host: EditorHost) => void;
   beta?: boolean;
 }

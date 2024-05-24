@@ -11,8 +11,8 @@ import {
   AIErrorType,
   type AIItemGroupConfig,
 } from '../../../../../_common/components/index.js';
-import { isInsidePageEditor } from '../../../../../_common/utils/query.js';
 import type { AIPanelErrorConfig, CopyConfig } from '../../type.js';
+import { filterAIItemGroup } from '../../utils.js';
 
 @customElement('ai-panel-error')
 export class AIPanelError extends WithDisposable(LitElement) {
@@ -142,10 +142,6 @@ export class AIPanelError extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor withAnswer = false;
 
-  get _editorMode() {
-    return isInsidePageEditor(this.host) ? 'page' : 'edgeless';
-  }
-
   private _getResponseGroup = () => {
     let responseGroup: AIItemGroupConfig[] = [];
     const errorType = this.config.error?.type;
@@ -153,20 +149,7 @@ export class AIPanelError extends WithDisposable(LitElement) {
       return responseGroup;
     }
 
-    responseGroup = this.config.responses
-      .map(group => ({
-        ...group,
-        items: group.items.filter(item =>
-          item.showWhen
-            ? item.showWhen(
-                this.host.command.chain(),
-                this._editorMode,
-                this.host
-              )
-            : true
-        ),
-      }))
-      .filter(group => group.items.length > 0);
+    responseGroup = filterAIItemGroup(this.host, this.config.responses);
 
     return responseGroup;
   };

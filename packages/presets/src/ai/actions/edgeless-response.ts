@@ -2,7 +2,6 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type {
   AffineAIPanelWidget,
   AIItemConfig,
-  CopilotSelectionController,
   EdgelessCopilotWidget,
   EdgelessElementToolbarWidget,
   EdgelessModel,
@@ -12,34 +11,36 @@ import type {
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import {
-  AFFINE_EDGELESS_COPILOT_WIDGET,
   DeleteIcon,
   EDGELESS_ELEMENT_TOOLBAR_WIDGET,
   EmbedHtmlBlockSpec,
   fitContent,
+  ImageBlockModel,
   InsertBelowIcon,
   NoteDisplayMode,
   ResetIcon,
 } from '@blocksuite/blocks';
 
-import { ChatWithAIIcon } from '../_common/icons.js';
+import { AIPenIcon, ChatWithAIIcon } from '../_common/icons.js';
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
 import { getSurfaceElementFromEditor } from '../_common/selection-utils.js';
 import { getAIPanel } from '../ai-panel.js';
 import { AIProvider } from '../provider.js';
 import { reportResponse } from '../utils/action-reporter.js';
-import { isMindMapRoot } from '../utils/edgeless.js';
+import {
+  getEdgelessCopilotWidget,
+  getService,
+  isMindMapRoot,
+} from '../utils/edgeless.js';
 import { preprocessHtml } from '../utils/html.js';
 import { fetchImageToFile } from '../utils/image.js';
 import {
+  getCopilotSelectedElems,
   getEdgelessRootFromEditor,
   getEdgelessService,
 } from '../utils/selection-utils.js';
-
-export type CtxRecord = {
-  get(): Record<string, unknown>;
-  set(data: Record<string, unknown>): void;
-};
+import { EXCLUDING_INSERT_ACTIONS } from './consts.js';
+import type { CtxRecord } from './types.js';
 
 type FinishConfig = Exclude<
   AffineAIPanelWidget['config'],
@@ -50,26 +51,6 @@ type ErrorConfig = Exclude<
   AffineAIPanelWidget['config'],
   null
 >['errorStateConfig'];
-
-export function getService(host: EditorHost) {
-  const edgelessService = host.spec.getService(
-    'affine:page'
-  ) as EdgelessRootService;
-
-  return edgelessService;
-}
-
-export function getEdgelessCopilotWidget(
-  host: EditorHost
-): EdgelessCopilotWidget {
-  const rootBlockId = host.doc.root?.id as string;
-  const copilotWidget = host.view.getWidget(
-    AFFINE_EDGELESS_COPILOT_WIDGET,
-    rootBlockId
-  ) as EdgelessCopilotWidget;
-
-  return copilotWidget;
-}
 
 export function getElementToolbar(
   host: EditorHost
@@ -87,18 +68,6 @@ export function getTriggerEntry(host: EditorHost) {
   const copilotWidget = getEdgelessCopilotWidget(host);
 
   return copilotWidget.visible ? 'selection' : 'toolbar';
-}
-
-export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
-  const service = getService(host);
-  const copilotWidget = getEdgelessCopilotWidget(host);
-
-  if (copilotWidget.visible) {
-    return (service.tool.controllers['copilot'] as CopilotSelectionController)
-      .selectedElements;
-  }
-
-  return service.selection.elements;
 }
 
 export function discard(
@@ -126,7 +95,8 @@ export function retry(panel: AffineAIPanelWidget): AIItemConfig {
   };
 }
 
-export function createInsertResp(
+export function createInsertResp<T extends keyof BlockSuitePresets.AIActions>(
+  id: T,
   handler: (host: EditorHost, ctx: CtxRecord) => void,
   host: EditorHost,
   ctx: CtxRecord,
@@ -137,7 +107,7 @@ export function createInsertResp(
     icon: InsertBelowIcon,
     showWhen: () => {
       const panel = getAIPanel(host);
-      return !!panel.answer;
+      return !EXCLUDING_INSERT_ACTIONS.includes(id) && !!panel.answer;
     },
     handler: () => {
       reportResponse('result:insert');
@@ -148,9 +118,99 @@ export function createInsertResp(
   };
 }
 
+export function useAsCaption<T extends keyof BlockSuitePresets.AIActions>(
+  id: T,
+  host: EditorHost
+): AIItemConfig {
+  return {
+    name: 'Use as caption',
+    icon: AIPenIcon,
+    showWhen: () => {
+      const panel = getAIPanel(host);
+      return id === 'generateCaption' && !!panel.answer;
+    },
+    handler: () => {
+      reportResponse('result:use-as-caption');
+      const panel = getAIPanel(host);
+      const caption = panel.answer;
+      if (!caption) return;
+
+      const selectedElements = getCopilotSelectedElems(host);
+      if (selectedElements.length !== 1) return;
+
+      const imageBlock = selectedElements[0];
+      if (!(imageBlock instanceof ImageBlockModel)) return;
+
+      host.doc.updateBlock(imageBlock, { caption });
+      panel.hide();
+    },
+  };
+}
+
 type MindMapNode = {
   text: string;
   children: MindMapNode[];
+};
+
+const defaultHandler = (host: EditorHost) => {
+  const doc = host.doc;
+  const panel = getAIPanel(host);
+  const edgelessCopilot = getEdgelessCopilotWidget(host);
+  const bounds = edgelessCopilot.determineInsertionBounds(800, 95);
+
+  doc.transact(() => {
+    const noteBlockId = doc.addBlock(
+      'affine:note',
+      {
+        xywh: bounds.serialize(),
+        displayMode: NoteDisplayMode.EdgelessOnly,
+      },
+      doc.root!.id
+    );
+
+    insertFromMarkdown(host, panel.answer!, noteBlockId)
+      .then(() => {
+        const service = getService(host);
+
+        service.selection.set({
+          elements: [noteBlockId],
+          editing: false,
+        });
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  });
+};
+
+const imageHandler = (host: EditorHost) => {
+  const aiPanel = getAIPanel(host);
+  // `DataURL` or `URL`
+  const data = aiPanel.answer;
+  if (!data) return;
+
+  const edgelessCopilot = getEdgelessCopilotWidget(host);
+  const bounds = edgelessCopilot.determineInsertionBounds();
+
+  edgelessCopilot.hideCopilotPanel();
+  aiPanel.hide();
+
+  const filename = 'image';
+  const imageProxy = host.std.clipboard.configs.get('imageProxy');
+
+  fetchImageToFile(data, filename, imageProxy)
+    .then(img => {
+      if (!img) return;
+
+      const edgelessRoot = getEdgelessRootFromEditor(host);
+      const { minX, minY } = bounds;
+      const [x, y] = edgelessRoot.service.viewport.toViewCoord(minX, minY);
+
+      host.doc.transact(() => {
+        edgelessRoot.addImages([img], { x, y }, true).catch(console.error);
+      });
+    })
+    .catch(console.error);
 };
 
 export const responses: {
@@ -333,66 +393,9 @@ export const responses: {
       }
     })().catch(console.error);
   },
-  createImage: host => {
-    const aiPanel = getAIPanel(host);
-    // `DataURL` or `URL`
-    const data = aiPanel.answer;
-    if (!data) return;
-
-    const edgelessCopilot = getEdgelessCopilotWidget(host);
-    const bounds = edgelessCopilot.determineInsertionBounds();
-
-    edgelessCopilot.hideCopilotPanel();
-    aiPanel.hide();
-
-    const filename = 'image';
-    const imageProxy = host.std.clipboard.configs.get('imageProxy');
-
-    fetchImageToFile(data, filename, imageProxy)
-      .then(img => {
-        if (!img) return;
-
-        const edgelessRoot = getEdgelessRootFromEditor(host);
-        const { minX, minY } = bounds;
-        const [x, y] = edgelessRoot.service.viewport.toViewCoord(minX, minY);
-
-        host.doc.transact(() => {
-          edgelessRoot.addImages([img], { x, y }, true).catch(console.error);
-        });
-      })
-      .catch(console.error);
-  },
-};
-
-const defaultHandler = (host: EditorHost) => {
-  const doc = host.doc;
-  const panel = getAIPanel(host);
-  const edgelessCopilot = getEdgelessCopilotWidget(host);
-  const bounds = edgelessCopilot.determineInsertionBounds(800, 95);
-
-  doc.transact(() => {
-    const noteBlockId = doc.addBlock(
-      'affine:note',
-      {
-        xywh: bounds.serialize(),
-        displayMode: NoteDisplayMode.EdgelessOnly,
-      },
-      doc.root!.id
-    );
-
-    insertFromMarkdown(host, panel.answer!, noteBlockId)
-      .then(() => {
-        const service = getService(host);
-
-        service.selection.set({
-          elements: [noteBlockId],
-          editing: false,
-        });
-      })
-      .catch(err => {
-        console.error(err);
-      });
-  });
+  createImage: imageHandler,
+  processImage: imageHandler,
+  filterImage: imageHandler,
 };
 
 const getButtonText: {
@@ -422,7 +425,7 @@ export function getInsertAndReplaceHandler<
   const handler = responses[id] ?? defaultHandler;
   const buttonText = getButtonText[id]?.(variants) ?? undefined;
 
-  return createInsertResp(handler, host, ctx, buttonText);
+  return createInsertResp(id, handler, host, ctx, buttonText);
 }
 
 export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
@@ -453,6 +456,7 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
             },
           },
           getInsertAndReplaceHandler(id, host, ctx, variants),
+          useAsCaption(id, host),
           retry(getAIPanel(host)),
           discard(getAIPanel(host), getEdgelessCopilotWidget(host)),
         ],

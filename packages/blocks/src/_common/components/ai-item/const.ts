@@ -1,0 +1,2 @@
+export const SUBMENU_OFFSET_MAIN_AXIS = 16;
+export const SUBMENU_OFFSET_CROSS_AXIS = -60;

@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import {
   type AIItemGroupConfig,
   AIStarIconWithAnimation,
@@ -32,19 +33,27 @@ import {
 } from '../../_common/icons.js';
 import {
   actionToHandler,
-  explainImageShowWhen,
+  experimentalImageActionsShowWhen,
+  imageOnlyShowWhen,
   mindmapChildShowWhen,
   mindmapRootShowWhen,
   noteBlockOrTextShowWhen,
   noteWithCodeBlockShowWen,
 } from '../../actions/edgeless-handler.js';
-import { getCopilotSelectedElems } from '../../actions/edgeless-response.js';
-import { textTones, translateLangs } from '../../actions/types.js';
+import {
+  imageFilterStyles,
+  imageProcessingTypes,
+  textTones,
+  translateLangs,
+} from '../../actions/types.js';
 import { getAIPanel } from '../../ai-panel.js';
 import { AIProvider } from '../../provider.js';
 import { mindMapToMarkdown } from '../../utils/edgeless.js';
 import { canvasToBlob, randomSeed } from '../../utils/image.js';
-import { getEdgelessRootFromEditor } from '../../utils/selection-utils.js';
+import {
+  getCopilotSelectedElems,
+  getEdgelessRootFromEditor,
+} from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
   return {
@@ -57,6 +66,50 @@ const toneSubItem = textTones.map(tone => {
   return {
     type: tone,
     handler: actionToHandler('changeTone', AIStarIconWithAnimation, { tone }),
+  };
+});
+
+const imageCustomInput = async (host: EditorHost) => {
+  const selectedElements = getCopilotSelectedElems(host);
+  if (selectedElements.length !== 1) return;
+
+  const imageBlock = selectedElements[0];
+  if (!(imageBlock instanceof ImageBlockModel)) return;
+  if (!imageBlock.sourceId) return;
+
+  const blob = await host.doc.blob.get(imageBlock.sourceId);
+  if (!blob) return;
+
+  return {
+    attachments: [blob],
+  };
+};
+
+export const imageFilterSubItem = imageFilterStyles.map(style => {
+  return {
+    type: style,
+    handler: actionToHandler(
+      'filterImage',
+      AIImageIconWithAnimation,
+      {
+        style,
+      },
+      imageCustomInput
+    ),
+  };
+});
+
+export const imageProcessingSubItem = imageProcessingTypes.map(type => {
+  return {
+    type,
+    handler: actionToHandler(
+      'processImage',
+      AIImageIconWithAnimation,
+      {
+        type,
+      },
+      imageCustomInput
+    ),
   };
 });
 
@@ -176,26 +229,12 @@ const reviewGroup: AIItemGroupConfig = {
     {
       name: 'Explain this image',
       icon: AIPenIcon,
-      showWhen: explainImageShowWhen,
+      showWhen: imageOnlyShowWhen,
       handler: actionToHandler(
         'explainImage',
         AIStarIconWithAnimation,
         undefined,
-        async host => {
-          const selectedElements = getCopilotSelectedElems(host);
-          if (selectedElements.length !== 1) return;
-
-          const imageBlock = selectedElements[0];
-          if (!(imageBlock instanceof ImageBlockModel)) return;
-          if (!imageBlock.sourceId) return;
-
-          const blob = await host.doc.blobSync.get(imageBlock.sourceId);
-          if (!blob) return;
-
-          return {
-            attachments: [blob],
-          };
-        }
+        imageCustomInput
       ),
     },
     {
@@ -438,6 +477,34 @@ const generateGroup: AIItemGroupConfig = {
             attachments: [png],
           };
         }
+      ),
+    },
+    {
+      name: 'AI image filter',
+      icon: ImproveWritingIcon,
+      showWhen: experimentalImageActionsShowWhen,
+      subItem: imageFilterSubItem,
+      subItemOffset: [12, -4],
+      beta: true,
+    },
+    {
+      name: 'Image processing',
+      icon: AIImageIcon,
+      showWhen: experimentalImageActionsShowWhen,
+      subItem: imageProcessingSubItem,
+      subItemOffset: [12, -6],
+      beta: true,
+    },
+    {
+      name: 'Generate a caption',
+      icon: AIPenIcon,
+      showWhen: experimentalImageActionsShowWhen,
+      beta: true,
+      handler: actionToHandler(
+        'generateCaption',
+        AIStarIconWithAnimation,
+        undefined,
+        imageCustomInput
       ),
     },
     {

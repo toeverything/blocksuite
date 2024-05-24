@@ -23,6 +23,24 @@ export const textTones = [
   'Humorous',
 ] as const;
 
+export const imageFilterStyles = [
+  'Clay style',
+  'Sketch style',
+  'Anime style',
+  'Pixel style',
+] as const;
+
+export const imageProcessingTypes = [
+  'Clearer',
+  'Remove background',
+  'Convert to sticker',
+] as const;
+
+export type CtxRecord = {
+  get(): Record<string, unknown>;
+  set(data: Record<string, unknown>): void;
+};
+
 declare global {
   namespace BlockSuitePresets {
     interface AITextActionOptions {
@@ -46,6 +64,14 @@ declare global {
     interface AIImageActionOptions extends AITextActionOptions {
       content?: string;
       seed?: string;
+    }
+
+    interface FilterImageOptions extends AIImageActionOptions {
+      style: (typeof imageFilterStyles)[number];
+    }
+
+    interface ProcessImageOptions extends AIImageActionOptions {
+      type: (typeof imageProcessingTypes)[number];
     }
 
     type TextStream = {
@@ -163,6 +189,15 @@ declare global {
         options: T
       ): AIActionTextResponse<T>;
       createImage<T extends AIImageActionOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      processImage<T extends ProcessImageOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      filterImage<T extends FilterImageOptions>(
+        options: T
+      ): AIActionTextResponse<T>;
+      generateCaption<T extends AITextActionOptions>(
         options: T
       ): AIActionTextResponse<T>;
     }

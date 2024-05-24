@@ -8,7 +8,7 @@ import './actions/slides.js';
 import './actions/mindmap.js';
 import './actions/chat-text.js';
 import './actions/copy-more.js';
-import './actions/explain-image.js';
+import './actions/image-to-text.js';
 import './actions/image.js';
 
 import type {
@@ -45,6 +45,7 @@ import {
   EdgelessEditorActions,
   PageEditorActions,
 } from './actions/actions-handle.js';
+import { HISTORY_IMAGE_ACTIONS } from './const.js';
 import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
@@ -282,16 +283,19 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
             .item=${item}
           ></action-mindmap>`;
         case 'Explain this image':
-          return html`<action-explain-image
+        case 'Generate a caption':
+          return html`<action-image-to-text
             .host=${this.host}
             .item=${item}
-          ></action-explain-image>`;
-        case 'image':
-          return html`<action-image
-            .host=${this.host}
-            .item=${item}
-          ></action-image>`;
+          ></action-image-to-text>`;
         default:
+          if (HISTORY_IMAGE_ACTIONS.includes(item.action)) {
+            return html`<action-image
+              .host=${this.host}
+              .item=${item}
+            ></action-image>`;
+          }
+
           return html`<action-text
             .item=${item}
             .host=${this.host}

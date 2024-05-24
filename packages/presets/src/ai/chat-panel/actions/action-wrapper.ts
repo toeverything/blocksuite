@@ -24,6 +24,7 @@ import {
 } from '../../_common/icons.js';
 import { createTextRenderer } from '../../messages/text.js';
 import { renderImages } from '../components/images.js';
+import { HISTORY_IMAGE_ACTIONS } from '../const.js';
 import type { ChatAction } from '../index.js';
 
 const icons: Record<string, TemplateResult<1>> = {
@@ -133,7 +134,7 @@ export class ActionWrapper extends WithDisposable(LitElement) {
         ? html`
             <div class="answer-prompt">
               <div class="subtitle">Answer</div>
-              ${item.action === 'image'
+              ${HISTORY_IMAGE_ACTIONS.includes(item.action)
                 ? images && renderImages(images)
                 : nothing}
               ${answer

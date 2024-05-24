@@ -19,6 +19,7 @@ export type ActionEventType =
   | 'aborted:stop'
   | 'result:insert'
   | 'result:replace'
+  | 'result:use-as-caption'
   | 'result:add-page'
   | 'result:add-note'
   | 'result:continue-in-chat'
