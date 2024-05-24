@@ -92,10 +92,10 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   @query('.affine-drag-handle-container')
-  private _dragHandleContainer!: HTMLDivElement;
+  private accessor _dragHandleContainer!: HTMLDivElement;
 
   @query('.affine-drag-handle-grabber')
-  private _dragHandleGrabber!: HTMLDivElement;
+  private accessor _dragHandleGrabber!: HTMLDivElement;
 
   draggingElements: BlockElement[] = [];
   dropBlockId = '';
@@ -111,7 +111,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   rafID = 0;
 
   @state()
-  private _dragHoverRect: {
+  private accessor _dragHoverRect: {
     width: number;
     height: number;
     left: number;

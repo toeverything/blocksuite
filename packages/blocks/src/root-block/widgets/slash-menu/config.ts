@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockModel } from '@blocksuite/store';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
@@ -519,16 +520,10 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return true;
         },
         action: ({ rootElement, model }) => {
-          const parent = rootElement.doc.getParent(model);
-          assertExists(parent);
-          const index = parent.children.indexOf(model);
-
-          const id = rootElement.doc.addBlock(
-            'affine:database',
-            {},
-            rootElement.doc.getParent(model),
-            index + 1
-          );
+          const id = createDatabaseBlockInNextLine(model);
+          if (!id) {
+            return;
+          }
           const service = rootElement.std.spec.getService('affine:database');
           service.initDatabaseBlock(
             rootElement.doc,
@@ -556,16 +551,10 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return true;
         },
         action: ({ model, rootElement }) => {
-          const parent = rootElement.doc.getParent(model);
-          assertExists(parent);
-          const index = parent.children.indexOf(model);
-
-          const id = rootElement.doc.addBlock(
-            'affine:database',
-            {},
-            rootElement.doc.getParent(model),
-            index + 1
-          );
+          const id = createDatabaseBlockInNextLine(model);
+          if (!id) {
+            return;
+          }
           const service = rootElement.std.spec.getService('affine:database');
           service.initDatabaseBlock(
             rootElement.doc,
@@ -758,3 +747,16 @@ export const menuGroups: SlashMenuOptions['menus'] = [
     ],
   },
 ];
+const createDatabaseBlockInNextLine = (model: BlockModel) => {
+  let parent = model.doc.getParent(model);
+  while (parent && parent.flavour !== 'affine:note') {
+    model = parent;
+    parent = model.doc.getParent(parent);
+  }
+  if (!parent) {
+    return;
+  }
+  const index = parent.children.indexOf(model);
+
+  return model.doc.addBlock('affine:database', {}, parent, index + 1);
+};

@@ -32,26 +32,22 @@ const TOOLBAR_SHADOWS_DARK = [
 ];
 
 const TOOLTIPS = [
-  'No Shadow',
-  'Box Shadow',
-  'Sticker Shadow',
-  'Paper Shadow',
-  'Floation Shadow',
-  'Film Shadow',
+  'No shadow',
+  'Box shadow',
+  'Sticker shadow',
+  'Paper shadow',
+  'Floation shadow',
+  'Film shadow',
 ];
 
 @customElement('edgeless-note-shadow-panel')
 export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      border-radius: 8px;
-      padding: 8px;
-      gap: 8px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
+      justify-content: space-between;
+      gap: 8px;
     }
 
     .item {
@@ -75,24 +71,23 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  value!: string;
+  accessor value!: string;
 
   @property({ attribute: false })
-  background!: string;
+  accessor background!: string;
 
   @property({ attribute: false })
-  onSelect!: (value: string) => void;
+  accessor onSelect!: (value: string) => void;
 
   override render() {
     const mode = getThemeMode();
     const SHADOWS =
       mode === 'dark' ? TOOLBAR_SHADOWS_DARK : TOOLBAR_SHADOWS_LIGHT;
-    return html`${repeat(
+    return repeat(
       NOTE_SHADOWS,
       shadow => shadow,
-      (shadow, index) => {
-        return html`
-          <style>
+      (shadow, index) =>
+        html`<style>
             .item-icon svg rect:first-of-type {
               fill: var(${this.background});
             }
@@ -118,10 +113,8 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
             >
               ${index === 0 ? NoteNoShadowIcon : NoteShadowSampleIcon}
             </edgeless-tool-icon-button>
-          </div>
-        `;
-      }
-    )} `;
+          </div>`
+    );
   }
 }
 

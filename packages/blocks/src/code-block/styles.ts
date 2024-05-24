@@ -10,11 +10,11 @@ export const codeBlockStyles = css`
     font-size: var(--affine-font-sm);
     line-height: var(--affine-line-height);
     position: relative;
-    padding: 32px 0px 12px 0px;
+    padding: 32px 24px;
     background: var(--affine-background-code-block);
     border-radius: 10px;
-    margin-top: 24px;
-    margin-bottom: 24px;
+    margin: 24px 0px;
+    box-sizing: border-box;
   }
 
   .affine-code-block-container .inline-editor {
@@ -26,21 +26,31 @@ export const codeBlockStyles = css`
     position: absolute;
     font-size: var(--affine-font-sm);
     line-height: var(--affine-line-height);
-    top: 12px;
-    left: 12px;
+    top: 5px;
+    left: 5px;
   }
 
-  .affine-code-block-container > .lang-list-wrapper {
+  .affine-code-block-container > .lang-list-wrapper,
+  .affine-code-block-container > affine-code-toolbar-widget {
     visibility: hidden;
   }
-  .affine-code-block-container:hover > .lang-list-wrapper {
+
+  .affine-code-block-container:hover > .lang-list-wrapper,
+  .affine-code-block-container:hover > affine-code-toolbar-widget {
     visibility: visible;
   }
 
   .affine-code-block-container > .lang-list-wrapper > .lang-button {
+    background-color: var(--affine-background-primary-color);
     display: flex;
     justify-content: flex-start;
-    padding: 0 8px;
+    gap: 4px;
+    padding: 2px 4px;
+    box-shadow: var(--affine-shadow-1);
+  }
+
+  .affine-code-block-container > .lang-list-wrapper > .lang-button:hover {
+    background-color: var(--affine-hover-color);
   }
 
   .affine-code-block-container rich-text {
@@ -49,22 +59,22 @@ export const codeBlockStyles = css`
     position: relative;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 20px;
     width: 90%;
   }
 
   .affine-code-block-container .rich-text-container {
     position: relative;
     border-radius: 4px;
-    padding: 4px 12px 4px 60px;
+    padding: 0px 24px 0px 30px;
   }
 
   #line-numbers {
     position: absolute;
-    text-align: right;
-    left: 20px;
+    left: 0px;
     line-height: var(--affine-line-height);
+    font-size: var(--affine-font-sm);
     color: var(--affine-text-secondary-color);
+    font-family: var(--affine-font-code-family);
   }
 
   .affine-code-block-container.wrap #line-numbers {
@@ -73,15 +83,5 @@ export const codeBlockStyles = css`
 
   .affine-code-block-container.wrap #line-numbers > div {
     margin-top: calc(var(--top, 0) / 1 - var(--affine-line-height));
-  }
-
-  .code-block-option {
-    box-shadow: var(--affine-shadow-2);
-    border-radius: 8px;
-    list-style: none;
-    padding: 4px;
-    width: 40px;
-    background-color: var(--affine-background-overlay-panel-color);
-    margin: 0;
   }
 `;

@@ -7,10 +7,10 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import { positionToVRect } from '../../../../../_common/components/index.js';
 import { NewEditIcon } from '../../../../../_common/icons/index.js';
 import { MoreHorizontalIcon } from '../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../data-view.js';
-import { positionToVRect } from '../../../utils/menu/index.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,
@@ -123,15 +123,15 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  dataViewEle!: DataViewRenderer;
+  accessor dataViewEle!: DataViewRenderer;
   @property({ attribute: false })
-  view!: DataViewKanbanManager;
+  accessor view!: DataViewKanbanManager;
   @property({ attribute: false })
-  groupKey!: string;
+  accessor groupKey!: string;
   @property({ attribute: false })
-  cardId!: string;
+  accessor cardId!: string;
   @state()
-  isFocus = false;
+  accessor isFocus = false;
 
   override connectedCallback() {
     super.connectedCallback();

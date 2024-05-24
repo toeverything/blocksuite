@@ -5,10 +5,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import { eventToVRect } from '../../../../../../_common/components/index.js';
 import { NewEditIcon } from '../../../../../../_common/icons/index.js';
 import { MoreHorizontalIcon } from '../../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
-import { eventToVRect } from '../../../../utils/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import type { TableViewSelection } from '../types.js';
@@ -96,13 +96,13 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     return this.closest('affine-database-table')?.selectionController;
   }
   @property({ attribute: false })
-  dataViewEle!: DataViewRenderer;
+  accessor dataViewEle!: DataViewRenderer;
   @property({ attribute: false })
-  view!: DataViewTableManager;
+  accessor view!: DataViewTableManager;
   @property({ attribute: false })
-  rowIndex!: number;
+  accessor rowIndex!: number;
   @property({ attribute: false })
-  rowId!: string;
+  accessor rowId!: string;
 
   public get groupKey() {
     return this.closest('affine-data-view-table-group')?.group?.key;

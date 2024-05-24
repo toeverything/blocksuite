@@ -3,7 +3,7 @@ import { CloseIcon, createDefaultDoc } from '@blocksuite/blocks';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { DocCollection } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -52,14 +52,12 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
 
-  @state()
   private get collection() {
     return this.editor.doc.collection;
   }
 
-  @state()
   private get docs() {
     return [...this.collection.docs.values()];
   }

@@ -4,6 +4,7 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { DocCollection } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -27,19 +28,21 @@ import { getSelectedRect } from '../../utils/query.js';
 @customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   @query('rich-text')
-  richText!: RichText;
+  accessor richText!: RichText;
 
   @property({ attribute: false })
-  element!: ShapeElementModel;
+  accessor element!: ShapeElementModel;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  mounteEditor?: (
-    element: ShapeElementModel,
-    edgeless: EdgelessRootBlockComponent
-  ) => void;
+  accessor mounteEditor:
+    | ((
+        element: ShapeElementModel,
+        edgeless: EdgelessRootBlockComponent
+      ) => void)
+    | undefined = undefined;
 
   get inlineEditor() {
     assertExists(this.richText.inlineEditor);
@@ -169,6 +172,17 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   private _unmount() {
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
+
+    if (this.element.text) {
+      const text = this.element.text.toString();
+      const trimed = text.trim();
+      const len = trimed.length;
+      if (len === 0) {
+        this.element.text = undefined;
+      } else if (len < text.length) {
+        this.element.text = new DocCollection.Y.Text(trimed);
+      }
+    }
 
     this.element.textDisplay = true;
     this.element.group instanceof MindmapElementModel &&

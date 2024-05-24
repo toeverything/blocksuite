@@ -9,9 +9,9 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
+import { popMenu } from '../../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../../_common/icons/index.js';
 import type { GroupHelper } from '../../../common/group-by/helper.js';
-import { popMenu } from '../../../utils/menu/index.js';
 import { renderUniLit } from '../../../utils/uni-component/uni-component.js';
 import { DataViewBase } from '../../data-view-base.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
@@ -104,7 +104,7 @@ export class DataViewKanban extends DataViewBase<
   hotkeysController = new KanbanHotkeysController(this);
   clipboardController = new KanbanClipboardController(this);
   @query('.affine-data-view-kanban-groups')
-  groups!: HTMLElement;
+  accessor groups!: HTMLElement;
   groupHelper?: GroupHelper;
 
   override connectedCallback() {

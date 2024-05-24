@@ -66,10 +66,10 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  block!: EmbedToolbarBlockElement;
+  accessor block!: EmbedToolbarBlockElement;
 
   @property({ attribute: false })
-  abortController!: AbortController;
+  accessor abortController!: AbortController;
 
   private get _model() {
     return this.block.model;

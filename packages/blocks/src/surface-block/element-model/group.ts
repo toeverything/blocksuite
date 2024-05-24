@@ -42,13 +42,13 @@ export class GroupElementModel extends GroupLikeModel<GroupElementProps> {
     );
   })
   @yfield()
-  children: Y.Map<boolean> = new DocCollection.Y.Map<boolean>();
+  accessor children: Y.Map<boolean> = new DocCollection.Y.Map<boolean>();
 
   @yfield()
-  title: Y.Text = new DocCollection.Y.Text();
+  accessor title: Y.Text = new DocCollection.Y.Text();
 
   @local()
-  showTitle: boolean = true;
+  accessor showTitle: boolean = true;
 
   get rotate() {
     return 0;

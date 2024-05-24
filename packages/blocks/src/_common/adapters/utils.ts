@@ -62,3 +62,20 @@ export const fetchable = (url: string) =>
   url.startsWith('http:') ||
   url.startsWith('https:') ||
   url.startsWith('data:');
+
+export const createText = (s: string) => {
+  return {
+    '$blocksuite:internal:text$': true,
+    delta: s.length === 0 ? [] : [{ insert: s }],
+  };
+};
+export const isText = (o: unknown) => {
+  if (
+    typeof o === 'object' &&
+    o !== null &&
+    '$blocksuite:internal:text$' in o
+  ) {
+    return o['$blocksuite:internal:text$'] === true;
+  }
+  return false;
+};

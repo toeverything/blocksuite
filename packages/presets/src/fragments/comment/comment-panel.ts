@@ -59,10 +59,10 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @query('.comment-panel-container')
-  private _container!: HTMLDivElement;
+  private accessor _container!: HTMLDivElement;
 
   commentManager: CommentManager | null = null;
 

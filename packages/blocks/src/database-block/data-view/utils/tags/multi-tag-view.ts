@@ -45,13 +45,13 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
   `;
 
   @query('.affine-select-cell-container')
-  selectContainer!: HTMLElement;
+  accessor selectContainer!: HTMLElement;
 
   @property({ attribute: false })
-  value: string[] = [];
+  accessor value: string[] = [];
 
   @property({ attribute: false })
-  options: SelectTag[] = [];
+  accessor options: SelectTag[] = [];
 
   override render() {
     const values = this.value;

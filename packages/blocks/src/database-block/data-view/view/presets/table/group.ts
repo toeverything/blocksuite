@@ -7,11 +7,11 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { popFilterableSimpleMenu } from '../../../../../_common/components/index.js';
 import { GroupTitle } from '../../../common/group-by/group-title.js';
 import type { GroupData } from '../../../common/group-by/helper.js';
 import { PlusIcon } from '../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../data-view.js';
-import { popFilterableSimpleMenu } from '../../../utils/index.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
@@ -57,13 +57,13 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  dataViewEle!: DataViewRenderer;
+  accessor dataViewEle!: DataViewRenderer;
   @property({ attribute: false })
-  view!: DataViewTableManager;
+  accessor view!: DataViewTableManager;
   @property({ attribute: false })
-  viewEle!: DataViewTable;
+  accessor viewEle!: DataViewTable;
   @property({ attribute: false })
-  group?: GroupData;
+  accessor group: GroupData | undefined = undefined;
   get rows() {
     return this.group?.rows ?? this.view.rows;
   }

@@ -25,6 +25,7 @@ import {
   LanguageIcon,
   LongerIcon,
   MakeItRealIcon,
+  MakeItRealIconWithAnimation,
   SelectionIcon,
   ShorterIcon,
   ToneIcon,
@@ -372,7 +373,7 @@ const generateGroup: AIItemGroupConfig = {
       showWhen: () => true,
       handler: actionToHandler(
         'makeItReal',
-        AIStarIconWithAnimation,
+        MakeItRealIconWithAnimation,
         undefined,
         async (host, ctx) => {
           const selectedElements = getCopilotSelectedElems(host);

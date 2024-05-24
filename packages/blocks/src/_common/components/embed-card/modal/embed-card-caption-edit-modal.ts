@@ -13,10 +13,10 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  block!: BlockComponent;
+  accessor block!: BlockComponent;
 
   @query('.embed-card-modal-input.caption')
-  captionInput!: HTMLTextAreaElement;
+  accessor captionInput!: HTMLTextAreaElement;
 
   private get _model() {
     return this.block.model;

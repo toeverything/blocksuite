@@ -131,16 +131,16 @@ export class AIPanelError extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  config!: AIPanelErrorConfig;
+  accessor config!: AIPanelErrorConfig;
 
   @property({ attribute: false })
-  copy?: CopyConfig;
+  accessor copy: CopyConfig | undefined = undefined;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  withAnswer = false;
+  accessor withAnswer = false;
 
   get _editorMode() {
     return isInsidePageEditor(this.host) ? 'page' : 'edgeless';

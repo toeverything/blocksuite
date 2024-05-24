@@ -121,20 +121,15 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     },
     Enter: ctx => {
       _preventDefault(ctx);
-
       if (blockElement.selected?.is('block')) return _selectText(false);
-
       const target = ctx.get('defaultState').event.target as Node;
       if (!blockElement.host.contains(target)) return;
-
       if (!blockElement.selected?.is('text')) return;
-
       blockElement.doc.captureSync();
 
       const inlineEditor = _getInlineEditor();
       const inlineRange = inlineEditor.getInlineRange();
       assertExists(inlineRange);
-
       if (
         !tryConvertBlock(
           blockElement,
@@ -145,7 +140,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       ) {
         return true;
       }
-
       const state = ctx.get('keyboardState');
       hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw);
 

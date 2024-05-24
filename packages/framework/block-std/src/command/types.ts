@@ -6,7 +6,7 @@
 // type TestC = MakeOptionalIfEmpty<C>;  // { prop: string }
 import type { cmdSymbol } from './consts.js';
 
-type IfAllKeysOptional<T, Yes, No> =
+export type IfAllKeysOptional<T, Yes, No> =
   Partial<T> extends T ? (T extends Partial<T> ? Yes : No) : No;
 type MakeOptionalIfEmpty<T> = IfAllKeysOptional<T, void | T, T>;
 
@@ -30,7 +30,7 @@ export type Command<
 type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
   ? void
   : Omit<A, keyof B>;
-type InDataOfCommand<C> =
+export type InDataOfCommand<C> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   C extends Command<infer K, any, infer R> ? CommandKeyToData<K> & R : never;
 type OutDataOfCommand<C> =
@@ -67,6 +67,9 @@ export type Chain<In extends object = {}> = CommonMethods<In> & {
     >
   ) => Chain<In & OutDataOfCommand<BlockSuite.Commands[K]>>;
 } & Cmds;
+
+export type ExecCommandResult<K extends keyof BlockSuite.Commands> =
+  OutDataOfCommand<BlockSuite.Commands[K]>;
 
 declare global {
   namespace BlockSuite {

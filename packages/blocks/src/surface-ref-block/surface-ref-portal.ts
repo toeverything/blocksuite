@@ -13,8 +13,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { FrameBlockModel } from '../frame-block/index.js';
+import { type EdgelessBlockType } from '../root-block/edgeless/edgeless-types.js';
 import type { EdgelessBlockModel } from '../root-block/edgeless/type.js';
-import { type EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
 
@@ -53,22 +53,22 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  refModel!: GroupElementModel | FrameBlockModel;
+  accessor refModel!: GroupElementModel | FrameBlockModel;
 
   @property({ attribute: false })
-  renderModel!: (model: BlockModel) => TemplateResult;
+  accessor renderModel!: (model: BlockModel) => TemplateResult;
 
   @query('.surface-blocks-portal')
-  portal!: HTMLDivElement;
+  accessor portal!: HTMLDivElement;
 
   @query('.stacking-canvas')
-  canvasSlot!: HTMLDivElement;
+  accessor canvasSlot!: HTMLDivElement;
 
   get surfaceService() {
     return this.host.std.spec.getService('affine:surface');

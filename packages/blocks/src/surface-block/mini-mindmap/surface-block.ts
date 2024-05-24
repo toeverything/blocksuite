@@ -18,7 +18,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
   private _renderer!: Renderer;
 
   @query('.affine-mini-mindmap-surface')
-  editorContainer!: HTMLDivElement;
+  accessor editorContainer!: HTMLDivElement;
 
   get mindmapService() {
     return this.host.spec.getService(

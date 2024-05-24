@@ -105,22 +105,22 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
     }
   `;
   @state()
-  private _curIndex = -1;
+  private accessor _curIndex = -1;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  frames!: FrameBlockModel[];
+  accessor frames!: FrameBlockModel[];
 
   @query('.edgeless-frame-order-items-container')
-  private _container!: HTMLDivElement;
+  private accessor _container!: HTMLDivElement;
 
   @query('.indicator-line')
-  private _indicatorLine!: HTMLDivElement;
+  private accessor _indicatorLine!: HTMLDivElement;
 
   @query('.clone')
-  private _clone!: HTMLDivElement;
+  private accessor _clone!: HTMLDivElement;
 
   override firstUpdated() {
     this._bindEvent();

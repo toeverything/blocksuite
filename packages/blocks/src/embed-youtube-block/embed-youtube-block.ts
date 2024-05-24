@@ -30,19 +30,19 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
 
   @property({ attribute: false })
-  loading = false;
+  accessor loading = false;
 
   @state()
-  private _isSelected = false;
+  private accessor _isSelected = false;
 
   @state()
-  private _showOverlay = true;
+  private accessor _showOverlay = true;
 
   @state()
-  private _showImage = false;
+  private accessor _showImage = false;
 
   @query('embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   private _isDragging = false;
 

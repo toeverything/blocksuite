@@ -80,25 +80,25 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  showPreviewIcon!: boolean;
+  accessor showPreviewIcon!: boolean;
 
   @property({ attribute: false })
-  enableNotesSorting!: boolean;
+  accessor enableNotesSorting!: boolean;
 
   @property({ attribute: false })
-  toggleShowPreviewIcon!: (on: boolean) => void;
+  accessor toggleShowPreviewIcon!: (on: boolean) => void;
 
   @property({ attribute: false })
-  toggleNotesSorting!: () => void;
+  accessor toggleNotesSorting!: () => void;
 
   @state()
-  private _settingPopperShow = false;
+  private accessor _settingPopperShow = false;
 
   @query('.note-setting-button')
-  private _noteSettingButton!: HTMLDivElement;
+  private accessor _noteSettingButton!: HTMLDivElement;
 
   @query('.note-preview-setting-container')
-  private _notePreviewSettingMenu!: HTMLDivElement;
+  private accessor _notePreviewSettingMenu!: HTMLDivElement;
 
   private _notePreviewSettingMenuPopper: ReturnType<
     typeof createButtonPopper
@@ -129,7 +129,6 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
               : ''}"
             .tooltip=${this._settingPopperShow ? '' : 'Preview Settings'}
             .tipPosition=${'bottom'}
-            .iconContainerPadding=${2}
             .active=${this._settingPopperShow}
             .activeMode=${'background'}
             @click=${() => this._notePreviewSettingMenuPopper?.toggle()}

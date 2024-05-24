@@ -11,6 +11,7 @@ export type DetailSlotProps = { view: DataViewManager; rowId: string };
 
 export interface DetailSlots {
   header?: UniComponent<DetailSlotProps>;
+  note?: UniComponent<DetailSlotProps>;
 }
 
 export interface DataSource {

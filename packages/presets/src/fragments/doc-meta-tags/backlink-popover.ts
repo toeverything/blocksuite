@@ -81,7 +81,7 @@ export class BacklinkButton extends WithDisposable(LitElement) {
   `;
 
   @state()
-  private _showPopover = false;
+  private accessor _showPopover = false;
 
   private _backlinks: BacklinkData[];
 

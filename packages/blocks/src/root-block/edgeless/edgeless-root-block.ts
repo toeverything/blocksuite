@@ -138,20 +138,20 @@ export class EdgelessRootBlockComponent extends BlockElement<
   mouseRoot!: HTMLElement;
 
   @state()
-  edgelessTool: EdgelessTool = {
+  accessor edgelessTool: EdgelessTool = {
     type: localStorage.defaultTool ?? 'default',
   };
 
   @query('edgeless-block-portal-container')
-  rootElementContainer!: EdgelessBlockPortalContainer;
+  accessor rootElementContainer!: EdgelessBlockPortalContainer;
 
   @query('.affine-edgeless-layer')
-  edgelessLayer!: HTMLDivElement;
+  accessor edgelessLayer!: HTMLDivElement;
 
   clipboardController = new EdgelessClipboardController(this);
 
   @query('affine-surface')
-  surface!: SurfaceBlockComponent;
+  accessor surface!: SurfaceBlockComponent;
 
   fontLoader!: FontLoader;
 
@@ -595,7 +595,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     });
   }
 
-  private _initFontloader() {
+  private _initFontLoader() {
     const fontLoader = this.service?.fontLoader;
     assertExists(fontLoader);
 
@@ -669,7 +669,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     this._initSlotEffects();
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
-    this._initFontloader();
+    this._initFontLoader();
     this._initRemoteCursor();
     this._initSurface();
 

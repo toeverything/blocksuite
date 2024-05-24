@@ -1388,7 +1388,14 @@ describe('notion html to snapshot', () => {
                 },
                 'matchesReplaceMap[58]': {
                   columnId: 'matchesReplaceMap[58]',
-                  value: ' Not started ',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: ' Not started ',
+                      },
+                    ],
+                  },
                 },
                 'matchesReplaceMap[60]': {
                   columnId: 'matchesReplaceMap[60]',
@@ -1410,7 +1417,14 @@ describe('notion html to snapshot', () => {
                 },
                 'matchesReplaceMap[58]': {
                   columnId: 'matchesReplaceMap[58]',
-                  value: ' Not started ',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: ' Not started ',
+                      },
+                    ],
+                  },
                 },
                 'matchesReplaceMap[60]': {
                   columnId: 'matchesReplaceMap[60]',
@@ -1432,7 +1446,14 @@ describe('notion html to snapshot', () => {
                 },
                 'matchesReplaceMap[58]': {
                   columnId: 'matchesReplaceMap[58]',
-                  value: ' Not started ',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: ' Not started ',
+                      },
+                    ],
+                  },
                 },
                 'matchesReplaceMap[60]': {
                   columnId: 'matchesReplaceMap[60]',
@@ -1575,31 +1596,57 @@ describe('notion html to snapshot', () => {
               'matchesReplaceMap[20]': {
                 'matchesReplaceMap[17]': {
                   columnId: 'matchesReplaceMap[17]',
-                  value: 'aa',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: 'aa',
+                      },
+                    ],
+                  },
                 },
                 'matchesReplaceMap[19]': {
                   columnId: 'matchesReplaceMap[19]',
-                  value: '',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
+                  },
                 },
               },
               'matchesReplaceMap[21]': {
                 'matchesReplaceMap[17]': {
                   columnId: 'matchesReplaceMap[17]',
-                  value: '1',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: '1',
+                      },
+                    ],
+                  },
                 },
                 'matchesReplaceMap[19]': {
                   columnId: 'matchesReplaceMap[19]',
-                  value: '',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
+                  },
                 },
               },
               'matchesReplaceMap[22]': {
                 'matchesReplaceMap[17]': {
                   columnId: 'matchesReplaceMap[17]',
-                  value: '',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
+                  },
                 },
                 'matchesReplaceMap[19]': {
                   columnId: 'matchesReplaceMap[19]',
-                  value: '',
+                  value: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
+                  },
                 },
               },
             },

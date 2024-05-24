@@ -7,7 +7,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { EdgelessRootBlockComponent } from '../../../../root-block/edgeless/edgeless-root-block.js';
-import type { EdgelessElementType } from '../../../../surface-block/edgeless-types.js';
+import type { EdgelessElementType } from '../../../../root-block/edgeless/edgeless-types.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../surface-block/utils/vec.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
@@ -22,16 +22,16 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  titleText!: string;
+  accessor titleText!: string;
 
   @property({ attribute: false })
-  descriptionText!: string;
+  accessor descriptionText!: string;
 
   @property({ attribute: false })
-  createOptions!:
+  accessor createOptions!:
     | {
         mode: 'page';
         parentModel: BlockModel | string;
@@ -42,13 +42,13 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
       };
 
   @property({ attribute: false })
-  onConfirm!: () => void;
+  accessor onConfirm!: () => void;
 
   @query('input')
-  input!: HTMLInputElement;
+  accessor input!: HTMLInputElement;
 
   @state()
-  private _linkInputValue = '';
+  private accessor _linkInputValue = '';
 
   override connectedCallback() {
     super.connectedCallback();

@@ -93,23 +93,22 @@ export class ActionWrapper extends WithDisposable(LitElement) {
         color: var(--affine-text-secondary-color);
         height: 20px;
         line-height: 20px;
-        margin-bottom: 4px;
       }
 
-      div:nth-child(3) {
+      .prompt {
         margin-top: 12px;
       }
     }
   `;
 
   @state()
-  promptShow = false;
+  accessor promptShow = false;
 
   @property({ attribute: false })
-  item!: ChatAction;
+  accessor item!: ChatAction;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   protected override render() {
     const { item } = this;
@@ -141,7 +140,7 @@ export class ActionWrapper extends WithDisposable(LitElement) {
                 ? createTextRenderer(this.host, { customHeading: true })(answer)
                 : nothing}
               ${originalText
-                ? html`<div class="subtitle">Prompt</div>
+                ? html`<div class="subtitle prompt">Prompt</div>
                     ${createTextRenderer(this.host, { customHeading: true })(
                       item.messages[0].content + originalText
                     )}`

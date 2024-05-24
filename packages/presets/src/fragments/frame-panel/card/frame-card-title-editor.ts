@@ -19,19 +19,19 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @query('rich-text')
-  richText!: RichText;
+  accessor richText!: RichText;
 
   @property({ attribute: false })
-  frameModel!: FrameBlockModel;
+  accessor frameModel!: FrameBlockModel;
 
   @property({ attribute: false })
-  titleContentElement!: HTMLElement;
+  accessor titleContentElement!: HTMLElement;
 
   @property({ attribute: false })
-  left!: number;
+  accessor left!: number;
 
   @property({ attribute: false })
-  maxWidth!: number;
+  accessor maxWidth!: number;
 
   private _isComposing = false;
 

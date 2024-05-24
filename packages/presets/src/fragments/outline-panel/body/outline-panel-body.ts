@@ -104,61 +104,61 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @state()
-  private _dragging = false;
+  private accessor _dragging = false;
 
   @state()
-  private _pageVisibleNotes: OutlineNoteItem[] = [];
+  private accessor _pageVisibleNotes: OutlineNoteItem[] = [];
 
   @state()
-  private _edgelessOnlyNotes: OutlineNoteItem[] = [];
+  private accessor _edgelessOnlyNotes: OutlineNoteItem[] = [];
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent | null;
+  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   @property({ attribute: false })
-  editorHost!: EditorHost;
+  accessor editorHost!: EditorHost;
 
   @property({ attribute: false })
-  mode: 'page' | 'edgeless' = 'page';
+  accessor mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  insertIndex?: number;
+  accessor insertIndex: number | undefined = undefined;
 
   @property({ attribute: false })
-  showPreviewIcon!: boolean;
+  accessor showPreviewIcon!: boolean;
 
   @property({ attribute: false })
-  enableNotesSorting!: boolean;
+  accessor enableNotesSorting!: boolean;
 
   @property({ attribute: false })
-  noticeVisible!: boolean;
+  accessor noticeVisible!: boolean;
 
   @property({ attribute: false })
-  toggleNotesSorting!: () => void;
+  accessor toggleNotesSorting!: () => void;
 
   @property({ attribute: false })
-  setNoticeVisibility!: (visibility: boolean) => void;
+  accessor setNoticeVisibility!: (visibility: boolean) => void;
 
   /**
    * store the id of selected notes
    */
   @state()
-  private _selected: string[] = [];
+  private accessor _selected: string[] = [];
 
   @query('.panel-list')
-  panelListElement!: HTMLElement;
+  accessor panelListElement!: HTMLElement;
 
   @query('.outline-panel-body-container')
-  OutlinePanelContainer!: HTMLElement;
+  accessor OutlinePanelContainer!: HTMLElement;
 
   @property({ attribute: false })
-  fitPadding!: number[];
+  accessor fitPadding!: number[];
 
   @property({ attribute: false })
-  domHost!: Document | HTMLElement;
+  accessor domHost!: Document | HTMLElement;
 
   private _docDisposables: DisposableGroup | null = null;
   private _indicatorTranslateY = 0;

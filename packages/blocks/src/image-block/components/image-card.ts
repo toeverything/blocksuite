@@ -61,7 +61,7 @@ export class AffineImageCard extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  block!: ImageBlockComponent;
+  accessor block!: ImageBlockComponent;
 
   override render() {
     const { isInSurface, loading, error, model } = this.block;

@@ -6,8 +6,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
+import { createPopup } from '../../../_common/components/index.js';
 import { ArrowLeftBigIcon } from '../../../_common/icons/index.js';
-import { createPopup } from '../utils/menu/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
@@ -160,9 +160,9 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     }
   `;
   @property({ attribute: false })
-  view!: DataViewManager;
+  accessor view!: DataViewManager;
   @property({ attribute: false })
-  onBack?: () => void;
+  accessor onBack: (() => void) | undefined = undefined;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -177,7 +177,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   }
 
   @query('.properties-group')
-  groupContainer!: HTMLElement;
+  accessor groupContainer!: HTMLElement;
 
   override firstUpdated() {
     const sortable = new Sortable(this.groupContainer, {

@@ -30,6 +30,7 @@ export class LangList extends LitElement {
         flex-direction: column;
         background: var(--affine-background-overlay-panel-color);
         color: var(--affine-text-primary-color);
+        box-shadow: var(--affine-menu-shadow);
         border-radius: 12px;
         z-index: var(--affine-z-index-popover);
         pointer-events: auto;
@@ -41,7 +42,6 @@ export class LangList extends LitElement {
         height: 100%;
         overflow: hidden;
         flex-direction: column;
-        box-shadow: var(--affine-menu-shadow);
         border-radius: 8px;
         padding: 8px;
       }
@@ -127,25 +127,27 @@ export class LangList extends LitElement {
   }
 
   @property({ attribute: false })
-  currentLanguageId!: BundledLanguage | PlainTextLanguage;
+  accessor currentLanguageId!: BundledLanguage | PlainTextLanguage;
 
   @property({ attribute: false })
-  onClose?: () => void;
+  accessor onClose: (() => void) | undefined = undefined;
 
   @property({ attribute: false })
-  onSelectLanguage?: (lang: StrictLanguageInfo | null) => void;
+  accessor onSelectLanguage:
+    | ((lang: StrictLanguageInfo | null) => void)
+    | undefined;
 
   @property({ attribute: false })
-  placement?: Placement;
+  accessor placement: Placement | undefined = undefined;
 
   @state()
-  private _filterText = '';
+  private accessor _filterText = '';
 
   @state()
-  private _currentSelectedIndex = 0;
+  private accessor _currentSelectedIndex = 0;
 
   @query('#filter-input')
-  filterInput!: HTMLInputElement;
+  accessor filterInput!: HTMLInputElement;
 
   override connectedCallback() {
     super.connectedCallback();

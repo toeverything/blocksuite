@@ -36,7 +36,7 @@ export class ComponentToolbarMenuDivider extends LitElement {
   `;
 
   @property({ type: Boolean })
-  vertical = true;
+  accessor vertical = true;
 
   override render() {
     return html`<div

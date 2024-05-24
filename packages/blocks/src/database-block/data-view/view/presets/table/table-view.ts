@@ -8,10 +8,10 @@ import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import { popMenu } from '../../../../../_common/components/index.js';
 import { AddCursorIcon } from '../../../../../_common/icons/index.js';
 import type { GroupHelper } from '../../../common/group-by/helper.js';
 import type { InsertToPosition } from '../../../types.js';
-import { popMenu } from '../../../utils/index.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
 import { renderUniLit } from '../../../utils/uni-component/index.js';
 import { DataViewBase } from '../../data-view-base.js';

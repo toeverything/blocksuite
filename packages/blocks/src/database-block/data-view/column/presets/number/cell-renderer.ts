@@ -70,7 +70,7 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   `;
 
   @query('input')
-  private _inputEle!: HTMLInputElement;
+  private accessor _inputEle!: HTMLInputElement;
 
   focusEnd = () => {
     const end = this._inputEle.value.length;

@@ -3,9 +3,9 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { positionToVRect } from '../../../../../../_common/components/index.js';
 import { ArrowDownIcon } from '../../../../../../_common/icons/index.js';
 import { getRootByElement } from '../../../../../../_common/utils/index.js';
-import { positionToVRect } from '../../../../utils/index.js';
 import {
   type ColumnDataType,
   getStatCalcOperationFromType,
@@ -56,13 +56,13 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  column!: DataViewTableColumnManager;
+  accessor column!: DataViewTableColumnManager;
 
   @state()
-  private operation: StatCalcOp | null = null;
+  private accessor operation: StatCalcOp | null = null;
 
   @state()
-  private result: StatOpResult | null = null;
+  private accessor result: StatOpResult | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();

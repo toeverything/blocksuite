@@ -89,28 +89,28 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  answer!: string;
+  accessor answer!: string;
 
   @property({ attribute: false })
-  templateShow = true;
+  accessor templateShow = true;
 
   @property({ attribute: false })
-  height = 400;
+  accessor height = 400;
 
   @property({ attribute: false })
-  ctx!: {
+  accessor ctx!: {
     get(): Record<string, unknown>;
     set(data: Record<string, unknown>): void;
   };
 
   @property({ attribute: false })
-  mindmapStyle?: MindmapStyle;
+  accessor mindmapStyle: MindmapStyle | undefined = undefined;
 
   @query('editor-host')
-  portalHost!: EditorHost;
+  accessor portalHost!: EditorHost;
 
   doc!: Doc;
   surface!: SurfaceBlockModel;

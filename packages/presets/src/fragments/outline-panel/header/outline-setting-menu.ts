@@ -58,10 +58,10 @@ export class OutlineNotePreviewSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  showPreviewIcon!: boolean;
+  accessor showPreviewIcon!: boolean;
 
   @property({ attribute: false })
-  toggleShowPreviewIcon!: (on: boolean) => void;
+  accessor toggleShowPreviewIcon!: (on: boolean) => void;
 
   override render() {
     return html`<div

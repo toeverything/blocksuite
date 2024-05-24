@@ -96,6 +96,7 @@ export function createButtonPopper(
   }
 
   const show = () => {
+    if (display === 'show') return;
     popperElement.setAttribute(ATTR_SHOW, '');
     display = 'show';
     stateUpdated({ display });
@@ -103,6 +104,7 @@ export function createButtonPopper(
   };
 
   const hide = () => {
+    if (display === 'hidden') return;
     popperElement.removeAttribute(ATTR_SHOW);
     display = 'hidden';
     stateUpdated({ display });

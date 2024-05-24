@@ -63,7 +63,7 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     let sumSize = 0;
     await Promise.all(
       Array.from(map.entries()).map(async ([id, blob]) => {
-        if (blob.size > 5 * 1024 * 1024) {
+        if (blob.size > 4 * 1024 * 1024) {
           const host = document.querySelector('editor-host');
           if (!host) {
             return;
@@ -75,7 +75,7 @@ export class ClipboardAdapter extends BaseAdapter<string> {
           return;
         }
         sumSize += blob.size;
-        if (sumSize > 10 * 1024 * 1024) {
+        if (sumSize > 6 * 1024 * 1024) {
           const host = document.querySelector('editor-host');
           if (!host) {
             return;

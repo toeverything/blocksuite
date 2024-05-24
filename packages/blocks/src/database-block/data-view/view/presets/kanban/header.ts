@@ -5,7 +5,7 @@ import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../utils/menu/index.js';
+import { popMenu } from '../../../../../_common/components/index.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
 const styles = css`
@@ -31,7 +31,7 @@ export class KanbanHeader extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  view!: DataViewKanbanManager;
+  accessor view!: DataViewKanbanManager;
   private clickGroup = (e: MouseEvent) => {
     popMenu(e.target as HTMLElement, {
       options: {

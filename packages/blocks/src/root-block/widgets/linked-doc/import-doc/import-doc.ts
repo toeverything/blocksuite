@@ -172,22 +172,22 @@ export class ImportDoc extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @state()
-  _loading = false;
+  accessor _loading = false;
 
   @state()
-  x = 0;
+  accessor x = 0;
 
   @state()
-  y = 0;
+  accessor y = 0;
 
   @state()
-  _startX = 0;
+  accessor _startX = 0;
 
   @state()
-  _startY = 0;
+  accessor _startY = 0;
 
   @query('.container')
-  containerEl!: HTMLElement;
+  accessor containerEl!: HTMLElement;
 
   constructor(
     private collection: DocCollection,

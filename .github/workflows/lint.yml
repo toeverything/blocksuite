@@ -15,9 +15,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         name: Install pnpm
         id: pnpm-install
+        with:
+          version: 9
       - name: Use Node.js LTS
         uses: actions/setup-node@v3
         with:
@@ -43,7 +45,7 @@ jobs:
       - name: Run type check
         run: pnpm build:packages && pnpm build:playground
         env:
-          NODE_OPTIONS: --max-old-space-size=8192
+          NODE_OPTIONS: --max-old-space-size=16384
 
       - name: Run ESLint
         # ESLint will save the cache files on cwd by default,

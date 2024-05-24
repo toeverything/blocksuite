@@ -7,6 +7,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { popFilterableSimpleMenu } from '../../../../_common/components/index.js';
 import type {
   FilterGroup,
   SingleFilter,
@@ -23,7 +24,6 @@ import { CrossIcon } from '../../common/icons/index.js';
 import { popLiteralEdit, renderLiteral } from '../../common/literal/matcher.js';
 import { tBoolean } from '../../logical/data-type.js';
 import { typesystem } from '../../logical/typesystem.js';
-import { popFilterableSimpleMenu } from '../../utils/menu/index.js';
 import { filterMatcher } from './matcher/matcher.js';
 
 @customElement('filter-condition-view')
@@ -87,15 +87,16 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  data!: SingleFilter;
+  accessor data!: SingleFilter;
 
   @property({ attribute: false })
-  setData!: (filter: SingleFilter) => void;
+  accessor setData!: (filter: SingleFilter) => void;
 
   @property({ attribute: false })
-  vars!: Variable[];
+  accessor vars!: Variable[];
+
   @property({ attribute: false })
-  onDelete?: () => void;
+  accessor onDelete: (() => void) | undefined = undefined;
 
   private _setRef = (ref: VariableOrProperty) => {
     this.setData(firstFilterByRef(this.vars, ref));

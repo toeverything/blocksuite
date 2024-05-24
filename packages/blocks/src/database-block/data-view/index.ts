@@ -8,7 +8,6 @@ export { DatabaseSelection } from './common/selection.js';
 export { DataView } from './data-view.js';
 export type { InsertToPosition } from './types.js';
 export type { DataViewSelection } from './types.js';
-export { popMenu } from './utils/index.js';
 export { insertPositionToIndex } from './utils/insert.js';
 export { renderUniLit } from './utils/uni-component/index.js';
 export { createUniComponentFromWebComponent } from './utils/uni-component/index.js';

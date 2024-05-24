@@ -2,6 +2,10 @@ import type { ReferenceElement } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import {
+  type Menu,
+  popFilterableSimpleMenu,
+} from '../../../../../../_common/components/index.js';
+import {
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
@@ -9,7 +13,6 @@ import {
 import type { RootBlockComponent } from '../../../../../../root-block/index.js';
 import { DeleteIcon } from '../../../../common/icons/index.js';
 import type { DataViewRenderer } from '../../../../data-view.js';
-import { type Menu, popFilterableSimpleMenu } from '../../../../utils/index.js';
 import type { DataViewColumnManager } from '../../../data-view-manager.js';
 import type { TableSelectionController } from '../controller/selection.js';
 import {

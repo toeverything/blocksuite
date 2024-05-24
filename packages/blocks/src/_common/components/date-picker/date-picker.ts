@@ -54,40 +54,40 @@ export class DatePicker extends WithDisposable(LitElement) {
 
   /** Checked date timestamp */
   @property({ type: Number })
-  value?: number;
+  accessor value: number | undefined = undefined;
 
   @property({ attribute: false })
-  onChange?: (value: Date) => void;
+  accessor onChange: ((value: Date) => void) | undefined = undefined;
 
   /** card padding in px */
   @property({ type: Number })
-  padding = 20;
+  accessor padding = 20;
   /** cell size in px */
   @property({ type: Number })
-  size = 28;
+  accessor size = 28;
   /** horizontal gap between cells in px */
   @property({ type: Number })
-  gapH = 10;
+  accessor gapH = 10;
   /** vertical gap between cells in px */
   @property({ type: Number })
-  gapV = 8;
+  accessor gapV = 8;
 
   /** current active month */
   private _cursor = new Date();
   /** web-accessibility for month select */
   @property({ attribute: false })
-  private _monthCursor = 0;
+  private accessor _monthCursor = 0;
   @property({ attribute: false })
-  private _yearCursor = 0;
+  private accessor _yearCursor = 0;
   @property({ attribute: false })
-  private _monthPickYearCursor = 0;
+  private accessor _monthPickYearCursor = 0;
   /** date matrix */
   @property({ attribute: false })
-  private _matrix: DateCell[][] = [];
+  private accessor _matrix: DateCell[][] = [];
   @property({ attribute: false })
-  private _yearMatrix: number[] = [];
+  private accessor _yearMatrix: number[] = [];
   @property({ attribute: false })
-  private _mode: 'date' | 'month' | 'year' = 'date';
+  private accessor _mode: 'date' | 'month' | 'year' = 'date';
 
   private _maxYear = 2099;
   private _minYear = 1970;

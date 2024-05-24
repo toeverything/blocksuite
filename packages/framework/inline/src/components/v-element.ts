@@ -12,12 +12,12 @@ export class VElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > extends LitElement {
   @property({ type: Object })
-  delta: DeltaInsert<T> = {
+  accessor delta: DeltaInsert<T> = {
     insert: ZERO_WIDTH_SPACE,
   };
 
   @property({ attribute: false })
-  selected!: boolean;
+  accessor selected!: boolean;
 
   override render() {
     const inlineEditor = getInlineEditorInsideRoot(this);

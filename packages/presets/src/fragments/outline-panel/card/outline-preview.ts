@@ -143,19 +143,19 @@ export class OutlineBlockPreview extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  block!: ValuesOf<BlockSuite.BlockModels>;
+  accessor block!: ValuesOf<BlockSuite.BlockModels>;
 
   @property({ attribute: false })
-  showPreviewIcon!: boolean;
+  accessor showPreviewIcon!: boolean;
 
   @property({ attribute: false })
-  enableNotesSorting!: boolean;
+  accessor enableNotesSorting!: boolean;
 
   @property({ attribute: false })
-  disabledIcon = false;
+  accessor disabledIcon = false;
 
   @property({ attribute: false })
-  cardNumber!: number;
+  accessor cardNumber!: number;
 
   private _textDisposables: DisposableGroup | null = null;
 

@@ -1,25 +1,28 @@
 import { keys } from '../../../_common/utils/iterable.js';
 import type { ElementModel } from '../base.js';
-import { getDecoratorState, setObjectMeta } from './common.js';
+import {
+  getDecoratorState,
+  getObjectPropMeta,
+  setObjectPropMeta,
+} from './common.js';
 
 const deriveSymbol = Symbol('derive');
 
 function getDerivedMeta(
-  target: unknown,
+  proto: unknown,
   prop: string | symbol
 ):
   | null
   | ((propValue: unknown, instance: unknown) => Record<string, unknown>)[] {
-  // @ts-ignore
-  return target[deriveSymbol]?.[prop] ?? null;
+  return getObjectPropMeta(proto, deriveSymbol, prop);
 }
 
 export function getDeriveProperties(
-  prototype: unknown,
   prop: string | symbol,
   propValue: unknown,
   receiver: ElementModel
 ) {
+  const prototype = Object.getPrototypeOf(receiver);
   const decoratorState = getDecoratorState();
 
   if (decoratorState.deriving || decoratorState.creating) {
@@ -73,20 +76,31 @@ export function updateDerivedProp(
  * @param fn
  * @returns
  */
-export function derive<T extends ElementModel>(
+export function derive<V, T extends ElementModel>(
   fn: (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     propValue: any,
     instance: T
   ) => Record<string, unknown>
-): PropertyDecorator {
-  return function deriveDecorator(target: unknown, prop: string | symbol) {
-    const derived = getDerivedMeta(target, prop as string);
+) {
+  return function deriveDecorator(
+    _: unknown,
+    context: ClassAccessorDecoratorContext
+  ) {
+    const prop = String(context.name);
+    return {
+      init(this: ElementModel, v: V) {
+        const proto = Object.getPrototypeOf(this);
+        const derived = getDerivedMeta(proto, prop);
 
-    if (Array.isArray(derived)) {
-      derived.push(fn as (typeof derived)[0]);
-    } else {
-      setObjectMeta(deriveSymbol, target, prop as string, [fn]);
-    }
+        if (Array.isArray(derived)) {
+          derived.push(fn as (typeof derived)[0]);
+        } else {
+          setObjectPropMeta(deriveSymbol, proto, prop as string, [fn]);
+        }
+
+        return v;
+      },
+    } as ClassAccessorDecoratorResult<ElementModel, V>;
   };
 }

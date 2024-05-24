@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { type AIError, openFileOrFiles } from '@blocksuite/blocks';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -25,6 +25,8 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       margin-top: 12px;
       position: relative;
       border-radius: 4px;
+      display: flex;
+      flex-direction: column;
     }
 
     .chat-panel-input-actions {
@@ -44,7 +46,8 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       resize: none;
       margin: 8px 12px;
       width: calc(100% - 32px);
-      min-height: 100px;
+      flex: 1;
+      line-height: 22px;
       border: none;
       font-size: 14px;
       font-weight: 400;
@@ -119,52 +122,54 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  updateItems!: (items: ChatItem[]) => void;
+  accessor updateItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
-  addToItems!: (items: ChatItem[]) => void;
+  accessor addToItems!: (items: ChatItem[]) => void;
 
   @property({ attribute: false })
-  status!: ChatStatus;
+  accessor status!: ChatStatus;
 
   @property({ attribute: false })
-  items!: ChatItem[];
+  accessor items!: ChatItem[];
 
   @property({ attribute: false })
-  error!: Error | null;
+  accessor error!: Error | null;
 
   @property({ attribute: false })
-  updateError!: (error: AIError | null) => void;
+  accessor updateError!: (error: AIError | null) => void;
 
   @property({ attribute: false })
-  updateStatus!: (status: ChatStatus) => void;
+  accessor updateStatus!: (status: ChatStatus) => void;
 
   @query('textarea')
-  textarea!: HTMLTextAreaElement;
+  accessor textarea!: HTMLTextAreaElement;
 
   @query('.close-wrapper')
-  closeWrapper!: HTMLDivElement;
+  accessor closeWrapper!: HTMLDivElement;
 
   @state()
-  images: File[] = [];
+  accessor images: File[] = [];
 
   @state()
-  curIndex = -1;
+  accessor curIndex = -1;
 
   @state()
-  isInputEmpty = true;
+  accessor isInputEmpty = true;
 
   @state()
-  focused = false;
+  accessor focused = false;
 
   @property({ attribute: false })
-  abortController!: AbortController | null;
+  accessor abortController!: AbortController | null;
 
   @property({ attribute: false })
-  updateAbortController!: (abortController: AbortController | null) => void;
+  accessor updateAbortController!: (
+    abortController: AbortController | null
+  ) => void;
 
   send = async () => {
     if (this.status === 'loading' || this.status === 'transmitting') return;
@@ -247,6 +252,8 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             ? '1px solid var(--affine-primary-color)'
             : '1px solid var(--affine-border-color)'};
           box-shadow: ${this.focused ? 'var(--affine-active-shadow)' : 'none'};
+          max-height: ${this.images.length > 0 ? '272px' : '200px'};
+          min-height: ${this.images.length > 0 ? '272px' : '200px'};
         }
       </style>
       <div class="chat-panel-input">
@@ -267,8 +274,8 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
                   const ele = evt.target as HTMLImageElement;
                   const rect = ele.getBoundingClientRect();
                   const parentRect = ele.parentElement!.getBoundingClientRect();
-                  const left = rect.right - parentRect.left - 8;
-                  const top = parentRect.top - rect.top - 8;
+                  const left = Math.abs(rect.right - parentRect.left) - 8;
+                  const top = Math.abs(parentRect.top - rect.top) - 8;
                   this.curIndex = index;
                   this.closeWrapper.style.display = 'flex';
                   this.closeWrapper.style.left = left + 'px';
@@ -326,19 +333,21 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
           }}
         ></textarea>
         <div class="chat-panel-input-actions">
-          <div
-            class="image-upload"
-            @click=${async () => {
-              const images = await openFileOrFiles({
-                acceptType: 'Images',
-                multiple: true,
-              });
-              if (!images) return;
-              this._addImages(images);
-            }}
-          >
-            ${ImageIcon}
-          </div>
+          ${this.images.length < MaximumImageCount
+            ? html`<div
+                class="image-upload"
+                @click=${async () => {
+                  const images = await openFileOrFiles({
+                    acceptType: 'Images',
+                    multiple: true,
+                  });
+                  if (!images) return;
+                  this._addImages(images);
+                }}
+              >
+                ${ImageIcon}
+              </div>`
+            : nothing}
           ${this.status === 'transmitting'
             ? html`<div
                 @click=${() => {

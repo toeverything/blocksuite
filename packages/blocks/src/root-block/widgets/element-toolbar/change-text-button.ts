@@ -2,7 +2,7 @@ import '../../edgeless/components/panel/align-panel.js';
 import '../../edgeless/components/panel/font-family-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { TextElementModel } from '../../../surface-block/index.js';
@@ -10,34 +10,22 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 
 @customElement('edgeless-change-text-button')
 export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
-  static override styles = css`
-    :host {
-      display: flex;
-    }
-
-    .change-text-container {
-      display: flex;
-    }
-  `;
+  @property({ attribute: false })
+  accessor texts: TextElementModel[] = [];
 
   @property({ attribute: false })
-  texts: TextElementModel[] = [];
-
-  @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   get doc() {
     return this.edgeless.doc;
   }
 
   override render() {
-    return html`<div class="change-text-container">
-      <edgeless-change-text-menu
-        .elements=${this.texts}
-        .elementType=${'text'}
-        .edgeless=${this.edgeless}
-      ></edgeless-change-text-menu>
-    </div>`;
+    return html`<edgeless-change-text-menu
+      .elements=${this.texts}
+      .elementType=${'text'}
+      .edgeless=${this.edgeless}
+    ></edgeless-change-text-menu>`;
   }
 }
 

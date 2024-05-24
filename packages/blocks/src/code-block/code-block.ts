@@ -1,5 +1,4 @@
 import '../_common/components/rich-text/rich-text.js';
-import './components/code-option.js';
 import './components/lang-list.js';
 
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/block-std';
@@ -9,20 +8,16 @@ import {
   type InlineRangeProvider,
   type InlineRootElement,
 } from '@blocksuite/inline';
-import { limitShift, offset, shift } from '@floating-ui/dom';
 import { html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { type BundledLanguage, type Highlighter } from 'shiki';
 import { z } from 'zod';
 
-import { HoverController } from '../_common/components/index.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
-import { PAGE_HEADER_HEIGHT } from '../_common/consts.js';
 import { ArrowDownIcon } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { getViewportElement } from '../_common/utils/query.js';
@@ -30,7 +25,6 @@ import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
-import { CodeOptionTemplate } from './components/code-option.js';
 import { createLangList } from './components/lang-list.js';
 import { codeBlockStyles } from './styles.js';
 import { getStandardLanguage, isPlaintext } from './utils/code-languages.js';
@@ -49,10 +43,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   static override styles = codeBlockStyles;
 
   @query('.lang-button')
-  private _langButton!: HTMLButtonElement;
+  private accessor _langButton!: HTMLButtonElement;
 
   @state()
-  private _langListAbortController?: AbortController;
+  private accessor _langListAbortController: AbortController | undefined =
+    undefined;
 
   private readonly _themeObserver = new ThemeObserver();
 
@@ -101,7 +96,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
    *
    * See {@link updated}
    */
-  private _perviousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
+  private _previousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: StrictLanguageInfo) {
     if (this._highlighter) {
@@ -149,61 +144,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   @query('rich-text')
-  private _richTextElement?: RichText;
-
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    const selection = this.host.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
-
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 &&
-        blockSelections[0].blockId !== this.blockId)
-    ) {
-      return null;
-    }
-
-    return {
-      template: ({ updatePortal }) =>
-        CodeOptionTemplate({
-          anchor: this,
-          model: this.model,
-          wrap: this.model.wrap,
-          toggleWrap: () => {
-            this.setWrap(!this.model.wrap);
-            updatePortal();
-          },
-          abortController,
-        }),
-      computePosition: {
-        referenceElement: this,
-        placement: 'right-start',
-        middleware: [
-          offset({
-            mainAxis: 12,
-            crossAxis: 10,
-          }),
-          shift({
-            crossAxis: true,
-            padding: {
-              top: PAGE_HEADER_HEIGHT + 12,
-              bottom: 12,
-              right: 12,
-            },
-            limiter: limitShift(),
-          }),
-        ],
-        autoUpdate: true,
-      },
-    };
-  });
+  private accessor _richTextElement: RichText | null = null;
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
@@ -217,7 +158,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this.clipboardController.hostConnected();
     this.setHighlightOptionsGetter(() => {
       return {
-        lang: this._perviousLanguage.id as BundledLanguage,
+        lang: this._previousLanguage.id as BundledLanguage,
         highlighter: this._highlighter,
       };
     });
@@ -392,9 +333,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override updated() {
-    if (this.model.language !== this._perviousLanguage.id) {
+    if (this.model.language !== this._previousLanguage.id) {
       const lang = getStandardLanguage(this.model.language);
-      this._perviousLanguage = lang ?? PLAIN_TEXT_LANG_INFO;
+      this._previousLanguage = lang ?? PLAIN_TEXT_LANG_INFO;
       if (lang) {
         this._startHighlight(lang).catch(console.error);
       } else {
@@ -440,7 +381,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     createLangList({
       abortController,
-      currentLanguage: this._perviousLanguage,
+      currentLanguage: this._previousLanguage,
       onSelectLanguage: lang => {
         this.setLang(lang ? lang.id : null);
         abortController.abort();
@@ -490,13 +431,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override renderBlock(): TemplateResult<1> {
     return html`
       <div
-        ${ref(this._whenHover.setReference)}
         class=${classMap({
           'affine-code-block-container': true,
           wrap: this.model.wrap,
         })}
       >
         ${this._curLanguageButtonTemplate()}
+
         <div class="rich-text-container">
           <div contenteditable="false" id="line-numbers"></div>
           <rich-text
@@ -515,8 +456,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           </rich-text>
         </div>
 
-        ${this.renderChildren(this.model)}
-
+        ${this.renderChildren(this.model)} ${Object.values(this.widgets)}
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>
     `;

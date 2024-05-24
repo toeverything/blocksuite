@@ -7,6 +7,7 @@ export {
   type AffineAIPanelWidgetConfig,
 } from './ai-panel/type.js';
 export { BlockHubWidget } from './block-hub/block-hub.js';
+export { AffineCodeToolbarWidget } from './code-toolbar/code-toolbar.js';
 export { AffineDocRemoteSelectionWidget } from './doc-remote-selection/doc-remote-selection.js';
 export { AffineDragHandleWidget } from './drag-handle/drag-handle.js';
 export {
@@ -22,7 +23,7 @@ export {
 } from './element-toolbar/index.js';
 export { toolbarDefaultConfig } from './format-bar/config.js';
 export { AffineFormatBarWidget } from './format-bar/format-bar.js';
-export { AffineImageToolbarWidget } from './image-toolbar/image-toolbar.js';
+export { AffineImageToolbarWidget } from './image-toolbar/index.js';
 export { AffineInnerModalWidget } from './inner-modal/inner-modal.js';
 export {
   // It's used in the AFFiNE!

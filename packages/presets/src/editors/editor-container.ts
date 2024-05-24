@@ -18,7 +18,7 @@ import {
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import type { EdgelessEditor } from './edgeless-editor.js';
@@ -74,15 +74,14 @@ export class AffineEditorContainer
   `;
 
   @property({ attribute: false })
-  doc!: Doc;
+  accessor doc!: Doc;
 
   @property({ attribute: false })
-  mode: 'page' | 'edgeless' = 'page';
+  accessor mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  pageSpecs = PageEditorBlockSpecs;
+  accessor pageSpecs = PageEditorBlockSpecs;
 
-  @state()
   private get _pageSpecs() {
     return [...this.pageSpecs].map(spec => {
       if (spec.schema.model.flavour === 'affine:page') {
@@ -106,9 +105,8 @@ export class AffineEditorContainer
   }
 
   @property({ attribute: false })
-  edgelessSpecs = EdgelessEditorBlockSpecs;
+  accessor edgelessSpecs = EdgelessEditorBlockSpecs;
 
-  @state()
   private get _edgelessSpecs() {
     return [...this.edgelessSpecs].map(spec => {
       if (spec.schema.model.flavour === 'affine:page') {
@@ -132,12 +130,13 @@ export class AffineEditorContainer
   }
 
   @property({ attribute: false })
-  override autofocus = false;
+  override accessor autofocus = false;
 
   @query('page-editor')
-  private _pageEditor?: PageEditor;
+  private accessor _pageEditor: PageEditor | null = null;
+
   @query('edgeless-editor')
-  private _edgelessEditor?: EdgelessEditor;
+  private accessor _edgelessEditor: EdgelessEditor | null = null;
 
   get editor() {
     const editor =
@@ -182,10 +181,10 @@ export class AffineEditorContainer
 
   /** @deprecated unreliable since pageSpecs can be overridden */
   @query('affine-page-root')
-  private _pageRoot?: PageRootBlockComponent;
+  private accessor _pageRoot: PageRootBlockComponent | null = null;
   /** @deprecated unreliable since edgelessSpecs can be overridden */
   @query('affine-edgeless-root')
-  private _edgelessRoot?: EdgelessRootBlockComponent;
+  private accessor _edgelessRoot: EdgelessRootBlockComponent | null = null;
 
   /**
    * @deprecated need to refactor

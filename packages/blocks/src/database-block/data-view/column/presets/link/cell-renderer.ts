@@ -135,7 +135,7 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
   `;
 
   @query('.affine-database-link-editing')
-  private _container!: HTMLInputElement;
+  private accessor _container!: HTMLInputElement;
 
   override firstUpdated() {
     this._focusEnd();

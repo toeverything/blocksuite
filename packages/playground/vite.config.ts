@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
+import { cpus } from 'node:os';
 import path, { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import type { GetManualChunk } from 'rollup';
 import type { Plugin } from 'vite';
 import { defineConfig, loadEnv } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
@@ -11,7 +13,7 @@ import wasm from 'vite-plugin-wasm';
 import { hmrPlugin } from './scripts/hmr-plugin';
 
 const require = createRequire(import.meta.url);
-const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
+const enableIstanbul = !!process.env.COVERAGE;
 const chunkSizeReport = !!process.env.CHUNK_SIZE_REPORT;
 
 const cache = new Map();
@@ -31,11 +33,13 @@ export function sourcemapExclude(): Plugin {
   };
 }
 
+type GetModuleInfo = Parameters<GetManualChunk>[1]['getModuleInfo'];
+
 function isDepInclude(
   id: string,
   depPaths: string[],
   importChain: string[],
-  getModuleInfo
+  getModuleInfo: GetModuleInfo
 ): boolean | undefined {
   const key = `${id}-${depPaths.join('|')}`;
   if (importChain.includes(id)) {
@@ -137,10 +141,22 @@ export default ({ mode }) => {
         }),
       wasm(),
     ],
+    esbuild: {
+      target: 'es2018',
+    },
     build: {
       target: 'ES2022',
       sourcemap: true,
       rollupOptions: {
+        cache: false,
+        maxParallelFileOps: Math.max(1, cpus().length - 1),
+        onwarn(warning, defaultHandler) {
+          if (['SOURCEMAP_ERROR', 'EVAL'].includes(warning.code)) {
+            return;
+          }
+
+          defaultHandler(warning);
+        },
         input: {
           main: resolve(__dirname, 'index.html'),
           'starter/': resolve(__dirname, 'starter/index.html'),
@@ -172,6 +188,10 @@ export default ({ mode }) => {
           ),
         },
         output: {
+          sourcemapIgnoreList: relativeSourcePath => {
+            const normalizedPath = path.normalize(relativeSourcePath);
+            return normalizedPath.includes('node_modules');
+          },
           manualChunks(id, { getModuleInfo }) {
             for (const group of Object.keys(chunkGroups)) {
               const deps = chunkGroups[group];

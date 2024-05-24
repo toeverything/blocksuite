@@ -6,8 +6,8 @@ import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { createPopup } from '../../../../_common/components/index.js';
 import type { FilterGroup, Variable } from '../../common/ast.js';
-import { createPopup } from '../../utils/menu/index.js';
 
 @customElement('advanced-filter-modal')
 export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
@@ -67,19 +67,19 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  isRoot = false;
+  accessor isRoot = false;
   @property({ attribute: false })
-  data!: FilterGroup;
+  accessor data!: FilterGroup;
 
   @property({ attribute: false })
-  vars!: Variable[];
+  accessor vars!: Variable[];
 
   @property({ attribute: false })
-  setData!: (filter: FilterGroup) => void;
+  accessor setData!: (filter: FilterGroup) => void;
   @property({ attribute: false })
-  onDelete!: () => void;
+  accessor onDelete!: () => void;
   @property({ attribute: false })
-  onBack!: () => void;
+  accessor onBack!: () => void;
 
   override connectedCallback() {
     super.connectedCallback();

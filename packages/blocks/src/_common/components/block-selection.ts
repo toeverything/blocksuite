@@ -38,13 +38,13 @@ export class BlockSelection extends LitElement {
   `;
 
   @property({ attribute: false })
-  block!: BlockElement;
+  accessor block!: BlockElement;
 
   @property({ attribute: false })
-  borderRadius?: number = 5;
+  accessor borderRadius: number = 5;
 
   @property({ attribute: false })
-  borderWidth?: number = 0;
+  accessor borderWidth: number = 0;
 
   protected override updated(_changedProperties: PropertyValues): void {
     super.updated(_changedProperties);

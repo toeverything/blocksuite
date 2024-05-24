@@ -36,13 +36,13 @@ export class AIItemList extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @property({ attribute: false })
-  groups!: AIItemGroupConfig[];
+  accessor groups!: AIItemGroupConfig[];
 
   @property({ attribute: false })
-  onClick?: () => void;
+  accessor onClick: (() => void) | undefined = undefined;
 
   override render() {
     return html`${repeat(this.groups, group => {

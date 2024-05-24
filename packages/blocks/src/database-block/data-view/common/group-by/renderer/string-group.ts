@@ -1,7 +1,7 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { popMenu } from '../../../utils/menu/index.js';
+import { popMenu } from '../../../../../_common/components/index.js';
 import { BaseGroup } from './base.js';
 
 @customElement('data-view-group-title-string-view')

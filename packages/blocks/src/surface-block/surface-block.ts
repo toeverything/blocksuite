@@ -99,7 +99,7 @@ export class SurfaceBlockComponent extends BlockElement<
   };
 
   @query('edgeless-block-portal-container')
-  portal!: EdgelessBlockPortalContainer;
+  accessor portal!: EdgelessBlockPortalContainer;
 
   get renderer() {
     return this._renderer;
@@ -114,7 +114,7 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   @query('.affine-edgeless-surface-block-container')
-  private _surfaceContainer!: HTMLElement;
+  private accessor _surfaceContainer!: HTMLElement;
 
   override connectedCallback() {
     super.connectedCallback();

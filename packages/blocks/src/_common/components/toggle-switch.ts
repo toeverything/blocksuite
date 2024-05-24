@@ -57,10 +57,10 @@ export class ToggleSwitch extends LitElement {
   static override styles = styles;
 
   @property({ attribute: false })
-  on = false;
+  accessor on = false;
 
   @property({ attribute: false })
-  onChange?: (on: boolean) => void;
+  accessor onChange: ((on: boolean) => void) | undefined = undefined;
 
   private _toggleSwitch() {
     this.on = !this.on;

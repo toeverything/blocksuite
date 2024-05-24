@@ -85,10 +85,10 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  layout: 'horizontal' | 'vertical' = 'horizontal';
+  accessor layout: 'horizontal' | 'vertical' = 'horizontal';
 
   @property({ attribute: false })
-  edgeless: EdgelessRootBlockComponent;
+  accessor edgeless: EdgelessRootBlockComponent;
 
   private _isVerticalBar() {
     return this.layout === 'vertical';

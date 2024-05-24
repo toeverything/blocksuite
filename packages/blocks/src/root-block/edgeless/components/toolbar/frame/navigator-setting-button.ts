@@ -47,27 +47,28 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   `;
 
   @state()
-  blackBackground = true;
+  accessor blackBackground = true;
 
   @property({ attribute: false })
-  popperShow = false;
+  accessor popperShow = false;
 
   @property({ attribute: false })
-  setPopperShow: (show: boolean) => void = () => {};
+  accessor setPopperShow: (show: boolean) => void = () => {};
 
   @property({ attribute: false })
-  hideToolbar = false;
+  accessor hideToolbar = false;
 
   @property({ attribute: false })
-  onHideToolbarChange?: (hideToolbar: boolean) => void;
+  accessor onHideToolbarChange: undefined | ((hideToolbar: boolean) => void) =
+    undefined;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent;
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   @query('.navigator-setting-button')
-  private _navigatorSettingButton!: HTMLElement;
+  private accessor _navigatorSettingButton!: HTMLElement;
   @query('.navigator-setting-menu')
-  private _navigatorSettingMenu!: HTMLElement;
+  private accessor _navigatorSettingMenu!: HTMLElement;
   private _navigatorSettingPopper?: ReturnType<
     typeof createButtonPopper
   > | null = null;

@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { assertImageOption } from 'utils/asserts.js';
 
 import { getIndexCoordinate, waitNextFrame } from './misc.js';
 
@@ -207,6 +208,38 @@ export async function moveToImage(page: Page) {
     };
   });
   await page.mouse.move(x, y);
+}
+
+export async function popImageMoreMenu(page: Page) {
+  await moveToImage(page);
+  await assertImageOption(page);
+  const moreButton = page.locator('.image-toolbar-button.more');
+  await moreButton.click();
+  const menu = page.locator('.image-more-popup-menu');
+
+  const turnIntoCardButton = page.locator('.menu-item', {
+    hasText: 'Turn into card view',
+  });
+
+  const copyButton = page.locator('.menu-item', {
+    hasText: 'Copy',
+  });
+
+  const duplicateButton = page.locator('.menu-item', {
+    hasText: 'Duplicate',
+  });
+
+  const deleteButton = page.locator('.menu-item', {
+    hasText: 'Delete',
+  });
+
+  return {
+    menu,
+    copyButton,
+    turnIntoCardButton,
+    duplicateButton,
+    deleteButton,
+  };
 }
 
 export async function clickBlockDragHandle(page: Page, blockId: string) {

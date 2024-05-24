@@ -18,21 +18,22 @@ import './left-side-panel.js';
 import './side-panel.js';
 
 import { type EditorHost, ShadowlessElement } from '@blocksuite/block-std';
-import type {
-  AffineTextAttributes,
-  SerializedXYWH,
-  TreeNode,
-} from '@blocksuite/blocks';
 import {
+  type AffineTextAttributes,
   BlocksUtils,
   ColorVariables,
+  defaultImageProxyMiddleware,
   extractCssVariables,
   FontFamilyVariables,
   HtmlTransformer,
   MarkdownTransformer,
+  NotionHtmlAdapter,
+  openFileOrFiles,
+  type SerializedXYWH,
   SizeVariables,
   StyleVariables,
   type SurfaceBlockComponent,
+  type TreeNode,
   ZipTransformer,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -42,8 +43,13 @@ import type {
   CommentPanel,
   CopilotPanel,
 } from '@blocksuite/presets';
-import type { BlockModel } from '@blocksuite/store';
-import { type DocCollection, Text, Utils } from '@blocksuite/store';
+import {
+  type BlockModel,
+  type DocCollection,
+  Job,
+  Text,
+  Utils,
+} from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
@@ -181,47 +187,47 @@ export class DebugMenu extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  collection!: DocCollection;
+  accessor collection!: DocCollection;
 
   @property({ attribute: false })
-  editor!: AffineEditorContainer;
+  accessor editor!: AffineEditorContainer;
 
   @property({ attribute: false })
-  outlinePanel!: CustomOutlinePanel;
+  accessor outlinePanel!: CustomOutlinePanel;
 
   @property({ attribute: false })
-  framePanel!: CustomFramePanel;
+  accessor framePanel!: CustomFramePanel;
 
   @property({ attribute: false })
-  chatPanel!: CustomChatPanel;
+  accessor chatPanel!: CustomChatPanel;
 
   @property({ attribute: false })
-  copilotPanel!: CopilotPanel;
+  accessor copilotPanel!: CopilotPanel;
 
   @property({ attribute: false })
-  commentPanel!: CommentPanel;
+  accessor commentPanel!: CommentPanel;
 
   @property({ attribute: false })
-  sidePanel!: SidePanel;
+  accessor sidePanel!: SidePanel;
   @property({ attribute: false })
-  leftSidePanel!: LeftSidePanel;
+  accessor leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
-  docsPanel!: DocsPanel;
+  accessor docsPanel!: DocsPanel;
 
   @state()
-  private _canUndo = false;
+  private accessor _canUndo = false;
 
   @state()
-  private _canRedo = false;
+  private accessor _canRedo = false;
 
   @property({ attribute: false })
-  readonly = false;
+  accessor readonly = false;
 
   @state()
-  private _hasOffset = false;
+  private accessor _hasOffset = false;
 
   @query('#block-type-dropdown')
-  blockTypeDropdown!: SlDropdown;
+  accessor blockTypeDropdown!: SlDropdown;
 
   private _styleMenu!: Pane;
   private _showStyleDebugMenu = false;
@@ -235,7 +241,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   @state()
-  private _dark = getDarkModeConfig();
+  private accessor _dark = getDarkModeConfig();
 
   get host() {
     return this.editor.host;
@@ -459,6 +465,23 @@ export class DebugMenu extends ShadowlessElement {
     input.click();
   }
 
+  private async _importNotionHTML() {
+    const file = await openFileOrFiles({ acceptType: 'Html', multiple: false });
+    if (!file) return;
+    const job = new Job({
+      collection: this.collection,
+      middlewares: [defaultImageProxyMiddleware],
+    });
+    const htmlAdapter = new NotionHtmlAdapter();
+    htmlAdapter.applyConfigs(job.adapterConfigs);
+    const snapshot = await htmlAdapter.toDocSnapshot({
+      file: await file.text(),
+      pageId: this.collection.idGenerator(),
+      assets: job.assetsManager,
+    });
+    await job.snapshotToDoc(snapshot);
+  }
+
   private _shareUrl() {
     const base64 = Utils.encodeCollectionAsYjsUpdateV2(this.collection);
     const url = new URL(window.location.toString());
@@ -671,6 +694,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click="${this._importSnapshot}">
                 Import Snapshot
+              </sl-menu-item>
+              <sl-menu-item @click="${this._importNotionHTML}">
+                Import Notion HTML
               </sl-menu-item>
               <sl-menu-item @click="${this._shareUrl}">
                 Share URL

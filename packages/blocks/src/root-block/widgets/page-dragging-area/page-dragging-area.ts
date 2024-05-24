@@ -32,7 +32,7 @@ export class AffinePageDraggingAreaWidget extends WidgetElement<
   PageRootBlockComponent
 > {
   @state()
-  rect: Rect | null = null;
+  accessor rect: Rect | null = null;
 
   private _rafID = 0;
 

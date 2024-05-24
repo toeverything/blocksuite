@@ -61,13 +61,13 @@ export class Loader extends LitElement {
   `;
 
   @property({ attribute: false })
-  hostModel: BlockModel | null = null;
+  accessor hostModel: BlockModel | null = null;
 
   @property({ attribute: false })
-  radius: string | number = '8px';
+  accessor radius: string | number = '8px';
 
   @property({ attribute: false })
-  width: string | number = '150px';
+  accessor width: string | number = '150px';
 
   constructor() {
     super();

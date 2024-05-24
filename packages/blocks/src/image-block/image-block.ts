@@ -30,37 +30,37 @@ export class ImageBlockComponent extends BlockElement<
   ImageBlockService
 > {
   @property({ attribute: false })
-  loading = false;
+  accessor loading = false;
 
   @property({ attribute: false })
-  error = false;
+  accessor error = false;
 
   @property({ attribute: false })
-  downloading = false;
+  accessor downloading = false;
 
   @property({ attribute: false })
-  retryCount = 0;
+  accessor retryCount = 0;
 
   @property({ attribute: false })
-  blob?: Blob;
+  accessor blob: Blob | undefined = undefined;
 
   @property({ attribute: false })
-  blobUrl?: string;
+  accessor blobUrl: string | undefined = undefined;
 
   @state()
-  lastSourceId!: string;
+  accessor lastSourceId!: string;
 
   @query('affine-image-block-card')
-  private _imageCard?: AffineImageCard;
+  private accessor _imageCard: AffineImageCard | null = null;
 
   @query('affine-page-image')
-  private _pageImage?: ImageBlockPageComponent;
+  private accessor _pageImage: ImageBlockPageComponent | null = null;
 
   @query('affine-edgeless-image')
-  private _edgelessImage?: ImageBlockEdgelessComponent;
+  private accessor _edgelessImage: ImageBlockEdgelessComponent | null = null;
 
   @query('embed-card-caption')
-  captionElement!: EmbedCardCaption;
+  accessor captionElement!: EmbedCardCaption;
 
   private _isInSurface = false;
 

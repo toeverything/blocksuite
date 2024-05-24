@@ -9,6 +9,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import {
+  popMenu,
+  positionToVRect,
+} from '../../../../../../../_common/components/index.js';
+import {
   DatabaseDuplicate,
   DatabaseInsertLeft,
   DatabaseInsertRight,
@@ -20,7 +24,6 @@ import {
 import type { InsertToPosition } from '../../../../../types.js';
 import { startDrag } from '../../../../../utils/drag.js';
 import { autoScrollOnBoundary } from '../../../../../utils/frame-loop.js';
-import { popMenu, positionToVRect } from '../../../../../utils/index.js';
 import { insertPositionToIndex } from '../../../../../utils/insert.js';
 import { getResultInRange } from '../../../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
@@ -48,13 +51,13 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  tableViewManager!: DataViewTableManager;
+  accessor tableViewManager!: DataViewTableManager;
 
   @property({ attribute: false })
-  column!: DataViewTableColumnManager;
+  accessor column!: DataViewTableColumnManager;
 
   @property({ attribute: false })
-  grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
+  accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
 
   private widthDragBar = createRef();
 

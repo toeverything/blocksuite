@@ -41,7 +41,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
   `;
 
   @state()
-  private _selectionRect: {
+  private accessor _selectionRect: {
     x: number;
     y: number;
     width: number;
@@ -49,10 +49,10 @@ export class EdgelessCopilotWidget extends WidgetElement<
   } = { x: 0, y: 0, width: 0, height: 0 };
 
   @state()
-  private _visible = false;
+  private accessor _visible = false;
 
   @query('.copilot-selection-rect')
-  selectionElem!: HTMLDivElement;
+  accessor selectionElem!: HTMLDivElement;
 
   private _selectionModelRect!: DOMRect;
 

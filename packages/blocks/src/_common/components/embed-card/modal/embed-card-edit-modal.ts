@@ -24,19 +24,19 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  model!: EmbedCardModel;
+  accessor model!: EmbedCardModel;
 
   @property({ attribute: false })
-  host!: EditorHost;
+  accessor host!: EditorHost;
 
   @query('.embed-card-modal-input.title')
-  titleInput!: HTMLInputElement;
+  accessor titleInput!: HTMLInputElement;
 
   @query('.embed-card-modal-input.description')
-  descInput!: HTMLTextAreaElement;
+  accessor descInput!: HTMLTextAreaElement;
 
   @state()
-  private _titleInputValue = '';
+  private accessor _titleInputValue = '';
 
   override connectedCallback() {
     super.connectedCallback();

@@ -71,19 +71,19 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless!: EdgelessRootBlockComponent | null;
+  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   @property({ attribute: false })
-  editorHost!: EditorHost;
+  accessor editorHost!: EditorHost;
 
   @state()
-  blackBackground = false;
+  accessor blackBackground = false;
 
   @state()
-  fillScreen = false;
+  accessor fillScreen = false;
 
   @state()
-  hideToolbar = false;
+  accessor hideToolbar = false;
 
   private get _rootService() {
     return this.editorHost.spec.getService('affine:page');

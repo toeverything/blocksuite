@@ -9,6 +9,10 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  eventToVRect,
+  popFilterableSimpleMenu,
+} from '../../../../_common/components/index.js';
+import {
   ArrowDownSmallIcon,
   DuplicateIcon,
 } from '../../../../_common/icons/index.js';
@@ -20,10 +24,6 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '../../common/icons/index.js';
-import {
-  eventToVRect,
-  popFilterableSimpleMenu,
-} from '../../utils/menu/index.js';
 import { popAddNewFilter } from './condition.js';
 
 @customElement('filter-group-view')
@@ -153,15 +153,16 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  depth = 1;
-  @property({ attribute: false })
-  data!: FilterGroup;
+  accessor depth = 1;
 
   @property({ attribute: false })
-  vars!: Variable[];
+  accessor data!: FilterGroup;
 
   @property({ attribute: false })
-  setData!: (filter: FilterGroup) => void;
+  accessor vars!: Variable[];
+
+  @property({ attribute: false })
+  accessor setData!: (filter: FilterGroup) => void;
 
   private opMap = {
     and: 'And',
@@ -217,10 +218,12 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   };
 
   @state()
-  containerClass?: {
-    index: number;
-    class: string;
-  };
+  accessor containerClass:
+    | {
+        index: number;
+        class: string;
+      }
+    | undefined = undefined;
 
   private _clickConditionOps(target: ReferenceElement, i: number) {
     const filter = this.data.conditions[i];
