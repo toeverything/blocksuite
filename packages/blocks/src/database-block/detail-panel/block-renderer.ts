@@ -46,10 +46,10 @@ export class BlockRenderer
   accessor view!: DataViewTableManager | DataViewKanbanManager;
   @property({ attribute: false })
   accessor rowId!: string;
-  host?: EditorHost;
-
+  @property({ attribute: false })
+  accessor host!: EditorHost;
   get model() {
-    return this.host?.doc.getBlockById(this.rowId);
+    return this.host?.doc.getBlock(this.rowId)?.model;
   }
 
   get topContenteditableElement() {
@@ -60,7 +60,6 @@ export class BlockRenderer
 
   public override connectedCallback() {
     super.connectedCallback();
-    this.host = this.closest('editor-host') ?? undefined;
     this._disposables.addFromEvent(
       this.topContenteditableElement ?? this,
       'keydown',
@@ -95,11 +94,31 @@ export class BlockRenderer
     </div>`;
   }
 
+  get service() {
+    return this.host.std.spec.getService('affine:database');
+  }
+  get inlineManager() {
+    return this.service.inlineManager;
+  }
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
   protected override render(): unknown {
     const model = this.model;
     if (!model) {
       return;
     }
-    return html` ${this.host?.renderModel(model)} ${this.renderIcon()} `;
+    return html`<rich-text
+        .yText=${model.text}
+        .attributesSchema=${this.attributesSchema}
+        .attributeRenderer=${this.attributeRenderer}
+        .embedChecker=${this.inlineManager.embedChecker}
+        .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
+        class="inline-editor"
+      ></rich-text
+      >${this.renderIcon()} `;
   }
 }
