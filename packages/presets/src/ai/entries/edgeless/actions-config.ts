@@ -77,7 +77,7 @@ const imageCustomInput = async (host: EditorHost) => {
   if (!(imageBlock instanceof ImageBlockModel)) return;
   if (!imageBlock.sourceId) return;
 
-  const blob = await host.doc.blob.get(imageBlock.sourceId);
+  const blob = await host.doc.blobSync.get(imageBlock.sourceId);
   if (!blob) return;
 
   return {
