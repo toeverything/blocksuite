@@ -1,14 +1,19 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BlobManager } from '../persistence/blob/types.js';
+interface BlobCRUD {
+  get: (key: string) => Promise<Blob | null> | Blob | null;
+  set: (key: string, value: Blob) => Promise<string> | string;
+  delete: (key: string) => Promise<void> | void;
+  list: () => Promise<string[]> | string[];
+}
 
 type AssetsManagerConfig = {
-  blob: BlobManager;
+  blob: BlobCRUD;
 };
 
 export class AssetsManager {
   private readonly _assetsMap = new Map<string, Blob>();
-  private readonly _blob: BlobManager;
+  private readonly _blob: BlobCRUD;
 
   constructor(options: AssetsManagerConfig) {
     this._blob = options.blob;
@@ -42,6 +47,6 @@ export class AssetsManager {
       return;
     }
 
-    await this._blob.set(blob, blobId);
+    await this._blob.set(blobId, blob);
   }
 }

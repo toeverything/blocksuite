@@ -14,10 +14,10 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "y-protocols": "^1.0.6",
-    "idb": "^8.0.0"
+    "idb": "^8.0.0",
+    "idb-keyval": "^6.2.1",
+    "y-protocols": "^1.0.6"
   },
-  "devDependencies": {},
   "peerDependencies": {
     "yjs": "^13.6.15"
   },

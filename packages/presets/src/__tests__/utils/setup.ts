@@ -1,13 +1,12 @@
 import { AffineSchemas } from '@blocksuite/blocks/schemas';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockCollection } from '@blocksuite/store';
-import { type BlobStorage, DocCollection, Text } from '@blocksuite/store';
-import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
+import { DocCollection, Text } from '@blocksuite/store';
+import { Generator, Schema } from '@blocksuite/store';
 
 import { AffineEditorContainer } from '../../index.js';
 
 function createCollectionOptions() {
-  const blobStorages: ((id: string) => BlobStorage)[] = [];
   const schema = new Schema();
   const room = Math.random().toString(16).slice(2, 8);
 
@@ -15,13 +14,10 @@ function createCollectionOptions() {
 
   const idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
-  blobStorages.push(createMemoryStorage);
-
   return {
     id: room,
     schema,
     idGenerator,
-    blobStorages,
     defaultFlags: {
       enable_synced_doc_block: true,
       enable_pie_menu: true,

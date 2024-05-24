@@ -352,6 +352,9 @@ importers:
 
   packages/framework/global:
     dependencies:
+      lib0:
+        specifier: ^0.2.93
+        version: 0.2.93
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -426,6 +429,9 @@ importers:
       idb:
         specifier: ^8.0.0
         version: 8.0.0
+      idb-keyval:
+        specifier: ^6.2.1
+        version: 6.2.1
       y-protocols:
         specifier: ^1.0.6
         version: 1.0.6(yjs@13.6.15)

@@ -187,7 +187,7 @@ export const getSelectedImagesAsBlobs = async (host: EditorHost) => {
       const sourceId = (host.doc.getBlock(s.blockId)?.model as ImageBlockModel)
         ?.sourceId;
       if (!sourceId) return null;
-      const blob = await (sourceId ? host.doc.blob.get(sourceId) : null);
+      const blob = await (sourceId ? host.doc.blobSync.get(sourceId) : null);
       if (!blob) return null;
       return new File([blob], sourceId);
     }) ?? []

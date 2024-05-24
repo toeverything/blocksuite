@@ -141,16 +141,24 @@ export class BlockCollection extends Space<FlatBlockMap> {
     return this._collection;
   }
 
+  get docSync() {
+    return this.collection.docSync;
+  }
+
+  get awarenessSync() {
+    return this.collection.awarenessSync;
+  }
+
+  get blobSync() {
+    return this.collection.blobSync;
+  }
+
   get schema() {
     return this.collection.schema;
   }
 
   get meta() {
     return this.collection.meta.getDocMeta(this.id);
-  }
-
-  get blob() {
-    return this.collection.blob;
   }
 
   get isEmpty() {

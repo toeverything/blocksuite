@@ -39,7 +39,7 @@ export async function uploadBlobForImage(
 
   try {
     setImageUploaded(blockId);
-    sourceId = await doc.blob.set(blob);
+    sourceId = await doc.blobSync.set(blob);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -69,7 +69,7 @@ async function getImageBlob(model: ImageBlockModel) {
   }
 
   const doc = model.doc;
-  const blob = await doc.blob.get(sourceId);
+  const blob = await doc.blobSync.get(sourceId);
 
   if (!blob) {
     return null;
@@ -123,7 +123,7 @@ export async function fetchImageBlob(block: ImageBlockComponent) {
       throw new Error('Image sourceId is missing!');
     }
 
-    const blob = await doc.blob.get(sourceId);
+    const blob = await doc.blobSync.get(sourceId);
     if (!blob) {
       throw new Error('Image blob is missing!');
     }

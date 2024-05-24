@@ -52,7 +52,7 @@ async function uploadAttachmentBlob(
 
   try {
     setAttachmentUploading(blockId);
-    sourceId = await doc.blob.set(blob);
+    sourceId = await doc.blobSync.set(blob);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -84,7 +84,7 @@ async function getAttachmentBlob(model: AttachmentBlockModel) {
   }
 
   const doc = model.doc;
-  let blob = await doc.blob.get(sourceId);
+  let blob = await doc.blobSync.get(sourceId);
 
   if (blob) {
     blob = new Blob([blob], { type: model.type });

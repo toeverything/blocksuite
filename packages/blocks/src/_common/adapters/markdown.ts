@@ -1,3 +1,4 @@
+import { sha } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
   FromBlockSnapshotPayload,
@@ -18,7 +19,6 @@ import {
   type DocSnapshot,
   getAssetName,
   nanoid,
-  sha,
   type SliceSnapshot,
 } from '@blocksuite/store';
 import { format } from 'date-fns/format';

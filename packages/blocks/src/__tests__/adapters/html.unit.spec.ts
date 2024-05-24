@@ -1,5 +1,5 @@
 import type { BlockSnapshot } from '@blocksuite/store';
-import { MemoryBlobManager } from '@blocksuite/store';
+import { MemoryBlobCRUD } from '@blocksuite/store';
 import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
@@ -946,10 +946,10 @@ describe('snapshot to html', () => {
     );
 
     const htmlAdapter = new HtmlAdapter();
-    const blobManager = new MemoryBlobManager();
+    const blobManager = new MemoryBlobCRUD();
     await blobManager.set(
-      new Blob(),
-      'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs='
+      'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
+      new Blob()
     );
     const assets = new AssetsManager({ blob: blobManager });
 

@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, sha } from '@blocksuite/global/utils';
 import type {
   CollectionInfoSnapshot,
   Doc,
@@ -6,7 +6,7 @@ import type {
   DocSnapshot,
   JobMiddleware,
 } from '@blocksuite/store';
-import { extMimeMap, getAssetName, Job, sha } from '@blocksuite/store';
+import { extMimeMap, getAssetName, Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 
 import { replaceIdMiddleware, titleMiddleware } from './middlewares.js';

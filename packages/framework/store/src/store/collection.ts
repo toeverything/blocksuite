@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
-import { blob, DocCollectionAddonType, indexer, test } from './addon/index.js';
+import { DocCollectionAddonType, indexer, test } from './addon/index.js';
 import {
   BlockCollection,
   defaultBlockSelector,
@@ -16,7 +16,6 @@ export type DocCollectionOptions = StoreOptions & {
   schema: Schema;
 };
 
-@blob
 @indexer
 @test
 export class DocCollection extends DocCollectionAddonType {
@@ -91,6 +90,10 @@ export class DocCollection extends DocCollectionAddonType {
 
   get awarenessSync() {
     return this.store.awarenessSync;
+  }
+
+  get blobSync() {
+    return this.store.blobSync;
   }
 
   private _hasDoc(docId: string) {
@@ -182,6 +185,7 @@ export class DocCollection extends DocCollectionAddonType {
    */
   start() {
     this.docSync.start();
+    this.blobSync.start();
     this.awarenessSync.connect();
   }
 
@@ -206,6 +210,7 @@ export class DocCollection extends DocCollectionAddonType {
    */
   forceStop() {
     this.docSync.forceStop();
+    this.blobSync.stop();
     this.awarenessSync.disconnect();
   }
 

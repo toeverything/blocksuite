@@ -80,12 +80,20 @@ export class Doc {
     return this._blockCollection.collection;
   }
 
-  get meta() {
-    return this._blockCollection.meta;
+  get docSync() {
+    return this.collection.docSync;
   }
 
-  get blob() {
-    return this._blockCollection.blob;
+  get awarenessSync() {
+    return this.collection.awarenessSync;
+  }
+
+  get blobSync() {
+    return this.collection.blobSync;
+  }
+
+  get meta() {
+    return this._blockCollection.meta;
   }
 
   get isEmpty() {
