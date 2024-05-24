@@ -502,6 +502,7 @@ export class AffineAIPanelWidget extends WidgetElement {
                 <ai-panel-answer
                   .finish=${false}
                   .config=${config.finishStateConfig}
+                  .host=${this.host}
                 >
                   ${this.answer &&
                   config.answerRenderer(this.answer, this.state)}
@@ -520,6 +521,7 @@ export class AffineAIPanelWidget extends WidgetElement {
           <ai-panel-answer
             .config=${config.finishStateConfig}
             .copy=${config.copy}
+            .host=${this.host}
           >
             ${this.answer && config.answerRenderer(this.answer, this.state)}
           </ai-panel-answer>

@@ -30,24 +30,27 @@ import {
 } from '../messages/wrapper.js';
 import { AIProvider } from '../provider.js';
 import { reportResponse } from '../utils/action-reporter.js';
-import { isMindmapChild, isMindMapRoot } from '../utils/edgeless.js';
+import {
+  getEdgelessCopilotWidget,
+  isMindmapChild,
+  isMindMapRoot,
+} from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
 import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
 import {
+  getCopilotSelectedElems,
   getSelectedNoteAnchor,
   getSelections,
 } from '../utils/selection-utils.js';
-import { EXCLUDING_COPY_ACTIONS } from './consts.js';
+import { EXCLUDING_COPY_ACTIONS, IMAGE_ACTIONS } from './consts.js';
 import { bindTextStream } from './doc-handler.js';
-import type { CtxRecord } from './edgeless-response.js';
 import {
   actionToErrorResponse,
   actionToResponse,
-  getCopilotSelectedElems,
-  getEdgelessCopilotWidget,
   getElementToolbar,
   responses,
 } from './edgeless-response.js';
+import type { CtxRecord } from './types.js';
 
 type AnswerRenderer = NonNullable<
   AffineAIPanelWidget['config']
@@ -86,7 +89,7 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
     return createIframeRenderer;
   }
 
-  if (id === 'createImage') {
+  if (IMAGE_ACTIONS.includes(id)) {
     return createImageRenderer;
   }
 
@@ -465,14 +468,21 @@ export function mindmapChildShowWhen(
   return selected.length === 1 && isMindmapChild(selected[0]);
 }
 
-export function explainImageShowWhen(
+export function imageOnlyShowWhen(_: unknown, __: unknown, host: EditorHost) {
+  const selected = getCopilotSelectedElems(host);
+
+  return selected.length === 1 && selected[0] instanceof ImageBlockModel;
+}
+
+export function experimentalImageActionsShowWhen(
   _: unknown,
   __: unknown,
   host: EditorHost
 ) {
-  const selected = getCopilotSelectedElems(host);
-
-  return selected.length === 1 && selected[0] instanceof ImageBlockModel;
+  return (
+    !!host.doc.awarenessStore.getFlag('enable_new_image_actions') &&
+    imageOnlyShowWhen(_, __, host)
+  );
 }
 
 export function mindmapRootShowWhen(_: unknown, __: unknown, host: EditorHost) {

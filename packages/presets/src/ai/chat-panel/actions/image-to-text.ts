@@ -9,8 +9,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { renderImages } from '../components/images.js';
 import type { ChatAction } from '../index.js';
 
-@customElement('action-explain-image')
-export class ActionExplainImage extends WithDisposable(ShadowlessElement) {
+@customElement('action-image-to-text')
+export class ActionImageToText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor item!: ChatAction;
 
@@ -30,6 +30,6 @@ export class ActionExplainImage extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'action-explain-image': ActionExplainImage;
+    'action-image-to-text': ActionImageToText;
   }
 }

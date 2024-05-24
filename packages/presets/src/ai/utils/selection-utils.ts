@@ -1,6 +1,8 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
+  CopilotSelectionController,
   EdgelessBlock,
+  EdgelessModel,
   FrameBlockModel,
   ImageBlockModel,
   SurfaceBlockComponent,
@@ -9,6 +11,7 @@ import { BlocksUtils, EdgelessRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { type DraftModel, Slice, toDraftModel } from '@blocksuite/store';
 
+import { getEdgelessCopilotWidget, getService } from './edgeless.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
 export const getRootService = (host: EditorHost) => {
@@ -195,3 +198,15 @@ export const getSelectedImagesAsBlobs = async (host: EditorHost) => {
 export const getSelectedNoteAnchor = (host: EditorHost, id: string) => {
   return host.querySelector(`[data-portal-block-id="${id}"] .note-background`);
 };
+
+export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
+  const service = getService(host);
+  const copilotWidget = getEdgelessCopilotWidget(host);
+
+  if (copilotWidget.visible) {
+    return (service.tool.controllers['copilot'] as CopilotSelectionController)
+      .selectedElements;
+  }
+
+  return service.selection.elements;
+}

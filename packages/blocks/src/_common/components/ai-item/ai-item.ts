@@ -9,6 +9,10 @@ import { ref } from 'lit/directives/ref.js';
 
 import { ArrowRightIcon, EnterIcon } from '../../icons/ai.js';
 import { HoverController } from '../hover/controller.js';
+import {
+  SUBMENU_OFFSET_CROSS_AXIS,
+  SUBMENU_OFFSET_MAIN_AXIS,
+} from './const.js';
 import { menuItemStyles } from './styles.js';
 import type { AIItemConfig } from './types.js';
 
@@ -29,8 +33,12 @@ export class AIItem extends WithDisposable(LitElement) {
 
   private _whenHover!: HoverController;
 
-  constructor() {
-    super();
+  override connectedCallback() {
+    super.connectedCallback();
+    const subMenuOffset = {
+      mainAxis: this.item.subItemOffset?.[0] ?? SUBMENU_OFFSET_MAIN_AXIS,
+      crossAxis: this.item.subItemOffset?.[1] ?? SUBMENU_OFFSET_CROSS_AXIS,
+    };
     this._whenHover = new HoverController(this, ({ abortController }) => {
       return {
         template: html`<ai-sub-item-list
@@ -42,7 +50,7 @@ export class AIItem extends WithDisposable(LitElement) {
         computePosition: {
           referenceElement: this,
           placement: 'right-start',
-          middleware: [flip(), offset({ mainAxis: 16, crossAxis: -60 })],
+          middleware: [flip(), offset(subMenuOffset)],
           autoUpdate: {
             ancestorScroll: false,
             ancestorResize: false,
