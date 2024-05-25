@@ -704,9 +704,10 @@ export const createPopup = (
     onClose?: () => void;
     middleware?: Array<Middleware | null | undefined | false>;
     placement?: Placement;
+    container?: HTMLElement;
   }
 ) => {
-  const modal = createModal();
+  const modal = createModal(options?.container ?? document.body);
   autoUpdate(target, content, () => {
     computePosition(target, content, {
       placement: options?.placement,
@@ -750,6 +751,7 @@ export const popMenu = <T>(
     options: MenuOptions;
     placement?: Placement;
     middleware?: Array<Middleware | null | undefined | false>;
+    container?: HTMLElement;
   }
 ): MenuHandler => {
   const menu = new MenuComponent<T>();
@@ -763,6 +765,7 @@ export const popMenu = <T>(
   const close = createPopup(target, menu, {
     onClose: props.options.onClose,
     middleware: props.middleware,
+    container: props.container,
   });
   return {
     close,

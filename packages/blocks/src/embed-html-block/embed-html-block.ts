@@ -2,14 +2,18 @@ import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 
 import { assertExists } from '@blocksuite/global/utils';
+import { flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import { popMenu } from '../_common/components/index.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
+import { SettingsIcon } from '../_common/icons/edgeless.js';
+import { CopyIcon, ExpandCloseIcon } from '../_common/icons/text.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { EmbedHtmlModel, EmbedHtmlStyles } from './embed-html-model.js';
 import type { EmbedHtmlBlockService } from './embed-html-service.js';
@@ -30,8 +34,14 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   @state()
   private accessor _showOverlay = true;
 
+  @state()
+  private accessor _copied = false;
+
   @query('.embed-html-block-iframe-wrapper')
   private accessor _iframeWrapper!: HTMLDivElement;
+
+  @query('.fullscreen-toolbar-container')
+  private accessor _fullScreenToolbarContainer!: HTMLDivElement;
 
   @query('embed-card-caption')
   accessor captionElement!: EmbedCardCaption;
@@ -112,6 +122,64 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
     }
   }
 
+  private _copyCode = () => {
+    if (this._copied) return;
+    this.std.clipboard
+      .writeToClipboard(items => {
+        items['text/plain'] = this.model.html ?? '';
+        return items;
+      })
+      .then(() => {
+        this._copied = true;
+        setTimeout(() => {
+          this._copied = false;
+        }, 2000);
+      })
+      .catch(console.error);
+  };
+
+  private _popFullScreenSettings() {
+    popMenu(this._fullScreenToolbarContainer, {
+      options: {
+        items: [
+          {
+            type: 'custom',
+            render: html`<div class="settings-header">
+              <span>Settings</span>
+              <menu-divider></menu-divider>
+            </div>`,
+          },
+          {
+            type: 'action',
+            name: 'Hide toolbar',
+            select: () => {},
+          },
+        ],
+      },
+      placement: 'top-end',
+      middleware: [flip({ mainAxis: true }), offset({ mainAxis: 3 })],
+      container: this._iframeWrapper,
+    });
+  }
+
+  private get _FullscreenToolbar() {
+    return html`
+      <div class="fullscreen-toolbar-container">
+        <icon-button @click=${this.close}>${ExpandCloseIcon}</icon-button>
+        <icon-button @click=${this._popFullScreenSettings.bind(this)}
+          >${SettingsIcon}</icon-button
+        >
+
+        <div class="short-divider"></div>
+        <icon-button
+          text="${this._copied ? 'Copied' : 'Copy Code'}"
+          @click=${this._copyCode}
+          >${CopyIcon}</icon-button
+        >
+      </div>
+    `;
+  }
+
   override renderBlock(): unknown {
     const { style, xywh } = this.model;
 
@@ -158,11 +226,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
                   scrolling="no"
                   .srcdoc=${htmlSrc}
                 ></iframe>
-                <div class="iframe-tip">
-                  Press&nbsp;
-                  <button class="key" @click=${this.close}>ESC</button>
-                  &nbsp;to&nbsp;close
-                </div>
+                ${this._FullscreenToolbar}
               </div>
 
               <div
