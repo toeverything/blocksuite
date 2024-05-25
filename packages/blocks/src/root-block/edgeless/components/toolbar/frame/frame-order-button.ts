@@ -3,7 +3,7 @@ import '../../buttons/tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
 import { FrameOrderAdjustmentIcon } from '../../../../../_common/icons/index.js';
 import { createButtonPopper } from '../../../../../_common/utils/button-popper.js';
@@ -38,14 +38,17 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
     typeof createButtonPopper
   > | null = null;
 
-  @state()
-  private accessor _popperShow = false;
+  @property({ attribute: false })
+  accessor popperShow = false;
+
+  @property({ attribute: false })
+  accessor setPopperShow: (show: boolean) => void = () => {};
 
   override firstUpdated() {
     this._edgelessFrameOrderPopper = createButtonPopper(
       this._edgelessFrameOrderButton,
       this._edgelessFrameOrderMenu,
-      ({ display }) => (this._popperShow = display === 'show')
+      ({ display }) => this.setPopperShow(display === 'show')
     );
   }
 
@@ -59,7 +62,7 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
       </style>
       <edgeless-tool-icon-button
         class="edgeless-frame-order-button"
-        .tooltip=${this._popperShow ? '' : 'Frame Order'}
+        .tooltip=${this.popperShow ? '' : 'Frame Order'}
         @click=${() => {
           if (readonly) return;
           this._edgelessFrameOrderPopper?.toggle();

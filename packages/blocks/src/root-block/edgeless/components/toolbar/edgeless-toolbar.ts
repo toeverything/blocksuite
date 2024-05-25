@@ -178,6 +178,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   @state()
   accessor settingMenuShow = false;
 
+  @state()
+  accessor frameMenuShow = false;
+
   @state({
     hasChanged() {
       return true;
@@ -202,6 +205,15 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   get edgelessTool() {
     return this.edgeless.edgelessTool;
+  }
+
+  private get _hideNavigatorToolbar() {
+    return (
+      this.edgelessTool.type === 'frameNavigator' &&
+      this._hideToolbar &&
+      !this.settingMenuShow &&
+      !this.frameMenuShow
+    );
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
@@ -407,6 +419,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <div class="short-divider"></div>
 
       <edgeless-frame-order-button
+        .popperShow=${this.frameMenuShow}
+        .setPopperShow=${(show: boolean) => {
+          this.frameMenuShow = show;
+        }}
         .frames=${this._frames}
         .edgeless=${this.edgeless}
       >
@@ -574,8 +590,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     return html`
       <div
         class="edgeless-toolbar-toggle-control"
-        data-hide=${this._hideToolbar &&
-        this.edgeless.edgelessTool.type === 'frameNavigator'}
+        data-hide=${this._hideNavigatorToolbar}
       >
         <div
           class="edgeless-toolbar-container"
