@@ -1,4 +1,8 @@
 import { NoteDisplayMode } from '@blocks/_common/types.js';
+import {
+  NOTE_INIT_HEIGHT,
+  NOTE_MIN_WIDTH,
+} from '@blocks/root-block/edgeless/utils/consts.js';
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -881,7 +885,7 @@ test('drag to add customized size note', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [270, 260, 600, 300]);
 });
 
-test('drag to add customized size note: should wider than minimum width and higher than minimum height ', async ({
+test('drag to add customized size note: should clamp to min width and min height', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -890,6 +894,7 @@ test('drag to add customized size note: should wider than minimum width and high
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
   await setEdgelessTool(page, 'note');
+
   // add note at 300,300
   await page.mouse.move(300, 300);
   await page.mouse.down();
@@ -897,17 +902,7 @@ test('drag to add customized size note: should wider than minimum width and high
   await page.mouse.up();
   await waitNextFrame(page);
 
-  // assert add note unsuccessful, note should be wider than minimum width and higher than minimum height
-  await assertBlockCount(page, 'note', 1);
-
-  await setEdgelessTool(page, 'note');
   await waitNextFrame(page);
-
-  // add note at 300,300
-  await page.mouse.move(300, 300);
-  await page.mouse.down();
-  await page.mouse.move(900, 600, { steps: 10 });
-  await page.mouse.up();
 
   // should wait for inline editor update and resizeObserver callback
   await waitForInlineEditorStateUpdated(page);
@@ -917,10 +912,15 @@ test('drag to add customized size note: should wider than minimum width and high
   // click out of note
   await page.mouse.click(250, 200);
   // click on note to select it
-  await page.mouse.click(600, 500);
+  await page.mouse.click(320, 300);
   // assert selected note
   // note add on edgeless mode will have a offsetX of 30 and offsetY of 40
-  await assertEdgelessSelectedRect(page, [270, 260, 600, 300]);
+  await assertEdgelessSelectedRect(page, [
+    270,
+    260,
+    NOTE_MIN_WIDTH,
+    NOTE_INIT_HEIGHT,
+  ]);
 });
 
 test('Note added on doc mode should display on both modes by default', async ({

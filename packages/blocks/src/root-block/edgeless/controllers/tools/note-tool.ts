@@ -10,7 +10,7 @@ import {
 import type { SelectionArea } from '../../services/tools-manager.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
-  NOTE_MIN_HEIGHT,
+  NOTE_INIT_HEIGHT,
   NOTE_MIN_WIDTH,
 } from '../../utils/consts.js';
 import { addNote } from '../../utils/note.js';
@@ -131,25 +131,30 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._draggingArea = null;
 
     const { x, y, width, height } = this._draggingNoteOverlay;
+
     this._disposeOverlay(this._draggingNoteOverlay);
 
-    if (width < NOTE_MIN_WIDTH || height < NOTE_MIN_HEIGHT) {
-      //TODO: add toast to notify user
-      this._edgeless.tools.setEdgelessTool({ type: 'default' });
-      return;
-    }
-
     const { childFlavour, childType } = this.tool;
+
     const options = {
       childFlavour,
       childType,
       collapse: true,
     };
+
     const [viewX, viewY] = this._edgeless.service.viewport.toViewCoord(x, y);
+
     const point = new Point(viewX, viewY);
 
     this._doc.captureSync();
-    addNote(this._edgeless, point, options, width, height);
+
+    addNote(
+      this._edgeless,
+      point,
+      options,
+      Math.max(width, NOTE_MIN_WIDTH),
+      Math.max(height, NOTE_INIT_HEIGHT)
+    );
   }
 
   private _updateOverlayPosition(x: number, y: number) {
