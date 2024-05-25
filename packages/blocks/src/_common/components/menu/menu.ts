@@ -63,6 +63,15 @@ type NormalMenu = MenuCommon &
         class?: string;
       }
     | {
+        type: 'toggle-switch';
+        name: string;
+        on: boolean;
+        postfix?: TemplateResult;
+        label?: TemplateResult;
+        onChange: (on: boolean) => void;
+        class?: string;
+      }
+    | {
         type: 'sub-menu';
         name: string;
         label?: TemplateResult;
@@ -96,9 +105,7 @@ export type MenuOptions = {
   items: Menu[];
 };
 
-type SelectItem = {
-  type: 'select';
-  select: () => void;
+type ItemBase = {
   label: TemplateResult;
   upDivider?: boolean;
   downDivider?: boolean;
@@ -106,14 +113,25 @@ type SelectItem = {
   onHover?: (hover: boolean) => void;
   class?: string;
 };
-type Item =
-  | SelectItem
-  | {
-      type: 'ui';
-      render: TemplateResult;
-      upDivider?: boolean;
-      downDivider?: boolean;
-    };
+
+type NormalItem = ItemBase & {
+  type: 'normal';
+};
+
+type SelectItem = ItemBase & {
+  type: 'select';
+  select: () => void;
+};
+
+type UIItem = {
+  type: 'ui';
+  render: TemplateResult;
+  upDivider?: boolean;
+  downDivider?: boolean;
+};
+
+type Item = SelectItem | NormalItem | UIItem;
+
 const isSelectableItem = (item: Item): item is SelectItem => {
   return item.type === 'select';
 };
@@ -423,6 +441,30 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
         },
       ];
     },
+    'toggle-switch': menu => {
+      const postfix = menu.postfix
+        ? html` <div class="icon">${menu.postfix}</div>`
+        : nothing;
+
+      const onChange = (on: boolean) => {
+        menu.onChange(on);
+      };
+
+      return [
+        {
+          type: 'normal',
+          label: html`
+            <div class="affine-menu-action-text">
+              ${menu.label ?? menu.name}
+            </div>
+
+            <toggle-switch .on=${menu.on} .onChange=${onChange}></toggle-switch>
+            ${postfix}
+          `,
+          class: menu.class ?? '',
+        },
+      ];
+    },
     group: menu => {
       const items = menu.children().flatMap(menu => this.process(menu));
       if (items[0]) {
@@ -629,17 +671,23 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
             const itemClass = menu.class ?? '';
             const classes = classMap({
               'affine-menu-action': true,
-              selected: this._selectedIndex === i,
+              selected: menu.type === 'select' && this._selectedIndex === i,
               [itemClass]: true,
             });
+
+            const select = () => {
+              if (!isSelectableItem(menu)) return;
+              menu.select();
+            };
+
             return html`
               ${divider && !hideDividerWhenHeaderDividerIsShow
                 ? html`<menu-divider></menu-divider>`
                 : null}
               <div
                 class="${classes}"
-                @click="${menu.select}"
-                @mouseenter="${mouseEnter}"
+                @click=${select}
+                @mouseenter=${mouseEnter}
               >
                 <div class="content">${menu.label}</div>
               </div>

@@ -59,59 +59,22 @@ export const styles = css`
     border: none;
   }
 
-  .settings-header {
-    padding: 12px 7px;
+  .embed-html-block-iframe-wrapper affine-menu {
+    min-width: 296px;
   }
 
-  .embed-html-block-iframe-wrapper > .fullscreen-toolbar-container {
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-menu-shadow);
-    border: 1px solid var(--affine-border-color);
-    border-radius: 40px;
+  .embed-html-block-iframe-wrapper affine-menu .settings-header {
+    padding: 4px 12px;
+    font-weight: 500;
+    font-size: var(--affine-font-xs);
+    color: var(--affine-text-secondary-color);
+  }
 
+  .embed-html-block-iframe-wrapper > embed-html-fullscreen-toolbar {
     display: none;
-    align-items: center;
-
-    padding: 0 20px;
-
-    height: 64px;
-    min-width: 235px;
-
-    position: absolute;
-    left: 50%;
-    bottom: 30px;
-    transform: translateX(-50%);
-
-    -webkit-user-select: none;
-    user-select: none;
   }
-
-  .embed-html-block-iframe-wrapper:fullscreen > .fullscreen-toolbar-container {
-    display: flex;
-  }
-
-  .embed-html-block-iframe-wrapper
-    > .fullscreen-toolbar-container
-    icon-button
-    svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  .embed-html-block-iframe-wrapper
-    > .fullscreen-toolbar-container
-    icon-button[text] {
-    display: flex;
-    justify-content: flex-start;
-    gap: 5px;
-    width: auto;
-  }
-
-  .short-divider {
-    background-color: var(--affine-border-color);
-    width: 1px;
-    height: 36px;
-    margin: 0 10px;
+  .embed-html-block-iframe-wrapper:fullscreen > embed-html-fullscreen-toolbar {
+    display: initial;
   }
 
   .affine-embed-html-iframe-overlay {
