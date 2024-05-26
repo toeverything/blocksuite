@@ -2,19 +2,19 @@ import { flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { popMenu } from '../_common/components/index.js';
-import { SettingsIcon } from '../_common/icons/edgeless.js';
-import { CopyIcon, ExpandCloseIcon } from '../_common/icons/text.js';
-import type { EmbedHtmlBlockComponent } from './embed-html-block.js';
+import { popMenu } from '../../_common/components/index.js';
+import { SettingsIcon } from '../../_common/icons/edgeless.js';
+import { CopyIcon, ExpandCloseIcon } from '../../_common/icons/text.js';
+import type { EmbedHtmlBlockComponent } from '../embed-html-block.js';
 
 @customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {
   static override styles = css`
     :host {
-      position: absolute;
       box-sizing: border-box;
+      position: absolute;
       z-index: 1;
-      left: calc(50%);
+      left: 50%;
       transform: translateX(-50%);
       bottom: 0;
       -webkit-user-select: none;
@@ -22,16 +22,16 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
     }
 
     .toolbar-toggle-control {
-      padding-bottom: 28px;
+      padding-bottom: 20px;
     }
 
-    .toolbar-toggle-control[data-hide='true'] {
-      transition: 0.23s ease;
+    .toolbar-toggle-control[data-auto-hide='true'] {
+      transition: 0.27s ease;
       padding-top: 100px;
       transform: translateY(100px);
     }
 
-    .toolbar-toggle-control[data-hide='true']:hover {
+    .toolbar-toggle-control[data-auto-hide='true']:hover {
       padding-top: 0;
       transform: translateY(0);
     }
@@ -50,9 +50,6 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       padding: 0 20px;
 
       height: 64px;
-
-      -webkit-user-select: none;
-      user-select: none;
     }
 
     .short-v-divider {
@@ -60,18 +57,6 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       background-color: var(--affine-border-color);
       width: 1px;
       height: 36px;
-      margin: 0 10px;
-    }
-
-    .fullscreen-toolbar-container .left,
-    .fullscreen-toolbar-container .right {
-      display: flex;
-      gap: 8px;
-    }
-
-    .fullscreen-toolbar-container icon-button svg {
-      width: 24px;
-      height: 24px;
     }
 
     .fullscreen-toolbar-container icon-button.copy-button {
@@ -79,7 +64,8 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       justify-content: flex-start;
       align-items: center;
       gap: 7px;
-      width: max-content;
+      width: 108px;
+      padding: 4px 8px;
       font-size: var(--affine-font-xs);
       & svg {
         width: 16px;
@@ -88,23 +74,44 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
     }
   `;
 
-  @state()
-  private accessor _hideToolbar = false;
-
-  @state()
-  private accessor _popperVisible = false;
-
   @property({ attribute: false })
   accessor embedHtml!: EmbedHtmlBlockComponent;
 
   @query('.fullscreen-toolbar-container')
   private accessor _fullScreenToolbarContainer!: HTMLElement;
 
+  @state()
+  private accessor _copied = false;
+
+  @state()
+  private accessor _popperVisible = false;
+
+  private get autoHideToolbar() {
+    return (
+      this.embedHtml.edgeless?.service.editPropsStore.getItem(
+        'autoHideEmbedHTMLFullScreenToolbar'
+      ) ?? false
+    );
+  }
+
+  private set autoHideToolbar(val: boolean) {
+    this.embedHtml.edgeless?.service.editPropsStore.setItem(
+      'autoHideEmbedHTMLFullScreenToolbar',
+      val
+    );
+  }
+
   copyCode = () => {
+    if (this._copied) return;
+
     this.embedHtml.std.clipboard
       .writeToClipboard(items => {
         items['text/plain'] = this.embedHtml.model.html ?? '';
         return items;
+      })
+      .then(() => {
+        this._copied = true;
+        setTimeout(() => (this._copied = false), 1500);
       })
       .catch(console.error);
   };
@@ -118,7 +125,6 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
             type: 'custom',
             render: html`<div class="settings-header">
               <span>Settings</span>
-              <menu-divider></menu-divider>
             </div>`,
           },
 
@@ -129,9 +135,9 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
               {
                 type: 'toggle-switch',
                 name: 'Hide toolbar',
-                on: this._hideToolbar,
+                on: this.autoHideToolbar,
                 onChange: on => {
-                  this._hideToolbar = on;
+                  this.autoHideToolbar = on;
                 },
               },
             ],
@@ -143,35 +149,34 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       },
 
       placement: 'top-end',
-      middleware: [flip(), offset({ mainAxis: 3, crossAxis: -40 })],
+      middleware: [flip(), offset({ mainAxis: 4, crossAxis: -40 })],
       container: this.embedHtml.iframeWrapper,
     });
   };
 
   override render() {
-    const hideToolbar = !this._popperVisible && this._hideToolbar;
+    const hideToolbar = !this._popperVisible && this.autoHideToolbar;
 
-    return html`<div data-hide=${hideToolbar} class="toolbar-toggle-control">
+    return html`<div
+      data-auto-hide=${hideToolbar}
+      class="toolbar-toggle-control"
+    >
       <div class="fullscreen-toolbar-container">
-        <div class="left">
-          <icon-button @click=${this.embedHtml.close}
-            >${ExpandCloseIcon}</icon-button
-          >
-          <icon-button @click=${this._popSettings} ?hover=${this._popperVisible}
-            >${SettingsIcon}</icon-button
-          >
-        </div>
+        <icon-button @click=${this.embedHtml.close}
+          >${ExpandCloseIcon}</icon-button
+        >
+        <icon-button @click=${this._popSettings} ?hover=${this._popperVisible}
+          >${SettingsIcon}</icon-button
+        >
 
         <div class="short-v-divider"></div>
 
-        <div class="right">
-          <icon-button
-            class="copy-button"
-            text="${'Copy Code'}"
-            @click=${this.copyCode}
-            >${CopyIcon}</icon-button
-          >
-        </div>
+        <icon-button
+          class="copy-button"
+          text="${this._copied ? 'Copied' : 'Copy Code'}"
+          @click=${this.copyCode}
+          >${CopyIcon}</icon-button
+        >
       </div>
     </div> `;
   }

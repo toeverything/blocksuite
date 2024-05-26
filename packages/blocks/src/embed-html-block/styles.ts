@@ -64,17 +64,18 @@ export const styles = css`
   }
 
   .embed-html-block-iframe-wrapper affine-menu .settings-header {
-    padding: 4px 12px;
+    padding: 7px 12px;
     font-weight: 500;
     font-size: var(--affine-font-xs);
     color: var(--affine-text-secondary-color);
   }
 
   .embed-html-block-iframe-wrapper > embed-html-fullscreen-toolbar {
-    display: none;
+    visibility: hidden;
   }
+
   .embed-html-block-iframe-wrapper:fullscreen > embed-html-fullscreen-toolbar {
-    display: initial;
+    visibility: visible;
   }
 
   .affine-embed-html-iframe-overlay {

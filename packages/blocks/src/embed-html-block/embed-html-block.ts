@@ -1,6 +1,6 @@
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
-import './fullscreen-toolbar.js';
+import './components/fullscreen-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
