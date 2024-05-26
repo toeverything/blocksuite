@@ -103,6 +103,7 @@ test(scoped`basic multi user state`, async ({ context, page: pageA }) => {
   await enterPlaygroundRoom(pageB, {
     flags: {},
     room,
+    blobStorage: undefined,
     noInit: true,
   });
   await waitDefaultPageLoaded(pageB);
@@ -126,6 +127,7 @@ test(
     await enterPlaygroundRoom(pageB, {
       flags: {},
       room,
+      blobStorage: undefined,
       noInit: true,
     });
 
@@ -151,6 +153,7 @@ test(scoped`A first open, B first edit`, async ({ context, page: pageA }) => {
   await enterPlaygroundRoom(pageB, {
     flags: {},
     room,
+    blobStorage: undefined,
     noInit: true,
   });
   await focusRichText(pageB);

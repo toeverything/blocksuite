@@ -6,6 +6,5 @@ export default defineWorkspace([
   './packages/framework/global/vitest.config.ts',
   './packages/framework/inline/vitest.config.ts',
   './packages/framework/store/vitest.config.ts',
-  './packages/framework/sync/vitest.config.ts',
   './packages/presets/vitest.config.ts',
 ]);

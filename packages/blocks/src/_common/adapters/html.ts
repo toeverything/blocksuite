@@ -1,4 +1,3 @@
-import { sha } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
@@ -15,6 +14,7 @@ import {
   BlockSnapshotSchema,
   getAssetName,
   nanoid,
+  sha,
 } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import {

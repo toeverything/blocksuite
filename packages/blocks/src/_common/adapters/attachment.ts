@@ -1,4 +1,3 @@
-import { sha } from '@blocksuite/global/utils';
 import type { AssetsManager } from '@blocksuite/store';
 import {
   BaseAdapter,
@@ -11,6 +10,7 @@ import {
   type FromSliceSnapshotPayload,
   type FromSliceSnapshotResult,
   nanoid,
+  sha,
   type SliceSnapshot,
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,

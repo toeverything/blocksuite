@@ -2,6 +2,10 @@ import { AffineSchemas, TestUtils } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockCollection } from '@blocksuite/store';
 import {
+  type BlobStorage,
+  createIndexeddbStorage,
+  createMemoryStorage,
+  createSimpleServerStorage,
   DocCollection,
   type DocCollectionOptions,
   Generator,
@@ -10,23 +14,29 @@ import {
   type StoreOptions,
 } from '@blocksuite/store';
 import {
-  type BlobSource,
   BroadcastChannelAwarenessSource,
   BroadcastChannelDocSource,
-  IndexedDBBlobSource,
-  MemoryBlobSource,
 } from '@blocksuite/sync';
 
-import { MockServerBlobSource } from '../../_common/sync/blob/mock-server.js';
 import type { InitFn } from '../data/utils.js';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room');
+const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const isE2E = room?.startsWith('playwright');
-const blobSourceArgs = (params.get('blobSource') ?? '').split(',');
 
 export function createStarterDocCollection() {
-  const collectionId = room ?? 'starter';
+  const blobStorages: ((id: string) => BlobStorage)[] = [];
+  if (blobStorageArgs.includes('memory')) {
+    blobStorages.push(createMemoryStorage);
+  }
+  if (blobStorageArgs.includes('idb')) {
+    blobStorages.push(createIndexeddbStorage);
+  }
+  if (blobStorageArgs.includes('mock')) {
+    blobStorages.push(createSimpleServerStorage);
+  }
+
   const schema = new Schema();
   schema.register(AffineSchemas);
   const idGenerator = isE2E ? Generator.AutoIncrement : Generator.NanoID;
@@ -39,21 +49,11 @@ export function createStarterDocCollection() {
   }
   const id = room ?? `starter-${Math.random().toString(16).slice(2, 8)}`;
 
-  const blobSources = {
-    main: new MemoryBlobSource(),
-    shadows: [] as BlobSource[],
-  } satisfies StoreOptions['blobSources'];
-  if (blobSourceArgs.includes('mock')) {
-    blobSources.shadows.push(new MockServerBlobSource(collectionId));
-  }
-  if (blobSourceArgs.includes('idb')) {
-    blobSources.shadows.push(new IndexedDBBlobSource(collectionId));
-  }
-
   const options: DocCollectionOptions = {
-    id: collectionId,
+    id,
     schema,
     idGenerator,
+    blobStorages,
     defaultFlags: {
       enable_synced_doc_block: true,
       enable_pie_menu: true,
@@ -62,7 +62,6 @@ export function createStarterDocCollection() {
     },
     awarenessSources: [new BroadcastChannelAwarenessSource(id)],
     docSources,
-    blobSources,
   };
   const collection = new DocCollection(options);
 

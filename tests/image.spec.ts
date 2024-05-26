@@ -269,11 +269,7 @@ async function initMockImage(page: Page) {
 }
 
 test('image loading but failed', async ({ page }) => {
-  expectConsoleMessage(
-    page,
-    'Error: Failed to fetch blob _e2e_test_image_id_',
-    'warning'
-  );
+  expectConsoleMessage(page, 'Error: Failed to fetch blob _e2e_test_image_id_');
   expectConsoleMessage(
     page,
     'Failed to load resource: the server responded with a status of 404 (Not Found)'
@@ -284,7 +280,7 @@ test('image loading but failed', async ({ page }) => {
     'warning'
   );
 
-  const room = await enterPlaygroundRoom(page, { blobSource: ['mock'] });
+  const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
   const timeout = 2000;
 
   // block image data request, force wait 100ms for loading test,
@@ -315,11 +311,7 @@ test('image loading but failed', async ({ page }) => {
 });
 
 test('image loading but success', async ({ page }) => {
-  expectConsoleMessage(
-    page,
-    'Error: Failed to fetch blob _e2e_test_image_id_',
-    'warning'
-  );
+  expectConsoleMessage(page, 'Error: Failed to fetch blob _e2e_test_image_id_');
   expectConsoleMessage(
     page,
     'Failed to load resource: the server responded with a status of 404 (Not Found)'
@@ -330,7 +322,7 @@ test('image loading but success', async ({ page }) => {
     'warning'
   );
 
-  const room = await enterPlaygroundRoom(page, { blobSource: ['mock'] });
+  const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
   const imageBuffer = await readFile(
     fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))
   );
@@ -374,7 +366,7 @@ test('image loading but success', async ({ page }) => {
 });
 
 test('image loaded successfully', async ({ page }) => {
-  const room = await enterPlaygroundRoom(page, { blobSource: ['mock'] });
+  const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
   const imageBuffer = await readFile(
     fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))
   );

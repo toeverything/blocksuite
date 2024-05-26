@@ -323,7 +323,7 @@ async function renderImageAbstract(
   const sourceId = (image as ImageBlockModel).sourceId;
   if (!sourceId) return;
 
-  const storage = card.linkedDoc?.blobSync;
+  const storage = card.linkedDoc?.blob;
   if (!storage) return;
 
   const blob = await storage.get(sourceId);

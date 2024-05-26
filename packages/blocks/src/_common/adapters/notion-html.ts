@@ -1,4 +1,4 @@
-import { isEqual, sha } from '@blocksuite/global/utils';
+import { isEqual } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
@@ -16,6 +16,7 @@ import {
   type DocSnapshot,
   getAssetName,
   nanoid,
+  sha,
   type SliceSnapshot,
 } from '@blocksuite/store';
 import rehypeParse from 'rehype-parse';

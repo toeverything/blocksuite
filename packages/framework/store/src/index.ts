@@ -5,6 +5,15 @@
 export type { Y };
 export * from './adapter/index.js';
 export * from './migration/index.js';
+export { createIndexeddbStorage } from './persistence/blob/indexeddb-storage.js';
+export { createMemoryStorage } from './persistence/blob/memory-storage.js';
+export { createSimpleServerStorage } from './persistence/blob/mock-server-storage.js';
+export type {
+  BlobManager,
+  BlobStorage,
+  BlobStorageCRUD,
+} from './persistence/blob/types.js';
+export { sha } from './persistence/blob/utils.js';
 export * from './reactive/index.js';
 export * from './schema/index.js';
 export * from './store/index.js';

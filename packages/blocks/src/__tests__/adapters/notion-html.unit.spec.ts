@@ -1,7 +1,7 @@
 import {
   AssetsManager,
   type BlockSnapshot,
-  MemoryBlobCRUD,
+  MemoryBlobManager,
 } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
@@ -1084,7 +1084,7 @@ describe('notion html to snapshot', () => {
     const adapter = new NotionHtmlAdapter();
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
-      assets: new AssetsManager({ blob: new MemoryBlobCRUD() }),
+      assets: new AssetsManager({ blob: new MemoryBlobManager() }),
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
@@ -1176,9 +1176,9 @@ describe('notion html to snapshot', () => {
     };
 
     const adapter = new NotionHtmlAdapter();
-    const blobCRUD = new MemoryBlobCRUD();
-    const key = await blobCRUD.set(new File([], 'README.pdf'));
-    const assestsManager = new AssetsManager({ blob: blobCRUD });
+    const blobManager = new MemoryBlobManager();
+    const key = await blobManager.set(new File([], 'README.pdf'));
+    const assestsManager = new AssetsManager({ blob: blobManager });
     await assestsManager.readFromBlob(key);
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,

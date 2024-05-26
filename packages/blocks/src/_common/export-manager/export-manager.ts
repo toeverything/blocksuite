@@ -242,7 +242,7 @@ export class ExportManager {
       if (matchFlavours(block, ['affine:image'])) {
         if (!block.sourceId) return;
 
-        const blob = await block.doc.blobSync.get(block.sourceId);
+        const blob = await block.doc.blob.get(block.sourceId);
         if (!blob) return;
 
         const blobToImage = (blob: Blob) =>

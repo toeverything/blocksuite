@@ -2,16 +2,14 @@ import { type Logger, NoopLogger } from '@blocksuite/global/utils';
 import {
   AwarenessEngine,
   type AwarenessSource,
-  BlobEngine,
-  type BlobSource,
   DocEngine,
   type DocSource,
-  MemoryBlobSource,
   NoopDocSource,
 } from '@blocksuite/sync';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
+import type { BlobStorage } from '../persistence/blob/types.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   createAutoIncrementIdGenerator,
@@ -56,14 +54,11 @@ export interface StoreOptions<
   id?: string;
   idGenerator?: Generator | IdGenerator;
   defaultFlags?: Partial<Flags>;
+  blobStorages?: ((id: string) => BlobStorage)[];
   logger?: Logger;
   docSources?: {
     main: DocSource;
-    shadows?: DocSource[];
-  };
-  blobSources?: {
-    main: BlobSource;
-    shadows?: BlobSource[];
+    shadow?: DocSource[];
   };
   awarenessSources?: AwarenessSource[];
 }
@@ -91,7 +86,6 @@ export class Store {
 
   readonly docSync: DocEngine;
   readonly awarenessSync: AwarenessEngine;
-  readonly blobSync: BlobEngine;
 
   constructor(
     {
@@ -101,9 +95,6 @@ export class Store {
       awarenessSources = [],
       docSources = {
         main: new NoopDocSource(),
-      },
-      blobSources = {
-        main: new MemoryBlobSource(),
       },
       logger = new NoopLogger(),
     }: StoreOptions = {
@@ -125,12 +116,7 @@ export class Store {
     this.docSync = new DocEngine(
       this.doc,
       docSources.main,
-      docSources.shadows ?? [],
-      logger
-    );
-    this.blobSync = new BlobEngine(
-      blobSources.main,
-      blobSources.shadows ?? [],
+      docSources.shadow ?? [],
       logger
     );
 

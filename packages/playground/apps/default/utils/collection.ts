@@ -1,6 +1,8 @@
 import { AffineSchemas } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import {
+  type BlobStorage,
+  createIndexeddbStorage,
   DocCollection,
   type DocCollectionOptions,
   Generator,
@@ -12,7 +14,6 @@ import {
 import {
   BroadcastChannelAwarenessSource,
   BroadcastChannelDocSource,
-  IndexedDBBlobSource,
   IndexedDBDocSource,
 } from '@blocksuite/sync';
 
@@ -22,6 +23,9 @@ import { WebSocketDocSource } from '../../_common/sync/websocket/doc';
 const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
 
 export async function createDefaultDocCollection() {
+  const blobStorages: ((id: string) => BlobStorage)[] = [
+    createIndexeddbStorage,
+  ];
   const idGenerator: Generator = Generator.NanoID;
   const schema = new Schema();
   schema.register(AffineSchemas);
@@ -41,14 +45,14 @@ export async function createDefaultDocCollection() {
       .then(() => {
         docSources = {
           main: new IndexedDBDocSource(),
-          shadows: [new WebSocketDocSource(ws)],
+          shadow: [new WebSocketDocSource(ws)],
         };
         awarenessSources = [new WebSocketAwarenessSource(ws)];
       })
       .catch(() => {
         docSources = {
           main: new IndexedDBDocSource(),
-          shadows: [new BroadcastChannelDocSource()],
+          shadow: [new BroadcastChannelDocSource()],
         };
         awarenessSources = [
           new BroadcastChannelAwarenessSource('quickEdgeless'),
@@ -60,9 +64,7 @@ export async function createDefaultDocCollection() {
     id: 'quickEdgeless',
     schema,
     idGenerator,
-    blobSources: {
-      main: new IndexedDBBlobSource('quickEdgeless'),
-    },
+    blobStorages,
     docSources,
     awarenessSources,
     defaultFlags: {

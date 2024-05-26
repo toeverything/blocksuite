@@ -127,6 +127,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
       id: 'MINI_MINDMAP_TEMPORARY',
       schema,
       idGenerator: Generator.NanoID,
+      blobStorages: [],
       awarenessSources: [],
     };
 

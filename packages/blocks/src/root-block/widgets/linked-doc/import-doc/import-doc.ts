@@ -1,8 +1,7 @@
 import '../../../../_common/components/loader.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { sha } from '@blocksuite/global/utils';
-import { type DocCollection, extMimeMap } from '@blocksuite/store';
+import { type DocCollection, extMimeMap, sha } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
