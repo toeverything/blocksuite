@@ -198,7 +198,20 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         const zipTransformer = this.rootService.transformers.zip;
         const docs = await zipTransformer.importDocs(this.collection, file);
         for (const doc of docs) {
-          const noteBlock = window.doc.getBlockByFlavour('affine:note');
+          let noteBlockId;
+          const noteBlocks = window.doc.getBlocksByFlavour('affine:note');
+          if (noteBlocks.length) {
+            noteBlockId = noteBlocks[0].id;
+          } else {
+            noteBlockId = this.doc.addBlock(
+              'affine:note',
+              {
+                xywh: '[-200,-48,400,96]',
+              },
+              this.doc.root?.id
+            );
+          }
+
           window.doc.addBlock(
             'affine:paragraph',
             {
@@ -215,7 +228,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 } as DeltaInsert<AffineTextAttributes>,
               ]),
             },
-            noteBlock[0].id
+            noteBlockId
           );
         }
         this.requestUpdate();

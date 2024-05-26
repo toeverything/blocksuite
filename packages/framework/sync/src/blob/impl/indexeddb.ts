@@ -21,7 +21,7 @@ export class IndexedDBBlobSource implements BlobSource {
   }
 
   async set(key: string, value: Blob) {
-    await set(key, value.arrayBuffer(), this.store);
+    await set(key, await value.arrayBuffer(), this.store);
     await set(key, value.type, this.mimeTypeStore);
     return key;
   }
