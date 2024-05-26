@@ -215,6 +215,10 @@ export class EditPropsStore {
       type: keyof LastProps;
       props: Record<string, unknown>;
     }>(),
+    itemUpdated: new Slot<{
+      key: keyof StorageProps;
+      value: StorageProps[keyof StorageProps];
+    }>(),
   };
 
   constructor(private _service: BlockService) {
@@ -280,7 +284,10 @@ export class EditPropsStore {
   }
 
   setItem<T extends keyof StorageProps>(key: T, value: StorageProps[T]) {
+    const oldValue = this.getItem(key);
     this._getStorage(key).setItem(this._getKey(key), JSON.stringify(value));
+    if (oldValue === value) return;
+    this.slots.itemUpdated.emit({ key, value });
   }
 
   getItem<T extends keyof StorageProps>(key: T) {
