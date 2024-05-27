@@ -44,19 +44,6 @@ export interface SelectionArea {
 }
 
 export class EdgelessToolsManager {
-  static create(
-    service: EdgelessRootService,
-    controllers: AbstractClassConstructor<EdgelessToolController>[]
-  ) {
-    const manager = new EdgelessToolsManager(service);
-
-    controllers.forEach(controller => {
-      manager.register(controller);
-    });
-
-    return manager;
-  }
-
   private _edgelessTool: EdgelessTool = this._getToolFromLocalStorage();
 
   private _container!: EdgelessRootBlockComponent;

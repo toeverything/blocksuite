@@ -66,25 +66,14 @@ export type CanvasLayer = BaseLayer<ElementModel> & {
 
 export type Layer = BlockLayer | CanvasLayer;
 
+/**
+ * LayerManager used to manage the elements' index and the layer information.
+ *
+ * Every element belongs to a layer, and the layer determines the rendering order of the element in edgeless.
+ * The layer manager will automatically update the layer information when the elements are added, updated or deleted.
+ */
 export class LayerManager {
   static INITAL_INDEX = 'a0';
-  static create(doc: Doc, surface: SurfaceBlockModel) {
-    const layerManager = new LayerManager(
-      (
-        doc
-          .getBlocks()
-          .filter(
-            model =>
-              model instanceof EdgelessBlockModel &&
-              renderableInEdgeless(doc, surface, model)
-          ) as EdgelessModel[]
-      ).concat(surface.elementModels)
-    );
-
-    layerManager.listen(doc, surface);
-
-    return layerManager;
-  }
 
   private _disposables = new DisposableGroup();
 
@@ -121,7 +110,19 @@ export class LayerManager {
     }
   }
 
-  private listen(doc: Doc, surface: SurfaceBlockModel) {
+  mount(doc: Doc, surface: SurfaceBlockModel) {
+    const edgelessElements = (
+      doc
+        .getBlocks()
+        .filter(
+          model =>
+            model instanceof EdgelessBlockModel &&
+            renderableInEdgeless(doc, surface, model)
+        ) as EdgelessModel[]
+    ).concat(surface.elementModels);
+
+    this._init(edgelessElements);
+
     this._disposables.add(
       doc.slots.blockUpdated.on(payload => {
         if (payload.type === 'add') {
