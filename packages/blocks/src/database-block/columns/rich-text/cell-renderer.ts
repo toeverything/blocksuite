@@ -12,6 +12,7 @@ import type {
   AffineTextAttributes,
 } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { getViewportElement } from '../../../_common/utils/query.js';
+import { HostContextKey } from '../../context/host-context.js';
 import { BaseCellRenderer } from '../../data-view/column/base-cell.js';
 import { createFromBaseCellRenderer } from '../../data-view/column/renderer.js';
 import { createIcon } from '../../data-view/utils/uni-icon.js';
@@ -104,8 +105,9 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   `;
 
   get service() {
-    const database = this.closest<DatabaseBlockComponent>('affine-database');
-    return database?.service;
+    return this.view
+      .getContext(HostContextKey)
+      ?.std.spec.getService('affine:database');
   }
 
   get inlineManager() {
@@ -188,8 +190,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   `;
 
   get service() {
-    const database = this.closest<DatabaseBlockComponent>('affine-database');
-    return database?.service;
+    return this.view
+      .getContext(HostContextKey)
+      ?.std.spec.getService('affine:database');
   }
 
   get inlineManager() {
