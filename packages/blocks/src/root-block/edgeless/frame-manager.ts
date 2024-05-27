@@ -7,12 +7,12 @@ import type {
   Selectable,
   TopLevelBlockModel,
 } from '../../_common/types.js';
-import { matchFlavours } from '../../_common/utils/model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessRootService } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import { EdgelessBlockModel } from './type.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
 
@@ -199,7 +199,7 @@ export function getBlocksInFrame(
   ).concat(
     surfaceModel[0].children.filter(ele => {
       if (ele.id === model.id) return;
-      if (matchFlavours(ele, ['affine:image', 'affine:frame'])) {
+      if (ele instanceof EdgelessBlockModel) {
         const blockBound = Bound.deserialize(ele.xywh);
         return fullyContained
           ? bound.contains(blockBound)
