@@ -1,5 +1,6 @@
 import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
+import './components/fullscreen-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { html } from 'lit';
@@ -31,7 +32,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   private accessor _showOverlay = true;
 
   @query('.embed-html-block-iframe-wrapper')
-  private accessor _iframeWrapper!: HTMLDivElement;
+  accessor iframeWrapper!: HTMLDivElement;
 
   @query('embed-card-caption')
   accessor captionElement!: EmbedCardCaption;
@@ -61,7 +62,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   }
 
   open = () => {
-    this._iframeWrapper?.requestFullscreen().catch(console.error);
+    this.iframeWrapper?.requestFullscreen().catch(console.error);
   };
 
   close = () => {
@@ -158,11 +159,9 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
                   scrolling="no"
                   .srcdoc=${htmlSrc}
                 ></iframe>
-                <div class="iframe-tip">
-                  Press&nbsp;
-                  <button class="key" @click=${this.close}>ESC</button>
-                  &nbsp;to&nbsp;close
-                </div>
+                <embed-html-fullscreen-toolbar
+                  .embedHtml=${this}
+                ></embed-html-fullscreen-toolbar>
               </div>
 
               <div

@@ -140,6 +140,8 @@ const LocalPropsSchema = z.object({
   presentBlackBackground: z.boolean(),
   presentFillScreen: z.boolean(),
   presentHideToolbar: z.boolean(),
+
+  autoHideEmbedHTMLFullScreenToolbar: z.boolean(),
 });
 
 type SessionProps = z.infer<typeof SessionPropsSchema>;
@@ -269,6 +271,8 @@ export class EditPropsStore {
         return 'blocksuite:remote-color';
       case 'showBidirectional':
         return 'blocksuite:' + id + ':showBidirectional';
+      case 'autoHideEmbedHTMLFullScreenToolbar':
+        return 'blocksuite:embedHTML:autoHideFullScreenToolbar';
       default:
         return key;
     }
