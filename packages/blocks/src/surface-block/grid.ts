@@ -232,4 +232,42 @@ export class GridManager<T extends EdgelessModel> {
 
     return results;
   }
+
+  /**
+   *
+   * @param bound
+   * @param strict
+   * @param reverseChecking If true, check if the bound is inside the elements instead of checking if the elements are inside the bound
+   * @returns
+   */
+  has(
+    bound: IBound,
+    strict: boolean = false,
+    reverseChecking: boolean = false,
+    exclude?: Set<T>
+  ) {
+    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
+    const b = Bound.from(bound);
+    const check = reverseChecking
+      ? (target: Bound) => {
+          return strict ? target.contains(b) : intersects(b, target);
+        }
+      : (target: Bound) => {
+          return strict ? b.contains(target) : intersects(target, b);
+        };
+
+    for (let i = minRow; i <= maxRow; i++) {
+      for (let j = minCol; j <= maxCol; j++) {
+        const gridElements = this._getGrid(i, j);
+        if (!gridElements) continue;
+        for (const element of gridElements) {
+          if (!exclude?.has(element) && check(element.elementBound)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
 }

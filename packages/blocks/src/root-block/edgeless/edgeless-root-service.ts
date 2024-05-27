@@ -353,23 +353,25 @@ export class EdgelessRootService extends RootService {
     const pickFrames = () => {
       return this._layer.frames.filter(
         frame =>
-          frame.hitTest(x, y, options, this.host) ||
+          frame.hitTest(x, y, options) ||
           frame.externalBound?.isPointInBound([x, y])
       ) as EdgelessModel[];
     };
 
-    let results = pickCanvasElement().concat(pickBlock());
+    const frames = pickFrames();
 
-    // FIXME: optimazation on ordered element
-    results.sort(this._layer.compare);
+    if (frames.length === 0 || options.all) {
+      let results = pickCanvasElement().concat(pickBlock());
 
-    if (options.all || results.length === 0) {
-      const frames = pickFrames();
+      // FIXME: optimazation on ordered element
+      results.sort(this._layer.compare);
 
-      results = frames.concat(results);
+      results = results.concat(frames);
+
+      return options.all ? results : last(results) ?? null;
+    } else {
+      return last(frames) ?? null;
     }
-
-    return options.all ? results : last(results) ?? null;
   }
 
   /**
@@ -413,13 +415,13 @@ export class EdgelessRootService extends RootService {
       case 'canvas':
         return pickCanvasElement();
       case 'blocks':
-        return pickFrames().concat(pickBlock());
+        return pickBlock().concat(pickFrames());
       case 'frame':
         return pickFrames();
       case 'all': {
         const results = pickCanvasElement().concat(pickBlock());
         results.sort(this._layer.compare);
-        return pickFrames().concat(results);
+        return results.concat(pickFrames());
       }
     }
   }

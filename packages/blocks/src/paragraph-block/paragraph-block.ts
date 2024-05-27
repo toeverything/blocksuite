@@ -1,6 +1,7 @@
 import '../_common/components/rich-text/rich-text.js';
 import '../_common/components/block-selection.js';
 
+import type { TextSelection } from '@blocksuite/block-std';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type InlineRangeProvider } from '@blocksuite/inline';
@@ -50,6 +51,8 @@ export class ParagraphBlockComponent extends BlockElement<
   @query('.affine-paragraph-placeholder')
   private accessor _placeholderContainer: HTMLElement | null = null;
 
+  private _currentTextSelection: TextSelection | undefined = undefined;
+
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
@@ -78,7 +81,21 @@ export class ParagraphBlockComponent extends BlockElement<
   override firstUpdated() {
     this._disposables.add(this.model.propsUpdated.on(this._updatePlaceholder));
     this._disposables.add(
-      this.host.selection.slots.changed.on(this._updatePlaceholder)
+      this.host.selection.slots.changed.on(() => {
+        const selection = this.host.selection.find('text');
+
+        if (
+          selection === this._currentTextSelection ||
+          (this._currentTextSelection &&
+            selection &&
+            selection.equals(this._currentTextSelection))
+        ) {
+          return;
+        }
+
+        this._currentTextSelection = selection;
+        this._updatePlaceholder();
+      })
     );
 
     this.updateComplete
@@ -103,8 +120,9 @@ export class ParagraphBlockComponent extends BlockElement<
     )
       return;
 
-    const selection = this.host.selection.find('text');
+    const selection = this._currentTextSelection;
     const isCollapsed = selection?.isCollapsed() ?? false;
+
     if (
       this.doc.readonly ||
       this.inlineEditor.yTextLength > 0 ||

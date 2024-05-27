@@ -89,7 +89,10 @@ export class LayerManager {
   private _disposables = new DisposableGroup();
 
   slots = {
-    layerUpdated: new Slot(),
+    layerUpdated: new Slot<{
+      type: 'delete' | 'add' | 'update';
+      initiatingElement: EdgelessModel;
+    }>(),
   };
 
   canvasElements!: ElementModel[];
@@ -622,7 +625,10 @@ export class LayerManager {
     if (insertType) {
       this._insertIntoLayer(element as EdgelessModel, insertType);
       this._buildCanvasLayers();
-      this.slots.layerUpdated.emit();
+      this.slots.layerUpdated.emit({
+        type: 'add',
+        initiatingElement: element,
+      });
     }
   }
 
@@ -645,14 +651,20 @@ export class LayerManager {
     if (deleteType) {
       this._removeFromLayer(element, deleteType);
       this._buildCanvasLayers();
-      this.slots.layerUpdated.emit();
+      this.slots.layerUpdated.emit({
+        type: 'delete',
+        initiatingElement: element,
+      });
     }
   }
 
   update(element: EdgelessModel, props?: Record<string, unknown>) {
     if (this._updateLayer(element, props)) {
       this._buildCanvasLayers();
-      this.slots.layerUpdated.emit();
+      this.slots.layerUpdated.emit({
+        type: 'update',
+        initiatingElement: element,
+      });
     }
   }
 

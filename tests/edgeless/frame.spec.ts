@@ -9,6 +9,7 @@ import {
   setEdgelessTool,
   Shape,
   triggerComponentToolbarAction,
+  zoomOutByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
   pressEnter,
@@ -66,10 +67,10 @@ test.describe('frame', () => {
   test('drag frame to move', async ({ page }) => {
     await addFrame(page);
     await autoFit(page);
-    await dragBetweenViewCoords(page, [100, 50], [105, 50]);
+    await dragBetweenViewCoords(page, [100, 50], [120, 70]);
     await selectAllByKeyboard(page);
-    await assertSelectedBound(page, [5, 0, 100, 100], 0);
-    await assertSelectedBound(page, [105, 0, 100, 100], 1);
+    await assertSelectedBound(page, [20, 20, 100, 100], 0);
+    await assertSelectedBound(page, [120, 20, 100, 100], 1);
   });
 
   test('edit frame title', async ({ page }) => {
@@ -77,6 +78,45 @@ test.describe('frame', () => {
     await autoFit(page);
     expect(await page.locator('edgeless-frame-title-editor').count()).toBe(0);
     await dblclickView(page, [-300 + 5, -270 - 20]);
+    await page.locator('edgeless-frame-title-editor').waitFor({
+      state: 'attached',
+    });
+    await type(page, 'ABC');
+    await assertEdgelessCanvasText(page, 'ABC');
+  });
+
+  test('edit frame after zoom', async ({ page }) => {
+    await addFrame(page);
+    await autoFit(page);
+    await zoomOutByKeyboard(page);
+    expect(await page.locator('edgeless-frame-title-editor').count()).toBe(0);
+    await dblclickView(page, [-300 + 5, -270 - 20]);
+    await page.locator('edgeless-frame-title-editor').waitFor({
+      state: 'attached',
+    });
+    await type(page, 'ABC');
+    await assertEdgelessCanvasText(page, 'ABC');
+  });
+
+  test('edit frame title after drag', async ({ page }) => {
+    await addFrame(page);
+    await autoFit(page);
+    await dragBetweenViewCoords(page, [100, 50], [120, 70]);
+    await selectAllByKeyboard(page);
+    await dblclickView(page, [-300 + 5 + 20, -270 - 20 + 20]);
+    await page.locator('edgeless-frame-title-editor').waitFor({
+      state: 'attached',
+    });
+    await type(page, 'ABC');
+    await assertEdgelessCanvasText(page, 'ABC');
+  });
+
+  test('edit title of the frame that created by tool ', async ({ page }) => {
+    await edgelessCommonSetup(page);
+    await setEdgelessTool(page, 'frame');
+
+    await dragBetweenViewCoords(page, [0, 0], [200, 100]);
+    await dblclickView(page, [65, -20]);
     await page.locator('edgeless-frame-title-editor').waitFor({
       state: 'attached',
     });

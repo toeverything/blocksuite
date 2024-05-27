@@ -66,37 +66,9 @@ export function isFrameInner(
 }
 
 export class EdgelessFrameManager {
-  private _innerMap = new Map<string, boolean>();
   private _disposable = new DisposableGroup();
 
-  constructor(private _rootService: EdgelessRootService) {
-    this._disposable.add(
-      this._rootService.doc.slots.blockUpdated.on(e => {
-        const { id, type } = e;
-        const element = this._rootService.getElementById(id);
-        if (!isFrameBlock(element)) return;
-        if (type === 'add') {
-          this._innerMap.set(
-            id,
-            isFrameInner(element, this._rootService.frames)
-          );
-        } else if (type === 'update' && e.props.key === 'xywh') {
-          this._innerMap.set(
-            id,
-            isFrameInner(element, this._rootService.frames)
-          );
-        }
-      })
-    );
-  }
-
-  getFrameInner(frame: FrameBlockModel) {
-    return this._innerMap.get(frame.id);
-  }
-
-  setFrameInner(frame: FrameBlockModel, isInner: boolean) {
-    this._innerMap.set(frame.id, isInner);
-  }
+  constructor(private _rootService: EdgelessRootService) {}
 
   selectFrame(eles: Selectable[]) {
     const frames = this._rootService.frames;

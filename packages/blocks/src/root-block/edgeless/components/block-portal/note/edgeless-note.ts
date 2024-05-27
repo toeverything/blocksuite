@@ -54,7 +54,8 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
           const bound = Bound.deserialize(this.model.xywh);
           const scale = this.model.edgeless.scale ?? 1;
           const height = entry.contentRect.height * scale;
-          if (almostEqual(bound.h, height)) {
+
+          if (!height || almostEqual(bound.h, height)) {
             return;
           }
 

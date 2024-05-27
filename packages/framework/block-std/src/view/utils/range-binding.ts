@@ -58,14 +58,18 @@ export class RangeBinding {
     path: string[];
   } | null = null;
   private _onStdSelectionChanged = (selections: BaseSelection[]) => {
+    const text =
+      selections.find((selection): selection is TextSelection =>
+        selection.is('text')
+      ) ?? null;
+
+    if (text === this._prevTextSelection) {
+      return;
+    }
+
     // wait for lit updated
     this.host.updateComplete
       .then(() => {
-        const text =
-          selections.find((selection): selection is TextSelection =>
-            selection.is('text')
-          ) ?? null;
-
         const model = text && this.host.doc.getBlockById(text.blockId);
         const path = model && this.host.view.calculatePath(model);
 
@@ -73,7 +77,8 @@ export class RangeBinding {
           text && this._prevTextSelection && path
             ? text.equals(this._prevTextSelection.selection) &&
               path.join('') === this._prevTextSelection.path.join('')
-            : text === this._prevTextSelection;
+            : false;
+
         if (eq) {
           return;
         }

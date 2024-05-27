@@ -18,19 +18,16 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import {
-  requestConnectedFrame,
-  requestThrottledConnectFrame,
-} from '../../../../_common/utils/event.js';
+import { requestThrottledConnectFrame } from '../../../../_common/utils/event.js';
 import { type TopLevelBlockModel } from '../../../../_common/utils/index.js';
-import type {
-  FrameBlockModel,
-  SurfaceBlockComponent,
-} from '../../../../index.js';
+import { last } from '../../../../_common/utils/iterable.js';
+import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { GroupElementModel } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessBlockType } from '../../edgeless-types.js';
+import { EdgelessBlockModel as EdgelessBlock } from '../../type.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
 import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
 
@@ -61,9 +58,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       position: absolute;
     }
 
-    .affine-edgeless-layer edgeless-frames-container {
+    .affine-edgeless-layer > [data-portal-block-id] {
+      display: none;
       position: relative;
-      z-index: 1;
     }
   `;
 
@@ -126,7 +123,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @state()
   private accessor _slicerAnchorNote: NoteBlockModel | null = null;
 
-  private _clearWillChangeId: null | ReturnType<typeof setTimeout> = null;
+  private _visibleElements: Set<EdgelessBlock> = new Set();
 
   concurrentRendering: number = 2;
 
@@ -158,20 +155,45 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
   }, this);
 
-  private _applyWillChangeProp = () => {
-    if (this._clearWillChangeId) clearTimeout(this._clearWillChangeId);
+  /**
+   * @returns true if the visible elements have changed
+   */
+  private _updateVisibleBlocks() {
+    const { service } = this.edgeless;
+    const blockSet = service.layer.blocksGrid.search(
+      service.viewport.viewportBounds,
+      false,
+      true
+    );
+    const frameSet = service.layer.framesGrid.search(
+      service.viewport.viewportBounds,
+      false,
+      true
+    );
 
-    this._clearWillChangeId = setTimeout(() => {
-      this.layer?.style.removeProperty('will-change');
-      this._clearWillChangeId = null;
-    }, 100);
-
-    if (this.layer.style.getPropertyValue('will-change') !== 'content') {
-      requestConnectedFrame(() => {
-        this.layer.style.setProperty('will-change', 'content');
-      }, this);
+    if (this._visibleElements.size !== blockSet.size + frameSet.size) {
+      this._visibleElements = new Set([...blockSet, ...frameSet]);
+      return true;
+    } else {
+      for (const element of this._visibleElements) {
+        if (
+          !blockSet.has(element) &&
+          !frameSet.has(element as FrameBlockModel)
+        ) {
+          this._visibleElements = new Set([...blockSet, ...frameSet]);
+          return true;
+        }
+      }
     }
-  };
+
+    return false;
+  }
+
+  private _updateOnVisibleBlocksChange = requestThrottledConnectFrame(() => {
+    if (this._updateVisibleBlocks()) {
+      this.requestUpdate();
+    }
+  }, this);
 
   setSlotContent(children: HTMLElement[]) {
     if (this.canvasSlot.children.length !== children.length) {
@@ -207,19 +229,43 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this._updateVisibleBlocks();
+  }
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
 
     _disposables.add(
       edgeless.service.viewport.viewportUpdated.on(() => {
-        this._applyWillChangeProp();
         this.refreshLayerViewport();
+        this._updateOnVisibleBlocksChange();
       })
     );
 
     _disposables.add(
       edgeless.service.layer.slots.layerUpdated.on(() => {
         this.requestUpdate();
+      })
+    );
+
+    _disposables.add(
+      edgeless.doc.slots.blockUpdated.on(payload => {
+        if (
+          (payload.type === 'update' && payload.props.key === 'xywh') ||
+          payload.type === 'add'
+        ) {
+          const block = edgeless.doc.getBlock(payload.id);
+
+          if (block?.model instanceof EdgelessBlock) {
+            this._updateOnVisibleBlocksChange();
+          }
+        } else {
+          if ('model' in payload && payload.model instanceof EdgelessBlock) {
+            this._updateOnVisibleBlocksChange();
+          }
+        }
       })
     );
 
@@ -256,7 +302,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   }
 
   override render() {
-    const { edgeless } = this;
+    const { edgeless, _visibleElements } = this;
     const { surface, doc, service } = edgeless;
     const { readonly } = doc;
     const { zoom } = service.viewport;
@@ -264,6 +310,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     if (!surface) return nothing;
 
     const layers = service.layer.layers;
+    const lastLayer = last(layers);
+    const frameStartIndex =
+      lastLayer?.zIndex ?? 1 + (lastLayer?.elements.length ?? 0) + 1;
 
     return html`
       <div class="affine-block-children-container edgeless">
@@ -272,12 +321,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           data-scale="${zoom}"
           data-translate="true"
         >
-          <edgeless-frames-container
-            .surface=${surface}
-            .edgeless=${edgeless}
-            .frames=${service.layer.frames}
-          >
-          </edgeless-frames-container>
           <div class="canvas-slot"></div>
           ${layers
             .filter(layer => layer.type === 'block')
@@ -315,15 +358,18 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                       .edgeless=${edgeless}
                       .updatingSet=${this.renderingSet}
                       .concurrentUpdatingCount=${this.concurrentRendering}
-                      style=${styleMap({
-                        display: 'block',
-                        zIndex,
-                        position: 'relative',
-                      })}
+                      style=${`z-index: ${zIndex};${_visibleElements.has(block) ? 'display:block' : ''}`}
                     ></${tag}>`;
                 }
               );
             })}
+          <edgeless-frames-container
+            .edgeless=${edgeless}
+            .frames=${service.layer.frames}
+            .startIndex=${frameStartIndex}
+            .visibleFrames=${this._visibleElements}
+          >
+          </edgeless-frames-container>
         </div>
       </div>
       <edgeless-dragging-area-rect
