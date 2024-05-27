@@ -46,7 +46,8 @@ declare global {
   export interface ColumnConfigMap {}
 }
 
-export type GetColumnDataFromConfig<T> =
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type GetColumnDataFromConfig<T extends ColumnConfig<any, any, any>> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends ColumnConfig<infer _, infer R, any> ? R : never;
 export type GetCellDataFromConfig<T> =

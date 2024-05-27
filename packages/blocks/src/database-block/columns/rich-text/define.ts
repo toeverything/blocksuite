@@ -1,5 +1,6 @@
 import { nanoid, Text } from '@blocksuite/store';
 
+import { clamp } from '../../../_common/utils/math.js';
 import { columnType } from '../../data-view/column/column-config.js';
 import { tRichText } from '../../data-view/logical/data-type.js';
 import { getTagColor } from '../../data-view/utils/tags/colors.js';
@@ -37,6 +38,7 @@ export const richTextColumnModelConfig =
       };
     },
   });
+
 richTextColumnModelConfig.addConvert('select', (_column, cells) => {
   const options: Record<string, SelectTag> = {};
   const getTag = (name: string) => {
@@ -91,5 +93,35 @@ richTextColumnModelConfig.addConvert('multi-select', (_column, cells) => {
     column: {
       options: Object.values(options),
     },
+  };
+});
+
+richTextColumnModelConfig.addConvert('number', (_column, cells) => {
+  return {
+    column: { decimal: 0 },
+    cells: cells.map(v => {
+      const num = v ? parseFloat(v.toString()) : NaN;
+      return isNaN(num) ? undefined : num;
+    }),
+  };
+});
+
+richTextColumnModelConfig.addConvert('progress', (_column, cells) => {
+  return {
+    column: {},
+    cells: cells.map(v => {
+      const progress = v ? parseInt(v.toString()) : NaN;
+      return !isNaN(progress) ? clamp(progress, 0, 100) : undefined;
+    }),
+  };
+});
+
+richTextColumnModelConfig.addConvert('checkbox', (_column, cells) => {
+  const truthyValues = ['yes', 'true'];
+  return {
+    column: {},
+    cells: cells.map(v =>
+      v && truthyValues.includes(v.toString().toLowerCase()) ? true : undefined
+    ),
   };
 });

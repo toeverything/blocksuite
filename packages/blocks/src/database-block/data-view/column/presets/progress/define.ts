@@ -25,7 +25,13 @@ export const progressColumnModelConfig = progressColumnType.modelConfig<number>(
     cellToJson: data => data ?? null,
   }
 );
+
 progressColumnModelConfig.addConvert('rich-text', (_column, cells) => ({
   column: {},
   cells: cells.map(v => new Text(v?.toString()).yText),
+}));
+
+progressColumnModelConfig.addConvert('number', (_column, cells) => ({
+  column: { decimal: 0 },
+  cells: cells.map(v => v),
 }));

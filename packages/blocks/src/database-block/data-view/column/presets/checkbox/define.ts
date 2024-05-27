@@ -1,15 +1,17 @@
+import { Text } from '@blocksuite/store';
+
 import { tBoolean } from '../../../logical/data-type.js';
 import { columnType } from '../../column-config.js';
 
-export const chceckboxColumnType = columnType('checkbox');
+export const checkboxColumnType = columnType('checkbox');
 declare global {
   interface ColumnConfigMap {
-    [chceckboxColumnType.type]: typeof checkboxColumnModelConfig;
+    [checkboxColumnType.type]: typeof checkboxColumnModelConfig.model;
   }
 }
 
 export const checkboxColumnModelConfig =
-  chceckboxColumnType.modelConfig<boolean>({
+  checkboxColumnType.modelConfig<boolean>({
     name: 'Checkbox',
     type: () => tBoolean.create(),
     defaultData: () => ({}),
@@ -21,3 +23,10 @@ export const checkboxColumnModelConfig =
     },
     cellToJson: data => data ?? null,
   });
+
+checkboxColumnModelConfig.addConvert('rich-text', (_columns, cells) => {
+  return {
+    column: {},
+    cells: cells.map(v => new Text(v ? 'Yes' : 'No').yText),
+  };
+});
