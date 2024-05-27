@@ -34,3 +34,9 @@ export class EdgelessTextBlockComponent extends BlockElement<EdgelessTextBlockMo
     `;
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-edgeless-text': EdgelessTextBlockComponent;
+  }
+}
