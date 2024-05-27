@@ -7,6 +7,7 @@ import {
   databaseBlockAllColumnMap,
   databaseBlockColumns,
 } from './columns/index.js';
+import { HostContextKey } from './context/host-context.js';
 import {
   BaseDataSource,
   type ColumnConfig,
@@ -44,6 +45,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
       .getDoc(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
+    this.setContext(HostContextKey, host);
   }
 
   public get rows(): string[] {
