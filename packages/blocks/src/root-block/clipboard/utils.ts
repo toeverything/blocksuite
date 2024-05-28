@@ -1,3 +1,8 @@
+import { assertExists } from '@blocksuite/global/utils';
+
+import { toast } from '../../_common/components/toast.js';
+import type { FileSnapshot } from './adapter.js';
+
 const chars =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -62,3 +67,58 @@ export const decode = (base64: string): ArrayBuffer => {
 
   return arraybuffer;
 };
+
+export async function encodeClipboardBlobs(map: Map<string, Blob>) {
+  const blobs: Record<string, FileSnapshot> = {};
+  let sumSize = 0;
+  await Promise.all(
+    Array.from(map.entries()).map(async ([id, blob]) => {
+      if (blob.size > 4 * 1024 * 1024) {
+        const host = document.querySelector('editor-host');
+        if (!host) {
+          return;
+        }
+        toast(
+          host,
+          (blob as File).name ?? 'File' + ' is too large to be copied'
+        );
+        return;
+      }
+      sumSize += blob.size;
+      if (sumSize > 6 * 1024 * 1024) {
+        const host = document.querySelector('editor-host');
+        if (!host) {
+          return;
+        }
+        toast(
+          host,
+          (blob as File).name ??
+            'File' + ' cannot be copied due to the clipboard size limit'
+        );
+        return;
+      }
+      const content = encode(await blob.arrayBuffer());
+      const file: FileSnapshot = {
+        name: (blob as File).name,
+        type: blob.type,
+        content,
+      };
+      blobs[id] = file;
+    })
+  );
+  return blobs;
+}
+
+export function decodeClipboardBlobs(
+  blobs: Record<string, FileSnapshot>,
+  map: Map<string, Blob> | undefined
+) {
+  Object.entries<FileSnapshot>(blobs).forEach(([sourceId, file]) => {
+    const blob = new Blob([decode(file.content)]);
+    const f = new File([blob], file.name, {
+      type: file.type,
+    });
+    assertExists(map);
+    map.set(sourceId, f);
+  });
+}

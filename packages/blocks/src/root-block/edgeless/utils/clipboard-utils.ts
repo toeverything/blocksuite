@@ -24,12 +24,11 @@ export async function duplicate(
   const totalBound = edgelessElementsBound(copyElements);
   totalBound.x += totalBound.w + offset;
 
-  const data = JSON.parse(
-    JSON.stringify(await prepareClipboardData(copyElements, edgeless.std))
-  );
+  const { snapshot } = await prepareClipboardData(copyElements, edgeless.std);
+
   const [canvasElements, blocks] =
-    clipboardController.createElementsFromClipboardData(
-      data as Record<string, unknown>[],
+    await clipboardController.createElementsFromClipboardData(
+      snapshot as Record<string, unknown>[],
       totalBound.center
     );
 

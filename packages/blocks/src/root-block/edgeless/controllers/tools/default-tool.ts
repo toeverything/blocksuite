@@ -399,14 +399,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const { _edgeless } = this;
     const { clipboardController } = _edgeless;
 
-    const data = JSON.parse(
-      JSON.stringify(await prepareClipboardData(this._toBeMoved, _edgeless.std))
+    const { snapshot } = await prepareClipboardData(
+      this._toBeMoved,
+      _edgeless.std
     );
 
     const bound = edgelessElementsBound(this._toBeMoved);
     const [elements, blocks] =
-      clipboardController.createElementsFromClipboardData(
-        data as Record<string, unknown>[],
+      await clipboardController.createElementsFromClipboardData(
+        snapshot as Record<string, unknown>[],
         bound.center
       );
 
