@@ -1,8 +1,10 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
+import type { PageRootService } from '@blocksuite/blocks';
 import {
   AffineFormatBarWidget,
   EdgelessEditorBlockSpecs,
   PageEditorBlockSpecs,
+  toast,
   toolbarDefaultConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -50,40 +52,17 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const editor = new AffineEditorContainer();
   editor.pageSpecs = [...PageEditorBlockSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
-      const setup = spec.setup;
-      spec = {
-        ...spec,
-        setup: (slots, disposable) => {
-          setup?.(slots, disposable);
-
-          const onFormatBarConnected = slots.widgetConnected.on(view => {
-            if (view.component instanceof AffineFormatBarWidget) {
-              configureFormatBar(view.component);
-            }
-          });
-
-          disposable.add(onFormatBarConnected);
-        },
-      };
+      spec = patchPageRootSpec(
+        spec as BlockSpec<'affine:page', PageRootService>
+      );
     }
     return spec;
   });
   editor.edgelessSpecs = [...EdgelessEditorBlockSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
-      spec = {
-        ...spec,
-        setup: (slots, disposable) => {
-          slots.mounted.once(() => {
-            const onFormatBarConnected = slots.widgetConnected.on(view => {
-              if (view.component instanceof AffineFormatBarWidget) {
-                configureFormatBar(view.component);
-              }
-            });
-
-            disposable.add(onFormatBarConnected);
-          });
-        },
-      };
+      spec = patchPageRootSpec(
+        spec as BlockSpec<'affine:page', PageRootService>
+      );
     }
     return spec;
   });
@@ -157,4 +136,58 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   });
 
   return editor;
+
+  function patchPageRootSpec(spec: BlockSpec<'affine:page', PageRootService>) {
+    const setup = spec.setup;
+    const newSpec: typeof spec = {
+      ...spec,
+      setup: (slots, disposable) => {
+        setup?.(slots, disposable);
+        slots.mounted.once(({ service }) => {
+          const pageRootService = service as PageRootService;
+          const onFormatBarConnected = slots.widgetConnected.on(view => {
+            if (view.component instanceof AffineFormatBarWidget) {
+              configureFormatBar(view.component);
+            }
+          });
+          disposable.add(onFormatBarConnected);
+          pageRootService.notificationService = {
+            toast: (message, options) => {
+              toast(service.host as EditorHost, message, options?.duration);
+            },
+            confirm: notification => {
+              return Promise.resolve(confirm(notification.title));
+            },
+          };
+          pageRootService.quickSearchService = {
+            async searchDoc({ userInput }) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+              const docs = collection.search({
+                query: userInput,
+                limit: 1,
+              });
+              const doc = [...docs].at(0);
+              if (doc) {
+                return {
+                  docId: doc[1],
+                };
+              } else if (userInput) {
+                return {
+                  userInput: userInput,
+                };
+              } else {
+                // randomly create a doc
+                const newDoc = collection.createDoc();
+                return {
+                  docId: newDoc.id,
+                };
+              }
+            },
+          };
+        });
+      },
+    };
+
+    return newSpec;
+  }
 }

@@ -798,6 +798,7 @@ type Action =
   | 'changeConnectorStrokeStyles'
   | 'addFrame'
   | 'addGroup'
+  | 'createGroupOnMoreOption'
   | 'ungroup'
   | 'releaseFromGroup'
   | 'createFrameOnMoreOption'
@@ -951,6 +952,18 @@ export async function triggerComponentToolbarAction(
         'edgeless-add-group-button'
       );
       await button.click();
+      break;
+    }
+    case 'createGroupOnMoreOption': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Group Section',
+        });
+      await actionButton.click();
       break;
     }
     case 'ungroup': {

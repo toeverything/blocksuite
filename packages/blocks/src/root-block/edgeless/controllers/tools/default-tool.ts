@@ -36,6 +36,7 @@ import {
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
+import { prepareCloneData } from '../../utils/clone-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
   isCanvasElement,
@@ -51,7 +52,6 @@ import {
   mountShapeTextEditor,
   mountTextElementEditor,
 } from '../../utils/text.js';
-import { prepareClipboardData } from '../clipboard.js';
 import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {
@@ -600,10 +600,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const { _edgeless } = this;
     const { clipboardController } = _edgeless;
 
-    const { snapshot } = await prepareClipboardData(
-      this._toBeMoved,
-      _edgeless.std
-    );
+    const snapshot = await prepareCloneData(this._toBeMoved, _edgeless.std);
 
     const bound = edgelessElementsBound(this._toBeMoved);
     const [elements, blocks] =

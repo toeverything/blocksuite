@@ -1,5 +1,4 @@
 import '../_common/components/block-selection.js';
-import '../_common/components/embed-card/embed-card-caption.js';
 import './components/fullscreen-toolbar.js';
 
 import { assertExists } from '@blocksuite/global/utils';
@@ -8,7 +7,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
@@ -34,8 +33,8 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
   @query('.embed-html-block-iframe-wrapper')
   accessor iframeWrapper!: HTMLDivElement;
 
-  @query('embed-card-caption')
-  accessor captionElement!: EmbedCardCaption;
+  @query('block-caption-editor')
+  accessor captionElement!: BlockCaptionEditor;
 
   private _isDragging = false;
 
@@ -180,7 +179,7 @@ export class EmbedHtmlBlockComponent extends EmbedBlockElement<
           </div>
         </div>
 
-        <embed-card-caption .block=${this}></embed-card-caption>
+        <block-caption-editor .block=${this}></block-caption-editor>
 
         <affine-block-selection .block=${this}></affine-block-selection>
       `;

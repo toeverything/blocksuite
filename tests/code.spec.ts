@@ -27,6 +27,7 @@ import {
   type,
   undoByKeyboard,
   updateBlockType,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockCount,
@@ -60,6 +61,7 @@ function getCodeBlock(page: Page) {
 
   const copyButton = codeToolbar.getByTestId('copy-code');
   const moreButton = codeToolbar.getByTestId('more-button');
+  const captionButton = codeToolbar.getByTestId('caption');
 
   const moreMenu = page.locator('affine-menu');
 
@@ -85,14 +87,16 @@ function getCodeBlock(page: Page) {
   return {
     codeBlock,
     codeToolbar,
+    captionButton,
     languageButton,
-    clickLanguageButton,
     langList,
     copyButton,
     moreButton,
-    openMore,
     langFilterInput,
     moreMenu,
+
+    openMore,
+    clickLanguageButton,
   };
 }
 
@@ -184,6 +188,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
   prop:index="a0"
 >
   <affine:code
+    prop:caption=""
     prop:language="Plain Text"
     prop:wrap={false}
   />
@@ -300,6 +305,7 @@ test('change code language can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
+  prop:caption=""
   prop:language="rust"
   prop:wrap={false}
 />`,
@@ -310,6 +316,7 @@ test('change code language can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
+  prop:caption=""
   prop:language="Plain Text"
   prop:wrap={false}
 />`,
@@ -442,11 +449,13 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
     prop:index="a0"
   >
     <affine:code
+      prop:caption=""
       prop:language="Plain Text"
       prop:text="use"
       prop:wrap={false}
     />
     <affine:code
+      prop:caption=""
       prop:language="Plain Text"
       prop:text="use"
       prop:wrap={false}
@@ -494,11 +503,13 @@ test('code block has content, click code block copy menu, copy whole code block'
     prop:index="a0"
   >
     <affine:code
+      prop:caption=""
       prop:language="javascript"
       prop:text="use"
       prop:wrap={false}
     />
     <affine:code
+      prop:caption=""
       prop:language="javascript"
       prop:text="use"
       prop:wrap={false}
@@ -545,10 +556,12 @@ test('code block is empty, click code block copy menu, copy the empty code block
     prop:index="a0"
   >
     <affine:code
+      prop:caption=""
       prop:language="javascript"
       prop:wrap={false}
     />
     <affine:code
+      prop:caption=""
       prop:language="javascript"
       prop:wrap={false}
     />
@@ -589,10 +602,12 @@ test('duplicate code block in more menu', async ({ page }) => {
     prop:index="a0"
   >
     <affine:code
+      prop:caption=""
       prop:language="javascript"
       prop:wrap={false}
     />
     <affine:code
+      prop:caption=""
       prop:language="javascript"
       prop:wrap={false}
     />
@@ -841,6 +856,29 @@ test('should tab works in code block', async ({ page }) => {
   await assertRichTexts(page, ['const a = 10;\n  \nconst b = "NothingToSay"']);
 });
 
+test('add caption works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { codeBlockId } = await initEmptyCodeBlockState(page);
+
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+  await codeBlockController.captionButton.click();
+  await type(page, 'BlockSuite');
+  await pressEnter(page);
+  await waitNextFrame(page, 100);
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:code
+  prop:caption="BlockSuite"
+  prop:language="Plain Text"
+  prop:wrap={false}
+/>`,
+    codeBlockId
+  );
+});
+
 test('toggle code block wrap can work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { codeBlockId } = await initEmptyCodeBlockState(page);
@@ -851,6 +889,7 @@ test('toggle code block wrap can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
+  prop:caption=""
   prop:language="Plain Text"
   prop:wrap={false}
 />`,
@@ -868,6 +907,7 @@ test('toggle code block wrap can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
+  prop:caption=""
   prop:language="Plain Text"
   prop:wrap={true}
 />`,
@@ -879,6 +919,7 @@ test('toggle code block wrap can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
+  prop:caption=""
   prop:language="Plain Text"
   prop:wrap={false}
 />`,
@@ -896,6 +937,7 @@ test('undo code block wrap can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
+  prop:caption=""
   prop:language="Plain Text"
   prop:wrap={false}
 />`,
@@ -908,6 +950,7 @@ test('undo code block wrap can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
+  prop:caption=""
   prop:language="Plain Text"
   prop:wrap={true}
 />`,
@@ -920,6 +963,7 @@ test('undo code block wrap can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
+  prop:caption=""
   prop:language="Plain Text"
   prop:wrap={false}
 />`,

@@ -1,5 +1,4 @@
 import './surface-ref-portal.js';
-import '../_common/components/embed-card/embed-card-caption.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
@@ -8,7 +7,7 @@ import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import {
   EdgelessModeIcon,
   FrameIcon,
@@ -232,8 +231,8 @@ export class SurfaceRefBlockComponent extends BlockElement<
   @query('surface-ref-portal')
   accessor portal!: SurfaceRefPortal;
 
-  @query('affine-surface-ref > embed-card-caption')
-  accessor captionElement!: EmbedCardCaption;
+  @query('affine-surface-ref > block-caption-editor')
+  accessor captionElement!: BlockCaptionEditor;
 
   private _isInSurface = false;
 
@@ -602,7 +601,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
         ${content}
       </div>
 
-      <embed-card-caption .block=${this}></embed-card-caption>
+      <block-caption-editor .block=${this}></block-caption-editor>
 
       ${Object.values(this.widgets)}
     `;

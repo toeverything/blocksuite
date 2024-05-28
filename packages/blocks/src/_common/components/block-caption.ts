@@ -1,21 +1,23 @@
+import type { BlockElement } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
+import type { BlockModel } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { AttachmentBlockComponent } from '../../../attachment-block/attachment-block.js';
-import type { EmbedHtmlBlockComponent } from '../../../embed-html-block/embed-html-block.js';
-import type { EmbedSyncedDocBlockComponent } from '../../../embed-synced-doc-block/embed-synced-doc-block.js';
-import type { ImageBlockComponent } from '../../../image-block/image-block.js';
-import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
-import { stopPropagation } from '../../utils/event.js';
-import { asyncFocusRichText } from '../../utils/selection.js';
-import type { EmbedToolbarBlockElement } from './type.js';
+import { stopPropagation } from '../utils/event.js';
+import { asyncFocusRichText } from '../utils/selection.js';
 
-@customElement('embed-card-caption')
-export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
+export interface BlockCaptionProps {
+  caption: string | null | undefined;
+}
+
+@customElement('block-caption-editor')
+export class BlockCaptionEditor<
+  Model extends BlockModel<BlockCaptionProps> = BlockModel<BlockCaptionProps>,
+> extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .affine-embed-card-caption {
+    .block-caption-editor {
       display: inline-table;
       resize: none;
       width: 100%;
@@ -27,19 +29,13 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
       font-family: inherit;
       text-align: center;
     }
-    .affine-embed-card-caption::placeholder {
+    .block-caption-editor::placeholder {
       color: var(--affine-placeholder-color);
     }
   `;
 
   @property({ attribute: false })
-  accessor block!:
-    | EmbedToolbarBlockElement
-    | AttachmentBlockComponent
-    | ImageBlockComponent
-    | EmbedHtmlBlockComponent
-    | SurfaceRefBlockComponent
-    | EmbedSyncedDocBlockComponent;
+  accessor block!: BlockElement<Model> & { isInSurface?: boolean };
 
   @state()
   accessor display = false;
@@ -47,7 +43,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
   @state()
   accessor caption: string | null | undefined = undefined;
 
-  @query('.affine-embed-card-caption')
+  @query('.block-caption-editor')
   accessor input!: HTMLInputElement;
 
   private _focus = false;
@@ -138,7 +134,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     return html`<textarea
       .disabled=${this.block.doc.readonly}
       placeholder="Write a caption"
-      class="affine-embed-card-caption"
+      class="block-caption-editor"
       .value=${this.caption ?? ''}
       @input=${this._onInputChange}
       @focus=${this._onInputFocus}
@@ -157,6 +153,6 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'embed-card-caption': EmbedCardCaption;
+    'block-caption-editor': BlockCaptionEditor;
   }
 }

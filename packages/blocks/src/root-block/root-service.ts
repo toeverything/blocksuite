@@ -62,7 +62,10 @@ export type QuickSearchResult =
   | null;
 
 export interface QuickSearchService {
-  searchDoc: (options: { action: 'insert' }) => Promise<QuickSearchResult>;
+  searchDoc: (options: {
+    action: 'insert';
+    userInput?: string;
+  }) => Promise<QuickSearchResult>;
 }
 
 export class RootService extends BlockService<RootBlockModel> {

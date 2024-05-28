@@ -1,12 +1,11 @@
 import '../_common/components/block-selection.js';
-import '../_common/components/embed-card/embed-card-caption.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
@@ -41,8 +40,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   @state()
   private accessor _showImage = false;
 
-  @query('embed-card-caption')
-  accessor captionElement!: EmbedCardCaption;
+  @query('block-caption-editor')
+  accessor captionElement!: BlockCaptionEditor;
 
   private _isDragging = false;
 
@@ -266,7 +265,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
             </div>
           </div>
 
-          <embed-card-caption .block=${this}></embed-card-caption>
+          <block-caption-editor .block=${this}></block-caption-editor>
 
           <affine-block-selection .block=${this}></affine-block-selection>
         </div>

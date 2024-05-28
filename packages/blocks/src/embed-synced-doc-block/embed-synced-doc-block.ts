@@ -1,6 +1,5 @@
 import './components/embed-synced-doc-card.js';
 import '../_common/components/block-selection.js';
-import '../_common/components/embed-card/embed-card-caption.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -11,7 +10,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
@@ -60,8 +59,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   @query(':scope > .embed-block-container > affine-embed-synced-doc-card')
   accessor syncedDocCard: EmbedSyncedDocCard | null = null;
 
-  @query(':scope > .embed-block-container > embed-card-caption')
-  accessor captionElement: EmbedCardCaption | null = null;
+  @query(':scope > .embed-block-container > block-caption-editor')
+  accessor captionElement: BlockCaptionEditor | null = null;
 
   @query(
     ':scope > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
@@ -434,7 +433,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
             .block=${this}
           ></affine-embed-synced-doc-card>
 
-          <embed-card-caption .block=${this}></embed-card-caption>
+          <block-caption-editor .block=${this}></block-caption-editor>
         `
       );
     }
@@ -520,7 +519,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
           ${
             isInSurface
-              ? html`<embed-card-caption .block=${this}></embed-card-caption>`
+              ? html`<block-caption-editor
+                  .block=${this}
+                ></block-caption-editor>`
               : nothing
           }
 

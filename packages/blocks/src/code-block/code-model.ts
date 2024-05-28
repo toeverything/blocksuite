@@ -9,6 +9,7 @@ export const CodeBlockSchema = defineBlockSchema({
     text: internal.Text(),
     language: FALLBACK_LANG,
     wrap: false,
+    caption: '',
   }),
   metadata: {
     version: 1,
