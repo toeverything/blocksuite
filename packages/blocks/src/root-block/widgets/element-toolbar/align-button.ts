@@ -81,7 +81,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   private get elements() {
-    return this.edgeless.service.selection.elements;
+    return this.edgeless.service.selection.selectedElements;
   }
 
   override firstUpdated() {

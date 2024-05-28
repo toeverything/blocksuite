@@ -16,6 +16,7 @@ import {
 } from '../../../_common/utils/iterable.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedHtmlModel } from '../../../embed-html-block/embed-html-model.js';
@@ -41,6 +42,7 @@ import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
+  isEdgelessTextBlock,
   isEmbeddedBlock,
   isFrameBlock,
   isImageBlock,
@@ -82,6 +84,7 @@ type CategorizedElements = {
     EmbedSyncedDocModel[] &
     EmbedHtmlModel[] &
     EmbedLoomModel[];
+  edgelessText?: EdgelessTextBlockModel[];
 };
 
 type CustomEntry = {
@@ -195,7 +198,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   }
 
   private _groupSelected(): CategorizedElements {
-    const result = groupBy(this.selection.elements, model => {
+    const result = groupBy(this.selection.selectedElements, model => {
       if (isNoteBlock(model)) {
         return 'note';
       } else if (isFrameBlock(model)) {
@@ -206,6 +209,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         return 'attachment';
       } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
         return 'embedCard';
+      } else if (isEdgelessTextBlock(model)) {
+        return 'edgelessText';
       }
 
       return (model as BlockSuite.SurfaceElementModelType).type;
@@ -282,14 +287,14 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
   private _recalculatePosition() {
     const { selection, viewport } = this.edgeless.service;
-    const elements = selection.elements;
+    const elements = selection.selectedElements;
 
     if (elements.length === 0) {
       this.style.transform = 'translate3d(0, 0, 0)';
       return;
     }
 
-    const bound = edgelessElementsBound(selection.elements);
+    const bound = edgelessElementsBound(selection.selectedElements);
 
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
@@ -305,7 +310,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     }
 
     let offset = 70;
-    if (this.selection.elements.some(ele => isFrameBlock(ele))) {
+    if (this.selection.selectedElements.some(ele => isFrameBlock(ele))) {
       offset += 10;
     }
 
@@ -342,7 +347,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       attachment,
       image,
     } = groupedSelected;
-    const { elements } = this.selection;
+    const { selectedElements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
       Object.values(groupedSelected),
       e => !!e.length,
@@ -350,11 +355,11 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     );
 
     const generalButtons =
-      elements.length !== connector?.length
+      selectedElements.length !== connector?.length
         ? [
-            renderAddFrameButton(edgeless, elements),
-            renderAddGroupButton(edgeless, elements),
-            renderAlignButton(edgeless, elements),
+            renderAddFrameButton(edgeless, selectedElements),
+            renderAddGroupButton(edgeless, selectedElements),
+            renderAlignButton(edgeless, selectedElements),
           ]
         : [];
 
@@ -375,14 +380,14 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           renderChangeImageButton(edgeless, image),
         ];
 
-    if (elements.length === 1) {
+    if (selectedElements.length === 1) {
       if (selection.firstElement.group instanceof GroupElementModel) {
         buttons.unshift(renderReleaseFromGroupButton(this.edgeless));
       }
     }
 
     const registeredEntries = this._registeredEntries
-      .filter(entry => entry.when(elements))
+      .filter(entry => entry.when(selectedElements))
       .map(entry => entry.render(this.edgeless));
 
     if (registeredEntries.length) {

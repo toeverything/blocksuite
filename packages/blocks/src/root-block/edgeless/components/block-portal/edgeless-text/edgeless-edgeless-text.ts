@@ -50,7 +50,9 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
 
     disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
-        if (selection.elements.includes(this.model as EdgelessBlockModel)) {
+        if (
+          selection.selectedElements.includes(this.model as EdgelessBlockModel)
+        ) {
           this._isResizing = true;
         }
       })

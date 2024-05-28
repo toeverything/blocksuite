@@ -57,3 +57,11 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
 export class EdgelessTextBlockModel extends selectable<EdgelessTextProps>(
   BlockModel
 ) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:edgeless-text': EdgelessTextBlockModel;
+    }
+  }
+}

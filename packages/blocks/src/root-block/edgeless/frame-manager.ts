@@ -96,7 +96,9 @@ export class EdgelessFrameManager {
     const surfaceModel =
       this._rootService.doc.getBlockByFlavour('affine:surface')[0];
 
-    let bound = edgelessElementsBound(this._rootService.selection.elements);
+    let bound = edgelessElementsBound(
+      this._rootService.selection.selectedElements
+    );
     bound = bound.expand(FRAME_PADDING);
     if (bound.w < MIN_FRAME_WIDTH) {
       const offset = (MIN_FRAME_WIDTH - bound.w) / 2;

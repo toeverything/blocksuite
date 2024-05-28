@@ -55,6 +55,7 @@ import {
   isAttachmentBlock,
   isBookmarkBlock,
   isCanvasElement,
+  isEdgelessTextBlock,
   isEmbeddedBlock,
   isEmbedFigmaBlock,
   isEmbedGithubBlock,
@@ -488,7 +489,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   get resizeMode(): ResizeMode {
-    const elements = this.selection.elements;
+    const elements = this.selection.selectedElements;
 
     let areAllConnectors = true;
     let areAllIndependentConnectors = elements.length > 1;
@@ -496,7 +497,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let areAllTexts = true;
 
     for (const element of elements) {
-      if (isNoteBlock(element) || isEmbedSyncedDocBlock(element)) {
+      if (
+        isNoteBlock(element) ||
+        isEdgelessTextBlock(element) ||
+        isEmbedSyncedDocBlock(element)
+      ) {
         areAllConnectors = false;
         if (this._shiftKey) {
           areAllShapes = false;
@@ -557,7 +562,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _shouldRenderSelection(elements?: BlockSuite.EdgelessModelType[]) {
-    elements = elements ?? this.selection.elements;
+    elements = elements ?? this.selection.selectedElements;
     return elements.length > 0 && !this.selection.editing;
   }
 
@@ -566,7 +571,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this._dragEndCallback = [];
     this.edgeless.slots.elementResizeStart.emit();
-    this.selection.elements.forEach(el => {
+    this.selection.selectedElements.forEach(el => {
       el.stash('xywh');
 
       if (el instanceof NoteBlockModel) {
@@ -782,7 +787,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       .rotateSelf(delta)
       .translateSelf(-center.x, -center.y);
 
-    const elements = selection.elements.filter(
+    const elements = selection.selectedElements.filter(
       element =>
         isImageBlock(element) ||
         (isCanvasElement(element) &&
@@ -829,7 +834,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     const { selection } = this;
-    const elements = selection.elements;
+    const elements = selection.selectedElements;
 
     if (elements.length !== 1) this._mode = 'scale';
 
@@ -911,7 +916,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _updateSelectedRect = requestThrottledConnectFrame(() => {
     const { zoom, selection, edgeless } = this;
 
-    const elements = selection.elements;
+    const elements = selection.selectedElements;
     // in surface
     const rect = getSelectedRect(elements);
 
@@ -947,15 +952,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       _selectedRect,
       resizeMode,
       zoom,
-      selection: { elements },
+      selection: { selectedElements },
     } = this;
 
-    const rect = getSelectedRect(elements);
-    const proportion = elements.some(element =>
+    const rect = getSelectedRect(selectedElements);
+    const proportion = selectedElements.some(element =>
       this._isProportionalElement(element)
     );
     // if there are more than one element, we need to refresh the state of resize manager
-    if (elements.length > 1) refresh = true;
+    if (selectedElements.length > 1) refresh = true;
 
     _resizeManager.updateState(
       resizeMode,
@@ -965,7 +970,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       refresh ? rect : undefined,
       proportion
     );
-    _resizeManager.updateBounds(getSelectableBounds(elements));
+    _resizeManager.updateBounds(getSelectableBounds(selectedElements));
   };
 
   private _updateOnViewportChange = () => {
@@ -981,7 +986,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._propDisposables.forEach(disposable => disposable.dispose());
     this._propDisposables = [];
 
-    this.selection.elements.forEach(element => {
+    this.selection.selectedElements.forEach(element => {
       if ('flavour' in element) {
         this._propDisposables.push(
           element.propsUpdated.on(() => {
@@ -1067,14 +1072,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return (
       !this.autoCompleteOff &&
       !this._isResizing &&
-      this.selection.elements.length === 1 &&
-      (this.selection.elements[0] instanceof ShapeElementModel ||
-        isNoteBlock(this.selection.elements[0]))
+      this.selection.selectedElements.length === 1 &&
+      (this.selection.selectedElements[0] instanceof ShapeElementModel ||
+        isNoteBlock(this.selection.selectedElements[0]))
     );
   }
 
   private _canRotate() {
-    return !this.selection.elements.every(
+    return !this.selection.selectedElements.every(
       ele =>
         isNoteBlock(ele) ||
         isFrameBlock(ele) ||
@@ -1088,7 +1093,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     if (!this.isConnected) return nothing;
 
     const { selection } = this;
-    const elements = selection.elements;
+    const elements = selection.selectedElements;
 
     if (!this._shouldRenderSelection(elements)) return nothing;
 
@@ -1215,7 +1220,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       ${!doc.readonly && !inoperable && this._canAutoComplete()
         ? html`<edgeless-auto-complete
-            .current=${this.selection.elements[0]}
+            .current=${this.selection.selectedElements[0]}
             .edgeless=${edgeless}
             .selectedRect=${_selectedRect}
           >

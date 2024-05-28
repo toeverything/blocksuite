@@ -207,13 +207,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _updateNoteSlicer() {
     const { edgeless } = this;
-    const { elements } = edgeless.service.selection;
+    const { selectedElements } = edgeless.service.selection;
     if (
       !edgeless.service.selection.editing &&
-      elements.length === 1 &&
-      isNoteBlock(elements[0])
+      selectedElements.length === 1 &&
+      isNoteBlock(selectedElements[0])
     ) {
-      this._slicerAnchorNote = elements[0];
+      this._slicerAnchorNote = selectedElements[0];
     } else {
       this._slicerAnchorNote = null;
     }

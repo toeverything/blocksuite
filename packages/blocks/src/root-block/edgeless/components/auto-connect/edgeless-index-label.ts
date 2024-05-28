@@ -179,8 +179,10 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
 
     _disposables.add(
       edgeless.service.selection.slots.updated.on(() => {
-        const { elements } = edgeless.service.selection;
-        if (!(elements.length === 1 && isNoteBlock(elements[0]))) {
+        const { selectedElements } = edgeless.service.selection;
+        if (
+          !(selectedElements.length === 1 && isNoteBlock(selectedElements[0]))
+        ) {
           this._index = -1;
         }
       })
@@ -232,13 +234,13 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
       .map(block => block.model) as SurfaceRefBlockModel[];
 
     const getVisibility = () => {
-      const { elements } = service.selection;
+      const { selectedElements } = service.selection;
 
       if (
-        elements.length === 1 &&
+        selectedElements.length === 1 &&
         !service.selection.editing &&
-        (isNoteBlock(elements[0]) ||
-          surfaceRefs.some(ref => ref.reference === elements[0].id))
+        (isNoteBlock(selectedElements[0]) ||
+          surfaceRefs.some(ref => ref.reference === selectedElements[0].id))
       ) {
         this._show = true;
       } else {

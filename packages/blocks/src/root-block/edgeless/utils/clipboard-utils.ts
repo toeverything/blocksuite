@@ -1,4 +1,5 @@
 import { groupBy } from '../../../_common/utils/iterable.js';
+import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
@@ -9,7 +10,12 @@ import {
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import { edgelessElementsBound } from './bound-utils.js';
 import { getElementsWithoutGroup } from './group.js';
-import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
+import {
+  isEdgelessTextBlock,
+  isFrameBlock,
+  isImageBlock,
+  isNoteBlock,
+} from './query.js';
 
 const offset = 10;
 export async function duplicate(
@@ -42,7 +48,7 @@ export async function duplicate(
   }
 }
 export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
-  const { notes, frames, shapes, images } = groupBy(
+  const { notes, frames, shapes, images, edgelessText } = groupBy(
     getElementsWithoutGroup(elements),
     element => {
       if (isNoteBlock(element)) {
@@ -51,6 +57,8 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
         return 'frames';
       } else if (isImageBlock(element)) {
         return 'images';
+      } else if (isEdgelessTextBlock(element)) {
+        return 'edgelessText';
       }
       return 'shapes';
     }
@@ -59,6 +67,7 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
     shapes: BlockSuite.SurfaceModelType[];
     frames: FrameBlockModel[];
     images: ImageBlockModel[];
+    edgelessText: EdgelessTextBlockModel[];
   };
 
   return {
@@ -66,5 +75,6 @@ export const splitElements = (elements: BlockSuite.EdgelessModelType[]) => {
     shapes: shapes ?? [],
     frames: frames ?? [],
     images: images ?? [],
+    edgelessText: edgelessText ?? [],
   };
 };

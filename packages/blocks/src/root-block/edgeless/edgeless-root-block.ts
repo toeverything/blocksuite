@@ -568,7 +568,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
-      this.service.selection.set(this.service.selection.selections);
+      this.service.selection.set(this.service.selection.surfaceSelections);
     });
 
     resizeObserver.observe(this.viewportElement);

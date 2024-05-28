@@ -889,7 +889,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
     const editing = edgelessRoot.service.selection.editing;
-    const selectedElements = edgelessRoot.service.selection.elements;
+    const selectedElements = edgelessRoot.service.selection.selectedElements;
     if (editing || selectedElements.length !== 1) {
       this._hide();
       return;
@@ -908,7 +908,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    const selections = edgelessRoot.service.selection.selections;
+    const selections = edgelessRoot.service.selection.surfaceSelections;
 
     this._anchorBlockId = selectedElement.id;
     this._anchorBlockPath = selections[0].blockId;

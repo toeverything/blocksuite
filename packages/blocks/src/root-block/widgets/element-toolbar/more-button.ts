@@ -218,7 +218,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       ACTION_DIVIDER,
       ...COPY_ACTIONS,
     ];
-    const refreshable = this.selection.elements.every(ele =>
+    const refreshable = this.selection.selectedElements.every(ele =>
       this._refreshable(ele as BlockModel)
     );
     if (refreshable) {
@@ -240,7 +240,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _delete = () => {
     this.doc.captureSync();
-    deleteElements(this.surface, this.selection.elements);
+    deleteElements(this.surface, this.selection.selectedElements);
 
     this.selection.set({
       elements: [],
@@ -274,7 +274,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'duplicate': {
-        await duplicate(this.edgeless, selection.elements);
+        await duplicate(this.edgeless, selection.selectedElements);
         break;
       }
       case 'delete': {
@@ -283,7 +283,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       }
       case 'copy-as-png': {
         const { notes, frames, shapes, images } = splitElements(
-          this.selection.elements
+          this.selection.selectedElements
         );
         this.slots.copyAsPng.emit({
           blocks: [...notes, ...removeContainedFrames(frames), ...images],
@@ -294,6 +294,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'create-frame': {
         const { service } = this.edgeless;
         const frame = service.frame.createFrameOnSelected();
+        if (!frame) break;
         this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
         break;
       }
@@ -305,13 +306,13 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'forward':
       case 'backward':
       case 'back': {
-        this.selection.elements.forEach(el => {
+        this.selection.selectedElements.forEach(el => {
           this.edgeless.service.reorderElement(el, type);
         });
         break;
       }
       case 'reload':
-        this._reload(this.selection.selections);
+        this._reload(this.selection.surfaceSelections);
         break;
     }
   };
@@ -319,7 +320,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   override render() {
     const selection = this.edgeless.service.selection;
     const actions = Actions(
-      selection.elements.some(ele => isFrameBlock(ele))
+      selection.selectedElements.some(ele => isFrameBlock(ele))
         ? this._FrameActions
         : this._Actions,
       this._runAction

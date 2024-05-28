@@ -37,7 +37,7 @@ export function getEdgelessService(editor: EditorHost) {
 export async function selectedToCanvas(editor: EditorHost) {
   const edgelessRoot = getEdgelessRootFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
-    edgelessRoot.service.selection.elements
+    edgelessRoot.service.selection.selectedElements
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;
@@ -209,5 +209,5 @@ export function getCopilotSelectedElems(
       .selectedElements;
   }
 
-  return service.selection.elements;
+  return service.selection.selectedElements;
 }

@@ -28,7 +28,7 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   }
 
   get selectedElements() {
-    return this.selection.elements;
+    return this.selection.selectedElements;
   }
 
   get area() {

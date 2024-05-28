@@ -501,13 +501,13 @@ export class AIChatLogic {
       name: 'Create mind-map',
       hide: () => {
         const service = getEdgelessService(this.host);
-        const ele = service.selection.elements[0];
+        const ele = service.selection.selectedElements[0];
         return !SurfaceBlockComponent.isShape(ele);
       },
       action: async () => {
         const reactiveData = this.reactiveData;
         const service = getEdgelessService(this.host);
-        const ele = service.selection.elements[0];
+        const ele = service.selection.selectedElements[0];
         if (!SurfaceBlockComponent.isShape(ele)) {
           return;
         }
@@ -559,7 +559,7 @@ export class AIChatLogic {
       name: 'Make it real',
       hide: () => {
         const service = getEdgelessService(this.host);
-        const elements = service.selection.elements;
+        const elements = service.selection.selectedElements;
         return elements.length === 0;
       },
       action: async () => {
