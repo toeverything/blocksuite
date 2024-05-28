@@ -1,5 +1,4 @@
 import '../_common/components/block-selection.js';
-import '../_common/components/embed-card/embed-card-caption.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
@@ -8,7 +7,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
@@ -38,8 +37,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   @property({ attribute: false })
   accessor loading = false;
 
-  @query('embed-card-caption')
-  accessor captionElement!: EmbedCardCaption;
+  @query('block-caption-editor')
+  accessor captionElement!: BlockCaptionEditor;
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
@@ -288,7 +287,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
             <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
 
-          <embed-card-caption .block=${this}></embed-card-caption>
+          <block-caption-editor .block=${this}></block-caption-editor>
 
           <affine-block-selection .block=${this}></affine-block-selection>
         </div>

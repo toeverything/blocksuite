@@ -1,5 +1,6 @@
 import {
   CancelWrapIcon,
+  CaptionIcon,
   CopyIcon,
   DeleteIcon,
   DuplicateIcon,
@@ -17,6 +18,16 @@ export const defaultItems: CodeToolbarItem[] = [
     showWhen: () => true,
     action: codeBlock => {
       codeBlock.copyCode();
+    },
+  },
+  {
+    type: 'action',
+    name: 'caption',
+    icon: CaptionIcon,
+    tooltip: 'Caption',
+    showWhen: blockElement => !blockElement.doc.readonly,
+    action: codeBlock => {
+      codeBlock.captionElement.show();
     },
   },
 ];

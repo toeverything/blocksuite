@@ -1,5 +1,4 @@
 import '../_common/components/block-selection.js';
-import '../_common/components/embed-card/embed-card-caption.js';
 
 import { BlockElement } from '@blocksuite/block-std';
 import { flip, offset } from '@floating-ui/dom';
@@ -9,7 +8,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import type { BlockCaptionEditor } from '../_common/components/index.js';
 import { HoverController } from '../_common/components/index.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import {
@@ -52,8 +51,8 @@ export class AttachmentBlockComponent extends BlockElement<
   @property({ attribute: false })
   accessor allowEmbed = false;
 
-  @query('embed-card-caption')
-  accessor captionElement!: EmbedCardCaption;
+  @query('block-caption-editor')
+  accessor captionElement!: BlockCaptionEditor;
 
   @state()
   private accessor _showOverlay = true;
@@ -317,7 +316,7 @@ export class AttachmentBlockComponent extends BlockElement<
               <div class="affine-attachment-banner">${FileTypeIcon}</div>
             </div>`}
 
-        <embed-card-caption .block=${this}></embed-card-caption>
+        <block-caption-editor .block=${this}></block-caption-editor>
 
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>

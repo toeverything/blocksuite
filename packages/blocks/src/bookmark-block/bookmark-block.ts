@@ -1,13 +1,12 @@
 import './components/bookmark-card.js';
 import '../_common/components/block-selection.js';
-import '../_common/components/embed-card/embed-card-caption.js';
 
 import { BlockElement } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { type BookmarkBlockModel } from './bookmark-model.js';
@@ -28,8 +27,8 @@ export class BookmarkBlockComponent extends BlockElement<
   @query('bookmark-card')
   accessor bookmarkCard!: HTMLElement;
 
-  @query('embed-card-caption')
-  accessor captionElement!: EmbedCardCaption;
+  @query('block-caption-editor')
+  accessor captionElement!: BlockCaptionEditor;
 
   private _isInSurface = false;
 
@@ -110,7 +109,7 @@ export class BookmarkBlockComponent extends BlockElement<
           .error=${this.error}
         ></bookmark-card>
 
-        <embed-card-caption .block=${this}></embed-card-caption>
+        <block-caption-editor .block=${this}></block-caption-editor>
 
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>

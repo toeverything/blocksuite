@@ -1,7 +1,6 @@
 import './components/image-card.js';
 import './components/page-image-block.js';
 import './components/edgeless-image-block.js';
-import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/block-selection.js';
 
 import { BlockElement } from '@blocksuite/block-std';
@@ -9,7 +8,7 @@ import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
@@ -59,8 +58,8 @@ export class ImageBlockComponent extends BlockElement<
   @query('affine-edgeless-image')
   private accessor _edgelessImage: ImageBlockEdgelessComponent | null = null;
 
-  @query('embed-card-caption')
-  accessor captionElement!: EmbedCardCaption;
+  @query('block-caption-editor')
+  accessor captionElement!: BlockCaptionEditor;
 
   private _isInSurface = false;
 
@@ -201,7 +200,7 @@ export class ImageBlockComponent extends BlockElement<
               ></affine-edgeless-image>`
             : html`<affine-page-image .block=${this}></affine-page-image>`}
 
-        <embed-card-caption .block=${this}></embed-card-caption>
+        <block-caption-editor .block=${this}></block-caption-editor>
 
         <affine-block-selection .block=${this}></affine-block-selection>
       </div>

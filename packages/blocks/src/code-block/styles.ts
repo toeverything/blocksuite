@@ -5,15 +5,19 @@ export const codeBlockStyles = css`
     position: relative;
     z-index: 1;
   }
+  .affine-code-block-wrapper {
+    position: relative;
+    margin: 24px 0px;
+  }
 
   .affine-code-block-container {
     font-size: var(--affine-font-sm);
     line-height: var(--affine-line-height);
     position: relative;
     padding: 32px 24px;
+    margin-bottom: 4px;
     background: var(--affine-background-code-block);
     border-radius: 10px;
-    margin: 24px 0px;
     box-sizing: border-box;
   }
 
