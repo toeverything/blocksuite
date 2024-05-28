@@ -1,5 +1,5 @@
-import type { EditorHost } from '@blocksuite/block-std';
-import type { PageRootService } from '@blocksuite/blocks';
+import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
+import { type PageRootService, toast } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BlockCollection } from '@blocksuite/store';
@@ -29,39 +29,17 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   const specs = getExampleSpecs();
   editor.pageSpecs = [...specs.pageModeSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
-      const setup = spec.setup;
-      spec = {
-        ...spec,
-        setup: (slots, disposable) => {
-          setup?.(slots, disposable);
-          slots.mounted.once(({ service }) => {
-            disposable.add(
-              (<PageRootService>service).slots.editorModeSwitch.on(
-                switchQuickEdgelessMenu
-              )
-            );
-          });
-        },
-      };
+      spec = patchPageRootSpec(
+        spec as BlockSpec<'affine:page', PageRootService>
+      );
     }
     return spec;
   });
   editor.edgelessSpecs = [...specs.edgelessModeSpecs].map(spec => {
     if (spec.schema.model.flavour === 'affine:page') {
-      const setup = spec.setup;
-      spec = {
-        ...spec,
-        setup: (slots, disposable) => {
-          setup?.(slots, disposable);
-          slots.mounted.once(({ service }) => {
-            disposable.add(
-              (<PageRootService>service).slots.editorModeSwitch.on(
-                switchQuickEdgelessMenu
-              )
-            );
-          });
-        },
-      };
+      spec = patchPageRootSpec(
+        spec as BlockSpec<'affine:page', PageRootService>
+      );
     }
     return spec;
   });
@@ -112,4 +90,55 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   });
 
   return editor;
+
+  function patchPageRootSpec(spec: BlockSpec<'affine:page', PageRootService>) {
+    const setup = spec.setup;
+    const newSpec: typeof spec = {
+      ...spec,
+      setup: (slots, disposable) => {
+        setup?.(slots, disposable);
+        slots.mounted.once(({ service }) => {
+          const pageRootService = service as PageRootService;
+          disposable.add(
+            pageRootService.slots.editorModeSwitch.on(switchQuickEdgelessMenu)
+          );
+          pageRootService.notificationService = {
+            toast: (message, options) => {
+              toast(service.host as EditorHost, message, options?.duration);
+            },
+            confirm: notification => {
+              return Promise.resolve(confirm(notification.title));
+            },
+          };
+          pageRootService.quickSearchService = {
+            async searchDoc({ userInput }) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+              const docs = collection.search({
+                query: userInput,
+                limit: 1,
+              });
+              const doc = [...docs].at(0);
+              if (doc) {
+                return {
+                  docId: doc[1],
+                };
+              } else if (userInput) {
+                return {
+                  userInput: userInput,
+                };
+              } else {
+                // randomly create a doc
+                const newDoc = collection.createDoc();
+                return {
+                  docId: newDoc.id,
+                };
+              }
+            },
+          };
+        });
+      },
+    };
+
+    return newSpec;
+  }
 }
