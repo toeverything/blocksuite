@@ -1,14 +1,16 @@
-import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { EdgelessEraserIcon } from '../../../../../_common/icons/index.js';
 import { type EdgelessTool } from '../../../../../_common/utils/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 @customElement('edgeless-eraser-tool-button')
-export class EdgelessEraserToolButton extends WithDisposable(LitElement) {
+export class EdgelessEraserToolButton extends EdgelessToolbarToolMixin(
+  LitElement
+) {
+  override _type: EdgelessTool['type'] = 'eraser';
   static override styles = css`
     .eraser-button {
       position: relative;
@@ -37,15 +39,6 @@ export class EdgelessEraserToolButton extends WithDisposable(LitElement) {
       top: 0px;
     }
   `;
-
-  @property({ attribute: false })
-  accessor edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   override firstUpdated() {
     this.edgeless.bindHotKey(

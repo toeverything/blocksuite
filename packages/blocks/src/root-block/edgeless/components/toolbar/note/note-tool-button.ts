@@ -1,20 +1,23 @@
 import '../../buttons/tool-icon-button.js';
 import './note-menu.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { ArrowUpIcon, NoteIcon } from '../../../../../_common/icons/index.js';
-import type { NoteTool } from '../../../../../_common/utils/index.js';
+import type {
+  EdgelessTool,
+  NoteTool,
+} from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
+import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
 
 @customElement('edgeless-note-tool-button')
-export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
+export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
+  override _type: EdgelessTool['type'] = 'affine:note';
   static override styles = css`
     :host {
       display: flex;
@@ -27,12 +30,6 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
       font-size: 0;
     }
   `;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor active = false;
 
   @state()
   accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
@@ -109,7 +106,7 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
-  override render() {
+  override defaultRender() {
     const { active } = this;
     const arrowColor = active ? 'currentColor' : '#77757D';
     return html`
@@ -129,6 +126,9 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
         </span>
       </edgeless-tool-icon-button>
     `;
+  }
+  override denseRender() {
+    return html`<div>TODO</div>`;
   }
 }
 

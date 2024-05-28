@@ -1,7 +1,6 @@
 import '../../buttons/tool-icon-button.js';
 import '../../panel/one-row-color-panel.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -10,9 +9,10 @@ import {
   ScribbledStyleIcon,
 } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
+import type { EdgelessTool } from '../../../../../_common/types.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import {
   LINE_COLOR_PREFIX,
   SHAPE_COLOR_PREFIX,
@@ -22,7 +22,8 @@ import {
 import type { ShapeName } from './shape-tool-element.js';
 
 @customElement('edgeless-shape-menu')
-export class EdgelessShapeMenu extends WithDisposable(LitElement) {
+export class EdgelessShapeMenu extends EdgelessToolbarToolMixin(LitElement) {
+  override _type: EdgelessTool['type'] = 'shape';
   static override styles = css`
     :host {
       display: flex;
@@ -52,9 +53,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
   accessor shapeType!: ShapeName;
 
   @property({ attribute: false })
@@ -73,7 +71,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   accessor onChange!: (props: Record<string, unknown>) => void;
 
   private _setStrokeColor = (strokeColor: CssVariableName) => {
-    if (this.edgeless.edgelessTool.type !== 'shape') return;
+    if (this.edgelessTool.type !== 'shape') return;
 
     const props: Record<string, unknown> = { strokeColor };
     const fillColor = strokeColor.replace(
@@ -87,7 +85,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   };
 
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
-    if (this.edgeless.edgelessTool.type !== 'shape') return;
+    if (this.edgelessTool.type !== 'shape') return;
 
     this.onChange({
       shapeStyle,
@@ -95,7 +93,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   };
 
   override render() {
-    if (this.edgeless.edgelessTool.type !== 'shape') return nothing;
+    if (this.edgelessTool.type !== 'shape') return nothing;
 
     const { radius, strokeColor, shapeStyle } = this;
     let { shapeType } = this;

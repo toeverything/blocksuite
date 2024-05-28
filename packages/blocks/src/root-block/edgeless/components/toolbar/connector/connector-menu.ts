@@ -11,9 +11,9 @@ import {
 } from '../../../../../_common/icons/index.js';
 import { type EdgelessTool } from '../../../../../_common/utils/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 const CONNECTOR_SUBMENU_WIDTH = 474;
 
@@ -57,7 +57,10 @@ function ConnectorModeButtonGroup(
 }
 
 @customElement('edgeless-connector-menu')
-export class EdgelessConnectorMenu extends LitElement {
+export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
+  LitElement
+) {
+  override _type: EdgelessTool['type'] = 'connector';
   static override styles = css`
     :host {
       position: absolute;
@@ -93,9 +96,6 @@ export class EdgelessConnectorMenu extends LitElement {
   `;
 
   @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
   accessor mode!: ConnectorMode;
 
   @property({ attribute: false })
@@ -106,10 +106,6 @@ export class EdgelessConnectorMenu extends LitElement {
 
   @property({ attribute: false })
   accessor onChange!: (props: Record<string, unknown>) => void;
-
-  private get edgelessTool(): EdgelessTool {
-    return this.edgeless.edgelessTool;
-  }
 
   override render() {
     if (this.edgelessTool.type !== 'connector') return nothing;

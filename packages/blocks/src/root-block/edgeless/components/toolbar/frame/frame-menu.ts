@@ -1,23 +1,15 @@
-import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import { DocCollection } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { type EdgelessTool } from '../../../../../_common/utils/index.js';
-import { Bound } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-
-export const FrameConfig = [
-  { name: '1:1', wh: [1200, 1200] },
-  { name: '4:3', wh: [1600, 1200] },
-  { name: '16:9', wh: [1600, 900] },
-  { name: '2:1', wh: [1600, 800] },
-];
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
+import { FrameConfig } from './config.js';
+import { createFrame } from './service.js';
 
 @customElement('edgeless-frame-menu')
-export class EdgelessFrameMenu extends WithDisposable(LitElement) {
+export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
+  protected override _type: EdgelessTool['type'] = 'frame';
   static override styles = css`
     :host {
       position: absolute;
@@ -82,16 +74,9 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   override render() {
     if (this.edgelessTool.type !== 'frame') return nothing;
     const { edgeless } = this;
-    const { surface } = edgeless;
     return html`
       <div class="frame-menu-container">
         <edgeless-slide-menu .menuWidth=${304} .showNext=${false}>
@@ -103,34 +88,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
               item => item.name,
               (item, index) => html`
                 <div
-                  @click=${() => {
-                    const frames = edgeless.service.frames;
-                    const center = edgeless.service.viewport.center;
-                    const bound = new Bound(
-                      center.x - item.wh[0] / 2,
-                      center.y - item.wh[1] / 2,
-                      item.wh[0],
-                      item.wh[1]
-                    );
-                    const id = edgeless.service.addBlock(
-                      'affine:frame',
-                      {
-                        title: new DocCollection.Y.Text(
-                          `Frame ${frames.length + 1}`
-                        ),
-                        xywh: bound.serialize(),
-                      },
-                      surface.model
-                    );
-                    edgeless.doc.captureSync();
-                    const frame = edgeless.service.getElementById(id);
-                    assertExists(frame);
-                    edgeless.tools.setEdgelessTool({ type: 'default' });
-                    edgeless.service.selection.set({
-                      elements: [frame.id],
-                      editing: false,
-                    });
-                  }}
+                  @click=${() => createFrame(edgeless, item.wh)}
                   class="frame-add-button ${index}"
                 >
                   ${item.name}

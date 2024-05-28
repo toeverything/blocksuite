@@ -112,6 +112,10 @@ export type LassoTool = {
   mode: LassoMode;
 };
 
+export type TemplateTool = {
+  type: 'template';
+};
+
 export type NoteChildrenFlavour =
   | 'affine:paragraph'
   | 'affine:list'
@@ -154,7 +158,8 @@ export type EdgelessTool =
   | FrameTool
   | FrameNavigatorTool
   | CopilotSelectionTool
-  | LassoTool;
+  | LassoTool
+  | TemplateTool;
 
 export interface Viewport {
   left: number;

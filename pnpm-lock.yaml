@@ -184,6 +184,9 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.6.5
         version: 1.6.5
+      '@lit/context':
+        specifier: ^1.1.1
+        version: 1.1.1
       '@sgtpooki/file-type':
         specifier: 1.0.1
         version: 1.0.1
@@ -1294,6 +1297,9 @@ packages:
 
   '@lit-labs/ssr-dom-shim@1.2.0':
     resolution: {integrity: sha512-yWJKmpGE6lUURKAaIltoPIE/wrbY3TEkqQt+X0m+7fQNnAv0keydnYvbiJFP1PnMhizmIWRWOG5KLhYyc/xl+g==}
+
+  '@lit/context@1.1.1':
+    resolution: {integrity: sha512-q/Rw7oWSJidUP43f/RUPwqZ6f5VlY8HzinTWxL/gW1Hvm2S5q2hZvV+qM8WFcC+oLNNknc3JKsd5TwxLk1hbdg==}
 
   '@lit/react@1.0.5':
     resolution: {integrity: sha512-RSHhrcuSMa4vzhqiTenzXvtQ6QDq3hSPsnHHO3jaPmmvVFeoNNm4DHoQ0zLdKAUvY3wP3tTENSUf7xpyVfrDEA==}
@@ -5819,6 +5825,10 @@ snapshots:
       '@lezer/common': 1.2.1
 
   '@lit-labs/ssr-dom-shim@1.2.0': {}
+
+  '@lit/context@1.1.1':
+    dependencies:
+      '@lit/reactive-element': 2.0.4
 
   '@lit/react@1.0.5(@types/react@18.3.2)':
     dependencies:

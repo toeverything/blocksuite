@@ -1,6 +1,5 @@
 import './template-panel.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
 import {
   arrow,
   autoUpdate,
@@ -9,16 +8,19 @@ import {
   shift,
 } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../_common/types.js';
 import { once } from '../../../../../_common/utils/event.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { renderIcon } from './icon.js';
 import type { EdgelessTemplatePanel } from './template-panel.js';
 
 @customElement('edgeless-template-button')
-export class EdgelessTemplateButton extends WithDisposable(LitElement) {
+export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
+  LitElement
+) {
+  override _type: EdgelessTool['type'] = 'template';
   static override styles = css`
     :host {
       position: relative;
@@ -36,12 +38,6 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
       color: var(--affine-background-primary-color);
     }
   `;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   private _openedPanel: EdgelessTemplatePanel | null = null;
   private _cleanup: (() => void) | null = null;

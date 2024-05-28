@@ -1,7 +1,6 @@
 import '../../buttons/tool-icon-button.js';
 import '../common/slide-menu.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -10,6 +9,7 @@ import { toggleEmbedCardCreateModal } from '../../../../../_common/components/em
 import { BookmarkIcon } from '../../../../../_common/icons/edgeless.js';
 import { AttachmentIcon } from '../../../../../_common/icons/text.js';
 import {
+  type EdgelessTool,
   type NoteChildrenFlavour,
   type NoteTool,
   openFileOrFiles,
@@ -18,11 +18,12 @@ import { FigmaIcon } from '../../../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../../../embed-github-block/styles.js';
 import { LoomIcon } from '../../../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../../../embed-youtube-block/styles.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { NOTE_MENU_ITEMS, NOTE_MENU_WIDTH } from './note-menu-config.js';
 
 @customElement('edgeless-note-menu')
-export class EdgelessNoteMenu extends WithDisposable(LitElement) {
+export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
+  override _type: EdgelessTool['type'] = 'affine:note';
   static override styles = css`
     :host {
       position: absolute;
@@ -60,9 +61,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
   accessor childFlavour!: NoteChildrenFlavour;
 
   @property({ attribute: false })
@@ -97,7 +95,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this.edgeless.edgelessTool.type !== 'affine:note') return nothing;
+    if (!this.active) return nothing;
 
     const { childType } = this;
 

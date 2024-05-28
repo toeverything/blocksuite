@@ -1,9 +1,8 @@
 import '../../buttons/tool-icon-button.js';
 import './frame-menu.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -12,12 +11,13 @@ import {
 } from '../../../../../_common/icons/index.js';
 import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
+import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 import type { EdgelessFrameMenu } from './frame-menu.js';
 
 @customElement('edgeless-frame-tool-button')
-export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
+export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
+  protected override _type: EdgelessTool['type'] = 'frame';
   static override styles = css`
     :host {
       display: flex;
@@ -31,15 +31,6 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
-
   private _frameMenu: MenuPopper<EdgelessFrameMenu> | null = null;
 
   private _toggleFrameMenu() {
@@ -51,7 +42,6 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
         x: 90,
         y: -40,
       });
-      this._frameMenu.element.edgelessTool = this.edgelessTool;
       this._frameMenu.element.edgeless = this.edgeless;
     }
   }
@@ -87,7 +77,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
-  override render() {
+  override defaultRender() {
     const type = this.edgelessTool?.type;
     const arrowColor = type === 'frame' ? 'currentColor' : '#77757D';
     return html`
@@ -110,6 +100,9 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
         </span>
       </edgeless-tool-icon-button>
     `;
+  }
+  override denseRender() {
+    return html`<div>TODO</div>`;
   }
 }
 

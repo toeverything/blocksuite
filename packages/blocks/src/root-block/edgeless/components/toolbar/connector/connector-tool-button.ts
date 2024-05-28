@@ -1,7 +1,7 @@
 import '../../buttons/toolbar-button.js';
 import './connector-menu.js';
 
-import { css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -14,16 +14,19 @@ import { ConnectorMode } from '../../../../../surface-block/index.js';
 import { DEFAULT_CONNECTOR_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
-import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
+import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
+import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
 import type { EdgelessConnectorMenu } from './connector-menu.js';
 
 @customElement('edgeless-connector-tool-button')
-export class EdgelessConnectorToolButton extends EdgelessToolButton<
-  EdgelessConnectorMenu,
-  'connector',
-  readonly ['mode', 'stroke', 'strokeWidth']
-> {
-  static override styles = css`
+export class EdgelessConnectorToolButton extends QuickToolMixin(
+  ToolbarButtonWithMenuMixin<
+    EdgelessConnectorMenu,
+    'connector',
+    readonly ['mode', 'stroke', 'strokeWidth']
+  >(LitElement)
+) {
+  static styles = css`
     :host {
       display: flex;
     }
@@ -85,7 +88,7 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
     }
   }
 
-  override render() {
+  override defaultRender() {
     const { active } = this;
     const arrowColor = active ? 'currentColor' : '#77757D';
     return html`
@@ -109,6 +112,10 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
         </span>
       </edgeless-tool-icon-button>
     `;
+  }
+
+  override denseRender() {
+    return html`<div>TODO: Connector</div>`;
   }
 }
 

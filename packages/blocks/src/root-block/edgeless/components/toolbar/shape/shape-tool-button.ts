@@ -2,7 +2,7 @@ import '../../buttons/toolbar-button.js';
 import './shape-menu.js';
 import './shape-tool-element.js';
 
-import { css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -24,7 +24,7 @@ import { ShapeStyle } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
-import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
+import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
 import type { Shape, ShapeName } from './shape-tool-element.js';
 
@@ -39,12 +39,12 @@ const shapes: Array<Shape> = [
 ];
 
 @customElement('edgeless-shape-tool-button')
-export class EdgelessShapeToolButton extends EdgelessToolButton<
+export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
   EdgelessShapeMenu,
   'shape',
   readonly ['shapeStyle', 'shapeType', 'fillColor', 'strokeColor', 'radius']
-> {
-  static override styles = css`
+>(LitElement) {
+  static styles = css`
     .shape-button-group {
       display: block;
       position: relative;
@@ -107,7 +107,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
   @state()
   private accessor order = shapes.map((_, i) => i + 1);
 
-  protected override _type = 'shape' as const;
+  override _type = 'shape' as const;
   protected override _states = [
     'shapeStyle',
     'shapeType',
@@ -121,7 +121,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
       this._disposeMenu();
       this.requestUpdate();
     } else {
-      this.edgeless.tools.setEdgelessTool({
+      this.setEdgelessTool({
         type: this._type,
         shapeType: this.shapeType,
       });

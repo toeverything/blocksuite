@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -9,11 +9,14 @@ import {
   LassoPolygonalIcon,
 } from '../../../../../_common/icons/edgeless.js';
 import { type EdgelessTool, LassoMode } from '../../../../../_common/types.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
 @customElement('edgeless-lasso-tool-button')
-export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
+export class EdgelessDefaultToolButton extends QuickToolMixin(
+  WithDisposable(LitElement)
+) {
+  override _type: EdgelessTool['type'] = 'lasso';
   static override styles = css`
     .current-icon {
       transition: 100ms;
@@ -25,14 +28,6 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
       font-size: 0;
     }
   `;
-  @property({ attribute: false })
-  accessor edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   @query('.current-icon')
   accessor currentIcon!: HTMLInputElement;
@@ -76,7 +71,7 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
     }, 100);
   };
 
-  override render() {
+  override defaultRender() {
     const type = this.edgelessTool?.type;
     const mode = this.curMode === LassoMode.FreeHand ? 'freehand' : 'polygonal';
 
@@ -100,6 +95,9 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
         </span>
       </edgeless-tool-icon-button>
     `;
+  }
+  override denseRender() {
+    return html`<div>TODO</div>`;
   }
 }
 

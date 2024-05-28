@@ -1,7 +1,7 @@
 import '../../buttons/toolbar-button.js';
 import './text-menu.js';
 
-import { css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -9,16 +9,16 @@ import { EdgelessTextIcon } from '../../../../../_common/icons/index.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
-import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
+import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
 import type { EdgelessTextMenu } from './text-menu.js';
 
 @customElement('edgeless-text-tool-button')
-export class EdgelessTextToolButton extends EdgelessToolButton<
+export class EdgelessTextToolButton extends ToolbarButtonWithMenuMixin<
   EdgelessTextMenu,
   'text',
   readonly ['color']
-> {
-  static override styles = css`
+>(LitElement) {
+  static styles = css`
     :host {
       display: flex;
     }

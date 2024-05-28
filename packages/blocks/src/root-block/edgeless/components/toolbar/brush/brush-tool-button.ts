@@ -1,7 +1,7 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -10,16 +10,16 @@ import { LineWidth } from '../../../../../_common/utils/index.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
-import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
+import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
 
 @customElement('edgeless-brush-tool-button')
-export class EdgelessBrushToolButton extends EdgelessToolButton<
+export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
   EdgelessBrushMenu,
   'brush',
   readonly ['color', 'lineWidth']
-> {
-  static override styles = css`
+>(LitElement) {
+  static styles = css`
     :host {
       display: flex;
     }

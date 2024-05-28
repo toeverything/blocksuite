@@ -22,6 +22,7 @@
     "@dotlottie/player-component": "^2.7.12",
     "@fal-ai/serverless-client": "^0.10.0",
     "@floating-ui/dom": "^1.6.5",
+    "@lit/context": "^1.1.1",
     "@sgtpooki/file-type": "1.0.1",
     "@toeverything/theme": "^0.7.30",
     "@types/hast": "^3.0.4",

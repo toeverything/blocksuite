@@ -1,6 +1,5 @@
-import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { css, html, LitElement, type TemplateResult } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -8,12 +7,13 @@ import {
   HandIcon,
   SelectIcon,
 } from '../../../../../_common/icons/index.js';
-import { type EdgelessTool } from '../../../../../_common/utils/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
+import type { EdgelessTool } from '../../../../../_common/types.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
 @customElement('edgeless-default-tool-button')
-export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
+export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
+  override _type: EdgelessTool['type'] = 'default';
   static override styles = css`
     .current-icon {
       transition: 100ms;
@@ -25,15 +25,6 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
       font-size: 0;
     }
   `;
-
-  @property({ attribute: false })
-  accessor edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   @query('.current-icon')
   accessor currentIcon!: HTMLInputElement;
@@ -84,10 +75,12 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
     }, 100);
   }
 
-  override render() {
+  override defaultRender() {
     const type = this.edgelessTool?.type;
     const arrowColor =
-      type === 'default' || type === 'pan' ? 'currentColor' : '#77757D';
+      type === 'default' || type === 'pan'
+        ? 'currentColor'
+        : 'var(--affine-primary-color)';
     return html`
       <edgeless-tool-icon-button
         class="edgeless-default-button ${type}"
@@ -107,6 +100,9 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
         </span>
       </edgeless-tool-icon-button>
     `;
+  }
+  override denseRender(): TemplateResult {
+    return html`<div>TODO</div>`;
   }
 }
 

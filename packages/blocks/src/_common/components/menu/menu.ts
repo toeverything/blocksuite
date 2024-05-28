@@ -814,6 +814,7 @@ export const popMenu = <T>(
     onClose: props.options.onClose,
     middleware: props.middleware,
     container: props.container,
+    placement: props.placement,
   });
   return {
     close,

@@ -7,8 +7,9 @@ import { BlockElement } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { type BlockModel } from '@blocksuite/store';
+import { ContextProvider } from '@lit/context';
 import { css, html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../../_common/components/toast.js';
@@ -19,7 +20,6 @@ import {
 } from '../../_common/consts.js';
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
 import {
-  type EdgelessTool,
   type IPoint,
   isPinchEvent,
   NoteDisplayMode,
@@ -74,6 +74,7 @@ import { PanToolController } from './controllers/tools/pan-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
 import { TextToolController } from './controllers/tools/text-tool.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
+import { edgelessToolContext } from './edgeless-root.context.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
@@ -84,7 +85,6 @@ import {
   DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
 import { isCanvasElement } from './utils/query.js';
-
 export interface EdgelessViewport {
   left: number;
   top: number;
@@ -137,10 +137,22 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   mouseRoot!: HTMLElement;
 
-  @state()
-  accessor edgelessTool: EdgelessTool = {
-    type: localStorage.defaultTool ?? 'default',
-  };
+  private _edgelessToolProvider = new ContextProvider(this, {
+    context: edgelessToolContext,
+    initialValue: {
+      type: localStorage.defaultTool ?? 'default',
+    },
+  });
+  get edgelessTool() {
+    return this._edgelessToolProvider.value;
+  }
+
+  // FIXME: using decorator has issue that initial cannot be provided
+  // @provide({ context: edgelessToolContext })
+  // @state()
+  // public edgelessTool: EdgelessTool = {
+  //   type: localStorage.defaultTool ?? 'default',
+  // };
 
   @query('edgeless-block-portal-container')
   accessor rootElementContainer!: EdgelessBlockPortalContainer;
@@ -232,7 +244,10 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
     disposables.add(this.service.selection);
     disposables.add(
-      slots.edgelessToolUpdated.on(tool => (this.edgelessTool = tool))
+      slots.edgelessToolUpdated.on(tool => {
+        this._edgelessToolProvider.setValue(tool);
+        // this._edgelessTool = tool;
+      })
     );
     disposables.add(
       slots.cursorUpdated.on(
