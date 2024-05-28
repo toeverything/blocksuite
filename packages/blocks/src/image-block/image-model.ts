@@ -38,3 +38,11 @@ export const ImageBlockSchema = defineBlockSchema({
 });
 
 export class ImageBlockModel extends selectable<ImageBlockProps>(BlockModel) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:image': ImageBlockModel;
+    }
+  }
+}

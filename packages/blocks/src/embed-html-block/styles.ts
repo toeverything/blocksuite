@@ -59,30 +59,23 @@ export const styles = css`
     border: none;
   }
 
-  .embed-html-block-iframe-wrapper > .iframe-tip {
-    display: none;
-    align-items: center;
-    position: absolute;
-    left: 50%;
-    bottom: 30px;
-    transform: translate3d(-50%, 0, 0);
+  .embed-html-block-iframe-wrapper affine-menu {
+    min-width: 296px;
+  }
+
+  .embed-html-block-iframe-wrapper affine-menu .settings-header {
+    padding: 7px 12px;
     font-weight: 500;
-    font-style: normal;
-    font-size: var(--affine-font-sm);
+    font-size: var(--affine-font-xs);
     color: var(--affine-text-secondary-color);
   }
-  .embed-html-block-iframe-wrapper > .iframe-tip > .key {
-    width: 48px;
-    height: 28px;
-    padding: 4px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: var(--affine-white);
-    border: 1px solid var(--affine-black-10);
-    background: var(--affine-primary-color);
+
+  .embed-html-block-iframe-wrapper > embed-html-fullscreen-toolbar {
+    visibility: hidden;
   }
-  .embed-html-block-iframe-wrapper:fullscreen > .iframe-tip {
-    display: flex;
+
+  .embed-html-block-iframe-wrapper:fullscreen > embed-html-fullscreen-toolbar {
+    visibility: visible;
   }
 
   .affine-embed-html-iframe-overlay {

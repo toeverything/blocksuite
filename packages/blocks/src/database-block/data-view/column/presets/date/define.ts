@@ -4,7 +4,7 @@ import { columnType } from '../../column-config.js';
 export const dateColumnType = columnType('date');
 declare global {
   interface ColumnConfigMap {
-    [dateColumnType.type]: typeof dateColumnModelConfig;
+    [dateColumnType.type]: typeof dateColumnModelConfig.model;
   }
 }
 export const dateColumnModelConfig = dateColumnType.modelConfig<number>({

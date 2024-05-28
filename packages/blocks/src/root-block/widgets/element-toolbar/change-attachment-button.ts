@@ -88,14 +88,17 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   override render() {
     const model = this.model;
 
-    return html`<edgeless-menu-button
+    return html`
+      <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Card style"
-          .tooltip=${'Card style'}
-        >
-          ${PaletteIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Card style"
+            .tooltip=${'Card style'}
+          >
+            ${PaletteIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <card-style-panel
           slot
@@ -116,7 +119,8 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
         @click=${() => this._showCaption()}
       >
         ${CaptionIcon}
-      </edgeless-tool-icon-button>`;
+      </edgeless-tool-icon-button>
+    `;
   }
 }
 
@@ -132,8 +136,10 @@ export function renderAttachmentButton(
 ) {
   if (attachments?.length !== 1) return nothing;
 
-  return html`<edgeless-change-attachment-button
-    .model=${attachments[0]}
-    .edgeless=${edgeless}
-  ></edgeless-change-attachment-button>`;
+  return html`
+    <edgeless-change-attachment-button
+      .model=${attachments[0]}
+      .edgeless=${edgeless}
+    ></edgeless-change-attachment-button>
+  `;
 }

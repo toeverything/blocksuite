@@ -3,9 +3,9 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import {
-  CanvasTextFontFamily,
-  CanvasTextFontStyle,
-  CanvasTextFontWeight,
+  FontFamily,
+  FontStyle,
+  FontWeight,
 } from '../../../../surface-block/consts.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
 import {
@@ -346,10 +346,10 @@ export function createTextElement(
     text: new DocCollection.Y.Text(),
     textAlign: 'left',
     fontSize: 24,
-    fontFamily: CanvasTextFontFamily.Inter,
+    fontFamily: FontFamily.Inter,
     color: GET_DEFAULT_TEXT_COLOR(),
-    fontWeight: CanvasTextFontWeight.Regular,
-    fontStyle: CanvasTextFontStyle.Normal,
+    fontWeight: FontWeight.Regular,
+    fontStyle: FontStyle.Normal,
   });
   const group = current.group;
   if (group instanceof GroupElementModel) {

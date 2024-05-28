@@ -56,9 +56,9 @@ function getCodeBlock(page: Page) {
   const langList = page.locator('lang-list');
   const langFilterInput = langList.locator('#filter-input');
 
-  const codeToolbar = page.locator('affine-code-toolbar-widget');
+  const codeToolbar = page.locator('affine-code-toolbar');
 
-  const copyButton = codeToolbar.getByTestId('copy-button');
+  const copyButton = codeToolbar.getByTestId('copy-code');
   const moreButton = codeToolbar.getByTestId('more-button');
 
   const moreMenu = page.locator('affine-menu');
@@ -812,15 +812,12 @@ test('code block toolbar widget can appear and disappear during mousemove', asyn
   if (!position) throw new Error('Failed to get affine code position');
   await page.mouse.move(position.x, position.y);
 
-  const locator = page.locator('affine-code-toolbar-widget');
+  const locator = page.locator('.code-toolbar-container');
   const toolbarPosition = await locator.boundingBox();
   if (!toolbarPosition) throw new Error('Failed to get option position');
   await page.mouse.move(toolbarPosition.x, toolbarPosition.y);
   await expect(locator).toBeVisible();
-  await page.mouse.move(
-    toolbarPosition.x + toolbarPosition.width + 10,
-    toolbarPosition.y
-  );
+  await page.mouse.move(position.x - 10, position.y - 10);
   await expect(locator).toBeHidden();
 });
 

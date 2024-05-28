@@ -1,10 +1,6 @@
 import type { Y } from '@blocksuite/store';
 
-import type {
-  FontFamily,
-  FontStyle,
-  FontWeight,
-} from '../../../element-model/common.js';
+import type { FontFamily, FontStyle, FontWeight } from '../../../consts.js';
 import type { TextElementModel } from '../../../element-model/text.js';
 import type { Bound } from '../../../utils/bound.js';
 import {
@@ -434,14 +430,28 @@ export function getCursorByCoord(
 }
 
 export function normalizeTextBound(
-  text: TextElementModel,
+  {
+    yText,
+    fontStyle,
+    fontWeight,
+    fontSize,
+    fontFamily,
+    hasMaxWidth,
+    maxWidth,
+  }: {
+    yText: Y.Text;
+    fontStyle: FontStyle;
+    fontWeight: FontWeight;
+    fontSize: number;
+    fontFamily: FontFamily;
+    hasMaxWidth?: boolean;
+    maxWidth?: number;
+  },
   bound: Bound,
   dragging: boolean = false
 ): Bound {
-  if (!text.text) return bound;
+  if (!yText) return bound;
 
-  const yText = text.text;
-  const { fontStyle, fontWeight, fontSize, fontFamily } = text;
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
   const font = getFontString({
     fontStyle,
@@ -452,8 +462,9 @@ export function normalizeTextBound(
 
   let lines: TextDelta[][] = [];
   const deltas: TextDelta[] = yText.toDelta() as TextDelta[];
+  const text = yText.toString();
   const widestCharWidth =
-    [...yText.toString()]
+    [...text]
       .map(char => getTextWidth(char, font))
       .sort((a, b) => a - b)
       .pop() ?? getTextWidth('W', font);
@@ -468,15 +479,15 @@ export function normalizeTextBound(
     attributes: delta.attributes,
   })) as TextDelta[];
   lines = deltaInsertsToChunks(insertDeltas);
-  if (!dragging && !text.hasMaxWidth) {
+  if (!dragging) {
     lines = deltaInsertsToChunks(deltas);
     const widestLineWidth = Math.max(
-      ...yText
-        .toString()
-        .split('\n')
-        .map(text => getTextWidth(text, font))
+      ...text.split('\n').map(line => getTextWidth(line, font))
     );
     bound.w = widestLineWidth;
+    if (hasMaxWidth && maxWidth && maxWidth > 0) {
+      bound.w = Math.min(bound.w, maxWidth);
+    }
   }
   bound.h = lineHeightPx * lines.length;
 

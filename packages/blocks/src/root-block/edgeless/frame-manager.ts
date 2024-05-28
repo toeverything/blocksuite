@@ -2,17 +2,12 @@ import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
 
-import type {
-  EdgelessModel,
-  Selectable,
-  TopLevelBlockModel,
-} from '../../_common/types.js';
-import { matchFlavours } from '../../_common/utils/model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessRootService } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import { EdgelessBlockModel } from './type.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
 
@@ -66,39 +61,11 @@ export function isFrameInner(
 }
 
 export class EdgelessFrameManager {
-  private _innerMap = new Map<string, boolean>();
   private _disposable = new DisposableGroup();
 
-  constructor(private _rootService: EdgelessRootService) {
-    this._disposable.add(
-      this._rootService.doc.slots.blockUpdated.on(e => {
-        const { id, type } = e;
-        const element = this._rootService.getElementById(id);
-        if (!isFrameBlock(element)) return;
-        if (type === 'add') {
-          this._innerMap.set(
-            id,
-            isFrameInner(element, this._rootService.frames)
-          );
-        } else if (type === 'update' && e.props.key === 'xywh') {
-          this._innerMap.set(
-            id,
-            isFrameInner(element, this._rootService.frames)
-          );
-        }
-      })
-    );
-  }
+  constructor(private _rootService: EdgelessRootService) {}
 
-  getFrameInner(frame: FrameBlockModel) {
-    return this._innerMap.get(frame.id);
-  }
-
-  setFrameInner(frame: FrameBlockModel, isInner: boolean) {
-    this._innerMap.set(frame.id, isInner);
-  }
-
-  selectFrame(eles: Selectable[]) {
+  selectFrame(eles: BlockSuite.EdgelessModelType[]) {
     const frames = this._rootService.frames;
     if (frames.length === 0) return null;
 
@@ -116,10 +83,8 @@ export class EdgelessFrameManager {
 
   getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: EdgelessModel[] = this._rootService.layer.canvasGrid.search(
-      bound,
-      true
-    );
+    const elements: BlockSuite.EdgelessModelType[] =
+      this._rootService.layer.canvasGrid.search(bound, true);
 
     return elements.concat(
       getBlocksInFrame(this._rootService.doc, frame, fullyContained)
@@ -195,11 +160,15 @@ export function getBlocksInFrame(
   ]) as SurfaceBlockModel[];
 
   return (
-    getNotesInFrame(doc, model, fullyContained) as TopLevelBlockModel[]
+    getNotesInFrame(
+      doc,
+      model,
+      fullyContained
+    ) as BlockSuite.EdgelessBlockModelType[]
   ).concat(
     surfaceModel[0].children.filter(ele => {
       if (ele.id === model.id) return;
-      if (matchFlavours(ele, ['affine:image', 'affine:frame'])) {
+      if (ele instanceof EdgelessBlockModel) {
         const blockBound = Bound.deserialize(ele.xywh);
         return fullyContained
           ? bound.contains(blockBound)
@@ -207,6 +176,6 @@ export function getBlocksInFrame(
       }
 
       return false;
-    }) as TopLevelBlockModel[]
+    }) as BlockSuite.EdgelessBlockModelType[]
   );
 }

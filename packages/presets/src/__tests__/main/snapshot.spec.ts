@@ -1,10 +1,15 @@
-import type { SurfaceBlockModel } from '@blocksuite/blocks';
+import { type SurfaceBlockModel } from '@blocksuite/blocks';
 import { beforeEach, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
 import { setupEditor } from '../utils/setup.js';
 
-const excludes = new Set(['shape-textBound', 'externalXYWH']);
+const excludes = new Set([
+  'shape-textBound',
+  'externalXYWH',
+  'connector-text',
+  'connector-labelXYWH',
+]);
 
 beforeEach(async () => {
   const cleanup = await setupEditor('page');
@@ -44,8 +49,9 @@ test('snapshot 1 importing', async () => {
   expect(surfaceElements.length).toBe(25);
 
   surfaceElements.forEach(element => {
+    type Type = keyof typeof element;
     for (const field in element) {
-      const value = element[field as keyof typeof element];
+      const value = element[field as Type];
 
       if (excludes.has(`${element.type}-${field}`) || excludes.has(field)) {
         return;

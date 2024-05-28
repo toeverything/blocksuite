@@ -1,19 +1,24 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import type { HitTestOptions } from '../../root-block/edgeless/type.js';
-import { DEFAULT_ROUGHNESS } from '../consts.js';
+import {
+  DEFAULT_ROUGHNESS,
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  StrokeStyle,
+  TextAlign,
+  TextResizing,
+  TextVerticalAlign,
+} from '../consts.js';
 import type { IBound, SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
 import type { PointLocation } from '../utils/point-location.js';
 import { type IVec2 } from '../utils/vec.js';
-import { type BaseProps, ElementModel } from './base.js';
-import { FontFamily, FontWeight, TextResizing } from './common.js';
 import {
-  type FontStyle,
-  type StrokeStyle,
-  type TextAlign,
-  type VerticalAlign,
-} from './common.js';
+  type IBaseProps,
+  type IHitTestOptions,
+  SurfaceElementModel,
+} from './base.js';
 import { local, yfield } from './decorators.js';
 import { diamond } from './utils/shape/diamond.js';
 import { ellipse } from './utils/shape/ellipse.js';
@@ -39,7 +44,7 @@ export enum ShapeTextFontSize {
   XLARGE = 36,
 }
 
-export type ShapeProps = BaseProps & {
+export type ShapeProps = IBaseProps & {
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
@@ -59,12 +64,12 @@ export type ShapeProps = BaseProps & {
   fontStyle?: FontStyle;
   textAlign?: TextAlign;
   textHorizontalAlign?: TextAlign;
-  textVerticalAlign?: VerticalAlign;
+  textVerticalAlign?: TextVerticalAlign;
   textResizing?: TextResizing;
   maxWidth?: false | number;
 };
 
-export class ShapeElementModel extends ElementModel<ShapeProps> {
+export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   static override propsToY(props: ShapeProps) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text);
@@ -105,7 +110,7 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   accessor strokeColor: string = '--affine-palette-line-yellow';
 
   @yfield()
-  accessor strokeStyle: StrokeStyle = 'solid';
+  accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
   @yfield('General' as ShapeStyle)
   accessor shapeStyle: ShapeStyle = 'General';
@@ -128,17 +133,17 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   @yfield(FontWeight.Regular as FontWeight)
   accessor fontWeight!: FontWeight;
 
-  @yfield('normal' as FontStyle)
+  @yfield(FontStyle.Normal as FontStyle)
   accessor fontStyle!: FontStyle;
 
-  @yfield('center' as TextAlign)
+  @yfield(TextAlign.Center as TextAlign)
   accessor textAlign!: TextAlign;
 
-  @yfield('center' as TextAlign)
+  @yfield(TextAlign.Center as TextAlign)
   accessor textHorizontalAlign!: TextAlign;
 
-  @yfield('center' as VerticalAlign)
-  accessor textVerticalAlign!: VerticalAlign;
+  @yfield(TextVerticalAlign.Center as TextVerticalAlign)
+  accessor textVerticalAlign!: TextVerticalAlign;
 
   @yfield(TextResizing.AUTO_HEIGHT as TextResizing)
   accessor textResizing: TextResizing = TextResizing.AUTO_HEIGHT;
@@ -148,7 +153,7 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
 
   textBound: IBound | null = null;
 
-  override hitTest(x: number, y: number, options: HitTestOptions) {
+  override hitTest(x: number, y: number, options: IHitTestOptions) {
     return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
       ...options,
       ignoreTransparent: options.ignoreTransparent ?? true,
@@ -169,5 +174,13 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
 
   override getRelativePointLocation(point: IVec2): PointLocation {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceElementModelMap {
+      shape: ShapeElementModel;
+    }
   }
 }

@@ -1,4 +1,3 @@
-import type { EdgelessModel } from '../../root-block/edgeless/type.js';
 import type { ConnectorElementModel } from '../index.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
@@ -6,17 +5,19 @@ import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 export const connectorMiddleware: SurfaceMiddleware = (
   surface: SurfaceBlockModel
 ) => {
+  const hasElementById = (id: string) =>
+    surface.hasElementById(id) || surface.doc.hasBlockById(id);
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
-    (surface.doc.getBlockById(id) as EdgelessModel);
+    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType);
   const pathGenerator = new ConnectorPathGenerator({
     getElementById: getElementById,
   });
   const updateConnectorPath = (connector: ConnectorElementModel) => {
     if (
-      ((connector.source?.id && getElementById(connector.source.id)) ||
+      ((connector.source?.id && hasElementById(connector.source.id)) ||
         (!connector.source?.id && connector.source?.position)) &&
-      ((connector.target?.id && getElementById(connector.target.id)) ||
+      ((connector.target?.id && hasElementById(connector.target.id)) ||
         (!connector.target?.id && connector.target?.position))
     ) {
       pathGenerator.updatePath(connector);

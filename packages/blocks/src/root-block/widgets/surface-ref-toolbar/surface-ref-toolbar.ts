@@ -14,7 +14,6 @@ import {
   DeleteIcon,
   DownloadIcon,
 } from '../../../_common/icons/text.js';
-import type { EdgelessModel } from '../../../_common/types.js';
 import { downloadBlob } from '../../../_common/utils/filesys.js';
 import {
   type SurfaceRefBlockComponent,
@@ -213,7 +212,8 @@ function SurfaceRefToolbarOptions(options: {
           edgelessToBlob(blockElement.host, {
             surfaceRefBlock: blockElement,
             surfaceRenderer: blockElement.surfaceRenderer,
-            edgelessElement: blockElement.referenceModel as EdgelessModel,
+            edgelessElement:
+              blockElement.referenceModel as BlockSuite.EdgelessModelType,
             blockContainer: blockElement.portal,
           })
             .then(blob => {

@@ -1,23 +1,10 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BlockModel, type Doc } from '@blocksuite/store';
 
-import type { BookmarkBlockModel } from '../bookmark-block/bookmark-model.js';
-import type { EmbedFigmaModel } from '../embed-figma-block/embed-figma-model.js';
-import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
-import type { EmbedHtmlModel } from '../embed-html-block/embed-html-model.js';
-import type { EmbedLinkedDocModel } from '../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedLoomModel } from '../embed-loom-block/embed-loom-model.js';
-import type { EmbedSyncedDocModel } from '../embed-synced-doc-block/embed-synced-doc-model.js';
-import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
-import type { FrameBlockModel } from '../frame-block/frame-model.js';
-import type { ImageBlockModel } from '../image-block/image-model.js';
-import type { NoteBlockModel } from '../note-block/note-model.js';
-import type { EdgelessModel } from '../root-block/edgeless/type.js';
 import type {
   ConnectorElementModel,
   ConnectorMode,
 } from '../surface-block/element-model/connector.js';
-import { type CanvasElement } from '../surface-block/element-model/index.js';
 import type {
   BrushElementModel,
   GroupElementModel,
@@ -60,34 +47,10 @@ export type AbstractEditor = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtendedModel = BlockModel & Record<string, any>;
 
-// blocks that would only appear under the edgeless container root
-export type TopLevelBlockModel =
-  | NoteBlockModel
-  | FrameBlockModel
-  | ImageBlockModel
-  | BookmarkBlockModel
-  | EmbedGithubModel
-  | EmbedYoutubeModel
-  | EmbedFigmaModel
-  | EmbedLinkedDocModel
-  | EmbedSyncedDocModel
-  | EmbedHtmlModel
-  | EmbedLoomModel;
-
-export type { EdgelessModel as EdgelessModel };
-
-export type Alignable = EdgelessModel;
-
-export type Selectable = EdgelessModel;
-
-export type Erasable = EdgelessModel;
-
-export type Connectable =
-  | TopLevelBlockModel
-  | Exclude<
-      CanvasElement,
-      ConnectorElementModel | BrushElementModel | GroupElementModel
-    >;
+export type Connectable = Exclude<
+  BlockSuite.EdgelessModelType,
+  ConnectorElementModel | BrushElementModel | GroupElementModel
+>;
 
 export type DefaultTool = {
   type: 'default';

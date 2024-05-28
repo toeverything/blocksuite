@@ -3,16 +3,15 @@ import { DocCollection, type Y } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
 
-import type { EdgelessModel } from '../../_common/types.js';
 import { last } from '../../_common/utils/iterable.js';
+import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import {
   deserializeXYWH,
   type SerializedXYWH,
   type XYWH,
 } from '../utils/xywh.js';
-import { type BaseProps, GroupLikeModel } from './base.js';
-import { TextResizing } from './common.js';
+import { type IBaseProps, SurfaceGroupLikeModel } from './base.js';
 import { LocalConnectorElementModel } from './connector.js';
 import { convert, observe, watch, yfield } from './decorators.js';
 import type {
@@ -49,11 +48,11 @@ const nodeSchema: z.ZodType<Node> = baseNodeSchema.extend({
 
 type NodeType = z.infer<typeof nodeSchema>;
 
-type MindmapElementProps = BaseProps & {
+type MindmapElementProps = IBaseProps & {
   nodes: Y.Map<NodeDetail>;
 };
 
-export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
+export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementProps> {
   get type() {
     return 'mindmap';
   }
@@ -66,7 +65,7 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
   pathGenerator: ConnectorPathGenerator = new ConnectorPathGenerator({
     getElementById: (id: string) =>
       this.surface.getElementById(id) ??
-      (this.surface.doc.getBlockById(id) as EdgelessModel),
+      (this.surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType),
   });
 
   @convert((initalValue, instance) => {
@@ -520,7 +519,9 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     this.pathGenerator.updatePath(connector);
   }
 
-  getLayoutDir(element: string | EdgelessModel): LayoutType | null {
+  getLayoutDir(
+    element: string | BlockSuite.EdgelessModelType
+  ): LayoutType | null {
     if (this.layoutType !== LayoutType.BALANCE) {
       return this.layoutType;
     }
@@ -646,5 +647,13 @@ export class MindmapElementModel extends GroupLikeModel<MindmapElementProps> {
     }
 
     return node.children.map(child => child.element);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceGroupLikeModelMap {
+      mindmap: MindmapElementModel;
+    }
   }
 }

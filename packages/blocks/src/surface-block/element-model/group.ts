@@ -2,21 +2,20 @@ import type { Y } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
 
 import { keys } from '../../_common/utils/iterable.js';
-import type { EdgelessModel } from '../../root-block/edgeless/type.js';
 import { Bound } from '../utils/bound.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
 import type { PointLocation } from '../utils/point-location.js';
 import type { IVec2 } from '../utils/vec.js';
-import type { BaseProps } from './base.js';
-import { GroupLikeModel } from './base.js';
+import type { IBaseProps } from './base.js';
+import { SurfaceGroupLikeModel } from './base.js';
 import { local, observe, yfield } from './decorators.js';
 
-type GroupElementProps = BaseProps & {
+type GroupElementProps = IBaseProps & {
   children: Y.Map<boolean>;
   title: Y.Text;
 };
 
-export class GroupElementModel extends GroupLikeModel<GroupElementProps> {
+export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> {
   static override propsToY(props: GroupElementProps) {
     if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
       props.title = new DocCollection.Y.Text(props.title);
@@ -64,7 +63,7 @@ export class GroupElementModel extends GroupLikeModel<GroupElementProps> {
     return 'group';
   }
 
-  addChild(element: EdgelessModel | string) {
+  addChild(element: BlockSuite.EdgelessModelType | string) {
     const id = typeof element === 'string' ? element : element.id;
 
     this.surface.doc.transact(() => {
@@ -72,7 +71,7 @@ export class GroupElementModel extends GroupLikeModel<GroupElementProps> {
     });
   }
 
-  removeDescendant(element: EdgelessModel | string) {
+  removeDescendant(element: BlockSuite.EdgelessModelType | string) {
     const id = typeof element === 'string' ? element : element.id;
 
     this.surface.doc.transact(() => {
@@ -87,5 +86,13 @@ export class GroupElementModel extends GroupLikeModel<GroupElementProps> {
   override intersectWithLine(start: IVec2, end: IVec2): PointLocation[] | null {
     const bound = Bound.deserialize(this.xywh);
     return linePolygonIntersects(start, end, bound.points);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceGroupLikeModelMap {
+      group: GroupElementModel;
+    }
   }
 }

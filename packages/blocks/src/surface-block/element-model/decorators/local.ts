@@ -1,4 +1,4 @@
-import type { ElementModel } from '../base.js';
+import type { SurfaceElementModel } from '../base.js';
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
 import { getDeriveProperties, updateDerivedProp } from './derive.js';
@@ -9,7 +9,7 @@ import { getDeriveProperties, updateDerivedProp } from './derive.js';
  * The local property act like it is a yfield property, but it's not synced to the Y map.
  * Updating local property will also trigger the `elementUpdated` slot of the surface model
  */
-export function local<V, T extends ElementModel>() {
+export function local<V, T extends SurfaceElementModel>() {
   return function localDecorator(
     _target: ClassAccessorDecoratorTarget<T, V>,
     context: ClassAccessorDecoratorContext

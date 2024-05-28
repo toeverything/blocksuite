@@ -16,6 +16,7 @@ import {
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { join } from 'lit/directives/join.js';
 
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import { toast } from '../../../_common/components/toast.js';
@@ -71,6 +72,7 @@ import type {
   EmbedYoutubeModel,
 } from '../../../embed-youtube-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
+import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessBlockType } from '../../edgeless/edgeless-types.js';
 import {
@@ -535,12 +537,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       );
     }
 
-    return html`
-      ${this._canShowUrlOptions && 'url' in model
-        ? html`<div
-              class="change-embed-card-button url"
-              @click=${this._copyUrl}
-            >
+    const buttons = [
+      this._canShowUrlOptions && 'url' in model
+        ? html`
+            <div class="change-embed-card-button url" @click=${this._copyUrl}>
               <span>${model.url}</span>
             </div>
 
@@ -564,19 +564,18 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             >
               ${EditIcon}
             </edgeless-tool-icon-button>
-
-            <edgeless-menu-divider></edgeless-menu-divider>`
-        : nothing}
-      ${isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
-        ? html` ${isEmbedSyncedDocBlock(model)
-              ? html`<div
-                  class="change-embed-card-button doc-info"
-                  @click=${this._open}
-                >
-                  ${this._pageIcon}
-                  <span>${this._docTitle}</span>
-                </div>`
-              : nothing}
+          `
+        : nothing,
+      isEmbedSyncedDocBlock(model)
+        ? html`
+            <div class="change-embed-card-button doc-info" @click=${this._open}>
+              ${this._pageIcon}
+              <span>${this._docTitle}</span>
+            </div>
+          `
+        : nothing,
+      isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
+        ? html`
             <edgeless-tool-icon-button
               arai-label="Open"
               .tooltip=${'Open'}
@@ -585,11 +584,11 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             >
               ${OpenIcon}
             </edgeless-tool-icon-button>
-
-            <edgeless-menu-divider></edgeless-menu-divider>`
-        : nothing}
-      ${this._canShowFullScreenButton
-        ? html`<edgeless-tool-icon-button
+          `
+        : nothing,
+      this._canShowFullScreenButton
+        ? html`
+            <edgeless-tool-icon-button
               arai-label="Full screen"
               .tooltip=${'Full screen'}
               class="change-embed-card-button expand"
@@ -597,93 +596,99 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             >
               ${ExpandFullIcon}
             </edgeless-tool-icon-button>
+          `
+        : nothing,
+      this._canConvertToEmbedView || this._isEmbedView
+        ? html`
+            <div class="change-embed-card-view-style">
+              <div class="change-embed-card-button-view-selector">
+                <edgeless-tool-icon-button
+                  class=${classMap({
+                    'change-embed-card-button': true,
+                    card: true,
+                    'current-view': this._isCardView,
+                  })}
+                  arai-label="Card view"
+                  .tooltip=${'Card view'}
+                  ?disabled=${this._doc.readonly}
+                  .hover=${false}
+                  @click=${this._convertToCardView}
+                >
+                  ${BookmarkIcon}
+                </edgeless-tool-icon-button>
 
-            <edgeless-menu-divider></edgeless-menu-divider> `
-        : nothing}
-      ${this._canConvertToEmbedView || this._isEmbedView
-        ? html`<div class="change-embed-card-view-style">
-            <div class="change-embed-card-button-view-selector">
-              <edgeless-tool-icon-button
-                class=${classMap({
-                  'change-embed-card-button': true,
-                  card: true,
-                  'current-view': this._isCardView,
-                })}
-                arai-label="Card view"
-                .tooltip=${'Card view'}
-                ?disabled=${this._doc.readonly}
-                .hover=${false}
-                @click=${this._convertToCardView}
-              >
-                ${BookmarkIcon}
-              </edgeless-tool-icon-button>
-
-              <edgeless-tool-icon-button
-                class=${classMap({
-                  'change-embed-card-button': true,
-                  embed: true,
-                  'current-view': this._isEmbedView,
-                })}
-                arai-label="Embed view"
-                .tooltip=${'Embed view'}
-                ?disabled=${this._doc.readonly}
-                .hover=${false}
-                @click=${this._convertToEmbedView}
-              >
-                ${EmbedWebIcon}
-              </edgeless-tool-icon-button>
+                <edgeless-tool-icon-button
+                  class=${classMap({
+                    'change-embed-card-button': true,
+                    embed: true,
+                    'current-view': this._isEmbedView,
+                  })}
+                  arai-label="Embed view"
+                  .tooltip=${'Embed view'}
+                  ?disabled=${this._doc.readonly}
+                  .hover=${false}
+                  @click=${this._convertToEmbedView}
+                >
+                  ${EmbedWebIcon}
+                </edgeless-tool-icon-button>
+              </div>
             </div>
-          </div>`
-        : nothing}
-      ${'style' in model && this._canShowCardStylePanel
-        ? html`<edgeless-menu-button
-            .contentPadding=${'8px'}
-            .button=${html`<edgeless-tool-icon-button
-              aria-label="Card style"
-              .tooltip=${'Card style'}
-            >
-              ${PaletteIcon}
-            </edgeless-tool-icon-button>`}
-          >
-            <card-style-panel
-              slot
-              .value=${model.style}
-              .options=${this._getCardStyleOptions}
-              .onSelect=${(value: EmbedCardStyle) => this._setCardStyle(value)}
-            >
-            </card-style-panel>
-          </edgeless-menu-button>`
-        : nothing}
-
-      <edgeless-menu-divider></edgeless-menu-divider>
-
-      <edgeless-tool-icon-button
-        arai-label="Add caption"
-        .tooltip=${'Add caption'}
-        class="change-embed-card-button caption"
-        ?disabled=${this._doc.readonly}
-        @click=${this._showCaption}
-      >
-        ${CaptionIcon}
-      </edgeless-tool-icon-button>
-
-      ${isEmbedHtmlBlock(model)
-        ? nothing
-        : html`<edgeless-menu-divider></edgeless-menu-divider>
+          `
+        : nothing,
+      'style' in model && this._canShowCardStylePanel
+        ? html`
             <edgeless-menu-button
               .contentPadding=${'8px'}
-              .button=${html`<edgeless-tool-icon-button
-                aria-label="Scale"
-                .tooltip=${'Scale'}
-                .justify=${'space-between'}
-                .iconContainerWidth=${'65px'}
-                .labelHeight=${'20px'}
-              >
-                <span class="label ellipsis"
-                  >${Math.round(this._embedScale * 100) + '%'}</span
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Card style"
+                  .tooltip=${'Card style'}
                 >
-                ${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>`}
+                  ${PaletteIcon}
+                </edgeless-tool-icon-button>
+              `}
+            >
+              <card-style-panel
+                slot
+                .value=${model.style}
+                .options=${this._getCardStyleOptions}
+                .onSelect=${(value: EmbedCardStyle) =>
+                  this._setCardStyle(value)}
+              >
+              </card-style-panel>
+            </edgeless-menu-button>
+          `
+        : nothing,
+      html`
+        <edgeless-tool-icon-button
+          arai-label="Add caption"
+          .tooltip=${'Add caption'}
+          class="change-embed-card-button caption"
+          ?disabled=${this._doc.readonly}
+          @click=${this._showCaption}
+        >
+          ${CaptionIcon}
+        </edgeless-tool-icon-button>
+      `,
+      isEmbedHtmlBlock(model)
+        ? nothing
+        : html`
+            <edgeless-menu-button
+              .contentPadding=${'8px'}
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Scale"
+                  .tooltip=${'Scale'}
+                  .justify=${'space-between'}
+                  .iconContainerWidth=${'65px'}
+                  .labelHeight=${'20px'}
+                >
+                  <span class="label ellipsis"
+                    >${Math.round(this._embedScale * 100) + '%'}</span
+                  >
+                  ${SmallArrowDownIcon}
+                </edgeless-tool-icon-button>
+              `}
             >
               <edgeless-scale-panel
                 slot
@@ -693,8 +698,14 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 .minSize=${0}
                 .onSelect=${(scale: number) => this._setEmbedScale(scale)}
               ></edgeless-scale-panel>
-            </edgeless-menu-button>`}
-    `;
+            </edgeless-menu-button>
+          `,
+    ];
+
+    return join(
+      buttons.filter(button => button !== nothing),
+      renderMenuDivider
+    );
   }
 }
 
@@ -710,8 +721,10 @@ export function renderEmbedButton(
 ) {
   if (models?.length !== 1) return nothing;
 
-  return html`<edgeless-change-embed-card-button
-    .model=${models[0]}
-    .edgeless=${edgeless}
-  ></edgeless-change-embed-card-button>`;
+  return html`
+    <edgeless-change-embed-card-button
+      .model=${models[0]}
+      .edgeless=${edgeless}
+    ></edgeless-change-embed-card-button>
+  `;
 }

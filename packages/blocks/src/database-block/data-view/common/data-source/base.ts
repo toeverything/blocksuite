@@ -6,8 +6,12 @@ import type { InsertToPosition } from '../../types.js';
 import type { UniComponent } from '../../utils/uni-component/index.js';
 import type { DataViewManager } from '../../view/data-view-manager.js';
 import { DEFAULT_COLUMN_WIDTH } from '../../view/presets/table/consts.js';
+import type { DataViewContextKey } from './context.js';
 
-export type DetailSlotProps = { view: DataViewManager; rowId: string };
+export type DetailSlotProps = {
+  view: DataViewManager;
+  rowId: string;
+};
 
 export interface DetailSlots {
   header?: UniComponent<DetailSlotProps>;
@@ -16,7 +20,9 @@ export interface DetailSlots {
 
 export interface DataSource {
   addPropertyConfigList: ColumnConfig[];
+
   getPropertyMeta(type: string): ColumnMeta;
+
   properties: string[];
   rows: string[];
   cellGetValue: (rowId: string, propertyId: string) => unknown;
@@ -58,9 +64,21 @@ export interface DataSource {
   detailSlots: DetailSlots;
 
   rowMove(rowId: string, position: InsertToPosition): void;
+
+  getContext<T>(key: DataViewContextKey<T>): T | undefined;
 }
 
 export abstract class BaseDataSource implements DataSource {
+  context = new Map<DataViewContextKey<unknown>, unknown>();
+
+  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.context.get(key) as T;
+  }
+
+  protected setContext<T>(key: DataViewContextKey<T>, value: T): void {
+    this.context.set(key, value);
+  }
+
   public abstract cellChangeValue(
     rowId: string,
     propertyId: string,
@@ -142,7 +160,9 @@ export abstract class BaseDataSource implements DataSource {
   };
 
   public abstract addPropertyConfigList: ColumnConfig[];
+
   public abstract getPropertyMeta(type: string): ColumnMeta;
+
   public get detailSlots(): DetailSlots {
     return {};
   }

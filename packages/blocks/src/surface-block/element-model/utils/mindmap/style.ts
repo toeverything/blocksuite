@@ -1,6 +1,5 @@
 import { last } from '../../../../_common/utils/iterable.js';
-import { FontWeight } from '../../common.js';
-import { FontFamily, type StrokeStyle } from '../../common.js';
+import { FontFamily, FontWeight, StrokeStyle } from '../../../consts.js';
 import type { LocalConnectorElementModel } from '../../connector.js';
 import { ConnectorMode } from '../../connector.js';
 import type { MindmapNode } from './layout.js';
@@ -77,7 +76,7 @@ export class StyleOne extends MindmapStyleGetter {
 
     return {
       connector: {
-        strokeStyle: 'solid',
+        strokeStyle: StrokeStyle.Solid,
         stroke: color,
         strokeWidth: 2,
 
@@ -138,7 +137,7 @@ export class StyleTwo extends MindmapStyleGetter {
 
     return {
       connector: {
-        strokeStyle: 'solid',
+        strokeStyle: StrokeStyle.Solid,
         stroke: '--affine-palette-line-grey',
         strokeWidth: 2,
 
@@ -199,7 +198,7 @@ export class StyleThree extends MindmapStyleGetter {
         fillColor: 'transparent',
       },
       connector: {
-        strokeStyle: 'solid',
+        strokeStyle: StrokeStyle.Solid,
         stroke: '--affine-palette-line-grey',
         strokeWidth: 2,
 
@@ -232,7 +231,7 @@ export class StyleFour extends MindmapStyleGetter {
   ): { connector: ConnectorStyle; node: NodeStyle } {
     return {
       connector: {
-        strokeStyle: 'solid',
+        strokeStyle: StrokeStyle.Solid,
         stroke: '--affine-palette-line-grey',
         strokeWidth: 2,
 

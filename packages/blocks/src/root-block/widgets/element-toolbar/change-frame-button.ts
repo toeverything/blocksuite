@@ -128,12 +128,14 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
 
       <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Background"
-          .tooltip=${'Background'}
-        >
-          <edgeless-color-button .color=${background}></edgeless-color-button>
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Background"
+            .tooltip=${'Background'}
+          >
+            <edgeless-color-button .color=${background}></edgeless-color-button>
+          </edgeless-tool-icon-button>
+        `}
       >
         <edgeless-color-panel
           slot
@@ -152,8 +154,10 @@ export function renderFrameButton(
 ) {
   if (!frames?.length) return nothing;
 
-  return html`<edgeless-change-frame-button
-    .edgeless=${edgeless}
-    .frames=${frames}
-  ></edgeless-change-frame-button>`;
+  return html`
+    <edgeless-change-frame-button
+      .edgeless=${edgeless}
+      .frames=${frames}
+    ></edgeless-change-frame-button>
+  `;
 }

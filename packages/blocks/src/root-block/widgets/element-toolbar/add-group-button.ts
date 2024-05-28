@@ -10,7 +10,6 @@ import {
   MindmapElementModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessModel } from '../../edgeless/type.js';
 
 @customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
@@ -24,14 +23,16 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   protected override render() {
-    return html`<edgeless-tool-icon-button
-      aria-label="Group"
-      .tooltip=${'Group'}
-      .labelHeight=${'20px'}
-      @click=${() => this.edgeless.service.createGroupFromSelected()}
-    >
-      ${GroupIcon}<span class="label medium">Group</span>
-    </edgeless-tool-icon-button>`;
+    return html`
+      <edgeless-tool-icon-button
+        aria-label="Group"
+        .tooltip=${'Group'}
+        .labelHeight=${'20px'}
+        @click=${() => this.edgeless.service.createGroupFromSelected()}
+      >
+        ${GroupIcon}<span class="label medium">Group</span>
+      </edgeless-tool-icon-button>
+    `;
   }
 }
 
@@ -43,14 +44,16 @@ declare global {
 
 export function renderAddGroupButton(
   edgeless: EdgelessRootBlockComponent,
-  elements: EdgelessModel[]
+  elements: BlockSuite.EdgelessModelType[]
 ) {
   if (elements.length < 2) return nothing;
   if (elements[0] instanceof GroupElementModel) return nothing;
   if (elements.some(e => e.group instanceof MindmapElementModel))
     return nothing;
 
-  return html`<edgeless-add-group-button
-    .edgeless=${edgeless}
-  ></edgeless-add-group-button>`;
+  return html`
+    <edgeless-add-group-button
+      .edgeless=${edgeless}
+    ></edgeless-add-group-button>
+  `;
 }

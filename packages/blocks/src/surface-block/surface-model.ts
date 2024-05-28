@@ -9,9 +9,8 @@ import {
 } from '@blocksuite/store';
 
 import {
-  type BaseProps,
-  type ElementModel,
-  GroupLikeModel,
+  type IBaseProps,
+  SurfaceGroupLikeModel,
 } from './element-model/base.js';
 import type {
   Connection,
@@ -179,7 +178,11 @@ export type SurfaceMiddleware = (
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _elementModels: Map<
     string,
-    { mount: () => void; unmount: () => void; model: ElementModel }
+    {
+      mount: () => void;
+      unmount: () => void;
+      model: BlockSuite.SurfaceElementModelType;
+    }
   > = new Map();
   private _disposables: DisposableGroup = new DisposableGroup();
   private _groupToElements: Map<string, string[]> = new Map();
@@ -193,7 +196,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
    */
   protected hooks = {
     update: new Slot<Omit<ElementUpdatedData, 'local'>>(),
-    remove: new Slot<{ id: string; type: string; model: ElementModel }>(),
+    remove: new Slot<{
+      id: string;
+      type: string;
+      model: BlockSuite.SurfaceElementModelType;
+    }>(),
   };
 
   elementUpdated = new Slot<ElementUpdatedData>();
@@ -201,12 +208,12 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   elementRemoved = new Slot<{
     id: string;
     type: string;
-    model: ElementModel;
+    model: BlockSuite.SurfaceElementModelType;
     local: boolean;
   }>();
 
   get elementModels() {
-    const models: ElementModel[] = [];
+    const models: BlockSuite.SurfaceElementModelType[] = [];
     this._elementModels.forEach(model => models.push(model.model));
     return models;
   }
@@ -334,9 +341,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       }
     };
     const isGroup = (
-      element: ElementModel
-    ): element is GroupLikeModel<BaseProps> =>
-      element instanceof GroupLikeModel;
+      element: BlockSuite.SurfaceElementModelType
+    ): element is BlockSuite.SurfaceGroupLikeModelType =>
+      element instanceof SurfaceGroupLikeModel;
 
     this.elementModels.forEach(model => {
       if (isGroup(model)) {
@@ -436,7 +443,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     };
 
     const updateConnectorMap = (
-      element: ElementModel,
+      element: BlockSuite.SurfaceElementModelType,
       type: 'add' | 'remove'
     ) => {
       if (element.type !== 'connector') return;
@@ -514,16 +521,17 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     ) as ConnectorElementModel[];
   }
 
-  getGroup<T extends GroupLikeModel<BaseProps> = GroupLikeModel<BaseProps>>(
-    id: string
-  ): T | null {
+  getGroup<
+    T extends
+      SurfaceGroupLikeModel<IBaseProps> = SurfaceGroupLikeModel<IBaseProps>,
+  >(id: string): T | null {
     return this._elementToGroup.has(id)
       ? (this.getElementById(this._elementToGroup.get(id)!) as T)
       : null;
   }
 
-  getGroups(id: string): GroupLikeModel<BaseProps>[] {
-    const groups: GroupLikeModel<BaseProps>[] = [];
+  getGroups(id: string): SurfaceGroupLikeModel<IBaseProps>[] {
+    const groups: SurfaceGroupLikeModel<IBaseProps>[] = [];
     let group = this.getGroup(id);
 
     while (group) {
@@ -546,7 +554,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     return this._elementModels.has(id);
   }
 
-  getElementById(id: string): ElementModel | null {
+  getElementById(id: string): BlockSuite.SurfaceElementModelType | null {
     return this._elementModels.get(id)?.model ?? null;
   }
 
@@ -588,7 +596,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       const element = this.getElementById(id)!;
       const group = this.getGroup(id);
 
-      if (element instanceof GroupLikeModel) {
+      if (element instanceof SurfaceGroupLikeModel) {
         element.childIds.forEach(childId => {
           if (this.hasElementById(childId)) {
             this.removeElement(childId);
@@ -606,7 +614,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
       this.hooks.remove.emit({
         id,
-        model: element as ElementModel,
+        model: element as BlockSuite.SurfaceElementModelType,
         type: element.type,
       });
     });

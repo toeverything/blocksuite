@@ -54,7 +54,8 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
           const bound = Bound.deserialize(this.model.xywh);
           const scale = this.model.edgeless.scale ?? 1;
           const height = entry.contentRect.height * scale;
-          if (almostEqual(bound.h, height)) {
+
+          if (!height || almostEqual(bound.h, height)) {
             return;
           }
 
@@ -408,7 +409,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         : 'none',
       background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
       border: `${borderSize}px ${
-        borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
+        borderStyle === StrokeStyle.Dash ? 'dashed' : borderStyle
       } var(--affine-black-10)`,
       boxShadow: this._editing
         ? 'var(--affine-active-shadow)'

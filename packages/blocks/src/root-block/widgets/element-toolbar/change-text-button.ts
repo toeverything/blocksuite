@@ -21,11 +21,13 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<edgeless-change-text-menu
-      .elements=${this.texts}
-      .elementType=${'text'}
-      .edgeless=${this.edgeless}
-    ></edgeless-change-text-menu>`;
+    return html`
+      <edgeless-change-text-menu
+        .elements=${this.texts}
+        .elementType=${'text'}
+        .edgeless=${this.edgeless}
+      ></edgeless-change-text-menu>
+    `;
   }
 }
 
@@ -41,9 +43,8 @@ export function renderChangeTextButton(
 ) {
   if (!elements?.length) return nothing;
 
-  return html`<edgeless-change-text-button
-    .texts=${elements}
-    .edgeless=${edgeless}
-  >
-  </edgeless-change-text-button>`;
+  return html`
+    <edgeless-change-text-button .texts=${elements} .edgeless=${edgeless}>
+    </edgeless-change-text-button>
+  `;
 }

@@ -54,3 +54,11 @@ export const BookmarkBlockSchema = defineBlockSchema({
 export class BookmarkBlockModel extends selectable<BookmarkBlockProps>(
   BlockModel
 ) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:bookmark': BookmarkBlockModel;
+    }
+  }
+}

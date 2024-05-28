@@ -17,8 +17,11 @@ import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
 import type { RootBlockModel } from '../../root-block/index.js';
 import type { IBound } from '../../surface-block/consts.js';
-import { ElementModel } from '../../surface-block/element-model/index.js';
-import type { GroupElementModel, Renderer } from '../../surface-block/index.js';
+import {
+  type GroupElementModel,
+  type Renderer,
+  SurfaceElementModel,
+} from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { fetchImage } from '../adapters/utils.js';
 import { CANVAS_EXPORT_IGNORE_TAGS } from '../consts.js';
@@ -193,7 +196,7 @@ export class ExportManager {
     blockElementGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessRootBlockComponent,
     nodes?: EdgelessBlockModel[],
-    surfaces?: ElementModel[],
+    surfaces?: BlockSuite.SurfaceElementModelType[],
     edgelessBackground?: {
       zoom: number;
     }
@@ -308,8 +311,8 @@ export class ExportManager {
       const surfaceElements = surfaces.flatMap(element =>
         element.type === 'group'
           ? ((element as GroupElementModel).childElements.filter(
-              el => el instanceof ElementModel
-            ) as ElementModel[])
+              el => el instanceof SurfaceElementModel
+            ) as BlockSuite.SurfaceElementModelType[])
           : element
       );
       const surfaceCanvas = surfaceRenderer.getCanvasByBound(

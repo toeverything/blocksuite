@@ -77,7 +77,8 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
     const { groups } = this;
     return html`
       ${groups.length === 1
-        ? html`<edgeless-tool-icon-button
+        ? html`
+            <edgeless-tool-icon-button
               aria-label="Insert into Page"
               .tooltip=${'Insert into Page'}
               .iconSize=${'20px'}
@@ -98,7 +99,8 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
               ${RenameIcon}
             </edgeless-tool-icon-button>
 
-            <edgeless-menu-divider></edgeless-menu-divider>`
+            <edgeless-menu-divider></edgeless-menu-divider>
+          `
         : nothing}
       <edgeless-tool-icon-button
         class=${'edgeless-component-toolbar-ungroup-button'}
@@ -130,9 +132,8 @@ export function renderGroupButton(
 ) {
   if (!groups?.length) return nothing;
 
-  return html`<edgeless-change-group-button
-    .edgeless=${edgeless}
-    .groups=${groups}
-  >
-  </edgeless-change-group-button>`;
+  return html`
+    <edgeless-change-group-button .edgeless=${edgeless} .groups=${groups}>
+    </edgeless-change-group-button>
+  `;
 }

@@ -3,7 +3,6 @@ import type {
   AffineAIPanelWidget,
   AIError,
   EdgelessCopilotWidget,
-  EdgelessModel,
   MindmapElementModel,
 } from '@blocksuite/blocks';
 import {
@@ -62,7 +61,9 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   ctx: CtxRecord
 ): AnswerRenderer {
   if (id === 'brainstormMindmap') {
-    const selectedElements = ctx.get()['selectedElements'] as EdgelessModel[];
+    const selectedElements = ctx.get()[
+      'selectedElements'
+    ] as BlockSuite.EdgelessModelType[];
 
     if (
       isMindMapRoot(selectedElements[0] || isMindmapChild(selectedElements[0]))
@@ -98,7 +99,7 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
 
 export async function getContentFromSelected(
   host: EditorHost,
-  selected: EdgelessModel[]
+  selected: BlockSuite.EdgelessModelType[]
 ) {
   const { notes, texts, shapes, images } = selected.reduce<{
     notes: NoteBlockModel[];

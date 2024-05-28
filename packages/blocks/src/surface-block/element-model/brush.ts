@@ -1,4 +1,3 @@
-import type { HitTestOptions } from '../../root-block/edgeless/type.js';
 import { getSolidStrokePoints } from '../canvas-renderer/element-renderer/brush/utils.js';
 import {
   Bound,
@@ -18,10 +17,14 @@ import { PointLocation } from '../utils/point-location.js';
 import type { IVec2 } from '../utils/vec.js';
 import { Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
-import { type BaseProps, ElementModel } from './base.js';
+import {
+  type IBaseProps,
+  type IHitTestOptions,
+  SurfaceElementModel,
+} from './base.js';
 import { convert, derive, watch, yfield } from './decorators.js';
 
-export type BrushProps = BaseProps & {
+export type BrushProps = IBaseProps & {
   /**
    * [[x0,y0,pressure0?],[x1,y1,pressure1?]...]
    * pressure is optional and exsits when pressure sensitivity is supported, otherwise not.
@@ -31,7 +34,7 @@ export type BrushProps = BaseProps & {
   lineWidth: number;
 };
 
-export class BrushElementModel extends ElementModel<BrushProps> {
+export class BrushElementModel extends SurfaceElementModel<BrushProps> {
   static override propsToY(props: BrushProps) {
     return props;
   }
@@ -144,7 +147,7 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     return 'brush';
   }
 
-  override hitTest(px: number, py: number, options?: HitTestOptions): boolean {
+  override hitTest(px: number, py: number, options?: IHitTestOptions): boolean {
     const hit = isPointOnlines(
       Bound.deserialize(this.xywh),
       this.points as [number, number][],
@@ -201,5 +204,13 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   override getRelativePointLocation(position: IVec2): PointLocation {
     const point = Bound.deserialize(this.xywh).getRelativePoint(position);
     return new PointLocation(point);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceElementModelMap {
+      brush: BrushElementModel;
+    }
   }
 }

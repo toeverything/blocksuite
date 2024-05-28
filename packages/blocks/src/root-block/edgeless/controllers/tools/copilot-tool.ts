@@ -3,7 +3,6 @@ import { Slot } from '@blocksuite/store';
 
 import type {
   CopilotSelectionTool,
-  EdgelessModel,
   EdgelessTool,
 } from '../../../../_common/utils/index.js';
 import { Bound, getElementsBound } from '../../../../surface-block/index.js';
@@ -60,7 +59,10 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     this._edgeless.tools.setEdgelessTool({ type: 'default' });
   }
 
-  updateDragPointsWith(selectedElements: EdgelessModel[], padding = 0) {
+  updateDragPointsWith(
+    selectedElements: BlockSuite.EdgelessModelType[],
+    padding = 0
+  ) {
     const bounds = getElementsBound(
       selectedElements.map(e => e.elementBound)
     ).expand(padding / this._edgeless.service.zoom);
@@ -69,7 +71,10 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     this.dragLastPoint = bounds.br as [number, number];
   }
 
-  updateSelectionWith(selectedElements: EdgelessModel[], padding = 0) {
+  updateSelectionWith(
+    selectedElements: BlockSuite.EdgelessModelType[],
+    padding = 0
+  ) {
     const { selection } = this._edgeless.service;
 
     selection.clear();

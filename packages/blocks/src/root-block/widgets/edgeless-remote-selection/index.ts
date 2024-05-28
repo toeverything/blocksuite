@@ -7,7 +7,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { RemoteCursor } from '../../../_common/icons/edgeless.js';
-import type { Selectable } from '../../../_common/types.js';
 import { requestThrottledConnectFrame } from '../../../_common/utils/event.js';
 import { pickValues } from '../../../_common/utils/iterable.js';
 import type { EdgelessRootBlockComponent } from '../../../root-block/edgeless/edgeless-root-block.js';
@@ -130,7 +129,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
 
       const elements = selection.elements
         .map(id => blockElement.service.getElementById(id))
-        .filter(element => element) as Selectable[];
+        .filter(element => element) as BlockSuite.EdgelessModelType[];
       const rect = getSelectedRect(elements);
 
       if (rect.width === 0 || rect.height === 0) return;

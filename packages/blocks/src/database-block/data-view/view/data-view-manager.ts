@@ -5,6 +5,7 @@ import type { ColumnConfig } from '../column/index.js';
 import { type CellRenderer } from '../column/index.js';
 import type { FilterGroup, Variable } from '../common/ast.js';
 import type { DataSource, DetailSlots } from '../common/data-source/base.js';
+import type { DataViewContextKey } from '../common/data-source/context.js';
 import type { SingleViewSource } from '../common/index.js';
 import type { TType } from '../logical/typesystem.js';
 import type { ColumnDataUpdater, InsertToPosition } from '../types.js';
@@ -125,6 +126,8 @@ export interface DataViewManager {
   get isDeleted(): boolean;
 
   get detailSlots(): DetailSlots;
+
+  getContext<T>(key: DataViewContextKey<T>): T | undefined;
 }
 
 export interface DataViewColumnManager<
@@ -187,6 +190,9 @@ export interface DataViewColumnManager<
 export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
   implements DataViewManager
 {
+  getContext<T>(key: DataViewContextKey<T>): T | undefined {
+    return this.dataSource.getContext(key);
+  }
   protected get dataSource(): DataSource {
     assertExists(this._dataSource, 'data source is not set');
     return this._dataSource;

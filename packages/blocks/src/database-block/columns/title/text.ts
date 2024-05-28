@@ -7,6 +7,7 @@ import { html } from 'lit/static-html.js';
 
 import type { RichText } from '../../../_common/components/index.js';
 import { getViewportElement } from '../../../_common/utils/query.js';
+import { HostContextKey } from '../../context/host-context.js';
 import { BaseCellRenderer } from '../../data-view/column/index.js';
 import type { DataViewKanbanManager } from '../../data-view/view/presets/kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../data-view/view/presets/table/table-view-manager.js';
@@ -77,8 +78,9 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
   @property({ attribute: false })
   accessor showIcon = false;
   get service() {
-    const database = this.closest<DatabaseBlockComponent>('affine-database');
-    return database?.service;
+    return this.view
+      .getContext(HostContextKey)
+      ?.std.spec.getService('affine:database');
   }
 
   get inlineManager() {

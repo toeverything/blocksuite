@@ -1,6 +1,6 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
-import type { CanvasTextFontFamilyValueType } from '../../consts.js';
+import type { FontFamily } from '../../consts.js';
 import { wrapFontFamily } from '../../utils/font.js';
 
 const RS_LTR_CHARS =
@@ -32,10 +32,7 @@ const cachedFontFamily = new Map<
     lineHeight: number;
   }
 >();
-export function getLineHeight(
-  fontFamily: CanvasTextFontFamilyValueType,
-  fontSize: number
-) {
+export function getLineHeight(fontFamily: FontFamily, fontSize: number) {
   const ctx = getMeasureCtx();
   const wrappedFontFamily = wrapFontFamily(fontFamily);
 
@@ -64,10 +61,10 @@ export function getFontString({
   fontSize,
   fontFamily,
 }: {
+  fontFamily: FontFamily;
+  fontSize: number;
   fontStyle: string;
   fontWeight: string;
-  fontSize: number;
-  fontFamily: CanvasTextFontFamilyValueType;
 }): string {
   const lineHeight = getLineHeight(fontFamily, fontSize);
   return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight}px ${wrapFontFamily(
@@ -107,10 +104,7 @@ export function getTextRect(
     .map(x => x || ' ')
     .join('\n');
 
-  const lineHeight = getLineHeight(
-    fontFamily as CanvasTextFontFamilyValueType,
-    fontSize
-  );
+  const lineHeight = getLineHeight(fontFamily as FontFamily, fontSize);
   const font = `${fontSize}px "${fontFamily}"`;
   const w = getTextWidth(text, font);
   const h = getTextHeight(text, lineHeight);

@@ -9,11 +9,7 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
-import type {
-  EdgelessModel,
-  IPoint,
-  Selectable,
-} from '../../../../_common/types.js';
+import type { IPoint } from '../../../../_common/types.js';
 import {
   requestThrottledConnectFrame,
   stopPropagation,
@@ -36,7 +32,6 @@ import type {
 import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { TextElementModel } from '../../../../surface-block/element-model/text.js';
-import type { ElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   deserializeXYWH,
@@ -454,7 +449,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;
-  private _propDiposables: Disposable[] = [];
+  private _propDisposables: Disposable[] = [];
   private _dragEndCallback: (() => void)[] = [];
 
   constructor() {
@@ -516,7 +511,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllShapes = false;
         areAllTexts = false;
       } else {
-        assertType<ElementModel>(element);
+        assertType<BlockSuite.SurfaceElementModelType>(element);
         if (element.type === CanvasElementType.CONNECTOR) {
           const connector = element as ConnectorElementModel;
           areAllIndependentConnectors &&= !(
@@ -548,7 +543,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return 'corner';
   }
 
-  private _isProportionalElement(element: EdgelessModel) {
+  private _isProportionalElement(element: BlockSuite.EdgelessModelType) {
     return (
       isAttachmentBlock(element) ||
       isImageBlock(element) ||
@@ -561,7 +556,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
   }
 
-  private _shouldRenderSelection(elements?: Selectable[]) {
+  private _shouldRenderSelection(elements?: BlockSuite.EdgelessModelType[]) {
     elements = elements ?? this.selection.elements;
     return elements.length > 0 && !this.selection.editing;
   }
@@ -722,39 +717,60 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         edgeless.service.updateElement(element.id, {
           xywh: bound.serialize(),
         });
-      } else {
-        if (element instanceof TextElementModel) {
-          let p = 1;
-          if (
-            direction === HandleDirection.Left ||
-            direction === HandleDirection.Right
-          ) {
-            bound = normalizeTextBound(element, bound, true);
-            // If the width of the text element has been changed by dragging,
-            // We need to set hasMaxWidth to true for wrapping the text
-            edgeless.service.updateElement(id, {
-              xywh: bound.serialize(),
-              fontSize: element.fontSize * p,
-              hasMaxWidth: true,
-            });
-          } else {
-            p = bound.h / element.h;
-            // const newFontsize = element.fontSize * p;
-            // bound = normalizeTextBound(element, bound, false, newFontsize);
-
-            edgeless.service.updateElement(id, {
-              xywh: bound.serialize(),
-              fontSize: element.fontSize * p,
-            });
-          }
-        } else {
-          if (element instanceof ShapeElementModel) {
-            bound = normalizeShapeBound(element, bound);
-          }
+      } else if (element instanceof TextElementModel) {
+        let p = 1;
+        if (
+          direction === HandleDirection.Left ||
+          direction === HandleDirection.Right
+        ) {
+          const {
+            text: yText,
+            fontFamily,
+            fontSize,
+            fontStyle,
+            fontWeight,
+            hasMaxWidth,
+          } = element;
+          // If the width of the text element has been changed by dragging,
+          // We need to set hasMaxWidth to true for wrapping the text
+          bound = normalizeTextBound(
+            {
+              yText,
+              fontFamily,
+              fontSize,
+              fontStyle,
+              fontWeight,
+              hasMaxWidth,
+            },
+            bound,
+            true
+          );
+          // If the width of the text element has been changed by dragging,
+          // We need to set hasMaxWidth to true for wrapping the text
           edgeless.service.updateElement(id, {
             xywh: bound.serialize(),
+            fontSize: element.fontSize * p,
+            hasMaxWidth: true,
+          });
+        } else {
+          p = bound.h / element.h;
+          // const newFontsize = element.fontSize * p;
+          // bound = normalizeTextBound(element, bound, false, newFontsize);
+
+          edgeless.service.updateElement(id, {
+            xywh: bound.serialize(),
+            fontSize: element.fontSize * p,
           });
         }
+      } else if (element instanceof ShapeElementModel) {
+        bound = normalizeShapeBound(element, bound);
+        edgeless.service.updateElement(id, {
+          xywh: bound.serialize(),
+        });
+      } else {
+        edgeless.service.updateElement(id, {
+          xywh: bound.serialize(),
+        });
       }
     });
   };
@@ -771,7 +787,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         isImageBlock(element) ||
         (isCanvasElement(element) &&
           element.type !== CanvasElementType.CONNECTOR)
-    ) as EdgelessModel[];
+    ) as BlockSuite.EdgelessModelType[];
 
     getElementsWithoutGroup(elements).forEach(element => {
       const { id, rotate } = element;
@@ -962,12 +978,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _initSelectedSlot = () => {
-    this._propDiposables.forEach(diposable => diposable.dispose());
-    this._propDiposables = [];
+    this._propDisposables.forEach(disposable => disposable.dispose());
+    this._propDisposables = [];
 
     this.selection.elements.forEach(element => {
       if ('flavour' in element) {
-        this._propDiposables.push(
+        this._propDisposables.push(
           element.propsUpdated.on(() => {
             this._updateOnElementChange(element.id);
           })
@@ -1043,7 +1059,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       edgeless.slots.elementResizeEnd.on(() => (this._isResizing = false))
     );
     _disposables.add(() => {
-      this._propDiposables.forEach(diposable => diposable.dispose());
+      this._propDisposables.forEach(disposable => disposable.dispose());
     });
   }
 

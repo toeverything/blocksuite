@@ -1,5 +1,4 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type { ElementModel } from '@blocksuite/blocks';
 import type { BlockModel } from '@blocksuite/store';
 
 export const translateLangs = [
@@ -56,7 +55,7 @@ declare global {
 
       // internal context
       host: EditorHost;
-      models?: (BlockModel | ElementModel)[];
+      models?: (BlockModel | BlockSuite.SurfaceElementModelType)[];
       control: 'format-bar' | 'slash-menu' | 'chat-send';
       where: 'chat-panel' | 'inline-chat-panel' | 'ai-panel';
     }

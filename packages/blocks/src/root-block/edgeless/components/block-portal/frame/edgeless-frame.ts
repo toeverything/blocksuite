@@ -1,25 +1,48 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { css, html, nothing } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FrameBlockModel } from '../../../../../frame-block/index.js';
-import { Bound } from '../../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
+import { FrameBlockModel } from '../../../../../frame-block/index.js';
+import {
+  Bound,
+  type SerializedXYWH,
+} from '../../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import { isFrameInner } from '../../../frame-manager.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
-const FRAME_OFFSET = 8;
+const NESTED_FRAME_OFFSET = 4;
 
 @customElement('edgeless-frame-title')
 export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    .affine-frame-title {
+      position: absolute;
+      z-index: 1;
+      left: 0px;
+      top: 0px;
+      border-radius: 4px;
+      width: fit-content;
+      padding: 8px 10px;
+      font-size: 14px;
+      cursor: default;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transform-origin: left bottom;
+      line-height: normal;
+    }
+  `;
+
   @property({ attribute: false })
   accessor frame!: FrameBlockModel;
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor zoom!: number;
 
   @state()
   private accessor _editing = false;
@@ -27,37 +50,45 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
   @state()
   private accessor _isNavigator = false;
 
-  private _updateElement = () => {
-    this.requestUpdate();
-  };
+  @query('.affine-frame-title')
+  private accessor _frameTitleEl!: HTMLDivElement;
+
+  @state()
+  private accessor _nestedFrame = false;
+
+  @state()
+  private accessor _frameTitle = '';
+
+  @state()
+  private accessor _xywh: SerializedXYWH | null = null;
+
+  private _cachedWidth = 0;
+  private _cachedHeight = 0;
 
   override connectedCallback() {
     super.connectedCallback();
 
     const { _disposables, edgeless } = this;
-    const { service, surface } = edgeless;
+    const { surface } = edgeless;
+
+    this._nestedFrame = this._isInsideFrame();
 
     _disposables.add(
-      service.viewport.viewportUpdated.on(() => {
-        this.requestUpdate();
+      edgeless.doc.slots.blockUpdated.on(payload => {
+        if (
+          payload.type === 'update' &&
+          payload.props.key === 'xywh' &&
+          edgeless.doc.getBlock(payload.id)?.model instanceof FrameBlockModel
+        ) {
+          this._nestedFrame = this._isInsideFrame();
+        }
       })
     );
 
     _disposables.add(
       this.frame.propsUpdated.on(() => {
+        this._xywh = this.frame.xywh;
         this.requestUpdate();
-      })
-    );
-
-    _disposables.add(
-      this.frame.doc.slots.blockUpdated.on(({ type, id }) => {
-        if (type === 'update' && id === this.frame.id) {
-          this.requestUpdate();
-        }
-
-        if (type === 'delete' && id === this.frame.id) {
-          this.remove();
-        }
       })
     );
 
@@ -69,75 +100,116 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    surface.edgeless.slots.edgelessToolUpdated.on(tool => {
-      this._isNavigator = tool.type === 'frameNavigator';
-    });
-
-    this.dataset.frameTitleId = this.frame.id;
-
-    this.frame.title.yText.observe(this._updateElement);
     _disposables.add(() => {
-      this.frame.title.yText.unobserve(this._updateElement);
+      surface.edgeless.slots.edgelessToolUpdated.on(tool => {
+        this._isNavigator = tool.type === 'frameNavigator';
+      });
     });
+
+    const updateTitle = () => {
+      this._frameTitle = this.frame.title.toString();
+    };
+    _disposables.add(() => {
+      this.frame.title.yText.unobserve(updateTitle);
+    });
+    this.frame.title.yText.observe(updateTitle);
+
+    this._frameTitle = this.frame.title.toString();
+    this._xywh = this.frame.xywh;
+  }
+
+  override updated(_changedProperties: Map<string, unknown>) {
+    if (this.style.display !== 'block' || !this._frameTitleEl) {
+      return;
+    }
+
+    let sizeChanged = false;
+    if (
+      this._cachedWidth === 0 ||
+      this._cachedHeight === 0 ||
+      _changedProperties.has('_frameTitle') ||
+      _changedProperties.has('_nestedFrame') ||
+      _changedProperties.has('_xywh')
+    ) {
+      this._cachedWidth = this._frameTitleEl.clientWidth;
+      this._cachedHeight = this._frameTitleEl.clientHeight;
+      sizeChanged = true;
+    }
+
+    if (sizeChanged || _changedProperties.has('zoom')) {
+      this._updateFrameTitleSize();
+    }
+  }
+
+  private _updateFrameTitleSize() {
+    const { _nestedFrame, zoom } = this;
+    const { elementBound } = this.frame;
+    const width = this._cachedWidth / zoom;
+    const height = this._cachedHeight / zoom;
+
+    if (width && height) {
+      this.frame.externalXYWH = `[${
+        elementBound.x + (_nestedFrame ? NESTED_FRAME_OFFSET / zoom : 0)
+      },${
+        elementBound.y +
+        (_nestedFrame
+          ? NESTED_FRAME_OFFSET / zoom
+          : -(height + NESTED_FRAME_OFFSET / zoom))
+      },${width},${height}]`;
+    }
+  }
+
+  private _isInsideFrame() {
+    return this.edgeless.service.layer.framesGrid.has(
+      this.frame.elementBound,
+      true,
+      true,
+      new Set([this.frame])
+    );
   }
 
   override render() {
     const model = this.frame;
     const bound = Bound.deserialize(model.xywh);
 
-    const { viewport, frame } = this.edgeless.service;
-    const { zoom } = viewport;
+    const { _isNavigator, _editing, zoom } = this;
 
-    const { _isNavigator, _editing } = this;
-    let isInner = frame.getFrameInner(model);
-    if (isInner === undefined) {
-      isInner = isFrameInner(model, this.edgeless.service.frames);
-      frame.setFrameInner(model, isInner);
-    }
-
-    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const left = (isInner ? FRAME_OFFSET : 0) + x;
-    const top = (isInner ? FRAME_OFFSET : -(29 + FRAME_OFFSET)) + y;
-    const maxWidth = isInner
-      ? bound.w * zoom - FRAME_OFFSET / zoom
+    const nestedFrame = this._nestedFrame;
+    const maxWidth = nestedFrame
+      ? bound.w * zoom - NESTED_FRAME_OFFSET / zoom
       : bound.w * zoom;
-    const hidden = 32 / zoom > bound.h && isInner;
-
-    const text = model.title.toString();
+    // 32 is the estimated height of title element
+    const hidden = 32 / zoom >= bound.h && nestedFrame;
+    const transformOperation = [
+      `translate(${bound.x}px, ${bound.y}px)`,
+      `translate(0%, ${nestedFrame ? 0 : -100}%)`,
+      `scale(${1 / zoom})`,
+      `translate(${nestedFrame ? NESTED_FRAME_OFFSET : 0}px, ${
+        nestedFrame ? NESTED_FRAME_OFFSET : -NESTED_FRAME_OFFSET
+      }px)`,
+    ];
 
     return html`
-      ${text && !_isNavigator && !_editing
+      ${this._frameTitle && !_isNavigator && !_editing
         ? html`
             <div
               style=${styleMap({
                 display: hidden ? 'none' : 'initial',
-                position: 'absolute',
-                zIndex: 1,
-                left: '0px',
-                top: '0px',
-                transform: `translate(${left}px, ${top}px)`,
-                borderRadius: '4px',
-                width: 'fit-content',
+                transform: transformOperation.join(' '),
                 maxWidth: maxWidth + 'px',
-                padding: '8px 10px',
-                fontSize: '14px',
-                background: isInner
+                background: nestedFrame
                   ? 'var(--affine-white)'
                   : 'var(--affine-text-primary-color)',
-                color: isInner
+                color: nestedFrame
                   ? 'var(--affine-text-secondary-color)'
                   : 'var(--affine-white)',
-                cursor: 'default',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                border: isInner
+                border: nestedFrame
                   ? '1px solid var(--affine-border-color)'
                   : 'none',
               })}
               class="affine-frame-title"
             >
-              ${text}
+              ${this._frameTitle}
             </div>
           `
         : nothing}
@@ -168,8 +240,16 @@ class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
 
 @customElement('edgeless-frames-container')
 export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
-  @property({ attribute: false })
-  accessor surface!: SurfaceBlockComponent;
+  static override styles = css`
+    edgeless-frames-container {
+      display: block;
+    }
+
+    edgeless-frames-container > [data-portal-block-id],
+    edgeless-frames-container > [data-frame-title-id] {
+      position: relative;
+    }
+  `;
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
@@ -178,49 +258,52 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   accessor frames!: FrameBlockModel[];
 
   @property({ attribute: false })
-  accessor onlyTitle = false;
+  accessor startIndex!: number;
 
-  protected override firstUpdated() {
-    const { _disposables } = this;
+  @property({ attribute: false })
+  accessor visibleFrames!: Set<FrameBlockModel>;
 
-    _disposables.add(
-      this.edgeless.surface.doc.slots.blockUpdated.on(({ flavour }) => {
-        if (flavour === 'affine:frame') {
-          this.requestUpdate();
-        }
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this._disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
+        // if zoom changed we need to re-render the frame titles
+        this.requestUpdate();
       })
     );
   }
 
   protected override render() {
-    return html`
-      ${repeat(
-        this.frames,
-        frame => frame.id,
-        (frame, index) =>
-          this.onlyTitle
-            ? html`
-                <edgeless-frame-title
-                  .frame=${frame}
-                  .edgeless=${this.edgeless}
-                >
-                </edgeless-frame-title>
-              `
-            : html`
-                <edgeless-block-portal-frame
-                  .index=${index}
-                  .model=${frame}
-                  .surface=${this.surface}
-                  .edgeless=${this.edgeless}
-                  .updatingSet=${this.edgeless.rootElementContainer
-                    .renderingSet}
-                  .concurrentUpdatingCount=${this.edgeless.rootElementContainer
-                    .concurrentRendering}
-                >
-                </edgeless-block-portal-frame>
-              `
-      )}
-    `;
+    const { visibleFrames, edgeless, startIndex } = this;
+    const zoom = edgeless.service.viewport.zoom;
+
+    return repeat(
+      edgeless.service.layer.frames,
+      frame => frame.id,
+      (frame, index) => html`
+        <edgeless-frame-title
+          data-frame-title-id=${frame.id}
+          style=${`z-index: ${startIndex + index};${visibleFrames.has(frame) ? 'display:block' : ''}`}
+          .frame=${frame}
+          .edgeless=${this.edgeless}
+          .zoom=${zoom}
+        >
+        </edgeless-frame-title>
+        <edgeless-block-portal-frame
+          data-portal-block-id=${frame.id}
+          .index=${1}
+          .model=${frame}
+          .surface=${this.edgeless.surface}
+          .edgeless=${this.edgeless}
+          .updatingSet=${this.edgeless.rootElementContainer.renderingSet}
+          .concurrentUpdatingCount=${this.edgeless.rootElementContainer
+            .concurrentRendering}
+          style=${`z-index: ${startIndex + index};${visibleFrames.has(frame) ? 'display:block' : ''}`}
+        >
+        </edgeless-block-portal-frame>
+      `
+    );
   }
 }
 

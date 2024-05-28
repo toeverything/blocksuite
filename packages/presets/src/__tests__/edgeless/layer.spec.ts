@@ -3,7 +3,6 @@
 import type { BlockElement } from '@blocksuite/block-std';
 import type {
   EdgelessRootBlockComponent,
-  ElementModel,
   NoteBlockModel,
 } from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
@@ -497,7 +496,7 @@ test('the actual rendering order of blocks should satisfy the logic order of the
 });
 
 describe('index generator', () => {
-  let preinsertedShape: ElementModel;
+  let preinsertedShape: BlockSuite.SurfaceElementModelType;
   let preinsertedNote: NoteBlockModel;
 
   beforeEach(() => {
@@ -508,7 +507,9 @@ describe('index generator', () => {
       index: service.layer.generateIndex('affine:block'),
     });
 
-    preinsertedShape = service.getElementById(shapeId)! as ElementModel;
+    preinsertedShape = service.getElementById(
+      shapeId
+    )! as BlockSuite.SurfaceElementModelType;
     preinsertedNote = service.getElementById(noteId)! as NoteBlockModel;
   });
 

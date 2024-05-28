@@ -15,7 +15,7 @@ import {
   SHAPE_TEXT_PADDING,
   SHAPE_TEXT_VERTICAL_PADDING,
 } from '../../../../surface-block/canvas-renderer/element-renderer/shape/utils.js';
-import { TextResizing } from '../../../../surface-block/element-model/common.js';
+import { TextResizing } from '../../../../surface-block/consts.js';
 import {
   MindmapElementModel,
   type ShapeElementModel,

@@ -105,3 +105,11 @@ export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
     return super.boxSelect(bound);
   }
 }
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:note': NoteBlockModel;
+    }
+  }
+}

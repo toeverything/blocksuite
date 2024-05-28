@@ -4,10 +4,7 @@ import { type EdgelessTool, LassoMode } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import { MindmapElementModel } from '../../surface-block/element-model/mindmap.js';
 import { LayoutType } from '../../surface-block/element-model/utils/mindmap/layout.js';
-import type {
-  ElementModel,
-  ShapeElementModel,
-} from '../../surface-block/index.js';
+import type { ShapeElementModel } from '../../surface-block/index.js';
 import {
   Bound,
   ConnectorElementModel,
@@ -493,7 +490,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       const node = mindmapNodes[0];
       const mindmap = node.group as MindmapElementModel;
       const nodeDirection = mindmap.getLayoutDir(node.id);
-      let targetNode: ElementModel | null = null;
+      let targetNode: BlockSuite.SurfaceElementModelType | null = null;
 
       switch (key) {
         case 'ArrowUp':

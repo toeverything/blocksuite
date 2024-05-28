@@ -1,6 +1,10 @@
 import '../../../_common/components/button.js';
 
-import type { BlockElement, CursorSelection } from '@blocksuite/block-std';
+import type {
+  BaseSelection,
+  BlockElement,
+  CursorSelection,
+} from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import {
@@ -64,7 +68,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     return this._selectedBlockElements;
   }
 
-  private _lastCursor: CursorSelection | null = null;
+  private _lastCursor: CursorSelection | undefined = undefined;
 
   get nativeRange() {
     const sl = document.getSelection();
@@ -165,6 +169,17 @@ export class AffineFormatBarWidget extends WidgetElement {
     return true;
   }
 
+  private _selectionEqual(
+    target: BaseSelection | undefined,
+    current: BaseSelection | undefined
+  ) {
+    if (target === current || (target && current && target.equals(current))) {
+      return true;
+    }
+
+    return false;
+  }
+
   private _calculatePlacement() {
     const rootElement = this.blockElement;
 
@@ -212,10 +227,8 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     // listen to selection change
     this.disposables.add(
-      this._selectionManager.slots.changed.on(async () => {
-        await this.host.updateComplete;
-
-        const update = () => {
+      this._selectionManager.slots.changed.on(() => {
+        const update = async () => {
           const textSelection = rootElement.selection.find('text');
           const blockSelections = rootElement.selection.filter('block');
 
@@ -227,14 +240,17 @@ export class AffineFormatBarWidget extends WidgetElement {
               return;
             }
 
-            if (this._lastCursor && !this._lastCursor.equals(cursorSelection)) {
+            if (!this._selectionEqual(cursorSelection, this._lastCursor)) {
               this._lastCursor = cursorSelection;
               return;
             }
           }
 
+          await this.host.getUpdateComplete();
+
           if (textSelection) {
             const block = this.host.view.getBlock(textSelection.blockId);
+
             if (
               !textSelection.isCollapsed() &&
               block &&
@@ -280,7 +296,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           this._reset();
         };
 
-        update();
+        update().catch(console.error);
       })
     );
     this.disposables.addFromEvent(document, 'selectionchange', () => {
@@ -453,7 +469,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     super.disconnectedCallback();
     this._abortController.abort();
     this._reset();
-    this._lastCursor = null;
+    this._lastCursor = undefined;
   }
 
   addDivider() {

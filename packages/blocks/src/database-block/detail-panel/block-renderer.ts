@@ -6,7 +6,6 @@ import { customElement, property } from 'lit/decorators.js';
 import type { DetailSlotProps } from '../data-view/common/data-source/base.js';
 import type { DataViewKanbanManager } from '../data-view/view/presets/kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../data-view/view/presets/table/table-view-manager.js';
-import type { DatabaseBlockComponent } from '../database-block.js';
 
 @customElement('database-datasource-block-renderer')
 export class BlockRenderer
@@ -52,16 +51,10 @@ export class BlockRenderer
     return this.host?.doc.getBlock(this.rowId)?.model;
   }
 
-  get topContenteditableElement() {
-    const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.topContenteditableElement;
-  }
-
   public override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(
-      this.topContenteditableElement ?? this,
+      this,
       'keydown',
       e => {
         if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {

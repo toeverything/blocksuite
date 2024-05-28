@@ -2,12 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { type Y } from '@blocksuite/store';
 
-import type {
-  EdgelessBlockModel,
-  EdgelessModel,
-  HitTestOptions,
-  IEdgelessElement,
-} from '../../root-block/edgeless/type.js';
+import type { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
 import { randomSeed } from '../rough/math.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
@@ -38,7 +33,7 @@ import {
 import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
 
 export type ModelToProps<
-  T extends ElementModel,
+  T extends SurfaceElementModel,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   K extends keyof any,
 > = OmitFunctionsAndKeysAndReadOnly<
@@ -46,12 +41,62 @@ export type ModelToProps<
   K | 'yMap' | 'surface' | 'display' | 'opacity' | 'externalXYWH'
 >;
 
-export type BaseProps = {
+export type IBaseProps = {
   index: string;
   seed: number;
 };
 
-export abstract class ElementModel<Props extends BaseProps = BaseProps>
+export interface IHitTestOptions {
+  expand?: number;
+
+  /**
+   * If true, the transparent area of the element will be ignored during hit test.
+   * Otherwise, the transparent area will be considered as filled area.
+   *
+   * Default is true.
+   */
+  ignoreTransparent?: boolean;
+
+  all?: boolean;
+  zoom?: number;
+}
+
+export interface IEdgelessElement {
+  id: string;
+  xywh: SerializedXYWH;
+  /**
+   * In some cases, you need to draw something related to the element, but it does not belong to the element itself.
+   * And it is also interactive, you can select element by clicking on it. E.g. the title of the group element.
+   * In this case, we need to store this kind of external xywh in order to do hit test. This property should not be synced to the doc.
+   * This property should be updated every time it gets rendered.
+   */
+  externalXYWH: SerializedXYWH | undefined;
+  externalBound: Bound | null;
+  rotate: number;
+  connectable: boolean;
+  index: string;
+
+  /**
+   * The bound of the element after rotation.
+   * The bound without rotation should be created by `Bound.deserialize(this.xywh)`.
+   */
+  elementBound: Bound;
+  group: SurfaceGroupLikeModel<IBaseProps> | null;
+  groups: SurfaceGroupLikeModel<IBaseProps>[];
+  containedByBounds(bounds: Bound): boolean;
+  getNearestPoint(point: IVec): IVec;
+  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
+  getRelativePointLocation(point: IVec): PointLocation;
+  hitTest(
+    x: number,
+    y: number,
+    options: IHitTestOptions,
+    host: EditorHost
+  ): boolean;
+  boxSelect(bound: Bound): boolean;
+}
+
+export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
   implements IEdgelessElement
 {
   static propsToY(props: Record<string, unknown>) {
@@ -172,7 +217,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     return this.deserializedXYWH[3];
   }
 
-  get group(): GroupLikeModel | null {
+  get group(): SurfaceGroupLikeModel | null {
     return this.surface.getGroup(this.id);
   }
 
@@ -205,7 +250,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
-    const curVal = this[prop as unknown as keyof ElementModel];
+    const curVal = this[prop as unknown as keyof SurfaceElementModel];
 
     this._stashed.set(prop, curVal);
 
@@ -219,7 +264,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
         const derivedProps = getDeriveProperties(
           prop as string,
           original,
-          this as unknown as ElementModel
+          this as unknown as SurfaceElementModel
         );
 
         this._stashed.set(prop, value);
@@ -243,7 +288,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
           },
         });
 
-        updateDerivedProp(derivedProps, this as unknown as ElementModel);
+        updateDerivedProp(derivedProps, this as unknown as SurfaceElementModel);
       },
     });
   }
@@ -303,7 +348,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     );
   }
 
-  hitTest(x: number, y: number, _: HitTestOptions, __: EditorHost): boolean {
+  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
     return this.elementBound.isPointInBound([x, y]);
   }
 
@@ -318,9 +363,9 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   onCreated() {}
 }
 
-export abstract class GroupLikeModel<
-  Props extends BaseProps = BaseProps,
-> extends ElementModel<Props> {
+export abstract class SurfaceGroupLikeModel<
+  Props extends IBaseProps = IBaseProps,
+> extends SurfaceElementModel<Props> {
   /**
    * The actual field that stores the children of the group.
    * It could be any type you want and this field should be decorated with `@yfield`.
@@ -367,7 +412,7 @@ export abstract class GroupLikeModel<
   }
 
   get childElements() {
-    const elements: EdgelessModel[] = [];
+    const elements: BlockSuite.EdgelessModelType[] = [];
 
     for (const key of this.childIds) {
       const element =
@@ -380,13 +425,13 @@ export abstract class GroupLikeModel<
     return elements;
   }
 
-  @local<SerializedXYWH, GroupLikeModel>()
+  @local<SerializedXYWH, SurfaceGroupLikeModel>()
   accessor xywh: SerializedXYWH = '[0,0,0,0]';
 
   /**
    * Check if the group has the given descendant.
    */
-  hasDescendant(element: string | EdgelessModel) {
+  hasDescendant(element: string | BlockSuite.EdgelessModelType) {
     const groups =
       typeof element === 'string'
         ? this.surface.getGroups(element)
@@ -401,7 +446,7 @@ export abstract class GroupLikeModel<
    */
   decendants(withoutGroup = true) {
     return this.childElements.reduce((prev, child) => {
-      if (child instanceof GroupLikeModel) {
+      if (child instanceof SurfaceGroupLikeModel) {
         prev = prev.concat(child.decendants());
 
         !withoutGroup && prev.push(child);
@@ -410,7 +455,7 @@ export abstract class GroupLikeModel<
       }
 
       return prev;
-    }, [] as EdgelessModel[]);
+    }, [] as BlockSuite.EdgelessModelType[]);
   }
 
   /**
@@ -419,7 +464,7 @@ export abstract class GroupLikeModel<
   abstract removeDescendant(id: string): void;
 }
 
-export abstract class LocalModel {
+export abstract class SurfaceLocalModel {
   protected _local: Map<string | symbol, unknown> = new Map();
 
   abstract rotate: number;
@@ -452,5 +497,27 @@ export abstract class LocalModel {
 
   get h() {
     return this.deserializedXYWH[3];
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceElementModelMap {}
+    type SurfaceElementModelType =
+      | SurfaceElementModelMap[keyof SurfaceElementModelMap]
+      | SurfaceElementModel;
+
+    interface SurfaceGroupLikeModelMap {}
+    type SurfaceGroupLikeModelType =
+      | SurfaceGroupLikeModelMap[keyof SurfaceGroupLikeModelMap]
+      | SurfaceGroupLikeModel;
+
+    interface SurfaceLocalModelMap {}
+    type SurfaceLocalModelType =
+      | SurfaceLocalModelMap[keyof SurfaceLocalModelMap]
+      | SurfaceLocalModel;
+
+    // not include local model
+    type SurfaceModelType = SurfaceElementModelType | SurfaceGroupLikeModelType;
   }
 }

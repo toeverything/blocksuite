@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import type { Erasable, IPoint } from '../../../../_common/utils/index.js';
+import type { IPoint } from '../../../../_common/utils/index.js';
 import { buildPath, type EraserTool } from '../../../../_common/utils/index.js';
 import {
   Bound,
@@ -11,6 +11,7 @@ import {
   linePolygonIntersects,
   Overlay,
 } from '../../../../surface-block/index.js';
+import type { IVec2 } from '../../../../surface-block/utils/vec.js';
 import { deleteElements } from '../../utils/crud.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { EdgelessToolController } from './index.js';
@@ -36,8 +37,8 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   private _eraserPoints: IVec[] = [];
   private _prevPoint: IVec = [];
   private _prevEraserPoint: IVec = [];
-  private _erasables: Set<Erasable> = new Set();
-  private _eraseTargets: Set<Erasable> = new Set();
+  private _erasables: Set<BlockSuite.EdgelessModelType> = new Set();
+  private _eraseTargets: Set<BlockSuite.EdgelessModelType> = new Set();
 
   private _loop = () => {
     const now = Date.now();
@@ -114,7 +115,12 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
           ele && ((<HTMLElement>ele).style.opacity = '0.3');
         }
       } else {
-        if (erasable.intersectWithLine(this._prevPoint, currentPoint)) {
+        if (
+          erasable.intersectWithLine(
+            this._prevPoint as IVec2,
+            currentPoint as IVec2
+          )
+        ) {
           this._eraseTargets.add(erasable);
           erasable.opacity = 0.3;
         }

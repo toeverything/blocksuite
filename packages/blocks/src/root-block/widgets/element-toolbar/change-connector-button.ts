@@ -2,12 +2,16 @@ import '../../edgeless/components/buttons/tool-icon-button.js';
 import '../../edgeless/components/buttons/menu-button.js';
 import '../../edgeless/components/panel/stroke-style-panel.js';
 import '../../edgeless/components/panel/color-panel.js';
+import './change-text-menu.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { html, LitElement, nothing } from 'lit';
+import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  AddTextIcon,
   ConnectorEndpointNoneIcon,
   CurveLineIcon,
   ElbowedLineIcon,
@@ -37,13 +41,13 @@ import {
   DEFAULT_REAR_END_POINT_STYLE,
   type StrokeStyle,
 } from '../../../surface-block/index.js';
-import type { LineStyleButtonProps } from '../../edgeless/components/buttons/line-style-button.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
 } from '../../edgeless/components/panel/color-panel.js';
 import type { LineStyleEvent } from '../../edgeless/components/panel/line-styles-panel.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import { mountConnectorLabelEditor } from '../../edgeless/utils/text.js';
 
 function getMostCommonColor(
   elements: ConnectorElementModel[]
@@ -71,23 +75,96 @@ function getMostCommonLineWidth(elements: ConnectorElementModel[]): LineWidth {
 
 export function getMostCommonLineStyle(
   elements: ConnectorElementModel[]
-): LineStyleButtonProps['mode'] | null {
-  const sizes = countBy(elements, (ele: ConnectorElementModel) => {
-    switch (ele.strokeStyle) {
-      case 'solid': {
-        return 'solid';
-      }
-      case 'dash': {
-        return 'dash';
-      }
-      case 'none': {
-        return 'none';
-      }
-    }
-  });
+): StrokeStyle | null {
+  const sizes = countBy(
+    elements,
+    (ele: ConnectorElementModel) => ele.strokeStyle
+  );
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
-  return max ? (max[0] as LineStyleButtonProps['mode']) : null;
+  return max ? (max[0] as StrokeStyle) : null;
 }
+
+interface EndpointStyle {
+  value: PointStyle;
+  icon: TemplateResult<1>;
+}
+
+const STYLE_LIST = [
+  {
+    name: 'General',
+    value: false,
+    icon: GeneralStyleIcon,
+  },
+  {
+    name: 'Scribbled',
+    value: true,
+    icon: ScribbledStyleIcon,
+  },
+];
+
+const FRONT_ENDPOINT_STYLE_LIST: EndpointStyle[] = [
+  {
+    value: 'None',
+    icon: ConnectorEndpointNoneIcon,
+  },
+  {
+    value: 'Arrow',
+    icon: FrontEndpointArrowIcon,
+  },
+  {
+    value: 'Triangle',
+    icon: FrontEndpointTriangleIcon,
+  },
+  {
+    value: 'Circle',
+    icon: FrontEndpointCircleIcon,
+  },
+  {
+    value: 'Diamond',
+    icon: FrontEndpointDiamondIcon,
+  },
+];
+
+const REAR_ENDPOINT_STYLE_LIST: EndpointStyle[] = [
+  {
+    value: 'Diamond',
+    icon: RearEndpointDiamondIcon,
+  },
+  {
+    value: 'Circle',
+    icon: RearEndpointCircleIcon,
+  },
+  {
+    value: 'Triangle',
+    icon: RearEndpointTriangleIcon,
+  },
+  {
+    value: 'Arrow',
+    icon: RearEndpointArrowIcon,
+  },
+  {
+    value: 'None',
+    icon: ConnectorEndpointNoneIcon,
+  },
+];
+
+const SHAPE_LIST = [
+  {
+    name: 'Straight',
+    icon: StraightLineIcon,
+    value: ConnectorMode.Straight,
+  },
+  {
+    name: 'Curve',
+    icon: CurveLineIcon,
+    value: ConnectorMode.Curve,
+  },
+  {
+    name: 'Elbowed',
+    icon: ElbowedLineIcon,
+    value: ConnectorMode.Orthogonal,
+  },
+];
 
 function getMostCommonRough(elements: ConnectorElementModel[]): boolean {
   const { trueCount, falseCount } = elements.reduce(
@@ -223,32 +300,25 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _getEndpointIcon(end: ConnectorEndpoint, style: PointStyle) {
-    switch (style) {
-      case 'None': {
-        return ConnectorEndpointNoneIcon;
-      }
-      case 'Arrow': {
-        return end === ConnectorEndpoint.Front
-          ? FrontEndpointArrowIcon
-          : RearEndpointArrowIcon;
-      }
-      case 'Triangle': {
-        return end === ConnectorEndpoint.Front
-          ? FrontEndpointTriangleIcon
-          : RearEndpointTriangleIcon;
-      }
-      case 'Circle': {
-        return end === ConnectorEndpoint.Front
-          ? FrontEndpointCircleIcon
-          : RearEndpointCircleIcon;
-      }
-      case 'Diamond': {
-        return end === ConnectorEndpoint.Front
-          ? FrontEndpointDiamondIcon
-          : RearEndpointDiamondIcon;
-      }
+  private _getEndpointIcon(list: EndpointStyle[], style: PointStyle) {
+    return (
+      list.find(({ value }) => value === style)?.icon ||
+      ConnectorEndpointNoneIcon
+    );
+  }
+
+  private _addLabel() {
+    mountConnectorLabelEditor(this.elements[0], this.edgeless);
+  }
+
+  private _showAddButtonOrTextMenu() {
+    if (this.elements.length === 1 && !this.elements[0].text) {
+      return 'button';
     }
+    if (!this.elements.some(e => !e.text)) {
+      return 'menu';
+    }
+    return 'nothing';
   }
 
   override render() {
@@ -265,16 +335,19 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Rear) ??
       DEFAULT_REAR_END_POINT_STYLE;
 
-    return html`<edgeless-menu-button
+    return html`
+      <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Stroke style"
-          .tooltip=${'Stroke style'}
-        >
-          <edgeless-color-button
-            .color=${selectedColor}
-          ></edgeless-color-button>
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Stroke style"
+            .tooltip=${'Stroke style'}
+          >
+            <edgeless-color-button
+              .color=${selectedColor}
+            ></edgeless-color-button>
+          </edgeless-tool-icon-button>
+        `}
       >
         <stroke-style-panel
           slot
@@ -291,101 +364,65 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       <edgeless-menu-divider></edgeless-menu-divider>
 
       <edgeless-menu-button
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Style"
-          .tooltip=${'Style'}
-        >
-          ${selectedRough
-            ? ScribbledStyleIcon
-            : GeneralStyleIcon}${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button aria-label="Style" .tooltip=${'Style'}>
+            ${selectedRough
+              ? ScribbledStyleIcon
+              : GeneralStyleIcon}${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <div slot data-orientation="horizontal">
-          <edgeless-tool-icon-button
-            aria-label="General"
-            .tooltip=${'General'}
-            .active=${!selectedRough}
-            .activeMode=${'background'}
-            @click=${() => this._setConnectorRough(false)}
-          >
-            ${GeneralStyleIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Scribbled"
-            .tooltip=${'Scribbled'}
-            .active=${selectedRough}
-            .activeMode=${'background'}
-            @click=${() => this._setConnectorRough(true)}
-          >
-            ${ScribbledStyleIcon}
-          </edgeless-tool-icon-button>
+          ${repeat(
+            STYLE_LIST,
+            item => item.name,
+            ({ name, value, icon }) => html`
+              <edgeless-tool-icon-button
+                aria-label=${name}
+                .tooltip=${name}
+                .active=${selectedRough === value}
+                .activeMode=${'background'}
+                @click=${() => this._setConnectorRough(value)}
+              >
+                ${icon}
+              </edgeless-tool-icon-button>
+            `
+          )}
         </div>
       </edgeless-menu-button>
 
       <edgeless-menu-divider></edgeless-menu-divider>
 
       <edgeless-menu-button
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Start point style"
-          .tooltip=${'Start point style'}
-        >
-          ${this._getEndpointIcon(
-            ConnectorEndpoint.Front,
-            selectedStartPointStyle
-          )}${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Start point style"
+            .tooltip=${'Start point style'}
+          >
+            ${this._getEndpointIcon(
+              FRONT_ENDPOINT_STYLE_LIST,
+              selectedStartPointStyle
+            )}${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <div slot data-orientation="horizontal">
-          <edgeless-tool-icon-button
-            aria-label="None"
-            .tooltip=${'None'}
-            .active=${selectedStartPointStyle === 'None'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Front, 'None')}
-          >
-            ${ConnectorEndpointNoneIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Arrow"
-            .tooltip=${'Arrow'}
-            .active=${selectedStartPointStyle === 'Arrow'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Front, 'Arrow')}
-          >
-            ${FrontEndpointArrowIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Triangle"
-            .tooltip=${'Triangle'}
-            .active=${selectedStartPointStyle === 'Triangle'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Front, 'Triangle')}
-          >
-            ${FrontEndpointTriangleIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Circle"
-            .tooltip=${'Circle'}
-            .active=${selectedStartPointStyle === 'Circle'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Front, 'Circle')}
-          >
-            ${FrontEndpointCircleIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Diamond"
-            .tooltip=${'Diamond'}
-            .active=${selectedStartPointStyle === 'Diamond'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Front, 'Diamond')}
-          >
-            ${FrontEndpointDiamondIcon}
-          </edgeless-tool-icon-button>
+          ${repeat(
+            FRONT_ENDPOINT_STYLE_LIST,
+            item => item.value,
+            ({ value, icon }) => html`
+              <edgeless-tool-icon-button
+                aria-label=${value}
+                .tooltip=${value}
+                .active=${selectedStartPointStyle === value}
+                .activeMode=${'background'}
+                @click=${() =>
+                  this._setConnectorPointStyle(ConnectorEndpoint.Front, value)}
+              >
+                ${icon}
+              </edgeless-tool-icon-button>
+            `
+          )}
         </div>
       </edgeless-menu-button>
 
@@ -403,112 +440,98 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
 
       <edgeless-menu-button
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="End point style"
-          .tooltip=${'End point style'}
-        >
-          ${this._getEndpointIcon(
-            ConnectorEndpoint.Rear,
-            selectedEndPointStyle
-          )}${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="End point style"
+            .tooltip=${'End point style'}
+          >
+            ${this._getEndpointIcon(
+              REAR_ENDPOINT_STYLE_LIST,
+              selectedEndPointStyle
+            )}${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <div slot data-orientation="horizontal">
-          <edgeless-tool-icon-button
-            aria-label="Diamond"
-            .tooltip=${'Diamond'}
-            .active=${selectedEndPointStyle === 'Diamond'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Rear, 'Diamond')}
-          >
-            ${RearEndpointDiamondIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Circle"
-            .tooltip=${'Circle'}
-            .active=${selectedEndPointStyle === 'Circle'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Rear, 'Circle')}
-          >
-            ${RearEndpointCircleIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Triangle"
-            .tooltip=${'Triangle'}
-            .active=${selectedEndPointStyle === 'Triangle'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Rear, 'Triangle')}
-          >
-            ${RearEndpointTriangleIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Arrow"
-            .tooltip=${'Arrow'}
-            .active=${selectedEndPointStyle === 'Arrow'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Rear, 'Arrow')}
-          >
-            ${RearEndpointArrowIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="None"
-            .tooltip=${'None'}
-            .active=${selectedEndPointStyle === 'None'}
-            .activeMode=${'background'}
-            @click=${() =>
-              this._setConnectorPointStyle(ConnectorEndpoint.Rear, 'None')}
-          >
-            ${ConnectorEndpointNoneIcon}
-          </edgeless-tool-icon-button>
+          ${repeat(
+            REAR_ENDPOINT_STYLE_LIST,
+            item => item.value,
+            ({ value, icon }) => html`
+              <edgeless-tool-icon-button
+                aria-label=${value}
+                .tooltip=${value}
+                .active=${selectedEndPointStyle === value}
+                .activeMode=${'background'}
+                @click=${() =>
+                  this._setConnectorPointStyle(ConnectorEndpoint.Rear, value)}
+              >
+                ${icon}
+              </edgeless-tool-icon-button>
+            `
+          )}
         </div>
       </edgeless-menu-button>
 
       <edgeless-menu-button
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Shape"
-          .tooltip=${'Connector shape'}
-        >
-          ${selectedMode === ConnectorMode.Straight
-            ? StraightLineIcon
-            : selectedMode === ConnectorMode.Orthogonal
-              ? ElbowedLineIcon
-              : CurveLineIcon}${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Shape"
+            .tooltip=${'Connector shape'}
+          >
+            ${choose(selectedMode, [
+              [ConnectorMode.Straight, () => StraightLineIcon],
+              [ConnectorMode.Orthogonal, () => ElbowedLineIcon],
+              [ConnectorMode.Curve, () => CurveLineIcon],
+            ])}${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <div slot data-orientation="horizontal">
-          <edgeless-tool-icon-button
-            aria-label="Straight"
-            .tooltip=${'Straight'}
-            .active=${selectedMode === ConnectorMode.Straight}
-            .activeMode=${'background'}
-            @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
-          >
-            ${StraightLineIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Curve"
-            .tooltip=${'Curve'}
-            .active=${selectedMode === ConnectorMode.Curve}
-            .activeMode=${'background'}
-            @click=${() => this._setConnectorMode(ConnectorMode.Curve)}
-          >
-            ${CurveLineIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            aria-label="Elbowed"
-            .tooltip=${'Elbowed'}
-            .active=${selectedMode === ConnectorMode.Orthogonal}
-            .activeMode=${'background'}
-            @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
-          >
-            ${ElbowedLineIcon}
-          </edgeless-tool-icon-button>
+          ${repeat(
+            SHAPE_LIST,
+            item => item.name,
+            ({ name, value, icon }) => html`
+              <edgeless-tool-icon-button
+                aria-label=${name}
+                .tooltip=${name}
+                .active=${selectedMode === value}
+                .activeMode=${'background'}
+                @click=${() => this._setConnectorMode(value)}
+              >
+                ${icon}
+              </edgeless-tool-icon-button>
+            `
+          )}
         </div>
-      </edgeless-menu-button>`;
+      </edgeless-menu-button>
+
+      ${choose(this._showAddButtonOrTextMenu(), [
+        [
+          'button',
+          () => html`
+            <edgeless-menu-divider></edgeless-menu-divider>
+            <edgeless-tool-icon-button
+              aria-label="Add text"
+              .tooltip=${'Add text'}
+              @click=${this._addLabel}
+            >
+              ${AddTextIcon}
+            </edgeless-tool-icon-button>
+          `,
+        ],
+        [
+          'menu',
+          () => html`
+            <edgeless-menu-divider></edgeless-menu-divider>
+            <edgeless-change-text-menu
+              .elementType=${'connector'}
+              .elements=${this.elements}
+              .edgeless=${this.edgeless}
+            ></edgeless-change-text-menu>
+          `,
+        ],
+      ])}
+    `;
   }
 }
 
@@ -524,9 +547,11 @@ export function renderConnectorButton(
 ) {
   if (!elements?.length) return nothing;
 
-  return html`<edgeless-change-connector-button
-    .elements=${elements}
-    .edgeless=${edgeless}
-  >
-  </edgeless-change-connector-button>`;
+  return html`
+    <edgeless-change-connector-button
+      .elements=${elements}
+      .edgeless=${edgeless}
+    >
+    </edgeless-change-connector-button>
+  `;
 }

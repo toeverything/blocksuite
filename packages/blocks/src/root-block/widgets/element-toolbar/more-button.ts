@@ -318,24 +318,25 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   override render() {
     const selection = this.edgeless.service.selection;
-
     const actions = Actions(
       selection.elements.some(ele => isFrameBlock(ele))
         ? this._FrameActions
         : this._Actions,
       this._runAction
     );
-    return html`<edgeless-menu-button
-      .contentPadding=${'8px'}
-      .button=${html`<edgeless-tool-icon-button
-        aria-label="More"
-        .tooltip=${'More'}
+    return html`
+      <edgeless-menu-button
+        .contentPadding=${'8px'}
+        .button=${html`<edgeless-tool-icon-button
+          aria-label="More"
+          .tooltip=${'More'}
+        >
+          ${this.vertical ? MoreVerticalIcon : MoreHorizontalIcon}
+        </edgeless-tool-icon-button>`}
       >
-        ${this.vertical ? MoreVerticalIcon : MoreHorizontalIcon}
-      </edgeless-tool-icon-button>`}
-    >
-      <div slot class="more-actions-container">${actions}</div>
-    </edgeless-menu-button>`;
+        <div slot class="more-actions-container">${actions}</div>
+      </edgeless-menu-button>
+    `;
   }
 }
 

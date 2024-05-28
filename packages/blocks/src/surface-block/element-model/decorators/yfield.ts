@@ -1,4 +1,4 @@
-import type { ElementModel } from '../base.js';
+import type { SurfaceElementModel } from '../base.js';
 import { getDecoratorState } from './common.js';
 import { convertProps } from './convert.js';
 import { getDeriveProperties, updateDerivedProp } from './derive.js';
@@ -18,7 +18,7 @@ export function getYFieldPropsSet(target: unknown): Set<string | symbol> {
   return proto[yPropsSetSymbol] as Set<string | symbol>;
 }
 
-export function yfield<V, T extends ElementModel>(fallback?: V) {
+export function yfield<V, T extends SurfaceElementModel>(fallback?: V) {
   // return function yDecorator(prototype: unknown, prop: string | symbol) {
   return function yDecorator(
     target: ClassAccessorDecoratorTarget<T, V>,
@@ -27,7 +27,7 @@ export function yfield<V, T extends ElementModel>(fallback?: V) {
     const prop = context.name;
 
     return {
-      init(this: ElementModel, v: V) {
+      init(this: SurfaceElementModel, v: V) {
         const yProps = getYFieldPropsSet(this);
 
         yProps.add(prop);
@@ -48,7 +48,7 @@ export function yfield<V, T extends ElementModel>(fallback?: V) {
         }
         return v;
       },
-      get(this: ElementModel) {
+      get(this: SurfaceElementModel) {
         return (
           this.yMap.get(prop as string) ??
           this._preserved.get(prop as string) ??

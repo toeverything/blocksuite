@@ -101,7 +101,6 @@ export type {
   TemplateManager,
 } from './root-block/edgeless/components/toolbar/template/template-type.js';
 export { CopilotSelectionController } from './root-block/edgeless/controllers/tools/copilot-tool.js';
-export type { EdgelessModel } from './root-block/edgeless/type.js';
 export * from './root-block/index.js';
 export * from './schemas.js';
 export * from './specs/index.js';
@@ -113,7 +112,6 @@ export {
   CommunityCanvasTextFonts,
   ConnectorElementModel,
   ConnectorMode,
-  ElementModel,
   fitContent,
   generateKeyBetween,
   getElementsBound,

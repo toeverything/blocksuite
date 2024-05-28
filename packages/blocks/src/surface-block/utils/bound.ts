@@ -71,6 +71,12 @@ export class Bound implements IBound {
     return [this.x + this.w / 2, this.y + this.h / 2];
   }
 
+  set center([cx, cy]: IVec) {
+    const [px, py] = this.center;
+    this.x += cx - px;
+    this.y += cy - py;
+  }
+
   get minX() {
     return this.x;
   }
@@ -276,6 +282,10 @@ export class Bound implements IBound {
 
   getVerticesAndMidpoints() {
     return [...this.points, ...this.midPoints];
+  }
+
+  toXYWH(): XYWH {
+    return [this.x, this.y, this.w, this.h];
   }
 
   static deserialize(s: string) {

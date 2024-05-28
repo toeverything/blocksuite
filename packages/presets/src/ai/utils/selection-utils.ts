@@ -2,7 +2,6 @@ import type { EditorHost } from '@blocksuite/block-std';
 import type {
   CopilotSelectionController,
   EdgelessBlock,
-  EdgelessModel,
   FrameBlockModel,
   ImageBlockModel,
   SurfaceBlockComponent,
@@ -199,7 +198,9 @@ export const getSelectedNoteAnchor = (host: EditorHost, id: string) => {
   return host.querySelector(`[data-portal-block-id="${id}"] .note-background`);
 };
 
-export function getCopilotSelectedElems(host: EditorHost): EdgelessModel[] {
+export function getCopilotSelectedElems(
+  host: EditorHost
+): BlockSuite.EdgelessModelType[] {
   const service = getService(host);
   const copilotWidget = getEdgelessCopilotWidget(host);
 

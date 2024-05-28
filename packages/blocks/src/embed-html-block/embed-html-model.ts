@@ -15,3 +15,11 @@ export type EmbedHtmlBlockProps = {
 export class EmbedHtmlModel extends defineEmbedModel<EmbedHtmlBlockProps>(
   BlockModel
 ) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:embed-html': EmbedHtmlModel;
+    }
+  }
+}

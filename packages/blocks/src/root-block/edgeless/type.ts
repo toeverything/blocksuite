@@ -3,9 +3,8 @@ import { BlockModel } from '@blocksuite/store';
 
 import type { EdgelessSelectableProps } from '../../_common/edgeless/mixin/edgeless-selectable.js';
 import type {
-  BaseProps,
-  ElementModel,
-  GroupLikeModel,
+  IEdgelessElement,
+  IHitTestOptions,
 } from '../../surface-block/element-model/base.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { Bound } from '../../surface-block/utils/bound.js';
@@ -20,56 +19,6 @@ import {
 import { PointLocation } from '../../surface-block/utils/point-location.js';
 import type { IVec } from '../../surface-block/utils/vec.js';
 import type { SerializedXYWH } from '../../surface-block/utils/xywh.js';
-
-export interface HitTestOptions {
-  expand?: number;
-
-  /**
-   * If true, the transparent area of the element will be ignored during hit test.
-   * Otherwise, the transparent area will be considered as filled area.
-   *
-   * Default is true.
-   */
-  ignoreTransparent?: boolean;
-
-  all?: boolean;
-  zoom?: number;
-}
-
-export interface IEdgelessElement {
-  id: string;
-  xywh: SerializedXYWH;
-  /**
-   * In some cases, you need to draw something related to the element, but it does not belong to the element itself.
-   * And it is also interactive, you can select element by clicking on it. E.g. the title of the group element.
-   * In this case, we need to store this kind of external xywh in order to do hit test. This property should not be synced to the doc.
-   * This property should be updated every time it gets rendered.
-   */
-  externalXYWH: SerializedXYWH | undefined;
-  externalBound: Bound | null;
-  rotate: number;
-  connectable: boolean;
-  index: string;
-
-  /**
-   * The bound of the element after rotation.
-   * The bound without rotation should be created by `Bound.deserialize(this.xywh)`.
-   */
-  elementBound: Bound;
-  group: GroupLikeModel<BaseProps> | null;
-  groups: GroupLikeModel<BaseProps>[];
-  containedByBounds(bounds: Bound): boolean;
-  getNearestPoint(point: IVec): IVec;
-  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
-  getRelativePointLocation(point: IVec): PointLocation;
-  hitTest(
-    x: number,
-    y: number,
-    options: HitTestOptions,
-    host: EditorHost
-  ): boolean;
-  boxSelect(bound: Bound): boolean;
-}
 
 export class EdgelessBlockModel<
     Props extends EdgelessSelectableProps = EdgelessSelectableProps,
@@ -99,7 +48,7 @@ export class EdgelessBlockModel<
     return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));
   }
 
-  hitTest(x: number, y: number, _: HitTestOptions, __: EditorHost): boolean {
+  hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
   }
@@ -173,4 +122,13 @@ export class EdgelessBlockModel<
   }
 }
 
-export type EdgelessModel = EdgelessBlockModel | ElementModel | GroupLikeModel;
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {}
+    type EdgelessBlockModelType =
+      | EdgelessBlockModelMap[keyof EdgelessBlockModelMap]
+      | EdgelessBlockModel;
+
+    type EdgelessModelType = EdgelessBlockModelType | SurfaceModelType;
+  }
+}

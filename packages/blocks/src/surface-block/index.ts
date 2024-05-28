@@ -19,7 +19,7 @@ export {
   GRID_GAP_MAX,
   GRID_GAP_MIN,
 } from './consts.js';
-export { ElementModel } from './element-model/base.js';
+export { SurfaceElementModel } from './element-model/base.js';
 export { BrushElementModel } from './element-model/brush.js';
 export {
   type Connection,
@@ -74,7 +74,7 @@ export {
   toRadian,
 } from './utils/math-utils.js';
 export { PointLocation } from './utils/point-location.js';
-export { type IVec, Vec } from './utils/vec.js';
+export { type IVec, type IVec2, Vec } from './utils/vec.js';
 export * from './utils/xywh.js';
 
 declare global {

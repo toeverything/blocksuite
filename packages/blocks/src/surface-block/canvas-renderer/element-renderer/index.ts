@@ -1,4 +1,4 @@
-import type { ElementModel, IBound } from '../../index.js';
+import type { IBound, SurfaceElementModel } from '../../index.js';
 import type { Renderer } from '../renderer.js';
 import { brush } from './brush/index.js';
 import { connector } from './connector/index.js';
@@ -8,7 +8,9 @@ import { shape } from './shape/index.js';
 import { text } from './text/index.js';
 export { normalizeShapeBound } from './shape/utils.js';
 
-export type ElementRenderer<T extends ElementModel = ElementModel> = (
+export type ElementRenderer<
+  T extends BlockSuite.SurfaceElementModelType = SurfaceElementModel,
+> = (
   model: T,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,

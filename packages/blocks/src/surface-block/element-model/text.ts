@@ -1,5 +1,6 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
+import { FontFamily, FontStyle, FontWeight, TextAlign } from '../consts.js';
 import type { SerializedXYWH } from '../index.js';
 import { Bound } from '../utils/bound.js';
 import {
@@ -9,27 +10,21 @@ import {
   polygonNearestPoint,
 } from '../utils/math-utils.js';
 import type { IVec2 } from '../utils/vec.js';
-import { type BaseProps, ElementModel } from './base.js';
-import {
-  FontFamily,
-  type FontStyle,
-  FontWeight,
-  type TextAlign,
-} from './common.js';
+import { type IBaseProps, SurfaceElementModel } from './base.js';
 import { yfield } from './decorators.js';
 
-export type TextElementProps = BaseProps & {
+export type TextElementProps = IBaseProps & {
   text: Y.Text;
   color: string;
   fontSize: number;
   fontFamily: FontFamily;
   fontWeight?: FontWeight;
   fontStyle?: FontStyle;
-  textAlign: 'left' | 'center' | 'right';
+  textAlign: TextAlign;
   hasMaxWidth?: boolean;
 };
 
-export class TextElementModel extends ElementModel<TextElementProps> {
+export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text as string);
@@ -59,11 +54,11 @@ export class TextElementModel extends ElementModel<TextElementProps> {
   @yfield<FontWeight, TextElementModel>(FontWeight.Regular)
   accessor fontWeight: FontWeight = FontWeight.Regular;
 
-  @yfield<FontStyle, TextElementModel>('normal')
-  accessor fontStyle: FontStyle = 'normal';
+  @yfield<FontStyle, TextElementModel>(FontStyle.Normal)
+  accessor fontStyle: FontStyle = FontStyle.Normal;
 
   @yfield()
-  accessor textAlign: TextAlign = 'center';
+  accessor textAlign: TextAlign = TextAlign.Center;
 
   @yfield(false)
   accessor hasMaxWidth: boolean = false;
@@ -92,5 +87,13 @@ export class TextElementModel extends ElementModel<TextElementProps> {
   override hitTest(x: number, y: number): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return pointInPolygon([x, y], points);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceElementModelMap {
+      text: TextElementModel;
+    }
   }
 }

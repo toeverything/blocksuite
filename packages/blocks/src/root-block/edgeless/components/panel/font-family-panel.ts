@@ -4,10 +4,8 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { CheckIcon } from '../../../../_common/icons/edgeless.js';
 import {
-  CanvasTextFontFamily,
-  CanvasTextFontFamilyKey,
-  CanvasTextFontFamilyName,
-  type CanvasTextFontFamilyValueType,
+  FontFamily,
+  FontFamilyList,
 } from '../../../../surface-block/consts.js';
 import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 
@@ -27,14 +25,12 @@ export class EdgelessFontFamilyPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  accessor value: CanvasTextFontFamilyValueType = CanvasTextFontFamily.Inter;
+  accessor value: FontFamily = FontFamily.Inter;
 
   @property({ attribute: false })
-  accessor onSelect:
-    | ((value: EdgelessFontFamilyPanel['value']) => void)
-    | undefined = undefined;
+  accessor onSelect: ((value: FontFamily) => void) | undefined = undefined;
 
-  private _onSelect(value: EdgelessFontFamilyPanel['value']) {
+  private _onSelect(value: FontFamily) {
     this.value = value;
     if (this.onSelect) {
       this.onSelect(value);
@@ -43,22 +39,20 @@ export class EdgelessFontFamilyPanel extends LitElement {
 
   override render() {
     return repeat(
-      CanvasTextFontFamilyKey,
-      key => key,
-      key => {
-        const font = CanvasTextFontFamily[key];
+      FontFamilyList,
+      item => item[0],
+      ([font, name]) => {
         const active = this.value === font;
-
         return html`
           <edgeless-tool-icon-button
-            class="${key.toLowerCase()}"
+            data-font="${name}"
             style="font-family: ${wrapFontFamily(font)}"
             .iconContainerPadding=${[4, 8]}
             .justify=${'space-between'}
             .active=${active}
             @click=${() => this._onSelect(font)}
           >
-            ${CanvasTextFontFamilyName[key]} ${active ? CheckIcon : nothing}
+            ${name} ${active ? CheckIcon : nothing}
           </edgeless-tool-icon-button>
         `;
       }

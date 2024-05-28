@@ -3,7 +3,7 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
 import { type IBound } from '../consts.js';
-import type { ElementModel } from '../element-model/base.js';
+import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 import { RoughCanvas } from '../rough/canvas.js';
 import { intersects } from '../utils/math-utils.js';
@@ -219,7 +219,7 @@ export class Renderer extends Viewport {
      * its element will be add to this array and drawing on the
      * main canvas
      */
-    let fallbackElement: ElementModel[] = [];
+    let fallbackElement: SurfaceElementModel[] = [];
 
     this.layerManager.getCanvasLayers().forEach((layer, idx) => {
       if (!this._stackingCanvas[idx]) {
@@ -250,7 +250,7 @@ export class Renderer extends Viewport {
     matrix: DOMMatrix,
     rc: RoughCanvas,
     bound: IBound,
-    surfaceElements?: ElementModel[],
+    surfaceElements?: SurfaceElementModel[],
     overLay: boolean = false
   ) {
     if (!ctx) return;
@@ -296,7 +296,7 @@ export class Renderer extends Viewport {
 
   public getCanvasByBound(
     bound: IBound = this.viewportBounds,
-    surfaceElements?: ElementModel[],
+    surfaceElements?: SurfaceElementModel[],
     canvas?: HTMLCanvasElement,
     clearBeforeDrawing?: boolean,
     withZoom?: boolean

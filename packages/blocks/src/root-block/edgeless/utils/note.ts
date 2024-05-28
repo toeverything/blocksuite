@@ -3,7 +3,6 @@ import {
   handleNativeRangeAtPoint,
   type NoteChildrenFlavour,
   type Point,
-  type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
@@ -52,7 +51,7 @@ export function addNote(
     const blocks =
       (doc.root?.children.filter(
         child => child.flavour === 'affine:note'
-      ) as TopLevelBlockModel[]) ?? [];
+      ) as BlockSuite.EdgelessBlockModelType[]) ?? [];
     const element = blocks.find(b => b.id === noteId);
     if (element) {
       edgeless.service.selection.set({

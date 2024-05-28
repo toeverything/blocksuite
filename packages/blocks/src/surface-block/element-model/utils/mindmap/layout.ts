@@ -1,4 +1,4 @@
-import type { ElementModel, SerializedXYWH } from '../../../index.js';
+import type { SerializedXYWH } from '../../../index.js';
 import { Bound } from '../../../utils/bound.js';
 import type { MindmapElementModel } from '../../mindmap.js';
 import { applyNodeStyle } from './style.js';
@@ -24,7 +24,7 @@ export type MindmapNode = {
   id: string;
   detail: NodeDetail;
 
-  element: ElementModel;
+  element: BlockSuite.SurfaceElementModelType;
   children: MindmapNode[];
 };
 

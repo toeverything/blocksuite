@@ -216,11 +216,13 @@ export function renderMindmapButton(
   )
     return nothing;
 
-  return html`<edgeless-change-mindmap-button
-    .elements=${elements.map(e => e.group)}
-    .edgeless=${edgeless}
-  >
-  </edgeless-change-mindmap-button>`;
+  return html`
+    <edgeless-change-mindmap-button
+      .elements=${elements.map(e => e.group)}
+      .edgeless=${edgeless}
+    >
+    </edgeless-change-mindmap-button>
+  `;
 }
 
 declare global {

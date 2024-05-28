@@ -43,15 +43,17 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<edgeless-tool-icon-button
-      aria-label="Add caption"
-      .tooltip=${'Add caption'}
-      class="change-image-button caption"
-      ?disabled=${this._doc.readonly}
-      @click=${() => this._showCaption()}
-    >
-      ${CaptionIcon}
-    </edgeless-tool-icon-button>`;
+    return html`
+      <edgeless-tool-icon-button
+        aria-label="Add caption"
+        .tooltip=${'Add caption'}
+        class="change-image-button caption"
+        ?disabled=${this._doc.readonly}
+        @click=${() => this._showCaption()}
+      >
+        ${CaptionIcon}
+      </edgeless-tool-icon-button>
+    `;
   }
 }
 
@@ -67,8 +69,10 @@ export function renderChangeImageButton(
 ) {
   if (images?.length !== 1) return nothing;
 
-  return html`<edgeless-change-image-button
-    .model=${images[0]}
-    .edgeless=${edgeless}
-  ></edgeless-change-image-button>`;
+  return html`
+    <edgeless-change-image-button
+      .model=${images[0]}
+      .edgeless=${edgeless}
+    ></edgeless-change-image-button>
+  `;
 }

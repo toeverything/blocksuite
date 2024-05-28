@@ -137,7 +137,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           break;
         }
         case 'dash': {
-          this._setStrokeStyle(StrokeStyle.Dashed);
+          this._setStrokeStyle(StrokeStyle.Dash);
           break;
         }
         case 'none': {
@@ -229,19 +229,22 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     return html`
       ${length === 1
-        ? html`<span class="display-mode-button-label">Show in</span>
+        ? html`
+            <span class="display-mode-button-label">Show in</span>
             <edgeless-menu-button
               .contentPadding=${'8px'}
-              .button=${html`<edgeless-tool-icon-button
-                aria-label="Mode"
-                .tooltip=${'Display mode'}
-                .justify=${'space-between'}
-                .withHover=${true}
-                .labelHeight=${'20px'}
-              >
-                <span class="label">${currentMode}</span>
-                ${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>`}
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Mode"
+                  .tooltip=${'Display mode'}
+                  .justify=${'space-between'}
+                  .withHover=${true}
+                  .labelHeight=${'20px'}
+                >
+                  <span class="label">${currentMode}</span>
+                  ${SmallArrowDownIcon}
+                </edgeless-tool-icon-button>
+              `}
             >
               <note-display-mode-panel
                 slot
@@ -252,20 +255,24 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               </note-display-mode-panel>
             </edgeless-menu-button>
 
-            <edgeless-menu-divider></edgeless-menu-divider>`
+            <edgeless-menu-divider></edgeless-menu-divider>
+          `
         : nothing}
       ${displayMode === NoteDisplayMode.DocOnly
         ? nothing
-        : html`<edgeless-menu-button
+        : html`
+            <edgeless-menu-button
               .contentPadding=${'8px'}
-              .button=${html`<edgeless-tool-icon-button
-                aria-label="Background"
-                .tooltip=${'Background'}
-              >
-                <edgeless-color-button
-                  .color=${background}
-                ></edgeless-color-button>
-              </edgeless-tool-icon-button>`}
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Background"
+                  .tooltip=${'Background'}
+                >
+                  <edgeless-color-button
+                    .color=${background}
+                  ></edgeless-color-button>
+                </edgeless-tool-icon-button>
+              `}
             >
               <edgeless-color-panel
                 slot
@@ -280,12 +287,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
             <edgeless-menu-button
               .contentPadding=${'6px'}
-              .button=${html`<edgeless-tool-icon-button
-                aria-label="Shadow style"
-                .tooltip=${'Shadow style'}
-              >
-                ${NoteShadowIcon}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>`}
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Shadow style"
+                  .tooltip=${'Shadow style'}
+                >
+                  ${NoteShadowIcon}${SmallArrowDownIcon}
+                </edgeless-tool-icon-button>
+              `}
             >
               <edgeless-note-shadow-panel
                 slot
@@ -297,12 +306,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             </edgeless-menu-button>
 
             <edgeless-menu-button
-              .button=${html`<edgeless-tool-icon-button
-                aria-label="Border style"
-                .tooltip=${'Border style'}
-              >
-                ${LineStyleIcon}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>`}
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Border style"
+                  .tooltip=${'Border style'}
+                >
+                  ${LineStyleIcon}${SmallArrowDownIcon}
+                </edgeless-tool-icon-button>
+              `}
             >
               <div slot data-orientation="horizontal">
                 ${LineStylesPanel({
@@ -316,12 +327,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             <edgeless-menu-button
               ${ref(this._cornersPanelRef)}
               .contentPadding=${'8px'}
-              .button=${html`<edgeless-tool-icon-button
-                aria-label="Corners"
-                .tooltip=${'Corners'}
-              >
-                ${NoteCornerIcon}${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>`}
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Corners"
+                  .tooltip=${'Corners'}
+                >
+                  ${NoteCornerIcon}${SmallArrowDownIcon}
+                </edgeless-tool-icon-button>
+              `}
             >
               <edgeless-size-panel
                 slot
@@ -335,9 +348,11 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               </edgeless-size-panel>
             </edgeless-menu-button>
 
-            <edgeless-menu-divider></edgeless-menu-divider>`}
+            <edgeless-menu-divider></edgeless-menu-divider>
+          `}
       ${length === 1
-        ? html`<edgeless-tool-icon-button
+        ? html`
+            <edgeless-tool-icon-button
               aria-label="Slicer"
               .tooltip=${getTooltipWithShortcut('Cutting mode', '-')}
               .active=${this.enableNoteSlicer}
@@ -345,7 +360,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             >
               ${ScissorsIcon}
             </edgeless-tool-icon-button>
-            <edgeless-menu-divider></edgeless-menu-divider>`
+            <edgeless-menu-divider></edgeless-menu-divider>
+          `
         : nothing}
 
       <edgeless-tool-icon-button
@@ -359,16 +375,18 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       <edgeless-menu-button
         ${ref(this._scalePanelRef)}
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Scale"
-          .tooltip=${'Scale'}
-          .justify=${'space-between'}
-          .labelHeight=${'20px'}
-          .iconContainerWidth=${'65px'}
-        >
-          <span class="label">${this._getScaleLabel(scale)}</span
-          >${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Scale"
+            .tooltip=${'Scale'}
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+            .iconContainerWidth=${'65px'}
+          >
+            <span class="label">${this._getScaleLabel(scale)}</span
+            >${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <edgeless-scale-panel
           slot
@@ -395,10 +413,12 @@ export function renderNoteButton(
 ) {
   if (!notes?.length) return nothing;
 
-  return html`<edgeless-change-note-button
-    .notes=${notes}
-    .edgeless=${edgeless}
-    .enableNoteSlicer=${false}
-  >
-  </edgeless-change-note-button>`;
+  return html`
+    <edgeless-change-note-button
+      .notes=${notes}
+      .edgeless=${edgeless}
+      .enableNoteSlicer=${false}
+    >
+    </edgeless-change-note-button>
+  `;
 }
