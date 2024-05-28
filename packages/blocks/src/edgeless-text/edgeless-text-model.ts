@@ -2,11 +2,11 @@ import type { Text } from '@blocksuite/store';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import type { FontStyle } from '../surface-block/element-model/common.js';
 import {
   FontFamily,
+  type FontStyle,
   FontWeight,
-} from '../surface-block/element-model/common.js';
+} from '../surface-block/consts.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 interface EdgelessTextProps {

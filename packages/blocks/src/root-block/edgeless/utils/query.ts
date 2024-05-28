@@ -46,7 +46,7 @@ export function isNoteBlock(
 }
 
 export function isEdgelessTextBlock(
-  element: BlockModel | EdgelessModel | null
+  element: BlockModel | BlockSuite.EdgelessModelType | null
 ): element is EdgelessTextBlockModel {
   return (
     !!element &&
