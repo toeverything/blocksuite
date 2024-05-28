@@ -30,13 +30,11 @@ export const codeBlockStyles = css`
     left: 5px;
   }
 
-  .affine-code-block-container > .lang-list-wrapper,
-  .affine-code-block-container > affine-code-toolbar-widget {
+  .affine-code-block-container > .lang-list-wrapper {
     visibility: hidden;
   }
 
-  .affine-code-block-container:hover > .lang-list-wrapper,
-  .affine-code-block-container:hover > affine-code-toolbar-widget {
+  .affine-code-block-container:hover > .lang-list-wrapper {
     visibility: visible;
   }
 

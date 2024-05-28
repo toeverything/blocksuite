@@ -8,6 +8,7 @@ import {
   type InlineRangeProvider,
   type InlineRootElement,
 } from '@blocksuite/inline';
+import { Slice } from '@blocksuite/store';
 import { html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -18,6 +19,7 @@ import { z } from 'zod';
 
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
+import { toast } from '../_common/components/toast.js';
 import { ArrowDownIcon } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { getViewportElement } from '../_common/utils/query.js';
@@ -352,6 +354,20 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     assertExists(this._richTextElement);
     this._richTextResizeObserver.disconnect();
     this._richTextResizeObserver.observe(this._richTextElement);
+  }
+
+  copyCode() {
+    const model = this.model;
+    const slice = Slice.fromModels(model.doc, [model]);
+    this.std.clipboard
+      .copySlice(slice)
+      .then(() => {
+        toast(this.host, 'Copied to clipboard');
+      })
+      .catch(e => {
+        toast(this.host, 'Copied failed, something went wrong');
+        console.error(e);
+      });
   }
 
   setHighlightOptionsGetter(fn: HighlightOptionsGetter) {
