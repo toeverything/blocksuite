@@ -2,12 +2,9 @@ import { groupBy } from '../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
-import {
-  getCopyElements,
-  prepareClipboardData,
-} from '../controllers/clipboard.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import { edgelessElementsBound } from './bound-utils.js';
+import { getCloneElements, prepareCloneData } from './clone-utils.js';
 import { getElementsWithoutGroup } from './group.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
 
@@ -18,12 +15,14 @@ export async function duplicate(
   select = true
 ) {
   const { clipboardController } = edgeless;
-  const copyElements = getCopyElements(edgeless.surface, elements);
+  const copyElements = getCloneElements(
+    elements,
+    edgeless.surface.edgeless.service.frame
+  );
   const totalBound = edgelessElementsBound(copyElements);
   totalBound.x += totalBound.w + offset;
 
-  const { snapshot } = await prepareClipboardData(copyElements, edgeless.std);
-
+  const snapshot = await prepareCloneData(copyElements, edgeless.std);
   const [canvasElements, blocks] =
     await clipboardController.createElementsFromClipboardData(
       snapshot as Record<string, unknown>[],

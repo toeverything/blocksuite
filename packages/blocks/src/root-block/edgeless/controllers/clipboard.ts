@@ -53,7 +53,6 @@ import {
 } from '../../../surface-block/index.js';
 import { ConnectorElementModel } from '../../../surface-block/index.js';
 import { compare } from '../../../surface-block/managers/layer-utils.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
@@ -65,6 +64,7 @@ import {
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
 import type { EdgelessElementType } from '../edgeless-types.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { getCloneElements, serializeElement } from '../utils/clone-utils.js';
 import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
 import { deleteElements } from '../utils/crud.js';
 import {
@@ -188,9 +188,9 @@ export class EdgelessClipboardController extends PageClipboard {
     const event = _context.get('clipboardState').raw;
     event.preventDefault();
 
-    const elements = getCopyElements(
-      this.surface,
-      this.selectionManager.elements
+    const elements = getCloneElements(
+      this.selectionManager.elements,
+      this.surface.edgeless.service.frame
     );
 
     // when note active, handle copy like page mode
@@ -1402,48 +1402,6 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 }
 
-export function getCopyElements(
-  surface: SurfaceBlockComponent,
-  elements: BlockSuite.EdgelessModelType[]
-) {
-  const set = new Set<BlockSuite.EdgelessModelType>();
-
-  elements.forEach(element => {
-    if (isFrameBlock(element)) {
-      set.add(element);
-      surface.edgeless.service.frame
-        .getElementsInFrame(element)
-        .forEach(ele => set.add(ele));
-    } else if (element instanceof SurfaceGroupLikeModel) {
-      getCopyElements(surface, element.childElements).forEach(ele =>
-        set.add(ele)
-      );
-      set.add(element);
-    } else {
-      set.add(element);
-    }
-  });
-  return Array.from(set);
-}
-
-function prepareConnectorClipboardData(
-  connector: ConnectorElementModel,
-  selected: BlockSuite.EdgelessModelType[]
-) {
-  const sourceId = connector.source?.id;
-  const targetId = connector.target?.id;
-  const serialized = connector.serialize();
-  if (sourceId && selected.every(s => s.id !== sourceId)) {
-    serialized.source = { position: connector.absolutePath[0] };
-  }
-  if (targetId && selected.every(s => s.id !== targetId)) {
-    serialized.target = {
-      position: connector.absolutePath[connector.absolutePath.length - 1],
-    };
-  }
-  return serialized;
-}
-
 export async function prepareClipboardData(
   selectedAll: BlockSuite.EdgelessModelType[],
   std: BlockStdScope
@@ -1453,49 +1411,11 @@ export async function prepareClipboardData(
   });
   const selected = await Promise.all(
     selectedAll.map(async selected => {
-      if (isNoteBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isFrameBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isImageBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        await job.assetsManager.readFromBlob(snapshot.props.sourceId as string);
-        return { ...snapshot };
-      } else if (isAttachmentBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        await job.assetsManager.readFromBlob(snapshot.props.sourceId as string);
-        return { ...snapshot };
-      } else if (isBookmarkBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isEmbedGithubBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isEmbedYoutubeBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isEmbedFigmaBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isEmbedLinkedDocBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isEmbedSyncedDocBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isEmbedHtmlBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (isEmbedLoomBlock(selected)) {
-        const snapshot = await job.blockToSnapshot(selected);
-        return { ...snapshot };
-      } else if (selected instanceof ConnectorElementModel) {
-        return prepareConnectorClipboardData(selected, selectedAll);
-      } else {
-        return (selected as BlockSuite.SurfaceElementModelType).serialize();
+      const data = await serializeElement(selected, selectedAll, job);
+      if (isAttachmentBlock(selected) || isImageBlock(selected)) {
+        await job.assetsManager.readFromBlob(data.props.sourceId as string);
       }
+      return data;
     })
   );
   const blobs = await encodeClipboardBlobs(job.assetsManager.getAssets());
