@@ -1,4 +1,3 @@
-import type { EdgelessModel } from '../../root-block/edgeless/type.js';
 import { MindmapElementModel } from '../element-model/mindmap.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 
@@ -8,7 +7,7 @@ export const mindmapMiddleware: SurfaceMiddleware = (
 ) => {
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
-    (surface.doc.getBlockById(id) as EdgelessModel);
+    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType);
   let layoutUpdPending = false;
   const layoutUpdList = new Set<MindmapElementModel>();
   const updateLayout = (mindmap: MindmapElementModel) => {

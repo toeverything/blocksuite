@@ -1,4 +1,3 @@
-import type { EdgelessModel } from '../root-block/edgeless/type.js';
 import { GRID_SIZE, type IBound } from './consts.js';
 import { compare } from './managers/layer-utils.js';
 import { Bound } from './utils/bound.js';
@@ -21,7 +20,9 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElement<T extends EdgelessModel>(ele: T): number[] {
+function rangeFromElement<T extends BlockSuite.EdgelessModelType>(
+  ele: T
+): number[] {
   const bound = ele.elementBound;
   const minRow = getGridIndex(bound.x);
   const maxRow = getGridIndex(bound.maxX);
@@ -30,7 +31,7 @@ function rangeFromElement<T extends EdgelessModel>(ele: T): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElementExternal<T extends EdgelessModel>(
+function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
   ele: T
 ): number[] | null {
   if (!ele.externalXYWH) return null;
@@ -43,7 +44,7 @@ function rangeFromElementExternal<T extends EdgelessModel>(
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export class GridManager<T extends EdgelessModel> {
+export class GridManager<T extends BlockSuite.EdgelessModelType> {
   private _grids: Map<string, Set<T>> = new Map();
   private _elementToGrids: Map<T, Set<Set<T>>> = new Map();
 

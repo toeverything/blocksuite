@@ -1,5 +1,4 @@
-import type { EdgelessModel } from '../../root-block/edgeless/type.js';
-import { GroupLikeModel } from '../element-model/base.js';
+import { SurfaceGroupLikeModel } from '../element-model/base.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
 import type { Bound } from '../utils/bound.js';
 
@@ -8,10 +7,10 @@ export const groupSizeMiddleware: SurfaceMiddleware = (
 ) => {
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
-    (surface.doc.getBlockById(id) as EdgelessModel);
+    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType);
   let pending = false;
-  const groupSet = new Set<GroupLikeModel>();
-  const calculateGroupSize = (group: GroupLikeModel) => {
+  const groupSet = new Set<SurfaceGroupLikeModel>();
+  const calculateGroupSize = (group: SurfaceGroupLikeModel) => {
     let bound: Bound | undefined;
     group.childIds.forEach(childId => {
       const elementBound = getElementById(childId)?.elementBound;
@@ -23,7 +22,7 @@ export const groupSizeMiddleware: SurfaceMiddleware = (
 
     group.xywh = bound?.serialize() ?? '[0,0,0,0]';
   };
-  const addGroupSizeUpdateList = (group: GroupLikeModel) => {
+  const addGroupSizeUpdateList = (group: SurfaceGroupLikeModel) => {
     groupSet.add(group);
 
     if (!pending) {
@@ -43,7 +42,10 @@ export const groupSizeMiddleware: SurfaceMiddleware = (
       if (payload.type === 'update') {
         const group = surface.getGroup(payload.id);
 
-        if (group instanceof GroupLikeModel && payload.props.key === 'xywh') {
+        if (
+          group instanceof SurfaceGroupLikeModel &&
+          payload.props.key === 'xywh'
+        ) {
           addGroupSizeUpdateList(group);
         }
       }
@@ -51,12 +53,12 @@ export const groupSizeMiddleware: SurfaceMiddleware = (
     surface.elementUpdated.on(({ id, props }) => {
       // update the group's xywh when children's xywh updated
       const group = surface.getGroup(id);
-      if (group instanceof GroupLikeModel && props['xywh']) {
+      if (group instanceof SurfaceGroupLikeModel && props['xywh']) {
         addGroupSizeUpdateList(group);
       }
 
       const element = surface.getElementById(id);
-      if (element instanceof GroupLikeModel && props['childIds']) {
+      if (element instanceof SurfaceGroupLikeModel && props['childIds']) {
         addGroupSizeUpdateList(element);
       }
     }),
@@ -64,14 +66,14 @@ export const groupSizeMiddleware: SurfaceMiddleware = (
       // update the group's xywh when added
       const group = surface.getElementById(id);
 
-      if (group instanceof GroupLikeModel) {
+      if (group instanceof SurfaceGroupLikeModel) {
         addGroupSizeUpdateList(group);
       }
     }),
   ];
 
   surface.elementModels.forEach(model => {
-    if (model instanceof GroupLikeModel) {
+    if (model instanceof SurfaceGroupLikeModel) {
       addGroupSizeUpdateList(model);
     }
   });
@@ -91,7 +93,7 @@ export const groupRelationMiddleware: SurfaceMiddleware = (
         const element = surface.getElementById(id)!;
 
         // remove the group if it has no children
-        if (element instanceof GroupLikeModel && props['childIds']) {
+        if (element instanceof SurfaceGroupLikeModel && props['childIds']) {
           if (element.childIds.length === 0) {
             surface.removeElement(id);
           }

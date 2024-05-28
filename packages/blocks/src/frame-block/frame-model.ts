@@ -2,7 +2,7 @@ import type { Text } from '@blocksuite/store';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import type { HitTestOptions } from '../root-block/edgeless/type.js';
+import type { IHitTestOptions } from '../surface-block/element-model/base.js';
 import { Bound, type SerializedXYWH } from '../surface-block/index.js';
 
 type FrameBlockProps = {
@@ -34,7 +34,7 @@ export const FrameBlockSchema = defineBlockSchema({
 export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
   static PADDING = [8, 10];
 
-  override hitTest(x: number, y: number, _: HitTestOptions): boolean {
+  override hitTest(x: number, y: number, _: IHitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointNearBound([x, y], 5);
 
@@ -48,5 +48,13 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
     return (
       bound.isIntersectWithBound(selectedBound) || selectedBound.contains(bound)
     );
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:frame': FrameBlockModel;
+    }
   }
 }

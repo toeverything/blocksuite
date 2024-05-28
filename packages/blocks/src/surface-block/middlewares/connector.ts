@@ -1,4 +1,3 @@
-import type { EdgelessModel } from '../../root-block/edgeless/type.js';
 import type { ConnectorElementModel } from '../index.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import type { SurfaceBlockModel, SurfaceMiddleware } from '../surface-model.js';
@@ -8,7 +7,7 @@ export const connectorMiddleware: SurfaceMiddleware = (
 ) => {
   const getElementById = (id: string) =>
     surface.getElementById(id) ??
-    (surface.doc.getBlockById(id) as EdgelessModel);
+    (surface.doc.getBlockById(id) as BlockSuite.EdgelessModelType);
   const pathGenerator = new ConnectorPathGenerator({
     getElementById: getElementById,
   });

@@ -10,12 +10,14 @@ import {
   type DefaultTool,
   handleNativeRangeAtPoint,
   resetNativeSelection,
-  type Selectable,
 } from '../../../../_common/utils/index.js';
 import { clamp } from '../../../../_common/utils/math.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import { GroupLikeModel } from '../../../../surface-block/element-model/base.js';
+import {
+  type IHitTestOptions,
+  SurfaceGroupLikeModel,
+} from '../../../../surface-block/element-model/base.js';
 import {
   GroupElementModel,
   MindmapElementModel,
@@ -24,12 +26,10 @@ import {
 } from '../../../../surface-block/element-model/index.js';
 import {
   Bound,
-  type CanvasElement,
   ConnectorElementModel,
   type IVec,
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
-import type { EdgelessModel, HitTestOptions } from '../../type.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
@@ -78,7 +78,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _isDoubleClickedOnMask = false;
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
-  private _toBeMoved: EdgelessModel[] = [];
+  private _toBeMoved: BlockSuite.EdgelessModelType[] = [];
   private _autoPanTimer: number | null = null;
   private _dragging = false;
   private _wheeling = false;
@@ -122,14 +122,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return this._edgeless.doc.readonly;
   }
 
-  private _pick(x: number, y: number, options?: HitTestOptions) {
+  private _pick(x: number, y: number, options?: IHitTestOptions) {
     const service = this._service;
     const modelPos = service.viewport.toModelCoord(x, y);
     const group = service.pickElementInGroup(modelPos[0], modelPos[1], options);
 
     if (group instanceof MindmapElementModel) {
       const picked = service.pickElement(modelPos[0], modelPos[1], {
-        ...((options ?? {}) as HitTestOptions),
+        ...((options ?? {}) as IHitTestOptions),
         all: true,
       });
 
@@ -206,7 +206,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  private _handleClickOnSelected(element: EdgelessModel, e: PointerEventState) {
+  private _handleClickOnSelected(
+    element: BlockSuite.EdgelessModelType,
+    e: PointerEventState
+  ) {
     if (this._readonly) return;
 
     const { selectedIds, selections } = this.selection;
@@ -253,7 +256,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return angle < Math.PI / 4 || angle > 3 * (Math.PI / 4) ? 'x' : 'y';
   }
 
-  private _handleSurfaceDragMove(selected: CanvasElement, bound: Bound) {
+  private _handleSurfaceDragMove(
+    selected: BlockSuite.SurfaceModelType,
+    bound: Bound
+  ) {
     if (!this._lock) {
       this._lock = true;
       this._doc.captureSync();
@@ -268,7 +274,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _handleBlockDragMove(block: EdgelessModel, bound: Bound) {
+  private _handleBlockDragMove(
+    block: BlockSuite.EdgelessModelType,
+    bound: Bound
+  ) {
     this._service.updateElement(block.id, {
       xywh: bound.serialize(),
     });
@@ -287,7 +296,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return false;
   }
 
-  private _isDraggable(element: Selectable) {
+  private _isDraggable(element: BlockSuite.EdgelessModelType) {
     return !(
       element instanceof ConnectorElementModel &&
       !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
@@ -573,7 +582,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._edgeless.service.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
-      } else if (element instanceof GroupLikeModel) {
+      } else if (element instanceof SurfaceGroupLikeModel) {
         element.decendants().forEach(ele => toBeMoved.add(ele));
       }
     });

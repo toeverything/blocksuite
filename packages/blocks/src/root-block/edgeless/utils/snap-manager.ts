@@ -1,4 +1,3 @@
-import type { Alignable } from '../../../_common/types.js';
 import { buildPath } from '../../../_common/utils/query.js';
 import { Point } from '../../../_common/utils/rect.js';
 import type { SurfaceBlockComponent } from '../../../index.js';
@@ -49,7 +48,9 @@ export class EdgelessSnapManager extends Overlay {
    */
   private _distributedAlignLines: [Point, Point][] = [];
 
-  private _getBoundsWithRotationByAlignable(alignable: Alignable) {
+  private _getBoundsWithRotationByAlignable(
+    alignable: BlockSuite.EdgelessModelType
+  ) {
     const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
     const [x, y, w, h] = deserializeXYWH(alignable.xywh);
     return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
@@ -66,7 +67,7 @@ export class EdgelessSnapManager extends Overlay {
     ) as SurfaceBlockComponent;
   }
 
-  setupAlignables(alignables: Alignable[]): Bound {
+  setupAlignables(alignables: BlockSuite.EdgelessModelType[]): Bound {
     if (alignables.length === 0) return new Bound();
 
     const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
@@ -85,17 +86,18 @@ export class EdgelessSnapManager extends Overlay {
     const canvasElements = this._rootService.elements;
     const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
-    (<Alignable[]>[...this._rootService.blocks, ...canvasElements]).forEach(
-      alignable => {
-        const bounds = this._getBoundsWithRotationByAlignable(alignable);
-        if (
-          viewportBounds.isOverlapWithBound(bounds) &&
-          !excludes.includes(alignable)
-        ) {
-          this._alignableBounds.push(bounds);
-        }
+    (<BlockSuite.EdgelessModelType[]>[
+      ...this._rootService.blocks,
+      ...canvasElements,
+    ]).forEach(alignable => {
+      const bounds = this._getBoundsWithRotationByAlignable(alignable);
+      if (
+        viewportBounds.isOverlapWithBound(bounds) &&
+        !excludes.includes(alignable)
+      ) {
+        this._alignableBounds.push(bounds);
       }
-    );
+    });
 
     return alignables.reduce((prev, element) => {
       const bounds = this._getBoundsWithRotationByAlignable(element);

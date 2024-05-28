@@ -19,7 +19,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import { requestThrottledConnectFrame } from '../../../../_common/utils/event.js';
-import { type TopLevelBlockModel } from '../../../../_common/utils/index.js';
 import { last } from '../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
@@ -65,7 +64,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   `;
 
   static renderPortal(
-    block: TopLevelBlockModel,
+    block: BlockSuite.EdgelessBlockModelType,
     zIndex: number,
     surface: SurfaceBlockComponent,
     edgeless: EdgelessRootBlockComponent
@@ -325,7 +324,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           ${layers
             .filter(layer => layer.type === 'block')
             .map(layer => {
-              const elements = layer.elements as TopLevelBlockModel[];
+              const elements =
+                layer.elements as BlockSuite.EdgelessBlockModelType[];
 
               return repeat(
                 elements,

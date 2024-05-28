@@ -2,11 +2,6 @@ import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
 
-import type {
-  EdgelessModel,
-  Selectable,
-  TopLevelBlockModel,
-} from '../../_common/types.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessRootService } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
@@ -70,7 +65,7 @@ export class EdgelessFrameManager {
 
   constructor(private _rootService: EdgelessRootService) {}
 
-  selectFrame(eles: Selectable[]) {
+  selectFrame(eles: BlockSuite.EdgelessModelType[]) {
     const frames = this._rootService.frames;
     if (frames.length === 0) return null;
 
@@ -88,10 +83,8 @@ export class EdgelessFrameManager {
 
   getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: EdgelessModel[] = this._rootService.layer.canvasGrid.search(
-      bound,
-      true
-    );
+    const elements: BlockSuite.EdgelessModelType[] =
+      this._rootService.layer.canvasGrid.search(bound, true);
 
     return elements.concat(
       getBlocksInFrame(this._rootService.doc, frame, fullyContained)
@@ -167,7 +160,11 @@ export function getBlocksInFrame(
   ]) as SurfaceBlockModel[];
 
   return (
-    getNotesInFrame(doc, model, fullyContained) as TopLevelBlockModel[]
+    getNotesInFrame(
+      doc,
+      model,
+      fullyContained
+    ) as BlockSuite.EdgelessBlockModelType[]
   ).concat(
     surfaceModel[0].children.filter(ele => {
       if (ele.id === model.id) return;
@@ -179,6 +176,6 @@ export function getBlocksInFrame(
       }
 
       return false;
-    }) as TopLevelBlockModel[]
+    }) as BlockSuite.EdgelessBlockModelType[]
   );
 }

@@ -24,3 +24,11 @@ export type EmbedLoomBlockProps = {
 export class EmbedLoomModel extends defineEmbedModel<EmbedLoomBlockProps>(
   BlockModel
 ) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:embed-loom': EmbedLoomModel;
+    }
+  }
+}

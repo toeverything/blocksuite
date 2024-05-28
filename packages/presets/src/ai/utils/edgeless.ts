@@ -5,7 +5,6 @@ import type {
 } from '@blocksuite/blocks';
 import {
   AFFINE_EDGELESS_COPILOT_WIDGET,
-  type EdgelessModel,
   MindmapElementModel,
   type ShapeElementModel,
 } from '@blocksuite/blocks';
@@ -31,13 +30,13 @@ export function mindMapToMarkdown(mindmap: MindmapElementModel) {
   return markdownStr;
 }
 
-export function isMindMapRoot(ele: EdgelessModel) {
+export function isMindMapRoot(ele: BlockSuite.EdgelessModelType) {
   const group = ele?.group;
 
   return group instanceof MindmapElementModel && group.tree.element === ele;
 }
 
-export function isMindmapChild(ele: EdgelessModel) {
+export function isMindmapChild(ele: BlockSuite.EdgelessModelType) {
   return ele?.group instanceof MindmapElementModel && !isMindMapRoot(ele);
 }
 

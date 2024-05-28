@@ -1,4 +1,3 @@
-import type { HitTestOptions } from '../../root-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import { Bound } from '../utils/bound.js';
 import { getBezierNearestPoint } from '../utils/curve.js';
@@ -10,7 +9,12 @@ import {
 import { PointLocation } from '../utils/point-location.js';
 import { type IVec2, Vec } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
-import { type BaseProps, ElementModel, LocalModel } from './base.js';
+import {
+  type IBaseProps,
+  type IHitTestOptions,
+  SurfaceElementModel,
+  SurfaceLocalModel,
+} from './base.js';
 import type { StrokeStyle } from './common.js';
 import { derive, local, yfield } from './decorators.js';
 
@@ -37,7 +41,7 @@ export enum ConnectorMode {
   Curve,
 }
 
-type ConnectorElementProps = BaseProps & {
+type ConnectorElementProps = IBaseProps & {
   mode: ConnectorMode;
   stroke: string;
   strokeWidth: number;
@@ -51,7 +55,7 @@ type ConnectorElementProps = BaseProps & {
   rearEndpointStyle?: PointStyle;
 };
 
-export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
+export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementProps> {
   updatingPath = false;
 
   get type() {
@@ -137,7 +141,7 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   override hitTest(
     x: number,
     y: number,
-    options?: HitTestOptions | undefined
+    options?: IHitTestOptions | undefined
   ): boolean {
     const point =
       this.mode === ConnectorMode.Curve
@@ -174,7 +178,7 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   }
 }
 
-export class LocalConnectorElementModel extends LocalModel {
+export class LocalConnectorElementModel extends SurfaceLocalModel {
   get type() {
     return 'connector';
   }
@@ -227,4 +231,15 @@ export class LocalConnectorElementModel extends LocalModel {
   frontEndpointStyle!: PointStyle;
 
   rearEndpointStyle!: PointStyle;
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceElementModelMap {
+      connector: ConnectorElementModel;
+    }
+    interface SurfaceLocalModelMap {
+      connector: LocalConnectorElementModel;
+    }
+  }
 }

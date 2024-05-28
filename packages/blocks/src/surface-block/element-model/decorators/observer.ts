@@ -1,6 +1,6 @@
 import type { Y } from '@blocksuite/store';
 
-import type { ElementModel } from '../base.js';
+import type { SurfaceElementModel } from '../base.js';
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
 const observeSymbol = Symbol('observe');
@@ -9,7 +9,7 @@ const observerDisposableSymbol = Symbol('observerDisposable');
 type ObserveFn<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   E extends Y.YEvent<any> = Y.YEvent<any>,
-  T extends ElementModel = ElementModel,
+  T extends SurfaceElementModel = SurfaceElementModel,
 > = (
   /**
    * The event object of the Y.Map or Y.Array, the `null` value means the observer is initializing.
@@ -31,8 +31,12 @@ type ObserveFn<
  * @param fn
  * @returns
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function observe<V, E extends Y.YEvent<any>, T extends ElementModel>(
+export function observe<
+  V,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  E extends Y.YEvent<any>,
+  T extends SurfaceElementModel,
+>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: ObserveFn<E, T>
 ) {
@@ -46,7 +50,7 @@ export function observe<V, E extends Y.YEvent<any>, T extends ElementModel>(
         setObjectPropMeta(observeSymbol, Object.getPrototypeOf(this), prop, fn);
         return v;
       },
-    } as ClassAccessorDecoratorResult<ElementModel, V>;
+    } as ClassAccessorDecoratorResult<SurfaceElementModel, V>;
   };
 }
 
@@ -58,7 +62,10 @@ function getObserveMeta(
   return getObjectPropMeta(proto, observeSymbol, prop);
 }
 
-export function startObserve(prop: string | symbol, receiver: ElementModel) {
+export function startObserve(
+  prop: string | symbol,
+  receiver: SurfaceElementModel
+) {
   const proto = Object.getPrototypeOf(receiver);
   const observeFn = getObserveMeta(proto, prop as string)!;
   // @ts-ignore
@@ -76,7 +83,7 @@ export function startObserve(prop: string | symbol, receiver: ElementModel) {
     return;
   }
 
-  const value = receiver[prop as keyof ElementModel] as
+  const value = receiver[prop as keyof SurfaceElementModel] as
     | Y.Map<unknown>
     | Y.Array<unknown>
     | null;
@@ -103,7 +110,10 @@ export function startObserve(prop: string | symbol, receiver: ElementModel) {
   }
 }
 
-export function initializedObservers(proto: unknown, receiver: ElementModel) {
+export function initializedObservers(
+  proto: unknown,
+  receiver: SurfaceElementModel
+) {
   const observers = getObjectPropMeta(proto, observeSymbol);
 
   Object.keys(observers).forEach(prop => {

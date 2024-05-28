@@ -1,12 +1,15 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import type { HitTestOptions } from '../../root-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import type { IBound, SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
 import type { PointLocation } from '../utils/point-location.js';
 import { type IVec2 } from '../utils/vec.js';
-import { type BaseProps, ElementModel } from './base.js';
+import {
+  type IBaseProps,
+  type IHitTestOptions,
+  SurfaceElementModel,
+} from './base.js';
 import { FontFamily, FontWeight, TextResizing } from './common.js';
 import {
   type FontStyle,
@@ -39,7 +42,7 @@ export enum ShapeTextFontSize {
   XLARGE = 36,
 }
 
-export type ShapeProps = BaseProps & {
+export type ShapeProps = IBaseProps & {
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
@@ -64,7 +67,7 @@ export type ShapeProps = BaseProps & {
   maxWidth?: false | number;
 };
 
-export class ShapeElementModel extends ElementModel<ShapeProps> {
+export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   static override propsToY(props: ShapeProps) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text);
@@ -148,7 +151,7 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
 
   textBound: IBound | null = null;
 
-  override hitTest(x: number, y: number, options: HitTestOptions) {
+  override hitTest(x: number, y: number, options: IHitTestOptions) {
     return shapeMethods[this.shapeType].hitTest.call(this, x, y, {
       ...options,
       ignoreTransparent: options.ignoreTransparent ?? true,
@@ -169,5 +172,13 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
 
   override getRelativePointLocation(point: IVec2): PointLocation {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceElementModelMap {
+      shape: ShapeElementModel;
+    }
   }
 }

@@ -10,7 +10,6 @@ import {
   MindmapElementModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessModel } from '../../edgeless/type.js';
 
 @customElement('edgeless-add-group-button')
 export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
@@ -43,7 +42,7 @@ declare global {
 
 export function renderAddGroupButton(
   edgeless: EdgelessRootBlockComponent,
-  elements: EdgelessModel[]
+  elements: BlockSuite.EdgelessModelType[]
 ) {
   if (elements.length < 2) return nothing;
   if (elements[0] instanceof GroupElementModel) return nothing;

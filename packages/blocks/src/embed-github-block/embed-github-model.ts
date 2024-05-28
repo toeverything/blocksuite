@@ -36,3 +36,11 @@ export type EmbedGithubBlockProps = {
 export class EmbedGithubModel extends defineEmbedModel<EmbedGithubBlockProps>(
   BlockModel
 ) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:embed-github': EmbedGithubModel;
+    }
+  }
+}

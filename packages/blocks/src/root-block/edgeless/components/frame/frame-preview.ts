@@ -11,7 +11,6 @@ import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessModel } from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type {
@@ -25,7 +24,7 @@ import type { SurfaceRefRenderer } from '../../../../surface-ref-block/surface-r
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 
-type RefElement = Exclude<EdgelessModel, NoteBlockModel>;
+type RefElement = Exclude<BlockSuite.EdgelessModelType, NoteBlockModel>;
 
 const DEFAULT_PREVIEW_CONTAINER_WIDTH = 280;
 const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 166;

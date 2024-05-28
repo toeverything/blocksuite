@@ -1,10 +1,6 @@
 import { assertEquals, assertExists } from '@blocksuite/global/utils';
 
-import type {
-  Connectable,
-  EdgelessModel,
-  Selectable,
-} from '../../_common/types.js';
+import type { Connectable } from '../../_common/types.js';
 import type { EdgelessRootService } from '../../root-block/edgeless/edgeless-root-service.js';
 import { Overlay } from '../canvas-renderer/renderer.js';
 import type { IBound } from '../consts.js';
@@ -43,14 +39,14 @@ export type OrthogonalConnectorInput = {
   endPoint: PointLocation;
 };
 
-function rBound(ele: EdgelessModel, anti = false): IBound {
+function rBound(ele: BlockSuite.EdgelessModelType, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
   return { ...bound, rotate: anti ? -ele.rotate : ele.rotate };
 }
 
 export function isConnectorAndBindingsAllSelected(
   connector: ConnectorElementModel | LocalConnectorElementModel,
-  selected: Selectable[]
+  selected: BlockSuite.EdgelessModelType[]
 ) {
   const connectorSelected = selected.find(s => s.id === connector.id);
   if (!connectorSelected) {
@@ -74,7 +70,7 @@ export function isConnectorAndBindingsAllSelected(
   return false;
 }
 
-export function getAnchors(ele: EdgelessModel) {
+export function getAnchors(ele: BlockSuite.EdgelessModelType) {
   const bound = Bound.deserialize(ele.xywh);
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
@@ -88,7 +84,7 @@ export function getAnchors(ele: EdgelessModel) {
   ]
     .map(vec => getPointFromBoundsWithRotation({ ...bound, rotate }, vec))
     .forEach(vec => {
-      const rst = ele.intersectWithLine(bound.center, vec);
+      const rst = ele.intersectWithLine(bound.center as IVec2, vec as IVec2);
       assertExists(rst);
       const originPoint = getPointFromBoundsWithRotation(
         { ...bound, rotate: -rotate },
@@ -100,10 +96,10 @@ export function getAnchors(ele: EdgelessModel) {
 }
 
 function getConnectableRelativePosition(
-  connectable: EdgelessModel,
+  connectable: BlockSuite.EdgelessModelType,
   position: IVec
 ) {
-  const location = connectable.getRelativePointLocation(position);
+  const location = connectable.getRelativePointLocation(position as IVec2);
   if (isVecZero(Vec.sub(position, [0, 0.5])))
     location.tangent = Vec.rot([0, -1], toRadian(connectable.rotate));
   else if (isVecZero(Vec.sub(position, [1, 0.5])))
@@ -826,7 +822,7 @@ export class ConnectionOverlay extends Overlay {
       if (result) break;
 
       // if not, check if closes to bound
-      const nearestPoint = connectable.getNearestPoint(point);
+      const nearestPoint = connectable.getNearestPoint(point as IVec2);
 
       if (Vec.dist(nearestPoint, point) < 8) {
         this.highlightPoint = nearestPoint;
@@ -886,7 +882,7 @@ export class ConnectorPathGenerator {
 
   constructor(
     private options: {
-      getElementById: (id: string) => EdgelessModel | Connectable | null;
+      getElementById: (id: string) => BlockSuite.EdgelessModelType | null;
     }
   ) {}
 

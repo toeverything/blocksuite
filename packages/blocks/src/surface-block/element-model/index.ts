@@ -1,7 +1,7 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
-import { ElementModel } from './base.js';
+import { SurfaceElementModel } from './base.js';
 import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
 import { initializedObservers, initializeWatchers } from './decorators.js';
@@ -36,7 +36,7 @@ export function createElementModel(
     newCreate?: boolean;
   }
 ): {
-  model: ElementModel;
+  model: SurfaceElementModel;
   unmount: () => void;
   mount: () => void;
 } {
@@ -58,7 +58,7 @@ export function createElementModel(
     model,
     stashedStore: stashed,
     onChange: payload => mounted && options.onChange({ id, ...payload }),
-  }) as ElementModel;
+  }) as SurfaceElementModel;
 
   state.creating = false;
   state.skipYfield = false;
@@ -143,7 +143,7 @@ export function propsToY(type: string, props: Record<string, unknown>) {
   }
 
   // @ts-ignore
-  return (ctor.propsToY ?? ElementModel.propsToY)(props);
+  return (ctor.propsToY ?? SurfaceElementModel.propsToY)(props);
 }
 
 export function createModelFromProps(
@@ -194,20 +194,12 @@ export function createModelFromProps(
 export {
   BrushElementModel,
   ConnectorElementModel,
-  ElementModel,
   GroupElementModel,
   MindmapElementModel,
   ShapeElementModel,
+  SurfaceElementModel,
   TextElementModel,
 };
-
-export type CanvasElement =
-  | BrushElementModel
-  | ConnectorElementModel
-  | ShapeElementModel
-  | TextElementModel
-  | GroupElementModel
-  | MindmapElementModel;
 
 export enum CanvasElementType {
   SHAPE = 'shape',

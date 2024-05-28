@@ -1,8 +1,8 @@
-import type { ElementModel } from '../../element-model/base.js';
+import type { SurfaceElementModel } from '../../element-model/base.js';
 import type { Renderer } from '../renderer.js';
 
 export type ElementRenderer = (
-  model: ElementModel,
+  model: SurfaceElementModel,
   ctx: CanvasRenderingContext2D,
   matrix: DOMMatrix,
   renderer: Renderer

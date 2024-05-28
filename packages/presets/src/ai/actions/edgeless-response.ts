@@ -4,7 +4,6 @@ import type {
   AIItemConfig,
   EdgelessCopilotWidget,
   EdgelessElementToolbarWidget,
-  EdgelessModel,
   EdgelessRootService,
   MindmapElementModel,
   ShapeElementModel,
@@ -224,7 +223,9 @@ export const responses: {
       'affine:surface'
     ) as SurfaceBlockModel[];
 
-    const elements = ctx.get()['selectedElements'] as EdgelessModel[];
+    const elements = ctx.get()[
+      'selectedElements'
+    ] as BlockSuite.EdgelessModelType[];
     const data = ctx.get() as {
       node: MindMapNode;
     };
@@ -276,7 +277,9 @@ export const responses: {
     const [surface] = host.doc.getBlockByFlavour(
       'affine:surface'
     ) as SurfaceBlockModel[];
-    const elements = ctx.get()['selectedElements'] as EdgelessModel[];
+    const elements = ctx.get()[
+      'selectedElements'
+    ] as BlockSuite.EdgelessModelType[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = ctx.get() as any;
     let newGenerated = true;

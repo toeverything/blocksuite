@@ -3,7 +3,6 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import type { EdgelessModel, TopLevelBlockModel } from '../_common/types.js';
 import type { NoteBlockModel } from '../note-block/index.js';
 import { Renderer } from '../surface-block/index.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
@@ -77,10 +76,10 @@ export class SurfaceRefRenderer {
     this.slots.unmounted.emit();
   }
 
-  getModel(id: string): EdgelessModel | null {
+  getModel(id: string): BlockSuite.EdgelessModelType | null {
     return (
       (this.doc.getBlockById(id) as Exclude<
-        TopLevelBlockModel,
+        BlockSuite.EdgelessBlockModelType,
         NoteBlockModel
       >) ??
       this._surfaceModel?.getElementById(id) ??

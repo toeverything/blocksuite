@@ -1,7 +1,8 @@
 import { Bound } from '../../../surface-block/index.js';
-import type { EdgelessModel } from '../../edgeless/type.js';
 
-export function edgelessElementsBound(elements: EdgelessModel[]) {
+export function edgelessElementsBound(
+  elements: BlockSuite.EdgelessModelType[]
+) {
   if (elements.length === 0) return new Bound();
   return elements.reduce((prev, element) => {
     return prev.unite(element.elementBound);

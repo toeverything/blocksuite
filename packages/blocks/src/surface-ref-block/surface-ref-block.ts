@@ -18,7 +18,6 @@ import { requestConnectedFrame } from '../_common/utils/event.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import { getBackgroundGrid } from '../root-block/edgeless/utils/query.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
-import type { ElementModel } from '../surface-block/element-model/base.js';
 import type { SurfaceBlockModel } from '../surface-block/index.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
@@ -46,7 +45,7 @@ const NO_CONTENT_REASON = {
   DEFAULT: 'This content was deleted on edgeless mode',
 } as Record<string, string>;
 
-type RefElement = ElementModel | FrameBlockModel;
+type RefElementModel = BlockSuite.SurfaceElementModelType | FrameBlockModel;
 
 @customElement('affine-surface-ref')
 export class SurfaceRefBlockComponent extends BlockElement<
@@ -225,7 +224,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
-  private _referencedModel: RefElement | null = null;
+  private _referencedModel: RefElementModel | null = null;
 
   @query('.ref-canvas-container')
   accessor container!: HTMLDivElement;
@@ -394,7 +393,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
       const referencedModel = this._surfaceRefRenderer.getModel(
         this.model.reference
-      ) as RefElement;
+      ) as RefElementModel;
       this._referencedModel =
         referencedModel && 'xywh' in referencedModel ? referencedModel : null;
 
@@ -499,7 +498,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
     pageService.slots.editorModeSwitch.emit('edgeless');
   }
 
-  private _renderMask(referencedModel: RefElement, flavourOrType: string) {
+  private _renderMask(referencedModel: RefElementModel, flavourOrType: string) {
     const title = 'title' in referencedModel ? referencedModel.title : '';
 
     return html`
@@ -537,7 +536,10 @@ export class SurfaceRefBlockComponent extends BlockElement<
     </div>`;
   }
 
-  private _renderRefContent(referencedModel: RefElement, renderer: Renderer) {
+  private _renderRefContent(
+    referencedModel: RefElementModel,
+    renderer: Renderer
+  ) {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
     const { zoom } = renderer;
     const { gap } = getBackgroundGrid(zoom, true);

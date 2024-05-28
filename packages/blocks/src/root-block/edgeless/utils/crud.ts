@@ -1,13 +1,10 @@
-import type {
-  Connectable,
-  EdgelessModel,
-} from '../../../_common/utils/index.js';
+import type { Connectable } from '../../../_common/utils/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isConnectable, isNoteBlock } from './query.js';
 
 export function deleteElements(
   surface: SurfaceBlockComponent,
-  elements: EdgelessModel[]
+  elements: BlockSuite.EdgelessModelType[]
 ) {
   const set = new Set(elements);
   const service = surface.edgeless.service;

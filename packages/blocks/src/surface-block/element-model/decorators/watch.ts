@@ -1,7 +1,7 @@
-import type { ElementModel } from '../base.js';
+import type { SurfaceElementModel } from '../base.js';
 import { getObjectPropMeta, setObjectPropMeta } from './common.js';
 
-type WatchFn<T extends ElementModel = ElementModel> = (
+type WatchFn<T extends SurfaceElementModel = SurfaceElementModel> = (
   oldValue: unknown,
   instance: T,
   local: boolean
@@ -13,7 +13,7 @@ const watchSymbol = Symbol('watch');
  * The watch decorator is used to watch the property change of the element.
  * You can thinks of it as a decorator version of `elementUpdated` slot of the surface model.
  */
-export function watch<V, T extends ElementModel>(
+export function watch<V, T extends SurfaceElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: WatchFn<T>
 ) {
@@ -23,11 +23,11 @@ export function watch<V, T extends ElementModel>(
   ) {
     const prop = context.name;
     return {
-      init(this: ElementModel, v: V) {
+      init(this: SurfaceElementModel, v: V) {
         setObjectPropMeta(watchSymbol, Object.getPrototypeOf(this), prop, fn);
         return v;
       },
-    } as ClassAccessorDecoratorResult<ElementModel, V>;
+    } as ClassAccessorDecoratorResult<SurfaceElementModel, V>;
   };
 }
 
@@ -35,7 +35,7 @@ function getWatchMeta(proto: unknown, prop: string | symbol): null | WatchFn {
   return getObjectPropMeta(proto, watchSymbol, prop);
 }
 
-function startWatch(prop: string | symbol, receiver: ElementModel) {
+function startWatch(prop: string | symbol, receiver: SurfaceElementModel) {
   const proto = Object.getPrototypeOf(receiver);
   const watchFn = getWatchMeta(proto, prop as string)!;
 
@@ -50,7 +50,10 @@ function startWatch(prop: string | symbol, receiver: ElementModel) {
   );
 }
 
-export function initializeWatchers(prototype: unknown, receiver: ElementModel) {
+export function initializeWatchers(
+  prototype: unknown,
+  receiver: SurfaceElementModel
+) {
   const watchers = getObjectPropMeta(prototype, watchSymbol);
 
   Object.keys(watchers).forEach(prop => {

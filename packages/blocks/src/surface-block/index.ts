@@ -19,7 +19,7 @@ export {
   GRID_GAP_MAX,
   GRID_GAP_MIN,
 } from './consts.js';
-export { ElementModel } from './element-model/base.js';
+export { SurfaceElementModel } from './element-model/base.js';
 export { BrushElementModel } from './element-model/brush.js';
 export {
   type Connection,

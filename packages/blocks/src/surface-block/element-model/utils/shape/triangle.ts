@@ -1,4 +1,3 @@
-import type { HitTestOptions } from '../../../../root-block/edgeless/type.js';
 import { DEFAULT_CENTRAL_AREA_RATIO, type IBound } from '../../../consts.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -13,6 +12,7 @@ import {
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
 import type { IVec2 } from '../../../utils/vec.js';
+import type { IHitTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 
 export const triangle = {
@@ -44,7 +44,7 @@ export const triangle = {
     this: ShapeElementModel,
     x: number,
     y: number,
-    options: HitTestOptions
+    options: IHitTestOptions
   ) {
     const points = getPointsFromBoundsWithRotation(this, triangle.points);
 

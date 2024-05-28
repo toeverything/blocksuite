@@ -15,3 +15,11 @@ export type EmbedSyncedDocBlockProps = {
 export class EmbedSyncedDocModel extends defineEmbedModel<EmbedSyncedDocBlockProps>(
   BlockModel
 ) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:embed-synced-doc': EmbedSyncedDocModel;
+    }
+  }
+}

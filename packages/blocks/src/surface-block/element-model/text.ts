@@ -9,7 +9,7 @@ import {
   polygonNearestPoint,
 } from '../utils/math-utils.js';
 import type { IVec2 } from '../utils/vec.js';
-import { type BaseProps, ElementModel } from './base.js';
+import { type IBaseProps, SurfaceElementModel } from './base.js';
 import {
   FontFamily,
   type FontStyle,
@@ -18,7 +18,7 @@ import {
 } from './common.js';
 import { yfield } from './decorators.js';
 
-export type TextElementProps = BaseProps & {
+export type TextElementProps = IBaseProps & {
   text: Y.Text;
   color: string;
   fontSize: number;
@@ -29,7 +29,7 @@ export type TextElementProps = BaseProps & {
   hasMaxWidth?: boolean;
 };
 
-export class TextElementModel extends ElementModel<TextElementProps> {
+export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   static override propsToY(props: Record<string, unknown>) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
       props.text = new DocCollection.Y.Text(props.text as string);
@@ -92,5 +92,13 @@ export class TextElementModel extends ElementModel<TextElementProps> {
   override hitTest(x: number, y: number): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return pointInPolygon([x, y], points);
+  }
+}
+
+declare global {
+  namespace BlockSuite {
+    interface SurfaceElementModelMap {
+      text: TextElementModel;
+    }
   }
 }

@@ -16,7 +16,6 @@ import {
   AlignVerticallyIcon,
   SmallArrowDownIcon,
 } from '../../../_common/icons/index.js';
-import type { EdgelessModel } from '../../../_common/utils/index.js';
 import {
   Bound,
   ConnectorElementModel,
@@ -42,7 +41,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     );
   }
 
-  private _updateXYWH(ele: EdgelessModel, bound: Bound) {
+  private _updateXYWH(ele: BlockSuite.EdgelessModelType, bound: Bound) {
     if (ele instanceof ConnectorElementModel) {
       ele.moveTo(bound);
     } else if (ele instanceof GroupElementModel) {
@@ -265,7 +264,7 @@ declare global {
 
 export function renderAlignButton(
   edgeless: EdgelessRootBlockComponent,
-  elements: EdgelessModel[]
+  elements: BlockSuite.EdgelessModelType[]
 ) {
   if (elements.length < 2) return nothing;
   if (elements.some(e => e.group instanceof MindmapElementModel))

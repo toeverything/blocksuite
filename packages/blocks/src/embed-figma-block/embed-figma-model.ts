@@ -22,3 +22,11 @@ export type EmbedFigmaBlockProps = {
 export class EmbedFigmaModel extends defineEmbedModel<EmbedFigmaBlockProps>(
   BlockModel
 ) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:embed-figma': EmbedFigmaModel;
+    }
+  }
+}

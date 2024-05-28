@@ -27,10 +27,7 @@ import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
-import {
-  type ElementModel,
-  GroupElementModel,
-} from '../../../surface-block/index.js';
+import { GroupElementModel } from '../../../surface-block/index.js';
 import {
   type BrushElementModel,
   clamp,
@@ -40,7 +37,6 @@ import {
 } from '../../../surface-block/index.js';
 import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessModel } from '../../edgeless/type.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
@@ -90,7 +86,7 @@ type CategorizedElements = {
 
 type CustomEntry = {
   render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
-  when: (model: EdgelessModel[]) => boolean;
+  when: (model: BlockSuite.EdgelessModelType[]) => boolean;
 };
 
 export const EDGELESS_ELEMENT_TOOLBAR_WIDGET =
@@ -168,7 +164,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   @state()
   private accessor _registeredEntries: {
     render: (edgeless: EdgelessRootBlockComponent) => TemplateResult | null;
-    when: (model: EdgelessModel[]) => boolean;
+    when: (model: BlockSuite.EdgelessModelType[]) => boolean;
   }[] = [];
 
   @state({
@@ -212,7 +208,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         return 'embedCard';
       }
 
-      return (model as ElementModel).type;
+      return (model as BlockSuite.SurfaceElementModelType).type;
     });
     return result as CategorizedElements;
   }
