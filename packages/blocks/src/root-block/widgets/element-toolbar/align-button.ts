@@ -4,6 +4,7 @@ import '../../edgeless/components/buttons/menu-button.js';
 import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import {
   AlignBottomIcon,
@@ -23,6 +24,56 @@ import {
   MindmapElementModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+
+enum Alignment {
+  Left = 'Align left',
+  Horizontally = 'Align horizontally',
+  Right = 'Align right',
+  DistributeHorizontally = 'Distribute horizontally',
+  Top = 'Align top',
+  Vertically = 'Align vertically',
+  Bottom = 'Align bottom',
+  DistributeVertically = 'Distribute vertically',
+}
+
+const ALIGNMENT_LIST = [
+  {
+    name: Alignment.Left,
+    content: AlignLeftIcon,
+  },
+  {
+    name: Alignment.Horizontally,
+    content: AlignHorizontallyIcon,
+  },
+  {
+    name: Alignment.Right,
+    content: AlignRightIcon,
+  },
+  {
+    name: Alignment.DistributeHorizontally,
+    content: AlignDistributeHorizontallyIcon,
+  },
+  {
+    name: 'divier',
+    content: html`<edgeless-menu-divider></edgeless-menu-divider>`,
+  },
+  {
+    name: Alignment.Top,
+    content: AlignTopIcon,
+  },
+  {
+    name: Alignment.Vertically,
+    content: AlignVerticallyIcon,
+  },
+  {
+    name: Alignment.Bottom,
+    content: AlignBottomIcon,
+  },
+  {
+    name: Alignment.DistributeVertically,
+    content: AlignDistributeVerticallyIcon,
+  },
+];
 
 @customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
@@ -186,73 +237,67 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     }
   }
 
+  private _align(type: Alignment) {
+    switch (type) {
+      case Alignment.Left:
+        this._alignLeft();
+        break;
+      case Alignment.Horizontally:
+        this._alignHorizontally();
+        break;
+      case Alignment.Right:
+        this._alignRight();
+        break;
+      case Alignment.DistributeHorizontally:
+        this._alignDistributeHorizontally();
+        break;
+      case Alignment.Top:
+        this._alignTop();
+        break;
+      case Alignment.Vertically:
+        this._alignVertically();
+        break;
+      case Alignment.Bottom:
+        this._alignBottom();
+        break;
+      case Alignment.DistributeVertically:
+        this._alignDistributeVertically();
+        break;
+    }
+  }
+
   override render() {
-    return html`<edgeless-menu-button
-      .button=${html`<edgeless-tool-icon-button
-        aria-label="Align objects"
-        .tooltip=${'Align objects'}
+    return html`
+      <edgeless-menu-button
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Align objects"
+            .tooltip=${'Align objects'}
+          >
+            ${AlignLeftIcon}${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
-        ${AlignLeftIcon}${SmallArrowDownIcon}
-      </edgeless-tool-icon-button>`}
-    >
-      <div slot data-orientation="horizontal">
-        <edgeless-tool-icon-button
-          .tooltip=${'Align left'}
-          @click=${() => this._alignLeft()}
-        >
-          ${AlignLeftIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${'Align horizontally'}
-          @click=${() => this._alignHorizontally()}
-        >
-          ${AlignHorizontallyIcon}
-        </edgeless-tool-icon-button>
-
-        <edgeless-tool-icon-button
-          .tooltip=${'Align right'}
-          @click=${() => this._alignRight()}
-        >
-          ${AlignRightIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${'Distribute horizontally'}
-          .disabled=${this.elements.length < 3}
-          @click=${() => this._alignDistributeHorizontally()}
-        >
-          ${AlignDistributeHorizontallyIcon}
-        </edgeless-tool-icon-button>
-
-        <edgeless-menu-divider></edgeless-menu-divider>
-
-        <edgeless-tool-icon-button
-          .tooltip=${'Align top'}
-          @click=${() => this._alignTop()}
-        >
-          ${AlignTopIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${'Align vertically'}
-          @click=${() => this._alignVertically()}
-        >
-          ${AlignVerticallyIcon}
-        </edgeless-tool-icon-button>
-
-        <edgeless-tool-icon-button
-          .tooltip=${'Align bottom'}
-          @click=${() => this._alignBottom()}
-        >
-          ${AlignBottomIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${'Distribute vertically'}
-          .disabled=${this.elements.length < 3}
-          @click=${() => this._alignDistributeVertically()}
-        >
-          ${AlignDistributeVerticallyIcon}
-        </edgeless-tool-icon-button>
-      </div>
-    </edgeless-menu-button>`;
+        <div slot data-orientation="horizontal">
+          ${repeat(
+            ALIGNMENT_LIST,
+            (item, index) => item.name + index,
+            ({ name, content }) => {
+              if (name === 'divider') return content;
+              return html`
+                <edgeless-tool-icon-button
+                  aria-label=${name}
+                  .tooltip=${name}
+                  @click=${() => this._align(name as Alignment)}
+                >
+                  ${content}
+                </edgeless-tool-icon-button>
+              `;
+            }
+          )}
+        </div>
+      </edgeless-menu-button>
+    `;
   }
 }
 
@@ -270,7 +315,7 @@ export function renderAlignButton(
   if (elements.some(e => e.group instanceof MindmapElementModel))
     return nothing;
 
-  return html`<edgeless-align-button
-    .edgeless=${edgeless}
-  ></edgeless-align-button>`;
+  return html`
+    <edgeless-align-button .edgeless=${edgeless}></edgeless-align-button>
+  `;
 }

@@ -7,6 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { StrokeStyle } from '../../../../surface-block/consts.js';
 import { STROKE_COLORS } from '../../../../surface-block/elements/shape/consts.js';
 import type { ColorEvent } from './color-panel.js';
 import { type LineStyleEvent, LineStylesPanel } from './line-styles-panel.js';
@@ -36,7 +37,7 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
   accessor strokeColor!: CssVariableName;
 
   @property({ attribute: false })
-  accessor strokeStyle!: 'solid' | 'dash' | 'none';
+  accessor strokeStyle!: StrokeStyle;
 
   @property({ attribute: false })
   accessor setStrokeStyle!: (e: LineStyleEvent) => void;
@@ -54,7 +55,7 @@ export class StrokeStylePanel extends WithDisposable(LitElement) {
           selectedLineSize: this.strokeWidth,
           selectedLineStyle: this.strokeStyle,
           onClick: e => this.setStrokeStyle(e),
-          lineStyle: ['solid', 'dash'],
+          lineStyles: [StrokeStyle.Solid, StrokeStyle.Dash],
         })}
       </div>
       <edgeless-menu-divider

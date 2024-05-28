@@ -18,17 +18,18 @@ import {
 } from '../../root-block/edgeless/components/panel/color-panel.js';
 import type { EdgelessElementType } from '../../root-block/edgeless/edgeless-types.js';
 import {
-  CanvasTextFontFamily,
-  CanvasTextFontStyle,
-  CanvasTextFontWeight,
+  FontFamily,
+  FontStyle,
+  FontWeight,
   ShapeStyle,
   StrokeStyle,
+  TextAlign,
+  TextVerticalAlign,
 } from '../consts.js';
 import {
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
 } from '../element-model/connector.js';
-import { TextAlign, TextVerticalAlign } from '../elements/consts.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -50,9 +51,9 @@ const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
 const LineWidthSchema = z.nativeEnum(LineWidth);
 const ShapeStyleSchema = z.nativeEnum(ShapeStyle);
 const ShapeTextFontSizeSchema = z.nativeEnum(SHAPE_TEXT_FONT_SIZE);
-const CanvasTextFontFamilySchema = z.nativeEnum(CanvasTextFontFamily);
-const CanvasTextFontWeightSchema = z.nativeEnum(CanvasTextFontWeight);
-const CanvasTextFontStyleSchema = z.nativeEnum(CanvasTextFontStyle);
+const FontFamilySchema = z.nativeEnum(FontFamily);
+const FontWeightSchema = z.nativeEnum(FontWeight);
+const FontStyleSchema = z.nativeEnum(FontStyle);
 const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
 const ShapeTypeSchema = z.nativeEnum(ShapeType);
@@ -83,9 +84,9 @@ const LastPropsSchema = z.object({
     strokeStyle: StrokeStyleSchema.optional(),
     color: z.string().optional(),
     fontSize: ShapeTextFontSizeSchema.optional(),
-    fontFamily: CanvasTextFontFamilySchema.optional(),
-    fontWeight: CanvasTextFontWeightSchema.optional(),
-    fontStyle: CanvasTextFontStyleSchema.optional(),
+    fontFamily: FontFamilySchema.optional(),
+    fontWeight: FontWeightSchema.optional(),
+    fontStyle: FontStyleSchema.optional(),
     textAlign: TextAlignSchema.optional(),
     textHorizontalAlign: TextAlignSchema.optional(),
     textVerticalAlign: TextVerticalAlignSchema.optional(),
@@ -93,10 +94,10 @@ const LastPropsSchema = z.object({
   }),
   text: z.object({
     color: z.string(),
-    fontFamily: CanvasTextFontFamilySchema,
+    fontFamily: FontFamilySchema,
     textAlign: TextAlignSchema,
-    fontWeight: CanvasTextFontWeightSchema,
-    fontStyle: CanvasTextFontStyleSchema,
+    fontWeight: FontWeightSchema,
+    fontStyle: FontStyleSchema,
     fontSize: z.number(),
   }),
   'affine:note': z.object({
@@ -187,10 +188,10 @@ export class EditPropsStore {
     },
     text: {
       color: GET_DEFAULT_TEXT_COLOR(),
-      fontFamily: CanvasTextFontFamily.Inter,
+      fontFamily: FontFamily.Inter,
       textAlign: TextAlign.Left,
-      fontWeight: CanvasTextFontWeight.Regular,
-      fontStyle: CanvasTextFontStyle.Normal,
+      fontWeight: FontWeight.Regular,
+      fontStyle: FontStyle.Normal,
       fontSize: 24,
     },
     'affine:note': {

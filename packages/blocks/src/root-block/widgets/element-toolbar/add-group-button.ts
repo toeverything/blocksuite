@@ -23,14 +23,16 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   protected override render() {
-    return html`<edgeless-tool-icon-button
-      aria-label="Group"
-      .tooltip=${'Group'}
-      .labelHeight=${'20px'}
-      @click=${() => this.edgeless.service.createGroupFromSelected()}
-    >
-      ${GroupIcon}<span class="label medium">Group</span>
-    </edgeless-tool-icon-button>`;
+    return html`
+      <edgeless-tool-icon-button
+        aria-label="Group"
+        .tooltip=${'Group'}
+        .labelHeight=${'20px'}
+        @click=${() => this.edgeless.service.createGroupFromSelected()}
+      >
+        ${GroupIcon}<span class="label medium">Group</span>
+      </edgeless-tool-icon-button>
+    `;
   }
 }
 
@@ -49,7 +51,9 @@ export function renderAddGroupButton(
   if (elements.some(e => e.group instanceof MindmapElementModel))
     return nothing;
 
-  return html`<edgeless-add-group-button
-    .edgeless=${edgeless}
-  ></edgeless-add-group-button>`;
+  return html`
+    <edgeless-add-group-button
+      .edgeless=${edgeless}
+    ></edgeless-add-group-button>
+  `;
 }

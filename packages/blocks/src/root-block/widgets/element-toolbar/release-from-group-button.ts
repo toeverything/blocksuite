@@ -34,14 +34,16 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
   }
 
   protected override render() {
-    return html`<edgeless-tool-icon-button
-      aria-label="Release from group"
-      .tooltip=${'Release from group'}
-      .iconSize=${'20px'}
-      @click=${() => this._releaseFromGroup()}
-    >
-      ${ReleaseFromGroupButtonIcon}
-    </edgeless-tool-icon-button>`;
+    return html`
+      <edgeless-tool-icon-button
+        aria-label="Release from group"
+        .tooltip=${'Release from group'}
+        .iconSize=${'20px'}
+        @click=${() => this._releaseFromGroup()}
+      >
+        ${ReleaseFromGroupButtonIcon}
+      </edgeless-tool-icon-button>
+    `;
   }
 }
 
@@ -54,7 +56,9 @@ declare global {
 export function renderReleaseFromGroupButton(
   edgeless: EdgelessRootBlockComponent
 ) {
-  return html`<edgeless-release-from-group-button
-    .edgeless=${edgeless}
-  ></edgeless-release-from-group-button>`;
+  return html`
+    <edgeless-release-from-group-button
+      .edgeless=${edgeless}
+    ></edgeless-release-from-group-button>
+  `;
 }

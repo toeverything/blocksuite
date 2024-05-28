@@ -9,7 +9,10 @@ import type {
   ConnectorElementModel,
   LocalConnectorElementModel,
 } from '../element-model/connector.js';
-import { ConnectorMode } from '../element-model/connector.js';
+import {
+  ConnectorMode,
+  isConnectorWithLabel,
+} from '../element-model/connector.js';
 import { AStarRunner } from '../utils/a-star.js';
 import { Bound, getBoundFromPoints } from '../utils/bound.js';
 import {
@@ -1145,6 +1148,17 @@ export class ConnectorPathGenerator {
     // the property assignment order matters
     connector.xywh = bound.serialize();
     connector.path = relativePoints;
+
+    // Updates Connector's Label position.
+    if (isConnectorWithLabel(connector)) {
+      const model = connector as ConnectorElementModel;
+      const [cx, cy] = model.getPointByOffsetDistance(
+        model.labelOffset.distance
+      );
+      const [, , w, h] = model.labelXYWH!;
+      model.labelXYWH = [cx - w / 2, cy - h / 2, w, h];
+    }
+
     connector.updatingPath = false;
   }
 

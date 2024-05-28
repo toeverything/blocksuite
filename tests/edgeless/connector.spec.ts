@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
   addBasicConnectorElement,
@@ -10,6 +10,7 @@ import {
   deleteAllConnectors,
   dragBetweenViewCoords,
   edgelessCommonSetup as commonSetup,
+  locatorComponentToolbar,
   pickColorAtPoints,
   rotateElementByHandle,
   Shape,
@@ -18,11 +19,13 @@ import {
 import {
   pressBackspace,
   redoByClick,
+  type,
   undoByClick,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
   assertConnectorPath,
+  assertEdgelessCanvasText,
   assertEdgelessNonSelectedRect,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -374,4 +377,45 @@ test('change connector stroke style', async ({ page }) => {
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
   expect(pickedColor[0]).toBe('#000000');
+});
+
+test.describe('connector label', () => {
+  async function setup(page: Page) {
+    await commonSetup(page);
+    const start = { x: 100, y: 200 };
+    const end = { x: 300, y: 300 };
+    await addBasicConnectorElement(page, start, end);
+  }
+
+  test('should insert a label in the middle of the curve when clicking the button', async ({
+    page,
+  }) => {
+    await setup(page);
+    await page.mouse.click(105, 200);
+
+    await triggerComponentToolbarAction(page, 'addText');
+    await type(page, ' a ');
+    await assertEdgelessCanvasText(page, ' a ');
+
+    await page.mouse.click(0, 0);
+    await waitNextFrame(page);
+    await page.mouse.click(105, 200);
+
+    const addTextBtn = locatorComponentToolbar(page).getByRole('button', {
+      name: 'Add text',
+    });
+    await expect(addTextBtn).toBeHidden();
+
+    await page.mouse.dblclick(200, 250);
+    await assertEdgelessCanvasText(page, 'a');
+
+    await page.keyboard.press('Backspace');
+    await assertEdgelessCanvasText(page, '');
+
+    await page.mouse.click(0, 0);
+    await waitNextFrame(page);
+    await page.mouse.click(200, 250);
+
+    await expect(addTextBtn).toBeVisible();
+  });
 });

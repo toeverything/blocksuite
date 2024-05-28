@@ -4,8 +4,9 @@ import '../../edgeless/components/panel/size-panel.js';
 import '../../edgeless/components/panel/font-weight-and-style-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
 
 import {
   SmallArrowDownIcon,
@@ -13,21 +14,25 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
 import {
   isFontStyleSupported,
   isFontWeightSupported,
 } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { normalizeTextBound } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { CanvasTextFontStyle } from '../../../surface-block/consts.js';
 import {
   FontFamily,
+  FontStyle,
   FontWeight,
-} from '../../../surface-block/element-model/common.js';
-import type { TextElementModel } from '../../../surface-block/element-model/text.js';
-import { TextAlign } from '../../../surface-block/elements/consts.js';
-import type { ShapeElementModel } from '../../../surface-block/index.js';
+  TextAlign,
+  type TextStyleProps,
+} from '../../../surface-block/consts.js';
+import { isConnectorWithLabel } from '../../../surface-block/element-model/connector.js';
+import { TextElementModel } from '../../../surface-block/element-model/text.js';
+import {
+  ConnectorElementModel,
+  type ShapeElementModel,
+} from '../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
@@ -37,19 +42,75 @@ import {
   getFontFacesByFontFamily,
   wrapFontFamily,
 } from '../../../surface-block/utils/font.js';
-import type { EdgelessAlignPanel } from '../../edgeless/components/panel/align-panel.js';
 import {
   type ColorEvent,
   GET_DEFAULT_LINE_COLOR,
   LINE_COLORS,
 } from '../../edgeless/components/panel/color-panel.js';
-import type { EdgelessFontFamilyPanel } from '../../edgeless/components/panel/font-family-panel.js';
-import type { EdgelessSizePanel } from '../../edgeless/components/panel/size-panel.js';
 import {
   type EdgelessCanvasTextElement,
   type EdgelessCanvasTextElementType,
 } from '../../edgeless/components/text/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
+
+const FONT_SIZE_LIST = [16, 24, 32, 36, 40, 64, 128];
+
+const FONT_WEIGHT_CHOOSE: [FontWeight, () => string][] = [
+  [FontWeight.Light, () => 'Light'],
+  [FontWeight.Regular, () => 'Regular'],
+  [FontWeight.SemiBold, () => 'Semibold'],
+];
+
+const TEXT_ALIGN_CHOOSE: [TextAlign, () => TemplateResult<1>][] = [
+  [TextAlign.Left, () => TextAlignLeftIcon],
+  [TextAlign.Center, () => TextAlignCenterIcon],
+  [TextAlign.Right, () => TextAlignRightIcon],
+];
+
+function countByField<K extends keyof TextStyleProps>(
+  elements: EdgelessCanvasTextElement[],
+  field: K
+) {
+  return countBy(elements, element => extractField(element, field));
+}
+
+function getMostCommonValue<K extends keyof TextStyleProps>(
+  elements: EdgelessCanvasTextElement[],
+  field: K
+) {
+  const values = countByField(elements, field);
+  return maxBy(Object.entries(values), ([_k, count]) => count);
+}
+
+function extractField<K extends keyof TextStyleProps>(
+  element: EdgelessCanvasTextElement,
+  field: K
+) {
+  return (
+    element instanceof ConnectorElementModel
+      ? element.labelStyle[field]
+      : element[field]
+  ) as TextStyleProps[K];
+}
+
+function updateFields(
+  service: EdgelessRootService,
+  element: EdgelessCanvasTextElement,
+  props: { [K in keyof TextStyleProps]?: TextStyleProps[K] }
+) {
+  if (element instanceof ConnectorElementModel) {
+    service.updateElement(element.id, {
+      labelStyle: {
+        ...element.labelStyle,
+        ...props,
+      },
+    });
+    return;
+  }
+
+  service.updateElement(element.id, props);
+}
 
 @customElement('edgeless-change-text-menu')
 export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
@@ -78,95 +139,107 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _getMostCommonFontFamily = (
     elements: EdgelessCanvasTextElement[]
-  ): EdgelessCanvasTextElement['fontFamily'] => {
-    const fontFamilies = countBy(
-      elements,
-      (element: EdgelessCanvasTextElement) => element.fontFamily
-    );
-    const max = maxBy(Object.entries(fontFamilies), ([_k, count]) => count);
-    return max
-      ? (max[0] as EdgelessCanvasTextElement['fontFamily'])
-      : FontFamily.Inter;
+  ): FontFamily => {
+    const max = getMostCommonValue(elements, 'fontFamily');
+    return max ? (max[0] as FontFamily) : FontFamily.Inter;
   };
 
   private _getMostCommonFontSize = (
     elements: EdgelessCanvasTextElement[]
-  ): EdgelessCanvasTextElement['fontSize'] => {
-    const fontSizes = countBy(
-      elements,
-      (element: EdgelessCanvasTextElement) => element.fontSize
-    );
-    const max = maxBy(Object.entries(fontSizes), ([_k, count]) => count);
-    return max ? (Number(max[0]) as EdgelessCanvasTextElement['fontSize']) : 16;
+  ): number => {
+    const max = getMostCommonValue(elements, 'fontSize');
+    return max ? Number(max[0]) : 16;
   };
 
   private _getMostCommonFontWeight = (
     elements: EdgelessCanvasTextElement[]
-  ): EdgelessCanvasTextElement['fontWeight'] => {
-    const fontWeights = countBy(
-      elements,
-      (element: EdgelessCanvasTextElement) => element.fontWeight
-    );
-    const max = maxBy(Object.entries(fontWeights), ([_k, count]) => count);
-    return max
-      ? (max[0] as EdgelessCanvasTextElement['fontWeight'])
-      : FontWeight.Regular;
+  ): FontWeight => {
+    const max = getMostCommonValue(elements, 'fontWeight');
+    return max ? (max[0] as FontWeight) : FontWeight.Regular;
   };
 
   private _getMostCommonFontStyle = (
     elements: EdgelessCanvasTextElement[]
-  ): EdgelessCanvasTextElement['fontStyle'] => {
-    const fontStyles = countBy(
-      elements,
-      (element: EdgelessCanvasTextElement) => element.fontStyle
-    );
-    const max = maxBy(Object.entries(fontStyles), ([_k, count]) => count);
-    return max
-      ? (max[0] as EdgelessCanvasTextElement['fontStyle'])
-      : CanvasTextFontStyle.Normal;
+  ): FontStyle => {
+    const max = getMostCommonValue(elements, 'fontStyle');
+    return max ? (max[0] as FontStyle) : FontStyle.Normal;
   };
 
   private _getMostCommonColor = (
     elements: EdgelessCanvasTextElement[]
-  ): EdgelessCanvasTextElement['color'] => {
-    const colors = countBy(
-      elements,
-      (element: EdgelessCanvasTextElement) => element.color
-    );
-    const max = maxBy(Object.entries(colors), ([_k, count]) => count);
-    return max
-      ? (max[0] as EdgelessCanvasTextElement['color'])
-      : GET_DEFAULT_LINE_COLOR();
+  ): string => {
+    const max = getMostCommonValue(elements, 'color');
+    return max ? max[0] : GET_DEFAULT_LINE_COLOR();
   };
 
   private _getMostCommonAlign = (
     elements: EdgelessCanvasTextElement[]
-  ): EdgelessCanvasTextElement['textAlign'] => {
-    const aligns = countBy(
-      elements,
-      (element: EdgelessCanvasTextElement) => element.textAlign
-    );
-    const max = maxBy(Object.entries(aligns), ([_k, count]) => count);
-    return max
-      ? (max[0] as EdgelessCanvasTextElement['textAlign'])
-      : TextAlign.Left;
+  ): TextAlign => {
+    const max = getMostCommonValue(elements, 'textAlign');
+    return max ? (max[0] as TextAlign) : TextAlign.Left;
   };
 
   private _updateElementBound = (element: EdgelessCanvasTextElement) => {
     const elementType = this.elementType;
-    if (elementType === CanvasElementType.TEXT) {
+    if (
+      elementType === CanvasElementType.TEXT &&
+      element instanceof TextElementModel
+    ) {
       // the change of font family will change the bound of the text
+      const {
+        text: yText,
+        fontFamily,
+        fontStyle,
+        fontSize,
+        fontWeight,
+        hasMaxWidth,
+      } = element;
       const newBound = normalizeTextBound(
-        element as TextElementModel,
-        new Bound(element.x, element.y, element.w, element.h)
+        {
+          yText,
+          fontFamily,
+          fontStyle,
+          fontSize,
+          fontWeight,
+          hasMaxWidth,
+        },
+        Bound.fromXYWH(element.deserializedXYWH)
       );
       this.service.updateElement(element.id, {
         xywh: newBound.serialize(),
       });
+    } else if (
+      elementType === CanvasElementType.CONNECTOR &&
+      isConnectorWithLabel(element)
+    ) {
+      const {
+        text,
+        labelXYWH,
+        labelStyle: { fontFamily, fontStyle, fontSize, fontWeight },
+        labelConstraints: { hasMaxWidth, maxWidth },
+      } = element as ConnectorElementModel;
+      const prevBounds = Bound.fromXYWH(labelXYWH || [0, 0, 16, 16]);
+      const center = prevBounds.center;
+      const bounds = normalizeTextBound(
+        {
+          yText: text!,
+          fontFamily,
+          fontStyle,
+          fontSize,
+          fontWeight,
+          hasMaxWidth,
+          maxWidth,
+        },
+        prevBounds
+      );
+      bounds.center = center;
+      this.service.updateElement(element.id, {
+        labelXYWH: bounds.toXYWH(),
+      });
     } else {
       const newBound = normalizeShapeBound(
         element as ShapeElementModel,
-        new Bound(element.x, element.y, element.w, element.h)
+        Bound.fromXYWH(element.deserializedXYWH)
       );
       this.service.updateElement(element.id, {
         xywh: newBound.serialize(),
@@ -174,25 +247,23 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     }
   };
 
-  private _setTextColor = (color: CssVariableName) => {
+  private _setTextColor = (color: string) => {
     this.elements.forEach(element => {
-      this.service.updateElement(element.id, {
+      updateFields(this.service, element, {
         color,
       });
     });
   };
 
-  private _setTextAlign = (align: EdgelessCanvasTextElement['textAlign']) => {
+  private _setTextAlign = (textAlign: TextAlign) => {
     this.elements.forEach(element => {
-      this.service.updateElement(element.id, {
-        textAlign: align,
+      updateFields(this.service, element, {
+        textAlign,
       });
     });
   };
 
-  private _setFontFamily = (
-    fontFamily: EdgelessCanvasTextElement['fontFamily']
-  ) => {
+  private _setFontFamily = (fontFamily: FontFamily) => {
     const currentFontWeight = this._getMostCommonFontWeight(this.elements);
     const fontWeight = isFontWeightSupported(fontFamily, currentFontWeight)
       ? currentFontWeight
@@ -200,10 +271,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const currentFontStyle = this._getMostCommonFontStyle(this.elements);
     const fontStyle = isFontStyleSupported(fontFamily, currentFontStyle)
       ? currentFontStyle
-      : CanvasTextFontStyle.Normal;
+      : FontStyle.Normal;
 
     this.elements.forEach(element => {
-      this.service.updateElement(element.id, {
+      updateFields(this.service, element, {
         fontFamily,
         fontWeight,
         fontStyle,
@@ -213,10 +284,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     });
   };
 
-  private _setFontSize = (fontSize: EdgelessCanvasTextElement['fontSize']) => {
+  private _setFontSize = (fontSize: number) => {
     this.elements.forEach(element => {
-      this.service.updateElement(element.id, {
-        fontSize: fontSize,
+      updateFields(this.service, element, {
+        fontSize,
       });
 
       this._updateElementBound(element);
@@ -225,10 +296,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _setFontWeightAndStyle = (
     fontWeight: FontWeight,
-    fontStyle: CanvasTextFontStyle
+    fontStyle: FontStyle
   ) => {
     this.elements.forEach(element => {
-      this.service.updateElement(element.id, {
+      updateFields(this.service, element, {
         fontWeight,
         fontStyle,
       });
@@ -238,38 +309,38 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   };
 
   override render() {
-    const selectedColor = this._getMostCommonColor(this.elements);
-    const selectedAlign = this._getMostCommonAlign(this.elements);
-    const selectedFontFamily = this._getMostCommonFontFamily(this.elements);
-    const selectedFontSize = Math.trunc(
-      this._getMostCommonFontSize(this.elements)
-    );
-    const selectedFontWeight = this._getMostCommonFontWeight(this.elements);
-    const selectedFontStyle = this._getMostCommonFontStyle(this.elements);
-
+    const elements = this.elements;
+    const selectedColor = this._getMostCommonColor(elements);
+    const selectedAlign = this._getMostCommonAlign(elements);
+    const selectedFontFamily = this._getMostCommonFontFamily(elements);
+    const selectedFontSize = Math.trunc(this._getMostCommonFontSize(elements));
+    const selectedFontWeight = this._getMostCommonFontWeight(elements);
+    const selectedFontStyle = this._getMostCommonFontStyle(elements);
     const matchFontFaces = getFontFacesByFontFamily(selectedFontFamily);
 
-    return html`<edgeless-menu-button
+    return html`
+      <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Font"
-          .tooltip=${'Font'}
-          .justify=${'space-between'}
-          .labelHeight=${'20px'}
-          .iconContainerWidth=${'40px'}
-        >
-          <span
-            class="label padding0"
-            style=${`font-family: ${wrapFontFamily(selectedFontFamily)}`}
-            >Aa</span
-          >${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Font"
+            .tooltip=${'Font'}
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+            .iconContainerWidth=${'40px'}
+          >
+            <span
+              class="label padding0"
+              style=${`font-family: ${wrapFontFamily(selectedFontFamily)}`}
+              >Aa</span
+            >${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <edgeless-font-family-panel
           slot
           .value=${selectedFontFamily}
-          .onSelect=${(value: EdgelessFontFamilyPanel['value']) =>
-            this._setFontFamily(value)}
+          .onSelect=${(value: FontFamily) => this._setFontFamily(value)}
         ></edgeless-font-family-panel>
       </edgeless-menu-button>
 
@@ -277,14 +348,16 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Text color"
-          .tooltip=${'Text color'}
-        >
-          <edgeless-text-color-icon
-            .color=${selectedColor}
-          ></edgeless-text-color-icon>
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Text color"
+            .tooltip=${'Text color'}
+          >
+            <edgeless-text-color-icon
+              .color=${selectedColor}
+            ></edgeless-text-color-icon>
+          </edgeless-tool-icon-button>
+        `}
       >
         <edgeless-color-panel
           slot
@@ -298,37 +371,32 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Font style"
-          .tooltip=${'Font style'}
-          .justify=${'space-between'}
-          .labelHeight=${'20px'}
-          .iconContainerWidth=${'90px'}
-          .disabled=${matchFontFaces.length === 1 &&
-          matchFontFaces[0].style === selectedFontStyle &&
-          matchFontFaces[0].weight === selectedFontWeight}
-        >
-          <span class="label ellipsis">
-            ${selectedFontWeight === FontWeight.Light
-              ? 'Light'
-              : selectedFontWeight === FontWeight.Regular
-                ? 'Regular'
-                : 'Semibold'}
-            ${selectedFontStyle === CanvasTextFontStyle.Italic
-              ? ' Italic'
-              : ''}</span
-          >${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Font style"
+            .tooltip=${'Font style'}
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+            .iconContainerWidth=${'90px'}
+            .disabled=${matchFontFaces.length === 1 &&
+            matchFontFaces[0].style === selectedFontStyle &&
+            matchFontFaces[0].weight === selectedFontWeight}
+          >
+            <span class="label ellipsis">
+              ${choose(selectedFontWeight, FONT_WEIGHT_CHOOSE)}
+              ${selectedFontStyle === FontStyle.Italic ? ' Italic' : ''}
+            </span>
+            ${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <edgeless-font-weight-and-style-panel
           slot
           .fontFamily=${selectedFontFamily}
           .fontWeight=${selectedFontWeight}
           .fontStyle=${selectedFontStyle}
-          .onSelect=${(
-            fontWeight: FontWeight,
-            fontStyle: CanvasTextFontStyle
-          ) => this._setFontWeightAndStyle(fontWeight, fontStyle)}
+          .onSelect=${(fontWeight: FontWeight, fontStyle: FontStyle) =>
+            this._setFontWeightAndStyle(fontWeight, fontStyle)}
         ></edgeless-font-weight-and-style-panel>
       </edgeless-menu-button>
 
@@ -336,50 +404,48 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Font size"
-          .tooltip=${'Font size'}
-          .justify=${'space-between'}
-          .labelHeight=${'20px'}
-          .iconContainerWidth=${'60px'}
-        >
-          <span class="label">${selectedFontSize}</span>
-          ${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Font size"
+            .tooltip=${'Font size'}
+            .justify=${'space-between'}
+            .labelHeight=${'20px'}
+            .iconContainerWidth=${'60px'}
+          >
+            <span class="label">${selectedFontSize}</span>
+            ${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <edgeless-size-panel
           slot
           data-type="check"
           .size=${selectedFontSize}
-          .labels=${['16', '24', '32', '36', '40', '64', '128']}
-          .sizes=${[16, 24, 32, 36, 40, 64, 128]}
-          .onSelect=${(fontSize: EdgelessSizePanel['size']) =>
-            this._setFontSize(fontSize)}
+          .labels=${FONT_SIZE_LIST.map(String)}
+          .sizes=${FONT_SIZE_LIST}
+          .onSelect=${(fontSize: number) => this._setFontSize(fontSize)}
         ></edgeless-size-panel>
       </edgeless-menu-button>
 
       <edgeless-menu-divider></edgeless-menu-divider>
 
       <edgeless-menu-button
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Alignment"
-          .tooltip=${'Alignment'}
-        >
-          ${selectedAlign === 'left'
-            ? TextAlignLeftIcon
-            : selectedAlign === 'center'
-              ? TextAlignCenterIcon
-              : TextAlignRightIcon}
-          ${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button
+            aria-label="Alignment"
+            .tooltip=${'Alignment'}
+          >
+            ${choose(selectedAlign, TEXT_ALIGN_CHOOSE)}${SmallArrowDownIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <edgeless-align-panel
           slot
           .value=${selectedAlign}
-          .onSelect=${(value: EdgelessAlignPanel['value']) =>
-            this._setTextAlign(value)}
+          .onSelect=${(value: TextAlign) => this._setTextAlign(value)}
         ></edgeless-align-panel>
-      </edgeless-menu-button> `;
+      </edgeless-menu-button>
+    `;
   }
 }
 

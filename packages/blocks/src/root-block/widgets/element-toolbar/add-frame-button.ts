@@ -20,17 +20,19 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   protected override render() {
-    return html`<edgeless-tool-icon-button
-      aria-label="Frame"
-      .tooltip=${'Frame'}
-      .labelHeight=${'20px'}
-      @click=${() => {
-        const frame = this.edgeless.service.frame.createFrameOnSelected();
-        this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
-      }}
-    >
-      ${FrameIcon}<span class="label medium">Frame</span>
-    </edgeless-tool-icon-button>`;
+    return html`
+      <edgeless-tool-icon-button
+        aria-label="Frame"
+        .tooltip=${'Frame'}
+        .labelHeight=${'20px'}
+        @click=${() => {
+          const frame = this.edgeless.service.frame.createFrameOnSelected();
+          this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
+        }}
+      >
+        ${FrameIcon}<span class="label medium">Frame</span>
+      </edgeless-tool-icon-button>
+    `;
   }
 }
 
@@ -48,7 +50,9 @@ export function renderAddFrameButton(
   if (elements.some(e => e.group instanceof MindmapElementModel))
     return nothing;
 
-  return html`<edgeless-add-frame-button
-    .edgeless=${edgeless}
-  ></edgeless-add-frame-button>`;
+  return html`
+    <edgeless-add-frame-button
+      .edgeless=${edgeless}
+    ></edgeless-add-frame-button>
+  `;
 }

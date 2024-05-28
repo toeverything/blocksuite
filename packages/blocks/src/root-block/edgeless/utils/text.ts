@@ -4,19 +4,22 @@ import { DocCollection } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
-import { CanvasTextFontFamily } from '../../../surface-block/consts.js';
+import { FontFamily } from '../../../surface-block/consts.js';
 import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
 import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
 import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
   Bound,
   CanvasElementType,
+  type ConnectorElementModel,
   type IModelCoord,
+  type IVec2,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
   isTransparent,
 } from '../components/panel/color-panel.js';
+import { EdgelessConnectorLabelEditor } from '../components/text/edgeless-connector-label-editor.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
@@ -75,8 +78,8 @@ export function mountShapeTextEditor(
       color,
       fontFamily:
         shapeElement.shapeStyle === 'General'
-          ? CanvasTextFontFamily.Inter
-          : CanvasTextFontFamily.Kalam,
+          ? FontFamily.Inter
+          : FontFamily.Kalam,
     });
   }
   const updatedElement = edgeless.service.getElementById(shapeElement.id);
@@ -148,4 +151,42 @@ export function addText(
       mountTextElementEditor(textElement, edgeless);
     }
   }
+}
+
+export function mountConnectorLabelEditor(
+  connector: ConnectorElementModel,
+  edgeless: EdgelessRootBlockComponent,
+  point?: IVec2
+) {
+  let text = connector.text;
+  if (!text) {
+    text = new DocCollection.Y.Text();
+
+    connector.text = text;
+    connector.labelStyle.color = GET_DEFAULT_LINE_COLOR();
+
+    if (point) {
+      const center = connector.getNearestPoint(point);
+      const distance = connector.getOffsetDistanceByPoint(center as IVec2);
+      const bounds = Bound.fromXYWH(connector.labelXYWH || [0, 0, 16, 16]);
+      bounds.center = center;
+      connector.labelOffset.distance = distance;
+      connector.labelXYWH = bounds.toXYWH();
+    }
+  }
+
+  const editor = new EdgelessConnectorLabelEditor();
+  editor.connector = connector;
+  editor.edgeless = edgeless;
+
+  edgeless.rootElementContainer.append(editor);
+  editor.updateComplete
+    .then(() => {
+      editor.inlineEditor?.focusEnd();
+    })
+    .catch(console.error);
+  edgeless.tools.switchToDefaultMode({
+    elements: [connector.id],
+    editing: true,
+  });
 }

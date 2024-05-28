@@ -1,6 +1,15 @@
 import { DocCollection, type Y } from '@blocksuite/store';
 
-import { DEFAULT_ROUGHNESS } from '../consts.js';
+import {
+  DEFAULT_ROUGHNESS,
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  StrokeStyle,
+  TextAlign,
+  TextResizing,
+  TextVerticalAlign,
+} from '../consts.js';
 import type { IBound, SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
 import type { PointLocation } from '../utils/point-location.js';
@@ -10,13 +19,6 @@ import {
   type IHitTestOptions,
   SurfaceElementModel,
 } from './base.js';
-import { FontFamily, FontWeight, TextResizing } from './common.js';
-import {
-  type FontStyle,
-  type StrokeStyle,
-  type TextAlign,
-  type VerticalAlign,
-} from './common.js';
 import { local, yfield } from './decorators.js';
 import { diamond } from './utils/shape/diamond.js';
 import { ellipse } from './utils/shape/ellipse.js';
@@ -62,7 +64,7 @@ export type ShapeProps = IBaseProps & {
   fontStyle?: FontStyle;
   textAlign?: TextAlign;
   textHorizontalAlign?: TextAlign;
-  textVerticalAlign?: VerticalAlign;
+  textVerticalAlign?: TextVerticalAlign;
   textResizing?: TextResizing;
   maxWidth?: false | number;
 };
@@ -108,7 +110,7 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   accessor strokeColor: string = '--affine-palette-line-yellow';
 
   @yfield()
-  accessor strokeStyle: StrokeStyle = 'solid';
+  accessor strokeStyle: StrokeStyle = StrokeStyle.Solid;
 
   @yfield('General' as ShapeStyle)
   accessor shapeStyle: ShapeStyle = 'General';
@@ -131,17 +133,17 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   @yfield(FontWeight.Regular as FontWeight)
   accessor fontWeight!: FontWeight;
 
-  @yfield('normal' as FontStyle)
+  @yfield(FontStyle.Normal as FontStyle)
   accessor fontStyle!: FontStyle;
 
-  @yfield('center' as TextAlign)
+  @yfield(TextAlign.Center as TextAlign)
   accessor textAlign!: TextAlign;
 
-  @yfield('center' as TextAlign)
+  @yfield(TextAlign.Center as TextAlign)
   accessor textHorizontalAlign!: TextAlign;
 
-  @yfield('center' as VerticalAlign)
-  accessor textVerticalAlign!: VerticalAlign;
+  @yfield(TextVerticalAlign.Center as TextVerticalAlign)
+  accessor textVerticalAlign!: TextVerticalAlign;
 
   @yfield(TextResizing.AUTO_HEIGHT as TextResizing)
   accessor textResizing: TextResizing = TextResizing.AUTO_HEIGHT;

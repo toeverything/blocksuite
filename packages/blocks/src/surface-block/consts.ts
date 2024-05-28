@@ -27,7 +27,7 @@ export enum ShapeStyle {
 
 export enum StrokeStyle {
   Solid = 'solid',
-  Dashed = 'dash',
+  Dash = 'dash',
   None = 'none',
 }
 
@@ -36,396 +36,419 @@ export interface IModelCoord {
   y: number;
 }
 
-export const CanvasTextFontFamily = {
-  Inter: 'blocksuite:surface:Inter',
-  Kalam: 'blocksuite:surface:Kalam',
-  Satoshi: 'blocksuite:surface:Satoshi',
-  Poppins: 'blocksuite:surface:Poppins',
-  Lora: 'blocksuite:surface:Lora',
-  BebasNeue: 'blocksuite:surface:BebasNeue',
-  OrelegaOne: 'blocksuite:surface:OrelegaOne',
-} as const;
-export type CanvasTextFontFamilyKeyType = keyof typeof CanvasTextFontFamily;
-export type CanvasTextFontFamilyValueType =
-  (typeof CanvasTextFontFamily)[CanvasTextFontFamilyKeyType];
+export enum TextAlign {
+  Left = 'left',
+  Center = 'center',
+  Right = 'right',
+}
 
-export const CanvasTextFontFamilyKey: CanvasTextFontFamilyKeyType[] =
-  Object.keys(CanvasTextFontFamily) as CanvasTextFontFamilyKeyType[];
-export const CanvasTextFontFamilyValue: CanvasTextFontFamilyValueType[] =
-  Object.values(CanvasTextFontFamily);
+export enum TextVerticalAlign {
+  Top = 'top',
+  Center = 'center',
+  Bottom = 'bottom',
+}
 
-export const CanvasTextFontFamilyName = {
-  Inter: 'Inter',
-  Kalam: 'Kalam',
-  Satoshi: 'Satoshi',
-  Poppins: 'Poppins',
-  Lora: 'Lora',
-  BebasNeue: 'Bebas Neue',
-  OrelegaOne: 'Orelega One',
-} as const satisfies Record<CanvasTextFontFamilyKeyType, string>;
+export enum TextResizing {
+  AUTO_WIDTH,
+  AUTO_HEIGHT,
+  FIXED_SIZE,
+}
 
-export enum CanvasTextFontWeight {
+export type TextStyleProps = {
+  color: string;
+  fontFamily: FontFamily;
+  fontSize: number;
+  fontStyle: FontStyle;
+  fontWeight: FontWeight;
+  textAlign: TextAlign;
+};
+
+export enum FontWeight {
   Light = '300',
   Regular = '400',
   SemiBold = '600',
 }
 
-export enum CanvasTextFontStyle {
+export enum FontStyle {
   Normal = 'normal',
   Italic = 'italic',
 }
 
+export enum FontFamily {
+  Inter = 'blocksuite:surface:Inter',
+  Kalam = 'blocksuite:surface:Kalam',
+  Satoshi = 'blocksuite:surface:Satoshi',
+  Poppins = 'blocksuite:surface:Poppins',
+  Lora = 'blocksuite:surface:Lora',
+  BebasNeue = 'blocksuite:surface:BebasNeue',
+  OrelegaOne = 'blocksuite:surface:OrelegaOne',
+}
+
+export const FontFamilyMap = {
+  [FontFamily.Inter]: 'Inter',
+  [FontFamily.Kalam]: 'Kalam',
+  [FontFamily.Satoshi]: 'Satoshi',
+  [FontFamily.Poppins]: 'Poppins',
+  [FontFamily.Lora]: 'Lora',
+  [FontFamily.BebasNeue]: 'Bebas Neue',
+  [FontFamily.OrelegaOne]: 'Orelega One',
+} as const satisfies Record<FontFamily, string>;
+
+export const FontFamilyList = Object.entries(FontFamilyMap) as {
+  [K in FontFamily]: [K, (typeof FontFamilyMap)[K]];
+}[FontFamily][];
+
 export const AffineCanvasTextFonts: FontConfig[] = [
   // Inter, https://fonts.cdnfonts.com/css/inter?styles=29139,29134,29135,29136,29140,29141
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://cdn.affine.pro/fonts/Inter-Light-BETA.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://cdn.affine.pro/fonts/Inter-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://cdn.affine.pro/fonts/Inter-SemiBold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://cdn.affine.pro/fonts/Inter-LightItalic-BETA.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Light,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://cdn.affine.pro/fonts/Inter-Italic.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Regular,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://cdn.affine.pro/fonts/Inter-SemiBoldItalic.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Italic,
   },
   // Kalam, https://fonts.cdnfonts.com/css/kalam?styles=15166,170689,170687
   {
-    font: CanvasTextFontFamily.Kalam,
+    font: FontFamily.Kalam,
     url: 'https://cdn.affine.pro/fonts/Kalam-Light.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Kalam,
+    font: FontFamily.Kalam,
     url: 'https://cdn.affine.pro/fonts/Kalam-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Kalam,
+    font: FontFamily.Kalam,
     url: 'https://cdn.affine.pro/fonts/Kalam-Bold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   // Satoshi, https://fonts.cdnfonts.com/css/satoshi?styles=135009,135004,135005,135006,135002,135003
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://cdn.affine.pro/fonts/Satoshi-Light.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://cdn.affine.pro/fonts/Satoshi-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://cdn.affine.pro/fonts/Satoshi-Bold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://cdn.affine.pro/fonts/Satoshi-LightItalic.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Light,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://cdn.affine.pro/fonts/Satoshi-Italic.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Regular,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://cdn.affine.pro/fonts/Satoshi-BoldItalic.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Italic,
   },
   // Poppins, https://fonts.cdnfonts.com/css/poppins?styles=20394,20389,20390,20391,20395,20396
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://cdn.affine.pro/fonts/Poppins-Light.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://cdn.affine.pro/fonts/Poppins-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://cdn.affine.pro/fonts/Poppins-SemiBold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://cdn.affine.pro/fonts/Poppins-LightItalic.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Light,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://cdn.affine.pro/fonts/Poppins-Italic.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Regular,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://cdn.affine.pro/fonts/Poppins-SemiBoldItalic.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Italic,
   },
   // Lora, https://fonts.cdnfonts.com/css/lora-4?styles=50357,50356,50354,50355
   {
-    font: CanvasTextFontFamily.Lora,
+    font: FontFamily.Lora,
     url: 'https://cdn.affine.pro/fonts/Lora-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Lora,
+    font: FontFamily.Lora,
     url: 'https://cdn.affine.pro/fonts/Lora-Bold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Lora,
+    font: FontFamily.Lora,
     url: 'https://cdn.affine.pro/fonts/Lora-Italic.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Regular,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Lora,
+    font: FontFamily.Lora,
     url: 'https://cdn.affine.pro/fonts/Lora-BoldItalic.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Italic,
   },
   // BebasNeue, https://fonts.cdnfonts.com/css/bebas-neue?styles=169713,17622,17620
   {
-    font: CanvasTextFontFamily.BebasNeue,
+    font: FontFamily.BebasNeue,
     url: 'https://cdn.affine.pro/fonts/BebasNeue-Light.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.BebasNeue,
+    font: FontFamily.BebasNeue,
     url: 'https://cdn.affine.pro/fonts/BebasNeue-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   // OrelegaOne, https://fonts.cdnfonts.com/css/orelega-one?styles=148618
   {
-    font: CanvasTextFontFamily.OrelegaOne,
+    font: FontFamily.OrelegaOne,
     url: 'https://cdn.affine.pro/fonts/OrelegaOne-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
 ];
 export const CommunityCanvasTextFonts: FontConfig[] = [
   // Inter, https://fonts.cdnfonts.com/css/inter?styles=29139,29134,29135,29136,29140,29141
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://fonts.cdnfonts.com/s/19795/Inter-Light-BETA.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://fonts.cdnfonts.com/s/19795/Inter-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://fonts.cdnfonts.com/s/19795/Inter-SemiBold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://fonts.cdnfonts.com/s/19795/Inter-LightItalic-BETA.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Light,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://fonts.cdnfonts.com/s/19795/Inter-Italic.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Regular,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Inter,
+    font: FontFamily.Inter,
     url: 'https://fonts.cdnfonts.com/s/19795/Inter-SemiBoldItalic.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Italic,
   },
   // Kalam, https://fonts.cdnfonts.com/css/kalam?styles=15166,170689,170687
   {
-    font: CanvasTextFontFamily.Kalam,
+    font: FontFamily.Kalam,
     url: 'https://fonts.cdnfonts.com/s/13130/Kalam-Light.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Kalam,
+    font: FontFamily.Kalam,
     url: 'https://fonts.cdnfonts.com/s/13130/Kalam-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Kalam,
+    font: FontFamily.Kalam,
     url: 'https://fonts.cdnfonts.com/s/13130/Kalam-Bold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   // Satoshi, https://fonts.cdnfonts.com/css/satoshi?styles=135009,135004,135005,135006,135002,135003
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://fonts.cdnfonts.com/s/85546/Satoshi-Light.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://fonts.cdnfonts.com/s/85546/Satoshi-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://fonts.cdnfonts.com/s/85546/Satoshi-Bold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://fonts.cdnfonts.com/s/85546/Satoshi-LightItalic.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Light,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://fonts.cdnfonts.com/s/85546/Satoshi-Italic.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Regular,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Satoshi,
+    font: FontFamily.Satoshi,
     url: 'https://fonts.cdnfonts.com/s/85546/Satoshi-BoldItalic.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Italic,
   },
   // Poppins, https://fonts.cdnfonts.com/css/poppins?styles=20394,20389,20390,20391,20395,20396
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://fonts.cdnfonts.com/s/16009/Poppins-Light.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://fonts.cdnfonts.com/s/16009/Poppins-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://fonts.cdnfonts.com/s/16009/Poppins-SemiBold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://fonts.cdnfonts.com/s/16009/Poppins-LightItalic.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Light,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://fonts.cdnfonts.com/s/16009/Poppins-Italic.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Regular,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Poppins,
+    font: FontFamily.Poppins,
     url: 'https://fonts.cdnfonts.com/s/16009/Poppins-SemiBoldItalic.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Italic,
   },
   // Lora, https://fonts.cdnfonts.com/css/lora-4?styles=50357,50356,50354,50355
   {
-    font: CanvasTextFontFamily.Lora,
+    font: FontFamily.Lora,
     url: 'https://fonts.cdnfonts.com/s/29883/Lora-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Lora,
+    font: FontFamily.Lora,
     url: 'https://fonts.cdnfonts.com/s/29883/Lora-Bold.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.Lora,
+    font: FontFamily.Lora,
     url: 'https://fonts.cdnfonts.com/s/29883/Lora-Italic.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.Regular,
+    style: FontStyle.Italic,
   },
   {
-    font: CanvasTextFontFamily.Lora,
+    font: FontFamily.Lora,
     url: 'https://fonts.cdnfonts.com/s/29883/Lora-BoldItalic.woff',
-    weight: CanvasTextFontWeight.SemiBold,
-    style: CanvasTextFontStyle.Italic,
+    weight: FontWeight.SemiBold,
+    style: FontStyle.Italic,
   },
   // BebasNeue, https://fonts.cdnfonts.com/css/bebas-neue?styles=169713,17622,17620
   {
-    font: CanvasTextFontFamily.BebasNeue,
+    font: FontFamily.BebasNeue,
     url: 'https://fonts.cdnfonts.com/s/14902/BebasNeue%20Light.woff',
-    weight: CanvasTextFontWeight.Light,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Light,
+    style: FontStyle.Normal,
   },
   {
-    font: CanvasTextFontFamily.BebasNeue,
+    font: FontFamily.BebasNeue,
     url: 'https://fonts.cdnfonts.com/s/14902/BebasNeue-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
   // OrelegaOne, https://fonts.cdnfonts.com/css/orelega-one?styles=148618
   {
-    font: CanvasTextFontFamily.OrelegaOne,
+    font: FontFamily.OrelegaOne,
     url: 'https://fonts.cdnfonts.com/s/93179/OrelegaOne-Regular.woff',
-    weight: CanvasTextFontWeight.Regular,
-    style: CanvasTextFontStyle.Normal,
+    weight: FontWeight.Regular,
+    style: FontStyle.Normal,
   },
 ];

@@ -101,14 +101,13 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
       <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="Color"
-          .tooltip=${'Color'}
-        >
-          <edgeless-color-button
-            .color=${this._selectedColor}
-          ></edgeless-color-button>
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button aria-label="Color" .tooltip=${'Color'}>
+            <edgeless-color-button
+              .color=${this._selectedColor}
+            ></edgeless-color-button>
+          </edgeless-tool-icon-button>
+        `}
       >
         <edgeless-color-panel
           slot
@@ -133,9 +132,8 @@ export function renderChangeBrushButton(
 ) {
   if (!elements?.length) return nothing;
 
-  return html`<edgeless-change-brush-button
-    .elements=${elements}
-    .edgeless=${edgeless}
-  >
-  </edgeless-change-brush-button>`;
+  return html`
+    <edgeless-change-brush-button .elements=${elements} .edgeless=${edgeless}>
+    </edgeless-change-brush-button>
+  `;
 }

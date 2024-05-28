@@ -1,11 +1,8 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
 
-import type { CanvasTextFontFamilyValueType } from '../consts.js';
-import type { FontFamily } from '../element-model/common.js';
+import type { FontFamily } from '../consts.js';
 
-export function wrapFontFamily(
-  fontFamily: CanvasTextFontFamilyValueType | string
-): string {
+export function wrapFontFamily(fontFamily: FontFamily | string): string {
   return `"${fontFamily}"`;
 }
 
@@ -26,15 +23,13 @@ export const getFontFaces = IS_FIREFOX
   : () => [...document.fonts.keys()];
 
 export const isSameFontFamily = IS_FIREFOX
-  ? (fontFamily: CanvasTextFontFamilyValueType | FontFamily | string) =>
-      (fontFace: FontFace) =>
-        fontFace.family === `"${fontFamily}"`
-  : (fontFamily: CanvasTextFontFamilyValueType | FontFamily | string) =>
-      (fontFace: FontFace) =>
-        fontFace.family === fontFamily;
+  ? (fontFamily: FontFamily | string) => (fontFace: FontFace) =>
+      fontFace.family === `"${fontFamily}"`
+  : (fontFamily: FontFamily | string) => (fontFace: FontFace) =>
+      fontFace.family === fontFamily;
 
 export function getFontFacesByFontFamily(
-  fontFamily: CanvasTextFontFamilyValueType | FontFamily | string
+  fontFamily: FontFamily | string
 ): FontFace[] {
   return (
     getFontFaces()

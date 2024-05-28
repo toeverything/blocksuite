@@ -7,7 +7,7 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '../../../../_common/icons/index.js';
-import { TextAlign } from '../../../../surface-block/elements/consts.js';
+import { TextAlign } from '../../../../surface-block/consts.js';
 
 const TEXT_ALIGN_LIST = [
   {
@@ -54,8 +54,8 @@ export class EdgelessAlignPanel extends LitElement {
     return repeat(
       TEXT_ALIGN_LIST,
       item => item.name,
-      ({ name, value, icon }) =>
-        html`<edgeless-tool-icon-button
+      ({ name, value, icon }) => html`
+        <edgeless-tool-icon-button
           .activeMode=${'background'}
           aria-label=${name}
           .tooltip=${name}
@@ -63,7 +63,8 @@ export class EdgelessAlignPanel extends LitElement {
           @click=${() => this._onSelect(value)}
         >
           ${icon}
-        </edgeless-tool-icon-button>`
+        </edgeless-tool-icon-button>
+      `
     );
   }
 }

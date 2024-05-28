@@ -721,8 +721,10 @@ export function renderEmbedButton(
 ) {
   if (models?.length !== 1) return nothing;
 
-  return html`<edgeless-change-embed-card-button
-    .model=${models[0]}
-    .edgeless=${edgeless}
-  ></edgeless-change-embed-card-button>`;
+  return html`
+    <edgeless-change-embed-card-button
+      .model=${models[0]}
+      .edgeless=${edgeless}
+    ></edgeless-change-embed-card-button>
+  `;
 }

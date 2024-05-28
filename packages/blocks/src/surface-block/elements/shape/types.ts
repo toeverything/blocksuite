@@ -1,14 +1,15 @@
 import type { Y } from '@blocksuite/store';
 
 import type {
-  CanvasTextFontFamilyValueType,
-  CanvasTextFontStyle,
-  CanvasTextFontWeight,
+  FontFamily,
+  FontStyle,
+  FontWeight,
   ShapeStyle,
   StrokeStyle,
+  TextAlign,
+  TextVerticalAlign,
 } from '../../consts.js';
 import type { CanvasElementType } from '../../element-model/index.js';
-import type { TextAlign, TextVerticalAlign } from '../consts.js';
 import type { ISurfaceElement } from '../surface-element.js';
 import type { SHAPE_TEXT_FONT_SIZE, ShapeType } from './consts.js';
 
@@ -28,9 +29,9 @@ export interface IShape extends ISurfaceElement {
   text?: Y.Text;
   color?: string;
   fontSize?: SHAPE_TEXT_FONT_SIZE;
-  fontFamily?: CanvasTextFontFamilyValueType;
-  fontWeight?: CanvasTextFontWeight;
-  fontStyle?: CanvasTextFontStyle;
+  fontFamily?: FontFamily;
+  fontWeight?: FontWeight;
+  fontStyle?: FontStyle;
   textAlign?: TextAlign;
   textHorizontalAlign?: TextAlign;
   textVerticalAlign?: TextVerticalAlign;

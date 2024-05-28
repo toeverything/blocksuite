@@ -1,4 +1,4 @@
-import { type IBound } from '../../../consts.js';
+import { DEFAULT_CENTRAL_AREA_RATIO, type IBound } from '../../../consts.js';
 import { Bound } from '../../../utils/bound.js';
 import {
   getCenterAreaBounds,
@@ -13,7 +13,6 @@ import {
 import { PointLocation } from '../../../utils/point-location.js';
 import type { IVec2 } from '../../../utils/vec.js';
 import type { IHitTestOptions } from '../../base.js';
-import { DEFAULT_CENTRAL_AREA_RATIO } from '../../common.js';
 import type { ShapeElementModel } from '../../shape.js';
 
 export const rect = {

@@ -18,16 +18,20 @@ import {
   type IHitTestOptions,
   SurfaceGroupLikeModel,
 } from '../../../../surface-block/element-model/base.js';
+import { isConnectorWithLabel } from '../../../../surface-block/element-model/connector.js';
 import {
+  ConnectorElementModel,
   GroupElementModel,
   MindmapElementModel,
   ShapeElementModel,
+  SurfaceElementModel,
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import {
   Bound,
-  ConnectorElementModel,
   type IVec,
+  type IVec2,
+  Vec,
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
@@ -39,6 +43,7 @@ import {
 } from '../../utils/query.js';
 import {
   addText,
+  mountConnectorLabelEditor,
   mountFrameTitleEditor,
   mountGroupTitleEditor,
   mountShapeTextEditor,
@@ -60,6 +65,8 @@ export enum DefaultModeDragType {
   PreviewDragging = 'preview-dragging',
   /** press alt/option key to clone selected  */
   AltCloning = 'alt-cloning',
+  /** Moving connector label */
+  ConnectorLabelMoving = 'connector-label-moving',
 }
 
 export class DefaultToolController extends EdgelessToolController<DefaultTool> {
@@ -87,6 +94,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   // For moving selection with space with mouse
   private _moveSelectionStartPos: IVec = [0, 0];
   private _moveSelectionDragStartTemp: IVec = [0, 0];
+
+  // For moving the connector label
+  private _selectedConnector: ConnectorElementModel | null = null;
+  private _selectedConnectorLabelBounds: Bound | null = null;
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
@@ -349,16 +360,20 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       addText(this._edgeless, e);
       return;
     } else {
-      const [modelX, modelY] = this._service.viewport.toModelCoord(e.x, e.y);
+      const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
       if (selected instanceof TextElementModel) {
         mountTextElementEditor(selected, this._edgeless, {
-          x: modelX,
-          y: modelY,
+          x,
+          y,
         });
         return;
       }
       if (selected instanceof ShapeElementModel) {
         mountShapeTextEditor(selected, this._edgeless);
+        return;
+      }
+      if (selected instanceof ConnectorElementModel) {
+        mountConnectorLabelEditor(selected, this._edgeless, [x, y]);
         return;
       }
       if (isFrameBlock(selected)) {
@@ -387,15 +402,60 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _determineDragType(e: PointerEventState): DefaultModeDragType {
+    const { x, y } = e;
     // Is dragging started from current selected rect
-    if (this._isInSelectedRect(e.x, e.y)) {
+    if (this._isInSelectedRect(x, y)) {
+      if (this.selection.elements.length === 1) {
+        let selected = this.selection.elements[0];
+        // double check
+        const currentSelected = this._pick(x, y);
+        if (
+          !isFrameBlock(selected) &&
+          !(selected instanceof GroupElementModel) &&
+          currentSelected &&
+          currentSelected !== selected
+        ) {
+          selected = currentSelected;
+          this._setSelectionState([selected.id], false);
+        }
+
+        if (
+          isCanvasElement(selected) &&
+          isConnectorWithLabel(selected) &&
+          (selected as ConnectorElementModel).labelHitTest(
+            this._service.viewport.toModelCoord(x, y)
+          )
+        ) {
+          this._selectedConnector = selected as ConnectorElementModel;
+          this._selectedConnectorLabelBounds = Bound.fromXYWH(
+            this._selectedConnector.labelXYWH!
+          );
+          return DefaultModeDragType.ConnectorLabelMoving;
+        }
+      }
+
       return this.selection.editing
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
-      const selected = this._pick(e.x, e.y);
+      const selected = this._pick(x, y);
       if (selected) {
         this._setSelectionState([selected.id], false);
+
+        if (
+          selected instanceof SurfaceElementModel &&
+          isConnectorWithLabel(selected) &&
+          (selected as ConnectorElementModel).labelHitTest(
+            this._service.viewport.toModelCoord(x, y)
+          )
+        ) {
+          this._selectedConnector = selected as ConnectorElementModel;
+          this._selectedConnectorLabelBounds = Bound.fromXYWH(
+            this._selectedConnector.labelXYWH!
+          );
+          return DefaultModeDragType.ConnectorLabelMoving;
+        }
+
         return DefaultModeDragType.ContentMoving;
       } else {
         return DefaultModeDragType.Selecting;
@@ -546,6 +606,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     this._toBeMoved.forEach(ele => {
       ele.stash('xywh');
+
+      if (ele instanceof ConnectorElementModel) {
+        ele.stash('labelXYWH');
+      }
     });
 
     // Connector needs to be updated first
@@ -661,6 +725,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           }
         })
       );
+      return;
     }
   }
 
@@ -705,6 +770,24 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       : this._surface.overlays.frame.clear();
   }
 
+  private _moveLabel(delta: IVec) {
+    const connector = this._selectedConnector;
+    let bounds = this._selectedConnectorLabelBounds;
+    if (!connector || !bounds) return;
+    bounds = bounds.clone();
+    const center = connector.getNearestPoint(
+      Vec.add(bounds.center, delta) as IVec2
+    );
+    const distance = connector.getOffsetDistanceByPoint(center as IVec2);
+    bounds.center = center;
+    this._service.updateElement(connector.id, {
+      labelXYWH: bounds.toXYWH(),
+      labelOffset: {
+        distance,
+      },
+    });
+  }
+
   onContainerDragMove(e: PointerEventState) {
     const { viewport } = this._service;
     const zoom = viewport.zoom;
@@ -747,6 +830,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._moveContent([dx, dy], alignBound, shifted, true);
         break;
       }
+      case DefaultModeDragType.ConnectorLabelMoving: {
+        const dx = (e.x - this._dragStartPos[0]) / zoom;
+        const dy = (e.y - this._dragStartPos[1]) / zoom;
+        this._moveLabel([dx, dy]);
+        break;
+      }
       case DefaultModeDragType.NativeEditing: {
         // TODO reset if drag out of note
         break;
@@ -756,11 +845,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onContainerDragEnd() {
     this._doc.transact(() => {
-      this._toBeMoved.forEach(el => {
-        el.pop('xywh');
+      this._toBeMoved.forEach(ele => {
+        ele.pop('xywh');
 
-        if (el.group instanceof MindmapElementModel) {
-          el.group.requestLayout();
+        if (ele instanceof ConnectorElementModel) {
+          ele.pop('labelXYWH');
+        }
+
+        if (ele.group instanceof MindmapElementModel) {
+          ele.group.requestLayout();
         }
       });
     });
@@ -780,6 +873,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._edgeless.service.snap.cleanupAlignables();
     surface.overlays.frame.clear();
     this._toBeMoved = [];
+    this._selectedConnector = null;
+    this._selectedConnectorLabelBounds = null;
     this._clearSelectingState();
     this.dragType = DefaultModeDragType.None;
   }

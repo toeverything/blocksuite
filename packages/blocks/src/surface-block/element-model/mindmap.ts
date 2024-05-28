@@ -4,6 +4,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 import { z } from 'zod';
 
 import { last } from '../../_common/utils/iterable.js';
+import { TextResizing } from '../consts.js';
 import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import {
   deserializeXYWH,
@@ -11,7 +12,6 @@ import {
   type XYWH,
 } from '../utils/xywh.js';
 import { type IBaseProps, SurfaceGroupLikeModel } from './base.js';
-import { TextResizing } from './common.js';
 import { LocalConnectorElementModel } from './connector.js';
 import { convert, observe, watch, yfield } from './decorators.js';
 import type {

@@ -30,7 +30,7 @@ async function assertTextFont(page: Page, font: string) {
     await fontButton.click();
   }
 
-  const button = fontPanel.locator(`.${font.toLowerCase()}`);
+  const button = fontPanel.locator(`[data-font="${font}"]`);
   await expect(button.locator('.active-mode-color[active]')).toBeVisible();
 }
 

@@ -63,8 +63,7 @@ export class EdgelessSizePanel extends LitElement {
   accessor labels = ['Small', 'Medium', 'Large', 'Huge'];
 
   @property({ attribute: false })
-  accessor onSelect: ((size: EdgelessSizePanel['size']) => void) | undefined =
-    undefined;
+  accessor onSelect: ((size: number) => void) | undefined = undefined;
 
   @property({ attribute: false })
   accessor onPopperCose: (() => void) | undefined = undefined;
@@ -78,7 +77,7 @@ export class EdgelessSizePanel extends LitElement {
   @property({ attribute: 'data-type' })
   accessor type: 'normal' | 'check' = 'normal';
 
-  private _onSelect(size: EdgelessSizePanel['size']) {
+  private _onSelect(size: number) {
     if (this.onSelect) this.onSelect(size);
   }
 
@@ -132,14 +131,16 @@ export class EdgelessSizePanel extends LitElement {
 
   renderItemWithCheck = (size: number, index: number) => {
     const active = this.size === size;
-    return html`<edgeless-tool-icon-button
-      .iconContainerPadding=${[4, 8]}
-      .justify=${'space-between'}
-      .active=${active}
-      @click=${() => this._onSelect(size)}
-    >
-      ${this.labels[index]} ${active ? CheckIcon : nothing}
-    </edgeless-tool-icon-button>`;
+    return html`
+      <edgeless-tool-icon-button
+        .iconContainerPadding=${[4, 8]}
+        .justify=${'space-between'}
+        .active=${active}
+        @click=${() => this._onSelect(size)}
+      >
+        ${this.labels[index]} ${active ? CheckIcon : nothing}
+      </edgeless-tool-icon-button>
+    `;
   };
 
   override render() {

@@ -391,17 +391,19 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
     const realButtons = buttons.filter(b => b !== nothing);
 
-    return html`<div
-      class="edgeless-component-toolbar-container"
-      @pointerdown=${stopPropagation}
-    >
-      ${join(realButtons, renderMenuDivider)}
-      ${realButtons.length ? renderMenuDivider() : nothing}
-      <edgeless-more-button
-        .edgeless=${edgeless}
-        .vertical=${true}
-      ></edgeless-more-button>
-    </div>`;
+    return html`
+      <div
+        class="edgeless-component-toolbar-container"
+        @pointerdown=${stopPropagation}
+      >
+        ${join(realButtons, renderMenuDivider)}
+        ${realButtons.length ? renderMenuDivider() : nothing}
+        <edgeless-more-button
+          .edgeless=${edgeless}
+          .vertical=${true}
+        ></edgeless-more-button>
+      </div>
+    `;
   }
 }
 
