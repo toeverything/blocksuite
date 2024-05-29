@@ -2,7 +2,7 @@ import { expect, test, vi } from 'vitest';
 import * as Y from 'yjs';
 
 import { Schema } from '../schema/index.js';
-import { DocCollection, Generator } from '../store/index.js';
+import { BlockViewType, DocCollection, Generator } from '../store/index.js';
 import {
   DividerBlockSchema,
   ListBlockSchema,
@@ -207,9 +207,10 @@ test('selector', () => {
   const doc1 = collection.createDoc({ id: 'home' });
   doc1.load();
   const doc2 = collection.getDoc('home');
-  const doc3 = collection.getDoc(
-    'home',
-    block => block.flavour !== 'affine:list'
+  const doc3 = collection.getDoc('home', block =>
+    block.flavour !== 'affine:list'
+      ? BlockViewType.Display
+      : BlockViewType.Hidden
   );
   expect(doc1).toBe(doc2);
   expect(doc1).not.toBe(doc3);

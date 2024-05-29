@@ -4,7 +4,12 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import type { Block, BlockModel, Doc } from '@blocksuite/store';
+import {
+  type Block,
+  type BlockModel,
+  BlockViewType,
+  type Doc,
+} from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -43,18 +48,18 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     let parent: BlockModel | Block | null = block;
 
     if (this.ancestors.has(block.id)) {
-      return true;
+      return BlockViewType.Display;
     }
 
     while (parent) {
       if (parent.id === this.model.id) {
-        return true;
+        return BlockViewType.Display;
       }
 
       parent = doc.getParent(parent.id);
     }
 
-    return false;
+    return BlockViewType.Hidden;
   };
 
   renderPreview(model: BlockModel) {
