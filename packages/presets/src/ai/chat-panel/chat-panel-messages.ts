@@ -373,6 +373,10 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           cursor: pointer;
           user-select: none;
         }
+
+        .action svg {
+          color: var(--affine-icon-color);
+        }
       </style>
       <chat-copy-more
         .host=${host}

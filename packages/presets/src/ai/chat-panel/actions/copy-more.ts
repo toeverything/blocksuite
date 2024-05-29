@@ -38,6 +38,10 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
       div:hover {
         background-color: var(--affine-hover-color);
       }
+
+      svg {
+        color: var(--affine-icon-color);
+      }
     }
 
     .more-menu {

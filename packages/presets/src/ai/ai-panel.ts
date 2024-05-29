@@ -3,19 +3,25 @@ import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
-  AIStarIconWithAnimation,
-  InsertBelowIcon,
-  ReplaceIcon,
-  ResetIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { ChatWithAIIcon, DiscardIcon } from './_common/icons.js';
+import {
+  AIStarIconWithAnimation,
+  ChatWithAIIcon,
+  DiscardIcon,
+  InsertBelowIcon,
+  InsertTopIcon,
+  ReplaceIcon,
+  RetryIcon,
+} from './_common/icons.js';
+import { INSERT_ABOVE_ACTIONS } from './actions/consts.js';
 import { createTextRenderer } from './messages/text.js';
 import { AIProvider } from './provider.js';
 import { reportResponse } from './utils/action-reporter.js';
 import {
   copyTextAnswer,
+  insertAbove,
   insertBelow,
   replace,
 } from './utils/editor-actions.js';
@@ -38,7 +44,9 @@ function getSelection(host: EditorHost) {
   };
 }
 
-export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
+export function buildTextResponseConfig<
+  T extends keyof BlockSuitePresets.AIActions,
+>(panel: AffineAIPanelWidget, id?: T) {
   const host = panel.host;
 
   const _replace = async () => {
@@ -69,6 +77,15 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
     panel.hide();
   };
 
+  const _insertAbove = async () => {
+    const selection = getSelection(host);
+    if (!selection || !panel.answer) return;
+
+    const { firstBlock } = selection;
+    await insertAbove(host, panel.answer, firstBlock);
+    panel.hide();
+  };
+
   return [
     {
       name: 'Response',
@@ -76,14 +93,27 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
         {
           name: 'Insert below',
           icon: InsertBelowIcon,
+          showWhen: () =>
+            !!panel.answer && (!id || !INSERT_ABOVE_ACTIONS.includes(id)),
           handler: () => {
             reportResponse('result:insert');
             _insertBelow().catch(console.error);
           },
         },
         {
+          name: 'Insert above',
+          icon: InsertTopIcon,
+          showWhen: () =>
+            !!panel.answer && !!id && INSERT_ABOVE_ACTIONS.includes(id),
+          handler: () => {
+            reportResponse('result:insert');
+            _insertAbove().catch(console.error);
+          },
+        },
+        {
           name: 'Replace selection',
           icon: ReplaceIcon,
+          showWhen: () => !!panel.answer,
           handler: () => {
             reportResponse('result:replace');
             _replace().catch(console.error);
@@ -108,7 +138,7 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
         },
         {
           name: 'Regenerate',
-          icon: ResetIcon,
+          icon: RetryIcon,
           handler: () => {
             reportResponse('result:retry');
             panel.generate();
@@ -126,7 +156,9 @@ export function buildTextResponseConfig(panel: AffineAIPanelWidget) {
   ];
 }
 
-export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
+export function buildErrorResponseConfig<
+  T extends keyof BlockSuitePresets.AIActions,
+>(panel: AffineAIPanelWidget, id?: T) {
   const host = panel.host;
   const _replace = async () => {
     const selection = getSelection(host);
@@ -156,13 +188,22 @@ export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
     panel.hide();
   };
 
+  const _insertAbove = async () => {
+    const selection = getSelection(host);
+    if (!selection || !panel.answer) return;
+
+    const { firstBlock } = selection;
+    await insertAbove(host, panel.answer, firstBlock);
+    panel.hide();
+  };
+
   return [
     {
       name: 'Response',
       items: [
         {
           name: 'Replace selection',
-          icon: ResetIcon,
+          icon: ReplaceIcon,
           showWhen: () => !!panel.answer,
           handler: () => {
             _replace().catch(console.error);
@@ -170,10 +211,21 @@ export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
         },
         {
           name: 'Insert below',
-          icon: DiscardIcon,
-          showWhen: () => !!panel.answer,
+          icon: InsertBelowIcon,
+          showWhen: () =>
+            !!panel.answer && (!id || !INSERT_ABOVE_ACTIONS.includes(id)),
           handler: () => {
             _insertBelow().catch(console.error);
+          },
+        },
+        {
+          name: 'Insert above',
+          icon: InsertTopIcon,
+          showWhen: () =>
+            !!panel.answer && !!id && INSERT_ABOVE_ACTIONS.includes(id),
+          handler: () => {
+            reportResponse('result:insert');
+            _insertAbove().catch(console.error);
           },
         },
       ],
@@ -183,7 +235,7 @@ export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
       items: [
         {
           name: 'Retry',
-          icon: ResetIcon,
+          icon: RetryIcon,
           showWhen: () => true,
           handler: () => {
             reportResponse('result:retry');
@@ -203,14 +255,20 @@ export function buildErrorResponseConfig(panel: AffineAIPanelWidget) {
   ];
 }
 
-export function buildFinishConfig(panel: AffineAIPanelWidget) {
+export function buildFinishConfig<T extends keyof BlockSuitePresets.AIActions>(
+  panel: AffineAIPanelWidget,
+  id?: T
+) {
   return {
-    responses: buildTextResponseConfig(panel),
+    responses: buildTextResponseConfig(panel, id),
     actions: [],
   };
 }
 
-export function buildErrorConfig(panel: AffineAIPanelWidget) {
+export function buildErrorConfig<T extends keyof BlockSuitePresets.AIActions>(
+  panel: AffineAIPanelWidget,
+  id?: T
+) {
   return {
     upgrade: () => {
       AIProvider.slots.requestUpgradePlan.emit({ host: panel.host });
@@ -223,7 +281,7 @@ export function buildErrorConfig(panel: AffineAIPanelWidget) {
     cancel: () => {
       panel.hide();
     },
-    responses: buildErrorResponseConfig(panel),
+    responses: buildErrorResponseConfig(panel, id),
   };
 }
 
