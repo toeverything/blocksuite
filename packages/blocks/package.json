@@ -54,6 +54,7 @@
     "shiki": "^1.5.2",
     "sortablejs": "^1.15.2",
     "unified": "^11.0.4",
+    "web-tree-sitter": "^0.22.6",
     "zod": "^3.23.8"
   },
   "exports": {
