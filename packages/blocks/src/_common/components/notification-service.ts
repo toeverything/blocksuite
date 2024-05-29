@@ -20,5 +20,6 @@ export interface NotificationService {
     message?: string | TemplateResult;
     accent?: 'info' | 'success' | 'warning' | 'error';
     duration?: number; // give 0 to disable auto dismiss
+    abort?: AbortSignal;
   }): void;
 }
