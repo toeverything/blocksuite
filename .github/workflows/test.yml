@@ -61,6 +61,7 @@ jobs:
       fail-fast: false
       matrix:
         shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        shard-total: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -96,20 +97,9 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run playwright test
-        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm test -- --forbid-only --shard=${{ matrix.shard }}/${{ matrix.shard-total }}
         env:
           COVERAGE: true
-
-      #      FIXME(mirone)
-      #      - name: Run First Editor test
-      #        run: pnpm test -- tests/basic.spec.ts tests/clipboard.spec.ts --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-      #        env:
-      #          MULTIPLE_EDITOR_INDEX: 0
-      #
-      #      - name: Run Second Editor test
-      #        run: pnpm test -- tests/basic.spec.ts tests/clipboard.spec.ts --forbid-only --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-      #        env:
-      #          MULTIPLE_EDITOR_INDEX: 1
 
       - name: Collect code coverage report
         run: pnpm exec nyc report -t .nyc_output --reporter=lcov
