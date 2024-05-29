@@ -19,6 +19,7 @@ import {
   NoteDisplayMode,
   ResetIcon,
 } from '@blocksuite/blocks';
+import type { TemplateResult } from 'lit';
 
 import { AIPenIcon, ChatWithAIIcon } from '../_common/icons.js';
 import { insertFromMarkdown } from '../_common/markdown-utils.js';
@@ -38,7 +39,7 @@ import {
   getEdgelessRootFromEditor,
   getEdgelessService,
 } from '../utils/selection-utils.js';
-import { EXCLUDING_INSERT_ACTIONS } from './consts.js';
+import { EXCLUDING_INSERT_ACTIONS, generatingStages } from './consts.js';
 import type { CtxRecord } from './types.js';
 
 type FinishConfig = Exclude<
@@ -466,6 +467,16 @@ export function actionToResponse<T extends keyof BlockSuitePresets.AIActions>(
       },
     ],
     actions: [],
+  };
+}
+
+export function actionToGenerating<T extends keyof BlockSuitePresets.AIActions>(
+  id: T,
+  generatingIcon: TemplateResult<1>
+) {
+  return {
+    generatingIcon,
+    stages: generatingStages[id],
   };
 }
 

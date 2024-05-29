@@ -1,9 +1,15 @@
+import '../generating-placeholder.js';
+
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { AIStopIcon } from '../../../../../_common/icons/ai.js';
+import {
+  AIStarIconWithAnimation,
+  AIStopIcon,
+} from '../../../../../_common/icons/ai.js';
+import type { AIPanelGeneratingConfig } from '../../type.js';
 
 @customElement('ai-panel-generating')
 export class AIPanelGenerating extends WithDisposable(LitElement) {
@@ -66,15 +72,38 @@ export class AIPanelGenerating extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  accessor icon!: TemplateResult<1>;
+  accessor config!: AIPanelGeneratingConfig;
+
+  @property({ attribute: false })
+  accessor loadingProgress: number = 1;
+
+  @property({ attribute: false })
+  accessor withAnswer!: boolean;
 
   @property({ attribute: false })
   accessor stopGenerating!: () => void;
 
+  updateLoadingProgress(progress: number) {
+    this.loadingProgress = progress;
+  }
+
   override render() {
+    const {
+      generatingIcon = AIStarIconWithAnimation,
+      stages,
+      height = 300,
+    } = this.config;
     return html`
+      ${stages && stages.length > 0
+        ? html`<generating-placeholder
+            .height=${height}
+            .loadingProgress=${this.loadingProgress}
+            .stages=${stages}
+            .showHeader=${!this.withAnswer}
+          ></generating-placeholder>`
+        : nothing}
       <div class="generating-tip">
-        <div class="left">${this.icon}</div>
+        <div class="left">${generatingIcon}</div>
         <div class="text">AI is generating...</div>
         <div @click=${this.stopGenerating} class="right">
           <span class="stop-icon">${AIStopIcon}</span>

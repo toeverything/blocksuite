@@ -50,6 +50,13 @@ const icons: Record<string, TemplateResult<1>> = {
   'Create a presentation': AIPresentationIcon,
   'Write a poem about this': AIPenIcon,
   'Write a blog post about this': AIPenIcon,
+  'AI image filter clay style': AIImageIcon,
+  'AI image filter sketch style': AIImageIcon,
+  'AI image filter anime style': AIImageIcon,
+  'AI image filter pixel style': AIImageIcon,
+  Clearer: AIImageIcon,
+  'Remove background': AIImageIcon,
+  'Convert to sticker': AIImageIcon,
 };
 
 @customElement('action-wrapper')

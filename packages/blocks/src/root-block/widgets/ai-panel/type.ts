@@ -10,10 +10,10 @@ export interface CopyConfig {
   onCopy: () => boolean | Promise<boolean>;
 }
 
-export type AIPanelAnswerConfig = {
+export interface AIPanelAnswerConfig {
   responses: AIItemGroupConfig[];
   actions: AIItemGroupConfig[];
-};
+}
 
 export interface AIPanelErrorConfig {
   login: () => void;
@@ -21,6 +21,12 @@ export interface AIPanelErrorConfig {
   cancel: () => void;
   responses: AIItemGroupConfig[];
   error?: AIError;
+}
+
+export interface AIPanelGeneratingConfig {
+  generatingIcon: TemplateResult<1>;
+  height?: number;
+  stages?: string[];
 }
 
 export interface AffineAIPanelWidgetConfig {
@@ -37,13 +43,12 @@ export interface AffineAIPanelWidgetConfig {
   }) => void;
 
   finishStateConfig: AIPanelAnswerConfig;
+  generatingStateConfig: AIPanelGeneratingConfig;
   errorStateConfig: AIPanelErrorConfig;
   hideCallback?: () => void;
   discardCallback?: () => void;
 
   copy?: CopyConfig;
-
-  generatingIcon: TemplateResult<1>;
 }
 
 export type AffineAIPanelState =

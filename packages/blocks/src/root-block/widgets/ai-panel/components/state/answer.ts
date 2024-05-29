@@ -42,6 +42,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       font-style: normal;
       font-weight: 500;
       line-height: 20px; /* 166.667% */
+      height: 20px;
     }
 
     .answer-body {

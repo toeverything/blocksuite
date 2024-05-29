@@ -11,6 +11,7 @@ import {
   buildCopyConfig,
   buildErrorConfig,
   buildFinishConfig,
+  buildGeneratingConfig,
   getAIPanel,
 } from '../ai-panel.js';
 import { createTextRenderer } from '../messages/text.js';
@@ -151,13 +152,13 @@ function updateAIPanelConfig<T extends keyof BlockSuitePresets.AIActions>(
   config.generateAnswer = actionToGenerateAnswer(id, variants)(host);
   config.answerRenderer = createTextRenderer(host, { maxHeight: 320 });
   config.finishStateConfig = buildFinishConfig(aiPanel, id);
+  config.generatingStateConfig = buildGeneratingConfig(generatingIcon);
   config.errorStateConfig = buildErrorConfig(aiPanel);
   config.copy = buildCopyConfig(aiPanel);
   config.discardCallback = () => {
     aiPanel.hide();
     reportResponse('result:discard');
   };
-  config.generatingIcon = generatingIcon;
 }
 
 export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(

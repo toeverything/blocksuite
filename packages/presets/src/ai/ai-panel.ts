@@ -5,6 +5,7 @@ import {
   type AffineAIPanelWidgetConfig,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
+import type { TemplateResult } from 'lit';
 
 import {
   AIStarIconWithAnimation,
@@ -285,6 +286,12 @@ export function buildErrorConfig<T extends keyof BlockSuitePresets.AIActions>(
   };
 }
 
+export function buildGeneratingConfig(generatingIcon?: TemplateResult<1>) {
+  return {
+    generatingIcon: generatingIcon ?? AIStarIconWithAnimation,
+  };
+}
+
 export function buildCopyConfig(panel: AffineAIPanelWidget) {
   return {
     allowed: true,
@@ -300,9 +307,9 @@ export function buildAIPanelConfig(
   return {
     answerRenderer: createTextRenderer(panel.host, { maxHeight: 320 }),
     finishStateConfig: buildFinishConfig(panel),
+    generatingStateConfig: buildGeneratingConfig(),
     errorStateConfig: buildErrorConfig(panel),
     copy: buildCopyConfig(panel),
-    generatingIcon: AIStarIconWithAnimation,
   };
 }
 

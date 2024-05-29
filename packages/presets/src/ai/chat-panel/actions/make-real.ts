@@ -21,7 +21,7 @@ export class ActionMakeReal extends WithDisposable(ShadowlessElement) {
     const answer = this.item.messages[2].content;
     return html`<action-wrapper .host=${this.host} .item=${this.item}>
       <div style=${styleMap({ marginBottom: '12px' })}>
-        ${createIframeRenderer(answer, 'finished')}
+        ${createIframeRenderer(this.host)(answer, 'finished')}
       </div>
     </action-wrapper>`;
   }
