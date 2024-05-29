@@ -13,8 +13,6 @@ import { waitNextFrame } from '../utils/actions/index.js';
 import { test } from '../utils/playwright.js';
 
 test.describe('fragments', () => {
-  test.describe.configure({ mode: 'serial' });
-
   test('should display empty placeholder when no frames', async ({ page }) => {
     await edgelessCommonSetup(page);
     await toggleFramePanel(page);
@@ -73,7 +71,8 @@ test.describe('fragments', () => {
     expect(await notePortal.count()).toBe(1);
   });
 
-  test('should update panel when frames change', async ({ page }) => {
+  test('should update panel when frames change', async ({ page }, testInfo) => {
+    if (testInfo.retry) await page.waitForTimeout(1000);
     await edgelessCommonSetup(page);
     await toggleFramePanel(page);
     const frameCards = page.locator('frame-card');
