@@ -12,7 +12,7 @@ import {
 import { waitNextFrame } from '../utils/actions/index.js';
 import { test } from '../utils/playwright.js';
 
-test.describe('frame-panel', () => {
+test.describe('frame panel', () => {
   test('should display empty placeholder when no frames', async ({ page }) => {
     await edgelessCommonSetup(page);
     await toggleFramePanel(page);
