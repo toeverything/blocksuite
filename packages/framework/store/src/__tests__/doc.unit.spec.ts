@@ -217,19 +217,15 @@ test('selector', () => {
 
   const page = doc1.addBlock('affine:page');
   const note = doc1.addBlock('affine:note', {}, page);
-  doc1.addBlock('affine:paragraph', {}, note);
-  doc1.addBlock('affine:list' as never, {}, note);
+  const paragraph1 = doc1.addBlock('affine:paragraph', {}, note);
+  const list1 = doc1.addBlock('affine:list' as never, {}, note);
 
-  expect(doc2?.getBlocks()).toHaveLength(4);
-  expect(doc3?.getBlocks()).toHaveLength(3);
+  expect(doc2?.getBlock(paragraph1)?.blockViewType).toBe(BlockViewType.Display);
+  expect(doc2?.getBlock(list1)?.blockViewType).toBe(BlockViewType.Display);
+  expect(doc3?.getBlock(list1)?.blockViewType).toBe(BlockViewType.Hidden);
 
-  expect(doc1?.getBlocksByFlavour('affine:list')).toHaveLength(1);
-  expect(doc2?.getBlocksByFlavour('affine:list')).toHaveLength(1);
-  expect(doc3?.getBlocksByFlavour('affine:list')).toHaveLength(0);
+  const list2 = doc1.addBlock('affine:list' as never, {}, note);
 
-  doc1.addBlock('affine:list' as never, {}, note);
-
-  expect(doc1?.getBlocksByFlavour('affine:list')).toHaveLength(2);
-  expect(doc2?.getBlocksByFlavour('affine:list')).toHaveLength(2);
-  expect(doc3?.getBlocksByFlavour('affine:list')).toHaveLength(0);
+  expect(doc2?.getBlock(list2)?.blockViewType).toBe(BlockViewType.Display);
+  expect(doc3?.getBlock(list2)?.blockViewType).toBe(BlockViewType.Hidden);
 });
