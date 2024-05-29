@@ -369,12 +369,12 @@ export class AffineDragHandleWidget extends WidgetElement<
     // The ancestors of the selected blocks should be rendered as Bypass
     selectedIds.map(block => {
       let parent: string | null = block;
-      while (parent && !ids.map(({ id }) => id).includes(parent)) {
+      do {
         if (!selectedIds.includes(parent)) {
           ids.push({ type: BlockViewType.Bypass, id: parent });
         }
         parent = this.doc.blockCollection.crud.getParent(parent);
-      }
+      } while (parent && !ids.map(({ id }) => id).includes(parent));
     });
 
     // The children of the selected blocks should be rendered as Display
