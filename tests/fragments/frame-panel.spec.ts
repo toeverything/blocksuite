@@ -89,7 +89,7 @@ test.describe('frame panel', () => {
 
     await setEdgelessTool(page, 'frame');
     await dragBetweenCoords(page, { x: 50, y: 300 }, { x: 120, y: 400 });
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
     const frames = page.locator('edgeless-block-portal-frame');
     expect(await frames.count()).toBe(2);
