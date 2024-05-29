@@ -9,6 +9,7 @@ import {
   Shape,
   toggleFramePanel,
 } from '../utils/actions/edgeless.js';
+import { waitNextFrame } from '../utils/actions/index.js';
 import { test } from '../utils/playwright.js';
 
 test.describe('frame panel', () => {
@@ -90,6 +91,7 @@ test.describe('frame panel', () => {
     await setEdgelessTool(page, 'frame');
     await dragBetweenCoords(page, { x: 50, y: 300 }, { x: 120, y: 400 });
 
+    await waitNextFrame(page);
     const frames = page.locator('edgeless-block-portal-frame');
     expect(await frames.count()).toBe(2);
     expect(await frameCards.count()).toBe(2);
