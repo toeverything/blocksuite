@@ -158,6 +158,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
             confirm: notification => {
               return Promise.resolve(confirm(notification.title));
             },
+            notify: notification => {
+              // todo: implement in playground
+              console.log(notification);
+            },
           };
           pageRootService.quickSearchService = {
             async searchDoc({ userInput }) {

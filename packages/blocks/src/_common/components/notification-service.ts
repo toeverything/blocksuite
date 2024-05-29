@@ -15,4 +15,10 @@ export interface NotificationService {
     cancelText: string;
     abort?: AbortSignal;
   }): Promise<boolean>;
+  notify(notification: {
+    title: string | TemplateResult;
+    message?: string | TemplateResult;
+    accent?: 'info' | 'success' | 'warning' | 'error';
+    duration?: number; // give 0 to disable auto dismiss
+  }): void;
 }
