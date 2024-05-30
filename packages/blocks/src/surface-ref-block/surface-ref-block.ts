@@ -8,6 +8,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
+import { Peekable } from '../_common/components/peekable.js';
 import {
   EdgelessModeIcon,
   FrameIcon,
@@ -47,6 +48,7 @@ const NO_CONTENT_REASON = {
 type RefElementModel = BlockSuite.SurfaceElementModelType | FrameBlockModel;
 
 @customElement('affine-surface-ref')
+@Peekable()
 export class SurfaceRefBlockComponent extends BlockElement<
   SurfaceRefBlockModel,
   SurfaceRefBlockService

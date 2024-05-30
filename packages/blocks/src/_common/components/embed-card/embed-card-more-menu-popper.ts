@@ -10,12 +10,14 @@ import {
   isEmbedSyncedDocBlock,
 } from '../../../root-block/edgeless/utils/query.js';
 import {
+  CenterPeekIcon,
   CopyIcon,
   DeleteIcon,
   DuplicateIcon,
   OpenIcon,
   RefreshIcon,
 } from '../../icons/text.js';
+import { isPeekable, peek } from '../peekable.js';
 import { toast } from '../toast.js';
 import type { EmbedToolbarBlockElement } from './type.js';
 
@@ -122,6 +124,14 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
+  private _peekable() {
+    return isPeekable(this.block);
+  }
+
+  private _peek() {
+    peek(this.block);
+  }
+
   override render() {
     return html`
       <div class="embed-card-more-menu">
@@ -138,6 +148,18 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
           >
             ${OpenIcon}
           </icon-button>
+
+          ${this._peekable()
+            ? html`<icon-button
+                width="126px"
+                height="32px"
+                text="Open in center peek"
+                class="menu-item center-peek"
+                @click=${() => this._peek()}
+              >
+                ${CenterPeekIcon}
+              </icon-button>`
+            : nothing}
 
           <icon-button
             width="126px"

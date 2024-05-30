@@ -139,6 +139,13 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
               }
             },
           };
+
+          pageRootService.peekViewService = {
+            peek(target: unknown) {
+              alert('Peek view not implemented in playground');
+              console.log('peek', target);
+            },
+          };
         });
       },
     };
