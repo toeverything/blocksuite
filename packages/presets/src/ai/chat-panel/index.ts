@@ -9,7 +9,7 @@ import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
-import { SmallHintIcon } from '../_common/icons.js';
+import { AIHelpIcon, SmallHintIcon } from '../_common/icons.js';
 import { AIProvider } from '../provider.js';
 import { type ChatContextValue, type ChatItem } from './chat-context.js';
 import type { ChatPanelMessages } from './chat-panel-messages.js';
@@ -32,9 +32,24 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       padding: 8px 0px;
       width: 100%;
       height: 36px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--affine-text-secondary-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      div:first-child {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--affine-text-secondary-color);
+      }
+
+      div:last-child {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
     }
 
     chat-panel-messages {
@@ -166,7 +181,16 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
 
   override render() {
     return html` <div class="chat-panel-container">
-      <div class="chat-panel-title">AFFINE AI</div>
+      <div class="chat-panel-title">
+        <div>AFFINE AI</div>
+        <div
+          @click=${() => {
+            AIProvider.toggleGeneralAIOnboarding?.(true);
+          }}
+        >
+          ${AIHelpIcon}
+        </div>
+      </div>
       <chat-panel-messages
         ${ref(this._chatMessages)}
         .chatContextValue=${this.chatContextValue}
