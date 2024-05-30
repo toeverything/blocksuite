@@ -37,7 +37,7 @@ export const multiSelectColumnModelConfig = multiSelectColumnType.modelConfig<
     return [];
   },
   cellToString: (data, colData) =>
-    data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
+    data?.map(id => colData.options.find(v => v.id === id)?.value).join(','),
   cellFromString: (data, colData) => {
     const optionMap = Object.fromEntries(
       colData.options.map(v => [v.value, v])
