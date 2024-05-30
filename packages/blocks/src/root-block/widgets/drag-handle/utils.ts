@@ -406,8 +406,8 @@ export function convertDragPreviewDocToEdgeless({
   const border = 2;
   const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
   const currentViewBound = new Bound(
-    (rect.x - viewportLeft) / state.cumulativeParentScale,
-    (rect.y - viewportTop) / state.cumulativeParentScale,
+    rect.x - viewportLeft,
+    rect.y - viewportTop,
     rect.width + border / noteScale,
     rect.height + border / noteScale
   );

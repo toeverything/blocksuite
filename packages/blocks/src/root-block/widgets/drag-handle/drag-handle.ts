@@ -1004,7 +1004,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     const state = ctx.get('pointerState');
     const { target } = state.raw;
     const element = captureEventTarget(target);
-    this.cumulativeParentScale = state.cumulativeParentScale;
     // When pointer not on block or on dragging, should do nothing
     if (!element) return;
 
@@ -1205,10 +1204,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
 
       const newNoteId = edgelessRoot.addNoteWithPoint(
-        new Point(
-          (state.raw.x - viewportLeft) / this.cumulativeParentScale,
-          (state.raw.y - viewportTop) / this.cumulativeParentScale
-        ),
+        new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
         {
           scale: this.noteScale,
         }
