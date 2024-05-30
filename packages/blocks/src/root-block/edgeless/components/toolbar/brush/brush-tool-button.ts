@@ -62,9 +62,7 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
     if (this._menu) {
       this._disposeMenu();
     } else {
-      this.edgeless.tools.setEdgelessTool({
-        type: this._type,
-      });
+      !this.active && this.setEdgelessTool({ type: this._type });
       this._menu = createPopper('edgeless-brush-menu', this, {
         x: 110,
         y: -40,
@@ -81,9 +79,7 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
     if (this._states.some(key => changedProperties.has(key))) {
       if (this._menu) {
         this.updateMenu();
-        this.edgeless.tools.setEdgelessTool({
-          type: this._type,
-        });
+        !this.active && this.setEdgelessTool({ type: this._type });
       }
     }
   }

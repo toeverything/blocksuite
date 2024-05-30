@@ -106,7 +106,7 @@ export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
     super.disconnectedCallback();
   }
 
-  override defaultRender() {
+  override render() {
     const { active } = this;
     const arrowColor = active ? 'currentColor' : '#77757D';
     return html`
@@ -126,9 +126,6 @@ export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
         </span>
       </edgeless-tool-icon-button>
     `;
-  }
-  override denseRender() {
-    return html`<div>TODO</div>`;
   }
 }
 

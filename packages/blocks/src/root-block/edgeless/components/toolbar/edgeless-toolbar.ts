@@ -52,6 +52,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       -webkit-user-select: none;
       user-select: none;
       width: 100%;
+      pointer-events: none;
     }
 
     .edgeless-toolbar-toggle-control {
@@ -59,7 +60,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: flex;
       justify-content: center;
       padding-bottom: 28px;
-      pointer-events: auto;
     }
     .edgeless-toolbar-toggle-control[data-enable='true'] {
       transition: 0.23s ease;
@@ -83,8 +83,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       width: fit-content;
       max-width: calc(100% - ${unsafeCSS(SAFE_AREA_WIDTH)}px * 2);
       height: ${unsafeCSS(TOOLBAR_HEIGHT)}px;
+      pointer-events: auto;
     }
-    :host([disabled]) .edgeless-toolbar-toggle-control {
+    :host([disabled]) .edgeless-toolbar-container {
       pointer-events: none;
     }
     .edgeless-toolbar-container[level='second'] {

@@ -77,7 +77,7 @@ export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
     super.disconnectedCallback();
   }
 
-  override defaultRender() {
+  override render() {
     const type = this.edgelessTool?.type;
     const arrowColor = type === 'frame' ? 'currentColor' : '#77757D';
     return html`
@@ -100,9 +100,6 @@ export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
         </span>
       </edgeless-tool-icon-button>
     `;
-  }
-  override denseRender() {
-    return html`<div>TODO</div>`;
   }
 }
 

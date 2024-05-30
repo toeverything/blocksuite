@@ -27,7 +27,7 @@ export class EdgelessPresentButton extends QuickToolMixin(
     }
   `;
 
-  override defaultRender() {
+  override render() {
     return html`<edgeless-tool-icon-button
     class="edgeless-frame-navigator-button"
     .tooltip=${'Present'}
@@ -42,9 +42,6 @@ export class EdgelessPresentButton extends QuickToolMixin(
     ${FrameNavigatorIcon}
     </edgeless-tool-icon-button>
   </div>`;
-  }
-  override denseRender() {
-    return html`<div>TODO</div>`;
   }
 }
 

@@ -35,12 +35,6 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     }
 
     protected abstract _type: EdgelessTool['type'];
-
-    override firstUpdated() {
-      this._disposables.add(
-        this.edgeless.slots.edgelessToolUpdated.on(() => this.requestUpdate())
-      );
-    }
   }
 
   return DerivedClass as unknown as T & Constructor<EdgelessToolbarToolClass>;

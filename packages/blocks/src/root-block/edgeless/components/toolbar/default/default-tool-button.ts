@@ -1,4 +1,4 @@
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -75,7 +75,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
     }, 100);
   }
 
-  override defaultRender() {
+  override render() {
     const type = this.edgelessTool?.type;
     const arrowColor =
       type === 'default' || type === 'pan'
@@ -100,9 +100,6 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
         </span>
       </edgeless-tool-icon-button>
     `;
-  }
-  override denseRender(): TemplateResult {
-    return html`<div>TODO</div>`;
   }
 }
 

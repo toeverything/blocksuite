@@ -88,7 +88,7 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
     }
   }
 
-  override defaultRender() {
+  override render() {
     const { active } = this;
     const arrowColor = active ? 'currentColor' : '#77757D';
     return html`
@@ -112,10 +112,6 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
         </span>
       </edgeless-tool-icon-button>
     `;
-  }
-
-  override denseRender() {
-    return html`<div>TODO: Connector</div>`;
   }
 }
 

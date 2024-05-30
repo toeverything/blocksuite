@@ -47,14 +47,17 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this.disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(tool => {
-        if (tool.type === 'lasso') {
-          this.curMode = tool.mode;
-        }
-      })
-    );
+    // this.disposables.add(
+    //   this.edgeless.slots.edgelessToolUpdated.on(tool => {
+    //     if (tool.type === 'lasso') {
+    //       this.curMode = tool.mode;
+    //     }
+    //   })
+    // );
   }
+
+  // get curMode
+  // set curMode
   private _changeTool = () => {
     const tool = this.edgelessTool;
     if (tool.type !== 'lasso') {
@@ -71,7 +74,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
     }, 100);
   };
 
-  override defaultRender() {
+  override render() {
     const type = this.edgelessTool?.type;
     const mode = this.curMode === LassoMode.FreeHand ? 'freehand' : 'polygonal';
 
@@ -95,9 +98,6 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
         </span>
       </edgeless-tool-icon-button>
     `;
-  }
-  override denseRender() {
-    return html`<div>TODO</div>`;
   }
 }
 

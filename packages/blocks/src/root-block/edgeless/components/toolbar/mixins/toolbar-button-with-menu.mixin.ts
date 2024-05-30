@@ -89,7 +89,6 @@ export const ToolbarButtonWithMenuMixin = <
       edgeless.bindHotKey(
         {
           Escape: () => {
-            console.log('123');
             if (this.edgelessTool.type === this._type) {
               edgeless.tools.setEdgelessTool({ type: 'default' });
             }
