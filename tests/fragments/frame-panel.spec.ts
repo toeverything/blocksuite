@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { dragBetweenCoords } from 'utils/actions/drag.js';
 
 import {
@@ -9,15 +9,12 @@ import {
   Shape,
   toggleFramePanel,
 } from '../utils/actions/edgeless.js';
+import { waitNextFrame } from '../utils/actions/index.js';
 import { test } from '../utils/playwright.js';
 
 test.describe('frame panel', () => {
-  async function init(page: Page) {
-    await edgelessCommonSetup(page);
-  }
-
   test('should display empty placeholder when no frames', async ({ page }) => {
-    await init(page);
+    await edgelessCommonSetup(page);
     await toggleFramePanel(page);
     const frameCards = page.locator('frame-card');
     expect(await frameCards.count()).toBe(0);
@@ -27,7 +24,7 @@ test.describe('frame panel', () => {
   });
 
   test('should display frame cards when there are frames', async ({ page }) => {
-    await init(page);
+    await edgelessCommonSetup(page);
     await toggleFramePanel(page);
 
     await addBasicShapeElement(
@@ -56,7 +53,7 @@ test.describe('frame panel', () => {
   test('should render note portal correctly in frame preview', async ({
     page,
   }) => {
-    await init(page);
+    await edgelessCommonSetup(page);
     await toggleFramePanel(page);
 
     await addNote(page, 'hello', 150, 500);
@@ -75,7 +72,7 @@ test.describe('frame panel', () => {
   });
 
   test('should update panel when frames change', async ({ page }) => {
-    await init(page);
+    await edgelessCommonSetup(page);
     await toggleFramePanel(page);
     const frameCards = page.locator('frame-card');
     expect(await frameCards.count()).toBe(0);
@@ -89,6 +86,7 @@ test.describe('frame panel', () => {
 
     await setEdgelessTool(page, 'frame');
     await dragBetweenCoords(page, { x: 50, y: 300 }, { x: 120, y: 400 });
+    await waitNextFrame(page);
 
     const frames = page.locator('edgeless-block-portal-frame');
     expect(await frames.count()).toBe(2);
@@ -96,7 +94,7 @@ test.describe('frame panel', () => {
 
     await page.mouse.click(50, 300);
     await page.keyboard.press('Delete');
-    await page.waitForTimeout(300);
+    await waitNextFrame(page);
 
     expect(await frames.count()).toBe(1);
     expect(await frameCards.count()).toBe(1);

@@ -80,7 +80,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this._layer = LayerManager.create(this.model.doc, this.model);
+    this._layer = LayerManager.create(this.doc, this.model);
     this._renderer = new Renderer({
       layerManager: this._layer,
       enableStackingCanvas: true,

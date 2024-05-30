@@ -1,5 +1,5 @@
 import { type Disposable } from '@blocksuite/global/utils';
-import type { Block, BlockModel } from '@blocksuite/store';
+import type { BlockModel, BlockSelector } from '@blocksuite/store';
 
 import type { ColumnMeta } from '../../database-block/data-view/index.js';
 
@@ -18,7 +18,7 @@ type PropertyMeta<
   updated: (block: T, callback: () => void) => Disposable;
 };
 export type BlockMeta<T extends BlockModel = BlockModel> = {
-  selector: (block: Block) => boolean;
+  selector: BlockSelector;
   properties: PropertyMeta<T>[];
 };
 export const createBlockMeta = <T extends BlockModel>(
