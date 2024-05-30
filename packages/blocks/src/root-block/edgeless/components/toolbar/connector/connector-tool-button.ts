@@ -80,9 +80,14 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
     if (this._states.some(key => changedProperties.has(key))) {
       if (this._menu) {
         this.updateMenu();
-        this.edgeless.tools.setEdgelessTool({
-          type: this._type,
-          mode: this.mode,
+        // FIXME
+        // scheduled an update (generally because a property was set) after an update completed, causing a new update to be scheduled.
+        // This is inefficient and should be avoided unless the next update can only be scheduled as a side effect of the previous update
+        setTimeout(() => {
+          this.setEdgelessTool({
+            type: this._type,
+            mode: this.mode,
+          });
         });
       }
     }

@@ -185,9 +185,12 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
     if (this._states.some(key => changedProperties.has(key))) {
       if (this._menu) {
         this.updateMenu();
-        this.edgeless.tools.setEdgelessTool({
-          type: this._type,
-          shapeType: this.shapeType,
+
+        setTimeout(() => {
+          this.setEdgelessTool({
+            type: this._type,
+            shapeType: this.shapeType,
+          });
         });
         const controller = this.edgeless.tools.currentController;
         if (controller instanceof ShapeToolController) {
