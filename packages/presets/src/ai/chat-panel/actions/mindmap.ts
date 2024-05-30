@@ -8,7 +8,7 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ChatAction } from '../index.js';
+import type { ChatAction } from '../chat-context.js';
 
 noop(MiniMindmapPreview);
 

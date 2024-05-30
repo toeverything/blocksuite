@@ -7,7 +7,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { createTextRenderer } from '../../messages/text.js';
-import type { ChatAction } from '../index.js';
+import type { ChatAction } from '../chat-context.js';
 
 @customElement('action-text')
 export class ActionText extends WithDisposable(LitElement) {

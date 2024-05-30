@@ -3,7 +3,6 @@ import './chat-panel-messages.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import type { AIError } from '@blocksuite/blocks';
 import { debounce } from '@blocksuite/global/utils';
 import type { Doc } from '@blocksuite/store';
 import { css, html, type PropertyValues } from 'lit';
@@ -12,30 +11,8 @@ import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
 import { SmallHintIcon } from '../_common/icons.js';
 import { AIProvider } from '../provider.js';
+import { type ChatContextValue, type ChatItem } from './chat-context.js';
 import type { ChatPanelMessages } from './chat-panel-messages.js';
-
-export type ChatMessage = {
-  content: string;
-  role: 'user' | 'assistant';
-  attachments?: string[];
-  createdAt: string;
-};
-
-export type ChatAction = {
-  action: string;
-  messages: ChatMessage[];
-  sessionId: string;
-  createdAt: string;
-};
-
-export type ChatItem = ChatMessage | ChatAction;
-
-export type ChatStatus =
-  | 'loading'
-  | 'success'
-  | 'error'
-  | 'idle'
-  | 'transmitting';
 
 @customElement('chat-panel')
 export class ChatPanel extends WithDisposable(ShadowlessElement) {
@@ -101,19 +78,17 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   accessor doc!: Doc;
 
   @state()
-  accessor items: ChatItem[] = [];
-
-  @state()
-  accessor status: ChatStatus = 'idle';
-
-  @state()
-  accessor error: AIError | null = null;
-
-  @state()
   accessor isLoading = false;
 
   @state()
-  accessor abortController: AbortController | null = null;
+  accessor chatContextValue: ChatContextValue = {
+    quote: '',
+    images: [],
+    abortController: null,
+    items: [],
+    status: 'idle',
+    error: null,
+  };
 
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
@@ -123,10 +98,11 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     if (!this.doc) throw new Error('doc is required');
 
     AIProvider.slots.actions.on(({ action, event }) => {
+      const { status } = this.chatContextValue;
       if (
         action !== 'chat' &&
         event === 'finished' &&
-        (this.status === 'idle' || this.status === 'success')
+        (status === 'idle' || status === 'success')
       ) {
         this._resetItems();
       }
@@ -138,6 +114,10 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       }
     });
   }
+
+  updateContext = (context: Partial<ChatContextValue>) => {
+    this.chatContextValue = { ...this.chatContextValue, ...context };
+  };
 
   private _resettingCounter = 0;
 
@@ -160,11 +140,14 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         items.push(...histories[0].messages);
       }
 
-      this.items = items.sort((a, b) => {
-        return (
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-      });
+      this.chatContextValue = {
+        ...this.chatContextValue,
+        items: items.sort((a, b) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        }),
+      };
 
       this.isLoading = false;
       this.scrollToDown();
@@ -177,28 +160,6 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  updateStatus = (status: ChatStatus) => {
-    this.status = status;
-  };
-
-  addToItems = (messages: ChatItem[]) => {
-    this.items = [...this.items, ...messages];
-    this.scrollToDown();
-  };
-
-  updateItems = (messages: ChatItem[]) => {
-    this.items = messages;
-    this.scrollToDown();
-  };
-
-  updateError = (error: AIError | null) => {
-    this.error = error;
-  };
-
-  updateAbortController = (abortController: AbortController | null) => {
-    this.abortController = abortController;
-  };
-
   scrollToDown() {
     requestAnimationFrame(() => this._chatMessages.value?.scrollToDown());
   }
@@ -208,28 +169,15 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       <div class="chat-panel-title">AFFINE AI</div>
       <chat-panel-messages
         ${ref(this._chatMessages)}
+        .chatContextValue=${this.chatContextValue}
+        .updateContext=${this.updateContext}
         .host=${this.host}
-        .items=${this.items}
-        .status=${this.status}
-        .error=${this.error}
         .isLoading=${this.isLoading}
-        .updateItems=${this.updateItems}
-        .updateStatus=${this.updateStatus}
-        .updateError=${this.updateError}
-        .abortController=${this.abortController}
-        .updateAbortController=${this.updateAbortController}
       ></chat-panel-messages>
       <chat-panel-input
+        .chatContextValue=${this.chatContextValue}
+        .updateContext=${this.updateContext}
         .host=${this.host}
-        .items=${this.items}
-        .updateItems=${this.updateItems}
-        .updateStatus=${this.updateStatus}
-        .abortController=${this.abortController}
-        .updateAbortController=${this.updateAbortController}
-        .addToItems=${this.addToItems}
-        .status=${this.status}
-        .error=${this.error}
-        .updateError=${this.updateError}
       ></chat-panel-input>
       <div class="chat-panel-footer">
         ${SmallHintIcon}

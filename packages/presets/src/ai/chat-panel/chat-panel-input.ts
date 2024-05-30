@@ -14,7 +14,7 @@ import {
 import { AIProvider } from '../provider.js';
 import { reportResponse } from '../utils/action-reporter.js';
 import { readBlobAsURL } from '../utils/image.js';
-import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
+import { type ChatContextValue, type ChatMessage } from './chat-context.js';
 
 const MaximumImageCount = 8;
 
@@ -124,35 +124,11 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor host!: EditorHost;
 
-  @property({ attribute: false })
-  accessor updateItems!: (items: ChatItem[]) => void;
-
-  @property({ attribute: false })
-  accessor addToItems!: (items: ChatItem[]) => void;
-
-  @property({ attribute: false })
-  accessor status!: ChatStatus;
-
-  @property({ attribute: false })
-  accessor items!: ChatItem[];
-
-  @property({ attribute: false })
-  accessor error!: Error | null;
-
-  @property({ attribute: false })
-  accessor updateError!: (error: AIError | null) => void;
-
-  @property({ attribute: false })
-  accessor updateStatus!: (status: ChatStatus) => void;
-
   @query('textarea')
   accessor textarea!: HTMLTextAreaElement;
 
   @query('.close-wrapper')
   accessor closeWrapper!: HTMLDivElement;
-
-  @state()
-  accessor images: File[] = [];
 
   @state()
   accessor curIndex = -1;
@@ -164,40 +140,42 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   accessor focused = false;
 
   @property({ attribute: false })
-  accessor abortController!: AbortController | null;
+  accessor chatContextValue!: ChatContextValue;
 
   @property({ attribute: false })
-  accessor updateAbortController!: (
-    abortController: AbortController | null
-  ) => void;
+  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
 
   send = async () => {
-    if (this.status === 'loading' || this.status === 'transmitting') return;
+    const { status } = this.chatContextValue;
+    if (status === 'loading' || status === 'transmitting') return;
 
     const text = this.textarea.value;
-    const { images } = this;
+    const { images } = this.chatContextValue;
     if (!text && images.length === 0) {
       return;
     }
     const { doc } = this.host;
     this.textarea.value = '';
     this.isInputEmpty = true;
-    this.images = [];
-    this.updateStatus('loading');
-    this.updateError(null);
+    this.updateContext({ images: [], status: 'loading', error: null });
 
     const attachments = await Promise.all(
       images?.map(image => readBlobAsURL(image))
     );
-    this.addToItems([
-      {
-        role: 'user',
-        content: text,
-        createdAt: new Date().toISOString(),
-        attachments,
-      },
-      { role: 'assistant', content: '', createdAt: new Date().toISOString() },
-    ]);
+
+    this.updateContext({
+      items: [
+        ...this.chatContextValue.items,
+        {
+          role: 'user',
+          content: text,
+          createdAt: new Date().toISOString(),
+          attachments,
+        },
+        { role: 'assistant', content: '', createdAt: new Date().toISOString() },
+      ],
+    });
+
     try {
       const abortController = new AbortController();
       const stream = AIProvider.actions.chat?.({
@@ -213,47 +191,50 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       });
 
       if (stream) {
-        this.updateAbortController(abortController);
+        this.updateContext({ abortController });
 
         for await (const text of stream) {
-          this.updateStatus('transmitting');
-          const items = [...this.items];
+          const items = [...this.chatContextValue.items];
           const last = items[items.length - 1] as ChatMessage;
           last.content += text;
-          this.updateItems(items);
+          this.updateContext({ items, status: 'transmitting' });
         }
 
-        this.updateStatus('success');
+        this.updateContext({ status: 'success' });
       }
     } catch (error) {
-      this.updateStatus('error');
-      this.updateError(error as AIError);
+      this.updateContext({ status: 'error', error: error as AIError });
     } finally {
-      this.updateAbortController(null);
+      this.updateContext({ abortController: null });
     }
   };
 
   private _addImages(images: File[]) {
-    this.images = [...this.images, ...images].slice(0, MaximumImageCount);
+    const oldImages = this.chatContextValue.images;
+    this.updateContext({
+      images: [...oldImages, ...images].slice(0, MaximumImageCount),
+    });
   }
 
   protected override render() {
+    const { images, status } = this.chatContextValue;
+
     return html`<style>
         .chat-panel-send svg rect {
-          fill: ${this.isInputEmpty && this.images.length === 0
+          fill: ${this.isInputEmpty && images.length === 0
             ? 'var(--affine-text-disable-color)'
             : 'var(--affine-primary-color)'};
         }
         .chat-panel-images {
-          margin: ${this.images.length > 0 ? '8px' : '0'};
+          margin: ${images.length > 0 ? '8px' : '0'};
         }
         .chat-panel-input {
           border: ${this.focused
             ? '1px solid var(--affine-primary-color)'
             : '1px solid var(--affine-border-color)'};
           box-shadow: ${this.focused ? 'var(--affine-active-shadow)' : 'none'};
-          max-height: ${this.images.length > 0 ? '272px' : '200px'};
-          min-height: ${this.images.length > 0 ? '272px' : '200px'};
+          max-height: ${images.length > 0 ? '272px' : '200px'};
+          min-height: ${images.length > 0 ? '272px' : '200px'};
         }
       </style>
       <div class="chat-panel-input">
@@ -265,7 +246,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
           }}
         >
           ${repeat(
-            this.images,
+            images,
             image => image.name,
             (image, index) =>
               html`<div
@@ -288,10 +269,10 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
           <div
             class="close-wrapper"
             @click=${() => {
-              if (this.curIndex >= 0 && this.curIndex < this.images.length) {
-                const images = [...this.images];
-                images.splice(this.curIndex, 1);
-                this.images = images;
+              if (this.curIndex >= 0 && this.curIndex < images.length) {
+                const newImages = [...images];
+                newImages.splice(this.curIndex, 1);
+                this.updateContext({ images: newImages });
                 this.curIndex = -1;
                 this.closeWrapper.style.display = 'none';
               }
@@ -333,7 +314,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
           }}
         ></textarea>
         <div class="chat-panel-input-actions">
-          ${this.images.length < MaximumImageCount
+          ${images.length < MaximumImageCount
             ? html`<div
                 class="image-upload"
                 @click=${async () => {
@@ -348,11 +329,11 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
                 ${ImageIcon}
               </div>`
             : nothing}
-          ${this.status === 'transmitting'
+          ${status === 'transmitting'
             ? html`<div
                 @click=${() => {
-                  this.abortController?.abort();
-                  this.updateStatus('success');
+                  this.chatContextValue.abortController?.abort();
+                  this.updateContext({ status: 'success' });
                   reportResponse('aborted:stop');
                 }}
               >
