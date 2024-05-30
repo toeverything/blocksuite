@@ -205,7 +205,7 @@ test('the tooltip of shape tool button should be hidden when the shape menu is s
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const shapeTool = locatorEdgelessToolButton(page, 'shape');
+  const shapeTool = await locatorEdgelessToolButton(page, 'shape');
   const shapeToolBox = await shapeTool.boundingBox();
   const tooltip = page.locator('.affine-tooltip');
 
@@ -263,7 +263,7 @@ test('edgeless toolbar shape menu shows up and close normally', async ({
   const toolbarLocator = page.locator('.edgeless-toolbar-container');
   await expect(toolbarLocator).toBeVisible();
 
-  const shapeTool = locatorEdgelessToolButton(page, 'shape');
+  const shapeTool = await locatorEdgelessToolButton(page, 'shape');
   const shapeToolBox = await shapeTool.boundingBox();
 
   assertExists(shapeToolBox);

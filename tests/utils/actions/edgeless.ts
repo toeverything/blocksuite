@@ -5,7 +5,7 @@ import type { IPoint, NoteDisplayMode } from '@blocks/_common/types.js';
 import { type NoteBlockModel } from '@blocks/note-block/index.js';
 import { type IVec } from '@blocks/surface-block/index.js';
 import { assertExists, sleep } from '@global/utils/index.js';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import { type Bound } from '../asserts.js';
@@ -135,7 +135,28 @@ type EdgelessTool =
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
-export function locatorEdgelessToolButton(
+const locatorEdgelessToolButtonSenior = async (
+  page: Page,
+  selector: string
+): Promise<Locator> => {
+  const target = page.locator(selector);
+  const visible = await target.isVisible();
+  if (visible) return target;
+  // try to click next page
+  const nextButton = page.locator(
+    '.senior-nav-button-wrapper.next > icon-button'
+  );
+  const nextExists = await nextButton.count();
+  const isDisabled =
+    (await nextButton.getAttribute('data-test-disabled')) === 'true';
+  console.log({ nextExists, isDisabled });
+  if (!nextExists || isDisabled) return target;
+  await nextButton.click();
+  await page.waitForTimeout(200);
+  return locatorEdgelessToolButtonSenior(page, selector);
+};
+
+export async function locatorEdgelessToolButton(
   page: Page,
   type: EdgelessTool,
   innerContainer = true
@@ -165,7 +186,11 @@ export function locatorEdgelessToolButton(
     default:
       buttonType = 'edgeless-tool-icon-button';
   }
-  const button = page.locator(`edgeless-toolbar ${buttonType}${selector}`);
+  // TODO: quickTool locator is different
+  const button = await locatorEdgelessToolButtonSenior(
+    page,
+    `edgeless-toolbar ${buttonType}${selector}`
+  );
 
   return innerContainer ? button.locator('.icon-container') : button;
 }
@@ -239,7 +264,7 @@ export async function setEdgelessTool(
 ) {
   switch (mode) {
     case 'default': {
-      const button = locatorEdgelessToolButton(page, 'default', false);
+      const button = await locatorEdgelessToolButton(page, 'default', false);
       const classes = (await button.getAttribute('class'))?.split(' ');
       if (!classes?.includes('default')) {
         await button.click();
@@ -248,7 +273,7 @@ export async function setEdgelessTool(
       break;
     }
     case 'pan': {
-      const button = locatorEdgelessToolButton(page, 'default', false);
+      const button = await locatorEdgelessToolButton(page, 'default', false);
       const classes = (await button.getAttribute('class'))?.split(' ');
       if (classes?.includes('default')) {
         await button.click();
@@ -268,12 +293,16 @@ export async function setEdgelessTool(
     case 'eraser':
     case 'frame':
     case 'connector': {
-      const button = locatorEdgelessToolButton(page, mode, false);
+      const button = await locatorEdgelessToolButton(page, mode, false);
       await button.click();
       break;
     }
     case 'shape': {
-      const shapeToolButton = locatorEdgelessToolButton(page, 'shape', false);
+      const shapeToolButton = await locatorEdgelessToolButton(
+        page,
+        'shape',
+        false
+      );
       await shapeToolButton.click();
 
       const squareShapeButton = page
