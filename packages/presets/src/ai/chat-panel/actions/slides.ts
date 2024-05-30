@@ -7,7 +7,7 @@ import { html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ChatAction } from '../index.js';
+import type { ChatAction } from '../chat-context.js';
 
 @customElement('action-slides')
 export class ActionSlides extends WithDisposable(ShadowlessElement) {

@@ -13,7 +13,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { CopyIcon, MoreIcon, RetryIcon } from '../../_common/icons.js';
 import { AIProvider } from '../../provider.js';
 import { copyText } from '../../utils/editor-actions.js';
-import type { ChatItem, ChatMessage, ChatStatus } from '../index.js';
+import { type ChatContextValue, type ChatMessage } from '../chat-context.js';
 import { PageEditorActions } from './actions-handle.js';
 
 noop(Tooltip);
@@ -90,24 +90,10 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
   accessor curBlockSelections: BlockSelection[] | undefined = undefined;
 
   @property({ attribute: false })
-  accessor items!: ChatItem[];
+  accessor chatContextValue!: ChatContextValue;
 
   @property({ attribute: false })
-  accessor updateItems!: (items: ChatItem[]) => void;
-
-  @property({ attribute: false })
-  accessor updateStatus!: (status: ChatStatus) => void;
-
-  @property({ attribute: false })
-  accessor updateError!: (error: AIError | null) => void;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController | null;
-
-  @property({ attribute: false })
-  accessor updateAbortController!: (
-    abortController: AbortController | null
-  ) => void;
+  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
 
   @state()
   private accessor _showMoreMenu = false;
@@ -143,16 +129,14 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
     const { doc } = this.host;
     try {
       const abortController = new AbortController();
-      const items = [...this.items];
+
+      const items = [...this.chatContextValue.items];
       const last = items[items.length - 1];
       if ('content' in last) {
         last.content = '';
         last.createdAt = new Date().toISOString();
       }
-
-      this.updateItems(items);
-      this.updateStatus('loading');
-      this.updateError(null);
+      this.updateContext({ items, status: 'loading', error: null });
 
       const stream = AIProvider.actions.chat?.({
         retry: true,
@@ -166,22 +150,20 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
       });
 
       if (stream) {
-        this.updateAbortController(abortController);
+        this.updateContext({ abortController });
         for await (const text of stream) {
-          this.updateStatus('transmitting');
-          const items = [...this.items];
+          const items = [...this.chatContextValue.items];
           const last = items[items.length - 1] as ChatMessage;
           last.content += text;
-          this.updateItems(items);
+          this.updateContext({ items, status: 'transmitting' });
         }
 
-        this.updateStatus('success');
+        this.updateContext({ status: 'success' });
       }
     } catch (error) {
-      this.updateStatus('error');
-      this.updateError(error as AIError);
+      this.updateContext({ status: 'error', error: error as AIError });
     } finally {
-      this.updateAbortController(null);
+      this.updateContext({ abortController: null });
     }
   }
 
