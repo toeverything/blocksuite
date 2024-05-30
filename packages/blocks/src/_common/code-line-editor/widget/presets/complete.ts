@@ -1,11 +1,14 @@
 import type { Query, SyntaxNode } from 'web-tree-sitter';
 
-import type { CodeLine, CodeLineSelection } from '../../code-line.js';
+import type {
+  CodeLine,
+  CodeLinePositionSelection,
+  CodeLineSelection,
+} from '../../code-line.js';
 import { Widget } from '../widget.js';
 
 type Complete = {
-  offsetStart?: number;
-  offsetEnd?: number;
+  selection: CodeLineSelection;
   text: string;
 };
 
@@ -14,7 +17,7 @@ export class CodeCompleteWidget extends Widget {
   private matches = new Set<{
     query: Query;
     run: (
-      selection: CodeLineSelection,
+      selection: CodeLinePositionSelection,
       name: string,
       node: SyntaxNode
     ) => Complete[];
@@ -52,7 +55,7 @@ export class CodeCompleteWidget extends Widget {
             background-color: #ccc;
         }
         `;
-    this.codeLine.root.append(styleElement);
+    this.codeLine.append(styleElement);
   }
 
   protected initHotKey() {
@@ -85,9 +88,9 @@ export class CodeCompleteWidget extends Widget {
         this.closeComplete();
       }
     };
-    this.codeLine.root.addEventListener('keydown', listener);
+    this.codeLine.addEventListener('keydown', listener);
     this.disposables.add(() => {
-      this.codeLine.root.removeEventListener('keydown', listener);
+      this.codeLine.removeEventListener('keydown', listener);
     });
   }
 
@@ -97,7 +100,7 @@ export class CodeCompleteWidget extends Widget {
     this.initHotKey();
     this.ops.matches.forEach(matcher => {
       this.matches.add({
-        query: this.codeLine.language.query(matcher.query),
+        query: this.codeLine.parser!.language.query(matcher.query),
         run: matcher.run,
       });
     });
@@ -127,10 +130,10 @@ export class CodeCompleteWidget extends Widget {
     );
   }
 
-  openComplete(start: number, end: number, list: Complete[]) {
-    this.codeLine.root.append(this.completeArea);
+  openComplete(selection: CodeLineSelection, list: Complete[]) {
+    this.codeLine.append(this.completeArea);
     this.completeArea.innerHTML = '';
-    const range = this.codeLine.selectionToRange(start, end);
+    const range = this.codeLine.selectionToRange(selection);
     if (!range) return;
     const rect = range.getBoundingClientRect();
     const parent = this.completeArea.offsetParent;
@@ -146,8 +149,8 @@ export class CodeCompleteWidget extends Widget {
       div.style.borderRadius = '4px';
       div.style.margin = '4px';
       div.addEventListener('click', () => {
-        const realStart = start + (item.offsetStart ?? 0);
-        const realEnd = end + (item.offsetEnd ?? 0);
+        const realStart = selection.start + (item.selection.start ?? 0);
+        const realEnd = selection.end + (item.selection.end ?? 0);
         this.codeLine.replaceText(realStart, realEnd, item.text);
         this.closeComplete();
       });

@@ -1,16 +1,11 @@
+import '../_common/code-line-editor/code-line.js';
+
 import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { Slice, Slot } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-import type { SyntaxNode } from 'web-tree-sitter';
-import Parser from 'web-tree-sitter';
 
-import {
-  CodeLine,
-  type CodeLineSelection,
-  codeLineWidgetPresets,
-} from '../_common/code-line-editor/index.js';
 import { popMenu } from '../_common/components/index.js';
 import {
   CopyIcon,
@@ -166,9 +161,6 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
         this.viewSource.updateSlot.emit();
       })
     );
-    this.initQuery().catch(console.error);
-    // this.disposables.add(() => {
-    // });
   }
 
   private dataView = new DataView();
@@ -274,77 +266,11 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       AFFINE_INNER_MODAL_WIDGET
     ] as AffineInnerModalWidget;
   }
-  @query('.query-container')
-  accessor queryContainer!: HTMLDivElement;
-  async initQuery() {
-    await Parser.init({
-      locateFile(scriptName: string) {
-        return `/${scriptName}`;
-      },
-    });
-    CodeLine.create(this.queryContainer, {
-      source:
-        'query todos as todo where todo.contains("asd") order by todo.createDate() desc skip 5 take 10',
-      language: await Parser.Language.load('/query-lang.wasm'),
-      widgets: [
-        new codeLineWidgetPresets.CodeErrorWidget(),
-        new codeLineWidgetPresets.CodeHighlightWidget(`
-(binary_expression operator:_ @operator)
-(number) @number
-(string) @string
-(boolean) @boolean
-(dot_expression "." @operator)
-(identifier) @identifier
-(query_expression [(_ ["query" "as" "where" "order" "by" "desc" "asc" "skip" "take"] @keyword) "query" @keyword])
-`),
-        new codeLineWidgetPresets.CodeCompleteWidget({
-          matches: [
-            {
-              query: '(dot_expression function:(_) @function)',
-              run: (selection, _name, node) =>
-                buildComplete(functionList, selection, node),
-            },
-            {
-              query: '(expression) @exp',
-              run: (selection, _name, node) =>
-                buildComplete(
-                  [...variableList, ...functionList],
-                  selection,
-                  node
-                ),
-            },
-          ],
-        }),
-      ],
-    });
-  }
   renderQuery() {
     return html`
-      <style>
-        ::highlight(clh-identifier) {
-          color: rgba(193, 122, 181);
-        }
-        ::highlight(clh-keyword) {
-          color: rgba(207, 141, 108);
-        }
-
-        ::highlight(clh-string) {
-          color: rgba(106, 170, 114);
-        }
-
-        ::highlight(clh-number) {
-          color: rgba(41, 171, 183);
-        }
-
-        ::highlight(clh-operator) {
-          color: black;
-        }
-
-        ::highlight(clh-boolean) {
-          color: rgba(207, 141, 108);
-        }
-      </style>
-      <div class="query-container"></div>
+      <code-line-editor
+        source='query todos as todo where todo.contains("asd") order by todo.createDate() desc skip 5 take 10'
+      ></code-line-editor>
     `;
   }
 
@@ -381,40 +307,3 @@ declare global {
     'affine-data-view': DataViewBlockComponent;
   }
 }
-
-const variableList = [
-  'column1',
-  'column2',
-  'column3',
-  'column4',
-  'JSON',
-  'true',
-  'false',
-  'window',
-  'console',
-];
-const functionList = [
-  'max',
-  'min',
-  'abs',
-  'sqrt',
-  'pow',
-  'length',
-  'normalize',
-  'slice',
-  'parse',
-];
-const buildComplete = (
-  options: string[],
-  selection: CodeLineSelection,
-  node: SyntaxNode
-) => {
-  return options.filter(filter(node.text)).map(v => ({
-    text: v,
-    offsetStart: node.startIndex - selection.start,
-    offsetEnd: node.endIndex - selection.end,
-  }));
-};
-const filter = (text: string) => (s: string) => {
-  return s.startsWith(text) && text != s;
-};

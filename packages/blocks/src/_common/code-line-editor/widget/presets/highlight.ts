@@ -14,7 +14,9 @@ export class CodeHighlightWidget extends Widget {
   override init(codeLine: CodeLine) {
     super.init(codeLine);
     try {
-      this.highlightQuery = this.codeLine.language.query(this.highlight);
+      this.highlightQuery = this.codeLine.parser?.language.query(
+        this.highlight
+      );
     } catch (e) {
       console.error(e);
     }

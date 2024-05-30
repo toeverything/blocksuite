@@ -10,7 +10,7 @@ export class CodeErrorWidget extends Widget {
     this.errorArea.style.position = 'absolute';
     this.errorArea.style.left = '0';
     this.errorArea.style.top = '0';
-    this.codeLine.root.append(this.errorArea);
+    this.codeLine.append(this.errorArea);
   }
 
   override init(codeLine: CodeLine) {
@@ -22,10 +22,10 @@ export class CodeErrorWidget extends Widget {
         this.errorArea.innerHTML = '';
         const baseRect = this.errorArea.getBoundingClientRect();
         for (const error of errors) {
-          const range = this.codeLine.selectionToRange(
-            error.startIndex,
-            error.endIndex
-          );
+          const range = this.codeLine.selectionToRange({
+            start: error.startPosition,
+            end: error.endPosition,
+          });
           if (range) {
             for (const rect of range.getClientRects()) {
               const div = document.createElement('div');
