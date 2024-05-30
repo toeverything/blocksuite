@@ -27,6 +27,7 @@ export class PeekableController {
 }
 
 export interface PeekViewService {
+  peek(pageRef: { docId: string; blockId?: string }): void;
   peek(target: HTMLElement): void;
   peek<Element extends BlockElement>(target: Element): void;
 }
