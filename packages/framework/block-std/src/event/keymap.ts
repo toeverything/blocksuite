@@ -50,6 +50,7 @@ function normalizeKeyName(name: string) {
 }
 
 function modifiers(name: string, event: KeyboardEvent, shift = true) {
+  if (name.length === 1) name = name.toLocaleLowerCase();
   if (event.altKey) name = 'Alt-' + name;
   if (event.ctrlKey) name = 'Ctrl-' + name;
   if (event.metaKey) name = 'Meta-' + name;
