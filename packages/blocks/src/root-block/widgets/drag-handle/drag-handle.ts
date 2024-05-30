@@ -3,14 +3,18 @@ import {
   PathFinder,
   type PointerEventState,
   type UIEventHandler,
+  WidgetElement,
 } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/block-std';
 import {
   assertExists,
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
-import { type BlockModel, type BlockSelector } from '@blocksuite/store';
+import {
+  type BlockModel,
+  type BlockSelector,
+  BlockViewType,
+} from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -44,7 +48,6 @@ import type { EdgelessBlockModel } from '../../edgeless/type.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
-import { DragHandleOptionsRunner } from './config.js';
 import {
   DRAG_HANDLE_CONTAINER_OFFSET_LEFT_TOP_LEVEL,
   DRAG_HANDLE_CONTAINER_PADDING,
@@ -55,6 +58,7 @@ import {
   DRAG_HANDLE_GRABBER_WIDTH,
   DRAG_HANDLE_GRABBER_WIDTH_HOVERED,
   DRAG_HOVER_RECT_PADDING,
+  DragHandleOptionsRunner,
   HOVER_AREA_RECT_PADDING_TOP_LEVEL,
 } from './config.js';
 import { styles } from './styles.js';
@@ -354,6 +358,46 @@ export class AffineDragHandleWidget extends WidgetElement<
     return previewOffset;
   };
 
+  private _calculateSelector = (selectedIds: string[]): BlockSelector => {
+    const ids: Array<{ id: string; type: BlockViewType }> = selectedIds.map(
+      id => ({
+        id,
+        type: BlockViewType.Display,
+      })
+    );
+
+    // The ancestors of the selected blocks should be rendered as Bypass
+    selectedIds.map(block => {
+      let parent: string | null = block;
+      do {
+        if (!selectedIds.includes(parent)) {
+          ids.push({ type: BlockViewType.Bypass, id: parent });
+        }
+        parent = this.doc.blockCollection.crud.getParent(parent);
+      } while (parent && !ids.map(({ id }) => id).includes(parent));
+    });
+
+    // The children of the selected blocks should be rendered as Display
+    const addChildren = (id: string) => {
+      const children = this.doc.getBlock(id)?.model.children ?? [];
+      children.forEach(child => {
+        ids.push({ type: BlockViewType.Display, id: child.id });
+        addChildren(child.id);
+      });
+    };
+    selectedIds.forEach(addChildren);
+
+    const selector: BlockSelector = block => {
+      const includes = ids.find(({ id }) => id === block.id);
+      if (includes) {
+        return includes.type;
+      }
+      return BlockViewType.Hidden;
+    };
+
+    return selector;
+  };
+
   private _createDragPreview = (
     blockElements: BlockElement[],
     state: PointerEventState,
@@ -374,16 +418,8 @@ export class AffineDragHandleWidget extends WidgetElement<
         blockElement => blockElement.model.id
       );
 
-      const ids: string[] = [];
-      selectedIds.map(block => {
-        let parent: string | null = block;
-        while (parent && !ids.includes(parent)) {
-          ids.push(parent);
-          parent = this.doc.blockCollection.crud.getParent(parent);
-        }
-      });
+      const selector = this._calculateSelector(selectedIds);
 
-      const selector: BlockSelector = block => ids.includes(block.id);
       const doc = this.doc.blockCollection.getDoc(selector);
 
       const previewSpec = SpecProvider.getInstance().getSpec('preview');
@@ -968,7 +1004,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     const state = ctx.get('pointerState');
     const { target } = state.raw;
     const element = captureEventTarget(target);
-    this.cumulativeParentScale = state.cumulativeParentScale;
     // When pointer not on block or on dragging, should do nothing
     if (!element) return;
 
@@ -1169,10 +1204,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       const { left: viewportLeft, top: viewportTop } = edgelessRoot.viewport;
 
       const newNoteId = edgelessRoot.addNoteWithPoint(
-        new Point(
-          (state.raw.x - viewportLeft) / this.cumulativeParentScale,
-          (state.raw.y - viewportTop) / this.cumulativeParentScale
-        ),
+        new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
         {
           scale: this.noteScale,
         }

@@ -9,7 +9,7 @@ import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
 import type { DocCollection } from '../collection.js';
 import { Space } from '../space.js';
 import { DocCRUD } from './crud.js';
-import type { BlockSelector, YBlock } from './index.js';
+import { type BlockSelector, BlockViewType, type YBlock } from './index.js';
 import { Doc } from './index.js';
 
 export type YBlocks = Y.Map<YBlock>;
@@ -33,7 +33,7 @@ type DocOptions = {
   idGenerator?: IdGenerator;
 };
 
-export const defaultBlockSelector = () => true;
+export const defaultBlockSelector = () => BlockViewType.Display;
 
 export class BlockCollection extends Space<FlatBlockMap> {
   private readonly _collection: DocCollection;

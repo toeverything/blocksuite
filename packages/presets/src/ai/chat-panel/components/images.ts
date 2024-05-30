@@ -16,6 +16,8 @@ export const renderImages = (images: string[]) => {
         display: flex;
         justify-content: center;
         align-items: center;
+        width: 70%;
+        max-width: 320px;
 
         img {
           max-width: 100%;

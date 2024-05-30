@@ -16,6 +16,7 @@ import { ref } from 'lit/directives/ref.js';
 
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
 import { HoverController } from '../../../../components/hover/controller.js';
+import { Peekable } from '../../../../components/peekable.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { FontDocIcon, FontLinkedDocIcon } from '../../../../icons/text.js';
 import {
@@ -32,7 +33,15 @@ export type RefNodeSlots = {
   docLinkClicked: Slot<{ docId: string; blockId?: string }>;
   tagClicked: Slot<{ tagId: string }>;
 };
+
+declare module '@blocksuite/blocks' {
+  interface PeekViewService {
+    peek(target: AffineReference): void;
+  }
+}
+
 @customElement('affine-reference')
+@Peekable({ action: false })
 export class AffineReference extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-reference {
@@ -78,7 +87,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   // Since the linked doc may be deleted, the `_refMeta` could be undefined.
   @state()
-  private accessor _refMeta: DocMeta | undefined = undefined;
+  accessor refMeta: DocMeta | undefined = undefined;
 
   private _refAttribute: NonNullable<AffineTextAttributes['reference']> = {
     type: 'LinkedPage',
@@ -171,7 +180,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const refMeta = doc.collection.meta.docMetas.find(
       doc => doc.id === refAttribute.pageId
     );
-    this._refMeta = refMeta
+    this.refMeta = refMeta
       ? {
           ...refMeta,
         }
@@ -181,7 +190,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   private _onClick() {
     if (!this.config.interactable) return;
 
-    const refMeta = this._refMeta;
+    const refMeta = this.refMeta;
     const model = getModelByElement(this);
     if (!refMeta) {
       // The doc is deleted
@@ -200,37 +209,41 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     rootElement.slots.docLinkClicked.emit({ docId: targetDocId });
   }
 
-  private _whenHover = new HoverController(this, ({ abortController }) => {
-    if (this.doc.readonly) {
-      return null;
-    }
+  private _whenHover: HoverController = new HoverController(
+    this,
+    ({ abortController }) => {
+      if (this.doc.readonly) {
+        return null;
+      }
 
-    const selection = this.std.selection;
-    const textSelection = selection.find('text');
-    if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
-    ) {
-      return null;
-    }
+      const selection = this.std.selection;
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || !!textSelection.from.length)
+      ) {
+        return null;
+      }
 
-    const blockSelections = selection.filter('block');
-    if (blockSelections.length) {
-      return null;
-    }
+      const blockSelections = selection.filter('block');
+      if (blockSelections.length) {
+        return null;
+      }
 
-    return {
-      template: toggleReferencePopup(
-        this.inlineEditor,
-        this.selfInlineRange,
-        this._refMeta?.title ?? DEFAULT_DOC_NAME,
-        abortController
-      ),
-    };
-  });
+      return {
+        template: toggleReferencePopup(
+          this,
+          this.inlineEditor,
+          this.selfInlineRange,
+          this.refMeta?.title ?? DEFAULT_DOC_NAME,
+          abortController
+        ),
+      };
+    }
+  );
 
   override render() {
-    const refMeta = this._refMeta;
+    const refMeta = this.refMeta;
     const isDeleted = !refMeta;
 
     const attributes = this.delta.attributes;

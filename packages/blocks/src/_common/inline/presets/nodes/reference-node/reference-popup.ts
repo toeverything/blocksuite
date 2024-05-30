@@ -23,6 +23,9 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  accessor target!: LitElement;
+
+  @property({ attribute: false })
   accessor inlineEditor!: AffineInlineEditor;
 
   @property({ attribute: false })
@@ -191,6 +194,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     }
     this._moreMenuAbortController = new AbortController();
     const referencePopupMoreMenu = new ReferencePopupMoreMenu();
+    referencePopupMoreMenu.target = this.target;
     referencePopupMoreMenu.abortController = this.abortController;
     referencePopupMoreMenu.inlineEditor = this.inlineEditor;
     referencePopupMoreMenu.targetInlineRange = this.targetInlineRange;
@@ -289,12 +293,14 @@ declare global {
 }
 
 export function toggleReferencePopup(
+  target: LitElement,
   inlineEditor: AffineInlineEditor,
   targetInlineRange: InlineRange,
   docTitle: string,
   abortController: AbortController
 ): ReferencePopup {
   const popup = new ReferencePopup();
+  popup.target = target;
   popup.inlineEditor = inlineEditor;
   popup.targetInlineRange = targetInlineRange;
   popup.docTitle = docTitle;

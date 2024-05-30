@@ -1,8 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
 import type { Doc } from '@blocksuite/store';
+import { type BlockModel, BlockViewType } from '@blocksuite/store';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
 import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
@@ -27,6 +28,9 @@ export class BlockElement<
 
   @property({ attribute: false })
   accessor content: TemplateResult | null = null;
+
+  @property({ attribute: false })
+  accessor viewType: BlockViewType = BlockViewType.Display;
 
   @property({
     attribute: false,
@@ -294,7 +298,7 @@ export class BlockElement<
   }
 
   override render() {
-    return when(
+    const block = when(
       this.isVersionMismatch,
       () => {
         const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
@@ -308,5 +312,11 @@ export class BlockElement<
       },
       () => this.renderBlock()
     );
+
+    return choose(this.viewType, [
+      [BlockViewType.Display, () => block],
+      [BlockViewType.Hidden, () => nothing],
+      [BlockViewType.Bypass, () => this.renderChildren(this.model)],
+    ]);
   }
 }

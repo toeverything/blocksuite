@@ -23,9 +23,9 @@ import {
   ArrowUpIcon,
 } from '../../_common/icons.js';
 import { createTextRenderer } from '../../messages/text.js';
+import type { ChatAction } from '../chat-context.js';
 import { renderImages } from '../components/images.js';
 import { HISTORY_IMAGE_ACTIONS } from '../const.js';
-import type { ChatAction } from '../index.js';
 
 const icons: Record<string, TemplateResult<1>> = {
   'Fix spelling for it': AIDoneIcon,
@@ -50,6 +50,13 @@ const icons: Record<string, TemplateResult<1>> = {
   'Create a presentation': AIPresentationIcon,
   'Write a poem about this': AIPenIcon,
   'Write a blog post about this': AIPenIcon,
+  'AI image filter clay style': AIImageIcon,
+  'AI image filter sketch style': AIImageIcon,
+  'AI image filter anime style': AIImageIcon,
+  'AI image filter pixel style': AIImageIcon,
+  Clearer: AIImageIcon,
+  'Remove background': AIImageIcon,
+  'Convert to sticker': AIImageIcon,
 };
 
 @customElement('action-wrapper')
