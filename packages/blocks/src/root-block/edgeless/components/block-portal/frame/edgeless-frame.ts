@@ -279,7 +279,7 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
     const zoom = edgeless.service.viewport.zoom;
 
     return repeat(
-      Array.from(new Set(edgeless.service.layer.frames)),
+      this.frames,
       frame => frame.id,
       (frame, index) => html`
         <edgeless-frame-title

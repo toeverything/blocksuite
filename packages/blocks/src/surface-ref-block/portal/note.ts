@@ -4,12 +4,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import {
-  type Block,
-  type BlockModel,
-  BlockViewType,
-  type Doc,
-} from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -44,28 +39,10 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   ancestors: Set<string> = new Set();
 
-  selector = (block: Block, doc: Doc) => {
-    let parent: BlockModel | Block | null = block;
-
-    if (this.ancestors.has(block.id)) {
-      return BlockViewType.Display;
-    }
-
-    while (parent) {
-      if (parent.id === this.model.id) {
-        return BlockViewType.Display;
-      }
-
-      parent = doc.getParent(parent.id);
-    }
-
-    return BlockViewType.Hidden;
-  };
-
-  renderPreview(model: BlockModel) {
-    const doc = model.doc.blockCollection.getDoc(this.selector);
+  renderPreview() {
+    const doc = this.model.doc.blockCollection.getDoc();
     const previewSpec = SpecProvider.getInstance().getSpec('preview');
-    return this.host.renderSpecPortal(doc, previewSpec.value);
+    return this.host.renderSpecPortal(doc, previewSpec.value.slice());
   }
 
   override connectedCallback() {
@@ -82,9 +59,6 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     this.disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
-    this._disposables.add(() => {
-      this.model.doc.blockCollection.clearSelector(this.selector);
-    });
   }
 
   override updated() {
@@ -143,7 +117,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
         data-model-height="${modelH}"
         data-portal-reference-block-id="${model.id}"
       >
-        ${this.renderPreview(model)}
+        ${this.renderPreview()}
       </div>
     `;
   }

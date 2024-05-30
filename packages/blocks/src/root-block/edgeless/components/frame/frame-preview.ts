@@ -6,13 +6,15 @@ import {
   WithDisposable,
 } from '@blocksuite/block-std';
 import { debounce, DisposableGroup } from '@blocksuite/global/utils';
-import { type Doc, nanoid } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
+import { type Block, BlockViewType, type Doc, nanoid } from '@blocksuite/store';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import { SpecProvider } from '../../../../specs/index.js';
 import type {
   ElementUpdatedData,
   SurfaceBlockModel,
@@ -333,6 +335,32 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     );
   }
 
+  private _getSelector = (model: BlockModel) => {
+    return (block: Block, doc: Doc) => {
+      let parent: BlockModel | Block | null = block;
+
+      while (parent) {
+        if (parent.id === model.id) {
+          return BlockViewType.Display;
+        }
+
+        parent = doc.getParent(parent.id);
+      }
+
+      return BlockViewType.Hidden;
+    };
+  };
+
+  private _renderModel(model: BlockModel) {
+    const selector = this._getSelector(model);
+    this._disposables.add(() => {
+      doc.blockCollection.clearSelector(selector);
+    });
+    const doc = model.doc.blockCollection.getDoc(selector);
+    const previewSpec = SpecProvider.getInstance().getSpec('preview');
+    return this.host.renderSpecPortal(doc, previewSpec.value);
+  }
+
   private _renderSurfaceContent(referencedModel: FrameBlockModel) {
     const { width, height } = this._getViewportWH(referencedModel);
     return html`<div
@@ -362,7 +390,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
             .doc=${this.doc}
             .host=${this.host}
             .refModel=${referencedModel}
-            .renderModel=${this.host.renderModel}
+            .renderModel=${this._renderModel}
           ></surface-ref-portal>
           <div class="frame-preview-surface-canvas-container">
             <!-- attach canvas here -->
