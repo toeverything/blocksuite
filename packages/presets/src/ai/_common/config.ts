@@ -391,3 +391,24 @@ export const AIImageItemGroups: AIItemGroupConfig[] = [
   },
   OthersAIGroup,
 ];
+
+export const AICodeItemGroups: AIItemGroupConfig[] = [
+  {
+    name: 'review with ai',
+    items: [
+      {
+        name: 'Explain this code',
+        icon: ExplainIcon,
+        showWhen: codeBlockShowWhen,
+        handler: actionToHandler('explainCode', AIStarIconWithAnimation),
+      },
+      {
+        name: 'Check code error',
+        icon: ExplainIcon,
+        showWhen: codeBlockShowWhen,
+        handler: actionToHandler('checkCodeErrors', AIStarIconWithAnimation),
+      },
+    ],
+  },
+  OthersAIGroup,
+];

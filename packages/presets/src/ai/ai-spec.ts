@@ -3,8 +3,10 @@ import {
   AFFINE_AI_PANEL_WIDGET,
   AFFINE_EDGELESS_COPILOT_WIDGET,
   AffineAIPanelWidget,
+  AffineCodeToolbarWidget,
   AffineFormatBarWidget,
   AffineSlashMenuWidget,
+  CodeBlockSpec,
   EdgelessCopilotWidget,
   EdgelessElementToolbarWidget,
   EdgelessRootBlockSpec,
@@ -16,6 +18,7 @@ import { assertInstanceOf } from '@blocksuite/global/utils';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { buildAIPanelConfig } from './ai-panel.js';
+import { setupCodeToolbarEntry } from './entries/code-toolbar/setup-code-toolbar.js';
 import {
   setupEdgelessCopilot,
   setupEdgelessElementToolbarEntry,
@@ -121,6 +124,18 @@ export const AIParagraphBlockSpec: BlockSpec = {
         };
         return placeholders[model.type];
       };
+    });
+  },
+};
+
+export const AICodeBlockSpec: BlockSpec = {
+  ...CodeBlockSpec,
+  setup(slots, disposableGroup) {
+    CodeBlockSpec.setup?.(slots, disposableGroup);
+    slots.widgetConnected.on(view => {
+      if (view.component instanceof AffineCodeToolbarWidget) {
+        setupCodeToolbarEntry(view.component);
+      }
     });
   },
 };
