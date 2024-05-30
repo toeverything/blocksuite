@@ -412,6 +412,7 @@ export class AffineAIPanelWidget extends WidgetElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._clearDiscardModal();
+    this._stopAutoUpdate?.();
   }
 
   private _onDocumentClick = (e: MouseEvent) => {
