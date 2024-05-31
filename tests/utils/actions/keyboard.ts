@@ -97,8 +97,10 @@ export async function pressEnterWithShortkey(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+Enter`, { delay: 20 });
 }
 
-export async function pressEscape(page: Page) {
-  await page.keyboard.press('Escape');
+export async function pressEscape(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('Escape', { delay: 20 });
+  }
 }
 
 export async function undoByKeyboard(page: Page) {

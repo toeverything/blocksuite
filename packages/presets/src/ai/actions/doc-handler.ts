@@ -21,6 +21,7 @@ import {
   getSelectedImagesAsBlobs,
   getSelectedTextContent,
   getSelections,
+  selectAboveBlocks,
 } from '../utils/selection-utils.js';
 
 export function bindTextStream(
@@ -73,15 +74,24 @@ export function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     let stream: BlockSuitePresets.TextStream | undefined;
     return {
       async *[Symbol.asyncIterator]() {
-        const selections = getSelections(host);
-        const [markdown, attachments] = await Promise.all([
-          getSelectedTextContent(host),
-          getSelectedImagesAsBlobs(host),
-        ]);
+        const { currentTextSelection, selectedBlocks } = getSelections(host);
+
+        let markdown: string;
+        let attachments: File[] = [];
+
+        if (currentTextSelection?.isCollapsed()) {
+          markdown = await selectAboveBlocks(host);
+        } else {
+          [markdown, attachments] = await Promise.all([
+            getSelectedTextContent(host),
+            getSelectedImagesAsBlobs(host),
+          ]);
+        }
+
         // for now if there are more than one selected blocks, we will not omit the attachments
         const sendAttachments =
-          selections?.selectedBlocks?.length === 1 && attachments.length > 0;
-        const models = selections?.selectedBlocks?.map(block => block.model);
+          selectedBlocks?.length === 1 && attachments.length > 0;
+        const models = selectedBlocks?.map(block => block.model);
         const options = {
           ...variants,
           attachments: sendAttachments ? attachments : undefined,

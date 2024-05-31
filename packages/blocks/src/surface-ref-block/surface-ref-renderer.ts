@@ -95,9 +95,9 @@ export class SurfaceRefRenderer {
     const init = () => {
       const model = getSurfaceBlock(this.doc);
       this._surfaceModel = model;
-      this.slots.surfaceModelChanged.emit(model);
 
-      if (!this._surfaceModel) return;
+      if (!model) return;
+      this.slots.surfaceModelChanged.emit(model);
     };
 
     init();

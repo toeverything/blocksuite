@@ -74,15 +74,37 @@ export class IconButton extends LitElement {
       display: none;
     }
 
-    :host > .text {
-      flex: 1;
+    :host > .text-container {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+    }
+
+    :host .text {
+      font-size: var(--affine-font-sm);
+      line-height: var(--affine-line-height);
+    }
+
+    :host .sub-text {
+      font-size: var(--affine-font-xs);
+      color: var(
+        --light-textColor-textSecondaryColor,
+        var(--textColor-textSecondaryColor, #8e8d91)
+      );
+      line-height: var(--affine-line-height);
+      text-overflow: ellipsis;
       overflow: hidden;
+      margin-top: -2px;
     }
 
     ::slotted(svg) {
       color: var(--svg-icon-color);
+    }
+
+    ::slotted([slot='suffix']) {
+      margin-left: auto;
     }
   `;
 
@@ -97,6 +119,9 @@ export class IconButton extends LitElement {
 
   @property()
   accessor text: string | null = null;
+
+  @property()
+  accessor subText: string | null = null;
 
   @property({ attribute: true, type: Boolean })
   accessor active: boolean = false;
@@ -175,10 +200,23 @@ export class IconButton extends LitElement {
       this.style.setProperty('--svg-icon-color', iconColor);
     }
 
-    return html`<slot></slot>${this.text
-        ? // wrap a span around the text so we can ellipsis it automatically
-          html`<span class="text">${this.text}</span>`
-        : ''}<slot name="suffix"></slot>`;
+    const text = this.text
+      ? // wrap a span around the text so we can ellipsis it automatically
+        html`<div class="text">${this.text}</div>`
+      : nothing;
+
+    const subText = this.subText
+      ? html`<div class="sub-text">${this.subText}</div>`
+      : nothing;
+
+    const textContainer =
+      this.text || this.subText
+        ? html`<div class="text-container">${text}${subText}</div>`
+        : nothing;
+
+    return html` <slot></slot>
+      ${textContainer}
+      <slot name="suffix"></slot>`;
   }
 }
 

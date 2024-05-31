@@ -8,6 +8,7 @@ import type {
 } from '@blocksuite/blocks';
 import { BlocksUtils, EdgelessRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockModel } from '@blocksuite/store';
 import { type DraftModel, Slice, toDraftModel } from '@blocksuite/store';
 
 import { getEdgelessCopilotWidget, getService } from './edgeless.js';
@@ -107,12 +108,12 @@ function traverse(model: DraftModel, drafts: DraftModel[]) {
   model.children = children;
 }
 
-export async function getSelectedTextContent(editorHost: EditorHost) {
-  const selectedModels = getSelectedModels(editorHost);
-  assertExists(selectedModels);
-
+export async function getTextContentFromBlockModels(
+  editorHost: EditorHost,
+  models: BlockModel[]
+) {
   // Currently only filter out images and databases
-  const selectedTextModels = selectedModels.filter(
+  const selectedTextModels = models.filter(
     model =>
       !BlocksUtils.matchFlavours(model, ['affine:image', 'affine:database'])
   );
@@ -120,6 +121,66 @@ export async function getSelectedTextContent(editorHost: EditorHost) {
   drafts.forEach(draft => traverse(draft, drafts));
   const slice = Slice.fromModels(editorHost.std.doc, drafts);
   return getMarkdownFromSlice(editorHost, slice);
+}
+
+export async function getSelectedTextContent(editorHost: EditorHost) {
+  const selectedModels = getSelectedModels(editorHost);
+  assertExists(selectedModels);
+  return getTextContentFromBlockModels(editorHost, selectedModels);
+}
+
+export async function selectAboveBlocks(editorHost: EditorHost, num = 10) {
+  let selectedModels = getSelectedModels(editorHost);
+  assertExists(selectedModels);
+
+  const lastLeafModel = selectedModels[selectedModels.length - 1];
+
+  let noteModel: BlockModel | null = lastLeafModel;
+  let lastRootModel: BlockModel | null = null;
+  while (noteModel && noteModel.flavour !== 'affine:note') {
+    lastRootModel = noteModel;
+    noteModel = editorHost.doc.getParent(noteModel);
+  }
+  assertExists(noteModel);
+  assertExists(lastRootModel);
+
+  const endIndex = noteModel.children.indexOf(lastRootModel) + 1;
+  const startIndex = Math.max(0, endIndex - num);
+  const startBlock = noteModel.children[startIndex];
+
+  selectedModels = [];
+  let stop = false;
+  const traverse = (model: BlockModel): void => {
+    if (stop) return;
+
+    selectedModels.push(model);
+
+    if (model === lastLeafModel) {
+      stop = true;
+      return;
+    }
+
+    model.children.forEach(child => traverse(child));
+  };
+  noteModel.children.slice(startIndex, endIndex).forEach(traverse);
+
+  const { selection } = editorHost;
+  selection.set([
+    selection.create('text', {
+      from: {
+        blockId: startBlock.id,
+        index: 0,
+        length: startBlock.text?.length ?? 0,
+      },
+      to: {
+        blockId: lastLeafModel.id,
+        index: 0,
+        length: selection.find('text')?.from.index ?? 0,
+      },
+    }),
+  ]);
+
+  return getTextContentFromBlockModels(editorHost, selectedModels);
 }
 
 export const stopPropagation = (e: Event) => {
