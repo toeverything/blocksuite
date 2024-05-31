@@ -8,7 +8,7 @@ import {
   ListBlockComponent,
   ParagraphBlockComponent,
 } from '@blocksuite/blocks';
-import { type BlockSelector, type Doc } from '@blocksuite/store';
+import { type BlockSelector, BlockViewType, type Doc } from '@blocksuite/store';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -179,7 +179,9 @@ export class AIAnswerText extends WithDisposable(LitElement) {
       'affine:code',
       'affine:list',
       'affine:divider',
-    ]);
+    ])
+      ? BlockViewType.Display
+      : BlockViewType.Hidden;
 
   private _updateDoc = () => {
     if (this._answers.length > 0) {

@@ -45,6 +45,7 @@ import { EXCLUDING_COPY_ACTIONS, IMAGE_ACTIONS } from './consts.js';
 import { bindTextStream } from './doc-handler.js';
 import {
   actionToErrorResponse,
+  actionToGenerating,
   actionToResponse,
   getElementToolbar,
   responses,
@@ -87,11 +88,11 @@ function actionToRenderer<T extends keyof BlockSuitePresets.AIActions>(
   }
 
   if (id === 'makeItReal') {
-    return createIframeRenderer;
+    return createIframeRenderer(host, { height: 300 });
   }
 
   if (IMAGE_ACTIONS.includes(id)) {
-    return createImageRenderer;
+    return createImageRenderer(host, { height: 300 });
   }
 
   return createTextRenderer(host, { maxHeight: 320 });
@@ -302,6 +303,7 @@ function updateEdgelessAIPanelConfig<
     customInput
   )(host, ctx);
   config.finishStateConfig = actionToResponse(id, host, ctx, variants);
+  config.generatingStateConfig = actionToGenerating(id, generatingIcon);
   config.errorStateConfig = actionToErrorResponse(
     aiPanel,
     id,
@@ -330,7 +332,6 @@ function updateEdgelessAIPanelConfig<
       })
       .catch(console.error);
   };
-  config.generatingIcon = generatingIcon;
 }
 
 export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(

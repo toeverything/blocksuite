@@ -156,10 +156,6 @@ export type EdgelessTool =
   | CopilotSelectionTool
   | LassoTool;
 
-export type EmbedBlockDoubleClickData = {
-  blockId: string;
-};
-
 export interface Viewport {
   left: number;
   top: number;

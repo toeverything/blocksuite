@@ -186,13 +186,6 @@ export class SurfaceBlockComponent extends BlockElement<
       })
     );
     this._disposables.add(
-      this.std.event.slots.parentScaleChanged.on(() => {
-        this._renderer.setCumulativeParentScale(
-          this.std.event.cumulativeParentScale
-        );
-      })
-    );
-    this._disposables.add(
       this.std.event.slots.editorHostPanned.on(() => {
         this._renderer.onResize();
       })
@@ -209,9 +202,6 @@ export class SurfaceBlockComponent extends BlockElement<
     if (!this._isEdgeless) return;
 
     this._renderer.attach(this._surfaceContainer);
-    this._renderer.setCumulativeParentScale(
-      this.std.event.cumulativeParentScale
-    );
     this._initResizeEffect();
   }
 

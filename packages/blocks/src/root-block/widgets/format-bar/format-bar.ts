@@ -568,7 +568,10 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     return html`<div
       class="${AFFINE_FORMAT_BAR_WIDGET}"
-      @pointerdown="${stopPropagation}"
+      @pointerdown="${(event: Event) => {
+        event.stopPropagation();
+        event.preventDefault();
+      }}"
       @wheel="${stopPropagation}"
     >
       ${items}

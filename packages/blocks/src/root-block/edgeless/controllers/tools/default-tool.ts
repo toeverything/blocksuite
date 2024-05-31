@@ -29,7 +29,6 @@ import {
   GroupElementModel,
   MindmapElementModel,
   ShapeElementModel,
-  SurfaceElementModel,
   TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import {
@@ -610,7 +609,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         });
 
         if (
-          selected instanceof SurfaceElementModel &&
+          isCanvasElement(selected) &&
           isConnectorWithLabel(selected) &&
           (selected as ConnectorElementModel).labelHitTest(
             this._service.viewport.toModelCoord(x, y)

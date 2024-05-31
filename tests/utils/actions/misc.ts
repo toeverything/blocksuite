@@ -259,14 +259,15 @@ export function expectConsoleMessage(
   });
 }
 
+export type PlaygroundRoomOptions = {
+  flags?: Partial<BlockSuiteFlags>;
+  room?: string;
+  blobSource?: ('idb' | 'mock')[];
+  noInit?: boolean;
+};
 export async function enterPlaygroundRoom(
   page: Page,
-  ops?: {
-    flags?: Partial<BlockSuiteFlags>;
-    room?: string;
-    blobSource?: ('idb' | 'mock')[];
-    noInit?: boolean;
-  }
+  ops?: PlaygroundRoomOptions
 ) {
   const url = new URL(DEFAULT_PLAYGROUND);
   let room = ops?.room;

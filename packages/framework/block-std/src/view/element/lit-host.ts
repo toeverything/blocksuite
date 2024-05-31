@@ -140,15 +140,11 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
   private _renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
+    const block = this.doc.getBlock(model.id);
     const schema = this.doc.schema.flavourSchemaMap.get(flavour);
-    if (!schema) {
-      console.warn(`Cannot find schema for ${flavour}.`);
-      return html`${nothing}`;
-    }
-
     const view = this.std.spec.getView(flavour);
-    if (!view) {
-      console.warn(`Cannot find view for ${flavour}.`);
+    if (!schema || !block || !view) {
+      console.warn(`Cannot find render flavour ${flavour}.`);
       return html`${nothing}`;
     }
 
@@ -174,6 +170,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
       .doc=${this.doc}
       .model=${model}
       .widgets=${widgets}
+      .viewType=${block.blockViewType}
     ></${tag}>`;
   };
 

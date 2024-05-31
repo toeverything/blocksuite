@@ -109,6 +109,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
             confirm: notification => {
               return Promise.resolve(confirm(notification.title));
             },
+            notify: notification => {
+              // todo: implement in playground
+              console.log(notification);
+            },
           };
           pageRootService.quickSearchService = {
             async searchDoc({ userInput }) {
@@ -133,6 +137,13 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
                   docId: newDoc.id,
                 };
               }
+            },
+          };
+
+          pageRootService.peekViewService = {
+            peek(target: unknown) {
+              alert('Peek view not implemented in playground');
+              console.log('peek', target);
             },
           };
         });

@@ -7,7 +7,12 @@ import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
-import type { NotificationService } from '../_common/components/notification-service.js';
+import {
+  getSelectedPeekableBlocksCommand,
+  type NotificationService,
+  peekSelectedBlockCommand,
+  type PeekViewService,
+} from '../_common/components/index.js';
 import {
   DEFAULT_IMAGE_PROXY_ENDPOINT,
   EMBED_CARD_HEIGHT,
@@ -75,8 +80,9 @@ export class RootService extends BlockService<RootBlockModel> {
   fileDropManager!: FileDropManager;
   exportManager!: ExportManager;
 
-  // impl provided by the user
+  // implements provided by affine
   notificationService: NotificationService | null = null;
+  peekViewService: PeekViewService | null = null;
 
   transformers = {
     markdown: MarkdownTransformer,
@@ -154,7 +160,9 @@ export class RootService extends BlockService<RootBlockModel> {
       .add('deleteText', deleteTextCommand)
       .add('formatBlock', formatBlockCommand)
       .add('formatNative', formatNativeCommand)
-      .add('formatText', formatTextCommand);
+      .add('formatText', formatTextCommand)
+      .add('peekSelectedBlock', peekSelectedBlockCommand)
+      .add('getSelectedPeekableBlocks', getSelectedPeekableBlocksCommand);
 
     this.loadFonts();
 

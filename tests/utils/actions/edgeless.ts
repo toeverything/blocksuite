@@ -796,6 +796,7 @@ type Action =
   | 'changeShapeStrokeStyles'
   | 'changeConnectorStrokeColor'
   | 'changeConnectorStrokeStyles'
+  | 'changeConnectorShape'
   | 'addFrame'
   | 'addGroup'
   | 'createGroupOnMoreOption'
@@ -937,6 +938,13 @@ export async function triggerComponentToolbarAction(
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-connector-button')
         .getByRole('button', { name: 'Stroke style' });
+      await button.click();
+      break;
+    }
+    case 'changeConnectorShape': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-connector-button')
+        .getByRole('button', { name: 'Shape' });
       await button.click();
       break;
     }

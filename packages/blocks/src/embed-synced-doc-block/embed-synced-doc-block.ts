@@ -11,6 +11,7 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
+import { Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
@@ -26,6 +27,7 @@ import type { EmbedSyncedDocBlockService } from './embed-synced-doc-service.js';
 import { blockStyles } from './styles.js';
 
 @customElement('affine-embed-synced-doc-block')
+@Peekable()
 export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   EmbedSyncedDocModel,
   EmbedSyncedDocBlockService

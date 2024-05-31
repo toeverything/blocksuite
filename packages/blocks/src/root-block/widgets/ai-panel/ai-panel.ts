@@ -15,11 +15,10 @@ import {
   size,
 } from '@floating-ui/dom';
 import { css, html, nothing, type PropertyValues } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { AIError } from '../../../_common/components/index.js';
-import { AIStarIconWithAnimation } from '../../../_common/icons/ai.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { getPageRootByElement } from '../../../_common/utils/query.js';
 import { PageRootService } from '../../page/page-root-service.js';
@@ -28,6 +27,7 @@ import {
   AFFINE_VIEWPORT_OVERLAY_WIDGET,
   type AffineViewportOverlayWidget,
 } from '../viewport-overlay/viewport-overlay.js';
+import type { AIPanelGenerating } from './components/index.js';
 import type { AffineAIPanelState, AffineAIPanelWidgetConfig } from './type.js';
 
 export const AFFINE_AI_PANEL_WIDGET = 'affine-ai-panel-widget';
@@ -64,12 +64,16 @@ export class AffineAIPanelWidget extends WidgetElement {
       box-sizing: border-box;
       width: 100%;
       height: fit-content;
-      gap: 8px;
       padding: 8px 0;
     }
 
+    .ai-panel-container:not(:has(ai-panel-generating)) {
+      gap: 8px;
+    }
+
     .ai-panel-container:has(ai-panel-answer),
-    .ai-panel-container:has(ai-panel-error) {
+    .ai-panel-container:has(ai-panel-error),
+    .ai-panel-container:has(ai-panel-generating:has(generating-placeholder)) {
       padding: 12px 0;
     }
 
@@ -85,6 +89,9 @@ export class AffineAIPanelWidget extends WidgetElement {
 
   @property()
   accessor state: AffineAIPanelState = 'hidden';
+
+  @query('ai-panel-generating')
+  accessor generatingElement: AIPanelGenerating | null = null;
 
   get viewportOverlayWidget() {
     const rootId = this.host.doc.root?.id;
@@ -147,8 +154,8 @@ export class AffineAIPanelWidget extends WidgetElement {
   };
 
   hide = () => {
-    this.state = 'hidden';
     this._resetAbortController();
+    this.state = 'hidden';
     this._stopAutoUpdate?.();
     this._inputText = null;
     this._answer = null;
@@ -260,6 +267,9 @@ export class AffineAIPanelWidget extends WidgetElement {
   get inputText() {
     return this._inputText;
   }
+  onInput = (text: string) => {
+    this._inputText = text;
+  };
 
   private _selection?: BaseSelection[];
 
@@ -361,17 +371,26 @@ export class AffineAIPanelWidget extends WidgetElement {
   private _onKeyDown = (event: KeyboardEvent) => {
     event.stopPropagation();
     const { state } = this;
-    if (
-      (state !== 'generating' && state !== 'input') ||
-      event.key !== 'Escape'
-    ) {
+    if (state !== 'generating' && state !== 'input') {
       return;
     }
 
-    if (state === 'generating') {
-      this.stopGenerating();
-    } else {
-      this.hide();
+    const { key, isComposing } = event;
+    if (key === 'Escape') {
+      if (state === 'generating') {
+        this.stopGenerating();
+      } else {
+        this.hide();
+      }
+      return;
+    }
+
+    if (key === 'Delete' || key === 'Backspace') {
+      if (isComposing) return;
+
+      if (state === 'input' && !this._inputText) {
+        this.hide();
+      }
     }
   };
 
@@ -405,6 +424,7 @@ export class AffineAIPanelWidget extends WidgetElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._clearDiscardModal();
+    this._stopAutoUpdate?.();
   }
 
   private _onDocumentClick = (e: MouseEvent) => {
@@ -492,6 +512,7 @@ export class AffineAIPanelWidget extends WidgetElement {
           html`<ai-panel-input
             .onBlur=${() => this.discard()}
             .onFinish=${this._inputFinish}
+            .onInput=${this.onInput}
           ></ai-panel-input>`,
       ],
       [
@@ -510,8 +531,9 @@ export class AffineAIPanelWidget extends WidgetElement {
               `
             : nothing}
           <ai-panel-generating
-            .icon=${config.generatingIcon ?? AIStarIconWithAnimation}
+            .config=${config.generatingStateConfig}
             .stopGenerating=${this.stopGenerating}
+            .withAnswer=${!!this.answer}
           ></ai-panel-generating>
         `,
       ],

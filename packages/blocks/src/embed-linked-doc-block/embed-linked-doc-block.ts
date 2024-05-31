@@ -13,6 +13,7 @@ import {
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
+import { isPeekable, Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { REFERENCE_NODE } from '../_common/inline/presets/nodes/consts.js';
@@ -30,6 +31,7 @@ import { styles } from './styles.js';
 import { getEmbedLinkedDocIcons } from './utils.js';
 
 @customElement('affine-embed-linked-doc-block')
+@Peekable()
 export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   EmbedLinkedDocModel,
   EmbedLinkedDocBlockService
@@ -156,13 +158,15 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     selectionManager.setGroup('note', [blockSelection]);
   }
 
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
+  private _handleClick(_event: MouseEvent) {
     if (this.isInSurface) return;
     this._selectBlock();
   }
 
   private _handleDoubleClick(event: MouseEvent) {
+    if (isPeekable(this)) {
+      return;
+    }
     event.stopPropagation();
     this.open();
   }

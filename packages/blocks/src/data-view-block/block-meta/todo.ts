@@ -1,3 +1,5 @@
+import { BlockViewType } from '@blocksuite/store';
+
 import { columnPresets } from '../../database-block/index.js';
 import {
   type ListBlockModel,
@@ -9,10 +11,12 @@ import { createBlockMeta } from './base.js';
 export const todoMeta = createBlockMeta<ListBlockModel>({
   selector: block => {
     if (block.flavour !== ListBlockSchema.model.flavour) {
-      return false;
+      return BlockViewType.Hidden;
     }
 
-    return (block.model as ListBlockModel).type === 'todo';
+    return (block.model as ListBlockModel).type === 'todo'
+      ? BlockViewType.Display
+      : BlockViewType.Hidden;
   },
 });
 todoMeta.addProperty({

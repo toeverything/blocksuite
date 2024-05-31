@@ -1,6 +1,11 @@
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockModel, BlockSelector, Doc } from '@blocksuite/store';
+import {
+  type BlockModel,
+  type BlockSelector,
+  BlockViewType,
+  type Doc,
+} from '@blocksuite/store';
 import { css, render, type TemplateResult } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
@@ -192,7 +197,11 @@ async function renderNoteContent(
       parent = doc.blockCollection.crud.getParent(parent);
     }
   });
-  const selector: BlockSelector = block => ids.includes(block.id);
+  const selector: BlockSelector = block => {
+    return ids.includes(block.id)
+      ? BlockViewType.Display
+      : BlockViewType.Hidden;
+  };
   const previewDoc = doc.blockCollection.getDoc(selector);
   const previewSpec = SpecProvider.getInstance().getSpec('preview');
   const previewTemplate = card.host.renderSpecPortal(

@@ -19,7 +19,12 @@ import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
-export { toast, Tooltip } from './_common/components/index.js';
+export {
+  PeekableController,
+  type PeekViewService,
+  toast,
+  Tooltip,
+} from './_common/components/index.js';
 export { RichText, scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {

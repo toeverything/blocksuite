@@ -2,12 +2,17 @@ import type { BlockElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline/types';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
+import { isPeekable, peek } from '../../../../components/peekable.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
-import { DeleteIcon, OpenIcon } from '../../../../icons/index.js';
+import {
+  CenterPeekIcon,
+  DeleteIcon,
+  OpenIcon,
+} from '../../../../icons/index.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 
 @customElement('reference-popup-more-menu')
@@ -55,6 +60,9 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
       background-color: var(--affine-border-color);
     }
   `;
+
+  @property({ attribute: false })
+  accessor target!: LitElement;
 
   @property({ attribute: false })
   accessor inlineEditor!: AffineInlineEditor;
@@ -119,6 +127,18 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
           >
             ${OpenIcon}
           </icon-button>
+
+          ${isPeekable(this.target)
+            ? html`<icon-button
+                width="126px"
+                height="32px"
+                class="menu-item open"
+                text="Open in center peek"
+                @click=${() => peek(this.target)}
+              >
+                ${CenterPeekIcon}
+              </icon-button>`
+            : nothing}
 
           <div class="divider"></div>
 

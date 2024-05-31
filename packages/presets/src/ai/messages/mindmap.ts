@@ -1,5 +1,3 @@
-import './_common/generating-placeholder.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
 import type {
   AffineAIPanelWidgetConfig,
@@ -8,6 +6,8 @@ import type {
 import { markdownToMindmap, MiniMindmapPreview } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
+
+import { getAIPanel } from '../ai-panel.js';
 
 noop(MiniMindmapPreview);
 
@@ -24,7 +24,8 @@ export const createMindmapRenderer: (
 ) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, ctx, style) => {
   return (answer, state) => {
     if (state === 'generating') {
-      return html`<ai-generating-placeholder></ai-generating-placeholder>`;
+      const panel = getAIPanel(host);
+      panel.generatingElement?.updateLoadingProgress(2);
     }
 
     if (state !== 'finished' && state !== 'error') {
@@ -37,6 +38,7 @@ export const createMindmapRenderer: (
       .answer=${answer}
       .mindmapStyle=${style}
       .templateShow=${style === undefined}
+      .height=${300}
     ></mini-mindmap-preview>`;
   };
 };
@@ -58,12 +60,12 @@ export const createMindmapExecuteRenderer: (
     get: () => Record<string, unknown>;
     set: (data: Record<string, unknown>) => void;
   }) => void
-) => AffineAIPanelWidgetConfig['answerRenderer'] = (_, ctx, handler) => {
+) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, ctx, handler) => {
   return (answer, state) => {
     if (state !== 'finished') {
-      return html`<ai-generating-placeholder
-        .height=${100}
-      ></ai-generating-placeholder>`;
+      const panel = getAIPanel(host);
+      panel.generatingElement?.updateLoadingProgress(2);
+      return nothing;
     }
 
     ctx.set({

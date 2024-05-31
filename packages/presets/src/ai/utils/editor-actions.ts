@@ -47,24 +47,42 @@ const setBlockSelection = (
   }
 };
 
-export const insertBelow = async (
+export const insert = async (
   host: EditorHost,
   content: string,
-  selectBlock: BlockElement
+  selectBlock: BlockElement,
+  below: boolean = true
 ) => {
   const blockParent = selectBlock.parentBlockElement;
   const index = blockParent.model.children.findIndex(
     model => model.id === selectBlock.model.id
   );
+  const insertIndex = below ? index + 1 : index;
 
   const models = await insertFromMarkdown(
     host,
     content,
     blockParent.model.id,
-    index + 1
+    insertIndex
   );
   await host.updateComplete;
   requestAnimationFrame(() => setBlockSelection(host, blockParent, models));
+};
+
+export const insertBelow = async (
+  host: EditorHost,
+  content: string,
+  selectBlock: BlockElement
+) => {
+  await insert(host, content, selectBlock, true);
+};
+
+export const insertAbove = async (
+  host: EditorHost,
+  content: string,
+  selectBlock: BlockElement
+) => {
+  await insert(host, content, selectBlock, false);
 };
 
 export const replace = async (
@@ -122,5 +140,9 @@ export const copyText = async (host: EditorHost, text: string) => {
     .flatMap(model => model.children);
   const slice = Slice.fromModels(previewDoc, models);
   await host.std.clipboard.copySlice(slice);
+  const { notificationService } = host.std.spec.getService('affine:page');
+  if (notificationService) {
+    notificationService.toast('Copied to clipboard');
+  }
   return true;
 };

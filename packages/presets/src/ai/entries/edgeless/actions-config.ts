@@ -286,10 +286,10 @@ const generateGroup: AIItemGroupConfig = {
           const selectedElements = getCopilotSelectedElems(host);
           const len = selectedElements.length;
 
+          const aiPanel = getAIPanel(host);
           // text to image
           // from user input
           if (len === 0) {
-            const aiPanel = getAIPanel(host);
             const content = aiPanel.inputText?.trim();
             if (!content) return;
             return {
@@ -301,7 +301,6 @@ const generateGroup: AIItemGroupConfig = {
 
           // from user input
           if (content.length === 0) {
-            const aiPanel = getAIPanel(host);
             content = aiPanel.inputText?.trim() || '';
           }
 
@@ -339,6 +338,7 @@ const generateGroup: AIItemGroupConfig = {
             }
           );
           if (!canvas) return;
+
           const png = await canvasToBlob(canvas);
           if (!png) return;
           return {

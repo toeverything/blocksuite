@@ -540,6 +540,21 @@ export const OpenIcon = html`<svg
   />
 </svg>`;
 
+export const CenterPeekIcon = html`<svg
+  xmlns="http://www.w3.org/2000/svg"
+  fill="none"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+>
+  <path
+    fill="currentColor"
+    fill-rule="evenodd"
+    d="M5.5 4.25A2.25 2.25 0 0 0 3.25 6.5v11a2.25 2.25 0 0 0 2.25 2.25h13a2.25 2.25 0 0 0 2.25-2.25v-11a2.25 2.25 0 0 0-2.25-2.25h-13ZM4.75 6.5a.75.75 0 0 1 .75-.75h13a.75.75 0 0 1 .75.75v11a.75.75 0 0 1-.75.75h-13a.75.75 0 0 1-.75-.75v-11ZM9 9a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H9Z"
+    clip-rule="evenodd"
+  />
+</svg>`;
+
 export const EditIcon = html`<svg
   width="20"
   height="20"

@@ -1,5 +1,3 @@
-import './_common/generating-placeholder.js';
-
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import {
@@ -13,6 +11,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
+import { getAIPanel } from '../ai-panel.js';
 import { PPTBuilder } from '../slides/index.js';
 
 export const createSlidesRenderer: (
@@ -24,7 +23,9 @@ export const createSlidesRenderer: (
 ) => AffineAIPanelWidgetConfig['answerRenderer'] = (host, ctx) => {
   return (answer, state) => {
     if (state === 'generating') {
-      return html`<ai-generating-placeholder></ai-generating-placeholder>`;
+      const panel = getAIPanel(host);
+      panel.generatingElement?.updateLoadingProgress(2);
+      return nothing;
     }
 
     if (state !== 'finished' && state !== 'error') {
@@ -34,7 +35,7 @@ export const createSlidesRenderer: (
     return html`<style>
         .slides-container {
           width: 100%;
-          height: 400px;
+          height: 300px;
         }
       </style>
       <div class="slides-container">

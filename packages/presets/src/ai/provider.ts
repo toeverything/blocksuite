@@ -41,6 +41,7 @@ export class AIProvider {
     null;
   private photoEngine: BlockSuitePresets.AIPhotoEngineService | null = null;
   private histories: BlockSuitePresets.AIHistoryService | null = null;
+  private toggleGeneralAIOnboarding: ((value: boolean) => void) | null = null;
   private readonly slots = {
     // use case: when user selects "continue in chat" in an ask ai result panel
     // do we need to pass the context to the chat panel?
@@ -84,6 +85,8 @@ export class AIProvider {
     engine: BlockSuitePresets.AIPhotoEngineService
   ): void;
 
+  static provide(id: 'onboarding', fn: (value: boolean) => void): void;
+
   // actions:
   static provide<T extends keyof BlockSuitePresets.AIActions>(
     id: T,
@@ -101,6 +104,10 @@ export class AIProvider {
     } else if (id === 'photoEngine') {
       AIProvider.instance.photoEngine =
         action as BlockSuitePresets.AIPhotoEngineService;
+    } else if (id === 'onboarding') {
+      AIProvider.instance.toggleGeneralAIOnboarding = action as (
+        value: boolean
+      ) => void;
     } else {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       AIProvider.instance.provideAction(id as any, action as any);
@@ -229,5 +236,9 @@ export class AIProvider {
 
   static get actionHistory() {
     return AIProvider.instance.actionHistory;
+  }
+
+  static get toggleGeneralAIOnboarding() {
+    return AIProvider.instance.toggleGeneralAIOnboarding;
   }
 }
