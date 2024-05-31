@@ -25,6 +25,7 @@ export const ListBlockSchema = defineBlockSchema({
       'affine:database',
       'affine:list',
       'affine:paragraph',
+      'affine:edgeless-text',
     ],
   },
 });

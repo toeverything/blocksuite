@@ -87,6 +87,10 @@ export class HandleResizeManager {
     this._onDragEnd = onDragEnd;
   }
 
+  get dragDirection() {
+    return this._dragDirection;
+  }
+
   get dragging() {
     return this._dragging;
   }

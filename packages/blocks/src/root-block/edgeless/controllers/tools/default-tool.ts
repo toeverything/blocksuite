@@ -12,6 +12,10 @@ import {
   resetNativeSelection,
 } from '../../../../_common/utils/index.js';
 import { clamp } from '../../../../_common/utils/math.js';
+import {
+  EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
+  EDGELESS_TEXT_BLOCK_MIN_WIDTH,
+} from '../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
@@ -45,7 +49,6 @@ import {
   isNoteBlock,
 } from '../../utils/query.js';
 import {
-  addText,
   mountConnectorLabelEditor,
   mountFrameTitleEditor,
   mountGroupTitleEditor,
@@ -141,11 +144,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const selected = this._pick(e.x, e.y, {
       ignoreTransparent: true,
     });
-
     if (selected) {
-      const { selectedIds, surfaceSelections: selections } =
-        this.edgelessSelectionManager;
-      const editing = selections[0]?.editing ?? false;
+      const { selectedIds, surfaceSelections } = this.edgelessSelectionManager;
+      const editing = surfaceSelections[0]?.editing ?? false;
 
       // click active canvas text, edgeless text block and note block
       if (
@@ -204,10 +205,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
                   rect.bottom - offsetY
                 );
                 handleNativeRangeAtPoint(x, y);
-                return;
+              } else {
+                handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
               }
-
-              handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
             }
           })
           .catch(console.error);
@@ -256,7 +256,42 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       expand: 10,
     });
     if (!selected) {
-      addText(this._edgeless, e);
+      // old: canvas text element
+      // addText(this._edgeless, e);
+
+      // new: edgeless text block
+      const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
+      const textId = this._service.addBlock(
+        'affine:edgeless-text',
+        {
+          xywh: new Bound(
+            x - EDGELESS_TEXT_BLOCK_MIN_WIDTH / 2,
+            y - EDGELESS_TEXT_BLOCK_MIN_HEIGHT / 2,
+            EDGELESS_TEXT_BLOCK_MIN_WIDTH,
+            EDGELESS_TEXT_BLOCK_MIN_HEIGHT
+          ).serialize(),
+        },
+        this._edgeless.surface.blockId
+      );
+
+      const blockId = this._doc.addBlock(
+        'affine:paragraph',
+        { type: 'text' },
+        textId
+      );
+      this._edgeless.updateComplete
+        .then(() => {
+          this.edgelessSelectionManager.set({
+            elements: [textId],
+            editing: true,
+          });
+        })
+        .catch(console.error);
+
+      if (blockId) {
+        asyncFocusRichText(this._edgeless.host, blockId)?.catch(console.error);
+      }
+
       return;
     } else {
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);

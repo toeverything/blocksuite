@@ -27,6 +27,15 @@ export class Bound implements IBound {
     this.h = h;
   }
 
+  static deserialize(s: string) {
+    const [x, y, w, h] = deserializeXYWH(s);
+    return new Bound(x, y, w, h);
+  }
+
+  static serialize(bound: IBound) {
+    return serializeXYWH(bound.x, bound.y, bound.w, bound.h);
+  }
+
   static fromXYWH(xywh: XYWH) {
     return new Bound(xywh[0], xywh[1], xywh[2], xywh[3]);
   }
@@ -286,11 +295,6 @@ export class Bound implements IBound {
 
   toXYWH(): XYWH {
     return [this.x, this.y, this.w, this.h];
-  }
-
-  static deserialize(s: string) {
-    const [x, y, w, h] = deserializeXYWH(s);
-    return new Bound(x, y, w, h);
   }
 }
 

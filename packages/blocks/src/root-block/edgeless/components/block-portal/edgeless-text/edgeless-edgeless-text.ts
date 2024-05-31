@@ -1,123 +1,174 @@
 import '../../../../../edgeless-text/edgeless-text-block.js';
 
-import { css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { css, html, type PropertyValueMap } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
+import {
+  EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
+  EDGELESS_TEXT_BLOCK_MIN_WIDTH,
+} from '../../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../../edgeless-text/edgeless-text-model.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
-import type { EdgelessBlockModel } from '../../../type.js';
+import { HandleDirection } from '../../resize/resize-handles.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 @customElement('edgeless-block-portal-edgeless-text')
 export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<EdgelessTextBlockModel> {
   static override styles = css`
-    .edgeless-block-portal-note:has(.affine-embed-synced-doc-container.editing)
-      > edgeless-note-mask {
-      display: none;
+    .edgeless-text-block-container {
+      position: absolute;
+      padding: 10px;
+      box-sizing: border-box;
     }
   `;
+
+  @query('.edgeless-text-block-container')
+  private accessor _textContainer!: HTMLDivElement;
 
   @state()
   private accessor _editing = false;
 
-  @state()
-  private accessor _isResizing = false;
+  private _horizontalResizing = false;
+  private _resizeObserver = new ResizeObserver(() => {
+    if (this._horizontalResizing) {
+      const bound = Bound.deserialize(this.model.xywh);
+      const rect = this._textContainer.getBoundingClientRect();
+      // only update height, width updated by dragging
+      bound.h = Math.max(
+        rect.height / this.edgeless.service.zoom,
+        EDGELESS_TEXT_BLOCK_MIN_HEIGHT
+      );
 
-  @state()
-  private accessor _isHover = false;
-
-  get _zoom() {
-    return this.edgeless.service.viewport.zoom;
-  }
-
-  private _hovered() {
-    if (!this._isHover && this.edgeless.service.selection.has(this.model.id)) {
-      this._isHover = true;
+      this.edgeless.doc.updateBlock(this.model, {
+        xywh: bound.serialize(),
+      });
+    } else {
+      this._updateXYWH();
     }
+  });
+
+  private _updateXYWH() {
+    const bound = Bound.deserialize(this.model.xywh);
+    const rect = this._textContainer.getBoundingClientRect();
+    bound.w = Math.max(
+      rect.width / this.edgeless.service.zoom,
+      EDGELESS_TEXT_BLOCK_MIN_WIDTH
+    );
+    bound.h = Math.max(
+      rect.height / this.edgeless.service.zoom,
+      EDGELESS_TEXT_BLOCK_MIN_HEIGHT
+    );
+    this.edgeless.doc.updateBlock(this.model, {
+      xywh: bound.serialize(),
+    });
   }
 
-  private _leaved() {
-    if (this._isHover) {
-      this._isHover = false;
-    }
-  }
+  override firstUpdated(props: PropertyValueMap<unknown>) {
+    super.firstUpdated(props);
 
-  override firstUpdated() {
     const { disposables, edgeless } = this;
-    const selection = this.edgeless.service.selection;
+    const edgelessSelection = edgeless.service.selection;
+    const selectedRect = this.portalContainer.selectedRect;
 
     disposables.add(
-      edgeless.slots.elementResizeStart.on(() => {
-        if (
-          selection.selectedElements.includes(this.model as EdgelessBlockModel)
-        ) {
-          this._isResizing = true;
-        }
-      })
+      selectedRect.slots.dragStart
+        .filter(() => edgelessSelection.selectedElements.includes(this.model))
+        .on(() => {
+          if (
+            selectedRect.dragDirection === HandleDirection.Left ||
+            selectedRect.dragDirection === HandleDirection.Right
+          ) {
+            this._horizontalResizing = true;
+          }
+        })
     );
     disposables.add(
-      edgeless.slots.elementResizeEnd.on(() => {
-        this._isResizing = false;
-      })
+      selectedRect.slots.dragEnd
+        .filter(() => edgelessSelection.selectedElements.includes(this.model))
+        .on(() => {
+          if (
+            selectedRect.dragDirection === HandleDirection.Left ||
+            selectedRect.dragDirection === HandleDirection.Right
+          ) {
+            this._horizontalResizing = false;
+          } else if (
+            selectedRect.dragDirection === HandleDirection.TopLeft ||
+            selectedRect.dragDirection === HandleDirection.TopRight ||
+            selectedRect.dragDirection === HandleDirection.BottomRight ||
+            selectedRect.dragDirection === HandleDirection.BottomLeft
+          ) {
+            this._updateXYWH();
+          }
+        })
     );
-  }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    const selection = this.edgeless.service.selection;
-
-    this._editing = selection.has(this.model.id) && selection.editing;
-    this._disposables.add(
-      selection.slots.updated.on(() => {
-        if (selection.has(this.model.id) && selection.editing) {
+    disposables.add(
+      edgelessSelection.slots.updated.on(() => {
+        if (edgelessSelection.has(this.model.id) && edgelessSelection.editing) {
           this._editing = true;
         } else {
           this._editing = false;
         }
       })
     );
+
+    this._resizeObserver.observe(this._textContainer);
   }
 
   override render() {
     const { model, index } = this;
-
-    const { xywh, scale = 1 } = model;
-
+    const { xywh, scale, rotate } = model;
     const bound = Bound.deserialize(xywh);
-    const width = bound.w / scale;
 
-    const style = {
-      position: 'absolute',
+    const style: StyleInfo = {
       zIndex: `${index}`,
-      width: `${width}px`,
       left: `${bound.x}px`,
       top: `${bound.y}px`,
-      padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-      boxSizing: 'border-box',
-      pointerEvents: this._editing ? 'none' : 'all',
-      transformOrigin: '0 0',
       transform: `scale(${scale})`,
+      transformOrigin: '0 0',
+      width: `${bound.w / scale}px`,
+      height: `${bound.h / scale}px`,
     };
+    if (this._editing) {
+      if (!this.model.hasMaxWidth) {
+        delete style.width;
+      }
+      delete style.height;
+    } else if (this._horizontalResizing) {
+      delete style.height;
+    }
 
     return html`
       <div
-        class="edgeless-block-portal-note blocksuite-overlay"
+        class="edgeless-text-block-container"
         style=${styleMap(style)}
-        data-model-height="${bound.h}"
-        @mouseleave=${this._leaved}
-        @mousemove=${this._hovered}
         data-scale="${scale}"
+        data-editing="${this._editing}"
       >
         <div
           style=${styleMap({
-            width: '100%',
-            height: '100%',
+            transform: `rotate(${rotate}deg)`,
+            transformOrigin: 'center',
           })}
         >
-          ${this.renderModel(model)}
+          <div
+            style=${styleMap({
+              position: 'absolute',
+              top: '0',
+              left: '0',
+              bottom: '0',
+              right: '0',
+              display: this._editing ? 'none' : 'block',
+            })}
+          ></div>
+          <div
+            style=${styleMap({
+              pointerEvents: this._editing ? 'auto' : 'none',
+            })}
+          >
+            ${this.renderModel(model)}
+          </div>
         </div>
       </div>
     `;

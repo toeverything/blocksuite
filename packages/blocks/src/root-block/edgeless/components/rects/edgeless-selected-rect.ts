@@ -2,7 +2,7 @@ import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertType, type Disposable } from '@blocksuite/global/utils';
+import { assertType, type Disposable, Slot } from '@blocksuite/global/utils';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
@@ -16,6 +16,7 @@ import {
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
+import { EDGELESS_TEXT_BLOCK_MIN_WIDTH } from '../../../../edgeless-text/edgeless-text-block.js';
 import {
   EMBED_HTML_MIN_HEIGHT,
   EMBED_HTML_MIN_WIDTH,
@@ -464,8 +465,19 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.addEventListener('pointerdown', stopPropagation);
   }
 
+  readonly slots = {
+    dragStart: new Slot(),
+    dragMove: new Slot(),
+    dragRotate: new Slot(),
+    dragEnd: new Slot(),
+  };
+
   get dragging() {
     return this._resizeManager.dragging || this.edgeless.tools.dragging;
+  }
+
+  get dragDirection() {
+    return this._resizeManager.dragDirection;
   }
 
   get selection() {
@@ -476,7 +488,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return this.edgeless.doc;
   }
 
-  get slots() {
+  get edgelessSlots() {
     return this.edgeless.slots;
   }
 
@@ -497,11 +509,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let areAllTexts = true;
 
     for (const element of elements) {
-      if (
-        isNoteBlock(element) ||
-        isEdgelessTextBlock(element) ||
-        isEmbedSyncedDocBlock(element)
-      ) {
+      if (isNoteBlock(element) || isEmbedSyncedDocBlock(element)) {
         areAllConnectors = false;
         if (this._shiftKey) {
           areAllShapes = false;
@@ -515,6 +523,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllConnectors = false;
         areAllShapes = false;
         areAllTexts = false;
+      } else if (isEdgelessTextBlock(element)) {
+        areAllConnectors = false;
+        areAllShapes = false;
       } else {
         assertType<BlockSuite.SurfaceElementModelType>(element);
         if (element.type === CanvasElementType.CONNECTOR) {
@@ -567,6 +578,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _onDragStart = () => {
+    this.slots.dragStart.emit();
+
     const rotation = this._resizeManager.rotation;
 
     this._dragEndCallback = [];
@@ -616,6 +629,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     >,
     direction: HandleDirection
   ) => {
+    this.slots.dragMove.emit();
+
     const { edgeless } = this;
 
     newBounds.forEach(({ bound }, id) => {
@@ -655,6 +670,41 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         props.edgeless = { ...element.edgeless, scale };
         props.xywh = bound.serialize();
         edgeless.service.updateElement(element.id, props);
+      } else if (isEdgelessTextBlock(element)) {
+        const oldXYWH = Bound.deserialize(element.xywh);
+        if (
+          direction === HandleDirection.TopLeft ||
+          direction === HandleDirection.TopRight ||
+          direction === HandleDirection.BottomRight ||
+          direction === HandleDirection.BottomLeft
+        ) {
+          const newScale = element.scale * (bound.w / oldXYWH.w);
+          this._scalePercent = `${Math.round(newScale * 100)}%`;
+          this._scaleDirection = direction;
+
+          bound.h = bound.w * (oldXYWH.h / oldXYWH.w);
+          edgeless.service.updateElement(element.id, {
+            scale: newScale,
+            xywh: bound.serialize(),
+          });
+        } else if (
+          direction === HandleDirection.Left ||
+          direction === HandleDirection.Right
+        ) {
+          const newRealWidth = clamp(
+            bound.w / element.scale,
+            EDGELESS_TEXT_BLOCK_MIN_WIDTH,
+            Infinity
+          );
+          bound.w = newRealWidth * element.scale;
+          edgeless.service.updateElement(element.id, {
+            xywh: Bound.serialize({
+              ...bound,
+              h: oldXYWH.h,
+            }),
+            hasMaxWidth: true,
+          });
+        }
       } else if (isEmbedSyncedDocBlock(element)) {
         const curBound = Bound.deserialize(element.xywh);
         const props: Partial<EmbedSyncedDocModel> = {};
@@ -781,6 +831,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragRotate = (center: IPoint, delta: number) => {
+    this.slots.dragRotate.emit();
+
     const { selection } = this;
     const m = new DOMMatrix()
       .translateSelf(center.x, center.y)
@@ -790,6 +842,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const elements = selection.selectedElements.filter(
       element =>
         isImageBlock(element) ||
+        isEdgelessTextBlock(element) ||
         (isCanvasElement(element) &&
           element.type !== CanvasElementType.CONNECTOR)
     ) as BlockSuite.EdgelessModelType[];
@@ -810,6 +863,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragEnd = () => {
+    this.slots.dragEnd.emit();
+
     this.doc.transact(() => {
       this._dragEndCallback.forEach(cb => cb());
     });
@@ -910,7 +965,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } else {
       this._cursorRotate = 0;
     }
-    this.slots.cursorUpdated.emit(cursor);
+    this.edgelessSlots.cursorUpdated.emit(cursor);
   };
 
   private _updateSelectedRect = requestThrottledConnectFrame(() => {
@@ -1023,7 +1078,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   override firstUpdated() {
-    const { _disposables, slots, selection, edgeless } = this;
+    const { _disposables, edgelessSlots, selection, edgeless } = this;
 
     _disposables.add(
       // viewport zooming / scrolling
@@ -1043,7 +1098,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
 
     _disposables.add(
-      slots.pressShiftKeyUpdated.on(pressed => {
+      edgelessSlots.pressShiftKeyUpdated.on(pressed => {
         this._shiftKey = pressed;
         this._resizeManager.onPressShiftKey(pressed);
         this._updateSelectedRect();

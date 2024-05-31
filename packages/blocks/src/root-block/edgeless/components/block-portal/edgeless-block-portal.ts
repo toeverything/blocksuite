@@ -360,6 +360,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                       .edgeless=${edgeless}
                       .updatingSet=${this.renderingSet}
                       .concurrentUpdatingCount=${this.concurrentRendering}
+                      .portalContainer=${this}
                       style=${`z-index: ${zIndex};${_visibleElements.has(block) ? 'display:block' : ''}`}
                     ></${tag}>`;
                 }

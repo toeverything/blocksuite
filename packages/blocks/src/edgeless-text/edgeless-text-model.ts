@@ -2,11 +2,7 @@ import type { Text } from '@blocksuite/store';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import {
-  FontFamily,
-  type FontStyle,
-  FontWeight,
-} from '../surface-block/consts.js';
+import { FontFamily, FontStyle, FontWeight } from '../surface-block/consts.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 interface EdgelessTextProps {
@@ -16,10 +12,12 @@ interface EdgelessTextProps {
   color: string;
   fontSize: number;
   fontFamily: FontFamily;
-  fontWeight?: FontWeight;
-  fontStyle?: FontStyle;
+  fontWeight: FontWeight;
+  fontStyle: FontStyle;
   textAlign: 'left' | 'center' | 'right';
-  scale?: number;
+  scale: number;
+  rotate: number;
+  hasMaxWidth: boolean;
 }
 
 export const EdgelessTextBlockSchema = defineBlockSchema({
@@ -32,7 +30,11 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
     fontSize: 16,
     fontFamily: FontFamily.Inter,
     fontWeight: FontWeight.Regular,
+    fontStyle: FontStyle.Normal,
     textAlign: 'left',
+    scale: 1,
+    rotate: 0,
+    hasMaxWidth: false,
   }),
   metadata: {
     version: 1,
