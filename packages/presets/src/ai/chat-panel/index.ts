@@ -11,7 +11,11 @@ import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
 import { AIHelpIcon, SmallHintIcon } from '../_common/icons.js';
 import { AIProvider } from '../provider.js';
-import { type ChatContextValue, type ChatItem } from './chat-context.js';
+import {
+  type ChatAction,
+  type ChatContextValue,
+  type ChatItem,
+} from './chat-context.js';
 import type { ChatPanelMessages } from './chat-panel-messages.js';
 
 @customElement('chat-panel')
@@ -134,6 +138,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     this.chatContextValue = { ...this.chatContextValue, ...context };
   };
 
+  private _chatSessionId = '';
   private _resettingCounter = 0;
 
   private _resetItems = debounce(() => {
@@ -152,6 +157,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
       const items: ChatItem[] = actions ? [...actions] : [];
 
       if (histories?.[0]) {
+        this._chatSessionId = histories[0].sessionId;
         items.push(...histories[0].messages);
       }
 
@@ -179,6 +185,33 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     requestAnimationFrame(() => this._chatMessages.value?.scrollToDown());
   }
 
+  private _cleanupHistories = async () => {
+    const notification =
+      this.host.std.spec.getService('affine:page').notificationService;
+    if (!notification) return;
+
+    if (
+      await notification.confirm({
+        title: 'Clear History',
+        message:
+          'Are you sure you want to clear all history? This action will permanently delete all content, including all chat logs and data, and cannot be undone.',
+        confirmText: 'Confirm',
+        cancelText: 'Cancel',
+      })
+    ) {
+      await AIProvider.histories?.cleanup(this.doc.collection.id, this.doc.id, [
+        this._chatSessionId,
+        ...(
+          this.chatContextValue.items.filter(
+            item => 'sessionId' in item
+          ) as ChatAction[]
+        ).map(item => item.sessionId),
+      ]);
+      notification.toast('History cleared');
+      this._resetItems();
+    }
+  };
+
   override render() {
     return html` <div class="chat-panel-container">
       <div class="chat-panel-title">
@@ -202,6 +235,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         .chatContextValue=${this.chatContextValue}
         .updateContext=${this.updateContext}
         .host=${this.host}
+        .cleanupHistories=${this._cleanupHistories}
       ></chat-panel-input>
       <div class="chat-panel-footer">
         ${SmallHintIcon}

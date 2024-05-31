@@ -224,6 +224,11 @@ declare global {
         workspaceId: string,
         docId?: string
       ) => Promise<AIHistory[] | undefined>;
+      cleanup: (
+        workspaceId: string,
+        docId: string,
+        sessionIds: string[]
+      ) => Promise<void>;
     }
 
     interface AIPhotoEngineService {

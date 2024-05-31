@@ -7,6 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import {
   ChatAbortIcon,
+  ChatClearIcon,
   ChatSendIcon,
   CloseIcon,
   ImageIcon,
@@ -30,40 +31,58 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     }
 
     .chat-panel-input-actions {
-      position: absolute;
-      right: 16px;
-      bottom: 6px;
       display: flex;
       gap: 8px;
       align-items: center;
+      padding: 8px;
+
+      div {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+      }
+
+      div:nth-child(2) {
+        margin-left: auto;
+      }
+
+      .chat-history-clear {
+        background-color: var(--affine-white);
+      }
+
+      .image-upload {
+        background-color: var(--affine-white);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     }
 
-    .chat-panel-input-actions svg {
-      cursor: pointer;
-    }
+    .chat-panel-input {
+      textarea {
+        resize: none;
+        margin: 8px 12px;
+        width: calc(100% - 32px);
+        line-height: 22px;
+        border: none;
+        font-size: 14px;
+        font-weight: 400;
+        font-family: var(--affine-font-family);
+        color: var(--affine-text-primary-color);
+        box-sizing: border-box;
+        overflow-y: hidden;
+      }
 
-    .chat-panel-input textarea {
-      resize: none;
-      margin: 8px 12px;
-      width: calc(100% - 32px);
-      flex: 1;
-      line-height: 22px;
-      border: none;
-      font-size: 14px;
-      font-weight: 400;
-      font-family: var(--affine-font-family);
-      color: var(--affine-text-primary-color);
-    }
+      textarea::placeholder {
+        font-size: 14px;
+        font-weight: 400;
+        font-family: var(--affine-font-family);
+        color: var(--affine-placeholder-color);
+      }
 
-    textarea::placeholder {
-      font-size: 14px;
-      font-weight: 400;
-      font-family: var(--affine-font-family);
-      color: var(--affine-placeholder-color);
-    }
-
-    textarea:focus {
-      outline: none;
+      textarea:focus {
+        outline: none;
+      }
     }
 
     .chat-panel-images {
@@ -115,10 +134,6 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     .close-wrapper:hover svg path {
       fill: var(--affine-error-color);
     }
-
-    .image-upload {
-      background-color: var(--affine-white);
-    }
   `;
 
   @property({ attribute: false })
@@ -144,6 +159,9 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor updateContext!: (context: Partial<ChatContextValue>) => void;
+
+  @property({ attribute: false })
+  accessor cleanupHistories!: () => Promise<void>;
 
   send = async () => {
     const { status } = this.chatContextValue;
@@ -234,7 +252,6 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             : '1px solid var(--affine-border-color)'};
           box-shadow: ${this.focused ? 'var(--affine-active-shadow)' : 'none'};
           max-height: ${images.length > 0 ? '272px' : '200px'};
-          min-height: ${images.length > 0 ? '272px' : '200px'};
         }
       </style>
       <div class="chat-panel-input">
@@ -286,6 +303,13 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
           placeholder="What are your thoughts?"
           @input=${() => {
             this.isInputEmpty = !this.textarea.value;
+            const { textarea } = this;
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+            if (this.scrollHeight >= 200) {
+              textarea.style.height = '200px';
+              textarea.style.overflowY = 'scroll';
+            }
           }}
           @keydown=${async (evt: KeyboardEvent) => {
             if (evt.key === 'Enter' && !evt.shiftKey && !evt.isComposing) {
@@ -314,6 +338,14 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
           }}
         ></textarea>
         <div class="chat-panel-input-actions">
+          <div
+            class="chat-history-clear"
+            @click=${async () => {
+              await this.cleanupHistories();
+            }}
+          >
+            ${ChatClearIcon}
+          </div>
           ${images.length < MaximumImageCount
             ? html`<div
                 class="image-upload"
