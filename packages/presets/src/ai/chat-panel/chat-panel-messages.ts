@@ -233,10 +233,19 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderItem(item: ChatItem, isLast: boolean) {
-    const { status } = this.chatContextValue;
+    const { status, error } = this.chatContextValue;
 
     if (isLast && status === 'loading') {
       return this.renderLoading();
+    }
+
+    if (
+      isLast &&
+      status === 'error' &&
+      (error instanceof PaymentRequiredError ||
+        error instanceof UnauthorizedError)
+    ) {
+      return this.renderError();
     }
 
     if ('role' in item) {
@@ -250,8 +259,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           .attachments=${item.attachments}
           .text=${item.content}
           .state=${state}
-        ></chat-text
-        >${this.renderEditorActions(item, isLast)}`;
+        ></chat-text>
+        ${isLast && status === 'error' ? this.renderError() : nothing}
+        ${this.renderEditorActions(item, isLast)}`;
     } else {
       switch (item.action) {
         case 'Create a presentation':
@@ -321,7 +331,13 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
 
     if (item.role !== 'assistant') return nothing;
 
-    if (isLast && status !== 'success' && status !== 'idle') return nothing;
+    if (
+      isLast &&
+      status !== 'success' &&
+      status !== 'idle' &&
+      status !== 'error'
+    )
+      return nothing;
 
     const { host } = this;
     const { content } = item;
@@ -379,6 +395,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         ? html`<div class="actions-container">
             ${repeat(
               actions.filter(action => {
+                if (!content) return false;
+
                 if (action.title === 'Replace selection') {
                   if (
                     (!this._currentTextSelection ||
@@ -430,7 +448,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   protected override render() {
-    const { items, status } = this.chatContextValue;
+    const { items } = this.chatContextValue;
     const { isLoading } = this;
     const filteredItems = items.filter(item => {
       return (
@@ -477,9 +495,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               return html`<div class="message">
                 ${this.renderAvatar(item)}
                 <div class="item-wrapper">${this.renderItem(item, isLast)}</div>
-                <div class="item-wrapper">
-                  ${status === 'error' && isLast ? this.renderError() : nothing}
-                </div>
               </div>`;
             })}
       </div>
