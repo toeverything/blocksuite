@@ -11,7 +11,7 @@ import {
   cleanSpecifiedTail,
   createKeydownObserver,
 } from '../../../_common/components/utils.js';
-import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
+import { getCurrentInlineEditor } from '../../../_common/utils/query.js';
 import type { LinkedDocOptions } from './config.js';
 import { type LinkedDocGroup } from './config.js';
 import { styles } from './styles.js';
@@ -50,10 +50,13 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
   }
 
   private _updateActionList() {
+    const inlineEditor = getCurrentInlineEditor(this.editorHost);
+    assertExists(inlineEditor);
+
     this._actionGroup = this.options.getMenus({
       editorHost: this.editorHost,
       query: this._query,
-      inlineEditor: this.inlineEditor,
+      inlineEditor,
       docMetas: this._doc.collection.meta.docMetas,
     });
   }
@@ -67,7 +70,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   constructor(
     private editorHost: EditorHost,
-    private inlineEditor: AffineInlineEditor,
     private abortController = new AbortController()
   ) {
     super();
@@ -75,8 +77,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    const inlineEditor = this.inlineEditor;
-    assertExists(inlineEditor, 'RichText InlineEditor not found');
 
     // init
     this._updateActionList();
@@ -91,8 +91,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     });
 
     createKeydownObserver({
-      target: inlineEditor.eventSource,
-      inlineEditor,
+      host: this.editorHost,
       onUpdateQuery: str => {
         this._query = str;
         this._activatedItemIndex = 0;
@@ -124,11 +123,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
       },
       onConfirm: () => {
         this.abortController.abort();
-        cleanSpecifiedTail(
-          this.editorHost,
-          this.inlineEditor,
-          this.triggerKey + this._query
-        );
+        cleanSpecifiedTail(this.editorHost, this.triggerKey + this._query);
         this._flattenActionList[this._activatedItemIndex]
           .action()
           ?.catch(console.error);
@@ -139,7 +134,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     });
   }
 
-  updatePosition(position: { height: number; x: string; y: string }) {
+  updatePosition(position: { height: number; x: string; y: string } | null) {
     this._position = position;
   }
 
@@ -180,7 +175,6 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
                     this.abortController.abort();
                     cleanSpecifiedTail(
                       this.editorHost,
-                      this.inlineEditor,
                       this.triggerKey + this._query
                     );
                     action()?.catch(console.error);

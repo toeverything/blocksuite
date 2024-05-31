@@ -1,5 +1,4 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -9,10 +8,7 @@ import {
   cleanSpecifiedTail,
   createKeydownObserver,
 } from '../../../_common/components/utils.js';
-import {
-  getRichTextByModel,
-  isControlledKeyboardEvent,
-} from '../../../_common/utils/index.js';
+import { isControlledKeyboardEvent } from '../../../_common/utils/index.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';
 import type { RootBlockComponent } from '../../../root-block/types.js';
 import { styles } from './styles.js';
@@ -81,17 +77,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
     });
     this._filterItems = this._updateItem('');
 
-    const richText = getRichTextByModel(this.host, this.model);
-    if (!richText) {
-      console.warn(
-        'Slash Menu may not work properly! No rich text found for model',
-        this.model
-      );
-      return;
-    }
-    const inlineEditor = richText.inlineEditor;
-    assertExists(inlineEditor, 'RichText InlineEditor not found');
-
     /**
      * Handle arrow key
      *
@@ -103,8 +88,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
      *   and if the following key is not the backspace key, the slash menu will be closed
      */
     createKeydownObserver({
-      target: inlineEditor.eventSource,
-      inlineEditor,
+      host: this.host,
       abortController: this.abortController,
       interceptor: (e, next) => {
         if (e.key === '/') {
@@ -262,11 +246,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     // Need to remove the search string
     // We must to do clean the slash string before we do the action
     // Otherwise, the action may change the model and cause the slash string to be changed
-    cleanSpecifiedTail(
-      this.host,
-      this.model,
-      this.triggerKey + this._searchString
-    );
+    cleanSpecifiedTail(this.host, this.triggerKey + this._searchString);
     this.abortController.abort();
 
     const { action } = this._filterItems[index];
