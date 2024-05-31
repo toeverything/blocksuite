@@ -27,7 +27,7 @@ export class IconButton extends LitElement {
     :host {
       box-sizing: border-box;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       border: none;
       width: var(--button-width);
