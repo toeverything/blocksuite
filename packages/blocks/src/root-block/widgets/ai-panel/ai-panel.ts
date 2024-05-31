@@ -154,8 +154,8 @@ export class AffineAIPanelWidget extends WidgetElement {
   };
 
   hide = () => {
-    this.state = 'hidden';
     this._resetAbortController();
+    this.state = 'hidden';
     this._stopAutoUpdate?.();
     this._inputText = null;
     this._answer = null;
@@ -267,6 +267,9 @@ export class AffineAIPanelWidget extends WidgetElement {
   get inputText() {
     return this._inputText;
   }
+  onInput = (text: string) => {
+    this._inputText = text;
+  };
 
   private _selection?: BaseSelection[];
 
@@ -368,17 +371,26 @@ export class AffineAIPanelWidget extends WidgetElement {
   private _onKeyDown = (event: KeyboardEvent) => {
     event.stopPropagation();
     const { state } = this;
-    if (
-      (state !== 'generating' && state !== 'input') ||
-      event.key !== 'Escape'
-    ) {
+    if (state !== 'generating' && state !== 'input') {
       return;
     }
 
-    if (state === 'generating') {
-      this.stopGenerating();
-    } else {
-      this.hide();
+    const { key, isComposing } = event;
+    if (key === 'Escape') {
+      if (state === 'generating') {
+        this.stopGenerating();
+      } else {
+        this.hide();
+      }
+      return;
+    }
+
+    if (key === 'Delete' || key === 'Backspace') {
+      if (isComposing) return;
+
+      if (state === 'input' && !this._inputText) {
+        this.hide();
+      }
     }
   };
 
@@ -500,6 +512,7 @@ export class AffineAIPanelWidget extends WidgetElement {
           html`<ai-panel-input
             .onBlur=${() => this.discard()}
             .onFinish=${this._inputFinish}
+            .onInput=${this.onInput}
           ></ai-panel-input>`,
       ],
       [

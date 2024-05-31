@@ -89,6 +89,9 @@ export class AIPanelInput extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor onFinish: ((input: string) => void) | undefined = undefined;
 
+  @property({ attribute: false })
+  accessor onInput: ((input: string) => void) | undefined = undefined;
+
   @query('.arrow')
   private accessor _arrow!: HTMLDivElement;
 
@@ -117,6 +120,7 @@ export class AIPanelInput extends WithDisposable(LitElement) {
     this._textarea.style.height = 'auto';
     this._textarea.style.height = this._textarea.scrollHeight + 'px';
 
+    this.onInput?.(this._textarea.value);
     const value = this._textarea.value.trim();
     if (value.length > 0) {
       this._arrow.dataset.active = '';
