@@ -161,8 +161,12 @@ export const getSelections = (
 ) => {
   const [_, data] = host.command
     .chain()
-    .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
-    .getSelectedBlocks({ types: ['text', 'block'], mode })
+    .tryAll(chain => [
+      chain.getTextSelection(),
+      chain.getBlockSelections(),
+      chain.getImageSelections(),
+    ])
+    .getSelectedBlocks({ types: ['text', 'block', 'image'], mode })
     .run();
 
   return data;

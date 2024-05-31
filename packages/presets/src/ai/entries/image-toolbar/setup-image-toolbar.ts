@@ -9,7 +9,15 @@ import { html } from 'lit';
 import { AIImageItemGroups } from '../../_common/config.js';
 
 export function setupImageToolbarEntry(imageToolbar: AffineImageToolbarWidget) {
-  console.log('setupImageToolbarEntry');
+  const onAskAIClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    const { host } = imageToolbar;
+    const { selection } = host;
+    const imageBlock = imageToolbar.blockElement;
+    selection.setGroup('note', [
+      selection.create('image', { blockId: imageBlock.blockId }),
+    ]);
+  };
   imageToolbar.buildDefaultConfig();
   imageToolbar.addConfigItems(
     [
@@ -23,6 +31,7 @@ export function setupImageToolbarEntry(imageToolbar: AffineImageToolbarWidget) {
             .size=${'small'}
             .backgroundColor=${'var(--affine-white)'}
             .boxShadow=${'var(--affine-shadow-1)'}
+            @click=${onAskAIClick}
           ></ask-ai-button>`;
         },
         showWhen: () => true,

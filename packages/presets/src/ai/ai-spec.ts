@@ -5,11 +5,13 @@ import {
   AffineAIPanelWidget,
   AffineCodeToolbarWidget,
   AffineFormatBarWidget,
+  AffineImageToolbarWidget,
   AffineSlashMenuWidget,
   CodeBlockSpec,
   EdgelessCopilotWidget,
   EdgelessElementToolbarWidget,
   EdgelessRootBlockSpec,
+  ImageBlockSpec,
   PageRootBlockSpec,
   ParagraphBlockService,
   ParagraphBlockSpec,
@@ -24,6 +26,7 @@ import {
   setupEdgelessElementToolbarEntry,
 } from './entries/edgeless/index.js';
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
+import { setupImageToolbarEntry } from './entries/image-toolbar/setup-image-toolbar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
 
@@ -135,6 +138,18 @@ export const AICodeBlockSpec: BlockSpec = {
     slots.widgetConnected.on(view => {
       if (view.component instanceof AffineCodeToolbarWidget) {
         setupCodeToolbarEntry(view.component);
+      }
+    });
+  },
+};
+
+export const AIImageBlockSpec: BlockSpec = {
+  ...ImageBlockSpec,
+  setup(slots, disposableGroup) {
+    ImageBlockSpec.setup?.(slots, disposableGroup);
+    slots.widgetConnected.on(view => {
+      if (view.component instanceof AffineImageToolbarWidget) {
+        setupImageToolbarEntry(view.component);
       }
     });
   },

@@ -13,7 +13,12 @@ import type { TemplateResult } from 'lit';
 
 import { actionToHandler } from '../actions/doc-handler.js';
 import { actionToHandler as edgelessActionToHandler } from '../actions/edgeless-handler.js';
-import { textTones, translateLangs } from '../actions/types.js';
+import {
+  imageFilterStyles,
+  imageProcessingTypes,
+  textTones,
+  translateLangs,
+} from '../actions/types.js';
 import { getAIPanel } from '../ai-panel.js';
 import { AIProvider } from '../provider.js';
 import {
@@ -55,6 +60,24 @@ export const toneSubItem: AISubItemConfig[] = textTones.map(tone => {
   return {
     type: tone,
     handler: actionToHandler('changeTone', AIStarIconWithAnimation, { tone }),
+  };
+});
+
+export const imageFilterSubItem = imageFilterStyles.map(style => {
+  return {
+    type: style,
+    handler: edgelessHandler('filterImage', AIImageIconWithAnimation, {
+      style,
+    }),
+  };
+});
+
+export const imageProcessingSubItem = imageProcessingTypes.map(type => {
+  return {
+    type,
+    handler: edgelessHandler('processImage', AIImageIconWithAnimation, {
+      type,
+    }),
   };
 });
 
@@ -375,6 +398,7 @@ export const AIImageItemGroups: AIItemGroupConfig[] = [
       {
         name: 'Explain this image',
         icon: ExplainIcon,
+        showWhen: () => true,
         handler: actionToHandler('explainImage', AIStarIconWithAnimation),
       },
     ],
@@ -385,7 +409,26 @@ export const AIImageItemGroups: AIItemGroupConfig[] = [
       {
         name: 'Generate an image',
         icon: AIImageIcon,
+        showWhen: () => true,
         handler: edgelessHandler('createImage', AIImageIconWithAnimation),
+      },
+      {
+        name: 'AI image filter',
+        icon: ImproveWritingIcon,
+        showWhen: (_, __, host) =>
+          !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
+        subItem: imageFilterSubItem,
+        subItemOffset: [12, -4],
+        beta: true,
+      },
+      {
+        name: 'Image processing',
+        icon: AIImageIcon,
+        showWhen: (_, __, host) =>
+          !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
+        subItem: imageProcessingSubItem,
+        subItemOffset: [12, -6],
+        beta: true,
       },
     ],
   },
@@ -399,13 +442,13 @@ export const AICodeItemGroups: AIItemGroupConfig[] = [
       {
         name: 'Explain this code',
         icon: ExplainIcon,
-        showWhen: codeBlockShowWhen,
+        showWhen: () => true,
         handler: actionToHandler('explainCode', AIStarIconWithAnimation),
       },
       {
         name: 'Check code error',
         icon: ExplainIcon,
-        showWhen: codeBlockShowWhen,
+        showWhen: () => true,
         handler: actionToHandler('checkCodeErrors', AIStarIconWithAnimation),
       },
     ],
