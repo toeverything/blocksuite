@@ -60,6 +60,7 @@ export const styles = css`
     padding: 4px;
     border: 1px solid var(--affine-border-color, #e3e2e4);
     border-radius: 4px;
+    color: var(--affine-icon-color);
 
     display: flex;
     justify-content: center;
