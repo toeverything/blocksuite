@@ -2,7 +2,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline';
 import type { Text } from '@blocksuite/store';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -151,9 +151,10 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
         .undoManager=${this.topContenteditableElement?.doc.history}
         .enableFormat=${false}
         .readonly=${this.readonly}
-        .verticalScrollContainer=${this.topContenteditableElement?.host
-          ? getViewportElement(this.topContenteditableElement.host)
-          : nothing}
+        .verticalScrollContainerGetter=${() =>
+          this.topContenteditableElement?.host
+            ? getViewportElement(this.topContenteditableElement.host)
+            : null}
         class="${classList}"
         data-title-empty="${isEmpty}"
         data-title-focus="${this.isActive}"

@@ -472,7 +472,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
               .enableClipboard=${false}
               .enableUndoRedo=${false}
               .wrapText=${this.model.wrap}
-              .verticalScrollContainer=${getViewportElement(this.host)}
+              .verticalScrollContainerGetter=${() =>
+                getViewportElement(this.host)}
             >
             </rich-text>
           </div>

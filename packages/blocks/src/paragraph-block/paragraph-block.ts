@@ -172,7 +172,8 @@ export class ParagraphBlockComponent extends BlockElement<
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
-            .verticalScrollContainer=${getViewportElement(this.host)}
+            .verticalScrollContainerGetter=${() =>
+              getViewportElement(this.host)}
           ></rich-text>
           <div contenteditable="false" class="affine-paragraph-placeholder">
             ${this.service.placeholderGenerator(this.model)}
