@@ -114,6 +114,9 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
     );
 
     this._resizeObserver.observe(this._textContainer);
+    this.model.deleted.on(() => {
+      this._resizeObserver.disconnect();
+    });
   }
 
   override render() {

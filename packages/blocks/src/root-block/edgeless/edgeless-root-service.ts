@@ -292,14 +292,15 @@ export class EdgelessRootService extends RootService {
   removeElement(id: string | BlockSuite.EdgelessModelType) {
     id = typeof id === 'string' ? id : id.id;
 
-    if (this._surface.hasElementById(id)) {
-      this._surface.removeElement(id);
+    const el = this.getElementById(id);
+    if (el instanceof EdgelessBlockModel) {
+      this.doc.deleteBlock(el);
       return;
     }
 
-    if (this.doc.hasBlockById(id)) {
-      const block = this.doc.getBlockById(id)!;
-      this.doc.deleteBlock(block);
+    if (this._surface.hasElementById(id)) {
+      this._surface.removeElement(id);
+      return;
     }
   }
 
