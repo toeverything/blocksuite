@@ -355,9 +355,10 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       .attributeRenderer=${this.attributeRenderer}
       .embedChecker=${this.inlineManager?.embedChecker}
       .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
-      .verticalScrollContainer=${this.topContenteditableElement?.host
-        ? getViewportElement(this.topContenteditableElement.host)
-        : nothing}
+      .verticalScrollContainerGetter=${() =>
+        this.topContenteditableElement?.host
+          ? getViewportElement(this.topContenteditableElement.host)
+          : null}
       class="affine-data-view-rich-text inline-editor"
     ></rich-text>`;
   }

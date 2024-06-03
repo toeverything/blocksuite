@@ -175,10 +175,12 @@ export class ChatCopyMore extends WithDisposable(LitElement) {
         }
       </style>
       <div class="copy-more">
-        <div @click=${() => copyText(host, content)}>
-          ${CopyIcon}
-          <affine-tooltip>Copy</affine-tooltip>
-        </div>
+        ${content
+          ? html`<div @click=${() => copyText(host, content)}>
+              ${CopyIcon}
+              <affine-tooltip>Copy</affine-tooltip>
+            </div>`
+          : nothing}
         ${isLast
           ? html`<div @click=${() => this._retry()}>
               ${RetryIcon}

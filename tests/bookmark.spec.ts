@@ -51,7 +51,7 @@ const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, '/links');
+  await type(page, '/link');
   await pressEnter(page);
   await type(page, inputUrl);
   await pressEnter(page);
@@ -200,7 +200,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
   await setInlineRangeInSelectedRichText(page, 0, inputUrl.length);
   await copyByKeyboard(page);
   await focusRichText(page);
-  await type(page, '/links');
+  await type(page, '/link');
   await pressEnter(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await pressEnter(page);
@@ -257,7 +257,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await copyByKeyboard(page);
   await pressArrowRight(page);
   await waitNextFrame(page);
-  await type(page, '/links');
+  await type(page, '/link');
   await pressEnter(page);
   await waitNextFrame(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
@@ -477,7 +477,7 @@ test('press backspace after bookmark block can select bookmark block', async ({
 
   await pressEnter(page);
   await pressArrowUp(page);
-  await type(page, '/links');
+  await type(page, '/link');
   await pressEnter(page);
   await type(page, inputUrl);
   await pressEnter(page);

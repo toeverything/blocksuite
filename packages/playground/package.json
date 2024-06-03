@@ -19,7 +19,7 @@
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/sync": "workspace:*",
-    "@shoelace-style/shoelace": "2.15.0",
+    "@shoelace-style/shoelace": "2.15.1",
     "@toeverything/y-indexeddb": "0.10.0-canary.9",
     "@types/katex": "^0.16.7",
     "browser-fs-access": "^0.35.0",
@@ -42,7 +42,7 @@
     "@types/micromatch": "^4.0.7",
     "graphql": "^16.8.1",
     "magic-string": "^0.30.10",
-    "openai": "^4.47.1",
+    "openai": "^4.47.2",
     "vite-plugin-wasm": "^3.3.0"
   }
 }

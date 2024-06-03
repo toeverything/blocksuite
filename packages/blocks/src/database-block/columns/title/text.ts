@@ -1,7 +1,7 @@
 import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
-import { css, nothing } from 'lit';
+import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
@@ -196,9 +196,10 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         .embedChecker=${this.inlineManager?.embedChecker}
         .markdownShortcutHandler=${this.inlineManager?.markdownShortcutHandler}
         .readonly=${this.readonly}
-        .verticalScrollContainer=${this.topContenteditableElement?.host
-          ? getViewportElement(this.topContenteditableElement.host)
-          : nothing}
+        .verticalScrollContainerGetter=${() =>
+          this.topContenteditableElement?.host
+            ? getViewportElement(this.topContenteditableElement.host)
+            : null}
         class="data-view-header-area-rich-text"
       ></rich-text>`;
   }

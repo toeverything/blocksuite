@@ -13,108 +13,98 @@ export const styles = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  .slash-menu-container {
-    z-index: var(--affine-z-index-popover);
-    user-select: none;
-  }
-
   .slash-menu {
     position: fixed;
     left: 0;
     top: 0;
     box-sizing: border-box;
-    font-size: var(--affine-font-base);
-    padding: 12px 0;
-    display: flex;
+    padding: 8px;
+    width: 258px;
+    overflow-y: auto;
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
 
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
-    border-radius: 12px;
+    border-radius: 8px;
     z-index: var(--affine-z-index-popover);
+    user-select: none;
     /* transition: max-height 0.2s ease-in-out; */
   }
 
-  .slash-category {
-    overflow: auto;
+  ${scrollbarStyle('.slash-menu')}
+
+  .slash-menu-group-name {
     box-sizing: border-box;
-    width: 150px;
-    max-width: 150px;
-    display: flex;
-    flex-direction: column;
-    color: var(--affine-text-secondary-color);
-    gap: 5px;
-    margin-bottom: 20px;
-    /* transition: max-width 0.2s ease-in-out; */
-  }
+    padding: 2px 8px;
 
-  ${scrollbarStyle('.slash-category')}
-
-  .slash-category-hide {
-    max-width: 0;
-    padding: 0;
-    margin: 0;
-    height: 0;
-  }
-
-  .slash-category-name {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-sm);
-    white-space: nowrap;
-    cursor: pointer;
-    padding: 4px 20px;
-  }
-
-  .slash-active-category {
-    position: relative;
-    box-sizing: border-box;
-    color: var(--affine-primary-color);
-  }
-
-  .slash-active-category::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 12px;
-    background: linear-gradient(
-      180deg,
-      var(--affine-text-emphasis-color) 0%,
-      var(--affine-palette-purple) 100%
+    font-size: var(--affine-font-xs);
+    font-weight: 500;
+    line-height: var(--affine-line-height);
+    text-align: left;
+    color: var(
+      --light-textColor-textSecondaryColor,
+      var(--textColor-textSecondaryColor, #8e8d91)
     );
-    border-radius: 1px;
   }
 
-  .slash-vertical-divider {
-    margin-top: 10px;
-    margin-bottom: 20px;
-    width: 1px;
-    background-color: var(--affine-border-color);
+  .slash-menu-item {
+    padding: 2px 4px 2px 8px;
+    justify-content: flex-start;
+    gap: 10px;
   }
 
-  .slash-item-container {
+  .slash-menu-item-icon {
     box-sizing: border-box;
-    overflow-y: auto;
-    padding: 0 8px;
-    width: 200px;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    border: 1px solid var(--affine-border-color, #e3e2e4);
+    border-radius: 4px;
+    color: var(--affine-icon-color);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  ${scrollbarStyle('.slash-item-container')}
-
-  .slash-item-divider {
-    border-top: 1px dashed var(--affine-border-color);
-    margin: 8px 0;
+  .slash-menu-item-icon svg {
+    display: block;
   }
-  .slash-item.delete:hover {
+
+  .slash-menu-item.delete:hover {
     background: var(--affine-background-error-color);
     color: var(--affine-error-color);
     fill: var(--affine-error-color);
   }
-  .slash-item.ask-ai {
+  .slash-menu-item.ask-ai {
     color: var(--affine-brand-color);
   }
-  .slash-item.github .github-icon {
+  .slash-menu-item.github .github-icon {
     color: var(--affine-black);
+  }
+`;
+
+export const slashItemToolTipStyle = css`
+  .affine-tooltip {
+    display: flex;
+    padding: 4px 4px 2px 4px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .tooltip-figure svg {
+    display: block;
+  }
+
+  .tooltip-caption {
+    padding-left: 4px;
+    color: var(
+      --light-textColor-textSecondaryColor,
+      var(--textColor-textSecondaryColor, #8e8d91)
+    );
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-xs);
+    line-height: var(--affine-line-height);
   }
 `;

@@ -241,9 +241,9 @@ function renderSurfaceRef(
 ) {
   card.isBannerEmpty = true;
 
-  const surfaceRedService = card.std.spec.getService('affine:surface-ref');
-  assertExists(surfaceRedService, `Surface ref service not found.`);
-  card.surfaceRefService = surfaceRedService;
+  const surfaceRefService = card.std.spec.getService('affine:surface-ref');
+  assertExists(surfaceRefService, `Surface ref service not found.`);
+  card.surfaceRefService = surfaceRefService;
 
   card.cleanUpSurfaceRefRenderer();
 

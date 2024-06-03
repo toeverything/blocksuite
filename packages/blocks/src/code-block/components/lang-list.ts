@@ -252,11 +252,9 @@ export class LangList extends LitElement {
                 ].join(' ')}
               >
                 ${language.name ?? language.id}
-                <slot name="suffix"
-                  >${this.currentLanguageId === language.id
-                    ? DoneIcon
-                    : nothing}</slot
-                >
+                <div slot="suffix">
+                  ${this.currentLanguageId === language.id ? DoneIcon : nothing}
+                </div>
               </icon-button>
             `;
           })}

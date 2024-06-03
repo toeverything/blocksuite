@@ -10,9 +10,9 @@
   "type": "module",
   "devDependencies": {
     "typedoc": "^0.25.13",
-    "typedoc-plugin-markdown": "4.0.1",
+    "typedoc-plugin-markdown": "4.0.3",
     "vite-plugin-wasm": "^3.3.0",
-    "vitepress": "1.1.4",
+    "vitepress": "1.2.2",
     "vue": "^3.4.27"
   },
   "scripts": {

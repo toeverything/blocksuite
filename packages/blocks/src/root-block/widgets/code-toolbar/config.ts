@@ -6,6 +6,7 @@ import {
   DuplicateIcon,
   WrapIcon,
 } from '../../../_common/icons/text.js';
+import { isInsidePageEditor } from '../../../_common/utils/query.js';
 import type { CodeToolbarItem, CodeToolbarMoreItem } from './types.js';
 import { duplicateCodeBlock } from './utils.js';
 
@@ -67,6 +68,13 @@ export const defaultMoreItems: CodeToolbarMoreItem[] = [
                   blockId: codeId,
                 }),
               ]);
+
+              if (isInsidePageEditor(editorHost)) {
+                const duplicateElement = editorHost.view.getBlock(codeId);
+                if (duplicateElement) {
+                  duplicateElement.scrollIntoView({ block: 'nearest' });
+                }
+              }
             })
             .catch(console.error);
         },
