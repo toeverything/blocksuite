@@ -174,16 +174,16 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       );
     }
 
-    // lazy
-    const verticalScrollContainer =
-      this.#verticalScrollContainer ||
-      (this.#verticalScrollContainer =
-        this.verticalScrollContainerGetter?.() || null);
-
     // init auto scroll
     inlineEditor.disposables.add(
       inlineEditor.slots.inlineRangeUpdate.on(([inlineRange, sync]) => {
         if (!inlineRange || !sync) return;
+
+        // lazy
+        const verticalScrollContainer =
+          this.#verticalScrollContainer ||
+          (this.#verticalScrollContainer =
+            this.verticalScrollContainerGetter?.() || null);
 
         inlineEditor
           .waitForUpdate()
