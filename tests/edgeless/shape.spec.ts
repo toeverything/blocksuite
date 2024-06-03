@@ -605,7 +605,11 @@ test.describe('shape hit test', () => {
   }
 
   test.beforeEach(async ({ page }) => {
-    await enterPlaygroundRoom(page);
+    await enterPlaygroundRoom(page, {
+      flags: {
+        enable_edgeless_text: false,
+      },
+    });
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
   });

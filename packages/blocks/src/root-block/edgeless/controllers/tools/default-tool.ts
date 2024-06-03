@@ -44,6 +44,7 @@ import {
   isNoteBlock,
 } from '../../utils/query.js';
 import {
+  addText,
   mountConnectorLabelEditor,
   mountFrameTitleEditor,
   mountGroupTitleEditor,
@@ -251,19 +252,23 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       expand: 10,
     });
     if (!selected) {
-      // old: canvas text element
-      // addText(this._edgeless, e);
-
-      // new: edgeless text block
-      const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
-      const textService = this._edgeless.host.spec.getService(
-        'affine:edgeless-text'
+      const textFlag = this._edgeless.doc.awarenessStore.getFlag(
+        'enable_edgeless_text'
       );
-      textService.initEdgelessTextBlock({
-        edgeless: this._edgeless,
-        x,
-        y,
-      });
+
+      if (textFlag) {
+        const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
+        const textService = this._edgeless.host.spec.getService(
+          'affine:edgeless-text'
+        );
+        textService.initEdgelessTextBlock({
+          edgeless: this._edgeless,
+          x,
+          y,
+        });
+      } else {
+        addText(this._edgeless, e);
+      }
       return;
     } else {
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);

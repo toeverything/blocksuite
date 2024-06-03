@@ -56,6 +56,10 @@ export async function createDefaultDocCollection() {
       });
   }
 
+  const flags: Partial<BlockSuiteFlags> = Object.fromEntries(
+    [...params.entries()].filter(([key]) => key.startsWith('enable_'))
+  );
+
   const options: DocCollectionOptions = {
     id: 'quickEdgeless',
     schema,
@@ -70,6 +74,7 @@ export async function createDefaultDocCollection() {
       enable_pie_menu: true,
       enable_lasso_tool: true,
       enable_mindmap_entry: true,
+      ...flags,
     },
   };
   const collection = new DocCollection(options);

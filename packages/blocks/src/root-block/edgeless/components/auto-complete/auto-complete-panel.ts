@@ -1,7 +1,7 @@
 import '../buttons/tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
@@ -15,10 +15,17 @@ import {
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import {
+  FontFamily,
+  FontStyle,
+  FontWeight,
+} from '../../../../surface-block/consts.js';
 import { type Connection } from '../../../../surface-block/element-model/connector.js';
 import {
+  CanvasElementType,
   type ConnectorElementModel,
   type ShapeElementModel,
+  TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import type { ShapeStyle } from '../../../../surface-block/element-model/shape.js';
 import {
@@ -38,7 +45,11 @@ import {
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_WIDTH,
 } from '../../utils/consts.js';
-import { mountShapeTextEditor } from '../../utils/text.js';
+import {
+  mountShapeTextEditor,
+  mountTextElementEditor,
+} from '../../utils/text.js';
+import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
   type AUTO_COMPLETE_TARGET_TYPE,
@@ -424,27 +435,61 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const { xywh, position } = target;
     const bound = Bound.fromXYWH(xywh);
     const edgelessService = this.edgeless.service;
-    const textService = this.edgeless.host.spec.getService(
-      'affine:edgeless-text'
+
+    const textFlag = this.edgeless.doc.awarenessStore.getFlag(
+      'enable_edgeless_text'
     );
-    const textId = textService.initEdgelessTextBlock({
-      edgeless: this.edgeless,
-      x: bound.x,
-      y: bound.y,
-    });
+    if (textFlag) {
+      const textService = this.edgeless.host.spec.getService(
+        'affine:edgeless-text'
+      );
+      const textId = textService.initEdgelessTextBlock({
+        edgeless: this.edgeless,
+        x: bound.x,
+        y: bound.y,
+      });
 
-    edgelessService.updateElement(this.connector.id, {
-      target: { id: textId, position },
-    });
-    if (this.currentSource.group instanceof GroupElementModel) {
-      this.currentSource.group.addChild(textId);
+      edgelessService.updateElement(this.connector.id, {
+        target: { id: textId, position },
+      });
+      if (this.currentSource.group instanceof GroupElementModel) {
+        this.currentSource.group.addChild(textId);
+      }
+
+      this.edgeless.service.selection.set({
+        elements: [textId],
+        editing: false,
+      });
+      this.edgeless.doc.captureSync();
+    } else {
+      const textId = edgelessService.addElement(CanvasElementType.TEXT, {
+        xywh: bound.serialize(),
+        text: new DocCollection.Y.Text(),
+        textAlign: 'left',
+        fontSize: 24,
+        fontFamily: FontFamily.Inter,
+        color: GET_DEFAULT_TEXT_COLOR(),
+        fontWeight: FontWeight.Regular,
+        fontStyle: FontStyle.Normal,
+      });
+      const textElement = edgelessService.getElementById(textId);
+      assertInstanceOf(textElement, TextElementModel);
+
+      edgelessService.updateElement(this.connector.id, {
+        target: { id: textId, position },
+      });
+      if (this.currentSource.group instanceof GroupElementModel) {
+        this.currentSource.group.addChild(textId);
+      }
+
+      this.edgeless.service.selection.set({
+        elements: [textId],
+        editing: false,
+      });
+      this.edgeless.doc.captureSync();
+
+      mountTextElementEditor(textElement, this.edgeless);
     }
-
-    this.edgeless.service.selection.set({
-      elements: [textId],
-      editing: false,
-    });
-    this.edgeless.doc.captureSync();
   }
 
   private _autoComplete(targetType: AUTO_COMPLETE_TARGET_TYPE) {

@@ -2,6 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import { type TextTool } from '../../../../_common/utils/index.js';
+import { addText } from '../../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export class TextToolController extends EdgelessToolController<TextTool> {
@@ -10,22 +11,26 @@ export class TextToolController extends EdgelessToolController<TextTool> {
   };
 
   onContainerClick(e: PointerEventState): void {
-    // old: canvas text element
-    // addText(this._edgeless, e);
-
-    // new: edgeless text block
-    const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
-    const textService = this._edgeless.host.spec.getService(
-      'affine:edgeless-text'
+    const textFlag = this._edgeless.doc.awarenessStore.getFlag(
+      'enable_edgeless_text'
     );
-    textService.initEdgelessTextBlock({
-      edgeless: this._edgeless,
-      x,
-      y,
-    });
-    this._service.tool.setEdgelessTool({
-      type: 'default',
-    });
+
+    if (textFlag) {
+      const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
+      const textService = this._edgeless.host.spec.getService(
+        'affine:edgeless-text'
+      );
+      textService.initEdgelessTextBlock({
+        edgeless: this._edgeless,
+        x,
+        y,
+      });
+      this._service.tool.setEdgelessTool({
+        type: 'default',
+      });
+    } else {
+      addText(this._edgeless, e);
+    }
   }
 
   onContainerContextMenu(): void {

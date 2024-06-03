@@ -35,7 +35,11 @@ async function assertTextFont(page: Page, font: string) {
 }
 
 test('add text element in default mode', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_edgeless_text: false,
+    },
+  });
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
@@ -68,7 +72,11 @@ test('add text element in default mode', async ({ page }) => {
 
 // it's also a little flaky
 test('add text element in text mode', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_edgeless_text: false,
+    },
+  });
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
@@ -101,7 +109,11 @@ test('add text element in text mode', async ({ page }) => {
 });
 
 test('copy and paste', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_edgeless_text: false,
+    },
+  });
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
@@ -134,7 +146,11 @@ test('copy and paste', async ({ page }) => {
 });
 
 test('normalize text element rect after change its font', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_edgeless_text: false,
+    },
+  });
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
@@ -177,7 +193,11 @@ test('normalize text element rect after change its font', async ({ page }) => {
 });
 
 test('auto wrap text by dragging left and right edge', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_edgeless_text: false,
+    },
+  });
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
@@ -251,7 +271,11 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
 test('text element should have maxWidth after adjusting width by dragging left or right edge', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_edgeless_text: false,
+    },
+  });
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
