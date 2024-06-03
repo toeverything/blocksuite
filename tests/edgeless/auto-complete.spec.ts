@@ -8,14 +8,18 @@ import {
   changeShapeFillColor,
   changeShapeStrokeColor,
   createShapeElement,
+  deleteAll,
   dragBetweenViewCoords,
   edgelessCommonSetup,
   getEdgelessSelectedRectModel,
   Shape,
+  switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
+  enterPlaygroundRoom,
+  initEmptyEdgelessState,
   waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from '../utils/actions/misc.js';
@@ -103,7 +107,14 @@ test.describe('auto-complete', () => {
     test('drag on right auto-complete button to add canvas text', async ({
       page,
     }) => {
-      await edgelessCommonSetup(page);
+      await enterPlaygroundRoom(page, {
+        flags: {
+          enable_edgeless_text: false,
+        },
+      });
+      await initEmptyEdgelessState(page);
+      await switchEditorMode(page);
+      await deleteAll(page);
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await assertSelectedBound(page, [0, 0, 100, 100]);
       await dragBetweenViewCoords(page, [120, 50], [200, 0]);
