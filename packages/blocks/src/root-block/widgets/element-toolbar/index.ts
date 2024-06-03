@@ -55,6 +55,7 @@ import { renderAlignButton } from './align-button.js';
 import { renderAttachmentButton } from './change-attachment-button.js';
 import { renderChangeBrushButton } from './change-brush-button.js';
 import { renderConnectorButton } from './change-connector-button.js';
+import { renderChangeEdgelessTextButton } from './change-edgeless-text-button.js';
 import { renderEmbedButton } from './change-embed-card-button.js';
 import { renderFrameButton } from './change-frame-button.js';
 import { renderGroupButton } from './change-group-button.js';
@@ -346,6 +347,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       embedCard,
       attachment,
       image,
+      edgelessText,
     } = groupedSelected;
     const { selectedElements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -373,6 +375,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           renderConnectorButton(edgeless, connector),
           renderNoteButton(edgeless, note),
           renderChangeTextButton(edgeless, text),
+          renderChangeEdgelessTextButton(edgeless, edgelessText),
           renderFrameButton(edgeless, frame),
           renderGroupButton(edgeless, group),
           renderEmbedButton(edgeless, embedCard),

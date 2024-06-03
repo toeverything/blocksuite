@@ -2,23 +2,23 @@ import type { Text } from '@blocksuite/store';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import { FontFamily, FontStyle, FontWeight } from '../surface-block/consts.js';
+import {
+  FontFamily,
+  FontStyle,
+  FontWeight,
+  TextAlign,
+  type TextStyleProps,
+} from '../surface-block/consts.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
-interface EdgelessTextProps {
+type EdgelessTextProps = {
   xywh: SerializedXYWH;
   index: string;
   text: Text;
-  color: string;
-  fontSize: number;
-  fontFamily: FontFamily;
-  fontWeight: FontWeight;
-  fontStyle: FontStyle;
-  textAlign: 'left' | 'center' | 'right';
   scale: number;
   rotate: number;
   hasMaxWidth: boolean;
-}
+} & TextStyleProps;
 
 export const EdgelessTextBlockSchema = defineBlockSchema({
   flavour: 'affine:edgeless-text',
@@ -27,11 +27,11 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
     index: 'a0',
     text: internal.Text(),
     color: '#000000',
-    fontSize: 16,
     fontFamily: FontFamily.Inter,
-    fontWeight: FontWeight.Regular,
+    fontSize: 16,
     fontStyle: FontStyle.Normal,
-    textAlign: 'left',
+    fontWeight: FontWeight.Regular,
+    textAlign: TextAlign.Left,
     scale: 1,
     rotate: 0,
     hasMaxWidth: false,
@@ -64,6 +64,10 @@ declare global {
   namespace BlockSuite {
     interface EdgelessBlockModelMap {
       'affine:edgeless-text': EdgelessTextBlockModel;
+    }
+
+    interface EdgelessTextModelMap {
+      'edgeless-text': EdgelessTextBlockModel;
     }
   }
 }

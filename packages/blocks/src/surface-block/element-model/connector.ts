@@ -488,7 +488,7 @@ export class LocalConnectorElementModel extends SurfaceLocalModel {
 }
 
 export function isConnectorWithLabel(
-  model: SurfaceElementModel | SurfaceLocalModel
+  model: BlockSuite.EdgelessModelType | BlockSuite.SurfaceLocalModelType
 ) {
   return model instanceof ConnectorElementModel && model.hasLabel();
 }
@@ -500,6 +500,9 @@ declare global {
     }
     interface SurfaceLocalModelMap {
       connector: LocalConnectorElementModel;
+    }
+    interface EdgelessTextModelMap {
+      connector: ConnectorElementModel;
     }
   }
 }

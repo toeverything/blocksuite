@@ -8,6 +8,7 @@ import {
   StrokeStyle,
   TextAlign,
   TextResizing,
+  type TextStyleProps,
   TextVerticalAlign,
 } from '../consts.js';
 import type { IBound, SerializedXYWH } from '../index.js';
@@ -57,17 +58,11 @@ export type ShapeProps = IBaseProps & {
   roughness?: number;
 
   text?: Y.Text;
-  color?: string;
-  fontSize?: number;
-  fontFamily?: string;
-  fontWeight?: FontWeight;
-  fontStyle?: FontStyle;
-  textAlign?: TextAlign;
   textHorizontalAlign?: TextAlign;
   textVerticalAlign?: TextVerticalAlign;
   textResizing?: TextResizing;
   maxWidth?: false | number;
-};
+} & Partial<TextStyleProps>;
 
 export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   static override propsToY(props: ShapeProps) {
@@ -180,6 +175,10 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
 declare global {
   namespace BlockSuite {
     interface SurfaceElementModelMap {
+      shape: ShapeElementModel;
+    }
+
+    interface EdgelessTextModelMap {
       shape: ShapeElementModel;
     }
   }
