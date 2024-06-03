@@ -6,8 +6,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
@@ -65,7 +65,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   accessor captionElement: BlockCaptionEditor | null = null;
 
   @query(
-    ':scope > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > editor-host'
+    ':scope > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > div > editor-host'
   )
   accessor syncedDocEditorHost: EditorHost | null = null;
 
@@ -151,7 +151,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
   private _handleFocusEventsInLoad = () => {
     const syncedDocEditorHost = this.syncedDocEditorHost;
-    assertExists(syncedDocEditorHost);
+    if (!syncedDocEditorHost) return;
 
     this.disposables.addFromEvent(syncedDocEditorHost, 'focusin', e => {
       e.stopPropagation();
@@ -208,9 +208,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     if (!this._error && !this._cycle) {
       await this.updateComplete;
 
-      const syncedDocEditorHost = this.syncedDocEditorHost;
-      assertExists(syncedDocEditorHost);
-
       this._handleFocusEventsInLoad();
     }
   }
@@ -223,8 +220,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
   private _handleOverlayDblClick = (event: MouseEvent) => {
     event.stopPropagation();
-    const syncedDocEditorHost = this.syncedDocEditorHost;
-    assertExists(syncedDocEditorHost);
   };
 
   open = () => {
@@ -461,18 +456,14 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       });
     }
 
-    const isSelected = !!this.selected?.is('block');
     const theme = getThemeMode();
-    const pageSpec = SpecProvider.getInstance().getSpec('page').value;
-    const edgelessSpec = SpecProvider.getInstance().getSpec('edgeless').value;
-    const EditorBlockSpec = editorMode === 'page' ? pageSpec : edgelessSpec;
-
-    this.dataset.nestedEditor = 'true';
+    const isSelected = !!this.selected?.is('block');
     const scale = isInSurface ? this.model.scale ?? 1 : undefined;
+
+    this.dataset.nestedEditor = '';
 
     return this.renderEmbed(
       () => html`
-      </div>
         <div
           class=${classMap({
             'affine-embed-synced-doc-container': true,
@@ -484,48 +475,58 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
           })}
           style=${containerStyleMap}
           @pointerdown=${this._handlePointerDown}
-          data-scale=${ifDefined(scale)}
+          ?data-scale=${scale}
         >
-          <div
-            class=${classMap({
-              'affine-embed-synced-doc-editor': true,
-              'affine-page-viewport': editorMode === 'page',
-              'affine-edgeless-viewport': editorMode === 'edgeless',
-            })}
-          >
-            ${this.host.renderSpecPortal(syncedDoc, EditorBlockSpec)}
-            ${
-              isEmpty && !isEditing && editorMode === 'page'
-                ? html`
-                    <div class="affine-embed-synced-doc-editor-empty">
-                      <span
-                        >This is a linked doc, you can add content here.</span
-                      >
-                    </div>
-                  `
-                : nothing
-            }
-            </div>
-
-            ${
-              isInSurface && !isEditing
-                ? html`
-                    <div
-                      class="affine-embed-synced-doc-editor-overlay"
-                      @dblclick=${this._handleOverlayDblClick}
-                    ></div>
-                  `
-                : nothing
-            }
+          <div class="affine-embed-synced-doc-editor">
+            ${choose(editorMode, [
+              [
+                'page',
+                () => html`
+                  <div class="affine-page-viewport">
+                    ${this.host.renderSpecPortal(
+                      syncedDoc,
+                      SpecProvider.getInstance().getSpec('page:preview').value
+                    )}
+                  </div>
+                `,
+              ],
+              [
+                'edgeless',
+                () => html`
+                  <div class="affine-edgeless-viewport">
+                    ${this.host.renderSpecPortal(
+                      syncedDoc,
+                      SpecProvider.getInstance().getSpec('edgeless:preview')
+                        .value
+                    )}
+                  </div>
+                `,
+              ],
+            ])}
+            ${isEmpty && !isEditing && editorMode === 'page'
+              ? html`
+                  <div class="affine-embed-synced-doc-editor-empty">
+                    <span>
+                      This is a linked doc, you can add content here.
+                    </span>
+                  </div>
+                `
+              : nothing}
           </div>
 
-          ${
-            isInSurface
-              ? html`<block-caption-editor
-                  .block=${this}
-                ></block-caption-editor>`
-              : nothing
-          }
+          ${isInSurface && !isEditing
+            ? html`
+                <div
+                  class="affine-embed-synced-doc-editor-overlay"
+                  @dblclick=${this._handleOverlayDblClick}
+                ></div>
+              `
+            : nothing}
+          ${isInSurface
+            ? html`
+                <block-caption-editor .block=${this}></block-caption-editor>
+              `
+            : nothing}
 
           <affine-block-selection .block=${this}></affine-block-selection>
         </div>

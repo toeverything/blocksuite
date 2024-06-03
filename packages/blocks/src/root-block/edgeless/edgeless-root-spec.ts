@@ -1,4 +1,9 @@
-import type { BlockSpec } from '@blocksuite/block-std';
+import type {
+  BlockElement,
+  BlockService,
+  BlockSpec,
+  BlockSpecSlots,
+} from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { RootBlockSchema } from '../root-model.js';
@@ -14,6 +19,7 @@ import { AFFINE_MODAL_WIDGET } from '../widgets/modal/modal.js';
 import { AFFINE_PIE_MENU_WIDGET } from '../widgets/pie-menu/index.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../widgets/slash-menu/index.js';
 import { AFFINE_VIEWPORT_OVERLAY_WIDGET } from '../widgets/viewport-overlay/viewport-overlay.js';
+import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import { EdgelessRootService } from './edgeless-root-service.js';
 
 export type EdgelessRootBlockWidgetName =
@@ -69,5 +75,29 @@ export const EdgelessRootBlockSpec: BlockSpec<EdgelessRootBlockWidgetName> = {
         AFFINE_VIEWPORT_OVERLAY_WIDGET
       )}`,
     },
+  },
+};
+
+export const PreviewEdgelessRootBlockSpec: BlockSpec = {
+  schema: RootBlockSchema,
+  service: EdgelessRootService,
+  view: {
+    component: literal`affine-edgeless-root`,
+  },
+  setup(slots: BlockSpecSlots) {
+    slots.viewConnected.on(
+      ({
+        component,
+        service,
+      }: {
+        component: BlockElement;
+        service: BlockService;
+      }) => {
+        // Does not allow the edgeless to display toolbar.
+        (component as EdgelessRootBlockComponent).disableComponents = true;
+        // Does not allow the user to move and zoom.
+        (service as EdgelessRootService).locked = true;
+      }
+    );
   },
 };

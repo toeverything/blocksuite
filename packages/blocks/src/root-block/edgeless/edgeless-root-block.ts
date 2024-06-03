@@ -127,6 +127,13 @@ export class EdgelessRootBlockComponent extends BlockElement<
   `;
 
   /**
+   * Disable components
+   *
+   * Toolbar is not allowed to display in `syncd doc block`.
+   */
+  disableComponents = false;
+
+  /**
    * Shared components
    */
   components = {
@@ -672,6 +679,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       this.tools.setEdgelessTool({ type: 'pan', panning: true });
     }
 
+    if (this.disableComponents) return;
     requestConnectedFrame(() => {
       this._handleToolbarFlag();
       this.requestUpdate();

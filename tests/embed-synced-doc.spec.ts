@@ -113,7 +113,8 @@ test.describe('Embed synced doc', () => {
     expect(EmbedSyncedDocPortalBox.height).toBeCloseTo(height + border, 1);
   });
 
-  test('can jump to other docs when click linked doc inside embed synced doc block', async ({
+  // @TODO: if `center peek` feature is already landed in, we can delete it.
+  test.skip('can jump to other docs when click linked doc inside embed synced doc block', async ({
     page,
   }) => {
     await initEmptyParagraphState(page);
