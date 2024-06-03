@@ -18,7 +18,7 @@ type EdgelessTextProps = {
   scale: number;
   rotate: number;
   hasMaxWidth: boolean;
-} & TextStyleProps;
+} & Omit<TextStyleProps, 'fontSize'>;
 
 export const EdgelessTextBlockSchema = defineBlockSchema({
   flavour: 'affine:edgeless-text',
@@ -28,7 +28,6 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
     text: internal.Text(),
     color: '#000000',
     fontFamily: FontFamily.Inter,
-    fontSize: 16,
     fontStyle: FontStyle.Normal,
     fontWeight: FontWeight.Regular,
     textAlign: TextAlign.Left,
@@ -62,6 +61,10 @@ export class EdgelessTextBlockModel extends selectable<EdgelessTextProps>(
 
 declare global {
   namespace BlockSuite {
+    interface BlockModels {
+      'affine:edgeless-text': EdgelessTextBlockModel;
+    }
+
     interface EdgelessBlockModelMap {
       'affine:edgeless-text': EdgelessTextBlockModel;
     }

@@ -4,7 +4,7 @@ import '../../edgeless/components/panel/size-panel.js';
 import '../../edgeless/components/panel/font-weight-and-style-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
@@ -15,6 +15,7 @@ import {
   TextAlignRightIcon,
 } from '../../../_common/icons/index.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
+import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import {
   isFontStyleSupported,
   isFontWeightSupported,
@@ -79,6 +80,7 @@ function extractField<K extends keyof TextStyleProps>(
   element: BlockSuite.EdgelessTextModelType,
   field: K
 ) {
+  if (element instanceof EdgelessTextBlockModel) return null;
   return (
     element instanceof ConnectorElementModel
       ? element.labelStyle[field]
@@ -392,32 +394,33 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <edgeless-menu-divider></edgeless-menu-divider>
 
-      <edgeless-menu-button
-        .contentPadding=${'8px'}
-        .button=${html`
-          <edgeless-tool-icon-button
-            aria-label="Font size"
-            .tooltip=${'Font size'}
-            .justify=${'space-between'}
-            .labelHeight=${'20px'}
-            .iconContainerWidth=${'60px'}
-          >
-            <span class="label">${selectedFontSize}</span>
-            ${SmallArrowDownIcon}
-          </edgeless-tool-icon-button>
-        `}
-      >
-        <edgeless-size-panel
-          slot
-          data-type="check"
-          .size=${selectedFontSize}
-          .labels=${FONT_SIZE_LIST.map(String)}
-          .sizes=${FONT_SIZE_LIST}
-          .onSelect=${(fontSize: number) => this._setFontSize(fontSize)}
-        ></edgeless-size-panel>
-      </edgeless-menu-button>
-
-      <edgeless-menu-divider></edgeless-menu-divider>
+      ${this.elementType !== 'edgeless-text'
+        ? html`<edgeless-menu-button
+              .contentPadding=${'8px'}
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Font size"
+                  .tooltip=${'Font size'}
+                  .justify=${'space-between'}
+                  .labelHeight=${'20px'}
+                  .iconContainerWidth=${'60px'}
+                >
+                  <span class="label">${selectedFontSize}</span>
+                  ${SmallArrowDownIcon}
+                </edgeless-tool-icon-button>
+              `}
+            >
+              <edgeless-size-panel
+                slot
+                data-type="check"
+                .size=${selectedFontSize}
+                .labels=${FONT_SIZE_LIST.map(String)}
+                .sizes=${FONT_SIZE_LIST}
+                .onSelect=${(fontSize: number) => this._setFontSize(fontSize)}
+              ></edgeless-size-panel>
+            </edgeless-menu-button>
+            <edgeless-menu-divider></edgeless-menu-divider>`
+        : nothing}
 
       <edgeless-menu-button
         .button=${html`

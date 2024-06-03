@@ -47,7 +47,7 @@ import { LoomIcon } from '../../../embed-loom-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
-import type { NoteBlockModel } from '../../../note-block/note-model.js';
+import { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
@@ -61,6 +61,7 @@ import {
   formatTime,
   insertContent,
   insideDatabase,
+  insideEdgelessText,
   tryRemoveEmptyLine,
 } from './utils.js';
 import { createConversionItem } from './utils.js';
@@ -460,7 +461,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       const { doc } = rootElement;
 
       const surfaceModel = getSurfaceBlock(doc);
-      const noteModel = doc.getParent(model) as NoteBlockModel;
+      const noteModel = doc.getParent(model);
+      if (!(noteModel instanceof NoteBlockModel)) return [];
 
       if (!surfaceModel) return [];
 
@@ -604,7 +606,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       tooltip: slashMenuToolTips['Table View'],
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:database') &&
-        !insideDatabase(model),
+        !insideDatabase(model) &&
+        !insideEdgelessText(model),
       action: ({ rootElement, model }) => {
         const id = createDatabaseBlockInNextLine(model);
         if (!id) {
@@ -629,6 +632,7 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:database') &&
         !insideDatabase(model) &&
+        !insideEdgelessText(model) &&
         !!model.doc.awarenessStore.getFlag('enable_block_query'),
 
       action: ({ model, rootElement }) => {
@@ -661,7 +665,8 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       tooltip: slashMenuToolTips['Kanban View'],
       showWhen: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:database') &&
-        !insideDatabase(model),
+        !insideDatabase(model) &&
+        !insideEdgelessText(model),
       action: ({ model, rootElement }) => {
         const id = createDatabaseBlockInNextLine(model);
         if (!id) {

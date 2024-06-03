@@ -13,13 +13,12 @@ export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 @customElement('affine-edgeless-text')
 export class EdgelessTextBlockComponent extends BlockElement<EdgelessTextBlockModel> {
   override renderBlock() {
-    const { color, fontFamily, fontStyle, fontSize, fontWeight, textAlign } =
-      this.model;
+    const { color, fontFamily, fontStyle, fontWeight, textAlign } = this.model;
+
     const style = styleMap({
       color: isCssVariable(color) ? `var(${color})` : color,
       fontFamily: wrapFontFamily(fontFamily),
       fontStyle,
-      fontSize: `${fontSize}px`,
       fontWeight,
       textAlign,
     });
