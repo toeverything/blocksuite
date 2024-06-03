@@ -128,6 +128,11 @@ export function mountGroupTitleEditor(
   });
 }
 
+/**
+ * @deprecated
+ *
+ * Canvas Text has been deprecated
+ */
 export function addText(
   edgeless: EdgelessRootBlockComponent,
   event: PointerEventState

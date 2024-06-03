@@ -19,7 +19,6 @@ import { type Connection } from '../../../../surface-block/element-model/connect
 import {
   type ConnectorElementModel,
   type ShapeElementModel,
-  TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import type { ShapeStyle } from '../../../../surface-block/element-model/shape.js';
 import {
@@ -39,10 +38,7 @@ import {
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_WIDTH,
 } from '../../utils/consts.js';
-import {
-  mountShapeTextEditor,
-  mountTextElementEditor,
-} from '../../utils/text.js';
+import { mountShapeTextEditor } from '../../utils/text.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
   type AUTO_COMPLETE_TARGET_TYPE,
@@ -52,7 +48,6 @@ import {
   AutoCompleteTextOverlay,
   capitalizeFirstLetter,
   createShapeElement,
-  createTextElement,
   DEFAULT_NOTE_BACKGROUND_COLOR,
   DEFAULT_NOTE_OVERLAY_HEIGHT,
   DEFAULT_TEXT_HEIGHT,
@@ -426,25 +421,30 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   private _addText() {
     const target = this._getTargetXYWH(DEFAULT_TEXT_WIDTH, DEFAULT_TEXT_HEIGHT);
     if (!target) return;
-
     const { xywh, position } = target;
-    const id = createTextElement(this.edgeless, this.currentSource);
-    const { service } = this.edgeless;
-
-    service.updateElement(id, { xywh: serializeXYWH(...xywh) });
-    service.updateElement(this.connector.id, {
-      target: { id, position },
+    const bound = Bound.fromXYWH(xywh);
+    const edgelessService = this.edgeless.service;
+    const textService = this.edgeless.host.spec.getService(
+      'affine:edgeless-text'
+    );
+    const textId = textService.initEdgelessTextBlock({
+      edgeless: this.edgeless,
+      x: bound.x,
+      y: bound.y,
     });
+
+    edgelessService.updateElement(this.connector.id, {
+      target: { id: textId, position },
+    });
+    if (this.currentSource.group instanceof GroupElementModel) {
+      this.currentSource.group.addChild(textId);
+    }
+
     this.edgeless.service.selection.set({
-      elements: [id],
+      elements: [textId],
       editing: false,
     });
     this.edgeless.doc.captureSync();
-    const textElement = this.edgeless.service.getElementById(id);
-    assertExists(textElement);
-    if (textElement instanceof TextElementModel) {
-      mountTextElementEditor(textElement, this.edgeless);
-    }
   }
 
   private _autoComplete(targetType: AUTO_COMPLETE_TARGET_TYPE) {

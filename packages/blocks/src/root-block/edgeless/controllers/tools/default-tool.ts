@@ -12,10 +12,6 @@ import {
   resetNativeSelection,
 } from '../../../../_common/utils/index.js';
 import { clamp } from '../../../../_common/utils/math.js';
-import {
-  EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
-  EDGELESS_TEXT_BLOCK_MIN_WIDTH,
-} from '../../../../edgeless-text/edgeless-text-block.js';
 import type { EdgelessTextBlockModel } from '../../../../edgeless-text/edgeless-text-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
@@ -260,37 +256,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
       // new: edgeless text block
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
-      const textId = this._service.addBlock(
-        'affine:edgeless-text',
-        {
-          xywh: new Bound(
-            x - EDGELESS_TEXT_BLOCK_MIN_WIDTH / 2,
-            y - EDGELESS_TEXT_BLOCK_MIN_HEIGHT / 2,
-            EDGELESS_TEXT_BLOCK_MIN_WIDTH,
-            EDGELESS_TEXT_BLOCK_MIN_HEIGHT
-          ).serialize(),
-        },
-        this._edgeless.surface.blockId
+      const textService = this._edgeless.host.spec.getService(
+        'affine:edgeless-text'
       );
-
-      const blockId = this._doc.addBlock(
-        'affine:paragraph',
-        { type: 'text' },
-        textId
-      );
-      this._edgeless.updateComplete
-        .then(() => {
-          this.edgelessSelectionManager.set({
-            elements: [textId],
-            editing: true,
-          });
-        })
-        .catch(console.error);
-
-      if (blockId) {
-        asyncFocusRichText(this._edgeless.host, blockId)?.catch(console.error);
-      }
-
+      textService.initEdgelessTextBlock({
+        edgeless: this._edgeless,
+        x,
+        y,
+      });
       return;
     } else {
       const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
