@@ -55,10 +55,6 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
 
   set rotate(_: number) {}
 
-  override get connectable() {
-    return false;
-  }
-
   get type() {
     return 'group';
   }

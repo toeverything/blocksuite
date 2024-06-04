@@ -7,6 +7,7 @@ import {
   CanvasElementType,
   type Connection,
   type ConnectorElementModel,
+  GroupElementModel,
   type IBound,
   type IVec,
 } from '../../../../surface-block/index.js';
@@ -52,18 +53,21 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   quickConnect(point: IVec, element: BlockSuite.EdgelessModelType) {
     this._startPoint = this._service.viewport.toModelCoord(point[0], point[1]);
     this._mode = ConnectorToolMode.Quick;
-    this._sourceBounds =
-      element.externalBound || Bound.deserialize(element.xywh);
+    this._sourceBounds = Bound.deserialize(element.xywh);
     this._sourceBounds.rotate = element.rotate;
     this._source = {
       id: element.id,
-      position: calculateNearestLocation(
-        this._startPoint,
-        Bound.deserialize(element.xywh)
-      ),
+      position: calculateNearestLocation(this._startPoint, this._sourceBounds),
     };
+    this._allowCancel = true;
 
     this._createConnector();
+
+    if (element instanceof GroupElementModel) {
+      this._surface.overlays.connector.sourceBounds = this._sourceBounds;
+    }
+
+    this.findTargetByPoint(point);
   }
 
   findTargetByPoint(point: IVec) {
