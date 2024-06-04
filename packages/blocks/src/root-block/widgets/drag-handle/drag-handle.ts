@@ -420,7 +420,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       const selector = this._calculateSelector(selectedIds);
 
-      const doc = this.doc.blockCollection.getDoc(selector);
+      const doc = this.doc.blockCollection.getDoc({ selector });
 
       const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
       const previewTemplate = this.host.renderSpecPortal(

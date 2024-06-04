@@ -12,11 +12,9 @@ import { customElement, property } from 'lit/decorators.js';
  *     :host {
  *       position: relative;
  *     }
- *   `
+ *
  *   render() {
- *     return html`${this.selected?.is('block')
- *       ? html`<affine-block-selection></affine-block-selection>`
- *       : null}`;
+ *      return html`<affine-block-selection></affine-block-selection>
  *   };
  * }
  * ```
@@ -26,6 +24,7 @@ export class BlockSelection extends LitElement {
   static override styles = css`
     :host {
       position: absolute;
+      z-index: 1;
       left: 0;
       top: 0;
       width: 100%;

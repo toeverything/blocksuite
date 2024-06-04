@@ -356,7 +356,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._disposables.add(() => {
       doc.blockCollection.clearSelector(selector);
     });
-    const doc = model.doc.blockCollection.getDoc(selector);
+    const doc = model.doc.blockCollection.getDoc({ selector });
     const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
     return this.host.renderSpecPortal(doc, previewSpec.value);
   }

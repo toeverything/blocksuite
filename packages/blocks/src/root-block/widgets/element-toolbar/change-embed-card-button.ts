@@ -223,6 +223,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
+  @property({ attribute: false })
+  accessor quickConnectButton!: TemplateResult<1>;
+
   @state()
   private accessor _embedScale = 1;
 
@@ -379,15 +382,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return block.docTitle;
   }
 
-  private _open() {
+  private _open = () => {
     this._blockElement?.open();
-  }
+  };
 
   private _showCaption() {
-    this._blockElement?.captionElement?.show();
+    this._blockElement?.captionEditor.show();
   }
 
-  private _copyUrl() {
+  private _copyUrl = () => {
     if (!('url' in this.model)) {
       return;
     }
@@ -395,7 +398,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     navigator.clipboard.writeText(this.model.url).catch(console.error);
     toast(this.std.host as EditorHost, 'Copied link to clipboard');
     this.edgeless.service.selection.clear();
-  }
+  };
 
   private _setCardStyle(style: EmbedCardStyle) {
     const bounds = Bound.deserialize(this.model.xywh);
@@ -405,7 +408,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this.model.doc.updateBlock(this.model, { style, xywh });
   }
 
-  private _convertToCardView() {
+  private _convertToCardView = () => {
     if (this._isCardView) {
       return;
     }
@@ -447,9 +450,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       elements: [blockId],
     });
     this._doc.deleteBlock(this.model);
-  }
+  };
 
-  private _convertToEmbedView() {
+  private _convertToEmbedView = () => {
     if (this._isEmbedView) {
       return;
     }
@@ -491,7 +494,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       elements: [blockId],
     });
     this._doc.deleteBlock(this.model);
-  }
+  };
 
   private _getScale = () => {
     if (isEmbedSyncedDocBlock(this.model)) {
@@ -566,6 +569,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </edgeless-tool-icon-button>
           `
         : nothing,
+
       isEmbedSyncedDocBlock(model)
         ? html`
             <div class="change-embed-card-button doc-info" @click=${this._open}>
@@ -574,6 +578,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </div>
           `
         : nothing,
+
       isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
         ? html`
             <edgeless-tool-icon-button
@@ -586,6 +591,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </edgeless-tool-icon-button>
           `
         : nothing,
+
       this._canShowFullScreenButton
         ? html`
             <edgeless-tool-icon-button
@@ -598,6 +604,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </edgeless-tool-icon-button>
           `
         : nothing,
+
       this._canConvertToEmbedView || this._isEmbedView
         ? html`
             <div class="change-embed-card-view-style">
@@ -635,6 +642,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </div>
           `
         : nothing,
+
       'style' in model && this._canShowCardStylePanel
         ? html`
             <edgeless-menu-button
@@ -659,6 +667,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
             </edgeless-menu-button>
           `
         : nothing,
+
       html`
         <edgeless-tool-icon-button
           arai-label="Add caption"
@@ -670,6 +679,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           ${CaptionIcon}
         </edgeless-tool-icon-button>
       `,
+
+      this.quickConnectButton,
+
       isEmbedHtmlBlock(model)
         ? nothing
         : html`
@@ -683,9 +695,9 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   .iconContainerWidth=${'65px'}
                   .labelHeight=${'20px'}
                 >
-                  <span class="label ellipsis"
-                    >${Math.round(this._embedScale * 100) + '%'}</span
-                  >
+                  <span class="label ellipsis">
+                    ${Math.round(this._embedScale * 100) + '%'}
+                  </span>
                   ${SmallArrowDownIcon}
                 </edgeless-tool-icon-button>
               `}
@@ -694,8 +706,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 slot
                 class="embed-scale-popper"
                 .scale=${Math.round(this._embedScale * 100)}
-                .scales=${[50, 100, 200]}
-                .minSize=${0}
                 .onSelect=${(scale: number) => this._setEmbedScale(scale)}
               ></edgeless-scale-panel>
             </edgeless-menu-button>
@@ -717,7 +727,8 @@ declare global {
 
 export function renderEmbedButton(
   edgeless: EdgelessRootBlockComponent,
-  models?: EdgelessChangeEmbedCardButton['model'][]
+  models?: EdgelessChangeEmbedCardButton['model'][],
+  quickConnectButton?: TemplateResult<1>[]
 ) {
   if (models?.length !== 1) return nothing;
 
@@ -725,6 +736,7 @@ export function renderEmbedButton(
     <edgeless-change-embed-card-button
       .model=${models[0]}
       .edgeless=${edgeless}
+      .quickConnectButton=${quickConnectButton?.pop() ?? nothing}
     ></edgeless-change-embed-card-button>
   `;
 }

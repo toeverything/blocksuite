@@ -35,7 +35,7 @@ export const commonConfig: ImageConfigItem[] = [
       abortController: AbortController
     ) => {
       abortController.abort();
-      blockElement.captionElement.show();
+      blockElement.captionEditor.show();
     },
     type: 'common',
   },

@@ -1,5 +1,6 @@
 export * from './ai-item/index.js';
 export * from './block-caption.js';
+export * from './block-component.js';
 export * from './block-selection.js';
 export * from './drag-indicator.js';
 export * from './file-drop-manager.js';

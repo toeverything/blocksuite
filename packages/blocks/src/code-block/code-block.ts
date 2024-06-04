@@ -1,7 +1,7 @@
 import '../_common/components/rich-text/rich-text.js';
 import './components/lang-list.js';
 
-import { BlockElement, getInlineRangeProvider } from '@blocksuite/block-std';
+import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   INLINE_ROOT_ATTR,
@@ -17,7 +17,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { type BundledLanguage, type Highlighter } from 'shiki';
 import { z } from 'zod';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { toast } from '../_common/components/toast.js';
@@ -26,6 +25,7 @@ import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { getViewportElement } from '../_common/utils/query.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
+import { BlockComponent } from './../_common/components/block-component.js';
 import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { createLangList } from './components/lang-list.js';
@@ -42,14 +42,17 @@ import {
 import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
+export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
   static override styles = codeBlockStyles;
+
+  override accessor useCaptionEditor = true;
+
+  override accessor blockContainerStyles = {
+    margin: '24px 0',
+  };
 
   @query('.lang-button')
   private accessor _langButton!: HTMLButtonElement;
-
-  @query('block-caption-editor')
-  accessor captionElement!: BlockCaptionEditor;
 
   @state()
   private accessor _langListAbortController: AbortController | undefined =
@@ -450,39 +453,34 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override renderBlock(): TemplateResult<1> {
     return html`
-      <div class="affine-code-block-wrapper">
-        <div
-          class=${classMap({
-            'affine-code-block-container': true,
-            wrap: this.model.wrap,
-          })}
-        >
-          ${this._curLanguageButtonTemplate()}
+      <div
+        class=${classMap({
+          'affine-code-block-container': true,
+          wrap: this.model.wrap,
+        })}
+      >
+        ${this._curLanguageButtonTemplate()}
 
-          <div class="rich-text-container">
-            <div contenteditable="false" id="line-numbers"></div>
-            <rich-text
-              .yText=${this.model.text.yText}
-              .inlineEventSource=${this.topContenteditableElement ?? nothing}
-              .undoManager=${this.doc.history}
-              .attributesSchema=${this.attributesSchema}
-              .attributeRenderer=${this.getAttributeRenderer()}
-              .readonly=${this.doc.readonly}
-              .inlineRangeProvider=${this._inlineRangeProvider}
-              .enableClipboard=${false}
-              .enableUndoRedo=${false}
-              .wrapText=${this.model.wrap}
-              .verticalScrollContainerGetter=${() =>
-                getViewportElement(this.host)}
-            >
-            </rich-text>
-          </div>
-
-          ${this.renderChildren(this.model)} ${Object.values(this.widgets)}
+        <div class="rich-text-container">
+          <div contenteditable="false" id="line-numbers"></div>
+          <rich-text
+            .yText=${this.model.text.yText}
+            .inlineEventSource=${this.topContenteditableElement ?? nothing}
+            .undoManager=${this.doc.history}
+            .attributesSchema=${this.attributesSchema}
+            .attributeRenderer=${this.getAttributeRenderer()}
+            .readonly=${this.doc.readonly}
+            .inlineRangeProvider=${this._inlineRangeProvider}
+            .enableClipboard=${false}
+            .enableUndoRedo=${false}
+            .wrapText=${this.model.wrap}
+            .verticalScrollContainerGetter=${() =>
+              getViewportElement(this.host)}
+          >
+          </rich-text>
         </div>
 
-        <block-caption-editor .block=${this}></block-caption-editor>
-        <affine-block-selection .block=${this}></affine-block-selection>
+        ${this.renderChildren(this.model)} ${Object.values(this.widgets)}
       </div>
     `;
   }

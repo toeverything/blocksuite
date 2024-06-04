@@ -204,16 +204,26 @@ export function handleInlineAskAIAction(host: EditorHost) {
     update,
   }) => {
     if (!AIProvider.actions.chat) return;
-    const stream = AIProvider.actions.chat({
-      input,
-      stream: true,
-      host,
-      where: 'inline-chat-panel',
-      control: 'chat-send',
-      docId: host.doc.id,
-      workspaceId: host.doc.collection.id,
-    });
-    bindTextStream(stream, { update, finish, signal });
+
+    // recover selection to get content from above blocks
+    assertExists(selection);
+    host.selection.set([selection]);
+
+    selectAboveBlocks(host)
+      .then(context => {
+        assertExists(AIProvider.actions.chat);
+        const stream = AIProvider.actions.chat({
+          input: `${context}\n${input}`,
+          stream: true,
+          host,
+          where: 'inline-chat-panel',
+          control: 'chat-send',
+          docId: host.doc.id,
+          workspaceId: host.doc.collection.id,
+        });
+        bindTextStream(stream, { update, finish, signal });
+      })
+      .catch(console.error);
   };
   assertExists(panel.config);
   panel.config.generateAnswer = generateAnswer;

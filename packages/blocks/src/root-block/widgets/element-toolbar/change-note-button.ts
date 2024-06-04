@@ -8,8 +8,9 @@ import '../../edgeless/components/panel/size-panel.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { html, LitElement, nothing } from 'lit';
+import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { join } from 'lit/directives/join.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
 import {
@@ -25,8 +26,12 @@ import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { type NoteBlockModel } from '../../../note-block/note-model.js';
-import { Bound, StrokeStyle } from '../../../surface-block/index.js';
-import type { EdgelessMenuButton } from '../../edgeless/components/buttons/menu-button.js';
+import type { StrokeStyle } from '../../../surface-block/index.js';
+import { Bound } from '../../../surface-block/index.js';
+import {
+  type EdgelessMenuButton,
+  renderMenuDivider,
+} from '../../edgeless/components/buttons/menu-button.js';
 import { type ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,
@@ -46,7 +51,36 @@ const NOTE_BACKGROUND: CssVariableName[] = [
   '--affine-tag-pink',
   '--affine-tag-gray',
   '--affine-palette-transparent',
-];
+] as const;
+
+const SIZE_LIST = [
+  {
+    name: 'None',
+    value: 0,
+  },
+  {
+    name: 'Small',
+    value: 8,
+  },
+  {
+    name: 'Medium',
+    value: 16,
+  },
+  {
+    name: 'Large',
+    value: 24,
+  },
+  {
+    name: 'Huge',
+    value: 32,
+  },
+] as const;
+
+const DisplayModeMap = {
+  [NoteDisplayMode.DocAndEdgeless]: 'Both',
+  [NoteDisplayMode.EdgelessOnly]: 'Edgeless',
+  [NoteDisplayMode.DocOnly]: 'Page',
+} as const satisfies Record<NoteDisplayMode, string>;
 
 @customElement('edgeless-change-note-button')
 export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
@@ -58,6 +92,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
+
+  @property({ attribute: false })
+  accessor quickConnectButton!: TemplateResult<1>;
 
   private accessor _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
   private accessor _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
@@ -130,21 +167,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _setStyles({ type, value }: LineStyleEvent) {
     if (type === 'size') {
       this._setStrokeWidth(value);
-    } else if (type === 'lineStyle') {
-      switch (value) {
-        case 'solid': {
-          this._setStrokeStyle(StrokeStyle.Solid);
-          break;
-        }
-        case 'dash': {
-          this._setStrokeStyle(StrokeStyle.Dash);
-          break;
-        }
-        case 'none': {
-          this._setStrokeStyle(StrokeStyle.None);
-          break;
-        }
-      }
+      return;
+    }
+    if (type === 'lineStyle') {
+      this._setStrokeStyle(value);
     }
   }
 
@@ -199,19 +225,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.edgeless.slots.toggleNoteSlicer.emit();
   }
 
-  private _getCurrentModeLabel(mode: NoteDisplayMode) {
-    switch (mode) {
-      case NoteDisplayMode.DocAndEdgeless:
-        return 'Both';
-      case NoteDisplayMode.EdgelessOnly:
-        return 'Edgeless';
-      case NoteDisplayMode.DocOnly:
-        return 'Page';
-      default:
-        return 'Both';
-    }
-  }
-
   private _getScaleLabel(scale: number) {
     return Math.round(scale * 100) + '%';
   }
@@ -225,10 +238,12 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     const { collapse } = edgeless;
     const scale = edgeless.scale ?? 1;
-    const currentMode = this._getCurrentModeLabel(displayMode);
+    const currentMode = DisplayModeMap[displayMode];
+    const onlyOne = length === 1;
+    const isDocOnly = displayMode === NoteDisplayMode.DocOnly;
 
-    return html`
-      ${length === 1
+    const buttons = [
+      onlyOne
         ? html`
             <span class="display-mode-button-label">Show in</span>
             <edgeless-menu-button
@@ -254,11 +269,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               >
               </note-display-mode-panel>
             </edgeless-menu-button>
-
-            <edgeless-menu-divider></edgeless-menu-divider>
           `
-        : nothing}
-      ${displayMode === NoteDisplayMode.DocOnly
+        : nothing,
+
+      isDocOnly
         ? nothing
         : html`
             <edgeless-menu-button
@@ -282,9 +296,11 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               >
               </edgeless-color-panel>
             </edgeless-menu-button>
+          `,
 
-            <edgeless-menu-divider></edgeless-menu-divider>
-
+      isDocOnly
+        ? nothing
+        : html`
             <edgeless-menu-button
               .contentPadding=${'6px'}
               .button=${html`
@@ -339,65 +355,69 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               <edgeless-size-panel
                 slot
                 .size=${borderRadius}
-                .labels=${['None', 'Small', 'Medium', 'Large', 'Huge']}
-                .sizes=${[0, 8, 16, 24, 32]}
+                .sizeList=${SIZE_LIST}
                 .minSize=${0}
                 .onSelect=${(size: number) => this._setBorderRadius(size)}
                 .onPopperCose=${() => this._cornersPanelRef.value?.close()}
               >
               </edgeless-size-panel>
             </edgeless-menu-button>
+          `,
 
-            <edgeless-menu-divider></edgeless-menu-divider>
-          `}
-      ${length === 1
+      onlyOne
         ? html`
             <edgeless-tool-icon-button
               aria-label="Slicer"
               .tooltip=${getTooltipWithShortcut('Cutting mode', '-')}
               .active=${this.enableNoteSlicer}
-              @click=${this._handleNoteSlicerButtonClick}
+              @click=${() => this._handleNoteSlicerButtonClick()}
             >
               ${ScissorsIcon}
             </edgeless-tool-icon-button>
-            <edgeless-menu-divider></edgeless-menu-divider>
           `
-        : nothing}
+        : nothing,
 
-      <edgeless-tool-icon-button
-        aria-label="Size"
-        .tooltip=${collapse ? 'Auto height' : 'Customized height'}
-        @click=${() => this._setCollapse()}
-      >
-        ${collapse ? ExpandIcon : ShrinkIcon}
-      </edgeless-tool-icon-button>
+      onlyOne ? this.quickConnectButton : nothing,
 
-      <edgeless-menu-button
-        ${ref(this._scalePanelRef)}
-        .contentPadding=${'8px'}
-        .button=${html`
-          <edgeless-tool-icon-button
-            aria-label="Scale"
-            .tooltip=${'Scale'}
-            .justify=${'space-between'}
-            .labelHeight=${'20px'}
-            .iconContainerWidth=${'65px'}
-          >
-            <span class="label">${this._getScaleLabel(scale)}</span
-            >${SmallArrowDownIcon}
-          </edgeless-tool-icon-button>
-        `}
-      >
-        <edgeless-scale-panel
-          slot
-          .scale=${Math.round(scale * 100)}
-          .scales=${[50, 100, 200]}
-          .minSize=${0}
-          .onSelect=${(scale: number) => this._setNoteScale(scale)}
-          .onPopperCose=${() => this._scalePanelRef.value?.close()}
-        ></edgeless-scale-panel>
-      </edgeless-menu-button>
-    `;
+      html`
+        <edgeless-tool-icon-button
+          aria-label="Size"
+          .tooltip=${collapse ? 'Auto height' : 'Customized height'}
+          @click=${() => this._setCollapse()}
+        >
+          ${collapse ? ExpandIcon : ShrinkIcon}
+        </edgeless-tool-icon-button>
+
+        <edgeless-menu-button
+          ${ref(this._scalePanelRef)}
+          .contentPadding=${'8px'}
+          .button=${html`
+            <edgeless-tool-icon-button
+              aria-label="Scale"
+              .tooltip=${'Scale'}
+              .justify=${'space-between'}
+              .labelHeight=${'20px'}
+              .iconContainerWidth=${'65px'}
+            >
+              <span class="label">${this._getScaleLabel(scale)}</span
+              >${SmallArrowDownIcon}
+            </edgeless-tool-icon-button>
+          `}
+        >
+          <edgeless-scale-panel
+            slot
+            .scale=${Math.round(scale * 100)}
+            .onSelect=${(scale: number) => this._setNoteScale(scale)}
+            .onPopperCose=${() => this._scalePanelRef.value?.close()}
+          ></edgeless-scale-panel>
+        </edgeless-menu-button>
+      `,
+    ];
+
+    return join(
+      buttons.filter(button => button !== nothing),
+      renderMenuDivider
+    );
   }
 }
 
@@ -409,7 +429,8 @@ declare global {
 
 export function renderNoteButton(
   edgeless: EdgelessRootBlockComponent,
-  notes?: NoteBlockModel[]
+  notes?: NoteBlockModel[],
+  quickConnectButton?: TemplateResult<1>[]
 ) {
   if (!notes?.length) return nothing;
 
@@ -418,6 +439,7 @@ export function renderNoteButton(
       .notes=${notes}
       .edgeless=${edgeless}
       .enableNoteSlicer=${false}
+      .quickConnectButton=${quickConnectButton?.pop() ?? nothing}
     >
     </edgeless-change-note-button>
   `;

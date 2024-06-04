@@ -40,7 +40,7 @@ const MINDMAP_STYLE_LIST = [
     value: MindmapStyle.FOUR,
     icon: MindmapStyleFour,
   },
-];
+] as const;
 
 interface LayoutItem {
   name: string;
@@ -64,7 +64,7 @@ const MINDMAP_LAYOUT_LIST: LayoutItem[] = [
     value: LayoutType.RIGHT,
     icon: MindmapRightLayoutIcon,
   },
-];
+] as const;
 
 @customElement('edgeless-change-mindmap-style-panel')
 class EdgelessChangeMindmapStylePanel extends LitElement {

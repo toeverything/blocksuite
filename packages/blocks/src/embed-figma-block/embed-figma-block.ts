@@ -1,11 +1,8 @@
-import '../_common/components/block-selection.js';
-
 import { assertExists } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
@@ -28,9 +25,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 
   @state()
   private accessor _showOverlay = true;
-
-  @query('block-caption-editor')
-  accessor captionElement!: BlockCaptionEditor;
 
   private _isDragging = false;
 
@@ -185,10 +179,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
               </div>
             </div>
           </div>
-
-          <block-caption-editor .block=${this}></block-caption-editor>
-
-          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
 
         ${this.isInSurface ? nothing : Object.values(this.widgets)}
