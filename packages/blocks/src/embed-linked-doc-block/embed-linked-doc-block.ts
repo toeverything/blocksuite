@@ -197,7 +197,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   };
 
   convertToEmbed = () => {
-    const { doc, pageId, caption, xywh } = this.model;
+    const { id, doc, pageId, caption, xywh } = this.model;
 
     // synced doc entry controlled by awareness flag
     const isSyncedDocEnabled = doc.awarenessStore.getFlag(
@@ -215,14 +215,21 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
       const edgeless = this.edgeless;
       assertExists(edgeless);
-      const blockId = edgeless.service.addBlock(
+
+      const newId = edgeless.service.addBlock(
         'affine:embed-synced-doc',
         { pageId, xywh: bound.serialize(), caption },
         edgeless.surface.model
       );
+
+      this.std.command.exec('reassociateConnectors', {
+        oldId: id,
+        newId,
+      });
+
       edgeless.service.selection.set({
         editing: false,
-        elements: [blockId],
+        elements: [newId],
       });
     } else {
       const parent = doc.getParent(this.model);

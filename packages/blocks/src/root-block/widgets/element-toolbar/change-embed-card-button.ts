@@ -423,7 +423,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       return;
     }
 
-    const { url, xywh, style, caption } = this.model;
+    const { id, url, xywh, style, caption } = this.model;
 
     let targetFlavour = 'affine:bookmark',
       targetStyle = style;
@@ -440,14 +440,20 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     bound.w = EMBED_CARD_WIDTH[targetStyle];
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
-    const blockId = this.edgeless.service.addBlock(
+    const newId = this.edgeless.service.addBlock(
       targetFlavour as EdgelessBlockType,
       { url, xywh: bound.serialize(), style: targetStyle, caption },
       this.edgeless.surface.model
     );
+
+    this.std.command.exec('reassociateConnectors', {
+      oldId: id,
+      newId,
+    });
+
     this.edgeless.service.selection.set({
       editing: false,
-      elements: [blockId],
+      elements: [newId],
     });
     this._doc.deleteBlock(this.model);
   };
@@ -471,7 +477,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     const { flavour, styles } = this._embedOptions;
 
-    const { url, xywh, style } = this.model;
+    const { id, url, xywh, style } = this.model;
 
     const targetStyle = styles.includes(style) ? style : styles[0];
 
@@ -479,7 +485,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     bound.w = EMBED_CARD_WIDTH[targetStyle];
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
-    const blockId = this.edgeless.service.addBlock(
+    const newId = this.edgeless.service.addBlock(
       flavour as EdgelessBlockType,
       {
         url,
@@ -489,9 +495,14 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       this.edgeless.surface.model
     );
 
+    this.std.command.exec('reassociateConnectors', {
+      oldId: id,
+      newId,
+    });
+
     this.edgeless.service.selection.set({
       editing: false,
-      elements: [blockId],
+      elements: [newId],
     });
     this._doc.deleteBlock(this.model);
   };
@@ -579,7 +590,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           `
         : nothing,
 
-      isEmbedLinkedDocBlock(model) || isEmbedSyncedDocBlock(model)
+      isEmbedSyncedDocBlock(model) || isEmbedLinkedDocBlock(model)
         ? html`
             <edgeless-tool-icon-button
               arai-label="Open"

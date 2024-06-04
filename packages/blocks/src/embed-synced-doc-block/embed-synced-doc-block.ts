@@ -258,7 +258,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   };
 
   convertToCard = () => {
-    const { doc, pageId, caption, xywh } = this.model;
+    const { id, doc, pageId, caption, xywh } = this.model;
 
     if (this.isInSurface) {
       const style = 'vertical';
@@ -268,14 +268,20 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
       const edgeless = this.edgeless;
       assertExists(edgeless);
-      const blockId = edgeless.service.addBlock(
+      const newId = edgeless.service.addBlock(
         'affine:embed-linked-doc',
         { pageId, xywh: bound.serialize(), style, caption },
         edgeless.surface.model
       );
+
+      this.std.command.exec('reassociateConnectors', {
+        oldId: id,
+        newId,
+      });
+
       edgeless.service.selection.set({
         editing: false,
-        elements: [blockId],
+        elements: [newId],
       });
     } else {
       const parent = doc.getParent(this.model);
