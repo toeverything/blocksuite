@@ -36,7 +36,7 @@ export class RangeManager {
     selection.removeAllRanges();
 
     const topContenteditableElement = this.host.querySelector(
-      `[contenteditable="true"]`
+      '[contenteditable="true"]'
     );
     if (topContenteditableElement instanceof HTMLElement) {
       topContenteditableElement.blur();

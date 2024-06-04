@@ -21,12 +21,6 @@ import { yfield } from './decorators.js';
 
 export type TextElementProps = IBaseProps & {
   text: Y.Text;
-  // color: string;
-  // fontSize: number;
-  // fontFamily: FontFamily;
-  // fontWeight?: FontWeight;
-  // fontStyle?: FontStyle;
-  // textAlign: TextAlign;
   hasMaxWidth?: boolean;
 } & Omit<TextStyleProps, 'fontWeight' | 'fontStyle'> &
   Partial<Pick<TextStyleProps, 'fontWeight' | 'fontStyle'>>;
