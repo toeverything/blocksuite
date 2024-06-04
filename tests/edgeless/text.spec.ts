@@ -14,7 +14,12 @@ import {
   waitNextFrame,
   zoomResetByKeyboard,
 } from '../utils/actions/index.js';
-import { assertEdgelessCanvasText } from '../utils/asserts.js';
+import {
+  assertBlockChildrenIds,
+  assertBlockFlavour,
+  assertBlockTextContent,
+  assertEdgelessCanvasText,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 async function assertTextFont(page: Page, font: string) {
@@ -290,5 +295,32 @@ test.describe('edgeless canvas text', () => {
     selectedRect = await getEdgelessSelectedRect(page);
     expect(selectedRect.width).toBeCloseTo(Math.round(lastWidth));
     expect(selectedRect.height).toBeGreaterThan(lastHeight);
+  });
+});
+
+test.describe('edgeless text block', () => {
+  test.beforeEach(async ({ page }) => {
+    await enterPlaygroundRoom(page, {
+      flags: {
+        enable_edgeless_text: true,
+      },
+    });
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+  });
+
+  test('add text element in default mode', async ({ page }) => {
+    await setEdgelessTool(page, 'default');
+    await page.mouse.dblclick(130, 140, {
+      delay: 100,
+    });
+    await waitForInlineEditorStateUpdated(page);
+    await waitNextFrame(page);
+    await type(page, 'hello', 100);
+
+    await assertBlockFlavour(page, 4, 'affine:edgeless-text');
+    await assertBlockFlavour(page, 5, 'affine:paragraph');
+    await assertBlockChildrenIds(page, '4', ['5']);
+    await assertBlockTextContent(page, 5, 'hello');
   });
 });

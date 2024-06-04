@@ -487,15 +487,67 @@ export async function assertBlockType(
 ) {
   const actual = await page.evaluate(
     ({ id }) => {
-      const element = document.querySelector(`[data-block-id="${id}"]`);
-      // @ts-ignore
-      const model = element.model as BlockModel;
+      const element = document.querySelector<BlockElement>(
+        `[data-block-id="${id}"]`
+      );
+
+      if (!element) {
+        throw new Error(`Element with id ${id} not found`);
+      }
+
+      const model = element.model;
       // @ts-ignore
       return model.type;
     },
     { id }
   );
   expect(actual).toBe(type);
+}
+
+export async function assertBlockFlavour(
+  page: Page,
+  id: string | number,
+  flavour: BlockSuite.Flavour
+) {
+  const actual = await page.evaluate(
+    ({ id }) => {
+      const element = document.querySelector<BlockElement>(
+        `[data-block-id="${id}"]`
+      );
+
+      if (!element) {
+        throw new Error(`Element with id ${id} not found`);
+      }
+
+      const model = element.model;
+      return model.flavour;
+    },
+    { id }
+  );
+  expect(actual).toBe(flavour);
+}
+
+export async function assertBlockTextContent(
+  page: Page,
+  id: string | number,
+  str: string
+) {
+  const actual = await page.evaluate(
+    ({ id }) => {
+      const element = document.querySelector<BlockElement>(
+        `[data-block-id="${id}"]`
+      );
+
+      if (!element) {
+        throw new Error(`Element with id ${id} not found`);
+      }
+
+      const model = element.model;
+      return model.text?.toString() ?? '';
+    },
+    { id }
+  );
+  expect(actual).toBe(str);
 }
 
 export async function assertBlockProps(

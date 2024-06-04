@@ -121,7 +121,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
 
   override render() {
     const { model, index } = this;
-    const { xywh, scale, rotate } = model;
+    const { xywh, scale, rotate, hasMaxWidth } = model;
     const bound = Bound.deserialize(xywh);
 
     const style: StyleInfo = {
@@ -134,7 +134,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       height: `${bound.h / scale}px`,
     };
     if (this._editing) {
-      if (!this.model.hasMaxWidth) {
+      if (!hasMaxWidth) {
         delete style.width;
       }
       delete style.height;
