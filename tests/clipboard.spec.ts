@@ -1339,7 +1339,7 @@ test(scoped`paste parent block`, async ({ page }) => {
   ]);
 });
 
-test(scoped`clipboard copy muti selection`, async ({ page }) => {
+test(scoped`clipboard copy multi selection`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

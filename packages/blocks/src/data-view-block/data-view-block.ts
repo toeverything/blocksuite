@@ -1,10 +1,10 @@
-import { BlockElement, RangeManager } from '@blocksuite/block-std';
+import { RangeManager } from '@blocksuite/block-std';
 import { Slice, Slot } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../_common/components/index.js';
+import { BlockComponent, popMenu } from '../_common/components/index.js';
 import {
   CopyIcon,
   DeleteIcon,
@@ -35,7 +35,7 @@ import type { DataViewBlockModel } from './data-view-model.js';
 import { BlockQueryViewSource } from './view-source.js';
 
 @customElement('affine-data-view')
-export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
+export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}
     affine-database {
@@ -282,11 +282,6 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
             target: () => this.innerModalWidget.target,
           },
         })}
-
-        <affine-block-selection
-          .block="${this}"
-          style="z-index: 1"
-        ></affine-block-selection>
       </div>
     `;
   }

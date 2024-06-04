@@ -1,5 +1,3 @@
-import '../../_common/components/block-selection.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { customElement, property, queryAsync } from 'lit/decorators.js';
@@ -260,8 +258,6 @@ export class EmbedSyncedDocCard extends WithDisposable(ShadowlessElement) {
             `
           : nothing}
       </div>
-
-      <affine-block-selection .block=${this.block}></affine-block-selection>
     `;
   }
 }

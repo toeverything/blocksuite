@@ -1,16 +1,15 @@
 /// <reference types="vite/client" />
-import '../_common/components/block-selection.js';
 
-import { BlockElement } from '@blocksuite/block-std';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import { BlockComponent } from '../_common/components/block-component.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { DividerBlockModel } from './divider-model.js';
 import { dividerBlockStyles } from './styles.js';
 
 @customElement('affine-divider')
-export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
+export class DividerBlockComponent extends BlockComponent<DividerBlockModel> {
   static override styles = dividerBlockStyles;
 
   override connectedCallback() {
@@ -40,8 +39,6 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
         <hr />
 
         ${children}
-
-        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
     `;
   }

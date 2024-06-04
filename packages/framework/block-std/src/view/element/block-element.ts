@@ -68,9 +68,12 @@ export class BlockElement<
 
   path!: string[];
 
-  get parentPath(): string[] {
-    return this.path.slice(0, -1);
-  }
+  @state()
+  protected accessor _renderers: Array<(content: unknown) => unknown> = [
+    this.renderBlock,
+    this._renderMismatchBlock,
+    this._renderViewType,
+  ];
 
   get parentBlockElement(): BlockElement {
     const el = this.parentElement;
@@ -297,8 +300,20 @@ export class BlockElement<
     `;
   }
 
-  override render() {
-    const block = when(
+  addRenderer(renderer: (content: unknown) => unknown) {
+    this._renderers.push(renderer);
+  }
+
+  private _renderViewType(content: unknown) {
+    return choose(this.viewType, [
+      [BlockViewType.Display, () => content],
+      [BlockViewType.Hidden, () => nothing],
+      [BlockViewType.Bypass, () => this.renderChildren(this.model)],
+    ]);
+  }
+
+  private _renderMismatchBlock(content: unknown) {
+    return when(
       this.isVersionMismatch,
       () => {
         const schema = this.doc.schema.flavourSchemaMap.get(this.model.flavour);
@@ -310,13 +325,14 @@ export class BlockElement<
         const actualVersion = this.model.version;
         return this.renderVersionMismatch(expectedVersion, actualVersion);
       },
-      () => this.renderBlock()
+      () => content
     );
+  }
 
-    return choose(this.viewType, [
-      [BlockViewType.Display, () => block],
-      [BlockViewType.Hidden, () => nothing],
-      [BlockViewType.Bypass, () => this.renderChildren(this.model)],
-    ]);
+  override render() {
+    return this._renderers.reduce(
+      (acc, cur) => cur.call(this, acc),
+      nothing as unknown
+    );
   }
 }

@@ -326,10 +326,9 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private _showCaption() {
-    const captionElement = this.blockElement.captionElement;
-    if (captionElement) {
-      captionElement.show();
-    } else {
+    try {
+      this.blockElement.captionEditor.show();
+    } catch (_) {
       toggleEmbedCardCaptionEditModal(this.blockElement);
     }
     this._resetAbortController();

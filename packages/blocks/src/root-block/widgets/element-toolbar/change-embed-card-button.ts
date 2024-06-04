@@ -384,7 +384,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    this._blockElement?.captionElement?.show();
+    this._blockElement?.captionEditor.show();
   }
 
   private _copyUrl() {

@@ -1,13 +1,17 @@
 import './components/title/index.js';
 
-import { BlockElement, RangeManager } from '@blocksuite/block-std';
+import { RangeManager } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { DragIndicator, popMenu } from '../_common/components/index.js';
+import {
+  BlockComponent,
+  DragIndicator,
+  popMenu,
+} from '../_common/components/index.js';
 import {
   CopyIcon,
   DeleteIcon,
@@ -46,7 +50,7 @@ import type { DatabaseBlockService } from './database-service.js';
 import { DatabaseBlockViewSource } from './view-source.js';
 
 @customElement('affine-database')
-export class DatabaseBlockComponent extends BlockElement<
+export class DatabaseBlockComponent extends BlockComponent<
   DatabaseBlockModel,
   DatabaseBlockService
 > {
@@ -387,11 +391,6 @@ export class DatabaseBlockComponent extends BlockElement<
             target: () => this.innerModalWidget.target,
           },
         })}
-
-        <affine-block-selection
-          .block="${this}"
-          style="z-index: 1"
-        ></affine-block-selection>
       </div>
     `;
   }

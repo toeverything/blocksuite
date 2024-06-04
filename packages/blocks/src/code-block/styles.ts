@@ -1,13 +1,9 @@
 import { css } from 'lit';
 
 export const codeBlockStyles = css`
-  code-block {
+  affine-code {
     position: relative;
     z-index: 1;
-  }
-  .affine-code-block-wrapper {
-    position: relative;
-    margin: 24px 0px;
   }
 
   .affine-code-block-container {

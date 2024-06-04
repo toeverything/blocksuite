@@ -1,15 +1,14 @@
-import '../_common/components/block-selection.js';
-
-import { BlockElement } from '@blocksuite/block-std';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/index.js';
-import { HoverController } from '../_common/components/index.js';
+import {
+  BlockComponent,
+  HoverController,
+} from '../_common/components/index.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import {
   AttachmentIcon16,
@@ -30,10 +29,11 @@ import { styles } from './styles.js';
 import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 
 @customElement('affine-attachment')
-export class AttachmentBlockComponent extends BlockElement<
+export class AttachmentBlockComponent extends BlockComponent<
   AttachmentBlockModel,
   AttachmentBlockService
 > {
+  override accessor useCaptionEditor = true;
   static override styles = styles;
 
   @property({ attribute: false })
@@ -50,9 +50,6 @@ export class AttachmentBlockComponent extends BlockElement<
 
   @property({ attribute: false })
   accessor allowEmbed = false;
-
-  @query('block-caption-editor')
-  accessor captionElement!: BlockCaptionEditor;
 
   @state()
   private accessor _showOverlay = true;
@@ -106,7 +103,7 @@ export class AttachmentBlockComponent extends BlockElement<
       template: AttachmentOptionsTemplate({
         anchor: this,
         model: this.model,
-        showCaption: () => this.captionElement.show(),
+        showCaption: () => this.captionEditor.show(),
         downloadAttachment: this.download,
         abortController,
       }),
@@ -315,10 +312,6 @@ export class AttachmentBlockComponent extends BlockElement<
 
               <div class="affine-attachment-banner">${FileTypeIcon}</div>
             </div>`}
-
-        <block-caption-editor .block=${this}></block-caption-editor>
-
-        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
     `;
   }

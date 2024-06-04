@@ -1,18 +1,9 @@
-import '../_common/components/block-selection.js';
-
 import { assertExists } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 import { html, nothing } from 'lit';
-import {
-  customElement,
-  property,
-  query,
-  queryAsync,
-  state,
-} from 'lit/decorators.js';
+import { customElement, property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { isPeekable, Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
@@ -65,9 +56,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   @state()
   private accessor _loading = false;
-
-  @query('block-caption-editor')
-  accessor captionElement!: BlockCaptionEditor;
 
   @queryAsync('.affine-embed-linked-doc-banner.render')
   accessor bannerContainer!: Promise<HTMLDivElement>;
@@ -465,10 +453,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
               : nothing}
             <div class="affine-embed-linked-doc-block-overlay"></div>
           </div>
-
-          <block-caption-editor .block=${this}></block-caption-editor>
-
-          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
 
         ${this.isInSurface ? nothing : Object.values(this.widgets)}

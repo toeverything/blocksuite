@@ -1,13 +1,14 @@
 /// <reference types="vite/client" />
 import '../_common/components/rich-text/rich-text.js';
-import '../_common/components/block-selection.js';
 
-import { BlockElement, getInlineRangeProvider } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
+import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
+import { BlockComponent } from '../_common/components/block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
@@ -21,11 +22,16 @@ import { ListIcon } from './utils/get-list-icon.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
-export class ListBlockComponent extends BlockElement<
+export class ListBlockComponent extends BlockComponent<
   ListBlockModel,
   ListBlockService
 > {
   static override styles = listBlockStyles;
+
+  override accessor blockContainerStyles = {
+    margin: '10px 0',
+  };
+
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
     assertExists(inlineManager);
@@ -211,8 +217,6 @@ export class ListBlockComponent extends BlockElement<
         </div>
 
         ${collapsed ? nothing : children}
-
-        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
     `;
   }
