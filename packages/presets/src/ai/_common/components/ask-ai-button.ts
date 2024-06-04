@@ -4,11 +4,15 @@ import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import {
   type AIItemGroupConfig,
   AIStarIcon,
-  createButtonPopper,
   EdgelessRootService,
 } from '@blocksuite/blocks';
-import { css, html, LitElement } from 'lit';
+import { HoverController } from '@blocksuite/blocks';
+import { createLitPortal } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
+import { flip, offset } from '@floating-ui/dom';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRootService } from '../../utils/selection-utils.js';
@@ -16,9 +20,15 @@ import { getRootService } from '../../utils/selection-utils.js';
 type buttonSize = 'small' | 'middle' | 'large';
 
 const buttonWidthMap: Record<buttonSize, string> = {
-  small: '70px',
+  small: '72px',
   middle: '76px',
   large: '82px',
+};
+
+const buttonHeightMap: Record<buttonSize, string> = {
+  small: '24px',
+  middle: '32px',
+  large: '32px',
 };
 
 @customElement('ask-ai-button')
@@ -41,6 +51,7 @@ export class AskAIButton extends WithDisposable(LitElement) {
 
     .ask-ai-icon-button.small {
       font-size: var(--affine-font-xs);
+      gap: 2px;
       svg {
         scale: 0.8;
       }
@@ -57,14 +68,6 @@ export class AskAIButton extends WithDisposable(LitElement) {
       line-height: 22px;
     }
 
-    ask-ai-panel {
-      display: none;
-    }
-
-    ask-ai-panel[data-show] {
-      display: block;
-    }
-
     .ask-ai-icon-button svg {
       color: var(--affine-brand-color);
     }
@@ -77,6 +80,9 @@ export class AskAIButton extends WithDisposable(LitElement) {
   accessor actionGroups!: AIItemGroupConfig[];
 
   @property({ attribute: false })
+  accessor toggleType!: 'hover' | 'click';
+
+  @property({ attribute: false })
   accessor size: buttonSize = 'middle';
 
   @property({ attribute: false })
@@ -87,9 +93,8 @@ export class AskAIButton extends WithDisposable(LitElement) {
 
   @query('.ask-ai-button')
   private accessor _askAIButton!: HTMLDivElement;
-  @query('ask-ai-panel')
-  private accessor _askAIPanel!: HTMLDivElement;
-  private _askAIPopper: ReturnType<typeof createButtonPopper> | null = null;
+
+  private _abortController: AbortController | null = null;
 
   get _edgeless() {
     const rootService = getRootService(this.host);
@@ -99,26 +104,57 @@ export class AskAIButton extends WithDisposable(LitElement) {
     return null;
   }
 
-  override firstUpdated() {
-    this._askAIPopper = createButtonPopper(
-      this._askAIButton,
-      this._askAIPanel,
-      ({ display }) => {
-        this._edgeless?.tool.setEdgelessTool({
-          type: display === 'show' ? 'copilot' : 'default',
-        });
+  private _whenHover = new HoverController(
+    this,
+    ({ abortController }) => {
+      return {
+        template: html`<ask-ai-panel
+          .host=${this.host}
+          .actionGroups=${this.actionGroups}
+          .abortController=${abortController}
+        ></ask-ai-panel>`,
+        computePosition: {
+          referenceElement: this,
+          placement: 'top-start',
+          middleware: [flip(), offset(-40)],
+          autoUpdate: true,
+        },
+      };
+    },
+    { allowMultiple: true }
+  );
+
+  private _toggleAIPanel = () => {
+    if (this.toggleType !== 'click') {
+      return;
+    }
+
+    if (this._abortController) {
+      this._abortController.abort();
+      this._abortController = null;
+      return;
+    }
+
+    this._abortController = new AbortController();
+    assertExists(this._askAIButton);
+    createLitPortal({
+      template: html`<ask-ai-panel
+        .host=${this.host}
+        .actionGroups=${this.actionGroups}
+      ></ask-ai-panel>`,
+      container: this._askAIButton,
+      computePosition: {
+        referenceElement: this._askAIButton,
+        placement: 'bottom-start',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
       },
-      10,
-      120,
-      () => {
-        if (this._edgeless) {
-          const { left: x, top: y, width, height } = this._edgeless.viewport;
-          return { x, y, width, height: height - 100 };
-        }
-        return;
-      }
-    );
-    this.disposables.add(this._askAIPopper);
+      abortController: this._abortController,
+      closeOnClickAway: true,
+    });
+  };
+
+  override firstUpdated() {
     this.disposables.add(() => {
       this._edgeless?.tool.setEdgelessTool({ type: 'default' });
     });
@@ -129,19 +165,21 @@ export class AskAIButton extends WithDisposable(LitElement) {
       backgroundColor: this.backgroundColor || 'transparent',
       boxShadow: this.boxShadow || 'none',
     });
-    return html`<div class="ask-ai-button" style=${buttonStyles}>
+    return html`<div
+      class="ask-ai-button"
+      style=${buttonStyles}
+      ${this.toggleType === 'hover'
+        ? ref(this._whenHover.setReference)
+        : nothing}
+      @click=${this._toggleAIPanel}
+    >
       <icon-button
         class="ask-ai-icon-button ${this.size}"
         width=${buttonWidthMap[this.size]}
-        height="24px"
-        @click=${() => this._askAIPopper?.toggle()}
+        height=${buttonHeightMap[this.size]}
       >
         ${AIStarIcon} <span>Ask AI</span></icon-button
       >
-      <ask-ai-panel
-        .host=${this.host}
-        .actionGroups=${this.actionGroups}
-      ></ask-ai-panel>
     </div>`;
   }
 }

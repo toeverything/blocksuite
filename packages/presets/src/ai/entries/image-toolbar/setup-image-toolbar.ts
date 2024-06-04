@@ -31,6 +31,7 @@ export function setupImageToolbarEntry(imageToolbar: AffineImageToolbarWidget) {
             .size=${'small'}
             .backgroundColor=${'var(--affine-white)'}
             .boxShadow=${'var(--affine-shadow-1)'}
+            .toggleType=${'click'}
             @click=${onAskAIClick}
           ></ask-ai-button>`;
         },

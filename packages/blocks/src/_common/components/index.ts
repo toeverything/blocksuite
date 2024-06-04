@@ -8,6 +8,7 @@ export * from './menu/index.js';
 export * from './menu-divider.js';
 export * from './notification-service.js';
 export * from './peekable.js';
+export * from './portal.js';
 export * from './rich-text/rich-text.js';
 export * from './toast.js';
 export * from './tooltip/index.js';

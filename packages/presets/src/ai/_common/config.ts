@@ -430,6 +430,14 @@ export const AIImageItemGroups: AIItemGroupConfig[] = [
         subItemOffset: [12, -6],
         beta: true,
       },
+      {
+        name: 'Generate a caption',
+        icon: AIPenIcon,
+        showWhen: (_, __, host) =>
+          !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
+        beta: true,
+        handler: actionToHandler('generateCaption', AIStarIconWithAnimation),
+      },
     ],
   },
   OthersAIGroup,

@@ -26,6 +26,7 @@ export function setupCodeToolbarEntry(codeToolbar: AffineCodeToolbarWidget) {
             .actionGroups=${AICodeItemGroups}
             .size=${'small'}
             .boxShadow=${'var(--affine-shadow-1)'}
+            .toggleType=${'click'}
           ></ask-ai-button>`;
         },
       },
