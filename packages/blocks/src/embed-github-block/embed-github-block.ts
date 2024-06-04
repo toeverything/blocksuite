@@ -1,13 +1,10 @@
-import '../_common/components/block-selection.js';
-
 import { assertExists } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
@@ -36,9 +33,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
   @property({ attribute: false })
   accessor loading = false;
-
-  @query('block-caption-editor')
-  accessor captionElement!: BlockCaptionEditor;
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
@@ -286,10 +280,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
             <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
-
-          <block-caption-editor .block=${this}></block-caption-editor>
-
-          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
 
         ${this.isInSurface ? nothing : Object.values(this.widgets)}

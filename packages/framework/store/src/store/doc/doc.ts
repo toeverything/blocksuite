@@ -20,6 +20,7 @@ type DocOptions = {
   blockCollection: BlockCollection;
   crud: DocCRUD;
   selector: BlockSelector;
+  readonly?: boolean;
 };
 
 export class Doc {
@@ -29,12 +30,20 @@ export class Doc {
   protected readonly _crud: DocCRUD;
   protected readonly _selector: BlockSelector;
   protected readonly _disposeBlockUpdated: Disposable;
+  protected readonly _readonly?: boolean;
 
-  constructor({ schema, blockCollection, crud, selector }: DocOptions) {
+  constructor({
+    schema,
+    blockCollection,
+    crud,
+    selector,
+    readonly,
+  }: DocOptions) {
     this._blockCollection = blockCollection;
     this._crud = crud;
     this._schema = schema;
     this._selector = selector;
+    this._readonly = readonly;
 
     this._yBlocks.forEach((_, id) => {
       if (!this._blocks.has(id)) {
@@ -67,7 +76,10 @@ export class Doc {
   }
 
   get readonly() {
-    return this._blockCollection.readonly;
+    if (this._blockCollection.readonly) {
+      return true;
+    }
+    return this._readonly === true;
   }
 
   get schema() {

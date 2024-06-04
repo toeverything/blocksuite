@@ -28,7 +28,7 @@ export const defaultItems: CodeToolbarItem[] = [
     tooltip: 'Caption',
     showWhen: blockElement => !blockElement.doc.readonly,
     action: codeBlock => {
-      codeBlock.captionElement.show();
+      codeBlock.captionEditor.show();
     },
   },
 ];

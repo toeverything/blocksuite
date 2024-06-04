@@ -1,13 +1,13 @@
 import '../_common/components/rich-text/rich-text.js';
-import '../_common/components/block-selection.js';
 
 import type { TextSelection } from '@blocksuite/block-std';
-import { BlockElement, getInlineRangeProvider } from '@blocksuite/block-std';
+import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type InlineRangeProvider } from '@blocksuite/inline';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
+import { BlockComponent } from '../_common/components/block-component.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
@@ -18,11 +18,13 @@ import type { ParagraphBlockService } from './paragraph-service.js';
 import { paragraphBlockStyles } from './styles.js';
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends BlockElement<
+export class ParagraphBlockComponent extends BlockComponent<
   ParagraphBlockModel,
   ParagraphBlockService
 > {
   static override styles = paragraphBlockStyles;
+
+  override accessor blockContainerStyles = { margin: '10px 0' };
 
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
@@ -182,8 +184,6 @@ export class ParagraphBlockComponent extends BlockElement<
         </div>
 
         ${children}
-
-        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
     `;
   }

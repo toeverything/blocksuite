@@ -3,7 +3,6 @@ import { css } from 'lit';
 export const paragraphBlockStyles = css`
   affine-paragraph {
     display: block;
-    margin: 10px 0;
     font-size: var(--affine-font-base);
   }
 

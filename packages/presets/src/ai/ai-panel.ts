@@ -3,11 +3,14 @@ import {
   AFFINE_AI_PANEL_WIDGET,
   AffineAIPanelWidget,
   type AffineAIPanelWidgetConfig,
+  type AIItemConfig,
+  ImageBlockModel,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { TemplateResult } from 'lit';
 
 import {
+  AIPenIcon,
   AIStarIconWithAnimation,
   ChatWithAIIcon,
   DiscardIcon,
@@ -42,6 +45,35 @@ function getSelection(host: EditorHost) {
     selectedModels,
     firstBlock,
     lastBlock,
+  };
+}
+
+function useAsCaption<T extends keyof BlockSuitePresets.AIActions>(
+  host: EditorHost,
+  id?: T
+): AIItemConfig {
+  return {
+    name: 'Use as caption',
+    icon: AIPenIcon,
+    showWhen: () => {
+      const panel = getAIPanel(host);
+      return id === 'generateCaption' && !!panel.answer;
+    },
+    handler: () => {
+      reportResponse('result:use-as-caption');
+      const panel = getAIPanel(host);
+      const caption = panel.answer;
+      if (!caption) return;
+
+      const { selectedBlocks } = getSelections(host);
+      if (!selectedBlocks || selectedBlocks.length !== 1) return;
+
+      const imageBlock = selectedBlocks[0].model;
+      if (!(imageBlock instanceof ImageBlockModel)) return;
+
+      host.doc.updateBlock(imageBlock, { caption });
+      panel.hide();
+    },
   };
 }
 
@@ -111,6 +143,7 @@ export function buildTextResponseConfig<
             _insertAbove().catch(console.error);
           },
         },
+        useAsCaption(host, id),
         {
           name: 'Replace selection',
           icon: ReplaceIcon,
@@ -229,6 +262,7 @@ export function buildErrorResponseConfig<
             _insertAbove().catch(console.error);
           },
         },
+        useAsCaption(host, id),
       ],
     },
     {

@@ -1,14 +1,12 @@
 import './components/image-card.js';
 import './components/page-image-block.js';
 import './components/edgeless-image-block.js';
-import '../_common/components/block-selection.js';
 
-import { BlockElement } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
+import { BlockComponent } from '../_common/components/block-component.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
@@ -24,10 +22,12 @@ import {
 } from './utils.js';
 
 @customElement('affine-image')
-export class ImageBlockComponent extends BlockElement<
+export class ImageBlockComponent extends BlockComponent<
   ImageBlockModel,
   ImageBlockService
 > {
+  override accessor useCaptionEditor = true;
+
   @property({ attribute: false })
   accessor loading = false;
 
@@ -57,9 +57,6 @@ export class ImageBlockComponent extends BlockElement<
 
   @query('affine-edgeless-image')
   private accessor _edgelessImage: ImageBlockEdgelessComponent | null = null;
-
-  @query('block-caption-editor')
-  accessor captionElement!: BlockCaptionEditor;
 
   private _isInSurface = false;
 
@@ -143,6 +140,10 @@ export class ImageBlockComponent extends BlockElement<
     const parent = this.host.doc.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
+    this.blockContainerStyles = this._isInSurface
+      ? undefined
+      : { margin: '18px 0' };
+
     this.model.propsUpdated.on(({ key }) => {
       if (key === 'sourceId') {
         this.refreshData();
@@ -165,7 +166,6 @@ export class ImageBlockComponent extends BlockElement<
     let containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
-      margin: '18px 0px',
     });
 
     if (this.isInSurface) {
@@ -199,10 +199,6 @@ export class ImageBlockComponent extends BlockElement<
                 }}
               ></affine-edgeless-image>`
             : html`<affine-page-image .block=${this}></affine-page-image>`}
-
-        <block-caption-editor .block=${this}></block-caption-editor>
-
-        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
 
       ${this.isInSurface ? nothing : Object.values(this.widgets)}

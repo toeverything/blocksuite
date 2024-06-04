@@ -40,7 +40,7 @@ export class EdgelessChangeImageButton extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    this._blockElement?.captionElement.show();
+    this._blockElement?.captionEditor.show();
   }
 
   override render() {

@@ -20,6 +20,8 @@ import { deserializeXYWH } from './surface-block/index.js';
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
 export {
+  createLitPortal,
+  HoverController,
   PeekableController,
   type PeekViewService,
   toast,

@@ -8,6 +8,7 @@ import { css, html, nothing, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
+import { ConnectorCWithArrowIcon } from '../../../_common/icons/edgeless.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import {
   atLeastNMatches,
@@ -28,7 +29,10 @@ import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { MindmapElementModel } from '../../../surface-block/element-model/mindmap.js';
-import { GroupElementModel } from '../../../surface-block/index.js';
+import {
+  ConnectorMode,
+  GroupElementModel,
+} from '../../../surface-block/index.js';
 import {
   type BrushElementModel,
   clamp,
@@ -37,6 +41,7 @@ import {
   type TextElementModel,
 } from '../../../surface-block/index.js';
 import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
+import type { ConnectorToolController } from '../../edgeless/controllers/tools/connector-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
@@ -145,14 +150,6 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       gap: 8px;
       color: var(--affine-text-primary-color);
       fill: currentColor;
-    }
-
-    .color-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 20px;
-      height: 20px;
     }
   `;
 
@@ -322,11 +319,44 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     top = clamp(top, 10, height - 150);
 
     this.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-    this.selectedIds = this.selection.selectedIds;
+    this.selectedIds = selection.selectedIds;
   }
 
   registerEntry(entry: CustomEntry) {
     this._registeredEntries.push(entry);
+  }
+
+  private _quickConnect(e: MouseEvent) {
+    const element = this.selection.selectedElements[0];
+    const point = this.edgeless.service.viewport.toViewPointFromClientPoint({
+      x: e.x,
+      y: e.y,
+    });
+    this.edgeless.doc.captureSync();
+    this.edgeless.tools.setEdgelessTool({
+      type: 'connector',
+      mode: ConnectorMode.Curve,
+    });
+
+    const ctc = this.edgeless.tools.controllers[
+      'connector'
+    ] as ConnectorToolController;
+    ctc.quickConnect([point.x, point.y], element);
+  }
+
+  private _renderQuickConnectButton() {
+    return [
+      html`
+        <edgeless-tool-icon-button
+          aria-label="Draw connector"
+          .tooltip=${'Draw connector'}
+          .activeMode=${'background'}
+          @click=${(e: MouseEvent) => this._quickConnect(e)}
+        >
+          ${ConnectorCWithArrowIcon}
+        </edgeless-tool-icon-button>
+      `,
+    ];
   }
 
   override render() {
@@ -356,6 +386,11 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       2
     );
 
+    const quickConnectButton =
+      selectedElements.length === 1 && !connector?.length
+        ? this._renderQuickConnectButton()
+        : undefined;
+
     const generalButtons =
       selectedElements.length !== connector?.length
         ? [
@@ -365,7 +400,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           ]
         : [];
 
-    const buttons = selectedAtLeastTwoTypes
+    const buttons: (symbol | TemplateResult)[] = selectedAtLeastTwoTypes
       ? generalButtons
       : [
           ...generalButtons,
@@ -373,12 +408,12 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           renderChangeShapeButton(edgeless, shape),
           renderChangeBrushButton(edgeless, brush),
           renderConnectorButton(edgeless, connector),
-          renderNoteButton(edgeless, note),
+          renderNoteButton(edgeless, note, quickConnectButton),
           renderChangeTextButton(edgeless, text),
           renderChangeEdgelessTextButton(edgeless, edgelessText),
           renderFrameButton(edgeless, frame),
           renderGroupButton(edgeless, group),
-          renderEmbedButton(edgeless, embedCard),
+          renderEmbedButton(edgeless, embedCard, quickConnectButton),
           renderAttachmentButton(edgeless, attachment),
           renderChangeImageButton(edgeless, image),
         ];
@@ -387,29 +422,33 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       if (selection.firstElement.group instanceof GroupElementModel) {
         buttons.unshift(renderReleaseFromGroupButton(this.edgeless));
       }
+
+      if (!connector?.length) {
+        buttons.push(quickConnectButton?.pop() ?? nothing);
+      }
     }
 
-    const registeredEntries = this._registeredEntries
+    this._registeredEntries
       .filter(entry => entry.when(selectedElements))
-      .map(entry => entry.render(this.edgeless));
+      .map(entry => entry.render(this.edgeless))
+      .forEach(entry => entry && buttons.unshift(entry));
 
-    if (registeredEntries.length) {
-      registeredEntries.forEach(entry => entry && buttons.unshift(entry));
-    }
-
-    const realButtons = buttons.filter(b => b !== nothing);
+    buttons.push(html`
+      <edgeless-more-button
+        .edgeless=${edgeless}
+        .vertical=${true}
+      ></edgeless-more-button>
+    `);
 
     return html`
       <div
         class="edgeless-component-toolbar-container"
         @pointerdown=${stopPropagation}
       >
-        ${join(realButtons, renderMenuDivider)}
-        ${realButtons.length ? renderMenuDivider() : nothing}
-        <edgeless-more-button
-          .edgeless=${edgeless}
-          .vertical=${true}
-        ></edgeless-more-button>
+        ${join(
+          buttons.filter(b => b !== nothing),
+          renderMenuDivider
+        )}
       </div>
     `;
   }

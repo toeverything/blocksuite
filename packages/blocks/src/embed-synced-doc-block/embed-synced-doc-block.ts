@@ -1,5 +1,4 @@
 import './components/embed-synced-doc-card.js';
-import '../_common/components/block-selection.js';
 
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -10,7 +9,6 @@ import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
 import { Peekable } from '../_common/components/peekable.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
@@ -32,6 +30,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   EmbedSyncedDocModel,
   EmbedSyncedDocBlockService
 > {
+  override accessor useCaptionEditor = false;
   static override styles = blockStyles;
 
   @state()
@@ -58,14 +57,13 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   @state()
   private accessor _empty = false;
 
-  @query(':scope > .embed-block-container > affine-embed-synced-doc-card')
+  @query(
+    ':scope > .affine-block-component > .embed-block-container > affine-embed-synced-doc-card'
+  )
   accessor syncedDocCard: EmbedSyncedDocCard | null = null;
 
-  @query(':scope > .embed-block-container > block-caption-editor')
-  accessor captionElement: BlockCaptionEditor | null = null;
-
   @query(
-    ':scope > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > div > editor-host'
+    ':scope > .affine-block-component > .embed-block-container > .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor > div > editor-host'
   )
   accessor syncedDocEditorHost: EditorHost | null = null;
 
@@ -260,7 +258,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   };
 
   convertToCard = () => {
-    const { doc, pageId, caption, xywh } = this.model;
+    const { id, doc, pageId, caption, xywh } = this.model;
 
     if (this.isInSurface) {
       const style = 'vertical';
@@ -270,14 +268,20 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
 
       const edgeless = this.edgeless;
       assertExists(edgeless);
-      const blockId = edgeless.service.addBlock(
+      const newId = edgeless.service.addBlock(
         'affine:embed-linked-doc',
         { pageId, xywh: bound.serialize(), style, caption },
         edgeless.surface.model
       );
+
+      this.std.command.exec('reassociateConnectors', {
+        oldId: id,
+        newId,
+      });
+
       edgeless.service.selection.set({
         editing: false,
-        elements: [blockId],
+        elements: [newId],
       });
     } else {
       const parent = doc.getParent(this.model);
@@ -387,7 +391,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this.syncedDocCard?.requestUpdate();
   }
 
-  override render() {
+  override renderBlock() {
     delete this.dataset.nestedEditor;
 
     const { style, xywh } = this.model;
@@ -429,8 +433,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
             style=${cardStyleMap}
             .block=${this}
           ></affine-embed-synced-doc-card>
-
-          <block-caption-editor .block=${this}></block-caption-editor>
         `
       );
     }
@@ -522,13 +524,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
                 ></div>
               `
             : nothing}
-          ${isInSurface
-            ? html`
-                <block-caption-editor .block=${this}></block-caption-editor>
-              `
-            : nothing}
-
-          <affine-block-selection .block=${this}></affine-block-selection>
         </div>
 
         ${this.isInSurface ? nothing : Object.values(this.widgets)}

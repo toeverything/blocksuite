@@ -13,6 +13,7 @@ import {
   ConnectorMode,
   isConnectorWithLabel,
 } from '../element-model/connector.js';
+import { GroupElementModel } from '../element-model/group.js';
 import { AStarRunner } from '../utils/a-star.js';
 import { Bound, getBoundFromPoints } from '../utils/bound.js';
 import {
@@ -41,6 +42,42 @@ export type OrthogonalConnectorInput = {
   startPoint: PointLocation;
   endPoint: PointLocation;
 };
+
+export const ConnectorEndpointLocations = [
+  // At top
+  [0.5, 0],
+  // At right
+  [1, 0.5],
+  // At bottom
+  [0.5, 1],
+  // At left
+  [0, 0.5],
+] as const satisfies IVec2[];
+
+export function calculateNearestLocation(
+  point: IVec,
+  bounds: IBound,
+  shortestDistance = Number.POSITIVE_INFINITY,
+  locations = ConnectorEndpointLocations
+) {
+  const { x, y, w, h } = bounds;
+  return locations
+    .map(offset => [x + offset[0] * w, y + offset[1] * h])
+    .map(point => getPointFromBoundsWithRotation(bounds, point))
+    .reduce(
+      (prev, curr, index) => {
+        const d = Vec.dist(point, curr);
+        if (d < shortestDistance) {
+          const location = locations[index];
+          shortestDistance = d;
+          prev[0] = location[0];
+          prev[1] = location[1];
+        }
+        return prev;
+      },
+      [...locations[0]]
+    ) as IVec2;
+}
 
 function rBound(ele: BlockSuite.EdgelessModelType, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
@@ -724,10 +761,28 @@ function adjustStartEndPoint(
   }
 }
 
+function renderRect(
+  ctx: CanvasRenderingContext2D,
+  bounds: IBound,
+  color: string,
+  lineWidth: number
+) {
+  const { x, y, w, h } = bounds;
+  ctx.save();
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.setLineDash([lineWidth * 2, lineWidth * 2]);
+  ctx.strokeRect(x, y, w, h);
+  ctx.closePath();
+  ctx.restore();
+}
+
 export class ConnectionOverlay extends Overlay {
   points: IVec[] = [];
   highlightPoint: IVec | null = null;
-  bound: Bound | null = null;
+  sourceBounds: IBound | null = null;
+  targetBounds: IBound | null = null;
 
   constructor(private _service: EdgelessRootService) {
     super();
@@ -746,29 +801,37 @@ export class ConnectionOverlay extends Overlay {
       '--affine-text-emphasis-color'
     );
 
+    ctx.globalAlpha = 0.6;
+    let lineWidth = 1 / zoom;
+    if (this.sourceBounds) {
+      renderRect(ctx, this.sourceBounds, color, lineWidth);
+    }
+    if (this.targetBounds) {
+      renderRect(ctx, this.targetBounds, color, lineWidth);
+    }
+
+    lineWidth = 2 / zoom;
     this.points.forEach(p => {
       ctx.beginPath();
       ctx.arc(p[0], p[1], radius, 0, PI2);
       ctx.fillStyle = 'white';
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = lineWidth;
       ctx.fill();
       ctx.stroke();
+      ctx.closePath();
     });
+
+    ctx.globalAlpha = 1;
     if (this.highlightPoint) {
       ctx.beginPath();
       ctx.arc(this.highlightPoint[0], this.highlightPoint[1], radius, 0, PI2);
       ctx.fillStyle = color;
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = lineWidth;
       ctx.fill();
       ctx.stroke();
-    }
-    if (this.bound) {
-      ctx.beginPath();
-      ctx.rect(this.bound.x, this.bound.y, this.bound.w, this.bound.h);
-      ctx.fillStyle = 'rgba(211, 211, 211, 0.3)';
-      ctx.fill();
+      ctx.closePath();
     }
   }
 
@@ -784,8 +847,10 @@ export class ConnectionOverlay extends Overlay {
   renderConnector(point: IVec, excludedIds: string[] = []) {
     const connectables = this._findConnectablesInViews();
     const service = this._service;
+    let target;
 
-    this.clear();
+    this._clearRect();
+
     let result: Connection | null = null;
     for (let i = 0; i < connectables.length; i++) {
       const connectable = connectables[i];
@@ -815,6 +880,7 @@ export class ConnectionOverlay extends Overlay {
           point[1]
         );
         if (Vec.dist(anchorViewCoord, pointerViewCoord) < 20) {
+          target = connectable;
           this.highlightPoint = anchor.point;
           result = {
             id: connectable.id,
@@ -834,6 +900,7 @@ export class ConnectionOverlay extends Overlay {
           nearestPoint
         );
         this._renderer.refresh();
+        target = connectable;
         result = {
           id: connectable.id,
           position: bound
@@ -855,28 +922,41 @@ export class ConnectionOverlay extends Overlay {
           this._service.host
         )
       ) {
+        target = connectable;
         result = {
           id: connectable.id,
         };
       }
     }
 
+    if (target && target instanceof GroupElementModel) {
+      this.targetBounds = Bound.deserialize(target.xywh);
+    } else {
+      this.targetBounds = null;
+    }
+
     // at last, if not, just return the point
-    if (!result)
+    if (!result) {
       result = {
         position: point as IVec2,
       };
+    }
 
     this._renderer.refresh();
 
     return result;
   }
 
-  clear() {
+  _clearRect() {
     this.points = [];
     this.highlightPoint = null;
-    this.bound = null;
     this._renderer.refresh();
+  }
+
+  clear() {
+    this.sourceBounds = null;
+    this.targetBounds = null;
+    this._clearRect();
   }
 }
 

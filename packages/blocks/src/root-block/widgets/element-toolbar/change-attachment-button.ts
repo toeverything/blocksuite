@@ -75,7 +75,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    this._blockElement?.captionElement.show();
+    this._blockElement?.captionEditor.show();
   }
 
   private _setCardStyle(style: EmbedCardStyle) {

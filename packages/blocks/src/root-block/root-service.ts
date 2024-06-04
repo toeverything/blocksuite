@@ -70,6 +70,7 @@ export interface QuickSearchService {
   searchDoc: (options: {
     action: 'insert';
     userInput?: string;
+    skipSelection?: boolean;
   }) => Promise<QuickSearchResult>;
 }
 
@@ -374,11 +375,16 @@ export class RootService extends BlockService<RootBlockModel> {
     this._insertCard(flavour, targetStyle, props);
   };
 
-  insertLinkByQuickSearch = async () => {
+  insertLinkByQuickSearch = async (
+    userInput?: string,
+    skipSelection?: boolean
+  ) => {
     if (!this.quickSearchService) return;
 
     const result = await this.quickSearchService.searchDoc({
       action: 'insert',
+      userInput,
+      skipSelection,
     });
     if (!result) return;
 

@@ -1,5 +1,4 @@
 import type { BlockService } from '@blocksuite/block-std';
-import { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -17,6 +16,7 @@ import {
   convertDragPreviewEdgelessToDoc,
 } from '../../root-block/widgets/drag-handle/utils.js';
 import { Bound } from '../../surface-block/index.js';
+import { BlockComponent } from '../components/block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
 import { type EmbedCardStyle, matchFlavours } from '../utils/index.js';
@@ -26,7 +26,8 @@ export class EmbedBlockElement<
     BlockModel<EdgelessSelectableProps> = BlockModel<EdgelessSelectableProps>,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
-> extends BlockElement<Model, Service, WidgetName> {
+> extends BlockComponent<Model, Service, WidgetName> {
+  override accessor useCaptionEditor = true;
   protected _cardStyle: EmbedCardStyle = 'horizontal';
   protected _width = EMBED_CARD_WIDTH.horizontal;
   protected _height = EMBED_CARD_HEIGHT.horizontal;
@@ -155,6 +156,10 @@ export class EmbedBlockElement<
     const parent = this.host.doc.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
+    this.blockContainerStyles = this.isInSurface
+      ? undefined
+      : { margin: '18px 0' };
+
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
@@ -168,7 +173,6 @@ export class EmbedBlockElement<
           style=${styleMap({
             position: 'relative',
             width: '100%',
-            margin: '18px 0px',
           })}
         >
           ${children()}

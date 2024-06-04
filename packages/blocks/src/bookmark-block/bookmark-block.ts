@@ -1,12 +1,10 @@
 import './components/bookmark-card.js';
-import '../_common/components/block-selection.js';
 
-import { BlockElement } from '@blocksuite/block-std';
 import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockCaptionEditor } from '../_common/components/block-caption.js';
+import { BlockComponent } from '../_common/components/block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { type BookmarkBlockModel } from './bookmark-model.js';
@@ -14,10 +12,12 @@ import type { BookmarkBlockService } from './bookmark-service.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
-export class BookmarkBlockComponent extends BlockElement<
+export class BookmarkBlockComponent extends BlockComponent<
   BookmarkBlockModel,
   BookmarkBlockService
 > {
+  override accessor useCaptionEditor = true;
+
   @property({ attribute: false })
   accessor loading = false;
 
@@ -26,9 +26,6 @@ export class BookmarkBlockComponent extends BlockElement<
 
   @query('bookmark-card')
   accessor bookmarkCard!: HTMLElement;
-
-  @query('block-caption-editor')
-  accessor captionElement!: BlockCaptionEditor;
 
   private _isInSurface = false;
 
@@ -63,6 +60,10 @@ export class BookmarkBlockComponent extends BlockElement<
     const parent = this.host.doc.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
+    this.blockContainerStyles = this._isInSurface
+      ? undefined
+      : { margin: '18px 0' };
+
     if (!this.model.description && !this.model.title) {
       this.refreshData();
     }
@@ -82,8 +83,8 @@ export class BookmarkBlockComponent extends BlockElement<
     let containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
-      margin: '18px 0px',
     });
+
     if (this.isInSurface) {
       const width = EMBED_CARD_WIDTH[style];
       const height = EMBED_CARD_HEIGHT[style];
@@ -108,10 +109,6 @@ export class BookmarkBlockComponent extends BlockElement<
           .loading=${this.loading}
           .error=${this.error}
         ></bookmark-card>
-
-        <block-caption-editor .block=${this}></block-caption-editor>
-
-        <affine-block-selection .block=${this}></affine-block-selection>
       </div>
 
       ${this.isInSurface ? nothing : Object.values(this.widgets)}
