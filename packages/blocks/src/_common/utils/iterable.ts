@@ -18,7 +18,7 @@ export function countBy<T>(
   const count: Record<string, number> = {};
   items.forEach(item => {
     const k = key(item);
-    if (!k) return;
+    if (k === null) return;
     if (!count[k]) {
       count[k] = 0;
     }
