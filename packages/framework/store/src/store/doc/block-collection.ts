@@ -1,5 +1,6 @@
 import { Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
+import { compress } from 'lz-string';
 import * as Y from 'yjs';
 
 import { Text } from '../../reactive/text.js';
@@ -35,6 +36,11 @@ type DocOptions = {
 
 export const defaultBlockSelector = () => BlockViewType.Display;
 
+export type GetDocOptions = {
+  selector?: BlockSelector;
+  readonly?: boolean;
+};
+
 export class BlockCollection extends Space<FlatBlockMap> {
   private readonly _collection: DocCollection;
   private readonly _idGenerator: IdGenerator;
@@ -43,7 +49,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
   /** Indicate whether the block tree is ready */
   private _ready = false;
   private _shouldTransact = true;
-  private _docMap: Map<BlockSelector, Doc> = new Map();
+  private _docMap: Map<string, Doc> = new Map();
 
   readonly slots = {
     /** This is always triggered after `doc.load` is called. */
@@ -103,22 +109,30 @@ export class BlockCollection extends Space<FlatBlockMap> {
     this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
   }
 
-  getDoc(selector: BlockSelector = defaultBlockSelector) {
-    if (this._docMap.has(selector)) {
-      return this._docMap.get(selector)!;
+  private _getDocMapKey(selector: BlockSelector, readonly?: boolean) {
+    const str = `${selector}-${readonly ?? '$'}`;
+    return compress(str);
+  }
+
+  getDoc({ selector = defaultBlockSelector, readonly }: GetDocOptions = {}) {
+    const key = this._getDocMapKey(selector, readonly);
+    if (this._docMap.has(key)) {
+      return this._docMap.get(key)!;
     }
     const doc = new Doc({
       blockCollection: this,
       crud: this._docCRUD,
       schema: this.collection.schema,
       selector,
+      readonly,
     });
-    this._docMap.set(selector, doc);
+    this._docMap.set(key, doc);
     return doc;
   }
 
-  clearSelector(selector: BlockSelector) {
-    this._docMap.delete(selector);
+  clearSelector(selector: BlockSelector, readonly?: boolean) {
+    const key = this._getDocMapKey(selector, readonly);
+    this._docMap.delete(key);
   }
 
   get readonly() {

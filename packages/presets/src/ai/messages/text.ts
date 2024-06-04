@@ -190,7 +190,9 @@ export class AIAnswerText extends WithDisposable(LitElement) {
       if (latestAnswer) {
         markDownToDoc(this.host, latestAnswer)
           .then(doc => {
-            this._doc = doc.blockCollection.getDoc(this._selector);
+            this._doc = doc.blockCollection.getDoc({
+              selector: this._selector,
+            });
             this.disposables.add(() => {
               doc.blockCollection.clearSelector(this._selector);
             });
