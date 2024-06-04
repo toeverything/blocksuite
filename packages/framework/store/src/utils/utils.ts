@@ -58,3 +58,13 @@ export function encodeCollectionAsYjsUpdateV2(
 ): string {
   return toBase64(Y.encodeStateAsUpdateV2(collection.doc));
 }
+
+export const hash = (str: string) => {
+  return str
+    .split('')
+    .reduce(
+      (prevHash, currVal) =>
+        ((prevHash << 5) - prevHash + currVal.charCodeAt(0)) | 0,
+      0
+    );
+};

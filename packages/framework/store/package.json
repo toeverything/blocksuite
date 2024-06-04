@@ -22,7 +22,6 @@
     "flexsearch": "0.7.43",
     "idb-keyval": "^6.2.1",
     "lib0": "^0.2.94",
-    "lz-string": "^1.5.0",
     "merge": "^2.1.1",
     "minimatch": "^9.0.4",
     "nanoid": "^5.0.7",
