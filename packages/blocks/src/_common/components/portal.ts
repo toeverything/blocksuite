@@ -308,7 +308,6 @@ export function createLitPortal({
       referenceElement instanceof Element &&
       !isElementVisible(referenceElement)
     ) {
-      console.log('abort, when update');
       abortController.abort();
     }
     computePosition(referenceElement, portalRoot, options)
