@@ -11,6 +11,7 @@ import {
 import type { Column } from '../database-block/data-view/view/presets/table/types.js';
 
 type Props = {
+  query?: string;
   title: string;
   views: DataViewDataType[];
   columns: Column[];

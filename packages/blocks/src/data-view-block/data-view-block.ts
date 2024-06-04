@@ -1,3 +1,5 @@
+import '../_common/code-line-editor/code-line.js';
+
 import { BlockElement, RangeManager } from '@blocksuite/block-std';
 import { Slice, Slot } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -264,10 +266,18 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       AFFINE_INNER_MODAL_WIDGET
     ] as AffineInnerModalWidget;
   }
+  renderQuery() {
+    return html`
+      <code-line-editor
+        source='query todos as todo where todo.contains("asd") order by todo.createDate() desc skip 5 take 10'
+      ></code-line-editor>
+    `;
+  }
 
   override renderBlock() {
     return html`
       <div contenteditable="false" style="position: relative">
+        ${this.renderQuery()}
         ${this.dataView.render({
           bindHotkey: this._bindHotkey,
           handleEvent: this._handleEvent,
