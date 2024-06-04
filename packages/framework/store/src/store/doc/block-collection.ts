@@ -1,11 +1,11 @@
 import { Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
-import * as lz from 'lz-string';
 import * as Y from 'yjs';
 
 import { Text } from '../../reactive/text.js';
 import type { BlockModel } from '../../schema/base.js';
 import type { IdGenerator } from '../../utils/id-generator.js';
+import { hash } from '../../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
 import type { DocCollection } from '../collection.js';
 import { Space } from '../space.js';
@@ -111,7 +111,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   private _getDocMapKey(selector: BlockSelector, readonly?: boolean) {
     const str = `${selector}-${readonly ?? '$'}`;
-    return lz.compress(str);
+    return hash(str).toString();
   }
 
   getDoc({ selector = defaultBlockSelector, readonly }: GetDocOptions = {}) {
