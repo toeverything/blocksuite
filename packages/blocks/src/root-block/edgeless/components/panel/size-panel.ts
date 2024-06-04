@@ -6,9 +6,15 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { CheckIcon } from '../../../../_common/icons/edgeless.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
+import { clamp } from '../../../../_common/utils/math.js';
 
 const MIN_SIZE = 1;
 const MAX_SIZE = 200;
+
+type SizeItem = {
+  name?: string;
+  value: number;
+};
 
 @customElement('edgeless-size-panel')
 export class EdgelessSizePanel extends LitElement {
@@ -57,10 +63,7 @@ export class EdgelessSizePanel extends LitElement {
   accessor size!: number;
 
   @property({ attribute: false })
-  accessor sizes!: number[];
-
-  @property({ attribute: false })
-  accessor labels = ['Small', 'Medium', 'Large', 'Huge'];
+  accessor sizeList!: SizeItem[];
 
   @property({ attribute: false })
   accessor onSelect: ((size: number) => void) | undefined = undefined;
@@ -78,11 +81,11 @@ export class EdgelessSizePanel extends LitElement {
   accessor type: 'normal' | 'check' = 'normal';
 
   private _onSelect(size: number) {
-    if (this.onSelect) this.onSelect(size);
+    this.onSelect?.(size);
   }
 
   private _onPopperClose() {
-    if (this.onPopperCose) this.onPopperCose();
+    this.onPopperCose?.();
   }
 
   private _onKeydown = (e: KeyboardEvent) => {
@@ -91,21 +94,15 @@ export class EdgelessSizePanel extends LitElement {
     if (e.key === 'Enter' && !e.isComposing) {
       e.preventDefault();
       const input = e.target as HTMLInputElement;
+      const size = parseInt(input.value.trim());
       // Handle edge case where user enters a non-number
-      if (isNaN(parseInt(input.value))) {
+      if (isNaN(size)) {
         input.value = '';
         return;
       }
 
-      let size = parseInt(input.value);
       // Handle edge case when user enters a number that is out of range
-      if (size < this.minSize) {
-        size = this.minSize;
-      } else if (size > this.maxSize) {
-        size = this.maxSize;
-      }
-
-      this._onSelect(size);
+      this._onSelect(clamp(size, this.minSize, this.maxSize));
       input.value = '';
       this._onPopperClose();
     }
@@ -117,35 +114,36 @@ export class EdgelessSizePanel extends LitElement {
       : this.renderItemWithCheck;
   }
 
-  renderItemWithNormal = (size: number, index: number) => {
-    const active = this.size === size;
-    return html`<edgeless-tool-icon-button
-      .iconContainerPadding=${[4, 8]}
-      .active=${active}
-      .activeMode=${'background'}
-      @click=${() => this._onSelect(size)}
-    >
-      ${this.labels[index]}
-    </edgeless-tool-icon-button>`;
+  renderItemWithNormal = ({ name, value }: SizeItem) => {
+    return html`
+      <edgeless-tool-icon-button
+        .iconContainerPadding=${[4, 8]}
+        .active=${this.size === value}
+        .activeMode=${'background'}
+        @click=${() => this._onSelect(value)}
+      >
+        ${name ?? value}
+      </edgeless-tool-icon-button>
+    `;
   };
 
-  renderItemWithCheck = (size: number, index: number) => {
-    const active = this.size === size;
+  renderItemWithCheck = ({ name, value }: SizeItem) => {
+    const active = this.size === value;
     return html`
       <edgeless-tool-icon-button
         .iconContainerPadding=${[4, 8]}
         .justify=${'space-between'}
         .active=${active}
-        @click=${() => this._onSelect(size)}
+        @click=${() => this._onSelect(value)}
       >
-        ${this.labels[index]} ${active ? CheckIcon : nothing}
+        ${name ?? value} ${active ? CheckIcon : nothing}
       </edgeless-tool-icon-button>
     `;
   };
 
   override render() {
     return html`
-      ${repeat(this.sizes, size => size, this.renderItem())}
+      ${repeat(this.sizeList, sizeItem => sizeItem.name, this.renderItem())}
 
       <input
         class="size-input"

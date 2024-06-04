@@ -5,9 +5,16 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
+import { clamp } from '../../../../_common/utils/math.js';
 
-const MIN_SCALE = 1;
+const MIN_SCALE = 0;
 const MAX_SCALE = 400;
+
+const SCALE_LIST = [50, 100, 200] as const;
+
+function format(scale: number) {
+  return `${scale}%`;
+}
 
 @customElement('edgeless-scale-panel')
 export class EdgelessScalePanel extends LitElement {
@@ -47,11 +54,10 @@ export class EdgelessScalePanel extends LitElement {
   accessor scale!: number;
 
   @property({ attribute: false })
-  accessor scales!: number[];
+  accessor scaleList: readonly number[] = SCALE_LIST;
 
   @property({ attribute: false })
-  accessor onSelect: ((size: EdgelessScalePanel['scale']) => void) | undefined =
-    undefined;
+  accessor onSelect: ((size: number) => void) | undefined = undefined;
 
   @property({ attribute: false })
   accessor onPopperCose: (() => void) | undefined = undefined;
@@ -62,12 +68,12 @@ export class EdgelessScalePanel extends LitElement {
   @property({ attribute: false })
   accessor maxScale: number = MAX_SCALE;
 
-  private _onSelect(scale: EdgelessScalePanel['scale']) {
-    if (this.onSelect) this.onSelect(scale / 100);
+  private _onSelect(scale: number) {
+    this.onSelect?.(scale / 100);
   }
 
   private _onPopperClose() {
-    if (this.onPopperCose) this.onPopperCose();
+    this.onPopperCose?.();
   }
 
   private _onKeydown = (e: KeyboardEvent) => {
@@ -76,21 +82,15 @@ export class EdgelessScalePanel extends LitElement {
     if (e.key === 'Enter' && !e.isComposing) {
       e.preventDefault();
       const input = e.target as HTMLInputElement;
+      const scale = parseInt(input.value.trim());
       // Handle edge case where user enters a non-number
-      if (isNaN(parseInt(input.value))) {
+      if (isNaN(scale)) {
         input.value = '';
         return;
       }
 
-      let size = parseInt(input.value);
       // Handle edge case when user enters a number that is out of range
-      if (size < this.minScale) {
-        size = this.minScale;
-      } else if (size > this.maxScale) {
-        size = this.maxScale;
-      }
-
-      this._onSelect(size);
+      this._onSelect(clamp(scale, this.minScale, this.maxScale));
       input.value = '';
       this._onPopperClose();
     }
@@ -99,7 +99,7 @@ export class EdgelessScalePanel extends LitElement {
   override render() {
     return html`
       ${repeat(
-        this.scales,
+        this.scaleList,
         scale => scale,
         scale =>
           html`<edgeless-tool-icon-button
@@ -108,7 +108,7 @@ export class EdgelessScalePanel extends LitElement {
             .active=${this.scale === scale}
             @click=${() => this._onSelect(scale)}
           >
-            ${scale + '%'}
+            ${format(scale)}
           </edgeless-tool-icon-button>`
       )}
 
@@ -118,7 +118,7 @@ export class EdgelessScalePanel extends LitElement {
         inputmode="numeric"
         pattern="[0-9]*"
         min="0"
-        placeholder=${Math.trunc(this.scale) + '%'}
+        placeholder=${format(Math.trunc(this.scale))}
         @keydown=${this._onKeydown}
         @input=${stopPropagation}
         @click=${stopPropagation}

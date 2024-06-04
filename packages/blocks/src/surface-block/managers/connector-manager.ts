@@ -42,6 +42,42 @@ export type OrthogonalConnectorInput = {
   endPoint: PointLocation;
 };
 
+export const ConnectorEndpointLocations = [
+  // At top
+  [0.5, 0],
+  // At right
+  [1, 0.5],
+  // At bottom
+  [0.5, 1],
+  // At left
+  [0, 0.5],
+] as const satisfies IVec2[];
+
+export function calculateNearestLocation(
+  point: IVec,
+  bounds: IBound,
+  shortestDistance = Number.POSITIVE_INFINITY,
+  locations = ConnectorEndpointLocations
+) {
+  const { x, y, w, h } = bounds;
+  return locations
+    .map(offset => [x + offset[0] * w, y + offset[1] * h])
+    .map(point => getPointFromBoundsWithRotation(bounds, point))
+    .reduce(
+      (prev, curr, index) => {
+        const d = Vec.dist(point, curr);
+        if (d < shortestDistance) {
+          const location = locations[index];
+          shortestDistance = d;
+          prev[0] = location[0];
+          prev[1] = location[1];
+        }
+        return prev;
+      },
+      [...locations[0]]
+    ) as IVec2;
+}
+
 function rBound(ele: BlockSuite.EdgelessModelType, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
   return { ...bound, rotate: anti ? -ele.rotate : ele.rotate };

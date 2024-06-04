@@ -54,19 +54,38 @@ import {
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import type { EdgelessRootService } from '../../edgeless/edgeless-root-service.js';
 
-const FONT_SIZE_LIST = [16, 24, 32, 36, 40, 64, 128];
+const FONT_SIZE_LIST = [
+  {
+    value: 16,
+  },
+  {
+    value: 24,
+  },
+  {
+    value: 32,
+  },
+  {
+    value: 40,
+  },
+  {
+    value: 64,
+  },
+  {
+    value: 128,
+  },
+] as const;
 
 const FONT_WEIGHT_CHOOSE: [FontWeight, () => string][] = [
   [FontWeight.Light, () => 'Light'],
   [FontWeight.Regular, () => 'Regular'],
   [FontWeight.SemiBold, () => 'Semibold'],
-];
+] as const;
 
 const TEXT_ALIGN_CHOOSE: [TextAlign, () => TemplateResult<1>][] = [
   [TextAlign.Left, () => TextAlignLeftIcon],
   [TextAlign.Center, () => TextAlignCenterIcon],
   [TextAlign.Right, () => TextAlignRightIcon],
-];
+] as const;
 
 function countByField<K extends keyof TextStyleProps>(
   elements: EdgelessCanvasTextElement[],
@@ -421,8 +440,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
           slot
           data-type="check"
           .size=${selectedFontSize}
-          .labels=${FONT_SIZE_LIST.map(String)}
-          .sizes=${FONT_SIZE_LIST}
+          .sizeList=${FONT_SIZE_LIST}
           .onSelect=${(fontSize: number) => this._setFontSize(fontSize)}
         ></edgeless-size-panel>
       </edgeless-menu-button>

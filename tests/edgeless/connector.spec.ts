@@ -15,6 +15,7 @@ import {
   rotateElementByHandle,
   setEdgelessTool,
   Shape,
+  toModelCoord,
   toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -29,6 +30,7 @@ import {
   assertConnectorPath,
   assertEdgelessCanvasText,
   assertEdgelessNonSelectedRect,
+  assertEdgelessSelectedRect,
   assertExists,
   assertPointAlmostEqual,
 } from '../utils/asserts.js';
@@ -647,5 +649,139 @@ test.describe('connector label with straight shape', () => {
 
     [cx, cy] = await getEditorCenter(page);
     assertPointAlmostEqual([cx, cy], [x, y]);
+  });
+});
+
+test.describe('quick connect', () => {
+  test('should create a connector when clicking on button', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+    const [x, y] = await toViewCoord(page, [50, 50]);
+    await page.mouse.click(x, y);
+
+    const quickConnectBtn = page.getByRole('button', {
+      name: 'Draw connector',
+    });
+
+    await expect(quickConnectBtn).toBeVisible();
+    await quickConnectBtn.click();
+    await expect(quickConnectBtn).toBeHidden();
+
+    await assertConnectorPath(page, [
+      [100, 50],
+      [x, y],
+    ]);
+  });
+
+  test('should be uncreated if the target is not found after clicking', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+    const [x, y] = await toViewCoord(page, [50, 50]);
+    await page.mouse.click(x, y);
+
+    const quickConnectBtn = page.getByRole('button', {
+      name: 'Draw connector',
+    });
+
+    const bounds = await quickConnectBtn.boundingBox();
+    assertExists(bounds);
+
+    await quickConnectBtn.click();
+
+    await page.mouse.click(bounds.x, bounds.y);
+    await assertEdgelessSelectedRect(page, [x - 50, y - 50, 100, 100]);
+  });
+
+  test('should be uncreated if the target is not found after pressing ESC', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+
+    // select shape
+    const [x, y] = await toViewCoord(page, [50, 50]);
+    await page.mouse.click(x, y);
+
+    // click button
+    await triggerComponentToolbarAction(page, 'quickConnect');
+
+    await page.keyboard.press('Escape');
+
+    await assertEdgelessNonSelectedRect(page);
+  });
+
+  test('should be connected if the target is found', async ({ page }) => {
+    await commonSetup(page);
+
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+    await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
+
+    // select shape
+    const [x, y] = await toViewCoord(page, [50, 50]);
+    await page.mouse.click(x, y);
+
+    // click button
+    await triggerComponentToolbarAction(page, 'quickConnect');
+
+    // click target
+    const [tx, ty] = await toViewCoord(page, [200, 50]);
+    await page.mouse.click(tx, ty);
+
+    await assertConnectorPath(page, [
+      [100, 50],
+      [200, 50],
+    ]);
+  });
+
+  test('should follow the mouse to automatically select the starting point', async ({
+    page,
+  }) => {
+    await commonSetup(page);
+
+    await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+    const shapeBounds = await toViewCoord(page, [0, 0]);
+
+    // select shape
+    const [x, y] = await toViewCoord(page, [50, 50]);
+    await page.mouse.click(x, y);
+
+    // click button
+    const quickConnectBtn = page.getByRole('button', {
+      name: 'Draw connector',
+    });
+    const bounds = await quickConnectBtn.boundingBox();
+    assertExists(bounds);
+    await quickConnectBtn.click();
+
+    // at right
+    let point: [number, number] = [bounds.x, bounds.y];
+    let endpoint = await toModelCoord(page, point);
+    await assertConnectorPath(page, [[100, 50], endpoint]);
+
+    // at top
+    point = [shapeBounds[0] + 50, shapeBounds[1] - 50];
+    endpoint = await toModelCoord(page, point);
+    await page.mouse.move(...point);
+    await waitNextFrame(page);
+    await assertConnectorPath(page, [[50, 0], endpoint]);
+
+    // at left
+    point = [shapeBounds[0] - 50, shapeBounds[1] + 50];
+    endpoint = await toModelCoord(page, point);
+    await page.mouse.move(...point);
+    await assertConnectorPath(page, [[0, 50], endpoint]);
+
+    // at bottom
+    point = [shapeBounds[0] + 50, shapeBounds[1] + 100 + 50];
+    endpoint = await toModelCoord(page, point);
+    await page.mouse.move(...point);
+    await assertConnectorPath(page, [[50, 100], endpoint]);
   });
 });

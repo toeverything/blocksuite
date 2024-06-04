@@ -808,7 +808,8 @@ type Action =
   | 'autoSize'
   | 'changeNoteDisplayMode'
   | 'changeNoteSlicerSetting'
-  | 'addText';
+  | 'addText'
+  | 'quickConnect';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -1026,6 +1027,13 @@ export async function triggerComponentToolbarAction(
     case 'addText': {
       const button = locatorComponentToolbar(page).getByRole('button', {
         name: 'Add text',
+      });
+      await button.click();
+      break;
+    }
+    case 'quickConnect': {
+      const button = locatorComponentToolbar(page).getByRole('button', {
+        name: 'Draw connector',
       });
       await button.click();
       break;

@@ -86,13 +86,13 @@ const REORDER_ACTIONS: Action[] = [
   { icon: BringForwardIcon, name: 'Bring Forward', type: 'forward' },
   { icon: SendBackwardIcon, name: 'Send Backward', type: 'backward' },
   { icon: SendToBackIcon, name: 'Send to Back', type: 'back' },
-];
+] as const;
 
 const COPY_ACTIONS: Action[] = [
   { icon: MoreCopyIcon, name: 'Copy', type: 'copy' },
   { icon: CopyAsPngIcon, name: 'Copy as PNG', type: 'copy-as-png' },
   { icon: MoreDuplicateIcon, name: 'Duplicate', type: 'duplicate' },
-];
+] as const;
 
 const DELETE_ACTION: Action = {
   icon: MoreDeleteIcon,
@@ -128,19 +128,25 @@ function Actions(
     actions,
     action => action.type,
     action => {
-      return action.type === 'divider'
-        ? html`<edgeless-menu-divider
+      if (action.type === 'divider') {
+        return html`
+          <edgeless-menu-divider
             data-orientation="horizontal"
             style="--height: 8px"
-          ></edgeless-menu-divider>`
-        : html`<div
-            aria-label=${action.name}
-            class="action-item ${action.type}"
-            @click=${() => onClick(action)}
-            ?data-disabled=${action.disabled}
-          >
-            ${action.icon}${action.name}
-          </div>`;
+          ></edgeless-menu-divider>
+        `;
+      }
+
+      return html`
+        <div
+          aria-label=${action.name}
+          class="action-item ${action.type}"
+          @click=${() => onClick(action)}
+          ?data-disabled=${action.disabled}
+        >
+          ${action.icon}${action.name}
+        </div>
+      `;
     }
   );
 }
@@ -324,15 +330,15 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         : this._Actions,
       this._runAction
     );
+
     return html`
       <edgeless-menu-button
         .contentPadding=${'8px'}
-        .button=${html`<edgeless-tool-icon-button
-          aria-label="More"
-          .tooltip=${'More'}
-        >
-          ${this.vertical ? MoreVerticalIcon : MoreHorizontalIcon}
-        </edgeless-tool-icon-button>`}
+        .button=${html`
+          <edgeless-tool-icon-button aria-label="More" .tooltip=${'More'}>
+            ${this.vertical ? MoreVerticalIcon : MoreHorizontalIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
         <div slot class="more-actions-container">${actions}</div>
       </edgeless-menu-button>
