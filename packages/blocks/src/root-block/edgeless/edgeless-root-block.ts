@@ -127,6 +127,13 @@ export class EdgelessRootBlockComponent extends BlockElement<
   `;
 
   /**
+   * Disable components
+   *
+   * Toolbar is not allowed to display in `syncd doc block`.
+   */
+  disableComponents = false;
+
+  /**
    * Shared components
    */
   components = {
@@ -643,14 +650,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
     );
 
     this._disposables.add(
-      this.std.event.slots.parentScaleChanged.on(() => {
-        this.service.viewport.setCumulativeParentScale(
-          this.std.event.cumulativeParentScale
-        );
-      })
-    );
-
-    this._disposables.add(
       this.std.event.slots.editorHostPanned.on(() => {
         this.service.viewport.onResize();
       })
@@ -680,6 +679,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       this.tools.setEdgelessTool({ type: 'pan', panning: true });
     }
 
+    if (this.disableComponents) return;
     requestConnectedFrame(() => {
       this._handleToolbarFlag();
       this.requestUpdate();
@@ -688,9 +688,6 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   private _initViewport() {
     this.service.viewport.setContainer(this);
-    this.service.viewport.setCumulativeParentScale(
-      this.std.event.cumulativeParentScale
-    );
 
     const run = () => {
       const viewport =

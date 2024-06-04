@@ -23,9 +23,9 @@ import {
   ArrowUpIcon,
 } from '../../_common/icons.js';
 import { createTextRenderer } from '../../messages/text.js';
+import type { ChatAction } from '../chat-context.js';
 import { renderImages } from '../components/images.js';
 import { HISTORY_IMAGE_ACTIONS } from '../const.js';
-import type { ChatAction } from '../index.js';
 
 const icons: Record<string, TemplateResult<1>> = {
   'Fix spelling for it': AIDoneIcon,

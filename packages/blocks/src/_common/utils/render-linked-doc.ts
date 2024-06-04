@@ -203,7 +203,7 @@ async function renderNoteContent(
       : BlockViewType.Hidden;
   };
   const previewDoc = doc.blockCollection.getDoc(selector);
-  const previewSpec = SpecProvider.getInstance().getSpec('preview');
+  const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
   const previewTemplate = card.host.renderSpecPortal(
     previewDoc,
     previewSpec.value
@@ -241,9 +241,9 @@ function renderSurfaceRef(
 ) {
   card.isBannerEmpty = true;
 
-  const surfaceRedService = card.std.spec.getService('affine:surface-ref');
-  assertExists(surfaceRedService, `Surface ref service not found.`);
-  card.surfaceRefService = surfaceRedService;
+  const surfaceRefService = card.std.spec.getService('affine:surface-ref');
+  assertExists(surfaceRefService, `Surface ref service not found.`);
+  card.surfaceRefService = surfaceRefService;
 
   card.cleanUpSurfaceRefRenderer();
 

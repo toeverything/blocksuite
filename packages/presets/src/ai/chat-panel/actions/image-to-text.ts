@@ -6,8 +6,8 @@ import { html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { ChatAction } from '../chat-context.js';
 import { renderImages } from '../components/images.js';
-import type { ChatAction } from '../index.js';
 
 @customElement('action-image-to-text')
 export class ActionImageToText extends WithDisposable(ShadowlessElement) {

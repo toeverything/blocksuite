@@ -1,26 +1,39 @@
 import { WithDisposable } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlockModel } from '@blocksuite/store';
-import { html, LitElement, nothing } from 'lit';
+import { autoPlacement, offset } from '@floating-ui/dom';
+import { html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { createLitPortal } from '../../../_common/components/portal.js';
 import {
   cleanSpecifiedTail,
   createKeydownObserver,
 } from '../../../_common/components/utils.js';
+import { ArrowDownIcon } from '../../../_common/icons/index.js';
 import {
-  getRichTextByModel,
+  getInlineEditorByModel,
   isControlledKeyboardEvent,
 } from '../../../_common/utils/index.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';
-import type { RootBlockComponent } from '../../../root-block/types.js';
-import { styles } from './styles.js';
+import type {
+  SlashMenuActionItem,
+  SlashMenuContext,
+  SlashMenuGroupDivider,
+  SlashMenuItem,
+  SlashMenuStaticConfig,
+  SlashMenuStaticItem,
+  SlashSubMenu,
+} from './config.js';
+import { slashItemToolTipStyle, styles } from './styles.js';
 import {
-  collectGroupNames,
-  type InternSlashItem as InternalSlashItem,
-  type SlashItem,
-  type SlashMenuOptions,
+  getFirstNotDividerItem,
+  isActionItem,
+  isGroupDivider,
+  isSubMenuItem,
+  notGroupDivider,
+  slashItemClassName,
 } from './utils.js';
 
 @customElement('affine-slash-menu')
@@ -28,31 +41,19 @@ export class SlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  accessor rootElement!: RootBlockComponent;
+  accessor context!: SlashMenuContext;
 
   @property({ attribute: false })
-  accessor model!: BlockModel;
-
-  @property({ attribute: false })
-  accessor options!: SlashMenuOptions;
+  accessor config!: SlashMenuStaticConfig;
 
   @property({ attribute: false })
   accessor triggerKey!: string;
 
-  @query('.slash-menu')
-  accessor slashMenuElement: HTMLElement | null = null;
+  @query('inner-slash-menu')
+  accessor slashMenuElement!: HTMLElement;
 
   @state()
-  private accessor _leftPanelActivated = false;
-
-  @state()
-  private accessor _activatedItemIndex = 0;
-
-  @state()
-  private accessor _filterItems: InternalSlashItem[] = [];
-
-  @state()
-  private accessor _hide = false;
+  private accessor _filteredItems: (SlashMenuActionItem | SlashSubMenu)[] = [];
 
   @state()
   private accessor _position: {
@@ -64,32 +65,26 @@ export class SlashMenu extends WithDisposable(LitElement) {
   abortController = new AbortController();
 
   get host() {
-    return this.rootElement.host;
+    return this.context.rootElement.host;
   }
 
-  /**
-   * Does not include the slash character
-   */
-  private _searchString = '';
+  private _itemPathMap = new Map<SlashMenuItem, number[]>();
+  private _query = '';
+  private _queryState: 'off' | 'on' | 'no_result' = 'off';
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
+
+    this._initItemPathMap();
+
     this._disposables.addFromEvent(this, 'mousedown', e => {
       // Prevent input from losing focus
       e.preventDefault();
     });
-    this._filterItems = this._updateItem('');
 
-    const richText = getRichTextByModel(this.host, this.model);
-    if (!richText) {
-      console.warn(
-        'Slash Menu may not work properly! No rich text found for model',
-        this.model
-      );
-      return;
-    }
-    const inlineEditor = richText.inlineEditor;
+    const { model } = this.context;
+
+    const inlineEditor = getInlineEditorByModel(this.host, model);
     assertExists(inlineEditor, 'RichText InlineEditor not found');
 
     /**
@@ -106,144 +101,312 @@ export class SlashMenu extends WithDisposable(LitElement) {
       target: inlineEditor.eventSource,
       inlineEditor,
       abortController: this.abortController,
-      interceptor: (e, next) => {
-        if (e.key === '/') {
+      interceptor: (event, next) => {
+        const { key, isComposing, code } = event;
+        if (key === this.triggerKey) {
           // Can not stopPropagation here,
           // otherwise the rich text will not be able to trigger a new the slash menu
           return;
         }
-        if (this._hide && e.key !== 'Backspace') {
+
+        if (key === 'Process' && !isComposing && code === 'Slash') {
+          // The IME case of above
+          return;
+        }
+
+        if (key !== 'Backspace' && this._queryState === 'no_result') {
           // if the following key is not the backspace key,
           // the slash menu will be closed
           this.abortController.abort();
           return;
         }
-        if (e.key === ' ') {
-          this._hide = true;
-          next();
+
+        if (key === 'ArrowRight' || key === 'ArrowLeft' || key === 'Escape') {
           return;
-        }
-        if (this._hide) {
-          this._hide = false;
         }
 
-        const isControlled = isControlledKeyboardEvent(e);
-        const isShift = e.shiftKey;
-        if (e.key === 'ArrowLeft' && !isControlled && !isShift) {
-          e.stopPropagation();
-          e.preventDefault();
-          // If the left panel is hidden, should not activate it
-          if (this._searchString.length) return;
-          this._leftPanelActivated = true;
-          return;
-        }
-        if (e.key === 'ArrowRight' && !isControlled && !isShift) {
-          e.stopPropagation();
-          e.preventDefault();
-          this._leftPanelActivated = false;
-          return;
-        }
         next();
       },
-      onUpdateQuery: val => {
-        const newFilteredItems = this._updateItem(val);
-        this._filterItems = newFilteredItems;
-        if (!newFilteredItems.length) {
-          this._hide = true;
-        }
+      onUpdateQuery: query => {
+        this._updateFilteredItems(query);
       },
-      onMove: step => {
-        const configLen = this._filterItems.length;
-        if (this._leftPanelActivated) {
-          const groupNames = collectGroupNames(this._filterItems);
-          const nowGroupIdx = groupNames.findIndex(
-            groupName =>
-              groupName ===
-              this._filterItems[this._activatedItemIndex].groupName
-          );
-          const targetGroup =
-            groupNames[
-              (nowGroupIdx + step + groupNames.length) % groupNames.length
-            ];
-          this._handleClickCategory(targetGroup);
-          return;
-        }
-        let ejectedCnt = configLen;
-        do {
-          this._activatedItemIndex =
-            (this._activatedItemIndex + step + configLen) % configLen;
-          // Skip disabled items
-        } while (
-          this._filterItems[this._activatedItemIndex].disabled &&
-          // If all items are disabled, the loop will never end
-          ejectedCnt--
-        );
-
-        this._scrollToItem(this._filterItems[this._activatedItemIndex], false);
-      },
-      onConfirm: () => {
-        this._handleClickItem(this._activatedItemIndex);
-      },
-      onEsc: () => {
-        this.abortController.abort();
-      },
+      onMove: () => {},
+      onConfirm: () => {},
     });
   }
 
-  updatePosition(position: { x: string; y: string; height: number }) {
+  updatePosition = (position: { x: string; y: string; height: number }) => {
     this._position = position;
-  }
+  };
 
-  // Handle click outside
-  private _onClickAway = () => {
-    // if (e.target === this) return;
-    if (!this._hide) return;
-    // If the slash menu is hidden, click anywhere will close the slash menu
+  private _initItemPathMap = () => {
+    const traverse = (item: SlashMenuStaticItem, path: number[]) => {
+      this._itemPathMap.set(item, [...path]);
+      if (isSubMenuItem(item)) {
+        item.subMenu.forEach((subItem, index) =>
+          traverse(subItem, [...path, index])
+        );
+      }
+    };
+
+    this.config.items.forEach((item, index) => traverse(item, [index]));
+  };
+
+  private _updateFilteredItems = (query: string) => {
+    this._filteredItems = [];
+
+    const searchStr = query.toLowerCase();
+    if (searchStr === '' || searchStr.endsWith(' ')) {
+      this._query = searchStr;
+      this._queryState = searchStr === '' ? 'off' : 'no_result';
+      return;
+    }
+
+    // Layer order traversal
+    let depth = 0;
+    let queue = this.config.items.filter(notGroupDivider);
+    while (queue.length !== 0) {
+      // remove the sub menu item from the previous layer result
+      this._filteredItems = this._filteredItems.filter(
+        item => !isSubMenuItem(item)
+      );
+
+      this._filteredItems = this._filteredItems.concat(
+        queue.filter(({ name, alias = [] }) =>
+          [name, ...alias].some(str => isFuzzyMatch(str, searchStr))
+        )
+      );
+
+      // We search first and second layer
+      if (this._filteredItems.length !== 0 && depth >= 1) break;
+
+      queue = queue
+        .map<typeof queue>(item => {
+          if (isSubMenuItem(item)) {
+            return item.subMenu.filter(notGroupDivider);
+          } else {
+            return [];
+          }
+        })
+        .flat();
+
+      depth++;
+    }
+
+    // make items in the same group in order
+    this._filteredItems = this._filteredItems.sort((a, b) => {
+      if (a.name.toLowerCase() === searchStr) return -1;
+      if (b.name.toLowerCase() === searchStr) return 1;
+
+      const aPath = this._itemPathMap.get(a);
+      const bPath = this._itemPathMap.get(b);
+
+      assertExists(aPath);
+      assertExists(bPath);
+
+      for (let i = 0; i < Math.min(aPath.length, bPath.length); i++) {
+        if (aPath[i] < bPath[i]) return -1;
+        if (aPath[i] > bPath[i]) return 1;
+      }
+      return aPath.length - bPath.length;
+    });
+
+    this._query = query;
+    this._queryState = this._filteredItems.length === 0 ? 'no_result' : 'on';
+  };
+
+  private _handleClickItem = (item: SlashMenuActionItem) => {
+    // Need to remove the search string
+    // We must to do clean the slash string before we do the action
+    // Otherwise, the action may change the model and cause the slash string to be changed
+    cleanSpecifiedTail(
+      this.host,
+      this.context.model,
+      this.triggerKey + this._query
+    );
+    item.action(this.context)?.catch(console.error);
     this.abortController.abort();
   };
 
-  private _updateItem(query: string): InternalSlashItem[] {
-    this._searchString = query;
-    this._activatedItemIndex = 0;
-    // Activate the right panel when search string is not empty
-    if (this._leftPanelActivated) {
-      this._leftPanelActivated = false;
-    }
-    const searchStr = this._searchString.toLowerCase();
-    let allMenus = this.options.menus
-      .map(group =>
-        typeof group.items === 'function'
-          ? group
-              .items({ rootElement: this.rootElement, model: this.model })
-              .map(item => ({ ...item, groupName: group.name }))
-          : group.items.map(item => ({ ...item, groupName: group.name }))
-      )
-      .flat();
+  override render() {
+    const slashMenuStyles = this._position
+      ? {
+          transform: `translate(${this._position.x}, ${this._position.y})`,
+          maxHeight: `${Math.min(this._position.height, this.config.maxHeight)}px`,
+        }
+      : {
+          visibility: 'hidden',
+        };
 
-    allMenus = allMenus.filter(({ showWhen = () => true }) =>
-      showWhen(this.model, this.rootElement)
+    return html`${this._queryState !== 'no_result'
+        ? html` <div
+            class="overlay-mask"
+            @click="${() => this.abortController.abort()}"
+          ></div>`
+        : nothing}
+      <inner-slash-menu
+        .context=${this.context}
+        .menu=${this._queryState === 'off'
+          ? this.config.items
+          : this._filteredItems}
+        .onClickItem=${this._handleClickItem}
+        .mainMenuStyle=${slashMenuStyles}
+        .abortController=${this.abortController}
+      >
+      </inner-slash-menu>`;
+  }
+}
+
+@customElement('inner-slash-menu')
+export class InnerSlashMenu extends WithDisposable(LitElement) {
+  static override styles = styles;
+
+  @property({ attribute: false })
+  accessor context!: SlashMenuContext;
+
+  @property({ attribute: false })
+  accessor menu!: SlashMenuStaticItem[];
+
+  @property({ attribute: false })
+  accessor depth: number = 0;
+
+  @property({ attribute: false })
+  accessor onClickItem!: (item: SlashMenuActionItem) => void;
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @property({ attribute: false })
+  accessor mainMenuStyle: Parameters<typeof styleMap>[0] | null = null;
+
+  @state()
+  private accessor _activeItem!: SlashMenuActionItem | SlashSubMenu;
+
+  private _currentSubMenu: SlashSubMenu | null = null;
+  private _subMenuAbortController: AbortController | null = null;
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    // close all sub menus
+    this.abortController?.signal?.addEventListener('abort', () => {
+      this._subMenuAbortController?.abort();
+    });
+    this.addEventListener('wheel', event => {
+      if (this._currentSubMenu) {
+        event.preventDefault();
+      }
+    });
+
+    const inlineEditor = getInlineEditorByModel(
+      this.context.rootElement.host,
+      this.context.model
     );
-    if (!searchStr) {
-      return allMenus;
-    }
+    assertExists(inlineEditor, 'RichText InlineEditor not found');
 
-    return allMenus.filter(({ name, alias = [] }) =>
-      [name, ...alias].some(str => isFuzzyMatch(str, searchStr))
+    inlineEditor.eventSource.addEventListener(
+      'keydown',
+      event => {
+        if (this._currentSubMenu) return;
+
+        const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
+
+        const onlyCmd = (ctrlKey || metaKey) && !altKey && !shiftKey;
+        const onlyShift = shiftKey && !isControlledKeyboardEvent(event);
+        const notControlShift = !(ctrlKey || metaKey || altKey || shiftKey);
+
+        let moveStep = 0;
+        if (
+          (key === 'ArrowUp' && notControlShift) ||
+          (key === 'Tab' && onlyShift) ||
+          (key === 'P' && onlyCmd) ||
+          (key === 'p' && onlyCmd)
+        ) {
+          moveStep = -1;
+        }
+
+        if (
+          (key === 'ArrowDown' && notControlShift) ||
+          (key === 'Tab' && notControlShift) ||
+          (key === 'n' && onlyCmd) ||
+          (key === 'N' && onlyCmd)
+        ) {
+          moveStep = 1;
+        }
+
+        if (moveStep !== 0) {
+          let itemIndex = this.menu.indexOf(this._activeItem);
+          do {
+            itemIndex =
+              (itemIndex + moveStep + this.menu.length) % this.menu.length;
+          } while (isGroupDivider(this.menu[itemIndex]));
+
+          this._activeItem = this.menu[itemIndex] as typeof this._activeItem;
+          this._scrollToItem(this._activeItem);
+
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        if (key === 'ArrowRight' && notControlShift) {
+          if (isSubMenuItem(this._activeItem)) {
+            this._openSubMenu(this._activeItem);
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        if ((key === 'ArrowLeft' || key === 'Escape') && notControlShift) {
+          this.abortController.abort();
+
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        if (key === 'Enter' && notControlShift) {
+          if (isSubMenuItem(this._activeItem)) {
+            this._openSubMenu(this._activeItem);
+          } else if (isActionItem(this._activeItem)) {
+            this.onClickItem(this._activeItem);
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+      {
+        capture: true,
+        signal: this.abortController.signal,
+      }
     );
   }
 
-  private _scrollToItem(item: SlashItem, force = true) {
+  override disconnectedCallback() {
+    this.abortController.abort();
+  }
+
+  override willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has('menu') && this.menu.length !== 0) {
+      const firstItem = getFirstNotDividerItem(this.menu);
+      assertExists(firstItem);
+      this._activeItem = firstItem;
+
+      // this case happen on query updated
+      this._subMenuAbortController?.abort();
+    }
+  }
+
+  private _scrollToItem(item: SlashMenuStaticItem) {
     const shadowRoot = this.shadowRoot;
     if (!shadowRoot) {
       return;
     }
-    const ele = shadowRoot.querySelector(`icon-button[text="${item.name}"]`);
+
+    const text = isGroupDivider(item) ? item.groupName : item.name;
+
+    const ele = shadowRoot.querySelector(`icon-button[text="${text}"]`);
     if (!ele) {
-      return;
-    }
-    if (force) {
-      // set parameter to `true` to align to top
-      ele.scrollIntoView(true);
       return;
     }
     ele.scrollIntoView({
@@ -251,130 +414,140 @@ export class SlashMenu extends WithDisposable(LitElement) {
     });
   }
 
-  private _handleClickItem(index: number) {
-    if (
-      this._leftPanelActivated ||
-      index < 0 ||
-      index >= this._filterItems.length
-    ) {
-      return;
-    }
-    // Need to remove the search string
-    // We must to do clean the slash string before we do the action
-    // Otherwise, the action may change the model and cause the slash string to be changed
-    cleanSpecifiedTail(
-      this.host,
-      this.model,
-      this.triggerKey + this._searchString
+  private _openSubMenu = (item: SlashSubMenu) => {
+    if (item === this._currentSubMenu) return;
+
+    const itemElement = this.shadowRoot?.querySelector(
+      `.${slashItemClassName(item)}`
     );
-    this.abortController.abort();
+    if (!itemElement) return;
 
-    const { action } = this._filterItems[index];
-    action({ rootElement: this.rootElement, model: this.model })?.catch(
-      console.error
-    );
-  }
+    this._closeSubMenu();
+    this._currentSubMenu = item;
+    this._subMenuAbortController = new AbortController();
+    this._subMenuAbortController.signal.addEventListener('abort', () => {
+      this._closeSubMenu();
+    });
 
-  private _handleClickCategory(groupName: string) {
-    const item = this._filterItems.find(item => item.groupName === groupName);
-    if (!item) return;
-    this._scrollToItem(item);
-    this._activatedItemIndex = this._filterItems.findIndex(
-      i => i.name === item.name
-    );
-  }
+    const subMenuElement = createLitPortal({
+      shadowDom: false,
+      template: html`<inner-slash-menu
+        .context=${this.context}
+        .menu=${item.subMenu}
+        .depth=${this.depth + 1}
+        .abortController=${this._subMenuAbortController}
+        .onClickItem=${this.onClickItem}
+      >
+        ${item.subMenu.map(this._renderItem)}
+      </inner-slash-menu>`,
+      computePosition: {
+        referenceElement: itemElement,
+        autoUpdate: true,
+        middleware: [
+          offset(22),
+          autoPlacement({
+            allowedPlacements: ['right-start', 'right-end'],
+          }),
+        ],
+      },
+      abortController: this._subMenuAbortController,
+    });
 
-  private _categoryTemplate() {
-    const showCategory = !this._searchString.length;
-    const activatedGroupName =
-      this._filterItems[this._activatedItemIndex]?.groupName;
-    const groups = collectGroupNames(this._filterItems);
+    subMenuElement.style.zIndex = `calc(var(--affine-z-index-popover) + ${this.depth})`;
+    subMenuElement.focus();
+  };
 
-    return html`<div
-      class="slash-category ${!showCategory ? 'slash-category-hide' : ''}"
+  private _closeSubMenu = () => {
+    this._subMenuAbortController?.abort();
+    this._subMenuAbortController = null;
+    this._currentSubMenu = null;
+  };
+
+  private _renderGroupItem = (item: SlashMenuGroupDivider) => {
+    return html`<div class="slash-menu-group-name">${item.groupName}</div>`;
+  };
+
+  private _renderActionItem = (item: SlashMenuActionItem) => {
+    const { name, icon, description, tooltip, customTemplate } = item;
+
+    const hover = item === this._activeItem;
+
+    return html`<icon-button
+      class="slash-menu-item ${slashItemClassName(item)}"
+      width="100%"
+      height="44px"
+      text=${customTemplate ?? name}
+      subText=${ifDefined(description)}
+      data-testid="${name}"
+      hover=${hover}
+      @mouseenter=${() => {
+        this._activeItem = item;
+        this._closeSubMenu();
+      }}
+      @click=${() => this.onClickItem(item)}
     >
-      ${groups.map(
-        groupName =>
-          html`<div
-            class="slash-category-name ${activatedGroupName === groupName
-              ? 'slash-active-category'
-              : ''}"
-            @click=${() => this._handleClickCategory(groupName)}
-          >
-            ${groupName}
-          </div>`
-      )}
-    </div>`;
-  }
+      ${icon && html`<div class="slash-menu-item-icon">${icon}</div>`}
+      ${tooltip &&
+      html`<affine-tooltip
+        tip-position="right"
+        .offset=${22}
+        .tooltipStyle=${slashItemToolTipStyle}
+      >
+        <div class="tooltip-figure">${tooltip.figure}</div>
+        <div class="tooltip-caption">${tooltip.caption}</div>
+      </affine-tooltip>`}
+    </icon-button>`;
+  };
+
+  private _renderSubMenuItem = (item: SlashSubMenu) => {
+    const { name, icon, description } = item;
+
+    const hover = item === this._activeItem;
+
+    return html`<icon-button
+      class="slash-menu-item ${slashItemClassName(item)}"
+      width="100%"
+      height="44px"
+      text=${name}
+      subText=${ifDefined(description)}
+      data-testid="${name}"
+      hover=${hover}
+      @mouseenter=${() => {
+        this._activeItem = item;
+        this._openSubMenu(item);
+      }}
+      @touchstart=${() => {
+        isSubMenuItem(item) &&
+          (this._currentSubMenu === item
+            ? this._closeSubMenu()
+            : this._openSubMenu(item));
+      }}
+    >
+      ${icon && html`<div class="slash-menu-item-icon">${icon}</div>`}
+      <div slot="suffix" style="transform: rotate(-90deg);">
+        ${ArrowDownIcon}
+      </div>
+    </icon-button>`;
+  };
+
+  private _renderItem = (item: SlashMenuStaticItem) => {
+    if (isGroupDivider(item)) return this._renderGroupItem(item);
+    else if (isActionItem(item)) return this._renderActionItem(item);
+    else if (isSubMenuItem(item)) return this._renderSubMenuItem(item);
+    else throw new Error('Unreachable');
+  };
 
   override render() {
-    if (this._hide) {
-      return nothing;
-    }
+    if (this.menu.length === 0) return nothing;
 
-    const MAX_HEIGHT_WITH_CATEGORY = 408;
-    const MAX_HEIGHT = 344;
-    const showCategory = !this._searchString.length;
+    const style = styleMap(this.mainMenuStyle ?? { position: 'relative' });
 
-    const slashMenuStyles = this._position
-      ? styleMap({
-          transform: `translate(${this._position.x}, ${this._position.y})`,
-          maxHeight: `${Math.min(
-            this._position.height,
-            showCategory ? MAX_HEIGHT_WITH_CATEGORY : MAX_HEIGHT
-          )}px`,
-        })
-      : styleMap({
-          visibility: 'hidden',
-        });
-
-    const btnItems = this._filterItems.map(
-      ({ name, icon, suffix, disabled = false, groupName }, index) => {
-        const showDivider =
-          index !== 0 && this._filterItems[index - 1].groupName !== groupName;
-        const itemClass = name.split(' ').join('-').toLocaleLowerCase();
-        return html`<div
-            class="slash-item-divider"
-            ?hidden=${!showDivider || !!this._searchString.length}
-          ></div>
-          <icon-button
-            class="slash-item ${itemClass}"
-            ?disabled=${disabled}
-            width="100%"
-            height="32px"
-            style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
-            hover=${!disabled &&
-            !this._leftPanelActivated &&
-            this._activatedItemIndex === index
-              ? 'true'
-              : 'false'}
-            text="${name}"
-            data-testid="${name}"
-            @mousemove=${() => {
-              // Use `mousemove` instead of `mouseover` to avoid navigate conflict in left panel
-              this._leftPanelActivated = false;
-              this._activatedItemIndex = index;
-            }}
-            @click=${() => {
-              this._handleClickItem(index);
-            }}
-          >
-            ${icon}
-            <div slot="suffix">${suffix}</div>
-          </icon-button>`;
-      }
-    );
-
-    return html`<div class="slash-menu-container blocksuite-overlay">
-      <div
-        class="overlay-mask"
-        @click="${() => this.abortController.abort()}"
-      ></div>
-      <div class="slash-menu" style="${slashMenuStyles}">
-        ${this._categoryTemplate()}
-        <div class="slash-vertical-divider"></div>
-        <div class="slash-item-container">${btnItems}</div>
-      </div>
+    return html`<div
+      class="slash-menu"
+      style=${style}
+      data-testid=${`sub-menu-${this.depth}`}
+    >
+      ${this.menu.map(this._renderItem)}
     </div>`;
   }
 }

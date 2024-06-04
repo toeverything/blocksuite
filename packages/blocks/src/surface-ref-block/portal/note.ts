@@ -41,7 +41,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   renderPreview() {
     const doc = this.model.doc.blockCollection.getDoc();
-    const previewSpec = SpecProvider.getInstance().getSpec('preview');
+    const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
     return this.host.renderSpecPortal(doc, previewSpec.value.slice());
   }
 

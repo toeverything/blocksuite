@@ -37,11 +37,9 @@ export const blockStyles = css`
     border: 1px solid var(--affine-border-color);
   }
 
-  affine-embed-synced-doc-block[data-nested-editor] {
-    position: relative;
-    display: block;
-    left: -24px;
-    width: calc(100% + 48px);
+  affine-embed-synced-doc-block[data-nested-editor]
+    .affine-embed-synced-doc-container.page {
+    padding: 0 24px;
   }
 
   .affine-embed-synced-doc-container {
@@ -131,6 +129,11 @@ export const blockStyles = css`
   .affine-embed-synced-doc-container
     > .affine-embed-synced-doc-editor.affine-page-viewport {
     background: transparent;
+  }
+
+  .affine-embed-synced-doc-container > .affine-embed-synced-doc-editor {
+    width: 100%;
+    height: 100%;
   }
 
   .affine-embed-synced-doc-editor .affine-page-root-block-container {

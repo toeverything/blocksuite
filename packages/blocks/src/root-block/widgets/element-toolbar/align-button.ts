@@ -25,7 +25,7 @@ import {
 } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
-enum Alignment {
+const enum Alignment {
   Left = 'Align left',
   Horizontally = 'Align horizontally',
   Right = 'Align right',
@@ -54,7 +54,7 @@ const ALIGNMENT_LIST = [
     content: AlignDistributeHorizontallyIcon,
   },
   {
-    name: 'divier',
+    name: 'divider',
     content: html`<edgeless-menu-divider></edgeless-menu-divider>`,
   },
   {
@@ -73,7 +73,7 @@ const ALIGNMENT_LIST = [
     name: Alignment.DistributeVertically,
     content: AlignDistributeVerticallyIcon,
   },
-];
+] as const;
 
 @customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {

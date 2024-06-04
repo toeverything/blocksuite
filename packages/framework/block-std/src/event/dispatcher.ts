@@ -105,14 +105,6 @@ export class UIEventDispatcher {
     this._clipboardControl = new ClipboardControl(this);
   }
 
-  /**
-   * @deprecated
-   * This method is deprecated and will be removed in the future.
-   */
-  get cumulativeParentScale() {
-    return this._pointerControl.cumulativeParentScale;
-  }
-
   mount() {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();

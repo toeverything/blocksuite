@@ -22,14 +22,21 @@ import { EdgelessSurfaceBlockSpec } from '../surface-block/surface-spec.js';
 import { PageSurfaceBlockSpec } from '../surface-block/surface-spec.js';
 import { EdgelessSurfaceRefBlockSpec } from '../surface-ref-block/surface-ref-spec.js';
 import { PageSurfaceRefBlockSpec } from '../surface-ref-block/surface-ref-spec.js';
-import { EdgelessEditorBlockSpecs } from './edgeless-specs.js';
+import {
+  EdgelessEditorBlockSpecs,
+  PreviewEdgelessEditorBlockSpecs,
+} from './edgeless-specs.js';
 import { PageEditorBlockSpecs } from './page-specs.js';
 import { PreviewEditorBlockSpecs } from './preview-specs.js';
 import { SpecProvider } from './utils/spec-provider.js';
 
 SpecProvider.getInstance().addSpec('page', PageEditorBlockSpecs);
 SpecProvider.getInstance().addSpec('edgeless', EdgelessEditorBlockSpecs);
-SpecProvider.getInstance().addSpec('preview', PreviewEditorBlockSpecs);
+SpecProvider.getInstance().addSpec('page:preview', PreviewEditorBlockSpecs);
+SpecProvider.getInstance().addSpec(
+  'edgeless:preview',
+  PreviewEdgelessEditorBlockSpecs
+);
 
 // specs preset
 export * from './edgeless-specs.js';

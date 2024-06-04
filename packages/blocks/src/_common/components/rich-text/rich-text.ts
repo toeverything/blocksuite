@@ -121,7 +121,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   accessor enableFormat = true;
 
   @property({ attribute: false })
-  accessor verticalScrollContainer: HTMLElement | undefined = undefined;
+  accessor verticalScrollContainerGetter:
+    | (() => HTMLElement | null)
+    | undefined = undefined;
+  #verticalScrollContainer: HTMLElement | null = null;
 
   private _inlineEditor: AffineInlineEditor | null = null;
   get inlineEditor() {
@@ -176,6 +179,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       inlineEditor.slots.inlineRangeUpdate.on(([inlineRange, sync]) => {
         if (!inlineRange || !sync) return;
 
+        // lazy
+        const verticalScrollContainer =
+          this.#verticalScrollContainer ||
+          (this.#verticalScrollContainer =
+            this.verticalScrollContainerGetter?.() || null);
+
         inlineEditor
           .waitForUpdate()
           .then(() => {
@@ -184,9 +193,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
             const range = inlineEditor.toDomRange(inlineRange);
             if (!range) return;
 
-            if (this.verticalScrollContainer) {
+            if (verticalScrollContainer) {
               const containerRect =
-                this.verticalScrollContainer.getBoundingClientRect();
+                verticalScrollContainer.getBoundingClientRect();
               const rangeRect = range.getBoundingClientRect();
 
               if (rangeRect.top < containerRect.top) {

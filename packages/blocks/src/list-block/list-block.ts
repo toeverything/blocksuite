@@ -205,7 +205,8 @@ export class ListBlockComponent extends BlockElement<
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
-            .verticalScrollContainer=${getViewportElement(this.host)}
+            .verticalScrollContainerGetter=${() =>
+              getViewportElement(this.host)}
           ></rich-text>
         </div>
 

@@ -244,14 +244,13 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       })
     );
 
-    const rootService = this._host.spec.getService('affine:page');
-    this._show = !!rootService.editPropsStore.getItem('showBidirectional');
+    this._show =
+      !!this._rootService.editPropsStore.getItem('showBidirectional');
   }
 
   private _toggleShow() {
     this._show = !this._show;
-    const rootService = this._host.spec.getService('affine:page');
-    rootService.editPropsStore.setItem('showBidirectional', this._show);
+    this._rootService.editPropsStore.setItem('showBidirectional', this._show);
   }
 
   private get _host() {
@@ -291,6 +290,10 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     return Array.from(ids);
   }
 
+  private get _rootService() {
+    return this._host.spec.getService('affine:page');
+  }
+
   private _renderLinks(ids: string[]) {
     const { collection } = this.doc;
 
@@ -305,10 +308,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
           const title = doc.meta?.title ? doc.meta.title : 'Untitled';
           return html`<div
             class="link"
-            @click=${() => {
-              this.pageRoot.slots.docLinkClicked.emit({
-                docId: id,
-              });
+            @click=${(e: MouseEvent) => {
+              this._handleLinkClick(e, id);
             }}
           >
             ${SmallLinkedDocIcon}
@@ -412,6 +413,20 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     </div>`;
   }
 
+  private _handleLinkClick(e: MouseEvent, docId: string, blockId?: string) {
+    if (e.shiftKey && this._rootService.peekViewService) {
+      this._rootService.peekViewService.peek({
+        docId,
+        blockId,
+      });
+    } else {
+      this.pageRoot.slots.docLinkClicked.emit({
+        docId,
+        blockId,
+      });
+    }
+  }
+
   private _backlink(model: BlockModel<object>, docId: string, blockId: string) {
     if (
       !matchFlavours(model, [
@@ -438,11 +453,9 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
     return html` <div
       class=${`rich-text-container ${type}`}
-      @click=${() =>
-        this.pageRoot.slots.docLinkClicked.emit({
-          docId,
-          blockId,
-        })}
+      @click=${(e: MouseEvent) => {
+        this._handleLinkClick(e, docId, blockId);
+      }}
     >
       <div class="rich-text">
         ${type

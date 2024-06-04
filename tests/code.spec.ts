@@ -18,6 +18,7 @@ import {
   pressBackspace,
   pressEnter,
   pressEnterWithShortkey,
+  pressEscape,
   pressShiftTab,
   pressTab,
   redoByKeyboard,
@@ -570,16 +571,40 @@ test('code block is empty, click code block copy menu, copy the empty code block
   );
 });
 
-test('duplicate code block in more menu', async ({ page }) => {
+test('duplicate code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page, { language: 'javascript' });
 
+  await focusRichText(page);
+  await type(page, 'let a: u8 = 7');
+  await pressEscape(page);
+  await waitNextFrame(page, 100);
+
   const codeBlockController = getCodeBlock(page);
   await codeBlockController.codeBlock.hover();
-  const moreMenu = await codeBlockController.openMore();
 
-  await expect(moreMenu.menu).toBeVisible();
-  await moreMenu.duplicateButton.click();
+  // change language
+  await codeBlockController.clickLanguageButton();
+  const langLocator = codeBlockController.langList;
+  await expect(langLocator).toBeVisible();
+  await type(page, 'rust');
+  await page.click('.lang-list-button-container > icon-button:nth-child(1)');
+
+  // add a caption
+  await codeBlockController.codeBlock.hover();
+  await codeBlockController.captionButton.click();
+  await type(page, 'BlockSuite');
+  await pressEnter(page);
+  await pressBackspace(page); // remove paragraph
+  await waitNextFrame(page, 100);
+
+  // turn on wrap
+  await codeBlockController.codeBlock.hover();
+  await (await codeBlockController.openMore()).wrapButton.click();
+
+  // duplicate
+  await codeBlockController.codeBlock.hover();
+  await (await codeBlockController.openMore()).duplicateButton.click();
 
   await assertStoreMatchJSX(
     page,
@@ -602,14 +627,16 @@ test('duplicate code block in more menu', async ({ page }) => {
     prop:index="a0"
   >
     <affine:code
-      prop:caption=""
-      prop:language="javascript"
-      prop:wrap={false}
+      prop:caption="BlockSuite"
+      prop:language="rust"
+      prop:text="let a: u8 = 7"
+      prop:wrap={true}
     />
     <affine:code
-      prop:caption=""
-      prop:language="javascript"
-      prop:wrap={false}
+      prop:caption="BlockSuite"
+      prop:language="rust"
+      prop:text="let a: u8 = 7"
+      prop:wrap={true}
     />
   </affine:note>
 </affine:page>`
@@ -882,7 +909,6 @@ test('add caption works', async ({ page }) => {
 test('toggle code block wrap can work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { codeBlockId } = await initEmptyCodeBlockState(page);
-  await focusRichText(page);
 
   const codeBlockController = getCodeBlock(page);
   await assertStoreMatchJSX(
@@ -897,11 +923,7 @@ test('toggle code block wrap can work', async ({ page }) => {
   );
 
   await codeBlockController.codeBlock.hover();
-  const moreMenu = await codeBlockController.openMore();
-
-  await expect(moreMenu.menu).toBeVisible();
-  await moreMenu.wrapButton.click();
-  await expect(moreMenu.menu).toBeHidden(); // hides menu after click
+  await (await codeBlockController.openMore()).wrapButton.click();
 
   await assertStoreMatchJSX(
     page,
@@ -914,7 +936,9 @@ test('toggle code block wrap can work', async ({ page }) => {
     codeBlockId
   );
 
+  await codeBlockController.codeBlock.hover();
   await (await codeBlockController.openMore()).wrapButton.click();
+
   await assertStoreMatchJSX(
     page,
     /*xml*/ `

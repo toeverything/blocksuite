@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { autoPlacement, offset } from '@floating-ui/dom';
+import { autoPlacement, offset, shift } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -94,6 +94,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
       placement: 'bottom-end',
       middleware: [
         offset(5),
+        shift({ crossAxis: true }),
         autoPlacement({
           allowedPlacements: ['bottom-start', 'bottom-end'],
         }),

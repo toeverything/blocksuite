@@ -20,7 +20,6 @@ import { type EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { ImageSelection } from '@blocksuite/blocks';
 import {
-  type AIError,
   isInsidePageEditor,
   PaymentRequiredError,
   UnauthorizedError,
@@ -45,8 +44,12 @@ import {
   EdgelessEditorActions,
   PageEditorActions,
 } from './actions/actions-handle.js';
+import {
+  type ChatContextValue,
+  type ChatItem,
+  type ChatMessage,
+} from './chat-context.js';
 import { HISTORY_IMAGE_ACTIONS } from './const.js';
-import type { ChatItem, ChatMessage, ChatStatus } from './index.js';
 
 @customElement('chat-panel-messages')
 export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
@@ -140,33 +143,13 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   accessor host!: EditorHost;
 
   @property({ attribute: false })
-  accessor items!: ChatItem[];
-
-  @property({ attribute: false })
-  accessor status!: ChatStatus;
-
-  @property({ attribute: false })
-  accessor error!: AIError | null;
-
-  @property({ attribute: false })
   accessor isLoading!: boolean;
 
   @property({ attribute: false })
-  accessor updateItems!: (items: ChatItem[]) => void;
+  accessor chatContextValue!: ChatContextValue;
 
   @property({ attribute: false })
-  accessor updateStatus!: (status: ChatStatus) => void;
-
-  @property({ attribute: false })
-  accessor updateError!: (error: AIError | null) => void;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController | null;
-
-  @property({ attribute: false })
-  accessor updateAbortController!: (
-    abortController: AbortController | null
-  ) => void;
+  accessor updateContext!: (context: Partial<ChatContextValue>) => void;
 
   @query('.chat-panel-messages')
   accessor messagesContainer!: HTMLDivElement;
@@ -189,14 +172,14 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     this.avatarUrl = res?.avatarUrl ?? '';
     this.disposables.add(
       AIProvider.slots.userInfo.on(userInfo => {
+        const { status, error } = this.chatContextValue;
         this.avatarUrl = userInfo?.avatarUrl ?? '';
         if (
-          this.status === 'error' &&
-          this.error instanceof UnauthorizedError &&
+          status === 'error' &&
+          error instanceof UnauthorizedError &&
           userInfo
         ) {
-          this.status = 'idle';
-          this.error = null;
+          this.updateContext({ status: 'idle', error: null });
         }
       })
     );
@@ -223,9 +206,11 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderError() {
-    if (this.error instanceof PaymentRequiredError) {
+    const { error } = this.chatContextValue;
+
+    if (error instanceof PaymentRequiredError) {
       return PaymentRequiredErrorRenderer(this.host);
-    } else if (this.error instanceof UnauthorizedError) {
+    } else if (error instanceof UnauthorizedError) {
       return GeneralErrorRenderer(
         html`You need to login to AFFiNE Cloud to continue using AFFiNE AI.`,
         html`<div
@@ -248,13 +233,24 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderItem(item: ChatItem, isLast: boolean) {
-    if (isLast && this.status === 'loading') {
+    const { status, error } = this.chatContextValue;
+
+    if (isLast && status === 'loading') {
       return this.renderLoading();
+    }
+
+    if (
+      isLast &&
+      status === 'error' &&
+      (error instanceof PaymentRequiredError ||
+        error instanceof UnauthorizedError)
+    ) {
+      return this.renderError();
     }
 
     if ('role' in item) {
       const state = isLast
-        ? this.status !== 'loading' && this.status !== 'transmitting'
+        ? status !== 'loading' && status !== 'transmitting'
           ? 'finished'
           : 'generating'
         : 'finished';
@@ -263,8 +259,9 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           .attachments=${item.attachments}
           .text=${item.content}
           .state=${state}
-        ></chat-text
-        >${this.renderEditorActions(item, isLast)}`;
+        ></chat-text>
+        ${isLast && status === 'error' ? this.renderError() : nothing}
+        ${this.renderEditorActions(item, isLast)}`;
     } else {
       switch (item.action) {
         case 'Create a presentation':
@@ -330,9 +327,16 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   renderEditorActions(item: ChatMessage, isLast: boolean) {
+    const { status } = this.chatContextValue;
+
     if (item.role !== 'assistant') return nothing;
 
-    if (isLast && this.status !== 'success' && this.status !== 'idle')
+    if (
+      isLast &&
+      status !== 'success' &&
+      status !== 'idle' &&
+      status !== 'error'
+    )
       return nothing;
 
     const { host } = this;
@@ -384,17 +388,15 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
         .isLast=${isLast}
         .curTextSelection=${this._currentTextSelection}
         .curBlockSelections=${this._currentBlockSelections}
-        .items=${this.items}
-        .abortController=${this.abortController}
-        .updateItems=${this.updateItems}
-        .updateStatus=${this.updateStatus}
-        .updateError=${this.updateError}
-        .updateAbortController=${this.updateAbortController}
+        .chatContextValue=${this.chatContextValue}
+        .updateContext=${this.updateContext}
       ></chat-copy-more>
       ${isLast
         ? html`<div class="actions-container">
             ${repeat(
               actions.filter(action => {
+                if (!content) return false;
+
                 if (action.title === 'Replace selection') {
                   if (
                     (!this._currentTextSelection ||
@@ -446,7 +448,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   }
 
   protected override render() {
-    const { items, isLoading } = this;
+    const { items } = this.chatContextValue;
+    const { isLoading } = this;
     const filteredItems = items.filter(item => {
       return (
         'role' in item ||
@@ -492,11 +495,6 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
               return html`<div class="message">
                 ${this.renderAvatar(item)}
                 <div class="item-wrapper">${this.renderItem(item, isLast)}</div>
-                <div class="item-wrapper">
-                  ${this.status === 'error' && isLast
-                    ? this.renderError()
-                    : nothing}
-                </div>
               </div>`;
             })}
       </div>

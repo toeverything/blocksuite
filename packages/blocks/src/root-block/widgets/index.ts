@@ -36,5 +36,13 @@ export { AffineLinkedDocWidget } from './linked-doc/index.js';
 export { AffineModalWidget } from './modal/modal.js';
 export { AffinePageDraggingAreaWidget } from './page-dragging-area/page-dragging-area.js';
 export { AffinePieMenuWidget } from './pie-menu/index.js';
-export { AffineSlashMenuWidget } from './slash-menu/index.js';
+export {
+  type AffineSlashMenuActionItem,
+  type AffineSlashMenuContext,
+  type AffineSlashMenuGroupDivider,
+  type AffineSlashMenuItem,
+  type AffineSlashMenuItemGenerator,
+  AffineSlashMenuWidget,
+  type AffineSlashSubMenu,
+} from './slash-menu/index.js';
 export { AffineSurfaceRefToolbar } from './surface-ref-toolbar/surface-ref-toolbar.js';
