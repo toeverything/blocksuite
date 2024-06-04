@@ -4,6 +4,7 @@ import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import type { ListBlockModel } from '../../list-block/index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
+import type { SurfaceRefBlockModel } from '../../surface-ref-block/surface-ref-model.js';
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
 export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
@@ -58,6 +59,21 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, collection }) => {
       }
       if (delta.length > 0) {
         model.text.applyDelta(delta);
+      }
+    }
+
+    if (
+      payload.type === 'block' &&
+      payload.snapshot.flavour === 'affine:surface-ref'
+    ) {
+      const model = payload.model as SurfaceRefBlockModel;
+      const original = model.reference;
+      if (idMap.has(original)) {
+        model.reference = idMap.get(original)!;
+      } else {
+        const newId = collection.idGenerator();
+        idMap.set(original, newId);
+        model.reference = newId;
       }
     }
   });
