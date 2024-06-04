@@ -58,46 +58,50 @@ export class AffineImageToolbarWidget extends WidgetElement<
 
   private _setHoverController = () => {
     this._hoverController = null;
-    this._hoverController = new HoverController(this, ({ abortController }) => {
-      const imageBlock = this.blockElement;
-      const selection = this.host.selection;
+    this._hoverController = new HoverController(
+      this,
+      ({ abortController }) => {
+        const imageBlock = this.blockElement;
+        const selection = this.host.selection;
 
-      const textSelection = selection.find('text');
-      if (
-        !!textSelection &&
-        (!!textSelection.to || !!textSelection.from.length)
-      ) {
-        return null;
-      }
+        const textSelection = selection.find('text');
+        if (
+          !!textSelection &&
+          (!!textSelection.to || !!textSelection.from.length)
+        ) {
+          return null;
+        }
 
-      const blockSelections = selection.filter('block');
-      if (
-        blockSelections.length > 1 ||
-        (blockSelections.length === 1 &&
-          blockSelections[0].blockId !== imageBlock.blockId)
-      ) {
-        return null;
-      }
+        const blockSelections = selection.filter('block');
+        if (
+          blockSelections.length > 1 ||
+          (blockSelections.length === 1 &&
+            blockSelections[0].blockId !== imageBlock.blockId)
+        ) {
+          return null;
+        }
 
-      const imageContainer = imageBlock.resizeImg ?? imageBlock.imageCard;
-      if (!imageContainer) {
-        return null;
-      }
+        const imageContainer = imageBlock.resizeImg ?? imageBlock.imageCard;
+        if (!imageContainer) {
+          return null;
+        }
 
-      return {
-        template: html`<affine-image-toolbar
-          .blockElement=${imageBlock}
-          .abortController=${abortController}
-          .config=${this.config}
-          .moreMenuConfig=${this.moreMenuConfig}
-        ></affine-image-toolbar>`,
-        computePosition: {
-          referenceElement: imageContainer,
-          placement: 'right-start',
-          autoUpdate: true,
-        },
-      };
-    });
+        return {
+          template: html`<affine-image-toolbar
+            .blockElement=${imageBlock}
+            .abortController=${abortController}
+            .config=${this.config}
+            .moreMenuConfig=${this.moreMenuConfig}
+          ></affine-image-toolbar>`,
+          computePosition: {
+            referenceElement: imageContainer,
+            placement: 'right-start',
+            autoUpdate: true,
+          },
+        };
+      },
+      { allowMultiple: true }
+    );
 
     const imageBlock = this.blockElement;
     this._hoverController.setReference(imageBlock);

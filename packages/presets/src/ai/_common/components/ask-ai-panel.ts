@@ -48,6 +48,9 @@ export class AskAIPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor actionGroups!: AIItemGroupConfig[];
 
+  @property({ attribute: false })
+  accessor abortController: AbortController | null = null;
+
   get _edgeless() {
     const rootService = getRootService(this.host);
     if (rootService instanceof EdgelessRootService) {

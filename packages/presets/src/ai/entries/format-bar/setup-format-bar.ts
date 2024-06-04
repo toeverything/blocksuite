@@ -18,6 +18,7 @@ export function setupFormatBarEntry(formatBar: AffineFormatBarWidget) {
           return html` <ask-ai-button
             .host=${formatBar.host}
             .actionGroups=${AIItemGroups}
+            .toggleType=${'hover'}
           ></ask-ai-button>`;
         },
       },

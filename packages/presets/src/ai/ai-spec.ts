@@ -3,11 +3,15 @@ import {
   AFFINE_AI_PANEL_WIDGET,
   AFFINE_EDGELESS_COPILOT_WIDGET,
   AffineAIPanelWidget,
+  AffineCodeToolbarWidget,
   AffineFormatBarWidget,
+  AffineImageToolbarWidget,
   AffineSlashMenuWidget,
+  CodeBlockSpec,
   EdgelessCopilotWidget,
   EdgelessElementToolbarWidget,
   EdgelessRootBlockSpec,
+  ImageBlockSpec,
   PageRootBlockSpec,
   ParagraphBlockService,
   ParagraphBlockSpec,
@@ -16,11 +20,13 @@ import { assertInstanceOf } from '@blocksuite/global/utils';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { buildAIPanelConfig } from './ai-panel.js';
+import { setupCodeToolbarEntry } from './entries/code-toolbar/setup-code-toolbar.js';
 import {
   setupEdgelessCopilot,
   setupEdgelessElementToolbarEntry,
 } from './entries/edgeless/index.js';
 import { setupFormatBarEntry } from './entries/format-bar/setup-format-bar.js';
+import { setupImageToolbarEntry } from './entries/image-toolbar/setup-image-toolbar.js';
 import { setupSlashMenuEntry } from './entries/slash-menu/setup-slash-menu.js';
 import { setupSpaceEntry } from './entries/space/setup-space.js';
 
@@ -121,6 +127,30 @@ export const AIParagraphBlockSpec: BlockSpec = {
         };
         return placeholders[model.type];
       };
+    });
+  },
+};
+
+export const AICodeBlockSpec: BlockSpec = {
+  ...CodeBlockSpec,
+  setup(slots, disposableGroup) {
+    CodeBlockSpec.setup?.(slots, disposableGroup);
+    slots.widgetConnected.on(view => {
+      if (view.component instanceof AffineCodeToolbarWidget) {
+        setupCodeToolbarEntry(view.component);
+      }
+    });
+  },
+};
+
+export const AIImageBlockSpec: BlockSpec = {
+  ...ImageBlockSpec,
+  setup(slots, disposableGroup) {
+    ImageBlockSpec.setup?.(slots, disposableGroup);
+    slots.widgetConnected.on(view => {
+      if (view.component instanceof AffineImageToolbarWidget) {
+        setupImageToolbarEntry(view.component);
+      }
     });
   },
 };
