@@ -187,6 +187,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             rootElement.slots.toggleNoteSlicer.emit();
           }
         },
+        '@': () => {
+          this.rootElement.std.command.exec('insertLinkByQuickSearch');
+        },
         'Shift-s': () => {
           if (this.rootElement.service.locked) return;
           if (
