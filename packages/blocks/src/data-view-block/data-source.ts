@@ -51,17 +51,17 @@ export class BlockQueryDataSource extends BaseDataSource {
       this.columnMetaMap.set(property.columnMeta.type, property.columnMeta);
     }
     for (const collection of this.workspace.docs.values()) {
-      for (const block of collection
-        .getDoc(this.meta.selector)
-        .blocks.values()) {
-        this.blockMap.set(block.id, block);
+      for (const block of collection.getDoc().blocks.values()) {
+        if (this.meta.selector(block)) {
+          this.blockMap.set(block.id, block);
+        }
       }
     }
     this.workspace.docs.forEach(doc => {
-      this.listenToDoc(doc.getDoc(this.meta.selector));
+      this.listenToDoc(doc.getDoc());
     });
     this.workspace.slots.docAdded.on(id => {
-      const doc = this.workspace.getDoc(id, this.meta.selector);
+      const doc = this.workspace.getDoc(id);
       if (doc) {
         this.listenToDoc(doc);
       }
@@ -77,7 +77,7 @@ export class BlockQueryDataSource extends BaseDataSource {
       doc.slots.blockUpdated.on(v => {
         if (v.type === 'add') {
           const blockById = doc.getBlock(v.id);
-          if (blockById) {
+          if (blockById && this.meta.selector(blockById)) {
             this.blockMap.set(v.id, blockById);
           }
         } else if (v.type === 'delete') {
