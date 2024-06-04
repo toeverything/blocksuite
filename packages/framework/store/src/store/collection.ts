@@ -4,10 +4,7 @@ import * as Y from 'yjs';
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
 import { DocCollectionAddonType, indexer, test } from './addon/index.js';
-import {
-  BlockCollection,
-  defaultBlockSelector,
-} from './doc/block-collection.js';
+import { BlockCollection, type GetDocOptions } from './doc/block-collection.js';
 import type { BlockSelector, Doc } from './doc/index.js';
 import { DocCollectionMeta, type DocMeta } from './meta.js';
 import { Store, type StoreOptions } from './store.js';
@@ -100,12 +97,9 @@ export class DocCollection extends DocCollectionAddonType {
     return this.docs.has(docId);
   }
 
-  getDoc(
-    docId: string,
-    selector: BlockSelector = defaultBlockSelector
-  ): Doc | null {
+  getDoc(docId: string, options?: GetDocOptions): Doc | null {
     const collection = this.getBlockCollection(docId);
-    return collection?.getDoc(selector) ?? null;
+    return collection?.getDoc(options) ?? null;
   }
 
   getBlockCollection(docId: string): BlockCollection | null {
@@ -156,7 +150,7 @@ export class DocCollection extends DocCollectionAddonType {
       createDate: Date.now(),
       tags: [],
     });
-    return this.getDoc(docId, selector) as Doc;
+    return this.getDoc(docId, { selector }) as Doc;
   }
 
   /** Update doc meta state. Note that this intentionally does not mutate doc state. */

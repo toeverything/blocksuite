@@ -202,7 +202,7 @@ async function renderNoteContent(
       ? BlockViewType.Display
       : BlockViewType.Hidden;
   };
-  const previewDoc = doc.blockCollection.getDoc(selector);
+  const previewDoc = doc.blockCollection.getDoc({ selector });
   const previewSpec = SpecProvider.getInstance().getSpec('page:preview');
   const previewTemplate = card.host.renderSpecPortal(
     previewDoc,

@@ -2,7 +2,12 @@ import { expect, test, vi } from 'vitest';
 import * as Y from 'yjs';
 
 import { Schema } from '../schema/index.js';
-import { BlockViewType, DocCollection, Generator } from '../store/index.js';
+import {
+  type BlockSelector,
+  BlockViewType,
+  DocCollection,
+  Generator,
+} from '../store/index.js';
 import {
   DividerBlockSchema,
   ListBlockSchema,
@@ -207,11 +212,14 @@ test('selector', () => {
   const doc1 = collection.createDoc({ id: 'home' });
   doc1.load();
   const doc2 = collection.getDoc('home');
-  const doc3 = collection.getDoc('home', block =>
+
+  const selector: BlockSelector = block =>
     block.flavour !== 'affine:list'
       ? BlockViewType.Display
-      : BlockViewType.Hidden
-  );
+      : BlockViewType.Hidden;
+  const doc3 = collection.getDoc('home', {
+    selector,
+  });
   expect(doc1).toBe(doc2);
   expect(doc1).not.toBe(doc3);
 
@@ -228,4 +236,29 @@ test('selector', () => {
 
   expect(doc2?.getBlock(list2)?.blockViewType).toBe(BlockViewType.Display);
   expect(doc3?.getBlock(list2)?.blockViewType).toBe(BlockViewType.Hidden);
+});
+
+test('local readonly', () => {
+  const options = createTestOptions();
+  const collection = new DocCollection(options);
+  const doc1 = collection.createDoc({ id: 'home' });
+  doc1.load();
+  const doc2 = collection.getDoc('home', { readonly: true });
+  const doc3 = collection.getDoc('home', { readonly: false });
+
+  expect(doc1.readonly).toBeFalsy();
+  expect(doc2?.readonly).toBeTruthy();
+  expect(doc3?.readonly).toBeFalsy();
+
+  collection.awarenessStore.setReadonly(doc1.blockCollection, true);
+
+  expect(doc1.readonly).toBeTruthy();
+  expect(doc2?.readonly).toBeTruthy();
+  expect(doc3?.readonly).toBeTruthy();
+
+  collection.awarenessStore.setReadonly(doc1.blockCollection, false);
+
+  expect(doc1.readonly).toBeFalsy();
+  expect(doc2?.readonly).toBeTruthy();
+  expect(doc3?.readonly).toBeFalsy();
 });
