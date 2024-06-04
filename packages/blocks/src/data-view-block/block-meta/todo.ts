@@ -1,5 +1,3 @@
-import { BlockViewType } from '@blocksuite/store';
-
 import { columnPresets } from '../../database-block/index.js';
 import {
   type ListBlockModel,
@@ -11,12 +9,10 @@ import { createBlockMeta } from './base.js';
 export const todoMeta = createBlockMeta<ListBlockModel>({
   selector: block => {
     if (block.flavour !== ListBlockSchema.model.flavour) {
-      return BlockViewType.Hidden;
+      return false;
     }
 
-    return (block.model as ListBlockModel).type === 'todo'
-      ? BlockViewType.Display
-      : BlockViewType.Hidden;
+    return (block.model as ListBlockModel).type === 'todo';
   },
 });
 todoMeta.addProperty({
@@ -28,10 +24,10 @@ todoMeta.addProperty({
     //
   },
   updated: (block, callback) => {
-    block.text.yText.observe(callback);
+    block.text?.yText.observe(callback);
     return {
       dispose: () => {
-        block.text.yText.unobserve(callback);
+        block.text?.yText.unobserve(callback);
       },
     };
   },
