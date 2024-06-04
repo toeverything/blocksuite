@@ -1,6 +1,6 @@
 import { Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
-import { compress } from 'lz-string';
+import * as lz from 'lz-string';
 import * as Y from 'yjs';
 
 import { Text } from '../../reactive/text.js';
@@ -111,7 +111,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   private _getDocMapKey(selector: BlockSelector, readonly?: boolean) {
     const str = `${selector}-${readonly ?? '$'}`;
-    return compress(str);
+    return lz.compress(str);
   }
 
   getDoc({ selector = defaultBlockSelector, readonly }: GetDocOptions = {}) {
