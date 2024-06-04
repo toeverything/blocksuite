@@ -1,6 +1,6 @@
 import '../_common/components/rich-text/rich-text.js';
 
-import type { TextSelection } from '@blocksuite/block-std';
+import type { BlockElement, TextSelection } from '@blocksuite/block-std';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type InlineRangeProvider } from '@blocksuite/inline';
