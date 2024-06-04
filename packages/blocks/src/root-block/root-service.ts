@@ -70,6 +70,7 @@ export interface QuickSearchService {
   searchDoc: (options: {
     action: 'insert';
     userInput?: string;
+    skipSelection?: boolean;
   }) => Promise<QuickSearchResult>;
 }
 
