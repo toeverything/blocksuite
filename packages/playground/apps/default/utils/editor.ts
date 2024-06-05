@@ -107,7 +107,10 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
               toast(service.host as EditorHost, message, options?.duration);
             },
             confirm: notification => {
-              return Promise.resolve(confirm(notification.title));
+              return Promise.resolve(confirm(notification.title.toString()));
+            },
+            prompt: notification => {
+              return Promise.resolve(prompt(notification.title.toString()));
             },
             notify: notification => {
               // todo: implement in playground

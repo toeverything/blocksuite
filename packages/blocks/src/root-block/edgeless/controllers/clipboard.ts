@@ -16,7 +16,6 @@ import DOMPurify from 'dompurify';
 
 import {
   CANVAS_EXPORT_IGNORE_TAGS,
-  DEFAULT_IMAGE_PROXY_ENDPOINT,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
@@ -1270,16 +1269,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
 
-    // TODO: use image proxy endpoint middleware shared with image block
-    let _imageProxyEndpoint: string | undefined;
-    if (
-      !_imageProxyEndpoint &&
-      location.protocol === 'https:' &&
-      location.hostname.split('.').includes('affine')
-    ) {
-      _imageProxyEndpoint = DEFAULT_IMAGE_PROXY_ENDPOINT;
-    }
-
+    const imageProxy = host.std.clipboard.configs.get('imageProxy');
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -1312,8 +1302,8 @@ export class EdgelessClipboardController extends PageClipboard {
         await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: 'transparent',
-      useCORS: _imageProxyEndpoint ? false : true,
-      proxy: _imageProxyEndpoint,
+      useCORS: imageProxy ? false : true,
+      proxy: imageProxy,
     };
 
     const _drawTopLevelBlock = async (

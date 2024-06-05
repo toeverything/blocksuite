@@ -135,14 +135,13 @@ export class Viewport {
   }
 
   onResize() {
-    const oldWidth = this.width;
-    const oldHeight = this.height;
-    const bbox = this._el.getBoundingClientRect();
+    const { centerX, centerY, zoom, width: oldWidth, height: oldHeight } = this;
+    const { left, top, width, height } = this._el.getBoundingClientRect();
 
-    this.setRect(bbox.left, bbox.top, bbox.width, bbox.height);
+    this.setRect(left, top, width, height);
     this.setCenter(
-      this.centerX - (oldWidth - this.width) / 2,
-      this.centerY - (oldHeight - this.height) / 2
+      centerX - (oldWidth - width) / zoom / 2,
+      centerY - (oldHeight - height) / zoom / 2
     );
   }
 

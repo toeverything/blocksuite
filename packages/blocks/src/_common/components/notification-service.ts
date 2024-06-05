@@ -8,18 +8,30 @@ export interface NotificationService {
       portal?: HTMLElement;
     }
   ): void;
-  confirm(notification: {
-    title: string;
+  confirm(options: {
+    title: string | TemplateResult;
     message: string | TemplateResult;
-    confirmText: string;
-    cancelText: string;
+    confirmText?: string;
+    cancelText?: string;
     abort?: AbortSignal;
   }): Promise<boolean>;
-  notify(notification: {
+  prompt(options: {
+    title: string | TemplateResult;
+    message: string | TemplateResult;
+    placeholder?: string;
+    confirmText?: string;
+    cancelText?: string;
+    abort?: AbortSignal;
+  }): Promise<string | null>; // when cancel, return null
+  notify(options: {
     title: string | TemplateResult;
     message?: string | TemplateResult;
     accent?: 'info' | 'success' | 'warning' | 'error';
     duration?: number; // give 0 to disable auto dismiss
     abort?: AbortSignal;
+    action?: {
+      label: string | TemplateResult;
+      onClick: () => void;
+    };
   }): void;
 }

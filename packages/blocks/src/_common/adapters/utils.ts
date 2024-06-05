@@ -10,6 +10,9 @@ export const fetchImage = async (
     if (!proxy) {
       return await fetch(url, init);
     }
+    if (url.startsWith('blob:')) {
+      return await fetch(url, init);
+    }
     if (url.startsWith('data:')) {
       return await fetch(url, init);
     }
