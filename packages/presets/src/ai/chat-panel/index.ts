@@ -12,6 +12,10 @@ import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 import { AIHelpIcon, SmallHintIcon } from '../_common/icons.js';
 import { AIProvider } from '../provider.js';
 import {
+  getSelectedImagesAsBlobs,
+  getSelectedTextContent,
+} from '../utils/selection-utils.js';
+import {
   type ChatAction,
   type ChatContextValue,
   type ChatItem,
@@ -107,6 +111,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
     items: [],
     status: 'idle',
     error: null,
+    markdown: '',
   };
 
   private _chatMessages: Ref<ChatPanelMessages> =
@@ -132,10 +137,34 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
         this._resetItems();
       }
     });
+
+    AIProvider.slots.requestContinueInChat.on(async ({ show }) => {
+      if (show) {
+        const text = await getSelectedTextContent(this.host, 'plain-text');
+        const markdown = await getSelectedTextContent(this.host, 'markdown');
+        const images = await getSelectedImagesAsBlobs(this.host);
+        this.updateContext({
+          quote: text,
+          markdown: markdown,
+          images: images,
+        });
+      }
+    });
   }
 
   updateContext = (context: Partial<ChatContextValue>) => {
     this.chatContextValue = { ...this.chatContextValue, ...context };
+  };
+
+  continueInChat = async () => {
+    const text = await getSelectedTextContent(this.host, 'plain-text');
+    const markdown = await getSelectedTextContent(this.host, 'markdown');
+    const images = await getSelectedImagesAsBlobs(this.host);
+    this.updateContext({
+      quote: text,
+      markdown,
+      images,
+    });
   };
 
   private _chatSessionId = '';

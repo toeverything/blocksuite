@@ -5,6 +5,7 @@ import {
   MarkdownAdapter,
   MixTextAdapter,
   pasteMiddleware,
+  PlainTextAdapter,
   titleMiddleware,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -64,20 +65,41 @@ function processTextInSnapshot(snapshot: SliceSnapshot, host: EditorHost) {
   content.forEach(snapshot => processSnapshot(snapshot, text, host));
 }
 
-export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
+export async function getContentFromSlice(
+  host: EditorHost,
+  slice: Slice,
+  type: 'markdown' | 'plain-text' = 'markdown'
+) {
   const job = new Job({
     collection: host.std.doc.collection,
     middlewares: [titleMiddleware],
   });
   const snapshot = await job.sliceToSnapshot(slice);
   processTextInSnapshot(snapshot, host);
-  const markdownAdapter = new MarkdownAdapter();
-  markdownAdapter.applyConfigs(job.adapterConfigs);
-  const markdown = await markdownAdapter.fromSliceSnapshot({
+  const adapter =
+    type === 'markdown' ? new MarkdownAdapter() : new PlainTextAdapter();
+  adapter.applyConfigs(job.adapterConfigs);
+  const content = await adapter.fromSliceSnapshot({
     snapshot,
     assets: job.assetsManager,
   });
-  return markdown.file;
+  return content.file;
+}
+
+export async function getPlainTextFromSlice(host: EditorHost, slice: Slice) {
+  const job = new Job({
+    collection: host.std.doc.collection,
+    middlewares: [titleMiddleware],
+  });
+  const snapshot = await job.sliceToSnapshot(slice);
+  processTextInSnapshot(snapshot, host);
+  const plainTextAdapter = new PlainTextAdapter();
+  plainTextAdapter.applyConfigs(job.adapterConfigs);
+  const plainText = await plainTextAdapter.fromSliceSnapshot({
+    snapshot,
+    assets: job.assetsManager,
+  });
+  return plainText.file;
 }
 
 export const markdownToSnapshot = async (

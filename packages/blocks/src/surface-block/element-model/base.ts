@@ -96,6 +96,14 @@ export interface IEdgelessElement {
   boxSelect(bound: Bound): boolean;
 }
 
+export type SerializedElement = Record<string, unknown> & {
+  type: string;
+  xywh: SerializedXYWH;
+  id: string;
+  index: string;
+  props: Record<string, unknown>;
+};
+
 export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
   implements IEdgelessElement
 {
@@ -353,7 +361,7 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
   }
 
   serialize() {
-    return this.yMap.toJSON();
+    return this.yMap.toJSON() as SerializedElement;
   }
 
   /**

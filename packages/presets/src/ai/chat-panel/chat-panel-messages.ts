@@ -10,6 +10,7 @@ import './actions/chat-text.js';
 import './actions/copy-more.js';
 import './actions/image-to-text.js';
 import './actions/image.js';
+import './chat-cards.js';
 
 import type {
   BaseSelection,
@@ -65,6 +66,12 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       height: 100%;
       position: relative;
       overflow-y: auto;
+
+      chat-cards {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+      }
     }
 
     .chat-panel-messages-placeholder {
@@ -479,17 +486,23 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       >
         ${items.length === 0
           ? html`<div class="chat-panel-messages-placeholder">
-              ${AffineIcon(
-                isLoading
-                  ? 'var(--affine-icon-secondary)'
-                  : 'var(--affine-primary-color)'
-              )}
-              <div>
-                ${this.isLoading
-                  ? 'AFFiNE AI is loading history...'
-                  : 'What can I help you with?'}
+                ${AffineIcon(
+                  isLoading
+                    ? 'var(--affine-icon-secondary)'
+                    : 'var(--affine-primary-color)'
+                )}
+                <div>
+                  ${this.isLoading
+                    ? 'AFFiNE AI is loading history...'
+                    : 'What can I help you with?'}
+                </div>
               </div>
-            </div>`
+              <chat-cards
+                .chatContextValue=${this.chatContextValue}
+                .updateContext=${this.updateContext}
+                .host=${this.host}
+                .selectionValue=${this._selectionValue}
+              ></chat-cards> `
           : repeat(filteredItems, (item, index) => {
               const isLast = index === filteredItems.length - 1;
               return html`<div class="message">
