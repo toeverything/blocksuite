@@ -388,7 +388,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
           margin-right: 4px;
         }
       </style>
-      <div class="quick-edgeless-menu default blocksuite-overlay">
+      <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
           <div class="top-container">
             <sl-dropdown placement="bottom" hoist>

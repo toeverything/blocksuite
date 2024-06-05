@@ -156,10 +156,7 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
 
     // XXX This is a side effect
     let accIdx = 0;
-    return html`<div
-      class="linked-doc-popover blocksuite-overlay"
-      style="${style}"
-    >
+    return html`<div class="linked-doc-popover" style="${style}">
       ${this._actionGroup
         .filter(group => group.items.length)
         .map((group, idx) => {
