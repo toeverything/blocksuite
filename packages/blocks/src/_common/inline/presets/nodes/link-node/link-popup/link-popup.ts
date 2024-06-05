@@ -118,6 +118,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
       Object.values(domRects).forEach(domRect => {
         const mockSelection = document.createElement('div');
+        mockSelection.classList.add('mock-selection');
         mockSelection.style.left = `${domRect.left}px`;
         mockSelection.style.top = `${domRect.top}px`;
         mockSelection.style.width = `${domRect.width}px`;
