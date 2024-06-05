@@ -6,13 +6,17 @@ import { Bound } from '../utils/bound.js';
 import { linePolygonIntersects } from '../utils/math-utils.js';
 import type { PointLocation } from '../utils/point-location.js';
 import type { IVec2 } from '../utils/vec.js';
-import type { IBaseProps } from './base.js';
+import type { IBaseProps, SerializedElement } from './base.js';
 import { SurfaceGroupLikeModel } from './base.js';
 import { local, observe, yfield } from './decorators.js';
 
 type GroupElementProps = IBaseProps & {
   children: Y.Map<boolean>;
   title: Y.Text;
+};
+
+export type SerializedGroupElement = SerializedElement & {
+  children: Record<string, boolean>;
 };
 
 export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> {
@@ -59,9 +63,16 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
     return 'group';
   }
 
+  override serialize() {
+    const result = super.serialize();
+    return result as SerializedGroupElement;
+  }
+
   addChild(element: BlockSuite.EdgelessModelType | string) {
     const id = typeof element === 'string' ? element : element.id;
-
+    if (!this.children) {
+      return;
+    }
     this.surface.doc.transact(() => {
       this.children.set(id, true);
     });
@@ -69,7 +80,9 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
 
   removeDescendant(element: BlockSuite.EdgelessModelType | string) {
     const id = typeof element === 'string' ? element : element.id;
-
+    if (!this.children) {
+      return;
+    }
     this.surface.doc.transact(() => {
       this.children.delete(id);
     });

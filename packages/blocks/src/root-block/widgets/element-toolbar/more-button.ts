@@ -13,6 +13,7 @@ import {
   BringForwardIcon,
   BringToFrontIcon,
   CopyAsPngIcon,
+  FontLinkedDocIcon,
   FrameIcon,
   GroupIcon,
   MoreCopyIcon,
@@ -25,6 +26,10 @@ import {
   SendToBackIcon,
 } from '../../../_common/icons/index.js';
 import { type ReorderingType } from '../../../_common/utils/index.js';
+import {
+  createLinkedDocFromEdgelessElements,
+  createLinkedDocFromNote,
+} from '../../../_common/utils/render-linked-doc.js';
 import type {
   AttachmentBlockComponent,
   BookmarkBlockComponent,
@@ -37,17 +42,23 @@ import type {
 import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 import { removeContainedFrames } from '../../edgeless/frame-manager.js';
+import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   duplicate,
   splitElements,
 } from '../../edgeless/utils/clipboard-utils.js';
+import { getCloneElements } from '../../edgeless/utils/clone-utils.js';
+import { moveConnectors } from '../../edgeless/utils/connector.js';
 import { deleteElements } from '../../edgeless/utils/crud.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
   isEmbeddedLinkBlock,
+  isEmbedLinkedDocBlock,
+  isEmbedSyncedDocBlock,
   isFrameBlock,
   isImageBlock,
+  isNoteBlock,
 } from '../../edgeless/utils/query.js';
 
 type EmbedLinkBlockComponent =
@@ -71,6 +82,8 @@ type Action =
         | 'copy-as-png'
         | 'create-frame'
         | 'create-group'
+        | 'turn-into-linked-doc'
+        | 'create-linked-doc'
         | 'copy'
         | 'duplicate'
         | 'reload'
@@ -116,6 +129,18 @@ const RELOAD_ACTION: Action = {
   icon: RefreshIcon,
   name: 'Reload',
   type: 'reload',
+};
+
+const TURN_INTO_LINKED_DOC_ACTION: Action = {
+  icon: FontLinkedDocIcon,
+  name: 'Turn into linked doc',
+  type: 'turn-into-linked-doc',
+};
+
+const CREATE_LINKED_DOC_ACTION: Action = {
+  icon: FontLinkedDocIcon,
+  name: 'Create linked doc',
+  type: 'create-linked-doc',
 };
 
 const ACTION_DIVIDER: Action = { type: 'divider' };
@@ -223,14 +248,11 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       ...REORDER_ACTIONS,
       ACTION_DIVIDER,
       ...COPY_ACTIONS,
+      ...this.getRefreshAction(),
+      ...this.getLinkedDocAction(),
+      ACTION_DIVIDER,
+      DELETE_ACTION,
     ];
-    const refreshable = this.selection.elements.every(ele =>
-      this._refreshable(ele as BlockModel)
-    );
-    if (refreshable) {
-      actions.push(RELOAD_ACTION);
-    }
-    actions.push(ACTION_DIVIDER, DELETE_ACTION);
     return actions;
   }
 
@@ -239,10 +261,103 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       FRAME_ACTION,
       ACTION_DIVIDER,
       ...COPY_ACTIONS,
+      ...this.getLinkedDocAction(),
       ACTION_DIVIDER,
       DELETE_ACTION,
     ];
   }
+
+  private getRefreshAction(): Action[] {
+    const refreshable = this.selection.elements.every(ele =>
+      this._refreshable(ele as BlockModel)
+    );
+    return refreshable ? [RELOAD_ACTION] : [];
+  }
+
+  private getLinkedDocAction() {
+    const isSingleSelect = this.selection.elements.length === 1;
+    const { firstElement } = this.selection;
+    if (
+      isSingleSelect &&
+      (isEmbedLinkedDocBlock(firstElement) ||
+        isEmbedSyncedDocBlock(firstElement))
+    ) {
+      return [];
+    }
+
+    if (isSingleSelect && isNoteBlock(firstElement)) {
+      return [ACTION_DIVIDER, TURN_INTO_LINKED_DOC_ACTION];
+    }
+
+    return [ACTION_DIVIDER, CREATE_LINKED_DOC_ACTION];
+  }
+
+  private _turnIntoLinkedDoc = () => {
+    const isSingleSelect = this.selection.elements.length === 1;
+    const { firstElement: element } = this.selection;
+
+    if (isSingleSelect && isNoteBlock(element)) {
+      const linkedDoc = createLinkedDocFromNote(
+        this.edgeless.host.doc,
+        element
+      );
+      // insert linked doc card
+      const cardId = this.edgeless.service.addBlock(
+        'affine:embed-synced-doc',
+        {
+          xywh: element.xywh,
+          style: 'syncedDoc',
+          pageId: linkedDoc.id,
+          index: element.index,
+        },
+        this.surface.model.id
+      );
+      moveConnectors(element.id, cardId, this.edgeless.service);
+      // delete selected elements
+      this.doc.transact(() => {
+        deleteElements(this.surface, [element]);
+      });
+      this.edgeless.service.selection.set({
+        elements: [cardId],
+        editing: false,
+      });
+    } else {
+      this._createLinkedDoc();
+    }
+  };
+
+  private _createLinkedDoc = () => {
+    const selection = this.edgeless.service.selection;
+    const elements = getCloneElements(
+      selection.elements,
+      this.edgeless.surface.edgeless.service.frame
+    );
+    const linkedDoc = createLinkedDocFromEdgelessElements(
+      this.edgeless.host.doc,
+      elements
+    );
+    // insert linked doc card
+    const width = 364;
+    const height = 390;
+    const bound = edgelessElementsBound(elements);
+    const cardId = this.edgeless.service.addBlock(
+      'affine:embed-linked-doc',
+      {
+        xywh: `[${bound.center[0] - width / 2}, ${bound.center[1] - height / 2}, ${width}, ${height}]`,
+        style: 'vertical',
+        pageId: linkedDoc.id,
+      },
+      this.surface.model.id
+    );
+    // delete selected elements
+    this.doc.transact(() => {
+      deleteElements(this.surface, elements);
+    });
+    this.edgeless.service.selection.set({
+      elements: [cardId],
+      editing: false,
+    });
+  };
 
   private _delete = () => {
     this.doc.captureSync();
@@ -295,6 +410,14 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           blocks: [...notes, ...removeContainedFrames(frames), ...images],
           shapes,
         });
+        break;
+      }
+      case 'turn-into-linked-doc': {
+        this._turnIntoLinkedDoc();
+        break;
+      }
+      case 'create-linked-doc': {
+        this._createLinkedDoc();
         break;
       }
       case 'create-frame': {

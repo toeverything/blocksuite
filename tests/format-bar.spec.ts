@@ -1612,7 +1612,41 @@ test('create linked doc from block selection with format bar', async ({
   );
   await waitNextFrame(page, 200);
 
-  await assertRichTexts(page, ['123', '456', '789']);
-  await assertBlockChildrenIds(page, '8', ['10', '12']);
-  await assertBlockChildrenIds(page, '10', ['11']);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:surface />
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+    </affine:paragraph>
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+  </affine:note>
+</affine:page>`
+  );
 });
