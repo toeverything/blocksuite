@@ -777,7 +777,7 @@ export function locatorComponentToolbar(page: Page) {
   return page.locator('edgeless-element-toolbar-widget');
 }
 
-function locatorComponentToolbarMoreButton(page: Page) {
+export function locatorComponentToolbarMoreButton(page: Page) {
   const moreButton = locatorComponentToolbar(page).locator(
     'edgeless-more-button'
   );
@@ -809,7 +809,13 @@ type Action =
   | 'changeNoteDisplayMode'
   | 'changeNoteSlicerSetting'
   | 'addText'
-  | 'quickConnect';
+  | 'quickConnect'
+  | 'turnIntoLinkedDoc'
+  | 'createLinkedDoc'
+  | 'linkedDocInfo'
+  | 'openLinkedDoc'
+  | 'toCardView'
+  | 'toEmbedView';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -1035,6 +1041,58 @@ export async function triggerComponentToolbarAction(
       const button = locatorComponentToolbar(page).getByRole('button', {
         name: 'Draw connector',
       });
+      await button.click();
+      break;
+    }
+    case 'turnIntoLinkedDoc': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Turn into linked doc',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'createLinkedDoc': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Create linked doc',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'linkedDocInfo': {
+      const button = locatorComponentToolbar(page).locator('.doc-info');
+      await button.click();
+      break;
+    }
+    case 'openLinkedDoc': {
+      const button = locatorComponentToolbar(page).locator('.open');
+      await button.click();
+      break;
+    }
+    case 'toCardView': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-tool-icon-button')
+        .filter({
+          hasText: 'Card view',
+        });
+      await button.click();
+      break;
+    }
+    case 'toEmbedView': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-tool-icon-button')
+        .filter({
+          hasText: 'Embed view',
+        });
       await button.click();
       break;
     }
@@ -1443,9 +1501,13 @@ export async function createConnectorElement(
   );
 }
 
-export async function createNote(page: Page, coord1: number[]) {
+export async function createNote(
+  page: Page,
+  coord1: number[],
+  content?: string
+) {
   const start = await toViewCoord(page, coord1);
-  return addNote(page, 'note', start[0], start[1]);
+  return addNote(page, content || 'note', start[0], start[1]);
 }
 
 export async function hoverOnNote(page: Page, id: string, offset = [0, 0]) {

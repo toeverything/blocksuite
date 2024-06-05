@@ -4,7 +4,7 @@ import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 
 import { matchFlavours } from '../../_common/utils/model.js';
-import { createLinkedDocFromSelectedBlocks } from '../../_common/utils/render-linked-doc.js';
+import { convertSelectedBlocksToLinkedDoc } from '../../_common/utils/render-linked-doc.js';
 
 export class PageKeyboardManager {
   constructor(public rootElement: BlockElement) {
@@ -150,7 +150,7 @@ export class PageKeyboardManager {
     }
 
     const doc = rootElement.host.doc;
-    const linkedDoc = createLinkedDocFromSelectedBlocks(doc, selectedModels);
+    const linkedDoc = convertSelectedBlocksToLinkedDoc(doc, selectedModels);
     const linkedDocService = rootElement.host.spec.getService(
       'affine:embed-linked-doc'
     );

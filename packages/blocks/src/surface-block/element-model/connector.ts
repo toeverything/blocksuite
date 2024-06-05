@@ -27,6 +27,7 @@ import type { SerializedXYWH, XYWH } from '../utils/xywh.js';
 import {
   type IBaseProps,
   type IHitTestOptions,
+  type SerializedElement,
   SurfaceElementModel,
   SurfaceLocalModel,
 } from './base.js';
@@ -42,6 +43,11 @@ export type PointStyle = 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond';
 export const DEFAULT_FRONT_END_POINT_STYLE = 'None' as const;
 export const DEFAULT_REAR_END_POINT_STYLE = 'Arrow' as const;
 export const CONNECTOR_LABEL_MAX_WIDTH = 280;
+
+export type SerializedConnection = {
+  id?: string;
+  position?: `[${number},${number}]` | PointLocation;
+};
 
 // at least one of id and position is not null
 // both exists means the position is relative to the element
@@ -83,6 +89,11 @@ export type ConnectorLabelProps = {
   labelOffset?: ConnectorLabelOffsetProps;
   labelStyle?: TextStyleProps;
   labelConstraints?: ConnectorLabelConstraintsProps;
+};
+
+export type SerializedConnectorElement = SerializedElement & {
+  source: SerializedConnection;
+  target: SerializedConnection;
 };
 
 type ConnectorElementProps = IBaseProps & {
@@ -328,7 +339,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   override serialize() {
     const result = super.serialize();
     result.xywh = this.xywh;
-    return result;
+    return result as SerializedConnectorElement;
   }
 
   /**

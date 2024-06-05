@@ -7,6 +7,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import { getBlockProps } from '../../../_common/utils/block-props.js';
 import {
   type BlockComponent,
   type EmbedCardStyle,
@@ -359,13 +360,6 @@ export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
   previousEle.forEach(blockElement => blockElement.classList.remove(className));
   previousEle = blockElements;
   blockElements.forEach(blockElement => blockElement.classList.add(className));
-}
-
-function getBlockProps(model: BlockModel): { [index: string]: unknown } {
-  const keys = model.keys as (keyof typeof model)[];
-  const values = keys.map(key => model[key]);
-  const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
-  return blockProps;
 }
 
 export function getDuplicateBlocks(blocks: BlockModel[]) {

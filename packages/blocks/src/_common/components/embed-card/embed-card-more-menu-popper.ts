@@ -17,6 +17,7 @@ import {
   OpenIcon,
   RefreshIcon,
 } from '../../icons/text.js';
+import { getBlockProps } from '../../utils/block-props.js';
 import { isPeekable, peek } from '../peekable.js';
 import { toast } from '../toast.js';
 import type { EmbedToolbarBlockElement } from './type.js';
@@ -99,11 +100,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
 
   private _duplicateBlock() {
     const model = this._model;
-    const keys = model.keys as (keyof typeof model)[];
-    const values = keys.map(key => model[key]);
-    const blockProps = Object.fromEntries(
-      keys.map((key, i) => [key, values[i]])
-    );
+    const blockProps = getBlockProps(model);
     const { width, height, xywh, rotate, zIndex, ...duplicateProps } =
       blockProps;
 

@@ -21,18 +21,22 @@ export const reassociateConnectorsCommand: Command<
 
   const surface = service.surface;
   const connectors = surface.getConnectors(oldId);
-  for (const connector of connectors) {
-    if (connector.source.id === oldId) {
-      connector.source.id = newId;
-      surface.updateElement(connector.id, {
-        source: connector.source,
+  for (const { id, source, target } of connectors) {
+    if (source.id === oldId) {
+      surface.updateElement(id, {
+        source: {
+          ...source,
+          id: newId,
+        },
       });
       continue;
     }
-    if (connector.target.id === oldId) {
-      connector.target.id = newId;
-      surface.updateElement(connector.id, {
-        target: connector.target,
+    if (target.id === oldId) {
+      surface.updateElement(id, {
+        target: {
+          ...target,
+          id: newId,
+        },
       });
     }
   }
