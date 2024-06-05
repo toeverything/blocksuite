@@ -58,6 +58,7 @@ export class Portal extends LitElement {
           ...(typeof this.shadowDom !== 'boolean' ? this.shadowDom : {}),
         })
       : portalRoot;
+    portalRoot.classList.add('blocksuite-portal');
     this.container.append(portalRoot);
     this._portalRoot = portalRoot;
     return renderRoot;
@@ -122,8 +123,12 @@ export function createSimplePortal({
   signal = new AbortController().signal,
   renderOptions,
   shadowDom = true,
+  identifyWrapper = true,
 }: PortalOptions) {
   const portalRoot = document.createElement('div');
+  if (identifyWrapper) {
+    portalRoot.classList.add('blocksuite-portal');
+  }
   if (shadowDom) {
     portalRoot.attachShadow({
       mode: 'open',
