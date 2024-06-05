@@ -1,10 +1,12 @@
 import './components/image-toolbar.js';
 
 import { WidgetElement } from '@blocksuite/block-std';
+import { limitShift, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { HoverController } from '../../../_common/components/hover/controller.js';
+import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import { commonConfig, moreMenuConfig } from './config.js';
@@ -96,6 +98,17 @@ export class AffineImageToolbarWidget extends WidgetElement<
           computePosition: {
             referenceElement: imageContainer,
             placement: 'right-start',
+            middleware: [
+              shift({
+                crossAxis: true,
+                padding: {
+                  top: PAGE_HEADER_HEIGHT + 12,
+                  bottom: 12,
+                  right: 12,
+                },
+                limiter: limitShift(),
+              }),
+            ],
             autoUpdate: true,
           },
         };
