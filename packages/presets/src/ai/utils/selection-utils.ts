@@ -12,7 +12,7 @@ import type { BlockModel } from '@blocksuite/store';
 import { type DraftModel, Slice, toDraftModel } from '@blocksuite/store';
 
 import { getEdgelessCopilotWidget, getService } from './edgeless.js';
-import { getMarkdownFromSlice } from './markdown-utils.js';
+import { getContentFromSlice } from './markdown-utils.js';
 
 export const getRootService = (host: EditorHost) => {
   return host.std.spec.getService('affine:page');
@@ -110,7 +110,8 @@ function traverse(model: DraftModel, drafts: DraftModel[]) {
 
 export async function getTextContentFromBlockModels(
   editorHost: EditorHost,
-  models: BlockModel[]
+  models: BlockModel[],
+  type: 'markdown' | 'plain-text' = 'markdown'
 ) {
   // Currently only filter out images and databases
   const selectedTextModels = models.filter(
@@ -120,13 +121,16 @@ export async function getTextContentFromBlockModels(
   const drafts = selectedTextModels.map(toDraftModel);
   drafts.forEach(draft => traverse(draft, drafts));
   const slice = Slice.fromModels(editorHost.std.doc, drafts);
-  return getMarkdownFromSlice(editorHost, slice);
+  return getContentFromSlice(editorHost, slice, type);
 }
 
-export async function getSelectedTextContent(editorHost: EditorHost) {
+export async function getSelectedTextContent(
+  editorHost: EditorHost,
+  type: 'markdown' | 'plain-text' = 'markdown'
+) {
   const selectedModels = getSelectedModels(editorHost);
   assertExists(selectedModels);
-  return getTextContentFromBlockModels(editorHost, selectedModels);
+  return getTextContentFromBlockModels(editorHost, selectedModels, type);
 }
 
 export async function selectAboveBlocks(editorHost: EditorHost, num = 10) {

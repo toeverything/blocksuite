@@ -28,6 +28,7 @@ export type ChatContextValue = {
   status: ChatStatus;
   error: AIError | null;
   quote: string;
+  markdown: string;
   images: File[];
   abortController: AbortController | null;
 };

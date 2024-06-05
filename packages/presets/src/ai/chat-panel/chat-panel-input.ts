@@ -19,6 +19,11 @@ import { type ChatContextValue, type ChatMessage } from './chat-context.js';
 
 const MaximumImageCount = 8;
 
+function getFirstTwoLines(text: string) {
+  const lines = text.split('\n');
+  return lines.slice(0, 2);
+}
+
 @customElement('chat-panel-input')
 export class ChatPanelInput extends WithDisposable(LitElement) {
   static override styles = css`
@@ -27,14 +32,63 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       position: relative;
       border-radius: 4px;
       display: flex;
+      gap: 4px;
       flex-direction: column;
+      padding: 8px;
+
+      .chat-selection-quote {
+        padding: 4px 0px 8px 0px;
+        padding-left: 15px;
+        max-height: 56px;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 22px;
+        color: var(--affine-text-secondary-color);
+        position: relative;
+
+        div {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .chat-quote-close {
+          position: absolute;
+          right: 0;
+          top: 0;
+          cursor: pointer;
+          display: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 4px;
+          border: 1px solid var(--affine-border-color);
+          background-color: var(--affine-white);
+        }
+      }
+
+      .chat-selection-quote:hover .chat-quote-close {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .chat-selection-quote::after {
+        content: '';
+        width: 2px;
+        height: calc(100% - 10px);
+        margin-top: 5px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: var(--affine-quote-color);
+        border-radius: 18px;
+      }
     }
 
     .chat-panel-input-actions {
       display: flex;
       gap: 8px;
       align-items: center;
-      padding: 8px;
 
       div {
         width: 24px;
@@ -61,8 +115,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     .chat-panel-input {
       textarea {
         resize: none;
-        margin: 8px 12px;
-        width: calc(100% - 32px);
+        width: 100%;
         line-height: 22px;
         border: none;
         font-size: 14px;
@@ -164,7 +217,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   accessor cleanupHistories!: () => Promise<void>;
 
   send = async () => {
-    const { status } = this.chatContextValue;
+    const { status, markdown } = this.chatContextValue;
     if (status === 'loading' || status === 'transmitting') return;
 
     const text = this.textarea.value;
@@ -175,18 +228,26 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     const { doc } = this.host;
     this.textarea.value = '';
     this.isInputEmpty = true;
-    this.updateContext({ images: [], status: 'loading', error: null });
+    this.updateContext({
+      images: [],
+      status: 'loading',
+      error: null,
+      quote: '',
+      markdown: '',
+    });
 
     const attachments = await Promise.all(
       images?.map(image => readBlobAsURL(image))
     );
+
+    const content = (markdown ? `${markdown}\n` : '') + text;
 
     this.updateContext({
       items: [
         ...this.chatContextValue.items,
         {
           role: 'user',
-          content: text,
+          content: content,
           createdAt: new Date().toISOString(),
           attachments,
         },
@@ -197,7 +258,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     try {
       const abortController = new AbortController();
       const stream = AIProvider.actions.chat?.({
-        input: text,
+        input: content,
         docId: doc.id,
         attachments: images,
         workspaceId: doc.collection.id,
@@ -243,9 +304,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             ? 'var(--affine-text-disable-color)'
             : 'var(--affine-primary-color)'};
         }
-        .chat-panel-images {
-          margin: ${images.length > 0 ? '8px' : '0'};
-        }
+
         .chat-panel-input {
           border: ${this.focused
             ? '1px solid var(--affine-primary-color)'
@@ -298,7 +357,23 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             ${CloseIcon}
           </div>
         </div>
-
+        ${this.chatContextValue.quote
+          ? html`<div class="chat-selection-quote">
+              ${repeat(
+                getFirstTwoLines(this.chatContextValue.quote),
+                line => line,
+                line => html`<div>${line}</div>`
+              )}
+              <div
+                class="chat-quote-close"
+                @click=${() => {
+                  this.updateContext({ quote: '', markdown: '' });
+                }}
+              >
+                ${CloseIcon}
+              </div>
+            </div>`
+          : nothing}
         <textarea
           placeholder="What are your thoughts?"
           @input=${() => {
