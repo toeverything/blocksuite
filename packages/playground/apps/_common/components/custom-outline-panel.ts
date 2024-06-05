@@ -52,9 +52,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
     return html`
       ${this._show
         ? html`
-            <div class="custom-outline-container blocksuite-overlay">
-              ${this._renderPanel()}
-            </div>
+            <div class="custom-outline-container">${this._renderPanel()}</div>
           `
         : null}
     `;

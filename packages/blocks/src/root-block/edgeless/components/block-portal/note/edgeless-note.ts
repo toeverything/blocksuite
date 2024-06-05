@@ -429,7 +429,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     return html`
       <div
-        class="edgeless-block-portal-note blocksuite-overlay"
+        class="edgeless-block-portal-note"
         style=${styleMap(style)}
         data-model-height="${bound.h}"
         @mouseleave=${this._leaved}

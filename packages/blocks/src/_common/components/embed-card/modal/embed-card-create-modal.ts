@@ -150,7 +150,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    return html`<div class="embed-card-modal blocksuite-overlay">
+    return html`<div class="embed-card-modal">
       <div class="embed-card-modal-mask" @click=${this._onCancel}></div>
       <div class="embed-card-modal-wrapper">
         <div class="embed-card-modal-title">${this.titleText}</div>

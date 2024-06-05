@@ -51,7 +51,7 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
   override render() {
     return html`
       ${this._show
-        ? html`<div class="custom-chat-container blocksuite-overlay">
+        ? html`<div class="custom-chat-container">
             <chat-panel
               .host=${this.editor.host}
               .doc=${this.editor.doc}

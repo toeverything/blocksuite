@@ -219,7 +219,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     );
 
     return html`
-      <div class="overlay-root blocksuite-overlay">
+      <div class="overlay-root">
         <div class="affine-reference-popover-container">
           <div class="affine-reference-popover view">
             <icon-button

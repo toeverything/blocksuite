@@ -163,7 +163,7 @@ const createDragPreview = (row: TableRow, x: number, y: number) => {
   cloneRow.rowIndex = row.rowIndex;
   cloneRow.rowId = row.rowId;
   div.append(cloneRow);
-  div.className = 'with-data-view-css-variable blocksuite-overlay';
+  div.className = 'with-data-view-css-variable';
   div.style.width = `${row.getBoundingClientRect().width}px`;
   div.style.position = 'fixed';
   div.style.pointerEvents = 'none';
@@ -185,7 +185,6 @@ const createDragPreview = (row: TableRow, x: number, y: number) => {
 };
 const createDropPreview = () => {
   const div = document.createElement('div');
-  div.classList.add('blocksuite-overlay');
   div.dataset.isDropPreview = 'true';
   div.style.pointerEvents = 'none';
   div.style.position = 'fixed';

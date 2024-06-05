@@ -343,7 +343,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
   override render() {
     if (this._loading) {
       return html`
-        <div class="overlay-mask blocksuite-overlay"></div>
+        <div class="overlay-mask"></div>
         <div class="container">
           <header
             class="loading-header"
@@ -362,7 +362,7 @@ export class ImportDoc extends WithDisposable(LitElement) {
     }
     return html`
       <div
-        class="overlay-mask blocksuite-overlay"
+        class="overlay-mask"
         @click="${() => this.abortController.abort()}"
       ></div>
       <div class="container">

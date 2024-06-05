@@ -160,7 +160,6 @@ type VerticalIndicator = {
 export const getVerticalIndicator = (): VerticalIndicator => {
   if (!preview) {
     const dragBar = new TableVerticalIndicator();
-    dragBar.classList.add('blocksuite-overlay');
     preview = {
       display(
         width: number,
