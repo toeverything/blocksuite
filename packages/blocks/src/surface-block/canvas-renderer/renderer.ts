@@ -77,18 +77,25 @@ export class Renderer extends Viewport {
   }
 
   private _initViewport() {
+    let sizeUpdatedRafId: number | null = null;
+
     this.viewportUpdated.on(() => {
+      if (sizeUpdatedRafId) {
+        this._resetSize();
+        this._render();
+        this._shouldUpdate = false;
+        return;
+      }
       this._shouldUpdate = true;
     });
 
-    let sizeUpdatedRafId: number | null = null;
     this.sizeUpdated.on(() => {
       if (sizeUpdatedRafId) return;
+      this._resetSize();
+      this._render();
+      this._shouldUpdate = false;
       sizeUpdatedRafId = requestConnectedFrame(() => {
-        this._resetSize();
-        this._render();
         sizeUpdatedRafId = null;
-        this._shouldUpdate = false;
       }, this._el);
     });
   }
