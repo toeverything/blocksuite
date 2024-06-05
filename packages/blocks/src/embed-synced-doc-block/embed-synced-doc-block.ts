@@ -7,6 +7,7 @@ import { html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { guard } from 'lit/directives/guard.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { Peekable } from '../_common/components/peekable.js';
@@ -391,6 +392,112 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this.syncedDocCard?.requestUpdate();
   }
 
+  private _renderSyncedView = () => {
+    const syncedDoc = this.syncedDoc;
+    const { isEditing, isEmpty } = this.blockState;
+    const isInSurface = this.isInSurface;
+    const editorMode = this.editorMode;
+
+    assertExists(syncedDoc);
+
+    let containerStyleMap = styleMap({
+      position: 'relative',
+      width: '100%',
+    });
+    if (isInSurface) {
+      const scale = this.model.scale ?? 1;
+      const bound = Bound.deserialize(
+        (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
+          .xywh
+      );
+      const width = bound.w / scale;
+      const height = bound.h / scale;
+      containerStyleMap = styleMap({
+        width: `${width}px`,
+        height: `${editorMode === 'page' && isEditing ? `max-content` : `${height}px`}`,
+        minHeight: `${height}px`,
+        transform: `scale(${scale})`,
+        transformOrigin: '0 0',
+      });
+    }
+
+    const theme = getThemeMode();
+    const isSelected = !!this.selected?.is('block');
+    const scale = isInSurface ? this.model.scale ?? 1 : undefined;
+
+    this.dataset.nestedEditor = '';
+
+    const renderEditor = () => {
+      console.log('-rerender-editor-');
+      return choose(editorMode, [
+        [
+          'page',
+          () => html`
+            <div class="affine-page-viewport">
+              ${this.host.renderSpecPortal(
+                syncedDoc,
+                SpecProvider.getInstance().getSpec('page:preview').value
+              )}
+            </div>
+          `,
+        ],
+        [
+          'edgeless',
+          () => html`
+            <div class="affine-edgeless-viewport">
+              ${this.host.renderSpecPortal(
+                syncedDoc,
+                SpecProvider.getInstance().getSpec('edgeless:preview').value
+              )}
+            </div>
+          `,
+        ],
+      ]);
+    };
+
+    return this.renderEmbed(
+      () => html`
+        <div
+          class=${classMap({
+            'affine-embed-synced-doc-container': true,
+            [editorMode]: true,
+            [theme]: true,
+            selected: isSelected,
+            editing: isEditing,
+            surface: isInSurface,
+          })}
+          style=${containerStyleMap}
+          @pointerdown=${this._handlePointerDown}
+          ?data-scale=${scale}
+        >
+          <div class="affine-embed-synced-doc-editor">
+            ${guard([editorMode, syncedDoc], renderEditor)}
+            ${isEmpty && !isEditing && editorMode === 'page'
+              ? html`
+                  <div class="affine-embed-synced-doc-editor-empty">
+                    <span>
+                      This is a linked doc, you can add content here.
+                    </span>
+                  </div>
+                `
+              : nothing}
+          </div>
+
+          ${isInSurface && !isEditing
+            ? html`
+                <div
+                  class="affine-embed-synced-doc-editor-overlay"
+                  @dblclick=${this._handleOverlayDblClick}
+                ></div>
+              `
+            : nothing}
+        </div>
+
+        ${this.isInSurface ? nothing : Object.values(this.widgets)}
+      `
+    );
+  };
+
   override renderBlock() {
     delete this.dataset.nestedEditor;
 
@@ -403,10 +510,8 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this._height = this.isInSurface ? bound.h : EMBED_CARD_HEIGHT[style];
 
     const syncedDoc = this.syncedDoc;
-    const { isLoading, isError, isDeleted, isCycle, isEditing, isEmpty } =
-      this.blockState;
+    const { isLoading, isError, isDeleted, isCycle } = this.blockState;
     const isInSurface = this.isInSurface;
-    const editorMode = this.editorMode;
 
     if (isLoading || isError || isDeleted || isCycle || !syncedDoc) {
       let cardStyleMap = styleMap({
@@ -437,97 +542,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
       );
     }
 
-    let containerStyleMap = styleMap({
-      position: 'relative',
-      width: '100%',
-    });
-    if (isInSurface) {
-      const scale = this.model.scale ?? 1;
-      const bound = Bound.deserialize(
-        (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
-          .xywh
-      );
-      const width = bound.w / scale;
-      const height = bound.h / scale;
-      containerStyleMap = styleMap({
-        width: `${width}px`,
-        height: `${editorMode === 'page' && isEditing ? `max-content` : `${height}px`}`,
-        minHeight: `${height}px`,
-        transform: `scale(${scale})`,
-        transformOrigin: '0 0',
-      });
-    }
-
-    const theme = getThemeMode();
-    const isSelected = !!this.selected?.is('block');
-    const scale = isInSurface ? this.model.scale ?? 1 : undefined;
-
-    this.dataset.nestedEditor = '';
-
-    return this.renderEmbed(
-      () => html`
-        <div
-          class=${classMap({
-            'affine-embed-synced-doc-container': true,
-            [editorMode]: true,
-            [theme]: true,
-            selected: isSelected,
-            editing: isEditing,
-            surface: isInSurface,
-          })}
-          style=${containerStyleMap}
-          @pointerdown=${this._handlePointerDown}
-          ?data-scale=${scale}
-        >
-          <div class="affine-embed-synced-doc-editor">
-            ${choose(editorMode, [
-              [
-                'page',
-                () => html`
-                  <div class="affine-page-viewport">
-                    ${this.host.renderSpecPortal(
-                      syncedDoc,
-                      SpecProvider.getInstance().getSpec('page:preview').value
-                    )}
-                  </div>
-                `,
-              ],
-              [
-                'edgeless',
-                () => html`
-                  <div class="affine-edgeless-viewport">
-                    ${this.host.renderSpecPortal(
-                      syncedDoc,
-                      SpecProvider.getInstance().getSpec('edgeless:preview')
-                        .value
-                    )}
-                  </div>
-                `,
-              ],
-            ])}
-            ${isEmpty && !isEditing && editorMode === 'page'
-              ? html`
-                  <div class="affine-embed-synced-doc-editor-empty">
-                    <span>
-                      This is a linked doc, you can add content here.
-                    </span>
-                  </div>
-                `
-              : nothing}
-          </div>
-
-          ${isInSurface && !isEditing
-            ? html`
-                <div
-                  class="affine-embed-synced-doc-editor-overlay"
-                  @dblclick=${this._handleOverlayDblClick}
-                ></div>
-              `
-            : nothing}
-        </div>
-
-        ${this.isInSurface ? nothing : Object.values(this.widgets)}
-      `
-    );
+    return this._renderSyncedView();
   }
 }
