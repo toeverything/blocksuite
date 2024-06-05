@@ -12,7 +12,6 @@ import {
   offset,
   type Rect,
   shift,
-  size,
 } from '@floating-ui/dom';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -77,7 +76,7 @@ export class AffineAIPanelWidget extends WidgetElement {
       padding: 12px 0;
     }
 
-    :host([data-hidden]) {
+    :host([data-state='hidden']) {
       display: none;
     }
   `;
@@ -307,30 +306,23 @@ export class AffineAIPanelWidget extends WidgetElement {
       rootBoundary: rootBoundary,
     };
 
-    const sizeMiddlewareInEdgeless = size({
-      ...overflowOptions,
-      apply: ({ elements, availableHeight }) => {
-        elements.floating.style.maxHeight = `${availableHeight}px`;
-      },
-    });
-
     // block element in page editor
     if (getPageRootByElement(reference)) {
       return {
         placement: 'bottom-start',
-        middleware: [shift(overflowOptions)],
+        middleware: [offset(8), shift(overflowOptions)],
       };
     }
     // block element in doc in edgeless editor
     else if (reference.closest('edgeless-block-portal-note')) {
       return {
         middleware: [
+          offset(8),
           shift(overflowOptions),
           autoPlacement({
             ...overflowOptions,
             allowedPlacements: ['top-start', 'bottom-start'],
           }),
-          sizeMiddlewareInEdgeless,
         ],
       };
     }
@@ -350,13 +342,24 @@ export class AffineAIPanelWidget extends WidgetElement {
             crossAxis: true,
             ...overflowOptions,
           }),
-          sizeMiddlewareInEdgeless,
         ],
       };
     }
   }
 
   private _autoUpdatePosition(reference: Element) {
+    // workaround for the case that the reference contains children block elements, like:
+    // paragraph
+    //    child paragraph
+    {
+      const childrenContainer = reference.querySelector(
+        '.affine-block-children-container'
+      );
+      if (childrenContainer && childrenContainer.previousElementSibling) {
+        reference = childrenContainer.previousElementSibling;
+      }
+    }
+
     this._stopAutoUpdate?.();
     this._stopAutoUpdate = autoUpdate(reference, this, () => {
       computePosition(reference, this, this._calcPositionOptions(reference))
@@ -486,14 +489,13 @@ export class AffineAIPanelWidget extends WidgetElement {
     } else {
       this.viewportOverlayWidget?.unlock();
     }
+
+    this.dataset.state = this.state;
   }
 
   override render() {
     if (this.state === 'hidden') {
-      this.dataset.hidden = '';
       return nothing;
-    } else {
-      delete this.dataset.hidden;
     }
 
     if (!this.config) return nothing;
