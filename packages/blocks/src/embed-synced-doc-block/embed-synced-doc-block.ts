@@ -428,7 +428,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     this.dataset.nestedEditor = '';
 
     const renderEditor = () => {
-      console.log('-rerender-editor-');
       return choose(editorMode, [
         [
           'page',
