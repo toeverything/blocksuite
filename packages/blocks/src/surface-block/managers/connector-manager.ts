@@ -929,7 +929,7 @@ export class ConnectionOverlay extends Overlay {
       }
     }
 
-    if (target && target instanceof GroupElementModel) {
+    if (target instanceof GroupElementModel) {
       this.targetBounds = Bound.deserialize(target.xywh);
     } else {
       this.targetBounds = null;

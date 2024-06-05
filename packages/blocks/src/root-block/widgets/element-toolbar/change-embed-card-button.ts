@@ -19,6 +19,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { join } from 'lit/directives/join.js';
 
 import { toggleEmbedCardEditModal } from '../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
+import { isPeekable, peek } from '../../../_common/components/index.js';
 import { toast } from '../../../_common/components/toast.js';
 import {
   EMBED_CARD_HEIGHT,
@@ -30,6 +31,7 @@ import {
 } from '../../../_common/icons/edgeless.js';
 import {
   CaptionIcon,
+  CenterPeekIcon,
   CopyIcon,
   EditIcon,
   EmbedEdgelessIcon,
@@ -386,6 +388,11 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._blockElement?.open();
   };
 
+  private _peek = () => {
+    if (!this._blockElement) return;
+    peek(this._blockElement);
+  };
+
   private _showCaption() {
     this._blockElement?.captionEditor.show();
   }
@@ -599,6 +606,19 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               @click=${this._open}
             >
               ${OpenIcon}
+            </edgeless-tool-icon-button>
+          `
+        : nothing,
+
+      this._blockElement && isPeekable(this._blockElement)
+        ? html`
+            <edgeless-tool-icon-button
+              arai-label="Center peek"
+              .tooltip=${'Center peek'}
+              class="change-embed-card-button center-peek"
+              @click=${this._peek}
+            >
+              ${CenterPeekIcon}
             </edgeless-tool-icon-button>
           `
         : nothing,

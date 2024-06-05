@@ -4,6 +4,7 @@ import '../../../_common/components/tooltip/tooltip.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { html, type TemplateResult } from 'lit';
 
+import { getBlockProps } from '../../../_common/utils/block-props.js';
 import { isInsidePageEditor } from '../../../_common/utils/query.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import type {
@@ -101,9 +102,7 @@ export function duplicate(
   abortController?: AbortController
 ) {
   const model = blockElement.model;
-  const keys = model.keys as (keyof typeof model)[];
-  const values = keys.map(key => model[key]);
-  const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
+  const blockProps = getBlockProps(model);
   const { width, height, xywh, rotate, zIndex, ...duplicateProps } = blockProps;
 
   const { doc } = model;

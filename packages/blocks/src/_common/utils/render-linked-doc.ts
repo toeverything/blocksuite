@@ -11,10 +11,19 @@ import { css, render, type TemplateResult } from 'lit';
 import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
+import type { NoteBlockModel } from '../../note-block/note-model.js';
+import { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
+import {
+  getElementProps,
+  sortEdgelessElements,
+} from '../../root-block/edgeless/utils/clone-utils.js';
+import { isNoteBlock } from '../../root-block/edgeless/utils/query.js';
 import { SpecProvider } from '../../specs/utils/spec-provider.js';
 import { Bound, getCommonBound } from '../../surface-block/utils/bound.js';
+import { getSurfaceBlock } from '../../surface-ref-block/utils.js';
 import { EMBED_CARD_HEIGHT } from '../consts.js';
 import { NoteDisplayMode } from '../types.js';
+import { getBlockProps } from './block-props.js';
 import { matchFlavours } from './model.js';
 
 export const embedNoteContentStyles = css`
@@ -121,7 +130,6 @@ function getNotesFromDoc(linkedDoc: Doc) {
   );
 
   if (!note || !note.length) {
-    console.log('No note block found in linked doc.');
     return null;
   }
 
@@ -346,18 +354,15 @@ async function renderImageAbstract(
   card.isBannerEmpty = false;
 }
 
-function moveBlocksToLinkedDoc(
-  doc: Doc,
-  linkedDoc: Doc,
+export function addBlocksToDoc(
+  targetDoc: Doc,
   model: BlockModel,
   parentId: string
 ) {
   // Add current block to linked doc
-  const keys = model.keys as (keyof typeof model)[];
-  const values = keys.map(key => model[key]);
-  const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
-  const newModelId = linkedDoc.addBlock(
-    model.flavour as never,
+  const blockProps = getBlockProps(model);
+  const newModelId = targetDoc.addBlock(
+    model.flavour as BlockSuite.Flavour,
     blockProps,
     parentId
   );
@@ -365,60 +370,135 @@ function moveBlocksToLinkedDoc(
   const children = model.children;
   if (children.length > 0) {
     children.forEach(child => {
-      moveBlocksToLinkedDoc(doc, linkedDoc, child, newModelId);
+      addBlocksToDoc(targetDoc, child, newModelId);
     });
   }
-  // Delete current block from original doc
-  doc.deleteBlock(model);
 }
 
-export function createLinkedDocFromSelectedBlocks(
+export function convertSelectedBlocksToLinkedDoc(
   doc: Doc,
-  selectedModels: BlockModel[]
+  selectedModels: BlockModel[],
+  docTitle?: string
+) {
+  const firstBlock = selectedModels[0];
+  assertExists(firstBlock);
+  // if title undefined, use the first heading block content as doc title
+  let title = docTitle;
+  let blocks = selectedModels;
+  if (
+    !docTitle &&
+    matchFlavours(firstBlock, ['affine:paragraph']) &&
+    firstBlock.type.match(/^h[1-6]$/)
+  ) {
+    title = firstBlock.text.toString();
+    blocks = selectedModels.slice(1);
+  }
+  const linkedDoc = createLinkedDocFromBlocks(doc, blocks, title);
+  // insert linked doc card
+  doc.addSiblingBlocks(
+    firstBlock,
+    [
+      {
+        flavour: 'affine:embed-linked-doc',
+        pageId: linkedDoc.id,
+      },
+    ],
+    'before'
+  );
+  // delete selected elements
+  selectedModels.forEach(model => doc.deleteBlock(model));
+  return linkedDoc;
+}
+
+export function createLinkedDocFromBlocks(
+  doc: Doc,
+  blocks: BlockModel[],
+  docTitle?: string
 ) {
   const linkedDoc = doc.collection.createDoc({});
   linkedDoc.load(() => {
     const rootId = linkedDoc.addBlock('affine:page', {
-      title: new doc.Text(''),
+      title: new doc.Text(docTitle),
     });
     linkedDoc.addBlock('affine:surface', {}, rootId);
     const noteId = linkedDoc.addBlock('affine:note', {}, rootId);
+    // Move blocks to linked doc recursively
+    blocks.forEach(model => {
+      addBlocksToDoc(linkedDoc, model, noteId);
+    });
+  });
+  return linkedDoc;
+}
 
-    const firstBlock = selectedModels[0];
-    assertExists(firstBlock);
-
-    doc.addSiblingBlocks(
-      firstBlock,
-      [
-        {
-          flavour: 'affine:embed-linked-doc',
-          pageId: linkedDoc.id,
-        },
-      ],
-      'before'
+export function createLinkedDocFromNote(
+  doc: Doc,
+  note: NoteBlockModel,
+  docTitle?: string
+) {
+  const linkedDoc = doc.collection.createDoc({});
+  linkedDoc.load(() => {
+    const rootId = linkedDoc.addBlock('affine:page', {
+      title: new doc.Text(docTitle),
+    });
+    linkedDoc.addBlock('affine:surface', {}, rootId);
+    const blockProps = getBlockProps(note);
+    // keep note props & show in both mode
+    const noteId = linkedDoc.addBlock(
+      'affine:note',
+      {
+        ...blockProps,
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      rootId
     );
+    // Add note to linked doc recursively
+    note.children.forEach(model => {
+      addBlocksToDoc(linkedDoc, model, noteId);
+    });
+  });
 
-    if (
-      matchFlavours(firstBlock, ['affine:paragraph']) &&
-      firstBlock.type.match(/^h[1-6]$/)
-    ) {
-      const title = firstBlock.text.toString();
-      linkedDoc.collection.setDocMeta(linkedDoc.id, {
-        title,
-      });
+  return linkedDoc;
+}
 
-      const linkedDocRootModel = linkedDoc.getBlockById(rootId);
-      assertExists(linkedDocRootModel);
-      linkedDoc.updateBlock(linkedDocRootModel, {
-        title: new doc.Text(title),
-      });
+export function createLinkedDocFromEdgelessElements(
+  doc: Doc,
+  elements: BlockSuite.EdgelessModelType[],
+  docTitle?: string
+) {
+  const linkedDoc = doc.collection.createDoc({});
+  linkedDoc.load(() => {
+    const rootId = linkedDoc.addBlock('affine:page', {
+      title: new doc.Text(docTitle),
+    });
+    const surfaceId = linkedDoc.addBlock('affine:surface', {}, rootId);
+    const surface = getSurfaceBlock(linkedDoc);
+    if (!surface) return;
 
-      doc.deleteBlock(firstBlock);
-      selectedModels.shift();
-    }
-    // Add selected blocks to linked doc recursively
-    selectedModels.forEach(model => {
-      moveBlocksToLinkedDoc(doc, linkedDoc, model, noteId);
+    const sortedElements = sortEdgelessElements(elements);
+    const ids: Map<string, string> = new Map();
+    sortedElements.forEach(model => {
+      let newId = model.id;
+      if (model instanceof EdgelessBlockModel) {
+        const blockProps = getBlockProps(model);
+        if (isNoteBlock(model)) {
+          newId = linkedDoc.addBlock('affine:note', blockProps, rootId);
+          // Add note children to linked doc recursively
+          model.children.forEach(model => {
+            addBlocksToDoc(linkedDoc, model, newId);
+          });
+        } else {
+          newId = linkedDoc.addBlock(
+            model.flavour as BlockSuite.Flavour,
+            blockProps,
+            surfaceId
+          );
+        }
+      } else {
+        const props = getElementProps(model, ids);
+        newId = surface.addElement(props);
+      }
+      ids.set(model.id, newId);
     });
   });
 

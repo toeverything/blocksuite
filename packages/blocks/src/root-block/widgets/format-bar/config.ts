@@ -27,7 +27,7 @@ import {
   TextIcon,
   UnderlineIcon,
 } from '../../../_common/icons/index.js';
-import { createLinkedDocFromSelectedBlocks } from '../../../_common/utils/render-linked-doc.js';
+import { convertSelectedBlocksToLinkedDoc } from '../../../_common/utils/render-linked-doc.js';
 import type { AffineFormatBarWidget } from './format-bar.js';
 
 export type DividerConfigItem = {
@@ -184,10 +184,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
         host.selection.clear();
 
         const doc = host.doc;
-        const linkedDoc = createLinkedDocFromSelectedBlocks(
-          doc,
-          selectedModels
-        );
+        const linkedDoc = convertSelectedBlocksToLinkedDoc(doc, selectedModels);
         const linkedDocService = host.spec.getService(
           'affine:embed-linked-doc'
         );

@@ -838,7 +838,7 @@ test.describe('quick connect', () => {
         [200, 100],
       ]);
 
-      // move to element within gorup 1
+      // move to elements within group 1
       await moveView(page, [190, 150]);
       await waitNextFrame(page);
 
@@ -860,7 +860,7 @@ test.describe('quick connect', () => {
       // click button
       await triggerComponentToolbarAction(page, 'quickConnect');
 
-      // move to element within gorup 2
+      // move to elements within group 2
       await moveView(page, [610, 50]);
       await waitNextFrame(page);
 

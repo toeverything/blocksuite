@@ -35,7 +35,7 @@ import {
   isMindMapRoot,
 } from '../utils/edgeless.js';
 import { copyTextAnswer } from '../utils/editor-actions.js';
-import { getMarkdownFromSlice } from '../utils/markdown-utils.js';
+import { getContentFromSlice } from '../utils/markdown-utils.js';
 import {
   getCopilotSelectedElems,
   getSelectedNoteAnchor,
@@ -128,7 +128,7 @@ export async function getContentFromSelected(
     await Promise.all(
       notes.map(note => {
         const slice = Slice.fromModels(host.doc, note.children);
-        return getMarkdownFromSlice(host, slice);
+        return getContentFromSlice(host, slice);
       })
     )
   )
