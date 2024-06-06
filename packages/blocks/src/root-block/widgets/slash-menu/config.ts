@@ -53,7 +53,6 @@ import { onModelTextUpdated } from '../../../root-block/utils/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
 import { getSurfaceBlock } from '../../../surface-ref-block/utils.js';
 import type { RootBlockComponent } from '../../types.js';
-import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import { type SlashMenuTooltip, slashMenuToolTips } from './tooltips.js';
 import {
   createDatabaseBlockInNextLine,
@@ -252,33 +251,41 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       icon: LinkedDocIcon,
       tooltip: slashMenuToolTips['Linked Doc'],
       alias: ['dual link'],
-      showWhen: ({ rootElement }) => {
-        const linkedDocWidgetEle =
-          rootElement.widgetElements['affine-linked-doc-widget'];
-        if (!linkedDocWidgetEle) return false;
-        if (!('showLinkedDoc' in linkedDocWidgetEle)) {
-          console.warn(
-            'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
-          );
-          return false;
+      showWhen: ({ model, rootElement }) =>
+        model.doc.schema.flavourSchemaMap.has('affine:embed-linked-doc') &&
+        !insideDatabase(model) &&
+        !!rootElement.service.quickSearchService,
+      action: async ({ model, rootElement }) => {
+        const { host, service, std } = rootElement;
+        const { quickSearchService } = service;
+        assertExists(quickSearchService);
+
+        const result = await quickSearchService.searchDoc({});
+        if (result === null) return;
+
+        if ('docId' in result) {
+          const linkedDoc = std.collection.getDoc(result.docId);
+          if (!linkedDoc) return;
+
+          host.doc.addSiblingBlocks(model, [
+            {
+              flavour: 'affine:embed-linked-doc',
+              pageId: linkedDoc.id,
+            },
+          ]);
+        } else if ('userInput' in result) {
+          const embedOptions = service.getEmbedBlockOptions(result.userInput);
+          if (!embedOptions) return;
+
+          host.doc.addSiblingBlocks(model, [
+            {
+              flavour: embedOptions.flavour,
+              url: result.userInput,
+            },
+          ]);
         }
-        return true;
-      },
-      action: ({ model, rootElement }) => {
-        const triggerKey = '@';
-        insertContent(rootElement.host, model, triggerKey);
-        assertExists(model.doc.root);
-        const widgetEle =
-          rootElement.widgetElements['affine-linked-doc-widget'];
-        assertExists(widgetEle);
-        // We have checked the existence of showLinkedDoc method in the showWhen
-        const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
-        // Wait for range to be updated
-        setTimeout(() => {
-          const inlineEditor = getInlineEditorByModel(rootElement.host, model);
-          assertExists(inlineEditor);
-          linkedDocWidget.showLinkedDoc(inlineEditor, triggerKey);
-        });
+
+        tryRemoveEmptyLine(model);
       },
     },
 
@@ -313,21 +320,38 @@ export const defaultSlashMenuConfig: SlashMenuConfig = {
       description: 'Add a bookmark for reference.',
       icon: LinkIcon,
       tooltip: slashMenuToolTips['Link'],
-      showWhen: ({ model }) =>
-        model.doc.schema.flavourSchemaMap.has('affine:bookmark') &&
-        !insideDatabase(model),
-      action: async ({ rootElement, model }) => {
-        const parentModel = rootElement.doc.getParent(model);
-        if (!parentModel) {
-          return;
+      showWhen: ({ model, rootElement }) =>
+        !insideDatabase(model) && !!rootElement.service.quickSearchService,
+      action: async ({ model, rootElement }) => {
+        const { host, service, std } = rootElement;
+        const { quickSearchService } = service;
+        assertExists(quickSearchService);
+
+        const result = await quickSearchService.searchDoc({});
+        if (result === null) return;
+
+        if ('docId' in result) {
+          const linkedDoc = std.collection.getDoc(result.docId);
+          if (!linkedDoc) return;
+
+          host.doc.addSiblingBlocks(model, [
+            {
+              flavour: 'affine:embed-linked-doc',
+              pageId: linkedDoc.id,
+            },
+          ]);
+        } else if ('userInput' in result) {
+          const embedOptions = service.getEmbedBlockOptions(result.userInput);
+          if (!embedOptions) return;
+
+          host.doc.addSiblingBlocks(model, [
+            {
+              flavour: embedOptions.flavour,
+              url: result.userInput,
+            },
+          ]);
         }
-        const index = parentModel.children.indexOf(model) + 1;
-        await toggleEmbedCardCreateModal(
-          rootElement.host,
-          'Links',
-          'The added link will be displayed as a card view.',
-          { mode: 'page', parentModel, index }
-        );
+
         tryRemoveEmptyLine(model);
       },
     },
