@@ -15,6 +15,7 @@ import {
   getBezierNearestTime,
   getBezierParameters,
   getBezierPoint,
+  intersects,
 } from '../utils/curve.js';
 import {
   linePolylineIntersects,
@@ -292,17 +293,16 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
       return true;
     }
 
+    const { mode, strokeWidth, absolutePath: path } = this;
+
     const point =
-      this.mode === ConnectorMode.Curve
-        ? getBezierNearestPoint(
-            getBezierParameters(this.absolutePath),
-            currentPoint
-          )
-        : polyLineNearestPoint(this.absolutePath, currentPoint);
+      mode === ConnectorMode.Curve
+        ? getBezierNearestPoint(getBezierParameters(path), currentPoint)
+        : polyLineNearestPoint(path, currentPoint);
 
     return (
       Vec.dist(point, currentPoint) <
-      (options?.expand ? this.strokeWidth / 2 : 0) + 8
+      (options?.expand ? strokeWidth / 2 : 0) + 8
     );
   }
 
@@ -317,7 +317,15 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   }
 
   override intersectWithLine(start: IVec2, end: IVec2) {
-    let intersected = linePolylineIntersects(start, end, this.absolutePath);
+    const { mode, absolutePath: path } = this;
+
+    let intersected = null;
+
+    if (mode === ConnectorMode.Curve && path.length > 1) {
+      intersected = intersects(path, [start, end]);
+    } else {
+      intersected = linePolylineIntersects(start, end, path);
+    }
 
     if (!intersected && this.hasLabel()) {
       intersected = linePolylineIntersects(

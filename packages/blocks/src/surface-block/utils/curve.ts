@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import { Bound } from './bound.js';
 import { CURVETIME_EPSILON, isZero } from './math-utils.js';
-import type { PointLocation } from './point-location.js';
+import { PointLocation } from './point-location.js';
 import { type IVec, Vec } from './vec.js';
 
 // control coords are not relative to start or end
@@ -257,4 +257,145 @@ export function getBezierCurveBoundingBox(values: BezierCurveParameters) {
   const bottom = Math.max.apply(null, bounds[1]);
 
   return new Bound(left, top, right - left, bottom - top);
+}
+
+// https://pomax.github.io/bezierjs/#intersect-line
+// MIT Licence
+
+// cube root function yielding real roots
+function crt(v: number) {
+  return v < 0 ? -Math.pow(-v, 1 / 3) : Math.pow(v, 1 / 3);
+}
+
+function align(points: BezierCurveParameters, [start, end]: IVec[]) {
+  const tx = start[0],
+    ty = start[1],
+    a = -Math.atan2(end[1] - ty, end[0] - tx),
+    d = function ([x, y]: IVec) {
+      return [
+        (x - tx) * Math.cos(a) - (y - ty) * Math.sin(a),
+        (x - tx) * Math.sin(a) + (y - ty) * Math.cos(a),
+      ];
+    };
+  return points.map(d);
+}
+
+function between(v: number, min: number, max: number) {
+  return (
+    (min <= v && v <= max) || approximately(v, min) || approximately(v, max)
+  );
+}
+
+function approximately(
+  a: number,
+  b: number,
+  precision?: number,
+  epsilon = 0.000001
+) {
+  return Math.abs(a - b) <= (precision || epsilon);
+}
+
+function roots(points: BezierCurveParameters, line: IVec[]) {
+  const order = points.length - 1;
+  const aligned = align(points, line);
+  const reduce = function (t: number) {
+    return 0 <= t && t <= 1;
+  };
+
+  if (order === 2) {
+    const a = aligned[0][1],
+      b = aligned[1][1],
+      c = aligned[2][1],
+      d = a - 2 * b + c;
+    if (d !== 0) {
+      const m1 = -Math.sqrt(b * b - a * c),
+        m2 = -a + b,
+        v1 = -(m1 + m2) / d,
+        v2 = -(-m1 + m2) / d;
+      return [v1, v2].filter(reduce);
+    } else if (b !== c && d === 0) {
+      return [(2 * b - c) / (2 * b - 2 * c)].filter(reduce);
+    }
+    return [];
+  }
+
+  // see http://www.trans4mind.com/personal_development/mathematics/polynomials/cubicAlgebra.htm
+  const pa = aligned[0][1],
+    pb = aligned[1][1],
+    pc = aligned[2][1],
+    pd = aligned[3][1];
+
+  const d = -pa + 3 * pb - 3 * pc + pd;
+  let a = 3 * pa - 6 * pb + 3 * pc,
+    b = -3 * pa + 3 * pb,
+    c = pa;
+
+  if (approximately(d, 0)) {
+    // this is not a cubic curve.
+    if (approximately(a, 0)) {
+      // in fact, this is not a quadratic curve either.
+      if (approximately(b, 0)) {
+        // in fact in fact, there are no solutions.
+        return [];
+      }
+      // linear solution:
+      return [-c / b].filter(reduce);
+    }
+    // quadratic solution:
+    const q = Math.sqrt(b * b - 4 * a * c),
+      a2 = 2 * a;
+    return [(q - b) / a2, (-b - q) / a2].filter(reduce);
+  }
+
+  // at this point, we know we need a cubic solution:
+
+  a /= d;
+  b /= d;
+  c /= d;
+
+  const p = (3 * b - a * a) / 3,
+    p3 = p / 3,
+    q = (2 * a * a * a - 9 * a * b + 27 * c) / 27,
+    q2 = q / 2,
+    discriminant = q2 * q2 + p3 * p3 * p3;
+
+  let u1, v1, x1, x2, x3;
+  if (discriminant < 0) {
+    const mp3 = -p / 3,
+      mp33 = mp3 * mp3 * mp3,
+      r = Math.sqrt(mp33),
+      t = -q / (2 * r),
+      cosphi = t < -1 ? -1 : t > 1 ? 1 : t,
+      phi = Math.acos(cosphi),
+      crtr = crt(r),
+      t1 = 2 * crtr;
+    x1 = t1 * Math.cos(phi / 3) - a / 3;
+    x2 = t1 * Math.cos((phi + Math.PI * 2) / 3) - a / 3;
+    x3 = t1 * Math.cos((phi + 2 * Math.PI * 2) / 3) - a / 3;
+    return [x1, x2, x3].filter(reduce);
+  } else if (discriminant === 0) {
+    u1 = q2 < 0 ? crt(-q2) : -crt(q2);
+    x1 = 2 * u1 - a / 3;
+    x2 = -u1 - a / 3;
+    return [x1, x2].filter(reduce);
+  } else {
+    const sd = Math.sqrt(discriminant);
+    u1 = crt(-q2 + sd);
+    v1 = crt(q2 + sd);
+    return [u1 - v1 - a / 3].filter(reduce);
+  }
+}
+
+export function intersects(path: PointLocation[], line: [IVec, IVec]) {
+  const { minX, maxX, minY, maxY } = Bound.fromPoints(line);
+  const points = getBezierParameters(path);
+  const intersectedPoints = roots(points, line)
+    .map(t => getBezierPoint(points, t))
+    .filter(point =>
+      point
+        ? between(point[0], minX, maxX) && between(point[1], minY, maxY)
+        : false
+    )
+    .map(point => new PointLocation(point!));
+  return intersectedPoints.length > 0 ? intersectedPoints : null;
 }
