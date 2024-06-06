@@ -318,7 +318,6 @@ function updateEdgelessAIPanelConfig<
     },
   };
   config.discardCallback = () => {
-    aiPanel.hide();
     reportResponse('result:discard');
   };
   config.hideCallback = () => {
@@ -328,6 +327,7 @@ function updateEdgelessAIPanelConfig<
           elements: [],
           editing: false,
         });
+        host.selection.clear();
         edgelessCopilot.lockToolbar(false);
       })
       .catch(console.error);

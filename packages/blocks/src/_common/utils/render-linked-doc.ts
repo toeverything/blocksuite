@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -104,6 +105,32 @@ export const embedNoteContentStyles = css`
     }
   }
 `;
+
+export function promptDocTitle(host: EditorHost, autofill?: string) {
+  const notification =
+    host.std.spec.getService('affine:page').notificationService;
+  if (!notification) return Promise.resolve(undefined);
+
+  return notification.prompt({
+    title: 'Create linked doc',
+    message: 'Enter a title for the new doc.',
+    placeholder: 'Untitled',
+    autofill,
+    confirmText: 'Confirm',
+    cancelText: 'Cancel',
+  });
+}
+
+export function getTitleFromSelectedModels(selectedModels: BlockModel[]) {
+  const firstBlock = selectedModels[0];
+  if (
+    matchFlavours(firstBlock, ['affine:paragraph']) &&
+    firstBlock.type.startsWith('h')
+  ) {
+    return firstBlock.text.toString();
+  }
+  return undefined;
+}
 
 export function renderLinkedDocInCard(
   card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
@@ -383,17 +410,8 @@ export function convertSelectedBlocksToLinkedDoc(
   const firstBlock = selectedModels[0];
   assertExists(firstBlock);
   // if title undefined, use the first heading block content as doc title
-  let title = docTitle;
-  let blocks = selectedModels;
-  if (
-    !docTitle &&
-    matchFlavours(firstBlock, ['affine:paragraph']) &&
-    firstBlock.type.match(/^h[1-6]$/)
-  ) {
-    title = firstBlock.text.toString();
-    blocks = selectedModels.slice(1);
-  }
-  const linkedDoc = createLinkedDocFromBlocks(doc, blocks, title);
+  const title = docTitle || getTitleFromSelectedModels(selectedModels);
+  const linkedDoc = createLinkedDocFromBlocks(doc, selectedModels, title);
   // insert linked doc card
   doc.addSiblingBlocks(
     firstBlock,

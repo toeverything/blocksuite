@@ -296,6 +296,50 @@ class PasteTr {
 
     this._mergeMultiple();
   }
+
+  convertToLinkedDoc = async (std: EditorHost['std']) => {
+    const quickSearchService =
+      std.spec.getService('affine:page').quickSearchService;
+
+    if (!quickSearchService) {
+      return;
+    }
+
+    const linkToDocId = new Map<string, string | null>();
+
+    for (const blockSnapshot of this.snapshot.content) {
+      if (blockSnapshot.props.text) {
+        const text = this._textFromSnapshot(blockSnapshot);
+        for (const op of text.delta) {
+          if (op.attributes?.link) {
+            let docId = linkToDocId.get(op.attributes.link);
+            if (docId === undefined) {
+              const searchResult = await quickSearchService.searchDoc({
+                userInput: op.attributes.link,
+                skipSelection: true,
+                action: 'insert',
+              });
+              if (searchResult && 'docId' in searchResult) {
+                const doc = std.collection.getDoc(searchResult.docId);
+                if (doc) {
+                  docId = doc.id;
+                  linkToDocId.set(op.attributes.link, doc.id);
+                }
+              }
+            }
+            if (docId) {
+              op.attributes.reference = {
+                pageId: docId,
+                type: 'LinkedPage',
+              };
+              op.insert = ' ';
+              delete op.attributes.link;
+            }
+          }
+        }
+      }
+    }
+  };
 }
 
 function flatNote(snapshot: SliceSnapshot) {
@@ -307,7 +351,7 @@ function flatNote(snapshot: SliceSnapshot) {
 export const pasteMiddleware = (std: EditorHost['std']): JobMiddleware => {
   return ({ slots }) => {
     let tr: PasteTr | undefined;
-    slots.beforeImport.on(payload => {
+    slots.beforeImport.on(async payload => {
       if (payload.type === 'slice') {
         const { snapshot } = payload;
         flatNote(snapshot);
@@ -320,6 +364,7 @@ export const pasteMiddleware = (std: EditorHost['std']): JobMiddleware => {
         if (tr.canMerge()) {
           tr.merge();
         }
+        await tr.convertToLinkedDoc(std);
       }
     });
     slots.afterImport.on(payload => {

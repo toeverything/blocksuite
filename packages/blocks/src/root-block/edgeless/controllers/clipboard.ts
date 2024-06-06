@@ -268,28 +268,50 @@ export class EdgelessClipboardController extends PageClipboard {
         lastMousePos.y
       );
 
+      // try interpret url as affine doc url
+      const doc = await this._rootService.quickSearchService?.searchDoc({
+        action: 'insert',
+        userInput: url,
+        skipSelection: true,
+      });
+
+      const pageId = doc && 'docId' in doc ? doc.docId : undefined;
+
       const embedOptions = this._rootService.getEmbedBlockOptions(url);
-      const flavour = embedOptions
-        ? (embedOptions.flavour as EdgelessElementType)
-        : 'affine:bookmark';
-      const style = embedOptions ? embedOptions.styles[0] : BookmarkStyles[0];
+      const flavour = pageId
+        ? 'affine:embed-linked-doc'
+        : embedOptions
+          ? (embedOptions.flavour as EdgelessElementType)
+          : 'affine:bookmark';
+      const style = pageId
+        ? 'vertical'
+        : embedOptions
+          ? embedOptions.styles[0]
+          : BookmarkStyles[0];
       const width = EMBED_CARD_WIDTH[style];
       const height = EMBED_CARD_HEIGHT[style];
 
+      const options: Record<string, unknown> = {
+        xywh: Bound.fromCenter(
+          Vec.toVec({
+            x,
+            y,
+          }),
+          width,
+          height
+        ).serialize(),
+        style,
+      };
+
+      if (pageId) {
+        options.pageId = pageId;
+      } else {
+        options.url = url;
+      }
+
       const id = this.host.service.addBlock(
         flavour,
-        {
-          xywh: Bound.fromCenter(
-            Vec.toVec({
-              x,
-              y,
-            }),
-            width,
-            height
-          ).serialize(),
-          url,
-          style,
-        },
+        options,
         this.surface.model.id
       );
 

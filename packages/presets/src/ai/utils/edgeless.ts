@@ -1,10 +1,11 @@
-import type { EditorHost } from '@blocksuite/block-std';
+import type { BlockElement, EditorHost } from '@blocksuite/block-std';
 import type {
   EdgelessCopilotWidget,
   EdgelessRootService,
 } from '@blocksuite/blocks';
 import {
   AFFINE_EDGELESS_COPILOT_WIDGET,
+  matchFlavours,
   MindmapElementModel,
   type ShapeElementModel,
 } from '@blocksuite/blocks';
@@ -58,4 +59,18 @@ export function getEdgelessCopilotWidget(
   ) as EdgelessCopilotWidget;
 
   return copilotWidget;
+}
+
+export function findNoteBlockModel(blockElement: BlockElement) {
+  let curBlock = blockElement;
+  while (curBlock) {
+    if (matchFlavours(curBlock.model, ['affine:note'])) {
+      return curBlock.model;
+    }
+    if (matchFlavours(curBlock.model, ['affine:page', 'affine:surface'])) {
+      return null;
+    }
+    curBlock = curBlock.parentBlockElement;
+  }
+  return null;
 }

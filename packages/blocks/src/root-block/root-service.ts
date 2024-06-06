@@ -68,7 +68,7 @@ export type QuickSearchResult =
 
 export interface QuickSearchService {
   searchDoc: (options: {
-    action: 'insert';
+    action?: 'insert';
     userInput?: string;
     skipSelection?: boolean;
   }) => Promise<QuickSearchResult>;
@@ -368,7 +368,7 @@ export class RootService extends BlockService<RootBlockModel> {
   };
 
   private _insertDoc = (docId: string) => {
-    const flavour = 'affine:embed-synced-doc';
+    const flavour = 'affine:embed-linked-doc';
     const targetStyle: EmbedCardStyle = 'vertical';
     const props: Record<string, unknown> = { pageId: docId };
 
