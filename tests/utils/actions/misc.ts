@@ -1410,3 +1410,32 @@ export async function scrollToBottom(page: Page) {
     );
   });
 }
+
+export async function mockQuickSearch(
+  page: Page,
+  mapping: Record<string, string> // query -> docId
+) {
+  // mock quick search service
+  await page.evaluate(mapping => {
+    window.host.std.spec.getService('affine:page').quickSearchService = {
+      searchDoc(options) {
+        return new Promise(resolve => {
+          if (!options.userInput) {
+            return resolve(null);
+          }
+
+          const docId = mapping[options.userInput];
+          if (!docId) {
+            return resolve({
+              userInput: options.userInput,
+            });
+          } else {
+            return resolve({
+              docId,
+            });
+          }
+        });
+      },
+    };
+  }, mapping);
+}

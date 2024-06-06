@@ -62,7 +62,7 @@ export class EdgelessPortalBase<T extends BlockModel> extends WithDisposable(
 
     this._disposables.add(
       this.model.propsUpdated.on(() => {
-        this.requestUpdate();
+        if (this.hasUpdated) this.requestUpdate();
       })
     );
   }

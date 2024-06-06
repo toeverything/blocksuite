@@ -5,20 +5,27 @@ import {
   createNote,
   createShapeElement,
   decreaseZoomLevel,
-  edgelessCommonSetup,
+  deleteAll,
   getAllSortedIds,
   getTypeById,
   Shape,
+  switchEditorMode,
   toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
   copyByKeyboard,
   edgelessCommonSetup as commonSetup,
+  enterPlaygroundRoom,
   expectConsoleMessage,
+  focusTitle,
+  getCurrentEditorDocId,
+  initEmptyEdgelessState,
+  mockQuickSearch,
   pasteByKeyboard,
   pasteContent,
   selectAllByKeyboard,
+  type,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import { assertConnectorPath, assertRichImage } from '../utils/asserts.js';
@@ -245,7 +252,7 @@ test.describe('group clipboard', () => {
 
   // FIX ME: paste position unexpected & redundant empty note
   test.skip('copy and paste group with frame inside', async ({ page }) => {
-    await edgelessCommonSetup(page);
+    await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createNote(page, [100, -100]);
     await page.mouse.click(10, 50);
@@ -273,7 +280,7 @@ test.describe('group clipboard', () => {
 
 test.describe('frame clipboard', () => {
   test('copy and paste frame with shape elements inside', async ({ page }) => {
-    await edgelessCommonSetup(page);
+    await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createNote(page, [100, -100]);
     await page.mouse.click(10, 50);
@@ -317,7 +324,7 @@ test.describe('frame clipboard', () => {
   });
 
   test('copy and paste frame with frame inside', async ({ page }) => {
-    await edgelessCommonSetup(page);
+    await commonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createNote(page, [100, -100]);
     await page.mouse.click(10, 50);
@@ -340,5 +347,63 @@ test.describe('frame clipboard', () => {
     await waitNextFrame(page, 500);
     const sortedIds = await getAllSortedIds(page);
     expect(sortedIds.length).toBe(10);
+  });
+});
+
+test.describe('pasting URLs', () => {
+  test('pasting github pr url', async ({ page }) => {
+    await commonSetup(page);
+    await waitNextFrame(page);
+    await pasteContent(page, {
+      'text/plain': 'https://github.com/toeverything/blocksuite/pull/7217',
+    });
+
+    await expect(page.locator('affine-embed-github-block')).toBeVisible();
+  });
+
+  test('pasting internal link', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await waitNextFrame(page);
+    await focusTitle(page);
+    const docId = await getCurrentEditorDocId(page);
+
+    await type(page, 'doc title');
+
+    await switchEditorMode(page);
+    await deleteAll(page);
+
+    await mockQuickSearch(page, {
+      'http://workspace/doc-id': docId,
+    });
+
+    await pasteContent(page, {
+      'text/plain': 'http://workspace/doc-id',
+    });
+
+    await expect(page.locator('affine-embed-linked-doc-block')).toBeVisible();
+
+    await expect(
+      page.locator('.affine-embed-linked-doc-content-title')
+    ).toHaveText('doc title');
+  });
+
+  test('pasting external link', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await waitNextFrame(page);
+    await focusTitle(page);
+
+    await type(page, 'doc title');
+
+    await switchEditorMode(page);
+    await deleteAll(page);
+    await waitNextFrame(page);
+
+    await pasteContent(page, {
+      'text/plain': 'https://affine.pro',
+    });
+
+    await expect(page.locator('bookmark-card')).toBeVisible();
   });
 });

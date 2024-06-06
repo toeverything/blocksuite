@@ -20,6 +20,7 @@ import {
   getClipboardSnapshot,
   getClipboardText,
   getCopyClipItemsInPage,
+  getCurrentEditorDocId,
   getEdgelessSelectedRectModel,
   getEditorLocator,
   getInlineSelectionIndex,
@@ -30,6 +31,7 @@ import {
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeParagraphs,
+  mockQuickSearch,
   pasteBlocks,
   pasteByKeyboard,
   pasteContent,
@@ -1311,6 +1313,23 @@ test(scoped`auto identify url`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test(scoped`pasting internal url`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+  await type(page, 'test page');
+
+  await focusRichText(page);
+  const docId = await getCurrentEditorDocId(page);
+  await mockQuickSearch(page, {
+    'http://workspace/doc-id': docId,
+  });
+  await pasteContent(page, {
+    'text/plain': 'http://workspace/doc-id',
+  });
+  await expect(page.locator('affine-reference')).toContainText('test page');
 });
 
 test(scoped`paste parent block`, async ({ page }) => {

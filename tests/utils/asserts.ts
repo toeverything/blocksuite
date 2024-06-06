@@ -234,18 +234,15 @@ export async function assertEdgelessCanvasText(page: Page, text: string) {
 
 export async function assertRichImage(page: Page, count: number) {
   const editor = getEditorLocator(page);
-  const actual = await editor.locator('.resizable-img').count();
-  expect(actual).toEqual(count);
+  await expect(editor.locator('.resizable-img')).toHaveCount(count);
 }
 
 export async function assertDivider(page: Page, count: number) {
-  const actual = await page.locator('affine-divider').count();
-  expect(actual).toEqual(count);
+  await expect(page.locator('affine-divider')).toHaveCount(count);
 }
 
 export async function assertRichDragButton(page: Page) {
-  const actual = await page.locator('.resize').count();
-  expect(actual).toEqual(4);
+  await expect(page.locator('.resize')).toHaveCount(4);
 }
 
 export async function assertImageSize(
@@ -295,12 +292,10 @@ export async function assertBlockCount(
   flavour: string,
   count: number
 ) {
-  const actual = await page.locator(`affine-${flavour}`).count();
-  expect(actual).toBe(count);
+  await expect(page.locator(`affine-${flavour}`)).toHaveCount(count);
 }
 export async function assertRowCount(page: Page, count: number) {
-  const actual = await page.locator('.affine-database-block-row').count();
-  expect(actual).toBe(count);
+  await expect(page.locator('.affine-database-block-row')).toHaveCount(count);
 }
 
 export async function assertRichTextInlineRange(
