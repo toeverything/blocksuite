@@ -1,5 +1,6 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 
+import { EdgelessTextBlockSpec } from '../edgeless-text/edgeless-text-spec.js';
 import { FrameBlockSpec } from '../frame-block/frame-spec.js';
 import {
   EdgelessRootBlockSpec,
@@ -15,6 +16,7 @@ export const EdgelessEditorBlockSpecs: BlockSpec[] = [
   EdgelessSurfaceBlockSpec,
   EdgelessSurfaceRefBlockSpec,
   FrameBlockSpec,
+  EdgelessTextBlockSpec,
 ];
 
 export const PreviewEdgelessEditorBlockSpecs: BlockSpec[] = [

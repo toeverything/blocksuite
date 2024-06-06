@@ -229,7 +229,7 @@ function edgelessHandler<T extends keyof BlockSuitePresets.AIActions>(
       const currentController = edgeless.tools.controllers[
         'copilot'
       ] as CopilotSelectionController;
-      const selectedElements = edgeless.service.selection.elements;
+      const selectedElements = edgeless.service.selection.selectedElements;
       currentController.updateDragPointsWith(selectedElements, 10);
       currentController.draggingAreaUpdated.emit(false); // do not show edgeless panel
 

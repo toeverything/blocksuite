@@ -380,9 +380,9 @@ export class Doc {
         model: block.model,
       });
 
-      block.model.dispose();
       this._blocks.delete(id);
       block.model.deleted.emit();
+      block.model.dispose();
     } catch (e) {
       console.error('An error occurred while removing block:');
       console.error(e);

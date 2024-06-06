@@ -5,6 +5,7 @@ import { property } from 'lit/decorators.js';
 import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
+import type { EdgelessBlockPortalContainer } from './edgeless-block-portal.js';
 
 export class EdgelessPortalBase<T extends BlockModel> extends WithDisposable(
   ShadowlessElement
@@ -26,6 +27,9 @@ export class EdgelessPortalBase<T extends BlockModel> extends WithDisposable(
 
   @property({ attribute: false })
   accessor concurrentUpdatingCount!: number;
+
+  @property({ attribute: false })
+  accessor portalContainer!: EdgelessBlockPortalContainer;
 
   protected renderModel(model: T) {
     return this.surface.host.renderModel(model);

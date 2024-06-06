@@ -50,6 +50,10 @@ export function createStarterDocCollection() {
     blobSources.shadows.push(new IndexedDBBlobSource(collectionId));
   }
 
+  const flags: Partial<BlockSuiteFlags> = Object.fromEntries(
+    [...params.entries()].filter(([key]) => key.startsWith('enable_'))
+  );
+
   const options: DocCollectionOptions = {
     id: collectionId,
     schema,
@@ -59,6 +63,7 @@ export function createStarterDocCollection() {
       enable_pie_menu: true,
       enable_lasso_tool: true,
       enable_mindmap_entry: true,
+      ...flags,
     },
     awarenessSources: [new BroadcastChannelAwarenessSource(id)],
     docSources,

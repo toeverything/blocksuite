@@ -17,6 +17,7 @@ import {
 } from '../../../_common/utils/iterable.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedHtmlModel } from '../../../embed-html-block/embed-html-model.js';
@@ -46,6 +47,7 @@ import { edgelessElementsBound } from '../../edgeless/utils/bound-utils.js';
 import {
   isAttachmentBlock,
   isBookmarkBlock,
+  isEdgelessTextBlock,
   isEmbeddedBlock,
   isFrameBlock,
   isImageBlock,
@@ -58,6 +60,7 @@ import { renderAlignButton } from './align-button.js';
 import { renderAttachmentButton } from './change-attachment-button.js';
 import { renderChangeBrushButton } from './change-brush-button.js';
 import { renderConnectorButton } from './change-connector-button.js';
+import { renderChangeEdgelessTextButton } from './change-edgeless-text-button.js';
 import { renderEmbedButton } from './change-embed-card-button.js';
 import { renderFrameButton } from './change-frame-button.js';
 import { renderGroupButton } from './change-group-button.js';
@@ -87,6 +90,7 @@ type CategorizedElements = {
     EmbedSyncedDocModel[] &
     EmbedHtmlModel[] &
     EmbedLoomModel[];
+  edgelessText?: EdgelessTextBlockModel[];
 };
 
 type CustomEntry = {
@@ -192,7 +196,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   }
 
   private _groupSelected(): CategorizedElements {
-    const result = groupBy(this.selection.elements, model => {
+    const result = groupBy(this.selection.selectedElements, model => {
       if (isNoteBlock(model)) {
         return 'note';
       } else if (isFrameBlock(model)) {
@@ -203,6 +207,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
         return 'attachment';
       } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
         return 'embedCard';
+      } else if (isEdgelessTextBlock(model)) {
+        return 'edgelessText';
       }
 
       return (model as BlockSuite.SurfaceElementModelType).type;
@@ -279,14 +285,14 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
 
   private _recalculatePosition() {
     const { selection, viewport } = this.edgeless.service;
-    const elements = selection.elements;
+    const elements = selection.selectedElements;
 
     if (elements.length === 0) {
       this.style.transform = 'translate3d(0, 0, 0)';
       return;
     }
 
-    const bound = edgelessElementsBound(elements);
+    const bound = edgelessElementsBound(selection.selectedElements);
 
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
@@ -302,7 +308,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     }
 
     let offset = 70;
-    if (elements.some(ele => isFrameBlock(ele))) {
+    if (this.selection.selectedElements.some(ele => isFrameBlock(ele))) {
       offset += 10;
     }
 
@@ -321,7 +327,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
   }
 
   private _quickConnect(e: MouseEvent) {
-    const element = this.selection.elements[0];
+    const element = this.selection.selectedElements[0];
     const point = this.edgeless.service.viewport.toViewPointFromClientPoint({
       x: e.x,
       y: e.y,
@@ -371,8 +377,9 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
       embedCard,
       attachment,
       image,
+      edgelessText,
     } = groupedSelected;
-    const { elements } = this.selection;
+    const { selectedElements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
       Object.values(groupedSelected),
       e => !!e.length,
@@ -380,16 +387,16 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     );
 
     const quickConnectButton =
-      elements.length === 1 && !connector?.length
+      selectedElements.length === 1 && !connector?.length
         ? this._renderQuickConnectButton()
         : undefined;
 
     const generalButtons =
-      elements.length !== connector?.length
+      selectedElements.length !== connector?.length
         ? [
-            renderAddFrameButton(edgeless, elements),
-            renderAddGroupButton(edgeless, elements),
-            renderAlignButton(edgeless, elements),
+            renderAddFrameButton(edgeless, selectedElements),
+            renderAddGroupButton(edgeless, selectedElements),
+            renderAlignButton(edgeless, selectedElements),
           ]
         : [];
 
@@ -403,6 +410,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           renderConnectorButton(edgeless, connector),
           renderNoteButton(edgeless, note, quickConnectButton),
           renderChangeTextButton(edgeless, text),
+          renderChangeEdgelessTextButton(edgeless, edgelessText),
           renderFrameButton(edgeless, frame),
           renderGroupButton(edgeless, group),
           renderEmbedButton(edgeless, embedCard, quickConnectButton),
@@ -410,7 +418,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           renderChangeImageButton(edgeless, image),
         ];
 
-    if (elements.length === 1) {
+    if (selectedElements.length === 1) {
       if (selection.firstElement.group instanceof GroupElementModel) {
         buttons.unshift(renderReleaseFromGroupButton(this.edgeless));
       }
@@ -421,7 +429,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     }
 
     this._registeredEntries
-      .filter(entry => entry.when(elements))
+      .filter(entry => entry.when(selectedElements))
       .map(entry => entry.render(this.edgeless))
       .forEach(entry => entry && buttons.unshift(entry));
 

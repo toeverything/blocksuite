@@ -167,7 +167,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const elements = this._getElementsInsideLasso().map(el => el.id);
 
     // current selections
-    const selection = this.selection.elements.map(el => el.id);
+    const selection = this.selection.selectedElements.map(el => el.id);
 
     const selectionMode = this._getSelectionMode(e);
     let set!: Set<string>;
@@ -205,7 +205,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     }
 
     this._currentSelectionState = new Set(
-      this.selection.elements.map(el => el.id)
+      this.selection.selectedElements.map(el => el.id)
     );
 
     this._isSelecting = true;
@@ -252,7 +252,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
     const [x, y] = this.toModelCoord(point);
     if (this._lassoPoints.length < 2) {
       this._currentSelectionState = new Set(
-        this.selection.elements.map(el => el.id)
+        this.selection.selectedElements.map(el => el.id)
       );
 
       const a = [x, y];
@@ -317,7 +317,7 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   override afterModeSwitch(newTool?: EdgelessTool): void {
     if (newTool?.type === 'lasso')
       this._currentSelectionState = new Set(
-        this.selection.elements.map(el => el.id)
+        this.selection.selectedElements.map(el => el.id)
       );
     this._reset();
   }

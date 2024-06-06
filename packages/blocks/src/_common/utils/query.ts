@@ -7,7 +7,6 @@ import type { BlockModel } from '@blocksuite/store';
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import type { RootBlockComponent } from '../../index.js';
-import type { EdgelessCanvasTextEditor } from '../../root-block/edgeless/components/text/types.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';
 import {
@@ -899,12 +898,6 @@ function getCellRect(element: Element, bounds?: DOMRect) {
     colRect.right - bounds.left,
     colRect.height
   );
-}
-
-export function getEdgelessCanvasTextEditor(element: Element | Document) {
-  return element.querySelector(
-    'edgeless-text-editor,edgeless-shape-text-editor'
-  ) as EdgelessCanvasTextEditor | null;
 }
 
 /**

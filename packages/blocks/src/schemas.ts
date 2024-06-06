@@ -10,6 +10,7 @@ import { CodeBlockSchema } from './code-block/code-model.js';
 import { DataViewBlockSchema } from './data-view-block/data-view-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
+import { EdgelessTextBlockSpec } from './edgeless-text/edgeless-text-spec.js';
 import { EmbedFigmaBlockSpec } from './embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from './embed-github-block/embed-github-spec.js';
 import { EmbedHtmlBlockSpec } from './embed-html-block/embed-html-spec.js';
@@ -49,4 +50,5 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   EmbedLinkedDocBlockSpec.schema,
   EmbedSyncedDocBlockSpec.schema,
   EmbedLoomBlockSpec.schema,
+  EdgelessTextBlockSpec.schema,
 ];

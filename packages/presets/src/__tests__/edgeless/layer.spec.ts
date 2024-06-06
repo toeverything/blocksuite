@@ -209,7 +209,7 @@ test('layer zindex should update correctly when elements changed', async () => {
   service.doc.captureSync();
 
   service.updateElement(noteId, {
-    index: service.layer.getReorderedIndex(note, 'front'),
+    index: service.layer.getReorderedIndex(note!, 'front'),
   });
   await wait();
   service.doc.captureSync();
@@ -224,7 +224,7 @@ test('layer zindex should update correctly when elements changed', async () => {
   assert2StepState();
 
   service.updateElement(topShapeId, {
-    index: service.layer.getReorderedIndex(topShape, 'front'),
+    index: service.layer.getReorderedIndex(topShape!, 'front'),
   });
   await wait();
   service.doc.captureSync();

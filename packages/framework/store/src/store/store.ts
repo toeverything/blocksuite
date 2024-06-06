@@ -79,6 +79,7 @@ const FLAGS_PRESET = {
   enable_lasso_tool: false,
   enable_mindmap_entry: false,
   enable_new_image_actions: false,
+  enable_edgeless_text: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

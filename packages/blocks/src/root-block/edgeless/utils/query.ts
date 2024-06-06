@@ -7,6 +7,7 @@ import {
 } from '../../../_common/utils/index.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import type { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
 import type { EmbedHtmlModel } from '../../../embed-html-block/index.js';
@@ -42,6 +43,16 @@ export function isNoteBlock(
   element: BlockModel | BlockSuite.EdgelessModelType | null
 ): element is NoteBlockModel {
   return !!element && 'flavour' in element && element.flavour === 'affine:note';
+}
+
+export function isEdgelessTextBlock(
+  element: BlockModel | BlockSuite.EdgelessModelType | null
+): element is EdgelessTextBlockModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:edgeless-text'
+  );
 }
 
 export function isFrameBlock(

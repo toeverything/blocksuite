@@ -80,7 +80,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
   }
 
   determineInsertionBounds(width = 800, height = 95) {
-    const elements = this.edgeless.service.selection.elements;
+    const elements = this.edgeless.service.selection.selectedElements;
     const offsetY = 20 / this.edgeless.service.viewport.zoom;
     const bounds = new Bound(0, 0, width, height);
     if (elements.length) {

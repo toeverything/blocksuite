@@ -155,7 +155,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { selection } = rootElement.service;
 
           if (
-            selection.elements.length === 1 &&
+            selection.selectedElements.length === 1 &&
             selection.firstElement instanceof EdgelessBlockModel &&
             matchFlavours(selection.firstElement as EdgelessBlockModel, [
               'affine:note',
@@ -167,10 +167,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         f: () => {
           if (this.rootElement.service.locked) return;
           if (
-            this.rootElement.service.selection.elements.length !== 0 &&
+            this.rootElement.service.selection.selectedElements.length !== 0 &&
             !this.rootElement.service.selection.editing
           ) {
             const frame = rootElement.service.frame.createFrameOnSelected();
+            if (!frame) return;
             rootElement.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.rootElement.service.selection.editing) {
             this._setEdgelessTool(rootElement, { type: 'frame' });
@@ -178,7 +179,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         '-': () => {
           if (this.rootElement.service.locked) return;
-          const { elements } = rootElement.service.selection;
+          const { selectedElements: elements } = rootElement.service.selection;
           if (
             !rootElement.service.selection.editing &&
             elements.length === 1 &&
@@ -227,7 +228,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         'Mod-g': ctx => {
           if (this.rootElement.service.locked) return;
           if (
-            this.rootElement.service.selection.elements.length > 1 &&
+            this.rootElement.service.selection.selectedElements.length > 1 &&
             !this.rootElement.service.selection.editing
           ) {
             ctx.get('keyboardState').event.preventDefault();
@@ -238,7 +239,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           if (this.rootElement.service.locked) return;
           const { selection } = this.rootElement.service;
           if (
-            selection.elements.length === 1 &&
+            selection.selectedElements.length === 1 &&
             selection.firstElement instanceof GroupElementModel
           ) {
             ctx.get('keyboardState').event.preventDefault();
@@ -463,10 +464,15 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    deleteElements(edgeless.surface, edgeless.service.selection.elements);
+    deleteElements(
+      edgeless.surface,
+      edgeless.service.selection.selectedElements
+    );
 
     edgeless.service.selection.clear();
-    edgeless.service.selection.set(edgeless.service.selection.selections);
+    edgeless.service.selection.set(
+      edgeless.service.selection.surfaceSelections
+    );
   }
 
   private _setEdgelessTool(
@@ -487,9 +493,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     if (edgeless.service.locked) return;
     if (edgeless.service.selection.editing) return;
 
-    const { elements } = edgeless.service.selection;
+    const { selectedElements } = edgeless.service.selection;
     const inc = shift ? 10 : 1;
-    const mindmapNodes = elements.filter(
+    const mindmapNodes = selectedElements.filter(
       el => el.group instanceof MindmapElementModel
     );
 
@@ -538,7 +544,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    elements.forEach(element => {
+    selectedElements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
 
       switch (key) {

@@ -27,6 +27,7 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
         .labelHeight=${'20px'}
         @click=${() => {
           const frame = this.edgeless.service.frame.createFrameOnSelected();
+          if (!frame) return;
           this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
         }}
       >

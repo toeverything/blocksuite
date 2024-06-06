@@ -45,7 +45,9 @@ describe('default tool', () => {
 
     click(edgeless.host, { x: 0, y: 50 });
 
-    expect(edgeless.service.selection.selections[0].elements).toEqual([id]);
+    expect(edgeless.service.selection.surfaceSelections[0].elements).toEqual([
+      id,
+    ]);
   });
 
   test('element drag moving', async () => {
@@ -82,7 +84,9 @@ describe('default tool', () => {
     await wait();
 
     click(edgeless.host, { x: 50, y: 50 });
-    expect(edgeless.service.selection.selections[0].elements).toEqual([noteId]);
+    expect(edgeless.service.selection.surfaceSelections[0].elements).toEqual([
+      noteId,
+    ]);
     drag(edgeless.host, { x: 50, y: 50 }, { x: 150, y: 150 });
     await wait();
 

@@ -16,6 +16,7 @@ import {
   TextAlignRightIcon,
 } from '../../../_common/icons/index.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
+import { EdgelessTextBlockModel } from '../../../edgeless-text/edgeless-text-model.js';
 import {
   isFontStyleSupported,
   isFontWeightSupported,
@@ -32,13 +33,9 @@ import { isConnectorWithLabel } from '../../../surface-block/element-model/conne
 import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
   ConnectorElementModel,
-  type ShapeElementModel,
+  ShapeElementModel,
 } from '../../../surface-block/index.js';
-import {
-  Bound,
-  CanvasElementType,
-  normalizeShapeBound,
-} from '../../../surface-block/index.js';
+import { Bound, normalizeShapeBound } from '../../../surface-block/index.js';
 import {
   getFontFacesByFontFamily,
   wrapFontFamily,
@@ -49,10 +46,6 @@ import {
   GET_DEFAULT_LINE_COLOR,
   LINE_COLORS,
 } from '../../edgeless/components/panel/color-panel.js';
-import {
-  type EdgelessCanvasTextElement,
-  type EdgelessCanvasTextElementType,
-} from '../../edgeless/components/text/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 const FONT_SIZE_LIST = [
@@ -94,16 +87,17 @@ const TEXT_ALIGN_CHOOSE: [TextAlign, () => TemplateResult<1>][] = [
 ] as const;
 
 function countByField<K extends keyof TextStyleProps>(
-  elements: EdgelessCanvasTextElement[],
+  elements: BlockSuite.EdgelessTextModelType[],
   field: K
 ) {
   return countBy(elements, element => extractField(element, field));
 }
 
 function extractField<K extends keyof TextStyleProps>(
-  element: EdgelessCanvasTextElement,
+  element: BlockSuite.EdgelessTextModelType,
   field: K
 ) {
+  if (element instanceof EdgelessTextBlockModel) return null;
   return (
     element instanceof ConnectorElementModel
       ? element.labelStyle[field]
@@ -112,45 +106,45 @@ function extractField<K extends keyof TextStyleProps>(
 }
 
 function getMostCommonValue<K extends keyof TextStyleProps>(
-  elements: EdgelessCanvasTextElement[],
+  elements: BlockSuite.EdgelessTextModelType[],
   field: K
 ) {
   const values = countByField(elements, field);
   return maxBy(Object.entries(values), ([_k, count]) => count);
 }
 
-function getMostCommonAlign(elements: EdgelessCanvasTextElement[]) {
+function getMostCommonAlign(elements: BlockSuite.EdgelessTextModelType[]) {
   const max = getMostCommonValue(elements, 'textAlign');
   return max ? (max[0] as TextAlign) : TextAlign.Left;
 }
 
-function getMostCommonColor(elements: EdgelessCanvasTextElement[]) {
+function getMostCommonColor(elements: BlockSuite.EdgelessTextModelType[]) {
   const max = getMostCommonValue(elements, 'color');
   return max ? max[0] : GET_DEFAULT_LINE_COLOR();
 }
 
-function getMostCommonFontFamily(elements: EdgelessCanvasTextElement[]) {
+function getMostCommonFontFamily(elements: BlockSuite.EdgelessTextModelType[]) {
   const max = getMostCommonValue(elements, 'fontFamily');
   return max ? (max[0] as FontFamily) : FontFamily.Inter;
 }
 
-function getMostCommonFontSize(elements: EdgelessCanvasTextElement[]) {
+function getMostCommonFontSize(elements: BlockSuite.EdgelessTextModelType[]) {
   const max = getMostCommonValue(elements, 'fontSize');
   return max ? Number(max[0]) : FONT_SIZE_LIST[0].value;
 }
 
-function getMostCommonFontStyle(elements: EdgelessCanvasTextElement[]) {
+function getMostCommonFontStyle(elements: BlockSuite.EdgelessTextModelType[]) {
   const max = getMostCommonValue(elements, 'fontStyle');
   return max ? (max[0] as FontStyle) : FontStyle.Normal;
 }
 
-function getMostCommonFontWeight(elements: EdgelessCanvasTextElement[]) {
+function getMostCommonFontWeight(elements: BlockSuite.EdgelessTextModelType[]) {
   const max = getMostCommonValue(elements, 'fontWeight');
   return max ? (max[0] as FontWeight) : FontWeight.Regular;
 }
 
 function buildProps(
-  element: EdgelessCanvasTextElement,
+  element: BlockSuite.EdgelessTextModelType,
   props: { [K in keyof TextStyleProps]?: TextStyleProps[K] }
 ) {
   if (element instanceof ConnectorElementModel) {
@@ -178,10 +172,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  accessor elements!: EdgelessCanvasTextElement[];
+  accessor elements!: BlockSuite.EdgelessTextModelType[];
 
   @property({ attribute: false })
-  accessor elementType!: EdgelessCanvasTextElementType;
+  accessor elementType!: BlockSuite.EdgelessTextModelKeyType;
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
@@ -190,12 +184,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     return this.edgeless.service;
   }
 
-  private _updateElementBound = (element: EdgelessCanvasTextElement) => {
+  private _updateElementBound = (element: BlockSuite.EdgelessTextModelType) => {
     const elementType = this.elementType;
-    if (
-      elementType === CanvasElementType.TEXT &&
-      element instanceof TextElementModel
-    ) {
+    if (elementType === 'text' && element instanceof TextElementModel) {
       // the change of font family will change the bound of the text
       const {
         text: yText,
@@ -219,10 +210,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.service.updateElement(element.id, {
         xywh: newBound.serialize(),
       });
-    } else if (
-      elementType === CanvasElementType.CONNECTOR &&
-      isConnectorWithLabel(element)
-    ) {
+    } else if (elementType === 'connector' && isConnectorWithLabel(element)) {
       const {
         text,
         labelXYWH,
@@ -247,15 +235,19 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.service.updateElement(element.id, {
         labelXYWH: bounds.toXYWH(),
       });
-    } else {
+    } else if (
+      elementType === 'shape' &&
+      element instanceof ShapeElementModel
+    ) {
       const newBound = normalizeShapeBound(
-        element as ShapeElementModel,
+        element,
         Bound.fromXYWH(element.deserializedXYWH)
       );
       this.service.updateElement(element.id, {
         xywh: newBound.serialize(),
       });
     }
+    // no need to update the bound of edgeless text block, which updates itself using ResizeObserver
   };
 
   private _setTextColor = ({ detail: color }: ColorEvent) => {
@@ -405,29 +397,33 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         `,
 
         html`
-          <edgeless-menu-button
-            .contentPadding=${'8px'}
-            .button=${html`
-              <edgeless-tool-icon-button
-                aria-label="Font size"
-                .tooltip=${'Font size'}
-                .justify=${'space-between'}
-                .labelHeight=${'20px'}
-                .iconContainerWidth=${'60px'}
-              >
-                <span class="label">${selectedFontSize}</span>
-                ${SmallArrowDownIcon}
-              </edgeless-tool-icon-button>
-            `}
-          >
-            <edgeless-size-panel
-              slot
-              data-type="check"
-              .size=${selectedFontSize}
-              .sizeList=${FONT_SIZE_LIST}
-              .onSelect=${this._setFontSize}
-            ></edgeless-size-panel>
-          </edgeless-menu-button>
+          ${this.elementType === 'edgeless-text'
+            ? nothing
+            : html`
+                <edgeless-menu-button
+                  .contentPadding=${'8px'}
+                  .button=${html`
+                    <edgeless-tool-icon-button
+                      aria-label="Font size"
+                      .tooltip=${'Font size'}
+                      .justify=${'space-between'}
+                      .labelHeight=${'20px'}
+                      .iconContainerWidth=${'60px'}
+                    >
+                      <span class="label">${selectedFontSize}</span>
+                      ${SmallArrowDownIcon}
+                    </edgeless-tool-icon-button>
+                  `}
+                >
+                  <edgeless-size-panel
+                    slot
+                    data-type="check"
+                    .size=${selectedFontSize}
+                    .sizeList=${FONT_SIZE_LIST}
+                    .onSelect=${this._setFontSize}
+                  ></edgeless-size-panel>
+                </edgeless-menu-button>
+              `}
         `,
 
         html`

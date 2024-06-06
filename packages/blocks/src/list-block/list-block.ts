@@ -13,7 +13,6 @@ import { bindContainerHotkey } from '../_common/components/rich-text/keymap/inde
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
-import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ListBlockModel } from './list-model.js';
 import type { ListBlockService } from './list-service.js';
@@ -89,8 +88,10 @@ export class ListBlockComponent extends BlockComponent<
 
   override get topContenteditableElement() {
     if (this.rootElement instanceof EdgelessRootBlockComponent) {
-      const note = this.closest<NoteBlockComponent>('affine-note');
-      return note;
+      const el = this.closest<BlockElement>(
+        'affine-note, affine-edgeless-text'
+      );
+      return el;
     }
     return this.rootElement;
   }

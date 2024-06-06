@@ -292,22 +292,23 @@ export class EdgelessRootService extends RootService {
   removeElement(id: string | BlockSuite.EdgelessModelType) {
     id = typeof id === 'string' ? id : id.id;
 
+    const el = this.getElementById(id);
+    if (el instanceof EdgelessBlockModel) {
+      this.doc.deleteBlock(el);
+      return;
+    }
+
     if (this._surface.hasElementById(id)) {
       this._surface.removeElement(id);
       return;
     }
-
-    if (this.doc.hasBlockById(id)) {
-      const block = this.doc.getBlockById(id)!;
-      this.doc.deleteBlock(block);
-    }
   }
 
-  getElementById(id: string) {
-    return (
+  getElementById(id: string): BlockSuite.EdgelessModelType | null {
+    const el =
       this._surface.getElementById(id) ??
-      (this.doc.getBlockById(id) as EdgelessBlockModel)
-    );
+      (this.doc.getBlockById(id) as BlockSuite.EdgelessBlockModelType | null);
+    return el;
   }
 
   pickElement(
@@ -516,8 +517,8 @@ export class EdgelessRootService extends RootService {
     const { selection } = this;
 
     if (
-      selection.elements.length === 0 ||
-      !selection.elements.every(
+      selection.selectedElements.length === 0 ||
+      !selection.selectedElements.every(
         element =>
           element.group === selection.firstElement.group &&
           !(element.group instanceof MindmapElementModel)
@@ -529,12 +530,12 @@ export class EdgelessRootService extends RootService {
     const parent = selection.firstElement.group as GroupElementModel;
 
     if (parent !== null) {
-      selection.elements.forEach(element => {
+      selection.selectedElements.forEach(element => {
         parent.removeDescendant(element.id);
       });
     }
 
-    const groupId = this.createGroup(selection.elements);
+    const groupId = this.createGroup(selection.selectedElements);
 
     if (parent !== null) {
       parent.addChild(groupId);

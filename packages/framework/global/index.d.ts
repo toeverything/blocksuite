@@ -9,5 +9,6 @@ declare type BlockSuiteFlags = {
   enable_lasso_tool: boolean;
   enable_mindmap_entry: boolean;
   enable_new_image_actions: boolean;
+  enable_edgeless_text: boolean;
   readonly: Record<string, boolean>;
 };

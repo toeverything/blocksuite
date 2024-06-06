@@ -5,6 +5,7 @@ import './bookmark/edgeless-bookmark.js';
 import './attachment/edgeless-attachment.js';
 import './frame/edgeless-frame.js';
 import './embed/edgeless-embed.js';
+import './edgeless-text/edgeless-edgeless-text.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
@@ -41,6 +42,7 @@ const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   ['affine:image', 'edgeless-block-portal-image'],
   ['affine:bookmark', 'edgeless-block-portal-bookmark'],
   ['affine:attachment', 'edgeless-block-portal-attachment'],
+  ['affine:edgeless-text', 'edgeless-block-portal-edgeless-text'],
   [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 
@@ -205,13 +207,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _updateNoteSlicer() {
     const { edgeless } = this;
-    const { elements } = edgeless.service.selection;
+    const { selectedElements } = edgeless.service.selection;
     if (
       !edgeless.service.selection.editing &&
-      elements.length === 1 &&
-      isNoteBlock(elements[0])
+      selectedElements.length === 1 &&
+      isNoteBlock(selectedElements[0])
     ) {
-      this._slicerAnchorNote = elements[0];
+      this._slicerAnchorNote = selectedElements[0];
     } else {
       this._slicerAnchorNote = null;
     }
@@ -358,6 +360,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                       .edgeless=${edgeless}
                       .updatingSet=${this.renderingSet}
                       .concurrentUpdatingCount=${this.concurrentRendering}
+                      .portalContainer=${this}
                       style=${`z-index: ${zIndex};${_visibleElements.has(block) ? 'display:block' : ''}`}
                     ></${tag}>`;
                 }

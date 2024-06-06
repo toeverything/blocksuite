@@ -668,6 +668,8 @@ function handleParagraphDeleteActions(
     }
 
     return true;
+  } else if (matchFlavours(previousSibling, ['affine:edgeless-text'])) {
+    return true;
   }
 
   // TODO handle in block service

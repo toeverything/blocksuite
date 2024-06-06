@@ -430,12 +430,12 @@ export class EdgelessToolsManager {
       const isEmptyState = Array.isArray(state)
         ? this.selection.isEmpty(state)
         : state.elements.length === 0;
-      const hasLastState = !!this.selection.lastState;
+      const hasLastState = !!this.selection.lastSurfaceSelections;
       const isNotSingleDocOnlyNote = !(
-        this.selection.lastState &&
-        this.selection.lastState[0] &&
-        this.selection.lastState[0].elements.length === 1 &&
-        this._isDocOnlyNote(this.selection.lastState[0].elements[0])
+        this.selection.lastSurfaceSelections &&
+        this.selection.lastSurfaceSelections[0] &&
+        this.selection.lastSurfaceSelections[0].elements.length === 1 &&
+        this._isDocOnlyNote(this.selection.lastSurfaceSelections[0].elements[0])
       );
 
       if (
@@ -447,7 +447,7 @@ export class EdgelessToolsManager {
         // (isDefaultType && isLastTypeCopilot) ||
         (isCopilotType && isLastTypeCopilot)
       ) {
-        state = this.selection.selections; // selection should remain same when switching between default and lasso tool
+        state = this.selection.surfaceSelections; // selection should remain same when switching between default and lasso tool
       } else if (
         ((isDefaultType && !isLastTypeLasso) || isLassoType) &&
         ((isDefaultType && !isLastTypeCopilot) || isCopilotType) &&
@@ -456,7 +456,7 @@ export class EdgelessToolsManager {
         isNotSingleDocOnlyNote &&
         restoreToLastSelection
       ) {
-        state = this.selection.lastState; // for getting the selection back after going to another tools
+        state = this.selection.lastSurfaceSelections; // for getting the selection back after going to another tools
       }
     }
 

@@ -144,11 +144,11 @@ export class EdgelessClipboardController extends PageClipboard {
     this.host.handleEvent(
       'copy',
       ctx => {
-        const { selections, selectedIds } = this.selectionManager;
+        const { surfaceSelections, selectedIds } = this.selectionManager;
 
         if (selectedIds.length === 0) return false;
 
-        this._onCopy(ctx, selections);
+        this._onCopy(ctx, surfaceSelections);
         return;
       },
       { global: true }
@@ -188,7 +188,7 @@ export class EdgelessClipboardController extends PageClipboard {
     event.preventDefault();
 
     const elements = getCloneElements(
-      this.selectionManager.elements,
+      this.selectionManager.selectedElements,
       this.surface.edgeless.service.frame
     );
 
@@ -221,11 +221,11 @@ export class EdgelessClipboardController extends PageClipboard {
     const event = _context.get('clipboardState').raw;
     event.preventDefault();
 
-    const { selections, elements } = this.selectionManager;
+    const { surfaceSelections, selectedElements } = this.selectionManager;
 
-    if (selections[0]?.editing) {
+    if (surfaceSelections[0]?.editing) {
       // use build-in paste handler in rich-text when paste in surface text element
-      if (isCanvasElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(selectedElements[0])) return;
       this.onPagePaste(_context);
       return;
     }
@@ -337,24 +337,24 @@ export class EdgelessClipboardController extends PageClipboard {
   };
 
   private _onCut = (_context: UIEventStateContext) => {
-    const { selections, elements } = this.selectionManager;
+    const { surfaceSelections, selectedElements } = this.selectionManager;
 
-    if (elements.length === 0) return;
+    if (selectedElements.length === 0) return;
 
     const event = _context.get('clipboardState').event;
     event.preventDefault();
 
-    this._onCopy(_context, selections);
+    this._onCopy(_context, surfaceSelections);
 
-    if (selections[0]?.editing) {
+    if (surfaceSelections[0]?.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
-      if (isCanvasElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(selectedElements[0])) return;
       this.onPageCut(_context);
       return;
     }
 
     this.doc.transact(() => {
-      deleteElements(this.surface, elements);
+      deleteElements(this.surface, selectedElements);
     });
 
     this.selectionManager.set({
