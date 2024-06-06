@@ -28,11 +28,12 @@ export interface NotificationService {
     title: string | TemplateResult;
     message?: string | TemplateResult;
     accent?: 'info' | 'success' | 'warning' | 'error';
-    duration?: number; // give 0 to disable auto dismiss
+    duration?: number; // unit ms, give 0 to disable auto dismiss
     abort?: AbortSignal;
     action?: {
       label: string | TemplateResult;
       onClick: () => void;
     };
+    onClose: () => void;
   }): void;
 }

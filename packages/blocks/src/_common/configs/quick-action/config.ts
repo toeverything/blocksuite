@@ -15,6 +15,7 @@ import {
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
+  notifyDocCreated,
   promptDocTitle,
 } from '../../utils/render-linked-doc.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
@@ -150,6 +151,7 @@ export const quickActionConfig: QuickActionConfig[] = [
           'affine:embed-linked-doc'
         );
         linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+        notifyDocCreated(host, doc);
       });
     },
   },
