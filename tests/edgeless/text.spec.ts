@@ -400,7 +400,7 @@ test.describe('edgeless text block', () => {
 
     await pressArrowRight(page);
     await assertRichTextInlineRange(page, 3, 2);
-    await pressArrowUp(page, 2);
+    await pressArrowUp(page);
     await assertRichTextInlineRange(page, 2, 2);
   });
 });

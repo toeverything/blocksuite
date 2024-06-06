@@ -20,6 +20,11 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       position: absolute;
       padding: 10px;
       box-sizing: border-box;
+
+      &[data-max-width='false'] .inline-editor span {
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
     }
   `;
 
@@ -148,6 +153,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
         style=${styleMap(style)}
         data-scale="${scale}"
         data-editing="${this._editing}"
+        data-max-width="${hasMaxWidth}"
       >
         <div
           style=${styleMap({

@@ -44,22 +44,22 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
       box-sizing: border-box;
       overflow: visible;
-    }
 
-    .inline-editor {
-      white-space: pre-wrap !important;
-      outline: none;
-    }
+      .inline-editor {
+        white-space: pre-wrap !important;
+        outline: none;
+      }
 
-    .inline-editor span {
-      word-break: normal !important;
-      overflow-wrap: anywhere !important;
-    }
+      .inline-editor span {
+        word-break: normal !important;
+        overflow-wrap: anywhere !important;
+      }
 
-    .edgeless-connector-label-editor-placeholder {
-      pointer-events: none;
-      color: var(--affine-text-disable-color);
-      white-space: nowrap;
+      .edgeless-connector-label-editor-placeholder {
+        pointer-events: none;
+        color: var(--affine-text-disable-color);
+        white-space: nowrap;
+      }
     }
   `;
 
