@@ -55,9 +55,7 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
   override render() {
     return html`
       ${this._show
-        ? html`<div class="custom-frame-container blocksuite-overlay">
-            ${this._renderPanel()}
-          </div>`
+        ? html`<div class="custom-frame-container">${this._renderPanel()}</div>`
         : nothing}
     `;
   }

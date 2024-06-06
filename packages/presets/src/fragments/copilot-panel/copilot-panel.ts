@@ -217,10 +217,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   override render() {
     const panel = this.panels[this.currentPanel];
     return html`
-      <div
-        style="display:flex;flex-direction: column;height: 100%"
-        class="blocksuite-overlay"
-      >
+      <div style="display:flex;flex-direction: column;height: 100%">
         <div
           style="display:flex;align-items:center;justify-content:center; padding-top: 17px;"
         >

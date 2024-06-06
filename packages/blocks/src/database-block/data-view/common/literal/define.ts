@@ -165,7 +165,6 @@ literalMatcher.register(tDate.create(), {
   view: createUniComponentFromWebComponent(DateLiteral),
   popEdit: (position, { value, onChange }) => {
     const input = document.createElement('input');
-    input.classList.add('blocksuite-overlay');
     input.type = 'date';
     input.click();
     input.valueAsNumber = value as number;

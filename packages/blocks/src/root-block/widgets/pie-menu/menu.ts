@@ -183,7 +183,7 @@ export class PieMenu extends WithDisposable(LitElement) {
       transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
     };
 
-    return html` <div class="pie-menu-container blocksuite-overlay">
+    return html` <div class="pie-menu-container">
       <div class="overlay" @click="${() => this.abortController.abort()}"></div>
 
       <div style="${styleMap(menuStyles)}" class="pie-menu">

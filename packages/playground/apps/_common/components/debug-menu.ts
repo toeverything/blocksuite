@@ -645,7 +645,7 @@ export class DebugMenu extends ShadowlessElement {
           margin-right: 4px;
         }
       </style>
-      <div class="debug-menu default blocksuite-overlay">
+      <div class="debug-menu default">
         <div class="default-toolbar">
           <!-- undo/redo group -->
           <sl-button-group label="History">

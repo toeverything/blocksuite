@@ -58,7 +58,7 @@ export class EmbedCardEditCaptionEditModal extends WithDisposable(
 
   override render() {
     return html`
-      <div class="embed-card-modal blocksuite-overlay">
+      <div class="embed-card-modal">
         <div class="embed-card-modal-mask" @click=${() => this.remove()}></div>
         <div class="embed-card-modal-wrapper">
           <div class="embed-card-modal-title">Caption</div>
