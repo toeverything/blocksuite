@@ -2,7 +2,6 @@ import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange, NativePoint } from '../types.js';
 import {
   type BaseTextAttributes,
-  findDocumentOrShadowRoot,
   isInEmbedElement,
   isInEmbedGap,
   isInEmptyLine,
@@ -96,8 +95,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       return;
     }
 
-    const selectionRoot = findDocumentOrShadowRoot(this.editor);
-    const selection = selectionRoot.getSelection();
+    const selection = document.getSelection();
     if (!selection) return;
     if (selection.rangeCount === 0) {
       if (previousInlineRange !== null) {
@@ -375,8 +373,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
   private _onClick = (event: MouseEvent) => {
     // select embed element when click on it
     if (event.target instanceof Node && isInEmbedElement(event.target)) {
-      const selectionRoot = findDocumentOrShadowRoot(this.editor);
-      const selection = selectionRoot.getSelection();
+      const selection = document.getSelection();
       if (!selection) return;
       if (event.target instanceof HTMLElement) {
         const vElement = event.target.closest('v-element');
