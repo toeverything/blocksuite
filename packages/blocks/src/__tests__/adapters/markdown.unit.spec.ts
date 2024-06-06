@@ -418,7 +418,6 @@ hhh
     expect(target.file).toBe(markdown);
   });
 
-  // TODO(@fourdim): fix this test
   test('todo list', async () => {
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
@@ -553,12 +552,12 @@ hhh
         },
       ],
     };
-    const markdown = `* [ ] aaa
+    const markdown = `\
+* [ ] aaa
   * [x] bbb
     * [ ] ccc
-  - [x] ddd
-
-- [ ] eee
+  * [x] ddd
+* [ ] eee
 `;
 
     const mdAdapter = new MarkdownAdapter();

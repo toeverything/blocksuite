@@ -29,6 +29,7 @@ import { type ReorderingType } from '../../../_common/utils/index.js';
 import {
   createLinkedDocFromEdgelessElements,
   createLinkedDocFromNote,
+  notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
 import type {
@@ -419,12 +420,14 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         const title = await promptDocTitle(this.edgeless.host);
         if (title === null) return;
         this._turnIntoLinkedDoc(title);
+        notifyDocCreated(this.edgeless.host, this.edgeless.doc);
         break;
       }
       case 'create-linked-doc': {
         const title = await promptDocTitle(this.edgeless.host);
         if (title === null) return;
         this._createLinkedDoc(title);
+        notifyDocCreated(this.edgeless.host, this.edgeless.doc);
         break;
       }
       case 'create-frame': {

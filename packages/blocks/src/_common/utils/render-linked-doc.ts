@@ -132,6 +132,44 @@ export function getTitleFromSelectedModels(selectedModels: BlockModel[]) {
   return undefined;
 }
 
+export function notifyDocCreated(host: EditorHost, doc: Doc) {
+  const notification =
+    host.std.spec.getService('affine:page').notificationService;
+  if (!notification) return;
+
+  const abortController = new AbortController();
+  const clear = () => {
+    doc.history.off('stack-item-added', addHandler);
+    doc.history.off('stack-item-popped', popHandler);
+    disposable.dispose();
+  };
+  const closeNotify = () => {
+    abortController.abort();
+    clear();
+  };
+
+  // edit or undo or switch doc, close notify toast
+  const addHandler = doc.history.on('stack-item-added', closeNotify);
+  const popHandler = doc.history.on('stack-item-popped', closeNotify);
+  const disposable = host.slots.unmounted.on(closeNotify);
+
+  notification.notify({
+    title: 'Linked doc created',
+    message: 'You can click undo to recovery block content',
+    accent: 'info',
+    duration: 10 * 1000,
+    action: {
+      label: 'undo',
+      onClick: () => {
+        doc.undo();
+        clear();
+      },
+    },
+    abort: abortController.signal,
+    onClose: clear,
+  });
+}
+
 export function renderLinkedDocInCard(
   card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
 ) {

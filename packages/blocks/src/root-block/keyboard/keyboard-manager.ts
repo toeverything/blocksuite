@@ -7,6 +7,7 @@ import { matchFlavours } from '../../_common/utils/model.js';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
+  notifyDocCreated,
   promptDocTitle,
 } from '../../_common/utils/render-linked-doc.js';
 
@@ -166,6 +167,7 @@ export class PageKeyboardManager {
         'affine:embed-linked-doc'
       );
       linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+      notifyDocCreated(rootElement.host, doc);
     });
   }
 }

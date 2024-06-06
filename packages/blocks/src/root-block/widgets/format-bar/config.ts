@@ -30,6 +30,7 @@ import {
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
+  notifyDocCreated,
   promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
 import type { AffineFormatBarWidget } from './format-bar.js';
@@ -200,6 +201,7 @@ export function toolbarDefaultConfig(toolbar: AffineFormatBarWidget) {
             'affine:embed-linked-doc'
           );
           linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+          notifyDocCreated(host, doc);
         });
       },
       showWhen: chain => {
