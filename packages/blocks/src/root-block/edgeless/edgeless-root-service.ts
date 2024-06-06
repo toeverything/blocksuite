@@ -644,16 +644,22 @@ export class EdgelessRootService extends RootService {
     this.viewport.setViewport(zoom, [centerX, centerY], true);
   }
 
-  getFitToScreenData(padding: [number, number, number, number] = [0, 0, 0, 0]) {
-    const bounds = [];
+  getFitToScreenData(
+    padding: [number, number, number, number] = [0, 0, 0, 0],
+    inputBounds?: Bound[]
+  ) {
+    let bounds = [];
+    if (inputBounds && inputBounds.length) {
+      bounds = inputBounds;
+    } else {
+      this.blocks.forEach(block => {
+        bounds.push(Bound.deserialize(block.xywh));
+      });
 
-    this.blocks.forEach(block => {
-      bounds.push(Bound.deserialize(block.xywh));
-    });
-
-    const surfaceElementsBound = getCommonBound(this.elements);
-    if (surfaceElementsBound) {
-      bounds.push(surfaceElementsBound);
+      const surfaceElementsBound = getCommonBound(this.elements);
+      if (surfaceElementsBound) {
+        bounds.push(surfaceElementsBound);
+      }
     }
 
     const [pt, pr, pb, pl] = padding;
