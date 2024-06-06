@@ -1,39 +1,38 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { autoPlacement, offset, shift } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { assertExists } from '@blocksuite/global/utils';
+import { flip, offset } from '@floating-ui/dom';
+import { css, html, LitElement, nothing } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { popMenu } from '../../../../_common/components/index.js';
+import { createLitPortal } from '../../../../_common/components/index.js';
+import { MorePopupMenu } from '../../../../_common/components/more-popup-menu/more-popup-menu.js';
 import { MoreVerticalIcon } from '../../../../_common/icons/edgeless.js';
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
 import type { CodeToolbarItem, CodeToolbarMoreItem } from '../types.js';
-import {
-  CodeToolbarItemRenderer,
-  CodeToolbarMoreMenuBuilder,
-} from '../utils.js';
+import { CodeToolbarItemRenderer, MoreMenuRenderer } from '../utils.js';
 
 @customElement('affine-code-toolbar')
 export class AffineCodeToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      transform: translateX(-100%);
+      z-index: 1;
+      position: absolute;
+      top: 0;
+      right: 0;
     }
 
     .code-toolbar-container {
-      visibility: hidden;
       display: flex;
       gap: 4px;
       box-sizing: border-box;
-    }
-
-    .code-toolbar-container[data-visible='true'] {
-      visibility: visible;
+      padding: 4px;
     }
 
     .code-toolbar-button {
       background-color: var(--affine-background-primary-color);
       color: var(--affine-icon-color);
       box-shadow: var(--affine-shadow-1);
+      border-radius: 4px;
     }
 
     .code-toolbar-button:hover {
@@ -55,86 +54,90 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
   accessor moreItems!: CodeToolbarMoreItem[];
 
   @state()
-  private accessor _popperVisible = false;
+  private accessor _moreMenuOpen = false;
 
-  @state()
-  private accessor _toolbarVisible = false;
+  @query('.code-toolbar-button.more-button')
+  private accessor _moreButton!: HTMLElement;
 
-  private get _showToolbar() {
-    const imageBlock = this.blockElement;
-    const selection = this.blockElement.host.selection;
+  private _popMenuAbortController: AbortController | null = null;
+  private _currentOpenMenu: AbortController | null = null;
 
-    const textSelection = selection.find('text');
+  closeCurrentMenu = () => {
+    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
+      this._currentOpenMenu.abort();
+      this._currentOpenMenu = null;
+    }
+  };
+
+  private _toggleMoreMenu() {
     if (
-      !!textSelection &&
-      (!!textSelection.to || !!textSelection.from.length)
+      this._currentOpenMenu &&
+      !this._currentOpenMenu.signal.aborted &&
+      this._currentOpenMenu === this._popMenuAbortController
     ) {
-      return false;
+      this.closeCurrentMenu();
+      this._moreMenuOpen = false;
+      return;
     }
 
-    const blockSelections = selection.filter('block');
-    if (
-      blockSelections.length > 1 ||
-      (blockSelections.length === 1 &&
-        blockSelections[0].blockId !== imageBlock.blockId)
-    ) {
-      return false;
-    }
-    return this._popperVisible || this._toolbarVisible;
+    this.closeCurrentMenu();
+    this._popMenuAbortController = new AbortController();
+    this._popMenuAbortController.signal.addEventListener(
+      'abort',
+      () => (this._moreMenuOpen = false)
+    );
+
+    this._currentOpenMenu = this._popMenuAbortController;
+
+    const moreMenu = new MorePopupMenu();
+    const moreItems = MoreMenuRenderer(
+      this.blockElement,
+      this._popMenuAbortController,
+      this.moreItems
+    );
+    moreMenu.items = moreItems;
+
+    assertExists(this._moreButton);
+    createLitPortal({
+      template: moreMenu,
+      container: this._moreButton,
+      computePosition: {
+        referenceElement: this._moreButton,
+        placement: 'bottom-start',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+      abortController: this._popMenuAbortController,
+      closeOnClickAway: true,
+    });
+    this._moreMenuOpen = true;
   }
 
-  private popMore = (e: MouseEvent) => {
-    if (this.blockElement.readonly) return;
-    if (!this.moreItems.length) return;
-    this._popperVisible = true;
-
-    const items = CodeToolbarMoreMenuBuilder(this.moreItems, this.blockElement);
-
-    popMenu(e.currentTarget as HTMLElement, {
-      placement: 'bottom-end',
-      middleware: [
-        offset(5),
-        shift({ crossAxis: true }),
-        autoPlacement({
-          allowedPlacements: ['bottom-start', 'bottom-end'],
-        }),
-      ],
-      options: {
-        items,
-        onClose: () => {
-          this._popperVisible = false;
-        },
-      },
-    });
-  };
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this.disposables.addFromEvent(this.blockElement, 'mouseover', () => {
-      if (this._toolbarVisible) return;
-      this._toolbarVisible = true;
-    });
-
-    this.disposables.addFromEvent(this.blockElement, 'mouseleave', () => {
-      this._toolbarVisible = false;
-    });
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.closeCurrentMenu();
   }
 
   override render() {
-    const items = CodeToolbarItemRenderer(this.items, this.blockElement);
+    const items = CodeToolbarItemRenderer(
+      this.items,
+      this.blockElement,
+      this.closeCurrentMenu
+    );
 
-    const visible = this._showToolbar;
-    return html`<div data-visible="${visible}" class="code-toolbar-container">
+    return html`<div class="code-toolbar-container">
       ${items}
       <icon-button
-        class="code-toolbar-button"
+        class="code-toolbar-button more-button"
         data-testid="more-button"
         size="24px"
         ?disabled=${this.blockElement.readonly}
-        ?hover=${this._popperVisible}
-        @click=${this.popMore}
+        @click=${() => this._toggleMoreMenu()}
       >
         ${MoreVerticalIcon}
-        <affine-tooltip tip-position="top" .offset=${5}>More</affine-tooltip>
+        ${!this._moreMenuOpen
+          ? html`<affine-tooltip>More</affine-tooltip>`
+          : nothing}
       </icon-button>
     </div>`;
   }

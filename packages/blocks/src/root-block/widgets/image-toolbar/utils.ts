@@ -18,7 +18,8 @@ import type {
 export function ConfigRenderer(
   blockElement: ImageBlockComponent,
   abortController: AbortController,
-  config: ImageConfigItem[]
+  config: ImageConfigItem[],
+  onClick?: () => void
 ) {
   return config
     .filter(item => {
@@ -43,7 +44,7 @@ export function ConfigRenderer(
         }
         case 'custom': {
           const customItem = item as CustomItem;
-          template = customItem.render(blockElement);
+          template = customItem.render(blockElement, onClick);
           break;
         }
         default:
@@ -76,7 +77,10 @@ export function MoreMenuRenderer(
               width="183px"
               height="30px"
               text=${moreItem.name}
-              @click=${() => moreItem.action(blockElement, abortController)}
+              @click=${(e: MouseEvent) => {
+                e.stopPropagation();
+                moreItem.action(blockElement, abortController);
+              }}
             >
               ${moreItem.icon}
             </icon-button>
@@ -91,10 +95,10 @@ export function MoreMenuRenderer(
           template = null;
       }
 
-      return [template] as const;
+      return template;
     })
-    .filter(([template]) => template !== null && template !== undefined)
-    .map(([template]) => template);
+    .filter((template): template is TemplateResult => template !== null)
+    .map(template => template);
 }
 
 export function duplicate(

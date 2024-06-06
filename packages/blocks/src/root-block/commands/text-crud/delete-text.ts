@@ -66,12 +66,10 @@ export const deleteTextCommand: Command<
   fromText.delete(from.index, from.length);
   toText.delete(0, to.length);
 
+  fromText.join(toText);
+
   selectedElements
-    .filter(
-      el =>
-        el.model.id !== fromElement.model.id &&
-        el.model.id !== toElement.model.id
-    )
+    .filter(el => el.model.id !== fromElement.model.id)
     .forEach(el => {
       ctx.std.doc.deleteBlock(el.model);
     });
