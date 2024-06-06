@@ -13,11 +13,12 @@
  */
 export function countBy<T>(
   items: T[],
-  key: (item: T) => string | number
+  key: (item: T) => string | number | null
 ): Record<string, number> {
   const count: Record<string, number> = {};
   items.forEach(item => {
     const k = key(item);
+    if (k === null) return;
     if (!count[k]) {
       count[k] = 0;
     }

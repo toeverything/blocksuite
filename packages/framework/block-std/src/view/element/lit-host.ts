@@ -1,7 +1,7 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
 import { handleError } from '@blocksuite/global/exceptions';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockModel, Doc } from '@blocksuite/store';
 import { css } from 'lit';
 import {
@@ -48,6 +48,10 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   std!: BlockSuite.Std;
 
   rangeManager: RangeManager | null = null;
+
+  readonly slots = {
+    unmounted: new Slot(),
+  };
 
   get command(): CommandManager {
     return this.std.command;
@@ -129,6 +133,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     super.disconnectedCallback();
     this.std.unmount();
     this.rangeManager = null;
+    this.slots.unmounted.emit();
   }
 
   override render() {

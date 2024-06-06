@@ -120,38 +120,40 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
 
   private _updateRemoteRects = () => {
     const { selection, blockElement } = this;
-    const remoteSelection = selection.remoteSelection;
+    const remoteSelectionsMap = selection.remoteSurfaceSelectionsMap;
     const remoteRects: EdgelessRemoteSelectionWidget['_remoteRects'] =
       new Map();
 
-    remoteSelection.forEach((selection, clientId) => {
-      if (selection.elements.length === 0) return;
+    remoteSelectionsMap.forEach((selections, clientId) => {
+      selections.forEach(selection => {
+        if (selection.elements.length === 0) return;
 
-      const elements = selection.elements
-        .map(id => blockElement.service.getElementById(id))
-        .filter(element => element) as BlockSuite.EdgelessModelType[];
-      const rect = getSelectedRect(elements);
+        const elements = selection.elements
+          .map(id => blockElement.service.getElementById(id))
+          .filter(element => element) as BlockSuite.EdgelessModelType[];
+        const rect = getSelectedRect(elements);
 
-      if (rect.width === 0 || rect.height === 0) return;
+        if (rect.width === 0 || rect.height === 0) return;
 
-      const { left, top } = rect;
-      const [width, height] = [rect.width, rect.height];
+        const { left, top } = rect;
+        const [width, height] = [rect.width, rect.height];
 
-      let rotate = 0;
-      if (elements.length === 1) {
-        const element = elements[0];
-        if (!isTopLevelBlock(element)) {
-          rotate = element.rotate ?? 0;
+        let rotate = 0;
+        if (elements.length === 1) {
+          const element = elements[0];
+          if (!isTopLevelBlock(element)) {
+            rotate = element.rotate ?? 0;
+          }
         }
-      }
 
-      remoteRects.set(clientId, {
-        width,
-        height,
-        borderStyle: 'solid',
-        left,
-        top,
-        rotate,
+        remoteRects.set(clientId, {
+          width,
+          height,
+          borderStyle: 'solid',
+          left,
+          top,
+          rotate,
+        });
       });
     });
 
@@ -163,13 +165,15 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
       new Map();
     const status = this.doc.awarenessStore.getStates();
 
-    this.selection.remoteCursor.forEach((cursorSelection, clientId) => {
-      remoteCursors.set(clientId, {
-        x: cursorSelection.x,
-        y: cursorSelection.y,
-        user: status.get(clientId)?.user,
-      });
-    });
+    this.selection.remoteCursorSelectionMap.forEach(
+      (cursorSelection, clientId) => {
+        remoteCursors.set(clientId, {
+          x: cursorSelection.x,
+          y: cursorSelection.y,
+          user: status.get(clientId)?.user,
+        });
+      }
+    );
 
     this._remoteCursors = remoteCursors;
   };

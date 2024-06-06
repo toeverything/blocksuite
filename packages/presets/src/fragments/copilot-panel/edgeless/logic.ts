@@ -74,7 +74,7 @@ export class AIEdgelessLogic {
     }
     const edgelessRoot = getEdgelessRootFromEditor(this.host);
     const { notes } = BlocksUtils.splitElements(
-      edgelessRoot.service.selection.elements
+      edgelessRoot.service.selection.selectedElements
     );
     // @ts-ignore
     const htmlBlock: {

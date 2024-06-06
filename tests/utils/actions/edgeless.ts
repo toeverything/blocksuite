@@ -1339,7 +1339,7 @@ export async function getSelectedBound(
     ([index]) => {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
-      const selected = container.service.selection.elements[index];
+      const selected = container.service.selection.selectedElements[index];
       return JSON.parse(selected.xywh);
     },
     [index]
@@ -1410,7 +1410,7 @@ export async function getTypeById(page: Page, id: string) {
     ([id]) => {
       const container = document.querySelector('affine-edgeless-root');
       if (!container) throw new Error('container not found');
-      const element = container.service.getElementById(id);
+      const element = container.service.getElementById(id)!;
       return 'flavour' in element ? element.flavour : element.type;
     },
     [id]

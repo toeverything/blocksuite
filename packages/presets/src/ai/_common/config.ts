@@ -63,23 +63,27 @@ export const toneSubItem: AISubItemConfig[] = textTones.map(tone => {
   };
 });
 
-export const imageFilterSubItem = imageFilterStyles.map(style => {
-  return {
-    type: style,
-    handler: edgelessHandler('filterImage', AIImageIconWithAnimation, {
-      style,
-    }),
-  };
-});
+export function createImageFilterSubItem() {
+  return imageFilterStyles.map(style => {
+    return {
+      type: style,
+      handler: edgelessHandler('filterImage', AIImageIconWithAnimation, {
+        style,
+      }),
+    };
+  });
+}
 
-export const imageProcessingSubItem = imageProcessingTypes.map(type => {
-  return {
-    type,
-    handler: edgelessHandler('processImage', AIImageIconWithAnimation, {
+export function createImageProcessingSubItem() {
+  return imageProcessingTypes.map(type => {
+    return {
       type,
-    }),
-  };
-});
+      handler: edgelessHandler('processImage', AIImageIconWithAnimation, {
+        type,
+      }),
+    };
+  });
+}
 
 // TODO: improve the logic, to make it more accurate
 const textBlockShowWhen = (chain: Chain<InitCommandCtx>) => {
@@ -229,7 +233,7 @@ function edgelessHandler<T extends keyof BlockSuitePresets.AIActions>(
       const currentController = edgeless.tools.controllers[
         'copilot'
       ] as CopilotSelectionController;
-      const selectedElements = edgeless.service.selection.elements;
+      const selectedElements = edgeless.service.selection.selectedElements;
       currentController.updateDragPointsWith(selectedElements, 10);
       currentController.draggingAreaUpdated.emit(false); // do not show edgeless panel
 
@@ -391,75 +395,79 @@ export const AIItemGroups: AIItemGroupConfig[] = [
   OthersAIGroup,
 ];
 
-export const AIImageItemGroups: AIItemGroupConfig[] = [
-  {
-    name: 'edit with ai',
-    items: [
-      {
-        name: 'Explain this image',
-        icon: ExplainIcon,
-        showWhen: () => true,
-        handler: actionToHandler('explainImage', AIStarIconWithAnimation),
-      },
-    ],
-  },
-  {
-    name: 'generate with ai',
-    items: [
-      {
-        name: 'Generate an image',
-        icon: AIImageIcon,
-        showWhen: () => true,
-        handler: edgelessHandler('createImage', AIImageIconWithAnimation),
-      },
-      {
-        name: 'AI image filter',
-        icon: ImproveWritingIcon,
-        showWhen: (_, __, host) =>
-          !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
-        subItem: imageFilterSubItem,
-        subItemOffset: [12, -4],
-        beta: true,
-      },
-      {
-        name: 'Image processing',
-        icon: AIImageIcon,
-        showWhen: (_, __, host) =>
-          !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
-        subItem: imageProcessingSubItem,
-        subItemOffset: [12, -6],
-        beta: true,
-      },
-      {
-        name: 'Generate a caption',
-        icon: AIPenIcon,
-        showWhen: (_, __, host) =>
-          !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
-        beta: true,
-        handler: actionToHandler('generateCaption', AIStarIconWithAnimation),
-      },
-    ],
-  },
-  OthersAIGroup,
-];
+export function buildAIImageItemGroups(): AIItemGroupConfig[] {
+  return [
+    {
+      name: 'edit with ai',
+      items: [
+        {
+          name: 'Explain this image',
+          icon: ExplainIcon,
+          showWhen: () => true,
+          handler: actionToHandler('explainImage', AIStarIconWithAnimation),
+        },
+      ],
+    },
+    {
+      name: 'generate with ai',
+      items: [
+        {
+          name: 'Generate an image',
+          icon: AIImageIcon,
+          showWhen: () => true,
+          handler: edgelessHandler('createImage', AIImageIconWithAnimation),
+        },
+        {
+          name: 'AI image filter',
+          icon: ImproveWritingIcon,
+          showWhen: (_, __, host) =>
+            !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
+          subItem: createImageFilterSubItem(),
+          subItemOffset: [12, -4],
+          beta: true,
+        },
+        {
+          name: 'Image processing',
+          icon: AIImageIcon,
+          showWhen: (_, __, host) =>
+            !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
+          subItem: createImageProcessingSubItem(),
+          subItemOffset: [12, -6],
+          beta: true,
+        },
+        {
+          name: 'Generate a caption',
+          icon: AIPenIcon,
+          showWhen: (_, __, host) =>
+            !!host.doc.awarenessStore.getFlag('enable_new_image_actions'),
+          beta: true,
+          handler: actionToHandler('generateCaption', AIStarIconWithAnimation),
+        },
+      ],
+    },
+    OthersAIGroup,
+  ];
+}
 
-export const AICodeItemGroups: AIItemGroupConfig[] = [
-  {
-    name: 'review with ai',
-    items: [
-      {
-        name: 'Explain this code',
-        icon: ExplainIcon,
-        showWhen: () => true,
-        handler: actionToHandler('explainCode', AIStarIconWithAnimation),
-      },
-      {
-        name: 'Check code error',
-        icon: ExplainIcon,
-        showWhen: () => true,
-        handler: actionToHandler('checkCodeErrors', AIStarIconWithAnimation),
-      },
-    ],
-  },
-  OthersAIGroup,
-];
+export function buildAICodeItemGroups(): AIItemGroupConfig[] {
+  return [
+    {
+      name: 'edit with ai',
+      items: [
+        {
+          name: 'Explain this code',
+          icon: ExplainIcon,
+          showWhen: () => true,
+          handler: actionToHandler('explainCode', AIStarIconWithAnimation),
+        },
+        {
+          name: 'Check code error',
+          icon: ExplainIcon,
+          showWhen: () => true,
+          handler: actionToHandler('checkCodeErrors', AIStarIconWithAnimation),
+        },
+      ],
+    },
+    OthersAIGroup,
+  ];
+}

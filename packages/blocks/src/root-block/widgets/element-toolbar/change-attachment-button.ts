@@ -38,9 +38,10 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   }
 
   private get _blockElement() {
-    const blockSelection = this.edgeless.service.selection.selections.filter(
-      sel => sel.elements.includes(this.model.id)
-    );
+    const blockSelection =
+      this.edgeless.service.selection.surfaceSelections.filter(sel =>
+        sel.elements.includes(this.model.id)
+      );
     if (blockSelection.length !== 1) {
       return;
     }

@@ -4,6 +4,7 @@ import { CodeBlockSpec } from '../code-block/code-block-spec.js';
 import { DataViewBlockSpec } from '../data-view-block/data-view-spec.js';
 import { DatabaseBlockSpec } from '../database-block/database-spec.js';
 import { DividerBlockSpec } from '../divider-block/divider-spec.js';
+import { EdgelessTextBlockSpec } from '../edgeless-text/edgeless-text-spec.js';
 import { EmbedFigmaBlockSpec } from '../embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/embed-github-spec.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
@@ -70,6 +71,7 @@ export {
   EdgelessSurfaceBlockSpec,
   EdgelessSurfaceRefBlockSpec,
   FrameBlockSpec,
+  EdgelessTextBlockSpec,
   // page
   PageRootBlockSpec,
   PageSurfaceBlockSpec,

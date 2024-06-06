@@ -8,6 +8,7 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  focusRichTextEnd,
   getInlineSelectionIndex,
   getInlineSelectionText,
   initEmptyCodeBlockState,
@@ -50,12 +51,13 @@ import { test } from './utils/playwright.js';
 function getCodeBlock(page: Page) {
   const codeBlock = page.locator('affine-code');
   const languageButton = codeBlock.getByTestId('lang-button');
+
   const clickLanguageButton = async () => {
     await codeBlock.hover();
     await languageButton.click({ delay: 50 });
   };
 
-  const langList = page.locator('lang-list');
+  const langList = page.locator('affine-filterable-list');
   const langFilterInput = langList.locator('#filter-input');
 
   const codeToolbar = page.locator('affine-code-toolbar');
@@ -64,25 +66,27 @@ function getCodeBlock(page: Page) {
   const moreButton = codeToolbar.getByTestId('more-button');
   const captionButton = codeToolbar.getByTestId('caption');
 
-  const moreMenu = page.locator('affine-menu');
+  const moreMenu = page.locator('more-popup-menu');
 
   const openMore = async () => {
     await moreButton.click();
-    const menu = page.locator('affine-menu');
+    const menu = page.locator('more-popup-menu');
 
-    const wrapButton = page.locator('.affine-menu-action', {
-      hasText: /(wrap|cancel wrap)/i,
-    });
+    const wrapButton = page.locator('.menu-item.wrap');
 
-    const duplicateButton = page.locator('.affine-menu-action', {
-      hasText: 'Duplicate',
-    });
+    const cancelWrapButton = page.locator('.menu-item.cancel-wrap');
 
-    const deleteButton = page.locator('.affine-menu-action', {
-      hasText: 'Delete',
-    });
+    const duplicateButton = page.locator('.menu-item.duplicate');
 
-    return { menu, wrapButton, duplicateButton, deleteButton };
+    const deleteButton = page.locator('.menu-item.delete');
+
+    return {
+      menu,
+      wrapButton,
+      cancelWrapButton,
+      duplicateButton,
+      deleteButton,
+    };
   };
 
   return {
@@ -254,8 +258,7 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
 
   const languageButton = codeBlockController.languageButton;
   await expect(languageButton).toBeVisible();
-  const languageText = await languageButton.innerText();
-  expect(languageText).toEqual('TypeScript');
+  await expect(languageButton).toHaveText('TypeScript');
 });
 
 test('use more than three backticks can not create code block', async ({
@@ -292,14 +295,18 @@ test('change code language can work', async ({ page }) => {
   await focusRichText(page);
 
   const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
   await codeBlockController.clickLanguageButton();
   const locator = codeBlockController.langList;
   await expect(locator).toBeVisible();
 
   await type(page, 'rust');
-  await page.click('.lang-list-button-container > icon-button:nth-child(1)');
+  await page.click(
+    '.affine-filterable-list > .items-container > icon-button:nth-child(1)'
+  );
   await expect(locator).toBeHidden();
 
+  await codeBlockController.codeBlock.hover();
   await expect(codeBlockController.languageButton).toHaveText('Rust');
 
   await assertStoreMatchJSX(
@@ -332,9 +339,7 @@ test('change code language can work', async ({ page }) => {
   await expect(codeBlockController.languageButton).toHaveText('TypeScript');
 });
 
-test('language select list can disappear when click other place', async ({
-  page,
-}) => {
+test('click outside should close language list', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -344,9 +349,9 @@ test('language select list can disappear when click other place', async ({
   const locator = codeBlock.langList;
   await expect(locator).toBeVisible();
 
-  const rect = await page.locator('.lang-list-button-container').boundingBox();
+  const rect = await page.locator('affine-filterable-list').boundingBox();
   if (!rect) throw new Error('Failed to get bounding box of code block.');
-  await page.mouse.click(rect.x + 10, rect.y + 10);
+  await page.mouse.click(rect.x - 10, rect.y - 10);
 
   await expect(locator).toBeHidden();
 });
@@ -575,11 +580,6 @@ test('duplicate code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page, { language: 'javascript' });
 
-  await focusRichText(page);
-  await type(page, 'let a: u8 = 7');
-  await pressEscape(page);
-  await waitNextFrame(page, 100);
-
   const codeBlockController = getCodeBlock(page);
   await codeBlockController.codeBlock.hover();
 
@@ -588,7 +588,15 @@ test('duplicate code block', async ({ page }) => {
   const langLocator = codeBlockController.langList;
   await expect(langLocator).toBeVisible();
   await type(page, 'rust');
-  await page.click('.lang-list-button-container > icon-button:nth-child(1)');
+  await page.click(
+    '.affine-filterable-list > .items-container > icon-button:nth-child(1)'
+  );
+
+  // add text
+  await focusRichTextEnd(page);
+  await type(page, 'let a: u8 = 7');
+  await pressEscape(page);
+  await waitNextFrame(page, 100);
 
   // add a caption
   await codeBlockController.codeBlock.hover();
@@ -937,7 +945,7 @@ test('toggle code block wrap can work', async ({ page }) => {
   );
 
   await codeBlockController.codeBlock.hover();
-  await (await codeBlockController.openMore()).wrapButton.click();
+  await (await codeBlockController.openMore()).cancelWrapButton.click();
 
   await assertStoreMatchJSX(
     page,
@@ -1013,9 +1021,8 @@ test('should open more menu and close on selecting', async ({ page }) => {
 test('should code block works in read only mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
-  await focusRichText(page);
+  await focusRichTextEnd(page);
 
-  await page.mouse.move(0, 0);
   await page.waitForTimeout(300);
   await switchReadonly(page);
 
@@ -1025,6 +1032,7 @@ test('should code block works in read only mode', async ({ page }) => {
   await codeBlockController.clickLanguageButton();
   await expect(codeBlockController.langList).toBeHidden();
 
+  await codeBlock.hover();
   await expect(codeBlockController.codeToolbar).toBeVisible();
   await codeBlockController.moreButton.click({ delay: 50 });
 

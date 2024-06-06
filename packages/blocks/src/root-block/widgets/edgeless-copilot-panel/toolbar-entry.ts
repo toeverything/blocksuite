@@ -31,7 +31,7 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
   accessor groups!: AIItemGroupConfig[];
 
   private _showCopilotPanel() {
-    const selectedElements = this.edgeless.service.selection.elements;
+    const selectedElements = this.edgeless.service.selection.selectedElements;
     const toBeSelected = new Set(selectedElements);
     selectedElements.forEach(element => {
       if (isFrameBlock(element)) {

@@ -11,7 +11,6 @@ import type {
 } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
-import { findDocumentOrShadowRoot } from '../utils/query.js';
 import {
   domRangeToInlineRange,
   inlineRangeToDomRange,
@@ -92,8 +91,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     }
 
     if (this._inlineRange === null) {
-      const selectionRoot = findDocumentOrShadowRoot(this.editor);
-      const selection = selectionRoot.getSelection();
+      const selection = document.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         if (range.intersectsNode(this.editor.rootElement)) {
@@ -117,8 +115,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   getNativeSelection(): Selection | null {
-    const selectionRoot = findDocumentOrShadowRoot(this.editor);
-    const selection = selectionRoot.getSelection();
+    const selection = document.getSelection();
     if (!selection) return null;
     if (selection.rangeCount === 0) return null;
 
@@ -159,6 +156,9 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     let index = 0;
     for (const vLine of vLines) {
       const texts = getTextNodesFromElement(vLine);
+      if (texts.length === 0) {
+        throw new Error('text node in v-text not found');
+      }
 
       for (const text of texts) {
         if (!text.textContent) {
@@ -402,8 +402,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _applyInlineRange = (inlineRange: InlineRange): void => {
-    const selectionRoot = findDocumentOrShadowRoot(this.editor);
-    const selection = selectionRoot.getSelection();
+    const selection = document.getSelection();
     if (!selection) {
       return;
     }

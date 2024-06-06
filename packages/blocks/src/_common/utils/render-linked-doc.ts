@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -104,6 +105,70 @@ export const embedNoteContentStyles = css`
     }
   }
 `;
+
+export function promptDocTitle(host: EditorHost, autofill?: string) {
+  const notification =
+    host.std.spec.getService('affine:page').notificationService;
+  if (!notification) return Promise.resolve(undefined);
+
+  return notification.prompt({
+    title: 'Create linked doc',
+    message: 'Enter a title for the new doc.',
+    placeholder: 'Untitled',
+    autofill,
+    confirmText: 'Confirm',
+    cancelText: 'Cancel',
+  });
+}
+
+export function getTitleFromSelectedModels(selectedModels: BlockModel[]) {
+  const firstBlock = selectedModels[0];
+  if (
+    matchFlavours(firstBlock, ['affine:paragraph']) &&
+    firstBlock.type.startsWith('h')
+  ) {
+    return firstBlock.text.toString();
+  }
+  return undefined;
+}
+
+export function notifyDocCreated(host: EditorHost, doc: Doc) {
+  const notification =
+    host.std.spec.getService('affine:page').notificationService;
+  if (!notification) return;
+
+  const abortController = new AbortController();
+  const clear = () => {
+    doc.history.off('stack-item-added', addHandler);
+    doc.history.off('stack-item-popped', popHandler);
+    disposable.dispose();
+  };
+  const closeNotify = () => {
+    abortController.abort();
+    clear();
+  };
+
+  // edit or undo or switch doc, close notify toast
+  const addHandler = doc.history.on('stack-item-added', closeNotify);
+  const popHandler = doc.history.on('stack-item-popped', closeNotify);
+  const disposable = host.slots.unmounted.on(closeNotify);
+
+  notification.notify({
+    title: 'Linked doc created',
+    message: 'You can click undo to recovery block content',
+    accent: 'info',
+    duration: 10 * 1000,
+    action: {
+      label: 'undo',
+      onClick: () => {
+        doc.undo();
+        clear();
+      },
+    },
+    abort: abortController.signal,
+    onClose: clear,
+  });
+}
 
 export function renderLinkedDocInCard(
   card: EmbedLinkedDocBlockComponent | EmbedSyncedDocCard
@@ -383,17 +448,8 @@ export function convertSelectedBlocksToLinkedDoc(
   const firstBlock = selectedModels[0];
   assertExists(firstBlock);
   // if title undefined, use the first heading block content as doc title
-  let title = docTitle;
-  let blocks = selectedModels;
-  if (
-    !docTitle &&
-    matchFlavours(firstBlock, ['affine:paragraph']) &&
-    firstBlock.type.match(/^h[1-6]$/)
-  ) {
-    title = firstBlock.text.toString();
-    blocks = selectedModels.slice(1);
-  }
-  const linkedDoc = createLinkedDocFromBlocks(doc, blocks, title);
+  const title = docTitle || getTitleFromSelectedModels(selectedModels);
+  const linkedDoc = createLinkedDocFromBlocks(doc, selectedModels, title);
   // insert linked doc card
   doc.addSiblingBlocks(
     firstBlock,

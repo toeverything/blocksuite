@@ -15,6 +15,7 @@ import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import type { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
+import { wrapFontFamily } from '../../../../surface-block/utils/font.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
@@ -337,6 +338,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       fontFamily,
       fontSize,
       fontWeight,
+      fontStyle,
       color,
       textAlign,
       rotate,
@@ -364,9 +366,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         transform: transformOperation.join(' '),
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
-        fontFamily: `"${fontFamily}"`,
+        fontFamily: wrapFontFamily(fontFamily),
         fontSize: `${fontSize}px`,
         fontWeight,
+        fontStyle,
         color: isCssVariable(color) ? `var(${color})` : color,
         textAlign,
         lineHeight: `${lineHeight}px`,

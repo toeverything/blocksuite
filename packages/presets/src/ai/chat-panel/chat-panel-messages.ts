@@ -461,7 +461,8 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
       return (
         'role' in item ||
         item.messages?.length === 3 ||
-        (item.action === 'image' && item.messages?.length === 2)
+        (HISTORY_IMAGE_ACTIONS.includes(item.action) &&
+          item.messages?.length === 2)
       );
     });
 

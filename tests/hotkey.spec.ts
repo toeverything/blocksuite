@@ -1097,11 +1097,7 @@ test('should cut work multiple line', async ({ page }) => {
   prop:index="a0"
 >
   <affine:paragraph
-    prop:text="1"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="9"
+    prop:text="19"
     prop:type="text"
   />
 </affine:note>`,

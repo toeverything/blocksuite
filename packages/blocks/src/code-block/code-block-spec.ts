@@ -9,6 +9,7 @@ export const CodeBlockSpec: BlockSpec = {
     component: literal`affine-code`,
     widgets: {
       codeToolbar: literal`affine-code-toolbar-widget`,
+      codeLangList: literal`affine-code-language-list-widget`,
     },
   },
 };

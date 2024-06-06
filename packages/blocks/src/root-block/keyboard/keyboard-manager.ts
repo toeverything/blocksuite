@@ -4,7 +4,12 @@ import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 
 import { matchFlavours } from '../../_common/utils/model.js';
-import { convertSelectedBlocksToLinkedDoc } from '../../_common/utils/render-linked-doc.js';
+import {
+  convertSelectedBlocksToLinkedDoc,
+  getTitleFromSelectedModels,
+  notifyDocCreated,
+  promptDocTitle,
+} from '../../_common/utils/render-linked-doc.js';
 
 export class PageKeyboardManager {
   constructor(public rootElement: BlockElement) {
@@ -150,10 +155,19 @@ export class PageKeyboardManager {
     }
 
     const doc = rootElement.host.doc;
-    const linkedDoc = convertSelectedBlocksToLinkedDoc(doc, selectedModels);
-    const linkedDocService = rootElement.host.spec.getService(
-      'affine:embed-linked-doc'
-    );
-    linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+    const autofill = getTitleFromSelectedModels(selectedModels);
+    void promptDocTitle(rootElement.host, autofill).then(title => {
+      if (title === null) return;
+      const linkedDoc = convertSelectedBlocksToLinkedDoc(
+        doc,
+        selectedModels,
+        title
+      );
+      const linkedDocService = rootElement.host.spec.getService(
+        'affine:embed-linked-doc'
+      );
+      linkedDocService.slots.linkedDocCreated.emit({ docId: linkedDoc.id });
+      notifyDocCreated(rootElement.host, doc);
+    });
   }
 }

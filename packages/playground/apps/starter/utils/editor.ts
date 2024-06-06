@@ -159,7 +159,12 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
               return Promise.resolve(confirm(notification.title.toString()));
             },
             prompt: notification => {
-              return Promise.resolve(prompt(notification.title.toString()));
+              return Promise.resolve(
+                prompt(
+                  notification.title.toString(),
+                  notification.autofill?.toString()
+                )
+              );
             },
             notify: notification => {
               // todo: implement in playground

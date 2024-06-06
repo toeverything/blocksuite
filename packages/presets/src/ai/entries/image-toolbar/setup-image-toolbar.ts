@@ -6,11 +6,11 @@ import type {
 } from '@blocksuite/blocks';
 import { html } from 'lit';
 
-import { AIImageItemGroups } from '../../_common/config.js';
+import type { AskAIButtonOptions } from '../../_common/components/ask-ai-button.js';
+import { buildAIImageItemGroups } from '../../_common/config.js';
 
 export function setupImageToolbarEntry(imageToolbar: AffineImageToolbarWidget) {
-  const onAskAIClick = (e: MouseEvent) => {
-    e.stopPropagation();
+  const onAskAIClick = () => {
     const { host } = imageToolbar;
     const { selection } = host;
     const imageBlock = imageToolbar.blockElement;
@@ -19,20 +19,29 @@ export function setupImageToolbarEntry(imageToolbar: AffineImageToolbarWidget) {
     ]);
   };
   imageToolbar.buildDefaultConfig();
+  const AIImageItemGroups = buildAIImageItemGroups();
+  const buttonOptions: AskAIButtonOptions = {
+    toggleType: 'click',
+    size: 'small',
+    backgroundColor: 'var(--affine-white)',
+    boxShadow: 'var(--affine-shadow-1)',
+    panelWidth: 300,
+  };
   imageToolbar.addConfigItems(
     [
       {
         type: 'custom',
-        render(imageBlock: ImageBlockComponent) {
+        render(imageBlock: ImageBlockComponent, onClick?: () => void) {
           return html`<ask-ai-button
             class="image-toolbar-button ask-ai"
             .host=${imageBlock.host}
             .actionGroups=${AIImageItemGroups}
-            .size=${'small'}
-            .backgroundColor=${'var(--affine-white)'}
-            .boxShadow=${'var(--affine-shadow-1)'}
-            .toggleType=${'click'}
-            @click=${onAskAIClick}
+            .options=${buttonOptions}
+            @click=${(e: MouseEvent) => {
+              e.stopPropagation();
+              onAskAIClick();
+              onClick?.();
+            }}
           ></ask-ai-button>`;
         },
         showWhen: () => true,

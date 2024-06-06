@@ -669,7 +669,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             currentTNode.type === 'listItem' &&
             previousTNode?.type === 'list' &&
             previousTNode.ordered === (o.node.props.type === 'numbered') &&
-            isNullish(previousTNode.children[0]?.checked) ===
+            isNullish(currentTNode.checked) ===
               isNullish(
                 o.node.props.type === 'todo'
                   ? (o.node.props.checked as boolean)

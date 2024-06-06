@@ -130,5 +130,9 @@ declare global {
       | EdgelessBlockModel;
 
     type EdgelessModelType = EdgelessBlockModelType | SurfaceModelType;
+
+    interface EdgelessTextModelMap {}
+    type EdgelessTextModelKeyType = keyof EdgelessTextModelMap;
+    type EdgelessTextModelType = EdgelessTextModelMap[EdgelessTextModelKeyType];
   }
 }

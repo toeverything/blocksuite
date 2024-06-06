@@ -166,7 +166,6 @@ function updateAIPanelConfig<T extends keyof BlockSuitePresets.AIActions>(
   config.errorStateConfig = buildErrorConfig(aiPanel);
   config.copy = buildCopyConfig(aiPanel);
   config.discardCallback = () => {
-    aiPanel.hide();
     reportResponse('result:discard');
   };
 }
