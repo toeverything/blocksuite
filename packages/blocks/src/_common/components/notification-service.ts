@@ -18,6 +18,7 @@ export interface NotificationService {
   prompt(options: {
     title: string | TemplateResult;
     message: string | TemplateResult;
+    autofill?: string;
     placeholder?: string;
     confirmText?: string;
     cancelText?: string;

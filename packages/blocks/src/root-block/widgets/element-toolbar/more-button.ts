@@ -29,6 +29,7 @@ import { type ReorderingType } from '../../../_common/utils/index.js';
 import {
   createLinkedDocFromEdgelessElements,
   createLinkedDocFromNote,
+  promptDocTitle,
 } from '../../../_common/utils/render-linked-doc.js';
 import type {
   AttachmentBlockComponent,
@@ -292,14 +293,15 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return [ACTION_DIVIDER, CREATE_LINKED_DOC_ACTION];
   }
 
-  private _turnIntoLinkedDoc = () => {
+  private _turnIntoLinkedDoc = (title?: string) => {
     const isSingleSelect = this.selection.selectedElements.length === 1;
     const { firstElement: element } = this.selection;
 
     if (isSingleSelect && isNoteBlock(element)) {
       const linkedDoc = createLinkedDocFromNote(
         this.edgeless.host.doc,
-        element
+        element,
+        title
       );
       // insert linked doc card
       const cardId = this.edgeless.service.addBlock(
@@ -322,11 +324,11 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         editing: false,
       });
     } else {
-      this._createLinkedDoc();
+      this._createLinkedDoc(title);
     }
   };
 
-  private _createLinkedDoc = () => {
+  private _createLinkedDoc = (title?: string) => {
     const selection = this.edgeless.service.selection;
     const elements = getCloneElements(
       selection.selectedElements,
@@ -334,7 +336,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     );
     const linkedDoc = createLinkedDocFromEdgelessElements(
       this.edgeless.host.doc,
-      elements
+      elements,
+      title
     );
     // insert linked doc card
     const width = 364;
@@ -413,11 +416,15 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'turn-into-linked-doc': {
-        this._turnIntoLinkedDoc();
+        const title = await promptDocTitle(this.edgeless.host);
+        if (title === null) return;
+        this._turnIntoLinkedDoc(title);
         break;
       }
       case 'create-linked-doc': {
-        this._createLinkedDoc();
+        const title = await promptDocTitle(this.edgeless.host);
+        if (title === null) return;
+        this._createLinkedDoc(title);
         break;
       }
       case 'create-frame': {
