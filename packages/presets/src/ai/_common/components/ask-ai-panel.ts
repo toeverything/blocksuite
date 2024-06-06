@@ -5,6 +5,7 @@ import {
 } from '@blocksuite/blocks';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRootService } from '../../utils/selection-utils.js';
 
@@ -18,7 +19,6 @@ export class AskAIPanel extends WithDisposable(LitElement) {
     .ask-ai-panel {
       box-sizing: border-box;
       padding: 8px;
-      min-width: 330px;
       max-height: 374px;
       overflow-y: auto;
       background: var(--affine-background-overlay-panel-color);
@@ -51,6 +51,9 @@ export class AskAIPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor abortController: AbortController | null = null;
 
+  @property({ attribute: false })
+  accessor minWidth = 330;
+
   get _edgeless() {
     const rootService = getRootService(this.host);
     if (rootService instanceof EdgelessRootService) {
@@ -78,7 +81,10 @@ export class AskAIPanel extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="ask-ai-panel">
+    const style = styleMap({
+      minWidth: `${this.minWidth}px`,
+    });
+    return html`<div class="ask-ai-panel" style=${style}>
       <ai-item-list
         .host=${this.host}
         .groups=${this._actionGroups}

@@ -17,8 +17,9 @@ export const defaultItems: CodeToolbarItem[] = [
     icon: CopyIcon,
     tooltip: 'Copy Code',
     showWhen: () => true,
-    action: codeBlock => {
+    action: (codeBlock, onClick) => {
       codeBlock.copyCode();
+      onClick?.();
     },
   },
   {
@@ -27,81 +28,67 @@ export const defaultItems: CodeToolbarItem[] = [
     icon: CaptionIcon,
     tooltip: 'Caption',
     showWhen: blockElement => !blockElement.doc.readonly,
-    action: codeBlock => {
+    action: (codeBlock, onClick) => {
       codeBlock.captionEditor.show();
+      onClick?.();
     },
   },
 ];
 
 export const defaultMoreItems: CodeToolbarMoreItem[] = [
-  // Wrap
   {
-    render: codeBlock => {
-      const model = codeBlock.model;
-      return {
-        type: 'action',
-
-        name: model.wrap ? 'Cancel Wrap' : 'Wrap',
-        icon: model.wrap ? CancelWrapIcon : WrapIcon,
-        select: () => {
-          codeBlock.setWrap(!model.wrap);
-        },
-      };
-    },
+    type: 'more',
+    name: codeBlock => (codeBlock.model.wrap ? 'Cancel Wrap' : 'Wrap'),
+    tooltip: '',
+    icon: codeBlock => (codeBlock.model.wrap ? CancelWrapIcon : WrapIcon),
     showWhen: () => true,
+    action: (codeBlock, abortController) => {
+      codeBlock.setWrap(!codeBlock.model.wrap);
+      abortController.abort();
+    },
   },
-  // Duplicate
   {
-    render: toolbar => {
-      return {
-        type: 'action',
-        name: 'Duplicate',
-        icon: DuplicateIcon,
-        select: () => {
-          const codeId = duplicateCodeBlock(toolbar.model);
-
-          const editorHost = toolbar.host;
-          editorHost.updateComplete
-            .then(() => {
-              editorHost.selection.setGroup('note', [
-                editorHost.selection.create('block', {
-                  blockId: codeId,
-                }),
-              ]);
-
-              if (isInsidePageEditor(editorHost)) {
-                const duplicateElement = editorHost.view.getBlock(codeId);
-                if (duplicateElement) {
-                  duplicateElement.scrollIntoView({ block: 'nearest' });
-                }
-              }
-            })
-            .catch(console.error);
-        },
-      };
-    },
+    type: 'more',
+    name: 'Duplicate',
+    tooltip: '',
+    icon: DuplicateIcon,
     showWhen: () => true,
+    action: (codeBlock, abortController) => {
+      const codeId = duplicateCodeBlock(codeBlock.model);
+
+      const editorHost = codeBlock.host;
+      editorHost.updateComplete
+        .then(() => {
+          editorHost.selection.setGroup('note', [
+            editorHost.selection.create('block', {
+              blockId: codeId,
+            }),
+          ]);
+
+          if (isInsidePageEditor(editorHost)) {
+            const duplicateElement = editorHost.view.getBlock(codeId);
+            if (duplicateElement) {
+              duplicateElement.scrollIntoView({ block: 'nearest' });
+            }
+          }
+        })
+        .catch(console.error);
+
+      abortController.abort();
+    },
   },
-  // Delete
   {
-    render: toolbar => {
-      const model = toolbar.model;
-      return {
-        type: 'group',
-        name: '',
-        children: () => [
-          {
-            type: 'action',
-            class: 'delete-item',
-            name: 'Delete',
-            select: () => {
-              model.doc.deleteBlock(model);
-            },
-            icon: DeleteIcon,
-          },
-        ],
-      };
-    },
+    type: 'divider',
+  },
+  {
+    type: 'more',
+    name: 'Delete',
+    tooltip: '',
+    icon: DeleteIcon,
     showWhen: () => true,
+    action: (codeBlock, abortController) => {
+      codeBlock.doc.deleteBlock(codeBlock.model);
+      abortController.abort();
+    },
   },
 ];

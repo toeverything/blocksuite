@@ -9,7 +9,8 @@ export type DefaultItemConfig = {
   showWhen: (blockElement: ImageBlockComponent) => boolean;
   action: (
     blockElement: ImageBlockComponent,
-    abortController: AbortController
+    abortController: AbortController,
+    onClick?: () => void
   ) => void;
 };
 
@@ -27,7 +28,10 @@ export type DividerItem = {
 
 export type CustomItem = {
   showWhen: (blockElement: ImageBlockComponent) => boolean;
-  render: (blockElement: ImageBlockComponent) => TemplateResult | null;
+  render: (
+    blockElement: ImageBlockComponent,
+    onClick?: () => void
+  ) => TemplateResult | null;
   type: 'custom';
 };
 

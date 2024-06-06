@@ -8,6 +8,7 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  focusRichTextEnd,
   getInlineSelectionIndex,
   getInlineSelectionText,
   initEmptyCodeBlockState,
@@ -65,25 +66,27 @@ function getCodeBlock(page: Page) {
   const moreButton = codeToolbar.getByTestId('more-button');
   const captionButton = codeToolbar.getByTestId('caption');
 
-  const moreMenu = page.locator('affine-menu');
+  const moreMenu = page.locator('more-popup-menu');
 
   const openMore = async () => {
     await moreButton.click();
-    const menu = page.locator('affine-menu');
+    const menu = page.locator('more-popup-menu');
 
-    const wrapButton = page.locator('.affine-menu-action', {
-      hasText: /(wrap|cancel wrap)/i,
-    });
+    const wrapButton = page.locator('.menu-item.wrap');
 
-    const duplicateButton = page.locator('.affine-menu-action', {
-      hasText: 'Duplicate',
-    });
+    const cancelWrapButton = page.locator('.menu-item.cancel-wrap');
 
-    const deleteButton = page.locator('.affine-menu-action', {
-      hasText: 'Delete',
-    });
+    const duplicateButton = page.locator('.menu-item.duplicate');
 
-    return { menu, wrapButton, duplicateButton, deleteButton };
+    const deleteButton = page.locator('.menu-item.delete');
+
+    return {
+      menu,
+      wrapButton,
+      cancelWrapButton,
+      duplicateButton,
+      deleteButton,
+    };
   };
 
   return {
@@ -590,7 +593,7 @@ test('duplicate code block', async ({ page }) => {
   );
 
   // add text
-  await focusRichText(page);
+  await focusRichTextEnd(page);
   await type(page, 'let a: u8 = 7');
   await pressEscape(page);
   await waitNextFrame(page, 100);
@@ -942,7 +945,7 @@ test('toggle code block wrap can work', async ({ page }) => {
   );
 
   await codeBlockController.codeBlock.hover();
-  await (await codeBlockController.openMore()).wrapButton.click();
+  await (await codeBlockController.openMore()).cancelWrapButton.click();
 
   await assertStoreMatchJSX(
     page,
@@ -1018,7 +1021,7 @@ test('should open more menu and close on selecting', async ({ page }) => {
 test('should code block works in read only mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
-  await focusRichText(page);
+  await focusRichTextEnd(page);
 
   await page.waitForTimeout(300);
   await switchReadonly(page);
