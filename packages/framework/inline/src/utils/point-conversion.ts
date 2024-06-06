@@ -19,18 +19,19 @@ export function nativePointToTextPoint(
 
   if (isVElement(node)) {
     const texts = getTextNodesFromElement(node);
-    if (texts.length === 1) {
-      const vElement = texts[0].parentElement?.closest(
-        '[data-v-element="true"]'
-      );
-      if (
-        vElement instanceof HTMLElement &&
-        vElement.dataset.vEmbed === 'true'
-      ) {
-        return [texts[0], 0];
-      }
+    const vElement = texts[0].parentElement?.closest('[data-v-element="true"]');
+
+    if (
+      texts.length === 1 &&
+      vElement instanceof HTMLElement &&
+      vElement.dataset.vEmbed === 'true'
+    ) {
+      return [texts[0], 0];
     }
-    return texts[offset] ? [texts[offset], 0] : null;
+
+    if (texts.length > 0) {
+      return texts[offset] ? [texts[offset], 0] : null;
+    }
   }
 
   if (isVLine(node) || isInlineRoot(node)) {
@@ -61,11 +62,11 @@ export function textPointToDomPoint(
     );
   }
 
-  if (!rootElement.contains(text)) {
-    return null;
-  }
+  if (!rootElement.contains(text)) return null;
 
   const texts = getTextNodesFromElement(rootElement);
+  if (texts.length === 0) return null;
+
   const goalIndex = texts.indexOf(text);
   let index = 0;
   for (const text of texts.slice(0, goalIndex)) {

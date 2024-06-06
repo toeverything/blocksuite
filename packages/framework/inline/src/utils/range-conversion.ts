@@ -265,6 +265,10 @@ export function inlineRangeToDomRange(
     }
 
     const texts = getTextNodesFromElement(lineElements[i]);
+    if (texts.length === 0) {
+      throw new Error('text node in v-text not found');
+    }
+
     for (const text of texts) {
       const textLength = calculateTextLength(text);
 
@@ -308,6 +312,9 @@ export function inlineRangeToDomRange(
     }
 
     const texts = getTextNodesFromElement(nextSibling);
+    if (texts.length === 0) {
+      throw new Error('text node in v-text not found');
+    }
     if (nextSibling instanceof VElement) {
       startText = texts[texts.length - 1];
       anchorOffset = calculateTextLength(startText);
@@ -330,6 +337,9 @@ export function inlineRangeToDomRange(
     }
 
     const texts = getTextNodesFromElement(nextSibling);
+    if (texts.length === 0) {
+      throw new Error('text node in v-text not found');
+    }
     endText = texts[0];
     focusOffset = 0;
   }
