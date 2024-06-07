@@ -148,6 +148,7 @@ export class Renderer extends Viewport {
       this._stackingCanvas = canvases;
       updateStackingCanvasSize(canvases);
       this.stackingCanvasUpdated.emit(canvases);
+      this.refresh();
     };
 
     this._disposables.add(
