@@ -1,6 +1,6 @@
 import { type EditorHost, WithDisposable } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
-import type { Doc } from '@blocksuite/store';
+import { type Doc, Job } from '@blocksuite/store';
 import {
   DocCollection,
   type DocCollectionOptions,
@@ -147,7 +147,7 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
   }
 
   private _toMindmapNode(answer: string) {
-    return markdownToMindmap(answer);
+    return markdownToMindmap(answer, this.doc);
   }
 
   private _switchStyle(style: MindmapStyle) {
@@ -233,9 +233,10 @@ type Node = {
   children: Node[];
 };
 
-export const markdownToMindmap = (answer: string) => {
+export const markdownToMindmap = (answer: string, doc: Doc) => {
   let result: Node | null = null;
-  const markdown = new MarkdownAdapter();
+  const job = new Job({ collection: doc.collection });
+  const markdown = new MarkdownAdapter(job);
   const ast = markdown['_markdownToAst'](answer);
   const traverse = (
     markdownNode: Unpacked<(typeof ast)['children']>,

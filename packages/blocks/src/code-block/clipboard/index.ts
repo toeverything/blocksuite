@@ -14,8 +14,6 @@ export class CodeClipboardController {
   }
 
   private _clipboard!: Clipboard;
-  private _plaintextAdapter = new PlainTextAdapter();
-  private _htmlAdapter = new HtmlAdapter();
 
   constructor(host: BlockElement) {
     this.host = host;
@@ -35,8 +33,8 @@ export class CodeClipboardController {
   }
 
   protected _init = () => {
-    this._clipboard.registerAdapter('text/plain', this._plaintextAdapter, 90);
-    this._clipboard.registerAdapter('text/html', this._htmlAdapter, 80);
+    this._clipboard.registerAdapter('text/plain', PlainTextAdapter, 90);
+    this._clipboard.registerAdapter('text/html', HtmlAdapter, 80);
     const paste = pasteMiddleware(this._std);
     this._clipboard.use(paste);
 

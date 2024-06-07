@@ -1,5 +1,6 @@
 import type { DeltaInsert } from '@blocksuite/inline';
-import type { AssetsManager } from '@blocksuite/store';
+import type { Job } from '@blocksuite/store';
+import { type AssetsManager } from '@blocksuite/store';
 import {
   ASTWalker,
   BaseAdapter,
@@ -35,9 +36,9 @@ type MixTextToSliceSnapshotPayload = {
 
 export class MixTextAdapter extends BaseAdapter<MixText> {
   private _markdownAdapter: MarkdownAdapter;
-  constructor() {
-    super();
-    this._markdownAdapter = new MarkdownAdapter();
+  constructor(job: Job) {
+    super(job);
+    this._markdownAdapter = new MarkdownAdapter(job);
   }
   async fromDocSnapshot({
     snapshot,

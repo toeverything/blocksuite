@@ -10,13 +10,8 @@ export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
     collection: host.std.doc.collection,
     middlewares: [titleMiddleware],
   });
-  const snapshot = await job.sliceToSnapshot(slice);
-  const markdownAdapter = new MarkdownAdapter();
-  markdownAdapter.applyConfigs(job.adapterConfigs);
-  const markdown = await markdownAdapter.fromSliceSnapshot({
-    snapshot,
-    assets: job.assetsManager,
-  });
+  const markdownAdapter = new MarkdownAdapter(job);
+  const markdown = await markdownAdapter.fromSlice(slice);
 
   return markdown.file;
 }
@@ -25,7 +20,7 @@ export const markdownToSnapshot = async (
   host: EditorHost
 ) => {
   const job = new Job({ collection: host.std.doc.collection });
-  const markdownAdapter = new MarkdownAdapter();
+  const markdownAdapter = new MarkdownAdapter(job);
   const { blockVersions, workspaceVersion, pageVersion } =
     host.std.doc.collection.meta;
   if (!blockVersions || !workspaceVersion || !pageVersion)

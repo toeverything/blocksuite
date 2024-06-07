@@ -2,7 +2,11 @@ import '../../../../_common/components/loader.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { sha } from '@blocksuite/global/utils';
-import { type DocCollection, extMimeMap } from '@blocksuite/store';
+import {
+  type DocCollection,
+  extMimeMap,
+  type JobMiddleware,
+} from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
@@ -36,28 +40,34 @@ export async function importMarkDown(
   text: string,
   fileName?: string
 ) {
+  const fileNameMiddleware: JobMiddleware = ({ slots }) => {
+    slots.beforeImport.on(payload => {
+      if (payload.type !== 'page') {
+        return;
+      }
+      if (!fileName) {
+        return;
+      }
+      payload.snapshot.meta.title = fileName;
+      payload.snapshot.blocks.props.title = {
+        '$blocksuite:internal:text$': true,
+        delta: [
+          {
+            insert: fileName,
+          },
+        ],
+      };
+    });
+  };
   const job = new Job({
     collection,
-    middlewares: [defaultImageProxyMiddleware],
+    middlewares: [defaultImageProxyMiddleware, fileNameMiddleware],
   });
-  const mdAdapter = new MarkdownAdapter();
-  mdAdapter.applyConfigs(job.adapterConfigs);
-  const snapshot = await mdAdapter.toDocSnapshot({
+  const mdAdapter = new MarkdownAdapter(job);
+  const page = await mdAdapter.toDoc({
     file: text,
     assets: job.assetsManager,
   });
-  if (fileName) {
-    snapshot.meta.title = fileName;
-    snapshot.blocks.props.title = {
-      '$blocksuite:internal:text$': true,
-      delta: [
-        {
-          insert: fileName,
-        },
-      ],
-    };
-  }
-  const page = await job.snapshotToDoc(snapshot);
   return page.id;
 }
 
@@ -66,8 +76,7 @@ export async function importHtml(collection: DocCollection, text: string) {
     collection,
     middlewares: [defaultImageProxyMiddleware],
   });
-  const htmlAdapter = new NotionHtmlAdapter();
-  htmlAdapter.applyConfigs(job.adapterConfigs);
+  const htmlAdapter = new NotionHtmlAdapter(job);
   const snapshot = await htmlAdapter.toDocSnapshot({
     file: text,
     assets: job.assetsManager,
@@ -142,21 +151,19 @@ export async function importNotion(collection: DocCollection, file: File) {
         collection: collection,
         middlewares: [defaultImageProxyMiddleware],
       });
-      const htmlAdapter = new NotionHtmlAdapter();
-      htmlAdapter.applyConfigs(job.adapterConfigs);
+      const htmlAdapter = new NotionHtmlAdapter(job);
       const assets = job.assetsManager.getAssets();
       for (const [key, value] of pendingAssets.entries()) {
         if (!assets.has(key)) {
           assets.set(key, value);
         }
       }
-      const snapshot = await htmlAdapter.toDocSnapshot({
+      const page = await htmlAdapter.toDoc({
         file: await zipFile.files[file].async('text'),
         pageId: pageMap.get(file),
         pageMap,
         assets: job.assetsManager,
       });
-      const page = await job.snapshotToDoc(snapshot);
       pageIds.push(page.id);
     });
     promises.push(...pagePromises);

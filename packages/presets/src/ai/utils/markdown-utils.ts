@@ -77,8 +77,7 @@ export async function getContentFromSlice(
   const snapshot = await job.sliceToSnapshot(slice);
   processTextInSnapshot(snapshot, host);
   const adapter =
-    type === 'markdown' ? new MarkdownAdapter() : new PlainTextAdapter();
-  adapter.applyConfigs(job.adapterConfigs);
+    type === 'markdown' ? new MarkdownAdapter(job) : new PlainTextAdapter(job);
   const content = await adapter.fromSliceSnapshot({
     snapshot,
     assets: job.assetsManager,
@@ -93,8 +92,7 @@ export async function getPlainTextFromSlice(host: EditorHost, slice: Slice) {
   });
   const snapshot = await job.sliceToSnapshot(slice);
   processTextInSnapshot(snapshot, host);
-  const plainTextAdapter = new PlainTextAdapter();
-  plainTextAdapter.applyConfigs(job.adapterConfigs);
+  const plainTextAdapter = new PlainTextAdapter(job);
   const plainText = await plainTextAdapter.fromSliceSnapshot({
     snapshot,
     assets: job.assetsManager,
@@ -110,14 +108,13 @@ export const markdownToSnapshot = async (
     collection: host.std.doc.collection,
     middlewares: [defaultImageProxyMiddleware, pasteMiddleware(host.std)],
   });
-  const markdownAdapter = new MixTextAdapter();
+  const markdownAdapter = new MixTextAdapter(job);
   const { blockVersions, workspaceVersion, pageVersion } =
     host.std.doc.collection.meta;
   if (!blockVersions || !workspaceVersion || !pageVersion)
     throw new Error(
       'Need blockVersions, workspaceVersion, pageVersion meta information to get slice'
     );
-  markdownAdapter.applyConfigs(job.adapterConfigs);
   const payload = {
     file: markdown,
     assets: job.assetsManager,
@@ -181,13 +178,11 @@ export async function markDownToDoc(host: EditorHost, answer: string) {
     collection,
     middlewares: [defaultImageProxyMiddleware],
   });
-  const mdAdapter = new MarkdownAdapter();
-  mdAdapter.applyConfigs(job.adapterConfigs);
-  const snapshot = await mdAdapter.toDocSnapshot({
+  const mdAdapter = new MarkdownAdapter(job);
+  const doc = await mdAdapter.toDoc({
     file: answer,
     assets: job.assetsManager,
   });
-  const doc = await job.snapshotToDoc(snapshot);
   if (!doc) {
     console.error('Failed to convert markdown to doc');
   }

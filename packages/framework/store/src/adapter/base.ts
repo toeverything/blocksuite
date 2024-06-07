@@ -1,6 +1,9 @@
 import { assertEquals } from '@blocksuite/global/utils';
 
+import type { Doc } from '../store/index.js';
 import type { AssetsManager } from '../transformer/assets.js';
+import type { Slice } from '../transformer/index.js';
+import { type DraftModel, type Job } from '../transformer/index.js';
 import type {
   BlockSnapshot,
   DocSnapshot,
@@ -48,6 +51,13 @@ export type ToSliceSnapshotPayload<Target> = {
 export abstract class BaseAdapter<AdapterTarget = unknown> {
   protected configs: Map<string, unknown> = new Map();
 
+  job: Job;
+
+  constructor(job: Job) {
+    this.job = job;
+    this.applyConfigs(job.adapterConfigs);
+  }
+
   abstract fromDocSnapshot(
     payload: FromDocSnapshotPayload
   ):
@@ -72,6 +82,56 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   abstract toSliceSnapshot(
     payload: ToSliceSnapshotPayload<AdapterTarget>
   ): Promise<SliceSnapshot | null> | SliceSnapshot | null;
+
+  async fromDoc(doc: Doc) {
+    const docSnapshot = await this.job.docToSnapshot(doc);
+    return this.fromDocSnapshot({
+      snapshot: docSnapshot,
+      assets: this.job.assetsManager,
+    });
+  }
+
+  async toDoc(payload: ToDocSnapshotPayload<AdapterTarget>) {
+    const snapshot = await this.toDocSnapshot(payload);
+    return this.job.snapshotToDoc(snapshot);
+  }
+
+  async fromBlock(mode: DraftModel) {
+    const blockSnapshot = await this.job.blockToSnapshot(mode);
+    return this.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+      assets: this.job.assetsManager,
+    });
+  }
+
+  async toBlock(
+    payload: ToBlockSnapshotPayload<AdapterTarget>,
+    doc: Doc,
+    parent?: string,
+    index?: number
+  ) {
+    const snapshot = await this.toBlockSnapshot(payload);
+    return this.job.snapshotToBlock(snapshot, doc, parent, index);
+  }
+
+  async fromSlice(slice: Slice) {
+    const sliceSnapshot = await this.job.sliceToSnapshot(slice);
+    return this.fromSliceSnapshot({
+      snapshot: sliceSnapshot,
+      assets: this.job.assetsManager,
+    });
+  }
+
+  async toSlice(
+    payload: ToSliceSnapshotPayload<AdapterTarget>,
+    doc: Doc,
+    parent?: string,
+    index?: number
+  ) {
+    const snapshot = await this.toSliceSnapshot(payload);
+    if (!snapshot) return;
+    return this.job.snapshotToSlice(snapshot, doc, parent, index);
+  }
 
   applyConfigs(configs: Map<string, unknown>) {
     this.configs = new Map(configs);

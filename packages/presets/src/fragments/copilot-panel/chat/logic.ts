@@ -625,11 +625,8 @@ export type ChatMessage =
 
 const docToMarkdown = async (doc: Doc) => {
   const job = new Job({ collection: doc.collection });
-  const snapshot = await job.docToSnapshot(doc);
-  const result = await new MarkdownAdapter().fromDocSnapshot({
-    snapshot,
-    assets: job.assetsManager,
-  });
+  const markdownAdapter = new MarkdownAdapter(job);
+  const result = await markdownAdapter.fromDoc(doc);
   return result.file;
 };
 const distance = (a: number[], b: number[]) => {
