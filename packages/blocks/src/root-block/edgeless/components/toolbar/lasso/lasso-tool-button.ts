@@ -18,6 +18,9 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
     .current-icon {
       transition: 100ms;
     }
+    .current-icon > svg {
+      display: block;
+    }
     .arrow-up-icon {
       position: absolute;
       top: 4px;

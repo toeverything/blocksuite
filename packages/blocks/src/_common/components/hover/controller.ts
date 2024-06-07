@@ -1,4 +1,4 @@
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 import type { StyleInfo } from 'lit/directives/style-map.js';
 
@@ -14,7 +14,7 @@ type OptionsParams = Omit<
 };
 type HoverPortalOptions = Omit<AdvancedPortalOptions, 'abortController'>;
 
-type HoverOptions = {
+export type HoverOptions = {
   /**
    * Transition style when the portal is shown or hidden.
    */
@@ -75,9 +75,9 @@ export class HoverController implements ReactiveController {
     onHover: (options: OptionsParams) => HoverPortalOptions | null,
     hoverOptions?: Partial<HoverOptions>
   ) {
+    this._hoverOptions = { ...DEFAULT_HOVER_OPTIONS, ...hoverOptions };
     (this.host = host).addController(this);
     this._onHover = onHover;
-    this._hoverOptions = { ...DEFAULT_HOVER_OPTIONS, ...hoverOptions };
   }
 
   hostConnected() {
@@ -104,10 +104,8 @@ export class HoverController implements ReactiveController {
         );
         return;
       }
-      if (this._abortController) {
-        return;
-      }
 
+      this._abortController?.abort();
       this._abortController = new AbortController();
       this._abortController.signal.addEventListener('abort', () => {
         this._abortController = undefined;
@@ -133,11 +131,7 @@ export class HoverController implements ReactiveController {
 
       const transition = this._hoverOptions.transition;
       if (transition) {
-        Object.assign(this._portal.style, transition.out);
-        setTimeout(() => {
-          assertExists(this._portal);
-          Object.assign(this._portal.style, transition.in);
-        });
+        Object.assign(this._portal.style, transition.in);
       }
 
       if (this._hoverOptions.setPortalAsFloating) {

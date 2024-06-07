@@ -492,6 +492,10 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
         tip-position="right"
         .offset=${22}
         .tooltipStyle=${slashItemToolTipStyle}
+        .hoverOptions=${{
+          enterDelay: 1500,
+          allowMultiple: false,
+        }}
       >
         <div class="tooltip-figure">${tooltip.figure}</div>
         <div class="tooltip-caption">${tooltip.caption}</div>
