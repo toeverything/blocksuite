@@ -103,6 +103,11 @@ export class EdgelessRootBlockComponent extends BlockElement<
   EdgelessRootBlockWidgetName
 > {
   static override styles = css`
+    affine-edgeless-root {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
     .widgets-container {
       position: absolute;
       left: 0;
@@ -814,11 +819,11 @@ export class EdgelessRootBlockComponent extends BlockElement<
   override renderBlock() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const widgets = html`${repeat(
+    const widgets = repeat(
       Object.entries(this.widgets),
       ([id]) => id,
       ([_, widget]) => widget
-    )}`;
+    );
 
     return html`${this.host.renderModel(this.surfaceBlockModel)}
       <edgeless-block-portal-container .edgeless=${this}>
