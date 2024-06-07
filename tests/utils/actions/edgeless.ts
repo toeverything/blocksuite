@@ -172,7 +172,7 @@ export function locatorEdgelessToolButton(
 
 export async function toggleZoomBarWhenSmallScreenWidth(page: Page) {
   const toggleZoomBarButton = page.locator(
-    '.toggle-button edgeless-tool-icon-button.non-actived'
+    '.toggle-button edgeless-tool-icon-button'
   );
   const isClosed = (await toggleZoomBarButton.count()) === 1;
   if (isClosed) {
@@ -720,7 +720,7 @@ export async function getZoomLevel(page: Page) {
   const span = page.locator(
     `.edgeless-zoom-toolbar-container.${zoomBarClass} .zoom-percent`
   );
-  await waitNextFrame(page, 60 / 0.25);
+  await waitNextFrame(page);
   const text = await span.textContent();
   if (!text) {
     throw new Error('Missing .zoom-percent');
