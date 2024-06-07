@@ -169,7 +169,12 @@ export class AskAIButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { toggleType, size, backgroundColor, boxShadow } = this.options;
+    const {
+      toggleType = 'click',
+      size = 'small',
+      backgroundColor,
+      boxShadow,
+    } = this.options;
     const buttonStyles = styleMap({
       backgroundColor: backgroundColor || 'transparent',
       boxShadow: boxShadow || 'none',
