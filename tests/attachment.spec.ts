@@ -210,6 +210,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
   );
 
   await undoByKeyboard(page);
+  await waitNextFrame(page);
   // The loading/error state should not be restored after undo
   await assertStoreMatchJSX(
     page,
@@ -238,6 +239,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
   );
 
   await redoByKeyboard(page);
+  await waitNextFrame(page);
   await assertStoreMatchJSX(
     page,
     `
