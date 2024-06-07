@@ -204,14 +204,7 @@ export function popFilterableList({
         list.placement = placement;
       });
 
-      return html`
-        <style>
-          :host {
-            z-index: var(--affine-z-index-popover);
-          }
-        </style>
-        ${list}
-      `;
+      return list;
     },
     container,
     computePosition: {

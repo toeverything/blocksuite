@@ -4,17 +4,19 @@ import { css, unsafeCSS } from 'lit';
 import { scrollbarStyle } from '../utils.js';
 export const filterableListStyles = css`
   :host {
-    max-height: 100%;
-    width: 230px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
     background: var(--affine-background-overlay-panel-color);
     color: var(--affine-text-primary-color);
     box-shadow: var(--affine-menu-shadow);
     border-radius: 12px;
-    z-index: var(--affine-z-index-popover);
+
+    display: flex;
+    flex-direction: column;
+
+    max-height: 100%;
+    width: 230px;
     pointer-events: auto;
+    overflow: hidden;
+    z-index: var(--affine-z-index-popover);
   }
 
   .affine-filterable-list {

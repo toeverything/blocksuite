@@ -50,7 +50,7 @@ import { test } from './utils/playwright.js';
  */
 function getCodeBlock(page: Page) {
   const codeBlock = page.locator('affine-code');
-  const languageButton = codeBlock.getByTestId('lang-button');
+  const languageButton = page.getByTestId('lang-button');
 
   const clickLanguageButton = async () => {
     await codeBlock.hover();

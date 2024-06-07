@@ -54,7 +54,6 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
           .abortController=${abortController}
         >
         </language-list-button>`,
-        container: this.blockElement,
         computePosition: {
           referenceElement: this.blockElement,
           placement: 'left-start',
