@@ -80,22 +80,16 @@ export class Renderer extends Viewport {
     let sizeUpdatedRafId: number | null = null;
 
     this.viewportUpdated.on(() => {
-      if (sizeUpdatedRafId) {
-        this._resetSize();
-        this._render();
-        this._shouldUpdate = false;
-        return;
-      }
       this._shouldUpdate = true;
     });
 
     this.sizeUpdated.on(() => {
       if (sizeUpdatedRafId) return;
-      this._resetSize();
-      this._render();
-      this._shouldUpdate = false;
       sizeUpdatedRafId = requestConnectedFrame(() => {
         sizeUpdatedRafId = null;
+        this._resetSize();
+        this._render();
+        this._shouldUpdate = false;
       }, this._el);
     });
   }
@@ -105,20 +99,15 @@ export class Renderer extends Viewport {
     const updateStackingCanvasSize = (canvases: HTMLCanvasElement[]) => {
       this._stackingCanvas = canvases;
 
-      const dpr = window.devicePixelRatio;
-      const width = Math.ceil(this._width * dpr);
-      const height = Math.ceil(this._height * dpr);
+      const sizeUpdater = this._canvasSizeUpdater();
 
-      canvases.forEach(canvas => {
-        if (canvas.width === width && canvas.height === height) {
-          return;
-        }
-
-        canvas.style.setProperty('width', `${this._width}px`);
-        canvas.style.setProperty('height', `${this._height}px`);
-        canvas.width = width;
-        canvas.height = height;
-      });
+      canvases
+        .filter(
+          ({ width, height }) =>
+            width !== sizeUpdater.actualWidth ||
+            height !== sizeUpdater.actualHeight
+        )
+        .forEach(sizeUpdater.update);
     };
     const updateStackingCanvas = () => {
       /**
@@ -141,7 +130,7 @@ export class Renderer extends Viewport {
         }
 
         canvas.dataset.layerId = `[${layer.indexes[0]}--${layer.indexes[1]}]`;
-        canvas.style.setProperty('z-index', layer.zIndex.toString());
+        canvas.style.zIndex = layer.zIndex.toString();
         canvases.push(canvas);
       }
 
@@ -180,27 +169,38 @@ export class Renderer extends Viewport {
     this._loop();
   }
 
+  /**
+   * Specifying the actual size gives better results and more consistent behavior across browsers.
+   *
+   * Make sure the main canvas and the offscreen canvas or layer canvas are the same size.
+   *
+   * It is not recommended to set width and height to 100%.
+   */
+  private _canvasSizeUpdater(dpr = window.devicePixelRatio) {
+    const { _width, _height } = this;
+    const width = `${_width}px`;
+    const height = `${_height}px`;
+    const actualWidth = Math.ceil(_width * dpr);
+    const actualHeight = Math.ceil(_height * dpr);
+
+    return {
+      actualWidth,
+      actualHeight,
+      update(canvas: HTMLCanvasElement) {
+        canvas.style.width = width;
+        canvas.style.height = height;
+        canvas.width = actualWidth;
+        canvas.height = actualHeight;
+      },
+    };
+  }
+
   private _resetSize() {
-    const { canvas } = this;
-    const dpr = window.devicePixelRatio;
+    const sizeUpdater = this._canvasSizeUpdater();
 
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    sizeUpdater.update(this.canvas);
 
-    const bbox = canvas.getBoundingClientRect();
-    const actualWidth = Math.ceil(bbox.width * dpr);
-    const actualHeight = Math.ceil(bbox.height * dpr);
-
-    canvas.width = actualWidth;
-    canvas.height = actualHeight;
-
-    this._stackingCanvas.forEach(canvas => {
-      canvas.width = actualWidth;
-      canvas.height = actualHeight;
-
-      canvas.style.width = `${bbox.width}px`;
-      canvas.style.height = `${bbox.height}px`;
-    });
+    this._stackingCanvas.forEach(sizeUpdater.update);
 
     this._shouldUpdate = true;
   }
@@ -208,9 +208,9 @@ export class Renderer extends Viewport {
   private _loop() {
     requestConnectedFrame(() => {
       if (this._shouldUpdate) {
+        this._shouldUpdate = false;
         this._render();
       }
-      this._shouldUpdate = false;
       this._loop();
     }, this._el);
   }
@@ -269,12 +269,7 @@ export class Renderer extends Viewport {
       ctx.save();
 
       const display = element.display ?? true;
-      const opacity = element.opacity ?? 1;
-      if (intersects(getBoundsWithRotation(element), bound) && display) {
-        ctx.globalAlpha = opacity;
-        const dx = element.x - bound.x;
-        const dy = element.y - bound.y;
-
+      if (display && intersects(getBoundsWithRotation(element), bound)) {
         const renderFn =
           modelRenderer[element.type as keyof typeof modelRenderer];
 
@@ -283,6 +278,10 @@ export class Renderer extends Viewport {
           ctx.restore();
           continue;
         }
+
+        ctx.globalAlpha = element.opacity ?? 1;
+        const dx = element.x - bound.x;
+        const dy = element.y - bound.y;
 
         renderFn(element, ctx, matrix.translate(dx, dy), this, bound);
       }
