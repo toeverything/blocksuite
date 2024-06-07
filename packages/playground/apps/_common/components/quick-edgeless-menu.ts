@@ -18,7 +18,11 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 
 import { ShadowlessElement } from '@blocksuite/block-std';
-import type { AffineTextAttributes, SerializedXYWH } from '@blocksuite/blocks';
+import type {
+  AffineTextAttributes,
+  DocMode,
+  SerializedXYWH,
+} from '@blocksuite/blocks';
 import { ColorVariables, extractCssVariables } from '@blocksuite/blocks';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { AffineEditorContainer } from '@blocksuite/presets';
@@ -86,7 +90,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   private accessor _canRedo = false;
 
   @property({ attribute: false })
-  accessor mode: 'page' | 'edgeless' = 'page';
+  accessor mode: DocMode | null = 'page';
 
   @property({ attribute: false })
   accessor readonly = false;
@@ -131,16 +135,15 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   };
 
   private _switchEditorMode() {
-    const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
-    localStorage.setItem('playground:editorMode', mode);
-    this.mode = mode;
+    const { docModeService } = this.rootService;
+    if (!docModeService) return;
+    this.mode = docModeService.toggleMode();
   }
 
   private _restoreMode() {
-    const mode = localStorage.getItem('playground:editorMode');
-    if (mode && (mode === 'edgeless' || mode === 'page')) {
-      this.mode = mode;
-    }
+    const { docModeService } = this.rootService;
+    if (!docModeService) return;
+    this.mode = docModeService.getMode();
   }
 
   private _addNote() {

@@ -205,13 +205,10 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
           this.requestUpdate();
         })
       );
-      disposables.add(
-        this.host.spec
-          .getService('affine:page')
-          .slots.editorModeSwitch.on(() => {
-            this.requestUpdate();
-          })
-      );
+
+      const { docModeService } = this.host.spec.getService('affine:page');
+      if (!docModeService) return;
+      disposables.add(docModeService.onModeChange(() => this.requestUpdate()));
     }
   }
 

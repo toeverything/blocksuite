@@ -6,6 +6,7 @@ import '../fragments/doc-meta-tags/doc-meta-tags.js';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type {
   AbstractEditor,
+  DocMode,
   EdgelessRootBlockComponent,
   PageRootBlockComponent,
   PageRootService,
@@ -77,7 +78,7 @@ export class AffineEditorContainer
   accessor doc!: Doc;
 
   @property({ attribute: false })
-  accessor mode: 'page' | 'edgeless' = 'page';
+  accessor mode: DocMode | null = 'page';
 
   @property({ attribute: false })
   accessor pageSpecs = PageEditorBlockSpecs;
@@ -91,10 +92,10 @@ export class AffineEditorContainer
           setup: (slots, disposable) => {
             setup?.(slots, disposable);
             slots.mounted.once(({ service }) => {
+              const { docModeService } = service as PageRootService;
+              if (!docModeService) return;
               disposable.add(
-                (service as PageRootService).slots.editorModeSwitch.on(
-                  this.switchEditor.bind(this)
-                )
+                docModeService.onModeChange(this.switchEditor.bind(this))
               );
             });
           },
@@ -116,10 +117,10 @@ export class AffineEditorContainer
           setup: (slots, disposable) => {
             setup?.(slots, disposable);
             slots.mounted.once(({ service }) => {
+              const { docModeService } = service as PageRootService;
+              if (!docModeService) return;
               disposable.add(
-                (service as PageRootService).slots.editorModeSwitch.on(
-                  this.switchEditor.bind(this)
-                )
+                docModeService.onModeChange(this.switchEditor.bind(this))
               );
             });
           },
@@ -154,7 +155,7 @@ export class AffineEditorContainer
     return this.doc.root as BlockModel;
   }
 
-  switchEditor(mode: typeof this.mode) {
+  switchEditor(mode: DocMode | null) {
     this.mode = mode;
   }
 
@@ -198,7 +199,6 @@ export class AffineEditorContainer
    */
   slots: AbstractEditor['slots'] = {
     docLinkClicked: new Slot(),
-    editorModeSwitched: new Slot(),
     docUpdated: new Slot(),
     tagClicked: new Slot<{ tagId: string }>(),
   };
@@ -220,10 +220,6 @@ export class AffineEditorContainer
    * @deprecated need to refactor
    */
   override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mode')) {
-      this.slots.editorModeSwitched.emit(this.mode);
-    }
-
     if (changedProperties.has('doc')) {
       this.slots.docUpdated.emit({ newDocId: this.doc.id });
     }

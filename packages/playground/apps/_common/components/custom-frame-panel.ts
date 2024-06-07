@@ -44,13 +44,16 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
       });
     });
 
-    this.disposables.add(
-      this.editor.slots.editorModeSwitched.on(() => {
-        this.editor.updateComplete
-          .then(() => this.requestUpdate())
-          .catch(console.error);
-      })
-    );
+    const { docModeService } = this.editor.host.spec.getService('affine:page');
+    if (docModeService) {
+      this.disposables.add(
+        docModeService.onModeChange(() => {
+          this.editor.updateComplete
+            .then(() => this.requestUpdate())
+            .catch(console.error);
+        })
+      );
+    }
   }
 
   override render() {

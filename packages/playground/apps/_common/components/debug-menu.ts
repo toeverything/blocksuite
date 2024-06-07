@@ -23,6 +23,7 @@ import {
   BlocksUtils,
   ColorVariables,
   defaultImageProxyMiddleware,
+  type DocMode,
   extractCssVariables,
   FontFamilyVariables,
   HtmlTransformer,
@@ -239,7 +240,7 @@ export class DebugMenu extends ShadowlessElement {
     return this.editor.mode;
   }
 
-  set mode(value: 'page' | 'edgeless') {
+  set mode(value: DocMode | null) {
     this.editor.mode = value;
   }
 
@@ -304,7 +305,9 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    this.mode = this.mode === 'page' ? 'edgeless' : 'page';
+    const { docModeService } = this.editor.host.spec.getService('affine:page');
+    if (!docModeService) return;
+    this.mode = docModeService.toggleMode();
   }
 
   private _toggleOutlinePanel() {
@@ -573,7 +576,8 @@ export class DebugMenu extends ShadowlessElement {
       this._canRedo = this.doc.canRedo;
     });
 
-    this.editor.slots.editorModeSwitched.on(() => {
+    const { docModeService } = this.editor.host.spec.getService('affine:page');
+    docModeService?.onModeChange(() => {
       this.requestUpdate();
     });
   }

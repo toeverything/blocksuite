@@ -5,6 +5,7 @@ import type { EditorHost } from '@block-std/view/element/lit-host.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
   DatabaseBlockModel,
+  DocMode,
   ListType,
   RichText,
   ThemeObserver,
@@ -278,6 +279,7 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('room', room);
   url.searchParams.set('blobSource', blobSource?.join(',') || 'idb');
   await page.goto(url.toString());
+
   // const readyPromise = waitForPageReady(page);
 
   // See https://github.com/microsoft/playwright/issues/5546
@@ -1438,4 +1440,28 @@ export async function mockQuickSearch(
       },
     };
   }, mapping);
+}
+
+export async function mockDocMode(page: Page) {
+  await page.evaluate(() => {
+    let docMode: DocMode = 'page';
+    const docModeService = {
+      setMode: (mode: DocMode) => {
+        docMode = mode;
+      },
+      getMode: () => {
+        return docMode;
+      },
+      toggleMode: () => {
+        const mode = docMode === 'page' ? 'edgeless' : 'page';
+        docModeService.setMode(mode);
+        return mode;
+      },
+      onModeChange: () => {
+        return { dispose: () => null };
+      },
+    };
+    window.host.std.spec.getService('affine:page').docModeService =
+      docModeService;
+  });
 }

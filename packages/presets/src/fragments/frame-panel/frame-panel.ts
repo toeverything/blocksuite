@@ -99,13 +99,16 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
   private _setEditorDisposables() {
     this._clearEditorDisposables();
     this._editorDisposables = new DisposableGroup();
-    this._editorDisposables.add(
-      this.editor.slots.editorModeSwitched.on(() => {
-        this.editor.updateComplete
-          .then(() => this.requestUpdate())
-          .catch(console.error);
-      })
-    );
+    const { docModeService } = this.editor.host.spec.getService('affine:page');
+    if (docModeService) {
+      this._editorDisposables.add(
+        docModeService.onModeChange(() => {
+          this.editor.updateComplete
+            .then(() => this.requestUpdate())
+            .catch(console.error);
+        })
+      );
+    }
     this._editorDisposables.add(
       this.editor.slots.docUpdated.on(() => {
         this.editor.updateComplete

@@ -23,6 +23,7 @@ import {
   enterPlaygroundRoom,
   getEditorLocator,
   initEmptyEdgelessState,
+  mockDocMode,
   waitNextFrame,
 } from './misc.js';
 
@@ -110,6 +111,7 @@ export async function toggleFramePanel(page: Page) {
 }
 
 export async function switchEditorMode(page: Page) {
+  await mockDocMode(page);
   await page.click('sl-tooltip[content="Switch Editor"]');
   // FIXME: listen to editor loaded event
   await waitNextFrame(page);

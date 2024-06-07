@@ -8,10 +8,12 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import {
+  type DocModeService,
   getSelectedPeekableBlocksCommand,
   type NotificationService,
   peekSelectedBlockCommand,
   type PeekViewService,
+  type QuickSearchService,
 } from '../_common/components/index.js';
 import {
   DEFAULT_IMAGE_PROXY_ENDPOINT,
@@ -65,14 +67,6 @@ export type QuickSearchResult =
   | { userInput: string }
   | null;
 
-export interface QuickSearchService {
-  searchDoc: (options: {
-    action?: 'insert';
-    userInput?: string;
-    skipSelection?: boolean;
-  }) => Promise<QuickSearchResult>;
-}
-
 export class RootService extends BlockService<RootBlockModel> {
   readonly fontLoader = new FontLoader();
 
@@ -86,6 +80,8 @@ export class RootService extends BlockService<RootBlockModel> {
   notificationService: NotificationService | null = null;
 
   peekViewService: PeekViewService | null = null;
+
+  docModeService: DocModeService | null = null;
 
   transformers = {
     markdown: MarkdownTransformer,

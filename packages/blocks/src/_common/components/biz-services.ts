@@ -1,4 +1,9 @@
+import type { BlockElement } from '@blocksuite/block-std';
+import type { Disposable } from '@blocksuite/global/utils';
 import type { TemplateResult } from 'lit';
+
+import type { QuickSearchResult } from '../../root-block/root-service.js';
+import type { DocMode } from '../types.js';
 
 export interface NotificationService {
   toast(
@@ -36,4 +41,28 @@ export interface NotificationService {
     };
     onClose: () => void;
   }): void;
+}
+
+export interface QuickSearchService {
+  searchDoc: (options: {
+    action?: 'insert';
+    userInput?: string;
+    skipSelection?: boolean;
+  }) => Promise<QuickSearchResult>;
+}
+
+export interface PeekViewService {
+  peek(pageRef: { docId: string; blockId?: string }): void;
+  peek(target: HTMLElement): void;
+  peek<Element extends BlockElement>(target: Element): void;
+}
+
+export interface DocModeService {
+  setMode: (mode: DocMode, docId?: string) => void;
+  getMode: (docId?: string) => DocMode | null;
+  toggleMode: (docId?: string) => DocMode | null;
+  onModeChange: (
+    handler: (mode: DocMode | null) => void,
+    docId?: string
+  ) => Disposable;
 }

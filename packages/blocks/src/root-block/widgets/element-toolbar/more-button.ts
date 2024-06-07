@@ -401,7 +401,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       this.edgeless.surface.edgeless.service.frame
     );
     const linkedDoc = createLinkedDocFromEdgelessElements(
-      this.edgeless.host.doc,
+      this.edgeless.host,
       elements,
       title
     );
