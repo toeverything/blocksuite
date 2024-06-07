@@ -6,6 +6,7 @@ import { describe, expect, test } from 'vitest';
 import { HtmlAdapter } from '../../_common/adapters/html.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 import { NoteDisplayMode } from '../../_common/types.js';
+import { createJob } from '../utils/create-job.js';
 
 const template = (html: string) =>
   `
@@ -107,7 +108,7 @@ describe('snapshot to html', () => {
       `<pre><code class="code-python"><span style="word-wrap: break-word; color: #AF00DB;">import</span><span style="word-wrap: break-word; color: #000000;"> this</span></code></pre>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -173,7 +174,7 @@ describe('snapshot to html', () => {
       `<pre><code class="code-python"><span style="word-wrap: break-word; color: #AF00DB;">import</span><span style="word-wrap: break-word; color: #000000;"> this</span></code></pre>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -239,7 +240,7 @@ describe('snapshot to html', () => {
       `<pre><code class="code-unknown">import this</code></pre>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -425,7 +426,7 @@ describe('snapshot to html', () => {
       `<div class="affine-paragraph-block-container"><p>aaa</p><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-paragraph-block-container"><p>bbb</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div><div class="affine-paragraph-block-container"><p>ccc</p><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-paragraph-block-container"><p>ddd</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div><div class="affine-paragraph-block-container"><p>eee</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div><div class="affine-paragraph-block-container"><p>fff</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-paragraph-block-container"><p>ggg</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-paragraph-block-container"><p>hhh</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -570,7 +571,7 @@ describe('snapshot to html', () => {
       `<div class="affine-list-block-container"><ul style=""><li>aaa</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-list-block-container"><ul style=""><li>bbb</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"><div class="affine-list-block-container"><ul style=""><li>ccc</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-list-block-container"><ul style=""><li>ddd</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div></div></div><div class="affine-list-block-container"><ul style=""><li>eee</li></ul><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -644,7 +645,7 @@ describe('snapshot to html', () => {
       `<div class="affine-paragraph-block-container"><p>aaa <code>bbb</code> ccc</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -718,7 +719,7 @@ describe('snapshot to html', () => {
       `<div class="affine-paragraph-block-container"><p>aaa <a href="https://affine.pro/">bbb</a> ccc</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -793,7 +794,7 @@ describe('snapshot to html', () => {
       `<div class="affine-paragraph-block-container"><p>aaa<strong>bbb</strong>ccc</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -868,7 +869,7 @@ describe('snapshot to html', () => {
       `<div class="affine-paragraph-block-container"><p>aaa<em>bbb</em>ccc</p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const target = await htmlAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
@@ -945,7 +946,7 @@ describe('snapshot to html', () => {
       `<figure class="affine-image-block-container"><img src="assets/YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob" alt="YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob" title="aaa"></figure><div class="affine-paragraph-block-container"><p></p><div class="affine-block-children-container" style="padding-left: 26px;"></div></div>`
     );
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const blobManager = new MemoryBlobCRUD();
     await blobManager.set(
       'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
@@ -999,7 +1000,7 @@ describe('html to snapshot', () => {
       ],
     };
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
       file: html,
     });
@@ -1109,7 +1110,7 @@ describe('html to snapshot', () => {
       ],
     };
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
       file: html,
     });
@@ -1153,7 +1154,7 @@ describe('html to snapshot', () => {
       ],
     };
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
       file: html,
     });
@@ -1189,7 +1190,7 @@ describe('html to snapshot', () => {
       ],
     };
 
-    const htmlAdapter = new HtmlAdapter();
+    const htmlAdapter = new HtmlAdapter(createJob());
     const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
       file: html,
     });

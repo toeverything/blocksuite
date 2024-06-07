@@ -8,6 +8,7 @@ import { describe, expect, test } from 'vitest';
 import { NotionHtmlAdapter } from '../../_common/adapters/notion-html.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 import { NoteDisplayMode } from '../../_common/types.js';
+import { createJob } from '../utils/create-job.js';
 
 describe('notion html to snapshot', () => {
   test('code', async () => {
@@ -52,7 +53,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -175,7 +176,7 @@ describe('notion html to snapshot', () => {
         },
       ],
     };
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -255,7 +256,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -774,7 +775,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -877,7 +878,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -925,7 +926,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -995,7 +996,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -1043,7 +1044,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -1081,7 +1082,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
       assets: new AssetsManager({ blob: new MemoryBlobCRUD() }),
@@ -1133,7 +1134,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -1175,7 +1176,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const blobCRUD = new MemoryBlobCRUD();
     const key = await blobCRUD.set(new File([], 'README.pdf'));
     const assestsManager = new AssetsManager({ blob: blobCRUD });
@@ -1528,7 +1529,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });
@@ -1717,7 +1718,7 @@ describe('notion html to snapshot', () => {
       ],
     };
 
-    const adapter = new NotionHtmlAdapter();
+    const adapter = new NotionHtmlAdapter(createJob());
     const rawBlockSnapshot = await adapter.toBlockSnapshot({
       file: html,
     });

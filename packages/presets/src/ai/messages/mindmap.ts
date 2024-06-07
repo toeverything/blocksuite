@@ -69,7 +69,7 @@ export const createMindmapExecuteRenderer: (
     }
 
     ctx.set({
-      node: markdownToMindmap(answer),
+      node: markdownToMindmap(answer, host.doc),
     });
 
     handler(ctx);

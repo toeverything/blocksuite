@@ -472,14 +472,12 @@ export class DebugMenu extends ShadowlessElement {
       collection: this.collection,
       middlewares: [defaultImageProxyMiddleware],
     });
-    const htmlAdapter = new NotionHtmlAdapter();
-    htmlAdapter.applyConfigs(job.adapterConfigs);
-    const snapshot = await htmlAdapter.toDocSnapshot({
+    const htmlAdapter = new NotionHtmlAdapter(job);
+    await htmlAdapter.toDoc({
       file: await file.text(),
       pageId: this.collection.idGenerator(),
       assets: job.assetsManager,
     });
-    await job.snapshotToDoc(snapshot);
   }
 
   private _shareUrl() {

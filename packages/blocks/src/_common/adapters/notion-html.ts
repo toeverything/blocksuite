@@ -161,6 +161,11 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     };
   }
 
+  override async toDoc(payload: NotionHtmlToDocSnapshotPayload) {
+    const snapshot = await this.toDocSnapshot(payload);
+    return this.job.snapshotToDoc(snapshot);
+  }
+
   override toBlockSnapshot(
     payload: NotionHtmlToBlockSnapshotPayload
   ): Promise<BlockSnapshot> {

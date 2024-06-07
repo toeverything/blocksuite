@@ -25,12 +25,6 @@ export class PageClipboard {
     return this.host.std;
   }
 
-  private _clipboardAdapter = new ClipboardAdapter();
-  private _mixtextAdapter = new MixTextAdapter();
-  private _htmlAdapter = new HtmlAdapter();
-  private _imageAdapter = new ImageAdapter();
-  private _attachmentAdapter = new AttachmentAdapter();
-
   constructor(host: BlockElement) {
     this.host = host;
   }
@@ -52,10 +46,10 @@ export class PageClipboard {
   protected _init = () => {
     this._std.clipboard.registerAdapter(
       ClipboardAdapter.MIME,
-      this._clipboardAdapter,
+      ClipboardAdapter,
       100
     );
-    this._std.clipboard.registerAdapter('text/html', this._htmlAdapter, 90);
+    this._std.clipboard.registerAdapter('text/html', HtmlAdapter, 90);
     [
       'image/apng',
       'image/avif',
@@ -64,11 +58,9 @@ export class PageClipboard {
       'image/png',
       'image/svg+xml',
       'image/webp',
-    ].map(type =>
-      this._std.clipboard.registerAdapter(type, this._imageAdapter, 80)
-    );
-    this._std.clipboard.registerAdapter('text/plain', this._mixtextAdapter, 70);
-    this._std.clipboard.registerAdapter('*/*', this._attachmentAdapter, 60);
+    ].map(type => this._std.clipboard.registerAdapter(type, ImageAdapter, 80));
+    this._std.clipboard.registerAdapter('text/plain', MixTextAdapter, 70);
+    this._std.clipboard.registerAdapter('*/*', AttachmentAdapter, 60);
     const copy = copyMiddleware(this._std);
     const paste = pasteMiddleware(this._std);
     this._std.clipboard.use(copy);

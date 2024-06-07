@@ -1,3 +1,4 @@
+import { DocCollection, Schema } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
 import { markdownToMindmap } from './mindmap-preview.js';
@@ -11,7 +12,9 @@ describe('markdownToMindmap: convert markdown list to a mind map tree', () => {
   - Text D
     - Text E
 `;
-    const nodes = markdownToMindmap(markdown);
+    const collection = new DocCollection({ schema: new Schema() });
+    const doc = collection.createDoc();
+    const nodes = markdownToMindmap(markdown, doc);
 
     expect(nodes).toEqual({
       text: 'Text A',
@@ -46,7 +49,9 @@ describe('markdownToMindmap: convert markdown list to a mind map tree', () => {
     - Text D
         - Text E
 `;
-    const nodes = markdownToMindmap(markdown);
+    const collection = new DocCollection({ schema: new Schema() });
+    const doc = collection.createDoc();
+    const nodes = markdownToMindmap(markdown, doc);
 
     expect(nodes).toEqual({
       text: 'Text A',
@@ -75,7 +80,9 @@ describe('markdownToMindmap: convert markdown list to a mind map tree', () => {
 
   test('empty case', () => {
     const markdown = '';
-    const nodes = markdownToMindmap(markdown);
+    const collection = new DocCollection({ schema: new Schema() });
+    const doc = collection.createDoc();
+    const nodes = markdownToMindmap(markdown, doc);
 
     expect(nodes).toEqual(null);
   });
