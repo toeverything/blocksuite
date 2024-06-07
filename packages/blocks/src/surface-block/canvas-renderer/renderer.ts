@@ -101,13 +101,7 @@ export class Renderer extends Viewport {
 
       const sizeUpdater = this._canvasSizeUpdater();
 
-      canvases
-        .filter(
-          ({ width, height }) =>
-            width !== sizeUpdater.actualWidth ||
-            height !== sizeUpdater.actualHeight
-        )
-        .forEach(sizeUpdater.update);
+      canvases.filter(sizeUpdater.filter).forEach(sizeUpdater.update);
     };
     const updateStackingCanvas = () => {
       /**
@@ -184,8 +178,9 @@ export class Renderer extends Viewport {
     const actualHeight = Math.ceil(_height * dpr);
 
     return {
-      actualWidth,
-      actualHeight,
+      filter({ width, height }: HTMLCanvasElement) {
+        return width !== actualWidth || height !== actualHeight;
+      },
       update(canvas: HTMLCanvasElement) {
         canvas.style.width = width;
         canvas.style.height = height;
