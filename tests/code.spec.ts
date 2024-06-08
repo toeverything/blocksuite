@@ -576,6 +576,34 @@ test('code block is empty, click code block copy menu, copy the empty code block
   );
 });
 
+test('language selection list should not close when hovering out of code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page, { language: 'javascript' });
+
+  const codeBlockController = getCodeBlock(page);
+  await codeBlockController.codeBlock.hover();
+
+  await codeBlockController.clickLanguageButton();
+  const langLocator = codeBlockController.langList;
+  await expect(langLocator).toBeVisible();
+
+  const bBox = await codeBlockController.codeBlock.boundingBox();
+  if (!bBox) throw new Error('Expected bounding box');
+
+  const { x, y, width, height } = bBox;
+
+  // hovering inside the code block should keep the list open
+  await page.mouse.move(x + width / 2, y + height / 2);
+  await expect(langLocator).toBeVisible();
+
+  // hovering out should not close the list
+  await page.mouse.move(x - 10, y - 10);
+  await waitNextFrame(page);
+  await expect(langLocator).toBeVisible();
+});
+
 test('duplicate code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page, { language: 'javascript' });

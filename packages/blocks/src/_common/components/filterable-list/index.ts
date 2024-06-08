@@ -99,7 +99,9 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
             'filterable-item': true,
             focussed,
           })}
+          @mouseover=${() => (this._curFocusIndex = idx)}
           @click=${() => this._select(item)}
+          hover=${focussed}
           width="100%"
           height="32px"
         >

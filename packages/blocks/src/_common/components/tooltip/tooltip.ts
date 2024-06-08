@@ -199,21 +199,15 @@ export class Tooltip extends LitElement {
               updatePortal();
             });
 
-            const slot = this.shadowRoot?.querySelector('slot');
-            if (!slot) throw new Error('slot not found in tooltip!');
-            // slot.addEventListener('slotchange', () => updatePortal, {
-            //   once: true,
-            // });
-            const slottedChildren = slot
-              .assignedNodes()
-              .map(node => node.cloneNode(true));
+            const children = Array.from(this.childNodes).map(node =>
+              node.cloneNode(true)
+            );
+
             return html`
               <style>
                 ${this._getStyles()}
               </style>
-              <div class="affine-tooltip" role="tooltip">
-                ${slottedChildren}
-              </div>
+              <div class="affine-tooltip" role="tooltip">${children}</div>
               <div class="arrow" style=${styleMap(arrowStyles)}></div>
             `;
           },
@@ -275,12 +269,6 @@ export class Tooltip extends LitElement {
 
       ${this.tooltipStyle}
     `;
-  }
-
-  override render() {
-    // The actual tooltip will render as a portal, and all content inside the slot will be treated as a template.
-    // See https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots
-    return html`<slot></slot>`;
   }
 }
 

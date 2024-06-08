@@ -119,6 +119,7 @@ export class HoverController implements ReactiveController {
       // If some problems arise when aborting the previous hover,
       // consider fixing the transition related issues and return void here
       this._abortController?.abort();
+
       this._abortController = new AbortController();
       this._abortController.signal.addEventListener('abort', () => {
         this._abortController = undefined;
