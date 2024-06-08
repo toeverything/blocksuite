@@ -12,38 +12,22 @@ import './text/text-tool-button.js';
 import './eraser/eraser-tool-button.js';
 import './frame/navigator-setting-button.js';
 import './template/template-tool-button.js';
+import './presentation-toolbar.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
 import { baseTheme } from '@toeverything/theme';
-import {
-  css,
-  html,
-  LitElement,
-  nothing,
-  type PropertyValues,
-  unsafeCSS,
-} from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { toast } from '../../../../_common/components/toast.js';
-import { type NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,
   FrameNavigatorIcon,
-  FrameNavigatorNextIcon,
-  FrameNavigatorPrevIcon,
-  NavigatorExitFullScreenIcon,
-  NavigatorFullScreenIcon,
 } from '../../../../_common/icons/index.js';
 import type { EdgelessTool } from '../../../../_common/types.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getImageFilesFromLocal } from '../../../../_common/utils/filesys.js';
-import type { FrameBlockModel } from '../../../../index.js';
-import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { isFrameBlock } from '../../utils/query.js';
-import { launchIntoFullscreen } from '../utils.js';
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
@@ -58,7 +42,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       -webkit-user-select: none;
       user-select: none;
     }
-
     :host([disabled]) {
       pointer-events: none;
     }
@@ -66,12 +49,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .edgeless-toolbar-toggle-control {
       padding-bottom: 28px;
     }
-    .edgeless-toolbar-toggle-control[data-hide='true'] {
+    .edgeless-toolbar-toggle-control[data-enable='true'] {
       transition: 0.23s ease;
       padding-top: 100px;
       transform: translateY(100px);
     }
-    .edgeless-toolbar-toggle-control[data-hide='true']:hover {
+    .edgeless-toolbar-toggle-control[data-enable='true']:hover {
       padding-top: 0;
       transform: translateY(0);
     }
@@ -131,89 +114,41 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .transform-button:hover svg {
       transform: scale(1.15);
     }
-
-    .edgeless-frame-navigator {
-      width: 145px;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .edgeless-frame-navigator-title {
-      display: inline-block;
-      cursor: pointer;
-      color: #424149;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      margin-right: 8px;
-    }
-
-    .edgeless-frame-navigator-count {
-      color: #8e8d91;
-    }
-    .edgeless-frame-navigator-stop {
-      background: #eb4335;
-      color: #ffffff;
-      box-shadow: 0px 1px 2px 0px #ffffff40 inset;
-      padding: 4px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
   `;
 
   edgeless: EdgelessRootBlockComponent;
-
-  @state()
-  private accessor _navigatorMode: NavigatorMode = 'fit';
-
-  get _hideToolbar() {
-    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
-  }
-  set _hideToolbar(value) {
-    this.edgeless.service.editPropsStore.setItem('presentHideToolbar', !!value);
-  }
-
-  @state()
-  accessor settingMenuShow = false;
-
-  @state()
-  accessor frameMenuShow = false;
-
-  @state({
-    hasChanged() {
-      return true;
-    },
-  })
-  private accessor _currentFrameIndex = 0;
-  private _timer?: ReturnType<typeof setTimeout>;
-  private _cachedIndex = -1;
-
-  private get _frames(): FrameBlockModel[] {
-    return this.edgeless.service.frames;
-  }
 
   constructor(edgeless: EdgelessRootBlockComponent) {
     super();
     this.edgeless = edgeless;
   }
 
+  private get _cachedPresentHideToolbar() {
+    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
+  }
+
+  @state()
+  accessor presentSettingMenuShow = false;
+  @state()
+  accessor presentFrameMenuShow = false;
+
+  /**
+   * When enabled, the toolbar will auto-hide when the mouse is not over it.
+   */
+  private get _enableAutoHide() {
+    return (
+      this.edgelessTool.type === 'frameNavigator' &&
+      this._cachedPresentHideToolbar &&
+      !this.presentSettingMenuShow &&
+      !this.presentFrameMenuShow
+    );
+  }
   get host() {
     return this.edgeless.host;
   }
 
   get edgelessTool() {
     return this.edgeless.edgelessTool;
-  }
-
-  private get _hideNavigatorToolbar() {
-    return (
-      this.edgelessTool.type === 'frameNavigator' &&
-      this._hideToolbar &&
-      !this.settingMenuShow &&
-      !this.frameMenuShow
-    );
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
@@ -229,80 +164,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this._imageLoading = false;
   }
 
-  private _nextFrame() {
-    const frames = this._frames;
-    const min = 0;
-    const max = frames.length - 1;
-    if (this._currentFrameIndex === frames.length - 1) {
-      toast(this.host, 'You have reached the last frame');
-    } else {
-      this._currentFrameIndex = clamp(this._currentFrameIndex + 1, min, max);
-    }
-  }
-
-  private _previousFrame() {
-    const frames = this._frames;
-    const min = 0;
-    const max = frames.length - 1;
-    if (this._currentFrameIndex === 0) {
-      toast(this.host, 'You have reached the first frame');
-    } else {
-      this._currentFrameIndex = clamp(this._currentFrameIndex - 1, min, max);
-    }
-  }
-
-  private _tryLoadNavigatorStateLocalRecord() {
-    this._navigatorMode =
-      this.edgeless.service.editPropsStore.getItem('presentFillScreen') === true
-        ? 'fill'
-        : 'fit';
-  }
-
   override firstUpdated() {
     const { _disposables, edgeless } = this;
-    const { slots } = edgeless;
-
-    edgeless.bindHotKey(
-      {
-        ArrowLeft: () => {
-          const { type } = this.edgelessTool;
-          if (type !== 'frameNavigator') return;
-          this._previousFrame();
-        },
-        ArrowRight: () => {
-          const { type } = this.edgelessTool;
-          if (type !== 'frameNavigator') return;
-          this._nextFrame();
-        },
-      },
-      {
-        global: true,
-      }
-    );
-
-    _disposables.add(
-      slots.edgelessToolUpdated.on(tool => {
-        if (tool.type === 'frameNavigator') {
-          this._cachedIndex = this._currentFrameIndex;
-          this._navigatorMode = tool.mode ?? this._navigatorMode;
-          if (isFrameBlock(edgeless.service.selection.selectedElements[0])) {
-            this._cachedIndex = this._frames.findIndex(
-              frame =>
-                frame.id === edgeless.service.selection.selectedElements[0].id
-            );
-          }
-          if (this._frames.length === 0)
-            toast(
-              this.host,
-              'The presentation requires at least 1 frame. You can firstly create a frame.',
-              5000
-            );
-          this._toggleFullScreen();
-        }
-
-        this.requestUpdate();
-      })
-    );
 
     _disposables.add(
       edgeless.service.viewport.viewportUpdated.on(() => this.requestUpdate())
@@ -313,161 +176,22 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(
-      edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
-        if (fillScreen !== undefined) {
-          this._navigatorMode = fillScreen ? 'fill' : 'fit';
-        }
-      })
-    );
-    // The toolbar should be disabled while edgeless AI is in progress.
-    _disposables.add(
       edgeless.slots.toolbarLocked.on(disabled => {
         this.toggleAttribute('disabled', disabled);
       })
     );
-
-    this._tryLoadNavigatorStateLocalRecord();
-  }
-
-  private _moveToCurrentFrame() {
-    const current = this._currentFrameIndex;
-    const viewport = this.edgeless.service.viewport;
-    const frame = this._frames[current];
-
-    if (frame) {
-      let bound = Bound.deserialize(frame.xywh);
-
-      if (this._navigatorMode === 'fill') {
-        const vb = viewport.viewportBounds;
-        const center = bound.center;
-        let w, h;
-        if (vb.w / vb.h > bound.w / bound.h) {
-          w = bound.w;
-          h = (w * vb.h) / vb.w;
-        } else {
-          h = bound.h;
-          w = (h * vb.w) / vb.h;
+    _disposables.add(
+      edgeless.slots.edgelessToolUpdated.on(() => this.requestUpdate())
+    );
+    // This state from `editPropsStore` is not reactive,
+    // if the value is updated outside of this component, it will not be reflected.
+    _disposables.add(
+      this.edgeless.service.editPropsStore.slots.itemUpdated.on(({ key }) => {
+        if (key === 'presentHideToolbar') {
+          this.requestUpdate();
         }
-        bound = Bound.fromCenter(center, w, h);
-      }
-
-      viewport.setViewportByBound(bound, [0, 0, 0, 0], false);
-      this.edgeless.slots.navigatorFrameChanged.emit(
-        this._frames[this._currentFrameIndex]
-      );
-    }
-  }
-
-  protected override updated(changedProperties: PropertyValues) {
-    const { type } = this.edgelessTool;
-    if (
-      changedProperties.has('_currentFrameIndex') &&
-      type === 'frameNavigator'
-    ) {
-      this._moveToCurrentFrame();
-    }
-  }
-
-  private _toggleFullScreen() {
-    if (document.fullscreenElement) {
-      clearTimeout(this._timer);
-      document.exitFullscreen().catch(console.error);
-    } else {
-      launchIntoFullscreen(this.edgeless.viewportElement);
-      this._timer = setTimeout(() => {
-        this._currentFrameIndex = this._cachedIndex;
-      }, 400);
-    }
-
-    setTimeout(() => this._moveToCurrentFrame(), 400);
-    this.edgeless.slots.fullScreenToggled.emit();
-  }
-
-  private get _FrameNavigator() {
-    const current = this._currentFrameIndex;
-    const frames = this._frames;
-    const frame = frames[current];
-    const { doc } = this.edgeless;
-
-    return html`
-      <edgeless-tool-icon-button
-        .tooltip=${'Previous'}
-        @click=${() => this._previousFrame()}
-      >
-        ${FrameNavigatorPrevIcon}
-      </edgeless-tool-icon-button>
-
-      <div class="edgeless-frame-navigator">
-        <span
-          class="edgeless-frame-navigator-title"
-          @click=${() =>
-            (this._currentFrameIndex = this._currentFrameIndex + 0)}
-          >${frame?.title ?? 'no frame'}</span
-        >
-
-        <span class="edgeless-frame-navigator-count"
-          >${frames.length === 0 ? 0 : current + 1}/${frames.length}</span
-        >
-      </div>
-
-      <edgeless-tool-icon-button
-        .tooltip=${'Next'}
-        @click=${() => this._nextFrame()}
-      >
-        ${FrameNavigatorNextIcon}
-      </edgeless-tool-icon-button>
-
-      <div class="short-divider"></div>
-
-      <edgeless-frame-order-button
-        .popperShow=${this.frameMenuShow}
-        .setPopperShow=${(show: boolean) => {
-          this.frameMenuShow = show;
-        }}
-        .frames=${this._frames}
-        .edgeless=${this.edgeless}
-      >
-      </edgeless-frame-order-button>
-
-      <edgeless-tool-icon-button
-        .tooltip=${document.fullscreenElement
-          ? 'Exit Full Screen'
-          : 'Enter Full Screen'}
-        @click=${() => this._toggleFullScreen()}
-      >
-        ${document.fullscreenElement
-          ? NavigatorExitFullScreenIcon
-          : NavigatorFullScreenIcon}
-      </edgeless-tool-icon-button>
-
-      <edgeless-navigator-setting-button
-        .edgeless=${this.edgeless}
-        .hideToolbar=${this._hideToolbar}
-        .onHideToolbarChange=${(hideToolbar: boolean) => {
-          this._hideToolbar = hideToolbar;
-        }}
-        .popperShow=${this.settingMenuShow}
-        .setPopperShow=${(show: boolean) => {
-          this.settingMenuShow = show;
-        }}
-      >
-      </edgeless-navigator-setting-button>
-
-      <div class="short-divider"></div>
-
-      <div
-        class="edgeless-frame-navigator-stop"
-        @click=${() => {
-          this.setEdgelessTool(
-            doc.readonly ? { type: 'pan', panning: false } : { type: 'default' }
-          );
-
-          document.fullscreenElement && this._toggleFullScreen();
-        }}
-      >
-        Stop
-      </div>
-    `;
+      })
+    );
   }
 
   private _Tools() {
@@ -559,7 +283,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${() => {
             this.setEdgelessTool({
               type: 'frameNavigator',
-              mode: this._navigatorMode,
             });
           }}
         >
@@ -585,13 +308,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       return nothing;
     }
 
-    const Content =
-      type === 'frameNavigator' ? this._FrameNavigator : this._DefaultContent;
-
     return html`
       <div
         class="edgeless-toolbar-toggle-control"
-        data-hide=${this._hideNavigatorToolbar}
+        data-enable=${this._enableAutoHide}
       >
         <div
           class="edgeless-toolbar-container"
@@ -599,7 +319,17 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @mousedown=${stopPropagation}
           @pointerdown=${stopPropagation}
         >
-          ${Content}
+          <presentation-toolbar
+            .visible=${type === 'frameNavigator'}
+            .edgeless=${this.edgeless}
+            .settingMenuShow=${this.presentSettingMenuShow}
+            .frameMenuShow=${this.presentFrameMenuShow}
+            .setSettingMenuShow=${(show: boolean) =>
+              (this.presentSettingMenuShow = show)}
+            .setFrameMenuShow=${(show: boolean) =>
+              (this.presentFrameMenuShow = show)}
+          ></presentation-toolbar>
+          ${type === 'frameNavigator' ? nothing : this._DefaultContent}
         </div>
       </div>
     `;
