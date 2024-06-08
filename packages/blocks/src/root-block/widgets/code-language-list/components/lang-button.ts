@@ -5,7 +5,7 @@ import { type BundledLanguage, bundledLanguagesInfo } from 'shiki';
 
 import {
   type FilterableListOptions,
-  popFilterableList,
+  showPopFilterableList,
 } from '../../../../_common/components/filterable-list/index.js';
 import { ArrowDownIcon } from '../../../../_common/icons/text.js';
 import type { CodeBlockComponent } from '../../../../code-block/code-block.js';
@@ -48,14 +48,16 @@ export class LanguageListButton extends LitElement {
   @property({ attribute: false })
   accessor blockElement!: CodeBlockComponent;
 
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
   @state()
   private accessor _currentLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
 
   @query('.lang-button')
   private accessor _langButton!: HTMLElement;
+
+  @property({ attribute: false })
+  accessor onChange: ((active: boolean) => void) | undefined = undefined;
+
+  private _abortController?: AbortController;
 
   private _updateLanguage() {
     this._currentLanguage =
@@ -68,8 +70,19 @@ export class LanguageListButton extends LitElement {
     this._updateLanguage();
   }
 
-  private _popList = () => {
+  private _clickLangBtn = () => {
     if (this.blockElement.doc.readonly) return;
+    if (this._abortController) {
+      // Close the language list if it's already opened.
+      this._abortController.abort();
+      return;
+    }
+    this._abortController = new AbortController();
+    this._abortController.signal.addEventListener('abort', () => {
+      this.onChange?.(false);
+      this._abortController = undefined;
+    });
+    this.onChange?.(true);
 
     const languages = (
       [...bundledLanguagesInfo, PLAIN_TEXT_LANG_INFO] as StrictLanguageInfo[]
@@ -89,14 +102,13 @@ export class LanguageListButton extends LitElement {
       items: languages,
     };
 
-    popFilterableList({
+    showPopFilterableList({
       options,
       filter: (a, b) =>
         getLanguagePriority(a.name as BundledLanguage) -
         getLanguagePriority(b.name as BundledLanguage),
       referenceElement: this._langButton,
-      container: this._langButton,
-      abortController: this.abortController,
+      abortController: this._abortController,
     });
   };
 
@@ -107,7 +119,7 @@ export class LanguageListButton extends LitElement {
       width="auto"
       text=${this._currentLanguage.name ?? this._currentLanguage.id}
       height="24px"
-      @click=${this._popList}
+      @click=${this._clickLangBtn}
       ?disabled=${this.blockElement.doc.readonly}
     >
       <span slot="suffix">

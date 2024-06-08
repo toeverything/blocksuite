@@ -172,7 +172,7 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
   }
 }
 
-export function popFilterableList({
+export function showPopFilterableList({
   options,
   filter,
   abortController,
@@ -236,7 +236,10 @@ export function popFilterableList({
           },
         }),
       ],
-      autoUpdate: true,
+      autoUpdate: {
+        // fix the lang list position incorrectly when scrolling
+        animationFrame: true,
+      },
     },
     abortController,
   });

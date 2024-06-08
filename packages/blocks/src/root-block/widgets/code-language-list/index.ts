@@ -4,14 +4,14 @@ import { WidgetElement } from '@blocksuite/block-std';
 import { offset } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
 
-import { HoverController } from '../../../_common/components/index.js';
+import {
+  createLitPortal,
+  whenHover,
+} from '../../../_common/components/index.js';
 import type { CodeBlockModel } from '../../../code-block/code-model.js';
 import type { CodeBlockComponent } from '../../../code-block/index.js';
-import {
-  PLAIN_TEXT_LANG_INFO,
-  type StrictLanguageInfo,
-} from '../../../code-block/utils/consts.js';
 
 export const AFFINE_CODE_LANGUAGE_LIST_WIDGET =
   'affine-code-language-list-widget';
@@ -21,37 +21,33 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
   CodeBlockModel,
   CodeBlockComponent
 > {
-  accessor _curLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
+  override connectedCallback() {
+    super.connectedCallback();
 
-  private _hoverController: HoverController | null = null;
-
-  private _setupHoverController() {
-    this._hoverController = null;
-    this._hoverController = new HoverController(this, ({ abortController }) => {
-      const codeBlock = this.blockElement;
-      const selection = this.host.selection;
-
-      const textSelection = selection.find('text');
-      if (
-        !!textSelection &&
-        (!!textSelection.to || !!textSelection.from.length)
-      ) {
-        return null;
+    let isActivated = false;
+    let abortController: AbortController | null = null;
+    const { setFloating, setReference } = whenHover(isHover => {
+      if (!isHover) {
+        // If the language list is opened, don't close it.
+        if (isActivated) return;
+        abortController?.abort();
+        return;
       }
+      if (abortController) return;
+      abortController = new AbortController();
+      abortController.signal.addEventListener('abort', () => {
+        abortController = null;
+      });
 
-      const blockSelections = selection.filter('block');
-      if (
-        blockSelections.length > 1 ||
-        (blockSelections.length === 1 &&
-          blockSelections[0].blockId !== codeBlock.blockId)
-      ) {
-        return null;
-      }
-
-      return {
+      createLitPortal({
+        closeOnClickAway: true,
+        abortController,
         template: html`<language-list-button
+          ${ref(setFloating)}
           .blockElement=${this.blockElement}
-          .abortController=${abortController}
+          .onChange=${(active: boolean) => {
+            isActivated = active;
+          }}
         >
         </language-list-button>`,
         computePosition: {
@@ -60,15 +56,9 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
           middleware: [offset({ mainAxis: -5, crossAxis: 5 })],
           autoUpdate: true,
         },
-      };
+      });
     });
-
-    this._hoverController.setReference(this.blockElement);
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._setupHoverController();
+    setReference(this.blockElement);
   }
 }
 

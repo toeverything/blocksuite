@@ -95,8 +95,19 @@ export class HoverController implements ReactiveController {
         }
         // Transition out
         Object.assign(this._portal.style, this._hoverOptions.transition.out);
+
+        // The transition event is not reliable,
+        // consider adding explicit duration to the transition options in the future
+        // See also https://github.com/w3c/csswg-drafts/issues/3043 https://github.com/toeverything/blocksuite/pull/7248/files#r1631375330
         this._portal.addEventListener(
           'transitionend',
+          () => {
+            abortController.abort();
+          },
+          { signal: abortController.signal }
+        );
+        this._portal.addEventListener(
+          'transitioncancel',
           () => {
             abortController.abort();
           },
@@ -105,6 +116,8 @@ export class HoverController implements ReactiveController {
         return;
       }
 
+      // If some problems arise when aborting the previous hover,
+      // consider fixing the transition related issues and return void here
       this._abortController?.abort();
       this._abortController = new AbortController();
       this._abortController.signal.addEventListener('abort', () => {
