@@ -87,8 +87,6 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const model = this.model;
-
     return html`
       <edgeless-menu-button
         .contentPadding=${'8px'}
@@ -103,7 +101,7 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
       >
         <card-style-panel
           slot
-          .value=${model.style}
+          .value=${this.model.style}
           .options=${this._getCardStyleOptions}
           .onSelect=${(value: EmbedCardStyle) => this._setCardStyle(value)}
         >

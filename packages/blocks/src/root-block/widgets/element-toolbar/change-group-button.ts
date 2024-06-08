@@ -122,7 +122,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
             ${UngroupButtonIcon}
           </edgeless-tool-icon-button>
         `,
-      ],
+      ].filter(button => button !== nothing),
       renderMenuDivider
     );
   }

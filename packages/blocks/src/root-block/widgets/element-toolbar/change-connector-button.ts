@@ -33,6 +33,10 @@ import {
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
+import type {
+  ConnectorElementProps,
+  ConnectorLabelProps,
+} from '../../../surface-block/element-model/connector.js';
 import type { PointStyle } from '../../../surface-block/index.js';
 import {
   type ConnectorElementModel,
@@ -108,6 +112,12 @@ function getMostCommonEndpointStyle(
   const modes = countBy(elements, ele => ele[field]);
   const max = maxBy(Object.entries(modes), ([_k, count]) => count);
   return max ? (max[0] as PointStyle) : null;
+}
+
+function notEqual<
+  K extends keyof Omit<ConnectorElementProps, keyof ConnectorLabelProps>,
+>(key: K, value: ConnectorElementProps[K]) {
+  return (element: ConnectorElementModel) => element[key] !== value;
 }
 
 interface EndpointStyle {
@@ -219,79 +229,54 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     return this.edgeless.service;
   }
 
-  private _setConnectorMode(mode: ConnectorMode) {
+  private _setConnectorProp<
+    K extends keyof Omit<ConnectorElementProps, keyof ConnectorLabelProps>,
+  >(key: K, value: ConnectorElementProps[K]) {
     this.doc.captureSync();
-    this.elements.forEach(element => {
-      if (element.mode !== mode) {
-        this.service.updateElement(element.id, {
-          mode,
-        });
-      }
-    });
+    this.elements
+      .filter(notEqual(key, value))
+      .forEach(element =>
+        this.service.updateElement(element.id, { [key]: value })
+      );
+  }
+
+  private _setConnectorMode(mode: ConnectorMode) {
+    this._setConnectorProp('mode', mode);
   }
 
   private _setConnectorRough(rough: boolean) {
-    this.doc.captureSync();
-    this.elements.forEach(element => {
-      if (element.rough !== rough) {
-        this.service.updateElement(element.id, {
-          rough,
-        });
-      }
-    });
+    this._setConnectorProp('rough', rough);
   }
 
   private _setConnectorColor(stroke: CssVariableName) {
-    this.doc.captureSync();
-
-    let shouldUpdate = false;
-    this.elements.forEach(element => {
-      if (element.stroke !== stroke) {
-        shouldUpdate = true;
-        this.service.updateElement(element.id, {
-          stroke,
-        });
-      }
-    });
-    if (shouldUpdate) this.requestUpdate();
+    this._setConnectorProp('stroke', stroke);
   }
 
   private _setConnectorStrokeWidth(strokeWidth: number) {
-    this.elements.forEach(ele => {
-      this.service.updateElement(ele.id, {
-        strokeWidth,
-      });
-    });
+    this._setConnectorProp('strokeWidth', strokeWidth);
   }
 
   private _setConnectorStrokeStyle(strokeStyle: StrokeStyle) {
-    this.elements.forEach(ele => {
-      this.service.updateElement(ele.id, {
-        strokeStyle,
-      });
-    });
+    this._setConnectorProp('strokeStyle', strokeStyle);
   }
 
-  private _setConnectorStorke(e: LineStyleEvent) {
-    if (e.type === 'size') {
-      this._setConnectorStrokeWidth(e.value);
+  private _setConnectorStorke({ type, value }: LineStyleEvent) {
+    if (type === 'size') {
+      this._setConnectorStrokeWidth(value);
       return;
     }
-    this._setConnectorStrokeStyle(e.value as StrokeStyle);
+    this._setConnectorStrokeStyle(value);
   }
 
   private _setConnectorPointStyle(end: ConnectorEndpoint, style: PointStyle) {
-    this.elements.forEach(ele => {
-      if (end === ConnectorEndpoint.Front) {
-        this.service.updateElement(ele.id, {
-          frontEndpointStyle: style,
-        });
-      } else {
-        this.service.updateElement(ele.id, {
-          rearEndpointStyle: style,
-        });
-      }
-    });
+    const props = {
+      [end === ConnectorEndpoint.Front
+        ? 'frontEndpointStyle'
+        : 'rearEndpointStyle']: style,
+    };
+    this.elements.forEach(element =>
+      this.service.updateElement(element.id, { ...props })
+    );
   }
 
   private _flipEndpointStyle(
@@ -300,12 +285,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   ) {
     if (frontEndpointStyle === rearEndpointStyle) return;
 
-    this.elements.forEach(ele => {
-      this.service.updateElement(ele.id, {
+    this.elements.forEach(element =>
+      this.service.updateElement(element.id, {
         frontEndpointStyle: rearEndpointStyle,
         rearEndpointStyle: frontEndpointStyle,
-      });
-    });
+      })
+    );
   }
 
   private _getEndpointIcon(list: EndpointStyle[], style: PointStyle) {

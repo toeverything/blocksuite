@@ -19,17 +19,19 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
+  private _createFrame = () => {
+    const frame = this.edgeless.service.frame.createFrameOnSelected();
+    if (!frame) return;
+    this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
+  };
+
   protected override render() {
     return html`
       <edgeless-tool-icon-button
         aria-label="Frame"
         .tooltip=${'Frame'}
         .labelHeight=${'20px'}
-        @click=${() => {
-          const frame = this.edgeless.service.frame.createFrameOnSelected();
-          if (!frame) return;
-          this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
-        }}
+        @click=${this._createFrame}
       >
         ${FrameIcon}<span class="label medium">Frame</span>
       </edgeless-tool-icon-button>

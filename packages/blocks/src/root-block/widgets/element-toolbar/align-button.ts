@@ -288,7 +288,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
                 <edgeless-tool-icon-button
                   aria-label=${name}
                   .tooltip=${name}
-                  @click=${() => this._align(name as Alignment)}
+                  @click=${() => this._align(name)}
                 >
                   ${content}
                 </edgeless-tool-icon-button>

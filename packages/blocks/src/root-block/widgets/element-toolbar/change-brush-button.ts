@@ -10,6 +10,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../_common/types.js';
 import { countBy, maxBy } from '../../../_common/utils/iterable.js';
+import type { BrushProps } from '../../../surface-block/element-model/brush.js';
 import type { BrushElementModel } from '../../../surface-block/index.js';
 import {
   type ColorEvent,
@@ -21,18 +22,19 @@ import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-bl
 function getMostCommonColor(
   elements: BrushElementModel[]
 ): CssVariableName | null {
-  const shapeTypes = countBy(elements, (ele: BrushElementModel) => ele.color);
-  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
+  const colors = countBy(elements, ele => ele.color);
+  const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonSize(elements: BrushElementModel[]): LineWidth {
-  const shapeTypes = countBy(
-    elements,
-    (ele: BrushElementModel) => ele.lineWidth
-  );
-  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
+  const sizes = countBy(elements, ele => ele.lineWidth);
+  const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (Number(max[0]) as LineWidth) : LineWidth.Four;
+}
+
+function notEqual<K extends keyof BrushProps>(key: K, value: BrushProps[K]) {
+  return (element: BrushElementModel) => element[key] !== value;
 }
 
 @customElement('edgeless-change-brush-button')
@@ -47,7 +49,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private accessor _selectedColor: string | null = null;
 
   @state()
-  private accessor _selectedSize: LineWidth | null = LineWidth.Four;
+  private accessor _selectedSize: LineWidth | null = null;
 
   get surface() {
     return this.edgeless.surface;
@@ -61,39 +63,43 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     return this.surface.edgeless.service;
   }
 
-  private _setLineWidth(size: LineWidth) {
+  private _setBrushProp<K extends keyof BrushProps>(
+    key: K,
+    value: BrushProps[K]
+  ) {
     this.doc.captureSync();
-    this.elements.forEach(element => {
-      if (element.lineWidth !== size) {
-        this.service.updateElement(element.id, {
-          lineWidth: size,
-        });
-      }
-    });
+    this.elements
+      .filter(notEqual(key, value))
+      .forEach(element =>
+        this.service.updateElement(element.id, { [key]: value })
+      );
   }
 
-  private _setBrushColor(color: CssVariableName) {
-    this.doc.captureSync();
-    this.elements.forEach(element => {
-      if (element.color !== color) {
-        this.service.updateElement(element.id, {
-          color,
-        });
-      }
-    });
-    if (color && this._selectedColor !== color) {
-      this._selectedColor = color;
-    }
+  private _setLineWidth = ({ detail: lineWidth }: LineWidthEvent) => {
+    this._setBrushProp('lineWidth', lineWidth);
+    this._selectedSize = lineWidth;
+  };
+
+  private _setBrushColor = ({ detail: color }: ColorEvent) => {
+    this._setBrushProp('color', color);
+    this._selectedColor = color;
+  };
+
+  get selectedColor() {
+    return this._selectedColor ?? getMostCommonColor(this.elements);
+  }
+
+  get selectedSize() {
+    return this._selectedSize ?? getMostCommonSize(this.elements);
   }
 
   override render() {
-    this._selectedColor = getMostCommonColor(this.elements);
-    this._selectedSize = getMostCommonSize(this.elements);
+    const { selectedSize, selectedColor } = this;
 
     return html`
       <edgeless-line-width-panel
-        .selectedSize=${this._selectedSize}
-        @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
+        .selectedSize=${selectedSize}
+        @select=${this._setLineWidth}
       >
       </edgeless-line-width-panel>
 
@@ -104,15 +110,15 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
         .button=${html`
           <edgeless-tool-icon-button aria-label="Color" .tooltip=${'Color'}>
             <edgeless-color-button
-              .color=${this._selectedColor}
+              .color=${selectedColor}
             ></edgeless-color-button>
           </edgeless-tool-icon-button>
         `}
       >
         <edgeless-color-panel
           slot
-          .value=${this._selectedColor}
-          @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
+          .value=${selectedColor}
+          @select=${this._setBrushColor}
         >
         </edgeless-color-panel>
       </edgeless-menu-button>

@@ -135,40 +135,30 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return textColor;
   }
 
-  private _setShapeFillColor(color: CssVariableName) {
-    const textColor = this._getTextColor(color);
-    const filled = !isTransparent(color);
-    this.elements.forEach(ele => {
-      this.service.updateElement(ele.id, {
-        filled,
-        fillColor: color,
-        color: textColor,
-      });
-    });
+  private _setShapeFillColor(fillColor: CssVariableName) {
+    const filled = !isTransparent(fillColor);
+    const color = this._getTextColor(fillColor);
+    this.elements.forEach(ele =>
+      this.service.updateElement(ele.id, { filled, fillColor, color })
+    );
   }
 
-  private _setShapeStrokeColor(color: CssVariableName) {
-    this.elements.forEach(ele => {
-      this.service.updateElement(ele.id, {
-        strokeColor: color,
-      });
-    });
+  private _setShapeStrokeColor(strokeColor: CssVariableName) {
+    this.elements.forEach(ele =>
+      this.service.updateElement(ele.id, { strokeColor })
+    );
   }
 
   private _setShapeStrokeWidth(strokeWidth: number) {
-    this.elements.forEach(ele => {
-      this.service.updateElement(ele.id, {
-        strokeWidth,
-      });
-    });
+    this.elements.forEach(ele =>
+      this.service.updateElement(ele.id, { strokeWidth })
+    );
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
-    this.elements.forEach(ele => {
-      this.service.updateElement(ele.id, {
-        strokeStyle,
-      });
-    });
+    this.elements.forEach(ele =>
+      this.service.updateElement(ele.id, { strokeStyle })
+    );
   }
 
   private _setShapeStyles({ type, value }: LineStyleEvent) {
@@ -182,14 +172,11 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   }
 
   private _setShapeStyle(shapeStyle: ShapeStyle) {
+    const fontFamily =
+      shapeStyle === ShapeStyle.General ? FontFamily.Inter : FontFamily.Kalam;
+
     this.elements.forEach(ele => {
-      this.service.updateElement(ele.id, {
-        shapeStyle: shapeStyle,
-        fontFamily:
-          shapeStyle === ShapeStyle.General
-            ? FontFamily.Inter
-            : FontFamily.Kalam,
-      });
+      this.service.updateElement(ele.id, { shapeStyle, fontFamily });
     });
   }
 

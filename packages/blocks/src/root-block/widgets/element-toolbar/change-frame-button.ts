@@ -155,7 +155,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             </edgeless-color-panel>
           </edgeless-menu-button>
         `,
-      ],
+      ].filter(button => button !== nothing),
       renderMenuDivider
     );
   }

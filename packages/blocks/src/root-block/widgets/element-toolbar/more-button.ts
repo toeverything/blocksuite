@@ -459,7 +459,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   override render() {
     const selection = this.edgeless.service.selection;
     const actions = Actions(
-      selection.selectedElements.some(ele => isFrameBlock(ele))
+      selection.selectedElements.some(isFrameBlock)
         ? this._FrameActions
         : this._Actions,
       this._runAction

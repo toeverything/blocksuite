@@ -22,13 +22,17 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
+  private _createGroup = () => {
+    this.edgeless.service.createGroupFromSelected();
+  };
+
   protected override render() {
     return html`
       <edgeless-tool-icon-button
         aria-label="Group"
         .tooltip=${'Group'}
         .labelHeight=${'20px'}
-        @click=${() => this.edgeless.service.createGroupFromSelected()}
+        @click=${this._createGroup}
       >
         ${GroupIcon}<span class="label medium">Group</span>
       </edgeless-tool-icon-button>

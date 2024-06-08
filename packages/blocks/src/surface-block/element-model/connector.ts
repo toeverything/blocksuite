@@ -97,7 +97,7 @@ export type SerializedConnectorElement = SerializedElement & {
   target: SerializedConnection;
 };
 
-type ConnectorElementProps = IBaseProps & {
+export type ConnectorElementProps = IBaseProps & {
   mode: ConnectorMode;
   stroke: string;
   strokeWidth: number;

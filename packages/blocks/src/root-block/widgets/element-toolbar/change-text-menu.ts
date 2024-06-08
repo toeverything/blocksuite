@@ -396,35 +396,33 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
           </edgeless-menu-button>
         `,
 
-        html`
-          ${this.elementType === 'edgeless-text'
-            ? nothing
-            : html`
-                <edgeless-menu-button
-                  .contentPadding=${'8px'}
-                  .button=${html`
-                    <edgeless-tool-icon-button
-                      aria-label="Font size"
-                      .tooltip=${'Font size'}
-                      .justify=${'space-between'}
-                      .labelHeight=${'20px'}
-                      .iconContainerWidth=${'60px'}
-                    >
-                      <span class="label">${selectedFontSize}</span>
-                      ${SmallArrowDownIcon}
-                    </edgeless-tool-icon-button>
-                  `}
-                >
-                  <edgeless-size-panel
-                    slot
-                    data-type="check"
-                    .size=${selectedFontSize}
-                    .sizeList=${FONT_SIZE_LIST}
-                    .onSelect=${this._setFontSize}
-                  ></edgeless-size-panel>
-                </edgeless-menu-button>
-              `}
-        `,
+        this.elementType === 'edgeless-text'
+          ? nothing
+          : html`
+              <edgeless-menu-button
+                .contentPadding=${'8px'}
+                .button=${html`
+                  <edgeless-tool-icon-button
+                    aria-label="Font size"
+                    .tooltip=${'Font size'}
+                    .justify=${'space-between'}
+                    .labelHeight=${'20px'}
+                    .iconContainerWidth=${'60px'}
+                  >
+                    <span class="label">${selectedFontSize}</span>
+                    ${SmallArrowDownIcon}
+                  </edgeless-tool-icon-button>
+                `}
+              >
+                <edgeless-size-panel
+                  slot
+                  data-type="check"
+                  .size=${selectedFontSize}
+                  .sizeList=${FONT_SIZE_LIST}
+                  .onSelect=${this._setFontSize}
+                ></edgeless-size-panel>
+              </edgeless-menu-button>
+            `,
 
         html`
           <edgeless-menu-button
@@ -444,7 +442,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
             ></edgeless-align-panel>
           </edgeless-menu-button>
         `,
-      ],
+      ].filter(b => b !== nothing),
       renderMenuDivider
     );
   }
