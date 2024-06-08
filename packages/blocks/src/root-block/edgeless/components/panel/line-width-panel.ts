@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 import { LineWidth } from '../../../../_common/types.js';
@@ -313,6 +313,12 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     this._disposables.addFromEvent(this, 'pointermove', this._onPointerMove);
     this._disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
     this._disposables.addFromEvent(this, 'pointerout', this._onPointerOut);
+  }
+
+  override willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has('selectedSize')) {
+      this._updateLineWidthPanel(this.selectedSize);
+    }
   }
 
   override disconnectedCallback(): void {
