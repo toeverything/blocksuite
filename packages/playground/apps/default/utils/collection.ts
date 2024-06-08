@@ -74,6 +74,7 @@ export async function createDefaultDocCollection() {
       enable_pie_menu: true,
       enable_lasso_tool: true,
       enable_mindmap_entry: true,
+      enable_edgeless_text: true,
       ...flags,
     },
   };
