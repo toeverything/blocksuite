@@ -13,17 +13,16 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 
 import type { FrameBlockModel } from '../frame-block/index.js';
-import { type EdgelessBlockType } from '../root-block/edgeless/edgeless-types.js';
-import type { EdgelessBlockModel } from '../root-block/edgeless/type.js';
+import type { EdgelessBlockModel } from '../root-block/edgeless/edgeless-block-model.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
 
 const portalMap = {
   'affine:note': 'surface-ref-note-portal',
-} as Record<EdgelessBlockType, string>;
+} as Record<BlockSuite.EdgelessModelKeyType, string>;
 
 const getPortalTag = (model: BlockModel) => {
-  const tag = portalMap[model.flavour as EdgelessBlockType];
+  const tag = portalMap[model.flavour as BlockSuite.EdgelessModelKeyType];
   return tag ?? 'surface-ref-generic-block-portal';
 };
 

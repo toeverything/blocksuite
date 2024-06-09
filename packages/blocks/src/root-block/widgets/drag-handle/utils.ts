@@ -25,7 +25,6 @@ import {
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessBlockType } from '../../edgeless/edgeless-types.js';
 import { isEmbedSyncedDocBlock } from '../../edgeless/utils/query.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -428,7 +427,7 @@ export function convertDragPreviewDocToEdgeless({
   const blockProps = getBlockProps(blockModel);
 
   const blockId = edgelessRoot.service.addBlock(
-    blockComponent.flavour as EdgelessBlockType,
+    blockComponent.flavour,
     {
       ...blockProps,
       xywh: newBound.serialize(),

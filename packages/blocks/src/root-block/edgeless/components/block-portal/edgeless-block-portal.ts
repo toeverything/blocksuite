@@ -25,9 +25,8 @@ import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { GroupElementModel } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import { EdgelessBlockModel } from '../../edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import type { EdgelessBlockType } from '../../edgeless-types.js';
-import { EdgelessBlockModel as EdgelessBlock } from '../../type.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
 import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
 
@@ -36,7 +35,7 @@ export type AutoConnectElement =
   | FrameBlockModel
   | GroupElementModel;
 
-const portalMap = new Map<EdgelessBlockType | RegExp, string>([
+const portalMap = new Map<BlockSuite.EdgelessModelKeyType | RegExp, string>([
   ['affine:frame', 'edgeless-block-portal-frame'],
   ['affine:note', 'edgeless-block-portal-note'],
   ['affine:image', 'edgeless-block-portal-image'],
@@ -124,7 +123,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @state()
   private accessor _slicerAnchorNote: NoteBlockModel | null = null;
 
-  private _visibleElements: Set<EdgelessBlock> = new Set();
+  private _visibleElements: Set<EdgelessBlockModel> = new Set();
 
   concurrentRendering: number = 2;
 
@@ -259,11 +258,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         ) {
           const block = edgeless.doc.getBlock(payload.id);
 
-          if (block?.model instanceof EdgelessBlock) {
+          if (block?.model instanceof EdgelessBlockModel) {
             this._updateOnVisibleBlocksChange();
           }
         } else {
-          if ('model' in payload && payload.model instanceof EdgelessBlock) {
+          if (
+            'model' in payload &&
+            payload.model instanceof EdgelessBlockModel
+          ) {
             this._updateOnVisibleBlocksChange();
           }
         }

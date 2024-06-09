@@ -13,8 +13,8 @@ import {
   GroupElementModel,
   MindmapElementModel,
 } from '../../../surface-block/index.js';
+import { EdgelessBlockModel } from '../edgeless-block-model.js';
 import type { EdgelessFrameManager } from '../frame-manager.js';
-import { EdgelessBlockModel } from '../type.js';
 import { isFrameBlock } from '../utils/query.js';
 
 export function getCloneElements(

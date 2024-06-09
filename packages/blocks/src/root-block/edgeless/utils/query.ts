@@ -29,7 +29,7 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '../../../surface-block/index.js';
-import type { EdgelessBlockModel } from '../type.js';
+import type { EdgelessBlockModel } from '../edgeless-block-model.js';
 import { getElementsWithoutGroup } from './group.js';
 import type { Viewport } from './viewport.js';
 

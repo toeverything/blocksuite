@@ -61,7 +61,6 @@ import {
   encodeClipboardBlobs,
 } from '../../clipboard/utils.js';
 import type { EdgelessRootBlockComponent } from '../edgeless-root-block.js';
-import type { EdgelessElementType } from '../edgeless-types.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { getCloneElements, serializeElement } from '../utils/clone-utils.js';
 import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
@@ -281,7 +280,7 @@ export class EdgelessClipboardController extends PageClipboard {
       const flavour = pageId
         ? 'affine:embed-linked-doc'
         : embedOptions
-          ? (embedOptions.flavour as EdgelessElementType)
+          ? (embedOptions.flavour as BlockSuite.EdgelessModelKeyType)
           : 'affine:bookmark';
       const style = pageId
         ? 'vertical'

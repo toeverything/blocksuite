@@ -12,11 +12,11 @@ import {
   GroupElementModel,
   ShapeType,
 } from '../../surface-block/index.js';
-import { EdgelessBlockModel } from '../edgeless/type.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import { CopilotSelectionController } from './controllers/tools/copilot-tool.js';
 import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
+import { EdgelessBlockModel } from './edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,

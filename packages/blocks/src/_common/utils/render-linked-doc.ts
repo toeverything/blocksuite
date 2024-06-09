@@ -13,7 +13,7 @@ import type { EmbedLinkedDocBlockComponent } from '../../embed-linked-doc-block/
 import type { EmbedSyncedDocCard } from '../../embed-synced-doc-block/components/embed-synced-doc-card.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
-import { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
+import { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import {
   getElementProps,
   sortEdgelessElements,

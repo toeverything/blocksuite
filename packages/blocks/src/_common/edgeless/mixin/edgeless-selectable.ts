@@ -1,7 +1,7 @@
 import type { Constructor } from '@blocksuite/global/utils';
 import { BlockModel } from '@blocksuite/store';
 
-import { EdgelessBlockModel } from '../../../root-block/edgeless/type.js';
+import { EdgelessBlockModel } from '../../../root-block/edgeless/edgeless-block-model.js';
 import { type SerializedXYWH } from '../../../surface-block/index.js';
 
 export type EdgelessSelectableProps = {

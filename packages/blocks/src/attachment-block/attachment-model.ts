@@ -83,3 +83,11 @@ export const AttachmentBlockSchema = defineBlockSchema({
 export class AttachmentBlockModel extends selectable<AttachmentBlockProps>(
   BlockModel
 ) {}
+
+declare global {
+  namespace BlockSuite {
+    interface EdgelessBlockModelMap {
+      'affine:attachment': AttachmentBlockModel;
+    }
+  }
+}

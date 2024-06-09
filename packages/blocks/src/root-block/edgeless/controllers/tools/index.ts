@@ -1,10 +1,10 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
 import type { EdgelessTool as EdgelessTool } from '../../../../_common/utils/index.js';
+import type { EdgelessBlockModel } from '../../edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import type { EdgelessRootService } from '../../edgeless-root-service.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
-import type { EdgelessBlockModel } from '../../type.js';
 
 export abstract class EdgelessToolController<
   Tool extends EdgelessTool = EdgelessTool,

@@ -76,7 +76,6 @@ import type {
 import { Bound } from '../../../surface-block/index.js';
 import { renderMenuDivider } from '../../edgeless/components/buttons/menu-button.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import type { EdgelessBlockType } from '../../edgeless/edgeless-types.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
@@ -449,7 +448,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
     const newId = this.edgeless.service.addBlock(
-      targetFlavour as EdgelessBlockType,
+      targetFlavour,
       { url, xywh: bound.serialize(), style: targetStyle, caption },
       this.edgeless.surface.model
     );
@@ -494,7 +493,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
     const newId = this.edgeless.service.addBlock(
-      flavour as EdgelessBlockType,
+      flavour,
       {
         url,
         xywh: bound.serialize(),

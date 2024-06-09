@@ -121,18 +121,3 @@ export class EdgelessBlockModel<
     return surfaceModel[0]?.getGroups(this.id) ?? [];
   }
 }
-
-declare global {
-  namespace BlockSuite {
-    interface EdgelessBlockModelMap {}
-    type EdgelessBlockModelType =
-      | EdgelessBlockModelMap[keyof EdgelessBlockModelMap]
-      | EdgelessBlockModel;
-
-    type EdgelessModelType = EdgelessBlockModelType | SurfaceModelType;
-
-    interface EdgelessTextModelMap {}
-    type EdgelessTextModelKeyType = keyof EdgelessTextModelMap;
-    type EdgelessTextModelType = EdgelessTextModelMap[EdgelessTextModelKeyType];
-  }
-}

@@ -49,7 +49,6 @@ import {
   getTextSelectionCommand,
 } from './commands/index.js';
 import type { EdgelessRootBlockComponent } from './edgeless/edgeless-root-block.js';
-import type { EdgelessElementType } from './edgeless/edgeless-types.js';
 import { FontLoader } from './font-loader/font-loader.js';
 import type { RootBlockModel } from './root-model.js';
 import type { RootBlockComponent } from './types.js';
@@ -330,7 +329,7 @@ export class RootService extends BlockService<RootBlockModel> {
       const surface = edgelessRoot.surface;
       const center = Vec.toVec(surface.renderer.center);
       edgelessRoot.service.addBlock(
-        flavour as EdgelessElementType,
+        flavour,
         {
           ...props,
           xywh: Bound.fromCenter(

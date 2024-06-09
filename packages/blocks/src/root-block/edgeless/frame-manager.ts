@@ -7,7 +7,7 @@ import type { EdgelessRootService } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import { EdgelessBlockModel } from './type.js';
+import { EdgelessBlockModel } from './edgeless-block-model.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
 

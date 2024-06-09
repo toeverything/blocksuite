@@ -2,7 +2,7 @@ import type { EditorHost } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { type Y } from '@blocksuite/store';
 
-import type { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
+import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import { randomSeed } from '../rough/math.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
@@ -511,21 +511,27 @@ export abstract class SurfaceLocalModel {
 declare global {
   namespace BlockSuite {
     interface SurfaceElementModelMap {}
+    type SurfaceElementModelKeyType = keyof SurfaceElementModelMap;
     type SurfaceElementModelType =
-      | SurfaceElementModelMap[keyof SurfaceElementModelMap]
+      | SurfaceElementModelMap[SurfaceElementModelKeyType]
       | SurfaceElementModel;
 
     interface SurfaceGroupLikeModelMap {}
+    type SurfaceGroupLikeModelKeyType = keyof SurfaceGroupLikeModelMap;
     type SurfaceGroupLikeModelType =
-      | SurfaceGroupLikeModelMap[keyof SurfaceGroupLikeModelMap]
+      | SurfaceGroupLikeModelMap[SurfaceGroupLikeModelKeyType]
       | SurfaceGroupLikeModel;
 
     interface SurfaceLocalModelMap {}
+    type SurfaceLocalModelKeyType = keyof SurfaceLocalModelMap;
     type SurfaceLocalModelType =
-      | SurfaceLocalModelMap[keyof SurfaceLocalModelMap]
+      | SurfaceLocalModelMap[SurfaceLocalModelKeyType]
       | SurfaceLocalModel;
 
     // not include local model
     type SurfaceModelType = SurfaceElementModelType | SurfaceGroupLikeModelType;
+    type SurfaceModelKeyType =
+      | SurfaceElementModelKeyType
+      | SurfaceGroupLikeModelKeyType;
   }
 }

@@ -16,7 +16,6 @@ import {
   GET_DEFAULT_TEXT_COLOR,
   LineColorsSchema,
 } from '../../root-block/edgeless/components/panel/color-panel.js';
-import type { EdgelessElementType } from '../../root-block/edgeless/edgeless-types.js';
 import {
   FontFamily,
   FontStyle,
@@ -236,7 +235,7 @@ export class EditPropsStore {
   }
 
   record(
-    type: EdgelessElementType,
+    type: BlockSuite.EdgelessModelKeyType,
     recordProps: Partial<LastProps[keyof LastProps]>
   ) {
     if (!isLastPropType(type)) return;
@@ -252,7 +251,7 @@ export class EditPropsStore {
     this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
   }
 
-  apply(type: EdgelessElementType, props: Record<string, unknown>) {
+  apply(type: BlockSuite.EdgelessModelKeyType, props: Record<string, unknown>) {
     if (!isLastPropType(type)) return;
 
     const lastProps = this._lastProps[type];
@@ -342,7 +341,9 @@ function extractProps(
   return result;
 }
 
-function isLastPropType(type: EdgelessElementType): type is keyof LastProps {
+function isLastPropType(
+  type: BlockSuite.EdgelessModelKeyType
+): type is keyof LastProps {
   return Object.keys(LastPropsSchema.shape).includes(type);
 }
 

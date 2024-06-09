@@ -10,15 +10,15 @@ import {
   isInsidePageEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
+import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import type { EdgelessRootBlockComponent } from '../../root-block/edgeless/edgeless-root-block.js';
 import { getBlocksInFrame } from '../../root-block/edgeless/frame-manager.js';
-import type { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
 import { xywhArrayToObject } from '../../root-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../root-block/edgeless/utils/query.js';
 import type { RootBlockModel } from '../../root-block/index.js';
 import type { IBound } from '../../surface-block/consts.js';
 import {
-  type GroupElementModel,
+  GroupElementModel,
   type Renderer,
   SurfaceElementModel,
 } from '../../surface-block/index.js';
@@ -309,10 +309,10 @@ export class ExportManager {
 
     if (surfaces?.length) {
       const surfaceElements = surfaces.flatMap(element =>
-        element.type === 'group'
-          ? ((element as GroupElementModel).childElements.filter(
+        element instanceof GroupElementModel
+          ? (element.childElements.filter(
               el => el instanceof SurfaceElementModel
-            ) as BlockSuite.SurfaceElementModelType[])
+            ) as SurfaceElementModel[])
           : element
       );
       const surfaceCanvas = surfaceRenderer.getCanvasByBound(

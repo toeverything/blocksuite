@@ -20,7 +20,7 @@ import { handleNativeRangeAtPoint } from '../../../../../_common/utils/selection
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
-import type { EdgelessBlockModel } from '../../../type.js';
+import type { EdgelessBlockModel } from '../../../edgeless-block-model.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const ACTIVE_NOTE_EXTRA_PADDING = 20;

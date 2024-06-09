@@ -6,7 +6,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
-import { EdgelessBlockModel } from '../../root-block/edgeless/type.js';
+import { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { SurfaceElementModel } from '../element-model/base.js';
 import type { GroupElementModel } from '../element-model/group.js';

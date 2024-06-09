@@ -28,7 +28,7 @@ import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { compare } from '../../surface-block/managers/layer-utils.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { RootService } from '../root-service.js';
-import type { EdgelessElementType } from './edgeless-types.js';
+import { EdgelessBlockModel } from './edgeless-block-model.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
@@ -40,7 +40,6 @@ import {
 } from './services/template-middlewares.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
-import { EdgelessBlockModel } from './type.js';
 import { FIT_TO_SCREEN_PADDING } from './utils/consts.js';
 import { getCursorMode } from './utils/query.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
@@ -263,7 +262,10 @@ export class EdgelessRootService extends RootService {
   ) {
     props['index'] = this.generateIndex(flavour);
 
-    this.editPropsStore.apply(flavour as EdgelessElementType, props);
+    this.editPropsStore.apply(
+      flavour as BlockSuite.EdgelessModelKeyType,
+      props
+    );
 
     return this.doc.addBlock(flavour as never, props, parent, parentIndex);
   }
@@ -277,14 +279,20 @@ export class EdgelessRootService extends RootService {
   updateElement(id: string, props: Record<string, unknown>) {
     const element = this._surface.getElementById(id);
     if (element) {
-      this.editPropsStore.record(element.type as EdgelessElementType, props);
+      this.editPropsStore.record(
+        element.type as BlockSuite.EdgelessModelKeyType,
+        props
+      );
       this._surface.updateElement(id, props);
       return;
     }
 
     const block = this.doc.getBlockById(id);
     if (block) {
-      this.editPropsStore.record(block.flavour as EdgelessElementType, props);
+      this.editPropsStore.record(
+        block.flavour as BlockSuite.EdgelessModelKeyType,
+        props
+      );
       this.doc.updateBlock(block, props);
     }
   }
