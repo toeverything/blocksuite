@@ -43,9 +43,6 @@ export type HoverOptions = {
    * @default true
    */
   setPortalAsFloating: boolean;
-  /**
-   * @deprecated TODO add new `exclusion` option
-   */
   allowMultiple?: boolean;
 } & WhenHoverOptions;
 

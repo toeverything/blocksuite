@@ -71,7 +71,8 @@ export class LanguageListButton extends LitElement {
     this._updateLanguage();
   }
 
-  private _clickLangBtn = () => {
+  private _clickLangBtn = (e: PointerEvent) => {
+    e.stopPropagation();
     if (this.blockElement.doc.readonly) return;
     if (this._abortController) {
       // Close the language list if it's already opened.
