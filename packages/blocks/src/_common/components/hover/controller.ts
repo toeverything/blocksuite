@@ -16,16 +16,6 @@ type HoverPortalOptions = Omit<AdvancedPortalOptions, 'abortController'>;
 
 export type HoverOptions = {
   /**
-   * Callback when the portal is aborted.
-   *
-   * If not provided, the signal will be aborted after the transition ends.
-   */
-  onAbort?: (context: {
-    portal: HTMLDivElement | undefined;
-    hoverOptions: HoverOptions;
-    abortController: AbortController;
-  }) => void;
-  /**
    * Transition style when the portal is shown or hidden.
    */
   transition: {
@@ -137,6 +127,10 @@ export class HoverController implements ReactiveController {
     return this._portal;
   }
 
+  public onAbort = () => {
+    this.abort();
+  };
+
   constructor(
     host: ReactiveControllerHost,
     onHover: (options: OptionsParams) => HoverPortalOptions | null,
@@ -155,22 +149,7 @@ export class HoverController implements ReactiveController {
     const { setReference, setFloating, dispose } = whenHover(isHover => {
       this._isHovering = isHover;
       if (!isHover) {
-        const abortController = this._abortController;
-        if (!abortController) return;
-        if (!this._hoverOptions.onAbort) {
-          // Default abort action
-          abortHoverPortal({
-            portal: this._portal,
-            hoverOptions: this._hoverOptions,
-            abortController,
-          });
-          return;
-        }
-        this._hoverOptions.onAbort({
-          portal: this._portal,
-          hoverOptions: this._hoverOptions,
-          abortController,
-        });
+        this.onAbort();
         return;
       }
 
@@ -220,8 +199,12 @@ export class HoverController implements ReactiveController {
     this._disposables.dispose();
   }
 
-  abort() {
+  abort(force = false) {
     if (!this._abortController) return;
+    if (force) {
+      this._abortController.abort();
+      return;
+    }
     abortHoverPortal({
       portal: this._portal,
       hoverOptions: this._hoverOptions,
