@@ -43,6 +43,9 @@ export type HoverOptions = {
    * @default true
    */
   setPortalAsFloating: boolean;
+  /**
+   * @deprecated TODO add new `exclusion` option
+   */
   allowMultiple?: boolean;
 } & WhenHoverOptions;
 
@@ -112,6 +115,12 @@ export class HoverController implements ReactiveController {
   private readonly _hoverOptions: HoverOptions;
 
   private _isHovering = false;
+
+  /**
+   * Whether the host is currently hovering.
+   *
+   * This property is unreliable when the floating element disconnect from the DOM suddenly.
+   */
   get isHovering() {
     return this._isHovering;
   }
@@ -127,6 +136,9 @@ export class HoverController implements ReactiveController {
     return this._portal;
   }
 
+  /**
+   * Callback when the portal needs to be aborted.
+   */
   public onAbort = () => {
     this.abort();
   };
