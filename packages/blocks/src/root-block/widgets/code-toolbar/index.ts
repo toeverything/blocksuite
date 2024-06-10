@@ -52,6 +52,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
   }
 
   private _hoverController: HoverController | null = null;
+  private _isActivated = false;
 
   private _setHoverController = () => {
     this._hoverController = null;
@@ -84,6 +85,12 @@ export class AffineCodeToolbarWidget extends WidgetElement<
             .abortController=${abortController}
             .items=${this.items}
             .moreItems=${this.moreItems}
+            .onActiveStatusChange=${(active: boolean) => {
+              this._isActivated = active;
+              if (!active) {
+                this._hoverController?.abort();
+              }
+            }}
           ></affine-code-toolbar>`,
           computePosition: {
             referenceElement: codeBlock,
@@ -108,6 +115,12 @@ export class AffineCodeToolbarWidget extends WidgetElement<
 
     const codeBlock = this.blockElement;
     this._hoverController.setReference(codeBlock);
+    this._hoverController.onAbort = () => {
+      // If the more menu is opened, don't close it.
+      if (this._isActivated) return;
+      this._hoverController?.abort();
+      return;
+    };
   };
 
   override firstUpdated() {
