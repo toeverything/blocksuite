@@ -51,6 +51,8 @@ export const writeImageBlobToClipboard = async (blob: Blob) => {
     // @ts-ignore
     await window.apis.clipboard?.copyAsImageFromString(blob);
   } else {
-    await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+    await navigator.clipboard.write([
+      new ClipboardItem({ [blob.type]: Promise.resolve(blob) }),
+    ]);
   }
 };

@@ -251,7 +251,7 @@ export async function copyImageBlob(blockElement: ImageBlockComponent) {
       }
 
       await navigator.clipboard.write([
-        new ClipboardItem({ [blob.type]: blob }),
+        new ClipboardItem({ [blob.type]: Promise.resolve(blob) }),
       ]);
     }
 

@@ -199,28 +199,33 @@ export class Clipboard {
 
     const snapshot = lz.compressToEncodedURIComponent(JSON.stringify(items));
     const html = `<div data-blocksuite-snapshot=${snapshot}>${innerHTML}</div>`;
-    const htmlBlob = new Blob([html], {
-      type: 'text/html',
-    });
-    const clipboardItems: Record<string, Blob> = {
-      'text/html': htmlBlob,
-    };
+    const htmlBlob = new Blob([html], { type: 'text/html' });
+    const clipboardItems: Record<string, Blob> = { 'text/html': htmlBlob };
+
     if (text.length > 0) {
-      const textBlob = new Blob([text], {
-        type: 'text/plain',
-      });
+      const textBlob = new Blob([text], { type: 'text/plain' });
       clipboardItems['text/plain'] = textBlob;
     }
 
     if (png instanceof Blob) {
       clipboardItems['image/png'] = png;
     } else if (png.length > 0) {
-      const pngBlob = new Blob([png], {
-        type: 'image/png',
-      });
+      const pngBlob = new Blob([png], { type: 'image/png' });
       clipboardItems['image/png'] = pngBlob;
     }
-    await navigator.clipboard.write([new ClipboardItem(clipboardItems)]);
+
+    // https://bugs.webkit.org/show_bug.cgi?id=222262
+    // https://developer.apple.com/forums/thread/691873
+    await navigator.clipboard.write([
+      new ClipboardItem(
+        Object.fromEntries(
+          Object.entries(clipboardItems).map(([key, value]) => [
+            key,
+            Promise.resolve(value),
+          ])
+        )
+      ),
+    ]);
   }
 
   readFromClipboard(clipboardData: DataTransfer) {
