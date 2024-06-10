@@ -53,7 +53,7 @@ export class AffineCodeLanguageListWidget extends WidgetElement<
             // This snippet is not perfect, it only checks the hover status at the moment.
             if (this._hoverController.isHovering) return;
             await sleep(1000);
-            if (this._hoverController.isHovering) return;
+            if (this._hoverController.isHovering || this._isActivated) return;
             this._hoverController.abort();
           }
         }}
