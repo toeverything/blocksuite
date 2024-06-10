@@ -97,7 +97,7 @@ export class AffineImageToolbarWidget extends WidgetElement<
             .moreMenuConfig=${this.moreMenuConfig}
             .onActiveStatusChange=${(active: boolean) => {
               this._isActivated = active;
-              if (!active) {
+              if (!active && !this._hoverController?.isHovering) {
                 this._hoverController?.abort();
               }
             }}
