@@ -57,6 +57,7 @@ export class AffineImageToolbarWidget extends WidgetElement<
   };
 
   private _hoverController: HoverController | null = null;
+  private _isActivated = false;
 
   private _setHoverController = () => {
     this._hoverController = null;
@@ -94,6 +95,12 @@ export class AffineImageToolbarWidget extends WidgetElement<
             .abortController=${abortController}
             .config=${this.config}
             .moreMenuConfig=${this.moreMenuConfig}
+            .onActiveStatusChange=${(active: boolean) => {
+              this._isActivated = active;
+              if (!active) {
+                this._hoverController?.abort();
+              }
+            }}
           ></affine-image-toolbar>`,
           computePosition: {
             referenceElement: imageContainer,
@@ -118,6 +125,12 @@ export class AffineImageToolbarWidget extends WidgetElement<
 
     const imageBlock = this.blockElement;
     this._hoverController.setReference(imageBlock);
+    this._hoverController.onAbort = () => {
+      // If the more menu is opened, don't close it.
+      if (this._isActivated) return;
+      this._hoverController?.abort();
+      return;
+    };
   };
 
   override firstUpdated() {
