@@ -18,6 +18,7 @@ import { EdgelessToolController } from './index.js';
 
 class EraserOverlay extends Overlay {
   d = '';
+
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = 0.33;
     const path = new Path2D(this.d);
@@ -32,12 +33,19 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   };
 
   private _overlay = new EraserOverlay();
+
   private _timestamp = 0;
+
   private _timer = 0;
+
   private _eraserPoints: IVec[] = [];
+
   private _prevPoint: IVec = [];
+
   private _prevEraserPoint: IVec = [];
+
   private _erasables = new Set<BlockSuite.EdgelessModelType>();
+
   private _eraseTargets = new Set<BlockSuite.EdgelessModelType>();
 
   private _loop = () => {

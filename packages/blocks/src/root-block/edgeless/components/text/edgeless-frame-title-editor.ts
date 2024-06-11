@@ -25,6 +25,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   @property({ attribute: false })
   accessor frameModel!: FrameBlockModel;
+
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
@@ -36,6 +37,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
+
   get inlineEditorContainer() {
     return this.inlineEditor.rootElement;
   }

@@ -58,12 +58,16 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager;
+
   @property({ attribute: false })
   accessor viewEle!: DataViewTable;
+
   @property({ attribute: false })
   accessor group: GroupData | undefined = undefined;
+
   get rows() {
     return this.group?.rows ?? this.view.rows;
   }
@@ -92,6 +96,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       };
     });
   };
+
   private clickAddRowInStart = () => {
     this.view.rowAdd('start', this.group?.key);
     requestAnimationFrame(() => {
@@ -109,6 +114,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       };
     });
   };
+
   private clickGroupOptions = (e: MouseEvent) => {
     const group = this.group;
     if (!group) {

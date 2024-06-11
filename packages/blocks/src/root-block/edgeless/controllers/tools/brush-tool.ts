@@ -17,12 +17,19 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   } as BrushTool;
 
   private _draggingElement: BrushElementModel | null = null;
+
   private _draggingElementId: string | null = null;
+
   protected _draggingPathPoints: number[][] | null = null;
+
   protected _draggingPathPressures: number[] | null = null;
+
   private _lastPoint: IVec | null = null;
+
   private _straightLineType: 'horizontal' | 'vertical' | null = null;
+
   private _pressureSupportedPointerIds = new Set<number>();
+
   private _lastPopLength = 0;
 
   onContainerPointerDown(): void {

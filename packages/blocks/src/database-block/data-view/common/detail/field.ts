@@ -99,14 +99,19 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor column!: DataViewColumnManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   @state()
   accessor isFocus = false;
+
   @state()
   accessor editing = false;
+
   private _cell = createRef<DataViewCellLifeCycle>();
 
   private get readonly() {
@@ -133,6 +138,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
 
     this.changeEditing(true);
   };
+
   public _clickLeft = (e: MouseEvent) => {
     if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;

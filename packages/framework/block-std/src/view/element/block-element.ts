@@ -188,6 +188,7 @@ export class BlockElement<
     await Promise.all(this.childBlockElements.map(el => el.updateComplete));
     return result;
   }
+
   protected override update(changedProperties: PropertyValues): void {
     // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
     // We can restore this state through the `dirty` property.

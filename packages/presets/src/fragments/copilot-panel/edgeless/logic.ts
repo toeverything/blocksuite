@@ -31,6 +31,7 @@ import { genHtml } from './gen-html.js';
 
 export class AIEdgelessLogic {
   public fromFrame: string = '';
+
   private targets: Record<
     string,
     {
@@ -44,6 +45,7 @@ export class AIEdgelessLogic {
   }
 
   private unsub?: () => void;
+
   public toggleAutoGen = () => {
     if (this.unsub) {
       this.unsub();
@@ -156,6 +158,7 @@ export class AIEdgelessLogic {
       await edgelessRoot.addImages([file]);
     }
   };
+
   createImageFromFrame = async () => {
     const from = this.host.doc.getBlockById(
       this.fromFrame ?? ''

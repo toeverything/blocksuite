@@ -81,32 +81,50 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   readonly tool = {
     type: 'default',
   } as DefaultTool;
+
   override enableHover = true;
+
   dragType = DefaultModeDragType.None;
 
   private _dragStartPos: IVec = [0, 0];
+
   private _dragLastPos: IVec = [0, 0];
+
   private _dragStartModelCoord: IVec = [0, 0];
+
   private _dragLastModelCoord: IVec = [0, 0];
+
   private _lock = false;
+
   // Do not select the text, when click again after activating the note.
   private _isDoubleClickedOnMask = false;
+
   private _alignBound = new Bound();
+
   private _selectedBounds: Bound[] = [];
+
   private _toBeMoved: BlockSuite.EdgelessModelType[] = [];
+
   private _autoPanTimer: number | null = null;
+
   private _dragging = false;
+
   private _wheeling = false;
+
   private _disposables: DisposableGroup | null = null;
 
   // For moving selection with space with mouse
   private _moveSelectionStartPos: IVec = [0, 0];
+
   private _moveSelectionDragStartTemp: IVec = [0, 0];
 
   // For moving the connector label
   private _selectedConnector: ConnectorElementModel | null = null;
+
   private _selectedConnectorLabelBounds: Bound | null = null;
+
   private _clearMindMapHoverState: (() => void)[] = [];
+
   private _hoveredMindMap: null | {
     mindmap: MindmapElementModel;
     node: MindmapNode;
@@ -115,6 +133,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       undefined
     >['mergeInfo'];
   } = null;
+
   private _draggingSingleMindmap: null | {
     mindmap: MindmapElementModel;
     node: MindmapNode;

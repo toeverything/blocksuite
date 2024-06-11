@@ -49,14 +49,17 @@ export class DocEngine {
   }
 
   readonly onStatusChange = new Slot<DocEngineStatus>();
+
   readonly priorityTarget = new SharedPriorityTarget();
 
   private _status: DocEngineStatus;
+
   private setStatus(s: DocEngineStatus) {
     this.logger.debug(`syne-engine:${this.rootDocId} status change`, s);
     this._status = s;
     this.onStatusChange.emit(s);
   }
+
   get status() {
     return this._status;
   }

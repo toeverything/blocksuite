@@ -161,8 +161,11 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   accessor domHost!: Document | HTMLElement;
 
   private _docDisposables: DisposableGroup | null = null;
+
   private _indicatorTranslateY = 0;
+
   private _changedFlag = false;
+
   private _oldViewport?: {
     zoom: number;
     center: {
@@ -170,7 +173,9 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       y: number;
     };
   };
+
   private _highlightMask: HTMLDivElement | null = null;
+
   private _highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   get viewportPadding(): [number, number, number, number] {

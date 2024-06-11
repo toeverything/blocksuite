@@ -14,17 +14,25 @@ export class PointerEventState extends UIEventState {
   override type = 'pointerState';
 
   raw: PointerEvent;
+
   point: Point;
+
   containerOffset: Point;
+
   start: Point;
+
   delta: Point;
+
   keys: {
     shift: boolean;
     cmd: boolean;
     alt: boolean;
   };
+
   button: number;
+
   dragging: boolean;
+
   pressure: number;
 
   get x() {

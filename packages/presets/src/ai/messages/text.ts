@@ -160,7 +160,9 @@ export class AIAnswerText extends WithDisposable(LitElement) {
   }
 
   private _doc!: Doc;
+
   private _answers: string[] = [];
+
   private _timer?: ReturnType<typeof setInterval> | null = null;
 
   private _clearTimer = () => {

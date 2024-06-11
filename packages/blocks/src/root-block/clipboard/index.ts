@@ -19,6 +19,7 @@ import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
 export class PageClipboard {
   protected _disposables = new DisposableGroup();
+
   host: BlockElement;
 
   private get _std() {

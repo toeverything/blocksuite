@@ -2,7 +2,9 @@ import type { ErrorCode } from './code.js';
 
 export class BlockSuiteError extends Error {
   public code: ErrorCode;
+
   public isFatal: boolean;
+
   constructor(code: ErrorCode, message: string) {
     super(message);
     this.name = 'BlockSuiteError';

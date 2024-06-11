@@ -34,6 +34,7 @@ import { cloneDeep } from './utils.js';
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   static templates = builtInTemplates;
+
   static override styles = css`
     :host {
       position: absolute;

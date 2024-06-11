@@ -67,8 +67,10 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
 
   @query('.navigator-setting-button')
   private accessor _navigatorSettingButton!: HTMLElement;
+
   @query('.navigator-setting-menu')
   private accessor _navigatorSettingMenu!: HTMLElement;
+
   private _navigatorSettingPopper?: ReturnType<
     typeof createButtonPopper
   > | null = null;

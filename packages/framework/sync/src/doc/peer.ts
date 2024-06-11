@@ -58,8 +58,11 @@ export class SyncPeer {
     pendingPullUpdates: 0,
     pendingPushUpdates: 0,
   };
+
   readonly onStatusChange = new Slot<DocPeerStatus>();
+
   readonly abort = new AbortController();
+
   get name() {
     return this.source.name;
   }

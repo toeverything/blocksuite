@@ -119,7 +119,9 @@ export class DatabaseBlockModalPreview extends WithDisposable(
       overflow: hidden;
     }
   `;
+
   blockId = 'database-modal-preview';
+
   @property({ attribute: false })
   accessor database!: DatabaseBlockComponent;
 
@@ -145,6 +147,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   }
 
   selectionUpdated = new Slot<DataViewSelection | undefined>();
+
   setSelection: (selection?: DataViewSelection) => void = selection => {
     this.database.host.selection.set(
       selection
@@ -157,6 +160,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
         : []
     );
   };
+
   bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable =
     hotkeys => {
       return {
@@ -165,6 +169,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
         }),
       };
     };
+
   handleEvent: (name: EventName, handler: UIEventHandler) => Disposable = (
     name,
     handler

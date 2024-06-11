@@ -14,7 +14,9 @@ export class EdgelessEraserToolButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
   override type: EdgelessTool['type'] = 'eraser';
+
   override enableActiveBackground = true;
+
   static override styles = css`
     :host {
       height: 100%;

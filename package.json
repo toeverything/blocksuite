@@ -51,6 +51,7 @@
     "@commitlint/config-conventional": "^19.2.2",
     "@open-wc/dev-server-hmr": "^0.2.0",
     "@playwright/test": "1.44.1",
+    "@stylistic/eslint-plugin-ts": "^2.1.0",
     "@types/node": "^20.12.13",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",

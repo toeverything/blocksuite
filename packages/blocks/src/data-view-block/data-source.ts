@@ -27,8 +27,11 @@ export type BlockQueryDataSourceConfig = {
 
 export class BlockQueryDataSource extends BaseDataSource {
   docDisposeMap = new Map<string, () => void>();
+
   blockMap = new Map<string, Block>();
+
   private meta: BlockMeta;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private columnMetaMap = new Map<string, ColumnMeta<any, any, any>>();
 

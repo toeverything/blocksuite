@@ -99,16 +99,21 @@ const abortHoverPortal = ({
 
 export class HoverController implements ReactiveController {
   protected _disposables = new DisposableGroup();
+
   host: ReactiveControllerHost;
 
   static globalAbortController?: AbortController;
 
   private _abortController?: AbortController;
+
   private _setReference?: (element?: Element | undefined) => void;
+
   private _portal?: HTMLDivElement;
+
   private readonly _onHover: (
     options: OptionsParams
   ) => HoverPortalOptions | null;
+
   private readonly _hoverOptions: HoverOptions;
 
   private _isHovering = false;

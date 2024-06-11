@@ -52,7 +52,9 @@ import {
 
 class AutoCompleteOverlay extends Overlay {
   linePoints: IVec[] = [];
+
   stroke = '';
+
   renderShape: ((ctx: CanvasRenderingContext2D) => void) | null = null;
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
@@ -165,7 +167,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private accessor _isMoving = false;
 
   private _timer: ReturnType<typeof setTimeout> | null = null;
+
   private _autoCompleteOverlay: AutoCompleteOverlay = new AutoCompleteOverlay();
+
   private _pathGenerator!: ConnectorPathGenerator;
 
   private get _surface() {

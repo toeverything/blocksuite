@@ -36,16 +36,22 @@ function pointAlmostEqual(a: IVec, b: IVec): boolean {
 
 export class AStarRunner {
   private _cameFrom = new Map<IVec, { from: IVec[]; indexs: number[] }>();
+
   private _frontier!: PriorityQueue<
     IVec,
     [diagonalCount: number, pointPriority: number, distCost: number]
   >;
 
   private _graph: Graph;
+
   private _costSoFar = new Map<IVec, number[]>();
+
   private _diagonalCount = new Map<IVec, number[]>();
+
   private _pointPriority = new Map<IVec, number[]>();
+
   private _current: IVec | null = null;
+
   private _complete = false;
 
   constructor(
@@ -63,6 +69,7 @@ export class AStarRunner {
     this._graph = new Graph([...points], blocks, expandBlocks);
     this._init();
   }
+
   private _init() {
     this._cameFrom.set(this._sp, { from: [this._originalSp], indexs: [-1] });
     this._cameFrom.set(this._originalSp, { from: [], indexs: [] });

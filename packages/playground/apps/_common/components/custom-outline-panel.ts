@@ -21,6 +21,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
       z-index: 1;
     }
   `;
+
   @state()
   private accessor _show = false;
 

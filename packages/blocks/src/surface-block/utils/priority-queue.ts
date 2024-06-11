@@ -5,6 +5,7 @@ type PriorityQueueNode<T, K> = {
 
 export class PriorityQueue<T, K> {
   heap: PriorityQueueNode<T, K>[] = [];
+
   constructor(private _compare: (a: K, b: K) => number) {}
 
   enqueue(value: T, priority: K): void {

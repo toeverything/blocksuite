@@ -6,6 +6,7 @@ export class IndexedDBBlobSource implements BlobSource {
   readonly = false;
 
   readonly store = createStore(`${this.name}_blob`, 'blob');
+
   readonly mimeTypeStore = createStore(`${this.name}_blob_mime`, 'blob_mime');
 
   constructor(readonly name: string) {}

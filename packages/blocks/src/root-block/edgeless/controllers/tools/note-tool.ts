@@ -26,7 +26,9 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   } as NoteTool;
 
   private _noteOverlay: NoteOverlay | null = null;
+
   private _draggingNoteOverlay: DraggingNoteOverlay | null = null;
+
   protected override _draggingArea: SelectionArea | null = null;
 
   onPressShiftKey(pressed: boolean) {

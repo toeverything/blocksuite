@@ -35,7 +35,9 @@ export class EdgelessDraggableElementController<T>
   implements ReactiveController
 {
   overlay: OverlayLayer | null = null;
+
   info = defaultInfo as DraggingInfo<T>;
+
   clearTimeout: ReturnType<typeof setTimeout> | null = null;
 
   states: ReactiveState<T> = {
@@ -43,6 +45,7 @@ export class EdgelessDraggableElementController<T>
     draggingElement: null,
     dragOut: null,
   };
+
   events: EventCache = {};
 
   constructor(
@@ -56,6 +59,7 @@ export class EdgelessDraggableElementController<T>
   public onMouseDown(e: MouseEvent, elementInfo: ElementInfo<T>) {
     this._onDragStart(mouseResolver(e), elementInfo);
   }
+
   public onTouchStart(e: TouchEvent, elementInfo: ElementInfo<T>) {
     this._onDragStart(touchResolver(e), elementInfo);
   }
@@ -70,6 +74,7 @@ export class EdgelessDraggableElementController<T>
     this.states[key] = value;
     this.host.requestUpdate();
   }
+
   private _updateStates(states: Partial<ReactiveState<T>>) {
     Object.assign(this.states, states);
     this.host.requestUpdate();
@@ -122,6 +127,7 @@ export class EdgelessDraggableElementController<T>
       this.events = { onTouchMove, onTouchEnd };
     }
   }
+
   private _onDragMove(e: ElementDragEvent) {
     if (this.states.cancelled) return;
     const { info, options } = this;
@@ -158,6 +164,7 @@ export class EdgelessDraggableElementController<T>
     const zoom = options.service.viewport.zoom;
     this._updateOverlayScale(zoom);
   }
+
   private _onDragEnd(_: ElementDragEvent) {
     const { overlay, info, options } = this;
     const { startTime, elementInfo, edgelessRect, moved } = info;

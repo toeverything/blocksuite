@@ -22,6 +22,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
 
   @property({ attribute: false })
   accessor group!: GroupElementModel;
+
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
@@ -29,6 +30,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
+
   get inlineEditorContainer() {
     return this.inlineEditor.rootElement;
   }

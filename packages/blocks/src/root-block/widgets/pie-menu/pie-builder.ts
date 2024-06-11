@@ -30,6 +30,7 @@ type PieBuilderConstructorProps = Omit<
 
 export class PieMenuBuilder {
   private _schema: PieMenuSchema | null = null;
+
   private _stack: PieNodeModel[] = [];
 
   constructor(base: PieBuilderConstructorProps) {

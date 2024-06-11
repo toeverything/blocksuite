@@ -6,11 +6,15 @@ import type { AffineReference } from './reference-node.js';
 export class ReferenceNodeConfig {
   private _customIcon: ((reference: AffineReference) => TemplateResult) | null =
     null;
+
   private _customTitle: ((reference: AffineReference) => string) | null = null;
+
   private _customContent:
     | ((reference: AffineReference) => TemplateResult)
     | null = null;
+
   private _Doc: Doc | null = null;
+
   private _interactable = true;
 
   get customIcon() {

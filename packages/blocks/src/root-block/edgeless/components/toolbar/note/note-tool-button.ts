@@ -18,6 +18,7 @@ import type { EdgelessNoteMenu } from './note-menu.js';
 @customElement('edgeless-note-tool-button')
 export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
   override type: EdgelessTool['type'] = 'affine:note';
+
   static override styles = css`
     :host {
       display: flex;
@@ -41,6 +42,7 @@ export class EdgelessNoteToolButton extends QuickToolMixin(LitElement) {
   accessor tip = 'Text';
 
   private _noteMenu: MenuPopper<EdgelessNoteMenu> | null = null;
+
   private _states = ['childFlavour', 'childType', 'tip'] as const;
 
   private _toggleNoteMenu() {

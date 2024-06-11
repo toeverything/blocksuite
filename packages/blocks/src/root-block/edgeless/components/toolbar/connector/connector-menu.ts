@@ -59,6 +59,7 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
   LitElement
 ) {
   override type: EdgelessTool['type'] = 'connector';
+
   static override styles = css`
     :host {
       position: absolute;

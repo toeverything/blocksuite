@@ -159,8 +159,10 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       flex: 1;
     }
   `;
+
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor onBack: (() => void) | undefined = undefined;
 
@@ -228,6 +230,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       <div class="${classList}" @click="${changeVisible}">${icon}</div>
     </div>`;
   };
+
   clickChangeAll = (allShow: boolean) => {
     this.view.columnsWithoutFilter.forEach(id => {
       if (this.view.columnGetType(id) !== 'title') {

@@ -18,6 +18,7 @@ import {
 @customElement('affine-pie-node')
 export class PieNode extends WithDisposable(LitElement) {
   static override styles = pieNodeStyles;
+
   @property({ attribute: false })
   accessor model!: PieNodeModel;
 

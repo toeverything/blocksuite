@@ -29,10 +29,15 @@ type RotateMoveHandler = (point: IPoint, rotate: number) => void;
 
 export class HandleResizeManager {
   private _onDragStart: DragStartHandler;
+
   private _onResizeMove: ResizeMoveHandler;
+
   private _onRotateMove: RotateMoveHandler;
+
   private _onDragEnd: DragEndHandler;
+
   private _dragDirection: HandleDirection = HandleDirection.Left;
+
   private _dragPos: {
     start: { x: number; y: number };
     end: { x: number; y: number };
@@ -54,7 +59,9 @@ export class HandleResizeManager {
   private _currentRect = new DOMRect();
 
   private _origin: { x: number; y: number } = { x: 0, y: 0 };
+
   private _resizeMode: ResizeMode = 'none';
+
   private _zoom = 1;
 
   private _bounds = new Map<
@@ -66,11 +73,17 @@ export class HandleResizeManager {
   >();
 
   private _aspectRatio = 1;
+
   private _locked = false;
+
   private _proportion = false;
+
   private _shiftKey = false;
+
   private _proportional = false;
+
   private _rotation = false;
+
   private _target: HTMLElement | null = null;
 
   private _dragging = false;

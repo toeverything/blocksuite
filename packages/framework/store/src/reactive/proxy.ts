@@ -18,6 +18,7 @@ export class ReactiveYArray extends BaseReactiveYData<
   YArray<unknown>
 > {
   protected readonly _proxy: unknown[];
+
   constructor(
     protected readonly _source: unknown[],
     protected readonly _ySource: YArray<unknown>,
@@ -133,6 +134,7 @@ export class ReactiveYArray extends BaseReactiveYData<
 
 export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
   protected readonly _proxy: UnRecord;
+
   constructor(
     protected readonly _source: UnRecord,
     protected readonly _ySource: YMap<unknown>,

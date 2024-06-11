@@ -1,5 +1,6 @@
 class RandomPicker<T> {
   private _originalArray: T[];
+
   private _copyArray: T[];
 
   constructor(array: T[]) {

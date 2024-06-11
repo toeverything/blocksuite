@@ -51,7 +51,9 @@ export class EdgelessConnectorToolButton extends QuickToolMixin(
   accessor strokeWidth = LineWidth.Two;
 
   override type = 'connector' as const;
+
   override _type = 'connector' as const;
+
   protected override readonly _states = [
     'mode',
     'stroke',

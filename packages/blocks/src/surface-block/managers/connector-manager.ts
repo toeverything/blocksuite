@@ -780,8 +780,11 @@ function renderRect(
 
 export class ConnectionOverlay extends Overlay {
   points: IVec[] = [];
+
   highlightPoint: IVec | null = null;
+
   sourceBounds: IBound | null = null;
+
   targetBounds: IBound | null = null;
 
   constructor(private _service: EdgelessRootService) {

@@ -103,6 +103,7 @@ export class SmoothCorner extends LitElement {
 
   @state()
   accessor width: number = 0;
+
   @state()
   accessor height: number = 0;
 

@@ -88,11 +88,17 @@ export class EdgelessRootService extends RootService {
   };
 
   private _surface!: SurfaceBlockModel;
+
   private _layer!: LayerManager;
+
   private _frame!: EdgelessFrameManager;
+
   private _snap!: EdgelessSnapManager;
+
   private _selection!: EdgelessSelectionManager;
+
   private _viewport!: Viewport;
+
   private _tool!: EdgelessToolsManager;
 
   override mounted() {

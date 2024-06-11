@@ -28,6 +28,7 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
       position: absolute;
     }
   `;
+
   @property({ attribute: false })
   accessor renderItem!: Array<() => TemplateResult>;
 
@@ -39,6 +40,7 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
 
   @queryAll(':scope > .component-overflow-item')
   accessor items!: HTMLDivElement[] & NodeList;
+
   @query(':scope > .component-overflow-more')
   accessor more!: HTMLDivElement;
 

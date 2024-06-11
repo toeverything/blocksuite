@@ -81,13 +81,19 @@ const FLAGS_PRESET = {
 
 export class Store {
   readonly id: string;
+
   readonly doc: BlockSuiteDoc;
+
   readonly spaces = new Map<string, Space>();
+
   readonly awarenessStore: AwarenessStore;
+
   readonly idGenerator: IdGenerator;
 
   readonly docSync: DocEngine;
+
   readonly awarenessSync: AwarenessEngine;
+
   readonly blobSync: BlobEngine;
 
   constructor(

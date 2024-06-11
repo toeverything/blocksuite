@@ -112,9 +112,13 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   accessor frameListContainer!: HTMLElement;
 
   private _frameItems: FrameListItem[] = [];
+
   private _frameElementHeight = 0;
+
   private _indicatorTranslateY = 0;
+
   private _docDisposables: DisposableGroup | null = null;
+
   private _lastEdgelessRootId = '';
 
   get frames() {

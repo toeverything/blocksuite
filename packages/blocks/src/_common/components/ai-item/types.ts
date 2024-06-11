@@ -39,6 +39,7 @@ export enum AIErrorType {
 
 export class UnauthorizedError extends BaseAIError {
   readonly type = AIErrorType.Unauthorized;
+
   constructor() {
     super('Unauthorized');
   }
@@ -47,6 +48,7 @@ export class UnauthorizedError extends BaseAIError {
 // user has used up the quota
 export class PaymentRequiredError extends BaseAIError {
   readonly type = AIErrorType.PaymentRequired;
+
   constructor() {
     super('Payment required');
   }
@@ -55,6 +57,7 @@ export class PaymentRequiredError extends BaseAIError {
 // general 500x error
 export class GeneralNetworkError extends BaseAIError {
   readonly type = AIErrorType.GeneralNetworkError;
+
   constructor(message: string = 'Network error') {
     super(message);
   }

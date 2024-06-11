@@ -41,12 +41,16 @@ export class BlockRenderer
       height: 16px;
     }
   `;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager | DataViewKanbanManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   @property({ attribute: false })
   accessor host!: EditorHost;
+
   get model() {
     return this.host?.doc.getBlock(this.rowId)?.model;
   }
@@ -90,15 +94,19 @@ export class BlockRenderer
   get service() {
     return this.host.std.spec.getService('affine:database');
   }
+
   get inlineManager() {
     return this.service.inlineManager;
   }
+
   get attributesSchema() {
     return this.inlineManager.getSchema();
   }
+
   get attributeRenderer() {
     return this.inlineManager.getRenderer();
   }
+
   protected override render(): unknown {
     const model = this.model;
     if (!model) {

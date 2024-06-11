@@ -209,8 +209,10 @@ export class DebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   accessor sidePanel!: SidePanel;
+
   @property({ attribute: false })
   accessor leftSidePanel!: LeftSidePanel;
+
   @property({ attribute: false })
   accessor docsPanel!: DocsPanel;
 
@@ -230,6 +232,7 @@ export class DebugMenu extends ShadowlessElement {
   accessor blockTypeDropdown!: SlDropdown;
 
   private _styleMenu!: Pane;
+
   private _showStyleDebugMenu = false;
 
   get mode() {

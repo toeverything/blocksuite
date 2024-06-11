@@ -26,7 +26,9 @@ function arrayAlmostEqual(point: IVec, point2: IVec) {
 
 export class Graph {
   private _xMap = new Map<number, IVec[]>();
+
   private _yMap = new Map<number, IVec[]>();
+
   constructor(
     private points: IVec[],
     private blocks: Bound[] = [],
@@ -43,6 +45,7 @@ export class Graph {
       yMap.get(y)?.push(point);
     });
   }
+
   private _isBlock(sp: IVec, ep: IVec) {
     return (
       this.blocks.some(block => {

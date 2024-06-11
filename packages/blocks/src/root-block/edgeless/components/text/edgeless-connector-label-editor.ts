@@ -82,7 +82,9 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
   }
 
   private _keeping = false;
+
   private _isComposition = false;
+
   private _resizeObserver: ResizeObserver | null = null;
 
   setKeeping(keeping: boolean) {

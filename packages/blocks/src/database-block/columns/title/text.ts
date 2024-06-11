@@ -74,9 +74,12 @@ const styles = css`
 
 abstract class BaseTextCell extends BaseCellRenderer<Text> {
   override accessor view!: DataViewTableManager | DataViewKanbanManager;
+
   static override styles = styles;
+
   @property({ attribute: false })
   accessor showIcon = false;
+
   get service() {
     return this.view
       .getContext(HostContextKey)
@@ -86,12 +89,15 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
   get inlineManager() {
     return this.service?.inlineManager;
   }
+
   get attributesSchema() {
     return this.inlineManager?.getSchema();
   }
+
   get attributeRenderer() {
     return this.inlineManager?.getRenderer();
   }
+
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
@@ -106,6 +112,7 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
 
   @query('rich-text')
   accessor richText!: RichText;
+
   get inlineEditor() {
     assertExists(this.richText);
     const inlineEditor = this.richText.inlineEditor;

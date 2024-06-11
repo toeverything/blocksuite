@@ -13,6 +13,7 @@ export class ParagraphBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
 > extends BlockService<ParagraphBlockModel> {
   readonly inlineManager = new InlineManager<TextAttributes>();
+
   readonly referenceNodeConfig = new ReferenceNodeConfig();
 
   override mounted(): void {

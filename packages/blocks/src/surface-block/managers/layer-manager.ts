@@ -65,6 +65,7 @@ export type Layer = BlockLayer | CanvasLayer;
 
 export class LayerManager {
   static INITAL_INDEX = 'a0';
+
   static create(doc: Doc, surface: SurfaceBlockModel) {
     const layerManager = new LayerManager(
       (
@@ -93,7 +94,9 @@ export class LayerManager {
   };
 
   canvasElements!: SurfaceElementModel[];
+
   blocks!: EdgelessBlockModel[];
+
   frames!: FrameBlockModel[];
 
   layers!: Layer[];
@@ -112,7 +115,9 @@ export class LayerManager {
   }[];
 
   blocksGrid = new GridManager<EdgelessBlockModel>();
+
   framesGrid = new GridManager<FrameBlockModel>();
+
   canvasGrid = new GridManager<SurfaceElementModel>();
 
   constructor(elements?: BlockSuite.EdgelessModelType[]) {

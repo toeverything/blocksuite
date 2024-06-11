@@ -17,6 +17,7 @@ export class BroadcastChannelDocSource implements DocSource {
   name = 'broadcast-channel';
 
   channel = new BroadcastChannel(this.channelName);
+
   docMap = new Map<string, Uint8Array>();
 
   constructor(readonly channelName: string = 'blocksuite:doc') {

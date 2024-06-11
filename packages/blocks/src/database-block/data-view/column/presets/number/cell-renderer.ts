@@ -120,6 +120,7 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   _blur() {
     this.selectCurrentCell(false);
   }
+
   _focus() {
     if (!this.isEditing) {
       this.selectCurrentCell(true);

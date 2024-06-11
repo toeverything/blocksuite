@@ -162,12 +162,15 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   accessor messagesContainer!: HTMLDivElement;
 
   private _selectionValue: BaseSelection[] = [];
+
   private get _currentTextSelection(): TextSelection | undefined {
     return this._selectionValue.find(v => v.type === 'text') as TextSelection;
   }
+
   private get _currentBlockSelections(): BlockSelection[] | undefined {
     return this._selectionValue.filter(v => v.type === 'block');
   }
+
   private get _currentImageSelections(): ImageSelection[] | undefined {
     return this._selectionValue.filter(v => v.type === 'image');
   }

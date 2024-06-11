@@ -86,14 +86,23 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private accessor _blockHubMenuEntry!: HTMLElement;
 
   private _currentClientX = 0;
+
   private _currentClientY = 0;
+
   private _isCardListVisible = false;
+
   private _indicator!: DragIndicator;
+
   private _lastDroppingTarget: EditingState | null = null;
+
   private _lastDroppingType: DroppingType = 'none';
+
   private _lastDraggingFlavour: string | null = null;
+
   private _timer: number | null = null;
+
   private _rafID: number = 0;
+
   private _editorHost: EditorHost;
 
   static override styles = styles;

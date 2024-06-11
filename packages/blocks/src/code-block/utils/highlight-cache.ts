@@ -2,6 +2,7 @@ import type { ThemedToken } from 'shiki';
 
 class LRUCache<K, V> {
   private maxSize: number;
+
   private cache: Map<K, V>;
 
   constructor(maxSize: number) {

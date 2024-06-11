@@ -21,6 +21,7 @@ import { NOTE_MENU_ITEMS } from './note-menu-config.js';
 @customElement('edgeless-note-menu')
 export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
   override type: EdgelessTool['type'] = 'affine:note';
+
   static override styles = css`
     :host {
       position: absolute;

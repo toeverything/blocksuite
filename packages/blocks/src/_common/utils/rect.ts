@@ -3,6 +3,7 @@ import { clamp } from './math.js';
 
 export class Point {
   public x: number;
+
   public y: number;
 
   constructor(x = 0, y = 0) {
@@ -88,6 +89,7 @@ export class Point {
 export class Rect {
   // `[left, top]`
   public min: Point;
+
   // `[right, bottom]`
   public max: Point;
 

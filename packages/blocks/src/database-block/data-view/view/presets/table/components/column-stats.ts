@@ -16,6 +16,7 @@ const styles = css`
 @customElement('affine-database-column-stats')
 export class DataBaseColumnStats extends WithDisposable(LitElement) {
   static override styles = styles;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager;
 

@@ -41,8 +41,11 @@ type RendererOptions = {
 
 export class Renderer extends Viewport {
   canvas: HTMLCanvasElement;
+
   ctx: CanvasRenderingContext2D;
+
   rc: RoughCanvas;
+
   layerManager: LayerManager;
 
   provider: Partial<EnvProvider>;
@@ -50,8 +53,11 @@ export class Renderer extends Viewport {
   stackingCanvasUpdated = new Slot<HTMLCanvasElement[]>();
 
   private _stackingCanvas: HTMLCanvasElement[] = [];
+
   private _overlays = new Set<Overlay>();
+
   private _shouldUpdate = false;
+
   private _disposables = new DisposableGroup();
 
   get stackingCanvas() {

@@ -10,6 +10,7 @@ export class PreviewRootBlockComponent extends BlockElement {
       display: block;
     }
   `;
+
   override renderBlock() {
     return html`<div class="affine-preview-root">
       ${this.host.renderChildren(this.model)}

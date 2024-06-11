@@ -98,10 +98,15 @@ export type UnRecord = Record<string, unknown>;
 
 export abstract class BaseReactiveYData<T, Y> {
   protected abstract readonly _proxy: T;
+
   protected abstract readonly _source: T;
+
   protected abstract readonly _ySource: Y;
+
   protected abstract readonly _options: ProxyOptions<T>;
+
   protected _skipNext = false;
+
   protected abstract _getProxy(): T;
   protected readonly _stashed = new Set<string | number>();
 

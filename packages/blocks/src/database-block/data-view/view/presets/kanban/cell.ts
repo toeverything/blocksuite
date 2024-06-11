@@ -60,14 +60,19 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor contentOnly = false;
+
   @property({ attribute: false })
   accessor view!: DataViewKanbanManager;
+
   @property({ attribute: false })
   accessor groupKey!: string;
+
   @property({ attribute: false })
   accessor cardId!: string;
+
   @property({ attribute: false })
   accessor column!: DataViewKanbanColumnManager;
+
   @state()
   accessor isFocus = false;
 

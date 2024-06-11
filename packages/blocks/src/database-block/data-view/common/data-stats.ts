@@ -258,6 +258,7 @@ export class ColumnDataStats<
 
     return colValues;
   }
+
   // gets the count of non-empty values in the column with separated out multiselect items
   private _getColumnValueCounts() {
     return this._getAllValuesAsString().length;

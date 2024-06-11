@@ -19,22 +19,35 @@ export const ZOOM_INITIAL = 1.0;
 
 export class Viewport {
   protected _left = 0;
+
   protected _top = 0;
+
   protected _width = 0;
+
   protected _height = 0;
+
   protected _center: IPoint = { x: 0, y: 0 };
+
   protected _zoom: number = 1.0;
+
   protected _rafId: number | null = null;
+
   protected _el!: HTMLElement;
+
   private _syncFlag = false;
+
   protected _cumulativeParentScale = 1;
+
   protected _locked = false;
 
   ZOOM_MAX = ZOOM_MAX;
+
   ZOOM_MIN = ZOOM_MIN;
 
   viewportUpdated = new Slot<{ zoom: number; center: IVec2 }>();
+
   viewportMoved = new Slot<IVec2>();
+
   sizeUpdated = new Slot<{
     width: number;
     height: number;

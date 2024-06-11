@@ -21,6 +21,7 @@ type AdapterMap = Map<
 
 export class Clipboard {
   private _jobMiddlewares: JobMiddleware[] = [];
+
   private _adapterMap: AdapterMap = new Map();
 
   constructor(public std: BlockSuite.Std) {}

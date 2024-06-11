@@ -13,6 +13,7 @@ export class KanbanDragController implements ReactiveController {
   constructor(private host: DataViewKanban) {
     this.host.addController(this);
   }
+
   get scrollContainer() {
     const scrollContainer = this.host.querySelector(
       '.affine-data-view-kanban-groups'
@@ -46,6 +47,7 @@ export class KanbanDragController implements ReactiveController {
       return;
     }
   };
+
   shooIndicator = (
     evt: MouseEvent,
     self: KanbanCard | undefined

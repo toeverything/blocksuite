@@ -45,11 +45,13 @@ export class InlineManager<
   in out TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
   private _specs: InlineSpecs<TextAttributes>[] = [];
+
   get specs() {
     return this._specs;
   }
 
   private _markdownMatches: InlineMarkdownMatch<TextAttributes>[] = [];
+
   get markdownMatches() {
     return this._markdownMatches;
   }

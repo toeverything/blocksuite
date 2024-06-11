@@ -119,17 +119,23 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
    * After the ymap is connected to the doc, this map will be cleared.
    */
   protected _preserved = new Map<string, unknown>();
+
   protected _stashed: Map<keyof Props | string, unknown>;
+
   protected _local = new Map<string | symbol, unknown>();
+
   protected _onChange: (payload: {
     props: Record<string, unknown>;
     oldValues: Record<string, unknown>;
     local: boolean;
   }) => void;
+
   protected _disposable = new DisposableGroup();
+
   protected _id: string;
 
   yMap: Y.Map<unknown>;
+
   surface!: SurfaceBlockModel;
 
   abstract rotate: number;
@@ -388,6 +394,7 @@ export abstract class SurfaceGroupLikeModel<
   get childIds() {
     return this._childIds;
   }
+
   private _childIds: string[] = [];
 
   /**

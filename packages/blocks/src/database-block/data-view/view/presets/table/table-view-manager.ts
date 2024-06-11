@@ -169,9 +169,11 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     result.push(...needShow);
     return result;
   }
+
   override get readonly(): boolean {
     return this.viewSource.readonly;
   }
+
   public isShow(rowId: string): boolean {
     if (this.filter.conditions.length) {
       const rowMap = Object.fromEntries(
@@ -207,6 +209,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
   public duplicateView(): void {
     this.viewSource.duplicate();
   }
+
   public deleteView(): void {
     this.viewSource.delete();
   }
@@ -266,6 +269,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
   get groupProperties() {
     return this.view.groupProperties ?? [];
   }
+
   public get groupHelper(): GroupHelper | undefined {
     const groupBy = this.view.groupBy;
     if (!groupBy) {
@@ -348,6 +352,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
       this.view.columns.find(v => v.id === columnId)?.statCalcType ?? 'none'
     );
   }
+
   public columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void {
     this.updateView(view => {
       return {
@@ -371,13 +376,17 @@ export class DataViewTableColumnManager extends DataViewColumnManagerBase {
   ) {
     super(propertyId, dataViewManager);
   }
+
   public readonly stats = new ColumnDataStats(this);
+
   get statCalcOp(): StatCalcOpType {
     return this.dataViewManager.columnGetStatCalcOp(this.id);
   }
+
   updateStatCalcOp(type: StatCalcOpType): void {
     return this.dataViewManager.columnUpdateStatCalcOp(this.id, type);
   }
+
   get width(): number {
     return this.dataViewManager.columnGetWidth(this.id);
   }

@@ -46,9 +46,11 @@ function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
 
 export class GridManager<T extends BlockSuite.EdgelessModelType> {
   private _grids = new Map<string, Set<T>>();
+
   private _elementToGrids = new Map<T, Set<Set<T>>>();
 
   private _externalGrids = new Map<string, Set<T>>();
+
   private _externalElementToGrids = new Map<T, Set<Set<T>>>();
 
   private _createGrid(row: number, col: number) {

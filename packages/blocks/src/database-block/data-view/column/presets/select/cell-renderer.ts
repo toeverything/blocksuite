@@ -48,6 +48,7 @@ export class SelectCellEditing extends BaseCellRenderer<
   _editComplete = () => {
     this.selectCurrentCell(false);
   };
+
   _onOptionsChange = (options: SelectTag[]) => {
     this.column.updateData(data => {
       return {

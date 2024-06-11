@@ -23,8 +23,11 @@ import { getSelectedRect } from '../../utils/query.js';
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   static PLACEHOLDER_TEXT = 'Type from here';
+
   static HORIZONTAL_PADDING = 10;
+
   static VERTICAL_PADDING = 6;
+
   static BORDER_WIDTH = 1;
 
   static override styles = css`
@@ -80,6 +83,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   private _keeping = false;
+
   private _isComposition = false;
 
   setKeeping(keeping: boolean) {

@@ -23,14 +23,19 @@ export class NoteRenderer
       --affine-editor-side-padding: 0;
     }
   `;
+
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   @property({ attribute: false })
   accessor model!: DatabaseBlockModel;
+
   @property({ attribute: false })
   accessor host!: EditorHost;
+
   @query('editor-host')
   accessor subHost!: EditorHost;
 

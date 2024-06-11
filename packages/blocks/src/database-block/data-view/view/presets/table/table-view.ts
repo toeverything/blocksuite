@@ -135,9 +135,13 @@ export class DataViewTable extends DataViewBase<
   static override styles = styles;
 
   dragController = new TableDragController(this);
+
   selectionController = new TableSelectionController(this);
+
   hotkeysController = new TableHotkeysController(this);
+
   clipboardController = new TableClipboardController(this);
+
   private get readonly() {
     return this.view.readonly;
   }
@@ -184,6 +188,7 @@ export class DataViewTable extends DataViewBase<
       };
     });
   };
+
   renderAddGroup = (groupHelper: GroupHelper) => {
     const addGroup = groupHelper.addGroup;
     if (!addGroup) {
@@ -216,6 +221,7 @@ export class DataViewTable extends DataViewBase<
       </div>
     </div>`;
   };
+
   private renderTable() {
     const groupHelper = this.view.groupHelper;
     if (groupHelper) {
@@ -240,6 +246,7 @@ export class DataViewTable extends DataViewBase<
       .viewEle="${this}"
     ></affine-data-view-table-group>`;
   }
+
   onWheel = (event: WheelEvent) => {
     if (event.metaKey || event.ctrlKey) {
       return;

@@ -71,7 +71,9 @@ export class TemplateJob {
   private _template: DocSnapshot | null = null;
 
   job: Job;
+
   model: SurfaceBlockModel;
+
   type: TemplateType;
 
   slots = {

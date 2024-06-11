@@ -22,6 +22,7 @@ import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
 @customElement('presentation-toolbar')
 export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
   override type: EdgelessTool['type'] = 'frameNavigator';
+
   static override styles = css`
     :host {
       align-items: inherit;
@@ -72,6 +73,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
   private get _cachedPresentHideToolbar() {
     return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
   }
+
   private set _cachedPresentHideToolbar(value) {
     this.edgeless.service.editPropsStore.setItem('presentHideToolbar', !!value);
   }
@@ -81,11 +83,13 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
   @property({ type: Boolean })
   accessor settingMenuShow = false;
+
   @property()
   accessor setSettingMenuShow: (show: boolean) => void = () => {};
 
   @property({ type: Boolean })
   accessor frameMenuShow = false;
+
   @property()
   accessor setFrameMenuShow: (show: boolean) => void = () => {};
 
@@ -98,7 +102,9 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     },
   })
   private accessor _currentFrameIndex = 0;
+
   private _timer?: ReturnType<typeof setTimeout>;
+
   private _cachedIndex = -1;
 
   private get _frames(): FrameBlockModel[] {

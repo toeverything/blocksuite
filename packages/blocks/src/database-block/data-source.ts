@@ -30,6 +30,7 @@ export type DatabaseBlockDataSourceConfig = {
 
 export class DatabaseBlockDataSource extends BaseDataSource {
   private readonly _model: DatabaseBlockModel;
+
   private _batch = 0;
 
   get doc() {

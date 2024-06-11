@@ -45,8 +45,10 @@ const styles = css`
 @customElement('data-view-header-tools')
 export class DataViewHeaderTools extends WidgetBase {
   static override styles = styles;
+
   @property({ attribute: false })
   accessor toolsMap!: Record<string, DataViewWidget[]>;
+
   @state()
   accessor showToolBar = false;
 

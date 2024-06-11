@@ -25,7 +25,9 @@ import { EdgelessToolController } from './index.js';
 
 class LassoOverlay extends Overlay {
   d = '';
+
   startPoint: IVec | null = null;
+
   render(ctx: CanvasRenderingContext2D): void {
     const path = new Path2D(this.d);
     const { zoom } = this._renderer;
@@ -62,10 +64,15 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
   } as LassoTool;
 
   private _overlay = new LassoOverlay();
+
   private _raf = 0;
+
   private _lassoPoints: IVec[] = [];
+
   private _lastPoint: IVec = [];
+
   private _isSelecting = false;
+
   private _currentSelectionState = new Set<string>(); // to finalize the selection
 
   get selection() {

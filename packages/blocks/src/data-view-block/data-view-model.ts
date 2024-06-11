@@ -49,6 +49,7 @@ export class DataViewBlockModel extends BlockModel<Props> {
       views: this.views,
     });
   }
+
   duplicateView(id: string): string {
     const newId = this.doc.generateBlockId();
     this.doc.transact(() => {
@@ -64,6 +65,7 @@ export class DataViewBlockModel extends BlockModel<Props> {
     });
     return newId;
   }
+
   moveViewTo(id: string, position: InsertToPosition) {
     this.doc.transact(() => {
       this.views = arrayMove(

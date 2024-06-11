@@ -69,7 +69,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
   }
 
   private _itemPathMap = new Map<SlashMenuItem, number[]>();
+
   private _query = '';
+
   private _queryState: 'off' | 'on' | 'no_result' = 'off';
 
   override connectedCallback() {
@@ -283,6 +285,7 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
   private accessor _activeItem!: SlashMenuActionItem | SlashSubMenu;
 
   private _currentSubMenu: SlashSubMenu | null = null;
+
   private _subMenuAbortController: AbortController | null = null;
 
   override connectedCallback() {

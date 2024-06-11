@@ -69,6 +69,7 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
   highlightOptionsGetter: HighlightOptionsGetter | null = null;
 
   readonly attributesSchema = z.object({});
+
   readonly getAttributeRenderer = () =>
     getCodeLineRenderer(() => ({
       lang:
@@ -94,7 +95,9 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
    * See {@link updated}
    */
   private _previousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
+
   private _highlighter: Highlighter | null = null;
+
   private async _startHighlight(lang: StrictLanguageInfo) {
     if (this._highlighter) {
       const loadedLangs = this._highlighter.getLoadedLanguages();

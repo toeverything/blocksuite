@@ -23,10 +23,12 @@ export type IndexBlockEvent =
 
 export class BlockIndexer {
   private readonly _doc: BlockSuiteDoc;
+
   private readonly _collectionSlots: {
     docAdded: Slot<string>;
     docRemoved: Slot<string>;
   };
+
   private _disposables = new DisposableGroup();
 
   public slots = {

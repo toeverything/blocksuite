@@ -12,11 +12,13 @@ import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
 export class EventService<TextAttributes extends BaseTextAttributes> {
   private _isComposing = false;
+
   get isComposing() {
     return this._isComposing;
   }
 
   private _previousAnchor: NativePoint | null = null;
+
   private _previousFocus: NativePoint | null = null;
 
   constructor(public readonly editor: InlineEditor<TextAttributes>) {}
@@ -151,6 +153,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _compositionInlineRange: InlineRange | null = null;
+
   private _onCompositionStart = () => {
     this._isComposing = true;
     // embeds is not editable and it will break IME

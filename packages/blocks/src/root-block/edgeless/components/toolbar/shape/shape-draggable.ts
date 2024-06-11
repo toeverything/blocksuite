@@ -53,7 +53,9 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   LitElement
 ) {
   draggableController!: EdgelessDraggableElementController<DraggableShape>;
+
   override type = 'shape' as const;
+
   static override styles = css`
     :host {
       display: flex;

@@ -55,6 +55,7 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
       display: contents;
     }
   `;
+
   @property({ attribute: false })
   accessor config!: DataViewRendererConfig;
 

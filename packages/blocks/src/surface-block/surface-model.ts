@@ -183,10 +183,15 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       model: BlockSuite.SurfaceElementModelType;
     }
   >();
+
   private _disposables: DisposableGroup = new DisposableGroup();
+
   private _groupToElements = new Map<string, string[]>();
+
   private _elementToGroup = new Map<string, string>();
+
   private _connectorToElements = new Map<string, string[]>();
+
   private _elementToConnector = new Map<string, string[]>();
 
   /**
@@ -203,7 +208,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   };
 
   elementUpdated = new Slot<ElementUpdatedData>();
+
   elementAdded = new Slot<{ id: string; local: boolean }>();
+
   elementRemoved = new Slot<{
     id: string;
     type: string;

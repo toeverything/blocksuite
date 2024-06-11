@@ -29,6 +29,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   } as ShapeTool;
 
   private _draggingElement: ShapeElementModel | null = null;
+
   private _draggingElementId: string | null = null;
 
   // shape overlay
@@ -38,6 +39,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   // For moving selection with space with mouse
   private _moveWithSpaceStartPos: IVec = [0, 0];
+
   private _moveWithSpaceShapePosTemp: SelectionArea | null = null;
 
   private _addNewShape(

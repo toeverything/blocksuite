@@ -15,7 +15,9 @@ export class SidePanel extends ShadowlessElement {
       display: none;
     }
   `;
+
   currentContent: HTMLElement | null = null;
+
   showContent(ele: HTMLElement) {
     if (this.currentContent) {
       this.currentContent.remove();
@@ -24,6 +26,7 @@ export class SidePanel extends ShadowlessElement {
     this.currentContent = ele;
     this.append(ele);
   }
+
   hideContent() {
     if (this.currentContent) {
       this.style.display = 'none';

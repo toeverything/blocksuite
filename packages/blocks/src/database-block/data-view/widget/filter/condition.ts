@@ -86,6 +86,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
       align-items: center;
     }
   `;
+
   @property({ attribute: false })
   accessor data!: SingleFilter;
 

@@ -193,18 +193,23 @@ export abstract class DataViewManagerBase<ViewData extends DataViewDataType>
   getContext<T>(key: DataViewContextKey<T>): T | undefined {
     return this.dataSource.getContext(key);
   }
+
   protected get dataSource(): DataSource {
     assertExists(this._dataSource, 'data source is not set');
     return this._dataSource;
   }
+
   protected get viewSource(): SingleViewSource<ViewData> {
     assertExists(this._viewSource, 'view source is not set');
     return this._viewSource;
   }
+
   private _viewSource?: SingleViewSource<ViewData>;
+
   private _dataSource?: DataSource;
 
   private searchString = '';
+
   private _filterVisible?: boolean;
 
   get rows(): string[] {

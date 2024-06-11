@@ -104,6 +104,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       width: 90%;
     }
   `;
+
   @state()
   private accessor _curIndex = -1;
 

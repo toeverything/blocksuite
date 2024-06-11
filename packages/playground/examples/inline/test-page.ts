@@ -395,8 +395,11 @@ export class TestPage extends ShadowlessElement {
   `;
 
   private _editorA: InlineEditor | null = null;
+
   private _editorB: InlineEditor | null = null;
+
   private _undoManagerA: Y.UndoManager | null = null;
+
   private _undoManagerB: Y.UndoManager | null = null;
 
   override firstUpdated() {

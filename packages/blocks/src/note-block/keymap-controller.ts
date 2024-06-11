@@ -17,6 +17,7 @@ import { ensureBlockInContainer } from './utils.js';
 
 export class KeymapController implements ReactiveController {
   private _anchorSel: BlockSelection | null = null;
+
   private _focusBlock: BlockElement | null = null;
 
   host: ReactiveControllerHost & BlockElement;

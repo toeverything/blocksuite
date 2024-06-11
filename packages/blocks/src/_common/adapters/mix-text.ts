@@ -36,10 +36,12 @@ type MixTextToSliceSnapshotPayload = {
 
 export class MixTextAdapter extends BaseAdapter<MixText> {
   private _markdownAdapter: MarkdownAdapter;
+
   constructor(job: Job) {
     super(job);
     this._markdownAdapter = new MarkdownAdapter(job);
   }
+
   async fromDocSnapshot({
     snapshot,
     assets,

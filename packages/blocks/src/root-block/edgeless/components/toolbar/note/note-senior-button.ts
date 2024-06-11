@@ -19,7 +19,9 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
   override type = 'affine:note' as const;
+
   override enableActiveBackground = true;
+
   static override styles = css`
     :host,
     .edgeless-note-button {
@@ -126,11 +128,14 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
   `;
 
   private _states = ['childFlavour', 'childType', 'tip'] as const;
+
   // TODO: better to extract these states outside of component?
   @state()
   accessor childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
+
   @state()
   accessor childType = 'text';
+
   @state()
   accessor tip = 'Note';
 

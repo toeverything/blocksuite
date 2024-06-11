@@ -34,9 +34,11 @@ export type FileDropOptions = {
 
 export class FileDropManager {
   private _blockService: BlockService;
+
   private _fileDropOptions: FileDropOptions;
 
   private static _dropResult: DropResult | null = null;
+
   private _indicator!: DragIndicator;
 
   constructor(blockService: BlockService, fileDropOptions: FileDropOptions) {

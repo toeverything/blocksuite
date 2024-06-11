@@ -21,6 +21,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
   getViewList() {
     return this.views;
   }
+
   duplicateView(id: string): string {
     const newId = this.doc.generateBlockId();
     this.doc.transact(() => {
@@ -58,6 +59,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
     });
     this.applyViewsUpdate();
   }
+
   moveViewTo(id: string, position: InsertToPosition) {
     this.doc.transact(() => {
       this.views = arrayMove(

@@ -62,54 +62,70 @@ export class DatePicker extends WithDisposable(LitElement) {
   /** card padding in px */
   @property({ type: Number })
   accessor padding = 20;
+
   /** cell size in px */
   @property({ type: Number })
   accessor size = 28;
+
   /** horizontal gap between cells in px */
   @property({ type: Number })
   accessor gapH = 10;
+
   /** vertical gap between cells in px */
   @property({ type: Number })
   accessor gapV = 8;
 
   /** current active month */
   private _cursor = new Date();
+
   /** web-accessibility for month select */
   @property({ attribute: false })
   private accessor _monthCursor = 0;
+
   @property({ attribute: false })
   private accessor _yearCursor = 0;
+
   @property({ attribute: false })
   private accessor _monthPickYearCursor = 0;
+
   /** date matrix */
   @property({ attribute: false })
   private accessor _matrix: DateCell[][] = [];
+
   @property({ attribute: false })
   private accessor _yearMatrix: number[] = [];
+
   @property({ attribute: false })
   private accessor _mode: 'date' | 'month' | 'year' = 'date';
 
   private _maxYear = 2099;
+
   private _minYear = 1970;
 
   get year() {
     return this._cursor.getFullYear();
   }
+
   get month() {
     return this._cursor.getMonth();
   }
+
   get date() {
     return this._cursor.getDate();
   }
+
   get day() {
     return this._cursor.getDay();
   }
+
   get yearLabel() {
     return this.year;
   }
+
   get monthLabel() {
     return months[this.month];
   }
+
   get dayLabel() {
     return days[this.day];
   }
@@ -118,10 +134,12 @@ export class DatePicker extends WithDisposable(LitElement) {
     const colNum = 7;
     return this.size * colNum + this.padding * 2 + this.gapH * (colNum - 1);
   }
+
   get cardHeight() {
     const rowNum = 7;
     return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
   }
+
   get minHeight() {
     const rowNum = 8;
     return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
@@ -186,21 +204,26 @@ export class DatePicker extends WithDisposable(LitElement) {
     this._monthPickYearCursor = this.year;
     this._mode = 'month';
   }
+
   public closeMonthSelector() {
     this._mode = 'date';
   }
+
   public toggleMonthSelector() {
     if (this._mode === 'month') this.closeMonthSelector();
     else this.openMonthSelector();
   }
+
   public openYearSelector() {
     this._yearCursor = clamp(this._minYear, this._maxYear, this.year);
     this._mode = 'year';
     this._getYearMatrix();
   }
+
   public closeYearSelector() {
     this._mode = 'date';
   }
+
   public toggleYearSelector() {
     if (this._mode === 'year') this.closeYearSelector();
     else this.openYearSelector();
@@ -210,6 +233,7 @@ export class DatePicker extends WithDisposable(LitElement) {
     this._cursor.setMonth(this._cursor.getMonth() + offset);
     this._getMatrix();
   }
+
   private _modeDecade(offset: number) {
     this._yearCursor = clamp(
       this._minYear,

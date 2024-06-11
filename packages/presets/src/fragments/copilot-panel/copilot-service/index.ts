@@ -28,12 +28,16 @@ export const allVendor: Vendor<any>[] = [openaiVendor, falVendor, llama2Vendor];
 export class CreateNewService extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor type!: string;
+
   @property({ attribute: false })
   accessor onSave!: (config: VendorConfig) => void;
+
   @state()
   accessor key = '';
+
   @state()
   accessor name = '';
+
   @state()
   accessor data: unknown | undefined = undefined;
 
@@ -155,8 +159,10 @@ export class VendorServiceSelect extends WithDisposable(ShadowlessElement) {
       cursor: pointer;
     }
   `;
+
   @property({ attribute: false })
   accessor featureKey!: string;
+
   @property({ attribute: false })
   accessor service!: AllServiceKind;
 
@@ -225,10 +231,13 @@ export class VendorServiceOptions extends WithDisposable(ShadowlessElement) {
       cursor: pointer;
     }
   `;
+
   @property({ attribute: false })
   accessor featureKey!: string;
+
   @property({ attribute: false })
   accessor service!: AllServiceKind;
+
   @property({ attribute: false })
   accessor close!: () => void;
 

@@ -92,15 +92,20 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       height: 16px;
     }
   `;
+
   get selectionController() {
     return this.closest('affine-database-table')?.selectionController;
   }
+
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager;
+
   @property({ attribute: false })
   accessor rowIndex!: number;
+
   @property({ attribute: false })
   accessor rowId!: string;
 
@@ -113,6 +118,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       this.selectionController.selection = selection;
     }
   };
+
   contextMenu = (e: MouseEvent) => {
     const selection = this.selectionController;
     if (!selection) {
@@ -143,6 +149,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     // eslint-disable-next-line wc/no-self-class
     this.classList.add('affine-database-block-row', 'database-row');
   }
+
   private _clickDragHandler = () => {
     const selectionController = this.selectionController;
     if (selectionController) {
@@ -170,6 +177,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       }
     }
   };
+
   protected override render(): unknown {
     const view = this.view;
     return html`

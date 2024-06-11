@@ -53,10 +53,12 @@ export class RangeBinding {
   }
 
   isComposing = false;
+
   private _prevTextSelection: {
     selection: TextSelection;
     path: string[];
   } | null = null;
+
   private _onStdSelectionChanged = (selections: BaseSelection[]) => {
     const text =
       selections.find((selection): selection is TextSelection =>

@@ -19,6 +19,7 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
       z-index: 1;
     }
   `;
+
   @state()
   private accessor _show = false;
 

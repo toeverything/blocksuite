@@ -14,6 +14,7 @@ export class RangeManager {
    * Used to mark certain elements so that they are excluded when synchronizing the native range and text selection (such as database block).
    */
   static rangeSyncExcludeAttr = 'data-range-sync-exclude';
+
   /**
    * Used to exclude certain elements when using `getSelectedBlockElementsByRange`.
    */

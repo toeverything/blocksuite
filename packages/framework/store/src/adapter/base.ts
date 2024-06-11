@@ -156,7 +156,9 @@ type NodeProps<Node extends object> = {
 // Ported from https://github.com/Rich-Harris/estree-walker MIT License
 export class ASTWalker<ONode extends object, TNode extends object | never> {
   private _enter: WalkerFn<ONode, TNode> | undefined;
+
   private _leave: WalkerFn<ONode, TNode> | undefined;
+
   private _isONode!: (node: unknown) => node is ONode;
 
   private context: ASTWalkerContext<TNode>;

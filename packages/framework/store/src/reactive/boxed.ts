@@ -4,6 +4,7 @@ import { NATIVE_UNIQ_IDENTIFIER } from '../consts.js';
 
 export class Boxed<T = unknown> {
   private readonly _map: Y.Map<T>;
+
   static is = (value: unknown): value is Boxed => {
     return (
       value instanceof Y.Map && value.get('type') === NATIVE_UNIQ_IDENTIFIER

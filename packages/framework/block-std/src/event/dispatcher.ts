@@ -89,11 +89,15 @@ export class UIEventDispatcher {
   ) as Record<EventName, Array<EventHandlerRunner>>;
 
   private _pointerControl: PointerControl;
+
   private _keyboardControl: KeyboardControl;
+
   private _rangeControl: RangeControl;
+
   private _clipboardControl: ClipboardControl;
 
   private _active = false;
+
   get active() {
     return this._active;
   }

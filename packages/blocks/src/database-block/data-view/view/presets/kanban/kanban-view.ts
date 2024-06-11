@@ -100,11 +100,16 @@ export class DataViewKanban extends DataViewBase<
   static override styles = styles;
 
   private dragController = new KanbanDragController(this);
+
   selectionController = new KanbanSelectionController(this);
+
   hotkeysController = new KanbanHotkeysController(this);
+
   clipboardController = new KanbanClipboardController(this);
+
   @query('.affine-data-view-kanban-groups')
   accessor groups!: HTMLElement;
+
   groupHelper?: GroupHelper;
 
   override connectedCallback() {
@@ -182,6 +187,7 @@ export class DataViewKanban extends DataViewBase<
       <div class="add-group-icon">${AddCursorIcon}</div>
     </div>`;
   };
+
   onWheel = (event: WheelEvent) => {
     if (event.metaKey || event.ctrlKey) {
       return;
@@ -194,6 +200,7 @@ export class DataViewKanban extends DataViewBase<
       event.stopPropagation();
     }
   };
+
   override render() {
     this.groupHelper = this.view.groupHelper;
     const groups = this.groupHelper?.groups;

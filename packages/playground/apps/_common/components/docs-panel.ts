@@ -51,6 +51,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-hover-color);
     }
   `;
+
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
 

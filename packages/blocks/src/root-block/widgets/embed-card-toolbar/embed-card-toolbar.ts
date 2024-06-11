@@ -78,6 +78,7 @@ export class EmbedCardToolbar extends WidgetElement<
   accessor hide: boolean = true;
 
   private _abortController = new AbortController();
+
   private _resetAbortController = () => {
     this._abortController.abort();
     this._abortController = new AbortController();
@@ -107,6 +108,7 @@ export class EmbedCardToolbar extends WidgetElement<
   }
 
   private _cardStyleMenuAbortController: AbortController | null = null;
+
   private _moreMenuAbortController: AbortController | null = null;
 
   private _embedOptions: EmbedOptions | null = null;

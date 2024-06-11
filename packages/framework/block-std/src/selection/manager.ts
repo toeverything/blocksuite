@@ -19,6 +19,7 @@ interface SelectionConstructor {
 
 export class SelectionManager {
   disposables = new DisposableGroup();
+
   private _selectionConstructors: Record<string, SelectionConstructor> = {};
 
   slots = {

@@ -23,6 +23,7 @@ import {
 
 export class TableSelectionController implements ReactiveController {
   __selectionElement = new SelectionElement();
+
   __dragToFillElement = new DragToFillElement();
 
   private get dragToFillDraggable() {
@@ -879,6 +880,7 @@ class SelectionElement extends ShadowlessElement {
   `;
 
   focusRef: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
+
   selectionRef: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
 
   override render() {

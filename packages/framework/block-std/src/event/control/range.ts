@@ -9,6 +9,7 @@ import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class RangeControl {
   private _prev: Range | null = null;
+
   constructor(private _dispatcher: UIEventDispatcher) {}
 
   listen() {

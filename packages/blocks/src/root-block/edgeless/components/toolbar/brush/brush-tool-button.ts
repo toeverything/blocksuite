@@ -22,8 +22,11 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
   readonly ['color', 'lineWidth']
 >(LitElement) {
   override type = 'brush' as const;
+
   override _type = 'brush' as const;
+
   override enableActiveBackground = true;
+
   static styles = css`
     :host {
       display: flex;
@@ -49,6 +52,7 @@ export class EdgelessBrushToolButton extends ToolbarButtonWithMenuMixin<
       transform: translateY(0);
     }
   `;
+
   @state()
   accessor color: string = DEFAULT_BRUSH_COLOR;
 

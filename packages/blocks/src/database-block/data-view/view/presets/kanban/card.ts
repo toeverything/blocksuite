@@ -124,12 +124,16 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
+
   @property({ attribute: false })
   accessor view!: DataViewKanbanManager;
+
   @property({ attribute: false })
   accessor groupKey!: string;
+
   @property({ attribute: false })
   accessor cardId!: string;
+
   @state()
   accessor isFocus = false;
 
@@ -292,6 +296,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       popCardMenu(this.dataViewEle, ele, this.cardId, selection);
     }
   };
+
   private contextMenu = (e: MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();

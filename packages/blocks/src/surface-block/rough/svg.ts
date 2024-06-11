@@ -11,6 +11,7 @@ import type { Point } from './geometry.js';
 
 export class RoughSVG {
   private gen: RoughGenerator;
+
   private svg: SVGSVGElement;
 
   constructor(svg: SVGSVGElement, config?: Config) {

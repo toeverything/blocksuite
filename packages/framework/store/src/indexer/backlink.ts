@@ -68,6 +68,7 @@ export class BacklinkIndexer {
   private _disposables = new DisposableGroup();
 
   private _linkIndexMap: Record<DocId, Record<BlockId, LinkedNode[]>> = {};
+
   get linkIndexMap() {
     return this._linkIndexMap;
   }
@@ -99,6 +100,7 @@ export class BacklinkIndexer {
 
   // TODO use inverted index
   private _backlinkIndexMapCache: Record<DocId, LinkedNode[]> | null = null;
+
   /**
    * Get the list of backlinks for a given doc
    */

@@ -2,6 +2,7 @@ export class AsyncQueue<T> {
   private _queue: T[];
 
   private _resolveUpdate: (() => void) | null = null;
+
   private _waitForUpdate: Promise<void> | null = null;
 
   constructor(init: T[] = []) {

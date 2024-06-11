@@ -34,8 +34,11 @@ type ChannelMessage = {
 
 export class IndexedDBDocSource implements DocSource {
   name = 'indexeddb';
+
   mergeCount = 1;
+
   dbPromise: Promise<IDBPDatabase<BlockSuiteBinaryDB>> | null = null;
+
   // indexeddb could be shared between tabs, so we use broadcast channel to notify other tabs
   channel = new BroadcastChannel('indexeddb:' + this.dbName);
 

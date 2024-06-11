@@ -108,9 +108,11 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   get inlineManager() {
     return this.service?.inlineManager;
   }
+
   get attributesSchema() {
     return this.inlineManager?.getSchema();
   }
+
   get attributeRenderer() {
     return this.inlineManager?.getRenderer();
   }
@@ -193,9 +195,11 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   get inlineManager() {
     return this.service?.inlineManager;
   }
+
   get attributesSchema() {
     return this.inlineManager?.getSchema();
   }
+
   get attributeRenderer() {
     return this.inlineManager?.getRenderer();
   }

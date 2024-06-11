@@ -29,8 +29,11 @@ const findLast = (snapshot: BlockSnapshot): BlockSnapshot => {
 
 class PointState {
   readonly block: BlockElement;
+
   readonly text: Text;
+
   readonly model: BlockModel;
+
   constructor(
     readonly std: EditorHost['std'],
     readonly point: TextRangePoint
@@ -51,12 +54,19 @@ class PointState {
 
 class PasteTr {
   private readonly lastIndex: number;
+
   private readonly fromPointState: PointState;
+
   private readonly endPointState: PointState;
+
   private readonly to: TextRangePoint | null;
+
   private readonly firstSnapshot: BlockSnapshot;
+
   private lastSnapshot: BlockSnapshot;
+
   private readonly firstSnapshotIsPlainText: boolean;
+
   constructor(
     public readonly std: EditorHost['std'],
     public readonly text: TextSelection,

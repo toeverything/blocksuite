@@ -48,12 +48,15 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
+
   get inlineEditorContainer() {
     return this.inlineEditor.rootElement;
   }
 
   private _lastXYWH = '';
+
   private _keeping = false;
+
   private _resizeObserver: ResizeObserver | null = null;
 
   setKeeping(keeping: boolean) {

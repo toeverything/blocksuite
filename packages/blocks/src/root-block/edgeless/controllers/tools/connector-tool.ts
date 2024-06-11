@@ -27,10 +27,15 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   } as ConnectorTool;
 
   private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
+
   private _connector: ConnectorElementModel | null = null;
+
   private _source: Connection | null = null;
+
   private _sourceBounds: IBound | null = null;
+
   private _startPoint: IVec | null = null;
+
   // Likes pressing `ESC`
   private _allowCancel = false;
 

@@ -44,11 +44,13 @@ export class UniLit<
       display: contents;
     }
   `;
+
   @property({ attribute: false })
   accessor uni: UniComponent<Props, Expose> | undefined = undefined;
 
   @property({ attribute: false })
   accessor props!: Props;
+
   @property({ attribute: false })
   accessor ref: Ref<Expose> | undefined = undefined;
 
@@ -124,8 +126,10 @@ class UniAnyRender<
 > extends ShadowlessElement {
   @property({ attribute: false })
   accessor props!: T;
+
   @property({ attribute: false })
   accessor expose!: Expose;
+
   @property({ attribute: false })
   accessor renderTemplate!: (props: T, expose: Expose) => TemplateResult;
 

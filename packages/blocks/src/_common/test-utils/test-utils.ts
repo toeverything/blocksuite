@@ -6,6 +6,7 @@ import {
 class DocTestUtils {
   // block model operations (data layer)
   mergeToCodeModel = mergeToCodeModel;
+
   transformModel = transformModel;
 }
 

@@ -159,6 +159,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       margin: 8px 0;
     }
   `;
+
   @property({ attribute: false })
   accessor data!: FilterGroup;
 
@@ -167,8 +168,10 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor setData!: (filter: FilterGroup) => void;
+
   @property({ attribute: false })
   accessor onBack!: () => void;
+
   @state()
   accessor containerClass:
     | {
@@ -176,6 +179,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
         class: string;
       }
     | undefined = undefined;
+
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,

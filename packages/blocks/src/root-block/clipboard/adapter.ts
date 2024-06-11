@@ -27,6 +27,7 @@ export type FileSnapshot = {
 
 export class ClipboardAdapter extends BaseAdapter<string> {
   static MIME = 'BLOCKSUITE/SNAPSHOT';
+
   override fromDocSnapshot(
     _payload: FromDocSnapshotPayload
   ): Promise<FromDocSnapshotResult<string>> {

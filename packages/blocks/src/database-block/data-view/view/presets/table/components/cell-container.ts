@@ -38,12 +38,16 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   @property({ attribute: false })
   accessor rowIndex!: number;
+
   @property({ attribute: false })
   accessor columnId!: string;
+
   @property({ attribute: false })
   accessor columnIndex!: number;
 

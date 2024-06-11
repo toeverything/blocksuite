@@ -26,6 +26,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
   LitElement
 ) {
   override type: EdgelessTool['type'][] = ['mindmap', 'text'];
+
   override enableActiveBackground = true;
 
   static override styles = css`

@@ -36,12 +36,12 @@ const createPattern = packageName => [
   },
   ...(packageName === 'blocks'
     ? [
-      {
-        group: ['**/std.js'],
-        message: 'Do not import from std',
-        allowTypeImports: false,
-      },
-    ]
+        {
+          group: ['**/std.js'],
+          message: 'Do not import from std',
+          allowTypeImports: false,
+        },
+      ]
     : []),
 ];
 
@@ -66,7 +66,7 @@ module.exports = {
   ],
   overrides: [
     {
-      plugins: ['@typescript-eslint'],
+      plugins: ['@typescript-eslint', '@stylistic/ts'],
       files: ['*.ts', '*.spec.ts'],
       rules: {
         'no-unused-vars': 'off',
@@ -117,6 +117,8 @@ module.exports = {
         'unicorn/new-for-builtins': 'error',
         'unicorn/prefer-node-protocol': 'error',
         'unicorn/no-useless-length-check': 'error',
+        '@stylistic/ts/lines-between-class-members': 'error',
+        '@stylistic/ts/space-before-blocks': 'error',
       },
     },
     ...allPackages.map(pkg => ({

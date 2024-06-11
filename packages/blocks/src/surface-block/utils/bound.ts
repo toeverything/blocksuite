@@ -16,8 +16,11 @@ import {
 
 export class Bound implements IBound {
   x: number;
+
   y: number;
+
   w: number;
+
   h: number;
 
   constructor(x = 0, y = 0, w = 0, h = 0) {

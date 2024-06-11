@@ -6,7 +6,9 @@ import { getSlots } from './slots.js';
 
 export class SpecStore {
   private _specs = new Map<string, BlockSpec>();
+
   private _services = new Map<string, BlockService>();
+
   private _disposables = new DisposableGroup();
 
   constructor(public std: BlockSuite.Std) {}

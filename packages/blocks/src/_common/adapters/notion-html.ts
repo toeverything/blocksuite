@@ -90,16 +90,19 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   ): Promise<FromDocSnapshotResult<NotionHtml>> {
     throw new Error('Method not implemented.');
   }
+
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<NotionHtml>> {
     throw new Error('Method not implemented.');
   }
+
   override fromSliceSnapshot(
     _payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<NotionHtml>> {
     throw new Error('Method not implemented.');
   }
+
   override async toDocSnapshot(
     payload: NotionHtmlToDocSnapshotPayload
   ): Promise<DocSnapshot> {

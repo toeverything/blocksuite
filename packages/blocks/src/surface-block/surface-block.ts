@@ -88,7 +88,9 @@ export class SurfaceBlockComponent extends BlockElement<
   `;
 
   private _renderer!: Renderer;
+
   private _lastTime = 0;
+
   private _cachedViewport = new Bound();
 
   readonly themeObserver = new ThemeObserver();
@@ -271,7 +273,9 @@ export class SurfaceBlockComponent extends BlockElement<
       </div>
     `;
   }
+
   static isShape = isShape;
+
   static isConnector = (element: unknown): element is ConnectorElementModel => {
     return element instanceof ConnectorElementModel;
   };

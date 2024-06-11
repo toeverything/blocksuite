@@ -36,12 +36,18 @@ export type ActionEventType =
  */
 export class AIProvider {
   private static readonly instance = new AIProvider();
+
   private readonly actions: Partial<BlockSuitePresets.AIActions> = {};
+
   private userInfoFn: () => AIUserInfo | Promise<AIUserInfo> | null = () =>
     null;
+
   private photoEngine: BlockSuitePresets.AIPhotoEngineService | null = null;
+
   private histories: BlockSuitePresets.AIHistoryService | null = null;
+
   private toggleGeneralAIOnboarding: ((value: boolean) => void) | null = null;
+
   private readonly slots = {
     // use case: when user selects "continue in chat" in an ask ai result panel
     // do we need to pass the context to the chat panel?
@@ -64,6 +70,7 @@ export class AIProvider {
   static LAST_ACTION_SESSIONID = '';
 
   static MAX_LOCAL_HISTORY = 10;
+
   // track the history of triggered actions (in memory only)
   private readonly actionHistory: {
     action: keyof BlockSuitePresets.AIActions;

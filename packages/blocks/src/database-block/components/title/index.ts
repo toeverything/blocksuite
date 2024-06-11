@@ -66,13 +66,16 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   @query('rich-text')
   private accessor richText!: RichText;
+
   get inlineEditor() {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
+
   get inlineEditorContainer() {
     return this.inlineEditor.rootElement;
   }
+
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');

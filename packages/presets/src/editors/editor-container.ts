@@ -144,6 +144,7 @@ export class AffineEditorContainer
     assertExists(editor);
     return editor;
   }
+
   get host() {
     assertExists(this.editor);
     return this.editor.host;
@@ -182,6 +183,7 @@ export class AffineEditorContainer
   /** @deprecated unreliable since pageSpecs can be overridden */
   @query('affine-page-root')
   private accessor _pageRoot: PageRootBlockComponent | null = null;
+
   /** @deprecated unreliable since edgelessSpecs can be overridden */
   @query('affine-edgeless-root')
   private accessor _edgelessRoot: EdgelessRootBlockComponent | null = null;

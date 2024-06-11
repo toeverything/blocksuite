@@ -57,6 +57,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
   private _selectionModelRect!: DOMRect;
 
   private _clickOutsideOff: (() => void) | null = null;
+
   private _listenClickOutsideId: number | null = null;
 
   private _copilotPanel!: EdgelessCopilotPanel | null;

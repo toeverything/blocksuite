@@ -101,11 +101,14 @@ export class CopilotChatPanel
   get chat() {
     return this.logic.chat;
   }
+
   get host() {
     return this.logic.getHost();
   }
+
   @query('.chat-messages-container')
   accessor chatMessagesContainer!: HTMLDivElement;
+
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
     if (
@@ -119,8 +122,10 @@ export class CopilotChatPanel
 
   @state()
   accessor tempMessage: string | undefined = undefined;
+
   @state()
   accessor history: ChatMessage[] = [];
+
   @state()
   accessor currentRequest: number | undefined = undefined;
 
@@ -130,10 +135,13 @@ export class CopilotChatPanel
 
   @state()
   accessor value = '';
+
   @state()
   accessor syncedDocs: EmbeddedDoc[] = [];
+
   @state()
   accessor surfaceSelection = false;
+
   @state()
   accessor docSelection = false;
 
@@ -258,6 +266,7 @@ export class CopilotChatPanel
     }
     return null;
   };
+
   toolbar() {
     // const lastMessage = this.history[this.history.length - 1];
     // return html`<div
@@ -285,6 +294,7 @@ export class CopilotChatPanel
     //     : nothing}
     // </div>`;
   }
+
   @query('.copilot-chat-panel-chat-input')
   accessor input!: HTMLInputElement;
 

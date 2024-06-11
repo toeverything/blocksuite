@@ -100,6 +100,7 @@ export class GroupHelper {
   }
 
   public readonly groups: GroupData[];
+
   public readonly groupMap: Record<string, GroupData>;
 
   groupConfig() {
@@ -184,6 +185,7 @@ export class GroupHelper {
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);
   }
+
   get addGroup() {
     return this.viewManager.columnGetMeta(this.column.type).model.ops.addGroup;
   }

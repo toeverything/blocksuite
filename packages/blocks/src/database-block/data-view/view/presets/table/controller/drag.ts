@@ -50,6 +50,7 @@ export class TableDragController implements ReactiveController {
     }
     return;
   };
+
   showIndicator = (evt: MouseEvent) => {
     const position = this.getInsertPosition(evt);
     if (position) {

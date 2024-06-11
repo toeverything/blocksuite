@@ -15,6 +15,7 @@ export class DatabaseBlockViewSource implements ViewSource {
   }
 
   private viewMap = new Map<string, SingleViewSource>();
+
   private currentId?: string;
 
   public selectView(id: string): void {

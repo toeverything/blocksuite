@@ -7,6 +7,7 @@ import { pasteMiddleware } from '../../root-block/clipboard/middlewares/index.js
 
 export class CodeClipboardController {
   protected _disposables = new DisposableGroup();
+
   host: BlockElement;
 
   private get _std() {

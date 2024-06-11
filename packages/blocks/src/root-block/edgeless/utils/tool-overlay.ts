@@ -80,8 +80,11 @@ const drawGeneralShape = (
 
 export abstract class Shape {
   xywh: XYWH;
+
   type: string;
+
   options: Options;
+
   shapeStyle: ShapeStyle;
 
   constructor(
@@ -212,9 +215,13 @@ export class ShapeFactory {
 
 class ToolOverlay extends Overlay {
   public x: number;
+
   public y: number;
+
   public globalAlpha: number;
+
   protected edgeless: EdgelessRootBlockComponent;
+
   protected disposables!: DisposableGroup;
 
   get computedStyle() {
@@ -346,6 +353,7 @@ export class ShapeOverlay extends ToolOverlay {
 
 export class NoteOverlay extends ToolOverlay {
   public text = '';
+
   public backgroundColor = 'transparent';
 
   private _getOverlayText(text: string): string {
@@ -451,8 +459,11 @@ export class DraggingNoteOverlay extends NoteOverlay {
   slots: {
     draggingNoteUpdated: Slot<{ xywh: XYWH }>;
   };
+
   width: number;
+
   height: number;
+
   constructor(
     edgeless: EdgelessRootBlockComponent,
     background: CssVariableName

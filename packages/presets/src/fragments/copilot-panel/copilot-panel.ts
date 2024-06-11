@@ -115,6 +115,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   accessor editor!: AffineEditorContainer;
 
   editorWithAI?: AIEdgelessLogic;
+
   aiLogic?: AILogic;
 
   get host() {

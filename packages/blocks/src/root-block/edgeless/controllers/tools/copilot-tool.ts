@@ -20,7 +20,9 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
   private _dragging = false;
 
   dragStartPoint: [number, number] = [0, 0];
+
   dragLastPoint: [number, number] = [0, 0];
+
   draggingAreaUpdated = new Slot<boolean | void>();
 
   get selection() {

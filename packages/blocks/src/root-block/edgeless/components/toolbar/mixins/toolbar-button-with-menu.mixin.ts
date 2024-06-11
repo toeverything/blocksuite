@@ -16,13 +16,17 @@ export declare abstract class ToolbarButtonWithMenuClass<
   States extends readonly (keyof LastProps[Type])[] = [],
 > extends EdgelessToolbarToolClass {
   protected abstract _type: Type;
+
   protected _states: States;
+
   protected _menu: MenuPopper<Menu> | null;
   protected updateMenu(): void;
   protected initLastPropsSlot(): void;
 
   edgeless: EdgelessRootBlockComponent;
+
   active: boolean;
+
   surface: SurfaceBlockComponent;
 }
 
@@ -44,7 +48,9 @@ export const ToolbarButtonWithMenuMixin = <
     }
 
     abstract _type: Type;
+
     protected _states!: States;
+
     protected _menu: MenuPopper<Menu> | null = null;
 
     protected updateMenu() {

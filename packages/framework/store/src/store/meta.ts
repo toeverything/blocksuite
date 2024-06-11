@@ -35,18 +35,23 @@ export type DocCollectionMetaState = {
 
 export class DocCollectionMeta {
   readonly id: string = 'meta';
+
   readonly doc: BlockSuiteDoc;
 
   private _prevDocs = new Set<string>();
 
   docMetaAdded = new Slot<string>();
+
   docMetaRemoved = new Slot<string>();
+
   docMetaUpdated = new Slot();
+
   commonFieldsUpdated = new Slot();
 
   protected readonly _yMap: Y.Map<
     DocCollectionMetaState[keyof DocCollectionMetaState]
   >;
+
   protected readonly _proxy: DocCollectionMetaState;
 
   constructor(doc: BlockSuiteDoc) {

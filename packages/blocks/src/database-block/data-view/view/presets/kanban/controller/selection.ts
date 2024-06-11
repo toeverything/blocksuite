@@ -18,6 +18,7 @@ export class KanbanSelectionController implements ReactiveController {
   constructor(private host: DataViewKanban) {
     this.host.addController(this);
   }
+
   _selection?: KanbanViewSelectionWithType;
 
   get view() {

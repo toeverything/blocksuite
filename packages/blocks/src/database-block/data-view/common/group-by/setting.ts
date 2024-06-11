@@ -53,8 +53,10 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
       background-color: #c0bfc1;
     }
   `;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager | DataViewKanbanManager;
+
   @query('.group-sort-setting')
   accessor groupContainer!: HTMLElement;
 

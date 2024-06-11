@@ -34,11 +34,13 @@ export class ImageAdapter extends BaseAdapter<Image> {
   ): Promise<FromDocSnapshotResult<Image>> {
     throw new Error('Method not implemented.');
   }
+
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<Image>> {
     throw new Error('Method not implemented.');
   }
+
   override fromSliceSnapshot(
     payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<Image>> {
@@ -59,16 +61,19 @@ export class ImageAdapter extends BaseAdapter<Image> {
     }
     return Promise.resolve({ file: images, assetsIds: [] });
   }
+
   override toDocSnapshot(
     _payload: ToDocSnapshotPayload<Image>
   ): Promise<DocSnapshot> {
     throw new Error('Method not implemented.');
   }
+
   override toBlockSnapshot(
     _payload: ToBlockSnapshotPayload<Image>
   ): Promise<BlockSnapshot> {
     throw new Error('Method not implemented.');
   }
+
   override async toSliceSnapshot(
     payload: ImageToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {

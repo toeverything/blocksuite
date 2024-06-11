@@ -65,7 +65,9 @@ const REINDEX_TIMEOUT = 200;
 
 export class SearchIndexer {
   private readonly _doc: BlockSuiteDoc;
+
   private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
+
   private _reindexMap: Map<string, IndexMeta> | null = null;
 
   constructor(

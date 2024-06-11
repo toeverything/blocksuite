@@ -164,6 +164,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   };
 
   private _chatSessionId = '';
+
   private _resettingCounter = 0;
 
   private _resetItems = debounce(() => {

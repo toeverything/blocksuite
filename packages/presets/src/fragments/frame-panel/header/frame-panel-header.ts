@@ -122,6 +122,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   > | null = null;
 
   private _navigatorMode: NavigatorMode = 'fit';
+
   private _edgelessDisposables: DisposableGroup | null = null;
 
   get rootService() {

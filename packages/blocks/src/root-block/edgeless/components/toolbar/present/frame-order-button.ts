@@ -34,6 +34,7 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
 
   @query('edgeless-frame-order-menu')
   private accessor _edgelessFrameOrderMenu!: EdgelessFrameOrderMenu;
+
   private _edgelessFrameOrderPopper: ReturnType<
     typeof createButtonPopper
   > | null = null;

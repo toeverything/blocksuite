@@ -175,25 +175,35 @@ export class BlockModel<
   [modelLabel]: Props = 'type_info_label' as never;
 
   version!: number;
+
   flavour!: string;
+
   role!: RoleType;
+
   /**
    * @deprecated use doc instead
    */
   page!: Doc;
+
   id!: string;
+
   yBlock!: YBlock;
+
   keys!: string[];
 
   stash!: (prop: keyof Props & string) => void;
+
   pop!: (prop: keyof Props & string) => void;
 
   // text is optional
   text?: Text;
 
   created = new Slot();
+
   deleted = new Slot();
+
   propsUpdated = new Slot<{ key: string }>();
+
   childrenUpdated = new Slot();
 
   get doc() {

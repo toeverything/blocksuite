@@ -34,6 +34,7 @@ export type ExportOptions = {
 };
 export class ExportManager {
   private _exportOptions: ExportOptions;
+
   private _blockService: BlockService;
 
   constructor(blockService: BlockService, options: ExportOptions) {

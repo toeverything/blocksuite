@@ -12,6 +12,7 @@ export class SurfaceRefRenderer {
   private readonly _surfaceRenderer: Renderer;
 
   private _surfaceModel: SurfaceBlockModel | null = null;
+
   protected _disposables = new DisposableGroup();
 
   slots = {

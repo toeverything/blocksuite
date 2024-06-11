@@ -91,6 +91,7 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
       };
     });
   }
+
   public override rowMove(rowId: string, position: InsertToPosition): void {
     this.dataSource.rowMove(rowId, position);
   }
@@ -314,6 +315,7 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
   public duplicateView(): void {
     this.viewSource.duplicate();
   }
+
   public deleteView(): void {
     this.viewSource.delete();
   }

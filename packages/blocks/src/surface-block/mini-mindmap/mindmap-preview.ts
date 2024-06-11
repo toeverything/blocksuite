@@ -113,7 +113,9 @@ export class MiniMindmapPreview extends WithDisposable(LitElement) {
   accessor portalHost!: EditorHost;
 
   doc!: Doc;
+
   surface!: SurfaceBlockModel;
+
   mindmapId!: string;
 
   get _mindmap() {

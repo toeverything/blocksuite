@@ -35,6 +35,7 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
   private accessor _editing = false;
 
   private _horizontalResizing = false;
+
   private _resizeObserver = new ResizeObserver(() => {
     if (this._horizontalResizing) {
       const bound = Bound.deserialize(this.model.xywh);

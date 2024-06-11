@@ -98,6 +98,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   accessor quickConnectButton!: TemplateResult<1>;
 
   private accessor _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
+
   private accessor _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
 
   private get doc() {
