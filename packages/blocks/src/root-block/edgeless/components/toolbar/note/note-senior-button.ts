@@ -199,7 +199,7 @@ export class EdgelessNoteSeniorButton extends EdgelessToolbarToolMixin(
 
     return html`<edgeless-toolbar-button
       class="edgeless-note-button"
-      .tooltip=${this.popper ? '' : getTooltipWithShortcut('Shape', 'S')}
+      .tooltip=${this.popper ? '' : getTooltipWithShortcut('Note', 'N')}
       .tooltipOffset=${5}
     >
       <div

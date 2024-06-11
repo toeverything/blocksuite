@@ -2,6 +2,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { LinkIcon } from '../../../../../_common/icons/text.js';
+import { getTooltipWithShortcut } from '../../utils.js';
 import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
 @customElement('edgeless-link-tool-button')
@@ -16,14 +17,13 @@ export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
   `;
 
   private _onClick() {
-    // TODO
-    alert('TODO');
+    this.edgeless.service.std.command.exec('insertLinkByQuickSearch');
   }
 
   override render() {
     return html`<edgeless-tool-icon-button
       .iconContainerPadding="${6}"
-      .tooltip="${'Link'}"
+      .tooltip="${getTooltipWithShortcut('Link', '@')}"
       .tooltipOffset=${17}
       class="edgeless-link-tool-button"
       @click=${this._onClick}

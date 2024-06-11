@@ -21,6 +21,7 @@ import type { EdgelessTool } from '../../../../_common/types.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { buildConnectorDenseMenu } from './connector/connector-dense-menu.js';
 import { buildFrameDenseMenu } from './frame/frame-dense-menu.js';
+import { buildLinkDenseMenu } from './link/link-dense-menu.js';
 
 export interface QuickTool {
   type?: EdgelessTool['type'];
@@ -110,6 +111,7 @@ export const getQuickTools = ({
     content: html`<edgeless-link-tool-button
       .edgeless=${edgeless}
     ></edgeless-link-tool-button>`,
+    menu: buildLinkDenseMenu(edgeless),
   });
   return quickTools;
 };

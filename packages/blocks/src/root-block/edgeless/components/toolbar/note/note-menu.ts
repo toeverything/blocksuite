@@ -14,6 +14,7 @@ import {
   openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
 import { ImageIcon } from '../../../../../image-block/styles.js';
+import { getTooltipWithShortcut } from '../../utils.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { NOTE_MENU_ITEMS } from './note-menu-config.js';
 
@@ -113,9 +114,11 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
 
             <edgeless-tool-icon-button
               .activeMode=${'background'}
-              .tooltip=${'Link'}
+              .tooltip=${getTooltipWithShortcut('Link', '@')}
               @click=${() => {
-                alert('TODO');
+                this.edgeless.service.std.command.exec(
+                  'insertLinkByQuickSearch'
+                );
               }}
             >
               ${LinkIcon}
