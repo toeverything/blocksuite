@@ -137,7 +137,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
    */
   private get _enableAutoHide() {
     return (
-      this.edgelessTool.type === 'frameNavigator' &&
+      this.isPresentMode &&
       this._cachedPresentHideToolbar &&
       !this.presentSettingMenuShow &&
       !this.presentFrameMenuShow
@@ -149,6 +149,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   get edgelessTool() {
     return this.edgeless.edgelessTool;
+  }
+
+  get isPresentMode() {
+    return this.edgelessTool.type === 'frameNavigator';
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
@@ -320,7 +324,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @pointerdown=${stopPropagation}
         >
           <presentation-toolbar
-            .visible=${type === 'frameNavigator'}
+            .visible=${this.isPresentMode}
             .edgeless=${this.edgeless}
             .settingMenuShow=${this.presentSettingMenuShow}
             .frameMenuShow=${this.presentFrameMenuShow}
@@ -329,7 +333,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             .setFrameMenuShow=${(show: boolean) =>
               (this.presentFrameMenuShow = show)}
           ></presentation-toolbar>
-          ${type === 'frameNavigator' ? nothing : this._DefaultContent}
+          ${this.isPresentMode ? nothing : this._DefaultContent}
         </div>
       </div>
     `;

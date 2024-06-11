@@ -29,6 +29,7 @@
     "@types/sortablejs": "^1.15.8",
     "date-fns": "^3.6.0",
     "dompurify": "^3.1.4",
+    "figma-squircle": "^0.3.1",
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",

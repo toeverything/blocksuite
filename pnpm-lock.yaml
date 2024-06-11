@@ -205,6 +205,9 @@ importers:
       dompurify:
         specifier: ^3.1.4
         version: 3.1.4
+      figma-squircle:
+        specifier: ^0.3.1
+        version: 0.3.1
       fractional-indexing:
         specifier: ^3.2.0
         version: 3.2.0
@@ -2720,6 +2723,9 @@ packages:
 
   fflate@0.8.2:
     resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
+
+  figma-squircle@0.3.1:
+    resolution: {integrity: sha512-cyb7fbNaJgM3XrMXRq/B4NPUILfbrSRHjqt+0/3OGBOejJKNLnFKTXSMSAjdqbw2bSo2Y2eCnYXvaRgshBnWQw==}
 
   file-entry-cache@6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
@@ -7342,6 +7348,8 @@ snapshots:
       reusify: 1.0.4
 
   fflate@0.8.2: {}
+
+  figma-squircle@0.3.1: {}
 
   file-entry-cache@6.0.1:
     dependencies:
