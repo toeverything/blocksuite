@@ -115,7 +115,7 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
       --r: 5.19deg;
     }
   `;
-
+  
   @state()
   private accessor _openedPanel: EdgelessTemplatePanel | null = null;
   private _cleanup: (() => void) | null = null;
@@ -125,9 +125,15 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
   private _togglePanel() {
     if (this._openedPanel) {
       this._closePanel();
+      if (this._prevTool) {
+        this.setEdgelessTool(this._prevTool);
+        this._prevTool = null;
+      }
       return;
     }
+
     this._prevTool = this.edgelessTool ? { ...this.edgelessTool } : null;
+
     this.setEdgelessTool({ type: 'template' });
 
     const panel = document.createElement('edgeless-templates-panel');
