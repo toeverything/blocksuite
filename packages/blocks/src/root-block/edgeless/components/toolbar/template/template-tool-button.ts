@@ -115,7 +115,7 @@ export class EdgelessTemplateButton extends EdgelessToolbarToolMixin(
       --r: 5.19deg;
     }
   `;
-  
+
   @state()
   private accessor _openedPanel: EdgelessTemplatePanel | null = null;
   private _cleanup: (() => void) | null = null;
