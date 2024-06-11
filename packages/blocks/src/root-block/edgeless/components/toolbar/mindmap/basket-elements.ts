@@ -89,12 +89,12 @@ export const mindmapConfig: ToolConfig = {
 
 export const getMindmapRender =
   (mindmapStyle: MindmapStyle): DraggableTool['render'] =>
-  (bound, edgelssService) => {
+  (bound, edgelessService) => {
     const [x, y, _, h] = bound.toXYWH();
-    const mindmapId = edgelssService.addElement('mindmap', {
+    const mindmapId = edgelessService.addElement('mindmap', {
       style: mindmapStyle,
     }) as string;
-    const mindmap = edgelssService.getElementById(
+    const mindmap = edgelessService.getElementById(
       mindmapId
     ) as MindmapElementModel;
 
@@ -112,10 +112,10 @@ export const getMindmapRender =
       ...args: Parameters<MindmapElementModel['addNode']>
     ) => {
       const id = mindmap.addNode(...args);
-      const node = edgelssService.getElementById(id) as ShapeElementModel;
+      const node = edgelessService.getElementById(id) as ShapeElementModel;
       return { node, id };
     };
-    const root = createNode(null, 'shape', undefined, undefined, {
+    const root = createNode(null, undefined, undefined, {
       text: 'Mind Map',
       xywh: `[${rootX},${rootY},${rootW},${rootH}]`,
     });
@@ -125,7 +125,6 @@ export const getMindmapRender =
       const nodeY = centerVertical - nodeH / 2 + (i - 1) * 50;
       createNode(
         root.id,
-        'shape',
         undefined,
         undefined,
         {
