@@ -3,7 +3,7 @@
 const allPackages = [
   'framework/block-std',
   'framework/global',
-  'frameworlk/inline',
+  'framework/inline',
   'framework/store',
   'framework/sync',
   'blocks',
@@ -36,12 +36,12 @@ const createPattern = packageName => [
   },
   ...(packageName === 'blocks'
     ? [
-        {
-          group: ['**/std.js'],
-          message: 'Do not import from std',
-          allowTypeImports: false,
-        },
-      ]
+      {
+        group: ['**/std.js'],
+        message: 'Do not import from std',
+        allowTypeImports: false,
+      },
+    ]
     : []),
 ];
 
@@ -69,8 +69,8 @@ module.exports = {
       plugins: ['@typescript-eslint'],
       files: ['*.ts', '*.spec.ts'],
       rules: {
-        '@typescript-eslint/ban-ts-comment': 'off',
         'no-unused-vars': 'off',
+        '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-unused-vars': [
           'error',
           {
@@ -88,10 +88,16 @@ module.exports = {
         'no-return-await': 'off',
         '@typescript-eslint/return-await': 'error',
         'require-await': 'off',
+        'no-implied-eval': 'off',
+        '@typescript-eslint/no-implied-eval': 'error',
         '@typescript-eslint/require-await': 'error',
         '@typescript-eslint/await-thenable': 'error',
         '@typescript-eslint/no-floating-promises': 'error',
         '@typescript-eslint/no-misused-promises': 'error',
+        '@typescript-eslint/consistent-generic-constructors': 'error',
+        '@typescript-eslint/consistent-indexed-object-style': 'error',
+        '@typescript-eslint/consistent-type-assertions': 'error',
+        '@typescript-eslint/no-import-type-side-effects': 'error',
         '@typescript-eslint/no-namespace': [
           'error',
           { allowDeclarations: true },
