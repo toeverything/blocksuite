@@ -33,7 +33,6 @@ const buttonHeightMap: Record<buttonSize, string> = {
 };
 
 export type AskAIButtonOptions = {
-  toggleType: toggleType;
   size: buttonSize;
   backgroundColor?: string;
   boxShadow?: string;
@@ -89,8 +88,10 @@ export class AskAIButton extends WithDisposable(LitElement) {
   accessor actionGroups!: AIItemGroupConfig[];
 
   @property({ attribute: false })
+  accessor toggleType: toggleType = 'hover';
+
+  @property({ attribute: false })
   accessor options: AskAIButtonOptions = {
-    toggleType: 'hover',
     size: 'middle',
     backgroundColor: undefined,
     boxShadow: undefined,
@@ -109,6 +110,13 @@ export class AskAIButton extends WithDisposable(LitElement) {
     }
     return null;
   }
+
+  private _clearAbortController = () => {
+    if (this._abortController) {
+      this._abortController.abort();
+      this._abortController = null;
+    }
+  };
 
   private _whenHover = new HoverController(
     this,
@@ -131,13 +139,12 @@ export class AskAIButton extends WithDisposable(LitElement) {
   );
 
   private _toggleAIPanel = () => {
-    if (this.options.toggleType !== 'click') {
+    if (this.toggleType !== 'click') {
       return;
     }
 
     if (this._abortController) {
-      this._abortController.abort();
-      this._abortController = null;
+      this._clearAbortController();
       return;
     }
 
@@ -168,13 +175,14 @@ export class AskAIButton extends WithDisposable(LitElement) {
     });
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearAbortController();
+  }
+
   override render() {
-    const {
-      toggleType = 'click',
-      size = 'small',
-      backgroundColor,
-      boxShadow,
-    } = this.options;
+    const { size = 'small', backgroundColor, boxShadow } = this.options;
+    const { toggleType } = this;
     const buttonStyles = styleMap({
       backgroundColor: backgroundColor || 'transparent',
       boxShadow: boxShadow || 'none',

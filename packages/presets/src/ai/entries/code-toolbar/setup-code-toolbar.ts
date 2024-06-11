@@ -6,6 +6,12 @@ import {
 } from '@blocksuite/blocks';
 import { html } from 'lit';
 
+const AICodeItemGroups = buildAICodeItemGroups();
+const buttonOptions: AskAIButtonOptions = {
+  size: 'small',
+  panelWidth: 240,
+};
+
 import type { AskAIButtonOptions } from '../../_common/components/ask-ai-button.js';
 import { buildAICodeItemGroups } from '../../_common/config.js';
 import { AIStarIcon } from '../../_common/icons.js';
@@ -19,13 +25,7 @@ export function setupCodeToolbarEntry(codeToolbar: AffineCodeToolbarWidget) {
       selection.create('block', { blockId: imageBlock.blockId }),
     ]);
   };
-  const AICodeItemGroups = buildAICodeItemGroups();
   codeToolbar.setupDefaultConfig();
-  const buttonOptions: AskAIButtonOptions = {
-    toggleType: 'click',
-    size: 'small',
-    panelWidth: 240,
-  };
   codeToolbar.addItems(
     [
       {
@@ -39,6 +39,7 @@ export function setupCodeToolbarEntry(codeToolbar: AffineCodeToolbarWidget) {
             class="code-toolbar-button ask-ai"
             .host=${codeBlock.host}
             .actionGroups=${AICodeItemGroups}
+            .toggleType=${'click'}
             .options=${buttonOptions}
             @click=${(e: MouseEvent) => {
               e.stopPropagation();
