@@ -92,7 +92,7 @@ export class AffineEditorContainer
             setup?.(slots, disposable);
             slots.mounted.once(({ service }) => {
               disposable.add(
-                (<PageRootService>service).slots.editorModeSwitch.on(
+                (service as PageRootService).slots.editorModeSwitch.on(
                   this.switchEditor.bind(this)
                 )
               );
@@ -117,7 +117,7 @@ export class AffineEditorContainer
             setup?.(slots, disposable);
             slots.mounted.once(({ service }) => {
               disposable.add(
-                (<PageRootService>service).slots.editorModeSwitch.on(
+                (service as PageRootService).slots.editorModeSwitch.on(
                   this.switchEditor.bind(this)
                 )
               );

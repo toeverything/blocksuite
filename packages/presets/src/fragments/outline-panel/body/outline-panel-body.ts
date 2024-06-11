@@ -8,7 +8,7 @@ import type {
 } from '@blocksuite/blocks';
 import { BlocksUtils, Bound, NoteDisplayMode } from '@blocksuite/blocks';
 import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
-import { type BlockModel, type Doc } from '@blocksuite/store';
+import type { BlockModel, Doc } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

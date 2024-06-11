@@ -23,10 +23,10 @@ import { ShapeOverlay } from '../../utils/tool-overlay.js';
 import { EdgelessToolController } from './index.js';
 
 export class ShapeToolController extends EdgelessToolController<ShapeTool> {
-  readonly tool = <ShapeTool>{
+  readonly tool = {
     type: 'shape',
     shapeType: 'rect',
-  };
+  } as ShapeTool;
 
   private _draggingElement: ShapeElementModel | null = null;
   private _draggingElementId: string | null = null;

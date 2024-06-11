@@ -1,4 +1,4 @@
-import { type ReferenceElement } from '@floating-ui/dom';
+import type { ReferenceElement } from '@floating-ui/dom';
 
 import { Matcher } from '../../logical/matcher.js';
 import type { TType } from '../../logical/typesystem.js';

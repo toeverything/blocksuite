@@ -1,6 +1,6 @@
 import { html, nothing } from 'lit';
 
-import { type IVec } from '../../../../surface-block/index.js';
+import type { IVec } from '../../../../surface-block/index.js';
 
 export enum HandleDirection {
   Left = 'left',

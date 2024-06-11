@@ -4,7 +4,7 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { KeymapController } from './keymap-controller.js';
-import { type NoteBlockModel } from './note-model.js';
+import type { NoteBlockModel } from './note-model.js';
 import type { NoteBlockService } from './note-service.js';
 
 @customElement('affine-note')

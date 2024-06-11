@@ -14,7 +14,7 @@ import { customElement, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { type BundledLanguage, type Highlighter } from 'shiki';
+import type { BundledLanguage, Highlighter } from 'shiki';
 import { z } from 'zod';
 
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';

@@ -13,7 +13,7 @@ import type { DataViewSelection, InsertToPosition } from '../types.js';
 import type { UniComponent } from '../utils/uni-component/index.js';
 import type { DataViewWidget } from '../widget/types.js';
 import type { DataViewManagerBase } from './data-view-manager.js';
-import { type DataViewManager } from './data-view-manager.js';
+import type { DataViewManager } from './data-view-manager.js';
 
 export interface DataViewProps<
   T extends DataViewManager = DataViewManager,

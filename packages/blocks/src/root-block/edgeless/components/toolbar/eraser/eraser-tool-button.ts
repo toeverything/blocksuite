@@ -3,7 +3,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { EdgelessEraserIcon } from '../../../../../_common/icons/index.js';
-import { type EdgelessTool } from '../../../../../_common/utils/index.js';
+import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 

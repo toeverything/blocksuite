@@ -10,6 +10,11 @@ import type {
   ToBlockSnapshotPayload,
   ToDocSnapshotPayload,
 } from '@blocksuite/store';
+import type {
+  BlockSnapshot,
+  DocSnapshot,
+  SliceSnapshot,
+} from '@blocksuite/store';
 import {
   type AssetsManager,
   BlockSnapshotSchema,
@@ -17,11 +22,6 @@ import {
   nanoid,
 } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
-import {
-  type BlockSnapshot,
-  type DocSnapshot,
-  type SliceSnapshot,
-} from '@blocksuite/store';
 import type { ElementContent, Root, Text } from 'hast';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';

@@ -10,7 +10,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { ViewSource } from '../../common/index.js';
 import { renderUniLit } from '../../utils/uni-component/index.js';
-import { type DataViewExpose } from '../../view/data-view.js';
+import type { DataViewExpose } from '../../view/data-view.js';
 import type { DataViewManager } from '../../view/data-view-manager.js';
 import type { DataViewWidget, DataViewWidgetProps } from '../types.js';
 import { WidgetBase } from '../widget-base.js';

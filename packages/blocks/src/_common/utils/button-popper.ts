@@ -1,4 +1,4 @@
-import { type Disposable } from '@blocksuite/global/utils';
+import type { Disposable } from '@blocksuite/global/utils';
 import {
   autoPlacement,
   computePosition,

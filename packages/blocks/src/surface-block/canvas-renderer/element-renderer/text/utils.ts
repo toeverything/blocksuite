@@ -14,9 +14,7 @@ import {
 
 export type TextDelta = {
   insert: string;
-  attributes?: {
-    [k: string]: unknown;
-  };
+  attributes?: Record<string, unknown>;
 };
 
 const getMeasureCtx = (function initMeasureContext() {
@@ -191,7 +189,7 @@ export function wrapTextDeltas(text: Y.Text, font: string, w: number) {
 }
 
 export const charWidth = (() => {
-  const cachedCharWidth: { [key: string]: Array<number> } = {};
+  const cachedCharWidth: Record<string, Array<number>> = {};
 
   const calculate = (char: string, font: string) => {
     const ascii = char.charCodeAt(0);

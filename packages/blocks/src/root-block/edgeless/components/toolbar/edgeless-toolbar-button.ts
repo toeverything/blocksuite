@@ -2,9 +2,9 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type LastProps } from '../../../../surface-block/managers/edit-session.js';
+import type { LastProps } from '../../../../surface-block/managers/edit-session.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { type MenuPopper } from './common/create-popper.js';
+import type { MenuPopper } from './common/create-popper.js';
 
 @customElement('edgeless-tool-button')
 export class EdgelessToolButton<

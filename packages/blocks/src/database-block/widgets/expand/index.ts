@@ -144,7 +144,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
     });
   }
 
-  selectionUpdated: Slot<DataViewSelection | undefined> = new Slot();
+  selectionUpdated = new Slot<DataViewSelection | undefined>();
   setSelection: (selection?: DataViewSelection) => void = selection => {
     this.database.host.selection.set(
       selection

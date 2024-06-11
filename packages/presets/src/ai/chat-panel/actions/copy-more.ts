@@ -13,7 +13,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { CopyIcon, MoreIcon, RetryIcon } from '../../_common/icons.js';
 import { AIProvider } from '../../provider.js';
 import { copyText } from '../../utils/editor-actions.js';
-import { type ChatContextValue, type ChatMessage } from '../chat-context.js';
+import type { ChatContextValue, ChatMessage } from '../chat-context.js';
 import { PageEditorActions } from './actions-handle.js';
 
 noop(Tooltip);

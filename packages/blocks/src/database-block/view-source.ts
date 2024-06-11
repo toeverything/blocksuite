@@ -3,7 +3,7 @@ import { Slot } from '@blocksuite/global/utils';
 import type { SingleViewSource, ViewSource } from './data-view/common/index.js';
 import type { InsertToPosition } from './data-view/types.js';
 import type { DataViewTypes, ViewMeta } from './data-view/view/data-view.js';
-import { type DatabaseBlockModel } from './database-model.js';
+import type { DatabaseBlockModel } from './database-model.js';
 import { databaseViewAddView } from './utils.js';
 import { databaseBlockViewMap, databaseBlockViews } from './views/index.js';
 

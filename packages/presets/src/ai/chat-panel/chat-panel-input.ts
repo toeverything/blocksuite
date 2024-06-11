@@ -15,7 +15,7 @@ import {
 import { AIProvider } from '../provider.js';
 import { reportResponse } from '../utils/action-reporter.js';
 import { readBlobAsURL } from '../utils/image.js';
-import { type ChatContextValue, type ChatMessage } from './chat-context.js';
+import type { ChatContextValue, ChatMessage } from './chat-context.js';
 
 const MaximumImageCount = 8;
 

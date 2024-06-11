@@ -43,13 +43,13 @@ export class FileDropManager {
     this._blockService = blockService;
     this._fileDropOptions = fileDropOptions;
 
-    this._indicator = <DragIndicator>(
-      document.querySelector('affine-drag-indicator')
-    );
+    this._indicator = document.querySelector(
+      'affine-drag-indicator'
+    ) as DragIndicator;
     if (!this._indicator) {
-      this._indicator = <DragIndicator>(
-        document.createElement('affine-drag-indicator')
-      );
+      this._indicator = document.createElement(
+        'affine-drag-indicator'
+      ) as DragIndicator;
       document.body.append(this._indicator);
     }
 

@@ -1,5 +1,5 @@
 import { assertExists, assertType } from '@blocksuite/global/utils';
-import { type BlockSnapshot, type SnapshotReturn } from '@blocksuite/store';
+import type { BlockSnapshot, SnapshotReturn } from '@blocksuite/store';
 
 import type { ConnectorElementModel } from '../../../surface-block/index.js';
 import { Bound } from '../../../surface-block/utils/bound.js';

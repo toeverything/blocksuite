@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import { Slice, Text } from '@blocksuite/store';
-import { type TemplateResult } from 'lit';
+import type { TemplateResult } from 'lit';
 
 import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { toast } from '../../../_common/components/toast.js';

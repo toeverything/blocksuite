@@ -471,8 +471,8 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
 
         function updateChildrenPosition(e: MouseEvent, positions: number[][]) {
           if (!e.target) return;
-          const children = (<HTMLElement>e.target).children;
-          (<HTMLElement[]>Array.from(children)).forEach((c, index) => {
+          const children = (e.target as HTMLElement).children;
+          (Array.from(children) as HTMLElement[]).forEach((c, index) => {
             c.style.top = positions[index][0] + 'px';
             c.style.left = positions[index][1] + 'px';
           });

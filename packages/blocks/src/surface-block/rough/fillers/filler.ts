@@ -7,7 +7,7 @@ import { HatchFiller } from './hatch-filler.js';
 import { ZigZagFiller } from './zigzag-filler.js';
 import { ZigZagLineFiller } from './zigzag-line-filler.js';
 
-const fillers: { [name: string]: PatternFiller } = {};
+const fillers: Record<string, PatternFiller> = {};
 
 export function getFiller(
   o: ResolvedOptions,

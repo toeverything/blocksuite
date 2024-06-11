@@ -1,6 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { type Y } from '@blocksuite/store';
+import type { Y } from '@blocksuite/store';
 
 import type { EdgelessBlockModel } from '../../root-block/edgeless/edgeless-block-model.js';
 import { randomSeed } from '../rough/math.js';
@@ -118,9 +118,9 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
    *
    * After the ymap is connected to the doc, this map will be cleared.
    */
-  protected _preserved: Map<string, unknown> = new Map();
+  protected _preserved = new Map<string, unknown>();
   protected _stashed: Map<keyof Props | string, unknown>;
-  protected _local: Map<string | symbol, unknown> = new Map();
+  protected _local = new Map<string | symbol, unknown>();
   protected _onChange: (payload: {
     props: Record<string, unknown>;
     oldValues: Record<string, unknown>;
@@ -474,7 +474,7 @@ export abstract class SurfaceGroupLikeModel<
 }
 
 export abstract class SurfaceLocalModel {
-  protected _local: Map<string | symbol, unknown> = new Map();
+  protected _local = new Map<string | symbol, unknown>();
 
   abstract rotate: number;
 

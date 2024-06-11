@@ -13,9 +13,9 @@ import {
 import { EdgelessToolController } from './index.js';
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
-  readonly tool = <CopilotSelectionTool>{
+  readonly tool = {
     type: 'copilot',
-  };
+  } as CopilotSelectionTool;
 
   private _dragging = false;
 

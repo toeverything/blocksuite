@@ -78,9 +78,9 @@ export enum DefaultModeDragType {
 }
 
 export class DefaultToolController extends EdgelessToolController<DefaultTool> {
-  readonly tool = <DefaultTool>{
+  readonly tool = {
     type: 'default',
-  };
+  } as DefaultTool;
   override enableHover = true;
   dragType = DefaultModeDragType.None;
 

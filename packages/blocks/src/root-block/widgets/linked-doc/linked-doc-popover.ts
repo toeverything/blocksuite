@@ -13,7 +13,7 @@ import {
 } from '../../../_common/components/utils.js';
 import type { AffineInlineEditor } from '../../../_common/inline/presets/affine-inline-specs.js';
 import type { LinkedDocOptions } from './config.js';
-import { type LinkedDocGroup } from './config.js';
+import type { LinkedDocGroup } from './config.js';
 import { styles } from './styles.js';
 
 @customElement('affine-linked-doc-popover')

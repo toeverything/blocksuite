@@ -2,7 +2,7 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import { type IBound } from '../consts.js';
+import type { IBound } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 import { RoughCanvas } from '../rough/canvas.js';
@@ -50,7 +50,7 @@ export class Renderer extends Viewport {
   stackingCanvasUpdated = new Slot<HTMLCanvasElement[]>();
 
   private _stackingCanvas: HTMLCanvasElement[] = [];
-  private _overlays: Set<Overlay> = new Set();
+  private _overlays = new Set<Overlay>();
   private _shouldUpdate = false;
   private _disposables = new DisposableGroup();
 

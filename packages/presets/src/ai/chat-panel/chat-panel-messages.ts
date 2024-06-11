@@ -17,7 +17,7 @@ import type {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
-import { type EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { ImageSelection } from '@blocksuite/blocks';
 import {
@@ -45,10 +45,10 @@ import {
   EdgelessEditorActions,
   PageEditorActions,
 } from './actions/actions-handle.js';
-import {
-  type ChatContextValue,
-  type ChatItem,
-  type ChatMessage,
+import type {
+  ChatContextValue,
+  ChatItem,
+  ChatMessage,
 } from './chat-context.js';
 import { HISTORY_IMAGE_ACTIONS } from './const.js';
 

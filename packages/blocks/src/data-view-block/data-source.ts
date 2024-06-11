@@ -1,7 +1,7 @@
-import { type EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
 import type { Block } from '@blocksuite/store';
-import { type Doc } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 
 import { databaseBlockAllColumnMap } from '../database-block/columns/index.js';
 import {
@@ -26,8 +26,8 @@ export type BlockQueryDataSourceConfig = {
 };
 
 export class BlockQueryDataSource extends BaseDataSource {
-  docDisposeMap: Map<string, () => void> = new Map();
-  blockMap: Map<string, Block> = new Map();
+  docDisposeMap = new Map<string, () => void>();
+  blockMap = new Map<string, Block>();
   private meta: BlockMeta;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private columnMetaMap = new Map<string, ColumnMeta<any, any, any>>();

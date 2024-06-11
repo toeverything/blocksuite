@@ -31,14 +31,15 @@ interface Coord {
   y: number;
 }
 
-interface TransformMap {
-  [key: string]: {
+type TransformMap = Record<
+  string,
+  {
     x: number;
     y: number;
     scale: number;
     origin: string;
-  };
-}
+  }
+>;
 
 @customElement('edgeless-shape-tool-element')
 export class EdgelessShapeToolElement extends WithDisposable(LitElement) {

@@ -57,9 +57,9 @@ class LassoOverlay extends Overlay {
 }
 
 export class LassoToolController extends EdgelessToolController<LassoTool> {
-  readonly tool = <LassoTool>{
+  readonly tool = {
     type: 'lasso',
-  };
+  } as LassoTool;
 
   private _overlay = new LassoOverlay();
   private _raf = 0;

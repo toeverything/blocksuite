@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { type AffineEditorContainer } from '@blocksuite/presets';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 

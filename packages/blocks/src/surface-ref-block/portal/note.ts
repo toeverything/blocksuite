@@ -4,7 +4,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/block-std';
-import { type BlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -16,7 +16,7 @@ import {
 } from '../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
 import { NoteDisplayMode } from '../../_common/types.js';
-import { type NoteBlockModel } from '../../note-block/index.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import { SpecProvider } from '../../specs/utils/spec-provider.js';
 import { deserializeXYWH } from '../../surface-block/index.js';
 
@@ -37,7 +37,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor host!: EditorHost;
 
-  ancestors: Set<string> = new Set();
+  ancestors = new Set<string>();
 
   renderPreview() {
     const doc = this.model.doc.blockCollection.getDoc();

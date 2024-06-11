@@ -11,7 +11,7 @@ import {
   rotatePoints,
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
-import { type IVec2 } from '../../../utils/vec.js';
+import type { IVec2 } from '../../../utils/vec.js';
 import type { IHitTestOptions } from '../../base.js';
 import type { ShapeElementModel } from '../../shape.js';
 

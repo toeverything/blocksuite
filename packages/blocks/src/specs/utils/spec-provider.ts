@@ -6,7 +6,7 @@ import { SpecBuilder } from './spec-builder.js';
 export class SpecProvider {
   static instance: SpecProvider;
 
-  private specMap: Map<string, BlockSpec[]> = new Map();
+  private specMap = new Map<string, BlockSpec[]>();
 
   private constructor() {}
 

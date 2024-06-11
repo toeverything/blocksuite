@@ -175,19 +175,19 @@ export type SurfaceMiddleware = (
 ) => () => void;
 
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
-  private _elementModels: Map<
+  private _elementModels = new Map<
     string,
     {
       mount: () => void;
       unmount: () => void;
       model: BlockSuite.SurfaceElementModelType;
     }
-  > = new Map();
+  >();
   private _disposables: DisposableGroup = new DisposableGroup();
-  private _groupToElements: Map<string, string[]> = new Map();
-  private _elementToGroup: Map<string, string> = new Map();
-  private _connectorToElements: Map<string, string[]> = new Map();
-  private _elementToConnector: Map<string, string[]> = new Map();
+  private _groupToElements = new Map<string, string[]>();
+  private _elementToGroup = new Map<string, string>();
+  private _connectorToElements = new Map<string, string[]>();
+  private _elementToConnector = new Map<string, string[]>();
 
   /**
    * Hooks is used to attach extra logic when calling `addElement`、`updateElement`(or assign property directly) and `removeElement`.

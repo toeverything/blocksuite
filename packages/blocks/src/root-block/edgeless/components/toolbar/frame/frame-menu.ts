@@ -5,7 +5,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { type EdgelessTool } from '../../../../../_common/utils/index.js';
+import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 

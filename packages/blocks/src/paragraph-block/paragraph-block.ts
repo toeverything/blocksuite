@@ -3,7 +3,7 @@ import '../_common/components/rich-text/rich-text.js';
 import type { BlockElement, TextSelection } from '@blocksuite/block-std';
 import { getInlineRangeProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type InlineRangeProvider } from '@blocksuite/inline';
+import type { InlineRangeProvider } from '@blocksuite/inline';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 

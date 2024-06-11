@@ -23,7 +23,7 @@ import {
 import type { ListBlockModel } from '../../../list-block/index.js';
 import type { RootBlockModel } from '../../../root-block/index.js';
 import { EMBED_BLOCK_FLAVOUR_LIST } from '../../consts.js';
-import { type ExtendedModel } from '../../types.js';
+import type { ExtendedModel } from '../../types.js';
 
 /**
  * Whether the block supports rendering its children.
