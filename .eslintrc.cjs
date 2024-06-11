@@ -94,7 +94,7 @@ module.exports = {
         'no-return-await': 'off',
         '@typescript-eslint/return-await': 'error',
         'require-await': 'off',
-        'no-implied-eval': 'off',
+        'no-implied-eval': 'error',
         '@typescript-eslint/no-implied-eval': 'error',
         '@typescript-eslint/require-await': 'error',
         '@typescript-eslint/await-thenable': 'error',

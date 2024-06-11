@@ -25,4 +25,5 @@ export const modelRenderer = {
   shape,
   text,
   mindmap,
-} as Record<string, ElementRenderer<unknown>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as Record<string, ElementRenderer<any>>;
