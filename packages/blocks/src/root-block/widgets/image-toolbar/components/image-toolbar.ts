@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -27,6 +27,9 @@ export class AffineImageToolbar extends LitElement {
 
   @property({ attribute: false })
   accessor moreMenuConfig!: MoreMenuConfigItem[];
+
+  @property({ attribute: false })
+  accessor onActiveStatusChange: (active: boolean) => void = noop;
 
   @query('.image-toolbar-button.more')
   private accessor _moreButton!: HTMLElement;
@@ -74,10 +77,12 @@ export class AffineImageToolbar extends LitElement {
 
     this.closeCurrentMenu();
     this._popMenuAbortController = new AbortController();
-    this._popMenuAbortController.signal.addEventListener(
-      'abort',
-      () => (this._moreMenuOpen = false)
-    );
+    this._popMenuAbortController.signal.addEventListener('abort', () => {
+      this._moreMenuOpen = false;
+      this.onActiveStatusChange(false);
+    });
+    this.onActiveStatusChange(true);
+
     this._currentOpenMenu = this._popMenuAbortController;
 
     const moreMenu = new MorePopupMenu();

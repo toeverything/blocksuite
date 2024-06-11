@@ -1,3 +1,4 @@
+import { noop } from '@blocksuite/global/utils';
 import { css, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -55,7 +56,7 @@ export class LanguageListButton extends LitElement {
   private accessor _langButton!: HTMLElement;
 
   @property({ attribute: false })
-  accessor onChange: ((active: boolean) => void) | undefined = undefined;
+  accessor onActiveStatusChange: (active: boolean) => void = noop;
 
   private _abortController?: AbortController;
 
@@ -79,10 +80,10 @@ export class LanguageListButton extends LitElement {
     }
     this._abortController = new AbortController();
     this._abortController.signal.addEventListener('abort', () => {
-      this.onChange?.(false);
+      this.onActiveStatusChange(false);
       this._abortController = undefined;
     });
-    this.onChange?.(true);
+    this.onActiveStatusChange(true);
 
     const languages = (
       [...bundledLanguagesInfo, PLAIN_TEXT_LANG_INFO] as StrictLanguageInfo[]

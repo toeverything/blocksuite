@@ -19,6 +19,22 @@ export type HoverOptions = {
    * Transition style when the portal is shown or hidden.
    */
   transition: {
+    /**
+     * Specifies the length of the transition in ms.
+     *
+     * You only need to specify the transition end duration actually.
+     *
+     * ---
+     *
+     * Why is the duration required?
+     *
+     * The transition event is not reliable, and it may not be triggered in some cases.
+     *
+     * See also https://github.com/w3c/csswg-drafts/issues/3043 https://github.com/toeverything/blocksuite/pull/7248/files#r1631375330
+     *
+     * Take a look at solutions from other projects: https://floating-ui.com/docs/useTransition#duration
+     */
+    duration: number;
     in: StyleInfo;
     out: StyleInfo;
   } | null;
@@ -32,6 +48,7 @@ export type HoverOptions = {
 
 const DEFAULT_HOVER_OPTIONS: HoverOptions = {
   transition: {
+    duration: 100,
     in: {
       opacity: '1',
       transition: 'opacity 0.1s ease-in-out',
@@ -43,6 +60,41 @@ const DEFAULT_HOVER_OPTIONS: HoverOptions = {
   },
   setPortalAsFloating: true,
   allowMultiple: false,
+};
+
+const abortHoverPortal = ({
+  portal,
+  hoverOptions,
+  abortController,
+}: {
+  portal: HTMLDivElement | undefined;
+  hoverOptions: HoverOptions;
+  abortController: AbortController;
+}) => {
+  if (!portal || !hoverOptions.transition) {
+    abortController.abort();
+    return;
+  }
+  // Transition out
+  Object.assign(portal.style, hoverOptions.transition.out);
+
+  portal.addEventListener(
+    'transitionend',
+    () => {
+      abortController.abort();
+    },
+    { signal: abortController.signal }
+  );
+  portal.addEventListener(
+    'transitioncancel',
+    () => {
+      abortController.abort();
+    },
+    { signal: abortController.signal }
+  );
+
+  // Make sure the portal is aborted after the transition ends
+  setTimeout(() => abortController.abort(), hoverOptions.transition.duration);
 };
 
 export class HoverController implements ReactiveController {
@@ -59,6 +111,17 @@ export class HoverController implements ReactiveController {
   ) => HoverPortalOptions | null;
   private readonly _hoverOptions: HoverOptions;
 
+  private _isHovering = false;
+
+  /**
+   * Whether the host is currently hovering.
+   *
+   * This property is unreliable when the floating element disconnect from the DOM suddenly.
+   */
+  get isHovering() {
+    return this._isHovering;
+  }
+
   get setReference() {
     if (!this._setReference) {
       throw new Error('setReference is not ready');
@@ -69,6 +132,13 @@ export class HoverController implements ReactiveController {
   get portal() {
     return this._portal;
   }
+
+  /**
+   * Callback when the portal needs to be aborted.
+   */
+  public onAbort = () => {
+    this.abort();
+  };
 
   constructor(
     host: ReactiveControllerHost,
@@ -86,39 +156,15 @@ export class HoverController implements ReactiveController {
     }
     // Start a timer when the host is connected
     const { setReference, setFloating, dispose } = whenHover(isHover => {
+      this._isHovering = isHover;
       if (!isHover) {
-        const abortController = this._abortController;
-        if (!abortController) return;
-        if (!this._portal || !this._hoverOptions.transition) {
-          abortController.abort();
-          return;
-        }
-        // Transition out
-        Object.assign(this._portal.style, this._hoverOptions.transition.out);
-
-        // The transition event is not reliable,
-        // consider adding explicit duration to the transition options in the future
-        // See also https://github.com/w3c/csswg-drafts/issues/3043 https://github.com/toeverything/blocksuite/pull/7248/files#r1631375330
-        this._portal.addEventListener(
-          'transitionend',
-          () => {
-            abortController.abort();
-          },
-          { signal: abortController.signal }
-        );
-        this._portal.addEventListener(
-          'transitioncancel',
-          () => {
-            abortController.abort();
-          },
-          { signal: abortController.signal }
-        );
+        this.onAbort();
         return;
       }
 
-      // If some problems arise when aborting the previous hover,
-      // consider fixing the transition related issues and return void here
-      this._abortController?.abort();
+      if (this._abortController) {
+        return;
+      }
 
       this._abortController = new AbortController();
       this._abortController.signal.addEventListener('abort', () => {
@@ -135,6 +181,7 @@ export class HoverController implements ReactiveController {
         abortController: this._abortController,
       });
       if (!portalOptions) {
+        // Sometimes the portal is not ready to show
         this._abortController.abort();
         return;
       }
@@ -159,5 +206,18 @@ export class HoverController implements ReactiveController {
   hostDisconnected() {
     this._abortController?.abort();
     this._disposables.dispose();
+  }
+
+  abort(force = false) {
+    if (!this._abortController) return;
+    if (force) {
+      this._abortController.abort();
+      return;
+    }
+    abortHoverPortal({
+      portal: this._portal,
+      hoverOptions: this._hoverOptions,
+      abortController: this._abortController,
+    });
   }
 }

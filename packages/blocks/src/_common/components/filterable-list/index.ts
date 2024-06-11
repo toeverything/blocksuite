@@ -101,7 +101,7 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
           })}
           @mouseover=${() => (this._curFocusIndex = idx)}
           @click=${() => this._select(item)}
-          hover=${focussed}
+          ?hover=${focussed}
           width="100%"
           height="32px"
         >
@@ -177,7 +177,7 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
 export function showPopFilterableList({
   options,
   filter,
-  abortController,
+  abortController = new AbortController(),
   referenceElement,
   container,
   maxHeight = 440,
@@ -185,7 +185,7 @@ export function showPopFilterableList({
   options: FilterableListComponent['options'];
   referenceElement: Element;
   container?: Element;
-  abortController: AbortController;
+  abortController?: AbortController;
   filter?: FilterableListComponent['listFilter'];
   maxHeight?: number;
 }) {
