@@ -6,6 +6,7 @@ import type { SurfaceBlockModel } from './surface-model.js';
 
 export class SurfaceBlockService extends BlockService<SurfaceBlockModel> {
   layer!: LayerManager;
+
   surface!: SurfaceBlockModel;
 
   override mounted(): void {

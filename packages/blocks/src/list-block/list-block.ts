@@ -36,15 +36,19 @@ export class ListBlockComponent extends BlockComponent<
     assertExists(inlineManager);
     return inlineManager;
   }
+
   get attributesSchema() {
     return this.inlineManager.getSchema();
   }
+
   get attributeRenderer() {
     return this.inlineManager.getRenderer();
   }
+
   get markdownShortcutHandler() {
     return this.inlineManager.markdownShortcutHandler;
   }
+
   get embedChecker() {
     return this.inlineManager.embedChecker;
   }

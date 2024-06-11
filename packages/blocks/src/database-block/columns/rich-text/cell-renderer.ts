@@ -48,12 +48,7 @@ function toggleStyle(
     Object.entries(attrs).map(([k, v]) => {
       if (
         typeof v === 'boolean' &&
-        v ===
-          (
-            oldAttributes as {
-              [k: string]: unknown;
-            }
-          )[k]
+        v === (oldAttributes as Record<string, unknown>)[k]
       ) {
         return [k, !v];
       } else {
@@ -113,9 +108,11 @@ export class RichTextCell extends BaseCellRenderer<Text> {
   get inlineManager() {
     return this.service?.inlineManager;
   }
+
   get attributesSchema() {
     return this.inlineManager?.getSchema();
   }
+
   get attributeRenderer() {
     return this.inlineManager?.getRenderer();
   }
@@ -198,9 +195,11 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   get inlineManager() {
     return this.service?.inlineManager;
   }
+
   get attributesSchema() {
     return this.inlineManager?.getSchema();
   }
+
   get attributeRenderer() {
     return this.inlineManager?.getRenderer();
   }

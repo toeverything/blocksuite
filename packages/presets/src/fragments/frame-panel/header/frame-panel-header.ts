@@ -3,7 +3,7 @@ import './frames-setting-menu.js';
 import type { EditorHost } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
 import type { EdgelessRootBlockComponent } from '@blocksuite/blocks';
-import { type NavigatorMode } from '@blocksuite/blocks';
+import type { NavigatorMode } from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html, LitElement, type PropertyValues } from 'lit';
@@ -122,6 +122,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   > | null = null;
 
   private _navigatorMode: NavigatorMode = 'fit';
+
   private _edgelessDisposables: DisposableGroup | null = null;
 
   get rootService() {

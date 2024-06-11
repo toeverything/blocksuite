@@ -7,6 +7,7 @@ const ImageSelectionSchema = z.object({
 
 export class ImageSelection extends BaseSelection {
   static override type = 'image';
+
   static override group = 'note';
 
   override equals(other: BaseSelection): boolean {

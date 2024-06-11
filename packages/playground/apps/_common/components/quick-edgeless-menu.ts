@@ -69,10 +69,13 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
+
   @property({ attribute: false })
   accessor leftSidePanel!: LeftSidePanel;
+
   @property({ attribute: false })
   accessor docsPanel!: DocsPanel;
+
   @property({ attribute: false })
   accessor chatPanel!: CustomChatPanel;
 
@@ -313,6 +316,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     url.search = params.toString();
     location.href = url.href;
   };
+
   private _toggleDocsPanel() {
     this.leftSidePanel.toggle(this.docsPanel);
   }

@@ -19,7 +19,7 @@ import {
 import { Bound, getElementsBound } from '../../../surface-block/index.js';
 import type { CopilotSelectionController } from '../../edgeless/controllers/tools/copilot-tool.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-import { type RootBlockModel } from '../../root-model.js';
+import type { RootBlockModel } from '../../root-model.js';
 import type { AffineAIPanelWidget } from '../ai-panel/ai-panel.js';
 import { AFFINE_AI_PANEL_WIDGET } from '../ai-panel/ai-panel.js';
 import { EdgelessCopilotPanel } from '../edgeless-copilot-panel/index.js';
@@ -57,6 +57,7 @@ export class EdgelessCopilotWidget extends WidgetElement<
   private _selectionModelRect!: DOMRect;
 
   private _clickOutsideOff: (() => void) | null = null;
+
   private _listenClickOutsideId: number | null = null;
 
   private _copilotPanel!: EdgelessCopilotPanel | null;

@@ -33,8 +33,11 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
   readonly ['shapeStyle', 'shapeType', 'fillColor', 'strokeColor', 'radius']
 >(LitElement) {
   override type = 'shape' as const;
+
   override _type = 'shape' as const;
+
   override enableActiveBackground = true;
+
   static styles = css`
     :host {
       display: block;
@@ -114,6 +117,7 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
       )
     );
   }
+
   // duplicated with connectedCallback, so override it
   override initLastPropsSlot() {
     noop();

@@ -6,7 +6,7 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists, throttle } from '@blocksuite/global/utils';
-import { type BlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -53,7 +53,7 @@ import type {
   IndexedCanvasUpdateEvent,
   SurfaceBlockComponent,
 } from '../../surface-block/surface-block.js';
-import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { RootBlockModel } from '../root-model.js';
 import type { EdgelessRootBlockWidgetName } from '../types.js';
@@ -142,7 +142,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
    * Shared components
    */
   components = {
-    toolbar: <EdgelessToolbar | null>null,
+    toolbar: null as EdgelessToolbar | null,
   };
 
   keyboardManager: EdgelessPageKeyboardManager | null = null;

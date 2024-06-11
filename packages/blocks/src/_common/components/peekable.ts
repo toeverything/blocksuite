@@ -18,9 +18,11 @@ export class PeekableController {
   private getRootService = () => {
     return this.target.std.spec.getService('affine:page');
   };
+
   get peekable() {
     return !!this.getRootService().peekViewService;
   }
+
   peek = () => {
     this.getRootService().peekViewService?.peek(this.target);
   };
@@ -72,6 +74,7 @@ export const Peekable =
 
     const derivedClass = class extends Class {
       [symbol]: PeekableController = new PeekableController(this);
+
       override connectedCallback() {
         super.connectedCallback();
 

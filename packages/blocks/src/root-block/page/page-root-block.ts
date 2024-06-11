@@ -1,8 +1,8 @@
-import { type PointerEventState } from '@blocksuite/block-std';
+import type { PointerEventState } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
-import { type Text } from '@blocksuite/store';
+import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

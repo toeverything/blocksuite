@@ -17,6 +17,7 @@ export type DocCollectionOptions = StoreOptions & {
 @test
 export class DocCollection extends DocCollectionAddonType {
   static Y = Y;
+
   protected _store: Store;
 
   protected readonly _schema: Schema;

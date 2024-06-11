@@ -4,7 +4,7 @@ import type {
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
-import { type BlockElement } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
@@ -17,6 +17,7 @@ import { ensureBlockInContainer } from './utils.js';
 
 export class KeymapController implements ReactiveController {
   private _anchorSel: BlockSelection | null = null;
+
   private _focusBlock: BlockElement | null = null;
 
   host: ReactiveControllerHost & BlockElement;

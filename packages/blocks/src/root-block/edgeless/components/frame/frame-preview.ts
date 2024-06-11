@@ -95,10 +95,13 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   private accessor _surfaceModel: SurfaceBlockModel | null = null;
 
   private _surfaceRefRendererId: string = nanoid();
+
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
   private _edgelessDisposables: DisposableGroup | null = null;
+
   private _docDisposables: DisposableGroup | null = null;
+
   private _frameDisposables: DisposableGroup | null = null;
 
   @query('.frame-preview-surface-canvas-container')

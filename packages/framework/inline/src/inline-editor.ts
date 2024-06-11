@@ -39,17 +39,23 @@ export class InlineEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
   static nativePointToTextPoint = nativePointToTextPoint;
+
   static textPointToDomPoint = textPointToDomPoint;
+
   static getTextNodesFromElement = getTextNodesFromElement;
 
   private _disposables = new DisposableGroup();
+
   get disposables() {
     return this._disposables;
   }
 
   private readonly _yText: Y.Text;
+
   private _rootElement: InlineRootElement<TextAttributes> | null = null;
+
   private _eventSource: HTMLElement | null = null;
+
   private _isReadonly = false;
 
   private _eventService: EventService<TextAttributes> =
@@ -72,6 +78,7 @@ export class InlineEditor<
   private _mounted = false;
 
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
+
   readonly inlineRangeProvider: InlineRangeProvider | null;
 
   readonly slots = {
@@ -144,41 +151,68 @@ export class InlineEditor<
   }
 
   setAttributeSchema = this._attributeService.setAttributeSchema;
+
   setAttributeRenderer = this._attributeService.setAttributeRenderer;
+
   setMarks = this._attributeService.setMarks;
+
   resetMarks = this._attributeService.resetMarks;
+
   getFormat = this._attributeService.getFormat;
 
   // Expose range service API
   toDomRange = this.rangeService.toDomRange;
+
   toInlineRange = this.rangeService.toInlineRange;
+
   getInlineRange = this.rangeService.getInlineRange;
+
   getInlineRangeFromElement = this.rangeService.getInlineRangeFromElement;
+
   getNativeSelection = this.rangeService.getNativeSelection;
+
   getTextPoint = this.rangeService.getTextPoint;
+
   getLine = this.rangeService.getLine;
+
   isValidInlineRange = this.rangeService.isValidInlineRange;
+
   isFirstLine = this.rangeService.isFirstLine;
+
   isLastLine = this.rangeService.isLastLine;
+
   setInlineRange = this.rangeService.setInlineRange;
+
   focusStart = this.rangeService.focusStart;
+
   focusEnd = this.rangeService.focusEnd;
+
   selectAll = this.rangeService.selectAll;
+
   focusIndex = this.rangeService.focusIndex;
+
   syncInlineRange = this.rangeService.syncInlineRange;
 
   // Expose delta service API
   getDeltasByInlineRange = this.deltaService.getDeltasByInlineRange;
+
   getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
+
   mapDeltasInInlineRange = this.deltaService.mapDeltasInInlineRange;
+
   isNormalizedDeltaSelected = this.deltaService.isNormalizedDeltaSelected;
 
   // Expose text service API
   deleteText = this._textService.deleteText;
+
   insertText = this._textService.insertText;
+
   insertLineBreak = this._textService.insertLineBreak;
+
   formatText = this._textService.formatText;
+
   resetText = this._textService.resetText;
+
   setText = this._textService.setText;
 
   // Expose hook service API

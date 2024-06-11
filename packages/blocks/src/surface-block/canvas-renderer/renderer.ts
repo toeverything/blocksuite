@@ -2,7 +2,7 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { Viewport } from '../../root-block/edgeless/utils/viewport.js';
-import { type IBound } from '../consts.js';
+import type { IBound } from '../consts.js';
 import type { SurfaceElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 import { RoughCanvas } from '../rough/canvas.js';
@@ -41,8 +41,11 @@ type RendererOptions = {
 
 export class Renderer extends Viewport {
   canvas: HTMLCanvasElement;
+
   ctx: CanvasRenderingContext2D;
+
   rc: RoughCanvas;
+
   layerManager: LayerManager;
 
   provider: Partial<EnvProvider>;
@@ -50,8 +53,11 @@ export class Renderer extends Viewport {
   stackingCanvasUpdated = new Slot<HTMLCanvasElement[]>();
 
   private _stackingCanvas: HTMLCanvasElement[] = [];
-  private _overlays: Set<Overlay> = new Set();
+
+  private _overlays = new Set<Overlay>();
+
   private _shouldUpdate = false;
+
   private _disposables = new DisposableGroup();
 
   get stackingCanvas() {
@@ -296,7 +302,7 @@ export class Renderer extends Viewport {
     ctx.restore();
   }
 
-  public getCanvasByBound(
+  getCanvasByBound(
     bound: IBound = this.viewportBounds,
     surfaceElements?: SurfaceElementModel[],
     canvas?: HTMLCanvasElement,
@@ -324,13 +330,13 @@ export class Renderer extends Viewport {
     return canvas;
   }
 
-  public addOverlay(overlay: Overlay) {
+  addOverlay(overlay: Overlay) {
     overlay.setRenderer(this);
     this._overlays.add(overlay);
     this._shouldUpdate = true;
   }
 
-  public removeOverlay(overlay: Overlay) {
+  removeOverlay(overlay: Overlay) {
     if (!this._overlays.has(overlay)) {
       return;
     }

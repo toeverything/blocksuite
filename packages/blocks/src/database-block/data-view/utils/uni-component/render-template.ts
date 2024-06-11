@@ -6,6 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 export class AnyRender<T> extends ShadowlessElement {
   @property({ attribute: false })
   accessor props!: T;
+
   @property({ attribute: false })
   accessor renderTemplate!: (props: T) => TemplateResult | symbol;
 

@@ -68,6 +68,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
   private accessor _inputEle!: HTMLInputElement;
 
   private _prevPortalAbortController: AbortController | null = null;
+
   private _datePicker: DatePicker | null = null;
 
   override onExitEditMode() {

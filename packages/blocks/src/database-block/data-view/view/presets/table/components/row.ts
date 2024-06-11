@@ -92,19 +92,24 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       height: 16px;
     }
   `;
+
   get selectionController() {
     return this.closest('affine-database-table')?.selectionController;
   }
+
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
+
   @property({ attribute: false })
   accessor view!: DataViewTableManager;
+
   @property({ attribute: false })
   accessor rowIndex!: number;
+
   @property({ attribute: false })
   accessor rowId!: string;
 
-  public get groupKey() {
+  get groupKey() {
     return this.closest('affine-data-view-table-group')?.group?.key;
   }
 
@@ -113,6 +118,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       this.selectionController.selection = selection;
     }
   };
+
   contextMenu = (e: MouseEvent) => {
     const selection = this.selectionController;
     if (!selection) {
@@ -137,12 +143,13 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     popRowMenu(this.dataViewEle, eventToVRect(e), this.rowId, selection);
   };
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
     // eslint-disable-next-line wc/no-self-class
     this.classList.add('affine-database-block-row', 'database-row');
   }
+
   private _clickDragHandler = () => {
     const selectionController = this.selectionController;
     if (selectionController) {
@@ -170,6 +177,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       }
     }
   };
+
   protected override render(): unknown {
     const view = this.view;
     return html`

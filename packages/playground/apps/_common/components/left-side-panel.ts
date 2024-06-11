@@ -15,6 +15,7 @@ export class LeftSidePanel extends ShadowlessElement {
       display: none;
     }
   `;
+
   currentContent: HTMLElement | null = null;
 
   showContent(ele: HTMLElement) {

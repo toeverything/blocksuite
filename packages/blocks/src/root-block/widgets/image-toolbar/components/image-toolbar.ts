@@ -47,6 +47,7 @@ export class AffineImageToolbar extends LitElement {
   }
 
   private _popMenuAbortController: AbortController | null = null;
+
   private _currentOpenMenu: AbortController | null = null;
 
   closeCurrentMenu = () => {

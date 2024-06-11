@@ -55,10 +55,11 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
       display: contents;
     }
   `;
+
   @property({ attribute: false })
   accessor config!: DataViewRendererConfig;
 
-  public get expose() {
+  get expose() {
     return this._view.value;
   }
 
@@ -92,7 +93,7 @@ export class DataViewRenderer extends WithDisposable(ShadowlessElement) {
 
   private viewMap: Record<string, ViewProps> = {};
 
-  public focusFirstCell = () => {
+  focusFirstCell = () => {
     this._view.value?.focusFirstCell();
   };
 
@@ -203,7 +204,7 @@ declare global {
 export class DataView {
   private _ref = createRef<DataViewRenderer>();
 
-  public get expose() {
+  get expose() {
     return this._ref.value?.expose;
   }
 

@@ -34,6 +34,7 @@ const TextSelectionSchema = z.object({
 
 export class TextSelection extends BaseSelection {
   static override type = 'text';
+
   static override group = 'note';
 
   from: TextRangePoint;
@@ -88,6 +89,7 @@ export class TextSelection extends BaseSelection {
     }
     return false;
   }
+
   override toJSON(): Record<string, unknown> {
     return {
       type: 'text',

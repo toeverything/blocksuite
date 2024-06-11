@@ -1,4 +1,4 @@
-import { type EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 
@@ -19,7 +19,7 @@ import {
   type InsertToPosition,
 } from './data-view/index.js';
 import { map } from './data-view/utils/uni-component/operation.js';
-import { type DatabaseBlockModel } from './database-model.js';
+import type { DatabaseBlockModel } from './database-model.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
 
@@ -30,6 +30,7 @@ export type DatabaseBlockDataSourceConfig = {
 
 export class DatabaseBlockDataSource extends BaseDataSource {
   private readonly _model: DatabaseBlockModel;
+
   private _batch = 0;
 
   get doc() {
@@ -48,15 +49,15 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     this.setContext(HostContextKey, host);
   }
 
-  public get rows(): string[] {
+  get rows(): string[] {
     return this._model.children.map(v => v.id);
   }
 
-  public get properties(): string[] {
+  get properties(): string[] {
     return this._model.columns.map(column => column.id);
   }
 
-  public slots = {
+  slots = {
     update: new Slot(),
   };
 
@@ -71,11 +72,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     });
   }
 
-  public cellChangeValue(
-    rowId: string,
-    propertyId: string,
-    value: unknown
-  ): void {
+  cellChangeValue(rowId: string, propertyId: string, value: unknown): void {
     this._runCapture();
 
     const type = this.propertyGetType(propertyId);
@@ -101,7 +98,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     }
   }
 
-  public cellGetValue(rowId: string, propertyId: string): unknown {
+  cellGetValue(rowId: string, propertyId: string): unknown {
     if (propertyId === 'type') {
       const model = this.getModelById(rowId);
       if (!model) {
@@ -134,10 +131,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     return this._model.children[this._model.childMap.get(rowId) ?? -1];
   }
 
-  public override cellGetRenderValue(
-    rowId: string,
-    propertyId: string
-  ): unknown {
+  override cellGetRenderValue(rowId: string, propertyId: string): unknown {
     return this.cellGetValue(rowId, propertyId);
   }
 
@@ -149,10 +143,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     return `Column ${i}`;
   }
 
-  public propertyAdd(
-    insertToPosition: InsertToPosition,
-    type?: string
-  ): string {
+  propertyAdd(insertToPosition: InsertToPosition, type?: string): string {
     this.doc.captureSync();
     return this._model.addColumn(
       insertToPosition,
@@ -162,23 +153,20 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     );
   }
 
-  public propertyChangeData(
-    propertyId: string,
-    data: Record<string, unknown>
-  ): void {
+  propertyChangeData(propertyId: string, data: Record<string, unknown>): void {
     this._runCapture();
 
     this._model.updateColumn(propertyId, () => ({ data }));
     this._model.applyColumnUpdate();
   }
 
-  public propertyChangeName(propertyId: string, name: string): void {
+  propertyChangeName(propertyId: string, name: string): void {
     this.doc.captureSync();
     this._model.updateColumn(propertyId, () => ({ name }));
     this._model.applyColumnUpdate();
   }
 
-  public propertyChangeType(propertyId: string, toType: string): void {
+  propertyChangeType(propertyId: string, toType: string): void {
     const currentType = this.propertyGetType(propertyId);
     const currentData = this.propertyGetData(propertyId);
     const rows = this.rows;
@@ -208,7 +196,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     this._model.applyColumnUpdate();
   }
 
-  public propertyDelete(id: string): void {
+  propertyDelete(id: string): void {
     this.doc.captureSync();
     const index = this._model.findColumnIndex(id);
     if (index < 0) return;
@@ -219,30 +207,30 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     this._model.applyColumnUpdate();
   }
 
-  public propertyGetData(propertyId: string): Record<string, unknown> {
+  propertyGetData(propertyId: string): Record<string, unknown> {
     return this._model.columns.find(v => v.id === propertyId)?.data ?? {};
   }
 
-  public override propertyGetReadonly(propertyId: string): boolean {
+  override propertyGetReadonly(propertyId: string): boolean {
     if (propertyId === 'type') return true;
     return false;
   }
 
-  public propertyGetName(propertyId: string): string {
+  propertyGetName(propertyId: string): string {
     if (propertyId === 'type') {
       return 'Block Type';
     }
     return this._model.columns.find(v => v.id === propertyId)?.name ?? '';
   }
 
-  public propertyGetType(propertyId: string): string {
+  propertyGetType(propertyId: string): string {
     if (propertyId === 'type') {
       return 'image';
     }
     return this._model.columns.find(v => v.id === propertyId)?.type ?? '';
   }
 
-  public propertyDuplicate(columnId: string): string {
+  propertyDuplicate(columnId: string): string {
     this.doc.captureSync();
     const currentSchema = this._model.getColumn(columnId);
     assertExists(currentSchema);
@@ -260,7 +248,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     return id;
   }
 
-  public rowAdd(insertPosition: InsertToPosition | number): string {
+  rowAdd(insertPosition: InsertToPosition | number): string {
     this.doc.captureSync();
     const index =
       typeof insertPosition === 'number'
@@ -269,7 +257,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     return this.doc.addBlock('affine:paragraph', {}, this._model.id, index);
   }
 
-  public rowDelete(ids: string[]): void {
+  rowDelete(ids: string[]): void {
     this.doc.captureSync();
     this.doc.updateBlock(this._model, {
       children: this._model.children.filter(v => !ids.includes(v.id)),
@@ -277,7 +265,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     this._model.deleteRows(ids);
   }
 
-  public override propertyGetDefaultWidth(propertyId: string): number {
+  override propertyGetDefaultWidth(propertyId: string): number {
     if (this.propertyGetType(propertyId) === 'title') {
       return 260;
     }
@@ -318,16 +306,16 @@ export class DatabaseBlockDataSource extends BaseDataSource {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
+  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
     return databaseBlockColumns.map(v => v.model);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getPropertyMeta(type: string): ColumnMeta<any, any, any> {
+  getPropertyMeta(type: string): ColumnMeta<any, any, any> {
     return databaseBlockAllColumnMap[type];
   }
 
-  public override get detailSlots(): DetailSlots {
+  override get detailSlots(): DetailSlots {
     return {
       ...super.detailSlots,
       header: map(createUniComponentFromWebComponent(BlockRenderer), props => ({
@@ -342,7 +330,7 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     };
   }
 
-  public rowMove(rowId: string, position: InsertToPosition): void {
+  rowMove(rowId: string, position: InsertToPosition): void {
     const model = this.doc.getBlockById(rowId);
     if (model) {
       const index = insertPositionToIndex(position, this._model.children);

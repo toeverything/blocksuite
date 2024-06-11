@@ -217,6 +217,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
       line-height: 20px;
     }
   `;
+
   @state()
   private accessor _surfaceModel: SurfaceBlockModel | null = null;
 

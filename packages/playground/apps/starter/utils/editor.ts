@@ -15,7 +15,7 @@ import {
   CopilotPanel,
 } from '@blocksuite/presets';
 import type { BlockCollection } from '@blocksuite/store';
-import { type DocCollection } from '@blocksuite/store';
+import type { DocCollection } from '@blocksuite/store';
 
 import { CustomChatPanel } from '../../_common/components/custom-chat-panel.js';
 import { CustomFramePanel } from '../../_common/components/custom-frame-panel.js';

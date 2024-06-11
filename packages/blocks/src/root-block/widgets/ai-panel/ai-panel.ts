@@ -255,6 +255,7 @@ export class AffineAIPanelWidget extends WidgetElement {
   };
 
   private _abortController = new AbortController();
+
   private _resetAbortController = () => {
     if (this.state === 'generating') {
       this._abortController.abort();
@@ -263,9 +264,11 @@ export class AffineAIPanelWidget extends WidgetElement {
   };
 
   private _inputText: string | null = null;
+
   get inputText() {
     return this._inputText;
   }
+
   onInput = (text: string) => {
     this._inputText = text;
   };
@@ -273,6 +276,7 @@ export class AffineAIPanelWidget extends WidgetElement {
   private _selection?: BaseSelection[];
 
   private _answer: string | null = null;
+
   get answer() {
     return this._answer;
   }

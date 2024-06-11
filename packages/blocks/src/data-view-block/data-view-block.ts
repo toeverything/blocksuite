@@ -69,6 +69,7 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
       background-color: var(--affine-hover-color);
     }
   `;
+
   private _clickDatabaseOps = (e: MouseEvent) => {
     popMenu(e.currentTarget as HTMLElement, {
       options: {
@@ -168,7 +169,8 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
   }
 
   private _dataSource?: DataSource;
-  public get dataSource(): DataSource {
+
+  get dataSource(): DataSource {
     if (!this._dataSource) {
       this._dataSource = new BlockQueryDataSource(this.host, this.model, {
         type: 'todo',
@@ -216,7 +218,8 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
   );
 
   private _viewSource?: ViewSource;
-  public get viewSource(): ViewSource {
+
+  get viewSource(): ViewSource {
     if (!this._viewSource) {
       this._viewSource = new BlockQueryViewSource(this.model);
     }
@@ -236,6 +239,7 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
         : []
     );
   };
+
   selectionUpdated = new Slot<DataViewSelection | undefined>();
 
   get getFlag() {
@@ -251,6 +255,7 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
       }),
     };
   };
+
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
       dispose: this.host.event.add(name, handler, {

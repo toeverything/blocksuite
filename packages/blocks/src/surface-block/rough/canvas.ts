@@ -10,7 +10,9 @@ import type { Point } from './geometry.js';
 
 export class RoughCanvas {
   private gen: RoughGenerator;
+
   private canvas: HTMLCanvasElement;
+
   private ctx: CanvasRenderingContext2D;
 
   constructor(canvas: HTMLCanvasElement, config?: Config) {

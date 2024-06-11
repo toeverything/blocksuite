@@ -61,8 +61,10 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   selection = new DetailSelection(this);
 
   private get readonly() {
@@ -89,6 +91,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   @query('.add-property')
   accessor addPropertyButton!: HTMLElement;
+
   _clickAddProperty = () => {
     popFilterableSimpleMenu(
       this.addPropertyButton,
@@ -137,7 +140,9 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
       ${this.renderNote()}
     `;
   }
+
   detailSlots?: DetailSlots;
+
   private renderHeader() {
     const header = this.detailSlots?.header;
     if (header) {
@@ -149,6 +154,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     }
     return undefined;
   }
+
   private renderNote() {
     const note = this.detailSlots?.note;
     if (note) {

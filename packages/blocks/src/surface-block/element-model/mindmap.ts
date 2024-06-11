@@ -190,9 +190,9 @@ export class MindmapElementModel extends SurfaceGroupLikeModel<MindmapElementPro
   @yfield()
   accessor style: MindmapStyle = MindmapStyle.ONE;
 
-  connectors: Map<string, LocalConnectorElementModel> = new Map();
+  connectors = new Map<string, LocalConnectorElementModel>();
 
-  extraConnectors: Map<string, LocalConnectorElementModel> = new Map();
+  extraConnectors = new Map<string, LocalConnectorElementModel>();
 
   private _tree!: MindmapRoot;
 

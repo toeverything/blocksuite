@@ -13,7 +13,7 @@ export interface Segment {
   data: number[];
 }
 
-const PARAMS: { [key: string]: number } = {
+const PARAMS: Record<string, number> = {
   A: 7,
   a: 7,
   C: 6,

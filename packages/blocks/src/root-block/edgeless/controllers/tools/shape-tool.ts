@@ -23,12 +23,13 @@ import { ShapeOverlay } from '../../utils/tool-overlay.js';
 import { EdgelessToolController } from './index.js';
 
 export class ShapeToolController extends EdgelessToolController<ShapeTool> {
-  readonly tool = <ShapeTool>{
+  readonly tool = {
     type: 'shape',
     shapeType: 'rect',
-  };
+  } as ShapeTool;
 
   private _draggingElement: ShapeElementModel | null = null;
+
   private _draggingElementId: string | null = null;
 
   // shape overlay
@@ -38,6 +39,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   // For moving selection with space with mouse
   private _moveWithSpaceStartPos: IVec = [0, 0];
+
   private _moveWithSpaceShapePosTemp: SelectionArea | null = null;
 
   private _addNewShape(

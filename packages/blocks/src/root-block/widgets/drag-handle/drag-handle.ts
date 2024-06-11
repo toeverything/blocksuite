@@ -102,16 +102,27 @@ export class AffineDragHandleWidget extends WidgetElement<
   private accessor _dragHandleGrabber!: HTMLDivElement;
 
   draggingElements: BlockElement[] = [];
+
   dropBlockId = '';
+
   dropType: DropType | null = null;
+
   dragging = false;
+
   dragPreview: DragPreview | null = null;
+
   dropIndicator: DropIndicator | null = null;
+
   lastDragPointerState: PointerEventState | null = null;
+
   scale = 1;
+
   noteScale = 1;
+
   cumulativeParentScale = 1;
+
   center: IVec = [0, 0];
+
   rafID = 0;
 
   @state()
@@ -123,13 +134,17 @@ export class AffineDragHandleWidget extends WidgetElement<
   } | null = null;
 
   private _lastHoveredBlockPath: string | null = null;
+
   private _lastShowedBlock: { path: string; el: BlockElement } | null = null;
 
   private _isHoverDragHandleVisible = false;
+
   private _isDragHandleHovered = false;
+
   private _isTopLevelDragHandleVisible = false;
 
   private _anchorBlockId = '';
+
   private _anchorBlockPath: string | null = null;
 
   private _anchorModelDisposables: DisposableGroup | null = null;

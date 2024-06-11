@@ -22,12 +22,18 @@ export class Block {
   blockViewType: BlockViewType = BlockViewType.Display;
 
   readonly model: BlockModel;
+
   readonly id: string;
+
   readonly flavour: string;
+
   readonly version: number;
+
   readonly yChildren: Y.Array<string[]>;
+
   private _byPassProxy: boolean = false;
-  private readonly _stashed: Set<string | number> = new Set();
+
+  private readonly _stashed = new Set<string | number>();
 
   constructor(
     readonly schema: Schema,

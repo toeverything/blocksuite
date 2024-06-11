@@ -10,7 +10,9 @@ export type BaseSelectionOptions = {
 
 export abstract class BaseSelection {
   static readonly type: string;
+
   static readonly group: string;
+
   readonly blockId: string;
 
   constructor({ blockId }: BaseSelectionOptions) {

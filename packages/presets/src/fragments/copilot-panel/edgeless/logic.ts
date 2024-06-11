@@ -30,7 +30,8 @@ import { editImage, jpegBase64ToFile } from './edit-image.js';
 import { genHtml } from './gen-html.js';
 
 export class AIEdgelessLogic {
-  public fromFrame: string = '';
+  fromFrame: string = '';
+
   private targets: Record<
     string,
     {
@@ -39,12 +40,13 @@ export class AIEdgelessLogic {
     }
   > = {};
 
-  public get autoGen() {
+  get autoGen() {
     return this.unsub !== undefined;
   }
 
   private unsub?: () => void;
-  public toggleAutoGen = () => {
+
+  toggleAutoGen = () => {
     if (this.unsub) {
       this.unsub();
       this.unsub = undefined;
@@ -156,6 +158,7 @@ export class AIEdgelessLogic {
       await edgelessRoot.addImages([file]);
     }
   };
+
   createImageFromFrame = async () => {
     const from = this.host.doc.getBlockById(
       this.fromFrame ?? ''

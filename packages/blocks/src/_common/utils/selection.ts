@@ -1,7 +1,7 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import { type InlineRange, type VLine } from '@blocksuite/inline';
+import type { InlineRange, VLine } from '@blocksuite/inline';
 import type { BlockModel } from '@blocksuite/store';
 
 import type { PageRootBlockComponent } from '../../root-block/page/page-root-block.js';

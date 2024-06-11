@@ -34,11 +34,13 @@ export class AttachmentAdapter extends BaseAdapter<Attachment> {
   ): Promise<FromDocSnapshotResult<Attachment>> {
     throw new Error('Method not implemented.');
   }
+
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<Attachment>> {
     throw new Error('Method not implemented.');
   }
+
   override fromSliceSnapshot(
     payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<Attachment>> {
@@ -59,16 +61,19 @@ export class AttachmentAdapter extends BaseAdapter<Attachment> {
     }
     return Promise.resolve({ file: attachments, assetsIds: [] });
   }
+
   override toDocSnapshot(
     _payload: ToDocSnapshotPayload<Attachment>
   ): Promise<DocSnapshot> {
     throw new Error('Method not implemented.');
   }
+
   override toBlockSnapshot(
     _payload: ToBlockSnapshotPayload<Attachment>
   ): Promise<BlockSnapshot> {
     throw new Error('Method not implemented.');
   }
+
   override async toSliceSnapshot(
     payload: AttachmentToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {

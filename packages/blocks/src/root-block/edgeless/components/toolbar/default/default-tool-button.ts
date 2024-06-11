@@ -13,6 +13,7 @@ import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 @customElement('edgeless-default-tool-button')
 export class EdgelessDefaultToolButton extends QuickToolMixin(LitElement) {
   override type: EdgelessTool['type'][] = ['default', 'pan'];
+
   static override styles = css`
     .current-icon {
       transition: 100ms;

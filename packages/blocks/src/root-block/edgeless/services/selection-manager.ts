@@ -35,7 +35,9 @@ export interface CursorSelectionState {
 
 export class EdgelessSelectionManager {
   service!: EdgelessRootService;
+
   surfaceModel!: SurfaceBlockModel;
+
   disposable: DisposableGroup = new DisposableGroup();
 
   readonly slots = {
@@ -47,28 +49,37 @@ export class EdgelessSelectionManager {
   };
 
   private _lastSurfaceSelections: SurfaceSelection[] = [];
-  private _surfaceSelections: SurfaceSelection[] = [];
-  private _cursorSelection: CursorSelection | null = null;
-  private _activeGroup: GroupElementModel | MindmapElementModel | null = null;
-  private _selectedSet: Set<string> = new Set();
 
-  private _remoteSelectedSet: Set<string> = new Set();
-  private _remoteCursorSelectionMap: Map<number, CursorSelection> = new Map();
-  private _remoteSurfaceSelectionsMap: Map<number, SurfaceSelection[]> =
-    new Map();
+  private _surfaceSelections: SurfaceSelection[] = [];
+
+  private _cursorSelection: CursorSelection | null = null;
+
+  private _activeGroup: GroupElementModel | MindmapElementModel | null = null;
+
+  private _selectedSet = new Set<string>();
+
+  private _remoteSelectedSet = new Set<string>();
+
+  private _remoteCursorSelectionMap = new Map<number, CursorSelection>();
+
+  private _remoteSurfaceSelectionsMap = new Map<number, SurfaceSelection[]>();
 
   get lastSurfaceSelections() {
     return this._lastSurfaceSelections;
   }
+
   get surfaceSelections() {
     return this._surfaceSelections;
   }
+
   get cursorSelection() {
     return this._cursorSelection;
   }
+
   get activeGroup() {
     return this._activeGroup;
   }
+
   get selectedSet() {
     return this._selectedSet;
   }
@@ -76,9 +87,11 @@ export class EdgelessSelectionManager {
   get remoteSelectedSet() {
     return this._remoteSelectedSet;
   }
+
   get remoteCursorSelectionMap() {
     return this._remoteCursorSelectionMap;
   }
+
   get remoteSurfaceSelectionsMap() {
     return this._remoteSurfaceSelectionsMap;
   }

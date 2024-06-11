@@ -8,6 +8,7 @@ const BlockSelectionSchema = z.object({
 
 export class BlockSelection extends BaseSelection {
   static override type = 'block';
+
   static override group = 'note';
 
   override equals(other: BaseSelection): boolean {

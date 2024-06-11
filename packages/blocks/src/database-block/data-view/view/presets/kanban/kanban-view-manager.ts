@@ -72,11 +72,11 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     });
   }
 
-  public columnGet(columnId: string): DataViewKanbanColumnManager {
+  columnGet(columnId: string): DataViewKanbanColumnManager {
     return new DataViewKanbanColumnManager(columnId, this);
   }
 
-  public columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
+  columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
     this.updateView(view => {
       const columnIndex = view.columns.findIndex(v => v.id === columnId);
       if (columnIndex < 0) {
@@ -91,21 +91,22 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
       };
     });
   }
-  public override rowMove(rowId: string, position: InsertToPosition): void {
+
+  override rowMove(rowId: string, position: InsertToPosition): void {
     this.dataSource.rowMove(rowId, position);
   }
 
-  public get columns(): string[] {
+  get columns(): string[] {
     return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
   }
 
-  public get detailColumns(): string[] {
+  get detailColumns(): string[] {
     return this.columnsWithoutFilter.filter(
       id => this.columnGetType(id) !== 'title'
     );
   }
 
-  public get columnsWithoutFilter(): string[] {
+  get columnsWithoutFilter(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
     this.view.columns.forEach(v => {
@@ -118,7 +119,7 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     return result;
   }
 
-  public isShow(rowId: string): boolean {
+  isShow(rowId: string): boolean {
     if (this.filter.conditions.length) {
       const rowMap = Object.fromEntries(
         this.columnManagerList.map(column => [
@@ -156,7 +157,7 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     });
   }
 
-  public get groupHelper(): GroupHelper | undefined {
+  get groupHelper(): GroupHelper | undefined {
     const groupBy = this.view.groupBy;
     if (!groupBy) {
       return;
@@ -233,21 +234,21 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     });
   }
 
-  public addCard(position: InsertToPosition, group: string) {
+  addCard(position: InsertToPosition, group: string) {
     const id = this.rowAdd(position);
     this.groupHelper?.addToGroup(id, group);
     return id;
   }
 
-  public get type(): string {
+  get type(): string {
     return this.view.mode;
   }
 
-  public get header() {
+  get header() {
     return this.view.header;
   }
 
-  public isInHeader(columnId: string) {
+  isInHeader(columnId: string) {
     const hd = this.view.header;
 
     return (
@@ -257,14 +258,12 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     );
   }
 
-  public hasHeader(_rowId: string): boolean {
+  hasHeader(_rowId: string): boolean {
     const hd = this.view.header;
     return !!hd.titleColumn || !!hd.iconColumn || !!hd.coverColumn;
   }
 
-  public getHeaderTitle(
-    _rowId: string
-  ): DataViewKanbanColumnManager | undefined {
+  getHeaderTitle(_rowId: string): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.titleColumn;
     if (!columnId) {
       return;
@@ -272,9 +271,7 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     return this.columnGet(columnId);
   }
 
-  public getHeaderIcon(
-    _rowId: string
-  ): DataViewKanbanColumnManager | undefined {
+  getHeaderIcon(_rowId: string): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.iconColumn;
     if (!columnId) {
       return;
@@ -282,9 +279,7 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     return this.columnGet(columnId);
   }
 
-  public getHeaderCover(
-    _rowId: string
-  ): DataViewKanbanColumnManager | undefined {
+  getHeaderCover(_rowId: string): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.coverColumn;
     if (!columnId) {
       return;
@@ -311,14 +306,15 @@ export class DataViewKanbanManager extends DataViewManagerBase<KanbanViewData> {
     return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
 
-  public duplicateView(): void {
+  duplicateView(): void {
     this.viewSource.duplicate();
   }
-  public deleteView(): void {
+
+  deleteView(): void {
     this.viewSource.delete();
   }
 
-  public get isDeleted(): boolean {
+  get isDeleted(): boolean {
     return this.viewSource.isDeleted();
   }
 }

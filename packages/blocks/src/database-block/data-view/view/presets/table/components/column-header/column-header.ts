@@ -24,7 +24,9 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private get readonly() {
     return this.tableViewManager.readonly;
   }
+
   private addColumnPositionRef = createRef();
+
   addColumnButton = renderTemplate(() => {
     if (this.readonly) return nothing;
 
@@ -36,7 +38,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     </div>`;
   });
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
       this.tableViewManager.slots.update.on(() => {

@@ -23,14 +23,19 @@ export class NoteRenderer
       --affine-editor-side-padding: 0;
     }
   `;
+
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   @property({ attribute: false })
   accessor model!: DatabaseBlockModel;
+
   @property({ attribute: false })
   accessor host!: EditorHost;
+
   @query('editor-host')
   accessor subHost!: EditorHost;
 
@@ -38,7 +43,7 @@ export class NoteRenderer
     return this.model;
   }
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.databaseBlock.propsUpdated.on(({ key }) => {
       if (key === 'notes') {
@@ -47,7 +52,7 @@ export class NoteRenderer
     });
   }
 
-  public addNote() {
+  addNote() {
     const collection = this.host?.std.collection;
     if (!collection) {
       return;

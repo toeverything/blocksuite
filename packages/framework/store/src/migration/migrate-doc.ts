@@ -38,11 +38,14 @@ export const docMigrations: IDocMigration[] = [
           frameModel.set('sys:flavour', 'affine:frame');
           frameModel.set('sys:id', id);
           frameModel.set('sys:children', new Y.Array());
-          frameModel.set('prop:title', (<Y.Text>element.get('title')).clone());
+          frameModel.set(
+            'prop:title',
+            (element.get('title') as Y.Text).clone()
+          );
           frameModel.set('prop:xywh', element.get('xywh'));
           frameModel.set('prop:index', element.get('index'));
           blocks.set(id, frameModel);
-          (<Y.Array<string>>rootModel.get('sys:children')).push([id]);
+          (rootModel.get('sys:children') as Y.Array<string>).push([id]);
           elements.delete(id);
         }
       });

@@ -123,7 +123,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @state()
   private accessor _slicerAnchorNote: NoteBlockModel | null = null;
 
-  private _visibleElements: Set<EdgelessBlockModel> = new Set();
+  private _visibleElements = new Set<EdgelessBlockModel>();
 
   concurrentRendering: number = 2;
 

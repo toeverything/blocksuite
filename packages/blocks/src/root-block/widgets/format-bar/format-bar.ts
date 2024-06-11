@@ -58,12 +58,14 @@ export class AffineFormatBarWidget extends WidgetElement {
 
   @state()
   private accessor _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
+
   get displayType() {
     return this._displayType;
   }
 
   @state()
   private accessor _selectedBlockElements: BlockElement[] = [];
+
   get selectedBlockElements() {
     return this._selectedBlockElements;
   }

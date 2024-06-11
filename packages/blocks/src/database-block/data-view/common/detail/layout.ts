@@ -65,8 +65,10 @@ class SideLayoutModal extends ShadowlessElement {
       background-color: var(--affine-hover-color);
     }
   `;
+
   @property({ attribute: false })
   accessor content: HTMLElement | undefined = undefined;
+
   @property({ attribute: false })
   accessor close: (() => void) | undefined = undefined;
 

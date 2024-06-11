@@ -2,8 +2,9 @@ import type { IPoint } from './index.js';
 import { clamp } from './math.js';
 
 export class Point {
-  public x: number;
-  public y: number;
+  x: number;
+
+  y: number;
 
   constructor(x = 0, y = 0) {
     this.x = x;
@@ -87,9 +88,10 @@ export class Point {
 
 export class Rect {
   // `[left, top]`
-  public min: Point;
+  min: Point;
+
   // `[right, bottom]`
-  public max: Point;
+  max: Point;
 
   constructor(left: number, top: number, right: number, bottom: number) {
     const [minX, maxX] = left <= right ? [left, right] : [right, left];

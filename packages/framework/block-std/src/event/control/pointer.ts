@@ -8,11 +8,17 @@ import { isFarEnough } from '../utils.js';
 
 export class PointerControl {
   private _lastPointerDownEvent: PointerEvent | null = null;
+
   private _startDragState: PointerEventState | null = null;
+
   private _lastDragState: PointerEventState | null = null;
+
   private _pointerDownCount = 0;
+
   private _dragging = false;
+
   private _startX = -Infinity;
+
   private _startY = -Infinity;
 
   constructor(private _dispatcher: UIEventDispatcher) {}

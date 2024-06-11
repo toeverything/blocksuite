@@ -34,6 +34,7 @@ export type ExportOptions = {
 };
 export class ExportManager {
   private _exportOptions: ExportOptions;
+
   private _blockService: BlockService;
 
   constructor(blockService: BlockService, options: ExportOptions) {
@@ -190,7 +191,7 @@ export class ExportManager {
   }
 
   // TODO: refactor of this part
-  public async edgelessToCanvas(
+  async edgelessToCanvas(
     surfaceRenderer: Renderer,
     bound: IBound,
     blockElementGetter: (model: BlockModel) => Element | null = () => null,
@@ -476,7 +477,7 @@ export class ExportManager {
     }
   }
 
-  public async exportPng() {
+  async exportPng() {
     const rootModel = this.doc.root;
     if (!rootModel) return;
     const canvasImage = await this._toCanvas();
@@ -490,7 +491,7 @@ export class ExportManager {
     );
   }
 
-  public replaceImgSrcWithSvg = async (element: HTMLElement) => {
+  replaceImgSrcWithSvg = async (element: HTMLElement) => {
     const imgList = Array.from(element.querySelectorAll('img'));
     // Create an array of promises
     const promises = imgList.map(img => {
@@ -538,7 +539,7 @@ export class ExportManager {
     await Promise.all(promises);
   };
 
-  public async exportPdf() {
+  async exportPdf() {
     const rootModel = this.doc.root;
     if (!rootModel) return;
     const canvasImage = await this._toCanvas();

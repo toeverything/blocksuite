@@ -83,6 +83,7 @@ export class AIPanelAnswer extends WithDisposable(LitElement) {
       --item-icon-hover-color: var(--affine-icon-color);
     }
   `;
+
   @property({ attribute: false })
   accessor config!: AIPanelAnswerConfig;
 

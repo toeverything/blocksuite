@@ -63,6 +63,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   @query('.inline-editor')
   private accessor _inlineEditorContainer!: HTMLDivElement;
+
   get inlineEditorContainer() {
     assertExists(this._inlineEditorContainer);
     return this._inlineEditorContainer;
@@ -73,6 +74,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor attributesSchema: z.ZodSchema | undefined = undefined;
+
   @property({ attribute: false })
   accessor attributeRenderer: AttributeRenderer | undefined = undefined;
 
@@ -99,6 +101,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor inlineRangeProvider: InlineRangeProvider | undefined = undefined;
+
   // rich-text will create a undoManager if it is not provided.
   @property({ attribute: false })
   accessor undoManager!: Y.UndoManager;
@@ -106,13 +109,16 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   // If it is true rich-text will prevent events related to clipboard bubbling up and handle them by itself.
   @property({ attribute: false })
   accessor enableClipboard = true;
+
   // If it is true rich-text will handle undo/redo by itself. (including v-range restore)
   // It will listen ctrl+z/ctrl+shift+z and call undoManager.undo/redo, keydown event will not
   // bubble up if pressed ctrl+z/ctrl+shift+z.
   @property({ attribute: false })
   accessor enableUndoRedo = true;
+
   @property({ attribute: false })
   accessor enableAutoScrollHorizontally = true;
+
   @property({ attribute: false })
   accessor wrapText = true;
 
@@ -124,9 +130,11 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   accessor verticalScrollContainerGetter:
     | (() => HTMLElement | null)
     | undefined = undefined;
+
   #verticalScrollContainer: HTMLElement | null = null;
 
   private _inlineEditor: AffineInlineEditor | null = null;
+
   get inlineEditor() {
     return this._inlineEditor;
   }

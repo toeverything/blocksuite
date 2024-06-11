@@ -63,6 +63,7 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
   private accessor _xywh: SerializedXYWH | null = null;
 
   private _cachedWidth = 0;
+
   private _cachedHeight = 0;
 
   override connectedCallback() {

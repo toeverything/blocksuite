@@ -26,14 +26,14 @@ import {
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { NoteDisplayMode } from '../../../_common/types.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { type NoteBlockModel } from '../../../note-block/note-model.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { StrokeStyle } from '../../../surface-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
 import {
   type EdgelessMenuButton,
   renderMenuDivider,
 } from '../../edgeless/components/buttons/menu-button.js';
-import { type ColorEvent } from '../../edgeless/components/panel/color-panel.js';
+import type { ColorEvent } from '../../edgeless/components/panel/color-panel.js';
 import {
   type LineStyleEvent,
   LineStylesPanel,
@@ -98,6 +98,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   accessor quickConnectButton!: TemplateResult<1>;
 
   private accessor _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
+
   private accessor _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
 
   private get doc() {

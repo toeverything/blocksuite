@@ -17,6 +17,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
   WithDisposable(LitElement)
 ) {
   override type = 'lasso' as const;
+
   static override styles = css`
     .current-icon {
       transition: 100ms;
@@ -49,6 +50,7 @@ export class EdgelessDefaultToolButton extends QuickToolMixin(
     this.currentIcon.style.opacity = '1';
     this.currentIcon.style.transform = `translateY(0px)`;
   }
+
   override connectedCallback(): void {
     super.connectedCallback();
 

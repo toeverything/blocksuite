@@ -89,6 +89,7 @@ export class AffineCustomModal extends LitElement {
   `;
 
   options!: ModalOptions;
+
   onOpen!: (div: HTMLDivElement) => void;
 
   close() {

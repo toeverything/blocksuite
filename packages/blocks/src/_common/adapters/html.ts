@@ -10,6 +10,11 @@ import type {
   ToBlockSnapshotPayload,
   ToDocSnapshotPayload,
 } from '@blocksuite/store';
+import type {
+  BlockSnapshot,
+  DocSnapshot,
+  SliceSnapshot,
+} from '@blocksuite/store';
 import {
   type AssetsManager,
   BlockSnapshotSchema,
@@ -17,11 +22,6 @@ import {
   nanoid,
 } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
-import {
-  type BlockSnapshot,
-  type DocSnapshot,
-  type SliceSnapshot,
-} from '@blocksuite/store';
 import type { ElementContent, Root, Text } from 'hast';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
@@ -81,6 +81,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       assetsIds,
     };
   }
+
   override async fromBlockSnapshot(
     payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<string>> {
@@ -102,6 +103,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       assetsIds,
     };
   }
+
   override async fromSliceSnapshot(
     payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<string>> {
@@ -126,6 +128,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       assetsIds: sliceAssetsIds,
     };
   }
+
   override async toDocSnapshot(
     payload: ToDocSnapshotPayload<string>
   ): Promise<DocSnapshot> {
@@ -186,6 +189,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       },
     };
   }
+
   override toBlockSnapshot(
     payload: ToBlockSnapshotPayload<string>
   ): Promise<BlockSnapshot> {
@@ -209,6 +213,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       payload.assets
     );
   }
+
   override async toSliceSnapshot(
     payload: HtmlToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {

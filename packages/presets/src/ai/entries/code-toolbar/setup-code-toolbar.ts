@@ -1,8 +1,8 @@
 import '../../_common/components/ask-ai-button.js';
 
-import {
-  type AffineCodeToolbarWidget,
-  type CodeBlockComponent,
+import type {
+  AffineCodeToolbarWidget,
+  CodeBlockComponent,
 } from '@blocksuite/blocks';
 import { html } from 'lit';
 

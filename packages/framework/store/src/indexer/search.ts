@@ -65,7 +65,9 @@ const REINDEX_TIMEOUT = 200;
 
 export class SearchIndexer {
   private readonly _doc: BlockSuiteDoc;
+
   private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
+
   private _reindexMap: Map<string, IndexMeta> | null = null;
 
   constructor(
@@ -152,7 +154,7 @@ export class SearchIndexer {
     }
   }
 
-  public refreshDocIndex(docId: string, doc: Doc) {
+  refreshDocIndex(docId: string, doc: Doc) {
     const yBlocks = doc.getMap('blocks') as YBlocks;
     yBlocks.forEach((_, key) => {
       this._refreshIndex(docId, key, 'add', yBlocks.get(key));

@@ -66,8 +66,10 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-hover-color);
     }
   `;
+
   @property({ attribute: false })
   accessor isRoot = false;
+
   @property({ attribute: false })
   accessor data!: FilterGroup;
 
@@ -76,8 +78,10 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor setData!: (filter: FilterGroup) => void;
+
   @property({ attribute: false })
   accessor onDelete!: () => void;
+
   @property({ attribute: false })
   accessor onBack!: () => void;
 

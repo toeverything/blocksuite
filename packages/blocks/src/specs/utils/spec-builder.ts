@@ -3,6 +3,7 @@ import { assertExists, type DisposableGroup } from '@blocksuite/global/utils';
 
 export class SpecBuilder {
   private readonly _value: BlockSpec[];
+
   constructor(spec: BlockSpec[]) {
     this._value = [...spec];
   }

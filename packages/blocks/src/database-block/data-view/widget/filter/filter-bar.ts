@@ -47,6 +47,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       line-height: 22px;
     }
   `;
+
   @property({ attribute: false })
   accessor data!: FilterGroup;
 
@@ -55,6 +56,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor setData!: (filter: FilterGroup) => void;
+
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,
@@ -63,9 +65,11 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ),
     });
   };
+
   override updated() {
     this.updateMoreFilterPanel?.();
   }
+
   private addFilter = (e: MouseEvent) => {
     const position = eventToVRect(e);
     popCreateFilter(position, {
@@ -82,6 +86,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       },
     });
   };
+
   private expandGroup = (position: ReferenceElement, i: number) => {
     const value = this.data.conditions[i];
     if (value.type !== 'group') {
@@ -100,6 +105,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       },
     });
   };
+
   renderMoreFilter = (count: number): TemplateResult => {
     return html` <div
       class="dv-shadow-2 dv-round-8"
@@ -116,6 +122,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       ${this.renderAddFilter()}
     </div>`;
   };
+
   updateMoreFilterPanel?: () => void;
 
   showMoreFilter = (e: MouseEvent, count: number) => {

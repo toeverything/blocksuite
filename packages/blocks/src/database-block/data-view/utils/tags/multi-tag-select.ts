@@ -63,6 +63,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   newTags = (tags: SelectTag[]) => {
     this.onOptionsChange([...tags, ...this.options]);
   };
+
   deleteTag = (id: string) => {
     this.onOptionsChange(
       this.options
@@ -73,6 +74,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
         }))
     );
   };
+
   changeTag = (tag: SelectTag) => {
     this.onOptionsChange(this.options.map(v => (v.id === tag.id ? tag : v)));
   };

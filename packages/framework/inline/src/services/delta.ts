@@ -13,7 +13,7 @@ import {
 } from '../utils/index.js';
 
 export class DeltaService<TextAttributes extends BaseTextAttributes> {
-  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   get deltas() {
     return this.editor.yText.toDelta() as DeltaInsert<TextAttributes>[];

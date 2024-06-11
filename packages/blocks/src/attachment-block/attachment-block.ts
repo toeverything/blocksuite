@@ -34,6 +34,7 @@ export class AttachmentBlockComponent extends BlockComponent<
   AttachmentBlockService
 > {
   override accessor useCaptionEditor = true;
+
   static override styles = styles;
 
   @property({ attribute: false })

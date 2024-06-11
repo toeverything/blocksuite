@@ -115,6 +115,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   accessor editor!: AffineEditorContainer;
 
   editorWithAI?: AIEdgelessLogic;
+
   aiLogic?: AILogic;
 
   get host() {
@@ -128,7 +129,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     return this.aiLogic;
   }
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
       getSurfaceElementFromEditor(this.host).model.childrenUpdated.on(() => {

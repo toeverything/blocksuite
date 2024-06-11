@@ -1,5 +1,5 @@
 import type { TextSelection } from '@blocksuite/block-std';
-import { type EditorHost, type TextRangePoint } from '@blocksuite/block-std';
+import type { EditorHost, TextRangePoint } from '@blocksuite/block-std';
 import {
   defaultImageProxyMiddleware,
   MarkdownAdapter,

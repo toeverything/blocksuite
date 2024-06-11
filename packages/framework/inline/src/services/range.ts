@@ -19,10 +19,12 @@ import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 
 export class RangeService<TextAttributes extends BaseTextAttributes> {
   private _inlineRange: InlineRange | null = null;
+
   private _lastStartRelativePosition: Y.RelativePosition | null = null;
+
   private _lastEndRelativePosition: Y.RelativePosition | null = null;
 
-  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   get yText() {
     return this.editor.yText;
@@ -39,6 +41,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
   get lastStartRelativePosition() {
     return this._lastStartRelativePosition;
   }
+
   get lastEndRelativePosition() {
     return this._lastEndRelativePosition;
   }

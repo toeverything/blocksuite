@@ -13,7 +13,9 @@ export class Space<
   State extends Record<string, unknown> = Record<string, any>,
 > {
   readonly id: string;
+
   readonly rootDoc: BlockSuiteDoc;
+
   readonly awarenessStore: AwarenessStore;
 
   private _loaded!: boolean;
@@ -25,6 +27,7 @@ export class Space<
    * can be used interchangeably with ySpace
    */
   protected readonly _ySpaceDoc: Y.Doc;
+
   protected readonly _yBlocks: Y.Map<State[keyof State]>;
 
   constructor(

@@ -20,6 +20,7 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
       z-index: 1;
     }
   `;
+
   @state()
   private accessor _show = false;
 
@@ -30,7 +31,7 @@ export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
     return html`<frame-panel .editor=${this.editor}></frame-panel>`;
   }
 
-  public toggleDisplay() {
+  toggleDisplay() {
     this._show = !this._show;
   }
 

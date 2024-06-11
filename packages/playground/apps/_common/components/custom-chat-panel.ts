@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
-import { type AffineEditorContainer } from '@blocksuite/presets';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -19,17 +19,18 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
       z-index: 1;
     }
   `;
+
   @state()
   private accessor _show = false;
 
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
 
-  public toggleDisplay() {
+  toggleDisplay() {
     this._show = !this._show;
   }
 
-  public show() {
+  show() {
     this._show = true;
   }
 

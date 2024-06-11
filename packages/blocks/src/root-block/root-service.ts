@@ -75,13 +75,16 @@ export interface QuickSearchService {
 
 export class RootService extends BlockService<RootBlockModel> {
   readonly fontLoader = new FontLoader();
+
   readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
 
   fileDropManager!: FileDropManager;
+
   exportManager!: ExportManager;
 
   // implements provided by affine
   notificationService: NotificationService | null = null;
+
   peekViewService: PeekViewService | null = null;
 
   transformers = {

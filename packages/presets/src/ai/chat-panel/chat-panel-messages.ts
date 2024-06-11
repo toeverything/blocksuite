@@ -17,7 +17,7 @@ import type {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
-import { type EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type { ImageSelection } from '@blocksuite/blocks';
 import {
@@ -45,10 +45,10 @@ import {
   EdgelessEditorActions,
   PageEditorActions,
 } from './actions/actions-handle.js';
-import {
-  type ChatContextValue,
-  type ChatItem,
-  type ChatMessage,
+import type {
+  ChatContextValue,
+  ChatItem,
+  ChatMessage,
 } from './chat-context.js';
 import { HISTORY_IMAGE_ACTIONS } from './const.js';
 
@@ -162,17 +162,20 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
   accessor messagesContainer!: HTMLDivElement;
 
   private _selectionValue: BaseSelection[] = [];
+
   private get _currentTextSelection(): TextSelection | undefined {
     return this._selectionValue.find(v => v.type === 'text') as TextSelection;
   }
+
   private get _currentBlockSelections(): BlockSelection[] | undefined {
     return this._selectionValue.filter(v => v.type === 'block');
   }
+
   private get _currentImageSelections(): ImageSelection[] | undefined {
     return this._selectionValue.filter(v => v.type === 'image');
   }
 
-  public override async connectedCallback() {
+  override async connectedCallback() {
     super.connectedCallback();
 
     const res = await AIProvider.userInfo;

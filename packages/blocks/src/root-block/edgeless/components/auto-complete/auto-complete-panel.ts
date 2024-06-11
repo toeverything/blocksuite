@@ -20,7 +20,7 @@ import {
   FontStyle,
   FontWeight,
 } from '../../../../surface-block/consts.js';
-import { type Connection } from '../../../../surface-block/element-model/connector.js';
+import type { Connection } from '../../../../surface-block/element-model/connector.js';
 import {
   CanvasElementType,
   type ConnectorElementModel,

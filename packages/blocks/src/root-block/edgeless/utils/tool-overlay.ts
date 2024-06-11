@@ -80,8 +80,11 @@ const drawGeneralShape = (
 
 export abstract class Shape {
   xywh: XYWH;
+
   type: string;
+
   options: Options;
+
   shapeStyle: ShapeStyle;
 
   constructor(
@@ -211,17 +214,21 @@ export class ShapeFactory {
 }
 
 class ToolOverlay extends Overlay {
-  public x: number;
-  public y: number;
-  public globalAlpha: number;
+  x: number;
+
+  y: number;
+
+  globalAlpha: number;
+
   protected edgeless: EdgelessRootBlockComponent;
+
   protected disposables!: DisposableGroup;
 
   get computedStyle() {
     return getComputedStyle(this.edgeless);
   }
 
-  public isTransparent(color: string): boolean {
+  isTransparent(color: string): boolean {
     return color.includes('transparent');
   }
 
@@ -258,7 +265,7 @@ class ToolOverlay extends Overlay {
 }
 
 export class ShapeOverlay extends ToolOverlay {
-  public shape: Shape;
+  shape: Shape;
 
   private _getRealStrokeColor(color: string) {
     const realStrokeColor = this.computedStyle.getPropertyValue(
@@ -345,8 +352,9 @@ export class ShapeOverlay extends ToolOverlay {
 }
 
 export class NoteOverlay extends ToolOverlay {
-  public text = '';
-  public backgroundColor = 'transparent';
+  text = '';
+
+  backgroundColor = 'transparent';
 
   private _getOverlayText(text: string): string {
     return text[0].toUpperCase() + text.slice(1);
@@ -451,8 +459,11 @@ export class DraggingNoteOverlay extends NoteOverlay {
   slots: {
     draggingNoteUpdated: Slot<{ xywh: XYWH }>;
   };
+
   width: number;
+
   height: number;
+
   constructor(
     edgeless: EdgelessRootBlockComponent,
     background: CssVariableName

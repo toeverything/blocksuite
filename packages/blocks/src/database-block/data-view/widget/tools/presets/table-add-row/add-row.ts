@@ -41,7 +41,7 @@ export class DataViewHeaderToolsAddRow extends WidgetBase {
     return this.view.readonly;
   }
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     if (!this.readonly) {
       this.disposables.addFromEvent(this, 'pointerdown', e => {

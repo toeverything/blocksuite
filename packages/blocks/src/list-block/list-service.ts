@@ -15,7 +15,9 @@ export class ListBlockService<
   TextAttributes extends AffineTextAttributes = AffineTextAttributes,
 > extends BlockService<ListBlockModel> {
   readonly inlineManager = new InlineManager<TextAttributes>();
+
   readonly referenceNodeConfig = new ReferenceNodeConfig();
+
   readonly styles = {
     icon: ListIcon,
     prefix: listPrefix,

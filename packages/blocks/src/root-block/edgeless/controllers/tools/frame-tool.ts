@@ -2,20 +2,18 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import {
-  type FrameTool,
-  type IPoint,
-} from '../../../../_common/utils/index.js';
+import type { FrameTool, IPoint } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class FrameToolController extends EdgelessToolController<FrameTool> {
-  readonly tool = <FrameTool>{
+  readonly tool = {
     type: 'frame',
-  };
+  } as FrameTool;
 
   private _startPoint: IVec | null = null;
+
   private _frame: FrameBlockModel | null = null;
 
   private _toModelCoord(p: IPoint): IVec {
@@ -25,11 +23,13 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   override onContainerPointerDown(): void {
     noop();
   }
+
   override onContainerDragStart(e: PointerEventState): void {
     this._doc.captureSync();
     const { point } = e;
     this._startPoint = this._toModelCoord(point);
   }
+
   override onContainerDragMove(e: PointerEventState): void {
     const currentPoint = this._toModelCoord(e.point);
     assertExists(this._startPoint);
@@ -55,6 +55,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
     });
   }
+
   override onContainerDragEnd(): void {
     if (this._frame) {
       const frame = this._frame;
@@ -71,24 +72,31 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     this._frame = null;
     this._startPoint = null;
   }
+
   override onContainerClick(): void {
     noop();
   }
+
   override onContainerDblClick(): void {
     noop();
   }
+
   override onContainerTripleClick(): void {
     noop();
   }
+
   override onContainerMouseMove(): void {
     noop();
   }
+
   override onContainerMouseOut(): void {
     noop();
   }
+
   override onContainerContextMenu(): void {
     noop();
   }
+
   override onPressShiftKey(): void {
     noop();
   }
@@ -100,6 +108,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   override beforeModeSwitch(): void {
     noop();
   }
+
   override afterModeSwitch(): void {
     noop();
   }

@@ -18,7 +18,7 @@ export class AttributeService<TextAttributes extends BaseTextAttributes> {
   private _attributeSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown> =
     baseTextAttributes as z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
 
-  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   get marks() {
     return this._marks;

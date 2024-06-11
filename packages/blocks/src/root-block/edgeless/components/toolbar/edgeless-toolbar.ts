@@ -204,13 +204,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     context: edgelessToolbarSlotsContext,
     initialValue: { resize: new Slot() } satisfies EdgelessToolbarSlots,
   });
+
   get slots() {
     return this._slotsProvider.value;
   }
+
   private _themeProvider = new ContextProvider(this, {
     context: edgelessToolbarThemeContext,
     initialValue: getThemeMode(),
   });
+
   private _themeObserver = new ThemeObserver();
 
   constructor(edgeless: EdgelessRootBlockComponent) {
@@ -227,10 +230,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   @state()
   accessor containerWidth = 1920;
+
   @state()
   accessor presentSettingMenuShow = false;
+
   @state()
   accessor presentFrameMenuShow = false;
+
   @state()
   accessor scrollSeniorToolIndex = 0;
 
@@ -247,6 +253,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       !this.presentFrameMenuShow
     );
   }
+
   get host() {
     return this.edgeless.host;
   }
@@ -281,7 +288,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _moreQuickToolsMenu: MenuHandler | null = null;
+
   private _moreQuickToolsMenuRef: HTMLElement | null = null;
+
   private _onContainerResize = debounce(({ w }: { w: number }) => {
     this.slots.resize.emit({ w, h: TOOLBAR_HEIGHT });
     this.containerWidth = w;
@@ -350,12 +359,14 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
   }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
     }
   }
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
 
@@ -398,21 +409,25 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private get _availableWidth() {
     return this.containerWidth - 2 * SAFE_AREA_WIDTH;
   }
+
   private get _quickToolsWidthTotal() {
     return (
       this._quickTools.length * (QUICK_TOOL_SIZE + QUICK_TOOLS_GAP) -
       QUICK_TOOLS_GAP
     );
   }
+
   private get _seniorToolsWidthTotal() {
     return (
       this._seniorTools.length * (SENIOR_TOOL_WIDTH + SENIOR_TOOLS_GAP) -
       SENIOR_TOOLS_GAP
     );
   }
+
   private get _spaceWidthTotal() {
     return DIVIDER_WIDTH + DIVIDER_SPACE * 2 + TOOLBAR_PADDING_X * 2;
   }
+
   private get _denseSeniorTools() {
     return (
       this._availableWidth -
@@ -421,11 +436,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this._seniorToolsWidthTotal
     );
   }
+
   private get _seniorToolNavWidth() {
     return this._denseSeniorTools
       ? (SENIOR_TOOL_NAV_SIZE + DIVIDER_SPACE) * 2
       : 0;
   }
+
   private get _denseQuickTools() {
     return (
       this._availableWidth -
@@ -435,6 +452,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this._quickToolsWidthTotal
     );
   }
+
   private get _visibleQuickToolSize() {
     if (!this._denseQuickTools) return this._quickTools.length;
     const availableWidth =
@@ -450,6 +468,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       )
     );
   }
+
   private get _hiddenQuickTools() {
     return this._quickTools
       .slice(this._visibleQuickToolSize)
@@ -473,6 +492,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private get _seniorScrollPrevDisabled() {
     return this.scrollSeniorToolIndex === 0;
   }
+
   private get _seniorScrollNextDisabled() {
     return (
       this.scrollSeniorToolIndex + this.scrollSeniorToolSize >=

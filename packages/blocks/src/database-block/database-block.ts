@@ -87,7 +87,9 @@ export class DatabaseBlockComponent extends BlockComponent<
       background-color: var(--affine-hover-color);
     }
   `;
+
   indicator = new DragIndicator();
+
   onDrag = (evt: MouseEvent, id: string): (() => void) => {
     const result = getDropResult(evt);
     if (result && result.rect) {
@@ -124,6 +126,7 @@ export class DatabaseBlockComponent extends BlockComponent<
     this.indicator.remove();
     return () => {};
   };
+
   private _clickDatabaseOps = (e: MouseEvent) => {
     popMenu(e.currentTarget as HTMLElement, {
       options: {
@@ -266,7 +269,8 @@ export class DatabaseBlockComponent extends BlockComponent<
   }
 
   private _dataSource?: DatabaseBlockDataSource;
-  public get dataSource(): DatabaseBlockDataSource {
+
+  get dataSource(): DatabaseBlockDataSource {
     if (!this._dataSource) {
       this._dataSource = new DatabaseBlockDataSource(this.host, {
         pageId: this.host.doc.id,
@@ -324,7 +328,8 @@ export class DatabaseBlockComponent extends BlockComponent<
   );
 
   private _viewSource?: ViewSource;
-  public get viewSource(): ViewSource {
+
+  get viewSource(): ViewSource {
     if (!this._viewSource) {
       this._viewSource = new DatabaseBlockViewSource(this.model);
     }
@@ -344,6 +349,7 @@ export class DatabaseBlockComponent extends BlockComponent<
         : []
     );
   };
+
   selectionUpdated = new Slot<DataViewSelection | undefined>();
 
   get getFlag() {
@@ -359,6 +365,7 @@ export class DatabaseBlockComponent extends BlockComponent<
       }),
     };
   };
+
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
       dispose: this.host.event.add(name, handler, {

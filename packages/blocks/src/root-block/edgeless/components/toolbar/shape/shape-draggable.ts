@@ -53,7 +53,9 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   LitElement
 ) {
   draggableController!: EdgelessDraggableElementController<DraggableShape>;
+
   override type = 'shape' as const;
+
   static override styles = css`
     :host {
       display: flex;
@@ -129,7 +131,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   @property({ attribute: false })
   accessor onShapeClick: (shape: DraggableShape) => void = () => {};
 
-  public initDragController() {
+  initDragController() {
     if (!this.edgeless || !this.toolbarContainer) return;
     if (this.draggableController) return;
     this.draggableController = new EdgelessDraggableElementController(this, {

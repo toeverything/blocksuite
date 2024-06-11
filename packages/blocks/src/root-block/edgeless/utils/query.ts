@@ -1,9 +1,9 @@
 import type { BlockModel } from '@blocksuite/store';
 
 import type { EmbedBlockModel } from '../../../_common/embed-block-helper/embed-block-model.js';
-import {
-  type Connectable,
-  type EdgelessTool,
+import type {
+  Connectable,
+  EdgelessTool,
 } from '../../../_common/utils/index.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';

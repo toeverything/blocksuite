@@ -34,22 +34,24 @@ export type FileDropOptions = {
 
 export class FileDropManager {
   private _blockService: BlockService;
+
   private _fileDropOptions: FileDropOptions;
 
   private static _dropResult: DropResult | null = null;
+
   private _indicator!: DragIndicator;
 
   constructor(blockService: BlockService, fileDropOptions: FileDropOptions) {
     this._blockService = blockService;
     this._fileDropOptions = fileDropOptions;
 
-    this._indicator = <DragIndicator>(
-      document.querySelector('affine-drag-indicator')
-    );
+    this._indicator = document.querySelector(
+      'affine-drag-indicator'
+    ) as DragIndicator;
     if (!this._indicator) {
-      this._indicator = <DragIndicator>(
-        document.createElement('affine-drag-indicator')
-      );
+      this._indicator = document.createElement(
+        'affine-drag-indicator'
+      ) as DragIndicator;
       document.body.append(this._indicator);
     }
 

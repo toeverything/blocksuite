@@ -152,6 +152,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-background-error-color);
     }
   `;
+
   @property({ attribute: false })
   accessor depth = 1;
 
@@ -192,6 +193,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       vars: this.vars,
     });
   };
+
   private _selectOp = (event: MouseEvent) => {
     popFilterableSimpleMenu(eventToVRect(event), [
       {

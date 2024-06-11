@@ -1,4 +1,4 @@
-import { type Disposable } from '@blocksuite/global/utils';
+import type { Disposable } from '@blocksuite/global/utils';
 
 import type { TType } from '../logical/typesystem.js';
 import type { StatCalcOpType } from '../view/presets/table/types.js';
@@ -48,7 +48,7 @@ export class ColumnConfig<
   convertMap = new Map();
 
   constructor(
-    public readonly type: Type,
+    readonly type: Type,
     public ops: ColumnOps<T, CellData>
   ) {}
 

@@ -3,7 +3,7 @@ import { assertEquals } from '@blocksuite/global/utils';
 import type { Doc } from '../store/index.js';
 import type { AssetsManager } from '../transformer/assets.js';
 import type { Slice } from '../transformer/index.js';
-import { type DraftModel, type Job } from '../transformer/index.js';
+import type { DraftModel, Job } from '../transformer/index.js';
 import type {
   BlockSnapshot,
   DocSnapshot,
@@ -49,7 +49,7 @@ export type ToSliceSnapshotPayload<Target> = {
 };
 
 export abstract class BaseAdapter<AdapterTarget = unknown> {
-  protected configs: Map<string, unknown> = new Map();
+  protected configs = new Map<string, unknown>();
 
   job: Job;
 
@@ -156,7 +156,9 @@ type NodeProps<Node extends object> = {
 // Ported from https://github.com/Rich-Harris/estree-walker MIT License
 export class ASTWalker<ONode extends object, TNode extends object | never> {
   private _enter: WalkerFn<ONode, TNode> | undefined;
+
   private _leave: WalkerFn<ONode, TNode> | undefined;
+
   private _isONode!: (node: unknown) => node is ONode;
 
   private context: ASTWalkerContext<TNode>;

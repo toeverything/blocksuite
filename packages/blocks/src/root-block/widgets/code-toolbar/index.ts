@@ -52,6 +52,7 @@ export class AffineCodeToolbarWidget extends WidgetElement<
   }
 
   private _hoverController: HoverController | null = null;
+
   private _isActivated = false;
 
   private _setHoverController = () => {

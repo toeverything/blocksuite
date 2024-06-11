@@ -68,11 +68,12 @@ export class BacklinkIndexer {
   private _disposables = new DisposableGroup();
 
   private _linkIndexMap: Record<DocId, Record<BlockId, LinkedNode[]>> = {};
+
   get linkIndexMap() {
     return this._linkIndexMap;
   }
 
-  public slots = {
+  slots = {
     /**
      * Note: sys:children update will not trigger event
      */
@@ -99,10 +100,11 @@ export class BacklinkIndexer {
 
   // TODO use inverted index
   private _backlinkIndexMapCache: Record<DocId, LinkedNode[]> | null = null;
+
   /**
    * Get the list of backlinks for a given doc
    */
-  public getBacklink(targetDocId: DocId) {
+  getBacklink(targetDocId: DocId) {
     if (this._backlinkIndexMapCache) {
       return this._backlinkIndexMapCache[targetDocId] ?? [];
     }

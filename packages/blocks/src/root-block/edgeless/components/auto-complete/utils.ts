@@ -50,6 +50,7 @@ export const DEFAULT_NOTE_BACKGROUND_COLOR =
 
 class AutoCompleteTargetOverlay extends Overlay {
   xywh: XYWH;
+
   constructor(xywh: XYWH) {
     super();
     this.xywh = xywh;
@@ -82,6 +83,7 @@ export class AutoCompleteTextOverlay extends AutoCompleteTargetOverlay {
 
 export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
   private _background: string;
+
   constructor(xywh: XYWH, background: string) {
     super(xywh);
     this._background = background;
@@ -111,6 +113,7 @@ export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
 
 export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
   private _strokeColor;
+
   constructor(xywh: XYWH, strokeColor: string) {
     super(xywh);
     this._strokeColor = strokeColor;
@@ -151,6 +154,7 @@ export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
 
 export class AutoCompleteShapeOverlay extends Overlay {
   private _shape: Shape;
+
   constructor(
     xywh: XYWH,
     type: TARGET_SHAPE_TYPE,

@@ -13,14 +13,16 @@ import {
 import { EdgelessToolController } from './index.js';
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
-  readonly tool = <CopilotSelectionTool>{
+  readonly tool = {
     type: 'copilot',
-  };
+  } as CopilotSelectionTool;
 
   private _dragging = false;
 
   dragStartPoint: [number, number] = [0, 0];
+
   dragLastPoint: [number, number] = [0, 0];
+
   draggingAreaUpdated = new Slot<boolean | void>();
 
   get selection() {

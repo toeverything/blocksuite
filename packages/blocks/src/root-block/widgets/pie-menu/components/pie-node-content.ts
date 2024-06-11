@@ -58,6 +58,7 @@ export class PieNodeContent extends LitElement {
       fill: 'forwards' as const,
     });
   }
+
   private _renderCenterNodeContent() {
     if (isSubmenuNode(this.node.model) && !this.isActive) {
       return this._renderChildNodeContent();

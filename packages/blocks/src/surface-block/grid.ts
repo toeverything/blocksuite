@@ -45,22 +45,24 @@ function rangeFromElementExternal<T extends BlockSuite.EdgelessModelType>(
 }
 
 export class GridManager<T extends BlockSuite.EdgelessModelType> {
-  private _grids: Map<string, Set<T>> = new Map();
-  private _elementToGrids: Map<T, Set<Set<T>>> = new Map();
+  private _grids = new Map<string, Set<T>>();
 
-  private _externalGrids: Map<string, Set<T>> = new Map();
-  private _externalElementToGrids: Map<T, Set<Set<T>>> = new Map();
+  private _elementToGrids = new Map<T, Set<Set<T>>>();
+
+  private _externalGrids = new Map<string, Set<T>>();
+
+  private _externalElementToGrids = new Map<T, Set<Set<T>>>();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements: Set<T> = new Set();
+    const elements = new Set<T>();
     this._grids.set(id, elements);
     return elements;
   }
 
   private _createExternalGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements: Set<T> = new Set();
+    const elements = new Set<T>();
     this._externalGrids.set(id, elements);
     return elements;
   }
@@ -160,7 +162,7 @@ export class GridManager<T extends BlockSuite.EdgelessModelType> {
 
   private _searchExternal(bound: IBound, strict = false): Set<T> {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const results: Set<T> = new Set();
+    const results = new Set<T>();
     const b = Bound.from(bound);
 
     for (let i = minRow; i <= maxRow; i++) {

@@ -51,6 +51,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-hover-color);
     }
   `;
+
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
 
@@ -62,7 +63,7 @@ export class DocsPanel extends WithDisposable(ShadowlessElement) {
     return [...this.collection.docs.values()];
   }
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
       this.editor.doc.collection.slots.docUpdated.on(() => {

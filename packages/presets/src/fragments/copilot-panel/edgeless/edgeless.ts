@@ -18,6 +18,7 @@ import {
 @customElement('copilot-edgeless-panel')
 export class CopilotEdgelessPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css``;
+
   @property({ attribute: false })
   accessor logic!: AILogic;
 

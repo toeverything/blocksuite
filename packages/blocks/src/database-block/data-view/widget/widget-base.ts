@@ -13,10 +13,13 @@ export class WidgetBase
 {
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor viewMethods!: DataViewExpose;
+
   @property({ attribute: false })
   accessor viewSource!: ViewSource;
+
   @property({ attribute: false })
   accessor dataSource!: DataSource;
 }

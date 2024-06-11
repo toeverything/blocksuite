@@ -2,7 +2,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { type EdgelessTool } from '../../../../../_common/utils/index.js';
+import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import { FrameConfig } from './config.js';
 import { createFrame } from './service.js';
@@ -10,6 +10,7 @@ import { createFrame } from './service.js';
 @customElement('edgeless-frame-menu')
 export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
   override type: EdgelessTool['type'] = 'frame';
+
   static override styles = css`
     :host {
       position: absolute;

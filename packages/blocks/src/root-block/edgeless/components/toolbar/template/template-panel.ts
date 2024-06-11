@@ -13,7 +13,7 @@ import {
   requestConnectedFrame,
   stopPropagation,
 } from '../../../../../_common/utils/event.js';
-import { type IBound } from '../../../../../surface-block/consts.js';
+import type { IBound } from '../../../../../surface-block/consts.js';
 import {
   Bound,
   getCommonBound,
@@ -34,6 +34,7 @@ import { cloneDeep } from './utils.js';
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   static templates = builtInTemplates;
+
   static override styles = css`
     :host {
       position: absolute;

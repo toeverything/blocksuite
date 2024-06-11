@@ -59,7 +59,9 @@ export class EdgelessToolsManager {
   private _edgelessTool: EdgelessTool = this._getToolFromLocalStorage();
 
   private _container!: EdgelessRootBlockComponent;
+
   private _service!: EdgelessRootService;
+
   private _controllers: Record<
     EdgelessTool['type'] | string,
     EdgelessToolController

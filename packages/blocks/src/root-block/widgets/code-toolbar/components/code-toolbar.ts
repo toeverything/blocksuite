@@ -63,6 +63,7 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
   private accessor _moreButton!: HTMLElement;
 
   private _popMenuAbortController: AbortController | null = null;
+
   private _currentOpenMenu: AbortController | null = null;
 
   closeCurrentMenu = () => {

@@ -5,6 +5,7 @@ import type { BlockElement, WidgetElement } from './element/index.js';
 
 export class ViewStore {
   private readonly _blockMap = new Map<string, BlockElement>();
+
   private readonly _widgetMap = new Map<string, WidgetElement>();
 
   setBlock = (node: BlockElement) => {

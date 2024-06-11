@@ -19,6 +19,7 @@ import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
 export class PageClipboard {
   protected _disposables = new DisposableGroup();
+
   host: BlockElement;
 
   private get _std() {
@@ -101,14 +102,14 @@ export class PageClipboard {
       .copySelectedModels();
   };
 
-  public onPageCopy: UIEventHandler = ctx => {
+  onPageCopy: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
     this._copySelected().run();
   };
 
-  public onPageCut: UIEventHandler = ctx => {
+  onPageCut: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
@@ -123,7 +124,7 @@ export class PageClipboard {
     }).run();
   };
 
-  public onPagePaste: UIEventHandler = ctx => {
+  onPagePaste: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
@@ -164,7 +165,7 @@ export class PageClipboard {
       .run();
   };
 
-  public onBlockSnapshotPaste = (
+  onBlockSnapshotPaste = (
     snapshot: BlockSnapshot,
     doc: Doc,
     parent?: string,

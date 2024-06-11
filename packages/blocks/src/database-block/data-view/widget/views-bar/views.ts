@@ -70,6 +70,7 @@ export class DataViewHeaderViews extends WidgetBase {
       background-color: var(--affine-hover-color-filled);
     }
   `;
+
   get readonly() {
     return this.viewSource.readonly;
   }
@@ -135,6 +136,7 @@ export class DataViewHeaderViews extends WidgetBase {
       },
     ]);
   };
+
   openViewOption = (target: ReferenceElement, id: string) => {
     if (this.readonly) {
       return;
@@ -219,6 +221,7 @@ export class DataViewHeaderViews extends WidgetBase {
       },
     });
   };
+
   _clickView(event: MouseEvent, id: string) {
     if (this.viewSource.currentViewId !== id) {
       this.viewSource.selectView(id);

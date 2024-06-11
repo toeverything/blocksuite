@@ -10,6 +10,7 @@ import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class KeyboardControl {
   private composition = false;
+
   constructor(private _dispatcher: UIEventDispatcher) {}
 
   private _createContext(event: Event, keyboardState: KeyboardEventState) {

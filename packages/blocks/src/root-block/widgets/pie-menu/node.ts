@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/block-std';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { type IVec } from '../../../surface-block/index.js';
+import type { IVec } from '../../../surface-block/index.js';
 import type { PieNodeModel } from './base.js';
 import type { PieMenu } from './menu.js';
 import { pieNodeStyles } from './styles.js';
@@ -18,6 +18,7 @@ import {
 @customElement('affine-pie-node')
 export class PieNode extends WithDisposable(LitElement) {
   static override styles = pieNodeStyles;
+
   @property({ attribute: false })
   accessor model!: PieNodeModel;
 

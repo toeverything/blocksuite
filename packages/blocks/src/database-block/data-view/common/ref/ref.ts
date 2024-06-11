@@ -37,6 +37,7 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
       color: var(--affine-icon-color);
     }
   `;
+
   @property({ attribute: false })
   accessor data: VariableOrProperty | undefined = undefined;
 

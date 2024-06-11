@@ -23,11 +23,7 @@ import { AwarenessStore, type RawAwarenessState } from '../yjs/awareness.js';
 import { BlockSuiteDoc } from '../yjs/index.js';
 import type { Space } from './space.js';
 
-export interface SerializedStore {
-  [key: string]: {
-    [key: string]: unknown;
-  };
-}
+export type SerializedStore = Record<string, Record<string, unknown>>;
 
 export enum Generator {
   /**
@@ -85,13 +81,19 @@ const FLAGS_PRESET = {
 
 export class Store {
   readonly id: string;
+
   readonly doc: BlockSuiteDoc;
+
   readonly spaces = new Map<string, Space>();
+
   readonly awarenessStore: AwarenessStore;
+
   readonly idGenerator: IdGenerator;
 
   readonly docSync: DocEngine;
+
   readonly awarenessSync: AwarenessEngine;
+
   readonly blobSync: BlobEngine;
 
   constructor(

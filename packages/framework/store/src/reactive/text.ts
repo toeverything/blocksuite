@@ -2,10 +2,8 @@ import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
 import * as Y from 'yjs';
 
 export interface OptionalAttributes {
-  attributes?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  attributes?: Record<string, any>;
 }
 export type DeltaOperation = {
   insert?: string;

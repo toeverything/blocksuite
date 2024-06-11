@@ -32,6 +32,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
   EmbedSyncedDocBlockService
 > {
   override accessor useCaptionEditor = false;
+
   static override styles = blockStyles;
 
   @state()

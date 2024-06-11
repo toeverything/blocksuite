@@ -14,7 +14,7 @@ import {
 import type { IBound, SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';
 import type { PointLocation } from '../utils/point-location.js';
-import { type IVec2 } from '../utils/vec.js';
+import type { IVec2 } from '../utils/vec.js';
 import {
   type IBaseProps,
   type IHitTestOptions,

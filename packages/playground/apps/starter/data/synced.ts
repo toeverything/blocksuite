@@ -1,7 +1,7 @@
 import { MarkdownTransformer } from '@blocksuite/blocks';
 import { type DocCollection, Text } from '@blocksuite/store';
 
-import { type InitFn } from './utils';
+import type { InitFn } from './utils';
 
 const syncedDocMarkdown = `We share some of our findings from developing local-first software prototypes at [Ink & Switch](https://www.inkandswitch.com/) over the course of several years. These experiments test the viability of CRDTs in practice, and explore the user interface challenges for this new data model. Lastly, we suggest some next steps for moving towards local-first software: for researchers, for app developers, and a startup opportunity for entrepreneurs.
 

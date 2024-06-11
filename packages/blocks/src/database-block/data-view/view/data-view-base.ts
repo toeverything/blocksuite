@@ -34,8 +34,10 @@ export abstract class DataViewBase<
 
   @property({ attribute: false })
   accessor view!: T;
+
   @property({ attribute: false })
   accessor viewSource!: ViewSource;
+
   @property({ attribute: false })
   accessor dataSource!: DataSource;
 

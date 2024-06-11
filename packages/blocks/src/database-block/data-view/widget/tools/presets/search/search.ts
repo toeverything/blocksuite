@@ -122,7 +122,9 @@ export class DataViewHeaderToolsSearch extends WidgetBase {
     const inputValue = el.value.trim();
     this.view.setSearch(inputValue);
   };
+
   preventBlur = false;
+
   private _onSearchBlur = () => {
     if (this._searchInput.value || this.preventBlur) {
       return;

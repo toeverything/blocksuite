@@ -1,14 +1,14 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import { type TextTool } from '../../../../_common/utils/index.js';
+import type { TextTool } from '../../../../_common/utils/index.js';
 import { addText } from '../../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export class TextToolController extends EdgelessToolController<TextTool> {
-  readonly tool = <TextTool>{
+  readonly tool = {
     type: 'text',
-  };
+  } as TextTool;
 
   onContainerClick(e: PointerEventState): void {
     const textFlag = this._edgeless.doc.awarenessStore.getFlag(

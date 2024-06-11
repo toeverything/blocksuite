@@ -40,8 +40,10 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
 
   @property({ attribute: false })
   accessor fontFamily = FontFamily.Inter;
+
   @property({ attribute: false })
   accessor fontWeight = FontWeight.Regular;
+
   @property({ attribute: false })
   accessor fontStyle = FontStyle.Normal;
 

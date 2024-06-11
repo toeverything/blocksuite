@@ -99,10 +99,13 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor dataViewEle!: DataViewRenderer;
+
   @property({ attribute: false })
   accessor view!: DataViewKanbanManager;
+
   @property({ attribute: false })
   accessor group!: GroupData;
+
   private clickAddCard = () => {
     const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {
@@ -118,6 +121,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       }
     });
   };
+
   private clickAddCardInStart = () => {
     const id = this.view.addCard('start', this.group.key);
     requestAnimationFrame(() => {
@@ -133,6 +137,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       }
     });
   };
+
   private clickGroupOptions = (e: MouseEvent) => {
     const ele = e.currentTarget as HTMLElement;
     popFilterableSimpleMenu(ele, [
@@ -155,6 +160,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       },
     ]);
   };
+
   override render() {
     const cards = this.group.rows;
     return html`

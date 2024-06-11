@@ -12,6 +12,7 @@ export class SurfaceRefRenderer {
   private readonly _surfaceRenderer: Renderer;
 
   private _surfaceModel: SurfaceBlockModel | null = null;
+
   protected _disposables = new DisposableGroup();
 
   slots = {
@@ -35,9 +36,9 @@ export class SurfaceRefRenderer {
   }
 
   constructor(
-    public readonly id: string,
-    public readonly doc: Doc,
-    public readonly std: BlockStdScope,
+    readonly id: string,
+    readonly doc: Doc,
+    readonly std: BlockStdScope,
     options: {
       enableStackingCanvas?: boolean;
     } = {

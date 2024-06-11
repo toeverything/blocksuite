@@ -4,7 +4,9 @@ import { type Disposable, flattenDisposables } from './disposable.js';
 // https://github.com/vincentdchan/blocky-editor
 export class Slot<T = void> implements Disposable {
   private _emitting = false;
+
   private _callbacks: ((v: T) => unknown)[] = [];
+
   private _disposables: Disposable[] = [];
 
   filter(testFun: (v: T) => boolean): Slot<T> {

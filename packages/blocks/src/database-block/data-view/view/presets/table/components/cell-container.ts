@@ -38,12 +38,16 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor rowId!: string;
+
   @property({ attribute: false })
   accessor rowIndex!: number;
+
   @property({ attribute: false })
   accessor columnId!: string;
+
   @property({ attribute: false })
   accessor columnIndex!: number;
 
@@ -58,7 +62,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return this.closest('affine-data-view-table-group')?.group?.key;
   }
 
-  public selectCurrentCell = (editing: boolean) => {
+  selectCurrentCell = (editing: boolean) => {
     if (this.selectionView) {
       this.selectionView.selection = {
         groupKey: this.groupKey,
@@ -83,7 +87,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
   private _cell = createRef<DataViewCellLifeCycle>();
 
-  public get cell(): DataViewCellLifeCycle | undefined {
+  get cell(): DataViewCellLifeCycle | undefined {
     return this._cell.value;
   }
 

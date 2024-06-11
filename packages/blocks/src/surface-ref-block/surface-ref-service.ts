@@ -1,5 +1,5 @@
 import { BlockService } from '@blocksuite/block-std';
-import { type Doc } from '@blocksuite/store';
+import type { Doc } from '@blocksuite/store';
 
 import { SurfaceRefRenderer } from './surface-ref-renderer.js';
 

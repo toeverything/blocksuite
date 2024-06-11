@@ -67,6 +67,7 @@ export class AISlidesRenderer extends WithDisposable(LitElement) {
     | undefined = undefined;
 
   private _editorContainer: Ref<HTMLDivElement> = createRef<HTMLDivElement>();
+
   private _doc!: Doc;
 
   @query('editor-host')

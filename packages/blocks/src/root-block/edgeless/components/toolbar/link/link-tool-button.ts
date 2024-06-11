@@ -8,6 +8,7 @@ import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 @customElement('edgeless-link-tool-button')
 export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {
   override type = 'default' as const;
+
   static override styles = css`
     .link-icon,
     .link-icon > svg {

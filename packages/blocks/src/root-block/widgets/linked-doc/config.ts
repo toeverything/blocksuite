@@ -1,6 +1,6 @@
 import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type DocMeta } from '@blocksuite/store';
+import type { DocMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { toast } from '../../../_common/components/toast.js';

@@ -1,8 +1,8 @@
 import { type DisposableClass, WithDisposable } from '@blocksuite/block-std';
-import { type Constructor } from '@blocksuite/global/utils';
+import type { Constructor } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
 import { cssVar } from '@toeverything/theme';
-import { type LitElement } from 'lit';
+import type { LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../_common/types.js';
@@ -12,16 +12,25 @@ import { edgelessToolbarThemeContext } from '../context.js';
 
 export declare abstract class EdgelessToolbarToolClass extends DisposableClass {
   edgeless: EdgelessRootBlockComponent;
+
   edgelessTool: EdgelessTool;
+
   toolbarContainer: HTMLElement | null;
+
   active: boolean;
+
   popper: MenuPopper<HTMLElement> | null;
+
   theme: 'light' | 'dark';
+
   enableActiveBackground?: boolean;
+
   abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
 
   setEdgelessTool: (tool: EdgelessTool) => void;
+
   createPopper: typeof createPopper;
+
   /**
    * @return true if operation was successful
    */
@@ -78,6 +87,7 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
       });
       return this.popper;
     }
+
     tryDisposePopper() {
       if (this.popper) {
         this.popper.dispose();

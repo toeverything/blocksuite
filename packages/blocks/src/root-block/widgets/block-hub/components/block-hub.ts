@@ -86,14 +86,23 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private accessor _blockHubMenuEntry!: HTMLElement;
 
   private _currentClientX = 0;
+
   private _currentClientY = 0;
+
   private _isCardListVisible = false;
+
   private _indicator!: DragIndicator;
+
   private _lastDroppingTarget: EditingState | null = null;
+
   private _lastDroppingType: DroppingType = 'none';
+
   private _lastDraggingFlavour: string | null = null;
+
   private _timer: number | null = null;
+
   private _rafID: number = 0;
+
   private _editorHost: EditorHost;
 
   static override styles = styles;
@@ -179,13 +188,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     );
     disposables.addFromEvent(window, 'resize', this._onResize);
 
-    this._indicator = <DragIndicator>(
-      document.querySelector('affine-drag-indicator')
-    );
+    this._indicator = document.querySelector(
+      'affine-drag-indicator'
+    ) as DragIndicator;
     if (!this._indicator) {
-      this._indicator = <DragIndicator>(
-        document.createElement('affine-drag-indicator')
-      );
+      this._indicator = document.createElement(
+        'affine-drag-indicator'
+      ) as DragIndicator;
       document.body.append(this._indicator);
     }
   }
@@ -195,7 +204,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._disposables.dispose();
   }
 
-  public toggleMenu() {
+  toggleMenu() {
     this._expanded = !this._expanded;
     if (!this._expanded) this._hideCardList();
   }

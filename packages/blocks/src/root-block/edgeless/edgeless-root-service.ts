@@ -11,9 +11,9 @@ import {
   type IHitTestOptions,
   SurfaceGroupLikeModel,
 } from '../../surface-block/element-model/base.js';
-import {
-  type CanvasElementType,
-  type ConnectorElementModel,
+import type {
+  CanvasElementType,
+  ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
 import type {
   GroupElementModel,
@@ -88,11 +88,17 @@ export class EdgelessRootService extends RootService {
   };
 
   private _surface!: SurfaceBlockModel;
+
   private _layer!: LayerManager;
+
   private _frame!: EdgelessFrameManager;
+
   private _snap!: EdgelessSnapManager;
+
   private _selection!: EdgelessSelectionManager;
+
   private _viewport!: Viewport;
+
   private _tool!: EdgelessToolsManager;
 
   override mounted() {
@@ -517,7 +523,7 @@ export class EdgelessRootService extends RootService {
           pre[id] = true;
           return pre;
         },
-        {} as { [id: string]: true }
+        {} as Record<string, true>
       ),
       title: `Group ${groups.length + 1}`,
     });

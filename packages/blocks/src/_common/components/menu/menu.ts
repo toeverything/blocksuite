@@ -258,16 +258,24 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       padding: 0 4px;
     }
   `;
+
   @property({ attribute: false })
   accessor options!: MenuOptions;
+
   @state()
   private accessor _text: string | undefined = undefined;
+
   @state()
   private accessor _selectedIndex: number | undefined = undefined;
+
   private subMenu?: HTMLElement;
+
   private inputRef = createRef<HTMLInputElement>();
+
   private allItems: Array<Item & { index?: number }> = [];
+
   private selectableItems!: Array<SelectItem>;
+
   private _checked: Record<string, boolean> = {};
 
   private setChecked(name: string, checked: boolean) {

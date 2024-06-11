@@ -30,7 +30,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   static override styles = styles;
 
   override _cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
+
   override _width = EMBED_CARD_WIDTH.horizontal;
+
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
   @property({ attribute: false })

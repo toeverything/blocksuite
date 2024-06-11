@@ -28,8 +28,11 @@ export class EmbedBlockElement<
   WidgetName extends string = string,
 > extends BlockComponent<Model, Service, WidgetName> {
   override accessor useCaptionEditor = true;
+
   protected _cardStyle: EmbedCardStyle = 'horizontal';
+
   protected _width = EMBED_CARD_WIDTH.horizontal;
+
   protected _height = EMBED_CARD_HEIGHT.horizontal;
 
   private _isInSurface = false;

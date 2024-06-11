@@ -15,11 +15,7 @@ import {
   getSelectedImagesAsBlobs,
   getSelectedTextContent,
 } from '../utils/selection-utils.js';
-import {
-  type ChatAction,
-  type ChatContextValue,
-  type ChatItem,
-} from './chat-context.js';
+import type { ChatAction, ChatContextValue, ChatItem } from './chat-context.js';
 import type { ChatPanelMessages } from './chat-panel-messages.js';
 
 @customElement('chat-panel')
@@ -117,7 +113,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     if (!this.doc) throw new Error('doc is required');
 
@@ -168,6 +164,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   };
 
   private _chatSessionId = '';
+
   private _resettingCounter = 0;
 
   private _resetItems = debounce(() => {

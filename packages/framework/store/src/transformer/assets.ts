@@ -13,6 +13,7 @@ type AssetsManagerConfig = {
 
 export class AssetsManager {
   private readonly _assetsMap = new Map<string, Blob>();
+
   private readonly _blob: BlobCRUD;
 
   constructor(options: AssetsManagerConfig) {

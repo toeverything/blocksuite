@@ -50,6 +50,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       cursor: grabbing;
     }
   `;
+
   @property({ attribute: false })
   accessor tableViewManager!: DataViewTableManager;
 
@@ -168,6 +169,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     };
   };
+
   private moveColumn = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const headerContainer = this.closest('affine-database-column-header');
@@ -276,6 +278,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
     this.popMenu();
   };
+
   private _contextMenu = (e: MouseEvent) => {
     e.preventDefault();
     this.popMenu(positionToVRect(e.x, e.y));
@@ -463,7 +466,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     });
   };
+
   private drawWidthDragBarTask = 0;
+
   private drawWidthDragBar = () => {
     const tableContainer = getTableContainer(this);
     const tableRect = tableContainer.getBoundingClientRect();
@@ -476,6 +481,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     );
     this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
   };
+
   private _enterWidthDragBar = () => {
     if (this.drawWidthDragBarTask) {
       cancelAnimationFrame(this.drawWidthDragBarTask);
@@ -483,6 +489,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
     this.drawWidthDragBar();
   };
+
   private _leaveWidthDragBar = () => {
     cancelAnimationFrame(this.drawWidthDragBarTask);
     this.drawWidthDragBarTask = 0;

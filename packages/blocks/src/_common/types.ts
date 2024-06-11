@@ -1,5 +1,5 @@
-import { type Slot } from '@blocksuite/global/utils';
-import { type BlockModel, type Doc } from '@blocksuite/store';
+import type { Slot } from '@blocksuite/global/utils';
+import type { BlockModel, Doc } from '@blocksuite/store';
 
 import type {
   ConnectorElementModel,

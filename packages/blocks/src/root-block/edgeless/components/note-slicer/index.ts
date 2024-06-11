@@ -109,8 +109,11 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   private accessor _activeSlicerIndex = 0;
 
   private _hidden = false;
+
   private _divingLinePositions: Point[] = [];
+
   private _noteBlockIds: string[] = [];
+
   private _noteDisposables: DisposableGroup | null = null;
 
   get _editorHost() {

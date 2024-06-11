@@ -11,7 +11,7 @@ import { Bound } from '../surface-block/utils/bound.js';
 import type { ImageBlockEdgelessComponent } from './components/edgeless-image-block.js';
 import type { AffineImageCard } from './components/image-card.js';
 import type { ImageBlockPageComponent } from './components/page-image-block.js';
-import { type ImageBlockModel } from './image-model.js';
+import type { ImageBlockModel } from './image-model.js';
 import type { ImageBlockService } from './image-service.js';
 import {
   copyImageBlob,

@@ -1,9 +1,7 @@
 export type Template = {
   name?: string;
   content: unknown;
-  assets?: {
-    [index: string]: string;
-  };
+  assets?: Record<string, string>;
   preview?: string;
   type: string;
 };

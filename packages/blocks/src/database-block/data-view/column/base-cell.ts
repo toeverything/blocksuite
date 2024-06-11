@@ -16,12 +16,16 @@ export abstract class BaseCellRenderer<
 {
   @property({ attribute: false })
   accessor view!: DataViewManager;
+
   @property({ attribute: false })
   accessor column!: DataViewColumnManager<Value, Data>;
+
   @property()
   accessor rowId!: string;
+
   @property({ attribute: false })
   accessor isEditing!: boolean;
+
   @property({ attribute: false })
   accessor selectCurrentCell!: (editing: boolean) => void;
 
@@ -37,23 +41,23 @@ export abstract class BaseCellRenderer<
     this.column.setValue(this.rowId, value);
   }
 
-  public beforeEnterEditMode(): boolean {
+  beforeEnterEditMode(): boolean {
     return true;
   }
 
-  public onEnterEditMode(): void {
+  onEnterEditMode(): void {
     // do nothing
   }
 
-  public onExitEditMode() {
+  onExitEditMode() {
     // do nothing
   }
 
-  public focusCell() {
+  focusCell() {
     return true;
   }
 
-  public blurCell() {
+  blurCell() {
     return true;
   }
 

@@ -5,8 +5,10 @@ import type { BlockSpec } from './index.js';
 import { getSlots } from './slots.js';
 
 export class SpecStore {
-  private _specs: Map<string, BlockSpec> = new Map();
-  private _services: Map<string, BlockService> = new Map();
+  private _specs = new Map<string, BlockSpec>();
+
+  private _services = new Map<string, BlockService>();
+
   private _disposables = new DisposableGroup();
 
   constructor(public std: BlockSuite.Std) {}

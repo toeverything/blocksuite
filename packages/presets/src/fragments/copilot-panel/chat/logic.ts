@@ -72,6 +72,7 @@ export class AIChatLogic {
   }
 
   reactiveData!: ChatReactiveData;
+
   private requestId = 0;
 
   async startRequest<T>(p: () => Promise<T>): Promise<T> {
@@ -495,6 +496,7 @@ export class AIChatLogic {
       },
     },
   ];
+
   edgelessSelectionActionList: AllAction[] = [
     {
       type: 'action',

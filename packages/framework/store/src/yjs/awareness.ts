@@ -34,6 +34,7 @@ export class AwarenessStore<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
   readonly awareness: YAwareness<RawAwarenessState<Flags>>;
+
   readonly store: Store;
 
   readonly slots = {

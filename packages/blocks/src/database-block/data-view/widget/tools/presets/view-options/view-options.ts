@@ -54,7 +54,9 @@ const styles = css`
 @customElement('data-view-header-tools-view-options')
 export class DataViewHeaderToolsViewOptions extends WidgetBase {
   static override styles = styles;
+
   override accessor view!: DataViewTableManager | DataViewKanbanManager;
+
   showToolBar(show: boolean) {
     const tools = this.closest('data-view-header-tools');
     if (tools) {
@@ -69,7 +71,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
     });
   };
 
-  public clickMoreAction = (e: MouseEvent) => {
+  clickMoreAction = (e: MouseEvent) => {
     e.stopPropagation();
     const target = eventToVRect(e);
     this.openMoreAction(target);

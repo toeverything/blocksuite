@@ -1,6 +1,6 @@
 import { type DocCollection, Text } from '@blocksuite/store';
 
-import { type InitFn } from './utils.js';
+import type { InitFn } from './utils.js';
 
 const params = new URLSearchParams(location.search);
 

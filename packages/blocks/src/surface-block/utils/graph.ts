@@ -1,7 +1,7 @@
 import type { Bound } from './bound.js';
 import { almostEqual, linePolygonIntersects } from './math-utils.js';
 import { isOverlap as _isOverlap } from './math-utils.js';
-import { type IVec } from './vec.js';
+import type { IVec } from './vec.js';
 
 function isOverlap(line: IVec[], line2: IVec[]) {
   if (
@@ -26,7 +26,9 @@ function arrayAlmostEqual(point: IVec, point2: IVec) {
 
 export class Graph {
   private _xMap = new Map<number, IVec[]>();
+
   private _yMap = new Map<number, IVec[]>();
+
   constructor(
     private points: IVec[],
     private blocks: Bound[] = [],
@@ -43,6 +45,7 @@ export class Graph {
       yMap.get(y)?.push(point);
     });
   }
+
   private _isBlock(sp: IVec, ep: IVec) {
     return (
       this.blocks.some(block => {

@@ -96,6 +96,7 @@ export type SelectedRect = {
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   // disable change-in-update warning
   static override enabledWarnings = [];
+
   static override styles = css`
     :host {
       display: block;
@@ -451,8 +452,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   accessor autoCompleteOff = false;
 
   private _resizeManager: HandleResizeManager;
+
   private _cursorRotate = 0;
+
   private _propDisposables: Disposable[] = [];
+
   private _dragEndCallback: (() => void)[] = [];
 
   constructor() {

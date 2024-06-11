@@ -25,11 +25,17 @@ type DocOptions = {
 
 export class Doc {
   protected readonly _schema: Schema;
-  protected readonly _blocks: Map<string, Block> = new Map();
+
+  protected readonly _blocks = new Map<string, Block>();
+
   protected readonly _blockCollection: BlockCollection;
+
   protected readonly _crud: DocCRUD;
+
   protected readonly _selector: BlockSelector;
+
   protected readonly _disposeBlockUpdated: Disposable;
+
   protected readonly _readonly?: boolean;
 
   constructor({

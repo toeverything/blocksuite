@@ -11,6 +11,7 @@ export class EdgelessPresentButton extends QuickToolMixin(
   EdgelessToolbarToolMixin(LitElement)
 ) {
   override type: EdgelessTool['type'] = 'frameNavigator';
+
   static override styles = css`
     :host {
       display: flex;

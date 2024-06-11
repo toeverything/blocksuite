@@ -7,11 +7,12 @@ export class TableHotkeysController implements ReactiveController {
   constructor(private host: DataViewTable) {
     this.host.addController(this);
   }
+
   get selectionController() {
     return this.host.selectionController;
   }
 
-  public hostConnected() {
+  hostConnected() {
     this.host.disposables.add(
       this.host.bindHotkey({
         Backspace: () => {

@@ -7,6 +7,7 @@ import { pasteMiddleware } from '../../root-block/clipboard/middlewares/index.js
 
 export class CodeClipboardController {
   protected _disposables = new DisposableGroup();
+
   host: BlockElement;
 
   private get _std() {
@@ -47,7 +48,7 @@ export class CodeClipboardController {
     });
   };
 
-  public onPagePaste: UIEventHandler = ctx => {
+  onPagePaste: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 

@@ -18,6 +18,7 @@ import { EdgelessToolController } from './index.js';
 
 class EraserOverlay extends Overlay {
   d = '';
+
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = 0.33;
     const path = new Path2D(this.d);
@@ -27,18 +28,25 @@ class EraserOverlay extends Overlay {
 }
 
 export class EraserToolController extends EdgelessToolController<EraserTool> {
-  public override readonly tool: EraserTool = {
+  override readonly tool: EraserTool = {
     type: 'eraser',
   };
 
   private _overlay = new EraserOverlay();
+
   private _timestamp = 0;
+
   private _timer = 0;
+
   private _eraserPoints: IVec[] = [];
+
   private _prevPoint: IVec = [];
+
   private _prevEraserPoint: IVec = [];
-  private _erasables: Set<BlockSuite.EdgelessModelType> = new Set();
-  private _eraseTargets: Set<BlockSuite.EdgelessModelType> = new Set();
+
+  private _erasables = new Set<BlockSuite.EdgelessModelType>();
+
+  private _eraseTargets = new Set<BlockSuite.EdgelessModelType>();
 
   private _loop = () => {
     const now = Date.now();
@@ -112,7 +120,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
             'block',
             buildPath(erasable)
           );
-          ele && ((<HTMLElement>ele).style.opacity = '0.3');
+          ele && ((ele as HTMLElement).style.opacity = '0.3');
         }
       } else {
         if (
@@ -137,7 +145,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
           'block',
           buildPath(erasable)
         );
-        ele && ((<HTMLElement>ele).style.opacity = '1');
+        ele && ((ele as HTMLElement).style.opacity = '1');
       } else {
         erasable.opacity = 1;
       }

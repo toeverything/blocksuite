@@ -26,7 +26,7 @@ export class Slice {
     });
   }
 
-  constructor(public readonly data: SliceData) {}
+  constructor(readonly data: SliceData) {}
 
   get content() {
     return this.data.content;

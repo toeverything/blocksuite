@@ -19,6 +19,7 @@ export class TagLiteral extends LiteralElement<
       white-space: nowrap;
     }
   `;
+
   tags() {
     const tags = this.type.data?.tags;
     if (!tags) {
