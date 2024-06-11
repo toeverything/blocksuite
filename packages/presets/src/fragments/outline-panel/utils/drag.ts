@@ -2,7 +2,7 @@ import { on, once } from '@blocksuite/blocks';
 import type { Doc } from '@blocksuite/store';
 
 import type { OutlinePanelBody } from '../body/outline-panel-body.js';
-import { type OutlineNoteCard } from '../card/outline-card.js';
+import type { OutlineNoteCard } from '../card/outline-card.js';
 
 /**
  * start drag notes

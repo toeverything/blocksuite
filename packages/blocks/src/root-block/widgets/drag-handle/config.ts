@@ -69,7 +69,7 @@ export type DragHandleOption = {
 };
 
 export class DragHandleOptionsRunner {
-  private optionMap: Map<DragHandleOption, number> = new Map();
+  private optionMap = new Map<DragHandleOption, number>();
 
   get options(): DragHandleOption[] {
     return Array.from(this.optionMap.keys());

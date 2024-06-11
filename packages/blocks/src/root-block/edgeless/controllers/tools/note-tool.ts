@@ -18,12 +18,12 @@ import { DraggingNoteOverlay, NoteOverlay } from '../../utils/tool-overlay.js';
 import { EdgelessToolController } from './index.js';
 
 export class NoteToolController extends EdgelessToolController<NoteTool> {
-  readonly tool = <NoteTool>{
+  readonly tool = {
     type: 'affine:note',
     childFlavour: 'affine:paragraph',
     childType: 'text',
     tip: 'Text',
-  };
+  } as NoteTool;
 
   private _noteOverlay: NoteOverlay | null = null;
   private _draggingNoteOverlay: DraggingNoteOverlay | null = null;

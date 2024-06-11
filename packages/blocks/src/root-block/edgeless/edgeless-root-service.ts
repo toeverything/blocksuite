@@ -11,9 +11,9 @@ import {
   type IHitTestOptions,
   SurfaceGroupLikeModel,
 } from '../../surface-block/element-model/base.js';
-import {
-  type CanvasElementType,
-  type ConnectorElementModel,
+import type {
+  CanvasElementType,
+  ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
 import type {
   GroupElementModel,
@@ -517,7 +517,7 @@ export class EdgelessRootService extends RootService {
           pre[id] = true;
           return pre;
         },
-        {} as { [id: string]: true }
+        {} as Record<string, true>
       ),
       title: `Group ${groups.length + 1}`,
     });

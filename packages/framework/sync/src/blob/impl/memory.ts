@@ -4,7 +4,7 @@ export class MemoryBlobSource implements BlobSource {
   name = 'memory';
   readonly = false;
 
-  readonly map: Map<string, Blob> = new Map();
+  readonly map = new Map<string, Blob>();
 
   get(key: string) {
     return Promise.resolve(this.map.get(key) ?? null);

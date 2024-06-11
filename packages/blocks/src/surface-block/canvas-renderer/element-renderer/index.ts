@@ -25,7 +25,4 @@ export const modelRenderer = {
   shape,
   text,
   mindmap,
-} as {
-  // @ts-ignore
-  [key: string]: ElementRenderer<unknown>;
-};
+} as Record<string, ElementRenderer<unknown>>;

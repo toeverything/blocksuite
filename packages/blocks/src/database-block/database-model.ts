@@ -15,13 +15,7 @@ export type DatabaseBlockProps = {
   notes?: Record<string, string>;
 };
 
-export type SerializedCells = {
-  // row
-  [key: string]: {
-    // column
-    [key: string]: Cell;
-  };
-};
+export type SerializedCells = Record<string, Record<string, Cell>>;
 
 export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
   getViewList() {

@@ -17,7 +17,7 @@ import { matchFlavours } from '../../../../../_common/utils/model.js';
 import { getClosestBlockElementByPoint } from '../../../../../_common/utils/query.js';
 import { Point } from '../../../../../_common/utils/rect.js';
 import { handleNativeRangeAtPoint } from '../../../../../_common/utils/selection.js';
-import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
+import type { NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import type { EdgelessBlockModel } from '../../../edgeless-block-model.js';

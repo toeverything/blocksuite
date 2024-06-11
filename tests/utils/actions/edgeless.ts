@@ -2,13 +2,13 @@ import '../declare-test-window.js';
 
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type { IPoint, NoteDisplayMode } from '@blocks/_common/types.js';
-import { type NoteBlockModel } from '@blocks/note-block/index.js';
-import { type IVec } from '@blocks/surface-block/index.js';
+import type { NoteBlockModel } from '@blocks/note-block/index.js';
+import type { IVec } from '@blocks/surface-block/index.js';
 import { assertExists, sleep } from '@global/utils/index.js';
 import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import { type Bound } from '../asserts.js';
+import type { Bound } from '../asserts.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
@@ -564,7 +564,7 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
 }
 
 export async function selectBrushSize(page: Page, size: string) {
-  const sizeIndexMap: { [key: string]: number } = {
+  const sizeIndexMap: Record<string, number> = {
     two: 1,
     four: 2,
     six: 3,

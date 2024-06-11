@@ -37,7 +37,7 @@ export type JobConfig = {
 export class Job {
   private readonly _collection: DocCollection;
   private readonly _assetsManager: AssetsManager;
-  private readonly _adapterConfigs: Map<string, string> = new Map();
+  private readonly _adapterConfigs = new Map<string, string>();
 
   private readonly _slots: JobSlots = {
     beforeImport: new Slot<BeforeImportPayload>(),

@@ -1,5 +1,5 @@
 import { BlockElement, type BlockService } from '@blocksuite/block-std';
-import { type BlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { query } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';

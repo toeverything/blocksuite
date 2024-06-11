@@ -458,14 +458,14 @@ export class EdgelessClipboardController extends PageClipboard {
 
       ...(result.connectors?.map(connector => {
         const oldId = connector.id as string;
-        const sourceId = (<Connection>connector.source).id;
+        const sourceId = (connector.source as Connection).id;
         if (sourceId) {
-          (<Connection>connector.source).id =
+          (connector.source as Connection).id =
             idMap.get(sourceId) ?? (sourceId as string);
         }
-        const targetId = (<Connection>connector.target).id;
+        const targetId = (connector.target as Connection).id;
         if (targetId) {
-          (<Connection>connector.target).id =
+          (connector.target as Connection).id =
             idMap.get(targetId) ?? (targetId as string);
         }
         const element = this._createCanvasElement(connector, idMap);

@@ -22,9 +22,9 @@ enum ConnectorToolMode {
 }
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {
-  readonly tool = <ConnectorTool>{
+  readonly tool = {
     type: 'connector',
-  };
+  } as ConnectorTool;
 
   private _mode: ConnectorToolMode = ConnectorToolMode.Dragging;
   private _connector: ConnectorElementModel | null = null;

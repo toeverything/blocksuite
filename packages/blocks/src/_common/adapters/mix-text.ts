@@ -1,6 +1,6 @@
 import type { DeltaInsert } from '@blocksuite/inline';
 import type { Job } from '@blocksuite/store';
-import { type AssetsManager } from '@blocksuite/store';
+import type { AssetsManager } from '@blocksuite/store';
 import {
   ASTWalker,
   BaseAdapter,

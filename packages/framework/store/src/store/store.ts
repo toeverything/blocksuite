@@ -23,11 +23,7 @@ import { AwarenessStore, type RawAwarenessState } from '../yjs/awareness.js';
 import { BlockSuiteDoc } from '../yjs/index.js';
 import type { Space } from './space.js';
 
-export interface SerializedStore {
-  [key: string]: {
-    [key: string]: unknown;
-  };
-}
+export type SerializedStore = Record<string, Record<string, unknown>>;
 
 export enum Generator {
   /**

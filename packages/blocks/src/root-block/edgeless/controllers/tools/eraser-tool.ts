@@ -37,8 +37,8 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   private _eraserPoints: IVec[] = [];
   private _prevPoint: IVec = [];
   private _prevEraserPoint: IVec = [];
-  private _erasables: Set<BlockSuite.EdgelessModelType> = new Set();
-  private _eraseTargets: Set<BlockSuite.EdgelessModelType> = new Set();
+  private _erasables = new Set<BlockSuite.EdgelessModelType>();
+  private _eraseTargets = new Set<BlockSuite.EdgelessModelType>();
 
   private _loop = () => {
     const now = Date.now();
@@ -112,7 +112,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
             'block',
             buildPath(erasable)
           );
-          ele && ((<HTMLElement>ele).style.opacity = '0.3');
+          ele && ((ele as HTMLElement).style.opacity = '0.3');
         }
       } else {
         if (
@@ -137,7 +137,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
           'block',
           buildPath(erasable)
         );
-        ele && ((<HTMLElement>ele).style.opacity = '1');
+        ele && ((ele as HTMLElement).style.opacity = '1');
       } else {
         erasable.opacity = 1;
       }

@@ -1,4 +1,4 @@
-import { type SurfaceRefBlockModel } from './surface-ref-model.js';
+import type { SurfaceRefBlockModel } from './surface-ref-model.js';
 import type { SurfaceRefBlockService } from './surface-ref-service.js';
 
 export * from './surface-ref-block.js';

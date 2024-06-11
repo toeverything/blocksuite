@@ -12,9 +12,9 @@ import { EdgelessToolController } from './index.js';
 export class BrushToolController extends EdgelessToolController<BrushTool> {
   static BRUSH_POP_GAP = 20;
 
-  readonly tool = <BrushTool>{
+  readonly tool = {
     type: 'brush',
-  };
+  } as BrushTool;
 
   private _draggingElement: BrushElementModel | null = null;
   private _draggingElementId: string | null = null;
@@ -22,7 +22,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   protected _draggingPathPressures: number[] | null = null;
   private _lastPoint: IVec | null = null;
   private _straightLineType: 'horizontal' | 'vertical' | null = null;
-  private _pressureSupportedPointerIds: Set<number> = new Set();
+  private _pressureSupportedPointerIds = new Set<number>();
   private _lastPopLength = 0;
 
   onContainerPointerDown(): void {

@@ -103,7 +103,7 @@ export abstract class BaseReactiveYData<T, Y> {
   protected abstract readonly _options: ProxyOptions<T>;
   protected _skipNext = false;
   protected abstract _getProxy(): T;
-  protected readonly _stashed: Set<string | number> = new Set();
+  protected readonly _stashed = new Set<string | number>();
 
   abstract stash(prop: string | number): void;
   abstract pop(prop: string | number): void;

@@ -2,14 +2,14 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { ColorUnit } from '../../edgeless/components/panel/color-panel.js';
-import {
-  type ActionFunction,
-  type PieColorNodeModel,
-  type PieCommandNodeModel,
-  type PieMenuContext,
-  type PieMenuSchema,
-  type PieNodeModel,
-  type PieSubmenuNodeModel,
+import type {
+  ActionFunction,
+  PieColorNodeModel,
+  PieCommandNodeModel,
+  PieMenuContext,
+  PieMenuSchema,
+  PieNodeModel,
+  PieSubmenuNodeModel,
 } from './base.js';
 import { PieManager } from './pie-manager.js';
 import { calcNodeAngles, calcNodeWedges, isNodeWithChildren } from './utils.js';

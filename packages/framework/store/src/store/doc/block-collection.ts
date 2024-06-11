@@ -22,9 +22,7 @@ export type BlockSysProps = {
   flavour: string;
   children?: BlockModel[];
 };
-export type BlockProps = BlockSysProps & {
-  [index: string]: unknown;
-};
+export type BlockProps = BlockSysProps & Record<string, unknown>;
 
 type DocOptions = {
   id: string;
@@ -49,7 +47,7 @@ export class BlockCollection extends Space<FlatBlockMap> {
   /** Indicate whether the block tree is ready */
   private _ready = false;
   private _shouldTransact = true;
-  private _docMap: Map<string, Doc> = new Map();
+  private _docMap = new Map<string, Doc>();
 
   readonly slots = {
     /** This is always triggered after `doc.load` is called. */

@@ -5,7 +5,7 @@ import { SharedPriorityTarget } from '../utils/async-queue.js';
 import { MANUALLY_STOP, throwIfAborted } from '../utils/throw-if-aborted.js';
 import { DocEngineStep, DocPeerStep } from './consts.js';
 import { type DocPeerStatus, SyncPeer } from './peer.js';
-import { type DocSource } from './source.js';
+import type { DocSource } from './source.js';
 
 export interface DocEngineStatus {
   step: DocEngineStep;

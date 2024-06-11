@@ -13,7 +13,7 @@ import {
   requestConnectedFrame,
   stopPropagation,
 } from '../../../../../_common/utils/event.js';
-import { type IBound } from '../../../../../surface-block/consts.js';
+import type { IBound } from '../../../../../surface-block/consts.js';
 import {
   Bound,
   getCommonBound,

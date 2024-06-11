@@ -17,9 +17,9 @@ import {
   DownloadIcon,
 } from '../../../_common/icons/text.js';
 import { downloadBlob } from '../../../_common/utils/filesys.js';
-import {
-  type SurfaceRefBlockComponent,
-  type SurfaceRefBlockModel,
+import type {
+  SurfaceRefBlockComponent,
+  SurfaceRefBlockModel,
 } from '../../../surface-ref-block/index.js';
 import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 

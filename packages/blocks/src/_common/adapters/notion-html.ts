@@ -76,12 +76,13 @@ type BlocksuiteTableColumn = {
   id: string;
 };
 
-type BlocksuiteTableRow = {
-  [key: string]: {
+type BlocksuiteTableRow = Record<
+  string,
+  {
     columnId: string;
     value: unknown;
-  };
-};
+  }
+>;
 
 export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   override fromDocSnapshot(

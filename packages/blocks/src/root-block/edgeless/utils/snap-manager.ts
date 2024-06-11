@@ -86,10 +86,12 @@ export class EdgelessSnapManager extends Overlay {
     const canvasElements = this._rootService.elements;
     const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
-    (<BlockSuite.EdgelessModelType[]>[
-      ...this._rootService.blocks,
-      ...canvasElements,
-    ]).forEach(alignable => {
+    (
+      [
+        ...this._rootService.blocks,
+        ...canvasElements,
+      ] as BlockSuite.EdgelessModelType[]
+    ).forEach(alignable => {
       const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (
         viewportBounds.isOverlapWithBound(bounds) &&

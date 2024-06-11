@@ -4,7 +4,7 @@ import type { Bound } from './bound.js';
 import { Graph } from './graph.js';
 import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
-import { type IVec } from './vec.js';
+import type { IVec } from './vec.js';
 
 function cost(point: IVec, point2: IVec) {
   return Math.abs(point[0] - point2[0]) + Math.abs(point[1] - point2[1]);

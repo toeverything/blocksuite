@@ -1,8 +1,8 @@
 import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
 
-import { type ColumnMeta } from '../column/column-config.js';
+import type { ColumnMeta } from '../column/column-config.js';
 import type { ColumnConfig } from '../column/index.js';
-import { type CellRenderer } from '../column/index.js';
+import type { CellRenderer } from '../column/index.js';
 import type { FilterGroup, Variable } from '../common/ast.js';
 import type { DataSource, DetailSlots } from '../common/data-source/base.js';
 import type { DataViewContextKey } from '../common/data-source/context.js';

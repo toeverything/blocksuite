@@ -25,7 +25,7 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../_common/icons/index.js';
-import { type ReorderingType } from '../../../_common/utils/index.js';
+import type { ReorderingType } from '../../../_common/utils/index.js';
 import {
   createLinkedDocFromEdgelessElements,
   createLinkedDocFromNote,

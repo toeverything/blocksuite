@@ -1,4 +1,4 @@
-import { type EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/block-std';
 import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
 import { type BlockModel, Text } from '@blocksuite/store';
 
@@ -19,7 +19,7 @@ import {
   type InsertToPosition,
 } from './data-view/index.js';
 import { map } from './data-view/utils/uni-component/operation.js';
-import { type DatabaseBlockModel } from './database-model.js';
+import type { DatabaseBlockModel } from './database-model.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
 

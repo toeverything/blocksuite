@@ -16,7 +16,7 @@ import {
 import { PointLocation } from '../utils/point-location.js';
 import type { IVec2 } from '../utils/vec.js';
 import { Vec } from '../utils/vec.js';
-import { type SerializedXYWH } from '../utils/xywh.js';
+import type { SerializedXYWH } from '../utils/xywh.js';
 import {
   type IBaseProps,
   type IHitTestOptions,

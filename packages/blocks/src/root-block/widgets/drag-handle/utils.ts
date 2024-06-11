@@ -38,7 +38,7 @@ import {
   type OnDragEndProps,
 } from './config.js';
 
-const heightMap: { [key: string]: number } = {
+const heightMap: Record<string, number> = {
   text: 23,
   h1: 40,
   h2: 36,

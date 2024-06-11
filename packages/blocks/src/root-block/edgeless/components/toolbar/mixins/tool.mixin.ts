@@ -1,8 +1,8 @@
 import { type DisposableClass, WithDisposable } from '@blocksuite/block-std';
-import { type Constructor } from '@blocksuite/global/utils';
+import type { Constructor } from '@blocksuite/global/utils';
 import { consume } from '@lit/context';
 import { cssVar } from '@toeverything/theme';
-import { type LitElement } from 'lit';
+import type { LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../_common/types.js';

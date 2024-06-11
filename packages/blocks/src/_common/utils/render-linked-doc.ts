@@ -532,7 +532,7 @@ export function createLinkedDocFromEdgelessElements(
     if (!surface) return;
 
     const sortedElements = sortEdgelessElements(elements);
-    const ids: Map<string, string> = new Map();
+    const ids = new Map<string, string>();
     sortedElements.forEach(model => {
       let newId = model.id;
       if (model instanceof EdgelessBlockModel) {

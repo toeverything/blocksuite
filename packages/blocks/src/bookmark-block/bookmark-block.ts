@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { BlockComponent } from '../_common/components/block-component.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { Bound } from '../surface-block/utils/bound.js';
-import { type BookmarkBlockModel } from './bookmark-model.js';
+import type { BookmarkBlockModel } from './bookmark-model.js';
 import type { BookmarkBlockService } from './bookmark-service.js';
 import { refreshBookmarkUrlData } from './utils.js';
 

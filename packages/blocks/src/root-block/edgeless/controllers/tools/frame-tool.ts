@@ -2,18 +2,15 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { DocCollection } from '@blocksuite/store';
 
-import {
-  type FrameTool,
-  type IPoint,
-} from '../../../../_common/utils/index.js';
+import type { FrameTool, IPoint } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class FrameToolController extends EdgelessToolController<FrameTool> {
-  readonly tool = <FrameTool>{
+  readonly tool = {
     type: 'frame',
-  };
+  } as FrameTool;
 
   private _startPoint: IVec | null = null;
   private _frame: FrameBlockModel | null = null;
