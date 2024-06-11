@@ -1,9 +1,8 @@
 import '../../buttons/tool-icon-button.js';
 import './frame-menu.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -12,12 +11,11 @@ import {
 } from '../../../../../_common/icons/index.js';
 import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
-import { createPopper, type MenuPopper } from '../common/create-popper.js';
-import type { EdgelessFrameMenu } from './frame-menu.js';
+import { QuickToolMixin } from '../mixins/quick-tool.mixin.js';
 
 @customElement('edgeless-frame-tool-button')
-export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
+export class EdgelessFrameToolButton extends QuickToolMixin(LitElement) {
+  override type: EdgelessTool['type'] = 'frame';
   static override styles = css`
     :host {
       display: flex;
@@ -31,72 +29,24 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
-  accessor setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
-
-  private _frameMenu: MenuPopper<EdgelessFrameMenu> | null = null;
-
   private _toggleFrameMenu() {
-    if (this._frameMenu) {
-      this._frameMenu.dispose();
-      this._frameMenu = null;
-    } else {
-      this._frameMenu = createPopper('edgeless-frame-menu', this, {
-        x: 90,
-        y: -40,
-      });
-      this._frameMenu.element.edgelessTool = this.edgelessTool;
-      this._frameMenu.element.edgeless = this.edgeless;
-    }
-  }
+    if (this.tryDisposePopper()) return;
 
-  override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('edgelessTool')) {
-      if (this.edgelessTool.type !== 'frame') {
-        this._frameMenu?.dispose();
-        this._frameMenu = null;
-      }
-      if (this._frameMenu) {
-        this._frameMenu.element.edgelessTool = this.edgelessTool;
-        this._frameMenu.element.edgeless = this.edgeless;
-      }
-    }
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(newTool => {
-        if (newTool.type !== 'frame') {
-          this._frameMenu?.dispose();
-          this._frameMenu = null;
-        }
-      })
-    );
-  }
-
-  override disconnectedCallback() {
-    this._frameMenu?.dispose();
-    this._frameMenu = null;
-    super.disconnectedCallback();
+    const menu = this.createPopper('edgeless-frame-menu', this);
+    menu.element.edgeless = this.edgeless;
   }
 
   override render() {
     const type = this.edgelessTool?.type;
-    const arrowColor = type === 'frame' ? 'currentColor' : '#77757D';
+    const arrowColor =
+      type === 'frame' ? 'currentColor' : 'var(--affine-icon-secondary)';
     return html`
       <edgeless-tool-icon-button
         class="edgeless-frame-button"
-        .tooltip=${this._frameMenu ? '' : getTooltipWithShortcut('Frame', 'F')}
+        .tooltip=${this.popper ? '' : getTooltipWithShortcut('Frame', 'F')}
         .tooltipOffset=${17}
         .active=${type === 'frame'}
-        .iconContainerPadding=${8}
+        .iconContainerPadding=${6}
         @click=${() => {
           this.setEdgelessTool({
             type: 'frame',

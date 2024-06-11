@@ -1602,70 +1602,70 @@ export const EdgelessModeIcon = html`
   </svg>
 `;
 
-export const EdgelessPenIcon = html`
+export const EdgelessPenLightIcon = html`
   <svg
     width="36"
-    height="61"
-    viewBox="0 0 36 61"
+    height="60"
+    viewBox="0 0 36 60"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     id="edgeless-pen-icon"
   >
-    <g filter="url(#filter0_d_8344_17221)">
+    <g filter="url(#filter0_d_5310_64454)">
       <path
-        d="M8.00024 40.8966L12.283 39.469V108.538H8.00024V40.8966Z"
+        d="M8 38.8965L12.2828 37.4689V106.538H8V38.8965Z"
         fill="currentColor"
       />
       <path
-        d="M8.00024 40.8966L12.283 39.469V108.538H8.00024V40.8966Z"
+        d="M8 38.8965L12.2828 37.4689V106.538H8V38.8965Z"
         fill="white"
         fill-opacity="0.1"
       />
       <path
-        d="M12.283 38.9929H17.5174V108.538H12.283V38.9929Z"
+        d="M12.2832 36.993H17.5177V106.538H12.2832V36.993Z"
         fill="currentColor"
       />
       <path
-        d="M17.5175 38.9929H22.7519V108.538H17.5175V38.9929Z"
+        d="M17.5176 36.993H22.7521V106.538H17.5176V36.993Z"
         fill="currentColor"
       />
       <path
-        d="M17.5175 38.9929H22.7519V108.538H17.5175V38.9929Z"
+        d="M17.5176 36.993H22.7521V106.538H17.5176V36.993Z"
         fill="black"
         fill-opacity="0.1"
       />
       <path
-        d="M22.752 32.9448L27.0347 40.8965V108.538H22.752V32.9448Z"
+        d="M22.752 30.9448L27.0347 38.8965V106.538H22.752V30.9448Z"
         fill="currentColor"
       />
       <path
-        d="M22.752 32.9448L27.0347 40.8965V108.538H22.752V32.9448Z"
+        d="M22.752 30.9448L27.0347 38.8965V106.538H22.752V30.9448Z"
         fill="black"
         fill-opacity="0.2"
       />
       <path
-        d="M16.5909 4.88078C16.8233 3.90625 18.2099 3.90623 18.4423 4.88075L19.896 10.9741L22.2755 20.9483L27.0345 40.8965L23.9871 40.0231C23.1982 39.7969 22.3511 39.9039 21.6431 40.3189L18.023 42.4414C17.7107 42.6245 17.3238 42.6245 17.0115 42.4414L13.0218 40.1023C12.5499 39.8256 11.9851 39.7543 11.4592 39.905L8 40.8965L12.7583 20.9483L15.1374 10.9741L16.5909 4.88078Z"
+        d="M16.5909 2.88078C16.8233 1.90625 18.2099 1.90623 18.4423 2.88075L19.896 8.97414L22.2755 18.9483L27.0345 38.8965L23.9871 38.0231C23.1982 37.7969 22.3511 37.9039 21.6431 38.3189L18.023 40.4414C17.7107 40.6245 17.3238 40.6245 17.0115 40.4414L13.0218 38.1023C12.5499 37.8256 11.9851 37.7543 11.4592 37.905L8 38.8965L12.7583 18.9483L15.1374 8.97414L16.5909 2.88078Z"
         fill="#F1F1F1"
       />
       <path
-        d="M16.5909 4.88078C16.8233 3.90625 18.2099 3.90623 18.4423 4.88075L19.896 10.9741L22.2755 20.9483L27.0345 40.8965L23.9871 40.0231C23.1982 39.7969 22.3511 39.9039 21.6431 40.3189L18.023 42.4414C17.7107 42.6245 17.3238 42.6245 17.0115 42.4414L13.0218 40.1023C12.5499 39.8256 11.9851 39.7543 11.4592 39.905L8 40.8965L12.7583 20.9483L15.1374 10.9741L16.5909 4.88078Z"
-        fill="url(#paint0_linear_8344_17221)"
+        d="M16.5909 2.88078C16.8233 1.90625 18.2099 1.90623 18.4423 2.88075L19.896 8.97414L22.2755 18.9483L27.0345 38.8965L23.9871 38.0231C23.1982 37.7969 22.3511 37.9039 21.6431 38.3189L18.023 40.4414C17.7107 40.6245 17.3238 40.6245 17.0115 40.4414L13.0218 38.1023C12.5499 37.8256 11.9851 37.7543 11.4592 37.905L8 38.8965L12.7583 18.9483L15.1374 8.97414L16.5909 2.88078Z"
+        fill="url(#paint0_linear_5310_64454)"
         fill-opacity="0.1"
       />
-      <g filter="url(#filter1_b_8344_17221)">
+      <g filter="url(#filter1_b_5310_64454)">
         <path
-          d="M16.5915 4.88076C16.824 3.90624 18.2106 3.90625 18.443 4.88077L20.3725 12.969H14.6621L16.5915 4.88076Z"
+          d="M16.7391 2.26209C16.9345 1.44293 18.1 1.44293 18.2954 2.26209L20.3725 10.969H14.6621L16.7391 2.26209Z"
           fill="currentColor"
         />
       </g>
     </g>
     <defs>
       <filter
-        id="filter0_d_8344_17221"
+        id="filter0_d_5310_64454"
         x="0"
-        y="-3"
-        width="35.0347"
-        height="123.538"
+        y="-5"
+        width="35.0352"
+        height="124"
         filterUnits="userSpaceOnUse"
         color-interpolation-filters="sRGB"
       >
@@ -1681,26 +1681,26 @@ export const EdgelessPenIcon = html`
         <feComposite in2="hardAlpha" operator="out" />
         <feColorMatrix
           type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.22 0"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"
         />
         <feBlend
           mode="normal"
           in2="BackgroundImageFix"
-          result="effect1_dropShadow_8344_17221"
+          result="effect1_dropShadow_5310_64454"
         />
         <feBlend
           mode="normal"
           in="SourceGraphic"
-          in2="effect1_dropShadow_8344_17221"
+          in2="effect1_dropShadow_5310_64454"
           result="shape"
         />
       </filter>
       <filter
-        id="filter1_b_8344_17221"
+        id="filter1_b_5310_64454"
         x="12.7587"
-        y="2.24645"
-        width="9.51722"
-        height="12.626"
+        y="-0.255743"
+        width="9.51686"
+        height="13.1282"
         filterUnits="userSpaceOnUse"
         color-interpolation-filters="sRGB"
       >
@@ -1709,239 +1709,591 @@ export const EdgelessPenIcon = html`
         <feComposite
           in2="SourceAlpha"
           operator="in"
-          result="effect1_backgroundBlur_8344_17221"
+          result="effect1_backgroundBlur_5310_64454"
         />
         <feBlend
           mode="normal"
           in="SourceGraphic"
-          in2="effect1_backgroundBlur_8344_17221"
+          in2="effect1_backgroundBlur_5310_64454"
           result="shape"
         />
       </filter>
       <linearGradient
-        id="paint0_linear_8344_17221"
+        id="paint0_linear_5310_64454"
         x1="22.1949"
-        y1="21.2552"
-        x2="16.9439"
-        y2="22.5016"
+        y1="19.2552"
+        x2="11.0983"
+        y2="21.5941"
         gradientUnits="userSpaceOnUse"
       >
         <stop />
-        <stop offset="0.302413" stop-opacity="0" />
-        <stop offset="0.557292" stop-opacity="0" />
+        <stop offset="0.3125" stop-opacity="0" />
         <stop offset="1" stop-opacity="0" />
       </linearGradient>
     </defs>
   </svg>
 `;
-
-export const EdgelessEraserIcon = html`
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="54"
-    height="72"
-    viewBox="0 0 54 52"
-    fill="none"
-    id="edgeless-eraser-icon"
-  >
-    <g filter="url(#filter0_d_8344_9244)">
-      <rect
-        x="10.575"
-        y="4.575"
-        width="33.35"
-        height="57.5"
-        rx="5.175"
-        fill="#F1F1F1"
-        stroke="#DDDDDD"
-        stroke-width="1.15"
-      />
-      <g filter="url(#filter1_f_8344_9244)">
-        <rect
-          x="42.2"
-          y="7.45001"
-          width="18.4"
-          height="3.45"
-          rx="1.725"
-          transform="rotate(90 42.2 7.45001)"
-          fill="white"
-        />
-      </g>
-      <g filter="url(#filter2_f_8344_9244)">
-        <rect
-          width="32.2"
-          height="5.75"
-          transform="matrix(1 0 0 -1 11.15 25.85)"
-          fill="#AFAFAF"
-        />
-      </g>
+export const EdgelessPenDarkIcon = html`<svg
+  width="34"
+  height="60"
+  viewBox="0 0 34 60"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  id="edgeless-pen-icon"
+>
+  <g filter="url(#filter0_d_5310_64464)">
+    <path
+      d="M7 38.8965L11.2828 37.4689V106.538H7V38.8965Z"
+      fill="currentColor"
+    />
+    <path
+      d="M7 38.8965L11.2828 37.4689V106.538H7V38.8965Z"
+      fill="black"
+      fill-opacity="0.1"
+    />
+    <path
+      d="M11.2832 36.993H16.5177V106.538H11.2832V36.993Z"
+      fill="currentColor"
+    />
+    <path
+      d="M11.2832 36.993H16.5177V106.538H11.2832V36.993Z"
+      fill="black"
+      fill-opacity="0.26"
+    />
+    <path
+      d="M16.5176 36.993H21.7521V106.538H16.5176V36.993Z"
+      fill="currentColor"
+    />
+    <path
+      d="M16.5176 36.993H21.7521V106.538H16.5176V36.993Z"
+      fill="black"
+      fill-opacity="0.4"
+    />
+    <path
+      d="M21.752 30.9448L26.0347 38.8965V106.538H21.752V30.9448Z"
+      fill="currentColor"
+    />
+    <path
+      d="M21.752 30.9448L26.0347 38.8965V106.538H21.752V30.9448Z"
+      fill="black"
+      fill-opacity="0.6"
+    />
+    <path
+      d="M15.5909 2.88078C15.8233 1.90625 17.2099 1.90623 17.4423 2.88075L18.896 8.97414L21.2755 18.9483L26.0345 38.8965L22.9871 38.0231C22.1982 37.7969 21.3511 37.9039 20.6431 38.3189L17.023 40.4414C16.7107 40.6245 16.3238 40.6245 16.0115 40.4414L12.0218 38.1023C11.5499 37.8256 10.9851 37.7543 10.4592 37.905L7 38.8965L11.7583 18.9483L14.1374 8.97414L15.5909 2.88078Z"
+      fill="#C1C1C1"
+    />
+    <path
+      d="M15.5909 2.88078C15.8233 1.90625 17.2099 1.90623 17.4423 2.88075L18.896 8.97414L21.2755 18.9483L26.0345 38.8965L22.9871 38.0231C22.1982 37.7969 21.3511 37.9039 20.6431 38.3189L17.023 40.4414C16.7107 40.6245 16.3238 40.6245 16.0115 40.4414L12.0218 38.1023C11.5499 37.8256 10.9851 37.7543 10.4592 37.905L7 38.8965L11.7583 18.9483L14.1374 8.97414L15.5909 2.88078Z"
+      fill="url(#paint0_linear_5310_64464)"
+      fill-opacity="0.1"
+    />
+    <g filter="url(#filter1_b_5310_64464)">
       <path
-        d="M21.5 18.375H22.075V18.95V62.65V63.225H21.5H10H9.425V62.65V40.8V29.875V24.4125V23.0013C9.425 21.9592 10.1672 21.0649 11.1915 20.8728C11.5816 20.7997 11.8933 20.506 11.9896 20.121L12.0015 20.0733L12.5593 20.2128L12.0015 20.0733C12.251 19.0752 13.1478 18.375 14.1767 18.375H15.75H21.5Z"
-        fill="#173654"
+        d="M15.7391 2.26209C15.9345 1.44293 17.1 1.44293 17.2954 2.26209L19.3725 10.969H13.6621L15.7391 2.26209Z"
+        fill="currentColor"
       />
       <path
-        d="M21.5 18.375H22.075V18.95V62.65V63.225H21.5H10H9.425V62.65V40.8V29.875V24.4125V23.0013C9.425 21.9592 10.1672 21.0649 11.1915 20.8728C11.5816 20.7997 11.8933 20.506 11.9896 20.121L12.0015 20.0733L12.5593 20.2128L12.0015 20.0733C12.251 19.0752 13.1478 18.375 14.1767 18.375H15.75H21.5Z"
-        fill="url(#paint0_linear_8344_9244)"
+        d="M15.7391 2.26209C15.9345 1.44293 17.1 1.44293 17.2954 2.26209L19.3725 10.969H13.6621L15.7391 2.26209Z"
+        fill="black"
         fill-opacity="0.2"
-      />
-      <path
-        d="M21.5 18.375H22.075V18.95V62.65V63.225H21.5H10H9.425V62.65V40.8V29.875V24.4125V23.0013C9.425 21.9592 10.1672 21.0649 11.1915 20.8728C11.5816 20.7997 11.8933 20.506 11.9896 20.121L12.0015 20.0733L12.5593 20.2128L12.0015 20.0733C12.251 19.0752 13.1478 18.375 14.1767 18.375H15.75H21.5Z"
-        stroke="#E0E0E0"
-        stroke-width="1.15"
-      />
-      <path
-        d="M33 18.375H32.425V18.95V62.65V63.225H33H44.5H45.075V62.65V40.8V29.875V24.4125V23.0013C45.075 21.9592 44.3328 21.0649 43.3085 20.8728C42.9184 20.7997 42.6067 20.506 42.5104 20.121L42.4985 20.0733L41.9407 20.2128L42.4985 20.0733C42.249 19.0752 41.3522 18.375 40.3233 18.375H38.75H33Z"
-        fill="#1E96EB"
-      />
-      <path
-        d="M33 18.375H32.425V18.95V62.65V63.225H33H44.5H45.075V62.65V40.8V29.875V24.4125V23.0013C45.075 21.9592 44.3328 21.0649 43.3085 20.8728C42.9184 20.7997 42.6067 20.506 42.5104 20.121L42.4985 20.0733L41.9407 20.2128L42.4985 20.0733C42.249 19.0752 41.3522 18.375 40.3233 18.375H38.75H33Z"
-        fill="url(#paint1_linear_8344_9244)"
-        fill-opacity="0.2"
-      />
-      <path
-        d="M33 18.375H32.425V18.95V62.65V63.225H33H44.5H45.075V62.65V40.8V29.875V24.4125V23.0013C45.075 21.9592 44.3328 21.0649 43.3085 20.8728C42.9184 20.7997 42.6067 20.506 42.5104 20.121L42.4985 20.0733L41.9407 20.2128L42.4985 20.0733C42.249 19.0752 41.3522 18.375 40.3233 18.375H38.75H33Z"
-        stroke="#E0E0E0"
-        stroke-width="1.15"
-      />
-      <rect
-        x="0.575"
-        y="-0.575"
-        width="12.65"
-        height="44.85"
-        transform="matrix(-1 0 0 1 34.15 18.95)"
-        fill="#EFFAFF"
-      />
-      <rect
-        x="0.575"
-        y="-0.575"
-        width="12.65"
-        height="44.85"
-        transform="matrix(-1 0 0 1 34.15 18.95)"
-        fill="url(#paint2_linear_8344_9244)"
-        fill-opacity="0.2"
-      />
-      <rect
-        x="0.575"
-        y="-0.575"
-        width="12.65"
-        height="44.85"
-        transform="matrix(-1 0 0 1 34.15 18.95)"
-        stroke="#E0E0E0"
-        stroke-width="1.15"
       />
     </g>
-    <defs>
-      <filter
-        id="filter0_d_8344_9244"
-        x="0"
-        y="0"
-        width="54"
-        height="75.8"
-        filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
-      >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
-        <feColorMatrix
-          in="SourceAlpha"
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-          result="hardAlpha"
-        />
-        <feOffset dy="4" />
-        <feGaussianBlur stdDeviation="4" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0"
-        />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow_8344_9244"
-        />
-        <feBlend
-          mode="normal"
-          in="SourceGraphic"
-          in2="effect1_dropShadow_8344_9244"
-          result="shape"
-        />
-      </filter>
-      <filter
-        id="filter1_f_8344_9244"
-        x="36.45"
-        y="5.15001"
-        width="8.05001"
-        height="23"
-        filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
-      >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
-        <feBlend
-          mode="normal"
-          in="SourceGraphic"
-          in2="BackgroundImageFix"
-          result="shape"
-        />
-        <feGaussianBlur
-          stdDeviation="1.15"
-          result="effect1_foregroundBlur_8344_9244"
-        />
-      </filter>
-      <filter
-        id="filter2_f_8344_9244"
-        x="6.54999"
-        y="15.5"
-        width="41.4"
-        height="14.95"
-        filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
-      >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
-        <feBlend
-          mode="normal"
-          in="SourceGraphic"
-          in2="BackgroundImageFix"
-          result="shape"
-        />
-        <feGaussianBlur
-          stdDeviation="2.3"
-          result="effect1_foregroundBlur_8344_9244"
-        />
-      </filter>
-      <linearGradient
-        id="paint0_linear_8344_9244"
-        x1="15.75"
-        y1="18.95"
-        x2="15.75"
-        y2="62.65"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stop-opacity="0" />
-        <stop offset="1" />
-      </linearGradient>
-      <linearGradient
-        id="paint1_linear_8344_9244"
-        x1="38.75"
-        y1="18.95"
-        x2="38.75"
-        y2="62.65"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stop-color="white" />
-        <stop offset="1" stop-opacity="0" />
-      </linearGradient>
-      <linearGradient
-        id="paint2_linear_8344_9244"
-        x1="5.75"
-        y1="0"
-        x2="5.75"
-        y2="43.7"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stop-color="#FFF8F8" stop-opacity="0" />
-        <stop offset="1" />
-      </linearGradient>
-    </defs>
-  </svg>
-`;
+  </g>
+  <defs>
+    <filter
+      id="filter0_d_5310_64464"
+      x="0"
+      y="-6"
+      width="33.0352"
+      height="122"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feOffset dy="2" />
+      <feGaussianBlur stdDeviation="3.5" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.78 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_5310_64464"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect1_dropShadow_5310_64464"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter1_b_5310_64464"
+      x="11.7587"
+      y="-0.255743"
+      width="9.51686"
+      height="13.1282"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="0.951724" />
+      <feComposite
+        in2="SourceAlpha"
+        operator="in"
+        result="effect1_backgroundBlur_5310_64464"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect1_backgroundBlur_5310_64464"
+        result="shape"
+      />
+    </filter>
+    <linearGradient
+      id="paint0_linear_5310_64464"
+      x1="21.1949"
+      y1="19.2552"
+      x2="11.5553"
+      y2="21.8444"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop />
+      <stop offset="0.302413" stop-opacity="0" />
+      <stop offset="0.557292" stop-opacity="0" />
+      <stop offset="1" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+</svg>`;
+
+export const EdgelessEraserLightIcon = html`<svg
+  width="44"
+  height="49"
+  viewBox="0 0 44 49"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  id="edgeless-eraser-icon"
+>
+  <g filter="url(#filter0_d_5310_64451)">
+    <rect x="6" y="2" width="32" height="59" rx="5.75" fill="#F1F1F1" />
+    <rect x="6.5" y="2.5" width="31" height="58" rx="5.25" stroke="#E3E2E4" />
+  </g>
+  <g filter="url(#filter1_f_5310_64451)">
+    <rect
+      x="36.2002"
+      y="4.44995"
+      width="18.4"
+      height="3.45"
+      rx="1.725"
+      transform="rotate(90 36.2002 4.44995)"
+      fill="white"
+      fill-opacity="0.78"
+    />
+  </g>
+  <g filter="url(#filter2_f_5310_64451)">
+    <path
+      d="M4 60H40V22C40 18.6863 37.3137 16 34 16H10C6.68629 16 4 18.6863 4 22V60Z"
+      fill="#343434"
+      fill-opacity="0.22"
+    />
+  </g>
+  <path
+    d="M16.5 16.5H11H9.37046C8.79521 16.5 8.29403 16.8921 8.15566 17.4505L8.14174 17.5067C7.93847 18.3269 7.27583 18.9534 6.44553 19.1105C5.89708 19.2142 5.5 19.6934 5.5 20.2516V21.75V27.5V39V61.5H16.5V16.5Z"
+    fill="#173654"
+  />
+  <path
+    d="M16.5 16.5H11H9.37046C8.79521 16.5 8.29403 16.8921 8.15566 17.4505L8.14174 17.5067C7.93847 18.3269 7.27583 18.9534 6.44553 19.1105C5.89708 19.2142 5.5 19.6934 5.5 20.2516V21.75V27.5V39V61.5H16.5V16.5Z"
+    fill="url(#paint0_linear_5310_64451)"
+    fill-opacity="0.2"
+  />
+  <path
+    d="M16.5 16.5H11H9.37046C8.79521 16.5 8.29403 16.8921 8.15566 17.4505L8.14174 17.5067C7.93847 18.3269 7.27583 18.9534 6.44553 19.1105C5.89708 19.2142 5.5 19.6934 5.5 20.2516V21.75V27.5V39V61.5H16.5V16.5Z"
+    stroke="#E7E7E7"
+  />
+  <path
+    d="M27.5 16.5H33H34.6295C35.2048 16.5 35.706 16.8921 35.8443 17.4505L35.8583 17.5067C36.0615 18.3269 36.7242 18.9534 37.5545 19.1105C38.1029 19.2142 38.5 19.6934 38.5 20.2516V21.75V27.5V39V61.5H27.5V16.5Z"
+    fill="#1E96EB"
+  />
+  <path
+    d="M27.5 16.5H33H34.6295C35.2048 16.5 35.706 16.8921 35.8443 17.4505L35.8583 17.5067C36.0615 18.3269 36.7242 18.9534 37.5545 19.1105C38.1029 19.2142 38.5 19.6934 38.5 20.2516V21.75V27.5V39V61.5H27.5V16.5Z"
+    fill="url(#paint1_linear_5310_64451)"
+    fill-opacity="0.2"
+  />
+  <path
+    d="M27.5 16.5H33H34.6295C35.2048 16.5 35.706 16.8921 35.8443 17.4505L35.8583 17.5067C36.0615 18.3269 36.7242 18.9534 37.5545 19.1105C38.1029 19.2142 38.5 19.6934 38.5 20.2516V21.75V27.5V39V61.5H27.5V16.5Z"
+    stroke="#E7E7E7"
+  />
+  <rect
+    x="-0.5"
+    y="0.5"
+    width="11"
+    height="45"
+    transform="matrix(-1 0 0 1 27 16)"
+    fill="#EFFAFF"
+  />
+  <rect
+    x="-0.5"
+    y="0.5"
+    width="11"
+    height="45"
+    transform="matrix(-1 0 0 1 27 16)"
+    fill="url(#paint2_linear_5310_64451)"
+    fill-opacity="0.2"
+  />
+  <rect
+    x="-0.5"
+    y="0.5"
+    width="11"
+    height="45"
+    transform="matrix(-1 0 0 1 27 16)"
+    stroke="#E7E7E7"
+  />
+  <defs>
+    <filter
+      id="filter0_d_5310_64451"
+      x="2"
+      y="2"
+      width="40"
+      height="67"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feOffset dy="4" />
+      <feGaussianBlur stdDeviation="2" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0.258824 0 0 0 0 0.254902 0 0 0 0 0.286275 0 0 0 0.18 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_5310_64451"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect1_dropShadow_5310_64451"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter1_f_5310_64451"
+      x="30.45"
+      y="2.14995"
+      width="8.0502"
+      height="23"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="BackgroundImageFix"
+        result="shape"
+      />
+      <feGaussianBlur
+        stdDeviation="1.15"
+        result="effect1_foregroundBlur_5310_64451"
+      />
+    </filter>
+    <filter
+      id="filter2_f_5310_64451"
+      x="0"
+      y="12"
+      width="44"
+      height="52"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="BackgroundImageFix"
+        result="shape"
+      />
+      <feGaussianBlur
+        stdDeviation="2"
+        result="effect1_foregroundBlur_5310_64451"
+      />
+    </filter>
+    <linearGradient
+      id="paint0_linear_5310_64451"
+      x1="11"
+      y1="16"
+      x2="11"
+      y2="62"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-opacity="0" />
+      <stop offset="1" />
+    </linearGradient>
+    <linearGradient
+      id="paint1_linear_5310_64451"
+      x1="33"
+      y1="16"
+      x2="33"
+      y2="62"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="white" />
+      <stop offset="1" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient
+      id="paint2_linear_5310_64451"
+      x1="6"
+      y1="0"
+      x2="6"
+      y2="46"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#FFF8F8" stop-opacity="0" />
+      <stop offset="1" />
+    </linearGradient>
+  </defs>
+</svg>`;
+export const EdgelessEraserDarkIcon = html`<svg
+  width="44"
+  height="49"
+  viewBox="0 0 44 49"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  id="edgeless-eraser-icon"
+>
+  <g filter="url(#filter0_d_5310_64471)">
+    <path
+      d="M6 7.75C6 4.57436 8.57436 2 11.75 2H32.25C35.4256 2 38 4.57436 38 7.75V61H6V7.75Z"
+      fill="#C1C1C1"
+    />
+    <path
+      d="M6.5 7.75C6.5 4.85051 8.85051 2.5 11.75 2.5H32.25C35.1495 2.5 37.5 4.85051 37.5 7.75V60.5H6.5V7.75Z"
+      stroke="#DDDDDD"
+    />
+    <path
+      d="M6.5 7.75C6.5 4.85051 8.85051 2.5 11.75 2.5H32.25C35.1495 2.5 37.5 4.85051 37.5 7.75V60.5H6.5V7.75Z"
+      stroke="black"
+      stroke-opacity="0.3"
+    />
+  </g>
+  <g filter="url(#filter1_f_5310_64471)">
+    <rect
+      x="36.2002"
+      y="4.44995"
+      width="18.4"
+      height="3.45"
+      rx="1.725"
+      transform="rotate(90 36.2002 4.44995)"
+      fill="white"
+      fill-opacity="0.38"
+    />
+  </g>
+  <g filter="url(#filter2_f_5310_64471)">
+    <path
+      d="M4 62H40V23C40 19.6863 37.3137 17 34 17H10C6.68629 17 4 19.6863 4 23V62Z"
+      fill="black"
+      fill-opacity="0.44"
+    />
+  </g>
+  <path
+    d="M16.5 16.5H11H9.37046C8.79521 16.5 8.29403 16.8921 8.15566 17.4505L8.14174 17.5067C7.93847 18.3269 7.27583 18.9534 6.44553 19.1105C5.89708 19.2142 5.5 19.6934 5.5 20.2516V21.75V27.5V39V61.5H16.5V16.5Z"
+    fill="#0D2338"
+  />
+  <path
+    d="M16.5 16.5H11H9.37046C8.79521 16.5 8.29403 16.8921 8.15566 17.4505L8.14174 17.5067C7.93847 18.3269 7.27583 18.9534 6.44553 19.1105C5.89708 19.2142 5.5 19.6934 5.5 20.2516V21.75V27.5V39V61.5H16.5V16.5Z"
+    fill="url(#paint0_linear_5310_64471)"
+    fill-opacity="0.2"
+  />
+  <path
+    d="M16.5 16.5H11H9.37046C8.79521 16.5 8.29403 16.8921 8.15566 17.4505L8.14174 17.5067C7.93847 18.3269 7.27583 18.9534 6.44553 19.1105C5.89708 19.2142 5.5 19.6934 5.5 20.2516V21.75V27.5V39V61.5H16.5V16.5Z"
+    stroke="#D3D3D3"
+  />
+  <path
+    d="M16.5 16.5H11H9.37046C8.79521 16.5 8.29403 16.8921 8.15566 17.4505L8.14174 17.5067C7.93847 18.3269 7.27583 18.9534 6.44553 19.1105C5.89708 19.2142 5.5 19.6934 5.5 20.2516V21.75V27.5V39V61.5H16.5V16.5Z"
+    stroke="black"
+    stroke-opacity="0.4"
+  />
+  <path
+    d="M27.5 16.5H33H34.6295C35.2048 16.5 35.706 16.8921 35.8443 17.4505L35.8583 17.5067C36.0615 18.3269 36.7242 18.9534 37.5545 19.1105C38.1029 19.2142 38.5 19.6934 38.5 20.2516V21.75V27.5V39V61.5H27.5V16.5Z"
+    fill="#1A7CC1"
+  />
+  <path
+    d="M27.5 16.5H33H34.6295C35.2048 16.5 35.706 16.8921 35.8443 17.4505L35.8583 17.5067C36.0615 18.3269 36.7242 18.9534 37.5545 19.1105C38.1029 19.2142 38.5 19.6934 38.5 20.2516V21.75V27.5V39V61.5H27.5V16.5Z"
+    fill="url(#paint1_linear_5310_64471)"
+    fill-opacity="0.2"
+  />
+  <path
+    d="M27.5 16.5H33H34.6295C35.2048 16.5 35.706 16.8921 35.8443 17.4505L35.8583 17.5067C36.0615 18.3269 36.7242 18.9534 37.5545 19.1105C38.1029 19.2142 38.5 19.6934 38.5 20.2516V21.75V27.5V39V61.5H27.5V16.5Z"
+    stroke="#D3D3D3"
+  />
+  <path
+    d="M27.5 16.5H33H34.6295C35.2048 16.5 35.706 16.8921 35.8443 17.4505L35.8583 17.5067C36.0615 18.3269 36.7242 18.9534 37.5545 19.1105C38.1029 19.2142 38.5 19.6934 38.5 20.2516V21.75V27.5V39V61.5H27.5V16.5Z"
+    stroke="black"
+    stroke-opacity="0.4"
+  />
+  <rect
+    x="-0.5"
+    y="0.5"
+    width="11"
+    height="45"
+    transform="matrix(-1 0 0 1 27 16)"
+    fill="#D0DFE5"
+  />
+  <rect
+    x="-0.5"
+    y="0.5"
+    width="11"
+    height="45"
+    transform="matrix(-1 0 0 1 27 16)"
+    fill="url(#paint2_linear_5310_64471)"
+    fill-opacity="0.2"
+  />
+  <rect
+    x="-0.5"
+    y="0.5"
+    width="11"
+    height="45"
+    transform="matrix(-1 0 0 1 27 16)"
+    stroke="#D3D3D3"
+  />
+  <rect
+    x="-0.5"
+    y="0.5"
+    width="11"
+    height="45"
+    transform="matrix(-1 0 0 1 27 16)"
+    stroke="black"
+    stroke-opacity="0.4"
+  />
+  <defs>
+    <filter
+      id="filter0_d_5310_64471"
+      x="2"
+      y="0"
+      width="40"
+      height="67"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feOffset dy="2" />
+      <feGaussianBlur stdDeviation="2" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0.195003 0 0 0 0 0.0133398 0 0 0 0 0.0133398 0 0 0 0.66 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_5310_64471"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect1_dropShadow_5310_64471"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter1_f_5310_64471"
+      x="30.45"
+      y="2.14995"
+      width="8.0502"
+      height="23"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="BackgroundImageFix"
+        result="shape"
+      />
+      <feGaussianBlur
+        stdDeviation="1.15"
+        result="effect1_foregroundBlur_5310_64471"
+      />
+    </filter>
+    <filter
+      id="filter2_f_5310_64471"
+      x="0"
+      y="13"
+      width="44"
+      height="53"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="BackgroundImageFix"
+        result="shape"
+      />
+      <feGaussianBlur
+        stdDeviation="2"
+        result="effect1_foregroundBlur_5310_64471"
+      />
+    </filter>
+    <linearGradient
+      id="paint0_linear_5310_64471"
+      x1="11"
+      y1="16"
+      x2="11"
+      y2="62"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-opacity="0" />
+      <stop offset="1" />
+    </linearGradient>
+    <linearGradient
+      id="paint1_linear_5310_64471"
+      x1="33"
+      y1="16"
+      x2="33"
+      y2="62"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="white" />
+      <stop offset="1" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient
+      id="paint2_linear_5310_64471"
+      x1="6"
+      y1="0"
+      x2="6"
+      y2="46"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#FFF8F8" stop-opacity="0" />
+      <stop offset="1" />
+    </linearGradient>
+  </defs>
+</svg>`;
 
 export const EdgelessTextIcon = html`<svg
   width="54"
@@ -2022,26 +2374,39 @@ export const rectSvg = html` <svg
   viewBox="0 0 100 100"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <rect stroke="inherit" width="100" y="20" height="80" fill="currentColor" />
+  <rect
+    stroke="inherit"
+    stroke-width="1"
+    width="100"
+    y="20"
+    height="80"
+    fill="currentColor"
+  />
 </svg>`;
 
-export const ellipseSvg = html` <svg
-  width="100"
-  height="100"
-  viewBox="0 0 100 100"
+export const ellipseSvg = html`<svg
+  width="48"
+  height="48"
+  viewBox="0 0 48 48"
+  fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <circle stroke="inherit" cx="50" cy="50" r="50" fill="currentColor" />
-</svg>`;
+  <circle cx="24" cy="24" r="23.5" fill="currentColor" stroke="inherit" />
+</svg> `;
 
-export const triangleSvg = html` <svg
-  width="100"
-  height="100"
-  viewBox="0 0 100 100"
+export const triangleSvg = html`<svg
+  width="62"
+  height="50"
+  viewBox="0 0 62 50"
+  fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <polygon stroke="inherit" points="50,0 100,100 0,100" fill="currentColor" />
-</svg>`;
+  <path
+    d="M0.8 49.2L31 0.8L61.2 49.2H0.8Z"
+    fill="currentColor"
+    stroke="inherit"
+  />
+</svg> `;
 
 export const diamondSvg = html` <svg
   width="100"
@@ -2056,21 +2421,23 @@ export const diamondSvg = html` <svg
   />
 </svg>`;
 
-export const roundedSvg = html` <svg
-  width="100"
-  height="100"
-  viewBox="0 0 100 100"
+export const roundedSvg = html`<svg
+  width="48"
+  height="48"
+  viewBox="0 0 48 48"
+  fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
   <rect
-    stroke="inherit"
-    width="100"
-    y="20"
-    height="80"
-    rx="10"
+    x="0.5"
+    y="0.5"
+    width="47"
+    height="47"
+    rx="5"
     fill="currentColor"
+    stroke="inherit"
   />
-</svg>`;
+</svg> `;
 
 export const EdgelessImageIcon = html`<svg
   width="66"
@@ -2940,21 +3307,20 @@ export const RemoteCursor = html`
   </svg>
 `;
 
-export const ConnectorIcon = html`
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-  >
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M14.25 6.5C14.25 4.70507 15.7051 3.25 17.5 3.25C19.2949 3.25 20.75 4.70507 20.75 6.5C20.75 8.29493 19.2949 9.75 17.5 9.75C16.89 9.75 16.3193 9.58196 15.8316 9.28964L9.28964 15.8316C9.58196 16.3193 9.75 16.89 9.75 17.5C9.75 19.2949 8.29493 20.75 6.5 20.75C4.70507 20.75 3.25 19.2949 3.25 17.5C3.25 15.7051 4.70507 14.25 6.5 14.25C7.14146 14.25 7.73952 14.4358 8.24327 14.7566L14.7566 8.24327C14.4358 7.73952 14.25 7.14146 14.25 6.5ZM17.5 4.75C16.5335 4.75 15.75 5.5335 15.75 6.5C15.75 7.4665 16.5335 8.25 17.5 8.25C18.4665 8.25 19.25 7.4665 19.25 6.5C19.25 5.5335 18.4665 4.75 17.5 4.75ZM6.5 15.75C5.5335 15.75 4.75 16.5335 4.75 17.5C4.75 18.4665 5.5335 19.25 6.5 19.25C7.4665 19.25 8.25 18.4665 8.25 17.5C8.25 16.5335 7.4665 15.75 6.5 15.75Z"
-      fill="currentColor"
-    />
-  </svg>
-`;
+export const ConnectorIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M15.9697 2.0199C16.2626 1.72701 16.7374 1.72701 17.0303 2.0199L21.9094 6.89894C22.2413 7.23089 22.2413 7.76908 21.9094 8.10102L17.0303 12.9801C16.7374 13.273 16.2626 13.273 15.9697 12.9801C15.6768 12.6872 15.6768 12.2123 15.9697 11.9194L19.6391 8.24998H18C14.8489 8.24998 13.4484 9.00822 12.7495 9.91192C12.0048 10.8749 11.877 12.1919 11.7476 13.8098C11.7449 13.8434 11.7422 13.8771 11.7395 13.911C11.6211 15.3973 11.481 17.1557 10.437 18.5057C9.3234 19.9457 7.34889 20.75 4 20.75C3.58579 20.75 3.25 20.4142 3.25 20C3.25 19.5858 3.58579 19.25 4 19.25C7.15111 19.25 8.5516 18.4917 9.25046 17.588C9.99517 16.6251 10.123 15.308 10.2524 13.6902C10.2551 13.6566 10.2578 13.6229 10.2605 13.589C10.3789 12.1027 10.519 10.3443 11.563 8.9943C12.6766 7.55424 14.6511 6.74998 18 6.74998H19.6391L15.9697 3.08056C15.6768 2.78767 15.6768 2.31279 15.9697 2.0199Z"
+    fill="currentColor"
+  />
+</svg> `;
 
 export const AutoConnectLeftIcon = html`<svg
   width="16"
@@ -3883,5 +4249,20 @@ export const CheckIcon = html`<svg
     fill-rule="evenodd"
     clip-rule="evenodd"
     d="M16.2751 5.39143C16.5192 5.63551 16.5192 6.03124 16.2751 6.27532L7.94178 14.6086C7.6977 14.8527 7.30197 14.8527 7.0579 14.6086L3.72456 11.2753C3.48048 11.0312 3.48048 10.6355 3.72456 10.3914C3.96864 10.1474 4.36437 10.1474 4.60845 10.3914L7.49984 13.2828L15.3912 5.39143C15.6353 5.14735 16.031 5.14735 16.2751 5.39143Z"
+  />
+</svg>`;
+
+export const ArrowLeftSmallIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 20 20"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M12.1086 5.39139C12.3527 5.63547 12.3527 6.0312 12.1086 6.27528L8.38388 10L12.1086 13.7247C12.3527 13.9688 12.3527 14.3645 12.1086 14.6086C11.8645 14.8527 11.4688 14.8527 11.2247 14.6086L7.05806 10.4419C6.81398 10.1979 6.81398 9.80214 7.05806 9.55806L11.2247 5.39139C11.4688 5.14731 11.8645 5.14731 12.1086 5.39139Z"
+    fill="currentColor"
   />
 </svg>`;

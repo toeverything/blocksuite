@@ -864,6 +864,8 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const selectedRect = editor
     .locator('edgeless-selected-rect')
     .locator('.affine-edgeless-selected-rect');
+  // FIXME: remove this timeout
+  await page.waitForTimeout(50);
   const box = await selectedRect.boundingBox();
   if (!box) throw new Error('Missing edgeless selected rect');
 

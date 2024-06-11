@@ -13,6 +13,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
+import type { NOTE_COLORS } from '../../../_common/edgeless/note/consts.js';
 import {
   ExpandIcon,
   LineStyleIcon,
@@ -106,6 +107,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _setBackground(color: CssVariableName) {
     this.notes.forEach(note => {
       this.doc.updateBlock(note, { background: color });
+    });
+    // TODO: better solution to handle this case?
+    this.edgeless.service.editPropsStore.record('affine:note', {
+      background: color as (typeof NOTE_COLORS)[number],
     });
   }
 

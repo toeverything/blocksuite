@@ -29,5 +29,3 @@ export const NOTE_MENU_ITEMS = BLOCKHUB_TEXT_ITEMS.concat(BLOCKHUB_LIST_ITEMS)
       childType: item.type,
     } as NoteMenuItem;
   });
-
-export const NOTE_MENU_WIDTH = 442;

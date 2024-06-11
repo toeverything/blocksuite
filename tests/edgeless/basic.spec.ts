@@ -183,6 +183,8 @@ test('the tooltip of more button should be hidden when the action menu is shown'
 
   assertExists(moreButtonBox);
 
+  // need to wait for previous tooltip to be hidden
+  await page.waitForTimeout(100);
   await page.mouse.move(moreButtonBox.x + 10, moreButtonBox.y + 10);
   await expect(tooltip).toBeVisible();
 
