@@ -1,8 +1,7 @@
 import '../../buttons/tool-icon-button.js';
 import '../../panel/one-row-color-panel.js';
 
-import { WithDisposable } from '@blocksuite/block-std';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
@@ -10,23 +9,23 @@ import {
   ScribbledStyleIcon,
 } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
+import type { EdgelessTool } from '../../../../../_common/types.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
-import type { EdgelessRootBlockComponent } from '../../../edgeless-root-block.js';
 import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
+import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 import {
   LINE_COLOR_PREFIX,
   SHAPE_COLOR_PREFIX,
-  SHAPE_SUBMENU_WIDTH,
   ShapeComponentConfig,
 } from './shape-menu-config.js';
 import type { ShapeName } from './shape-tool-element.js';
 
 @customElement('edgeless-shape-menu')
-export class EdgelessShapeMenu extends WithDisposable(LitElement) {
+export class EdgelessShapeMenu extends EdgelessToolbarToolMixin(LitElement) {
+  override type: EdgelessTool['type'] = 'shape';
   static override styles = css`
     :host {
       display: flex;
-      position: absolute;
       z-index: -1;
     }
     .menu-content {
@@ -52,9 +51,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
-  @property({ attribute: false })
   accessor shapeType!: ShapeName;
 
   @property({ attribute: false })
@@ -73,7 +69,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   accessor onChange!: (props: Record<string, unknown>) => void;
 
   private _setStrokeColor = (strokeColor: CssVariableName) => {
-    if (this.edgeless.edgelessTool.type !== 'shape') return;
+    if (this.edgelessTool.type !== 'shape') return;
 
     const props: Record<string, unknown> = { strokeColor };
     const fillColor = strokeColor.replace(
@@ -87,7 +83,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   };
 
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
-    if (this.edgeless.edgelessTool.type !== 'shape') return;
+    if (this.edgelessTool.type !== 'shape') return;
 
     this.onChange({
       shapeStyle,
@@ -95,8 +91,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   };
 
   override render() {
-    if (this.edgeless.edgelessTool.type !== 'shape') return nothing;
-
     const { radius, strokeColor, shapeStyle } = this;
     let { shapeType } = this;
     if (shapeType === 'rect' && radius > 0) {
@@ -104,60 +98,56 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
     }
 
     return html`
-      <div class="shape-menu-container">
-        <edgeless-slide-menu .menuWidth=${SHAPE_SUBMENU_WIDTH}>
-          <div class="menu-content">
-            <div class="shape-style-container">
-              <edgeless-tool-icon-button
-                .tooltip=${'General'}
-                .active=${shapeStyle === ShapeStyle.General}
-                .activeMode=${'background'}
-                @click=${() => {
-                  this._setShapeStyle(ShapeStyle.General);
-                }}
-              >
-                ${GeneralStyleIcon}
-              </edgeless-tool-icon-button>
-              <edgeless-tool-icon-button
-                .tooltip=${'Scribbled'}
-                .active=${shapeStyle === ShapeStyle.Scribbled}
-                .activeMode=${'background'}
-                @click=${() => {
-                  this._setShapeStyle(ShapeStyle.Scribbled);
-                }}
-              >
-                ${ScribbledStyleIcon}
-              </edgeless-tool-icon-button>
-            </div>
-            <menu-divider .vertical=${true}></menu-divider>
-            <div class="shape-type-container">
-              ${ShapeComponentConfig.map(
-                ({ name, generalIcon, scribbledIcon, tooltip }) => {
-                  return html`
-                    <edgeless-tool-icon-button
-                      .tooltip=${tooltip}
-                      .active=${shapeType === name}
-                      .activeMode=${'background'}
-                      @click=${() => {
-                        this.onChange({ shapeType: name });
-                      }}
-                    >
-                      ${shapeStyle === ShapeStyle.General
-                        ? generalIcon
-                        : scribbledIcon}
-                    </edgeless-tool-icon-button>
-                  `;
-                }
-              )}
-            </div>
-            <menu-divider .vertical=${true}></menu-divider>
-            <edgeless-one-row-color-panel
-              .value=${strokeColor}
-              @select=${(e: ColorEvent) => this._setStrokeColor(e.detail)}
-            ></edgeless-one-row-color-panel>
+      <edgeless-slide-menu>
+        <div class="menu-content">
+          <div class="shape-style-container">
+            <edgeless-tool-icon-button
+              .tooltip=${'General'}
+              .active=${shapeStyle === ShapeStyle.General}
+              .activeMode=${'background'}
+              @click=${() => {
+                this._setShapeStyle(ShapeStyle.General);
+              }}
+            >
+              ${GeneralStyleIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Scribbled'}
+              .active=${shapeStyle === ShapeStyle.Scribbled}
+              .activeMode=${'background'}
+              @click=${() => {
+                this._setShapeStyle(ShapeStyle.Scribbled);
+              }}
+            >
+              ${ScribbledStyleIcon}
+            </edgeless-tool-icon-button>
           </div>
-        </edgeless-slide-menu>
-      </div>
+          <menu-divider .vertical=${true}></menu-divider>
+          <div class="shape-type-container">
+            ${ShapeComponentConfig.map(
+              ({ name, generalIcon, scribbledIcon, tooltip, value }) => {
+                return html`
+                  <edgeless-tool-icon-button
+                    .tooltip=${tooltip}
+                    .active=${shapeType === name}
+                    .activeMode=${'background'}
+                    @click=${() => this.onChange(value)}
+                  >
+                    ${shapeStyle === ShapeStyle.General
+                      ? generalIcon
+                      : scribbledIcon}
+                  </edgeless-tool-icon-button>
+                `;
+              }
+            )}
+          </div>
+          <menu-divider .vertical=${true}></menu-divider>
+          <edgeless-one-row-color-panel
+            .value=${strokeColor}
+            @select=${(e: ColorEvent) => this._setStrokeColor(e.detail)}
+          ></edgeless-one-row-color-panel>
+        </div>
+      </edgeless-slide-menu>
     `;
   }
 }

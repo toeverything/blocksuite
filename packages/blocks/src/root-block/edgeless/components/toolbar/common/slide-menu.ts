@@ -1,46 +1,51 @@
 import { WithDisposable } from '@blocksuite/block-std';
+import { consume } from '@lit/context';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-const DEFAULT_MENU_WIDTH = 468;
-const MENU_HEIGHT = 40;
 import { ArrowRightSmallIcon } from '../../../../../_common/icons/index.js';
+import {
+  type EdgelessToolbarSlots,
+  edgelessToolbarSlotsContext,
+} from '../context.js';
 
 @customElement('edgeless-slide-menu')
 export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   static override styles = css`
+    :host {
+      max-width: 100%;
+    }
     ::-webkit-scrollbar {
       display: none;
     }
+    .slide-menu-wrapper {
+      position: relative;
+    }
     .menu-container {
-      --menu-width: ${DEFAULT_MENU_WIDTH}px;
-      --menu-height: ${MENU_HEIGHT}px;
       background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
       border-radius: 8px 8px 0 0;
       border: 1px solid var(--affine-border-color);
+      border-bottom: none;
       display: flex;
       align-items: center;
-      width: var(--menu-width);
+      width: fit-content;
+      max-width: 100%;
       overflow-x: auto;
       overscroll-behavior: none;
       scrollbar-width: none;
       position: relative;
       height: calc(var(--menu-height) + 1px);
       box-sizing: border-box;
-      padding: 0 18px;
+      padding: 0 10px;
+      scroll-snap-type: x mandatory;
     }
     .slide-menu-content {
       display: flex;
       align-items: center;
       justify-content: center;
-      position: absolute;
-      left: 0;
-      top: 0;
       height: 100%;
       transition: left 0.5s ease-in-out;
-      padding: 0 16px;
     }
     .next-slide-button,
     .previous-slide-button {
@@ -84,84 +89,81 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       transform: rotate(180deg);
     }
   `;
-  @property({ attribute: false })
-  accessor menuWidth = DEFAULT_MENU_WIDTH;
+
+  @consume({ context: edgelessToolbarSlotsContext })
+  accessor toolbarSlots!: EdgelessToolbarSlots;
 
   @property({ attribute: false })
-  accessor showNext = true;
+  accessor showPrevious = false;
+
+  @property({ attribute: false })
+  accessor showNext = false;
+
+  @property({ attribute: false })
+  accessor height = '40px';
 
   @query('.menu-container')
   private accessor _menuContainer!: HTMLDivElement;
 
-  @query('.next-slide-button')
-  private accessor _nextSlideButton!: HTMLDivElement;
-
-  @query('.previous-slide-button')
-  private accessor _previousSlideButton!: HTMLDivElement;
-
   @query('.slide-menu-content')
   private accessor _slideMenuContent!: HTMLDivElement;
 
-  private _toggleSlideButton(scrollLeft: number) {
-    this._previousSlideButton.style.opacity = '1';
-    this._nextSlideButton.style.opacity = '1';
+  private _toggleSlideButton() {
+    const scrollLeft = this._menuContainer.scrollLeft;
+    const menuWidth = this._menuContainer.clientWidth;
+
     const leftMin = 0;
-    const leftMax = this._slideMenuContent.clientWidth - this.menuWidth + 2; // border is 2
-    if (scrollLeft === leftMin) {
-      this._previousSlideButton.style.opacity = '0';
-    }
-    if (scrollLeft === leftMax) {
-      this._nextSlideButton.style.opacity = '0';
-    }
+    const leftMax = this._slideMenuContent.clientWidth - menuWidth + 2; // border is 2
+    this.showPrevious = scrollLeft > leftMin;
+    this.showNext = scrollLeft < leftMax;
   }
 
   override firstUpdated() {
-    this._toggleSlideButton(this._menuContainer.scrollLeft);
+    setTimeout(this._toggleSlideButton.bind(this), 0);
     this._disposables.addFromEvent(this._menuContainer, 'scrollend', () => {
-      this._toggleSlideButton(this._menuContainer.scrollLeft);
+      this._toggleSlideButton();
     });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._disposables.dispose();
+    this._disposables.add(
+      this.toolbarSlots.resize.on(() => this._toggleSlideButton())
+    );
   }
 
   private _handleWheel(event: WheelEvent) {
     event.stopPropagation();
-    this._menuContainer.scrollBy({
-      left: event.deltaX,
-    });
   }
 
   private _handleSlideButtonClick(direction: 'left' | 'right') {
-    const left = direction === 'left' ? 0 : this._slideMenuContent.clientWidth;
+    const totalWidth = this._slideMenuContent.clientWidth;
+    const currentScrollLeft = this._menuContainer.scrollLeft;
+    const menuWidth = this._menuContainer.clientWidth;
+    const newLeft =
+      currentScrollLeft + (direction === 'left' ? -menuWidth : menuWidth);
     this._menuContainer.scrollTo({
-      left: left,
+      left: Math.max(0, Math.min(newLeft, totalWidth)),
       behavior: 'smooth',
     });
   }
 
   override render() {
-    const menuContainerStyles = styleMap({
-      '--menu-width': `${this.menuWidth}px`,
-    });
-
     return html`
-      <div>
+      <div class="slide-menu-wrapper">
         <div
           class="previous-slide-button"
           @click=${() => this._handleSlideButtonClick('left')}
+          style=${styleMap({ opacity: this.showPrevious ? '1' : '0' })}
         >
           ${ArrowRightSmallIcon}
         </div>
-        <div class="menu-container" style=${menuContainerStyles}>
+        <div
+          class="menu-container"
+          style=${styleMap({ '--menu-height': this.height })}
+        >
           <div class="slide-menu-content" @wheel=${this._handleWheel}>
             <slot></slot>
           </div>
         </div>
         <div
-          style=${styleMap({ display: this.showNext ? 'normal' : 'none' })}
+          style=${styleMap({ opacity: this.showNext ? '1' : '0' })}
           class="next-slide-button"
           @click=${() => this._handleSlideButtonClick('right')}
         >

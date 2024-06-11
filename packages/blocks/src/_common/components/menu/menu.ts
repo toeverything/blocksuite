@@ -78,6 +78,8 @@ type NormalMenu = MenuCommon &
         postfix?: TemplateResult;
         icon?: TemplateResult;
         options: MenuOptions;
+        select?: () => void;
+        isSelected?: boolean;
       }
     | {
         type: 'custom';
@@ -234,6 +236,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
 
     .affine-menu-action.selected-item svg {
       color: var(--affine-text-emphasis-color);
+      fill: currentColor;
     }
 
     .database-menu-component-action-button:hover {
@@ -476,7 +479,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       return items;
     },
     'sub-menu': menu => {
-      const select = () => {
+      const openSubMenu = () => {
         this.subMenu?.remove();
         setTimeout(() => {
           const subMenu = new MenuComponent();
@@ -511,6 +514,10 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           this.subMenu = subMenu;
         });
       };
+      const select = () => {
+        menu.select?.();
+        menu.select ? this._complete() : openSubMenu();
+      };
       const postfix = html` <div class="icon">
         ${menu.postfix ?? ArrowRightSmallIcon}
       </div>`;
@@ -524,9 +531,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
               ${menu.label ?? menu.name}
             </div>
             ${postfix}`,
-          mouseEnter: select,
+          mouseEnter: openSubMenu,
           select,
-          class: '',
+          class: menu.isSelected ? 'selected-item' : '',
         },
       ];
     },
@@ -813,6 +820,7 @@ export const popMenu = <T>(
     onClose: props.options.onClose,
     middleware: props.middleware,
     container: props.container,
+    placement: props.placement,
   });
   return {
     close,

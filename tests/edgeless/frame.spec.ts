@@ -58,7 +58,7 @@ test.describe('frame', () => {
       await setEdgelessTool(page, 'frame');
       const frameMenu = page.locator('edgeless-frame-menu');
       await expect(frameMenu).toBeVisible();
-      const button = page.locator('.frame-add-button:nth-of-type(2)');
+      const button = page.locator('.frame-add-button[data-name="1:1"]');
       await button.click();
       await assertSelectedBound(page, [-500, -550, 1200, 1200]);
     });

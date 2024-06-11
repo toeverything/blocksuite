@@ -90,6 +90,7 @@ export class MindmapSurfaceBlock extends BlockElement<SurfaceBlockModel> {
       },
     });
     this._theme.observe(this.ownerDocument.documentElement);
+    this.disposables.add(this._theme);
   }
 
   override firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {

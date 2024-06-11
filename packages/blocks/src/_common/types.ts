@@ -112,6 +112,10 @@ export type LassoTool = {
   mode: LassoMode;
 };
 
+export type TemplateTool = {
+  type: 'template';
+};
+
 export type NoteChildrenFlavour =
   | 'affine:paragraph'
   | 'affine:list'
@@ -142,6 +146,10 @@ export type ConnectorTool = {
   mode: ConnectorMode;
 };
 
+export type MindmapTool = {
+  type: 'mindmap';
+};
+
 export type EdgelessTool =
   | DefaultTool
   | TextTool
@@ -154,7 +162,9 @@ export type EdgelessTool =
   | FrameTool
   | FrameNavigatorTool
   | CopilotSelectionTool
-  | LassoTool;
+  | LassoTool
+  | TemplateTool
+  | MindmapTool;
 
 export interface Viewport {
   left: number;

@@ -205,19 +205,19 @@ test('the tooltip of shape tool button should be hidden when the shape menu is s
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const shapeTool = locatorEdgelessToolButton(page, 'shape');
+  const shapeTool = await locatorEdgelessToolButton(page, 'shape');
   const shapeToolBox = await shapeTool.boundingBox();
   const tooltip = page.locator('.affine-tooltip');
 
   assertExists(shapeToolBox);
 
-  await page.mouse.move(shapeToolBox.x + 20, shapeToolBox.y + 20);
+  await page.mouse.move(shapeToolBox.x + 2, shapeToolBox.y + 2);
   await expect(tooltip).toBeVisible();
 
-  await page.mouse.click(shapeToolBox.x + 20, shapeToolBox.y + 20);
+  await page.mouse.click(shapeToolBox.x + 2, shapeToolBox.y + 2);
   await expect(tooltip).toBeHidden();
 
-  await page.mouse.click(shapeToolBox.x + 20, shapeToolBox.y + 20);
+  await page.mouse.click(shapeToolBox.x + 2, shapeToolBox.y + 2);
   await expect(tooltip).toBeVisible();
 });
 
@@ -263,18 +263,18 @@ test('edgeless toolbar shape menu shows up and close normally', async ({
   const toolbarLocator = page.locator('.edgeless-toolbar-container');
   await expect(toolbarLocator).toBeVisible();
 
-  const shapeTool = locatorEdgelessToolButton(page, 'shape');
+  const shapeTool = await locatorEdgelessToolButton(page, 'shape');
   const shapeToolBox = await shapeTool.boundingBox();
 
   assertExists(shapeToolBox);
 
-  await page.mouse.click(shapeToolBox.x + 20, shapeToolBox.y + 20);
+  await page.mouse.click(shapeToolBox.x + 2, shapeToolBox.y + 2);
 
   const shapeMenu = page.locator('edgeless-shape-menu');
   await expect(shapeMenu).toBeVisible();
   await page.waitForTimeout(500);
 
-  await page.mouse.click(shapeToolBox.x + 20, shapeToolBox.y + 20);
+  await page.mouse.click(shapeToolBox.x + 2, shapeToolBox.y + 2);
   await page.waitForTimeout(500);
   await expect(shapeMenu).toBeHidden();
 });

@@ -1,7 +1,7 @@
 import '../../buttons/toolbar-button.js';
 import './text-menu.js';
 
-import { css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -9,16 +9,16 @@ import { EdgelessTextIcon } from '../../../../../_common/icons/index.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
-import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
+import { ToolbarButtonWithMenuMixin } from '../mixins/toolbar-button-with-menu.mixin.js';
 import type { EdgelessTextMenu } from './text-menu.js';
 
 @customElement('edgeless-text-tool-button')
-export class EdgelessTextToolButton extends EdgelessToolButton<
+export class EdgelessTextToolButton extends ToolbarButtonWithMenuMixin<
   EdgelessTextMenu,
   'text',
   readonly ['color']
-> {
-  static override styles = css`
+>(LitElement) {
+  static styles = css`
     :host {
       display: flex;
     }
@@ -33,21 +33,18 @@ export class EdgelessTextToolButton extends EdgelessToolButton<
   @state()
   accessor color = GET_DEFAULT_TEXT_COLOR();
 
-  protected override _type = 'text' as const;
+  override type = 'text' as const;
+  override _type = 'text' as const;
   protected override _states = ['color'] as const;
 
   private _toggleTextMenu() {
     if (this._menu) {
-      this._disposeMenu();
       this.requestUpdate();
     } else {
       this.edgeless.tools.setEdgelessTool({
         type: this._type,
       });
-      this._menu = createPopper('edgeless-text-menu', this, {
-        x: 130,
-        y: -40,
-      });
+      this._menu = createPopper('edgeless-text-menu', this);
       this.updateMenu();
       this._menu.element.edgeless = this.edgeless;
       this._menu.element.onChange = (props: Record<string, unknown>) => {

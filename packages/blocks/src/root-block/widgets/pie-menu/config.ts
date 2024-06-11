@@ -5,9 +5,9 @@ import {
   ConnectorIcon,
   CurveLineIcon,
   DiamondIcon,
-  EdgelessEraserIcon,
+  EdgelessEraserLightIcon,
   EdgelessGeneralShapeIcon,
-  EdgelessPenIcon,
+  EdgelessPenLightIcon,
   ElbowedLineIcon,
   EllipseIcon,
   FrameIcon,
@@ -70,7 +70,7 @@ const pie = new PieMenuBuilder({
 
 pie.expandableCommand({
   label: 'Pen',
-  icon: EdgelessPenIcon,
+  icon: EdgelessPenLightIcon,
   action: setEdgelessToolAction({ type: 'brush' }),
   submenus: pie => {
     pie.colorPicker({
@@ -88,7 +88,7 @@ pie.expandableCommand({
 
 pie.command({
   label: 'Eraser',
-  icon: EdgelessEraserIcon,
+  icon: EdgelessEraserLightIcon,
   action: setEdgelessToolAction({
     type: 'eraser',
   }),

@@ -148,7 +148,7 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await page.keyboard.down('Space');
-  const defaultButton = locatorEdgelessToolButton(page, 'pan', false);
+  const defaultButton = await locatorEdgelessToolButton(page, 'pan', false);
   await assertNotHasClass(defaultButton, 'pan');
   await waitNextFrame(page);
 });

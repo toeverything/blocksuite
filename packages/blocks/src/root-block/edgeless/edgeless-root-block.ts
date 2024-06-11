@@ -72,6 +72,7 @@ import { LassoToolController } from './controllers/tools/lasso-tool.js';
 import { NoteToolController } from './controllers/tools/note-tool.js';
 import { PanToolController } from './controllers/tools/pan-tool.js';
 import { ShapeToolController } from './controllers/tools/shape-tool.js';
+import { TemplateToolController } from './controllers/tools/template-tool.js';
 import { TextToolController } from './controllers/tools/text-tool.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
@@ -84,7 +85,6 @@ import {
   DEFAULT_NOTE_WIDTH,
 } from './utils/consts.js';
 import { isCanvasElement } from './utils/query.js';
-
 export interface EdgelessViewport {
   left: number;
   top: number;
@@ -244,7 +244,9 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
     disposables.add(this.service.selection);
     disposables.add(
-      slots.edgelessToolUpdated.on(tool => (this.edgelessTool = tool))
+      slots.edgelessToolUpdated.on(tool => {
+        this.edgelessTool = tool;
+      })
     );
     disposables.add(
       slots.cursorUpdated.on(
@@ -729,6 +731,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
       PresentToolController,
       CopilotSelectionController,
       LassoToolController,
+      TemplateToolController,
     ] as EdgelessToolConstructor[];
 
     tools.forEach(tool => {

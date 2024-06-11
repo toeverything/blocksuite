@@ -9,7 +9,6 @@ import {
 } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import type { ShapeType } from '../../../../../surface-block/elements/shape/consts.js';
 import type { ShapeStyle } from '../../../../../surface-block/index.js';
 import {
@@ -95,13 +94,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   accessor shapeType!: ShapeName;
 
   @property({ attribute: false })
-  accessor fillColor!: CssVariableName;
-
-  @property({ attribute: false })
   accessor shapeStyle!: ShapeStyle;
-
-  @property({ attribute: false })
-  accessor strokeColor!: CssVariableName;
 
   @property({ attribute: false })
   accessor radius!: number;
@@ -292,12 +285,6 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       this._backupShapeElement.style.setProperty('--scale', '0.9');
       this._backupShapeElement.style.zIndex = '999';
     }
-
-    this.edgeless.slots.edgelessToolUpdated.on(newTool => {
-      if (newTool.type !== 'shape') {
-        return;
-      }
-    });
   }
 
   override render() {

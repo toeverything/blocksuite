@@ -89,8 +89,7 @@ test.describe('edgeless canvas text', () => {
 
   // it's also a little flaky
   test('add text element in text mode', async ({ page }) => {
-    await setEdgelessTool(page, 'text');
-    await page.mouse.click(130, 140);
+    await page.mouse.dblclick(130, 140);
     await waitNextFrame(page);
 
     await type(page, 'hello');
@@ -101,8 +100,7 @@ test.describe('edgeless canvas text', () => {
 
     expect(await page.locator('edgeless-text-editor').count()).toBe(0);
 
-    await page.mouse.click(145, 145);
-    await page.mouse.click(145, 145);
+    await page.mouse.dblclick(145, 145);
 
     await page.locator('edgeless-text-editor').waitFor({
       state: 'attached',
@@ -147,8 +145,7 @@ test.describe('edgeless canvas text', () => {
   test('normalize text element rect after change its font', async ({
     page,
   }) => {
-    await setEdgelessTool(page, 'text');
-    await page.mouse.click(200, 200);
+    await page.mouse.dblclick(200, 200);
     await waitNextFrame(page);
 
     await type(page, 'aaa\nbbbbbbbb\n\ncc');

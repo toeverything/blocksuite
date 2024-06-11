@@ -1,4 +1,5 @@
-import { WithDisposable } from '@blocksuite/block-std';
+import './present/navigator-setting-button.js';
+
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -16,9 +17,11 @@ import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
+import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
 
 @customElement('presentation-toolbar')
-export class PresentationToolbar extends WithDisposable(LitElement) {
+export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
+  override type: EdgelessTool['type'] = 'frameNavigator';
   static override styles = css`
     :host {
       align-items: inherit;
@@ -66,8 +69,6 @@ export class PresentationToolbar extends WithDisposable(LitElement) {
     }
   `;
 
-  edgeless: EdgelessRootBlockComponent;
-
   private get _cachedPresentHideToolbar() {
     return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
   }
@@ -108,18 +109,10 @@ export class PresentationToolbar extends WithDisposable(LitElement) {
     return this.edgeless.host;
   }
 
-  get edgelessTool() {
-    return this.edgeless.edgelessTool;
-  }
-
   constructor(edgeless: EdgelessRootBlockComponent) {
     super();
     this.edgeless = edgeless;
   }
-
-  setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.tools.setEdgelessTool(edgelessTool);
-  };
 
   private _nextFrame() {
     const frames = this._frames;
