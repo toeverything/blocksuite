@@ -2,6 +2,7 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import { WidgetElement } from '@blocksuite/block-std';
 import {
   assertExists,
+  debounce,
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
@@ -37,55 +38,62 @@ export type AffineSlashMenuGroupDivider = SlashMenuGroupDivider;
 
 let globalAbortController = new AbortController();
 
-function showSlashMenu({
-  context,
-  range,
-  container = document.body,
-  abortController = new AbortController(),
-  config,
-  triggerKey,
-}: {
-  context: SlashMenuContext;
-  range: Range;
-  container?: HTMLElement;
-  abortController?: AbortController;
-  config: SlashMenuStaticConfig;
-  triggerKey: string;
-}) {
-  // Abort previous format quick bar
+function closeSlashMenu() {
   globalAbortController.abort();
-  globalAbortController = abortController;
-  const disposables = new DisposableGroup();
-  abortController.signal.addEventListener('abort', () => disposables.dispose());
-
-  const slashMenu = new SlashMenu();
-  disposables.add(() => slashMenu.remove());
-  slashMenu.context = context;
-  slashMenu.abortController = abortController;
-  slashMenu.config = config;
-  slashMenu.triggerKey = triggerKey;
-
-  // Handle position
-  const updatePosition = throttle(() => {
-    const slashMenuElement = slashMenu.slashMenuElement;
-    assertExists(
-      slashMenuElement,
-      'You should render the slash menu node even if no position'
-    );
-    const position = getPopperPosition(slashMenuElement, range);
-    slashMenu.updatePosition(position);
-  }, 10);
-
-  disposables.addFromEvent(window, 'resize', updatePosition);
-
-  // FIXME(Flrande): It is not a best practice,
-  // but merely a temporary measure for reusing previous components.
-  // Mount
-  container.append(slashMenu);
-  // Wait for the Node to be mounted
-  setTimeout(updatePosition);
-  return slashMenu;
 }
+
+const showSlashMenu = debounce(
+  ({
+    context,
+    range,
+    container = document.body,
+    abortController = new AbortController(),
+    config,
+    triggerKey,
+  }: {
+    context: SlashMenuContext;
+    range: Range;
+    container?: HTMLElement;
+    abortController?: AbortController;
+    config: SlashMenuStaticConfig;
+    triggerKey: string;
+  }) => {
+    globalAbortController = abortController;
+    const disposables = new DisposableGroup();
+    abortController.signal.addEventListener('abort', () =>
+      disposables.dispose()
+    );
+
+    const slashMenu = new SlashMenu();
+    disposables.add(() => slashMenu.remove());
+    slashMenu.context = context;
+    slashMenu.abortController = abortController;
+    slashMenu.config = config;
+    slashMenu.triggerKey = triggerKey;
+
+    // Handle position
+    const updatePosition = throttle(() => {
+      const slashMenuElement = slashMenu.slashMenuElement;
+      assertExists(
+        slashMenuElement,
+        'You should render the slash menu node even if no position'
+      );
+      const position = getPopperPosition(slashMenuElement, range);
+      slashMenu.updatePosition(position);
+    }, 10);
+
+    disposables.addFromEvent(window, 'resize', updatePosition);
+
+    // FIXME(Flrande): It is not a best practice,
+    // but merely a temporary measure for reusing previous components.
+    // Mount
+    container.append(slashMenu);
+    // Wait for the Node to be mounted
+    setTimeout(updatePosition);
+    return slashMenu;
+  },
+  100
+);
 
 export const AFFINE_SLASH_MENU_WIDGET = 'affine-slash-menu-widget';
 
@@ -172,6 +180,8 @@ export class AffineSlashMenuWidget extends WidgetElement {
       requestAnimationFrame(() => {
         const curRange = getCurrentNativeRange();
         if (!curRange) return;
+
+        closeSlashMenu();
         showSlashMenu({
           context: { model, rootElement },
           range: curRange,
