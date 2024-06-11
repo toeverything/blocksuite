@@ -7,7 +7,7 @@ import '../../edgeless/components/panel/shape-panel.js';
 import './change-text-menu.js';
 
 import { WithDisposable } from '@blocksuite/block-std';
-import { html, LitElement, nothing } from 'lit';
+import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { cache } from 'lit/directives/cache.js';
 import { choose } from 'lit/directives/choose.js';
@@ -191,7 +191,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     if (!this.elements.some(e => !e.text)) {
       return 'menu';
     }
-    return nothing;
+    return 'nothing';
   }
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
@@ -326,31 +326,35 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           </edgeless-menu-button>
         `,
 
-        choose(this._showAddButtonOrTextMenu(), [
+        choose<string, TemplateResult<1> | typeof nothing>(
+          this._showAddButtonOrTextMenu(),
           [
-            'button',
-            () => html`
-              <edgeless-tool-icon-button
-                aria-label="Add text"
-                .tooltip=${'Add text'}
-                @click=${this._addText}
-              >
-                ${AddTextIcon}
-              </edgeless-tool-icon-button>
-            `,
-          ],
-          [
-            'menu',
-            () => html`
-              <edgeless-change-text-menu
-                .elementType=${'shape'}
-                .elements=${elements}
-                .edgeless=${this.edgeless}
-              ></edgeless-change-text-menu>
-            `,
-          ],
-        ]),
-      ],
+            [
+              'button',
+              () => html`
+                <edgeless-tool-icon-button
+                  aria-label="Add text"
+                  .tooltip=${'Add text'}
+                  @click=${this._addText}
+                >
+                  ${AddTextIcon}
+                </edgeless-tool-icon-button>
+              `,
+            ],
+            [
+              'menu',
+              () => html`
+                <edgeless-change-text-menu
+                  .elementType=${'shape'}
+                  .elements=${elements}
+                  .edgeless=${this.edgeless}
+                ></edgeless-change-text-menu>
+              `,
+            ],
+            ['nothing', () => nothing],
+          ]
+        ),
+      ].filter(button => button !== nothing),
       renderMenuDivider
     );
   }

@@ -311,7 +311,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     if (!this.elements.some(e => !e.text)) {
       return 'menu';
     }
-    return nothing;
+    return 'nothing';
   }
 
   override render() {
@@ -502,31 +502,35 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
           </edgeless-menu-button>
         `,
 
-        choose(this._showAddButtonOrTextMenu(), [
+        choose<string, TemplateResult<1> | typeof nothing>(
+          this._showAddButtonOrTextMenu(),
           [
-            'button',
-            () => html`
-              <edgeless-tool-icon-button
-                aria-label="Add text"
-                .tooltip=${'Add text'}
-                @click=${this._addLabel}
-              >
-                ${AddTextIcon}
-              </edgeless-tool-icon-button>
-            `,
-          ],
-          [
-            'menu',
-            () => html`
-              <edgeless-change-text-menu
-                .elementType=${'connector'}
-                .elements=${this.elements}
-                .edgeless=${this.edgeless}
-              ></edgeless-change-text-menu>
-            `,
-          ],
-        ]),
-      ],
+            [
+              'button',
+              () => html`
+                <edgeless-tool-icon-button
+                  aria-label="Add text"
+                  .tooltip=${'Add text'}
+                  @click=${this._addLabel}
+                >
+                  ${AddTextIcon}
+                </edgeless-tool-icon-button>
+              `,
+            ],
+            [
+              'menu',
+              () => html`
+                <edgeless-change-text-menu
+                  .elementType=${'connector'}
+                  .elements=${this.elements}
+                  .edgeless=${this.edgeless}
+                ></edgeless-change-text-menu>
+              `,
+            ],
+            ['nothing', () => nothing],
+          ]
+        ),
+      ].filter(button => button !== nothing),
       renderMenuDivider
     );
   }
