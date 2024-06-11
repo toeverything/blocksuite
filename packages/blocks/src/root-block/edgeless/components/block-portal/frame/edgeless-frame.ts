@@ -76,9 +76,11 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
     _disposables.add(
       edgeless.doc.slots.blockUpdated.on(payload => {
         if (
-          payload.type === 'update' &&
-          payload.props.key === 'xywh' &&
-          edgeless.doc.getBlock(payload.id)?.model instanceof FrameBlockModel
+          (payload.type === 'update' &&
+            payload.props.key === 'xywh' &&
+            edgeless.doc.getBlock(payload.id)?.model instanceof
+              FrameBlockModel) ||
+          (payload.type === 'add' && payload.flavour === 'affine:frame')
         ) {
           this._nestedFrame = this._isInsideFrame();
         }
@@ -197,6 +199,7 @@ export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
                 display: hidden ? 'none' : 'initial',
                 transform: transformOperation.join(' '),
                 maxWidth: maxWidth + 'px',
+                transformOrigin: nestedFrame ? 'top left' : 'bottom left',
                 background: nestedFrame
                   ? 'var(--affine-white)'
                   : 'var(--affine-text-primary-color)',
