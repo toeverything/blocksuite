@@ -26,6 +26,7 @@ import type { RootBlockModel } from '../root-model.js';
 import type { PageRootService } from './page-root-service.js';
 
 const DOC_BLOCK_CHILD_PADDING = 24;
+const DOC_BOTTOM_PADDING = 32;
 
 function testClickOnBlankArea(
   state: PointerEventState,
@@ -85,6 +86,8 @@ export class PageRootBlockComponent extends BlockElement<
       padding-left: var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px);
       /* prettier-ignore */
       padding-right: var(--affine-editor-side-padding, ${DOC_BLOCK_CHILD_PADDING}px);
+      /* prettier-ignore */
+      padding-bottom: var(--affine-editor-bottom-padding, ${DOC_BOTTOM_PADDING}px);
     }
 
     /* Extra small devices (phones, 640px and down) */
