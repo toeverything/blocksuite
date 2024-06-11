@@ -213,12 +213,13 @@ describe('mindmap', () => {
       ],
     };
     const mindmapId = service.addElement('mindmap', { children: tree });
-    const mindmap = service.getElementById(mindmapId) as MindmapElementModel;
+    const mindmap = () =>
+      service.getElementById(mindmapId) as MindmapElementModel;
 
     expect(service.surface.elementModels.length).toBe(6);
     doc.captureSync();
 
-    service.removeElement(mindmap.tree.element);
+    service.removeElement(mindmap().tree.element);
     expect(service.surface.elementModels.length).toBe(0);
     doc.captureSync();
     await wait();
@@ -227,9 +228,8 @@ describe('mindmap', () => {
     expect(service.surface.elementModels.length).toBe(6);
     await wait();
 
-    service.removeElement(mindmap.tree.children[2].element);
+    service.removeElement(mindmap().tree.children[2].element);
     expect(service.surface.elementModels.length).toBe(4);
-    doc.captureSync();
     await wait();
 
     doc.undo();

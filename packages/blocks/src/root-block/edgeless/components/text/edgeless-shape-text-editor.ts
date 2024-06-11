@@ -10,11 +10,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import {
-  SHAPE_TEXT_PADDING,
-  SHAPE_TEXT_VERTICAL_PADDING,
-} from '../../../../surface-block/canvas-renderer/element-renderer/shape/utils.js';
+  getNearestTranslation,
+  isElementOutsideViewport,
+} from '../../../../_common/edgeless/mindmap/index.js';
+import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { TextResizing } from '../../../../surface-block/consts.js';
 import {
   MindmapElementModel,
@@ -37,7 +37,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @property({ attribute: false })
-  accessor mounteEditor:
+  accessor mountEditor:
     | ((
         element: ShapeElementModel,
         edgeless: EdgelessRootBlockComponent
@@ -95,6 +95,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           containerHeight
         ).serialize(),
       });
+      this.element.group instanceof MindmapElementModel &&
+        this.element.group.layout();
       this.richText.style.minHeight = `${containerHeight}px`;
     }
 
@@ -200,6 +202,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       return;
     }
 
+    const service = this.edgeless.service;
+
     this._disposables.addFromEvent(this, 'keydown', evt => {
       switch (evt.key) {
         case 'Enter': {
@@ -208,13 +212,27 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           const element = this.element;
           const mindmap = this.element.group as MindmapElementModel;
           const parent = mindmap.getParentNode(element.id) ?? element;
-          const id = mindmap.addNode(parent.id, 'shape');
+          const id = mindmap.addNode(parent.id);
 
           requestAnimationFrame(() => {
             this.element = edgeless.service.getElementById(
               id
             ) as ShapeElementModel;
-            this.mounteEditor?.(this.element, edgeless);
+            const element = this.element;
+            this.mountEditor?.(element, edgeless);
+
+            if (isElementOutsideViewport(service.viewport, element, [20, 20])) {
+              const [dx, dy] = getNearestTranslation(
+                edgeless.service.viewport,
+                element,
+                [20, 20]
+              );
+
+              edgeless.service.viewport.smoothTranslate(
+                service.viewport.centerX - dx,
+                service.viewport.centerY + dy
+              );
+            }
           });
 
           (this.ownerDocument.activeElement as HTMLElement).blur();
@@ -225,13 +243,41 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           const edgeless = this.edgeless;
           const element = this.element;
           const mindmap = this.element.group as MindmapElementModel;
-          const id = mindmap.addNode(element.id, 'shape');
+          const id = mindmap.addNode(element.id);
 
           requestAnimationFrame(() => {
             this.element = edgeless.service.getElementById(
               id
             ) as ShapeElementModel;
-            this.mounteEditor?.(this.element, edgeless);
+            const element = this.element;
+            this.mountEditor?.(element, edgeless);
+
+            if (isElementOutsideViewport(service.viewport, element, [20, 20])) {
+              const [dx, dy] = getNearestTranslation(
+                edgeless.service.viewport,
+                element,
+                [20, 20]
+              );
+
+              edgeless.service.viewport.smoothTranslate(
+                service.viewport.centerX - dx,
+                service.viewport.centerY + dy
+              );
+            }
+          });
+
+          (this.ownerDocument.activeElement as HTMLElement).blur();
+          break;
+        }
+        case 'Escape': {
+          const service = this.edgeless.service;
+          const element = this.element;
+
+          requestAnimationFrame(() => {
+            service.selection.set({
+              elements: [element.id],
+              editing: false,
+            });
           });
 
           (this.ownerDocument.activeElement as HTMLElement).blur();
@@ -245,6 +291,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       throw new Error('Failed to mount shape editor because of no text.');
     }
 
+    const [verticalPadding, horiPadding] = this.element.padding;
     const textResizing = this.element.textResizing;
     const viewport = this.edgeless.service.viewport;
     const zoom = viewport.zoom;
@@ -269,7 +316,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         textResizing > TextResizing.AUTO_WIDTH
           ? rect.width + 'px'
           : 'fit-content',
-      minHeight: rect.height + 'px',
+      // override rich-text style (height: 100%)
+      height: 'initial',
+      minHeight:
+        textResizing === TextResizing.AUTO_WIDTH ? '1em' : `${rect.height}px`,
       maxWidth:
         textResizing === TextResizing.AUTO_WIDTH
           ? this.element.maxWidth
@@ -277,8 +327,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
             : undefined
           : undefined,
       boxSizing: 'border-box',
-      // override rich-text style (height: 100%)
-      height: 'initial',
       fontSize: this.element.fontSize + 'px',
       fontFamily: wrapFontFamily(this.element.fontFamily),
       fontWeight: this.element.fontWeight,
@@ -289,7 +337,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       color: isCssVariable(this.element.color)
         ? `var(${this.element.color})`
         : this.element.color,
-      padding: `${SHAPE_TEXT_VERTICAL_PADDING}px ${SHAPE_TEXT_PADDING}px`,
+      padding: `${verticalPadding}px ${horiPadding}px`,
       textAlign: this.element.textAlign,
       display: 'grid',
       gridTemplateColumns: '100%',

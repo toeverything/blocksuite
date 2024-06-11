@@ -21,7 +21,8 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
 
     const group = element.group;
 
-    group.removeDescendant(element.id);
+    // eslint-disable-next-line unicorn/prefer-dom-node-remove
+    group.removeChild(element);
 
     element.index = service.layer.generateIndex(
       'flavour' in element ? element.flavour : element.type

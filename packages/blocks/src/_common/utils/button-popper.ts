@@ -84,12 +84,12 @@ export function createButtonPopper(
         }),
       ],
     })
-      .then(({ x, y }) => {
+      .then(({ x, y, middlewareData: data }) => {
         Object.assign(popperElement.style, {
           position: 'absolute',
           zIndex: 1,
-          left: `${x}px`,
-          top: `${y}px`,
+          left: `${x + (data.shift?.x ?? 0)}px`,
+          top: `${y + (data.shift?.y ?? 0)}px`,
         });
       })
       .catch(console.error);

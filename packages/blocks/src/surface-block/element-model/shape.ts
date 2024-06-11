@@ -64,6 +64,9 @@ export type ShapeProps = IBaseProps & {
   maxWidth?: false | number;
 } & Partial<TextStyleProps>;
 
+export const SHAPE_TEXT_PADDING = 20;
+export const SHAPE_TEXT_VERTICAL_PADDING = 10;
+
 export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
   static override propsToY(props: ShapeProps) {
     if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
@@ -145,6 +148,20 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
 
   @yfield(false as false | number)
   accessor maxWidth: false | number = false;
+
+  @local()
+  accessor padding: [number, number] = [
+    SHAPE_TEXT_VERTICAL_PADDING,
+    SHAPE_TEXT_PADDING,
+  ];
+
+  @local()
+  accessor shadow: {
+    blur: number;
+    offsetX: number;
+    offsetY: number;
+    color: string;
+  } | null = null;
 
   textBound: IBound | null = null;
 

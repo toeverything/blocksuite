@@ -39,7 +39,7 @@ export class EdgelessCopilotToolbarEntry extends WithDisposable(LitElement) {
           .getElementsInFrame(element)
           .forEach(ele => toBeSelected.add(ele));
       } else if (element instanceof SurfaceGroupLikeModel) {
-        element.decendants().forEach(ele => toBeSelected.add(ele));
+        element.descendants().forEach(ele => toBeSelected.add(ele));
       }
     });
 

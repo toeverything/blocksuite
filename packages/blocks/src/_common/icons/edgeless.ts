@@ -3122,166 +3122,731 @@ export const MindmapRightLayoutIcon = html`<svg
 </svg>`;
 
 export const MindmapStyleOne = html`<svg
-  width="78"
-  height="78"
-  viewBox="0 0 78 78"
+  width="64"
+  height="48"
+  viewBox="0 0 64 48"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <rect
-    x="46"
-    y="10"
-    width="21"
-    height="14"
-    rx="2.46"
-    fill="white"
+  <rect width="64" height="48" rx="4" />
+  <path d="M23.976 24L43.4022 24" stroke="#E660A4" stroke-width="1.4" />
+  <path
+    d="M23.976 24.0001L26.5099 24.0001C30.4749 24.0001 33.6891 20.7858 33.6891 16.8208V16.8208C33.6891 12.8559 36.9034 9.6416 40.8684 9.6416L43.4022 9.6416"
     stroke="#6E52DF"
-    stroke-width="1.25"
-  />
-  <rect
-    x="46"
-    y="54"
-    width="21"
-    height="14"
-    rx="2.46"
-    fill="white"
-    stroke="#FF8C38"
-    stroke-width="1.25"
+    stroke-width="1.4"
   />
   <path
-    d="M32 39V39C35.866 39 39 35.866 39 32V24C39 20.134 42.134 17 46 17V17"
-    stroke="#6E52DF"
-    stroke-width="1.25"
-  />
-  <rect
-    x="46"
-    y="32"
-    width="21"
-    height="14"
-    rx="2.46"
-    fill="white"
-    stroke="#E660A4"
-    stroke-width="1.25"
-  />
-  <path d="M32 39H46" stroke="#E660A4" stroke-width="1.25" />
-  <path
-    d="M32 39V39C35.866 39 39 42.134 39 46V54C39 57.866 42.134 61 46 61V61"
+    d="M23.976 24L26.5099 24C30.4749 24 33.6891 27.2143 33.6891 31.1792V31.1792C33.6891 35.1442 36.9034 38.3585 40.8684 38.3585L43.4022 38.3585"
     stroke="#FF8C38"
-    stroke-width="1.25"
+    stroke-width="1.4"
   />
-  <rect
-    x="9"
-    y="31"
-    width="23"
-    height="16"
-    rx="2.46"
-    fill="white"
-    stroke="#84CFFF"
-    stroke-width="1.25"
-  />
-</svg>`;
+  <g>
+    <rect
+      x="42.7023"
+      y="33.4353"
+      width="15.7585"
+      height="9.84617"
+      rx="2.38923"
+      stroke="#FF8C38"
+      stroke-width="1.4"
+      shape-rendering="crispEdges"
+    />
+  </g>
+  <g>
+    <rect
+      x="42.7023"
+      y="19.0769"
+      width="15.7585"
+      height="9.84617"
+      rx="2.38923"
+      stroke="#E660A4"
+      stroke-width="1.4"
+      shape-rendering="crispEdges"
+    />
+  </g>
+  <g>
+    <rect
+      x="42.7023"
+      y="4.71846"
+      width="15.7585"
+      height="9.84617"
+      rx="2.38923"
+      stroke="#6E52DF"
+      stroke-width="1.4"
+      shape-rendering="crispEdges"
+    />
+  </g>
+  <g>
+    <rect
+      x="5.53921"
+      y="17.3879"
+      width="18.2923"
+      height="13.2246"
+      rx="2.77776"
+      stroke="#84CFFF"
+      stroke-width="1.4"
+      shape-rendering="crispEdges"
+    />
+  </g>
+</svg> `;
 
 export const MindmapStyleTwo = html`<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="78"
-  height="78"
-  viewBox="0 0 78 78"
+  width="64"
+  height="48"
+  viewBox="0 0 64 48"
   fill="none"
+  xmlns="http://www.w3.org/2000/svg"
 >
-  <rect x="46" y="10" width="21" height="14" rx="2.46" fill="#B8E3FF" />
-  <rect x="46" y="54" width="21" height="14" rx="2.46" fill="#B8E3FF" />
   <path
-    d="M32 39V39C35.866 39 39 35.866 39 32V24C39 20.134 42.134 17 46 17V17"
-    stroke="#BFC0BF"
-    stroke-width="1.25"
+    d="M23.9761 24L43.4023 24"
+    stroke="black"
+    stroke-width="1.4"
+    stroke-linejoin="round"
   />
-  <rect x="46" y="32" width="21" height="14" rx="2.46" fill="#B8E3FF" />
-  <path d="M32 39H46" stroke="#BFC0BF" stroke-width="1.25" />
   <path
-    d="M32 39V39C35.866 39 39 42.134 39 46V54C39 57.866 42.134 61 46 61V61"
-    stroke="#BFC0BF"
-    stroke-width="1.25"
+    d="M23.9761 24.0001L33.5892 24.0001C33.6444 24.0001 33.6892 23.9553 33.6892 23.9001L33.6892 9.7416C33.6892 9.68637 33.7339 9.6416 33.7892 9.6416L43.4023 9.6416"
+    stroke="black"
+    stroke-width="1.4"
+    stroke-linejoin="round"
   />
-  <rect x="9" y="31" width="23" height="16" rx="2.46" fill="#B8F2E7" />
-</svg>`;
+  <path
+    d="M23.9761 24L33.5892 24C33.6444 24 33.6892 24.0448 33.6892 24.1L33.6892 38.2585C33.6892 38.3137 33.7339 38.3585 33.7892 38.3585L43.4023 38.3585"
+    stroke="black"
+    stroke-width="1.4"
+    stroke-linejoin="round"
+  />
+  <g filter="url(#filter0_dd_7851_11431)">
+    <rect
+      x="43.4023"
+      y="34.1353"
+      width="14.3585"
+      height="8.44617"
+      rx="0.1"
+      fill="#84CFFF"
+    />
+  </g>
+  <g filter="url(#filter1_dd_7851_11431)">
+    <rect
+      x="43.4023"
+      y="19.7769"
+      width="14.3585"
+      height="8.44617"
+      rx="0.1"
+      fill="#84CFFF"
+    />
+  </g>
+  <g filter="url(#filter2_dd_7851_11431)">
+    <rect
+      x="43.4023"
+      y="5.41846"
+      width="14.3585"
+      height="8.44617"
+      rx="0.1"
+      fill="#84CFFF"
+    />
+  </g>
+  <g filter="url(#filter3_dd_7851_11431)">
+    <rect
+      x="6.23926"
+      y="18.0879"
+      width="16.8923"
+      height="11.8246"
+      rx="0.1"
+      fill="#FFC46B"
+    />
+  </g>
+  <defs>
+    <filter
+      id="filter0_dd_7851_11431"
+      x="42.4023"
+      y="33.1353"
+      width="17.3585"
+      height="11.4463"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect1_dropShadow_7851_11431"
+      />
+      <feOffset dx="1" dy="1" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_7851_11431"
+      />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect2_dropShadow_7851_11431"
+      />
+      <feOffset />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="effect1_dropShadow_7851_11431"
+        result="effect2_dropShadow_7851_11431"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect2_dropShadow_7851_11431"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter1_dd_7851_11431"
+      x="42.4023"
+      y="18.7769"
+      width="17.3585"
+      height="11.4463"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect1_dropShadow_7851_11431"
+      />
+      <feOffset dx="1" dy="1" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_7851_11431"
+      />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect2_dropShadow_7851_11431"
+      />
+      <feOffset />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="effect1_dropShadow_7851_11431"
+        result="effect2_dropShadow_7851_11431"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect2_dropShadow_7851_11431"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter2_dd_7851_11431"
+      x="42.4023"
+      y="4.41846"
+      width="17.3585"
+      height="11.4463"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect1_dropShadow_7851_11431"
+      />
+      <feOffset dx="1" dy="1" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_7851_11431"
+      />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect2_dropShadow_7851_11431"
+      />
+      <feOffset />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="effect1_dropShadow_7851_11431"
+        result="effect2_dropShadow_7851_11431"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect2_dropShadow_7851_11431"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter3_dd_7851_11431"
+      x="5.23926"
+      y="17.0879"
+      width="19.8923"
+      height="14.8247"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect1_dropShadow_7851_11431"
+      />
+      <feOffset dx="1" dy="1" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_7851_11431"
+      />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect2_dropShadow_7851_11431"
+      />
+      <feOffset />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="effect1_dropShadow_7851_11431"
+        result="effect2_dropShadow_7851_11431"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect2_dropShadow_7851_11431"
+        result="shape"
+      />
+    </filter>
+  </defs>
+</svg> `;
 
 export const MindmapStyleThree = html`<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="78"
-  height="78"
-  viewBox="0 0 78 78"
+  width="64"
+  height="48"
+  viewBox="0 0 64 48"
   fill="none"
+  xmlns="http://www.w3.org/2000/svg"
 >
-  <rect x="46" y="10" width="21" height="14" rx="2.46" fill="#ED8CBD" />
-  <rect x="46" y="54" width="21" height="14" rx="2.46" fill="#ED8CBD" />
+  <path d="M23.976 24L43.4022 24" stroke="#FFD338" stroke-width="1.4" />
   <path
-    d="M32 39V39C35.866 39 39 35.866 39 32V24C39 20.134 42.134 17 46 17V17"
-    stroke="#BFC0BF"
-    stroke-width="1.25"
+    d="M23.976 24.0001L26.5099 24.0001C30.4749 24.0001 33.6891 20.7858 33.6891 16.8208V16.8208C33.6891 12.8559 36.9034 9.6416 40.8684 9.6416L43.4022 9.6416"
+    stroke="#FFD338"
+    stroke-width="1.4"
   />
-  <rect x="46" y="32" width="21" height="14" rx="2.46" fill="#ED8CBD" />
-  <path d="M32 39H46" stroke="#BFC0BF" stroke-width="1.25" />
   <path
-    d="M32 39V39C35.866 39 39 42.134 39 46V54C39 57.866 42.134 61 46 61V61"
-    stroke="#BFC0BF"
-    stroke-width="1.25"
+    d="M23.976 24L26.5099 24C30.4749 24 33.6891 27.2143 33.6891 31.1792V31.1792C33.6891 35.1442 36.9034 38.3585 40.8684 38.3585L43.4022 38.3585"
+    stroke="#FFD338"
+    stroke-width="1.4"
   />
-  <rect x="9" y="31" width="23" height="16" rx="2.46" fill="#ED8CBD" />
-</svg>`;
+  <g filter="url(#filter0_d_7851_6843)">
+    <rect
+      x="43.4023"
+      y="34.1353"
+      width="14.3585"
+      height="8.44617"
+      rx="1.68923"
+      fill="white"
+    />
+    <rect
+      x="42.7023"
+      y="33.4353"
+      width="15.7585"
+      height="9.84617"
+      rx="2.38923"
+      stroke="#FFD338"
+      stroke-width="1.4"
+    />
+  </g>
+  <g filter="url(#filter1_d_7851_6843)">
+    <rect
+      x="43.4023"
+      y="19.7769"
+      width="14.3585"
+      height="8.44617"
+      rx="1.68923"
+      fill="white"
+    />
+    <rect
+      x="42.7023"
+      y="19.0769"
+      width="15.7585"
+      height="9.84617"
+      rx="2.38923"
+      stroke="#FFD338"
+      stroke-width="1.4"
+    />
+  </g>
+  <g filter="url(#filter2_d_7851_6843)">
+    <rect
+      x="43.4023"
+      y="5.41846"
+      width="14.3585"
+      height="8.44617"
+      rx="1.68923"
+      fill="white"
+    />
+    <rect
+      x="42.7023"
+      y="4.71846"
+      width="15.7585"
+      height="9.84617"
+      rx="2.38923"
+      stroke="#FFD338"
+      stroke-width="1.4"
+    />
+  </g>
+  <g filter="url(#filter3_d_7851_6843)">
+    <rect
+      x="6.23921"
+      y="18.0879"
+      width="16.8923"
+      height="11.8246"
+      rx="2.07776"
+      fill="#FFD338"
+    />
+    <rect
+      x="5.53921"
+      y="17.3879"
+      width="18.2923"
+      height="13.2246"
+      rx="2.77776"
+      stroke="white"
+      stroke-width="1.4"
+    />
+  </g>
+  <defs>
+    <filter
+      id="filter0_d_7851_6843"
+      x="39.4684"
+      y="30.2015"
+      width="22.2262"
+      height="16.3138"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feOffset />
+      <feGaussianBlur stdDeviation="1.26693" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_7851_6843"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect1_dropShadow_7851_6843"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter1_d_7851_6843"
+      x="39.4684"
+      y="15.8431"
+      width="22.2262"
+      height="16.3138"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feOffset />
+      <feGaussianBlur stdDeviation="1.26693" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_7851_6843"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect1_dropShadow_7851_6843"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter2_d_7851_6843"
+      x="39.4684"
+      y="1.4847"
+      width="22.2262"
+      height="16.3138"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feOffset />
+      <feGaussianBlur stdDeviation="1.26693" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_7851_6843"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect1_dropShadow_7851_6843"
+        result="shape"
+      />
+    </filter>
+    <filter
+      id="filter3_d_7851_6843"
+      x="2.30537"
+      y="14.1541"
+      width="24.76"
+      height="19.6922"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feOffset />
+      <feGaussianBlur stdDeviation="1.26693" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_7851_6843"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect1_dropShadow_7851_6843"
+        result="shape"
+      />
+    </filter>
+  </defs>
+</svg> `;
 
 export const MindmapStyleFour = html`<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="78"
-  height="78"
-  viewBox="0 0 78 78"
+  width="64"
+  height="48"
+  viewBox="0 0 64 48"
   fill="none"
+  xmlns="http://www.w3.org/2000/svg"
 >
-  <rect
-    x="47"
-    y="10"
-    width="20"
-    height="14"
-    stroke="currentColor"
-    stroke-width="1.25"
-  />
-  <rect
-    x="47"
-    y="54"
-    width="20"
-    height="14"
-    stroke="currentColor"
-    stroke-width="1.25"
+  <path
+    d="M23.9761 24L43.4023 24"
+    stroke="#E660A4"
+    stroke-width="1.4"
+    stroke-linecap="round"
   />
   <path
-    d="M32 39H39.5V17H47"
-    stroke="currentColor"
-    stroke-width="1.25"
-    stroke-linejoin="round"
+    d="M23.9761 24.0001L26.5099 24.0001C30.4749 24.0001 33.6892 20.7858 33.6892 16.8208V16.8208C33.6892 12.8559 36.9034 9.6416 40.8684 9.6416L43.4023 9.6416"
+    stroke="#6E52DF"
+    stroke-width="1.4"
+    stroke-linecap="round"
   />
-  <rect
-    x="47"
-    y="32"
-    width="20"
-    height="14"
-    stroke="currentColor"
-    stroke-width="1.25"
-  />
-  <path d="M32 39H47" stroke="currentColor" stroke-width="1.25" />
   <path
-    d="M32 39H39.5V61H47"
-    stroke="currentColor"
-    stroke-width="1.25"
-    stroke-linejoin="round"
+    d="M23.9761 24L26.5099 24C30.4749 24 33.6892 27.2143 33.6892 31.1792V31.1792C33.6892 35.1442 36.9034 38.3585 40.8684 38.3585L43.4023 38.3585"
+    stroke="#FF8C38"
+    stroke-width="1.4"
+    stroke-linecap="round"
   />
-  <rect
-    x="9"
-    y="31"
-    width="23"
+  <path
+    d="M7 26C9.85124 21.8236 11.8347 18.5607 11.8347 20.649C11.8347 22.7372 10.9669 24.695 11.2149 25.3475C11.4628 26 12.9504 24.0423 13.9421 22.8677C14.9339 21.6931 15.9256 21.0405 15.8017 22.8677C15.6777 24.6949 16.2975 25.739 17.2893 24.8254C18.281 23.9118 19.2727 23.5203 20.0165 23.7813C20.6116 23.9901 21.5868 24.5644 22 24.8254"
+    stroke="black"
+    stroke-width="1.4"
+    stroke-linecap="round"
+  />
+  <path
+    d="M44 11C46.4711 7.51964 48.1901 4.80062 48.1901 6.54079C48.1901 8.28097 47.438 9.91246 47.6529 10.4562C47.8678 11 49.157 9.36862 50.0165 8.38977C50.876 7.41092 51.7355 6.86712 51.6281 8.38977C51.5207 9.91243 52.0579 10.7825 52.9174 10.0212C53.7769 9.25986 54.6364 8.93358 55.281 9.1511C55.7967 9.32512 56.6419 9.80367 57 10.0212"
+    stroke="black"
+    stroke-width="1.4"
+    stroke-linecap="round"
+  />
+  <path
+    d="M44 25.5C46.4711 22.0196 48.1901 19.3006 48.1901 21.0408C48.1901 22.781 47.438 24.4125 47.6529 24.9562C47.8678 25.5 49.157 23.8686 50.0165 22.8898C50.876 21.9109 51.7355 21.3671 51.6281 22.8898C51.5207 24.4124 52.0579 25.2825 52.9174 24.5212C53.7769 23.7599 54.6364 23.4336 55.281 23.6511C55.7967 23.8251 56.6419 24.3037 57 24.5212"
+    stroke="black"
+    stroke-width="1.4"
+    stroke-linecap="round"
+  />
+  <path
+    d="M44 40C46.4711 36.5196 48.1901 33.8006 48.1901 35.5408C48.1901 37.281 47.438 38.9125 47.6529 39.4562C47.8678 40 49.157 38.3686 50.0165 37.3898C50.876 36.4109 51.7355 35.8671 51.6281 37.3898C51.5207 38.9124 52.0579 39.7825 52.9174 39.0212C53.7769 38.2599 54.6364 37.9336 55.281 38.1511C55.7967 38.3251 56.6419 38.8037 57 39.0212"
+    stroke="black"
+    stroke-width="1.4"
+    stroke-linecap="round"
+  />
+</svg> `;
+
+export const MindMapSiblingIcon = html`
+  <svg
+    width="16"
     height="16"
-    stroke="currentColor"
-    stroke-width="1.25"
-  />
-</svg>`;
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g clip-path="url(#clip0_6751_1329)">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M6.89958 4.83333C7.10139 4.13998 7.74155 3.6333 8.50004 3.6333H12.1667C13.0872 3.6333 13.8334 4.37949 13.8334 5.29997C13.8334 6.22044 13.0872 6.96663 12.1667 6.96663H8.50004C7.7661 6.96663 7.14296 6.49223 6.92054 5.83333H4.82375C5.1376 6.25116 5.32357 6.77053 5.32357 7.33333V8.66667C5.32357 9.49509 5.99514 10.1667 6.82357 10.1667H6.89958C7.10139 9.47331 7.74155 8.96663 8.50004 8.96663H12.1667C13.0872 8.96663 13.8334 9.71283 13.8334 10.6333C13.8334 11.5538 13.0872 12.3 12.1667 12.3H8.50004C7.7661 12.3 7.14296 11.8256 6.92054 11.1667H6.82357C5.44286 11.1667 4.32357 10.0474 4.32357 8.66667V7.33333C4.32357 6.50491 3.652 5.83333 2.82357 5.83333H1.33337V4.83333H6.89958ZM8.50004 4.6333C8.13185 4.6333 7.83337 4.93178 7.83337 5.29997C7.83337 5.66816 8.13185 5.96663 8.50004 5.96663H12.1667C12.5349 5.96663 12.8334 5.66816 12.8334 5.29997C12.8334 4.93178 12.5349 4.6333 12.1667 4.6333H8.50004ZM8.50004 9.96663C8.13185 9.96663 7.83337 10.2651 7.83337 10.6333C7.83337 11.0015 8.13185 11.3 8.50004 11.3H12.1667C12.5349 11.3 12.8334 11.0015 12.8334 10.6333C12.8334 10.2651 12.5349 9.96663 12.1667 9.96663H8.50004Z"
+        fill="currentColor"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_6751_1329">
+        <rect width="16" height="16" fill="currentColor" />
+      </clipPath>
+    </defs>
+  </svg>
+`;
+
+export const MindMapChildIcon = html`
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g clip-path="url(#clip0_6751_10458)">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M6.90239 7.49984C7.12003 6.73034 7.82752 6.1665 8.66671 6.1665H12C13.0126 6.1665 13.8334 6.98732 13.8334 7.99984C13.8334 9.01236 13.0126 9.83317 12 9.83317H8.66671C7.82752 9.83317 7.12003 9.26934 6.90239 8.49984H1.33337C1.05723 8.49984 0.833374 8.27598 0.833374 7.99984C0.833374 7.72369 1.05723 7.49984 1.33337 7.49984H6.90239ZM8.66671 7.1665C8.20647 7.1665 7.83337 7.5396 7.83337 7.99984C7.83337 8.46007 8.20647 8.83317 8.66671 8.83317H12C12.4603 8.83317 12.8334 8.46007 12.8334 7.99984C12.8334 7.5396 12.4603 7.1665 12 7.1665H8.66671Z"
+        fill="currentColor"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_6751_10458">
+        <rect width="16" height="16" fill="currentColor" />
+      </clipPath>
+    </defs>
+  </svg>
+`;
 
 export const AddTextIcon = html`<svg
   width="20"

@@ -78,7 +78,7 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
     });
   }
 
-  removeDescendant(element: BlockSuite.EdgelessModelType | string) {
+  removeChild(element: BlockSuite.EdgelessModelType | string) {
     const id = typeof element === 'string' ? element : element.id;
     if (!this.children) {
       return;

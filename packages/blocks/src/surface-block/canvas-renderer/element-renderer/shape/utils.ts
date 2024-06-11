@@ -1,6 +1,6 @@
 import type { TextAlign, TextVerticalAlign } from '../../../consts.js';
 import type { ShapeElementModel } from '../../../element-model/shape.js';
-import type { Bound } from '../../../index.js';
+import type { Bound, SerializedXYWH } from '../../../index.js';
 import type { Renderer } from '../../renderer.js';
 import {
   deltaInsertsToChunks,
@@ -12,9 +12,6 @@ import {
   wrapText,
   wrapTextDeltas,
 } from '../text/utils.js';
-
-export const SHAPE_TEXT_PADDING = 20;
-export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
@@ -53,6 +50,23 @@ export function drawGeneralShape(
       break;
     default:
       ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeStyle);
+  }
+  if (shapeModel.shadow) {
+    const { blur, offsetX, offsetY, color } = shapeModel.shadow;
+    const scale = ctx.getTransform().a;
+
+    ctx.shadowBlur = blur;
+    ctx.shadowOffsetX = offsetX * scale;
+    ctx.shadowOffsetY = offsetY * scale;
+    ctx.shadowColor = renderer.getVariableColor(color);
+  }
+
+  ctx.stroke();
+  ctx.fill();
+  if (shapeModel.shadow) {
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
   }
   ctx.fill();
   ctx.stroke();
@@ -126,25 +140,30 @@ function drawTriangle(
   ctx.closePath();
 }
 
-export function horizontalOffset(width: number, textAlign: TextAlign) {
+export function horizontalOffset(
+  width: number,
+  textAlign: TextAlign,
+  horiPadding: number
+) {
   return textAlign === 'center'
     ? width / 2
     : textAlign === 'right'
-      ? width - SHAPE_TEXT_PADDING
-      : SHAPE_TEXT_PADDING;
+      ? width - horiPadding
+      : horiPadding;
 }
 
 export function verticalOffset(
   lines: TextDelta[][],
   lineHeight: number,
   height: number,
-  textVerticalAlign: TextVerticalAlign
+  textVerticalAlign: TextVerticalAlign,
+  verticalPadding: number
 ) {
   return textVerticalAlign === 'center'
     ? (height - lineHeight * lines.length) / 2
     : textVerticalAlign === 'top'
-      ? SHAPE_TEXT_VERTICAL_PADDING
-      : height - lineHeight * lines.length - SHAPE_TEXT_VERTICAL_PADDING;
+      ? verticalPadding
+      : height - lineHeight * lines.length - verticalPadding;
 }
 export function normalizeShapeBound(
   shape: ShapeElementModel,
@@ -152,6 +171,7 @@ export function normalizeShapeBound(
 ): Bound {
   if (!shape.text) return bound;
 
+  const [verticalPadding, horiPadding] = shape.padding;
   const yText = shape.text;
   const { fontFamily, fontSize, fontStyle, fontWeight } = shape;
   const lineHeight = getLineHeight(fontFamily, fontSize);
@@ -167,19 +187,19 @@ export function normalizeShapeBound(
       .sort((a, b) => a - b)
       .pop() ?? getTextWidth('W', font);
 
-  if (bound.w < widestCharWidth + SHAPE_TEXT_PADDING * 2) {
-    bound.w = widestCharWidth + SHAPE_TEXT_PADDING * 2;
+  if (bound.w < widestCharWidth + horiPadding * 2) {
+    bound.w = widestCharWidth + horiPadding * 2;
   }
   const deltas: TextDelta[] = (yText.toDelta() as TextDelta[]).flatMap(
     delta => ({
-      insert: wrapText(delta.insert, font, bound.w - SHAPE_TEXT_PADDING * 2),
+      insert: wrapText(delta.insert, font, bound.w - horiPadding * 2),
       attributes: delta.attributes,
     })
   ) as TextDelta[];
   const lines = deltaInsertsToChunks(deltas);
 
-  if (bound.h < lineHeight * lines.length + SHAPE_TEXT_VERTICAL_PADDING * 2) {
-    bound.h = lineHeight * lines.length + SHAPE_TEXT_VERTICAL_PADDING * 2;
+  if (bound.h < lineHeight * lines.length + verticalPadding * 2) {
+    bound.h = lineHeight * lines.length + verticalPadding * 2;
   }
 
   return bound;
@@ -192,6 +212,7 @@ export function fitContent(shape: ShapeElementModel) {
     return;
   }
 
+  const [verticalPadding, horiPadding] = shape.padding;
   const lines = deltaInsertsToChunks(
     wrapTextDeltas(shape.text, font, shape.maxWidth || Number.MAX_SAFE_INTEGER)
   );
@@ -208,8 +229,14 @@ export function fitContent(shape: ShapeElementModel) {
     }
   });
 
-  maxWidth += SHAPE_TEXT_PADDING * 2;
-  height += SHAPE_TEXT_VERTICAL_PADDING * 2;
+  height = Math.max(lineHeight, height);
 
-  shape.xywh = `[${shape.x},${shape.y},${maxWidth},${height}]`;
+  maxWidth += horiPadding * 2;
+  height += verticalPadding * 2;
+
+  const newXYWH = `[${shape.x},${shape.y},${maxWidth},${height}]`;
+
+  if (shape.xywh !== newXYWH) {
+    shape.xywh = newXYWH as SerializedXYWH;
+  }
 }

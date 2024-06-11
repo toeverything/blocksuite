@@ -51,7 +51,6 @@ export enum TextVerticalAlign {
 export enum TextResizing {
   AUTO_WIDTH,
   AUTO_HEIGHT,
-  FIXED_SIZE,
 }
 
 export type TextStyleProps = {
@@ -66,7 +65,9 @@ export type TextStyleProps = {
 export enum FontWeight {
   Light = '300',
   Regular = '400',
+  Medium = '500',
   SemiBold = '600',
+  Bold = '700',
 }
 
 export enum FontStyle {

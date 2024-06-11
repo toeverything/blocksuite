@@ -9,6 +9,7 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
+import { isMindmapNode } from '../../../../_common/edgeless/mindmap/index.js';
 import type { IPoint } from '../../../../_common/types.js';
 import {
   requestThrottledConnectFrame,
@@ -507,6 +508,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let areAllIndependentConnectors = elements.length > 1;
     let areAllShapes = true;
     let areAllTexts = true;
+    let hasMindmapNode = false;
 
     for (const element of elements) {
       if (isNoteBlock(element) || isEmbedSyncedDocBlock(element)) {
@@ -542,6 +544,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         )
           areAllShapes = false;
         if (element.type !== CanvasElementType.TEXT) areAllTexts = false;
+
+        if (isMindmapNode(element)) {
+          hasMindmapNode = true;
+        }
       }
     }
 
@@ -553,6 +559,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
+    if (hasMindmapNode) return 'none';
     if (areAllShapes) return 'all';
     if (areAllTexts) return 'edgeAndCorner';
 

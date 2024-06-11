@@ -27,7 +27,6 @@ import {
   groupRelationMiddleware,
   groupSizeMiddleware,
 } from './middlewares/group.js';
-import { mindmapMiddleware } from './middlewares/mindmap.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 import { generateElementId } from './utils/index.js';
 
@@ -192,7 +191,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   /**
    * Hooks is used to attach extra logic when calling `addElement`、`updateElement`(or assign property directly) and `removeElement`.
-   * It's usefull when dealing with relation between different model.
+   * It's useful when dealing with relation between different model.
    */
   protected hooks = {
     update: new Slot<Omit<ElementUpdatedData, 'local'>>(),
@@ -235,7 +234,6 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       connectorMiddleware(this, this.hooks),
       groupRelationMiddleware(this, this.hooks),
       groupSizeMiddleware(this, this.hooks),
-      mindmapMiddleware(this, this.hooks),
     ].forEach(disposable => this._disposables.add(disposable));
   }
 
@@ -396,7 +394,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
             const group = this.getGroup(id);
 
             if (group) {
-              group.removeDescendant(id);
+              // eslint-disable-next-line unicorn/prefer-dom-node-remove
+              group.removeChild(id);
             }
           }
         }
@@ -607,7 +606,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       }
 
       if (group) {
-        group.removeDescendant(id);
+        // eslint-disable-next-line unicorn/prefer-dom-node-remove
+        group.removeChild(id);
       }
 
       this.elements.getValue()!.delete(id);

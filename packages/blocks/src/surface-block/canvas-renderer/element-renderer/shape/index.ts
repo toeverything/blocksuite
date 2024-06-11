@@ -17,11 +17,7 @@ import { diamond } from './diamond.js';
 import { ellipse } from './ellipse.js';
 import { rect } from './rect.js';
 import { triangle } from './triangle.js';
-import {
-  horizontalOffset,
-  SHAPE_TEXT_PADDING,
-  verticalOffset,
-} from './utils.js';
+import { horizontalOffset, verticalOffset } from './utils.js';
 
 const shapeRenderers: {
   [key in ShapeType]: (
@@ -66,9 +62,11 @@ function renderText(
     w,
     h,
     textVerticalAlign,
+    padding,
   } = model;
   if (!text) return;
 
+  const [verticalPadding, horiPadding] = padding;
   const lineHeight = getLineHeight(fontFamily, fontSize);
   const font = getFontString({
     fontSize,
@@ -77,10 +75,16 @@ function renderText(
     fontStyle: model.fontStyle,
   });
   const lines = deltaInsertsToChunks(
-    wrapTextDeltas(text, font, w - SHAPE_TEXT_PADDING * 2)
+    wrapTextDeltas(text, font, w - horiPadding * 2)
   );
-  const horiOffset = horizontalOffset(model.w, model.textAlign);
-  const vertOffset = verticalOffset(lines, lineHeight, h, textVerticalAlign);
+  const horiOffset = horizontalOffset(model.w, model.textAlign, horiPadding);
+  const vertOffset = verticalOffset(
+    lines,
+    lineHeight,
+    h,
+    textVerticalAlign,
+    verticalPadding
+  );
   let maxLineWidth = 0;
 
   for (const [lineIndex, line] of lines.entries()) {

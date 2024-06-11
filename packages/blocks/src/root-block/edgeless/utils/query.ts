@@ -26,12 +26,19 @@ import {
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
+  MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessBlockModel } from '../edgeless-block-model.js';
 import { getElementsWithoutGroup } from './group.js';
 import type { Viewport } from './viewport.js';
+
+export function isMindmapNode(
+  element: EdgelessBlockModel | BlockSuite.EdgelessModelType | null
+) {
+  return element?.group instanceof MindmapElementModel;
+}
 
 export function isTopLevelBlock(
   selectable: BlockModel | BlockSuite.EdgelessModelType | BlockModel | null

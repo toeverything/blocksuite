@@ -322,12 +322,12 @@ export class EdgelessRootService extends RootService {
   pickElement(
     x: number,
     y: number,
-    options: { all: true }
+    options: { all: true; expand?: number }
   ): BlockSuite.EdgelessModelType[];
   pickElement(
     x: number,
     y: number,
-    options?: { all: false }
+    options?: { all: false; expand?: number }
   ): BlockSuite.EdgelessModelType | null;
   pickElement(
     x: number,
@@ -396,8 +396,12 @@ export class EdgelessRootService extends RootService {
   ): BlockSuite.EdgelessModelType[];
   pickElementsByBound(
     bound: IBound | Bound,
-    type: 'blocks'
+    type: 'blocks' | 'frame'
   ): EdgelessBlockModel[];
+  pickElementsByBound(
+    bound: IBound | Bound,
+    type: 'canvas'
+  ): BlockSuite.SurfaceElementModelType[];
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'frame' | 'blocks' | 'canvas' | 'all' = 'all'
@@ -539,7 +543,8 @@ export class EdgelessRootService extends RootService {
 
     if (parent !== null) {
       selection.selectedElements.forEach(element => {
-        parent.removeDescendant(element.id);
+        // eslint-disable-next-line unicorn/prefer-dom-node-remove
+        parent.removeChild(element.id);
       });
     }
 
@@ -567,11 +572,13 @@ export class EdgelessRootService extends RootService {
     }
 
     if (parent !== null) {
-      parent.removeDescendant(group.id);
+      // eslint-disable-next-line unicorn/prefer-dom-node-remove
+      parent.removeChild(group.id);
     }
 
     elements.forEach(element => {
-      group.removeDescendant(element.id);
+      // eslint-disable-next-line unicorn/prefer-dom-node-remove
+      group.removeChild(element.id);
     });
 
     elements.forEach(element => {

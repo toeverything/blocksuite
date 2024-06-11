@@ -113,7 +113,7 @@ export abstract class SurfaceElementModel<Props extends IBaseProps = IBaseProps>
 
   /**
    * When the ymap is not connected to the doc, its value cannot be read.
-   * But we need to use those value during the creation, so the yfied decorated field's value will
+   * But we need to use those value during the creation, so the yfield decorated field's value will
    * be stored in this map too during the creation.
    *
    * After the ymap is connected to the doc, this map will be cleared.
@@ -376,9 +376,10 @@ export abstract class SurfaceGroupLikeModel<
 > extends SurfaceElementModel<Props> {
   /**
    * The actual field that stores the children of the group.
-   * It could be any type you want and this field should be decorated with `@yfield`.
+   * It should be a ymap decorated with `@yfield`.
    */
-  abstract children: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  abstract children: Y.Map<any>;
 
   /**
    * The ids of the children. Its role is to provide a unique way to access the children.
@@ -392,7 +393,7 @@ export abstract class SurfaceGroupLikeModel<
   /**
    * Set the new value of the childIds
    * @param value the new value of the childIds
-   * @param fromLocal if true, the change is happend in the local
+   * @param fromLocal if true, the change is happened in the local
    */
   protected setChildIds(value: string[], fromLocal: boolean) {
     const oldChildIds = this.childIds;
@@ -449,13 +450,13 @@ export abstract class SurfaceGroupLikeModel<
   }
 
   /**
-   * Get all decendants of this group
+   * Get all descendants of this group
    * @param withoutGroup if true, will not include group element
    */
-  decendants(withoutGroup = true) {
+  descendants(withoutGroup = true) {
     return this.childElements.reduce((prev, child) => {
       if (child instanceof SurfaceGroupLikeModel) {
-        prev = prev.concat(child.decendants());
+        prev = prev.concat(child.descendants());
 
         !withoutGroup && prev.push(child);
       } else {
@@ -467,9 +468,9 @@ export abstract class SurfaceGroupLikeModel<
   }
 
   /**
-   * Remove the descendant from the group
+   * Remove the child from the group
    */
-  abstract removeDescendant(id: string): void;
+  abstract removeChild(id: string): void;
 }
 
 export abstract class SurfaceLocalModel {
@@ -480,6 +481,8 @@ export abstract class SurfaceLocalModel {
   abstract xywh: SerializedXYWH;
 
   private _lastXYWH: SerializedXYWH = '[0,0,-1,-1]';
+
+  opacity: number = 1;
 
   get deserializedXYWH() {
     if (this.xywh !== this._lastXYWH) {

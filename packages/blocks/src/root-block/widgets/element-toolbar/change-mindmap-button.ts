@@ -29,10 +29,6 @@ const MINDMAP_STYLE_LIST = [
     icon: MindmapStyleOne,
   },
   {
-    value: MindmapStyle.TWO,
-    icon: MindmapStyleTwo,
-  },
-  {
     value: MindmapStyle.THREE,
     icon: MindmapStyleThree,
   },
@@ -40,7 +36,11 @@ const MINDMAP_STYLE_LIST = [
     value: MindmapStyle.FOUR,
     icon: MindmapStyleFour,
   },
-] as const;
+  {
+    value: MindmapStyle.TWO,
+    icon: MindmapStyleTwo,
+  },
+];
 
 interface LayoutItem {
   name: string;
@@ -75,18 +75,21 @@ class EdgelessChangeMindmapStylePanel extends LitElement {
       justify-content: center;
       flex-direction: row;
       gap: 8px;
+      background: var(--affine-background-overlay-panel-color);
     }
 
     .style-item {
       border-radius: 4px;
-      border: 1px solid var(--affine-border-color);
+    }
+
+    .style-item > svg {
+      vertical-align: middle;
     }
 
     .style-item.active,
     .style-item:hover {
       cursor: pointer;
-      border-color: var(--affine-brand-color);
-      background-color: var(--affine-background-primary-color);
+      background-color: var(--affine-hover-color);
     }
   `;
 
@@ -157,6 +160,9 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   accessor elements!: MindmapElementModel[];
 
   @property({ attribute: false })
+  accessor nodes!: ShapeElementModel[];
+
+  @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
   @state()
@@ -180,13 +186,34 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
   }
 
   private _updateStyle = (style: MindmapStyle) => {
-    this.elements.forEach(element => (element.style = style));
+    this._mindmaps.forEach(element => (element.style = style));
   };
 
   private _updateLayoutType = (layoutType: LayoutType) => {
-    this.elements.forEach(element => (element.layoutType = layoutType));
+    this.elements.forEach(element => {
+      element.layoutType = layoutType;
+      element.layout();
+    });
     this.layoutType = layoutType;
   };
+
+  private get _mindmaps() {
+    const mindmaps = new Set<MindmapElementModel>();
+
+    return this.elements.reduce((_, el) => {
+      mindmaps.add(el);
+
+      return mindmaps;
+    }, mindmaps);
+  }
+
+  private _isSubnode() {
+    return (
+      this.nodes.length === 1 &&
+      (this.nodes[0].group as MindmapElementModel).tree.element !==
+        this.nodes[0]
+    );
+  }
 
   override render() {
     return html`
@@ -206,22 +233,26 @@ export class EdgelessChangeMindmapButton extends WithDisposable(LitElement) {
         </edgeless-change-mindmap-style-panel>
       </edgeless-menu-button>
 
-      <edgeless-menu-divider></edgeless-menu-divider>
-
-      <edgeless-menu-button
-        .button=${html`
-          <edgeless-tool-icon-button aria-label="Layout" .tooltip=${'Layout'}>
-            ${this.layout.icon}${SmallArrowDownIcon}
-          </edgeless-tool-icon-button>
-        `}
-      >
-        <edgeless-change-mindmap-layout-panel
-          slot
-          .mindmapLayout=${this.layout.value}
-          .onSelect=${this._updateLayoutType}
-        >
-        </edgeless-change-mindmap-layout-panel>
-      </edgeless-menu-button>
+      ${this._isSubnode()
+        ? nothing
+        : html`<edgeless-menu-divider></edgeless-menu-divider>
+            <edgeless-menu-button
+              .button=${html`
+                <edgeless-tool-icon-button
+                  aria-label="Layout"
+                  .tooltip=${'Layout'}
+                >
+                  ${this.layout.icon}${SmallArrowDownIcon}
+                </edgeless-tool-icon-button>
+              `}
+            >
+              <edgeless-change-mindmap-layout-panel
+                slot
+                .mindmapLayout=${this.layout.value}
+                .onSelect=${this._updateLayoutType}
+              >
+              </edgeless-change-mindmap-layout-panel>
+            </edgeless-menu-button>`}
     `;
   }
 }
@@ -236,7 +267,7 @@ export function renderMindmapButton(
       const group = edgeless.service.surface.getGroup(e.id);
       if (!group) return true;
       if (group.type !== 'mindmap') return true;
-      return (group as MindmapElementModel).tree.element !== e;
+      return false;
     })
   )
     return nothing;
@@ -244,6 +275,7 @@ export function renderMindmapButton(
   return html`
     <edgeless-change-mindmap-button
       .elements=${elements.map(e => e.group)}
+      .nodes=${elements}
       .edgeless=${edgeless}
     >
     </edgeless-change-mindmap-button>

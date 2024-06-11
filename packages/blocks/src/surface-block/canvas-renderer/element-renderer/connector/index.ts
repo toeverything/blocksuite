@@ -126,6 +126,7 @@ function renderPoints(
     ctx.strokeStyle = realStrokeColor;
     ctx.lineWidth = strokeWidth;
     ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
     dash && ctx.setLineDash([12, 12]);
     ctx.beginPath();
     if (curve) {
