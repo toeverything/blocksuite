@@ -23,11 +23,12 @@ export function affineTextStyles(
     inlineCodeStyle = {
       'font-family': 'var(--affine-font-code-family)',
       background: 'var(--affine-background-code-block)',
-      color: 'var(--affine-text-primary-color)',
+      border: '1px solid var(--affine-border-color)',
       'border-radius': '2px',
+      color: 'var(--affine-text-primary-color)',
       padding: '3px 6px 4px',
       'font-variant-ligatures': 'none',
-      'line-height': 'var(--affine-font-base)',
+      'line-height': 'auto',
     };
   }
 

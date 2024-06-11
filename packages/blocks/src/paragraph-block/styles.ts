@@ -24,7 +24,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
   .h1 code {
-    font-size: calc(var(--affine-font-base) + 8px);
+    font-size: calc(var(--affine-font-base) + 10px);
   }
   .h2 {
     font-size: var(--affine-font-h-2);
@@ -34,7 +34,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
   .h2 code {
-    font-size: calc(var(--affine-font-base) + 6px);
+    font-size: calc(var(--affine-font-base) + 8px);
   }
   .h3 {
     font-size: var(--affine-font-h-3);
@@ -44,7 +44,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
   .h3 code {
-    font-size: calc(var(--affine-font-base) + 4px);
+    font-size: calc(var(--affine-font-base) + 6px);
   }
   .h4 {
     font-size: var(--affine-font-h-4);
@@ -54,7 +54,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
   .h4 code {
-    font-size: calc(var(--affine-font-base) + 2px);
+    font-size: calc(var(--affine-font-base) + 4px);
   }
   .h5 {
     font-size: var(--affine-font-h-5);
@@ -64,7 +64,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
   .h5 code {
-    font-size: calc(var(--affine-font-base));
+    font-size: calc(var(--affine-font-base) + 2px);
   }
   .h6 {
     font-size: var(--affine-font-h-6);
@@ -74,7 +74,7 @@ export const paragraphBlockStyles = css`
     margin-bottom: 10px;
   }
   .h6 code {
-    font-size: calc(var(--affine-font-base) - 2px);
+    font-size: var(--affine-font-base);
   }
   .quote {
     line-height: 26px;
