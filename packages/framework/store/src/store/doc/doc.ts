@@ -1,4 +1,4 @@
-import { assertExists, type Disposable } from '@blocksuite/global/utils';
+import { assertExists, type Disposable, Slot } from '@blocksuite/global/utils';
 
 import type { BlockModel, Schema } from '../../schema/index.js';
 import { syncBlockProps } from '../../utils/utils.js';
@@ -38,6 +38,46 @@ export class Doc {
 
   protected readonly _readonly?: boolean;
 
+  // @ts-ignore
+  readonly slots: BlockCollection['slots'] & {
+    /** This is always triggered after `doc.load` is called. */
+    ready: Slot;
+    /**
+     * This fires when the root block is added via API call or has just been initialized from existing ydoc.
+     * useful for internal block UI components to start subscribing following up events.
+     * Note that at this moment, the whole block tree may not be fully initialized yet.
+     */
+    rootAdded: Slot<string>;
+    rootDeleted: Slot<string>;
+    blockUpdated: Slot<
+      | {
+          type: 'add';
+          id: string;
+          init: boolean;
+          flavour: string;
+          model: BlockModel;
+        }
+      | {
+          type: 'delete';
+          id: string;
+          flavour: string;
+          parent: string;
+          model: BlockModel;
+        }
+      | {
+          type: 'update';
+          id: string;
+          flavour: string;
+          props: { key: string };
+        }
+    >;
+  } = {
+    ready: new Slot(),
+    rootAdded: new Slot(),
+    rootDeleted: new Slot(),
+    blockUpdated: new Slot(),
+  };
+
   constructor({
     schema,
     blockCollection,
@@ -71,10 +111,20 @@ export class Doc {
         }
       }
     );
+
+    this.slots = {
+      ...this.slots,
+      historyUpdated: this._blockCollection.slots.historyUpdated,
+      yBlockUpdated: this._blockCollection.slots.yBlockUpdated,
+    };
   }
 
   dispose() {
     this._disposeBlockUpdated.dispose();
+    this.slots.ready.dispose();
+    this.slots.blockUpdated.dispose();
+    this.slots.rootAdded.dispose();
+    this.slots.rootDeleted.dispose();
   }
 
   get blockCollection() {
@@ -162,10 +212,6 @@ export class Doc {
     return this._blockCollection.rootDoc;
   }
 
-  get slots() {
-    return this._blockCollection.slots;
-  }
-
   get awarenessStore() {
     return this._blockCollection.awarenessStore;
   }
@@ -204,6 +250,7 @@ export class Doc {
 
   load(initFn?: () => void) {
     this._blockCollection.load(initFn);
+    this.slots.ready.emit();
     return this;
   }
 
@@ -337,7 +384,7 @@ export class Doc {
             block.model.propsUpdated.emit({ key });
           }
 
-          this._blockCollection.slots.blockUpdated.emit({
+          this.slots.blockUpdated.emit({
             type: 'update',
             id,
             flavour: block.flavour,
@@ -353,7 +400,7 @@ export class Doc {
       block.model.created.emit();
 
       if (block.model.role === 'root') {
-        this._blockCollection.slots.rootAdded.emit(id);
+        this.slots.rootAdded.emit(id);
       }
 
       this.slots.blockUpdated.emit({
@@ -375,7 +422,7 @@ export class Doc {
       if (!block) return;
 
       if (block.model.role === 'root') {
-        this._blockCollection.slots.rootDeleted.emit(id);
+        this.slots.rootDeleted.emit(id);
       }
 
       this.slots.blockUpdated.emit({

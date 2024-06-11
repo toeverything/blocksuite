@@ -5,7 +5,6 @@ import * as Y from 'yjs';
 import { Text } from '../../reactive/text.js';
 import type { BlockModel } from '../../schema/base.js';
 import type { IdGenerator } from '../../utils/id-generator.js';
-import { hash } from '../../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
 import type { DocCollection } from '../collection.js';
 import { Space } from '../space.js';
@@ -53,19 +52,14 @@ export class BlockCollection extends Space<FlatBlockMap> {
 
   private _shouldTransact = true;
 
-  private _docMap = new Map<string, Doc>();
+  private _docMap = {
+    undefined: new WeakMap<BlockSelector, Doc>(),
+    true: new WeakMap<BlockSelector, Doc>(),
+    false: new WeakMap<BlockSelector, Doc>(),
+  };
 
   readonly slots = {
-    /** This is always triggered after `doc.load` is called. */
-    ready: new Slot(),
     historyUpdated: new Slot(),
-    /**
-     * This fires when the root block is added via API call or has just been initialized from existing ydoc.
-     * useful for internal block UI components to start subscribing following up events.
-     * Note that at this moment, the whole block tree may not be fully initialized yet.
-     */
-    rootAdded: new Slot<string>(),
-    rootDeleted: new Slot<string>(),
     yBlockUpdated: new Slot<
       | {
           type: 'add';
@@ -74,28 +68,6 @@ export class BlockCollection extends Space<FlatBlockMap> {
       | {
           type: 'delete';
           id: string;
-        }
-    >(),
-    blockUpdated: new Slot<
-      | {
-          type: 'add';
-          id: string;
-          init: boolean;
-          flavour: string;
-          model: BlockModel;
-        }
-      | {
-          type: 'delete';
-          id: string;
-          flavour: string;
-          parent: string;
-          model: BlockModel;
-        }
-      | {
-          type: 'update';
-          id: string;
-          flavour: string;
-          props: { key: string };
         }
     >(),
   };
@@ -113,16 +85,17 @@ export class BlockCollection extends Space<FlatBlockMap> {
     this._docCRUD = new DocCRUD(this._yBlocks, collection.schema);
   }
 
-  private _getDocMapKey(selector: BlockSelector, readonly?: boolean) {
-    const str = `${selector}-${readonly ?? '$'}`;
-    return hash(str).toString();
+  private _getReadonlyKey(readonly?: boolean): 'true' | 'false' | 'undefined' {
+    return (readonly?.toString() as 'true' | 'false') ?? 'undefined';
   }
 
   getDoc({ selector = defaultBlockSelector, readonly }: GetDocOptions = {}) {
-    const key = this._getDocMapKey(selector, readonly);
-    if (this._docMap.has(key)) {
-      return this._docMap.get(key)!;
+    const readonlyKey = this._getReadonlyKey(readonly);
+
+    if (this._docMap[readonlyKey].has(selector)) {
+      return this._docMap[readonlyKey].get(selector)!;
     }
+
     const doc = new Doc({
       blockCollection: this,
       crud: this._docCRUD,
@@ -130,13 +103,16 @@ export class BlockCollection extends Space<FlatBlockMap> {
       selector,
       readonly,
     });
-    this._docMap.set(key, doc);
+
+    this._docMap[readonlyKey].set(selector, doc);
+
     return doc;
   }
 
   clearSelector(selector: BlockSelector, readonly?: boolean) {
-    const key = this._getDocMapKey(selector, readonly);
-    this._docMap.delete(key);
+    const readonlyKey = this._getReadonlyKey(readonly);
+
+    this._docMap[readonlyKey].delete(selector);
   }
 
   get readonly() {
@@ -263,16 +239,12 @@ export class BlockCollection extends Space<FlatBlockMap> {
     initFn?.();
 
     this._ready = true;
-    this.slots.ready.emit();
 
     return this;
   }
 
   dispose() {
     this.slots.historyUpdated.dispose();
-    this.slots.rootAdded.dispose();
-    this.slots.rootDeleted.dispose();
-    this.slots.blockUpdated.dispose();
 
     if (this.ready) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
