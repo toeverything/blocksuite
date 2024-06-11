@@ -214,11 +214,11 @@ export class ShapeFactory {
 }
 
 class ToolOverlay extends Overlay {
-  public x: number;
+  x: number;
 
-  public y: number;
+  y: number;
 
-  public globalAlpha: number;
+  globalAlpha: number;
 
   protected edgeless: EdgelessRootBlockComponent;
 
@@ -228,7 +228,7 @@ class ToolOverlay extends Overlay {
     return getComputedStyle(this.edgeless);
   }
 
-  public isTransparent(color: string): boolean {
+  isTransparent(color: string): boolean {
     return color.includes('transparent');
   }
 
@@ -265,7 +265,7 @@ class ToolOverlay extends Overlay {
 }
 
 export class ShapeOverlay extends ToolOverlay {
-  public shape: Shape;
+  shape: Shape;
 
   private _getRealStrokeColor(color: string) {
     const realStrokeColor = this.computedStyle.getPropertyValue(
@@ -352,9 +352,9 @@ export class ShapeOverlay extends ToolOverlay {
 }
 
 export class NoteOverlay extends ToolOverlay {
-  public text = '';
+  text = '';
 
-  public backgroundColor = 'transparent';
+  backgroundColor = 'transparent';
 
   private _getOverlayText(text: string): string {
     return text[0].toUpperCase() + text.slice(1);

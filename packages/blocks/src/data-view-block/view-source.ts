@@ -22,22 +22,22 @@ export class BlockQueryViewSource implements ViewSource {
 
   private currentId?: string;
 
-  public selectView(id: string): void {
+  selectView(id: string): void {
     this.currentId = id;
     this.updateSlot.emit();
   }
 
-  public updateSlot = new Slot();
+  updateSlot = new Slot();
 
-  public get views(): SingleViewSource[] {
+  get views(): SingleViewSource[] {
     return this.model.views.map(v => this.viewGet(v.id));
   }
 
-  public get currentView(): SingleViewSource {
+  get currentView(): SingleViewSource {
     return this.viewGet(this.currentViewId);
   }
 
-  public get readonly(): boolean {
+  get readonly(): boolean {
     return this.model.doc.readonly;
   }
 
@@ -77,7 +77,7 @@ export class BlockQueryViewSource implements ViewSource {
     },
   };
 
-  public viewAdd(viewType: DataViewTypes): string {
+  viewAdd(viewType: DataViewTypes): string {
     this.model.doc.captureSync();
     const view = this.viewInit[viewType]();
     this.model.doc.transact(() => {
@@ -87,7 +87,7 @@ export class BlockQueryViewSource implements ViewSource {
     return view.id;
   }
 
-  public viewGet(id: string): SingleViewSource {
+  viewGet(id: string): SingleViewSource {
     let result = this.viewMap.get(id);
     if (!result) {
       const getView = () => {
@@ -140,20 +140,20 @@ export class BlockQueryViewSource implements ViewSource {
     return result;
   }
 
-  public duplicate(id: string): void {
+  duplicate(id: string): void {
     const newId = this.model.duplicateView(id);
     this.selectView(newId);
   }
 
-  public moveTo(id: string, position: InsertToPosition): void {
+  moveTo(id: string, position: InsertToPosition): void {
     this.model.moveViewTo(id, position);
   }
 
-  public get allViewMeta(): ViewMeta[] {
+  get allViewMeta(): ViewMeta[] {
     return blockQueryViews;
   }
 
-  public getViewMeta(type: string): ViewMeta {
+  getViewMeta(type: string): ViewMeta {
     return blockQueryViewMap[type];
   }
 }

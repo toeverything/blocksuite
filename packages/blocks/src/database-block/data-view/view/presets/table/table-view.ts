@@ -160,7 +160,7 @@ export class DataViewTable extends DataViewBase<
     if (this.readonly) return;
   }
 
-  public override addRow(position: InsertToPosition) {
+  override addRow(position: InsertToPosition) {
     this._addRow(this.view, position);
   }
 
@@ -260,18 +260,18 @@ export class DataViewTable extends DataViewBase<
     }
   };
 
-  public hideIndicator(): void {
+  hideIndicator(): void {
     this.dragController.dropPreview.remove();
   }
 
-  public moveTo(id: string, evt: MouseEvent): void {
+  moveTo(id: string, evt: MouseEvent): void {
     const result = this.dragController.getInsertPosition(evt);
     if (result) {
       this.view.rowMove(id, result.position, undefined, result.groupKey);
     }
   }
 
-  public showIndicator(evt: MouseEvent): boolean {
+  showIndicator(evt: MouseEvent): boolean {
     return this.dragController.showIndicator(evt) != null;
   }
 

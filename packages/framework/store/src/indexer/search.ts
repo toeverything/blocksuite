@@ -154,7 +154,7 @@ export class SearchIndexer {
     }
   }
 
-  public refreshDocIndex(docId: string, doc: Doc) {
+  refreshDocIndex(docId: string, doc: Doc) {
     const yBlocks = doc.getMap('blocks') as YBlocks;
     yBlocks.forEach((_, key) => {
       this._refreshIndex(docId, key, 'add', yBlocks.get(key));

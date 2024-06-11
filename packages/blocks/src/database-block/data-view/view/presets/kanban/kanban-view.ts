@@ -241,11 +241,11 @@ export class DataViewKanban extends DataViewBase<
     return this.selectionController.selection;
   }
 
-  public hideIndicator(): void {
+  hideIndicator(): void {
     this.dragController.dropPreview.remove();
   }
 
-  public moveTo(id: string, evt: MouseEvent): void {
+  moveTo(id: string, evt: MouseEvent): void {
     const position = this.dragController.getInsertPosition(evt);
     if (position) {
       position.group.group.helper.moveCardTo(
@@ -257,7 +257,7 @@ export class DataViewKanban extends DataViewBase<
     }
   }
 
-  public showIndicator(evt: MouseEvent): boolean {
+  showIndicator(evt: MouseEvent): boolean {
     return this.dragController.shooIndicator(evt, undefined) != null;
   }
 }

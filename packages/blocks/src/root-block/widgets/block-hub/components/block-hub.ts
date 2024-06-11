@@ -204,7 +204,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._disposables.dispose();
   }
 
-  public toggleMenu() {
+  toggleMenu() {
     this._expanded = !this._expanded;
     if (!this._expanded) this._hideCardList();
   }

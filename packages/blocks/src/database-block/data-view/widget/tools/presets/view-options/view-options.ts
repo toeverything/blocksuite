@@ -71,7 +71,7 @@ export class DataViewHeaderToolsViewOptions extends WidgetBase {
     });
   };
 
-  public clickMoreAction = (e: MouseEvent) => {
+  clickMoreAction = (e: MouseEvent) => {
     e.stopPropagation();
     const target = eventToVRect(e);
     this.openMoreAction(target);

@@ -11,7 +11,7 @@ export class KanbanHotkeysController implements ReactiveController {
     return !!this.host.selectionController.selection;
   }
 
-  public hostConnected() {
+  hostConnected() {
     this.host.disposables.add(
       this.host.bindHotkey({
         Escape: () => {

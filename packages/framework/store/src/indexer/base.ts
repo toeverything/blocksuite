@@ -31,7 +31,7 @@ export class BlockIndexer {
 
   private _disposables = new DisposableGroup();
 
-  public slots = {
+  slots = {
     docRemoved: new Slot<DocId>(),
     /**
      * Note: sys:children update will not trigger event

@@ -118,11 +118,11 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     return this.view.readonly;
   }
 
-  public get cell(): DataViewCellLifeCycle | undefined {
+  get cell(): DataViewCellLifeCycle | undefined {
     return this._cell.value;
   }
 
-  public changeEditing = (editing: boolean) => {
+  changeEditing = (editing: boolean) => {
     const selection = this.closest('affine-data-view-record-detail')?.selection;
     if (selection) {
       selection.selection = {
@@ -132,14 +132,14 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  public _click = (e: MouseEvent) => {
+  _click = (e: MouseEvent) => {
     e.stopPropagation();
     if (this.readonly) return;
 
     this.changeEditing(true);
   };
 
-  public _clickLeft = (e: MouseEvent) => {
+  _clickLeft = (e: MouseEvent) => {
     if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;
     const columns = this.view.detailColumns;

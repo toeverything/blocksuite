@@ -109,7 +109,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor rowId!: string;
 
-  public get groupKey() {
+  get groupKey() {
     return this.closest('affine-data-view-table-group')?.group?.key;
   }
 
@@ -143,7 +143,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     popRowMenu(this.dataViewEle, eventToVRect(e), this.rowId, selection);
   };
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
     // eslint-disable-next-line wc/no-self-class

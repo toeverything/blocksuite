@@ -74,7 +74,7 @@ export class PriorityAsyncQueue<
 > extends AsyncQueue<T> {
   constructor(
     init: T[] = [],
-    public readonly priorityTarget: SharedPriorityTarget = new SharedPriorityTarget()
+    readonly priorityTarget: SharedPriorityTarget = new SharedPriorityTarget()
   ) {
     super(init);
   }
@@ -98,5 +98,5 @@ export class PriorityAsyncQueue<
  * Shared priority target can be shared by multiple queues.
  */
 export class SharedPriorityTarget {
-  public priorityRule: ((id: string) => boolean) | null = null;
+  priorityRule: ((id: string) => boolean) | null = null;
 }

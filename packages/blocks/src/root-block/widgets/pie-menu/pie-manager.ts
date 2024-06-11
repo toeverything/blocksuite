@@ -14,7 +14,7 @@ export class PieManager {
 
   private static registeredSchemas: Record<string, PieMenuSchema> = {};
 
-  public static settings = {
+  static settings = {
     /**
      * Specifies the distance between the root-node and the child-nodes
      */
@@ -40,32 +40,28 @@ export class PieManager {
     EXPANDABLE_ACTION_NODE_TIMEOUT: 300,
   };
 
-  public static slots = {
+  static slots = {
     open: new Slot<PieMenuSchema>(),
   };
 
-  public static add(schema: PieMenuSchema) {
+  static add(schema: PieMenuSchema) {
     return this.schemas.add(schema);
   }
 
-  public static remove(schema: PieMenuSchema) {
+  static remove(schema: PieMenuSchema) {
     return this.schemas.delete(schema);
   }
 
-  public static setup({
-    rootElement,
-  }: {
-    rootElement: EdgelessRootBlockComponent;
-  }) {
+  static setup({ rootElement }: { rootElement: EdgelessRootBlockComponent }) {
     this.schemas.forEach(schema => this._register(schema));
     this._setupTriggers(rootElement);
   }
 
-  public static dispose() {
+  static dispose() {
     this.registeredSchemas = {};
   }
 
-  public static open(id: PieMenuId) {
+  static open(id: PieMenuId) {
     this.slots.open.emit(this._getSchema(id));
   }
 

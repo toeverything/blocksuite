@@ -175,7 +175,7 @@ export class ChatPanelMessages extends WithDisposable(ShadowlessElement) {
     return this._selectionValue.filter(v => v.type === 'image');
   }
 
-  public override async connectedCallback() {
+  override async connectedCallback() {
     super.connectedCallback();
 
     const res = await AIProvider.userInfo;

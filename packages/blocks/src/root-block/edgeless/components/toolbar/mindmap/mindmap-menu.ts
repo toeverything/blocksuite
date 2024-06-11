@@ -87,7 +87,7 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
     return getMindMaps(this.theme);
   }
 
-  public initDragController() {
+  initDragController() {
     if (this.draggableController || !this.edgeless) return;
     this.draggableController = new EdgelessDraggableElementController(this, {
       service: this.edgeless.service,

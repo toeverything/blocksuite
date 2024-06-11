@@ -99,7 +99,7 @@ export class AStarRunner {
     return neighbors;
   }
 
-  public step() {
+  step() {
     if (this._complete) return;
     this._current = this._frontier.dequeue();
     const current = this._current;
@@ -216,7 +216,7 @@ export class AStarRunner {
     }
   }
 
-  public reset() {
+  reset() {
     this._cameFrom.clear();
     this._costSoFar.clear();
     this._diagonalCount.clear();
@@ -225,7 +225,7 @@ export class AStarRunner {
     this._init();
   }
 
-  public run() {
+  run() {
     while (!this._complete) {
       this.step();
     }

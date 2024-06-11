@@ -56,7 +56,7 @@ export class TableSelectionController implements ReactiveController {
     return this.view;
   }
 
-  public hostConnected() {
+  hostConnected() {
     requestAnimationFrame(() => {
       this.tableContainer.append(this.__selectionElement);
       this.tableContainer.append(this.__dragToFillElement);
@@ -524,7 +524,7 @@ export class TableSelectionController implements ReactiveController {
       .item(columnIndex);
   }
 
-  public rows(groupKey: string | undefined) {
+  rows(groupKey: string | undefined) {
     const container =
       groupKey != null
         ? this.tableContainer.querySelector(
@@ -696,7 +696,7 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
-  public selectRow(index: number) {
+  selectRow(index: number) {
     this.selection = {
       rowsSelection: {
         start: index,
@@ -710,7 +710,7 @@ export class TableSelectionController implements ReactiveController {
     };
   }
 
-  public toggleRow(index: number) {
+  toggleRow(index: number) {
     const selection = this.selection;
     if (selection) {
       const rowsSelection = selection.rowsSelection;
@@ -764,11 +764,11 @@ export class TableSelectionController implements ReactiveController {
     });
   }
 
-  public insertRowBefore(groupKey: string | undefined, rowId: string) {
+  insertRowBefore(groupKey: string | undefined, rowId: string) {
     this.insertTo(groupKey, rowId, true);
   }
 
-  public insertRowAfter(groupKey: string | undefined, rowId: string) {
+  insertRowAfter(groupKey: string | undefined, rowId: string) {
     this.insertTo(groupKey, rowId, false);
   }
 
@@ -807,7 +807,7 @@ export class TableSelectionController implements ReactiveController {
     return this.host.view;
   }
 
-  public deleteRow(rowId: string) {
+  deleteRow(rowId: string) {
     this.view.rowDelete([rowId]);
     this.focusToCell('up');
   }
@@ -850,7 +850,7 @@ export class TableSelectionController implements ReactiveController {
 
 @customElement('data-view-table-selection')
 class SelectionElement extends ShadowlessElement {
-  public static override styles = css`
+  static override styles = css`
     .database-selection {
       position: absolute;
       z-index: 1;

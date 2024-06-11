@@ -43,7 +43,7 @@ export class NoteRenderer
     return this.model;
   }
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.databaseBlock.propsUpdated.on(({ key }) => {
       if (key === 'notes') {
@@ -52,7 +52,7 @@ export class NoteRenderer
     });
   }
 
-  public addNote() {
+  addNote() {
     const collection = this.host?.std.collection;
     if (!collection) {
       return;

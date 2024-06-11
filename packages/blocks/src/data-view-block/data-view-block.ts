@@ -170,7 +170,7 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
 
   private _dataSource?: DataSource;
 
-  public get dataSource(): DataSource {
+  get dataSource(): DataSource {
     if (!this._dataSource) {
       this._dataSource = new BlockQueryDataSource(this.host, this.model, {
         type: 'todo',
@@ -219,7 +219,7 @@ export class DataViewBlockComponent extends BlockComponent<DataViewBlockModel> {
 
   private _viewSource?: ViewSource;
 
-  public get viewSource(): ViewSource {
+  get viewSource(): ViewSource {
     if (!this._viewSource) {
       this._viewSource = new BlockQueryViewSource(this.model);
     }

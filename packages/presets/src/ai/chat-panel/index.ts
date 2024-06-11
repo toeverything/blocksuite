@@ -113,7 +113,7 @@ export class ChatPanel extends WithDisposable(ShadowlessElement) {
   private _chatMessages: Ref<ChatPanelMessages> =
     createRef<ChatPanelMessages>();
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     if (!this.doc) throw new Error('doc is required');
 

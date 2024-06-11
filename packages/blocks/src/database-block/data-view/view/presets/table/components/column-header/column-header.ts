@@ -38,7 +38,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     </div>`;
   });
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
       this.tableViewManager.slots.update.on(() => {

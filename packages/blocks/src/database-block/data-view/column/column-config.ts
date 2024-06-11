@@ -48,7 +48,7 @@ export class ColumnConfig<
   convertMap = new Map();
 
   constructor(
-    public readonly type: Type,
+    readonly type: Type,
     public ops: ColumnOps<T, CellData>
   ) {}
 

@@ -20,7 +20,7 @@ import type { StatCalcOpType } from './types.js';
 type TableViewData = _DataViewDataTypeMap['table'];
 
 export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
-  public override get type(): string {
+  override get type(): string {
     return this.view.mode;
   }
 
@@ -61,7 +61,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     });
   }
 
-  public override rowMove(
+  override rowMove(
     rowId: string,
     position: InsertToPosition,
     fromGroup?: string,
@@ -93,18 +93,18 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     });
   }
 
-  public columnGet(columnId: string): DataViewTableColumnManager {
+  columnGet(columnId: string): DataViewTableColumnManager {
     return new DataViewTableColumnManager(columnId, this);
   }
 
-  public columnGetWidth(columnId: string): number {
+  columnGetWidth(columnId: string): number {
     return (
       this.view.columns.find(v => v.id === columnId)?.width ??
       this.dataSource.propertyGetDefaultWidth(columnId)
     );
   }
 
-  public columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
+  columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
     this.updateView(view => {
       const columnIndex = view.columns.findIndex(v => v.id === columnId);
       if (columnIndex < 0) {
@@ -120,7 +120,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     });
   }
 
-  public columnUpdateWidth(columnId: string, width: number): void {
+  columnUpdateWidth(columnId: string, width: number): void {
     this.updateView(view => {
       return {
         columns: view.columns.map(v =>
@@ -135,17 +135,17 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     });
   }
 
-  public get columns(): string[] {
+  get columns(): string[] {
     return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
   }
 
-  public get detailColumns(): string[] {
+  get detailColumns(): string[] {
     return this.columnsWithoutFilter.filter(
       id => this.columnGetType(id) !== 'title'
     );
   }
 
-  public override rowAdd(
+  override rowAdd(
     insertPosition: InsertToPosition | number,
     groupKey?: string
   ): string {
@@ -157,7 +157,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     return id;
   }
 
-  public get columnsWithoutFilter(): string[] {
+  get columnsWithoutFilter(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
     this.view.columns.forEach(v => {
@@ -174,7 +174,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     return this.viewSource.readonly;
   }
 
-  public isShow(rowId: string): boolean {
+  isShow(rowId: string): boolean {
     if (this.filter.conditions.length) {
       const rowMap = Object.fromEntries(
         this.columnManagerList.map(column => [
@@ -206,19 +206,19 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
 
-  public duplicateView(): void {
+  duplicateView(): void {
     this.viewSource.duplicate();
   }
 
-  public deleteView(): void {
+  deleteView(): void {
     this.viewSource.delete();
   }
 
-  public get isDeleted(): boolean {
+  get isDeleted(): boolean {
     return this.viewSource.isDeleted();
   }
 
-  public get header() {
+  get header() {
     return (
       this.view.header ?? {
         titleColumn: this.columnsWithoutFilter.find(
@@ -229,11 +229,11 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     );
   }
 
-  public isInHeader(columnId: string) {
+  isInHeader(columnId: string) {
     return Object.values(this.header).some(v => v === columnId);
   }
 
-  public hasHeader(rowId: string): boolean {
+  hasHeader(rowId: string): boolean {
     return Object.values(this.header).some(id => this.cellGetValue(rowId, id));
   }
 
@@ -270,7 +270,7 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     return this.view.groupProperties ?? [];
   }
 
-  public get groupHelper(): GroupHelper | undefined {
+  get groupHelper(): GroupHelper | undefined {
     const groupBy = this.view.groupBy;
     if (!groupBy) {
       return;
@@ -347,13 +347,13 @@ export class DataViewTableManager extends DataViewManagerBase<TableViewData> {
     });
   }
 
-  public columnGetStatCalcOp(columnId: string): StatCalcOpType {
+  columnGetStatCalcOp(columnId: string): StatCalcOpType {
     return (
       this.view.columns.find(v => v.id === columnId)?.statCalcType ?? 'none'
     );
   }
 
-  public columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void {
+  columnUpdateStatCalcOp(columnId: string, op: StatCalcOpType): void {
     this.updateView(view => {
       return {
         columns: view.columns.map(v =>
@@ -377,7 +377,7 @@ export class DataViewTableColumnManager extends DataViewColumnManagerBase {
     super(propertyId, dataViewManager);
   }
 
-  public readonly stats = new ColumnDataStats(this);
+  readonly stats = new ColumnDataStats(this);
 
   get statCalcOp(): StatCalcOpType {
     return this.dataViewManager.columnGetStatCalcOp(this.id);

@@ -131,7 +131,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   @property({ attribute: false })
   accessor onShapeClick: (shape: DraggableShape) => void = () => {};
 
-  public initDragController() {
+  initDragController() {
     if (!this.edgeless || !this.toolbarContainer) return;
     if (this.draggableController) return;
     this.draggableController = new EdgelessDraggableElementController(this, {

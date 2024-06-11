@@ -68,9 +68,9 @@ class PasteTr {
   private readonly firstSnapshotIsPlainText: boolean;
 
   constructor(
-    public readonly std: EditorHost['std'],
-    public readonly text: TextSelection,
-    public readonly snapshot: SliceSnapshot
+    readonly std: EditorHost['std'],
+    readonly text: TextSelection,
+    readonly snapshot: SliceSnapshot
   ) {
     const { from, to } = text;
     const end = to ?? from;

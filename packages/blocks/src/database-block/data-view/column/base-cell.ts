@@ -41,23 +41,23 @@ export abstract class BaseCellRenderer<
     this.column.setValue(this.rowId, value);
   }
 
-  public beforeEnterEditMode(): boolean {
+  beforeEnterEditMode(): boolean {
     return true;
   }
 
-  public onEnterEditMode(): void {
+  onEnterEditMode(): void {
     // do nothing
   }
 
-  public onExitEditMode() {
+  onExitEditMode() {
     // do nothing
   }
 
-  public focusCell() {
+  focusCell() {
     return true;
   }
 
-  public blurCell() {
+  blurCell() {
     return true;
   }
 

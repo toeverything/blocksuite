@@ -21,7 +21,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
   private _previousFocus: NativePoint | null = null;
 
-  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   get inlineRangeProvider() {
     return this.editor.inlineRangeProvider;

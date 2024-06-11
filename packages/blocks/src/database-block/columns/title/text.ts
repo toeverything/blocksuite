@@ -178,7 +178,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       .catch(console.error);
   }
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     const selectAll = (e: KeyboardEvent) => {
       if (e.key === 'a' && (IS_MAC ? e.metaKey : e.ctrlKey)) {

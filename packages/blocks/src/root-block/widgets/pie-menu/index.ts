@@ -106,7 +106,7 @@ export class AffinePieMenuWidget extends WidgetElement {
     this.selectOnTrigRelease.allow = false;
   }
 
-  public _createMenu(
+  _createMenu(
     schema: PieMenuSchema,
     {
       x,

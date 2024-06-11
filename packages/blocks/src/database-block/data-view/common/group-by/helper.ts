@@ -99,9 +99,9 @@ export class GroupHelper {
     });
   }
 
-  public readonly groups: GroupData[];
+  readonly groups: GroupData[];
 
-  public readonly groupMap: Record<string, GroupData>;
+  readonly groupMap: Record<string, GroupData>;
 
   groupConfig() {
     return groupByMatcher.findData(v => v.name === this.groupBy.name);
@@ -147,7 +147,7 @@ export class GroupHelper {
     this.ops.changeGroupSort(keys);
   }
 
-  public moveGroupTo(groupKey: string, position: InsertToPosition) {
+  moveGroupTo(groupKey: string, position: InsertToPosition) {
     const keys = this.groups.map(v => v.key);
     keys.splice(
       keys.findIndex(key => key === groupKey),

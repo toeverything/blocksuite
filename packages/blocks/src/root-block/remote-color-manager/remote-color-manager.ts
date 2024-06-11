@@ -11,7 +11,7 @@ export class RemoteColorManager {
     return this.host.spec.getService('affine:page');
   }
 
-  constructor(public readonly host: EditorHost) {
+  constructor(readonly host: EditorHost) {
     const sessionColor = this.rootService.editPropsStore.getItem('remoteColor');
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);

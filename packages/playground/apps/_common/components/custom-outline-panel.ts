@@ -35,7 +35,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
     ></outline-panel>`;
   }
 
-  public toggleDisplay() {
+  toggleDisplay() {
     this._show = !this._show;
   }
 

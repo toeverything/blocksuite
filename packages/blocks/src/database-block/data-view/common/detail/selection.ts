@@ -105,7 +105,7 @@ export class DetailSelection {
     ) as RecordField | undefined;
   }
 
-  public focusUp() {
+  focusUp() {
     const selection = this.selection;
     if (!selection || selection?.isEditing) {
       return;
@@ -120,7 +120,7 @@ export class DetailSelection {
     }
   }
 
-  public focusDown() {
+  focusDown() {
     const selection = this.selection;
     if (!selection || selection?.isEditing) {
       return;
@@ -135,7 +135,7 @@ export class DetailSelection {
     }
   }
 
-  public deleteProperty() {
+  deleteProperty() {
     //
   }
 

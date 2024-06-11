@@ -270,7 +270,7 @@ export class DatabaseBlockComponent extends BlockComponent<
 
   private _dataSource?: DatabaseBlockDataSource;
 
-  public get dataSource(): DatabaseBlockDataSource {
+  get dataSource(): DatabaseBlockDataSource {
     if (!this._dataSource) {
       this._dataSource = new DatabaseBlockDataSource(this.host, {
         pageId: this.host.doc.id,
@@ -329,7 +329,7 @@ export class DatabaseBlockComponent extends BlockComponent<
 
   private _viewSource?: ViewSource;
 
-  public get viewSource(): ViewSource {
+  get viewSource(): ViewSource {
     if (!this._viewSource) {
       this._viewSource = new DatabaseBlockViewSource(this.model);
     }

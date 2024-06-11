@@ -44,7 +44,7 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
   @query(':scope > .component-overflow-more')
   accessor more!: HTMLDivElement;
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     const resize = new ResizeObserver(() => {
       this.adjustStyle();

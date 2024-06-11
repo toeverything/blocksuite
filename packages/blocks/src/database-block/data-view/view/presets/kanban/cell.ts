@@ -81,7 +81,7 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
 
   private _cell = createRef<DataViewCellLifeCycle>();
 
-  public get cell(): DataViewCellLifeCycle | undefined {
+  get cell(): DataViewCellLifeCycle | undefined {
     return this._cell.value;
   }
 

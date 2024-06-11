@@ -105,10 +105,7 @@ export class AffineLinkedDocWidget extends WidgetElement {
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedDoc = (
-    inlineEditor: AffineInlineEditor,
-    triggerKey: string
-  ) => {
+  showLinkedDoc = (inlineEditor: AffineInlineEditor, triggerKey: string) => {
     const curRange = getCurrentNativeRange();
     if (!curRange) return;
     showLinkedDocPopover({

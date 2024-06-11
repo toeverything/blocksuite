@@ -73,7 +73,7 @@ export class BacklinkIndexer {
     return this._linkIndexMap;
   }
 
-  public slots = {
+  slots = {
     /**
      * Note: sys:children update will not trigger event
      */
@@ -104,7 +104,7 @@ export class BacklinkIndexer {
   /**
    * Get the list of backlinks for a given doc
    */
-  public getBacklink(targetDocId: DocId) {
+  getBacklink(targetDocId: DocId) {
     if (this._backlinkIndexMapCache) {
       return this._backlinkIndexMapCache[targetDocId] ?? [];
     }

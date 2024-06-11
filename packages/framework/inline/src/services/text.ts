@@ -4,7 +4,7 @@ import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import { intersectInlineRange } from '../utils/inline-range.js';
 
 export class InlineTextService<TextAttributes extends BaseTextAttributes> {
-  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   readonly transact = this.editor.transact;
 

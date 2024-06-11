@@ -159,7 +159,7 @@ export class DatePicker extends WithDisposable(LitElement) {
   /**
    * Focus on date-cell
    */
-  public focusDateCell() {
+  focusDateCell() {
     const lastEl = this.shadowRoot?.querySelector(
       'button.date-cell[tabindex="0"]'
     ) as HTMLElement;
@@ -170,61 +170,61 @@ export class DatePicker extends WithDisposable(LitElement) {
    * check if date-cell is focused
    * @returns
    */
-  public isDateCellFocused() {
+  isDateCellFocused() {
     const focused = this.shadowRoot?.activeElement as HTMLElement;
     return focused?.classList.contains('date-cell');
   }
 
-  public focusMonthCell() {
+  focusMonthCell() {
     const lastEl = this.shadowRoot?.querySelector(
       'button.month-cell[tabindex="0"]'
     ) as HTMLElement;
     lastEl?.focus();
   }
 
-  public isMonthCellFocused() {
+  isMonthCellFocused() {
     const focused = this.shadowRoot?.activeElement as HTMLElement;
     return focused?.classList.contains('month-cell');
   }
 
-  public focusYearCell() {
+  focusYearCell() {
     const lastEl = this.shadowRoot?.querySelector(
       'button.year-cell[tabindex="0"]'
     ) as HTMLElement;
     lastEl?.focus();
   }
 
-  public isYearCellFocused() {
+  isYearCellFocused() {
     const focused = this.shadowRoot?.activeElement as HTMLElement;
     return focused?.classList.contains('year-cell');
   }
 
-  public openMonthSelector() {
+  openMonthSelector() {
     this._monthCursor = this.month;
     this._monthPickYearCursor = this.year;
     this._mode = 'month';
   }
 
-  public closeMonthSelector() {
+  closeMonthSelector() {
     this._mode = 'date';
   }
 
-  public toggleMonthSelector() {
+  toggleMonthSelector() {
     if (this._mode === 'month') this.closeMonthSelector();
     else this.openMonthSelector();
   }
 
-  public openYearSelector() {
+  openYearSelector() {
     this._yearCursor = clamp(this._minYear, this._maxYear, this.year);
     this._mode = 'year';
     this._getYearMatrix();
   }
 
-  public closeYearSelector() {
+  closeYearSelector() {
     this._mode = 'date';
   }
 
-  public toggleYearSelector() {
+  toggleYearSelector() {
     if (this._mode === 'year') this.closeYearSelector();
     else this.openYearSelector();
   }

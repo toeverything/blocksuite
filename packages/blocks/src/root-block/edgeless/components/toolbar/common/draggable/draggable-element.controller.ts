@@ -56,11 +56,11 @@ export class EdgelessDraggableElementController<T>
     host.addController(this);
   }
 
-  public onMouseDown(e: MouseEvent, elementInfo: ElementInfo<T>) {
+  onMouseDown(e: MouseEvent, elementInfo: ElementInfo<T>) {
     this._onDragStart(mouseResolver(e), elementInfo);
   }
 
-  public onTouchStart(e: TouchEvent, elementInfo: ElementInfo<T>) {
+  onTouchStart(e: TouchEvent, elementInfo: ElementInfo<T>) {
     this._onDragStart(touchResolver(e), elementInfo);
   }
 
@@ -294,7 +294,7 @@ export class EdgelessDraggableElementController<T>
   /**
    * Cancel the current dragging & animate even if dragOut
    */
-  public cancel() {
+  cancel() {
     if (this.states.cancelled) return;
     this._updateState('cancelled', true);
     this._animateCancelDrop();

@@ -12,7 +12,7 @@ export class TableHotkeysController implements ReactiveController {
     return this.host.selectionController;
   }
 
-  public hostConnected() {
+  hostConnected() {
     this.host.disposables.add(
       this.host.bindHotkey({
         Backspace: () => {

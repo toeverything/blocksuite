@@ -141,7 +141,7 @@ export class HoverController implements ReactiveController {
   /**
    * Callback when the portal needs to be aborted.
    */
-  public onAbort = () => {
+  onAbort = () => {
     this.abort();
   };
 

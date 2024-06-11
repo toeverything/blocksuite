@@ -36,9 +36,9 @@ export class SurfaceRefRenderer {
   }
 
   constructor(
-    public readonly id: string,
-    public readonly doc: Doc,
-    public readonly std: BlockStdScope,
+    readonly id: string,
+    readonly doc: Doc,
+    readonly std: BlockStdScope,
     options: {
       enableStackingCanvas?: boolean;
     } = {

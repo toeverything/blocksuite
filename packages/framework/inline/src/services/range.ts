@@ -24,7 +24,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
   private _lastEndRelativePosition: Y.RelativePosition | null = null;
 
-  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
 
   get yText() {
     return this.editor.yText;

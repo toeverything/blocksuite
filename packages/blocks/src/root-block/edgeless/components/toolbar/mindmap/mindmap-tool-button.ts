@@ -167,7 +167,7 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
     ];
   }
 
-  public initDragController() {
+  initDragController() {
     if (!this.edgeless || !this.toolbarContainer) return;
     if (this.draggableController) return;
     this.draggableController = new EdgelessDraggableElementController(this, {

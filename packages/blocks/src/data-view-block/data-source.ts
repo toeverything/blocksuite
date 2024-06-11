@@ -95,26 +95,22 @@ export class BlockQueryDataSource extends BaseDataSource {
     return [...this.blockMap.values()];
   }
 
-  public get rows(): string[] {
+  get rows(): string[] {
     return this.blocks.map(v => v.id);
   }
 
-  public get properties(): string[] {
+  get properties(): string[] {
     return [
       ...this.meta.properties.map(v => v.key),
       ...this.block.columns.map(v => v.id),
     ];
   }
 
-  public slots = {
+  slots = {
     update: new Slot(),
   };
 
-  public cellChangeValue(
-    rowId: string,
-    propertyId: string,
-    value: unknown
-  ): void {
+  cellChangeValue(rowId: string, propertyId: string, value: unknown): void {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       this.block.cells[rowId] = {
@@ -131,7 +127,7 @@ export class BlockQueryDataSource extends BaseDataSource {
     }
   }
 
-  public cellGetValue(rowId: string, propertyId: string): unknown {
+  cellGetValue(rowId: string, propertyId: string): unknown {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       return this.block.cells[rowId]?.[propertyId];
@@ -143,24 +139,21 @@ export class BlockQueryDataSource extends BaseDataSource {
     return;
   }
 
-  public propertyChangeData(
-    propertyId: string,
-    data: Record<string, unknown>
-  ): void {
+  propertyChangeData(propertyId: string, data: Record<string, unknown>): void {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       viewColumn.data = data;
     }
   }
 
-  public propertyChangeName(propertyId: string, name: string): void {
+  propertyChangeName(propertyId: string, name: string): void {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       viewColumn.name = name;
     }
   }
 
-  public propertyChangeType(propertyId: string, toType: string): void {
+  propertyChangeType(propertyId: string, toType: string): void {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       const currentType = viewColumn.type;
@@ -191,14 +184,14 @@ export class BlockQueryDataSource extends BaseDataSource {
     }
   }
 
-  public propertyDelete(_id: string): void {
+  propertyDelete(_id: string): void {
     const index = this.block.columns.findIndex(v => v.id === _id);
     if (index >= 0) {
       this.block.columns.splice(index, 1);
     }
   }
 
-  public propertyGetData(propertyId: string): Record<string, unknown> {
+  propertyGetData(propertyId: string): Record<string, unknown> {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       return viewColumn.data;
@@ -210,7 +203,7 @@ export class BlockQueryDataSource extends BaseDataSource {
     );
   }
 
-  public override propertyGetReadonly(propertyId: string): boolean {
+  override propertyGetReadonly(propertyId: string): boolean {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       return false;
@@ -219,7 +212,7 @@ export class BlockQueryDataSource extends BaseDataSource {
     return this.getProperty(propertyId)?.set == null;
   }
 
-  public propertyGetName(propertyId: string): string {
+  propertyGetName(propertyId: string): string {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       return viewColumn.name;
@@ -236,7 +229,7 @@ export class BlockQueryDataSource extends BaseDataSource {
     return property;
   }
 
-  public propertyGetType(propertyId: string): string {
+  propertyGetType(propertyId: string): string {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
       return viewColumn.type;
@@ -247,19 +240,19 @@ export class BlockQueryDataSource extends BaseDataSource {
     return this.getProperty(propertyId).columnMeta.type;
   }
 
-  public propertyDuplicate(_columnId: string): string {
+  propertyDuplicate(_columnId: string): string {
     throw new Error('Method not implemented.');
   }
 
-  public rowAdd(_insertPosition: InsertToPosition | number): string {
+  rowAdd(_insertPosition: InsertToPosition | number): string {
     throw new Error('Method not implemented.');
   }
 
-  public rowDelete(_ids: string[]): void {
+  rowDelete(_ids: string[]): void {
     throw new Error('Method not implemented.');
   }
 
-  public override propertyGetDefaultWidth(propertyId: string): number {
+  override propertyGetDefaultWidth(propertyId: string): number {
     if (this.propertyGetType(propertyId) === 'title') {
       return 260;
     }
@@ -281,12 +274,12 @@ export class BlockQueryDataSource extends BaseDataSource {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
+  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
     return queryBlockColumns.map(v => v.model);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getPropertyMeta(type: string): ColumnMeta<any, any, any> {
+  getPropertyMeta(type: string): ColumnMeta<any, any, any> {
     const meta = this.columnMetaMap.get(type);
     if (meta) {
       return meta;
@@ -294,14 +287,14 @@ export class BlockQueryDataSource extends BaseDataSource {
     return queryBlockAllColumnMap[type];
   }
 
-  public override get detailSlots(): DetailSlots {
+  override get detailSlots(): DetailSlots {
     return {
       ...super.detailSlots,
       header: createUniComponentFromWebComponent(BlockRenderer),
     };
   }
 
-  public rowMove(_rowId: string, _position: InsertToPosition): void {}
+  rowMove(_rowId: string, _position: InsertToPosition): void {}
 
   private newColumnName() {
     let i = 1;
@@ -311,7 +304,7 @@ export class BlockQueryDataSource extends BaseDataSource {
     return `Column ${i}`;
   }
 
-  public propertyAdd(
+  propertyAdd(
     insertToPosition: InsertToPosition,
     type: string | undefined
   ): string {

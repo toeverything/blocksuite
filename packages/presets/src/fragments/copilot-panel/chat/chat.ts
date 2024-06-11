@@ -145,7 +145,7 @@ export class CopilotChatPanel
   @state()
   accessor docSelection = false;
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.logic.chat.reactiveData = this;
     this.disposables.add(

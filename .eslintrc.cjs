@@ -71,6 +71,12 @@ module.exports = {
       rules: {
         'no-unused-vars': 'off',
         '@typescript-eslint/ban-ts-comment': 'off',
+        '@typescript-eslint/explicit-member-accessibility': [
+          'error',
+          {
+            accessibility: 'no-public',
+          },
+        ],
         '@typescript-eslint/no-unused-vars': [
           'error',
           {

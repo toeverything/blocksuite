@@ -28,7 +28,7 @@ class EraserOverlay extends Overlay {
 }
 
 export class EraserToolController extends EdgelessToolController<EraserTool> {
-  public override readonly tool: EraserTool = {
+  override readonly tool: EraserTool = {
     type: 'eraser',
   };
 

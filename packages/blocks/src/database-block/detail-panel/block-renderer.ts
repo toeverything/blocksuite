@@ -55,7 +55,7 @@ export class BlockRenderer
     return this.host?.doc.getBlock(this.rowId)?.model;
   }
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(
       this,

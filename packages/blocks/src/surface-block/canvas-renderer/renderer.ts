@@ -302,7 +302,7 @@ export class Renderer extends Viewport {
     ctx.restore();
   }
 
-  public getCanvasByBound(
+  getCanvasByBound(
     bound: IBound = this.viewportBounds,
     surfaceElements?: SurfaceElementModel[],
     canvas?: HTMLCanvasElement,
@@ -330,13 +330,13 @@ export class Renderer extends Viewport {
     return canvas;
   }
 
-  public addOverlay(overlay: Overlay) {
+  addOverlay(overlay: Overlay) {
     overlay.setRenderer(this);
     this._overlays.add(overlay);
     this._shouldUpdate = true;
   }
 
-  public removeOverlay(overlay: Overlay) {
+  removeOverlay(overlay: Overlay) {
     if (!this._overlays.has(overlay)) {
       return;
     }

@@ -125,7 +125,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   @property({ attribute: false })
   accessor database!: DatabaseBlockComponent;
 
-  public override connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.database.selection.slots.changed.on(selections => {
       const selection = selections.find(v => {

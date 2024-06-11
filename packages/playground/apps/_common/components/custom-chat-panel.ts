@@ -26,11 +26,11 @@ export class CustomChatPanel extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor editor!: AffineEditorContainer;
 
-  public toggleDisplay() {
+  toggleDisplay() {
     this._show = !this._show;
   }
 
-  public show() {
+  show() {
     this._show = true;
   }
 
