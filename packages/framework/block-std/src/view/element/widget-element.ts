@@ -12,6 +12,7 @@ import type { EditorHost } from './lit-host.js';
 export class WidgetElement<
   Model extends BlockModel = BlockModel,
   B extends BlockElement = BlockElement,
+  S extends BlockService = BlockService,
 > extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor host!: EditorHost;
@@ -24,7 +25,7 @@ export class WidgetElement<
 
   path!: string[];
 
-  service!: BlockService;
+  service!: S;
 
   blockElement!: B;
 
@@ -68,7 +69,7 @@ export class WidgetElement<
     assertExists(parentElement);
     // TODO(mirone/#6534): find a better way to get block element from a node
     this.blockElement = parentElement.closest('[data-block-id]') as B;
-    this.service = this.blockElement.service;
+    this.service = this.blockElement.service as S;
     this.path = this.host.view.calculatePath(this.model).concat(id);
     this.service.specSlots.widgetConnected.emit({
       service: this.blockElement.service,
