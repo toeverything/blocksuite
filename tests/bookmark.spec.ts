@@ -1,5 +1,6 @@
 import './utils/declare-test-window.js';
 
+import { sleep } from '@global/utils.js';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { getEmbedCardToolbar } from 'utils/query.js';
@@ -53,6 +54,7 @@ const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await focusRichText(page);
   await type(page, '/link');
   await pressEnter(page);
+  await sleep(100);
   await type(page, inputUrl);
   await pressEnter(page);
 };

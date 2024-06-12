@@ -1,3 +1,4 @@
+import { sleep } from '@global/utils.js';
 import { expect, type Page } from '@playwright/test';
 
 import { popImageMoreMenu } from './utils/actions/drag.js';
@@ -61,6 +62,7 @@ function getAttachment(page: Page) {
 
     const fileChooser = page.waitForEvent('filechooser');
     await pressEnter(page);
+    await sleep(100);
     await (await fileChooser).setFiles(FILE_PATH);
 
     // Try to break the undo redo test
