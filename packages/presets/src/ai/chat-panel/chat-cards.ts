@@ -321,34 +321,41 @@ export class ChatCards extends WithDisposable(LitElement) {
   }
 
   protected override render() {
-    return html`<div class="cards-container">
-      ${repeat(
-        ChatCardsConfig,
-        card => card.name,
-        card => {
-          if (
-            card.render(this.text, this.images[0], this.caption) !== nothing
-          ) {
-            return html`<div
-              @click=${async () => {
-                if (card.name === 'doc') {
-                  await this._handleDocSelection();
-                }
-                card.handler(
-                  this.updateContext,
-                  this.text,
-                  this.markdown,
-                  this.images
-                );
-              }}
-            >
-              ${card.render(this.text, this.images[0], this.caption)}
-            </div> `;
+    return html`
+      <div class="cards-container">
+        ${repeat(
+          ChatCardsConfig,
+          card => card.name,
+          card => {
+            const content = card.render(
+              this.text,
+              this.images[0],
+              this.caption
+            );
+            if (content === nothing) {
+              return nothing;
+            }
+            return html`
+              <div
+                @click=${async () => {
+                  if (card.name === 'doc') {
+                    await this._handleDocSelection();
+                  }
+                  card.handler(
+                    this.updateContext,
+                    this.text,
+                    this.markdown,
+                    this.images
+                  );
+                }}
+              >
+                ${content}
+              </div>
+            `;
           }
-          return nothing;
-        }
-      )}
-    </div>`;
+        )}
+      </div>
+    `;
   }
 }
 

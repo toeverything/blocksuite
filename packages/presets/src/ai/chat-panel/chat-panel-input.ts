@@ -202,6 +202,9 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
   @query('.chat-panel-images')
   accessor imagesWrapper!: HTMLDivElement;
 
+  @query('.chat-selection-quote')
+  accessor quoteWrapper!: HTMLDivElement;
+
   @query('textarea')
   accessor textarea!: HTMLTextAreaElement;
 
@@ -281,8 +284,28 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
     `;
   }
 
+  private _renderQuote(quote: string) {
+    return html`
+      <div class="chat-selection-quote">
+        ${repeat(
+          getFirstTwoLines(quote),
+          line => line,
+          line => html`<div>${line}</div>`
+        )}
+        <div
+          class="chat-quote-close"
+          @click=${() => {
+            this.updateContext({ quote: '', markdown: '' });
+          }}
+        >
+          ${CloseIcon}
+        </div>
+      </div>
+    `;
+  }
+
   protected override render() {
-    const { images, status } = this.chatContextValue;
+    const { images, status, quote } = this.chatContextValue;
     const hasImages = images.length > 0;
     const maxHeight = hasImages ? 272 + 2 : 200 + 2;
 
@@ -303,23 +326,7 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
       </style>
       <div class="chat-panel-input">
         ${hasImages ? this._renderImages(images) : nothing}
-        ${this.chatContextValue.quote
-          ? html`<div class="chat-selection-quote">
-              ${repeat(
-                getFirstTwoLines(this.chatContextValue.quote),
-                line => line,
-                line => html`<div>${line}</div>`
-              )}
-              <div
-                class="chat-quote-close"
-                @click=${() => {
-                  this.updateContext({ quote: '', markdown: '' });
-                }}
-              >
-                ${CloseIcon}
-              </div>
-            </div>`
-          : nothing}
+        ${quote.length ? this._renderQuote(quote) : nothing}
         <textarea
           rows="1"
           placeholder="What are your thoughts?"
@@ -330,7 +337,9 @@ export class ChatPanelInput extends WithDisposable(LitElement) {
             textarea.style.height = textarea.scrollHeight + 'px';
             let imagesHeight = this.imagesWrapper?.scrollHeight ?? 0;
             if (imagesHeight) imagesHeight += 12;
-            if (this.scrollHeight >= 200 + imagesHeight) {
+            let quoteHeight = this.quoteWrapper?.clientHeight ?? 0;
+            if (quoteHeight) quoteHeight += 12;
+            if (this.scrollHeight >= 200 + imagesHeight + quoteHeight) {
               textarea.style.height = '148px';
               textarea.style.overflowY = 'scroll';
             }
