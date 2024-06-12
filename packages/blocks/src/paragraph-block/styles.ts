@@ -18,7 +18,8 @@ export const paragraphBlockStyles = css`
   }
   .h1 {
     font-size: var(--affine-font-h-1);
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     line-height: calc(1em + 8px);
     margin-top: 18px;
     margin-bottom: 10px;
@@ -29,6 +30,7 @@ export const paragraphBlockStyles = css`
   .h2 {
     font-size: var(--affine-font-h-2);
     font-weight: 600;
+    letter-spacing: -0.02em;
     line-height: calc(1em + 10px);
     margin-top: 14px;
     margin-bottom: 10px;
@@ -39,6 +41,7 @@ export const paragraphBlockStyles = css`
   .h3 {
     font-size: var(--affine-font-h-3);
     font-weight: 600;
+    letter-spacing: -0.02em;
     line-height: calc(1em + 8px);
     margin-top: 12px;
     margin-bottom: 10px;
@@ -49,6 +52,7 @@ export const paragraphBlockStyles = css`
   .h4 {
     font-size: var(--affine-font-h-4);
     font-weight: 600;
+    letter-spacing: -0.015em;
     line-height: calc(1em + 8px);
     margin-top: 12px;
     margin-bottom: 10px;
@@ -59,6 +63,7 @@ export const paragraphBlockStyles = css`
   .h5 {
     font-size: var(--affine-font-h-5);
     font-weight: 600;
+    letter-spacing: -0.015em;
     line-height: calc(1em + 8px);
     margin-top: 12px;
     margin-bottom: 10px;
@@ -69,6 +74,7 @@ export const paragraphBlockStyles = css`
   .h6 {
     font-size: var(--affine-font-h-6);
     font-weight: 600;
+    letter-spacing: -0.015em;
     line-height: calc(1em + 8px);
     margin-top: 12px;
     margin-bottom: 10px;
