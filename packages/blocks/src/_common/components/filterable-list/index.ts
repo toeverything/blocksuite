@@ -94,7 +94,7 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
           })}
           @mouseover=${() => (this._curFocusIndex = idx)}
           @click=${() => this._select(item)}
-          ?hover=${focussed}
+          hover=${focussed}
           width="100%"
           height="32px"
         >
