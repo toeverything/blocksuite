@@ -207,7 +207,7 @@ const imageHandler = (host: EditorHost) => {
       const [x, y] = edgelessRoot.service.viewport.toViewCoord(minX, minY);
 
       host.doc.transact(() => {
-        edgelessRoot.addImages([img], { x, y }, true).catch(console.error);
+        edgelessRoot.addImages([img], [x, y], true).catch(console.error);
       });
     })
     .catch(console.error);

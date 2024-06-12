@@ -393,12 +393,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .autoCompleteOff=${this._enableNoteSlicer}
       ></edgeless-selected-rect>
 
-      ${!readonly
-        ? html`<edgeless-index-label
+      ${readonly
+        ? nothing
+        : html`<edgeless-index-label
             .surface=${surface}
             .edgeless=${edgeless}
-          ></edgeless-index-label>`
-        : nothing}
+          ></edgeless-index-label>`}
 
       <edgeless-navigator-black-background
         .edgeless=${edgeless}

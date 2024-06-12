@@ -45,6 +45,7 @@ import type {
 import {
   Bound,
   type IBound,
+  type IVec2,
   normalizeWheelDeltaY,
   serializeXYWH,
   Vec,
@@ -378,7 +379,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
 
   async addImages(
     files: File[],
-    point?: IPoint,
+    point?: IVec2,
     inTopLeft?: boolean
   ): Promise<string[]> {
     const imageFiles = [...files].filter(file =>
@@ -402,7 +403,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     }
 
     let { x, y } = this.service.viewport.center;
-    if (point) [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
+    if (point) [x, y] = this.service.viewport.toModelCoord(...point);
 
     const dropInfos: { point: Point; blockId: string }[] = [];
 
@@ -460,7 +461,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     return blockIds;
   }
 
-  async addAttachments(files: File[], point?: IPoint): Promise<string[]> {
+  async addAttachments(files: File[], point?: IVec2): Promise<string[]> {
     if (!files.length) return [];
 
     const attachmentService = this.host.spec.getService('affine:attachment');
@@ -479,7 +480,7 @@ export class EdgelessRootBlockComponent extends BlockElement<
     }
 
     let { x, y } = this.service.viewport.center;
-    if (point) [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
+    if (point) [x, y] = this.service.viewport.toModelCoord(...point);
 
     const CARD_STACK_GAP = 32;
 

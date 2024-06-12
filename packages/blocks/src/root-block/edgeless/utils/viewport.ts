@@ -166,20 +166,22 @@ export class Viewport {
     this.setRect(rect.left, rect.top, rect.width, rect.height);
   }
 
-  toViewPointFromClientPoint({ x, y }: IPoint): IPoint {
+  toViewCoordFromClientCoord([x, y]: IVec2): IVec2 {
     const { left, top } = this;
-    return {
-      x: x - left,
-      y: y - top,
-    };
+    return [x - left, y - top];
   }
 
-  toModelCoord(viewX: number, viewY: number): [number, number] {
+  toModelCoordFromClientCoord([x, y]: IVec2): IVec2 {
+    const { left, top } = this;
+    return this.toModelCoord(x - left, y - top);
+  }
+
+  toModelCoord(viewX: number, viewY: number): IVec2 {
     const { viewportX, viewportY, zoom } = this;
     return [viewportX + viewX / zoom, viewportY + viewY / zoom];
   }
 
-  toViewCoord(modelX: number, modelY: number): [number, number] {
+  toViewCoord(modelX: number, modelY: number): IVec2 {
     const { viewportX, viewportY, zoom } = this;
     return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
   }

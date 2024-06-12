@@ -135,7 +135,7 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     const { x, y } = instance;
 
     return {
-      absolutePath: path.map(p => p.clone().setVec([p[0] + x, p[1] + y])),
+      absolutePath: path.map(p => p.clone().setVec(Vec.add(p, [x, y]))),
     };
   })
   @local()
@@ -240,6 +240,68 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   } as ConnectorLabelConstraintsProps)
   accessor labelConstraints!: ConnectorLabelConstraintsProps;
 
+  resizePath(originalPath: PointLocation[], matrix: DOMMatrix) {
+    if (this.mode === ConnectorMode.Curve) {
+      return originalPath.map(point => {
+        const [p, t, absIn, absOut] = [
+          point,
+          point.tangent,
+          point.absIn,
+          point.absOut,
+        ]
+          .map(p => new DOMPoint(...p).matrixTransform(matrix))
+          .map(p => [p.x, p.y]);
+        const ip = Vec.sub(absIn, p);
+        const op = Vec.sub(absOut, p);
+        return new PointLocation(p, t, ip, op);
+      });
+    }
+
+    return originalPath.map(point => {
+      const { x, y } = new DOMPoint(...point).matrixTransform(matrix);
+      const p = [x, y];
+      return PointLocation.fromVec(p);
+    });
+  }
+
+  resize(bounds: Bound, originalPath: PointLocation[], matrix: DOMMatrix) {
+    this.updatingPath = false;
+
+    const path = this.resizePath(originalPath, matrix);
+
+    // the property assignment order matters
+    this.xywh = bounds.serialize();
+    this.path = path.map(p => p.clone().setVec(Vec.sub(p, bounds.tl)));
+
+    const props: {
+      labelXYWH?: XYWH;
+      source?: Connection;
+      target?: Connection;
+    } = {};
+
+    // Updates Connector's Label position.
+    if (this.hasLabel()) {
+      const [cx, cy] = this.getPointByOffsetDistance(this.labelOffset.distance);
+      const [, , w, h] = this.labelXYWH!;
+      props.labelXYWH = [cx - w / 2, cy - h / 2, w, h];
+    }
+
+    if (!this.source.id) {
+      props.source = {
+        ...this.source,
+        position: path[0].toVec() as [number, number],
+      };
+    }
+    if (!this.target.id) {
+      props.target = {
+        ...this.target,
+        position: path[path.length - 1].toVec() as [number, number],
+      };
+    }
+
+    return props;
+  }
+
   moveTo(bound: Bound) {
     const oldBound = Bound.deserialize(this.xywh);
     const offset = Vec.sub([bound.x, bound.y], [oldBound.x, oldBound.y]);
@@ -262,6 +324,10 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
       const [x, y, w, h] = this.labelXYWH!;
       this.labelXYWH = [x + offset[0], y + offset[1], w, h];
     }
+  }
+
+  get connected() {
+    return !!(this.source.id || this.target.id);
   }
 
   hasLabel() {

@@ -52,7 +52,7 @@ export const ConnectorEndpointLocations = [
   [0.5, 1],
   // At left
   [0, 0.5],
-] as const satisfies IVec2[];
+] as const;
 
 export function calculateNearestLocation(
   point: IVec,

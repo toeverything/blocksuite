@@ -19,7 +19,7 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
-import { matchFlavours, Point } from '../../../_common/utils/index.js';
+import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   blockElementGetter,
@@ -53,7 +53,11 @@ import {
 import { ConnectorElementModel } from '../../../surface-block/index.js';
 import { compare } from '../../../surface-block/managers/layer-utils.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
-import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
+import {
+  type IVec,
+  type IVec2,
+  Vec,
+} from '../../../surface-block/utils/vec.js';
 import { ClipboardAdapter } from '../../clipboard/adapter.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import {
@@ -232,11 +236,12 @@ export class EdgelessClipboardController extends PageClipboard {
     const data = event.clipboardData;
     if (!data) return;
 
+    const { lastMousePos } = this.toolManager;
+    const point: IVec2 = [lastMousePos.x, lastMousePos.y];
+
     if (isPureFileInClipboard(data)) {
       const files = data.files;
       if (files.length === 0) return;
-
-      const { lastMousePos } = this.toolManager;
 
       const imageFiles: File[] = [],
         attachmentFiles: File[] = [];
@@ -251,9 +256,9 @@ export class EdgelessClipboardController extends PageClipboard {
 
       // when only images in clipboard, add image-blocks else add all files as attachments
       if (attachmentFiles.length === 0) {
-        await this.host.addImages(imageFiles, lastMousePos);
+        await this.host.addImages(imageFiles, point);
       } else {
-        await this.host.addAttachments([...files], lastMousePos);
+        await this.host.addAttachments([...files], point);
       }
 
       return;
@@ -324,8 +329,6 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const svg = tryGetSvgFromClipboard(data);
     if (svg) {
-      const { lastMousePos } = this.toolManager;
-      const point = new Point(lastMousePos.x, lastMousePos.y);
       await this.host.addImages([svg], point);
       return;
     }

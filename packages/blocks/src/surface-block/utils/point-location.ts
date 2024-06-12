@@ -29,6 +29,10 @@ export class PointLocation extends Array<number> implements IVec {
     return point;
   }
 
+  toVec(): IVec {
+    return [this[0], this[1]];
+  }
+
   setVec(vec: IVec) {
     this[0] = vec[0];
     this[1] = vec[1];

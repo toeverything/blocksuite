@@ -326,12 +326,12 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     this._registeredEntries.push(entry);
   }
 
-  private _quickConnect(e: MouseEvent) {
+  private _quickConnect = ({ x, y }: MouseEvent) => {
     const element = this.selection.selectedElements[0];
-    const point = this.edgeless.service.viewport.toViewPointFromClientPoint({
-      x: e.x,
-      y: e.y,
-    });
+    const point = this.edgeless.service.viewport.toViewCoordFromClientCoord([
+      x,
+      y,
+    ]);
     this.edgeless.doc.captureSync();
     this.edgeless.tools.setEdgelessTool({
       type: 'connector',
@@ -341,8 +341,8 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
     const ctc = this.edgeless.tools.controllers[
       'connector'
     ] as ConnectorToolController;
-    ctc.quickConnect([point.x, point.y], element);
-  }
+    ctc.quickConnect(point, element);
+  };
 
   private _renderQuickConnectButton() {
     return [
@@ -351,7 +351,7 @@ export class EdgelessElementToolbarWidget extends WidgetElement<
           aria-label="Draw connector"
           .tooltip=${'Draw connector'}
           .activeMode=${'background'}
-          @click=${(e: MouseEvent) => this._quickConnect(e)}
+          @click=${this._quickConnect}
         >
           ${ConnectorCWithArrowIcon}
         </edgeless-tool-icon-button>

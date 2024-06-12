@@ -60,7 +60,7 @@ export class ImageBlockService extends BlockService<ImageBlockModel> {
         );
       } else if (isInsideEdgelessEditor(this.host as EditorHost)) {
         const edgelessRoot = this.rootElement as EdgelessRootBlockComponent;
-        point = edgelessRoot.service.viewport.toViewPointFromClientPoint(point);
+        point = edgelessRoot.service.viewport.toViewCoordFromClientCoord(point);
         await edgelessRoot.addImages(imageFiles, point);
       }
 

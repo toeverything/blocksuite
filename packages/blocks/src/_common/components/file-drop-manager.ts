@@ -8,18 +8,18 @@ import {
   type DropResult,
   getClosestBlockElementByPoint,
   getModelByBlockComponent,
-  type IPoint,
   isInsidePageEditor,
   matchFlavours,
   Point,
 } from '../../_common/utils/index.js';
+import type { IVec2 } from '../../surface-block/index.js';
 import type { DragIndicator } from './drag-indicator.js';
 
 export type onDropProps = {
   files: File[];
   targetModel: BlockModel | null;
   place: 'before' | 'after';
-  point: IPoint;
+  point: IVec2;
 };
 
 export type FileDropOptions = {
@@ -165,16 +165,13 @@ export class FileDropManager {
     event.preventDefault();
 
     const { targetModel, type: place } = this;
-    const { clientX, clientY } = event;
+    const { x, y } = event;
 
     onDrop({
       files: [...droppedFiles],
       targetModel,
       place,
-      point: {
-        x: clientX,
-        y: clientY,
-      },
+      point: [x, y],
     })?.catch(console.error);
   };
 }

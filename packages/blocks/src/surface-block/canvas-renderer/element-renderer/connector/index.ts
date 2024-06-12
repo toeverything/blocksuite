@@ -1,12 +1,14 @@
-import {
-  type ConnectorElementModel,
-  isConnectorWithLabel,
-  type LocalConnectorElementModel,
-  type PointStyle,
+import type {
+  ConnectorElementModel,
+  LocalConnectorElementModel,
+  PointStyle,
 } from '../../../element-model/connector.js';
-import { ConnectorMode } from '../../../element-model/connector.js';
-import type { PointLocation } from '../../../index.js';
+import {
+  ConnectorMode,
+  isConnectorWithLabel,
+} from '../../../element-model/connector.js';
 import { getBezierParameters } from '../../../utils/curve.js';
+import type { PointLocation } from '../../../utils/point-location.js';
 import type { Renderer } from '../../renderer.js';
 import {
   deltaInsertsToChunks,
@@ -65,7 +67,7 @@ export function connector(
     dy = ly - y;
 
     const path = new Path2D();
-    path.rect(0 - offset / 2, 0 - offset / 2, w + offset, h + offset);
+    path.rect(-offset / 2, -offset / 2, w + offset, h + offset);
     path.rect(dx - 3 - 0.5, dy - 3 - 0.5, lw + 6 + 1, lh + 6 + 1);
     ctx.clip(path, 'evenodd');
   }
@@ -213,8 +215,8 @@ function renderLabel(
     fontFamily,
   });
   const [, , w, h] = labelXYWH!;
-  const hw = w / 2;
-  const hh = h / 2;
+  const cx = w / 2;
+  const cy = h / 2;
   const deltas = wrapTextDeltas(text!, font, w);
   const lines = deltaInsertsToChunks(deltas);
   const lineHeight = getLineHeight(fontFamily, fontSize);
@@ -256,7 +258,7 @@ function renderLabel(
             : rtl
               ? 0.5
               : -0.5);
-      ctx.fillText(str, x + hw, index * lineHeight - textHeight + hh);
+      ctx.fillText(str, x + cx, index * lineHeight - textHeight + cy);
 
       if (shouldTemporarilyAttach) {
         ctx.canvas.remove();

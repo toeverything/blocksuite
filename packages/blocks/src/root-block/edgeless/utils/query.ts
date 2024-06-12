@@ -18,10 +18,12 @@ import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtu
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
+import type { PointLocation } from '../../../surface-block/index.js';
 import {
   Bound,
   type CanvasElementWithText,
   clamp,
+  ConnectorElementModel,
   deserializeXYWH,
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
@@ -279,29 +281,28 @@ export function getSelectedRect(
   );
 }
 
+export type SelectableProps = {
+  bound: Bound;
+  rotate: number;
+  path?: PointLocation[];
+};
+
 export function getSelectableBounds(
   selected: BlockSuite.EdgelessModelType[]
-): Map<
-  string,
-  {
-    bound: Bound;
-    rotate: number;
-  }
-> {
-  const bounds = new Map<
-    string,
-    {
-      bound: Bound;
-      rotate: number;
-    }
-  >();
+): Map<string, SelectableProps> {
+  const bounds = new Map();
   getElementsWithoutGroup(selected).forEach(ele => {
     const bound = Bound.deserialize(ele.xywh);
-
-    bounds.set(ele.id, {
+    const props: SelectableProps = {
       bound,
       rotate: ele.rotate,
-    });
+    };
+
+    if (isCanvasElement(ele) && ele instanceof ConnectorElementModel) {
+      props.path = ele.absolutePath.map(p => p.clone());
+    }
+
+    bounds.set(ele.id, props);
   });
 
   return bounds;
