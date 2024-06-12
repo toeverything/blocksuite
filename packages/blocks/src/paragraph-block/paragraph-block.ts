@@ -12,6 +12,7 @@ import { bindContainerHotkey } from '../_common/components/rich-text/keymap/inde
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { getViewportElement } from '../_common/utils/query.js';
+import { EdgelessTextBlockComponent } from '../edgeless-text/edgeless-text-block.js';
 import { EdgelessRootBlockComponent } from '../root-block/edgeless/edgeless-root-block.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 import type { ParagraphBlockService } from './paragraph-service.js';
@@ -52,6 +53,10 @@ export class ParagraphBlockComponent extends BlockComponent<
       return el;
     }
     return this.rootElement;
+  }
+
+  get inEdgelessText() {
+    return this.topContenteditableElement instanceof EdgelessTextBlockComponent;
   }
 
   get inlineEditor() {
@@ -182,9 +187,16 @@ export class ParagraphBlockComponent extends BlockComponent<
             .verticalScrollContainerGetter=${() =>
               getViewportElement(this.host)}
           ></rich-text>
-          <div contenteditable="false" class="affine-paragraph-placeholder">
-            ${this.service.placeholderGenerator(this.model)}
-          </div>
+          ${this.inEdgelessText
+            ? nothing
+            : html`
+                <div
+                  contenteditable="false"
+                  class="affine-paragraph-placeholder"
+                >
+                  ${this.service.placeholderGenerator(this.model)}
+                </div>
+              `}
         </div>
 
         ${children}

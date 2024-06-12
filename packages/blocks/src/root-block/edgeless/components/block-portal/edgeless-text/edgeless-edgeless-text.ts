@@ -18,7 +18,6 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
   static override styles = css`
     .edgeless-text-block-container {
       position: absolute;
-      padding: 10px;
       box-sizing: border-box;
 
       &[data-max-width='false'] .inline-editor span {
@@ -160,6 +159,12 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
           style=${styleMap({
             transform: `rotate(${rotate}deg)`,
             transformOrigin: 'center',
+            padding: '10px',
+            border: `1px solid ${this._editing ? 'var(--affine—primary—color, #1e96eb)' : 'transparent'}`,
+            borderRadius: '4px',
+            boxShadow: this._editing
+              ? '0px 0px 0px 2px rgba(30, 150, 235, 0.3)'
+              : 'none',
           })}
         >
           <div

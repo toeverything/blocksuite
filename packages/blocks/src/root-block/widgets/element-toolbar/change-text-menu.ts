@@ -97,7 +97,13 @@ function extractField<K extends keyof TextStyleProps>(
   element: BlockSuite.EdgelessTextModelType,
   field: K
 ) {
-  if (element instanceof EdgelessTextBlockModel) return null;
+  //TODO: It's not a very good handling method.
+  //      The edgeless-change-text-menu should be refactored into a widget to allow external registration of its own logic.
+  if (element instanceof EdgelessTextBlockModel) {
+    return field === 'fontSize'
+      ? null
+      : (element[field as keyof EdgelessTextBlockModel] as TextStyleProps[K]);
+  }
   return (
     element instanceof ConnectorElementModel
       ? element.labelStyle[field]
