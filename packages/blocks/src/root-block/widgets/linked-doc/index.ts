@@ -100,23 +100,6 @@ export class AffineLinkedDocWidget extends WidgetElement {
 
   options = AffineLinkedDocWidget.DEFAULT_OPTIONS;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this.handleEvent('keyDown', this._onKeyDown);
-  }
-
-  showLinkedDoc = (inlineEditor: AffineInlineEditor, triggerKey: string) => {
-    const curRange = getCurrentNativeRange();
-    if (!curRange) return;
-    showLinkedDocPopover({
-      editorHost: this.host,
-      inlineEditor,
-      range: curRange,
-      options: this.options,
-      triggerKey,
-    });
-  };
-
   private getInlineEditor = (evt: KeyboardEvent) => {
     if (evt.target instanceof HTMLElement) {
       const editor = (
@@ -194,6 +177,23 @@ export class AffineLinkedDocWidget extends WidgetElement {
         return;
       }
       this.showLinkedDoc(inlineEditor, matchedKey);
+    });
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.handleEvent('keyDown', this._onKeyDown);
+  }
+
+  showLinkedDoc = (inlineEditor: AffineInlineEditor, triggerKey: string) => {
+    const curRange = getCurrentNativeRange();
+    if (!curRange) return;
+    showLinkedDocPopover({
+      editorHost: this.host,
+      inlineEditor,
+      range: curRange,
+      options: this.options,
+      triggerKey,
     });
   };
 }

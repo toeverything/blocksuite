@@ -52,9 +52,11 @@ shapes.push({
 export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  draggableController!: EdgelessDraggableElementController<DraggableShape>;
-
-  override type = 'shape' as const;
+  get shapeShadow() {
+    return this.theme === 'dark'
+      ? '0 0 7px rgba(0, 0, 0, .22)'
+      : '0 0 5px rgba(0, 0, 0, .2)';
+  }
 
   static override styles = css`
     :host {
@@ -116,11 +118,9 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
     }
   `;
 
-  get shapeShadow() {
-    return this.theme === 'dark'
-      ? '0 0 7px rgba(0, 0, 0, .22)'
-      : '0 0 5px rgba(0, 0, 0, .2)';
-  }
+  draggableController!: EdgelessDraggableElementController<DraggableShape>;
+
+  override type = 'shape' as const;
 
   @property({ attribute: false })
   accessor color!: string;

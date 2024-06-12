@@ -18,7 +18,9 @@ const textItem: TextItem = { type: 'text', icon: textIcon, render: textRender };
 
 @customElement('edgeless-mindmap-menu')
 export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
-  override type = 'mindmap' as const;
+  get mindMaps() {
+    return getMindMaps(this.theme);
+  }
 
   static override styles = css`
     :host {
@@ -73,6 +75,8 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
+  override type = 'mindmap' as const;
+
   draggableController!: EdgelessDraggableElementController<
     ToolbarMindmapItem | TextItem
   >;
@@ -82,10 +86,6 @@ export class EdgelessMindmapMenu extends EdgelessToolbarToolMixin(LitElement) {
 
   @property({ attribute: false })
   accessor onActiveStyleChange!: (style: MindmapStyle) => void;
-
-  get mindMaps() {
-    return getMindMaps(this.theme);
-  }
 
   initDragController() {
     if (this.draggableController || !this.edgeless) return;

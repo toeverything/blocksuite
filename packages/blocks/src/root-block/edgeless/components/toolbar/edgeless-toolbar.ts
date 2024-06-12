@@ -48,6 +48,140 @@ const SAFE_AREA_WIDTH = 64;
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
+  get slots() {
+    return this._slotsProvider.value;
+  }
+
+  private get _cachedPresentHideToolbar() {
+    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
+  }
+
+  /**
+   * When enabled, the toolbar will auto-hide when the mouse is not over it.
+   */
+  private get _enableAutoHide() {
+    return (
+      this.isPresentMode &&
+      this._cachedPresentHideToolbar &&
+      !this.presentSettingMenuShow &&
+      !this.presentFrameMenuShow
+    );
+  }
+
+  get host() {
+    return this.edgeless.host;
+  }
+
+  get isPresentMode() {
+    return this.edgelessTool.type === 'frameNavigator';
+  }
+
+  private get _seniorTools() {
+    return getSeniorTools({
+      edgeless: this.edgeless,
+      toolbarContainer: this.toolbarContainer,
+    });
+  }
+
+  private get _quickTools() {
+    return getQuickTools({ edgeless: this.edgeless });
+  }
+
+  // calculate all the width manually
+  private get _availableWidth() {
+    return this.containerWidth - 2 * SAFE_AREA_WIDTH;
+  }
+
+  private get _quickToolsWidthTotal() {
+    return (
+      this._quickTools.length * (QUICK_TOOL_SIZE + QUICK_TOOLS_GAP) -
+      QUICK_TOOLS_GAP
+    );
+  }
+
+  private get _seniorToolsWidthTotal() {
+    return (
+      this._seniorTools.length * (SENIOR_TOOL_WIDTH + SENIOR_TOOLS_GAP) -
+      SENIOR_TOOLS_GAP
+    );
+  }
+
+  private get _spaceWidthTotal() {
+    return DIVIDER_WIDTH + DIVIDER_SPACE * 2 + TOOLBAR_PADDING_X * 2;
+  }
+
+  private get _denseSeniorTools() {
+    return (
+      this._availableWidth -
+        this._quickToolsWidthTotal -
+        this._spaceWidthTotal <
+      this._seniorToolsWidthTotal
+    );
+  }
+
+  private get _seniorToolNavWidth() {
+    return this._denseSeniorTools
+      ? (SENIOR_TOOL_NAV_SIZE + DIVIDER_SPACE) * 2
+      : 0;
+  }
+
+  private get _denseQuickTools() {
+    return (
+      this._availableWidth -
+        this._seniorToolNavWidth -
+        1 * SENIOR_TOOL_WIDTH -
+        2 * TOOLBAR_PADDING_X <
+      this._quickToolsWidthTotal
+    );
+  }
+
+  private get _visibleQuickToolSize() {
+    if (!this._denseQuickTools) return this._quickTools.length;
+    const availableWidth =
+      this._availableWidth -
+      this._seniorToolNavWidth -
+      this._spaceWidthTotal -
+      SENIOR_TOOL_WIDTH;
+    return Math.max(
+      1,
+      Math.floor(
+        (availableWidth - QUICK_TOOL_MORE_SIZE - DIVIDER_SPACE) /
+          (QUICK_TOOL_SIZE + QUICK_TOOLS_GAP)
+      )
+    );
+  }
+
+  private get _hiddenQuickTools() {
+    return this._quickTools
+      .slice(this._visibleQuickToolSize)
+      .filter(tool => !!tool.menu);
+  }
+
+  get scrollSeniorToolSize() {
+    if (this._denseQuickTools) return 1;
+    const seniorAvailableWidth =
+      this._availableWidth - this._quickToolsWidthTotal - this._spaceWidthTotal;
+    if (seniorAvailableWidth >= this._seniorToolsWidthTotal)
+      return this._seniorTools.length;
+    return (
+      Math.floor(
+        (seniorAvailableWidth - (SENIOR_TOOL_NAV_SIZE + DIVIDER_SPACE) * 2) /
+          SENIOR_TOOL_WIDTH
+      ) || 1
+    );
+  }
+
+  private get _seniorScrollPrevDisabled() {
+    return this.scrollSeniorToolIndex === 0;
+  }
+
+  private get _seniorScrollNextDisabled() {
+    return (
+      this.scrollSeniorToolIndex + this.scrollSeniorToolSize >=
+      this._seniorTools.length
+    );
+  }
+
   static override styles = css`
     :host {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
@@ -198,16 +332,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   `;
 
-  edgeless: EdgelessRootBlockComponent;
-
   private _slotsProvider = new ContextProvider(this, {
     context: edgelessToolbarSlotsContext,
     initialValue: { resize: new Slot() } satisfies EdgelessToolbarSlots,
   });
-
-  get slots() {
-    return this._slotsProvider.value;
-  }
 
   private _themeProvider = new ContextProvider(this, {
     context: edgelessToolbarThemeContext,
@@ -216,76 +344,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _themeObserver = new ThemeObserver();
 
-  constructor(edgeless: EdgelessRootBlockComponent) {
-    super();
-    this.edgeless = edgeless;
-  }
-
-  private get _cachedPresentHideToolbar() {
-    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
-  }
-
-  @query('.edgeless-toolbar-container')
-  accessor toolbarContainer!: HTMLElement;
-
-  @state()
-  accessor containerWidth = 1920;
-
-  @state()
-  accessor presentSettingMenuShow = false;
-
-  @state()
-  accessor presentFrameMenuShow = false;
-
-  @state()
-  accessor scrollSeniorToolIndex = 0;
-
   private _resizeObserver: ResizeObserver | null = null;
-
-  /**
-   * When enabled, the toolbar will auto-hide when the mouse is not over it.
-   */
-  private get _enableAutoHide() {
-    return (
-      this.isPresentMode &&
-      this._cachedPresentHideToolbar &&
-      !this.presentSettingMenuShow &&
-      !this.presentFrameMenuShow
-    );
-  }
-
-  get host() {
-    return this.edgeless.host;
-  }
-
-  @state()
-  accessor edgelessTool: EdgelessTool = {
-    type: localStorage.defaultTool ?? 'default',
-  };
-
-  get isPresentMode() {
-    return this.edgelessTool.type === 'frameNavigator';
-  }
-
-  setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.tools.setEdgelessTool(edgelessTool);
-  };
-
-  private _onSeniorNavPrev() {
-    if (this._seniorScrollPrevDisabled) return;
-    this.scrollSeniorToolIndex = Math.max(
-      0,
-      this.scrollSeniorToolIndex - this.scrollSeniorToolSize
-    );
-  }
-
-  private _onSeniorNavNext() {
-    if (this._seniorScrollNextDisabled) return;
-    this.scrollSeniorToolIndex = Math.min(
-      this._seniorTools.length - this.scrollSeniorToolSize,
-      this.scrollSeniorToolIndex + this.scrollSeniorToolSize
-    );
-  }
 
   private _moreQuickToolsMenu: MenuHandler | null = null;
 
@@ -320,6 +379,49 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   }, 300);
 
+  edgeless: EdgelessRootBlockComponent;
+
+  @query('.edgeless-toolbar-container')
+  accessor toolbarContainer!: HTMLElement;
+
+  @state()
+  accessor containerWidth = 1920;
+
+  @state()
+  accessor presentSettingMenuShow = false;
+
+  @state()
+  accessor presentFrameMenuShow = false;
+
+  @state()
+  accessor scrollSeniorToolIndex = 0;
+
+  @state()
+  accessor edgelessTool: EdgelessTool = {
+    type: localStorage.defaultTool ?? 'default',
+  };
+
+  constructor(edgeless: EdgelessRootBlockComponent) {
+    super();
+    this.edgeless = edgeless;
+  }
+
+  private _onSeniorNavPrev() {
+    if (this._seniorScrollPrevDisabled) return;
+    this.scrollSeniorToolIndex = Math.max(
+      0,
+      this.scrollSeniorToolIndex - this.scrollSeniorToolSize
+    );
+  }
+
+  private _onSeniorNavNext() {
+    if (this._seniorScrollNextDisabled) return;
+    this.scrollSeniorToolIndex = Math.min(
+      this._seniorTools.length - this.scrollSeniorToolSize,
+      this.scrollSeniorToolIndex + this.scrollSeniorToolSize
+    );
+  }
+
   private _openMoreQuickToolsMenu(e: { currentTarget: HTMLElement }) {
     if (!this._hiddenQuickTools.length) return;
 
@@ -339,165 +441,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         items: this._hiddenQuickTools.map(tool => tool.menu!),
       },
     });
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._resizeObserver = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const { width } = entry.contentRect;
-        this._onContainerResize({ w: width });
-      }
-    });
-    this._resizeObserver.observe(this);
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this._themeProvider.setValue(getThemeMode()));
-    this._disposables.add(() => this._themeObserver.dispose());
-    this._disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(tool => {
-        this.edgelessTool = tool;
-      })
-    );
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    if (this._resizeObserver) {
-      this._resizeObserver.disconnect();
-    }
-  }
-
-  override firstUpdated() {
-    const { _disposables, edgeless } = this;
-
-    _disposables.add(
-      edgeless.service.viewport.viewportUpdated.on(() => this.requestUpdate())
-    );
-    _disposables.add(
-      edgeless.slots.readonlyUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-    _disposables.add(
-      edgeless.slots.toolbarLocked.on(disabled => {
-        this.toggleAttribute('disabled', disabled);
-      })
-    );
-    // This state from `editPropsStore` is not reactive,
-    // if the value is updated outside of this component, it will not be reflected.
-    _disposables.add(
-      this.edgeless.service.editPropsStore.slots.itemUpdated.on(({ key }) => {
-        if (key === 'presentHideToolbar') {
-          this.requestUpdate();
-        }
-      })
-    );
-  }
-
-  private get _seniorTools() {
-    return getSeniorTools({
-      edgeless: this.edgeless,
-      toolbarContainer: this.toolbarContainer,
-    });
-  }
-
-  private get _quickTools() {
-    return getQuickTools({ edgeless: this.edgeless });
-  }
-
-  // calculate all the width manually
-  private get _availableWidth() {
-    return this.containerWidth - 2 * SAFE_AREA_WIDTH;
-  }
-
-  private get _quickToolsWidthTotal() {
-    return (
-      this._quickTools.length * (QUICK_TOOL_SIZE + QUICK_TOOLS_GAP) -
-      QUICK_TOOLS_GAP
-    );
-  }
-
-  private get _seniorToolsWidthTotal() {
-    return (
-      this._seniorTools.length * (SENIOR_TOOL_WIDTH + SENIOR_TOOLS_GAP) -
-      SENIOR_TOOLS_GAP
-    );
-  }
-
-  private get _spaceWidthTotal() {
-    return DIVIDER_WIDTH + DIVIDER_SPACE * 2 + TOOLBAR_PADDING_X * 2;
-  }
-
-  private get _denseSeniorTools() {
-    return (
-      this._availableWidth -
-        this._quickToolsWidthTotal -
-        this._spaceWidthTotal <
-      this._seniorToolsWidthTotal
-    );
-  }
-
-  private get _seniorToolNavWidth() {
-    return this._denseSeniorTools
-      ? (SENIOR_TOOL_NAV_SIZE + DIVIDER_SPACE) * 2
-      : 0;
-  }
-
-  private get _denseQuickTools() {
-    return (
-      this._availableWidth -
-        this._seniorToolNavWidth -
-        1 * SENIOR_TOOL_WIDTH -
-        2 * TOOLBAR_PADDING_X <
-      this._quickToolsWidthTotal
-    );
-  }
-
-  private get _visibleQuickToolSize() {
-    if (!this._denseQuickTools) return this._quickTools.length;
-    const availableWidth =
-      this._availableWidth -
-      this._seniorToolNavWidth -
-      this._spaceWidthTotal -
-      SENIOR_TOOL_WIDTH;
-    return Math.max(
-      1,
-      Math.floor(
-        (availableWidth - QUICK_TOOL_MORE_SIZE - DIVIDER_SPACE) /
-          (QUICK_TOOL_SIZE + QUICK_TOOLS_GAP)
-      )
-    );
-  }
-
-  private get _hiddenQuickTools() {
-    return this._quickTools
-      .slice(this._visibleQuickToolSize)
-      .filter(tool => !!tool.menu);
-  }
-
-  get scrollSeniorToolSize() {
-    if (this._denseQuickTools) return 1;
-    const seniorAvailableWidth =
-      this._availableWidth - this._quickToolsWidthTotal - this._spaceWidthTotal;
-    if (seniorAvailableWidth >= this._seniorToolsWidthTotal)
-      return this._seniorTools.length;
-    return (
-      Math.floor(
-        (seniorAvailableWidth - (SENIOR_TOOL_NAV_SIZE + DIVIDER_SPACE) * 2) /
-          SENIOR_TOOL_WIDTH
-      ) || 1
-    );
-  }
-
-  private get _seniorScrollPrevDisabled() {
-    return this.scrollSeniorToolIndex === 0;
-  }
-
-  private get _seniorScrollNextDisabled() {
-    return (
-      this.scrollSeniorToolIndex + this.scrollSeniorToolSize >=
-      this._seniorTools.length
-    );
   }
 
   private _renderContent() {
@@ -554,6 +497,63 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         </icon-button>
       </div>
     `;
+  }
+
+  setEdgelessTool = (edgelessTool: EdgelessTool) => {
+    this.edgeless.tools.setEdgelessTool(edgelessTool);
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const { width } = entry.contentRect;
+        this._onContainerResize({ w: width });
+      }
+    });
+    this._resizeObserver.observe(this);
+    this._themeObserver.observe(document.documentElement);
+    this._themeObserver.on(() => this._themeProvider.setValue(getThemeMode()));
+    this._disposables.add(() => this._themeObserver.dispose());
+    this._disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(tool => {
+        this.edgelessTool = tool;
+      })
+    );
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+    }
+  }
+
+  override firstUpdated() {
+    const { _disposables, edgeless } = this;
+
+    _disposables.add(
+      edgeless.service.viewport.viewportUpdated.on(() => this.requestUpdate())
+    );
+    _disposables.add(
+      edgeless.slots.readonlyUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+    _disposables.add(
+      edgeless.slots.toolbarLocked.on(disabled => {
+        this.toggleAttribute('disabled', disabled);
+      })
+    );
+    // This state from `editPropsStore` is not reactive,
+    // if the value is updated outside of this component, it will not be reflected.
+    _disposables.add(
+      this.edgeless.service.editPropsStore.slots.itemUpdated.on(({ key }) => {
+        if (key === 'presentHideToolbar') {
+          this.requestUpdate();
+        }
+      })
+    );
   }
 
   override render() {

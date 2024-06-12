@@ -11,9 +11,9 @@ import type { BlobSource } from '@blocksuite/sync';
 export class MockServerBlobSource implements BlobSource {
   private readonly _cache = new Map<string, Blob>();
 
-  constructor(readonly name: string) {}
-
   readonly = false;
+
+  constructor(readonly name: string) {}
 
   async get(key: string) {
     if (this._cache.has(key)) {

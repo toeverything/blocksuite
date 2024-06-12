@@ -12,6 +12,26 @@ export class BlockRenderer
   extends WithDisposable(ShadowlessElement)
   implements DetailSlotProps
 {
+  get model() {
+    return this.host?.doc.getBlock(this.rowId)?.model;
+  }
+
+  get service() {
+    return this.host.std.spec.getService('affine:database');
+  }
+
+  get inlineManager() {
+    return this.service.inlineManager;
+  }
+
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
+
   static override styles = css`
     database-datasource-block-renderer {
       padding-bottom: 20px;
@@ -51,8 +71,20 @@ export class BlockRenderer
   @property({ attribute: false })
   accessor host!: EditorHost;
 
-  get model() {
-    return this.host?.doc.getBlock(this.rowId)?.model;
+  protected override render(): unknown {
+    const model = this.model;
+    if (!model) {
+      return;
+    }
+    return html`<rich-text
+        .yText=${model.text}
+        .attributesSchema=${this.attributesSchema}
+        .attributeRenderer=${this.attributeRenderer}
+        .embedChecker=${this.inlineManager.embedChecker}
+        .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
+        class="inline-editor"
+      ></rich-text
+      >${this.renderIcon()} `;
   }
 
   override connectedCallback() {
@@ -89,37 +121,5 @@ export class BlockRenderer
     return html` <div class="database-block-detail-header-icon">
       ${this.view.cellGetValue(this.rowId, iconColumn)}
     </div>`;
-  }
-
-  get service() {
-    return this.host.std.spec.getService('affine:database');
-  }
-
-  get inlineManager() {
-    return this.service.inlineManager;
-  }
-
-  get attributesSchema() {
-    return this.inlineManager.getSchema();
-  }
-
-  get attributeRenderer() {
-    return this.inlineManager.getRenderer();
-  }
-
-  protected override render(): unknown {
-    const model = this.model;
-    if (!model) {
-      return;
-    }
-    return html`<rich-text
-        .yText=${model.text}
-        .attributesSchema=${this.attributesSchema}
-        .attributeRenderer=${this.attributeRenderer}
-        .embedChecker=${this.inlineManager.embedChecker}
-        .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
-        class="inline-editor"
-      ></rich-text
-      >${this.renderIcon()} `;
   }
 }

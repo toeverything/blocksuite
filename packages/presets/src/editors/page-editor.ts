@@ -14,6 +14,10 @@ noop(EditorHost);
 
 @customElement('page-editor')
 export class PageEditor extends WithDisposable(ShadowlessElement) {
+  get host() {
+    return this._host.value as EditorHost;
+  }
+
   static override styles = css`
     page-editor {
       font-family: var(--affine-font-family);
@@ -45,6 +49,8 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private _host: Ref<EditorHost> = createRef<EditorHost>();
+
   @property({ attribute: false })
   accessor doc!: Doc;
 
@@ -53,12 +59,6 @@ export class PageEditor extends WithDisposable(ShadowlessElement) {
 
   @property({ type: Boolean })
   accessor hasViewport = true;
-
-  private _host: Ref<EditorHost> = createRef<EditorHost>();
-
-  get host() {
-    return this._host.value as EditorHost;
-  }
 
   override connectedCallback() {
     super.connectedCallback();

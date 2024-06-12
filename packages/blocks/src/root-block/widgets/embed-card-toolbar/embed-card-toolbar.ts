@@ -65,56 +65,6 @@ export class EmbedCardToolbar extends WidgetElement<
   EmbedToolbarModel,
   EmbedToolbarBlockElement
 > {
-  static override styles = embedCardToolbarStyle;
-
-  @query('.embed-card-toolbar')
-  accessor embedCardToolbarElement!: HTMLElement;
-
-  @query('.embed-card-toolbar-button.card-style')
-  accessor cardStyleButton: HTMLElement | null = null;
-
-  @query('.embed-card-toolbar-button.more-button')
-  accessor moreButton: HTMLElement | null = null;
-
-  @state()
-  accessor hide: boolean = true;
-
-  private _abortController = new AbortController();
-
-  private _resetAbortController = () => {
-    this._abortController.abort();
-    this._abortController = new AbortController();
-  };
-
-  private _show() {
-    this.hide = false;
-    this._abortController.signal.addEventListener(
-      'abort',
-      autoUpdate(this.blockElement, this, () => {
-        computePosition(this.blockElement, this, {
-          placement: 'top-start',
-          middleware: [flip(), offset(8)],
-        })
-          .then(({ x, y }) => {
-            this.style.left = `${x}px`;
-            this.style.top = `${y}px`;
-          })
-          .catch(console.error);
-      })
-    );
-  }
-
-  private _hide() {
-    this._resetAbortController();
-    this.hide = true;
-  }
-
-  private _cardStyleMenuAbortController: AbortController | null = null;
-
-  private _moreMenuAbortController: AbortController | null = null;
-
-  private _embedOptions: EmbedOptions | null = null;
-
   private get _selection() {
     return this.host.selection;
   }
@@ -167,25 +117,6 @@ export class EmbedCardToolbar extends WidgetElement<
     );
   }
 
-  private _canShowCardStylePanel(
-    model: BlockModel
-  ): model is BookmarkBlockModel | EmbedGithubModel | EmbedLinkedDocModel {
-    return (
-      isBookmarkBlock(model) ||
-      isEmbedGithubBlock(model) ||
-      isEmbedLinkedDocBlock(model)
-    );
-  }
-
-  private _copyUrl() {
-    if (!('url' in this.model)) {
-      return;
-    }
-
-    navigator.clipboard.writeText(this.model.url).catch(console.error);
-    toast(this.host as EditorHost, 'Copied link to clipboard');
-  }
-
   private get _pageIcon() {
     if (
       !isEmbedLinkedDocBlock(this.model) &&
@@ -211,6 +142,75 @@ export class EmbedCardToolbar extends WidgetElement<
       | EmbedLinkedDocBlockComponent
       | EmbedSyncedDocBlockComponent;
     return block.docTitle;
+  }
+
+  static override styles = embedCardToolbarStyle;
+
+  private _abortController = new AbortController();
+
+  private _cardStyleMenuAbortController: AbortController | null = null;
+
+  private _moreMenuAbortController: AbortController | null = null;
+
+  private _embedOptions: EmbedOptions | null = null;
+
+  @query('.embed-card-toolbar')
+  accessor embedCardToolbarElement!: HTMLElement;
+
+  @query('.embed-card-toolbar-button.card-style')
+  accessor cardStyleButton: HTMLElement | null = null;
+
+  @query('.embed-card-toolbar-button.more-button')
+  accessor moreButton: HTMLElement | null = null;
+
+  @state()
+  accessor hide: boolean = true;
+
+  private _resetAbortController = () => {
+    this._abortController.abort();
+    this._abortController = new AbortController();
+  };
+
+  private _show() {
+    this.hide = false;
+    this._abortController.signal.addEventListener(
+      'abort',
+      autoUpdate(this.blockElement, this, () => {
+        computePosition(this.blockElement, this, {
+          placement: 'top-start',
+          middleware: [flip(), offset(8)],
+        })
+          .then(({ x, y }) => {
+            this.style.left = `${x}px`;
+            this.style.top = `${y}px`;
+          })
+          .catch(console.error);
+      })
+    );
+  }
+
+  private _hide() {
+    this._resetAbortController();
+    this.hide = true;
+  }
+
+  private _canShowCardStylePanel(
+    model: BlockModel
+  ): model is BookmarkBlockModel | EmbedGithubModel | EmbedLinkedDocModel {
+    return (
+      isBookmarkBlock(model) ||
+      isEmbedGithubBlock(model) ||
+      isEmbedLinkedDocBlock(model)
+    );
+  }
+
+  private _copyUrl() {
+    if (!('url' in this.model)) {
+      return;
+    }
+
+    navigator.clipboard.writeText(this.model.url).catch(console.error);
+    toast(this.host as EditorHost, 'Copied link to clipboard');
   }
 
   private _turnIntoInlineView() {

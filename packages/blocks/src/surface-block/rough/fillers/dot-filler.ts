@@ -11,12 +11,6 @@ export class DotFiller implements PatternFiller {
     this.helper = helper;
   }
 
-  fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
-    o = Object.assign({}, o, { hachureAngle: 0 });
-    const lines = polygonHachureLines(polygonList, o);
-    return this.dotsOnLines(lines, o);
-  }
-
   private dotsOnLines(lines: Line[], o: ResolvedOptions): OpSet {
     const ops: Op[] = [];
     let gap = o.hachureGap;
@@ -46,5 +40,11 @@ export class DotFiller implements PatternFiller {
       }
     }
     return { type: 'fillSketch', ops };
+  }
+
+  fillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet {
+    o = Object.assign({}, o, { hachureAngle: 0 });
+    const lines = polygonHachureLines(polygonList, o);
+    return this.dotsOnLines(lines, o);
   }
 }

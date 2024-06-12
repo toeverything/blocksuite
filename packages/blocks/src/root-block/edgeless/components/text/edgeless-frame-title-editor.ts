@@ -20,15 +20,6 @@ import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
 export class EdgelessFrameTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {
-  @query('rich-text')
-  accessor richText!: RichText;
-
-  @property({ attribute: false })
-  accessor frameModel!: FrameBlockModel;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   get editorHost() {
     return this.edgeless.host;
   }
@@ -50,6 +41,25 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     ]) as FrameBlockComponent | null;
     assertExists(block);
     return block;
+  }
+
+  @query('rich-text')
+  accessor richText!: RichText;
+
+  @property({ attribute: false })
+  accessor frameModel!: FrameBlockModel;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
+
+  private _unmount() {
+    // dispose in advance to avoid execute `this.remove()` twice
+    this.disposables.dispose();
+    this.edgeless.service.selection.set({
+      elements: [],
+      editing: false,
+    });
+    this.remove();
   }
 
   override connectedCallback() {
@@ -104,16 +114,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
         );
       })
       .catch(console.error);
-  }
-
-  private _unmount() {
-    // dispose in advance to avoid execute `this.remove()` twice
-    this.disposables.dispose();
-    this.edgeless.service.selection.set({
-      elements: [],
-      editing: false,
-    });
-    this.remove();
   }
 
   override render() {

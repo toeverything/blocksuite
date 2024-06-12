@@ -41,6 +41,18 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
   SuperClass: T
 ) => {
   abstract class DerivedClass extends WithDisposable(SuperClass) {
+    get setEdgelessTool() {
+      return this.edgeless.tools.setEdgelessTool;
+    }
+
+    get active() {
+      const { type } = this;
+      const activeType = this.edgelessTool.type;
+      return Array.isArray(type)
+        ? type.includes(activeType)
+        : activeType === type;
+    }
+
     @property({ attribute: false })
     accessor edgeless!: EdgelessRootBlockComponent;
 
@@ -55,18 +67,6 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
 
     enableActiveBackground = false;
 
-    get setEdgelessTool() {
-      return this.edgeless.tools.setEdgelessTool;
-    }
-
-    get active() {
-      const { type } = this;
-      const activeType = this.edgelessTool.type;
-      return Array.isArray(type)
-        ? type.includes(activeType)
-        : activeType === type;
-    }
-
     abstract type: EdgelessTool['type'] | EdgelessTool['type'][];
 
     @state()
@@ -74,6 +74,13 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
 
     private _updateActiveEdgelessTool(newTool?: EdgelessTool) {
       this.edgelessTool = newTool ?? this.edgeless.edgelessTool;
+    }
+
+    private _applyActiveStyle() {
+      if (!this.enableActiveBackground) return;
+      this.style.background = this.active
+        ? cssVar('hoverColor')
+        : 'transparent';
     }
 
     // TODO: move to toolbar-tool-with-menu.mixin
@@ -117,13 +124,6 @@ export const EdgelessToolbarToolMixin = <T extends Constructor<LitElement>>(
     override disconnectedCallback() {
       super.disconnectedCallback();
       this.popper?.dispose();
-    }
-
-    private _applyActiveStyle() {
-      if (!this.enableActiveBackground) return;
-      this.style.background = this.active
-        ? cssVar('hoverColor')
-        : 'transparent';
     }
   }
 

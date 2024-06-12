@@ -9,6 +9,21 @@ import type { EmbedHtmlBlockComponent } from '../embed-html-block.js';
 
 @customElement('embed-html-fullscreen-toolbar')
 export class EmbedHtmlFullscreenToolbar extends LitElement {
+  private get autoHideToolbar() {
+    return (
+      this.embedHtml.edgeless?.service.editPropsStore.getItem(
+        'autoHideEmbedHTMLFullScreenToolbar'
+      ) ?? false
+    );
+  }
+
+  private set autoHideToolbar(val: boolean) {
+    this.embedHtml.edgeless?.service.editPropsStore.setItem(
+      'autoHideEmbedHTMLFullScreenToolbar',
+      val
+    );
+  }
+
   static override styles = css`
     :host {
       box-sizing: border-box;
@@ -74,9 +89,6 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor embedHtml!: EmbedHtmlBlockComponent;
-
   @query('.fullscreen-toolbar-container')
   private accessor _fullScreenToolbarContainer!: HTMLElement;
 
@@ -86,35 +98,8 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
   @state()
   private accessor _popperVisible = false;
 
-  private get autoHideToolbar() {
-    return (
-      this.embedHtml.edgeless?.service.editPropsStore.getItem(
-        'autoHideEmbedHTMLFullScreenToolbar'
-      ) ?? false
-    );
-  }
-
-  private set autoHideToolbar(val: boolean) {
-    this.embedHtml.edgeless?.service.editPropsStore.setItem(
-      'autoHideEmbedHTMLFullScreenToolbar',
-      val
-    );
-  }
-
-  copyCode = () => {
-    if (this._copied) return;
-
-    this.embedHtml.std.clipboard
-      .writeToClipboard(items => {
-        items['text/plain'] = this.embedHtml.model.html ?? '';
-        return items;
-      })
-      .then(() => {
-        this._copied = true;
-        setTimeout(() => (this._copied = false), 1500);
-      })
-      .catch(console.error);
-  };
+  @property({ attribute: false })
+  accessor embedHtml!: EmbedHtmlBlockComponent;
 
   private _popSettings = () => {
     this._popperVisible = true;
@@ -152,6 +137,21 @@ export class EmbedHtmlFullscreenToolbar extends LitElement {
       middleware: [flip(), offset({ mainAxis: 4, crossAxis: -40 })],
       container: this.embedHtml.iframeWrapper,
     });
+  };
+
+  copyCode = () => {
+    if (this._copied) return;
+
+    this.embedHtml.std.clipboard
+      .writeToClipboard(items => {
+        items['text/plain'] = this.embedHtml.model.html ?? '';
+        return items;
+      })
+      .then(() => {
+        this._copied = true;
+        setTimeout(() => (this._copied = false), 1500);
+      })
+      .catch(console.error);
   };
 
   override render() {

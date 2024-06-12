@@ -42,12 +42,6 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
     return rootElement;
   }
 
-  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
-
-  slots = {
-    onFilesDropped: new Slot<File[]>(),
-  };
-
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
     onDrop: async ({ files, targetModel, place, point }) => {
@@ -76,8 +70,6 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
       return true;
     },
   };
-
-  fileDropManager!: FileDropManager;
 
   private _dragHandleOption: DragHandleOption = {
     flavour: AttachmentBlockSchema.model.flavour,
@@ -177,6 +169,14 @@ export class AttachmentBlockService extends BlockService<AttachmentBlockModel> {
       return false;
     },
   };
+
+  maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+
+  slots = {
+    onFilesDropped: new Slot<File[]>(),
+  };
+
+  fileDropManager!: FileDropManager;
 
   override mounted(): void {
     super.mounted();

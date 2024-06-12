@@ -97,6 +97,10 @@ export function y2Native(
 export type UnRecord = Record<string, unknown>;
 
 export abstract class BaseReactiveYData<T, Y> {
+  get proxy() {
+    return this._proxy;
+  }
+
   protected abstract readonly _proxy: T;
 
   protected abstract readonly _source: T;
@@ -107,15 +111,9 @@ export abstract class BaseReactiveYData<T, Y> {
 
   protected _skipNext = false;
 
-  protected abstract _getProxy(): T;
   protected readonly _stashed = new Set<string | number>();
 
-  abstract stash(prop: string | number): void;
-  abstract pop(prop: string | number): void;
-
-  get proxy() {
-    return this._proxy;
-  }
+  protected abstract _getProxy(): T;
 
   protected _getOrigin = (
     doc: YDoc
@@ -154,4 +152,7 @@ export abstract class BaseReactiveYData<T, Y> {
 
     this._options.onChange?.(this._proxy);
   };
+
+  abstract stash(prop: string | number): void;
+  abstract pop(prop: string | number): void;
 }

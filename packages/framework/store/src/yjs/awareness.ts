@@ -61,6 +61,36 @@ export class AwarenessStore<
     this.awareness.setLocalStateField('flags', flags);
   }
 
+  private _onAwarenessChange = (diff: {
+    added: number[];
+    removed: number[];
+    updated: number[];
+  }) => {
+    const { added, removed, updated } = diff;
+
+    const states = this.awareness.getStates();
+    added.forEach(id => {
+      this.slots.update.emit({
+        id,
+        type: 'add',
+        state: states.get(id),
+      });
+    });
+    updated.forEach(id => {
+      this.slots.update.emit({
+        id,
+        type: 'update',
+        state: states.get(id),
+      });
+    });
+    removed.forEach(id => {
+      this.slots.update.emit({
+        id,
+        type: 'remove',
+      });
+    });
+  };
+
   setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
     const oldFlags = this.awareness.getLocalState()?.flags ?? {};
     this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
@@ -103,36 +133,6 @@ export class AwarenessStore<
   getStates(): Map<number, RawAwarenessState<Flags>> {
     return this.awareness.getStates();
   }
-
-  private _onAwarenessChange = (diff: {
-    added: number[];
-    removed: number[];
-    updated: number[];
-  }) => {
-    const { added, removed, updated } = diff;
-
-    const states = this.awareness.getStates();
-    added.forEach(id => {
-      this.slots.update.emit({
-        id,
-        type: 'add',
-        state: states.get(id),
-      });
-    });
-    updated.forEach(id => {
-      this.slots.update.emit({
-        id,
-        type: 'update',
-        state: states.get(id),
-      });
-    });
-    removed.forEach(id => {
-      this.slots.update.emit({
-        id,
-        type: 'remove',
-      });
-    });
-  };
 
   destroy() {
     if (this.awareness) {

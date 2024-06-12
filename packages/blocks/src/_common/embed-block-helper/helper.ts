@@ -60,6 +60,12 @@ export function createEmbedBlock<
 export class LinkPreviewer {
   private _endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
 
+  private _getStringFromHTML(html: string) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent;
+  }
+
   setEndpoint = (endpoint: string) => {
     this._endpoint = endpoint;
   };
@@ -117,10 +123,4 @@ export class LinkPreviewer {
       };
     }
   };
-
-  private _getStringFromHTML(html: string) {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.textContent;
-  }
 }

@@ -10,6 +10,10 @@ import { RoughGenerator } from './generator.js';
 import type { Point } from './geometry.js';
 
 export class RoughSVG {
+  get generator(): RoughGenerator {
+    return this.gen;
+  }
+
   private gen: RoughGenerator;
 
   private svg: SVGSVGElement;
@@ -17,6 +21,29 @@ export class RoughSVG {
   constructor(svg: SVGSVGElement, config?: Config) {
     this.svg = svg;
     this.gen = new RoughGenerator(config);
+  }
+
+  private fillSketch(
+    doc: Document,
+    drawing: OpSet,
+    o: ResolvedOptions
+  ): SVGPathElement {
+    let fweight = o.fillWeight;
+    if (fweight < 0) {
+      fweight = o.strokeWidth / 2;
+    }
+    const path = doc.createElementNS(SVGNS, 'path');
+    path.setAttribute('d', this.opsToPath(drawing, o.fixedDecimalPlaceDigits));
+    path.setAttribute('stroke', o.fill || '');
+    path.setAttribute('stroke-width', fweight + '');
+    path.setAttribute('fill', 'none');
+    if (o.fillLineDash) {
+      path.setAttribute('stroke-dasharray', o.fillLineDash.join(' ').trim());
+    }
+    if (o.fillLineDashOffset) {
+      path.setAttribute('stroke-dashoffset', `${o.fillLineDashOffset}`);
+    }
+    return path;
   }
 
   draw(drawable: Drawable): SVGGElement {
@@ -66,33 +93,6 @@ export class RoughSVG {
       }
     }
     return g;
-  }
-
-  private fillSketch(
-    doc: Document,
-    drawing: OpSet,
-    o: ResolvedOptions
-  ): SVGPathElement {
-    let fweight = o.fillWeight;
-    if (fweight < 0) {
-      fweight = o.strokeWidth / 2;
-    }
-    const path = doc.createElementNS(SVGNS, 'path');
-    path.setAttribute('d', this.opsToPath(drawing, o.fixedDecimalPlaceDigits));
-    path.setAttribute('stroke', o.fill || '');
-    path.setAttribute('stroke-width', fweight + '');
-    path.setAttribute('fill', 'none');
-    if (o.fillLineDash) {
-      path.setAttribute('stroke-dasharray', o.fillLineDash.join(' ').trim());
-    }
-    if (o.fillLineDashOffset) {
-      path.setAttribute('stroke-dashoffset', `${o.fillLineDashOffset}`);
-    }
-    return path;
-  }
-
-  get generator(): RoughGenerator {
-    return this.gen;
   }
 
   getDefaultOptions(): ResolvedOptions {

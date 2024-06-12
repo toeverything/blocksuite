@@ -29,13 +29,45 @@ export type DatabaseBlockDataSourceConfig = {
 };
 
 export class DatabaseBlockDataSource extends BaseDataSource {
+  get doc() {
+    return this._model.doc;
+  }
+
+  get rows(): string[] {
+    return this._model.children.map(v => v.id);
+  }
+
+  get properties(): string[] {
+    return this._model.columns.map(column => column.id);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
+    return databaseBlockColumns.map(v => v.model);
+  }
+
+  override get detailSlots(): DetailSlots {
+    return {
+      ...super.detailSlots,
+      header: map(createUniComponentFromWebComponent(BlockRenderer), props => ({
+        ...props,
+        host: this.host,
+      })),
+      note: map(createUniComponentFromWebComponent(NoteRenderer), props => ({
+        ...props,
+        model: this._model,
+        host: this.host,
+      })),
+    };
+  }
+
   private readonly _model: DatabaseBlockModel;
 
   private _batch = 0;
 
-  get doc() {
-    return this._model.doc;
-  }
+  slots = {
+    update: new Slot(),
+  };
 
   constructor(
     private host: EditorHost,
@@ -49,18 +81,6 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     this.setContext(HostContextKey, host);
   }
 
-  get rows(): string[] {
-    return this._model.children.map(v => v.id);
-  }
-
-  get properties(): string[] {
-    return this._model.columns.map(column => column.id);
-  }
-
-  slots = {
-    update: new Slot(),
-  };
-
   private _runCapture() {
     if (this._batch) {
       return;
@@ -70,6 +90,18 @@ export class DatabaseBlockDataSource extends BaseDataSource {
       this.doc.captureSync();
       this._batch = 0;
     });
+  }
+
+  private getModelById(rowId: string): BlockModel | undefined {
+    return this._model.children[this._model.childMap.get(rowId) ?? -1];
+  }
+
+  private newColumnName() {
+    let i = 1;
+    while (this._model.columns.some(column => column.name === `Column ${i}`)) {
+      i++;
+    }
+    return `Column ${i}`;
   }
 
   cellChangeValue(rowId: string, propertyId: string, value: unknown): void {
@@ -127,20 +159,8 @@ export class DatabaseBlockDataSource extends BaseDataSource {
     return super.cellGetExtra(rowId, propertyId);
   }
 
-  private getModelById(rowId: string): BlockModel | undefined {
-    return this._model.children[this._model.childMap.get(rowId) ?? -1];
-  }
-
   override cellGetRenderValue(rowId: string, propertyId: string): unknown {
     return this.cellGetValue(rowId, propertyId);
-  }
-
-  private newColumnName() {
-    let i = 1;
-    while (this._model.columns.some(column => column.name === `Column ${i}`)) {
-      i++;
-    }
-    return `Column ${i}`;
   }
 
   propertyAdd(insertToPosition: InsertToPosition, type?: string): string {
@@ -306,28 +326,8 @@ export class DatabaseBlockDataSource extends BaseDataSource {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
-    return databaseBlockColumns.map(v => v.model);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getPropertyMeta(type: string): ColumnMeta<any, any, any> {
     return databaseBlockAllColumnMap[type];
-  }
-
-  override get detailSlots(): DetailSlots {
-    return {
-      ...super.detailSlots,
-      header: map(createUniComponentFromWebComponent(BlockRenderer), props => ({
-        ...props,
-        host: this.host,
-      })),
-      note: map(createUniComponentFromWebComponent(NoteRenderer), props => ({
-        ...props,
-        model: this._model,
-        host: this.host,
-      })),
-    };
   }
 
   rowMove(rowId: string, position: InsertToPosition): void {

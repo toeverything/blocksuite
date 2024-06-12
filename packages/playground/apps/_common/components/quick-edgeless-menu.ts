@@ -46,6 +46,14 @@ setBasePath(basePath);
 
 @customElement('quick-edgeless-menu')
 export class QuickEdgelessMenu extends ShadowlessElement {
+  get doc() {
+    return this.editor.doc;
+  }
+
+  get rootService() {
+    return this.editor.host.spec.getService('affine:page');
+  }
+
   static override styles = css`
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
@@ -64,6 +72,15 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     }
   `;
 
+  @state()
+  private accessor _canUndo = false;
+
+  @state()
+  private accessor _canRedo = false;
+
+  @state()
+  private accessor _dark = localStorage.getItem('blocksuite:dark') === 'true';
+
   @property({ attribute: false })
   accessor collection!: DocCollection;
 
@@ -79,50 +96,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   @property({ attribute: false })
   accessor chatPanel!: CustomChatPanel;
 
-  @state()
-  private accessor _canUndo = false;
-
-  @state()
-  private accessor _canRedo = false;
-
   @property({ attribute: false })
   accessor mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
   accessor readonly = false;
-
-  @state()
-  private accessor _dark = localStorage.getItem('blocksuite:dark') === 'true';
-
-  get doc() {
-    return this.editor.doc;
-  }
-
-  get rootService() {
-    return this.editor.host.spec.getService('affine:page');
-  }
-
-  override createRenderRoot() {
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    this._setThemeMode(this._dark && matchMedia.matches);
-    matchMedia.addEventListener('change', this._darkModeChange);
-
-    return this;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    document.body.addEventListener('keydown', this._keydown);
-    this._restoreMode();
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    matchMedia.removeEventListener('change', this._darkModeChange);
-    document.body.removeEventListener('keydown', this._keydown);
-  }
 
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'F1') {
@@ -319,6 +297,28 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   private _toggleDocsPanel() {
     this.leftSidePanel.toggle(this.docsPanel);
+  }
+
+  override createRenderRoot() {
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    this._setThemeMode(this._dark && matchMedia.matches);
+    matchMedia.addEventListener('change', this._darkModeChange);
+
+    return this;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    document.body.addEventListener('keydown', this._keydown);
+    this._restoreMode();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    matchMedia.removeEventListener('change', this._darkModeChange);
+    document.body.removeEventListener('keydown', this._keydown);
   }
 
   override firstUpdated() {

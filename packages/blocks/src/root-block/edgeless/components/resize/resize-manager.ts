@@ -32,6 +32,30 @@ type ResizeMoveHandler = (
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
 
 export class HandleResizeManager {
+  get dragDirection() {
+    return this._dragDirection;
+  }
+
+  get dragging() {
+    return this._dragging;
+  }
+
+  get rotation() {
+    return this._rotation;
+  }
+
+  get currentRect() {
+    return this._currentRect;
+  }
+
+  get originalRect() {
+    return this._originalRect;
+  }
+
+  get bounds() {
+    return this._bounds;
+  }
+
   private _onDragStart: DragStartHandler;
 
   private _onResizeMove: ResizeMoveHandler;
@@ -102,70 +126,6 @@ export class HandleResizeManager {
     this._onResizeMove = onResizeMove;
     this._onRotateMove = onRotateMove;
     this._onDragEnd = onDragEnd;
-  }
-
-  get dragDirection() {
-    return this._dragDirection;
-  }
-
-  get dragging() {
-    return this._dragging;
-  }
-
-  get rotation() {
-    return this._rotation;
-  }
-
-  get currentRect() {
-    return this._currentRect;
-  }
-
-  get originalRect() {
-    return this._originalRect;
-  }
-
-  get bounds() {
-    return this._bounds;
-  }
-
-  updateState(
-    resizeMode: ResizeMode,
-    rotate: number,
-    zoom: number,
-    position?: { x: number; y: number },
-    originalRect?: DOMRect,
-    proportion = false
-  ) {
-    this._resizeMode = resizeMode;
-    this._rotate = rotate;
-    this._zoom = zoom;
-    this._proportion = proportion;
-
-    if (position) {
-      this._currentRect.x = position.x;
-      this._currentRect.y = position.y;
-      this._originalRect.x = this._currentRect.x;
-      this._originalRect.y = this._currentRect.y;
-    }
-
-    if (originalRect) {
-      this._originalRect = originalRect;
-      this._aspectRatio = originalRect.width / originalRect.height;
-      this._currentRect = DOMRect.fromRect(originalRect);
-    }
-  }
-
-  updateRectPosition(delta: { x: number; y: number }) {
-    this._currentRect.x += delta.x;
-    this._currentRect.y += delta.y;
-    this._originalRect.x = this._currentRect.x;
-    this._originalRect.y = this._currentRect.y;
-
-    return this._originalRect;
-  }
-
-  updateBounds(bounds: Map<string, SelectableProps>) {
-    this._bounds = bounds;
   }
 
   private _onResize(proportion: boolean) {
@@ -614,6 +574,46 @@ export class HandleResizeManager {
 
     this._dragPos.start = { x, y };
     this._rotate += delta;
+  }
+
+  updateState(
+    resizeMode: ResizeMode,
+    rotate: number,
+    zoom: number,
+    position?: { x: number; y: number },
+    originalRect?: DOMRect,
+    proportion = false
+  ) {
+    this._resizeMode = resizeMode;
+    this._rotate = rotate;
+    this._zoom = zoom;
+    this._proportion = proportion;
+
+    if (position) {
+      this._currentRect.x = position.x;
+      this._currentRect.y = position.y;
+      this._originalRect.x = this._currentRect.x;
+      this._originalRect.y = this._currentRect.y;
+    }
+
+    if (originalRect) {
+      this._originalRect = originalRect;
+      this._aspectRatio = originalRect.width / originalRect.height;
+      this._currentRect = DOMRect.fromRect(originalRect);
+    }
+  }
+
+  updateRectPosition(delta: { x: number; y: number }) {
+    this._currentRect.x += delta.x;
+    this._currentRect.y += delta.y;
+    this._originalRect.x = this._currentRect.x;
+    this._originalRect.y = this._currentRect.y;
+
+    return this._originalRect;
+  }
+
+  updateBounds(bounds: Map<string, SelectableProps>) {
+    this._bounds = bounds;
   }
 
   onPointerDown = (

@@ -20,16 +20,6 @@ export class DataBaseColumnStats extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor view!: DataViewTableManager;
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    this.disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
   protected override render() {
     const cols = this.view.columnManagerList;
 
@@ -46,6 +36,16 @@ export class DataBaseColumnStats extends WithDisposable(LitElement) {
         )}
       </div>
     `;
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this.disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 }
 

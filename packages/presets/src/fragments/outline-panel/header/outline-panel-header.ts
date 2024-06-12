@@ -79,18 +79,6 @@ const styles = css`
 export class OutlinePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor showPreviewIcon!: boolean;
-
-  @property({ attribute: false })
-  accessor enableNotesSorting!: boolean;
-
-  @property({ attribute: false })
-  accessor toggleShowPreviewIcon!: (on: boolean) => void;
-
-  @property({ attribute: false })
-  accessor toggleNotesSorting!: () => void;
-
   @state()
   private accessor _settingPopperShow = false;
 
@@ -103,6 +91,18 @@ export class OutlinePanelHeader extends WithDisposable(LitElement) {
   private _notePreviewSettingMenuPopper: ReturnType<
     typeof createButtonPopper
   > | null = null;
+
+  @property({ attribute: false })
+  accessor showPreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  accessor enableNotesSorting!: boolean;
+
+  @property({ attribute: false })
+  accessor toggleShowPreviewIcon!: (on: boolean) => void;
+
+  @property({ attribute: false })
+  accessor toggleNotesSorting!: () => void;
 
   override firstUpdated() {
     const _disposables = this._disposables;

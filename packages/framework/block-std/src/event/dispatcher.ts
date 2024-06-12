@@ -72,17 +72,17 @@ export type EventScope = {
 };
 
 export class UIEventDispatcher {
-  disposables = new DisposableGroup();
+  get active() {
+    return this._active;
+  }
 
-  /**
-   * @deprecated
-   *
-   * This property is deprecated and will be removed in the future.
-   */
-  slots = {
-    parentScaleChanged: new Slot<number>(),
-    editorHostPanned: new Slot(),
-  };
+  get host() {
+    return this.std.host;
+  }
+
+  private get _currentSelections() {
+    return this.std.selection.value;
+  }
 
   private _handlersMap = Object.fromEntries(
     eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
@@ -98,72 +98,23 @@ export class UIEventDispatcher {
 
   private _active = false;
 
-  get active() {
-    return this._active;
-  }
+  disposables = new DisposableGroup();
+
+  /**
+   * @deprecated
+   *
+   * This property is deprecated and will be removed in the future.
+   */
+  slots = {
+    parentScaleChanged: new Slot<number>(),
+    editorHostPanned: new Slot(),
+  };
 
   constructor(public std: BlockSuite.Std) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
-  }
-
-  mount() {
-    if (this.disposables.disposed) {
-      this.disposables = new DisposableGroup();
-    }
-    this._bindEvents();
-  }
-
-  unmount() {
-    this.disposables.dispose();
-  }
-
-  get host() {
-    return this.std.host;
-  }
-
-  run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
-    if (!this.active) return;
-
-    const sourceState = context.get('sourceState');
-    if (!scope) {
-      scope = this._getEventScope(name, sourceState);
-      if (!scope) {
-        return;
-      }
-    }
-    for (const runner of scope.runners) {
-      const { fn } = runner;
-      const result = fn(context);
-      if (result) {
-        return;
-      }
-    }
-  }
-
-  add(name: EventName, handler: UIEventHandler, options?: EventOptions) {
-    const runner: EventHandlerRunner = {
-      fn: handler,
-      flavour: options?.flavour,
-      path: options?.path,
-    };
-    this._handlersMap[name].unshift(runner);
-    return () => {
-      if (this._handlersMap[name].includes(runner)) {
-        this._handlersMap[name] = this._handlersMap[name].filter(
-          x => x !== runner
-        );
-      }
-    };
-  }
-
-  bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
-    this._keyboardControl.bindHotkey(...args);
-
-  private get _currentSelections() {
-    return this.std.selection.value;
   }
 
   private _getEventScope(name: EventName, state: EventSourceState) {
@@ -190,35 +141,6 @@ export class UIEventDispatcher {
     }
 
     return output;
-  }
-
-  buildEventScope(
-    name: EventName,
-    flavours: string[],
-    paths: string[][]
-  ): EventScope | undefined {
-    const handlers = this._handlersMap[name];
-    if (!handlers) return;
-
-    const globalEvents = handlers.filter(
-      handler => handler.flavour === undefined && handler.path === undefined
-    );
-
-    const pathEvents = handlers.filter(handler => {
-      const _path = handler.path;
-      if (_path === undefined) return false;
-      return paths.some(path => PathFinder.includes(path, _path));
-    });
-
-    const flavourEvents = handlers.filter(
-      handler => handler.flavour && flavours.includes(handler.flavour)
-    );
-
-    return {
-      runners: pathEvents.concat(flavourEvents).concat(globalEvents),
-      flavours,
-      paths,
-    };
   }
 
   private _buildEventScopeByTarget(name: EventName, target: Node) {
@@ -345,5 +267,83 @@ export class UIEventDispatcher {
         this._active = false;
       }
     });
+  }
+
+  mount() {
+    if (this.disposables.disposed) {
+      this.disposables = new DisposableGroup();
+    }
+    this._bindEvents();
+  }
+
+  unmount() {
+    this.disposables.dispose();
+  }
+
+  run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
+    if (!this.active) return;
+
+    const sourceState = context.get('sourceState');
+    if (!scope) {
+      scope = this._getEventScope(name, sourceState);
+      if (!scope) {
+        return;
+      }
+    }
+    for (const runner of scope.runners) {
+      const { fn } = runner;
+      const result = fn(context);
+      if (result) {
+        return;
+      }
+    }
+  }
+
+  add(name: EventName, handler: UIEventHandler, options?: EventOptions) {
+    const runner: EventHandlerRunner = {
+      fn: handler,
+      flavour: options?.flavour,
+      path: options?.path,
+    };
+    this._handlersMap[name].unshift(runner);
+    return () => {
+      if (this._handlersMap[name].includes(runner)) {
+        this._handlersMap[name] = this._handlersMap[name].filter(
+          x => x !== runner
+        );
+      }
+    };
+  }
+
+  bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
+    this._keyboardControl.bindHotkey(...args);
+
+  buildEventScope(
+    name: EventName,
+    flavours: string[],
+    paths: string[][]
+  ): EventScope | undefined {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    const globalEvents = handlers.filter(
+      handler => handler.flavour === undefined && handler.path === undefined
+    );
+
+    const pathEvents = handlers.filter(handler => {
+      const _path = handler.path;
+      if (_path === undefined) return false;
+      return paths.some(path => PathFinder.includes(path, _path));
+    });
+
+    const flavourEvents = handlers.filter(
+      handler => handler.flavour && flavours.includes(handler.flavour)
+    );
+
+    return {
+      runners: pathEvents.concat(flavourEvents).concat(globalEvents),
+      flavours,
+      paths,
+    };
   }
 }

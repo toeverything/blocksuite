@@ -44,6 +44,16 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
     }
   `;
 
+  @state()
+  private accessor _moreMenuOpen = false;
+
+  @query('.code-toolbar-button.more-button')
+  private accessor _moreButton!: HTMLElement;
+
+  private _popMenuAbortController: AbortController | null = null;
+
+  private _currentOpenMenu: AbortController | null = null;
+
   @property({ attribute: false })
   accessor blockElement!: CodeBlockComponent;
 
@@ -55,23 +65,6 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor onActiveStatusChange: (active: boolean) => void = noop;
-
-  @state()
-  private accessor _moreMenuOpen = false;
-
-  @query('.code-toolbar-button.more-button')
-  private accessor _moreButton!: HTMLElement;
-
-  private _popMenuAbortController: AbortController | null = null;
-
-  private _currentOpenMenu: AbortController | null = null;
-
-  closeCurrentMenu = () => {
-    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
-      this._currentOpenMenu.abort();
-      this._currentOpenMenu = null;
-    }
-  };
 
   private _toggleMoreMenu() {
     if (
@@ -117,6 +110,13 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
     });
     this._moreMenuOpen = true;
   }
+
+  closeCurrentMenu = () => {
+    if (this._currentOpenMenu && !this._currentOpenMenu.signal.aborted) {
+      this._currentOpenMenu.abort();
+      this._currentOpenMenu = null;
+    }
+  };
 
   override disconnectedCallback() {
     super.disconnectedCallback();

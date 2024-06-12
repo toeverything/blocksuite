@@ -31,6 +31,30 @@ export class EdgelessCopilotWidget extends WidgetElement<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
+  get visible() {
+    return !!(
+      this._visible &&
+      this._selectionRect.width &&
+      this._selectionRect.height
+    );
+  }
+
+  get selectionRect() {
+    return this._selectionRect;
+  }
+
+  get selectionModelRect() {
+    return this._selectionModelRect;
+  }
+
+  get edgeless() {
+    return this.blockElement;
+  }
+
+  set visible(visible: boolean) {
+    this._visible = visible;
+  }
+
   static override styles = css`
     .copilot-selection-rect {
       position: absolute;
@@ -51,9 +75,6 @@ export class EdgelessCopilotWidget extends WidgetElement<
   @state()
   private accessor _visible = false;
 
-  @query('.copilot-selection-rect')
-  accessor selectionElem!: HTMLDivElement;
-
   private _selectionModelRect!: DOMRect;
 
   private _clickOutsideOff: (() => void) | null = null;
@@ -62,59 +83,10 @@ export class EdgelessCopilotWidget extends WidgetElement<
 
   private _copilotPanel!: EdgelessCopilotPanel | null;
 
+  @query('.copilot-selection-rect')
+  accessor selectionElem!: HTMLDivElement;
+
   groups: AIItemGroupConfig[] = [];
-
-  get visible() {
-    return !!(
-      this._visible &&
-      this._selectionRect.width &&
-      this._selectionRect.height
-    );
-  }
-
-  get selectionRect() {
-    return this._selectionRect;
-  }
-
-  get selectionModelRect() {
-    return this._selectionModelRect;
-  }
-
-  determineInsertionBounds(width = 800, height = 95) {
-    const elements = this.edgeless.service.selection.selectedElements;
-    const offsetY = 20 / this.edgeless.service.viewport.zoom;
-    const bounds = new Bound(0, 0, width, height);
-    if (elements.length) {
-      const { x, y, h } = getElementsBound(
-        elements.map(ele => ele.elementBound)
-      );
-      bounds.x = x;
-      bounds.y = y + h + offsetY;
-    } else {
-      const { x, y, height: h } = this.selectionModelRect;
-      bounds.x = x;
-      bounds.y = y + h + offsetY;
-    }
-    return bounds;
-  }
-
-  get edgeless() {
-    return this.blockElement;
-  }
-
-  set visible(visible: boolean) {
-    this._visible = visible;
-  }
-
-  hideCopilotPanel() {
-    this._copilotPanel?.hide();
-    this._copilotPanel = null;
-    this._clickOutsideOff = null;
-  }
-
-  lockToolbar(disabled: boolean) {
-    this.edgeless.slots.toolbarLocked.emit(disabled);
-  }
 
   private _updateSelection(rect: DOMRect) {
     this._selectionModelRect = rect;
@@ -225,6 +197,34 @@ export class EdgelessCopilotWidget extends WidgetElement<
           });
       });
     }, this);
+  }
+
+  determineInsertionBounds(width = 800, height = 95) {
+    const elements = this.edgeless.service.selection.selectedElements;
+    const offsetY = 20 / this.edgeless.service.viewport.zoom;
+    const bounds = new Bound(0, 0, width, height);
+    if (elements.length) {
+      const { x, y, h } = getElementsBound(
+        elements.map(ele => ele.elementBound)
+      );
+      bounds.x = x;
+      bounds.y = y + h + offsetY;
+    } else {
+      const { x, y, height: h } = this.selectionModelRect;
+      bounds.x = x;
+      bounds.y = y + h + offsetY;
+    }
+    return bounds;
+  }
+
+  hideCopilotPanel() {
+    this._copilotPanel?.hide();
+    this._copilotPanel = null;
+    this._clickOutsideOff = null;
+  }
+
+  lockToolbar(disabled: boolean) {
+    this.edgeless.slots.toolbarLocked.emit(disabled);
   }
 
   override connectedCallback(): void {

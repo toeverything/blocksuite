@@ -55,36 +55,25 @@ const styles = css`
 export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  accessor column!: DataViewTableColumnManager;
-
   @state()
   private accessor operation: StatCalcOp | null = null;
 
   @state()
   private accessor result: StatOpResult | null = null;
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this.operation = getStatCalcOperationFromType(this.column.statCalcOp);
-    this.calculate();
+  @property({ attribute: false })
+  accessor column!: DataViewTableColumnManager;
 
-    this.disposables.addFromEvent(this, 'click', this.openMenu);
+  private getResultString() {
+    if (!this.result || !isFinite(this.result.value)) return '';
+    const { displayFormat: df, value } = this.result;
 
-    const view = this.column.dataViewManager;
-    this.disposables.add(
-      view.slots.update.on(() => {
-        this.calculate();
-      })
-    );
-
-    view.rows.forEach(rowId => {
-      this._disposables.add(
-        this.column.onCellUpdate(rowId, () => {
-          this.calculate();
-        })
-      );
-    });
+    switch (df) {
+      case '%':
+        return `${(value * 100).toFixed(3)}%`;
+      case 'x10':
+        return `${value}`;
+    }
   }
 
   protected override render() {
@@ -107,16 +96,27 @@ export class DatabaseColumnStatsCell extends WithDisposable(LitElement) {
     </div>`;
   }
 
-  private getResultString() {
-    if (!this.result || !isFinite(this.result.value)) return '';
-    const { displayFormat: df, value } = this.result;
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.operation = getStatCalcOperationFromType(this.column.statCalcOp);
+    this.calculate();
 
-    switch (df) {
-      case '%':
-        return `${(value * 100).toFixed(3)}%`;
-      case 'x10':
-        return `${value}`;
-    }
+    this.disposables.addFromEvent(this, 'click', this.openMenu);
+
+    const view = this.column.dataViewManager;
+    this.disposables.add(
+      view.slots.update.on(() => {
+        this.calculate();
+      })
+    );
+
+    view.rows.forEach(rowId => {
+      this._disposables.add(
+        this.column.onCellUpdate(rowId, () => {
+          this.calculate();
+        })
+      );
+    });
   }
 
   openMenu = (ev: MouseEvent) => {

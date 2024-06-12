@@ -112,16 +112,6 @@ export type ConnectorElementProps = IBaseProps & {
 } & ConnectorLabelProps;
 
 export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementProps> {
-  static override propsToY(props: ConnectorElementProps) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text);
-    }
-
-    return props;
-  }
-
-  updatingPath = false;
-
   get type() {
     return 'connector';
   }
@@ -130,6 +120,20 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
   override get connectable() {
     return false as const;
   }
+
+  get connected() {
+    return !!(this.source.id || this.target.id);
+  }
+
+  override get elementBound() {
+    let bounds = super.elementBound;
+    if (this.hasLabel()) {
+      bounds = bounds.unite(Bound.fromXYWH(this.labelXYWH!));
+    }
+    return bounds;
+  }
+
+  updatingPath = false;
 
   @derive((path: PointLocation[], instance: ConnectorElementModel) => {
     const { x, y } = instance;
@@ -326,10 +330,6 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     }
   }
 
-  get connected() {
-    return !!(this.source.id || this.target.id);
-  }
-
   hasLabel() {
     return Boolean(!this.lableEditing && this.labelDisplay && this.labelXYWH);
   }
@@ -338,14 +338,6 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
     return (
       this.hasLabel() && Bound.fromXYWH(this.labelXYWH!).isPointInBound(point)
     );
-  }
-
-  override get elementBound() {
-    let bounds = super.elementBound;
-    if (this.hasLabel()) {
-      bounds = bounds.unite(Bound.fromXYWH(this.labelXYWH!));
-    }
-    return bounds;
   }
 
   override hitTest(
@@ -514,6 +506,14 @@ export class ConnectorElementModel extends SurfaceElementModel<ConnectorElementP
 
     const b = getBezierParameters(path);
     return getBezierNearestTime(b, point);
+  }
+
+  static override propsToY(props: ConnectorElementProps) {
+    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
+      props.text = new DocCollection.Y.Text(props.text);
+    }
+
+    return props;
   }
 }
 

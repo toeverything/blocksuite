@@ -14,6 +14,28 @@ import type { DataViewTableColumnManager } from '../table-view-manager.js';
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
+  private get selectionView() {
+    return this.closest('affine-database-table')?.selectionController;
+  }
+
+  private get groupKey() {
+    return this.closest('affine-data-view-table-group')?.group?.key;
+  }
+
+  private get readonly() {
+    return this.column.readonly;
+  }
+
+  get table() {
+    const table = this.closest('affine-database-table');
+    assertExists(table);
+    return table;
+  }
+
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
   static override styles = css`
     affine-database-cell-container {
       display: flex;
@@ -32,6 +54,8 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       padding: 8px;
     }
   `;
+
+  private _cell = createRef<DataViewCellLifeCycle>();
 
   @state()
   accessor isEditing = false;
@@ -54,14 +78,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor column!: DataViewTableColumnManager;
 
-  private get selectionView() {
-    return this.closest('affine-database-table')?.selectionController;
-  }
-
-  private get groupKey() {
-    return this.closest('affine-data-view-table-group')?.group?.key;
-  }
-
   selectCurrentCell = (editing: boolean) => {
     if (this.selectionView) {
       this.selectionView.selection = {
@@ -74,22 +90,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       };
     }
   };
-
-  private get readonly() {
-    return this.column.readonly;
-  }
-
-  get table() {
-    const table = this.closest('affine-database-table');
-    assertExists(table);
-    return table;
-  }
-
-  private _cell = createRef<DataViewCellLifeCycle>();
-
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
 
   override connectedCallback() {
     super.connectedCallback();

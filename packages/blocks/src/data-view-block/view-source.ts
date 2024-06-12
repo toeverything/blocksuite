@@ -12,22 +12,9 @@ import type { DataViewBlockModel } from './data-view-model.js';
 import { blockQueryViewMap, blockQueryViews } from './views/index.js';
 
 export class BlockQueryViewSource implements ViewSource {
-  constructor(private model: DataViewBlockModel) {}
-
   get currentViewId(): string {
     return this.currentId ?? this.model.views[0].id;
   }
-
-  private viewMap = new Map<string, SingleViewSource>();
-
-  private currentId?: string;
-
-  selectView(id: string): void {
-    this.currentId = id;
-    this.updateSlot.emit();
-  }
-
-  updateSlot = new Slot();
 
   get views(): SingleViewSource[] {
     return this.model.views.map(v => this.viewGet(v.id));
@@ -40,6 +27,16 @@ export class BlockQueryViewSource implements ViewSource {
   get readonly(): boolean {
     return this.model.doc.readonly;
   }
+
+  get allViewMeta(): ViewMeta[] {
+    return blockQueryViews;
+  }
+
+  private viewMap = new Map<string, SingleViewSource>();
+
+  private currentId?: string;
+
+  updateSlot = new Slot();
 
   viewInit: Record<
     (typeof blockQueryViews)[number]['type'],
@@ -76,6 +73,13 @@ export class BlockQueryViewSource implements ViewSource {
       };
     },
   };
+
+  constructor(private model: DataViewBlockModel) {}
+
+  selectView(id: string): void {
+    this.currentId = id;
+    this.updateSlot.emit();
+  }
 
   viewAdd(viewType: DataViewTypes): string {
     this.model.doc.captureSync();
@@ -147,10 +151,6 @@ export class BlockQueryViewSource implements ViewSource {
 
   moveTo(id: string, position: InsertToPosition): void {
     this.model.moveViewTo(id, position);
-  }
-
-  get allViewMeta(): ViewMeta[] {
-    return blockQueryViews;
   }
 
   getViewMeta(type: string): ViewMeta {

@@ -8,13 +8,13 @@ import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class FrameToolController extends EdgelessToolController<FrameTool> {
-  readonly tool = {
-    type: 'frame',
-  } as FrameTool;
-
   private _startPoint: IVec | null = null;
 
   private _frame: FrameBlockModel | null = null;
+
+  readonly tool = {
+    type: 'frame',
+  } as FrameTool;
 
   private _toModelCoord(p: IPoint): IVec {
     return this._service.viewport.toModelCoord(p.x, p.y);

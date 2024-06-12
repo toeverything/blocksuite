@@ -20,8 +20,6 @@ import { NOTE_MENU_ITEMS } from './note-menu-config.js';
 
 @customElement('edgeless-note-menu')
 export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
-  override type: EdgelessTool['type'] = 'affine:note';
-
   static override styles = css`
     :host {
       position: absolute;
@@ -53,6 +51,11 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
+  @state()
+  private accessor _imageLoading = false;
+
+  override type: EdgelessTool['type'] = 'affine:note';
+
   @property({ attribute: false })
   accessor childFlavour!: NoteChildrenFlavour;
 
@@ -70,9 +73,6 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
       tip: string;
     }>
   ) => void;
-
-  @state()
-  private accessor _imageLoading = false;
 
   private async _addImages() {
     this._imageLoading = true;

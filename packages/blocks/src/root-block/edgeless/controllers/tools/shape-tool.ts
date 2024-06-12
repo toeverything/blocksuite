@@ -23,11 +23,6 @@ import { ShapeOverlay } from '../../utils/tool-overlay.js';
 import { EdgelessToolController } from './index.js';
 
 export class ShapeToolController extends EdgelessToolController<ShapeTool> {
-  readonly tool = {
-    type: 'shape',
-    shapeType: 'rect',
-  } as ShapeTool;
-
   private _draggingElement: ShapeElementModel | null = null;
 
   private _draggingElementId: string | null = null;
@@ -35,12 +30,17 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   // shape overlay
   private _shapeOverlay: ShapeOverlay | null = null;
 
-  protected override _draggingArea: SelectionArea | null = null;
-
   // For moving selection with space with mouse
   private _moveWithSpaceStartPos: IVec = [0, 0];
 
   private _moveWithSpaceShapePosTemp: SelectionArea | null = null;
+
+  protected override _draggingArea: SelectionArea | null = null;
+
+  readonly tool = {
+    type: 'shape',
+    shapeType: 'rect',
+  } as ShapeTool;
 
   private _addNewShape(
     e: PointerEventState,
@@ -65,6 +65,76 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     });
 
     return id;
+  }
+
+  private _move() {
+    const {
+      _draggingArea,
+      _moveWithSpaceStartPos,
+      _moveWithSpaceShapePosTemp,
+    } = this;
+    assertExists(_draggingArea);
+    assertExists(_moveWithSpaceShapePosTemp);
+
+    const { x: moveCurX, y: moveCurY } = _draggingArea.end;
+
+    const dx = moveCurX - _moveWithSpaceStartPos[0];
+    const dy = moveCurY - _moveWithSpaceStartPos[1];
+
+    const { start, end } = _moveWithSpaceShapePosTemp;
+    _draggingArea.start.x = start.x + dx;
+    _draggingArea.start.y = start.y + dy;
+    _draggingArea.end.x = end.x + dx;
+    _draggingArea.end.y = end.y + dy;
+  }
+
+  private _resize(shift = false) {
+    const { _draggingElementId: id, _draggingArea } = this;
+    assertExists(id);
+    assertExists(_draggingArea);
+
+    const { viewport } = this._service;
+    const { zoom } = viewport;
+    const {
+      start: { x: startX, y: startY },
+      end,
+    } = _draggingArea;
+    let { x: endX, y: endY } = end;
+
+    if (shift) {
+      const w = Math.abs(endX - startX);
+      const h = Math.abs(endY - startY);
+      const m = Math.max(w, h);
+      endX = startX + (endX > startX ? m : -m);
+      endY = startY + (endY > startY ? m : -m);
+    }
+
+    const [x, y] = viewport.toModelCoord(
+      Math.min(startX, endX),
+      Math.min(startY, endY)
+    );
+    const w = Math.abs(startX - endX) / zoom;
+    const h = Math.abs(startY - endY) / zoom;
+
+    const bound = new Bound(x, y, w, h);
+
+    this._service.updateElement(id, {
+      xywh: bound.serialize(),
+    });
+  }
+
+  private _updateOverlayPosition(x: number, y: number) {
+    if (!this._shapeOverlay) return;
+    this._shapeOverlay.x = x;
+    this._shapeOverlay.y = y;
+    this._edgeless.surface.refresh();
+  }
+
+  private _hideOverlay() {
+    if (!this._shapeOverlay) return;
+
+    this._shapeOverlay.globalAlpha = 0;
+    this._edgeless.surface.refresh();
   }
 
   onContainerClick(e: PointerEventState): void {
@@ -197,82 +267,12 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     }
   }
 
-  private _move() {
-    const {
-      _draggingArea,
-      _moveWithSpaceStartPos,
-      _moveWithSpaceShapePosTemp,
-    } = this;
-    assertExists(_draggingArea);
-    assertExists(_moveWithSpaceShapePosTemp);
-
-    const { x: moveCurX, y: moveCurY } = _draggingArea.end;
-
-    const dx = moveCurX - _moveWithSpaceStartPos[0];
-    const dy = moveCurY - _moveWithSpaceStartPos[1];
-
-    const { start, end } = _moveWithSpaceShapePosTemp;
-    _draggingArea.start.x = start.x + dx;
-    _draggingArea.start.y = start.y + dy;
-    _draggingArea.end.x = end.x + dx;
-    _draggingArea.end.y = end.y + dy;
-  }
-
-  private _resize(shift = false) {
-    const { _draggingElementId: id, _draggingArea } = this;
-    assertExists(id);
-    assertExists(_draggingArea);
-
-    const { viewport } = this._service;
-    const { zoom } = viewport;
-    const {
-      start: { x: startX, y: startY },
-      end,
-    } = _draggingArea;
-    let { x: endX, y: endY } = end;
-
-    if (shift) {
-      const w = Math.abs(endX - startX);
-      const h = Math.abs(endY - startY);
-      const m = Math.max(w, h);
-      endX = startX + (endX > startX ? m : -m);
-      endY = startY + (endY > startY ? m : -m);
-    }
-
-    const [x, y] = viewport.toModelCoord(
-      Math.min(startX, endX),
-      Math.min(startY, endY)
-    );
-    const w = Math.abs(startX - endX) / zoom;
-    const h = Math.abs(startY - endY) / zoom;
-
-    const bound = new Bound(x, y, w, h);
-
-    this._service.updateElement(id, {
-      xywh: bound.serialize(),
-    });
-  }
-
-  private _updateOverlayPosition(x: number, y: number) {
-    if (!this._shapeOverlay) return;
-    this._shapeOverlay.x = x;
-    this._shapeOverlay.y = y;
-    this._edgeless.surface.refresh();
-  }
-
   clearOverlay() {
     if (!this._shapeOverlay) return;
 
     this._shapeOverlay.dispose();
     this._edgeless.surface.renderer.removeOverlay(this._shapeOverlay);
     this._shapeOverlay = null;
-    this._edgeless.surface.refresh();
-  }
-
-  private _hideOverlay() {
-    if (!this._shapeOverlay) return;
-
-    this._shapeOverlay.globalAlpha = 0;
     this._edgeless.surface.refresh();
   }
 

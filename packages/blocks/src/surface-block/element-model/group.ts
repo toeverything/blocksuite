@@ -20,22 +20,14 @@ export type SerializedGroupElement = SerializedElement & {
 };
 
 export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> {
-  static override propsToY(props: GroupElementProps) {
-    if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
-      props.title = new DocCollection.Y.Text(props.title);
-    }
+  get rotate() {
+    return 0;
+  }
 
-    if (props.children && !(props.children instanceof DocCollection.Y.Map)) {
-      const children = new DocCollection.Y.Map() as Y.Map<boolean>;
+  set rotate(_: number) {}
 
-      keys(props.children).forEach(key => {
-        children.set(key as string, true);
-      });
-
-      props.children = children;
-    }
-
-    return props;
+  get type() {
+    return 'group';
   }
 
   @observe((_, instance: GroupElementModel, transaction) => {
@@ -52,16 +44,6 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
 
   @local()
   accessor showTitle: boolean = true;
-
-  get rotate() {
-    return 0;
-  }
-
-  set rotate(_: number) {}
-
-  get type() {
-    return 'group';
-  }
 
   override serialize() {
     const result = super.serialize();
@@ -95,6 +77,24 @@ export class GroupElementModel extends SurfaceGroupLikeModel<GroupElementProps> 
   override intersectWithLine(start: IVec2, end: IVec2): PointLocation[] | null {
     const bound = Bound.deserialize(this.xywh);
     return linePolygonIntersects(start, end, bound.points);
+  }
+
+  static override propsToY(props: GroupElementProps) {
+    if (props.title && !(props.title instanceof DocCollection.Y.Text)) {
+      props.title = new DocCollection.Y.Text(props.title);
+    }
+
+    if (props.children && !(props.children instanceof DocCollection.Y.Map)) {
+      const children = new DocCollection.Y.Map() as Y.Map<boolean>;
+
+      keys(props.children).forEach(key => {
+        children.set(key as string, true);
+      });
+
+      props.children = children;
+    }
+
+    return props;
   }
 }
 

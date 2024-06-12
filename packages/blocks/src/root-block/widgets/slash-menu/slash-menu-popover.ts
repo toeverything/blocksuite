@@ -38,7 +38,27 @@ import {
 
 @customElement('affine-slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
+  get host() {
+    return this.context.rootElement.host;
+  }
+
   static override styles = styles;
+
+  @state()
+  private accessor _filteredItems: (SlashMenuActionItem | SlashSubMenu)[] = [];
+
+  @state()
+  private accessor _position: {
+    x: string;
+    y: string;
+    height: number;
+  } | null = null;
+
+  private _itemPathMap = new Map<SlashMenuItem, number[]>();
+
+  private _query = '';
+
+  private _queryState: 'off' | 'on' | 'no_result' = 'off';
 
   @property({ attribute: false })
   accessor context!: SlashMenuContext;
@@ -52,94 +72,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   @query('inner-slash-menu')
   accessor slashMenuElement!: HTMLElement;
 
-  @state()
-  private accessor _filteredItems: (SlashMenuActionItem | SlashSubMenu)[] = [];
-
-  @state()
-  private accessor _position: {
-    x: string;
-    y: string;
-    height: number;
-  } | null = null;
-
   abortController = new AbortController();
-
-  get host() {
-    return this.context.rootElement.host;
-  }
-
-  private _itemPathMap = new Map<SlashMenuItem, number[]>();
-
-  private _query = '';
-
-  private _queryState: 'off' | 'on' | 'no_result' = 'off';
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._initItemPathMap();
-
-    this._disposables.addFromEvent(this, 'mousedown', e => {
-      // Prevent input from losing focus
-      e.preventDefault();
-    });
-
-    const { model } = this.context;
-
-    const inlineEditor = getInlineEditorByModel(this.host, model);
-    assertExists(inlineEditor, 'RichText InlineEditor not found');
-
-    /**
-     * Handle arrow key
-     *
-     * The slash menu will be closed in the following keyboard cases:
-     * - Press the space key
-     * - Press the backspace key and the search string is empty
-     * - Press the escape key
-     * - When the search item is empty, the slash menu will be hidden temporarily,
-     *   and if the following key is not the backspace key, the slash menu will be closed
-     */
-    createKeydownObserver({
-      target: inlineEditor.eventSource,
-      inlineEditor,
-      abortController: this.abortController,
-      interceptor: (event, next) => {
-        const { key, isComposing, code } = event;
-        if (key === this.triggerKey) {
-          // Can not stopPropagation here,
-          // otherwise the rich text will not be able to trigger a new the slash menu
-          return;
-        }
-
-        if (key === 'Process' && !isComposing && code === 'Slash') {
-          // The IME case of above
-          return;
-        }
-
-        if (key !== 'Backspace' && this._queryState === 'no_result') {
-          // if the following key is not the backspace key,
-          // the slash menu will be closed
-          this.abortController.abort();
-          return;
-        }
-
-        if (key === 'ArrowRight' || key === 'ArrowLeft' || key === 'Escape') {
-          return;
-        }
-
-        next();
-      },
-      onUpdateQuery: query => {
-        this._updateFilteredItems(query);
-      },
-      onMove: () => {},
-      onConfirm: () => {},
-    });
-  }
-
-  updatePosition = (position: { x: string; y: string; height: number }) => {
-    this._position = position;
-  };
 
   private _initItemPathMap = () => {
     const traverse = (item: SlashMenuStaticItem, path: number[]) => {
@@ -230,6 +163,73 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   };
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._initItemPathMap();
+
+    this._disposables.addFromEvent(this, 'mousedown', e => {
+      // Prevent input from losing focus
+      e.preventDefault();
+    });
+
+    const { model } = this.context;
+
+    const inlineEditor = getInlineEditorByModel(this.host, model);
+    assertExists(inlineEditor, 'RichText InlineEditor not found');
+
+    /**
+     * Handle arrow key
+     *
+     * The slash menu will be closed in the following keyboard cases:
+     * - Press the space key
+     * - Press the backspace key and the search string is empty
+     * - Press the escape key
+     * - When the search item is empty, the slash menu will be hidden temporarily,
+     *   and if the following key is not the backspace key, the slash menu will be closed
+     */
+    createKeydownObserver({
+      target: inlineEditor.eventSource,
+      inlineEditor,
+      abortController: this.abortController,
+      interceptor: (event, next) => {
+        const { key, isComposing, code } = event;
+        if (key === this.triggerKey) {
+          // Can not stopPropagation here,
+          // otherwise the rich text will not be able to trigger a new the slash menu
+          return;
+        }
+
+        if (key === 'Process' && !isComposing && code === 'Slash') {
+          // The IME case of above
+          return;
+        }
+
+        if (key !== 'Backspace' && this._queryState === 'no_result') {
+          // if the following key is not the backspace key,
+          // the slash menu will be closed
+          this.abortController.abort();
+          return;
+        }
+
+        if (key === 'ArrowRight' || key === 'ArrowLeft' || key === 'Escape') {
+          return;
+        }
+
+        next();
+      },
+      onUpdateQuery: query => {
+        this._updateFilteredItems(query);
+      },
+      onMove: () => {},
+      onConfirm: () => {},
+    });
+  }
+
+  updatePosition = (position: { x: string; y: string; height: number }) => {
+    this._position = position;
+  };
+
   override render() {
     const slashMenuStyles = this._position
       ? {
@@ -263,6 +263,13 @@ export class SlashMenu extends WithDisposable(LitElement) {
 export class InnerSlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
+  @state()
+  private accessor _activeItem!: SlashMenuActionItem | SlashSubMenu;
+
+  private _currentSubMenu: SlashSubMenu | null = null;
+
+  private _subMenuAbortController: AbortController | null = null;
+
   @property({ attribute: false })
   accessor context!: SlashMenuContext;
 
@@ -280,125 +287,6 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor mainMenuStyle: Parameters<typeof styleMap>[0] | null = null;
-
-  @state()
-  private accessor _activeItem!: SlashMenuActionItem | SlashSubMenu;
-
-  private _currentSubMenu: SlashSubMenu | null = null;
-
-  private _subMenuAbortController: AbortController | null = null;
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    // close all sub menus
-    this.abortController?.signal?.addEventListener('abort', () => {
-      this._subMenuAbortController?.abort();
-    });
-    this.addEventListener('wheel', event => {
-      if (this._currentSubMenu) {
-        event.preventDefault();
-      }
-    });
-
-    const inlineEditor = getInlineEditorByModel(
-      this.context.rootElement.host,
-      this.context.model
-    );
-    assertExists(inlineEditor, 'RichText InlineEditor not found');
-
-    inlineEditor.eventSource.addEventListener(
-      'keydown',
-      event => {
-        if (this._currentSubMenu) return;
-
-        const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
-
-        const onlyCmd = (ctrlKey || metaKey) && !altKey && !shiftKey;
-        const onlyShift = shiftKey && !isControlledKeyboardEvent(event);
-        const notControlShift = !(ctrlKey || metaKey || altKey || shiftKey);
-
-        let moveStep = 0;
-        if (
-          (key === 'ArrowUp' && notControlShift) ||
-          (key === 'Tab' && onlyShift) ||
-          (key === 'P' && onlyCmd) ||
-          (key === 'p' && onlyCmd)
-        ) {
-          moveStep = -1;
-        }
-
-        if (
-          (key === 'ArrowDown' && notControlShift) ||
-          (key === 'Tab' && notControlShift) ||
-          (key === 'n' && onlyCmd) ||
-          (key === 'N' && onlyCmd)
-        ) {
-          moveStep = 1;
-        }
-
-        if (moveStep !== 0) {
-          let itemIndex = this.menu.indexOf(this._activeItem);
-          do {
-            itemIndex =
-              (itemIndex + moveStep + this.menu.length) % this.menu.length;
-          } while (isGroupDivider(this.menu[itemIndex]));
-
-          this._activeItem = this.menu[itemIndex] as typeof this._activeItem;
-          this._scrollToItem(this._activeItem);
-
-          event.preventDefault();
-          event.stopPropagation();
-        }
-
-        if (key === 'ArrowRight' && notControlShift) {
-          if (isSubMenuItem(this._activeItem)) {
-            this._openSubMenu(this._activeItem);
-          }
-
-          event.preventDefault();
-          event.stopPropagation();
-        }
-
-        if ((key === 'ArrowLeft' || key === 'Escape') && notControlShift) {
-          this.abortController.abort();
-
-          event.preventDefault();
-          event.stopPropagation();
-        }
-
-        if (key === 'Enter' && notControlShift) {
-          if (isSubMenuItem(this._activeItem)) {
-            this._openSubMenu(this._activeItem);
-          } else if (isActionItem(this._activeItem)) {
-            this.onClickItem(this._activeItem);
-          }
-
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      },
-      {
-        capture: true,
-        signal: this.abortController.signal,
-      }
-    );
-  }
-
-  override disconnectedCallback() {
-    this.abortController.abort();
-  }
-
-  override willUpdate(changedProperties: PropertyValues<this>) {
-    if (changedProperties.has('menu') && this.menu.length !== 0) {
-      const firstItem = getFirstNotDividerItem(this.menu);
-      assertExists(firstItem);
-      this._activeItem = firstItem;
-
-      // this case happen on query updated
-      this._subMenuAbortController?.abort();
-    }
-  }
 
   private _scrollToItem(item: SlashMenuStaticItem) {
     const shadowRoot = this.shadowRoot;
@@ -543,6 +431,118 @@ export class InnerSlashMenu extends WithDisposable(LitElement) {
     else if (isSubMenuItem(item)) return this._renderSubMenuItem(item);
     else throw new Error('Unreachable');
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    // close all sub menus
+    this.abortController?.signal?.addEventListener('abort', () => {
+      this._subMenuAbortController?.abort();
+    });
+    this.addEventListener('wheel', event => {
+      if (this._currentSubMenu) {
+        event.preventDefault();
+      }
+    });
+
+    const inlineEditor = getInlineEditorByModel(
+      this.context.rootElement.host,
+      this.context.model
+    );
+    assertExists(inlineEditor, 'RichText InlineEditor not found');
+
+    inlineEditor.eventSource.addEventListener(
+      'keydown',
+      event => {
+        if (this._currentSubMenu) return;
+
+        const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
+
+        const onlyCmd = (ctrlKey || metaKey) && !altKey && !shiftKey;
+        const onlyShift = shiftKey && !isControlledKeyboardEvent(event);
+        const notControlShift = !(ctrlKey || metaKey || altKey || shiftKey);
+
+        let moveStep = 0;
+        if (
+          (key === 'ArrowUp' && notControlShift) ||
+          (key === 'Tab' && onlyShift) ||
+          (key === 'P' && onlyCmd) ||
+          (key === 'p' && onlyCmd)
+        ) {
+          moveStep = -1;
+        }
+
+        if (
+          (key === 'ArrowDown' && notControlShift) ||
+          (key === 'Tab' && notControlShift) ||
+          (key === 'n' && onlyCmd) ||
+          (key === 'N' && onlyCmd)
+        ) {
+          moveStep = 1;
+        }
+
+        if (moveStep !== 0) {
+          let itemIndex = this.menu.indexOf(this._activeItem);
+          do {
+            itemIndex =
+              (itemIndex + moveStep + this.menu.length) % this.menu.length;
+          } while (isGroupDivider(this.menu[itemIndex]));
+
+          this._activeItem = this.menu[itemIndex] as typeof this._activeItem;
+          this._scrollToItem(this._activeItem);
+
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        if (key === 'ArrowRight' && notControlShift) {
+          if (isSubMenuItem(this._activeItem)) {
+            this._openSubMenu(this._activeItem);
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        if ((key === 'ArrowLeft' || key === 'Escape') && notControlShift) {
+          this.abortController.abort();
+
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        if (key === 'Enter' && notControlShift) {
+          if (isSubMenuItem(this._activeItem)) {
+            this._openSubMenu(this._activeItem);
+          } else if (isActionItem(this._activeItem)) {
+            this.onClickItem(this._activeItem);
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      },
+      {
+        capture: true,
+        signal: this.abortController.signal,
+      }
+    );
+  }
+
+  override disconnectedCallback() {
+    this.abortController.abort();
+  }
+
+  override willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has('menu') && this.menu.length !== 0) {
+      const firstItem = getFirstNotDividerItem(this.menu);
+      assertExists(firstItem);
+      this._activeItem = firstItem;
+
+      // this case happen on query updated
+      this._subMenuAbortController?.abort();
+    }
+  }
 
   override render() {
     if (this.menu.length === 0) return nothing;

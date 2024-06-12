@@ -230,6 +230,34 @@ export class EditPropsStore {
     }
   }
 
+  private _getKey<T extends keyof StorageProps>(key: T) {
+    const id = this._service.doc.id;
+    switch (key) {
+      case 'viewport':
+        return 'blocksuite:' + id + ':edgelessViewport';
+      case 'presentBlackBackground':
+        return 'blocksuite:presentation:blackBackground';
+      case 'presentFillScreen':
+        return 'blocksuite:presentation:fillScreen';
+      case 'presentHideToolbar':
+        return 'blocksuite:presentation:hideToolbar';
+      case 'templateCache':
+        return 'blocksuite:' + id + ':templateTool';
+      case 'remoteColor':
+        return 'blocksuite:remote-color';
+      case 'showBidirectional':
+        return 'blocksuite:' + id + ':showBidirectional';
+      case 'autoHideEmbedHTMLFullScreenToolbar':
+        return 'blocksuite:embedHTML:autoHideFullScreenToolbar';
+      default:
+        return key;
+    }
+  }
+
+  private _getStorage<T extends keyof StorageProps>(key: T) {
+    return isSessionProp(key) ? sessionStorage : localStorage;
+  }
+
   getLastProps<T extends keyof LastProps>(type: T) {
     return this._lastProps[type] as LastProps[T];
   }
@@ -258,30 +286,6 @@ export class EditPropsStore {
     deepAssign(props, lastProps);
   }
 
-  private _getKey<T extends keyof StorageProps>(key: T) {
-    const id = this._service.doc.id;
-    switch (key) {
-      case 'viewport':
-        return 'blocksuite:' + id + ':edgelessViewport';
-      case 'presentBlackBackground':
-        return 'blocksuite:presentation:blackBackground';
-      case 'presentFillScreen':
-        return 'blocksuite:presentation:fillScreen';
-      case 'presentHideToolbar':
-        return 'blocksuite:presentation:hideToolbar';
-      case 'templateCache':
-        return 'blocksuite:' + id + ':templateTool';
-      case 'remoteColor':
-        return 'blocksuite:remote-color';
-      case 'showBidirectional':
-        return 'blocksuite:' + id + ':showBidirectional';
-      case 'autoHideEmbedHTMLFullScreenToolbar':
-        return 'blocksuite:embedHTML:autoHideFullScreenToolbar';
-      default:
-        return key;
-    }
-  }
-
   setItem<T extends keyof StorageProps>(key: T, value: StorageProps[T]) {
     const oldValue = this.getItem(key);
     this._getStorage(key).setItem(this._getKey(key), JSON.stringify(value));
@@ -308,10 +312,6 @@ export class EditPropsStore {
     } catch {
       return null;
     }
-  }
-
-  private _getStorage<T extends keyof StorageProps>(key: T) {
-    return isSessionProp(key) ? sessionStorage : localStorage;
   }
 
   dispose() {

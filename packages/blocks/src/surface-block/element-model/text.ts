@@ -26,12 +26,8 @@ export type TextElementProps = IBaseProps & {
   Partial<Pick<TextStyleProps, 'fontWeight' | 'fontStyle'>>;
 
 export class TextElementModel extends SurfaceElementModel<TextElementProps> {
-  static override propsToY(props: Record<string, unknown>) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text as string);
-    }
-
-    return props;
+  get type() {
+    return 'text';
   }
 
   @yfield()
@@ -64,10 +60,6 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   @yfield(false)
   accessor hasMaxWidth: boolean = false;
 
-  get type() {
-    return 'text';
-  }
-
   override getNearestPoint(point: IVec2): IVec2 {
     return polygonNearestPoint(
       Bound.deserialize(this.xywh).points,
@@ -88,6 +80,14 @@ export class TextElementModel extends SurfaceElementModel<TextElementProps> {
   override hitTest(x: number, y: number): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return pointInPolygon([x, y], points);
+  }
+
+  static override propsToY(props: Record<string, unknown>) {
+    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
+      props.text = new DocCollection.Y.Text(props.text as string);
+    }
+
+    return props;
   }
 }
 

@@ -44,6 +44,13 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
   @query(':scope > .component-overflow-more')
   accessor more!: HTMLDivElement;
 
+  protected override updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    requestAnimationFrame(() => {
+      this.adjustStyle();
+    });
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     const resize = new ResizeObserver(() => {
@@ -52,13 +59,6 @@ export class Overflow extends WithDisposable(ShadowlessElement) {
     resize.observe(this);
     this.disposables.add(() => {
       resize.unobserve(this);
-    });
-  }
-
-  protected override updated(_changedProperties: PropertyValues) {
-    super.updated(_changedProperties);
-    requestAnimationFrame(() => {
-      this.adjustStyle();
     });
   }
 

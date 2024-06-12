@@ -149,12 +149,6 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor surface!: SurfaceBlockComponent;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
-
   @state()
   private accessor _show = false;
 
@@ -168,57 +162,11 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   @state()
   private accessor _index = -1;
 
-  protected override firstUpdated(): void {
-    const { _disposables, edgeless } = this;
+  @property({ attribute: false })
+  accessor surface!: SurfaceBlockComponent;
 
-    _disposables.add(
-      edgeless.service.viewport.viewportUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    _disposables.add(
-      edgeless.service.selection.slots.updated.on(() => {
-        const { selectedElements } = edgeless.service.selection;
-        if (
-          !(selectedElements.length === 1 && isNoteBlock(selectedElements[0]))
-        ) {
-          this._index = -1;
-        }
-      })
-    );
-
-    requestConnectedFrame(() => {
-      this._disposables.add(
-        edgeless.dispatcher.add('click', ctx => {
-          const event = ctx.get('pointerState');
-          const { raw } = event;
-          const target = raw.target as HTMLElement;
-          if (!target) return false;
-          if (target.closest('.edgeless-index-label')) {
-            const ele = target.closest('.edgeless-index-label') as Element;
-            const index = Number(ele.getAttribute('index'));
-            this._index = index === this._index ? -1 : index;
-            return true;
-          } else if (target.closest('.edgeless-auto-connect-next-button')) {
-            this._navigateToNext();
-            return true;
-          } else if (target.closest('.edgeless-auto-connect-previous-button')) {
-            this._navigateToPrev();
-            return true;
-          }
-          return false;
-        })
-      );
-    }, edgeless);
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    this._setHostStyle();
-    this._initLabels();
-  }
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent;
 
   private _setHostStyle() {
     this.style.position = 'absolute';
@@ -543,6 +491,51 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     )}`;
   }
 
+  protected override firstUpdated(): void {
+    const { _disposables, edgeless } = this;
+
+    _disposables.add(
+      edgeless.service.viewport.viewportUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    _disposables.add(
+      edgeless.service.selection.slots.updated.on(() => {
+        const { selectedElements } = edgeless.service.selection;
+        if (
+          !(selectedElements.length === 1 && isNoteBlock(selectedElements[0]))
+        ) {
+          this._index = -1;
+        }
+      })
+    );
+
+    requestConnectedFrame(() => {
+      this._disposables.add(
+        edgeless.dispatcher.add('click', ctx => {
+          const event = ctx.get('pointerState');
+          const { raw } = event;
+          const target = raw.target as HTMLElement;
+          if (!target) return false;
+          if (target.closest('.edgeless-index-label')) {
+            const ele = target.closest('.edgeless-index-label') as Element;
+            const index = Number(ele.getAttribute('index'));
+            this._index = index === this._index ? -1 : index;
+            return true;
+          } else if (target.closest('.edgeless-auto-connect-next-button')) {
+            this._navigateToNext();
+            return true;
+          } else if (target.closest('.edgeless-auto-connect-previous-button')) {
+            this._navigateToPrev();
+            return true;
+          }
+          return false;
+        })
+      );
+    }, edgeless);
+  }
+
   protected override render() {
     if (!this._show) return nothing;
 
@@ -553,6 +546,13 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     ${this._index >= 0 && this._index < elements.length
       ? this._NavigatorComponent(elements)
       : nothing} `;
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this._setHostStyle();
+    this._initLabels();
   }
 }
 

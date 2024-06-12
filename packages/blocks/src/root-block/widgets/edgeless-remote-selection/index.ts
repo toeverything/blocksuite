@@ -25,6 +25,18 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
   RootBlockModel,
   EdgelessRootBlockComponent
 > {
+  get edgeless() {
+    return this.blockElement;
+  }
+
+  get selection() {
+    return this.edgeless.service.selection;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
+  }
+
   static override styles = css`
     :host {
       pointer-events: none;
@@ -81,10 +93,6 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
     }
   `;
 
-  get edgeless() {
-    return this.blockElement;
-  }
-
   @state()
   private accessor _remoteRects: Map<
     number,
@@ -108,15 +116,16 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
     }
   > = new Map();
 
-  get selection() {
-    return this.edgeless.service.selection;
-  }
-
-  get surface() {
-    return this.edgeless.surface;
-  }
-
   private _remoteColorManager: RemoteColorManager | null = null;
+
+  private _updateTransform = requestThrottledConnectFrame(() => {
+    const { translateX, translateY } = this.edgeless.service.viewport;
+
+    this.style.setProperty(
+      'transform',
+      `translate(${translateX}px, ${translateY}px)`
+    );
+  }, this);
 
   private _updateRemoteRects = () => {
     const { selection, blockElement } = this;
@@ -184,15 +193,6 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<
     if (this.isConnected && this.selection.hasRemote(id))
       this._updateRemoteRects();
   };
-
-  private _updateTransform = requestThrottledConnectFrame(() => {
-    const { translateX, translateY } = this.edgeless.service.viewport;
-
-    this.style.setProperty(
-      'transform',
-      `translate(${translateX}px, ${translateY}px)`
-    );
-  }, this);
 
   override connectedCallback() {
     super.connectedCallback();

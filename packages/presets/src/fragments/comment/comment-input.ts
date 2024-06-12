@@ -9,6 +9,10 @@ import type { Comment, CommentManager } from './comment-manager.js';
 
 @customElement('comment-input')
 export class CommentInput extends WithDisposable(ShadowlessElement) {
+  get host() {
+    return this.manager.host;
+  }
+
   static override styles = css`
     .comment-input-container {
       padding: 16px;
@@ -41,18 +45,14 @@ export class CommentInput extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  @query('rich-text')
+  private accessor _editor!: RichText;
+
   @property({ attribute: false })
   accessor manager!: CommentManager;
 
   @property({ attribute: false })
   accessor onSubmit: undefined | ((comment: Comment) => void) = undefined;
-
-  @query('rich-text')
-  private accessor _editor!: RichText;
-
-  get host() {
-    return this.manager.host;
-  }
 
   private _submit = (textSelection: TextSelection) => {
     const deltas = this._editor.inlineEditor?.yTextDeltas;

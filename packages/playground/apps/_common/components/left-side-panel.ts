@@ -18,6 +18,10 @@ export class LeftSidePanel extends ShadowlessElement {
 
   currentContent: HTMLElement | null = null;
 
+  protected override render(): unknown {
+    return html``;
+  }
+
   showContent(ele: HTMLElement) {
     if (this.currentContent) {
       this.currentContent.remove();
@@ -41,10 +45,6 @@ export class LeftSidePanel extends ShadowlessElement {
     } else {
       this.hideContent();
     }
-  }
-
-  protected override render(): unknown {
-    return html``;
   }
 }
 

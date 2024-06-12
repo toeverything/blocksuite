@@ -85,6 +85,14 @@ const DisplayModeMap = {
 
 @customElement('edgeless-change-note-button')
 export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
+  private get doc() {
+    return this.edgeless.doc;
+  }
+
+  private accessor _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
+
+  private accessor _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
+
   @property({ attribute: false })
   accessor notes: NoteBlockModel[] = [];
 
@@ -96,14 +104,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor quickConnectButton!: TemplateResult<1>;
-
-  private accessor _scalePanelRef: Ref<EdgelessMenuButton> = createRef();
-
-  private accessor _cornersPanelRef: Ref<EdgelessMenuButton> = createRef();
-
-  private get doc() {
-    return this.edgeless.doc;
-  }
 
   private _setBackground(color: CssVariableName) {
     this.notes.forEach(note => {

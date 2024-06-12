@@ -58,8 +58,6 @@ function ConnectorModeButtonGroup(
 export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
   LitElement
 ) {
-  override type: EdgelessTool['type'] = 'connector';
-
   static override styles = css`
     :host {
       position: absolute;
@@ -93,6 +91,8 @@ export class EdgelessConnectorMenu extends EdgelessToolbarToolMixin(
       display: inline-block;
     }
   `;
+
+  override type: EdgelessTool['type'] = 'connector';
 
   @property({ attribute: false })
   accessor mode!: ConnectorMode;

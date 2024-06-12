@@ -101,6 +101,14 @@ const styles = css`
 `;
 
 export class OutlinePanelBody extends WithDisposable(LitElement) {
+  get viewportPadding(): [number, number, number, number] {
+    return this.fitPadding
+      ? ([0, 0, 0, 0].map((val, idx) =>
+          Number.isFinite(this.fitPadding[idx]) ? this.fitPadding[idx] : val
+        ) as [number, number, number, number])
+      : [0, 0, 0, 0];
+  }
+
   static override styles = styles;
 
   @state()
@@ -111,6 +119,30 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
   @state()
   private accessor _edgelessOnlyNotes: OutlineNoteItem[] = [];
+
+  /**
+   * store the id of selected notes
+   */
+  @state()
+  private accessor _selected: string[] = [];
+
+  private _docDisposables: DisposableGroup | null = null;
+
+  private _indicatorTranslateY = 0;
+
+  private _changedFlag = false;
+
+  private _oldViewport?: {
+    zoom: number;
+    center: {
+      x: number;
+      y: number;
+    };
+  };
+
+  private _highlightMask: HTMLDivElement | null = null;
+
+  private _highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   @property({ attribute: false })
   accessor doc!: Doc;
@@ -142,12 +174,6 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor setNoticeVisibility!: (visibility: boolean) => void;
 
-  /**
-   * store the id of selected notes
-   */
-  @state()
-  private accessor _selected: string[] = [];
-
   @query('.panel-list')
   accessor panelListElement!: HTMLElement;
 
@@ -160,32 +186,6 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   @property({ attribute: false })
   accessor domHost!: Document | HTMLElement;
 
-  private _docDisposables: DisposableGroup | null = null;
-
-  private _indicatorTranslateY = 0;
-
-  private _changedFlag = false;
-
-  private _oldViewport?: {
-    zoom: number;
-    center: {
-      x: number;
-      y: number;
-    };
-  };
-
-  private _highlightMask: HTMLDivElement | null = null;
-
-  private _highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
-
-  get viewportPadding(): [number, number, number, number] {
-    return this.fitPadding
-      ? ([0, 0, 0, 0].map((val, idx) =>
-          Number.isFinite(this.fitPadding[idx]) ? this.fitPadding[idx] : val
-        ) as [number, number, number, number])
-      : [0, 0, 0, 0];
-  }
-
   private _isEdgelessMode() {
     return this.mode === 'edgeless';
   }
@@ -197,29 +197,6 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       clearTimeout(this._highlightTimeoutId);
       this._highlightTimeoutId = null;
     }
-  }
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-
-    if (!this._changedFlag && this._oldViewport) {
-      const edgeless = this.edgeless;
-
-      if (!edgeless) return;
-
-      edgeless.service.viewport.setViewport(
-        this._oldViewport.zoom,
-        [this._oldViewport.center.x, this._oldViewport.center.y],
-        true
-      );
-    }
-
-    this._clearDocDisposables();
-    this._clearHighlightMask();
   }
 
   private _clearDocDisposables() {
@@ -276,23 +253,6 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
     this._updateNotes();
     this._updateNoticeVisibility();
-  }
-
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('doc') || _changedProperties.has('edgeless')) {
-      this._setDocDisposables();
-    }
-
-    if (
-      _changedProperties.has('mode') &&
-      this.edgeless &&
-      this._isEdgelessMode()
-    ) {
-      this._clearHighlightMask();
-      if (_changedProperties.get('mode') === undefined) return;
-
-      requestAnimationFrame(() => this._zoomToFit());
-    }
   }
 
   private _updateNotes() {
@@ -477,11 +437,6 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     }
 
     this.toggleNotesSorting();
-  }
-
-  override firstUpdated(): void {
-    this.disposables.addFromEvent(this, 'click', this._clickHandler);
-    this.disposables.addFromEvent(this, 'dblclick', this._doubleClickHandler);
   }
 
   private _zoomToFit() {
@@ -728,6 +683,51 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
         Use headings to create a table of contents.
       </div>
     </div>`;
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+
+    if (!this._changedFlag && this._oldViewport) {
+      const edgeless = this.edgeless;
+
+      if (!edgeless) return;
+
+      edgeless.service.viewport.setViewport(
+        this._oldViewport.zoom,
+        [this._oldViewport.center.x, this._oldViewport.center.y],
+        true
+      );
+    }
+
+    this._clearDocDisposables();
+    this._clearHighlightMask();
+  }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('doc') || _changedProperties.has('edgeless')) {
+      this._setDocDisposables();
+    }
+
+    if (
+      _changedProperties.has('mode') &&
+      this.edgeless &&
+      this._isEdgelessMode()
+    ) {
+      this._clearHighlightMask();
+      if (_changedProperties.get('mode') === undefined) return;
+
+      requestAnimationFrame(() => this._zoomToFit());
+    }
+  }
+
+  override firstUpdated(): void {
+    this.disposables.addFromEvent(this, 'click', this._clickHandler);
+    this.disposables.addFromEvent(this, 'dblclick', this._doubleClickHandler);
   }
 
   override render() {

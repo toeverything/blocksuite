@@ -75,16 +75,6 @@ export class TextCellEditing extends BaseCellRenderer<string> {
   @query('input')
   private accessor _inputEle!: HTMLInputElement;
 
-  focusEnd = () => {
-    const end = this._inputEle.value.length;
-    this._inputEle.focus();
-    this._inputEle.setSelectionRange(end, end);
-  };
-
-  override onExitEditMode() {
-    this._setValue();
-  }
-
   private _setValue = (str: string = this._inputEle.value) => {
     this._inputEle.value = `${this.value ?? ''}`;
     this.onChange(str);
@@ -98,6 +88,16 @@ export class TextCellEditing extends BaseCellRenderer<string> {
       });
     }
   };
+
+  focusEnd = () => {
+    const end = this._inputEle.value.length;
+    this._inputEle.focus();
+    this._inputEle.setSelectionRange(end, end);
+  };
+
+  override onExitEditMode() {
+    this._setValue();
+  }
 
   override firstUpdated() {
     this.focusEnd();

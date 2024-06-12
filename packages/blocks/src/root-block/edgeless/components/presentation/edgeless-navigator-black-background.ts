@@ -26,10 +26,10 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
   @state()
   private accessor show = false;
 
+  private _blackBackground = false;
+
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
-
-  private _blackBackground = false;
 
   private _tryLoadBlackBackground() {
     const value = this.edgeless.service.editPropsStore.getItem(

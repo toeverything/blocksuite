@@ -71,6 +71,12 @@ export class Graph {
     );
   }
 
+  private _canSkipBlock(point: IVec) {
+    return this.excludedPoints.some(excludedPoint => {
+      return arrayAlmostEqual(point, excludedPoint);
+    });
+  }
+
   neighbors(curPoint: IVec): IVec[] {
     const [x, y] = curPoint;
     const neighbors = new Set<IVec>();
@@ -135,11 +141,5 @@ export class Graph {
     }
 
     return Array.from(neighbors);
-  }
-
-  private _canSkipBlock(point: IVec) {
-    return this.excludedPoints.some(excludedPoint => {
-      return arrayAlmostEqual(point, excludedPoint);
-    });
   }
 }

@@ -26,81 +26,11 @@ import { styles } from './styles.js';
 
 @customElement('reference-popup')
 export class ReferencePopup extends WithDisposable(LitElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor target!: LitElement;
-
-  @property({ attribute: false })
-  accessor inlineEditor!: AffineInlineEditor;
-
-  @property({ attribute: false })
-  accessor targetInlineRange!: InlineRange;
-
-  @property({ attribute: false })
-  accessor docTitle!: string;
-
-  @property({ attribute: false })
-  accessor abortController!: AbortController;
-
-  @query('.affine-reference-popover-container')
-  accessor popupContainer!: HTMLDivElement;
-
   get referenceDocId() {
     const docId = this.inlineEditor.getFormat(this.targetInlineRange).reference
       ?.pageId;
     assertExists(docId);
     return docId;
-  }
-
-  private _moreMenuAbortController: AbortController | null = null;
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    if (this.targetInlineRange.length === 0) {
-      throw new Error('Cannot toggle reference popup on empty range');
-    }
-
-    const parent = this.blockElement.host.doc.getParent(
-      this.blockElement.model
-    );
-    assertExists(parent);
-
-    this.disposables.add(
-      parent.childrenUpdated.on(() => {
-        const children = parent.children;
-        if (children.includes(this.blockElement.model)) return;
-        this.abortController.abort();
-      })
-    );
-  }
-
-  override updated() {
-    assertExists(this.popupContainer);
-    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
-    assertExists(range);
-
-    const visualElement = {
-      getBoundingClientRect: () => range.getBoundingClientRect(),
-      getClientRects: () => range.getClientRects(),
-    };
-    computePosition(visualElement, this.popupContainer, {
-      middleware: [
-        offset(10),
-        inline(),
-        shift({
-          padding: 6,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        const popupContainer = this.popupContainer;
-        if (!popupContainer) return;
-        popupContainer.style.left = `${x}px`;
-        popupContainer.style.top = `${y}px`;
-      })
-      .catch(console.error);
   }
 
   get blockElement() {
@@ -126,6 +56,28 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   get _isInsideEmbedSyncedDocBlock() {
     return !!this.blockElement.closest('affine-embed-synced-doc-block');
   }
+
+  static override styles = styles;
+
+  private _moreMenuAbortController: AbortController | null = null;
+
+  @property({ attribute: false })
+  accessor target!: LitElement;
+
+  @property({ attribute: false })
+  accessor inlineEditor!: AffineInlineEditor;
+
+  @property({ attribute: false })
+  accessor targetInlineRange!: InlineRange;
+
+  @property({ attribute: false })
+  accessor docTitle!: string;
+
+  @property({ attribute: false })
+  accessor abortController!: AbortController;
+
+  @query('.affine-reference-popover-container')
+  accessor popupContainer!: HTMLDivElement;
 
   private _openDoc() {
     const refDocId = this.referenceDocId;
@@ -216,6 +168,54 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       },
       abortController: this._moreMenuAbortController,
     });
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    if (this.targetInlineRange.length === 0) {
+      throw new Error('Cannot toggle reference popup on empty range');
+    }
+
+    const parent = this.blockElement.host.doc.getParent(
+      this.blockElement.model
+    );
+    assertExists(parent);
+
+    this.disposables.add(
+      parent.childrenUpdated.on(() => {
+        const children = parent.children;
+        if (children.includes(this.blockElement.model)) return;
+        this.abortController.abort();
+      })
+    );
+  }
+
+  override updated() {
+    assertExists(this.popupContainer);
+    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
+    assertExists(range);
+
+    const visualElement = {
+      getBoundingClientRect: () => range.getBoundingClientRect(),
+      getClientRects: () => range.getClientRects(),
+    };
+    computePosition(visualElement, this.popupContainer, {
+      middleware: [
+        offset(10),
+        inline(),
+        shift({
+          padding: 6,
+        }),
+      ],
+    })
+      .then(({ x, y }) => {
+        const popupContainer = this.popupContainer;
+        if (!popupContainer) return;
+        popupContainer.style.left = `${x}px`;
+        popupContainer.style.top = `${y}px`;
+      })
+      .catch(console.error);
   }
 
   override render() {

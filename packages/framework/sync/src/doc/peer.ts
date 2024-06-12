@@ -51,6 +51,22 @@ export interface DocPeerStatus {
  *
  */
 export class SyncPeer {
+  get name() {
+    return this.source.name;
+  }
+
+  private set status(s: DocPeerStatus) {
+    if (!isEqual(s, this._status)) {
+      this.logger.debug(`doc-peer:${this.name} status change`, s);
+      this._status = s;
+      this.onStatusChange.emit(s);
+    }
+  }
+
+  get status() {
+    return this._status;
+  }
+
   private _status: DocPeerStatus = {
     step: DocPeerStep.LoadingRootDoc,
     totalDocs: 1,
@@ -63,9 +79,27 @@ export class SyncPeer {
 
   readonly abort = new AbortController();
 
-  get name() {
-    return this.source.name;
-  }
+  readonly state: {
+    connectedDocs: Map<string, Doc>;
+    pushUpdatesQueue: PriorityAsyncQueue<{
+      id: string;
+      data: Uint8Array[];
+    }>;
+    pushingUpdate: boolean;
+    pullUpdatesQueue: PriorityAsyncQueue<{
+      id: string;
+      data: Uint8Array;
+    }>;
+    subdocLoading: boolean;
+    subdocsLoadQueue: PriorityAsyncQueue<{ id: string; doc: Doc }>;
+  } = {
+    connectedDocs: new Map(),
+    pushUpdatesQueue: new PriorityAsyncQueue([], this.priorityTarget),
+    pushingUpdate: false,
+    pullUpdatesQueue: new PriorityAsyncQueue([], this.priorityTarget),
+    subdocLoading: false,
+    subdocsLoadQueue: new PriorityAsyncQueue([], this.priorityTarget),
+  };
 
   constructor(
     readonly rootDoc: Doc,
@@ -79,18 +113,6 @@ export class SyncPeer {
       // should not reach here
       console.error(err);
     });
-  }
-
-  private set status(s: DocPeerStatus) {
-    if (!isEqual(s, this._status)) {
-      this.logger.debug(`doc-peer:${this.name} status change`, s);
-      this._status = s;
-      this.onStatusChange.emit(s);
-    }
-  }
-
-  get status() {
-    return this._status;
   }
 
   /**
@@ -150,28 +172,6 @@ export class SyncPeer {
       }
     }
   }
-
-  readonly state: {
-    connectedDocs: Map<string, Doc>;
-    pushUpdatesQueue: PriorityAsyncQueue<{
-      id: string;
-      data: Uint8Array[];
-    }>;
-    pushingUpdate: boolean;
-    pullUpdatesQueue: PriorityAsyncQueue<{
-      id: string;
-      data: Uint8Array;
-    }>;
-    subdocLoading: boolean;
-    subdocsLoadQueue: PriorityAsyncQueue<{ id: string; doc: Doc }>;
-  } = {
-    connectedDocs: new Map(),
-    pushUpdatesQueue: new PriorityAsyncQueue([], this.priorityTarget),
-    pushingUpdate: false,
-    pullUpdatesQueue: new PriorityAsyncQueue([], this.priorityTarget),
-    subdocLoading: false,
-    subdocsLoadQueue: new PriorityAsyncQueue([], this.priorityTarget),
-  };
 
   initState() {
     this.state.connectedDocs.clear();

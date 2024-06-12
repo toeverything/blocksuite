@@ -74,33 +74,6 @@ export interface QuickSearchService {
 }
 
 export class RootService extends BlockService<RootBlockModel> {
-  readonly fontLoader = new FontLoader();
-
-  readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
-
-  fileDropManager!: FileDropManager;
-
-  exportManager!: ExportManager;
-
-  // implements provided by affine
-  notificationService: NotificationService | null = null;
-
-  peekViewService: PeekViewService | null = null;
-
-  transformers = {
-    markdown: MarkdownTransformer,
-    html: HtmlTransformer,
-    zip: ZipTransformer,
-  };
-
-  private _fileDropOptions: FileDropOptions = {
-    flavour: this.flavour,
-  };
-
-  private _exportOptions = {
-    imageProxyEndpoint: DEFAULT_IMAGE_PROXY_ENDPOINT,
-  };
-
   get viewportElement() {
     const rootElement = this.std.view.viewFromPath('block', [
       this.std.doc.root?.id ?? '',
@@ -111,85 +84,12 @@ export class RootService extends BlockService<RootBlockModel> {
     return viewportElement;
   }
 
-  accessor quickSearchService: QuickSearchService | null = null;
-
-  accessor getEditorMode: (docId: string) => 'page' | 'edgeless' = docId =>
-    docId.endsWith('edgeless') ? 'edgeless' : 'page';
-
-  private _getDocUpdatedAt: (docId: string) => Date = () => new Date();
-
   get getDocUpdatedAt() {
     return this._getDocUpdatedAt;
   }
 
   set getDocUpdatedAt(value) {
     this._getDocUpdatedAt = value;
-  }
-
-  private _embedBlockRegistry = new Set<EmbedOptions>();
-
-  registerEmbedBlockOptions = (options: EmbedOptions): void => {
-    this._embedBlockRegistry.add(options);
-  };
-
-  getEmbedBlockOptions = (url: string): EmbedOptions | null => {
-    const entries = this._embedBlockRegistry.entries();
-    for (const [options] of entries) {
-      const regex = options.urlRegex;
-      if (regex.test(url)) return options;
-    }
-    return null;
-  };
-
-  override unmounted() {
-    this.editPropsStore.dispose();
-    this.fontLoader.clear();
-  }
-
-  override mounted() {
-    super.mounted();
-
-    this.std.command
-      .add('getBlockIndex', getBlockIndexCommand)
-      .add('getNextBlock', getNextBlockCommand)
-      .add('getPrevBlock', getPrevBlockCommand)
-      .add('getSelectedBlocks', getSelectedBlocksCommand)
-      .add('copySelectedModels', copySelectedModelsCommand)
-      .add('deleteSelectedModels', deleteSelectedModelsCommand)
-      .add('getSelectedModels', getSelectedModelsCommand)
-      .add('getBlockSelections', getBlockSelectionsCommand)
-      .add('getImageSelections', getImageSelectionsCommand)
-      .add('getTextSelection', getTextSelectionCommand)
-      .add('deleteText', deleteTextCommand)
-      .add('formatBlock', formatBlockCommand)
-      .add('formatNative', formatNativeCommand)
-      .add('formatText', formatTextCommand)
-      .add('peekSelectedBlock', peekSelectedBlockCommand)
-      .add('getSelectedPeekableBlocks', getSelectedPeekableBlocksCommand);
-
-    this.loadFonts();
-
-    this.exportManager = new ExportManager(this, this._exportOptions);
-
-    this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
-    this.disposables.addFromEvent(
-      this.host,
-      'dragover',
-      this.fileDropManager.onDragOver
-    );
-
-    this.disposables.addFromEvent(
-      this.host,
-      'dragleave',
-      this.fileDropManager.onDragLeave
-    );
-
-    this.disposables.add(
-      this.std.event.add('pointerDown', ctx => {
-        const state = ctx.get('pointerState');
-        state.raw.stopPropagation();
-      })
-    );
   }
 
   get selectedBlocks() {
@@ -214,9 +114,38 @@ export class RootService extends BlockService<RootBlockModel> {
     return this.selectedBlocks.map(block => block.model);
   }
 
-  loadFonts() {
-    this.fontLoader.load(CommunityCanvasTextFonts);
-  }
+  private _fileDropOptions: FileDropOptions = {
+    flavour: this.flavour,
+  };
+
+  private _exportOptions = {
+    imageProxyEndpoint: DEFAULT_IMAGE_PROXY_ENDPOINT,
+  };
+
+  private _embedBlockRegistry = new Set<EmbedOptions>();
+
+  readonly fontLoader = new FontLoader();
+
+  readonly editPropsStore: EditPropsStore = new EditPropsStore(this);
+
+  fileDropManager!: FileDropManager;
+
+  exportManager!: ExportManager;
+
+  // implements provided by affine
+  notificationService: NotificationService | null = null;
+
+  peekViewService: PeekViewService | null = null;
+
+  transformers = {
+    markdown: MarkdownTransformer,
+    html: HtmlTransformer,
+    zip: ZipTransformer,
+  };
+
+  accessor quickSearchService: QuickSearchService | null = null;
+
+  private _getDocUpdatedAt: (docId: string) => Date = () => new Date();
 
   private _getLastNoteBlock() {
     const { doc } = this;
@@ -235,26 +164,6 @@ export class RootService extends BlockService<RootBlockModel> {
     }
     return note;
   }
-
-  appendParagraph = (text: string = '') => {
-    const { doc } = this;
-    if (!doc.root) return;
-    if (doc.readonly) return;
-    let noteId = this._getLastNoteBlock()?.id;
-    if (!noteId) {
-      noteId = doc.addBlock('affine:note', {}, doc.root.id);
-    }
-    const id = doc.addBlock(
-      'affine:paragraph',
-      { text: new doc.Text(text) },
-      noteId
-    );
-
-    asyncFocusRichText(this.host as EditorHost, id, {
-      index: text.length,
-      length: 0,
-    })?.catch(console.error);
-  };
 
   private _getMode = () => {
     const rootId = this.doc.root?.id;
@@ -375,6 +284,97 @@ export class RootService extends BlockService<RootBlockModel> {
     const props: Record<string, unknown> = { pageId: docId };
 
     this._insertCard(flavour, targetStyle, props);
+  };
+
+  accessor getEditorMode: (docId: string) => 'page' | 'edgeless' = docId =>
+    docId.endsWith('edgeless') ? 'edgeless' : 'page';
+
+  registerEmbedBlockOptions = (options: EmbedOptions): void => {
+    this._embedBlockRegistry.add(options);
+  };
+
+  getEmbedBlockOptions = (url: string): EmbedOptions | null => {
+    const entries = this._embedBlockRegistry.entries();
+    for (const [options] of entries) {
+      const regex = options.urlRegex;
+      if (regex.test(url)) return options;
+    }
+    return null;
+  };
+
+  override unmounted() {
+    this.editPropsStore.dispose();
+    this.fontLoader.clear();
+  }
+
+  override mounted() {
+    super.mounted();
+
+    this.std.command
+      .add('getBlockIndex', getBlockIndexCommand)
+      .add('getNextBlock', getNextBlockCommand)
+      .add('getPrevBlock', getPrevBlockCommand)
+      .add('getSelectedBlocks', getSelectedBlocksCommand)
+      .add('copySelectedModels', copySelectedModelsCommand)
+      .add('deleteSelectedModels', deleteSelectedModelsCommand)
+      .add('getSelectedModels', getSelectedModelsCommand)
+      .add('getBlockSelections', getBlockSelectionsCommand)
+      .add('getImageSelections', getImageSelectionsCommand)
+      .add('getTextSelection', getTextSelectionCommand)
+      .add('deleteText', deleteTextCommand)
+      .add('formatBlock', formatBlockCommand)
+      .add('formatNative', formatNativeCommand)
+      .add('formatText', formatTextCommand)
+      .add('peekSelectedBlock', peekSelectedBlockCommand)
+      .add('getSelectedPeekableBlocks', getSelectedPeekableBlocksCommand);
+
+    this.loadFonts();
+
+    this.exportManager = new ExportManager(this, this._exportOptions);
+
+    this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
+    this.disposables.addFromEvent(
+      this.host,
+      'dragover',
+      this.fileDropManager.onDragOver
+    );
+
+    this.disposables.addFromEvent(
+      this.host,
+      'dragleave',
+      this.fileDropManager.onDragLeave
+    );
+
+    this.disposables.add(
+      this.std.event.add('pointerDown', ctx => {
+        const state = ctx.get('pointerState');
+        state.raw.stopPropagation();
+      })
+    );
+  }
+
+  loadFonts() {
+    this.fontLoader.load(CommunityCanvasTextFonts);
+  }
+
+  appendParagraph = (text: string = '') => {
+    const { doc } = this;
+    if (!doc.root) return;
+    if (doc.readonly) return;
+    let noteId = this._getLastNoteBlock()?.id;
+    if (!noteId) {
+      noteId = doc.addBlock('affine:note', {}, doc.root.id);
+    }
+    const id = doc.addBlock(
+      'affine:paragraph',
+      { text: new doc.Text(text) },
+      noteId
+    );
+
+    asyncFocusRichText(this.host as EditorHost, id, {
+      index: text.length,
+      length: 0,
+    })?.catch(console.error);
   };
 
   insertLinkByQuickSearch = async (

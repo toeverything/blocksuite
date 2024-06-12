@@ -4,6 +4,10 @@ import type { FrameNavigatorTool } from '../../../../_common/utils/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class PresentToolController extends EdgelessToolController<FrameNavigatorTool> {
+  readonly tool = {
+    type: 'frameNavigator',
+  } as FrameNavigatorTool;
+
   override onContainerPointerDown(): void {
     noop();
   }
@@ -59,8 +63,4 @@ export class PresentToolController extends EdgelessToolController<FrameNavigator
   override afterModeSwitch(): void {
     noop();
   }
-
-  readonly tool = {
-    type: 'frameNavigator',
-  } as FrameNavigatorTool;
 }

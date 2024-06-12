@@ -9,8 +9,6 @@ import { createFrame } from './service.js';
 
 @customElement('edgeless-frame-menu')
 export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
-  override type: EdgelessTool['type'] = 'frame';
-
   static override styles = css`
     :host {
       position: absolute;
@@ -68,6 +66,8 @@ export class EdgelessFrameMenu extends EdgelessToolbarToolMixin(LitElement) {
       transform: scaleX(0.5);
     }
   `;
+
+  override type: EdgelessTool['type'] = 'frame';
 
   override render() {
     const { edgeless } = this;

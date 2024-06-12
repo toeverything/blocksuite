@@ -53,94 +53,6 @@ import {
 } from './utils/viewport.js';
 
 export class EdgelessRootService extends RootService {
-  TemplateJob = TemplateJob;
-
-  slots = {
-    edgelessToolUpdated: new Slot<EdgelessTool>(),
-    pressShiftKeyUpdated: new Slot<boolean>(),
-    cursorUpdated: new Slot<string>(),
-    copyAsPng: new Slot<{
-      blocks: BlockSuite.EdgelessBlockModelType[];
-      shapes: BlockSuite.SurfaceModelType[];
-    }>(),
-    readonlyUpdated: new Slot<boolean>(),
-    draggingAreaUpdated: new Slot(),
-    navigatorSettingUpdated: new Slot<{
-      hideToolbar?: boolean;
-      blackBackground?: boolean;
-      fillScreen?: boolean;
-    }>(),
-    navigatorFrameChanged: new Slot<FrameBlockModel>(),
-    fullScreenToggled: new Slot(),
-
-    elementResizeStart: new Slot(),
-    elementResizeEnd: new Slot(),
-    toggleNoteSlicer: new Slot(),
-
-    docLinkClicked: new Slot<{
-      docId: string;
-      blockId?: string;
-    }>(),
-    tagClicked: new Slot<{ tagId: string }>(),
-    editorModeSwitch: new Slot<'edgeless' | 'page'>(),
-
-    toolbarLocked: new Slot<boolean>(),
-  };
-
-  private _surface!: SurfaceBlockModel;
-
-  private _layer!: LayerManager;
-
-  private _frame!: EdgelessFrameManager;
-
-  private _snap!: EdgelessSnapManager;
-
-  private _selection!: EdgelessSelectionManager;
-
-  private _viewport!: Viewport;
-
-  private _tool!: EdgelessToolsManager;
-
-  override mounted() {
-    super.mounted();
-
-    this._surface = this.doc.getBlockByFlavour(
-      'affine:surface'
-    )[0] as SurfaceBlockModel;
-
-    if (!this._surface) {
-      throw new Error('surface block not found');
-    }
-
-    this._layer = LayerManager.create(this.doc, this._surface);
-    this._frame = new EdgelessFrameManager(this);
-    this._snap = new EdgelessSnapManager(this);
-    this._viewport = new Viewport();
-    this._selection = new EdgelessSelectionManager(this);
-    this._tool = EdgelessToolsManager.create(this, []);
-
-    this._initSlotEffects();
-    this._initReadonlyListener();
-  }
-
-  override unmounted() {
-    super.unmounted();
-
-    this.editPropsStore.setItem('viewport', {
-      centerX: this.viewport.centerX,
-      centerY: this.viewport.centerY,
-      zoom: this.viewport.zoom,
-    });
-
-    this._layer.dispose();
-    this._selection.dispose();
-    this.selectionManager.set([]);
-    this.viewport.dispose();
-    this.tool.dispose();
-    this.disposables.dispose();
-    this._frame.dispose();
-  }
-
   get tool() {
     return this._tool;
   }
@@ -211,6 +123,54 @@ export class EdgelessRootService extends RootService {
     return this.std.host as EditorHost;
   }
 
+  private _surface!: SurfaceBlockModel;
+
+  private _layer!: LayerManager;
+
+  private _frame!: EdgelessFrameManager;
+
+  private _snap!: EdgelessSnapManager;
+
+  private _selection!: EdgelessSelectionManager;
+
+  private _viewport!: Viewport;
+
+  private _tool!: EdgelessToolsManager;
+
+  TemplateJob = TemplateJob;
+
+  slots = {
+    edgelessToolUpdated: new Slot<EdgelessTool>(),
+    pressShiftKeyUpdated: new Slot<boolean>(),
+    cursorUpdated: new Slot<string>(),
+    copyAsPng: new Slot<{
+      blocks: BlockSuite.EdgelessBlockModelType[];
+      shapes: BlockSuite.SurfaceModelType[];
+    }>(),
+    readonlyUpdated: new Slot<boolean>(),
+    draggingAreaUpdated: new Slot(),
+    navigatorSettingUpdated: new Slot<{
+      hideToolbar?: boolean;
+      blackBackground?: boolean;
+      fillScreen?: boolean;
+    }>(),
+    navigatorFrameChanged: new Slot<FrameBlockModel>(),
+    fullScreenToggled: new Slot(),
+
+    elementResizeStart: new Slot(),
+    elementResizeEnd: new Slot(),
+    toggleNoteSlicer: new Slot(),
+
+    docLinkClicked: new Slot<{
+      docId: string;
+      blockId?: string;
+    }>(),
+    tagClicked: new Slot<{ tagId: string }>(),
+    editorModeSwitch: new Slot<'edgeless' | 'page'>(),
+
+    toolbarLocked: new Slot<boolean>(),
+  };
+
   private _initSlotEffects() {
     const { disposables, slots } = this;
 
@@ -239,6 +199,46 @@ export class EdgelessRootService extends RootService {
         }
       })
     );
+  }
+
+  override mounted() {
+    super.mounted();
+
+    this._surface = this.doc.getBlockByFlavour(
+      'affine:surface'
+    )[0] as SurfaceBlockModel;
+
+    if (!this._surface) {
+      throw new Error('surface block not found');
+    }
+
+    this._layer = LayerManager.create(this.doc, this._surface);
+    this._frame = new EdgelessFrameManager(this);
+    this._snap = new EdgelessSnapManager(this);
+    this._viewport = new Viewport();
+    this._selection = new EdgelessSelectionManager(this);
+    this._tool = EdgelessToolsManager.create(this, []);
+
+    this._initSlotEffects();
+    this._initReadonlyListener();
+  }
+
+  override unmounted() {
+    super.unmounted();
+
+    this.editPropsStore.setItem('viewport', {
+      centerX: this.viewport.centerX,
+      centerY: this.viewport.centerY,
+      zoom: this.viewport.zoom,
+    });
+
+    this._layer.dispose();
+    this._selection.dispose();
+    this.selectionManager.set([]);
+    this.viewport.dispose();
+    this.tool.dispose();
+    this.disposables.dispose();
+    this._frame.dispose();
   }
 
   generateIndex(type: string) {

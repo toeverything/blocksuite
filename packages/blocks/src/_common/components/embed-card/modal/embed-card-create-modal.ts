@@ -20,6 +20,9 @@ import { embedCardModalStyles } from './styles.js';
 export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
+  @state()
+  private accessor _linkInputValue = '';
+
   @property({ attribute: false })
   accessor host!: EditorHost;
 
@@ -45,22 +48,6 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
 
   @query('input')
   accessor input!: HTMLInputElement;
-
-  @state()
-  private accessor _linkInputValue = '';
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this.updateComplete
-      .then(() => {
-        requestAnimationFrame(() => {
-          this.input.focus();
-        });
-      })
-      .catch(console.error);
-    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
-  }
 
   private _handleInput(e: InputEvent) {
     const target = e.target as HTMLInputElement;
@@ -147,6 +134,19 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   private _onCancel = () => {
     this.remove();
   };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.updateComplete
+      .then(() => {
+        requestAnimationFrame(() => {
+          this.input.focus();
+        });
+      })
+      .catch(console.error);
+    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
+  }
 
   override render() {
     return html`<div class="embed-card-modal">

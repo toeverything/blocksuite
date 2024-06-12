@@ -12,6 +12,21 @@ import type { DatabaseBlockComponent } from '../../database-block.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.topContenteditableElement;
+  }
+
   static override styles = css`
     .affine-database-title {
       position: relative;
@@ -52,6 +67,12 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  @query('rich-text')
+  private accessor richText!: RichText;
+
+  @state()
+  private accessor isActive = false;
+
   @property({ attribute: false })
   accessor titleText!: Text;
 
@@ -64,23 +85,15 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   @state()
   accessor isComposing = false;
 
-  @query('rich-text')
-  private accessor richText!: RichText;
-
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
-  get topContenteditableElement() {
-    const databaseBlock =
-      this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.topContenteditableElement;
-  }
+  private _onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.isComposing) {
+      // prevent insert v-line
+      event.preventDefault();
+      // insert new row
+      this.onPressEnterKey?.();
+      return;
+    }
+  };
 
   override firstUpdated() {
     // for title placeholder
@@ -124,19 +137,6 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     await this.richText?.updateComplete;
     return result;
   }
-
-  private _onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.isComposing) {
-      // prevent insert v-line
-      event.preventDefault();
-      // insert new row
-      this.onPressEnterKey?.();
-      return;
-    }
-  };
-
-  @state()
-  private accessor isActive = false;
 
   override render() {
     const isEmpty =

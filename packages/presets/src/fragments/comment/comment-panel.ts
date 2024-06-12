@@ -58,13 +58,26 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
   @query('.comment-panel-container')
   private accessor _container!: HTMLDivElement;
 
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
   commentManager: CommentManager | null = null;
+
+  private _addComment() {
+    const textSelection = this.host.selection.find('text');
+    if (!textSelection) return;
+
+    const commentInput = new CommentInput();
+    assertExists(this.commentManager);
+    commentInput.manager = this.commentManager;
+    commentInput.onSubmit = () => {
+      this.requestUpdate();
+    };
+    this._container.append(commentInput);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -93,19 +106,6 @@ export class CommentPanel extends WithDisposable(ShadowlessElement) {
         })}
       </div>
     </div>`;
-  }
-
-  private _addComment() {
-    const textSelection = this.host.selection.find('text');
-    if (!textSelection) return;
-
-    const commentInput = new CommentInput();
-    assertExists(this.commentManager);
-    commentInput.manager = this.commentManager;
-    commentInput.onSubmit = () => {
-      this.requestUpdate();
-    };
-    this._container.append(commentInput);
   }
 }
 

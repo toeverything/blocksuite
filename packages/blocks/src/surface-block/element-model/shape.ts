@@ -68,14 +68,6 @@ export const SHAPE_TEXT_PADDING = 20;
 export const SHAPE_TEXT_VERTICAL_PADDING = 10;
 
 export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
-  static override propsToY(props: ShapeProps) {
-    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
-      props.text = new DocCollection.Y.Text(props.text);
-    }
-
-    return props;
-  }
-
   get type() {
     return 'shape';
   }
@@ -186,6 +178,14 @@ export class ShapeElementModel extends SurfaceElementModel<ShapeProps> {
 
   override getRelativePointLocation(point: IVec2): PointLocation {
     return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
+  }
+
+  static override propsToY(props: ShapeProps) {
+    if (props.text && !(props.text instanceof DocCollection.Y.Text)) {
+      props.text = new DocCollection.Y.Text(props.text);
+    }
+
+    return props;
   }
 }
 

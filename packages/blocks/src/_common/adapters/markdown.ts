@@ -56,227 +56,6 @@ type MarkdownToSliceSnapshotPayload = {
 };
 
 export class MarkdownAdapter extends BaseAdapter<Markdown> {
-  async fromDocSnapshot({
-    snapshot,
-    assets,
-  }: FromDocSnapshotPayload): Promise<FromDocSnapshotResult<Markdown>> {
-    let buffer = '';
-    const { file, assetsIds } = await this.fromBlockSnapshot({
-      snapshot: snapshot.blocks,
-      assets,
-    });
-    buffer += file;
-    return {
-      file: buffer,
-      assetsIds,
-    };
-  }
-
-  async fromBlockSnapshot({
-    snapshot,
-    assets,
-  }: FromBlockSnapshotPayload): Promise<FromBlockSnapshotResult<Markdown>> {
-    const root: Root = {
-      type: 'root',
-      children: [],
-    };
-    const { ast, assetsIds } = await this._traverseSnapshot(
-      snapshot,
-      root,
-      assets
-    );
-    return {
-      file: this._astToMarkdown(ast),
-      assetsIds,
-    };
-  }
-
-  async fromSliceSnapshot({
-    snapshot,
-    assets,
-  }: FromSliceSnapshotPayload): Promise<FromSliceSnapshotResult<Markdown>> {
-    let buffer = '';
-    const sliceAssetsIds: string[] = [];
-    for (const contentSlice of snapshot.content) {
-      const root: Root = {
-        type: 'root',
-        children: [],
-      };
-      const { ast, assetsIds } = await this._traverseSnapshot(
-        contentSlice,
-        root,
-        assets
-      );
-      sliceAssetsIds.push(...assetsIds);
-      buffer += this._astToMarkdown(ast);
-    }
-    const markdown =
-      buffer.match(/\n/g)?.length === 1 ? buffer.trimEnd() : buffer;
-    return {
-      file: markdown,
-      assetsIds: sliceAssetsIds,
-    };
-  }
-
-  async toDocSnapshot(
-    payload: ToDocSnapshotPayload<Markdown>
-  ): Promise<DocSnapshot> {
-    const markdownAst = this._markdownToAst(payload.file);
-    const blockSnapshotRoot = {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [],
-    };
-    return {
-      type: 'page',
-      meta: {
-        id: nanoid(),
-        title: 'Untitled',
-        createDate: Date.now(),
-        tags: [],
-      },
-      blocks: {
-        type: 'block',
-        id: nanoid(),
-        flavour: 'affine:page',
-        props: {
-          title: {
-            '$blocksuite:internal:text$': true,
-            delta: [
-              {
-                insert: 'Untitled',
-              },
-            ],
-          },
-        },
-        children: [
-          {
-            type: 'block',
-            id: nanoid(),
-            flavour: 'affine:surface',
-            props: {
-              elements: {},
-            },
-            children: [],
-          },
-          await this._traverseMarkdown(
-            markdownAst,
-            blockSnapshotRoot as BlockSnapshot,
-            payload.assets
-          ),
-        ],
-      },
-    };
-  }
-
-  async toBlockSnapshot(
-    payload: ToBlockSnapshotPayload<Markdown>
-  ): Promise<BlockSnapshot> {
-    const markdownAst = this._markdownToAst(payload.file);
-    const blockSnapshotRoot = {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [],
-    };
-    return this._traverseMarkdown(
-      markdownAst,
-      blockSnapshotRoot as BlockSnapshot,
-      payload.assets
-    );
-  }
-
-  async toSliceSnapshot(
-    payload: MarkdownToSliceSnapshotPayload
-  ): Promise<SliceSnapshot | null> {
-    let codeFence = '';
-    payload.file = payload.file
-      .split('\n')
-      .map(line => {
-        if (line.trimStart().startsWith('-')) {
-          return line;
-        }
-        const trimmedLine = line.trimStart();
-        if (!codeFence && trimmedLine.startsWith('```')) {
-          codeFence = trimmedLine.substring(
-            0,
-            trimmedLine.lastIndexOf('```') + 3
-          );
-          if (codeFence.split('').every(c => c === '`')) {
-            return line;
-          }
-          codeFence = '';
-        }
-        if (!codeFence && trimmedLine.startsWith('~~~')) {
-          codeFence = trimmedLine.substring(
-            0,
-            trimmedLine.lastIndexOf('~~~') + 3
-          );
-          if (codeFence.split('').every(c => c === '~')) {
-            return line;
-          }
-          codeFence = '';
-        }
-        if (
-          !!codeFence &&
-          trimmedLine.startsWith(codeFence) &&
-          trimmedLine.lastIndexOf(codeFence) === 0
-        ) {
-          codeFence = '';
-        }
-        if (codeFence) {
-          return line;
-        }
-        return line.replace(/^ /, '&#x20;');
-      })
-      .join('\n');
-    const markdownAst = this._markdownToAst(payload.file);
-    const blockSnapshotRoot = {
-      type: 'block',
-      id: nanoid(),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [],
-    };
-    const contentSlice = (await this._traverseMarkdown(
-      markdownAst,
-      blockSnapshotRoot as BlockSnapshot,
-      payload.assets
-    )) as BlockSnapshot;
-    if (contentSlice.children.length === 0) {
-      return null;
-    }
-    return {
-      type: 'slice',
-      content: [contentSlice],
-      pageVersion: payload.pageVersion,
-      workspaceVersion: payload.workspaceVersion,
-      workspaceId: payload.workspaceId,
-      pageId: payload.pageId,
-    };
-  }
-
   private _traverseSnapshot = async (
     snapshot: BlockSnapshot,
     markdown: MarkdownAST,
@@ -1164,5 +943,226 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return 'children' in ast
       ? ast.children.flatMap(child => this._mdastToDelta(child))
       : [];
+  }
+
+  async fromDocSnapshot({
+    snapshot,
+    assets,
+  }: FromDocSnapshotPayload): Promise<FromDocSnapshotResult<Markdown>> {
+    let buffer = '';
+    const { file, assetsIds } = await this.fromBlockSnapshot({
+      snapshot: snapshot.blocks,
+      assets,
+    });
+    buffer += file;
+    return {
+      file: buffer,
+      assetsIds,
+    };
+  }
+
+  async fromBlockSnapshot({
+    snapshot,
+    assets,
+  }: FromBlockSnapshotPayload): Promise<FromBlockSnapshotResult<Markdown>> {
+    const root: Root = {
+      type: 'root',
+      children: [],
+    };
+    const { ast, assetsIds } = await this._traverseSnapshot(
+      snapshot,
+      root,
+      assets
+    );
+    return {
+      file: this._astToMarkdown(ast),
+      assetsIds,
+    };
+  }
+
+  async fromSliceSnapshot({
+    snapshot,
+    assets,
+  }: FromSliceSnapshotPayload): Promise<FromSliceSnapshotResult<Markdown>> {
+    let buffer = '';
+    const sliceAssetsIds: string[] = [];
+    for (const contentSlice of snapshot.content) {
+      const root: Root = {
+        type: 'root',
+        children: [],
+      };
+      const { ast, assetsIds } = await this._traverseSnapshot(
+        contentSlice,
+        root,
+        assets
+      );
+      sliceAssetsIds.push(...assetsIds);
+      buffer += this._astToMarkdown(ast);
+    }
+    const markdown =
+      buffer.match(/\n/g)?.length === 1 ? buffer.trimEnd() : buffer;
+    return {
+      file: markdown,
+      assetsIds: sliceAssetsIds,
+    };
+  }
+
+  async toDocSnapshot(
+    payload: ToDocSnapshotPayload<Markdown>
+  ): Promise<DocSnapshot> {
+    const markdownAst = this._markdownToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [],
+    };
+    return {
+      type: 'page',
+      meta: {
+        id: nanoid(),
+        title: 'Untitled',
+        createDate: Date.now(),
+        tags: [],
+      },
+      blocks: {
+        type: 'block',
+        id: nanoid(),
+        flavour: 'affine:page',
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [
+              {
+                insert: 'Untitled',
+              },
+            ],
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: nanoid(),
+            flavour: 'affine:surface',
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          await this._traverseMarkdown(
+            markdownAst,
+            blockSnapshotRoot as BlockSnapshot,
+            payload.assets
+          ),
+        ],
+      },
+    };
+  }
+
+  async toBlockSnapshot(
+    payload: ToBlockSnapshotPayload<Markdown>
+  ): Promise<BlockSnapshot> {
+    const markdownAst = this._markdownToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [],
+    };
+    return this._traverseMarkdown(
+      markdownAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    );
+  }
+
+  async toSliceSnapshot(
+    payload: MarkdownToSliceSnapshotPayload
+  ): Promise<SliceSnapshot | null> {
+    let codeFence = '';
+    payload.file = payload.file
+      .split('\n')
+      .map(line => {
+        if (line.trimStart().startsWith('-')) {
+          return line;
+        }
+        const trimmedLine = line.trimStart();
+        if (!codeFence && trimmedLine.startsWith('```')) {
+          codeFence = trimmedLine.substring(
+            0,
+            trimmedLine.lastIndexOf('```') + 3
+          );
+          if (codeFence.split('').every(c => c === '`')) {
+            return line;
+          }
+          codeFence = '';
+        }
+        if (!codeFence && trimmedLine.startsWith('~~~')) {
+          codeFence = trimmedLine.substring(
+            0,
+            trimmedLine.lastIndexOf('~~~') + 3
+          );
+          if (codeFence.split('').every(c => c === '~')) {
+            return line;
+          }
+          codeFence = '';
+        }
+        if (
+          !!codeFence &&
+          trimmedLine.startsWith(codeFence) &&
+          trimmedLine.lastIndexOf(codeFence) === 0
+        ) {
+          codeFence = '';
+        }
+        if (codeFence) {
+          return line;
+        }
+        return line.replace(/^ /, '&#x20;');
+      })
+      .join('\n');
+    const markdownAst = this._markdownToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid(),
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [],
+    };
+    const contentSlice = (await this._traverseMarkdown(
+      markdownAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    )) as BlockSnapshot;
+    if (contentSlice.children.length === 0) {
+      return null;
+    }
+    return {
+      type: 'slice',
+      content: [contentSlice],
+      pageVersion: payload.pageVersion,
+      workspaceVersion: payload.workspaceVersion,
+      workspaceId: payload.workspaceId,
+      pageId: payload.pageId,
+    };
   }
 }

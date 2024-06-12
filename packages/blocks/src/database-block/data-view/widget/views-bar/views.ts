@@ -24,6 +24,10 @@ import { WidgetBase } from '../widget-base.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WidgetBase {
+  get readonly() {
+    return this.viewSource.readonly;
+  }
+
   static override styles = css`
     data-view-header-views {
       height: 32px;
@@ -71,8 +75,8 @@ export class DataViewHeaderViews extends WidgetBase {
     }
   `;
 
-  get readonly() {
-    return this.viewSource.readonly;
+  private getRenderer(view: SingleViewSource) {
+    return this.viewSource.getViewMeta(view.view.mode).renderer;
   }
 
   _addViewMenu = (event: MouseEvent) => {
@@ -280,10 +284,6 @@ export class DataViewHeaderViews extends WidgetBase {
       `;
     });
   };
-
-  private getRenderer(view: SingleViewSource) {
-    return this.viewSource.getViewMeta(view.view.mode).renderer;
-  }
 
   override render() {
     return html`

@@ -40,18 +40,6 @@ import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
-  static override styles = codeBlockStyles;
-
-  override accessor useCaptionEditor = true;
-
-  override accessor blockContainerStyles = {
-    margin: '24px 0',
-  };
-
-  private readonly _themeObserver = new ThemeObserver();
-
-  clipboardController = new CodeClipboardController(this);
-
   get readonly() {
     return this.doc.readonly;
   }
@@ -66,17 +54,19 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
     return this.rootElement;
   }
 
-  highlightOptionsGetter: HighlightOptionsGetter | null = null;
+  get inlineEditor() {
+    const inlineRoot = this.querySelector<InlineRootElement>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    if (!inlineRoot) {
+      throw new Error('Inline editor root not found');
+    }
+    return inlineRoot.inlineEditor;
+  }
 
-  readonly attributesSchema = z.object({});
+  static override styles = codeBlockStyles;
 
-  readonly getAttributeRenderer = () =>
-    getCodeLineRenderer(() => ({
-      lang:
-        getStandardLanguage(this.model.language.toLowerCase())?.id ??
-        'plaintext',
-      highlighter: this._highlighter,
-    }));
+  private readonly _themeObserver = new ThemeObserver();
 
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
@@ -97,6 +87,23 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
   private _previousLanguage: StrictLanguageInfo = PLAIN_TEXT_LANG_INFO;
 
   private _highlighter: Highlighter | null = null;
+
+  private _inlineRangeProvider: InlineRangeProvider | null = null;
+
+  @query('rich-text')
+  private accessor _richTextElement: RichText | null = null;
+
+  override accessor useCaptionEditor = true;
+
+  override accessor blockContainerStyles = {
+    margin: '24px 0',
+  };
+
+  clipboardController = new CodeClipboardController(this);
+
+  highlightOptionsGetter: HighlightOptionsGetter | null = null;
+
+  readonly attributesSchema = z.object({});
 
   private async _startHighlight(lang: StrictLanguageInfo) {
     if (this._highlighter) {
@@ -131,20 +138,28 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
     }
   }
 
-  private _inlineRangeProvider: InlineRangeProvider | null = null;
+  private _updateLineNumbers() {
+    const lineNumbersContainer =
+      this.querySelector<HTMLElement>('#line-numbers');
+    assertExists(lineNumbersContainer);
 
-  get inlineEditor() {
-    const inlineRoot = this.querySelector<InlineRootElement>(
-      `[${INLINE_ROOT_ATTR}]`
+    const next = this.model.wrap
+      ? generateLineNumberRender()
+      : lineNumberRender;
+
+    render(
+      repeat(Array.from(this.querySelectorAll('v-line')), next),
+      lineNumbersContainer
     );
-    if (!inlineRoot) {
-      throw new Error('Inline editor root not found');
-    }
-    return inlineRoot.inlineEditor;
   }
 
-  @query('rich-text')
-  private accessor _richTextElement: RichText | null = null;
+  readonly getAttributeRenderer = () =>
+    getCodeLineRenderer(() => ({
+      lang:
+        getStandardLanguage(this.model.language.toLowerCase())?.id ??
+        'plaintext',
+      highlighter: this._highlighter,
+    }));
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
@@ -382,21 +397,6 @@ export class CodeBlockComponent extends BlockComponent<CodeBlockModel> {
 
   setWrap(wrap: boolean) {
     this.doc.updateBlock(this.model, { wrap });
-  }
-
-  private _updateLineNumbers() {
-    const lineNumbersContainer =
-      this.querySelector<HTMLElement>('#line-numbers');
-    assertExists(lineNumbersContainer);
-
-    const next = this.model.wrap
-      ? generateLineNumberRender()
-      : lineNumberRender;
-
-    render(
-      repeat(Array.from(this.querySelectorAll('v-line')), next),
-      lineNumbersContainer
-    );
   }
 
   override renderBlock(): TemplateResult<1> {

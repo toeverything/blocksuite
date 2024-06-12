@@ -20,6 +20,17 @@ import { getSurfaceElementFromEditor } from './utils/selection-utils.js';
 
 @customElement('copilot-panel')
 export class CopilotPanel extends WithDisposable(ShadowlessElement) {
+  get host() {
+    return this.editor.host;
+  }
+
+  get logic() {
+    if (!this.aiLogic) {
+      this.aiLogic = new AILogic(() => this.host);
+    }
+    return this.aiLogic;
+  }
+
   static override styles = css`
     copilot-panel {
       width: 100%;
@@ -118,26 +129,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
 
   aiLogic?: AILogic;
 
-  get host() {
-    return this.editor.host;
-  }
-
-  get logic() {
-    if (!this.aiLogic) {
-      this.aiLogic = new AILogic(() => this.host);
-    }
-    return this.aiLogic;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.disposables.add(
-      getSurfaceElementFromEditor(this.host).model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
   config = () => {
     const createNew = (type: string) => () => {
       const panel = new CreateNewService();
@@ -187,6 +178,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     `;
   };
 
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   panels: Record<
     string,
     {
@@ -214,6 +206,15 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
 
   @state()
   accessor currentPanel: keyof typeof this.panels = 'Chat';
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      getSurfaceElementFromEditor(this.host).model.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   override render() {
     const panel = this.panels[this.currentPanel];

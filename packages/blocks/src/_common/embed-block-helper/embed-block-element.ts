@@ -27,16 +27,6 @@ export class EmbedBlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockComponent<Model, Service, WidgetName> {
-  override accessor useCaptionEditor = true;
-
-  protected _cardStyle: EmbedCardStyle = 'horizontal';
-
-  protected _width = EMBED_CARD_WIDTH.horizontal;
-
-  protected _height = EMBED_CARD_HEIGHT.horizontal;
-
-  private _isInSurface = false;
-
   get isInSurface() {
     return this._isInSurface;
   }
@@ -58,6 +48,8 @@ export class EmbedBlockElement<
       (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
     );
   }
+
+  private _isInSurface = false;
 
   private _dragHandleOption: DragHandleOption = {
     flavour: /affine:embed-*/,
@@ -150,6 +142,14 @@ export class EmbedBlockElement<
       return false;
     },
   };
+
+  protected _cardStyle: EmbedCardStyle = 'horizontal';
+
+  protected _width = EMBED_CARD_WIDTH.horizontal;
+
+  protected _height = EMBED_CARD_HEIGHT.horizontal;
+
+  override accessor useCaptionEditor = true;
 
   override connectedCallback() {
     super.connectedCallback();

@@ -56,14 +56,6 @@ export class EdgelessDraggableElementController<T>
     host.addController(this);
   }
 
-  onMouseDown(e: MouseEvent, elementInfo: ElementInfo<T>) {
-    this._onDragStart(mouseResolver(e), elementInfo);
-  }
-
-  onTouchStart(e: TouchEvent, elementInfo: ElementInfo<T>) {
-    this._onDragStart(touchResolver(e), elementInfo);
-  }
-
   /**
    * @internal
    */
@@ -289,6 +281,14 @@ export class EdgelessDraggableElementController<T>
       this.removeAllEvents();
       this.clearTimeout = null;
     }, duration);
+  }
+
+  onMouseDown(e: MouseEvent, elementInfo: ElementInfo<T>) {
+    this._onDragStart(mouseResolver(e), elementInfo);
+  }
+
+  onTouchStart(e: TouchEvent, elementInfo: ElementInfo<T>) {
+    this._onDragStart(touchResolver(e), elementInfo);
   }
 
   /**

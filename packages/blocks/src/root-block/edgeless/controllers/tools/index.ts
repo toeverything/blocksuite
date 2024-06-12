@@ -9,22 +9,6 @@ import type { SelectionArea } from '../../services/tools-manager.js';
 export abstract class EdgelessToolController<
   Tool extends EdgelessTool = EdgelessTool,
 > {
-  protected _edgeless!: EdgelessRootBlockComponent;
-
-  protected _draggingArea: SelectionArea | null = null;
-
-  protected _service: EdgelessRootService;
-
-  enableHover = false;
-
-  constructor(service: EdgelessRootService) {
-    this._service = service;
-  }
-
-  mount(edgeless: EdgelessRootBlockComponent) {
-    this._edgeless = edgeless;
-  }
-
   get draggingArea() {
     return this._draggingArea;
   }
@@ -41,7 +25,23 @@ export abstract class EdgelessToolController<
     return this._edgeless.service.blocks;
   }
 
+  protected _edgeless!: EdgelessRootBlockComponent;
+
+  protected _draggingArea: SelectionArea | null = null;
+
+  protected _service: EdgelessRootService;
+
+  enableHover = false;
+
   abstract tool: Tool;
+
+  constructor(service: EdgelessRootService) {
+    this._service = service;
+  }
+
+  mount(edgeless: EdgelessRootBlockComponent) {
+    this._edgeless = edgeless;
+  }
   abstract onContainerPointerDown(e: PointerEventState): void;
   abstract onContainerDragStart(e: PointerEventState): void;
   abstract onContainerDragMove(e: PointerEventState): void;

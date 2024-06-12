@@ -167,29 +167,6 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
     this.context = new ASTWalkerContext<TNode>();
   }
 
-  setEnter = (fn: WalkerFn<ONode, TNode>) => {
-    this._enter = fn;
-  };
-
-  setLeave = (fn: WalkerFn<ONode, TNode>) => {
-    this._leave = fn;
-  };
-
-  setONodeTypeGuard = (fn: (node: unknown) => node is ONode) => {
-    this._isONode = fn;
-  };
-
-  walk = async (oNode: ONode, tNode: TNode) => {
-    this.context.openNode(tNode);
-    await this._visit({ node: oNode, parent: null, prop: null, index: null });
-    assertEquals(this.context.stack.length, 1, 'There are unclosed nodes');
-    return this.context.currentNode();
-  };
-
-  walkONode = async (oNode: ONode) => {
-    await this._visit({ node: oNode, parent: null, prop: null, index: null });
-  };
-
   private _visit = async (o: NodeProps<ONode>) => {
     if (!o.node) return;
     this.context._skipChildrenNum = 0;
@@ -247,5 +224,28 @@ export class ASTWalker<ONode extends object, TNode extends object | never> {
     if (this._leave) {
       await this._leave(o, this.context);
     }
+  };
+
+  setEnter = (fn: WalkerFn<ONode, TNode>) => {
+    this._enter = fn;
+  };
+
+  setLeave = (fn: WalkerFn<ONode, TNode>) => {
+    this._leave = fn;
+  };
+
+  setONodeTypeGuard = (fn: (node: unknown) => node is ONode) => {
+    this._isONode = fn;
+  };
+
+  walk = async (oNode: ONode, tNode: TNode) => {
+    this.context.openNode(tNode);
+    await this._visit({ node: oNode, parent: null, prop: null, index: null });
+    assertEquals(this.context.stack.length, 1, 'There are unclosed nodes');
+    return this.context.currentNode();
+  };
+
+  walkONode = async (oNode: ONode) => {
+    await this._visit({ node: oNode, parent: null, prop: null, index: null });
   };
 }

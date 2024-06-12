@@ -12,8 +12,6 @@ import { EdgelessToolbarToolMixin } from '../mixins/tool.mixin.js';
 
 @customElement('edgeless-brush-menu')
 export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(LitElement) {
-  type: EdgelessTool['type'] = 'brush';
-
   static override styles = css`
     :host {
       display: flex;
@@ -31,6 +29,8 @@ export class EdgelessBrushMenu extends EdgelessToolbarToolMixin(LitElement) {
       margin: 0 9px;
     }
   `;
+
+  type: EdgelessTool['type'] = 'brush';
 
   @property({ attribute: false })
   accessor color!: string;

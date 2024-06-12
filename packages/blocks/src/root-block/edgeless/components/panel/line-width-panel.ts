@@ -107,15 +107,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor selectedSize: LineWidth = LineWidth.Two;
-
-  @property({ attribute: false })
-  accessor hasTooltip = true;
-
-  @property({ attribute: false })
-  accessor disable = false;
-
   @query('.line-width-panel')
   private accessor _lineWidthPanel!: HTMLElement;
 
@@ -132,6 +123,15 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   private accessor _dragHandle!: HTMLElement;
 
   private _dragConfig: DragConfig | null = null;
+
+  @property({ attribute: false })
+  accessor selectedSize: LineWidth = LineWidth.Two;
+
+  @property({ attribute: false })
+  accessor hasTooltip = true;
+
+  @property({ attribute: false })
+  accessor disable = false;
 
   private _updateLineWidthPanel(selectedSize: LineWidth) {
     if (!this._lineWidthOverlay) return;

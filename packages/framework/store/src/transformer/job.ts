@@ -35,6 +35,18 @@ export type JobConfig = {
 };
 
 export class Job {
+  get assetsManager() {
+    return this._assetsManager;
+  }
+
+  get assets() {
+    return this._assetsManager.getAssets();
+  }
+
+  get adapterConfigs() {
+    return this._adapterConfigs;
+  }
+
   private readonly _collection: DocCollection;
 
   private readonly _assetsManager: AssetsManager;
@@ -60,22 +72,6 @@ export class Job {
         adapterConfigs: this._adapterConfigs,
       });
     });
-  }
-
-  get assetsManager() {
-    return this._assetsManager;
-  }
-
-  get assets() {
-    return this._assetsManager.getAssets();
-  }
-
-  get adapterConfigs() {
-    return this._adapterConfigs;
-  }
-
-  reset() {
-    this._assetsManager.cleanup();
   }
 
   private _getSchema(flavour: string) {
@@ -160,13 +156,6 @@ export class Job {
     return snapshot;
   }
 
-  blockToSnapshot = async (model: DraftModel): Promise<BlockSnapshot> => {
-    const snapshot = await this._blockToSnapshot(model);
-    BlockSnapshotSchema.parse(snapshot);
-
-    return snapshot;
-  };
-
   private async _snapshotToBlock(
     snapshot: BlockSnapshot,
     doc: Doc,
@@ -217,6 +206,17 @@ export class Job {
 
     return model;
   }
+
+  reset() {
+    this._assetsManager.cleanup();
+  }
+
+  blockToSnapshot = async (model: DraftModel): Promise<BlockSnapshot> => {
+    const snapshot = await this._blockToSnapshot(model);
+    BlockSnapshotSchema.parse(snapshot);
+
+    return snapshot;
+  };
 
   snapshotToModelData = async (snapshot: BlockSnapshot) => {
     const { children, flavour, props, id } = snapshot;

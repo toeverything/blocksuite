@@ -56,7 +56,17 @@ const styles = css`
 
 @customElement('affine-data-view-kanban-cell')
 export class KanbanCell extends WithDisposable(ShadowlessElement) {
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
+  get selection() {
+    return this.closest('affine-data-view-kanban')?.selectionController;
+  }
+
   static override styles = styles;
+
+  private _cell = createRef<DataViewCellLifeCycle>();
 
   @property({ attribute: false })
   accessor contentOnly = false;
@@ -78,12 +88,6 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
 
   @state()
   accessor editing = false;
-
-  private _cell = createRef<DataViewCellLifeCycle>();
-
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -118,10 +122,6 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
       isEditing: editing,
     };
   };
-
-  get selection() {
-    return this.closest('affine-data-view-kanban')?.selectionController;
-  }
 
   renderIcon() {
     if (this.contentOnly) {

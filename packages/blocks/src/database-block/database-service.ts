@@ -22,6 +22,10 @@ export class DatabaseBlockService<
 
   readonly referenceNodeConfig = new ReferenceNodeConfig();
 
+  databaseViewInitEmpty = databaseViewInitEmpty;
+
+  viewPresets = viewPresets;
+
   override mounted(): void {
     super.mounted();
     this.selectionManager.register(DatabaseSelection);
@@ -34,10 +38,6 @@ export class DatabaseBlockService<
     this.inlineManager.registerSpecs(inlineSpecs);
     this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
   }
-
-  databaseViewInitEmpty = databaseViewInitEmpty;
-
-  viewPresets = viewPresets;
 
   initDatabaseBlock(
     doc: Doc,

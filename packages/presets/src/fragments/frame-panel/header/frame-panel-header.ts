@@ -100,13 +100,11 @@ const styles = css`
 `;
 
 export class FramePanelHeader extends WithDisposable(LitElement) {
+  get rootService() {
+    return this.editorHost.spec.getService('affine:page');
+  }
+
   static override styles = styles;
-
-  @property({ attribute: false })
-  accessor editorHost!: EditorHost;
-
-  @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   @state()
   private accessor _settingPopperShow = false;
@@ -125,9 +123,11 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _edgelessDisposables: DisposableGroup | null = null;
 
-  get rootService() {
-    return this.editorHost.spec.getService('affine:page');
-  }
+  @property({ attribute: false })
+  accessor editorHost!: EditorHost;
+
+  @property({ attribute: false })
+  accessor edgeless!: EdgelessRootBlockComponent | null;
 
   private _enterPresentationMode = () => {
     if (!this.edgeless)

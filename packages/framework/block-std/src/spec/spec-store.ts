@@ -11,8 +11,6 @@ export class SpecStore {
 
   private _disposables = new DisposableGroup();
 
-  constructor(public std: BlockSuite.Std) {}
-
   readonly slots = {
     beforeApply: new Slot(),
     beforeMount: new Slot(),
@@ -21,6 +19,55 @@ export class SpecStore {
     afterMount: new Slot(),
     afterUnmount: new Slot(),
   };
+
+  constructor(public std: BlockSuite.Std) {}
+
+  private _diffServices(
+    oldSpecs: Map<string, BlockSpec>,
+    newSpecs: Map<string, BlockSpec>
+  ) {
+    oldSpecs.forEach((oldSpec, flavour) => {
+      if (
+        newSpecs.has(flavour) &&
+        newSpecs.get(flavour)?.service === oldSpec.service
+      ) {
+        return;
+      }
+
+      const service = this._services.get(flavour);
+      if (service) {
+        service.dispose();
+        service.unmounted();
+      }
+      this._services.delete(flavour);
+    });
+    newSpecs.forEach((newSpec, flavour) => {
+      if (this._services.has(flavour)) {
+        return;
+      }
+
+      const Service = newSpec.service ?? BlockService;
+
+      const slots = getSlots();
+      const service = new Service({
+        flavour,
+        std: this.std,
+        slots,
+      });
+
+      newSpec.setup?.(slots, this._disposables);
+      this._services.set(flavour, service);
+      service.mounted();
+    });
+  }
+
+  private _buildSpecMap(specs: Array<BlockSpec>) {
+    const specMap = new Map<string, BlockSpec>();
+    specs.forEach(spec => {
+      specMap.set(spec.schema.model.flavour, spec);
+    });
+    return specMap;
+  }
 
   mount() {
     this.slots.beforeMount.emit();
@@ -71,53 +118,6 @@ export class SpecStore {
   getService<Service extends BlockService>(flavour: string): Service;
   getService(flavour: string): BlockService {
     return this._services.get(flavour) as never;
-  }
-
-  private _diffServices(
-    oldSpecs: Map<string, BlockSpec>,
-    newSpecs: Map<string, BlockSpec>
-  ) {
-    oldSpecs.forEach((oldSpec, flavour) => {
-      if (
-        newSpecs.has(flavour) &&
-        newSpecs.get(flavour)?.service === oldSpec.service
-      ) {
-        return;
-      }
-
-      const service = this._services.get(flavour);
-      if (service) {
-        service.dispose();
-        service.unmounted();
-      }
-      this._services.delete(flavour);
-    });
-    newSpecs.forEach((newSpec, flavour) => {
-      if (this._services.has(flavour)) {
-        return;
-      }
-
-      const Service = newSpec.service ?? BlockService;
-
-      const slots = getSlots();
-      const service = new Service({
-        flavour,
-        std: this.std,
-        slots,
-      });
-
-      newSpec.setup?.(slots, this._disposables);
-      this._services.set(flavour, service);
-      service.mounted();
-    });
-  }
-
-  private _buildSpecMap(specs: Array<BlockSpec>) {
-    const specMap = new Map<string, BlockSpec>();
-    specs.forEach(spec => {
-      specMap.set(spec.schema.model.flavour, spec);
-    });
-    return specMap;
   }
 }
 

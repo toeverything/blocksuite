@@ -32,12 +32,6 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
   'shape',
   readonly ['shapeStyle', 'shapeType', 'fillColor', 'strokeColor', 'radius']
 >(LitElement) {
-  override type = 'shape' as const;
-
-  override _type = 'shape' as const;
-
-  override enableActiveBackground = true;
-
   static styles = css`
     :host {
       display: block;
@@ -50,6 +44,20 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
       height: 64px;
     }
   `;
+
+  protected override _states = [
+    'shapeStyle',
+    'shapeType',
+    'fillColor',
+    'strokeColor',
+    'radius',
+  ] as const;
+
+  override type = 'shape' as const;
+
+  override _type = 'shape' as const;
+
+  override enableActiveBackground = true;
 
   @state()
   accessor shapeStyle: ShapeStyle = ShapeStyle.Scribbled;
@@ -65,14 +73,6 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
 
   @state()
   accessor radius = 0;
-
-  protected override _states = [
-    'shapeStyle',
-    'shapeType',
-    'fillColor',
-    'strokeColor',
-    'radius',
-  ] as const;
 
   private _toggleMenu() {
     if (this.tryDisposePopper()) return;
@@ -93,6 +93,26 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
       },
     });
     this.updateMenu();
+  }
+
+  private _updateOverlay() {
+    const controller = this.edgeless.tools.currentController;
+    if (controller instanceof ShapeToolController) {
+      controller.createOverlay();
+    }
+  }
+
+  private _handleShapeClick(shape: DraggableShape) {
+    if (!this.popper) {
+      this._toggleMenu();
+    }
+    const name = shape.name;
+    if (name !== this.shapeType) {
+      const shapeConfig = ShapeComponentConfig.find(s => s.name === name);
+      if (!shapeConfig) return;
+      this.edgeless.service.editPropsStore.record('shape', shapeConfig?.value);
+      this.updateMenu();
+    }
   }
 
   override connectedCallback(): void {
@@ -121,26 +141,6 @@ export class EdgelessShapeToolButton extends ToolbarButtonWithMenuMixin<
   // duplicated with connectedCallback, so override it
   override initLastPropsSlot() {
     noop();
-  }
-
-  private _updateOverlay() {
-    const controller = this.edgeless.tools.currentController;
-    if (controller instanceof ShapeToolController) {
-      controller.createOverlay();
-    }
-  }
-
-  private _handleShapeClick(shape: DraggableShape) {
-    if (!this.popper) {
-      this._toggleMenu();
-    }
-    const name = shape.name;
-    if (name !== this.shapeType) {
-      const shapeConfig = ShapeComponentConfig.find(s => s.name === name);
-      if (!shapeConfig) return;
-      this.edgeless.service.editPropsStore.record('shape', shapeConfig?.value);
-      this.updateMenu();
-    }
   }
 
   override render() {

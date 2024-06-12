@@ -26,22 +26,49 @@ export type BlockQueryDataSourceConfig = {
 };
 
 export class BlockQueryDataSource extends BaseDataSource {
-  docDisposeMap = new Map<string, () => void>();
+  get workspace() {
+    return this.host.doc.collection;
+  }
 
-  blockMap = new Map<string, Block>();
+  private get blocks() {
+    return [...this.blockMap.values()];
+  }
+
+  get rows(): string[] {
+    return this.blocks.map(v => v.id);
+  }
+
+  get properties(): string[] {
+    return [
+      ...this.meta.properties.map(v => v.key),
+      ...this.block.columns.map(v => v.id),
+    ];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
+    return queryBlockColumns.map(v => v.model);
+  }
+
+  override get detailSlots(): DetailSlots {
+    return {
+      ...super.detailSlots,
+      header: createUniComponentFromWebComponent(BlockRenderer),
+    };
+  }
 
   private meta: BlockMeta;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private columnMetaMap = new Map<string, ColumnMeta<any, any, any>>();
 
-  getViewColumn(id: string) {
-    return this.block.columns.find(v => v.id === id);
-  }
+  docDisposeMap = new Map<string, () => void>();
 
-  get workspace() {
-    return this.host.doc.collection;
-  }
+  blockMap = new Map<string, Block>();
+
+  slots = {
+    update: new Slot(),
+  };
 
   constructor(
     private host: EditorHost,
@@ -74,6 +101,24 @@ export class BlockQueryDataSource extends BaseDataSource {
     });
   }
 
+  private getProperty(propertyId: string) {
+    const property = this.meta.properties.find(v => v.key === propertyId);
+    assertExists(property, `property ${propertyId} not found`);
+    return property;
+  }
+
+  private newColumnName() {
+    let i = 1;
+    while (this.block.columns.some(column => column.name === `Column ${i}`)) {
+      i++;
+    }
+    return `Column ${i}`;
+  }
+
+  getViewColumn(id: string) {
+    return this.block.columns.find(v => v.id === id);
+  }
+
   listenToDoc(doc: Doc) {
     this.docDisposeMap.set(
       doc.id,
@@ -90,25 +135,6 @@ export class BlockQueryDataSource extends BaseDataSource {
       }).dispose
     );
   }
-
-  private get blocks() {
-    return [...this.blockMap.values()];
-  }
-
-  get rows(): string[] {
-    return this.blocks.map(v => v.id);
-  }
-
-  get properties(): string[] {
-    return [
-      ...this.meta.properties.map(v => v.key),
-      ...this.block.columns.map(v => v.id),
-    ];
-  }
-
-  slots = {
-    update: new Slot(),
-  };
 
   cellChangeValue(rowId: string, propertyId: string, value: unknown): void {
     const viewColumn = this.getViewColumn(propertyId);
@@ -223,12 +249,6 @@ export class BlockQueryDataSource extends BaseDataSource {
     return this.getProperty(propertyId)?.name ?? '';
   }
 
-  private getProperty(propertyId: string) {
-    const property = this.meta.properties.find(v => v.key === propertyId);
-    assertExists(property, `property ${propertyId} not found`);
-    return property;
-  }
-
   propertyGetType(propertyId: string): string {
     const viewColumn = this.getViewColumn(propertyId);
     if (viewColumn) {
@@ -274,11 +294,6 @@ export class BlockQueryDataSource extends BaseDataSource {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get addPropertyConfigList(): ColumnConfig<any, any, any>[] {
-    return queryBlockColumns.map(v => v.model);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getPropertyMeta(type: string): ColumnMeta<any, any, any> {
     const meta = this.columnMetaMap.get(type);
     if (meta) {
@@ -287,22 +302,7 @@ export class BlockQueryDataSource extends BaseDataSource {
     return queryBlockAllColumnMap[type];
   }
 
-  override get detailSlots(): DetailSlots {
-    return {
-      ...super.detailSlots,
-      header: createUniComponentFromWebComponent(BlockRenderer),
-    };
-  }
-
   rowMove(_rowId: string, _position: InsertToPosition): void {}
-
-  private newColumnName() {
-    let i = 1;
-    while (this.block.columns.some(column => column.name === `Column ${i}`)) {
-      i++;
-    }
-    return `Column ${i}`;
-  }
 
   propertyAdd(
     insertToPosition: InsertToPosition,

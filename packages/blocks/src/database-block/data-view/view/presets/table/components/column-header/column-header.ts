@@ -16,16 +16,16 @@ import { styles } from './styles.js';
 
 @customElement('affine-database-column-header')
 export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor tableViewManager!: DataViewTableManager;
-
   private get readonly() {
     return this.tableViewManager.readonly;
   }
 
+  static override styles = styles;
+
   private addColumnPositionRef = createRef();
+
+  @property({ attribute: false })
+  accessor tableViewManager!: DataViewTableManager;
 
   addColumnButton = renderTemplate(() => {
     if (this.readonly) return nothing;
@@ -37,6 +37,14 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       ${AddCursorIcon}
     </div>`;
   });
+
+  private _onAddColumn = () => {
+    if (this.readonly) return;
+    this.tableViewManager.columnAdd('end');
+    requestAnimationFrame(() => {
+      this.editLastColumnTitle();
+    });
+  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -105,14 +113,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         });
       })
       .catch(console.error);
-  };
-
-  private _onAddColumn = () => {
-    if (this.readonly) return;
-    this.tableViewManager.columnAdd('end');
-    requestAnimationFrame(() => {
-      this.editLastColumnTitle();
-    });
   };
 
   editLastColumnTitle = () => {

@@ -1,7 +1,7 @@
 type SelectionConstructor<T = unknown> = {
-  new (...args: unknown[]): T;
   type: string;
   group: string;
+  new (...args: unknown[]): T;
 };
 
 export type BaseSelectionOptions = {

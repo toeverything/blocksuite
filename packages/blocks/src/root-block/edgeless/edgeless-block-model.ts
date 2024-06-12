@@ -26,12 +26,6 @@ export class EdgelessBlockModel<
   extends BlockModel<Props>
   implements IEdgelessElement
 {
-  connectable = true;
-
-  rotate = 0;
-
-  private _externalXYWH: SerializedXYWH | undefined = undefined;
-
   get externalXYWH(): SerializedXYWH | undefined {
     return this._externalXYWH;
   }
@@ -48,6 +42,28 @@ export class EdgelessBlockModel<
     const bound = Bound.deserialize(this.xywh);
     return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));
   }
+
+  get group(): IEdgelessElement['group'] {
+    const surfaceModel = this.doc.getBlockByFlavour(
+      'affine:surface'
+    ) as SurfaceBlockModel[];
+
+    return surfaceModel[0]?.getGroup(this.id) ?? null;
+  }
+
+  get groups() {
+    const surfaceModel = this.doc.getBlockByFlavour(
+      'affine:surface'
+    ) as SurfaceBlockModel[];
+
+    return surfaceModel[0]?.getGroups(this.id) ?? [];
+  }
+
+  private _externalXYWH: SerializedXYWH | undefined = undefined;
+
+  connectable = true;
+
+  rotate = 0;
 
   hitTest(x: number, y: number, _: IHitTestOptions, __: EditorHost): boolean {
     const bound = Bound.deserialize(this.xywh);
@@ -104,21 +120,5 @@ export class EdgelessBlockModel<
         this.intersectWithLine(point, points[(i + 1) % points.length])
       )
     );
-  }
-
-  get group(): IEdgelessElement['group'] {
-    const surfaceModel = this.doc.getBlockByFlavour(
-      'affine:surface'
-    ) as SurfaceBlockModel[];
-
-    return surfaceModel[0]?.getGroup(this.id) ?? null;
-  }
-
-  get groups() {
-    const surfaceModel = this.doc.getBlockByFlavour(
-      'affine:surface'
-    ) as SurfaceBlockModel[];
-
-    return surfaceModel[0]?.getGroups(this.id) ?? [];
   }
 }

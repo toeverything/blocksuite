@@ -25,6 +25,14 @@ import {
 
 @customElement('affine-data-view-record-field')
 export class RecordField extends WithDisposable(ShadowlessElement) {
+  private get readonly() {
+    return this.view.readonly;
+  }
+
+  get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value;
+  }
+
   static override styles = css`
     affine-data-view-record-field {
       display: flex;
@@ -97,6 +105,8 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private _cell = createRef<DataViewCellLifeCycle>();
+
   @property({ attribute: false })
   accessor view!: DataViewManager;
 
@@ -111,16 +121,6 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
 
   @state()
   accessor editing = false;
-
-  private _cell = createRef<DataViewCellLifeCycle>();
-
-  private get readonly() {
-    return this.view.readonly;
-  }
-
-  get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value;
-  }
 
   changeEditing = (editing: boolean) => {
     const selection = this.closest('affine-data-view-record-detail')?.selection;

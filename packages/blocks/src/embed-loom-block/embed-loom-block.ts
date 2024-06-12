@@ -20,11 +20,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedLoomStyles)[number] = 'video';
-
-  @property({ attribute: false })
-  accessor loading = false;
-
   @state()
   private accessor _isSelected = false;
 
@@ -34,6 +29,11 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
   private _isDragging = false;
 
   private _isResizing = false;
+
+  override _cardStyle: (typeof EmbedLoomStyles)[number] = 'video';
+
+  @property({ attribute: false })
+  accessor loading = false;
 
   private _selectBlock() {
     const selectionManager = this.host.selection;

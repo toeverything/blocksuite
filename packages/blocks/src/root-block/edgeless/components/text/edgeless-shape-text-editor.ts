@@ -27,6 +27,21 @@ import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
+  private _lastXYWH = '';
+
+  private _keeping = false;
+
+  private _resizeObserver: ResizeObserver | null = null;
+
   @query('rich-text')
   accessor richText!: RichText;
 
@@ -43,25 +58,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         edgeless: EdgelessRootBlockComponent
       ) => void)
     | undefined = undefined;
-
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
-  private _lastXYWH = '';
-
-  private _keeping = false;
-
-  private _resizeObserver: ResizeObserver | null = null;
-
-  setKeeping(keeping: boolean) {
-    this._keeping = keeping;
-  }
 
   private _updateElementWH() {
     const bcr = this.richText.getBoundingClientRect();
@@ -107,71 +103,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       elements: [this.element.id],
       editing: true,
     });
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
-  }
-
-  override firstUpdated(): void {
-    const dispatcher = this.edgeless.dispatcher;
-    assertExists(dispatcher);
-
-    this.element.textDisplay = false;
-
-    this.disposables.add(
-      this.edgeless.service.viewport.viewportUpdated.on(() => {
-        this.requestUpdate();
-        this.updateComplete
-          .then(() => {
-            this._updateElementWH();
-          })
-          .catch(console.error);
-      })
-    );
-    this.disposables.add(
-      dispatcher.add('click', () => {
-        return true;
-      })
-    );
-    this.disposables.add(
-      dispatcher.add('doubleClick', () => {
-        return true;
-      })
-    );
-
-    this.updateComplete
-      .then(() => {
-        if (this.element.group instanceof MindmapElementModel) {
-          this.inlineEditor.selectAll();
-        } else {
-          this.inlineEditor.focusEnd();
-        }
-
-        this.disposables.add(
-          this.inlineEditor.slots.renderComplete.on(() => {
-            this._updateElementWH();
-          })
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'blur',
-          () => {
-            if (this._keeping) return;
-            this._unmount();
-          }
-        );
-      })
-      .catch(console.error);
-
-    this._initMindmapKeyBindings();
-  }
-
-  override async getUpdateComplete(): Promise<boolean> {
-    const result = await super.getUpdateComplete();
-    await this.richText?.updateComplete;
-    return result;
   }
 
   private _unmount() {
@@ -287,6 +218,75 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         }
       }
     });
+  }
+
+  setKeeping(keeping: boolean) {
+    this._keeping = keeping;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+  }
+
+  override firstUpdated(): void {
+    const dispatcher = this.edgeless.dispatcher;
+    assertExists(dispatcher);
+
+    this.element.textDisplay = false;
+
+    this.disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
+        this.requestUpdate();
+        this.updateComplete
+          .then(() => {
+            this._updateElementWH();
+          })
+          .catch(console.error);
+      })
+    );
+    this.disposables.add(
+      dispatcher.add('click', () => {
+        return true;
+      })
+    );
+    this.disposables.add(
+      dispatcher.add('doubleClick', () => {
+        return true;
+      })
+    );
+
+    this.updateComplete
+      .then(() => {
+        if (this.element.group instanceof MindmapElementModel) {
+          this.inlineEditor.selectAll();
+        } else {
+          this.inlineEditor.focusEnd();
+        }
+
+        this.disposables.add(
+          this.inlineEditor.slots.renderComplete.on(() => {
+            this._updateElementWH();
+          })
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'blur',
+          () => {
+            if (this._keeping) return;
+            this._unmount();
+          }
+        );
+      })
+      .catch(console.error);
+
+    this._initMindmapKeyBindings();
+  }
+
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.richText?.updateComplete;
+    return result;
   }
 
   override render() {

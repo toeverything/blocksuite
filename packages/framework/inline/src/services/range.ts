@@ -18,14 +18,6 @@ import {
 import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 
 export class RangeService<TextAttributes extends BaseTextAttributes> {
-  private _inlineRange: InlineRange | null = null;
-
-  private _lastStartRelativePosition: Y.RelativePosition | null = null;
-
-  private _lastEndRelativePosition: Y.RelativePosition | null = null;
-
-  constructor(readonly editor: InlineEditor<TextAttributes>) {}
-
   get yText() {
     return this.editor.yText;
   }
@@ -45,6 +37,30 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
   get lastEndRelativePosition() {
     return this._lastEndRelativePosition;
   }
+
+  private _inlineRange: InlineRange | null = null;
+
+  private _lastStartRelativePosition: Y.RelativePosition | null = null;
+
+  private _lastEndRelativePosition: Y.RelativePosition | null = null;
+
+  constructor(readonly editor: InlineEditor<TextAttributes>) {}
+
+  private _applyInlineRange = (inlineRange: InlineRange): void => {
+    const selection = document.getSelection();
+    if (!selection) {
+      return;
+    }
+    const newRange = this.toDomRange(inlineRange);
+
+    if (!newRange) {
+      return;
+    }
+
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+    this.editor.slots.inlineRangeApply.emit(newRange);
+  };
 
   onInlineRangeUpdated = async ([
     newInlineRange,
@@ -402,21 +418,5 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     const { rootElement, yText } = this.editor;
 
     return domRangeToInlineRange(range, rootElement, yText);
-  };
-
-  private _applyInlineRange = (inlineRange: InlineRange): void => {
-    const selection = document.getSelection();
-    if (!selection) {
-      return;
-    }
-    const newRange = this.toDomRange(inlineRange);
-
-    if (!newRange) {
-      return;
-    }
-
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-    this.editor.slots.inlineRangeApply.emit(newRange);
   };
 }

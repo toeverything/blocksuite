@@ -30,6 +30,15 @@ const BORDER_WIDTH = 1;
 export class EdgelessConnectorLabelEditor extends WithDisposable(
   ShadowlessElement
 ) {
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
   static override styles = css`
     .edgeless-connector-label-editor {
       position: absolute;
@@ -63,6 +72,12 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
     }
   `;
 
+  private _keeping = false;
+
+  private _isComposition = false;
+
+  private _resizeObserver: ResizeObserver | null = null;
+
   @query('rich-text')
   accessor richText!: RichText;
 
@@ -71,25 +86,6 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
-
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
-
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
-
-  private _keeping = false;
-
-  private _isComposition = false;
-
-  private _resizeObserver: ResizeObserver | null = null;
-
-  setKeeping(keeping: boolean) {
-    this._keeping = keeping;
-  }
 
   private _updateLabelRect = () => {
     const { connector, edgeless } = this;
@@ -112,6 +108,10 @@ export class EdgelessConnectorLabelEditor extends WithDisposable(
       });
     }
   };
+
+  setKeeping(keeping: boolean) {
+    this._keeping = keeping;
+  }
 
   override connectedCallback() {
     super.connectedCallback();

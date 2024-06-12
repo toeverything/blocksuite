@@ -123,6 +123,8 @@ export class Tooltip extends LitElement {
     }
   `;
 
+  private _hoverController!: HoverController;
+
   @property({ attribute: 'tip-position' })
   accessor placement: Placement = 'top';
 
@@ -164,14 +166,6 @@ export class Tooltip extends LitElement {
 
   @property({ attribute: false })
   accessor hoverOptions: Partial<HoverOptions> = {};
-
-  private _hoverController!: HoverController;
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._setUpHoverController();
-  }
 
   private _setUpHoverController = () => {
     this._hoverController = new HoverController(
@@ -243,10 +237,6 @@ export class Tooltip extends LitElement {
     }, 0);
   };
 
-  getPortal() {
-    return this._hoverController.portal;
-  }
-
   private _getStyles() {
     return css`
       ${styles}
@@ -269,6 +259,16 @@ export class Tooltip extends LitElement {
 
       ${this.tooltipStyle}
     `;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._setUpHoverController();
+  }
+
+  getPortal() {
+    return this._hoverController.portal;
   }
 }
 

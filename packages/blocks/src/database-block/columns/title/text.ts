@@ -73,13 +73,6 @@ const styles = css`
 `;
 
 abstract class BaseTextCell extends BaseCellRenderer<Text> {
-  override accessor view!: DataViewTableManager | DataViewKanbanManager;
-
-  static override styles = styles;
-
-  @property({ attribute: false })
-  accessor showIcon = false;
-
   get service() {
     return this.view
       .getContext(HostContextKey)
@@ -110,15 +103,22 @@ abstract class BaseTextCell extends BaseCellRenderer<Text> {
     return this.view.columnGet(columnId);
   }
 
-  @query('rich-text')
-  accessor richText!: RichText;
-
   get inlineEditor() {
     assertExists(this.richText);
     const inlineEditor = this.richText.inlineEditor;
     assertExists(inlineEditor);
     return inlineEditor;
   }
+
+  static override styles = styles;
+
+  override accessor view!: DataViewTableManager | DataViewKanbanManager;
+
+  @property({ attribute: false })
+  accessor showIcon = false;
+
+  @query('rich-text')
+  accessor richText!: RichText;
 
   renderIcon() {
     if (!this.showIcon) {

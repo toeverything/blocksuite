@@ -59,9 +59,13 @@ class LassoOverlay extends Overlay {
 }
 
 export class LassoToolController extends EdgelessToolController<LassoTool> {
-  readonly tool = {
-    type: 'lasso',
-  } as LassoTool;
+  get selection() {
+    return this._edgeless.service.selection;
+  }
+
+  get isSelecting() {
+    return this._isSelecting;
+  }
 
   private _overlay = new LassoOverlay();
 
@@ -75,17 +79,9 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
 
   private _currentSelectionState = new Set<string>(); // to finalize the selection
 
-  get selection() {
-    return this._edgeless.service.selection;
-  }
-
-  get isSelecting() {
-    return this._isSelecting;
-  }
-
-  abort() {
-    this._reset();
-  }
+  readonly tool = {
+    type: 'lasso',
+  } as LassoTool;
 
   private toModelCoord(p: IPoint): IVec {
     return this._service.viewport.toModelCoord(p.x, p.y);
@@ -199,6 +195,10 @@ export class LassoToolController extends EdgelessToolController<LassoTool> {
         break;
     }
     this._setSelectionState(Array.from(set), false);
+  }
+
+  abort() {
+    this._reset();
   }
 
   // For Freehand Mode =

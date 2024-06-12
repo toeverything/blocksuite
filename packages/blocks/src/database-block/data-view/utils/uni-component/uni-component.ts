@@ -39,6 +39,10 @@ export class UniLit<
   Props,
   Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > extends ShadowlessElement {
+  get expose(): Expose | undefined {
+    return this.uniReturn?.expose;
+  }
+
   static override styles = css`
     uni-lit {
       display: contents;
@@ -56,10 +60,6 @@ export class UniLit<
 
   uniReturn?: UniComponentReturn<Props, Expose>;
 
-  get expose(): Expose | undefined {
-    return this.uniReturn?.expose;
-  }
-
   private mount() {
     this.uniReturn = this.uni?.(this, this.props);
     if (this.ref) {
@@ -70,16 +70,6 @@ export class UniLit<
 
   private unmount() {
     this.uniReturn?.unmount();
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.mount();
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.unmount();
   }
 
   protected override updated(_changedProperties: PropertyValues) {
@@ -94,6 +84,16 @@ export class UniLit<
 
   protected override render(): unknown {
     return html``;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.mount();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.unmount();
   }
 }
 

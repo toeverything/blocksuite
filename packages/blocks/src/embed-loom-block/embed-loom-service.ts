@@ -11,6 +11,9 @@ import { queryEmbedLoomData } from './utils.js';
 export class EmbedLoomBlockService extends BlockService<EmbedLoomModel> {
   private static readonly linkPreviewer = new LinkPreviewer();
 
+  static setLinkPreviewEndpoint =
+    EmbedLoomBlockService.linkPreviewer.setEndpoint;
+
   queryUrlData = (embedLoomModel: EmbedLoomModel) => {
     return queryEmbedLoomData(embedLoomModel);
   };
@@ -28,7 +31,4 @@ export class EmbedLoomBlockService extends BlockService<EmbedLoomModel> {
       });
     });
   }
-
-  static setLinkPreviewEndpoint =
-    EmbedLoomBlockService.linkPreviewer.setEndpoint;
 }

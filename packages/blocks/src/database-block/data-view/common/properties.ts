@@ -166,6 +166,13 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   @property({ attribute: false })
   accessor onBack: (() => void) | undefined = undefined;
 
+  @query('.properties-group')
+  accessor groupContainer!: HTMLElement;
+
+  private itemsGroup() {
+    return this.view.columnsWithoutFilter.map(id => this.view.columnGet(id));
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
@@ -177,9 +184,6 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       e.stopPropagation();
     });
   }
-
-  @query('.properties-group')
-  accessor groupContainer!: HTMLElement;
 
   override firstUpdated() {
     const sortable = new Sortable(this.groupContainer, {
@@ -205,10 +209,6 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     this._disposables.add({
       dispose: () => sortable.destroy(),
     });
-  }
-
-  private itemsGroup() {
-    return this.view.columnsWithoutFilter.map(id => this.view.columnGet(id));
   }
 
   renderColumn = (column: DataViewColumnManager) => {

@@ -11,6 +11,9 @@ import { queryEmbedGithubApiData, queryEmbedGithubData } from './utils.js';
 export class EmbedGithubBlockService extends BlockService<EmbedGithubModel> {
   private static readonly linkPreviewer = new LinkPreviewer();
 
+  static setLinkPreviewEndpoint =
+    EmbedGithubBlockService.linkPreviewer.setEndpoint;
+
   queryUrlData = (embedGithubModel: EmbedGithubModel) => {
     return queryEmbedGithubData(
       embedGithubModel,
@@ -35,7 +38,4 @@ export class EmbedGithubBlockService extends BlockService<EmbedGithubModel> {
       });
     });
   }
-
-  static setLinkPreviewEndpoint =
-    EmbedGithubBlockService.linkPreviewer.setEndpoint;
 }

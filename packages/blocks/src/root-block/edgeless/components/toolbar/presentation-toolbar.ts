@@ -21,7 +21,21 @@ import { EdgelessToolbarToolMixin } from './mixins/tool.mixin.js';
 
 @customElement('presentation-toolbar')
 export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
-  override type: EdgelessTool['type'] = 'frameNavigator';
+  private get _cachedPresentHideToolbar() {
+    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
+  }
+
+  private set _cachedPresentHideToolbar(value) {
+    this.edgeless.service.editPropsStore.setItem('presentHideToolbar', !!value);
+  }
+
+  private get _frames(): FrameBlockModel[] {
+    return this.edgeless.service.frames;
+  }
+
+  get host() {
+    return this.edgeless.host;
+  }
 
   static override styles = css`
     :host {
@@ -70,29 +84,6 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     }
   `;
 
-  private get _cachedPresentHideToolbar() {
-    return !!this.edgeless.service.editPropsStore.getItem('presentHideToolbar');
-  }
-
-  private set _cachedPresentHideToolbar(value) {
-    this.edgeless.service.editPropsStore.setItem('presentHideToolbar', !!value);
-  }
-
-  @property({ attribute: true, type: Boolean })
-  accessor visible = true;
-
-  @property({ type: Boolean })
-  accessor settingMenuShow = false;
-
-  @property()
-  accessor setSettingMenuShow: (show: boolean) => void = () => {};
-
-  @property({ type: Boolean })
-  accessor frameMenuShow = false;
-
-  @property()
-  accessor setFrameMenuShow: (show: boolean) => void = () => {};
-
   @state()
   private accessor _navigatorMode: NavigatorMode = 'fit';
 
@@ -107,13 +98,16 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
 
   private _cachedIndex = -1;
 
-  private get _frames(): FrameBlockModel[] {
-    return this.edgeless.service.frames;
-  }
+  override type: EdgelessTool['type'] = 'frameNavigator';
 
-  get host() {
-    return this.edgeless.host;
-  }
+  @property({ attribute: true, type: Boolean })
+  accessor visible = true;
+
+  @property({ type: Boolean })
+  accessor settingMenuShow = false;
+
+  @property({ type: Boolean })
+  accessor frameMenuShow = false;
 
   constructor(edgeless: EdgelessRootBlockComponent) {
     super();
@@ -186,6 +180,21 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
     this.edgeless.slots.fullScreenToggled.emit();
   }
 
+  protected override updated(changedProperties: PropertyValues) {
+    if (
+      changedProperties.has('_currentFrameIndex') &&
+      this.edgelessTool.type === 'frameNavigator'
+    ) {
+      this._moveToCurrentFrame();
+    }
+  }
+
+  @property()
+  accessor setSettingMenuShow: (show: boolean) => void = () => {};
+
+  @property()
+  accessor setFrameMenuShow: (show: boolean) => void = () => {};
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
     const { slots } = edgeless;
@@ -244,15 +253,6 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(LitElement) {
       this.edgeless.service.editPropsStore.getItem('presentFillScreen') === true
         ? 'fill'
         : 'fit';
-  }
-
-  protected override updated(changedProperties: PropertyValues) {
-    if (
-      changedProperties.has('_currentFrameIndex') &&
-      this.edgelessTool.type === 'frameNavigator'
-    ) {
-      this._moveToCurrentFrame();
-    }
   }
 
   override render() {

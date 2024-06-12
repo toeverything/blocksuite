@@ -22,6 +22,93 @@ export class ColumnDataStats<
     this.dataViewManager = column.dataViewManager;
   }
 
+  private _assertColumnType(type: string) {
+    assertEquals(
+      this.column.type,
+      type,
+      `This function should only be called in a column of type ${type}`
+    );
+  }
+
+  private _getEmptyCellCount() {
+    let empty = 0;
+
+    for (const rId of this.dataViewManager.rows) {
+      const colVal = this.column.getStringValue(rId).trim();
+      if (colVal === '') empty++;
+    }
+    return empty;
+  }
+
+  private _getNonEmptyCellCount() {
+    let notEmpty = 0;
+
+    for (const rId of this.dataViewManager.rows) {
+      const colVal = this.column.getStringValue(rId).trim();
+      if (colVal !== '') notEmpty++;
+    }
+    return notEmpty;
+  }
+
+  // this functions also splits the individual values inside the multiselect
+  private _getAllValuesAsString() {
+    const colType = this.column.type;
+    const colValues: string[] = [];
+
+    for (const rId of this.dataViewManager.rows) {
+      switch (colType) {
+        case 'multi-select': {
+          const options = (this.column.data.options ?? []) as SelectTag[];
+          const values = (this.column.getValue(rId) ?? []) as string[];
+          const map = new Map<string, SelectTag>(options?.map(v => [v.id, v]));
+          for (const id of values) {
+            const opt = map.get(id);
+
+            if (opt) colValues.push(opt.value);
+          }
+          break;
+        }
+        default: {
+          const value = this.column.getStringValue(rId);
+          if (value.trim() !== '') colValues.push(value);
+        }
+      }
+    }
+
+    return colValues;
+  }
+
+  // gets the count of non-empty values in the column with separated out multiselect items
+  private _getColumnValueCounts() {
+    return this._getAllValuesAsString().length;
+  }
+
+  // @ts-ignore
+  private _getColValuesAsString(noEmpty = false) {
+    const val = this.dataViewManager.rows.map(rId => {
+      return this.column.getStringValue(rId);
+    });
+    return noEmpty ? val.filter(v => v.trim() !== '') : val;
+  }
+
+  private _getColValuesAsNumber() {
+    this._assertColumnType('number');
+    const values: number[] = [];
+    for (const rId of this.dataViewManager.rows) {
+      const value = this.column.getValue(rId) as number | undefined;
+      if (value !== undefined) values.push(value);
+    }
+    return values;
+  }
+
+  private _getCheckBoxColValues() {
+    this._assertColumnType('checkbox');
+    const val = this.dataViewManager.rows.map(rId => {
+      return this.column.getValue(rId);
+    });
+    return val as (boolean | undefined)[];
+  }
+
   /**
    * Returns the number of cells in the column.
    */
@@ -201,92 +288,5 @@ export class ColumnDataStats<
   percentNotChecked() {
     this._assertColumnType('checkbox');
     return 1.0 - this.percentChecked();
-  }
-
-  private _assertColumnType(type: string) {
-    assertEquals(
-      this.column.type,
-      type,
-      `This function should only be called in a column of type ${type}`
-    );
-  }
-
-  private _getEmptyCellCount() {
-    let empty = 0;
-
-    for (const rId of this.dataViewManager.rows) {
-      const colVal = this.column.getStringValue(rId).trim();
-      if (colVal === '') empty++;
-    }
-    return empty;
-  }
-
-  private _getNonEmptyCellCount() {
-    let notEmpty = 0;
-
-    for (const rId of this.dataViewManager.rows) {
-      const colVal = this.column.getStringValue(rId).trim();
-      if (colVal !== '') notEmpty++;
-    }
-    return notEmpty;
-  }
-
-  // this functions also splits the individual values inside the multiselect
-  private _getAllValuesAsString() {
-    const colType = this.column.type;
-    const colValues: string[] = [];
-
-    for (const rId of this.dataViewManager.rows) {
-      switch (colType) {
-        case 'multi-select': {
-          const options = (this.column.data.options ?? []) as SelectTag[];
-          const values = (this.column.getValue(rId) ?? []) as string[];
-          const map = new Map<string, SelectTag>(options?.map(v => [v.id, v]));
-          for (const id of values) {
-            const opt = map.get(id);
-
-            if (opt) colValues.push(opt.value);
-          }
-          break;
-        }
-        default: {
-          const value = this.column.getStringValue(rId);
-          if (value.trim() !== '') colValues.push(value);
-        }
-      }
-    }
-
-    return colValues;
-  }
-
-  // gets the count of non-empty values in the column with separated out multiselect items
-  private _getColumnValueCounts() {
-    return this._getAllValuesAsString().length;
-  }
-
-  // @ts-ignore
-  private _getColValuesAsString(noEmpty = false) {
-    const val = this.dataViewManager.rows.map(rId => {
-      return this.column.getStringValue(rId);
-    });
-    return noEmpty ? val.filter(v => v.trim() !== '') : val;
-  }
-
-  private _getColValuesAsNumber() {
-    this._assertColumnType('number');
-    const values: number[] = [];
-    for (const rId of this.dataViewManager.rows) {
-      const value = this.column.getValue(rId) as number | undefined;
-      if (value !== undefined) values.push(value);
-    }
-    return values;
-  }
-
-  private _getCheckBoxColValues() {
-    this._assertColumnType('checkbox');
-    const val = this.dataViewManager.rows.map(rId => {
-      return this.column.getValue(rId);
-    });
-    return val as (boolean | undefined)[];
   }
 }

@@ -12,29 +12,6 @@ export class RangeControl {
 
   constructor(private _dispatcher: UIEventDispatcher) {}
 
-  listen() {
-    this._dispatcher.disposables.addFromEvent(
-      document,
-      'selectionchange',
-      this._selectionChange
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'compositionstart',
-      this._compositionStart
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'compositionend',
-      this._compositionEnd
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.host,
-      'compositionupdate',
-      this._compositionUpdate
-    );
-  }
-
   private _compositionUpdate = (event: Event) => {
     const scope = this._buildScope('compositionUpdate');
 
@@ -176,5 +153,28 @@ export class RangeControl {
       blocks.add(blockView.path);
     });
     return Array.from(blocks);
+  }
+
+  listen() {
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'selectionchange',
+      this._selectionChange
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'compositionstart',
+      this._compositionStart
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'compositionend',
+      this._compositionEnd
+    );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.host,
+      'compositionupdate',
+      this._compositionUpdate
+    );
   }
 }

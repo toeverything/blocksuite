@@ -41,6 +41,14 @@ export type AskAIButtonOptions = {
 
 @customElement('ask-ai-button')
 export class AskAIButton extends WithDisposable(LitElement) {
+  get _edgeless() {
+    const rootService = getRootService(this.host);
+    if (rootService instanceof EdgelessRootService) {
+      return rootService;
+    }
+    return null;
+  }
+
   static override styles = css`
     .ask-ai-button {
       border-radius: 4px;
@@ -81,42 +89,10 @@ export class AskAIButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  accessor host!: EditorHost;
-
-  @property({ attribute: false })
-  accessor actionGroups!: AIItemGroupConfig[];
-
-  @property({ attribute: false })
-  accessor toggleType: toggleType = 'hover';
-
-  @property({ attribute: false })
-  accessor options: AskAIButtonOptions = {
-    size: 'middle',
-    backgroundColor: undefined,
-    boxShadow: undefined,
-    panelWidth: 330,
-  };
-
   @query('.ask-ai-button')
   private accessor _askAIButton!: HTMLDivElement;
 
   private _abortController: AbortController | null = null;
-
-  get _edgeless() {
-    const rootService = getRootService(this.host);
-    if (rootService instanceof EdgelessRootService) {
-      return rootService;
-    }
-    return null;
-  }
-
-  private _clearAbortController = () => {
-    if (this._abortController) {
-      this._abortController.abort();
-      this._abortController = null;
-    }
-  };
 
   private _whenHover = new HoverController(
     this,
@@ -137,6 +113,30 @@ export class AskAIButton extends WithDisposable(LitElement) {
     },
     { allowMultiple: true }
   );
+
+  @property({ attribute: false })
+  accessor host!: EditorHost;
+
+  @property({ attribute: false })
+  accessor actionGroups!: AIItemGroupConfig[];
+
+  @property({ attribute: false })
+  accessor toggleType: toggleType = 'hover';
+
+  @property({ attribute: false })
+  accessor options: AskAIButtonOptions = {
+    size: 'middle',
+    backgroundColor: undefined,
+    boxShadow: undefined,
+    panelWidth: 330,
+  };
+
+  private _clearAbortController = () => {
+    if (this._abortController) {
+      this._abortController.abort();
+      this._abortController = null;
+    }
+  };
 
   private _toggleAIPanel = () => {
     if (this.toggleType !== 'click') {

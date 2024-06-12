@@ -23,6 +23,9 @@ type EmbedCardModel =
 export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
+  @state()
+  private accessor _titleInputValue = '';
+
   @property({ attribute: false })
   accessor model!: EmbedCardModel;
 
@@ -34,24 +37,6 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
 
   @query('.embed-card-modal-input.description')
   accessor descInput!: HTMLTextAreaElement;
-
-  @state()
-  private accessor _titleInputValue = '';
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this.updateComplete
-      .then(() => {
-        this.titleInput.focus();
-        this.titleInput.setSelectionRange(0, this.titleInput.value.length);
-      })
-      .catch(console.error);
-
-    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
-
-    this._titleInputValue = this.model.title ?? '';
-  }
 
   private _handleInput(e: InputEvent) {
     const target = e.target as HTMLInputElement;
@@ -80,6 +65,21 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
       description: this.descInput.value,
     });
     this.remove();
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.updateComplete
+      .then(() => {
+        this.titleInput.focus();
+        this.titleInput.setSelectionRange(0, this.titleInput.value.length);
+      })
+      .catch(console.error);
+
+    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
+
+    this._titleInputValue = this.model.title ?? '';
   }
 
   override render() {

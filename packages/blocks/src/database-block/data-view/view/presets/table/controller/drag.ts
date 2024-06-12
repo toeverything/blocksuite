@@ -8,11 +8,11 @@ import { TableRow } from '../components/row.js';
 import type { DataViewTable } from '../table-view.js';
 
 export class TableDragController implements ReactiveController {
+  dropPreview = createDropPreview();
+
   constructor(private host: DataViewTable) {
     this.host.addController(this);
   }
-
-  dropPreview = createDropPreview();
 
   getInsertPosition = (
     evt: MouseEvent

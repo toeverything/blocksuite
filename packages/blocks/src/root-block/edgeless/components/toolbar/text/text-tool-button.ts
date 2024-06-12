@@ -30,14 +30,14 @@ export class EdgelessTextToolButton extends ToolbarButtonWithMenuMixin<
     }
   `;
 
+  protected override _states = ['color'] as const;
+
   @state()
   accessor color = GET_DEFAULT_TEXT_COLOR();
 
   override type = 'text' as const;
 
   override _type = 'text' as const;
-
-  protected override _states = ['color'] as const;
 
   private _toggleTextMenu() {
     if (this._menu) {

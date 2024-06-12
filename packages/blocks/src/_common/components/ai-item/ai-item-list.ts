@@ -42,6 +42,10 @@ export class AIItemList extends WithDisposable(LitElement) {
     }
   `;
 
+  private _abortController: AbortController | null = null;
+
+  private _activeSubMenuItem: AIItemConfig | null = null;
+
   @property({ attribute: false })
   accessor host!: EditorHost;
 
@@ -50,10 +54,6 @@ export class AIItemList extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor onClick: (() => void) | undefined = undefined;
-
-  private _abortController: AbortController | null = null;
-
-  private _activeSubMenuItem: AIItemConfig | null = null;
 
   private _itemClassName = (item: AIItemConfig) => {
     return 'ai-item-' + item.name.split(' ').join('-').toLocaleLowerCase();

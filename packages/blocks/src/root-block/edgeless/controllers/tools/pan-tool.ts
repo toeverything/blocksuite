@@ -5,11 +5,11 @@ import type { PanTool } from '../../../../_common/utils/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class PanToolController extends EdgelessToolController<PanTool> {
+  private _lastPoint: [number, number] | null = null;
+
   readonly tool = {
     type: 'pan',
   } as PanTool;
-
-  private _lastPoint: [number, number] | null = null;
 
   onContainerClick(): void {
     noop();

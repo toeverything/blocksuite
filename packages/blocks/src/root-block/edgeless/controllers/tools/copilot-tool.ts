@@ -13,18 +13,6 @@ import {
 import { EdgelessToolController } from './index.js';
 
 export class CopilotSelectionController extends EdgelessToolController<CopilotSelectionTool> {
-  readonly tool = {
-    type: 'copilot',
-  } as CopilotSelectionTool;
-
-  private _dragging = false;
-
-  dragStartPoint: [number, number] = [0, 0];
-
-  dragLastPoint: [number, number] = [0, 0];
-
-  draggingAreaUpdated = new Slot<boolean | void>();
-
   get selection() {
     return this._edgeless.service.selection;
   }
@@ -52,6 +40,23 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
       this._edgeless.doc.root!.id
     ) as AffineAIPanelWidget;
     return aiPanel && aiPanel.state !== 'hidden';
+  }
+
+  private _dragging = false;
+
+  readonly tool = {
+    type: 'copilot',
+  } as CopilotSelectionTool;
+
+  dragStartPoint: [number, number] = [0, 0];
+
+  dragLastPoint: [number, number] = [0, 0];
+
+  draggingAreaUpdated = new Slot<boolean | void>();
+
+  private _initDragState(e: PointerEventState) {
+    this.dragStartPoint = this._service.viewport.toModelCoord(e.x, e.y);
+    this.dragLastPoint = this.dragStartPoint;
   }
 
   abort() {
@@ -90,11 +95,6 @@ export class CopilotSelectionController extends EdgelessToolController<CopilotSe
     });
 
     this.draggingAreaUpdated.emit(true);
-  }
-
-  private _initDragState(e: PointerEventState) {
-    this.dragStartPoint = this._service.viewport.toModelCoord(e.x, e.y);
-    this.dragLastPoint = this.dragStartPoint;
   }
 
   override onContainerDragStart(e: PointerEventState): void {

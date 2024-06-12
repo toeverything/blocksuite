@@ -15,6 +15,10 @@ export class SelectGroupView extends BaseGroup<
   },
   string
 > {
+  get tag() {
+    return this.data.options.find(v => v.id === this.value);
+  }
+
   static override styles = css`
     data-view-group-title-select-view {
       overflow: hidden;
@@ -38,25 +42,6 @@ export class SelectGroupView extends BaseGroup<
       white-space: nowrap;
     }
   `;
-
-  get tag() {
-    return this.data.options.find(v => v.id === this.value);
-  }
-
-  updateTag(tag: Partial<SelectTag>) {
-    this.updateData?.({
-      ...this.data,
-      options: this.data.options.map(v => {
-        if (v.id === this.value) {
-          return {
-            ...v,
-            ...tag,
-          };
-        }
-        return v;
-      }),
-    });
-  }
 
   private _click = () => {
     if (this.readonly) {
@@ -110,5 +95,20 @@ export class SelectGroupView extends BaseGroup<
     return html` <div @click="${this._click}" class="${classList}">
       <div class="tag" style="${style}">${tag.value}</div>
     </div>`;
+  }
+
+  updateTag(tag: Partial<SelectTag>) {
+    this.updateData?.({
+      ...this.data,
+      options: this.data.options.map(v => {
+        if (v.id === this.value) {
+          return {
+            ...v,
+            ...tag,
+          };
+        }
+        return v;
+      }),
+    });
   }
 }

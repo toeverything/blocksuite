@@ -22,6 +22,15 @@ import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
+  }
+
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
+  }
+
   static PLACEHOLDER_TEXT = 'Type from here';
 
   static HORIZONTAL_PADDING = 10;
@@ -64,6 +73,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  private _keeping = false;
+
+  private _isComposition = false;
+
   @query('rich-text')
   accessor richText!: RichText;
 
@@ -73,18 +86,78 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
 
-  get inlineEditor() {
-    assertExists(this.richText.inlineEditor);
-    return this.richText.inlineEditor;
-  }
+  private _updateRect = () => {
+    const edgeless = this.edgeless;
+    const element = this.element;
 
-  get inlineEditorContainer() {
-    return this.inlineEditor.rootElement;
-  }
+    if (!edgeless || !element) return;
 
-  private _keeping = false;
+    const newWidth = this.inlineEditorContainer.scrollWidth;
+    const newHeight = this.inlineEditorContainer.scrollHeight;
+    const bound = new Bound(element.x, element.y, newWidth, newHeight);
+    const { x, y, w, h, rotate } = element;
 
-  private _isComposition = false;
+    switch (element.textAlign) {
+      case 'left':
+        {
+          const newPos = this.getCoordsOnLeftAlign(
+            {
+              x,
+              y,
+              w,
+              h,
+              r: toRadian(rotate),
+            },
+            newWidth,
+            newHeight
+          );
+
+          bound.x = newPos.x;
+          bound.y = newPos.y;
+        }
+        break;
+      case 'center':
+        {
+          const newPos = this.getCoordsOnCenterAlign(
+            {
+              x,
+              y,
+              w,
+              h,
+              r: toRadian(rotate),
+            },
+            newWidth,
+            newHeight
+          );
+
+          bound.x = newPos.x;
+          bound.y = newPos.y;
+        }
+        break;
+      case 'right':
+        {
+          const newPos = this.getCoordsOnRightAlign(
+            {
+              x,
+              y,
+              w,
+              h,
+              r: toRadian(rotate),
+            },
+            newWidth,
+            newHeight
+          );
+
+          bound.x = newPos.x;
+          bound.y = newPos.y;
+        }
+        break;
+    }
+
+    edgeless.service.updateElement(element.id, {
+      xywh: bound.serialize(),
+    });
+  };
 
   setKeeping(keeping: boolean) {
     this._keeping = keeping;
@@ -162,79 +235,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
     return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
   }
-
-  private _updateRect = () => {
-    const edgeless = this.edgeless;
-    const element = this.element;
-
-    if (!edgeless || !element) return;
-
-    const newWidth = this.inlineEditorContainer.scrollWidth;
-    const newHeight = this.inlineEditorContainer.scrollHeight;
-    const bound = new Bound(element.x, element.y, newWidth, newHeight);
-    const { x, y, w, h, rotate } = element;
-
-    switch (element.textAlign) {
-      case 'left':
-        {
-          const newPos = this.getCoordsOnLeftAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-      case 'center':
-        {
-          const newPos = this.getCoordsOnCenterAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-      case 'right':
-        {
-          const newPos = this.getCoordsOnRightAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-    }
-
-    edgeless.service.updateElement(element.id, {
-      xywh: bound.serialize(),
-    });
-  };
 
   getVisualPosition(element: TextElementModel) {
     const { x, y, w, h, rotate } = element;

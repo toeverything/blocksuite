@@ -54,6 +54,41 @@ export class PageRootBlockComponent extends BlockElement<
   PageRootService,
   PageRootBlockWidgetName
 > {
+  get slots() {
+    return this.service.slots;
+  }
+
+  get viewportElement(): HTMLDivElement {
+    if (this._viewportElement) return this._viewportElement;
+    this._viewportElement = this.host.closest(
+      '.affine-page-viewport'
+    ) as HTMLDivElement | null;
+    assertExists(this._viewportElement);
+    return this._viewportElement;
+  }
+
+  get viewport(): Viewport {
+    const {
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    } = this.viewportElement;
+    const { top, left } = this.viewportElement.getBoundingClientRect();
+    return {
+      top,
+      left,
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    };
+  }
+
   static override styles = css`
     editor-host:has(> affine-page-root, * > affine-page-root) {
       display: block;
@@ -109,49 +144,14 @@ export class PageRootBlockComponent extends BlockElement<
     }
   `;
 
+  private _viewportElement: HTMLDivElement | null = null;
+
   keyboardManager: PageKeyboardManager | null = null;
 
   clipboardController = new PageClipboard(this);
 
   @query('.affine-page-root-block-container')
   accessor rootElementContainer!: HTMLDivElement;
-
-  private _viewportElement: HTMLDivElement | null = null;
-
-  get slots() {
-    return this.service.slots;
-  }
-
-  get viewportElement(): HTMLDivElement {
-    if (this._viewportElement) return this._viewportElement;
-    this._viewportElement = this.host.closest(
-      '.affine-page-viewport'
-    ) as HTMLDivElement | null;
-    assertExists(this._viewportElement);
-    return this._viewportElement;
-  }
-
-  get viewport(): Viewport {
-    const {
-      scrollLeft,
-      scrollTop,
-      scrollWidth,
-      scrollHeight,
-      clientWidth,
-      clientHeight,
-    } = this.viewportElement;
-    const { top, left } = this.viewportElement.getBoundingClientRect();
-    return {
-      top,
-      left,
-      scrollLeft,
-      scrollTop,
-      scrollWidth,
-      scrollHeight,
-      clientWidth,
-      clientHeight,
-    };
-  }
 
   private _createDefaultNoteBlock() {
     const { doc } = this;

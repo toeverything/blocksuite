@@ -9,6 +9,18 @@ import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 import { getSurfaceBlock } from './utils.js';
 
 export class SurfaceRefRenderer {
+  get surfaceService() {
+    return this.std.spec.getService('affine:surface');
+  }
+
+  get surfaceRenderer() {
+    return this._surfaceRenderer;
+  }
+
+  get surfaceModel() {
+    return this._surfaceModel;
+  }
+
   private readonly _surfaceRenderer: Renderer;
 
   private _surfaceModel: SurfaceBlockModel | null = null;
@@ -22,18 +34,6 @@ export class SurfaceRefRenderer {
     mounted: new Slot(),
     unmounted: new Slot(),
   };
-
-  get surfaceService() {
-    return this.std.spec.getService('affine:surface');
-  }
-
-  get surfaceRenderer() {
-    return this._surfaceRenderer;
-  }
-
-  get surfaceModel() {
-    return this._surfaceModel;
-  }
 
   constructor(
     readonly id: string,
@@ -60,32 +60,6 @@ export class SurfaceRefRenderer {
     this.slots.unmounted.once(() => {
       themeObserver.dispose();
     });
-  }
-
-  mount() {
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-
-    this._initSurfaceModel();
-    this._initSurfaceRenderer();
-    this.slots.mounted.emit();
-  }
-
-  unmount() {
-    this._disposables.dispose();
-    this.slots.unmounted.emit();
-  }
-
-  getModel(id: string): BlockSuite.EdgelessModelType | null {
-    return (
-      (this.doc.getBlockById(id) as Exclude<
-        BlockSuite.EdgelessBlockModelType,
-        NoteBlockModel
-      >) ??
-      this._surfaceModel?.getElementById(id) ??
-      null
-    );
   }
 
   private _initSurfaceRenderer() {
@@ -116,5 +90,31 @@ export class SurfaceRefRenderer {
         })
       );
     }
+  }
+
+  mount() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+
+    this._initSurfaceModel();
+    this._initSurfaceRenderer();
+    this.slots.mounted.emit();
+  }
+
+  unmount() {
+    this._disposables.dispose();
+    this.slots.unmounted.emit();
+  }
+
+  getModel(id: string): BlockSuite.EdgelessModelType | null {
+    return (
+      (this.doc.getBlockById(id) as Exclude<
+        BlockSuite.EdgelessBlockModelType,
+        NoteBlockModel
+      >) ??
+      this._surfaceModel?.getElementById(id) ??
+      null
+    );
   }
 }

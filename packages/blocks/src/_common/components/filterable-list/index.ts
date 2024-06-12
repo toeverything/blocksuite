@@ -19,6 +19,18 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
 ) {
   static override styles = filterableListStyles;
 
+  @query('#filter-input')
+  private accessor _filterInput!: HTMLInputElement;
+
+  @query('.filterable-item.focussed')
+  private accessor _focussedItem!: HTMLElement | null;
+
+  @state()
+  private accessor _filterText = '';
+
+  @state()
+  private accessor _curFocusIndex = 0;
+
   @property({ attribute: false })
   accessor placement: Placement | undefined = undefined;
 
@@ -32,25 +44,6 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
 
   @property({ attribute: false })
   accessor options!: FilterableListOptions<Props>;
-
-  @query('#filter-input')
-  private accessor _filterInput!: HTMLInputElement;
-
-  @query('.filterable-item.focussed')
-  private accessor _focussedItem!: HTMLElement | null;
-
-  @state()
-  private accessor _filterText = '';
-
-  @state()
-  private accessor _curFocusIndex = 0;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    requestAnimationFrame(() => {
-      this._filterInput.focus();
-    });
-  }
 
   private _filterItems() {
     const searchFilter = !this._filterText
@@ -111,6 +104,13 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
           </div>
         </icon-button>
       `;
+    });
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    requestAnimationFrame(() => {
+      this._filterInput.focus();
     });
   }
 

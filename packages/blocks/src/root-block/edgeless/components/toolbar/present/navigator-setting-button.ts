@@ -46,14 +46,21 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     }
   `;
 
+  @query('.navigator-setting-button')
+  private accessor _navigatorSettingButton!: HTMLElement;
+
+  @query('.navigator-setting-menu')
+  private accessor _navigatorSettingMenu!: HTMLElement;
+
+  private _navigatorSettingPopper?: ReturnType<
+    typeof createButtonPopper
+  > | null = null;
+
   @state()
   accessor blackBackground = true;
 
   @property({ attribute: false })
   accessor popperShow = false;
-
-  @property({ attribute: false })
-  accessor setPopperShow: (show: boolean) => void = () => {};
 
   @property({ attribute: false })
   accessor hideToolbar = false;
@@ -64,16 +71,6 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   accessor edgeless!: EdgelessRootBlockComponent;
-
-  @query('.navigator-setting-button')
-  private accessor _navigatorSettingButton!: HTMLElement;
-
-  @query('.navigator-setting-menu')
-  private accessor _navigatorSettingMenu!: HTMLElement;
-
-  private _navigatorSettingPopper?: ReturnType<
-    typeof createButtonPopper
-  > | null = null;
 
   private _tryRestoreSettings() {
     const blackBackground = this.edgeless.service.editPropsStore.getItem(
@@ -88,6 +85,9 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
       blackBackground: this.blackBackground,
     });
   };
+
+  @property({ attribute: false })
+  accessor setPopperShow: (show: boolean) => void = () => {};
 
   override connectedCallback() {
     super.connectedCallback();

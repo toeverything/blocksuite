@@ -34,36 +34,6 @@ export interface CursorSelectionState {
 }
 
 export class EdgelessSelectionManager {
-  service!: EdgelessRootService;
-
-  surfaceModel!: SurfaceBlockModel;
-
-  disposable: DisposableGroup = new DisposableGroup();
-
-  readonly slots = {
-    updated: new Slot<SurfaceSelection[]>(),
-    remoteUpdated: new Slot(),
-
-    cursorUpdated: new Slot<CursorSelection>(),
-    remoteCursorUpdated: new Slot(),
-  };
-
-  private _lastSurfaceSelections: SurfaceSelection[] = [];
-
-  private _surfaceSelections: SurfaceSelection[] = [];
-
-  private _cursorSelection: CursorSelection | null = null;
-
-  private _activeGroup: GroupElementModel | MindmapElementModel | null = null;
-
-  private _selectedSet = new Set<string>();
-
-  private _remoteSelectedSet = new Set<string>();
-
-  private _remoteCursorSelectionMap = new Map<number, CursorSelection>();
-
-  private _remoteSurfaceSelectionsMap = new Map<number, SurfaceSelection[]>();
-
   get lastSurfaceSelections() {
     return this._lastSurfaceSelections;
   }
@@ -134,6 +104,36 @@ export class EdgelessSelectionManager {
   get stdSelectionManager() {
     return this.service.std.selection;
   }
+
+  private _lastSurfaceSelections: SurfaceSelection[] = [];
+
+  private _surfaceSelections: SurfaceSelection[] = [];
+
+  private _cursorSelection: CursorSelection | null = null;
+
+  private _activeGroup: GroupElementModel | MindmapElementModel | null = null;
+
+  private _selectedSet = new Set<string>();
+
+  private _remoteSelectedSet = new Set<string>();
+
+  private _remoteCursorSelectionMap = new Map<number, CursorSelection>();
+
+  private _remoteSurfaceSelectionsMap = new Map<number, SurfaceSelection[]>();
+
+  service!: EdgelessRootService;
+
+  surfaceModel!: SurfaceBlockModel;
+
+  disposable: DisposableGroup = new DisposableGroup();
+
+  readonly slots = {
+    updated: new Slot<SurfaceSelection[]>(),
+    remoteUpdated: new Slot(),
+
+    cursorUpdated: new Slot<CursorSelection>(),
+    remoteCursorUpdated: new Slot(),
+  };
 
   constructor(service: EdgelessRootService) {
     this.service = service;
