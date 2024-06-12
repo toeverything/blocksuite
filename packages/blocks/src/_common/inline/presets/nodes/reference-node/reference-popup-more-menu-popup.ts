@@ -122,7 +122,7 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
             width="126px"
             height="32px"
             class="menu-item open"
-            text="Open"
+            text="Open this doc"
             @click=${() => this._openDoc()}
           >
             ${OpenIcon}
@@ -132,7 +132,7 @@ export class ReferencePopupMoreMenu extends WithDisposable(LitElement) {
             ? html`<icon-button
                 width="126px"
                 height="32px"
-                class="menu-item open"
+                class="menu-item center-peek"
                 text="Open in center peek"
                 @click=${() => peek(this.target)}
               >

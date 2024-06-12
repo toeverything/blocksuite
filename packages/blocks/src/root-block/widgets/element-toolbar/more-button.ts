@@ -4,14 +4,17 @@ import '../../edgeless/components/toolbar/shape/shape-menu.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { isPeekable, peek } from '../../../_common/components/peekable.js';
 import {
   BringForwardIcon,
   BringToFrontIcon,
+  CenterPeekIcon,
   CopyAsPngIcon,
   FontLinkedDocIcon,
   FrameIcon,
@@ -21,6 +24,7 @@ import {
   MoreDuplicateIcon,
   MoreHorizontalIcon,
   MoreVerticalIcon,
+  OpenIcon,
   RefreshIcon,
   SendBackwardIcon,
   SendToBackIcon,
@@ -37,7 +41,9 @@ import type {
   BookmarkBlockComponent,
   EmbedFigmaBlockComponent,
   EmbedGithubBlockComponent,
+  EmbedLinkedDocBlockComponent,
   EmbedLoomBlockComponent,
+  EmbedSyncedDocBlockComponent,
   EmbedYoutubeBlockComponent,
   ImageBlockComponent,
 } from '../../../index.js';
@@ -89,12 +95,25 @@ type Action =
         | 'copy'
         | 'duplicate'
         | 'reload'
+        | 'open'
+        | 'center-peek'
         | ReorderingType;
       disabled?: boolean;
     }
   | {
       type: 'divider';
     };
+
+const OPEN_ACTION: Action = {
+  icon: OpenIcon,
+  name: 'Open this doc',
+  type: 'open',
+};
+const CENTER_PEEK_ACTION: Action = {
+  icon: CenterPeekIcon,
+  name: 'Open in center peek',
+  type: 'center-peek',
+};
 
 const REORDER_ACTIONS: Action[] = [
   { icon: BringToFrontIcon, name: 'Bring to Front', type: 'front' },
@@ -242,12 +261,34 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return this.edgeless.host.view;
   }
 
+  private get _blockElement() {
+    const blockSelection = this.edgeless.service.selection.surfaceSelections;
+    if (blockSelection.length !== 1) {
+      return;
+    }
+
+    const blockElement = this.view.getBlock(blockSelection[0].blockId) as
+      | BookmarkBlockComponent
+      | EmbedGithubBlockComponent
+      | EmbedYoutubeBlockComponent
+      | EmbedFigmaBlockComponent
+      | EmbedLinkedDocBlockComponent
+      | EmbedSyncedDocBlockComponent
+      | EmbedLoomBlockComponent
+      | null;
+    assertExists(blockElement);
+
+    return blockElement;
+  }
+
   get _Actions(): Action[] {
     const actions: Action[] = [
       FRAME_ACTION,
       GROUP_ACTION,
       ACTION_DIVIDER,
       ...REORDER_ACTIONS,
+      ACTION_DIVIDER,
+      ...this.getOpenActions(),
       ACTION_DIVIDER,
       ...COPY_ACTIONS,
       ...this.getRefreshAction(),
@@ -267,6 +308,30 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       ACTION_DIVIDER,
       DELETE_ACTION,
     ];
+  }
+
+  private getOpenActions(): Action[] {
+    const isSingleSelect = this.selection.selectedElements.length === 1;
+    const { firstElement } = this.selection;
+    const result: Action[] = [];
+
+    if (
+      isSingleSelect &&
+      (isEmbedLinkedDocBlock(firstElement) ||
+        isEmbedSyncedDocBlock(firstElement))
+    ) {
+      result.push(OPEN_ACTION);
+    }
+
+    if (
+      isSingleSelect &&
+      this._blockElement &&
+      isPeekable(this._blockElement)
+    ) {
+      result.push(CENTER_PEEK_ACTION);
+    }
+
+    return result;
   }
 
   private getRefreshAction(): Action[] {
@@ -452,6 +517,16 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       }
       case 'reload':
         this._reload(this.selection.surfaceSelections);
+        break;
+      case 'open':
+        if (this._blockElement) {
+          this._blockElement.open();
+        }
+        break;
+      case 'center-peek':
+        if (this._blockElement) {
+          peek(this._blockElement);
+        }
         break;
     }
   };

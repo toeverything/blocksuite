@@ -10,10 +10,16 @@ import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { RootBlockComponent } from '../../../../../root-block/types.js';
+import { isPeekable, peek } from '../../../../components/index.js';
 import { createLitPortal } from '../../../../components/portal.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../../../icons/index.js';
-import { EmbedWebIcon, LinkIcon, OpenIcon } from '../../../../icons/text.js';
+import {
+  CenterPeekIcon,
+  EmbedWebIcon,
+  LinkIcon,
+  OpenIcon,
+} from '../../../../icons/text.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 import { ReferencePopupMoreMenu } from './reference-popup-more-menu-popup.js';
 import { styles } from './styles.js';
@@ -228,10 +234,20 @@ export class ReferencePopup extends WithDisposable(LitElement) {
               @click=${this._openDoc}
             >
               ${OpenIcon}
-              <affine-tooltip .offset=${12}
-                >${'Click to open doc'}</affine-tooltip
-              >
+              <affine-tooltip .offset=${12}>${'Open this doc'}</affine-tooltip>
             </icon-button>
+            ${isPeekable(this.target)
+              ? html`<icon-button
+                  size="24px"
+                  class="affine-reference-popover-open-button"
+                  @click=${() => peek(this.target)}
+                >
+                  ${CenterPeekIcon}
+                  <affine-tooltip .offset=${12}
+                    >${'Open in center peek'}</affine-tooltip
+                  >
+                </icon-button>`
+              : nothing}
 
             <span class="affine-reference-popover-dividing-line"></span>
 

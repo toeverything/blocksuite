@@ -22,6 +22,7 @@ import type {
   EmbedToolbarBlockElement,
   EmbedToolbarModel,
 } from '../../../_common/components/embed-card/type.js';
+import { isPeekable, peek } from '../../../_common/components/index.js';
 import { createLitPortal } from '../../../_common/components/portal.js';
 import { toast } from '../../../_common/components/toast.js';
 import {
@@ -30,6 +31,7 @@ import {
 } from '../../../_common/icons/edgeless.js';
 import {
   CaptionIcon,
+  CenterPeekIcon,
   CopyIcon,
   EditIcon,
   EmbedEdgelessIcon,
@@ -439,6 +441,8 @@ export class EmbedCardToolbar extends WidgetElement<
       <div
         class="embed-card-toolbar"
         @pointerdown=${(e: MouseEvent) => e.stopPropagation()}
+        @click=${(e: MouseEvent) => e.stopPropagation()}
+        @dblclick=${(e: MouseEvent) => e.stopPropagation()}
       >
         ${this._canShowUrlOptions && 'url' in model
           ? html`
@@ -485,13 +489,27 @@ export class EmbedCardToolbar extends WidgetElement<
                   ? nothing
                   : html`${this._pageIcon} <span>${this._docTitle}</span>`}
                 ${OpenIcon}
-                <affine-tooltip .offset=${12}>${'Open'}</affine-tooltip>
+                <affine-tooltip .offset=${12}
+                  >${'Open this doc'}</affine-tooltip
+                >
               </icon-button>
 
               <div class="divider"></div>
             `
           : nothing}
-
+        ${isPeekable(this.blockElement)
+          ? html`<icon-button
+                size="24px"
+                class="embed-card-toolbar-button peek"
+                @click=${() => peek(this.blockElement)}
+              >
+                ${CenterPeekIcon}
+                <affine-tooltip .offset=${12}
+                  >${'Open in center peek'}</affine-tooltip
+                >
+              </icon-button>
+              <div class="divider"></div>`
+          : nothing}
         <div class="embed-card-toolbar-button view-selector">
           <icon-button
             size="24px"

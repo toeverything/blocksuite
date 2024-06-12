@@ -1,9 +1,9 @@
-import type {
+import {
   BlockElement,
-  BlockStdScope,
-  Command,
-  DisposableClass,
-  InitCommandCtx,
+  type BlockStdScope,
+  type Command,
+  type DisposableClass,
+  type InitCommandCtx,
 } from '@blocksuite/block-std';
 import { assertExists, type Constructor } from '@blocksuite/global/utils';
 import type { LitElement } from 'lit';
@@ -34,7 +34,7 @@ export interface PeekViewService {
   peek<Element extends BlockElement>(target: Element): void;
 }
 
-type PeekableAction = 'double-click' | 'shift-click';
+type PeekableAction = 'double-click' | 'selected-click' | 'shift-click';
 
 type PeekableOptions = {
   action: PeekableAction | PeekableAction[] | false; // false means do not bind any action
@@ -61,7 +61,7 @@ export const peek = <Element extends LitElement>(e: Element): void => {
 export const Peekable =
   <C extends PeekableClass>(
     options: PeekableOptions = {
-      action: ['double-click', 'shift-click'],
+      action: ['double-click', 'selected-click', 'shift-click'],
     }
   ) =>
   (Class: C, context: ClassDecoratorContext) => {
@@ -93,6 +93,37 @@ export const Peekable =
         if (actions.includes('shift-click')) {
           this.disposables.addFromEvent(target, 'click', e => {
             if (e.shiftKey && this[symbol].peekable) {
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              this[symbol].peek();
+            }
+          });
+        }
+        if (
+          actions.includes('selected-click') &&
+          this instanceof BlockElement
+        ) {
+          let lastSelectedTime: number | null = null;
+          this.disposables.add(
+            this.selection.slots.changed.on(() => {
+              const selected = this.selected?.is('block') || false;
+              if (selected) {
+                if (!lastSelectedTime) {
+                  lastSelectedTime = Date.now();
+                }
+              } else {
+                lastSelectedTime = null;
+              }
+            })
+          );
+          this.disposables.addFromEvent(target, 'click', e => {
+            if (
+              this[symbol].peekable &&
+              this instanceof BlockElement &&
+              lastSelectedTime
+                ? Date.now() - lastSelectedTime > 500
+                : false
+            ) {
               e.stopPropagation();
               e.stopImmediatePropagation();
               this[symbol].peek();

@@ -601,7 +601,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         ? html`
             <edgeless-tool-icon-button
               arai-label="Open"
-              .tooltip=${'Open'}
+              .tooltip=${'Open this doc'}
               class="change-embed-card-button open"
               @click=${this._open}
             >
@@ -614,7 +614,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
         ? html`
             <edgeless-tool-icon-button
               arai-label="Center peek"
-              .tooltip=${'Center peek'}
+              .tooltip=${'Open in center peek'}
               class="change-embed-card-button center-peek"
               @click=${this._peek}
             >

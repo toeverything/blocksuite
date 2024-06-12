@@ -139,10 +139,11 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
                   userInput: userInput,
                 };
               } else {
-                // randomly create a doc
-                const newDoc = collection.createDoc();
+                // randomly pick a doc
                 return {
-                  docId: newDoc.id,
+                  docId: [...collection.docs.values()][
+                    Math.floor(Math.random() * collection.docs.size)
+                  ].id,
                 };
               }
             },

@@ -1106,7 +1106,9 @@ export async function triggerComponentToolbarAction(
       break;
     }
     case 'openLinkedDoc': {
-      const button = locatorComponentToolbar(page).locator('.open');
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-change-embed-card-button .open'
+      );
       await button.click();
       break;
     }
