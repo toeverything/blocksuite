@@ -32,15 +32,16 @@ export interface EditingState {
 
 export type CommonSlots = RefNodeSlots;
 
-export type EditorMode = 'page' | 'edgeless';
+export type DocMode = 'page' | 'edgeless';
+
 type EditorSlots = {
-  editorModeSwitched: Slot<EditorMode>;
+  editorModeSwitched: Slot<DocMode>;
   docUpdated: Slot<{ newDocId: string }>;
 };
 
 export type AbstractEditor = {
   doc: Doc;
-  mode: EditorMode;
+  mode: DocMode;
   readonly slots: CommonSlots & EditorSlots;
 } & HTMLElement;
 
