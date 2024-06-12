@@ -38,7 +38,9 @@ export function setupSlashMenuEntry(slashMenu: AffineSlashMenuWidget) {
       if (affineAIPanelWidget === null) return false;
 
       const chain = rootElement.host.command.chain();
-      const editorMode = rootElement.service.getEditorMode(rootElement.doc.id);
+      const editorMode = rootElement.service.docModeService.getMode(
+        rootElement.doc.id
+      );
 
       return item?.showWhen?.(chain, editorMode, rootElement.host) ?? true;
     };

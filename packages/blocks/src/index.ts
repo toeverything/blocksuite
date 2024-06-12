@@ -19,15 +19,20 @@ import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
 export * from './_common/components/ai-item/index.js';
+export type {
+  DocModeService,
+  NotificationService,
+  PeekViewService,
+} from './_common/components/index.js';
 export {
   createLitPortal,
   HoverController,
   PeekableController,
-  type PeekViewService,
+  RichText,
+  scrollbarStyle,
   toast,
   Tooltip,
 } from './_common/components/index.js';
-export { RichText, scrollbarStyle } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
   createEmbedBlock,
@@ -65,7 +70,11 @@ export {
   ThemeObserver,
 } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
-export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
+export {
+  type AbstractEditor,
+  type DocMode,
+  NoteDisplayMode,
+} from './_common/types.js';
 export {
   createButtonPopper,
   matchFlavours,

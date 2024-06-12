@@ -96,7 +96,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       return;
     }
 
-    this._editorMode = this._rootService.getEditorMode(this.model.pageId);
+    this._editorMode = this._rootService.docModeService.getMode(
+      this.model.pageId
+    );
     this._docUpdatedAt = this._rootService.getDocUpdatedAt(this.model.pageId);
 
     if (!linkedDoc.loaded) {

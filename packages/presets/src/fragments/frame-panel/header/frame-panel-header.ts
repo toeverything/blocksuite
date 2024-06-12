@@ -130,8 +130,9 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   accessor edgeless!: EdgelessRootBlockComponent | null;
 
   private _enterPresentationMode = () => {
-    if (!this.edgeless)
-      this.rootService.slots.editorModeSwitch.emit('edgeless');
+    if (!this.edgeless) {
+      this.rootService.docModeService.setMode('edgeless');
+    }
 
     setTimeout(() => {
       this.edgeless?.updateComplete

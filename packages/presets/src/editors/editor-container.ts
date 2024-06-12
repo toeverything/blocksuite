@@ -6,6 +6,7 @@ import '../fragments/doc-meta-tags/doc-meta-tags.js';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/block-std';
 import type {
   AbstractEditor,
+  DocMode,
   EdgelessRootBlockComponent,
   PageRootBlockComponent,
   PageRootService,
@@ -54,10 +55,9 @@ export class AffineEditorContainer
           setup: (slots, disposable) => {
             setup?.(slots, disposable);
             slots.mounted.once(({ service }) => {
+              const { docModeService } = service as PageRootService;
               disposable.add(
-                (service as PageRootService).slots.editorModeSwitch.on(
-                  this.switchEditor.bind(this)
-                )
+                docModeService.onModeChange(this.switchEditor.bind(this))
               );
             });
           },
@@ -76,10 +76,9 @@ export class AffineEditorContainer
           setup: (slots, disposable) => {
             setup?.(slots, disposable);
             slots.mounted.once(({ service }) => {
+              const { docModeService } = service as PageRootService;
               disposable.add(
-                (service as PageRootService).slots.editorModeSwitch.on(
-                  this.switchEditor.bind(this)
-                )
+                docModeService.onModeChange(this.switchEditor.bind(this))
               );
             });
           },
@@ -151,7 +150,7 @@ export class AffineEditorContainer
   accessor doc!: Doc;
 
   @property({ attribute: false })
-  accessor mode: 'page' | 'edgeless' = 'page';
+  accessor mode: DocMode = 'page';
 
   @property({ attribute: false })
   accessor pageSpecs = PageEditorBlockSpecs;
@@ -177,7 +176,7 @@ export class AffineEditorContainer
     tagClicked: new Slot<{ tagId: string }>(),
   };
 
-  switchEditor(mode: typeof this.mode) {
+  switchEditor(mode: DocMode) {
     this.mode = mode;
   }
 

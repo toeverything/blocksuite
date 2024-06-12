@@ -166,8 +166,6 @@ export class EdgelessRootService extends RootService {
       blockId?: string;
     }>(),
     tagClicked: new Slot<{ tagId: string }>(),
-    editorModeSwitch: new Slot<'edgeless' | 'page'>(),
-
     toolbarLocked: new Slot<boolean>(),
   };
 

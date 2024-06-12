@@ -8,6 +8,8 @@ import {
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
 import {
+  createDocModeService,
+  type DocModeService,
   getSelectedPeekableBlocksCommand,
   type NotificationService,
   peekSelectedBlockCommand,
@@ -136,6 +138,8 @@ export class RootService extends BlockService<RootBlockModel> {
   notificationService: NotificationService | null = null;
 
   peekViewService: PeekViewService | null = null;
+
+  docModeService: DocModeService = createDocModeService(this.doc);
 
   transformers = {
     markdown: MarkdownTransformer,

@@ -1,5 +1,5 @@
 import type { BlockSpec, EditorHost } from '@blocksuite/block-std';
-import { type PageRootService, toast } from '@blocksuite/blocks';
+import type { DocMode, PageRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BlockCollection } from '@blocksuite/store';
@@ -8,6 +8,11 @@ import type { DocCollection } from '@blocksuite/store';
 import { DocsPanel } from '../../_common/components/docs-panel.js';
 import { LeftSidePanel } from '../../_common/components/left-side-panel.js';
 import { QuickEdgelessMenu } from '../../_common/components/quick-edgeless-menu.js';
+import {
+  mockDocModeService,
+  mockNotificationService,
+  mockQuickSearchService,
+} from '../../_common/mock-services.js';
 import { getExampleSpecs } from '../specs-examples/index.js';
 
 const params = new URLSearchParams(location.search);
@@ -68,7 +73,8 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
   quickEdgelessMenu.leftSidePanel = leftSidePanel;
   quickEdgelessMenu.docsPanel = docsPanel;
 
-  function switchQuickEdgelessMenu(mode: typeof defaultMode) {
+  function switchQuickEdgelessMenu(mode: DocMode) {
+    if (!mode) return;
     quickEdgelessMenu.mode = mode;
   }
 
@@ -99,62 +105,23 @@ export async function mountDefaultDocEditor(collection: DocCollection) {
         setup?.(slots, disposable);
         slots.mounted.once(({ service }) => {
           const pageRootService = service as PageRootService;
-          disposable.add(
-            pageRootService.slots.editorModeSwitch.on(switchQuickEdgelessMenu)
-          );
-          pageRootService.notificationService = {
-            toast: (message, options) => {
-              toast(service.host as EditorHost, message, options?.duration);
-            },
-            confirm: notification => {
-              return Promise.resolve(confirm(notification.title.toString()));
-            },
-            prompt: notification => {
-              return Promise.resolve(
-                prompt(
-                  notification.title.toString(),
-                  notification.autofill?.toString()
-                )
-              );
-            },
-            notify: notification => {
-              // todo: implement in playground
-              console.log(notification);
-            },
-          };
-          pageRootService.quickSearchService = {
-            async searchDoc({ userInput }) {
-              await new Promise(resolve => setTimeout(resolve, 500));
-              const docs = collection.search({
-                query: userInput,
-                limit: 1,
-              });
-              const doc = [...docs].at(0);
-              if (doc) {
-                return {
-                  docId: doc[1],
-                };
-              } else if (userInput) {
-                return {
-                  userInput: userInput,
-                };
-              } else {
-                // randomly pick a doc
-                return {
-                  docId: [...collection.docs.values()][
-                    Math.floor(Math.random() * collection.docs.size)
-                  ].id,
-                };
-              }
-            },
-          };
-
+          pageRootService.notificationService =
+            mockNotificationService(pageRootService);
+          pageRootService.quickSearchService =
+            mockQuickSearchService(collection);
           pageRootService.peekViewService = {
             peek(target: unknown) {
               alert('Peek view not implemented in playground');
               console.log('peek', target);
             },
           };
+          pageRootService.docModeService = mockDocModeService();
+          pageRootService.docModeService &&
+            disposable.add(
+              pageRootService.docModeService.onModeChange(
+                switchQuickEdgelessMenu
+              )
+            );
         });
       },
     };
