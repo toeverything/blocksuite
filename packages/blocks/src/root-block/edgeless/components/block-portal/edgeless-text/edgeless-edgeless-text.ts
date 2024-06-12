@@ -135,15 +135,17 @@ export class EdgelessBlockPortalEdgelessText extends EdgelessPortalBase<Edgeless
       top: `${bound.y}px`,
       transform: `scale(${scale})`,
       transformOrigin: '0 0',
-      width: `${bound.w / scale}px`,
       height: `${bound.h / scale}px`,
     };
+
+    if (hasMaxWidth) {
+      style.width = `${bound.w / scale}px`;
+    }
+
     if (this._editing) {
-      if (!hasMaxWidth) {
-        delete style.width;
-      }
       delete style.height;
     } else if (this._horizontalResizing) {
+      style.width = `${bound.w / scale}px`;
       delete style.height;
     }
 
