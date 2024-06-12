@@ -64,7 +64,9 @@ export class EmbedLoomBlockComponent extends EmbedBlockElement<
   };
 
   refreshData = () => {
-    refreshEmbedLoomUrlData(this).catch(console.error);
+    refreshEmbedLoomUrlData(this, this.fetchAbortController.signal).catch(
+      console.error
+    );
   };
 
   override connectedCallback() {

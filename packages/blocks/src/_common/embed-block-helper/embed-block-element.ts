@@ -51,6 +51,12 @@ export class EmbedBlockElement<
 
   private _isInSurface = false;
 
+  private _fetchAbortController = new AbortController();
+
+  get fetchAbortController() {
+    return this._fetchAbortController;
+  }
+
   private _dragHandleOption: DragHandleOption = {
     flavour: /affine:embed-*/,
     edgeless: true,
@@ -154,6 +160,9 @@ export class EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    if (this._fetchAbortController.signal.aborted)
+      this._fetchAbortController = new AbortController();
+
     this.contentEditable = 'false';
 
     const parent = this.host.doc.getParent(this.model);
@@ -166,6 +175,11 @@ export class EmbedBlockElement<
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._fetchAbortController.abort();
   }
 
   renderEmbed = (children: () => TemplateResult) => {

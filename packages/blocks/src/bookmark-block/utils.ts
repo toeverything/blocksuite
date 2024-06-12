@@ -1,10 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import { isAbortError } from '../_common/utils/helper.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 
-// Result is boolean used to record whether the meta data is crawled
 export async function refreshBookmarkUrlData(
-  bookmarkElement: BookmarkBlockComponent
+  bookmarkElement: BookmarkBlockComponent,
+  signal?: AbortSignal
 ) {
   let title = null,
     description = null,
@@ -17,28 +18,32 @@ export async function refreshBookmarkUrlData(
     const queryUrlData = bookmarkElement.service?.queryUrlData;
     assertExists(queryUrlData);
 
-    const bookmarkUrlData = await queryUrlData(bookmarkElement.model.url);
-    ({
-      title = null,
-      description = null,
-      icon = null,
-      image = null,
-    } = bookmarkUrlData);
+    const bookmarkUrlData = await queryUrlData(
+      bookmarkElement.model.url,
+      signal
+    );
+
+    title = bookmarkUrlData.title ?? null;
+    description = bookmarkUrlData.description ?? null;
+    icon = bookmarkUrlData.icon ?? null;
+    image = bookmarkUrlData.image ?? null;
 
     if (!title && !description && !icon && !image) {
       bookmarkElement.error = true;
     }
-  } catch (error) {
-    console.error(error);
-    bookmarkElement.error = true;
-  } finally {
+
+    if (signal?.aborted) return;
+
     bookmarkElement.doc.updateBlock(bookmarkElement.model, {
       title,
       description,
       icon,
       image,
     });
-
+  } catch (error) {
+    if (signal?.aborted || isAbortError(error)) return;
+    throw error;
+  } finally {
     bookmarkElement.loading = false;
   }
 }

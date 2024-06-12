@@ -70,7 +70,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   };
 
   refreshData = () => {
-    refreshEmbedYoutubeUrlData(this).catch(console.error);
+    refreshEmbedYoutubeUrlData(this, this.fetchAbortController.signal).catch(
+      console.error
+    );
   };
 
   override connectedCallback() {

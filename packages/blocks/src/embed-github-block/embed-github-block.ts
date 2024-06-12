@@ -68,11 +68,15 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   };
 
   refreshData = () => {
-    refreshEmbedGithubUrlData(this).catch(console.error);
+    refreshEmbedGithubUrlData(this, this.fetchAbortController.signal).catch(
+      console.error
+    );
   };
 
   refreshStatus = () => {
-    refreshEmbedGithubStatus(this).catch(console.error);
+    refreshEmbedGithubStatus(this, this.fetchAbortController.signal).catch(
+      console.error
+    );
   };
 
   override connectedCallback() {

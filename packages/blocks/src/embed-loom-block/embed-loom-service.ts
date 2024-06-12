@@ -14,8 +14,8 @@ export class EmbedLoomBlockService extends BlockService<EmbedLoomModel> {
   static setLinkPreviewEndpoint =
     EmbedLoomBlockService.linkPreviewer.setEndpoint;
 
-  queryUrlData = (embedLoomModel: EmbedLoomModel) => {
-    return queryEmbedLoomData(embedLoomModel);
+  queryUrlData = (embedLoomModel: EmbedLoomModel, signal?: AbortSignal) => {
+    return queryEmbedLoomData(embedLoomModel, signal);
   };
 
   override mounted() {

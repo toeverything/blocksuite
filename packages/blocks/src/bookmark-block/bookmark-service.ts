@@ -119,8 +119,8 @@ export class BookmarkBlockService extends BlockService<BookmarkBlockModel> {
     },
   };
 
-  queryUrlData = (url: string) => {
-    return BookmarkBlockService.linkPreviewer.query(url);
+  queryUrlData = (url: string, signal?: AbortSignal) => {
+    return BookmarkBlockService.linkPreviewer.query(url, signal);
   };
 
   override mounted(): void {

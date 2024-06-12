@@ -3,6 +3,7 @@ import type { BaseBlockTransformer } from '@blocksuite/store';
 import { defineBlockSchema } from '@blocksuite/store';
 
 import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
+import { isAbortError } from '../utils/helper.js';
 import type { EmbedBlockModel } from './embed-block-model.js';
 import type {
   EmbedBlockGeneratorOptions,
@@ -70,7 +71,10 @@ export class LinkPreviewer {
     this._endpoint = endpoint;
   };
 
-  query = async (url: string): Promise<Partial<LinkPreviewData>> => {
+  query = async (
+    url: string,
+    signal?: AbortSignal
+  ): Promise<Partial<LinkPreviewData>> => {
     if (
       (url.startsWith('https://x.com/') ||
         url.startsWith('https://www.x.com/') ||
@@ -82,7 +86,7 @@ export class LinkPreviewer {
       url =
         'https://api.fxtwitter.com/status/' + /\/status\/(.*)/.exec(url)?.[1];
       try {
-        const { tweet } = await fetch(url).then(res => res.json());
+        const { tweet } = await fetch(url, { signal }).then(res => res.json());
         return {
           title: tweet.author.name,
           icon: tweet.author.avatar_url,
@@ -101,6 +105,7 @@ export class LinkPreviewer {
         body: JSON.stringify({
           url,
         }),
+        signal,
       })
         .then(r => {
           if (!r || !r.ok) {
@@ -108,9 +113,12 @@ export class LinkPreviewer {
           }
           return r;
         })
-        .catch(_ => {
+        .catch(err => {
+          if (isAbortError(err)) return null;
           throw new Error('Failed to fetch link preview');
         });
+
+      if (!response) return {};
 
       const data: LinkPreviewResponseData = await response.json();
       return {
