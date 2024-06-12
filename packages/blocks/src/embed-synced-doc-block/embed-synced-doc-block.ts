@@ -219,10 +219,6 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
     }
   };
 
-  private _handleOverlayDblClick = (event: MouseEvent) => {
-    event.stopPropagation();
-  };
-
   private _isClickAtBorder(
     event: MouseEvent,
     element: HTMLElement,
@@ -341,12 +337,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockElement<
           </div>
 
           ${isInSurface && !isEditing
-            ? html`
-                <div
-                  class="affine-embed-synced-doc-editor-overlay"
-                  @dblclick=${this._handleOverlayDblClick}
-                ></div>
-              `
+            ? html` <div class="affine-embed-synced-doc-editor-overlay"></div> `
             : nothing}
         </div>
 
