@@ -1,9 +1,9 @@
 import type { EditorHost } from '@blocksuite/block-std';
-import type {
-  CopilotSelectionController,
-  FrameBlockModel,
+import {
+  type CopilotSelectionController,
+  type FrameBlockModel,
   ImageBlockModel,
-  SurfaceBlockComponent,
+  type SurfaceBlockComponent,
 } from '@blocksuite/blocks';
 import { BlocksUtils, EdgelessRootService } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -279,3 +279,19 @@ export function getCopilotSelectedElems(
 
   return service.selection.selectedElements;
 }
+
+export const imageCustomInput = async (host: EditorHost) => {
+  const selectedElements = getCopilotSelectedElems(host);
+  if (selectedElements.length !== 1) return;
+
+  const imageBlock = selectedElements[0];
+  if (!(imageBlock instanceof ImageBlockModel)) return;
+  if (!imageBlock.sourceId) return;
+
+  const blob = await host.doc.blobSync.get(imageBlock.sourceId);
+  if (!blob) return;
+
+  return {
+    attachments: [blob],
+  };
+};

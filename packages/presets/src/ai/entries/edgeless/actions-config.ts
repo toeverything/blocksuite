@@ -1,9 +1,7 @@
-import type { EditorHost } from '@blocksuite/block-std';
 import {
   type AIItemGroupConfig,
   AIStarIconWithAnimation,
   BlocksUtils,
-  ImageBlockModel,
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
@@ -53,6 +51,7 @@ import { canvasToBlob, randomSeed } from '../../utils/image.js';
 import {
   getCopilotSelectedElems,
   getEdgelessRootFromEditor,
+  imageCustomInput,
 } from '../../utils/selection-utils.js';
 
 const translateSubItem = translateLangs.map(lang => {
@@ -68,22 +67,6 @@ const toneSubItem = textTones.map(tone => {
     handler: actionToHandler('changeTone', AIStarIconWithAnimation, { tone }),
   };
 });
-
-const imageCustomInput = async (host: EditorHost) => {
-  const selectedElements = getCopilotSelectedElems(host);
-  if (selectedElements.length !== 1) return;
-
-  const imageBlock = selectedElements[0];
-  if (!(imageBlock instanceof ImageBlockModel)) return;
-  if (!imageBlock.sourceId) return;
-
-  const blob = await host.doc.blobSync.get(imageBlock.sourceId);
-  if (!blob) return;
-
-  return {
-    attachments: [blob],
-  };
-};
 
 export const imageFilterSubItem = imageFilterStyles.map(style => {
   return {

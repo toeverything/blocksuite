@@ -162,7 +162,8 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
     content?: string;
     attachments?: (string | Blob)[];
     seed?: string;
-  } | void>
+  } | void>,
+  trackerOptions?: BlockSuitePresets.TrackerOptions
 ) {
   const action = AIProvider.actions[id];
 
@@ -171,6 +172,8 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
   if (extract && typeof extract === 'function') {
     return (host: EditorHost, ctx: CtxRecord): BlockSuitePresets.TextStream => {
       let stream: BlockSuitePresets.TextStream | undefined;
+      const control = trackerOptions?.control || 'format-bar';
+      const where = trackerOptions?.where || 'ai-panel';
       return {
         async *[Symbol.asyncIterator]() {
           const models = getCopilotSelectedElems(host);
@@ -179,8 +182,8 @@ function actionToStream<T extends keyof BlockSuitePresets.AIActions>(
             signal,
             input: '',
             stream: true,
-            where: 'ai-panel',
-            control: 'format-bar',
+            control,
+            where,
             models,
             host,
             docId: host.doc.id,
@@ -244,7 +247,8 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
     content?: string;
     attachments?: (string | Blob)[];
     seed?: string;
-  } | void>
+  } | void>,
+  trackerOptions?: BlockSuitePresets.TrackerOptions
 ) {
   return (host: EditorHost, ctx: CtxRecord) => {
     return ({
@@ -262,7 +266,13 @@ function actionToGeneration<T extends keyof BlockSuitePresets.AIActions>(
         if (selectedElements.length === 0) return;
       }
 
-      const stream = actionToStream(id, signal, variants, extract)?.(host, ctx);
+      const stream = actionToStream(
+        id,
+        signal,
+        variants,
+        extract,
+        trackerOptions
+      )?.(host, ctx);
 
       if (!stream) return;
 
@@ -291,7 +301,8 @@ function updateEdgelessAIPanelConfig<
     content?: string;
     attachments?: (string | Blob)[];
     seed?: string;
-  } | void>
+  } | void>,
+  trackerOptions?: BlockSuitePresets.TrackerOptions
 ) {
   const host = aiPanel.host;
   const { config } = aiPanel;
@@ -300,7 +311,8 @@ function updateEdgelessAIPanelConfig<
   config.generateAnswer = actionToGeneration(
     id,
     variants,
-    customInput
+    customInput,
+    trackerOptions
   )(host, ctx);
   config.finishStateConfig = actionToResponse(id, host, ctx, variants);
   config.generatingStateConfig = actionToGenerating(id, generatingIcon);
@@ -349,7 +361,8 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
     content?: string;
     attachments?: (string | Blob)[];
     seed?: string;
-  } | void>
+  } | void>,
+  trackerOptions?: BlockSuitePresets.TrackerOptions
 ) {
   return (host: EditorHost) => {
     const aiPanel = getAIPanel(host);
@@ -380,7 +393,8 @@ export function actionToHandler<T extends keyof BlockSuitePresets.AIActions>(
       generatingIcon,
       ctx,
       variants,
-      customInput
+      customInput,
+      trackerOptions
     );
 
     const elementToolbar = getElementToolbar(host);

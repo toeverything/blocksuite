@@ -42,6 +42,19 @@ export type CtxRecord = {
 
 declare global {
   namespace BlockSuitePresets {
+    type TrackerControl =
+      | 'format-bar'
+      | 'slash-menu'
+      | 'chat-send'
+      | 'block-action-bar';
+
+    type TrackerWhere = 'chat-panel' | 'inline-chat-panel' | 'ai-panel';
+
+    interface TrackerOptions {
+      control: TrackerControl;
+      where: TrackerWhere;
+    }
+
     interface AITextActionOptions {
       input?: string;
       stream?: boolean;
@@ -56,8 +69,8 @@ declare global {
       // internal context
       host: EditorHost;
       models?: (BlockModel | BlockSuite.SurfaceElementModelType)[];
-      control: 'format-bar' | 'slash-menu' | 'chat-send';
-      where: 'chat-panel' | 'inline-chat-panel' | 'ai-panel';
+      control: TrackerControl;
+      where: TrackerWhere;
     }
 
     interface AIImageActionOptions extends AITextActionOptions {
